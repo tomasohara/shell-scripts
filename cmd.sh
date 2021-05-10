@@ -1,0 +1,84 @@
+#! /bin/csh -f
+#
+# cmd.sh: run's the specified command, capturing stderr and allowing for
+# an optional time out
+# TODO:
+# - get redirection to work with time-outs
+# - use timeout command if available
+#
+
+# Uncomment (or comment) the following for enabling (or disabling) tracing
+## set echo=1
+
+# Parse command-line arguments
+set command = ""
+set use_time_out = 0
+set time_out = 30
+set time_out_specified = 0
+set redirect = 1
+set detailed = 0
+
+if ("$1" == "") then
+    set script_name = `basename $0`
+    echo ""
+    echo "usage: `basename $0` [--verbose] [--time-out [N]] command args ..."
+    echo ""
+    echo "ex: `basename $0` --time-out 5 prep.exe access.txt"
+    echo ""
+    exit
+endif
+while ("$1" =~ -*)
+    if ("$1" == "--time-out") then
+	set use_time_out = 1
+	if ("$2" =~ [0-9]*) then
+	    set time_out = $2
+	    set time_out_specified = 1
+	    shift
+	endif
+	set redirect = 0
+    else if ("$1" == "--redirect") then
+	set redirect = 1
+    else if ("$1" == "--verbose") then
+	set detailed = 1
+    else if ("$1" == "--trace") then
+	set echo = 1
+    endif
+    shift
+end
+set command = "$*"
+
+# Clear log file
+set log_file = "/tmp/temp_$$.log"
+if (($redirect == 1) || ($use_time_out == 1)) then
+    echo "" > $log_file
+endif
+
+# Setup process to kill the script if timeout occurs
+# TODO: figure out how to disable the shells PID display with background jobs
+# example: rup.sh wb2
+#     [1] 1983
+# TODO: rework to kill the child process (e.g., 1983), waiting for it with bash's 'wait PID' or a CSH equivalent
+if ($use_time_out == 1) then
+    set force_option = ""
+    if ( "`printenv OSTYPE`" == "cygwin" ) set force_option = "-f"
+    if ($detailed == 1) then
+	echo "Issuing: (sleep $time_out ... kill $force_option -9 $$) &" >> $log_file
+    endif
+    ( (sleep $time_out; kill $force_option -9 $$) & ) >& /dev/null
+endif
+
+# Run the command redirecting the output
+# NOTE: redirection doesn't work with time-out's since the script gets killed
+if ($redirect == 1) then
+    if ($detailed == 1) then
+	echo "Issuing: $command" >>&! $log_file
+    endif
+    $command >>&! $log_file
+    cat $log_file
+    rm $log_file
+else
+    if ($detailed == 1) then
+	echo "Issuing: $command"
+    endif
+    $command
+endif
