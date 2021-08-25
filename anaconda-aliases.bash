@@ -1,4 +1,4 @@
-# Anaconda support from tpo-magro (circa Jan 2020)
+# Anaconda support based on conda installation
 #
 #------------------------------------------------------------------------
 # Copyright (c) 2020 Thomas P. O'Hara
@@ -53,19 +53,33 @@ alias add-tensorfow='conda activate env_tensorflow_gpu'
 alias all-conda-to-pythonpath='export PYTHONPATH=$anaconda3_dir/envs/env_tensorflow_gpu/lib/python3.7/site-packages:$anaconda3_dir/lib/python3.7:$PYTHONPATH'
 # OLD: alias init-jsl-conda='init-conda; export PYTHONPATH="$HOME/john-snow-labs/python:$PYTHONPATH"'
 # note: various conda-xyz aliases for sake of tab completion
-## alias conda-list-env='conda list env'
-alias conda-list-env='conda env list'
+alias conda-list-env='conda list env'
 alias conda-list-env-hack='ls ~/.conda/envs'
-alias conda-activate-env='source activate'
-alias conda-deactivate-env='source deactivate'
-## OLD: alias activate-conda-env=conda-activate-env
+alias conda-env-list='conda env list'
+alias conda-env-name='conda env list | extract_matches.perl "^(\S+ )  " | echoize'
+## OLD: alias conda-activate-env='source activate'
+## OLD: function conda-activate-env { source activate "$1"; add-conda-env-to-xterm-title; }
+function conda-activate-env {
+    local env="$1"
+    if [ "$env" = "" ]; then
+	echo "Usage: conda-activate-env"
+	echo ""
+	echo "Note: available environments:"
+	## TODO: use columns
+	conda-list-env-hack | perl -pe 's/^/    /;'
+	echo ""
+    fi
+    source activate "$env";
+    add-conda-env-to-xterm-title;
+}
+## OLD: alias conda-deactivate-env='source deactivate'
+function conda-deactivate-env { source deactivate "$1"; add-conda-env-to-xterm-title; }
 
 # Miniconda3 initializaion
 # <<< conda initialize <<<
 # !! Contents within this block are managed by 'conda init' !!
 function init-miniconda3 () {
-    ## OLD: local base="/usr/local/misc/programs/miniconda3"
-    local base="$HOME/miniconda3"
+    local base="/usr/local/misc/programs/anaconda3"
     local conda_setup="$("$base/bin/conda" 'shell.bash' 'hook' 2> /dev/null)"
     if [ $? -eq 0 ]; then
 	eval "$conda_setup"
@@ -85,6 +99,10 @@ function init-miniconda3 () {
 # conda-create-env(name, [python_version=3.7]): create Python3 environment for Python 3.7 by default
 # TODO: determine the version, make sure ipython gets installed
 function conda-create-env () {
+    if [ "$1" = "" ]; then
+	echo "usage: conda-create-env name [python_version=3.7]"
+	return
+    fi
     local name="$1"
     local python_version="$2"
     if [ "$python_version" = "" ]; then python_version="3.7"; fi

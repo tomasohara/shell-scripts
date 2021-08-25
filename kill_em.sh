@@ -27,7 +27,7 @@ set aux_script=$aux_base.sh
 set aux_file0=$aux_base.lst0
 set aux_file1=$aux_base.lst1
 # Note: by default requires number [from time] prior to process spec.
-set pattern_prefix = "[0-9] [^ ]*"
+set pattern_prefix = ":[0-9][0-9] [^ ]*"
 set filter = '($)(^)'		# filters nothing (i.e., unsatisfiable regex)
 set user = `whoami`
 ## OLD:
@@ -136,11 +136,14 @@ endif
 # intended for remote execution.
 #
 # NOTES:
-#  $ ps alwx | egrep "(PID|$$)"
-#    F   UID   PID  PPID PRI  NI   VSZ  RSS WCHAN  STAT TTY        TIME COMMAND
-#  100  2222 31510 31507  18   0  2568 1708 wait4  S    pts/1      0:00 bash
-#  000  2222 31656 31510  18   0  3528 1532 -      R    pts/1      0:00 ps alwx
-#  000  2222 31657 31510  18   0  1404  460 pipe_w S    pts/1      0:00 egrep (PID|31510)
+# - example
+#   $ ps alwx | egrep "(PID|$$)"
+#     F   UID   PID  PPID PRI  NI   VSZ  RSS WCHAN  STAT TTY        TIME COMMAND
+#   100  2222 31510 31507  18   0  2568 1708 wait4  S    pts/1      0:00 bash
+#   000  2222 31656 31510  18   0  3528 1532 -      R    pts/1      0:00 ps alwx
+#   000  2222 31657 31510  18   0  1404  460 pipe_w S    pts/1      0:00 egrep (PID|31510)
+# - where a[ll]; l[ong]; w[ide]; and x is for no tty (redundant with 'a')
+# - TODO: drop w and x
 #   
 if ("$pattern" == ".") then
     set parent=`ps alwx | perl -Ssw extract_matches.perl "^\d+\s+\d+\s+$$\s+(\d+)"`

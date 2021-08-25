@@ -1,47 +1,102 @@
-#! /bin/csh -f
+#! /usr/bin/env bash
 #
-# name.sh: explanation
-# TODO: fill out the TODO's below
+# TODO: name.sh: explanation
 #
-## TODO:
-## - Update template based on more recent scripts (e.g., start.sh).
-## - Add brief meta-commment comment (e.g., "## comments are meta comments for version control, etc.").
+# NOTES:
+# - templates for common bash expressions:
+#     if [ $x = value ]; then STMT; fi
+#     if [ EXPR_a ]; then STMT_a; elif [ EXPR_a  ]; then STMT_b; else STMT_c; fi
+#     if [[ (EXPR1) && (EXPR2) ]]; then STMT; fi
+#     if [[ $var =~ pattern ]]; then STMT; fi       note: requires Bash 3.0+
+#        where pattern is unquoted egrep regex expression
+#     if (( ARITH_EXPR )); then STMT; fi
+#     if [ -s "file" ]; then ...; fi
+#     case EXPR in PATTERN_a) STMT_a;; PATTERN_b) STMT_b;; ... esac
+#     for name [in words ...]; do commands; done
+#     for (( expr1 ; expr2 ; expr3 )) ; do commands ; done
+#     while [ expr ] ; do commands ; done
+#     $((arithmetic))              evaluate arithmetic expression
+#     $(command ...)               same as `command ...`
+# TODO: variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
+#     note: EXPR is C style;
+#         Format                    Example
+#         let EXPR                  let i++
+#         let VAR=(EXPR)            let max_mem=(4 * 1024)
+# Examples:
+# - for (( i=0; i<10; i++ )); do  echo $i; done
+# - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
+# - if [[ $JAVA_HOME =~ x64 ]]; then echo "64-bit Java"; fi
+# - case "$HOST_NICKNAME" in ec2*) echo "AWS";; hostw*) echo "HW";; *) echo "non-server"; esac
+# - if [[ $1 =~ */ ]]; then echo '$1' ends in slash; fi
+# - if [[ ! $file =~ http ]]; then echo hey; fi
+#
+# TODO:
+# - *** Update me (e.g., from recent scripts)! ***
+# - change existing scripts to use '#! /usr/bin/env bash'
+# - Check the TODO comments for customizations needed for the script."
+# - Put the template for common bash expressions elsewhere.
+# - Add examples for each of the templates above.
+# - Change 'shift 1' to 'shift' in ~/bin bash scripts.
+# - Mention some useful variables:
+#   (e.g., ${!#} for last argument--see https://stackoverflow.com/questions/1853946/getting-the-last-argument-passed-to-a-shell-script).
+# - Document regex match quirks.
 #
 
-# Uncomment (or comment) the following for enabling (or disabling) tracing
-## echo "$*"
-## set echo=1
+# Uncomment following line(s) for tracing:
+# - xtrace shows arg expansion (and often is sufficient)
+# - verbose shows source commands as is (but usually is superfluous w/ xtrace)
+#  
+## echo "$@"
+## set -o xtrace
+## DEBUG: set -o verbose
 
-# Parse command-line arguments
-## TODO: Revise with respect to more current scripts (e.g., start.sh).
-if ("$1" == "") then
-    set script_name = `basename $0`
-    ## set log_name = `echo "$script_name" | perl -pe "s/.sh/.log/;"`
+# Show usage statement
+# TODO: convert into a function that get invoked with $1 is empty or --help
+# in $@.
+# NOTE: See sync-loop.sh for an example.
+#
+if [ "$1" = "" ]; then
+    script=$(basename "$0")
+    ## TODO: if [ $script ~= *\ * ]; then script='"'$script'"; fi
+    ## TODO: base=$(basename "$0" .bash)
     echo ""
-    echo "usage: `basename $0` [options]"
+    ## TODO: add option or remove TODO placeholder
+    echo "Usage: $0 [--TODO] [--trace] [--help] [--]"
     echo ""
-    # TODO: example (e.g., replace whatever)"
-    echo "ex: `basename $0` whatever"
+    echo "Examples:"
+    echo ""
+    ## TODO: example 1
+    echo "$0 example 1"
+    echo ""
+    ## TODO: example 2
+    echo "$script example 2"
+    echo ""
+    echo "Notes:"
+    echo "- The -- option is to use default options and to avoid usage statement."
+    ## TODO: add more notes
+    ## echo ""
     echo ""
     exit
-endif
-while ("$1" =~ -*)
-    if ("$1" == "-") then
-	echo "Using default options"
-    else if ("$1" == "--trace") then
-	set echo = 1
-    else if ("$1" == "--fubar") then
+fi
+
+# Parse command-line options
+# TODO: set getopt-type utility
+#
+moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
+while [ "$moreoptions" = "1" ]; do
+    # TODO : add real options
+    if [ "$1" = "--trace" ]; then
+	set -o xtrace
+    elif [ "$1" = "--fubar" ]; then
 	echo "fubar"
+    elif [ "$1" = "--" ]; then
+	break
     else
-	echo "ERROR: unknown option: $1"
+	echo "ERROR: Unknown option: $1";
 	exit
-    endif
-    shift
-end
+    fi
+    shift;
+    moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
+done
 
 # TODO: Do whatever
-echo whatever
-
-#E TODO: Cleanup things
-## if ($?DEBUG_LEVEL == 0) set DEBUG_LEVEL=0
-## if ($DEBUG_LEVEL < 5) rm $aux_base*

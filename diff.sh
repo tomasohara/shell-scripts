@@ -6,24 +6,35 @@
 # Notes:
 # - Intended for use with diff3 for merging files
 #   ex: alias diff3-merge='/usr/bin/diff3 --merge --text --diff-program=diff.sh'
-# - Also see fdo_diff.sh for more complicated version (e.g., allowing for file patterns).
+# - Also see do_diff.sh for more complicated version (e.g., allowing for file patterns).
 # - Diff options:
 #   -b  --ignore-space-change: Ignore changes in the amount of white space.
 #   -w  --ignore-all-space: Ignore all white space.
 #   -B  --ignore-blank-lines: Ignore changes whose lines are all blank.
 #   -a  --text: Treat all files as text.
 #
+# TODO: convert to Bash (or better yet, Python).
+#
 
 # Uncomment (or comment) the following for enabling (or disabling) tracing
 ## set echo=1
-
 
 # Parse command-line arguments, checking for diff options
 # NOTE: options with embedded spaces not supported (eg, '--label LABEL')
 set diff_options=""
 set whitespace_options="-wbB"
+set verbose_output="0"
 while ("$1" =~ -*)
-    set diff_options = "$diff_options $1"
+    ## TODO: distinguish better from diff.sh options vs. diff itself
+    if ("$1" == "--verbose") then
+	set verbose_output="1"
+    else if ("$1" == "--help") then
+	break
+    else if ("$1" == "--trace") then
+	set echo=1
+    else
+	set diff_options = "$diff_options $1"
+    endif
     shift
 end
 if ("$2" == "") then
@@ -31,9 +42,11 @@ if ("$2" == "") then
     echo ""
     echo "usage: `basename $0` [options] file1 file2"
     echo ""
+    echo "options: [--verbose] [--trace] [--help]"
+    echo ""
     echo "ex: `basename $0` tpo-julien-alexa-Job-Search-Contact-Info.txt alexa-top-job-search-sites.txt"
     echo ""
-    echo "notse: "
+    echo "notes: "
     echo "- CR's converted to newlines, and multiple newlines are collapsed"
     echo "- uses $whitespace_options diff opiton to ignore white space."
     echo ""
@@ -53,11 +66,11 @@ if (! -e "$file2") then
     exit
 endif
 #
-set temp1=/tmp/my-diff-1.$$
-set temp2=/tmp/my-diff-2.$$
+set temp1=$TMP/diff-1.$$
+set temp2=$TMP/diff-2.$$
 
 # Convert files with <CR>'s changed into <NL>'s.
-# Also, collapse multiple <NL> sequences into one <NL>/
+# Also, collapse multiple <NL> sequences into one <NL>.
 #
 perl -0777 -pe 's/\r/\n/g;' "$file1" | perl -0777 -pe 's/\n\n+/\n/;' > "$temp1"
 perl -0777 -pe 's/\r/\n/g;' "$file2" | perl -0777 -pe 's/\n\n+/\n/;' > "$temp2"
@@ -67,8 +80,10 @@ if (! -e "$temp2") echo "WARNING: unable to create intermediate file $temp2"
 if (-z "$temp2") echo "WARNING: empty intermediate file $temp2"
 
 # Compare the files ignoring white spaces and blank lines
-diff -q $whitespace_options $diff_options "$temp1" "$temp2" > /dev/null
-if ($? == 1) echo "Differences:   $file1    $file2"
+if ("$verbose_output" == "1") then
+    diff -q $whitespace_options $diff_options "$temp1" "$temp2" > /dev/null
+    if ($? == 1) echo "Differences:   $file1    $file2"
+endif
 diff $whitespace_options $diff_options "$temp1" "$temp2" |& perl -pe "s@$temp1@$file1@; s@$temp2@$file2@;"
 
 # Cleanup

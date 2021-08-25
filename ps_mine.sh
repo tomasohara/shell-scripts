@@ -90,8 +90,11 @@ if ($verbose_mode) then
 endif
 
 # Determine the process-listing command to use as well as the sort fields
+# Note: ps options (BSD): a[ll]; u[ser]; g[roup]; w[ide] output (ww unlimited)
 set ps_command = "ps auxgww"
-set grep_command = "grep ^$user"
+## OLD: set grep_command = "grep ^$user"
+## TODO: break down into grep_command and grep_options (see HACK below)
+set grep_command = "grep '^$user'"
 ## OLD: set sort_command = "sort +2 +3 -rn"
 ## OLD: set sort_command = "sort --key=2 --key=3 -rn"
 set sort_command = "sort --key=3 --key=4 -rn"
@@ -101,14 +104,17 @@ if ($OSTYPE == solaris) then
     set grep_command = "egrep '^ +$user'"
     ## OLD: set sort_command = "sort +3 -rn"
     set sort_command = "sort --key=3 -rn"
-else if ($OSTYPE == "linux") then 
-    set ps_command = "ps auxwww"
+## OLD
+## else if ($OSTYPE == "linux") then
+##    ## TODO: specify long widths for each column
+##    set ps_command = "ps auxwww"
 endif
     
 
 # Show optional status
 if ($verbose_mode) then
     ## OLD: echo "Issuing: $ps_command | $grep_command | egrep -v '$filter' | $sort_command"
+    ## OLD: echo "Issuing: $ps_command | $grep_command | egrep -v '$exclude_filter' | egrep '$include_filter' | $sort_command"
     echo "Issuing: $ps_command | $grep_command | egrep -v '$exclude_filter' | egrep '$include_filter' | $sort_command"
 endif
 
@@ -127,7 +133,9 @@ if ($OSTYPE == solaris) then
     ## grep "^ *$user" $ps_output | $sort_command
 else
     ## OLD: $grep_command $ps_output | egrep -v "$filter" | grep -v "$ps_command" | $sort_command
-    $grep_command $ps_output | egrep -v "$exclude_filter" | egrep "$include_filter" | grep -v "$ps_command" | $sort_command
+    ## OLD: $grep_command $ps_output | egrep -v "$exclude_filter" | egrep "$include_filter" | grep -v "$ps_command" | $sort_command
+    ## HACK
+    grep "^$user" $ps_output | egrep -v "$exclude_filter" | egrep "$include_filter" | grep -v "$ps_command" | $sort_command
 endif
 
 # Cleanup

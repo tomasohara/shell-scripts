@@ -34,14 +34,17 @@ BEGIN {
 # for command-line arguments (see init_var's in &init).
 use strict;
 use vars qw/$warning $warnings $skip_warnings $context $no_asterisks $skip_ruby_lib $ruby/;
+use vars qw/$relaxed $strict/;
 
 if (!defined($ARGV[0])) {
     my $options = "options = [-warnings] [-context=N] [-no_astericks] [-skip_ruby_lib]";
+    $options .= " [-relaxed | -strict]";
     my $example = "ex: $script_name whatever\n";
     my $note = "Notes:\n";
     $note .= "- The default context is 1\n";
     $note .= "- Warnings are skipped by default\n";
     $note .= "- Use -no_astericks if input uses ***'s outside of error contexts\n";
+    $note .= "Use -relaxed to exclude special cases (e.g., xyz='error')\n";
 
     die "\nusage: $script_name [options]\n\n$options\n\n$example\n\n$note\n";
 }
@@ -55,6 +58,8 @@ my($show_warnings) = (! $skip_warnings);
 my $asterisks = (! $no_asterisks);
 &init_var(*ruby, &FALSE);	   	# alias for -skip_ruby_lib
 &init_var(*skip_ruby_lib, $ruby);	# skip Ruby library related errors
+&init_var(*relaxed, &FALSE);            # relaxed for special cases
+&init_var(*strict, ! $relaxed);         # alias for relaxed=0
 
 my $NULL = chr(0);			# null character ('\0')
 my(@before_context);			# prior context
@@ -143,7 +148,7 @@ while (<>) {
 
 	   # Python errors
 	   || /^Traceback/		# stack trace
-	   || /^\S+Error/		# exception
+	   || /^\S+Error/		# exception (e.g., TypeError)
 
 	   # Cygwin errors
 	   || /\bunable to remap\b/
@@ -156,9 +161,13 @@ while (<>) {
 
     # Check for warnings and starred messages
     # TODO: Have option for restricting ***'s to start of line.
+    # NOTE: $strict includes "error" or "warning" occurring anywhere;
+    # added to excluded keywords usage as in "conflict_handler='error'".
     elsif ($show_warnings &&
-	   (/\b(Warning|WARNING)\b/ 
-	    || /\b(Error|error)\b/	# matches within line error case above
+	   ((/\b(warning)\b/i           # warning token occuring 
+	     && ((! /='warning'/i) || $strict)) # ... includes quotes if strict
+	    || (/\b(error)\b/i	        # matches within line error case above
+		&& ((! /='error'/i) || $strict))  # ... includes quotes if strict
 	    || /: No match/		# shell warning?
 	    || /: warning\b/		# Ruby warnings
 	    || /^bash: /                # ex: "bash: [: : unary operator expected"

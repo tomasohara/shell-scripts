@@ -50,10 +50,13 @@ no strict "refs";		# allow for symbolic file handles
 use vars qw/$class_filter $max_count $label $word $last $freq_last
     $freq_first $header $show_header $skip_header $classes $show_classes
     $simple $normalize $fix $alpha $preserve $cumulative $just_freq $no_comments/;
+use vars qw /$strip_comments $first/;
 
 
 if (! defined($ARGV[0])) {
     my($options) = "options = [-max_count=N] [-word=w] [-class_filter=\"list\"] [-simple] [-normalize] [-cumulative] [-no_comments] [-verbose]";
+    $options .= "[-[freq_]first] [-[freq_]last] [-label=text] [-[show_|skip_]header] [-[show_]classes] [-alpha] [-preserve] [-just_freq]";
+    $options .= "\nother options = " . &COMMON_OPTIONS;
     my($example) = "ex: $script_name -d=5 -class_filter=\"pp-bnf pp-dir pp-mnr pp-prp pp-tmp pp=ext pp-loc\" as.freq\n\n";
     $example = "examples:\n\n$script_name -verbose -simple .47 .42 .06 .05\n\n";
     $example .= "$script_name -freq_last all-fe.freq\n\n";
@@ -64,6 +67,18 @@ if (! defined($ARGV[0])) {
     $example .= "$script_name -no_comments -verbose -last \$file.freq | cut.perl -f='3,5' - >| \$file.rfreq\n\n";
 
     print STDERR "\nusage: $script_name [options]\n\n$options\n\n$example";
+    # TODO: put notes before examples as with other scripts
+    print STDERR "notes:\n";
+    print STDERR "- The -strip_comments option is an alias for old -no_comments=0.\n";
+    print STDERR "- Use -verbose for more details.\n";
+    if ($verbose) {
+	# TODO: move into common.perl as new function
+	my($detailed_usage) = &run_command("extract_matches.perl -fields=2 'init_var\\(\\*(\\w+).*\\s# (.*)' '$0'");
+	$detailed_usage =~ s/^/  /mg;
+	$detailed_usage =~ s/\t/: /g;
+	print STDERR "- Option descriptions:\n$detailed_usage\n";	
+    }
+    
     &exit();
 }
 
@@ -89,7 +104,9 @@ if ($class_filter ne "") {
 &init_var(*alpha, &FALSE);		# show keys alphabetized
 &init_var(*preserve, &FALSE);		# preserve order of keys
 &init_var(*cumulative, &FALSE);		# show cumulative probability
-&init_var(*no_comments, &FALSE);	# used to bypass comment stripping
+## OLD: &init_var(*no_comments, &FALSE);	# used to bypass comment stripping
+&init_var(*strip_comments, &FALSE);     # alias for (confusing) -no_comments=0
+&init_var(*no_comments, ! $strip_comments); # used to bypass comment stripping
 
 my($LOG2) = log(2);
 
@@ -161,14 +178,8 @@ sub regular_calc_entropy {
 	# Skip comments and blank lines
 	s/#.*// unless ($no_comments);
 	next if (/^\s*$/);
-
-	# Optionally, make sure tab-delimited (TODO, allow for spaces in quoted strings)
 	## OLD: s/\s\s+/\t/g if ($fix);		# make sure input is tab-delimited
-	## OLD: s/\s+/\t/g if ($fix);		# make sure input is tab-delimited
-	if ($fix) {
-	    s/^\s+//;
-	    s/\s+/\t/g;
-	}
+	s/\s+/\t/g if ($fix);		# make sure input is tab-delimited
 	if (! m/\t/) {
 	    &warning("unexpected input at line $. ($_)\nUse -fix if not tab-delimited.\n");
 	    next;
@@ -278,13 +289,15 @@ sub simple_calc_entropy {
 	my($p_lg_p) = ($prob > 0) ? (- $prob * (log($prob)/$LOG2)) : 0;
 	$entropy += $p_lg_p;
 	my($prob_value) = ($cumulative ? $sum_p : $prob);
-	printf "#\t%.3f\t%.3f\n", $prob_value, $p_lg_p if ($verbose && (! $just_freq));
+	## OLD: printf "#\t%.3f\t%.3f\n", $prob_value, $p_lg_p if ($verbose && (! $just_freq));
+	printf "#\t%s\t%s\n", &round($prob_value), &round($p_lg_p) if ($verbose && (! $just_freq));
 	print &round($prob_value), "\n" if ($just_freq);
     }
     if ($verbose && (! $just_freq)) {
 	printf "#%s\n", "-" x 32;
 	printf "# word\tclasses\tfreq\tentropy\tmax_prob\n" unless ($skip_header);
-	printf "#\t%.3f\t%.3f\t   %.3f\n", $sum_p, $entropy, $max_prob;
+	## OLD: printf "#\t%.3f\t%.3f\t   %.3f\n", $sum_p, $entropy, $max_prob;
+	printf "#\t%s\t%s\t   %s\n", &round($sum_p), &round($entropy), &round($max_prob);
     }
     &debug_print(&TL_VERBOSE, "simple_calc_entropy(@data) => $entropy\n");
 

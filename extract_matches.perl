@@ -40,11 +40,12 @@ if (! defined($nostrict)) {
 ##
 use vars qw/$replacement $restore $para $file $fields $one_per_line
     $max_count $i $locale $single $preserve $slurp/;
-
+use vars qw/$multi_per_line/;
 
 # Process the command-line options
 if (!defined($ARGV[0])) {
     my($options) = "options = [-replacement=perl_template] [-fields=N] [-para] [-file] [-restore] [-max_count=n] [-one_per_line|-single] [-locale] [-i] [-preserve]";
+    $options .= " [-multi_per_line]";
     my($example) = "examples:\n\nls -l | $0 \"\\.([^\\.]+\$)\"\n\n";
     $example .= "echo '(trace' `$script_name \"^\\(defun (\\S+)\" init.lisp` ')'\n\n";
     $example .= "$script_name -replacement='\$1-\$2-method' '^\\(def-instance-method \\((\\S+) (\\S+)' /home/tom/cycl/subloop-class-example.lisp\n\n";
@@ -65,9 +66,12 @@ if (!defined($ARGV[0])) {
 &init_var(*file, $slurp);		# entire file input mode
 &init_var(*fields, 1);			# number of output fields
 &init_var(*single, &FALSE);		# alias for -one_per_line
+# NOTE: multi_per_line (as in count_it.perl) is the default
 &init_var(*one_per_line, $single);	# only count one instance of the pattern per line
+&init_var(*multi_per_line, ! $single);  # multiple matches per line
 &init_var(*max_count,			# maximum number of matches per line
-	  $one_per_line ? 1 : &MAXINT);
+	  ## OLD: $one_per_line ? 1 : &MAXINT);
+	  $multi_per_line ? &MAXINT : 1);
 &init_var(*i, &FALSE);			# ignore case
 &init_var(*preserve, &FALSE);		# preserve case (when -i in effect)
 &debug_print(&TL_DETAILED, "Note: -preserve not implemented\n") if ($preserve);
@@ -101,6 +105,7 @@ if ($file) {
 if (($pattern =~ /^\^/) || ($pattern =~ /\$$/)) {
     $max_count = 1;
 }
+&debug_print(&TL_VERY_DETAILED, "max_count=$max_count\n");
 
 # For multiple-field patterns, generate a replacement with tab separated fillers
 # note: this assumes that replacement is same as "\$1" default
@@ -121,11 +126,7 @@ if ($pattern !~ /\(.*\)/) {
 # (e.g. "\1 better written as $1 at (eval 2) line 1, <> line 17.")
 $replacement =~ s/\\(\d+)/\$$1/g;
 #
-# Make sure special characters in replacement are escaped (for reegex and eval).
-## TODO: $replacement =~ s/(\b|[^\\])([<>\\])/$1\\$2/;
-$replacement =~ s/(\b|[^\\])([\"])/$1\\$2/g;
-#
-&debug_out(&TL_VERBOSE, "pattern='%s'; replacement='%s'; restore='%s'\n", $pattern, $replacement, $restore);
+&debug_out(&TL_VERY_DETAILED, "pattern='%s'; replacement='%s'; restore='%s'\n", $pattern, $replacement, $restore);
 
 # Scan through the text (checking the pattern line by line)
 while (<>) {
@@ -141,11 +142,12 @@ while (<>) {
     my($count) = 0;
     while (($ignore_case && m/$pattern/is) || (m/$pattern/s)) {
 	my($matching_text) = $&;
-	&debug_out(&TL_VERBOSE, "matching text: '%s'\n", $matching_text);
+	&debug_print(&TL_VERY_DETAILED, "\n");
+	&debug_out(&TL_VERY_DETAILED, "matching text: '%s'\n", $matching_text);
 	for ($i = 1; $i <= $fields; $i++) {
-	    &debug_out(&TL_VERBOSE, "\$%d = '%s'; ", $i, eval "\${$i}");
+	    &debug_out(&TL_VERY_DETAILED, "\$%d = '%s'; ", $i, eval "\${$i}");
 	}
-	&debug_print(&TL_VERBOSE, "\n");
+	&debug_print(&TL_VERY_DETAILED, "\n");
 
 	# Update the current line being matched
 	if ($restore ne "") {
@@ -165,17 +167,18 @@ while (<>) {
 	## my($replacement_text) = eval { $replacement; };
 	my($replacement_text);
 	eval "\$replacement_text = \"$replacement\";";
-	&debug_out(&TL_VERBOSE, "replacement text: '%s'\n", $replacement_text);
+	&debug_out(&TL_VERY_DETAILED, "replacement text: '%s'\n", $replacement_text);
 	if ($ignore_case) {
 	    $matching_text =~ s/$pattern/$replacement_text/si;
 	}
 	else {
 	    $matching_text =~ s/$pattern/$replacement_text/s;
 	}
-	&debug_out(&TL_VERBOSE, "resulting text: '%s'\n", $matching_text);
+	&debug_out(&TL_VERY_DETAILED, "resulting text: '%s'\n", $matching_text);
 	print "$matching_text\n";
 
 	# See if limit for displayed matches reached
+	&debug_print(&TL_VERY_DETAILED, "count=$count max_count=$max_count\n"); 
 	$count++;
 	last if ($count >= $max_count);
     }

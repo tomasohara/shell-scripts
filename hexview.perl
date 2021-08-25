@@ -52,12 +52,20 @@ BEGIN {
 # for command-line arguments (see init_var's in &init).
 use strict;
 use vars qw/$width $lines $newline $newlines $help/;
+use vars qw/$no_ascii $no_offset $no_hex/;
 
 $width = 16 unless defined($width); 		# number of hexed characters per line
 my $half_width = $width / 2;			# width of column
 $lines = &FALSE unless (defined($lines));	# alias for -newlines
 $newline = &FALSE unless (defined($newline));	# another alias for -newlines
 $newlines = ($lines || $newline) unless (defined($newlines));	# end hex section at newlines not just every N chars
+&init_var(*no_ascii, &FALSE);                   # omit ascii section (righthand side)
+&init_var(*no_offset, &FALSE);                  # omit offset section (lefthand side)
+&init_var(*no_hex, &FALSE);                     # omit hex section (middle)
+my($show_ascii) = (! $no_ascii);
+my($show_offset) = (! $no_offset);
+my($show_hex) = (! $no_hex);
+
 my($show_help) = $help;
 
 # Show a usage statement if no arguments given.
@@ -67,6 +75,7 @@ my($show_help) = $help;
 if ($show_help) {
     # Construct usage options spec, notes, examples and notes
     my($options) = "main options = [-newline[s] | -line] [-width=N]";
+    $options .= " [-no_ascii] [-no_offset] [-no_hex]";
     $options .= "\nother options = " . &COMMON_OPTIONS;
     my($note) = "notes:\n";
     $note .= "- Use -newlines to force line breaks at newlines\n";
@@ -141,108 +150,121 @@ while (($len = read(STDIN, $data, $width)) > 0) {
     for (my $i = 0; (($i < $width) && ($i < length($data))); $i++) {
 	# Print the offset as an 8-digit hex number.
 	# TODO: Check input size and adapt max width accordingly (also have option for size).
-	printf("%8.8lX  ", $offset + $i);
+	if ($show_offset) {
+	    printf("%8.8lX  ", $offset + $i);
+	}
 	my($extra_first_half) = min($i, $half_width);
 	my($extra_second_half) = max(0, (min($i, $width) - $half_width));
 	my($extra_both_halves) = ($extra_first_half + $extra_second_half);
 
-	# Print indentation to account for non-zero offset due to forced-newline
-	if ($newlines) {
-	    for (my $j = 0; $j < $extra_first_half; $j++) {
-		&ptrace("1");
-		print("$missing_hex ");
-	    }
-	}
-
-	# Print the first half of the hexadecimal representation.
-	my($half_start) = 0;
-	for ($half_start = $i; $i < $half_width; $i++) {
-	    &ptrace("2");
-	    print("$array[$i] ");
-
-	    # Special case processing for newlines
-	    if ($newlines && ($array[$i] eq "0A")) {
-
-		# Print spaces for remainder of hex representation
-		for (my $j = 0; $j < ($half_width - $i - 1); $j++) {
-		    &ptrace("3");
+	# Print hexadecimal as two sets of hex pairs separate by a dash
+	if ($show_hex) {
+    	    
+	    # Print indentation to account for non-zero offset due to forced-newline
+	    if ($newlines) {
+		for (my $j = 0; $j < $extra_first_half; $j++) {
+		    &ptrace("1");
 		    print("$missing_hex ");
 		}
-
-		# Middle empty divided (because some blank hex bytes in first half)
-		&ptrace("4");
-		print($empty_div);
-
-		# Print empty second half of hex representation
-		for (my $j = 0; $j < $half_width; $j++) {
-		    &ptrace("5");
-		    print("$missing_hex ");
-		}
-
-		# Print ascii representation
-		&ptrace("6");
-		print(" ");
-		if ($extra_first_half) {
-		    &ptrace("7");
-		    print(" " x $extra_first_half);
-		}
-		&ptrace("8");
-		my($num_chars) = ($i - $half_start + 1);
-		print(substr($data, $line_start, $num_chars), "\n");
-		$line_start += $num_chars;
-		next data_loop;
 	    }
-	}
-
-	# Print the dash between the hexadecimal halves (unless forced newline processed).
-	&ptrace("9");
-	print($middle_div);
-
-	# Print indentation to account for non-zero offset due to forced-newline
-	if ($newlines) {
-	    for (my $j = 0; $j < $extra_second_half; $j++) {
-		&ptrace("0");
-		print("$missing_hex ");
-	    }
-	}
 	    
-	# Print the second half of the hexadecimal representation.
-	for ($half_start = $i; $i < $width; $i++) {
-	    &ptrace("!");
-	    print("$array[$i] ");
+	    # Print the first half of the hexadecimal representation.
+	    my($half_start) = 0;
+	    for ($half_start = $i; $i < $half_width; $i++) {
+		&ptrace("2");
+		print("$array[$i] ");
+		
+		# Special case processing for newlines
+		if ($newlines && ($array[$i] eq "0A")) {
+		    
+		    # Print spaces for remainder of hex representation
+		    for (my $j = 0; $j < ($half_width - $i - 1); $j++) {
+			&ptrace("3");
+			print("$missing_hex ");
+		    }
 
-	    # Special case processing for newlines
-	    if ($newlines && ($array[$i] eq "0A")) {
+		    # Middle empty divided (because some blank hex bytes in first half)
+		    &ptrace("4");
+		    print($empty_div);
 
-		# Print spaces for remainder of hex representation
-		for (my $j = 0; $j < ($width - $i - 1); $j++) {
-		    &ptrace("@");
+		    # Print empty second half of hex representation
+		    for (my $j = 0; $j < $half_width; $j++) {
+			&ptrace("5");
+			print("$missing_hex ");
+		    }
+
+		    # Print ascii representation
+		    &ptrace("6");
+		    print(" ");
+		    if ($extra_first_half) {
+			&ptrace("7");
+			print(" " x $extra_first_half);
+		    }
+		    &ptrace("8");
+		    my($num_chars) = ($i - $half_start + 1);
+		    print(substr($data, $line_start, $num_chars), "\n");
+		    $line_start += $num_chars;
+		    next data_loop;
+		}
+	    }
+
+	    # Print the dash between the hexadecimal halves (unless forced newline processed).
+	    &ptrace("9");
+	    print($middle_div);
+
+	    # Print indentation to account for non-zero offset due to forced-newline
+	    if ($newlines) {
+		for (my $j = 0; $j < $extra_second_half; $j++) {
+		    &ptrace("0");
 		    print("$missing_hex ");
 		}
-
-		# Print ascii representation
-		&ptrace("#");
-		print(" ");
-		if ($extra_both_halves > 0) {
-		    &ptrace("\$");
-		    print(" " x $extra_both_halves);
-		}
-		&ptrace("%");
-		my($num_chars) = $half_width - $extra_first_half + ($i - $half_start) + 1;
-		print(substr($data, $line_start, $num_chars), "\n");
-		$line_start += $num_chars;
-		next data_loop;
 	    }
-	}
+	    
+	    # Print the second half of the hexadecimal representation.
+	    for ($half_start = $i; $i < $width; $i++) {
+		&ptrace("!");
+		print("$array[$i] ");
 
+		# Special case processing for newlines
+		if ($newlines && ($array[$i] eq "0A")) {
+
+		    # Print spaces for remainder of hex representation
+		    for (my $j = 0; $j < ($width - $i - 1); $j++) {
+			&ptrace("@");
+			print("$missing_hex ");
+		    }
+
+		    # Print ascii representation
+		    &ptrace("#");
+		    print(" ");
+		    if ($extra_both_halves > 0) {
+			&ptrace("\$");
+			print(" " x $extra_both_halves);
+		    }
+		    &ptrace("%");
+		    my($num_chars) = $half_width - $extra_first_half + ($i - $half_start) + 1;
+		    print(substr($data, $line_start, $num_chars), "\n");
+		    $line_start += $num_chars;
+		    next data_loop;
+		}
+	    }
+
+	}
+	
+	
 	# Print the line contents proper.
 	# Note: . used for non-printing characters (see tr above).
-	&ptrace("^");
-	print(" ");
-	&ptrace("&");
-	print(" " x $extra_both_halves);
-	&ptrace("*");
-	print(substr($data, $line_start), "\n");
+	if ($show_ascii) {
+	    &ptrace("^");
+	    print(" ");
+	    &ptrace("&");
+	    print(" " x $extra_both_halves);
+	    &ptrace("*");
+	    print(substr($data, $line_start), "\n");
+	}
+	else {
+	    print("\n");
+	}
     }
   end_data_loop:
 

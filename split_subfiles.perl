@@ -27,14 +27,17 @@ BEGIN {
 ## TODO: 
 use strict;
 use vars qw/$include_start $include_end $ext $file_pattern $skip_start $file_base $base $header $trailer $start_num/;
+use vars qw/$partition $start_at_top/;
 
 # Show a usage statement if no arguments given
 # NOTE: By convention - is used when no arguments are required
 if (!defined($ARGV[0])) {
     my($options) = "main options = [-skip_start] [-include_end] [-ext=label] [-file_base=label] [-file_pattern=regex]";
+    $options .= " [-start_at_top]";
     $options .= "\nother options = " . &COMMON_OPTIONS;
     my($example) = "examples:\n\n$0 -skip_start FUNCTION DESCRIPTION clman.data\n\n";
     $example .= "$script_name -ext='.xml' -base='genia-' -include_end -header='<?xml version=\"1.0\" encoding=\"UTF-8\"?>' '<article>' '</article>' ../GENIAcorpus3.02.xml\n\n";
+    $example .= "$script_name -start_at_top -file_base=sub-docs/split- '\\x0C' '\\x0C' 205834Orig1s000Admincorres_HARVONI.pdf.content\n";
     my($note) = "";
     $note .= "notes:\n\nRegular expressions can be used start and end.\n";
 
@@ -47,6 +50,8 @@ if (!defined($ARGV[0])) {
 &init_var(*skip_start, &FALSE);	# line matching start region not output
 &init_var(*include_start, ! $skip_start); # whether to output first line in region
 &init_var(*include_end, &FALSE);  # whether to output last line in region
+&init_var(*partition, &FALSE);    # partition the file based on start pattern
+&init_var(*start_at_top, $partition); # whether start is also top of input
 &init_var(*ext, "");		# file extension with '.'
 &init_var(*file_pattern, "");	# regex for determining file name from start text
 my($use_file_pattern) = ($file_pattern ne "");
@@ -54,7 +59,8 @@ my($use_file_pattern) = ($file_pattern ne "");
     ($use_file_pattern ? "" : "split"));
 &init_var(*header, "");		# additional text added at start
 &init_var(*trailer, "");	# additional text added at end
-&init_var(*start_num, 1);		# starting value for filename
+## OLD: &init_var(*start_num, 1);		# starting value for filename
+&init_var(*start_num, 1);	# starting value for filename number affix
 
 # Make sure the optional file pattern has placeholder parentheses
 # TODO: use more flexible pattern as in count_it.perl
@@ -78,6 +84,9 @@ if (defined($ARGV[0])) {
 if (defined($ARGV[0])) {
     $end = shift @ARGV;
 }
+elsif ($partition) {
+    $end = $start;
+}
 
 &debug_print(&TL_DETAILED, "Start pattern (inclusive=$include_start): /${start}/\n");
 &debug_print(&TL_DETAILED, "End pattern (inclusive=$include_end) : /${end}/\n");
@@ -86,14 +95,16 @@ if (defined($ARGV[0])) {
 my($next_num) = $start_num;
 
 # Process each line of the input stream 
-my($include) = $FALSE;
+## OLD: my($include) = $FALSE;
+my($include) = $start_at_top;
 while (<>) {
     &dump_line();
     my($at_start) = &FALSE;
     my($at_end) = &FALSE;
 
     # check for start of inclusion region
-    if (/$start/
+    if (## OLD: /$start/
+	(/$start/ || (($. == 1) && $start_at_top))
 	&& (($include == $FALSE) || ($start eq $end))) {
 	&debug_print(&TL_DETAILED, "start of inclusion region at line $.\n");
 	$at_start = &TRUE;
@@ -112,12 +123,14 @@ while (<>) {
 	$next_num++;
 
 	print OUTPUT $header if ($header ne "");
-	print OUTPUT $_ if ($include_start);
+	## OLD: print OUTPUT $_ if ($include_start);
+	print OUTPUT $_ if ($include_start && !$partition);
 	$include = $TRUE;
     }
 
     # check for end of inclusion region
-    if (($include == $TRUE) && /$end/) {
+    ## OLD: if (($include == $TRUE) && /$end/) {
+    if (($include == $TRUE) && (/$end/ && !$partition)) {
 	&debug_print(&TL_DETAILED, "end of inclusion region at line $.\n");
 	$at_end = &TRUE;
 	print OUTPUT $_ if ($include_end && (! $at_start));
@@ -127,7 +140,8 @@ while (<>) {
     }
 
     # print the text if within the inclusion region
-    if ($include && (! $at_start) && (! $at_end)) {
+    ## if ($include && (! $at_start) && (! $at_end)) {
+    if ($include && ((!$at_start && !$at_end) || $partition)) {
 	&debug_print(&TL_VERBOSE, "including line\n");
 	print OUTPUT $_;
     }

@@ -88,7 +88,8 @@ my($default_pattern) = (($pattern_file ne "") ? &read_file($pattern_file) : "");
 if (!defined($ARGV[0])) {
     my($options) = "options = [-i(gnore)] [-alpha] [-freq_first] [-para] [-preserve] [-foldcase]\n";
     $options    .= "          [-compact] [-min_freq=N | -nonsingletons | -min2] [-slurp] [-unaccent] [-chomp]\n";
-    $options    .= "          [-occurrences] [-cumulative] [-one_per_line]\n";
+    ## OLD: $options    .= "          [-occurrences] [-cumulative] [-one_per_line]\n";
+    $options    .= "          [-occurrences] [-cumulative] [-multi_per_line|-one_per_line]\n";
     my($example) = "examples:\n\nls | $script_name '\\.([^\\.]+)\$'\n\n";
     $example .= "$0 '(outside\/\\S+)' omcsraw.tag\n\n";
     $example .= "perl -CIOE -Sw $script_name '(.)' - < wiki-lang-info/utf8/da  >| /tmp/da.freq\n\n";
@@ -102,6 +103,7 @@ if (!defined($ARGV[0])) {
     $note .= "-para reads text in paragraph mode (rather than line)\n";
     $note .= "-slurp reads the entire file at once (for long-distance patterns)\n";
     $note .= "-occurrences incorporates count field (\$1 for pattern & \$2 count)\n";
+    $note .= "-multi_per_line allows for multple occurrences in a line (assumed unless ^ used)\n";
     ## TODO: add optional extended help with examples for misc. options
 
     die "\nusage: $script_name [options] pattern file ...\n\n$options\n\n$example\n$note\n";
@@ -113,11 +115,15 @@ if ($pattern eq "") {
 
 ## BAD: my($has_line_anchor) = (($pattern =~ "^\^") || ($pattern =~ /[^\\]\$$/));
 ## TODO: exclude \$ at end of string (e.g., "100\$")
+## TODO: add unit test: (echo "12 34 56 78" | count_it.perl '\d{2}' | wc -l) =>  4
 ## BAD: my($has_line_anchor) = ((index($pattern, "^") == 0) || (rindex($pattern, "\$") != $#pattern));
 my($has_line_anchor) = ((index($pattern, "^") == 0) 
 			|| (rindex($pattern, "\$") == length($pattern))); 
-&init_var(*multi_per_line, ! $has_line_anchor);	# count multiple instance of the pattern per line (even when ^ and $ are specified)
-&init_var(*one_per_line, ! $multi_per_line); # only count one instance of the pattern per line
+## OLD:
+## &init_var(*multi_per_line, ! $has_line_anchor);	# count multiple instance of the pattern per line (even when ^ and $ are specified)
+## &init_var(*one_per_line, ! $multi_per_line); # only count one instance of the pattern per line
+&init_var(*one_per_line, $has_line_anchor); # only count one instance of the pattern per line
+&init_var(*multi_per_line, ! $one_per_line);	# count multiple instance of the pattern per line (even when ^ and $ are specified)
 &assertion(! ($one_per_line && $multi_per_line));
 
 if ($locale) {
@@ -210,7 +216,9 @@ while (<>) {
 	# Update the hash table of the patterns
 	if ($found) {
 	    $tag = &trim($tag) if ($trim);
-	    &debug_print(&TL_VERY_DETAILED, "adding: '$tag'\n");
+	    ## TODO: add unit test for differences using optional suffixes vs. lookahead (e.g., '\w{3}((, )|$)' vs. '\w{3}(?=(, )|$)'
+	    ## OLD: &debug_print(&TL_VERY_DETAILED, "adding: '$tag'\n");
+	    &debug_print(&TL_VERY_DETAILED, "adding: '$tag'; \$\&='$&'\n");
 	    $num++;
 	    my($count) = 1;
 	    if ($occurrence_field) {

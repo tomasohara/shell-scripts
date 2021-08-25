@@ -29,14 +29,12 @@ eval 'exec perl -Ssw $0 "$@"'
 BEGIN { 
     my $dir = $0; $dir =~ s/[^\\\/]*$//; unshift(@INC, $dir);
     require 'common.perl';
-    use vars qw/$verbose/;
 }
 
 # Specify additional diagnostics and strict variable usage, excepting those
 # for command-line arguments (see init_var's in &init).
 use strict;
 use vars qw/$v $i $para $slurp $context $C $A $B $n $max $show_filename $w $c $h/;
-use vars qw/$context_sep $COLUMNS/;
 
 # Determine values of command-line arguments
 # TODO: use expanded names for all options (e.g., -not_atching for -v)
@@ -57,11 +55,6 @@ my($just_count) = $c;
 	  ((scalar @ARGV) > 2) && !$h);
 ## TODO: &init_var(*c, &FALSE);		# just show count
 &init_var(*w, &FALSE);		# match word boundaries
-&init_var(*COLUMNS, 80);	# number of columns (set via resize command)
-my($dotted_line) = ("." x $COLUMNS);
-my($default_context_sep) = ($verbose ? $dotted_line : "--");
-&init_var(*context_sep,	        # text to print between matches (if $A, $B, or $C)
-	  $default_context_sep);
 
 # Show usage statement if insufficient arguments
 #
@@ -71,32 +64,25 @@ if (!defined($ARGV[0])) {
     $example .= "perlgrep.perl -para -i \"coling\" comps.bib | & less\n\n";
     $example .= "$0 -show_filename -max=1 \"\\r\\n\" *.lisp\n\n";
 
-   print STDERR "\nusage: $script_name [options]\n\n$options\n\n$example\n\n";
+    print STDERR "\nusage: $script_name [options]\n\n$options\n\n$example\n\n";
     &exit();
 }
 my($pattern) = shift @ARGV;
 
-# Do santy checks
-&assertion(($A + $B) >= 0);
-&assertion($C >= 0);
-
-## OLD: select(STDOUT); $| = 1;		    # set stdout unbuffered
-
-# Set stdout unbuffered
-select(STDOUT); $| = 1;
+select(STDOUT); $| = 1;		    # set stdout unbuffered
 
 # Optionally set paragraph input mode
 $/ = "" if ($para);		# paragraph input mode
-$/ = 0777 if ($slurp);		# complete-file input mode
+## OLD: $/ = 0777 if ($slurp);		# complete-file input mode
+undef $/ if ($slurp);		# complete-file input mode
 
 # Modify the pattern to reflect word boundaries
 if ($w) {
     $pattern = "\\b$pattern\\b";
 }
 
-# Initialize accumulators
 my(@before);			# lines before current target context
-#
+
 &debug_print(&TL_DETAILED, "checking for pattern '$pattern'; just_count=$just_count\n");
 my($hit_count) = 0;
 my($after_context) = 0;
@@ -140,18 +126,11 @@ while (<>) {
 	$current_count++;
 	$undisplayed_counts = &TRUE;
 	if (! $just_count) {
-	    # Output divider (--) between matches
-	    if (($A + $B) > 0) {
-		print "$context_sep\n";
-	    }
-
-	    # Output pre-context
 	    if ($B > 0) {
 		printf "%s", join("", @before);
 		@before = ();
 	    }
 
-	    # Output match, opitonally including filename and line number (or para)
 	    if ($show_filename) {
 		print "$current_file:";
 	    }

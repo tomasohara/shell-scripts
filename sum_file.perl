@@ -44,6 +44,7 @@ use strict;
 use vars qw/$fract $diff $labels $headings $f $f1 $f2 $col $col1 $col2 $fix
     $ttest $paired_ttest $paired $anova $mann_whitney $each $interactive $stats
     $stdev $keep_nonnumeric $skip_nonnumeric $cumulative $average $context $flag_index_change $show_sum $dollars $commas $delim/;
+use vars qw/$strip/;
 
 # Check options for statistical tests
 &init_var(*ttest, &FALSE);	# perform standard t-test analysis
@@ -101,8 +102,12 @@ $f2 = ($col2 - 1) if ($f2 == -1);
 if ($flag_index_change) {
     &assert($col2 > 0);
 }
-&init_var(*dollars, &FALSE);	# the data contain dollar signs (to be ignored)
-&init_var(*commas, &FALSE);	# the data contain commas (to be ignored)
+## OLD:
+## &init_var(*dollars, &FALSE);	# the data contain dollar signs (to be ignored)
+## &init_var(*commas, &FALSE);	# the data contain commas (to be ignored)
+&init_var(*strip, &FALSE);      # strip comma's and dollar signs
+&init_var(*dollars, $strip);	# the data contain dollar signs (to be ignored)
+&init_var(*commas, $strip);	# the data contain commas (to be ignored)
 &init_var(*delim, "\t");        # column separator
 
 my($sum) = 0;
@@ -367,11 +372,11 @@ if ($stats == &FALSE) {
 	    print "num = 0\n";
 	}
 	else {
-	    debug_print(&TL_USUAL, "data: @data\n");
+	    debug_print(&TL_DETAILED, "data: @data\n");
 	    if ($verbose) {
 		print("data: @data\n");
 	    }
-	    printf "num = %d; mean = %s; stdev = %s; min = %s max = %s\n", (scalar @data), &round(&mean(@data)), &round(&stdev(@data)), &round(&min_item(@data)), &round(&max_item(@data));
+	    printf "num = %d; mean = %s; stdev = %s; min = %s; max = %s; sum = %s\n", (scalar @data), &round(&mean(@data)), &round(&stdev(@data)), &round(&min_item(@data)), &round(&max_item(@data)), &round($sum);
 	}
     }
 }

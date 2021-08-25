@@ -1,4 +1,5 @@
-# do_setup.bash: Initialization file for use with bash 
+# do_setup.bash: Initialization file for use with bash
+# *** OLD: DO NOT MODIFY: use tomohara-aliases.bash instead! ***
 #
 # NOTES:
 #
@@ -936,8 +937,9 @@ function view-mail- () { $ZPAGER $HOME/mail/OLD/mail_$1.gz; }
 alias view-mail-log='$PAGER $HOME/mail/sent-mail'
 function view-mail-log- () { $ZPAGER $HOME/mail/OLD/logged_messages_$1.gz; }
 alias view-mail-aliases='$PAGER $HOME/.mailrc'
+## OLD
 ## function mail-tpo () { mail -s $1 tom_o_hara@msn.com < $1; }
-function mail-tpo () { mail -s $1 tomohara@umbc.edu < $1; }
+## function mail-tpo () { mail -s $1 tomohara@umbc.edu < $1; }
 
 # Simple calculator commands
 function old-calc () { echo "$@" | bc -l; }
@@ -1329,16 +1331,17 @@ function pdf-print () { acroread -toPostScript < "$1" | lpr; lpq; }
 function ps-print () { lpr < "$1"; }
 alias ps-view='gv'
 ## OLD: alias pv='pdf-view'
-function pdf-to-ascii () { ps2ascii "$1" > "$1.ascii"; }
-function all-pdf-to-ascii () { 
-    for f in *.pdf; do 
-	echo "checking $f.ascii"; 
-	if [ ! -e "$f.ascii" ]; then 
-	    echo "converting $f"; 
-	    pdf-to-ascii "$f"; 
-	fi; 
-    done; 
-}
+## OLD
+## function pdf-to-ascii () { ps2ascii "$1" > "$1.ascii"; }
+## function all-pdf-to-ascii () { 
+##     for f in *.pdf; do 
+## 	echo "checking $f.ascii"; 
+## 	if [ ! -e "$f.ascii" ]; then 
+## 	    echo "converting $f"; 
+## 	    pdf-to-ascii "$f"; 
+## 	fi; 
+##     done; 
+## }
 #
 #
 # v alias for view .ps or .pdf files

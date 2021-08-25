@@ -48,7 +48,7 @@ sub log10 {
 #
 sub round_num {
     my($number, $places) = @_;
-    $places = 3 if (! defined($places));
+    $places = $precision if (! defined($places));
     my($result) = sprintf(".${places}f", $number);
     return $number;
 }
@@ -62,14 +62,13 @@ sub ceil {
 #...............................................................................
 
 if ((defined($ARGV[0]) && ($ARGV[0] eq "help"))
-    || $help			# TODO: reformat
+    || (defined($help) && $help)
     || (!defined($ARGV[0]) && &blocking_stdin())) {
     $options = "options = [-init=expr] [-fmt=printf-format-spec] [-integer | -precision=N] [-args | -]";
     $example = "examples:\n\n";
-    $example .=	"$script_name -integer '24 * (60 * 60)'\n\n";
-    $example .= "$script_name -precision=6 '666 / 1e6'\n\n";
-    &assertion($example =~ /\n\n$/m);
-    die "\nusage: $script_name [options]\n\n$options\n\n$example";
+    $example .=	"$script_name whatever\n";
+    $example .= "$script_name -precision=6 '1/10e6'\n";
+    die "\nusage: $script_name [options]\n\n$options\n\n$example\n";
 }
 
 use vars qw/$args $init $int $integer $fmt/;

@@ -820,7 +820,7 @@ sub warning {
 # - have version that doesn't evaluate the expression
 #
 sub assert {
-    my($expression) = @_;
+    my($expression, $package, $filename, $line) = @_;
     if ($disable_assertions) {
 	&debug_print(99, "my assert(@_) {checking disabled}\n");
 	return;
@@ -829,7 +829,9 @@ sub assert {
 
     # Determine the package to use for the evaluation environment,
     # as well as the filename and line number for the assertion call.
-    my($package, $filename, $line) = caller;
+    if (! defined($package)) {
+	($package, $filename, $line) = caller;
+    }
 
     # Evaluate the expression in the caller's package
     ## &debug_print(&TL_VERBOSE+4, "eval: 'package $package; $expression;'\n");
@@ -852,9 +854,15 @@ sub assert {
 # assertion(expression): ditto
 # TODO: Rework so soft_assertion is the defined function (i.e., not alias).
 #
-sub soft_assertion { &assert(@_); }
+sub soft_assertion { 
+    my($package, $filename, $line) = caller; 
+    &assert(@_, $package, $filename, $line); 
+}
 #
-sub assertion { &assert(@_); }
+sub assertion { 
+    my($package, $filename, $line) = caller; 
+    &assert(@_, $package, $filename, $line);
+}
 
 # reset_trace():      reset the line number and other trace information
 # NOTE: obsolete function
@@ -1300,11 +1308,12 @@ sub intersection {
     my($list1_ref, $list2_ref) = @_;
     &debug_print(&TL_VERBOSE+2, "intersection(@_)\n");
     my(%seen);
+    my($item);
     
     # Tag each item in the second list as seen
     map { $seen{$_} = &TRUE; } @$list2_ref;
 
-    # Get those items from first seen in second
+    # Get those items not see
     my(@list) = grep (defined($seen{$_}), @$list1_ref);
     &debug_print(&TL_VERBOSE+3, "intersection((@$list1_ref), (@$list2_ref)) =>\n(@list)\n");
 

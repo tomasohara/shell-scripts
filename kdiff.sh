@@ -52,5 +52,5 @@ if [ "$OSTYPE" = "cygwin" ]; then
 fi
 
 # Invoke kdiff
-$kdiff "$file1" "$file2" &
-
+## OLD: $kdiff "$file1" "$file2" &
+$kdiff "$file1" "$file2" 2>| $TMP/kdiff-$$.log &

@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 #
 # TODO: name.sh: explanation
 #
@@ -14,6 +14,9 @@
 #     case EXPR in PATTERN_a) STMT_a;; PATTERN_b) STMT_b;; ... esac
 #     for name [in words ...]; do commands; done
 #     for (( expr1 ; expr2 ; expr3 )) ; do commands ; done
+#     while [ expr ] ; do commands ; done
+#     $((arithmetic))              evaluate arithmetic expression
+#     $(command ...)               same as `command ...`
 # TODO: variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
 #     note: EXPR is C style;
 #         Format                    Example
@@ -24,12 +27,19 @@
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
 # - if [[ $JAVA_HOME =~ x64 ]]; then echo "64-bit Java"; fi
 # - case "$HOST_NICKNAME" in ec2*) echo "AWS";; hostw*) echo "HW";; *) echo "non-server"; esac
+# - if [[ $1 =~ */ ]]; then echo '$1' ends in slash; fi
+# - if [[ ! $file =~ http ]]; then echo hey; fi
 #
 # TODO:
+# - *** Update me (e.g., from recent scripts)! ***
+# - change existing scripts to use '#! /usr/bin/env bash'
 # - Check the TODO comments for customizations needed for the script."
 # - Put the template for common bash expressions elsewhere.
 # - Add examples for each of the templates above.
 # - Change 'shift 1' to 'shift' in ~/bin bash scripts.
+# - Mention some useful variables:
+#   (e.g., ${!#} for last argument--see https://stackoverflow.com/questions/1853946/getting-the-last-argument-passed-to-a-shell-script).
+# - Document regex match quirks.
 #
 
 # Uncomment following line(s) for tracing:
@@ -38,7 +48,7 @@
 #  
 ## echo "$@"
 ## set -o xtrace
-## set -o verbose
+## DEBUG: set -o verbose
 
 # Show usage statement
 # TODO: convert into a function that get invoked with $1 is empty or --help
@@ -46,7 +56,9 @@
 # NOTE: See sync-loop.sh for an example.
 #
 if [ "$1" = "" ]; then
-    base=$(basename "$0")
+    script=$(basename "$0")
+    ## TODO: if [ $script ~= *\ * ]; then script='"'$script'"; fi
+    ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
     echo "Usage: $0 [--TODO] [--trace] [--help] [--]"
@@ -54,10 +66,10 @@ if [ "$1" = "" ]; then
     echo "Examples:"
     echo ""
     ## TODO: example 1
-    echo "\"$base\" example 1"
+    echo "$0 example 1"
     echo ""
     ## TODO: example 2
-    echo "\"$base\" example 2"
+    echo "$script example 2"
     echo ""
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."

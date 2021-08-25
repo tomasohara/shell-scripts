@@ -1,4 +1,4 @@
-#! /usr/bin/env bash
+#! /bin/bash
 #
 # Sets the xterm title bar to the string given on the command line.
 # The first argument gives the full title and the second the iconified title.
@@ -18,7 +18,6 @@
 # - set_xterm_title.bash "/c/cartera-de-tomas/ILIT" "ILIT"
 #
 # TODO:
-# - *** Issue a warning if PROMPT_COMMAND is set (to avoid much head scratching).
 # - Document environment variable usage:
 #   HOST PWD TERM DEFAULT_HOST USER HOST_NICKNAME OSTYPE HOSTNAME SUDO_USER HOME
 # - Add environment variables for prefix (and affix?) analagous to XTERM_TITLE_SUFFIX.
@@ -95,22 +94,12 @@
 
 # Show usage if no arguments or --help
 # TODO: put argument processing in loop (see template.bash)
-full_title="0"
 if [ "$1" = "--trace" ]; then
     set -o xtrace
     shift
 fi
-if [ "$1" = "--verbose-trace" ]; then
-    set -o verbose
-    shift
-fi
-if [ "$1" = "--full-title" ]; then
-    full_title="1"
-    shift
-fi
 if [[ ("$1" = "") || ("$1" = "--help") ]]; then
-    echo "Usage: [misc-options] [--full-title] [--help] $0 title [icon-title]"
-    echo "   misc-options: [--trace] [--verbose-trace]"
+    echo "Usage: [--trace] [--help] $0 title [icon-title]"
     echo ""
     script=$(basename "$0")
     # NOTE:
@@ -134,49 +123,28 @@ if [ "$TERM" = "screen" ]; then full="SCREEN: $full"; icon="SCREEN: $icon"; fi
 ## echo full="$full"
 ## echo icon="$icon"
 
+#...............................................................................
+# A bunch of adhoc stuff changes to the window title
+
 # Make sure hostname set and see if optional default host indicated
 if [ "$HOST" = "" ]; then
     HOST="$HOSTNAME"
-    ## OLD: if [ "$HOST" = "" ]; then HOST=$(uname -n | perl -pe 's/\..*//g;'); fi
-    if [ "$HOST" = "" ]; then HOST=$(uname); fi
-    HOST=$(echo "$HOST" | uname -n | perl -pe 's/\..*//g;');
-    ## DEBUG: echo HOST: "$HOST"
+    if [ "$HOST" = "" ]; then HOST=`uname -n`; fi
 fi
 if [ "$DEFAULT_HOST" = "" ]; then
-    ## OLD: if [ -e $HOME/.default_host ]; then DEFAULT_HOST=$(cat $HOME/.default_host); fi
-    ## TEST: conditional-source $HOME/.default_host
-    ## TODO: rename .default_host to .set-default-host for clarity
-    if [ -e $HOME/.default_host ]; then source $HOME/.default_host; fi
-    ## DEBUG: echo DEFAULT_HOST: "$DEFAULT_HOST"
+    if [ -e $HOME/.default_host ]; then DEFAULT_HOST=`cat $HOME/.default_host`; fi
 fi
-## HACK: set DEFAULT_HOST to HOST if still unset
-## TODO: fix logic at end
-if [ "$DEFAULT_HOST" = "" ]; then DEFAULT_HOST="$HOST"; fi
-## DEBUG: echo "HOST: $HOST; DEFAULT_HOST: $DEFAULT_HOST"
 
 # If default host indicated and not the current host, add name as prefix
 # note: n/a used for DEFAULT_HOST to force this (see tohara-aliases.bash).
 if [  "$DEFAULT_HOST" != "" ]; then
     if [ "$HOST" != "$DEFAULT_HOST" ]; then
-	## DEBUG: echo "nickname check"
-
     	# Add a nickname for the host from environment (e.g., set in ~/.bash_profile).
-	# TODO: if (( ("$full_title" = "1") && ("$HOST_NICKNAME" != "") )); ...
-	## TODO:
-	## if (( ("$full_title" != "0") && ("$HOST_NICKNAME" != "") )); then
-    	##     HOST="$HOST ($HOST_NICKNAME)"
-	## fi
-	## Note: effing Bash!
-	if [ "$full_title" = "1" ]; then if [ "$HOST_NICKNAME" != "" ]; then HOST="$HOST ($HOST_NICKNAME)"; fi; fi
+    	if [ "$HOST_NICKNAME" != "" ]; then HOST="$HOST ($HOST_NICKNAME)"; fi
 
 	# Make the settings for the xerm title
-	# Note: Host not put at end due to task base truncation
-	# TODO: Have option to put host at start
-	## OLD:
-	## full="$HOST: $full"
-	## icon="$HOST: $icon"
-	full="$full@$HOST"
-	icon="$full@$HOST"
+	full="$HOST: $full"
+	icon="$HOST: $icon"
     fi
 fi
 
@@ -191,22 +159,40 @@ if [ "$XTERM_TITLE_SUFFIX" != "" ]; then
    icon="$icon; $XTERM_TITLE_SUFFIX"
 fi
 
-## DEBUG: echo "iconified=$icon; full=$full"
+# If SCRIPT_PID set, add this at start
+#
+if [ "$SCRIPT_PID" != "" ]; then
+    full="script:$SCRIPT_PID $full"
+    icon="script:$SCRIPT_PID $icon"
+fi
+
+# If prompt prefix set, include that at very start.
+# TODO: just add that full version (i.e., not minimized)
+#
+if [ "$PS_symbol" != "" ]; then
+    full="$PS_symbol $full"
+    icon="$PS_symbol $icon"
+fi
+#
+# Note: *** put other changes above this one (so PS_symbol kept first)
+
+#...............................................................................
+# Do the actual title change
 
 # Under CygWin, set title using Win32 cmd command to set title to '<args>'
 # NOTE: title is a built-in command of the XP shell
 ## OLD: if [ "$OSTYPE" = "cygwin" ]; then
+## if [ "$TERM" = "cygwin" ]; then
 if [ "$TERM" = "cygwin" ]; then
-    ## DEBUG: echo cygwin case
+  TODO: both  ## DEBUG: echo cygwin case
+    ## TODO: cmd /k title ...?
     cmd /c title $icon
 
-# If not default host, set Window and minimized title to '<host>:<args>'
-# TODO: use $full and $icon
-elif [ "$HOST" != "$DEFAULT_HOST" ]; then
-   ## DEBUG: echo non-default host case
-   ## BAD: echo "]0;${HOST}: $*";
-   echo -n "]1;${HOST}: $icon";
-   echo -n "]2;${HOST}: $full";
+## # If not default host, set Window and minimized title to '<host>:<args>'
+## # TODO: use $full and $icon
+## elif [ "$HOST" != "$DEFAULT_HOST" ]; then
+##    ## DEBUG: echo non-default host case
+##    echo "]0;${HOST}: $*";
 
 # Otherwise set Window and minimized title to '<args>'
 else
