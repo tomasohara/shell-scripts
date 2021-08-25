@@ -174,6 +174,7 @@ hoy=$(hoy)
 ## OLD: alias TODAY=todays-date
 alias TODAY=todays-date
 TODAY=$(todays-date)
+alias date-central='TZ="America/Chicago" date'
 
 # Alias creation helper(s)
 function quiet-unalias () { unalias "$@" 2> /dev/null; }
@@ -1784,7 +1785,8 @@ function script {
     command script --append "$@";
     # Restore prompt
     unset SCRIPT_PID;
-    "$old_PS_symbol";
+    reset-prompt "$old_PS_symbol";
+    cd .;
 }
 
 #-------------------------------------------------------------------------------
