@@ -207,3 +207,6 @@ else
     echo -n "]1;$icon";
     echo -n "]2;$full";
 fi
+
+## TODO: delete
+## dummy change for git
