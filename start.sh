@@ -6,6 +6,7 @@
 # - Allow for invoking more than one file (e.g., for viewing multiple images).
 # - Allow for user to override the application, such as via enironment
 #   (e.g., IMAGE_APP=gimp).
+# - Get programs for each type from user configuration files (e.g., mime settings).
 #
 
 # Uncomment following line(s) for tracing:
@@ -29,6 +30,8 @@ while [ "$more_options" = "1" ]; do
     elif [ "$1" = "--view" ]; then
 	for_editting=0;
     elif [ "$1" = "--edit" ]; then
+	for_editting=1;
+    elif [ "$1" = "--open" ]; then
 	for_editting=1;
     elif [ "$1" = "--" ]; then
 	break;
@@ -126,10 +129,13 @@ case "$lower_file1" in
     # note: uses viewer that Files invokes (eog, the "eye of GNOME")
     ## OLD: *.jpeg | *.jpg | *.png | *.gif | *.xcf) invoke /usr/lib/pinta/Pinta.exe "$@" & ;;
     ## OLD: *.jpeg | *.jpg | *.png | *.gif | *.xcf) invoke eog "$@" & ;;
-    *.jpeg | *.jpg | *.png | *.gif | *.xcf) invoke "$image_program"  "$@" & ;;
+    *.jpeg | *.jpg | *.png | *.gif | *.svg | *.xcf) invoke "$image_program"  "$@" & ;;
 
+    # Video files
+    *.mov | *.mp4) invoke vlc "$@" & ;;
+    
     # MS Office and LibreOffice files: word processor files, spreadsheets, etc.
-    *.doc | *.docx | *.pptx | *.odt | *.odg | *.xls | *.xlsx | *.csv) invoke libreoffice "$@" & ;;
+    *.doc | *.docx | *.pptx | *.odp | *.odt | *.odg | *.xls | *.xlsx | *.csv) invoke libreoffice "$@" & ;;
 
     # HTML files and XML files
     *.html | *.xml) invoke firefox "$@" & ;;

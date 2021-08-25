@@ -52,16 +52,6 @@ my(@file2) = ($line ? &get_file_lines($file2) : &get_file_words($file2));
 &trace_array(\@file2);
 my(@file3) = &$set_operation_fn(\@file1, \@file2);
 
-# Do some sanity checks
-if ($diff) {
-    &assertion((scalar @file3) >= (scalar @file1));
-    &assertion((scalar @file3) >= (scalar @file2));
-}
-else {
-    &assertion((scalar @file3) <= (scalar @file1));
-    &assertion((scalar @file3) <= (scalar @file2));
-}
-
 # Display the results of the intersection
 #
 my($delim) = $single_line ? " " : "\n";

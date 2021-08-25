@@ -6,3 +6,11 @@ There is no overall documentation, but the scripts themselves are generally well
 
 Tom O'Hara
 Spring 2021
+
+--------------------------------------------------------------------------------
+Thu 24 Jun 21
+
+TODO:
+- chmod +x and then check-in all
+- add domainname.sh and anaconda-aliases.bash
+- add set_xterm_title.bash, startup-tracing.bash, and perl scripts

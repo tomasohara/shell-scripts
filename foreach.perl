@@ -97,7 +97,8 @@ if (($file_required) && (!defined($ARGV[0]))) {
 
 
 # Get the command to execute from the command-line arguments.
-&trace_array(\@ARGV);
+## OLD: &trace_array(\@ARGV);
+&trace_array(\@ARGV, 4, "ARGV");
 my($command) = shift @ARGV;
 &debug_out(&TL_VERBOSE, "command='%s'\n", $command);
 
@@ -154,7 +155,9 @@ my($host_pos) = 0;
 ## my($count) = 0;
 my($wrap_around) = &FALSE;
 my($n) = 0;			# 1-based position in foreach list
+&debug_print(7, "pre foreach ARGV: ARGV=(@ARGV)\n");
 foreach $f (@ARGV) {
+    &debug_print(7, "f=$f\n");
     $F = $f;
     my($command_line) = $command;
     my($host) = "";

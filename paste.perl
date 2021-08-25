@@ -22,8 +22,7 @@ BEGIN {
 # Specify additional diagnostics and strict variable usage, excepting those
 # for command-line arguments (see init_var's in &init).
 use strict;
-## OLDL use vars qw/$keys $filter $comments $default $preserve $i $fold_case $preserve_order 
-use vars qw/$keys $filter $comments $default $preserve $i $fold_case $preserve_order $delim $csv
+use vars qw/$keys $filter $comments $default $preserve $i $fold_case $preserve_order 
             $preserve_case $labels $undefined $delimiter/;
 
 &init_var(*keys, &FALSE);		# column 1 specifies keys of lines to be joined
@@ -38,10 +37,7 @@ use vars qw/$keys $filter $comments $default $preserve $i $fold_case $preserve_o
 	  ($preserve || (! $fold_case)));
 &init_var(*labels, "");			# labels for the column headers
 &init_var(*undefined, "");		# value to use for undefined data
-&init_var(*csv, &FALSE);		# input is comma-separated values
-&init_var(*delim, ($csv ? "," : "\t"));	# alias for -delimiter
-## OLD: &init_var(*delimiter, "\t");		# column delimiter
-&init_var(*delimiter, $delim);		# column delimiter
+&init_var(*delimiter, "\t");		# column delimiter
 
 if (!defined($ARGV[0])) {
     my($options) = "options = [-keys] [-labels=list] [-filter=\"pattern\"] [-default=value] [-fold_case] [-preserve] [-preserve_order]";

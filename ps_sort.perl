@@ -36,7 +36,7 @@ eval 'exec perl -Ssw $0 "$@"'
 BEGIN { 
     my $dir = $0; $dir =~ s/[^\\\/]*$//; unshift(@INC, $dir);
     require 'common.perl';
-    use vars qw/$verbose/;
+    ## TODO: use vars qw/$verbose/;
     require 'extra.perl';
 }
 
@@ -114,9 +114,7 @@ for (my $t = 1; $t <= $num_times; $t++) {
     my($header) = "";
 
     my $i = 0;
-    ## OLD: &debug_print(&TL_VERBOSE, "Invoking subprocess: ps $ps_options | cut $cut_options | ...\n");
-    my($invocation_level) = ($verbose ? &TL_ALWAYS : &TL_VERBOSE);
-    &debug_print($invocation_level, "Invoking subprocess: ps $ps_options | cut $cut_options | ...\n");
+    &debug_print(&TL_VERBOSE, "Invoking subprocess: ps $ps_options | cut $cut_options | ...\n");
     open(PS, "ps $ps_options | cut $cut_options |");
     while (<PS>) {
 	&dump_line();
@@ -163,9 +161,7 @@ for (my $t = 1; $t <= $num_times; $t++) {
     #	       $by eq "rss" ? *by_rss :
     #	       *by_default);
     #
-    ## OLD: &debug_print(&TL_VERBOSE, "eval \"*xyz = *$by\"\n");
-    my($set_sort_level) = ($verbose ? &TL_ALWAYS : &TL_VERBOSE);
-    &debug_print($set_sort_level, "setting sort column array to $by\n");
+    &debug_print(&TL_VERBOSE, "eval \"*xyz = *$by\"\n");
     eval "*xyz = *$by";
     *xyz = *cpu if (!defined($xyz[0]));
 

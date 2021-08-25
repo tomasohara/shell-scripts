@@ -18,15 +18,18 @@ set time_out_specified = 0
 set redirect = 1
 set detailed = 0
 
-if ("$1" == "") then
-    set script_name = `basename $0`
-    echo ""
-    echo "usage: `basename $0` [--verbose] [--time-out [N]] command args ..."
-    echo ""
-    echo "ex: `basename $0` --time-out 5 prep.exe access.txt"
-    echo ""
-    exit
-endif
+## OLD:
+## if ("$1" == "") then
+##     set script_name = `basename $0`
+##     echo ""
+##     echo "usage: `basename $0` [--verbose] [--time-out [N]] command args ..."
+##     echo ""
+##     echo "ex: `basename $0` --time-out 5 prep.exe access.txt"
+##     echo ""
+##     exit
+## endif
+set show_usage = "0"
+if ("$1" == "") set show_usage = "1"
 while ("$1" =~ -*)
     if ("$1" == "--time-out") then
 	set use_time_out = 1
@@ -42,10 +45,24 @@ while ("$1" =~ -*)
 	set detailed = 1
     else if ("$1" == "--trace") then
 	set echo = 1
+    else
+	set show_usage=1
+	echo "Error: unexpected option: $1"
     endif
     shift
 end
 set command = "$*"
+
+# Show usage if requested or issue with command line
+if ("$show_usage" != "0") then
+    set script_name = `basename $0`
+    echo ""
+    echo "usage: `basename $0` [--verbose] [--time-out [N]] command args ..."
+    echo ""
+    echo "ex: `basename $0` --time-out 5 prep.exe access.txt"
+    echo ""
+    exit
+endif
 
 # Clear log file
 set log_file = "/tmp/temp_$$.log"

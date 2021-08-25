@@ -58,12 +58,6 @@ $program_name -same_line -preserve_tabs
 Notes:
 - Use -same_line if line endings should be preserved.
 - Tabs preserved unless -space_tokenization specified.
-- Other options:
-  -para: paragraph input mode
-  -retain_punct: retain the formatting of the punctuation
-  -same_line: keep sentences on same line
-  -preserve_tabs: retain tab characters
-  -space_tokenization: use single space for runs of whitespace
 
 USAGE_END
 
@@ -96,8 +90,7 @@ while (<>) {
     # note: line not chomp'ed as ending newline used in patterns
     my($line) = $_;
     &dump_line($line);
-    ## DEBUG: 
-    &debug_out(&TL_VERY_DETAILED, "hex in: %s\n", &run_command_over("hexview.perl - <", $line));
+    ## DEBUG: &debug_out(&TL_VERY_DETAILED, "hex in: %s\n", &run_command_over("hexview.perl - <", $line));
 
     # Optionally convert horizontal tabs to vertical ones
     ## TODO: my($HTAB) = "\x08";
@@ -116,8 +109,7 @@ while (<>) {
 	&debug_print(&TL_VERY_VERBOSE, "Done mapping tabs\n");
     }
     # OLD: $_ = $line;
-    ## DEBUG: 
-    &debug_out(&TL_VERY_DETAILED, "line='%s'\nhex: %s\n", $line, &run_command_over("hexview.perl - <", $line));
+    ## DEBUG: &debug_out(&TL_VERY_DETAILED, "line='%s'\nhex: %s\n", $line, &run_command_over("hexview.perl - <", $line));
     # TODO: track down problem with $_ being unset somewhere above after the dump_line
 
     # Check for sentence breaks
@@ -129,8 +121,7 @@ while (<>) {
 	$line =~ s/([\)\]\}] *\.)/$1\n/g;		# add new line after right parenthesis, brace or bracket
 	$line =~ s/(\s[A-Z][a-z]{3,} *\.)/$1\n/g;	# likewise for proper nouns (capitalized words > length 3)
     }
-    ## DEBUG: 
-    &debug_out(&TL_VERY_DETAILED, "line='%s'\nhex: %s\n", $line, &run_command_over("hexview.perl - <", $line));
+    ## DEBUG: &debug_out(&TL_VERY_DETAILED, "line='%s'\nhex: %s\n", $line, &run_command_over("hexview.perl - <", $line));
 
     # Put whitespace around punct & other special chars
     # NOTE: possessives are restored
@@ -139,20 +130,17 @@ while (<>) {
 	$line =~ s/([\~\!\@\#\$\%\^\&\*\(\)\_\+\`\-\=\{\}\|\[\]\\\:\"\;\'\<\>\?\,\.\/])/ $1 /g;
 	$line =~ s/ \' s / \'s /g;			# restore possessive
     }
-    ## DEBUG: 
-    &debug_out(&TL_VERY_DETAILED, "line='%s'\nhex: %s\n", $line, &run_command_over("hexview.perl - <", $line));
+    ## DEBUG: &debug_out(&TL_VERY_DETAILED, "line='%s'\nhex: %s\n", $line, &run_command_over("hexview.perl - <", $line));
 
     # Convert newlines to spaces unless at end of sentence
     if (! $same_line) {
 	&debug_print(&TL_VERY_DETAILED, "Converting internal newlines to spaces\n");
 	$line =~ s/([^\.\?\! \r\n\t])\s*\n/$1 /g;
     }
-    ## DEBUG: 
-    &debug_out(&TL_VERY_DETAILED, "line='%s'\nhex: %s\n", $line, &run_command_over("hexview.perl - <", $line));
+    ## DEBUG: &debug_out(&TL_VERY_DETAILED, "line='%s'\nhex: %s\n", $line, &run_command_over("hexview.perl - <", $line));
 
     # Combine multiple spaces into single space; also remove leading and trailing spaces.
-    ## DEBUG: 
-    &debug_out(&TL_VERY_DETAILED, "line='%s'\nhex: %s\n", $line, &run_command_over("hexview.perl - <", $line));
+    ## DEBUG: &debug_out(&TL_VERY_DETAILED, "line='%s'\nhex: %s\n", $line, &run_command_over("hexview.perl - <", $line));
     if ($space_tokenization) {
 	&debug_print(&TL_VERY_DETAILED, "Applying space tokenization\n");
 	# TODO: simplifying patterns (due to newline handling)
@@ -160,12 +148,10 @@ while (<>) {
 	$line =~ s/^\s//;
 	$line =~ s/\s\n$/\n/;
     }
-    ## DEBUG: 
-    &debug_out(&TL_VERY_DETAILED, "line='%s'\nhex: %s\n", $line, &run_command_over("hexview.perl - <", $line));
+    ## DEBUG: &debug_out(&TL_VERY_DETAILED, "line='%s'\nhex: %s\n", $line, &run_command_over("hexview.perl - <", $line));
 
     # Convert vertical tabs back into horizontal ones
-    ## DEBUG: 
-    &debug_out(&TL_VERY_DETAILED, "hex2: %s\n", &run_command_over("hexview.perl - <", $line));
+    ## DEBUG: &debug_out(&TL_VERY_DETAILED, "hex2: %s\n", &run_command_over("hexview.perl - <", $line));
     ## OLD: &assert($line eq $_);
     if ($preserve_tabs && $mapped) {
 	&debug_print(&TL_VERY_DETAILED, "Restoring tabs\n");
@@ -175,7 +161,6 @@ while (<>) {
     }
 
     # Print final result
-    ## DEBUG: 
-    &debug_out(&TL_VERY_DETAILED, "hex out: %s\n", &run_command_over("hexview.perl - <", $line));
+    ## DEBUG: &debug_out(&TL_VERY_DETAILED, "hex out: %s\n", &run_command_over("hexview.perl - <", $line));
     print($line);
 }

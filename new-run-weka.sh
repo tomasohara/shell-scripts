@@ -36,7 +36,8 @@ folds=10			# number of cross-validation folds
 usual=0				# use usual Weka classifiers (Naive Bayes and ZeroR)
 trace=0				# script tracing
 verbose=0			# detailed output
-debug=0				# debug level
+## OLD: debug=0			   # debug level
+debug="$DEBUG_LEVEL"		# debug level
 class_pos_option="-last"	# feature2ml option for class variable position
 feature2ml_options="-stdout=0"  # other feature2ml options
 nolabels=1			# first line specifies lables
@@ -50,6 +51,7 @@ other_classifier_classes=()     # java class names for other classifiers to run 
 
 # Show usage if no arguments are given
 if [ "$1" = "" ]; then
+    script_name=$(basename $0)
     echo ""
     echo "usage: $0 [options] training-file [testing-file]"
     echo "options = [--folds N] [--usual] [--svm] [--[skip-]j48] ] [--csv] [--skip-arff] [--no-labels] [--label-file file] [--trace] [--debug] [--weka jar-file] [--4GB | --2GB | [--GB N] | [--max-mem mb]] [--time] [--other-classifier label relative-class-spec]"
@@ -61,7 +63,9 @@ if [ "$1" = "" ]; then
     echo "perlgrep.perl -para 'Feature variable assignments' table.doc | extract_matches.perl '^\S+\t\S+\t(.*)' - | perl -pe 's/ /\_/g;' >| feature-labels.list";
     echo "$0 --usual --first --label-file feature-labels.list table0.train table0.test"
     echo ""
-    echo "$0 -weka c:/Program-Misc/Weka-3-7/weka.jar  mass-noun.data >| mass-noun.data.log 2>&1"
+    echo "$0 --weka c:/Program-Misc/Weka-3-7/weka.jar  mass-noun.data >| mass-noun.data.log 2>&1"
+    echo ""
+    echo "$script_name --weka ~/programs/java/weka-3-8-5/weka.jar iris.arff > iris.weka.log 2>&1"
     echo ""
     echo "Notes:"
     echo "- Assumes CLASSPATH is includes weka.jar; use -weka option if not."
@@ -110,7 +114,7 @@ while [ "$moreoptions" = "1" ]; do
         max_mem=$2
         shift
     elif [ "$1" = "--GB" ]; then
-        let max_mem=($2 * 1024)
+        max_mem=$(($2 * 1024))
         shift
     elif [ "$1" = "--4GB" ]; then
         max_mem=4096
@@ -137,6 +141,8 @@ while [ "$moreoptions" = "1" ]; do
 	shift 2
     elif [ "$1" = "--skip-arff" ]; then
 	skip_arff=1
+    elif [ "$1" == "--trace" ]; then
+	set -o xtrace
     else
 	echo "ERROR: invalid option '$1'"
         exit
@@ -148,9 +154,20 @@ done
 # Check file options
 # TODO: warn about filenames with leading dashes due to argument order problems
 # ex: new-run-weka.sh new-run-weka.sh --verbose --csv --labels ...
+# NOTE: Conversion to arff format skipped if "arff" in training filename
+# TODO: check for other specific extensions (e.g., .csv and .data)
 train_file="$1"
+ext="table"
+if [[ $train_file =~ .arff ]]; then
+    skip_arff=1;
+    ext="arff";
+else
+    ext=$(echo "$train_file" | perl -pe 's/^.*\.(\w+)$/$1/;')
+fi
+
 if [ $verbose = 1 ]; then echo "train_file: $train_file"; fi
-train_base=`basename "$train_file" .table`
+## OLD: train_base=`basename "$train_file" .table`
+train_base=$(basename "$train_file" .$ext)
 result_base=$train_base
 test_file=""
 if [ "$2" != "" ]; then
@@ -185,32 +202,32 @@ echo "" > $temp_log
 # Convert feature table into Weka's .arff format
 if [ $skip_arff = 1 ]; then
     # Copy over ARFF files as is
-    cp $train_file $temp-${train_base}.arff
-    if [ "$test_file" != "" ]; then cp $test_file $temp-${test_base}.arff; fi
+    cp -vp $train_file $temp-${train_base}.arff
+    if [ "$test_file" != "" ]; then cp -vp $test_file $temp-${test_base}.arff; fi
 else
     # Convert training file into ARFF
-    cp $train_file $temp-${train_base}.table
+    cp -vp $train_file $temp-${train_base}.$ext
     options="-weka $feature2ml_options $class_pos_option"
     if [ $nolabels = 1 ]; then options="$options -nolabels"; fi
-    if [ $verbose = 1 ]; then echo "Issuing: feature2ml.perl $options $temp-${train_base}.table"; fi
-    $time_option  perl -Ssw feature2ml.perl $options $temp-${train_base}.table >> $temp_log
+    if [ $verbose = 1 ]; then echo "Issuing: feature2ml.perl $options $temp-${train_base}.$ext"; fi
+    $time_option  perl -Ssw feature2ml.perl $options $temp-${train_base}.$ext >> $temp_log
     #
     # Optionally convert test file, syncrhonizing header with training file
     if [ "$test_file" != "" ]; then
-	test_base=`basename "$test_file" .table`
+	test_base=`basename "$test_file" .$ext`
 	result_base="${train_base}-${test_base}"
 
 	# Convert testing file into ARFF
-	cp $test_file $temp-${test_base}.table
-	if [ $verbose = 1 ]; then echo "Issuing: feature2ml.perl $options $temp-${test_base}.table"; fi
-	$time_option  perl -Ssw feature2ml.perl $options $temp-${test_base}.table >> $temp_log
+	cp -vp $test_file $temp-${test_base}.$ext
+	if [ $verbose = 1 ]; then echo "Issuing: feature2ml.perl $options $temp-${test_base}.$ext"; fi
+	$time_option  perl -Ssw feature2ml.perl $options $temp-${test_base}.$ext >> $temp_log
 
         # Make sure the ARFF file headers match for training and test files
         # NOTE: the label line of both of the original files must match.
         #
 	# Create combined ARFF data file
-	cat $train_file $test_file >| $temp-${result_base}.table
-	$time_option  perl -Ssw feature2ml.perl $options $temp-${result_base}.table >> $temp_log >> $temp_log
+	cat $train_file $test_file >| $temp-${result_base}.$ext
+	$time_option  perl -Ssw feature2ml.perl $options $temp-${result_base}.$ext >> $temp_log >> $temp_log
 	#
         # Extract the attribute listing from the combined data file
 	grep '^@' $temp-${result_base}.arff > $temp-${result_base}.header
@@ -264,7 +281,7 @@ java_options="-mx${max_mem}m -oss${max_mem}m"
 
 # Setup the options for the Weka classifiers
 #   -v: Outputs no statistics for training data.
-#   -i: Outputs detailed information-retrieval statistics for each class (i.e., "Detailed Accuracy By Class" section).
+## OLD   -i: Outputs detailed information-retrieval statistics for each class (i.e., "Detailed Accuracy By Class" section).
 #   -k: Outputs information-theoretic statistics (e.g., "K&B Relative Info Score" and "Complexity improvement").
 #   -t: Training file.
 #   -T: Testing file.
@@ -272,7 +289,8 @@ java_options="-mx${max_mem}m -oss${max_mem}m"
 #   -D: Debug mode (*** not supported by J48 ***)
 weka_options=""
 if [ $debug = 1 ]; then weka_options="${weka_options} -D"; fi
-weka_options="${weka_options} -v -i -k -t $temp-${train_base}.arff"
+## OLD: weka_options="${weka_options} -v -i -k -t $temp-${train_base}.arff"
+weka_options="${weka_options} -v -k -t $temp-${train_base}.arff"
 if [ "$test_file" != "" ]; then
     weka_options="${weka_options} -T $temp-${test_base}.arff"
 else

@@ -37,24 +37,27 @@ use strict;
 no strict "refs";		# allow for symbolic file handles
 use vars qw/$arff $weka $c45 $dataset $nolabels $labels $first $last
     $class_pos $csv $stdout $lin $enumerated_value_labels $generic_value_labels/;
-
+use vars qw/$infer_type/;
 
 # Parse the command-line arguments
 if (!defined($ARGV[0])) {
     my($options) = "options = [-nolabels] [-class_pos] [-first] [-dataset=name] [-preserve]  [-c45 | -arff | -lin] [-csv] [-stdout] [-enumerated_value_labels | -generic_value_labels]";
+    $options .= " [-infer_type]";
 
     my($example) = "Examples:\n\n$script_name compoundString < compoundString.table\n\n";
     ## OLD: $example .= "$0 -d=5 test_english.table\n\n";
     ## OLD: $example .= "$0 multiword.position.table\n\n";
     $example .= "$0 -first -weka ai-restaurant-example.features\n";
     $example .= "less ai-restaurant-example.arff\n\n";
+    $example .= "$script_name -csv -infer_type -arff -last iris.csv > iris.arff\n\n";
     $example .= "foreach.perl -trace '$0 \$f' *.features >| feature2ml.log 2>&1\n\n";
 
     my($note) = "Notes:\n\nFor c4.5, creates <dataset_name>.names and <dataset_name>.data\n";
-    $note .= "For Weka, creates <dataset_name>..arff file created.\n";
+    $note .= "For Weka, the <dataset_name>.arff file is created.\n";
     $note .= "Use -stdout, to send to standard output instead.\n";
     $note .= "The -lin option is for Dekang Lin's maxent utility, see\n";
     $note .= "    http://webdocs.cs.ualberta.ca/~lindek/maxent.tgz\n";
+    $note .= "Use -infer_type to guess numeric usage (for arff \@attribute)\n";
     $note .= "\n";
 
     print STDERR "\nusage: $script_name [options] dataset_file\n\n$options\n\n$example\n$note";
@@ -78,10 +81,25 @@ if (!defined($ARGV[0])) {
 my($final_class_pos) = -1;
 &init_var(*csv, &FALSE);	# input data is in comma-separated value format
 &init_var(*stdout, $weka);	# use standard output instead of separate output file
-my($delim_regex) = ($csv ? ",\\s+" : "\t");
+## OLD: my($delim_regex) = ($csv ? ",\\s+" : "\t");
+my($delim_regex) = ($csv ? ",\\s*" : "\t");
 my($comma_delim) = ", ";	# for internal feature string vector
 &init_var(*generic_value_labels, &FALSE); # use values like Fij rather than feature[i]=value[i,j]
 &init_var(*enumerated_value_labels, &FALSE); # variant with all feature values mapped to integer
+&init_var(*infer_type, &FALSE); # infer numeric attribute from values
+&debug_print(&TL_DETAILED, "delim_regex=$delim_regex\n");
+
+# Sanity check that CSV used for file with .csv extension
+# TODO: add check that number of commas exceeds number of tabs if using CSV.
+if (defined($ARGV[0])) {
+    my($filename) = $ARGV[0];
+    if ($csv) {
+	&assert($filename =~ /.csv/);
+    }
+    else {
+	&assert($filename =~ /\.(data|tab|tsv)$/);
+    }
+}
 
 # Derive the dataset name from the file if not given
 if ($dataset eq "") {
@@ -119,6 +137,7 @@ while (<>) {
 
     # Extract features
     my(@features) = split(/$delim_regex/, $_);
+    &assert((scalar @features) > 1);
     $count++;
     if ($class_pos < 0) {
 	$class_pos = $#features;
@@ -168,8 +187,13 @@ while (<>) {
 
 	# Quote features that contain spaces or punctuation
 	# NOTE: single quotes are converted to double quotes
+	# NOTE: doesn't quote numbers when inferring attribute types
+        # TODO: make quoting entirely optional
 	$features[$i] =~ s/\'/\"/g;
-	$features[$i] = "\'" . $features[$i] . "\'" if ($features[$i] !~ /^\w+$/);
+	## OLD: $features[$i] = "\'" . $features[$i] . "\'" if ($features[$i] !~ /^\w+$/);
+	if (($features[$i] !~ /^\w+$/) && $infer_type && (! &is_numeric($features[$i]))) {
+	    $features[$i] = "\'" . $features[$i] . "\'"
+	}
 
 	&add_feature_value($i, $features[$i]);
     }
@@ -332,7 +356,22 @@ sub output_arff_description {
     # Output the attribute specification
     for (my $i = 0; $i < $num_features; $i++) {
 	if ($i != $final_class_pos) {
-	    printf $handle "\@attribute %s { %s }\n", $labels[$i], join($comma_delim, &get_feature_values($i));
+	    ## OLD: printf $handle "\@attribute %s { %s }\n", $labels[$i], join($comma_delim, &get_feature_values($i));
+
+	    # Infer as numeric if all values are numbers.
+	    # TODO: streamline via mapping
+	    my(@features) = &get_feature_values($i);
+	    my($all_numeric) = &FALSE;
+	    if ($infer_type) {
+		my($count_numeric) = 0;
+		map { $count_numeric += &is_numeric($_); } @features;
+		$all_numeric = ($count_numeric == (scalar @features));
+		&debug_print(&TL_DETAILED, "feature $i; num-count=$count_numeric all?=$all_numeric\n");
+	    }
+
+	    # Print specification
+	    my($attribute_spec) = ($all_numeric ? "NUMERIC" : join($comma_delim, @features));
+	    printf $handle "\@attribute %s %s \n", $labels[$i], $attribute_spec;
 	}
     }
     printf $handle "\@attribute class { %s }\n", join($comma_delim, &get_feature_values($final_class_pos));

@@ -55,7 +55,7 @@ set no_glob = "0"
 
 # Show usage statement if insufficient arguments given
 if ("$2" == "") then
-    set script = `basename $0`+
+    set script = `basename $0`
     echo ""
     echo "Usage: $script [option] {--all | pattern} master_dir"
     echo ""

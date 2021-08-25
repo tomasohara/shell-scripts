@@ -18,12 +18,17 @@ BEGIN {
     use vars qw/$script_name/;
 }
 
+# Show usage if no arguments
 use strict;
 use vars qw/$LYNX $base $prefix $file_prefix $all $bare $retries $pause $width $testing $link $depth $inclusion $exclusion $start $end $source $sublink_regex $create_subdirs/;
-
+use vars qw/$ext $ignore_subdir/;
+#
 if (!defined($ARGV[0])) {
     my($options) =  "options = [-base=base_URL] [-LYNX=lynx_command] [-file_prefix=name] [-bare] [-source] [-testing]\n";
-    $options .= "          [-all] [-depth=N][-sublink_regex=pattern] [-create_subdirs]";
+    $options .=     "          [-all] [-depth=N][-sublink_regex=pattern] [-create_subdirs]";
+    $options .=                                                                          " [-link] [-pause=N]\n";
+    $options .=     "          [-width=N] [-retries=N] [-inclusion=regex] [-exclusion=regex] [-source]\n";
+    $options .=     "          [-start=text] [-end=text] [-ext=text]";
     my($example) = "examples:\n\n$script_name acm_careerops.html\n\n";
     $example .= "$script_name -base=http://dancetv.com/tutorial/swing/ swing_index.html\n\n";
     ## $example .= "$script_name -all -bare sgi_ml_index.html\n\n";
@@ -65,6 +70,8 @@ if (!defined($ARGV[0])) {
 my($dump_option) = ($source ? "-source" : "-dump");
 &init_var_exp(*sublink_regex, "");	# pattern for links to follow recursively
 &init_var_exp(*create_subdirs, &FALSE); # create sudirectory for each recursive traversal
+&init_var_exp(*ext, "");        # extension to use if none given
+&init_var_exp(*ignore_subdir, &FALSE); # ignore subdirectory structure
 
 ## my($LYNX, $base, $file_prefix) = ($LYNX, $base, $file_prefix);
 ##
@@ -100,6 +107,9 @@ if ($base ne "") {
 if ($file_prefix eq "-") {
     $file_prefix = $bare ? "" : &remove_dir($base);
 }
+if (($ext ne "") and ($ext !~ /\./)) {
+    $ext = ".$ext";
+}    
 
 ## &debug_out(5, "NOTE: stupid Perl bug in reporting undefined values\n");
 &debug_out(5, "base='%s'\nfile_prefix='%s'\n", $base, $file_prefix);
@@ -150,7 +160,8 @@ while (<>) {
 	}
 
 	# Standardize the reference
-	if ($http_ref !~ /http:/i) {
+	## OLD: if ($http_ref !~ /http:/i) {
+	if ($http_ref !~ /https?:/i) {
 	    $http_ref =~ s/^\///;
 	    $http_ref = "$base${http_ref}";
 
@@ -175,12 +186,21 @@ while (<>) {
 	if ($all || ($http_ref =~ /\.htm/i)) {
 	    print "dumping link $http_ref\n";
 	    ## my($file) = &remove_dir($http_ref);
+	    ## TODO: $file => $local_file
 	    my($file) = $http_ref;
 	    $file =~ s/$base//;		# remove base html prefix
-	    $file =~ s/\//_/g;		# flatten out dir structure (\ => _)
+	    if ($ignore_subdir) {
+		$file =~ s/^.*\///g;    # just use filename proper (i.e., no parent directories)
+	    }
+	    ## OLD: $file =~ s/\//_/g;		# flatten out dir structure (\ => _)
+	    $file =~ s/\//_/g;		# flatten out dir structure (e.g., / => _)
 	    if (! $source) {
 		$file =~ s/\.html?/.list/i;	# HTML files are converted to text
 	    }
+	    if ($file !~ /$ext$/) {
+		$file .= $ext;
+	    }
+	    &debug_print(5, "local file for download: '${file_prefix}$file'; pause=$pause\n");
 	    my($OK) = &FALSE;
 	    if (! $testing) {
 		for (my $i = 0; ($i < $retries) && (! $OK); $i++) {

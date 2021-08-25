@@ -91,7 +91,16 @@ endif
 
 # Determine the process-listing command to use as well as the sort fields
 # Note: ps options (BSD): a[ll]; u[ser]; g[roup]; w[ide] output (ww unlimited)
-set ps_command = "ps auxgww"
+# via ps man page:
+#     a  Lift the BSD-style "only yourself" restriction[.]
+#     g  Really all, even session leaders.  This flag is obsolete and may be
+#        discontinued in a future release.  It is normally implied by the a
+#        flag, and is only useful when operating in the sunos4 personality.
+#     w  Wide output.  Use this option twice for unlimited width.
+#     x  Lift the BSD-style "must have a tty" restriction[.]
+## OLD: set ps_command = "ps auxwww"
+## OLD2: set ps_command = "ps auxgww"
+set ps_command = "ps auxww"
 ## OLD: set grep_command = "grep ^$user"
 ## TODO: break down into grep_command and grep_options (see HACK below)
 set grep_command = "grep '^$user'"

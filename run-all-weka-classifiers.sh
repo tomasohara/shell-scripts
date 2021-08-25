@@ -8,7 +8,6 @@
 # - Reconcile with run_weka_classifiers.sh.
 # - Add in support for meta-folds (see new-run-lexicalization-POS-experiments.sh).
 # - Add in support for non-arff input (e.g., converion via feature2ml.perl).
-
 #........................................................................
 # Weka options
 #
@@ -20,6 +19,16 @@
 # -v                            only only test data statistics
 #
 #........................................................................
+# Excerpt from classifier listing (from Java properties files):
+#
+#   # Lists the Classifiers I want to choose from
+#   weka.classifiers.Classifier=\
+#    weka.classifiers.bayes.AODE,\
+#    weka.classifiers.bayes.AODEsr,\
+#    weka.classifiers.bayes.BayesianLogisticRegression,\
+#    weka.classifiers.bayes.BayesNet,\
+#     ...
+#
 
 # Uncomment following line(s) for tracing:
 # - xtrace shows arg expansion (and often is sufficient)
@@ -173,19 +182,28 @@ if [ "$test_file" != "" ]; then test_section='Error on test data'; fi
 #
 # NOTES:
 # - List derived from src/main/java/weka/gui/GenericObjectEditor.props in weka-src.jar.
+#   -- extract_matches.perl "weka.classifiers.([a-z][A-Za-z0-9_\.]+)" src/main/java/weka/gui/GenericObjectEditor.props | egrep -v 'meta|supportVector|evaluation.output|bayes.net'
 # - Classifiers requiring numeric class values: 
 #     m5.M5Prime  LRW  LinearRegression
 # - Classifiers requiring 2-class datasets: 
 #     Logistic  adtree.ADTree  SMO
-# - NueralNetwork must be invoked via interface (since net must be created first)
+# - NeuralNetwork must be invoked via interface (since net must be created first)
 # - BVDecompose needs separate .arff file for decomposition
 # - UserClassifier is for interactive classification
+# TODO: add more explicit derivation notes (e.g., UserClassifier omitted)
 #
-classifiers=(bayes.AODE  bayes.AODEsr  bayes.BayesianLogisticRegression  bayes.BayesNet  bayes.ComplementNaiveBayes  bayes.DMNBtext  bayes.HNB  bayes.NaiveBayes  bayes.NaiveBayesMultinomial  bayes.NaiveBayesMultinomialUpdateable  bayes.NaiveBayesSimple  bayes.NaiveBayesUpdateable  bayes.WAODE  functions.GaussianProcesses  functions.IsotonicRegression  functions.LeastMedSq  functions.LibLINEAR  functions.LibSVM  functions.LinearRegression  functions.Logistic  functions.MultilayerPerceptron  functions.PaceRegression  functions.PLSClassifier  functions.RBFNetwork  functions.SimpleLinearRegression  functions.SimpleLogistic  functions.SMO  functions.SMOreg  functions.VotedPerceptron  functions.Winnow  lazy.IB1  lazy.IBk  lazy.KStar  lazy.LBR  lazy.LWL  mi.CitationKNN  mi.MDD  mi.MIBoost  mi.MIDD  mi.MIEMDD  mi.MILR  mi.MINND  mi.MIOptimalBall  mi.MISMO  mi.MISVM  mi.MIWrapper  mi.SimpleMI  mi.TLD  mi.TLDSimple  misc.FLR  misc.HyperPipes  misc.OSDL  misc.SerializedClassifier  misc.VFI  scripting.GroovyClassifier  scripting.JythonClassifier  trees.ADTree  trees.BFTree  trees.DecisionStump  trees.FT  trees.Id3  trees.J48  trees.J48graft  trees.LADTree  trees.LMT  trees.M5P  trees.NBTree  trees.RandomForest  trees.RandomTree  trees.REPTree  trees.SimpleCart   rules.ConjunctiveRule  rules.DecisionTable  rules.DTNB  rules.JRip  rules.M5Rules  rules.NNge  rules.OLM  rules.OneR  rules.PART  rules.Prism  rules.Ridor  rules.ZeroR)
+# TODO: allow for versioning
+#
+## OLD:
+## classifiers=(bayes.AODE  bayes.AODEsr  bayes.BayesianLogisticRegression  bayes.BayesNet  bayes.ComplementNaiveBayes  bayes.DMNBtext  bayes.HNB  bayes.NaiveBayes  bayes.NaiveBayesMultinomial  bayes.NaiveBayesMultinomialUpdateable  bayes.NaiveBayesSimple  bayes.NaiveBayesUpdateable  bayes.WAODE  functions.GaussianProcesses  functions.IsotonicRegression  functions.LeastMedSq  functions.LibLINEAR  functions.LibSVM  functions.LinearRegression  functions.Logistic  functions.MultilayerPerceptron  functions.PaceRegression  functions.PLSClassifier  functions.RBFNetwork  functions.SimpleLinearRegression  functions.SimpleLogistic  functions.SMO  functions.SMOreg  functions.VotedPerceptron  functions.Winnow  lazy.IB1  lazy.IBk  lazy.KStar  lazy.LBR  lazy.LWL  mi.CitationKNN  mi.MDD  mi.MIBoost  mi.MIDD  mi.MIEMDD  mi.MILR  mi.MINND  mi.MIOptimalBall  mi.MISMO  mi.MISVM  mi.MIWrapper  mi.SimpleMI  mi.TLD  mi.TLDSimple  misc.FLR  misc.HyperPipes  misc.OSDL  misc.SerializedClassifier  misc.VFI  scripting.GroovyClassifier  scripting.JythonClassifier  trees.ADTree  trees.BFTree  trees.DecisionStump  trees.FT  trees.Id3  trees.J48  trees.J48graft  trees.LADTree  trees.LMT  trees.M5P  trees.NBTree  trees.RandomForest  trees.RandomTree  trees.REPTree  trees.SimpleCart   rules.ConjunctiveRule  rules.DecisionTable  rules.DTNB  rules.JRip  rules.M5Rules  rules.NNge  rules.OLM  rules.OneR  rules.PART  rules.Prism  rules.Ridor  rules.ZeroR)
+classifiers=(bayes.AODE bayes.AODEsr bayes.BayesianLogisticRegression bayes.BayesNet bayes.ComplementNaiveBayes bayes.DMNBtext bayes.HNB bayes.NaiveBayes bayes.NaiveBayesMultinomial bayes.NaiveBayesMultinomialUpdateable bayes.NaiveBayesSimple bayes.NaiveBayesUpdateable bayes.WAODE functions.GaussianProcesses functions.IsotonicRegression functions.LeastMedSq functions.LibLINEAR functions.LibSVM functions.LinearRegression functions.Logistic functions.MultilayerPerceptron functions.PaceRegression functions.PLSClassifier functions.RBFNetwork functions.SimpleLinearRegression functions.SimpleLogistic functions.SMO functions.SMOreg functions.VotedPerceptron functions.Winnow lazy.IB1 lazy.IBk lazy.KStar lazy.LBR lazy.LWL mi.CitationKNN mi.MDD mi.MIBoost mi.MIDD mi.MIEMDD mi.MILR mi.MINND mi.MIOptimalBall mi.MISMO mi.MISVM mi.MIWrapper mi.SimpleMI mi.TLD mi.TLDSimple misc.FLR misc.HyperPipes misc.OSDL misc.SerializedClassifier misc.VFI scripting.GroovyClassifier scripting.JythonClassifier trees.ADTree trees.BFTree trees.DecisionStump trees.FT trees.Id3 trees.J48 trees.J48graft trees.LADTree trees.LMT trees.M5P trees.NBTree trees.RandomForest trees.RandomTree trees.REPTree trees.SimpleCart rules.ConjunctiveRule rules.DecisionTable rules.DTNB rules.JRip rules.M5Rules rules.NNge rules.OLM rules.OneR rules.PART rules.Prism rules.Ridor rules.ZeroR)
 #
 ## OLD: classifiers=(BVDecompose CVParameterSelection CostMatrix DecisionStump DecisionTable HyperPipes IB1 IBk Id3 KernelDensity LWR LinearRegression Logistic MultiScheme NaiveBayes NaiveBayesSimple OneR Prism SMO Stacking VFI VotedPerceptron ZeroR m5.M5Prime j48.PART j48.J48 kstar.KStar adtree.ADTree)
 #
-meta_classifiers=(AdaBoostM1  AdditiveRegression  AttributeSelectedClassifier  Bagging  ClassificationViaClustering  ClassificationViaRegression  CostSensitiveClassifier  CVParameterSelection  Dagging  Decorate  END  EnsembleSelection  FilteredClassifier  Grading  GridSearch  LogitBoost  MetaCost  MultiBoostAB  MultiClassClassifier  MultiScheme  OrdinalClassClassifier  RacedIncrementalLogitBoost  RandomCommittee  RandomSubSpace  RegressionByDiscretization  RotationForest  Stacking  StackingC  ThresholdSelector  Vote  nestedDichotomies.ClassBalancedND  nestedDichotomies.DataNearBalancedND  nestedDichotomies.ND)
+## new: FilteredClassifier
+meta_classifiers=(AdaBoostM1 AdditiveRegression AttributeSelectedClassifier Bagging ClassificationViaClustering ClassificationViaRegression CostSensitiveClassifier CVParameterSelection Dagging Decorate END EnsembleSelection FilteredClassifier Grading GridSearch LogitBoost MetaCost MultiBoostAB MultiClassClassifier MultiScheme OrdinalClassClassifier RacedIncrementalLogitBoost RandomCommittee RandomSubSpace RegressionByDiscretization RotationForest Stacking StackingC ThresholdSelector Vote nestedDichotomies.ClassBalancedND nestedDichotomies.DataNearBalancedND nestedDichotomies.ND FilteredClassifier)
+## OLD:
+## meta_classifiers=(AdaBoostM1  AdditiveRegression  AttributeSelectedClassifier  Bagging  ClassificationViaClustering  ClassificationViaRegression  CostSensitiveClassifier  CVParameterSelection  Dagging  Decorate  END  EnsembleSelection  FilteredClassifier  Grading  GridSearch  LogitBoost  MetaCost  MultiBoostAB  MultiClassClassifier  MultiScheme  OrdinalClassClassifier  RacedIncrementalLogitBoost  RandomCommittee  RandomSubSpace  RegressionByDiscretization  RotationForest  Stacking  StackingC  ThresholdSelector  Vote  nestedDichotomies.ClassBalancedND  nestedDichotomies.DataNearBalancedND  nestedDichotomies.ND)
 ##
 ## OLD: meta_classifiers=(AdaBoostM1 AdditiveRegression AttributeSelectedClassifier Bagging CheckClassifier ClassificationViaRegression CostSensitiveClassifier DistributionMetaClassifier FilteredClassifier LogitBoost MetaCost MultiClassClassifier RegressionByDiscretization ThresholdSelector)
 

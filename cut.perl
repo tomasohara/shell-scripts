@@ -83,16 +83,6 @@ while ($field_spec =~ /(\d+)-(\d+)/) {
 # HACK: allow fields to have embedded comma's (as in value support below)
 my(@fields) = split(/,/, $field_spec);
 
-# Make sure delimiter conflict with regex operator properly escaped
-my($escape_count) = 0;
-sub MAX_ESCAPE_COUNT { 5 };
-# 
-while (($delimiter =~ /([^\\]|^)([\|\*\+\.])/) && ($escape_count < &MAX_ESCAPE_COUNT)) {
-    $delimiter = "$1\\$2";
-    $escape_count++;
-}
-&debug_print(&TL_VERBOSE, "Escape count: $escape_count; delimiter: $delimiter\n");
-
 # Extract fields from each line of input
 while (<>) {
     &dump_line();
@@ -101,14 +91,12 @@ while (<>) {
     # Optionally, fix up the data into columns
     # Note: mainly intended for whitespace-delimited data
     if ($fix) {
-	&assertion($delimiter eq "\t");
 	s/\s+/$delimiter/g;
     }
     # HACK: Replace non-space delimiter within quotes with <DELIM> token
     # TODO: Use unassigned Unicode value in place of <DELIM>
     my($line) = $_;
     $line = &encode_delimiter($line);
-    ## BAD: my(@columns) = split("$delimiter", $line);
     my(@columns) = split(/$delimiter/, $line);
     &trace_array(\@columns, &TL_VERY_DETAILED, "\@columns");
 
@@ -137,9 +125,7 @@ while (<>) {
 #-------------------------------------------------------------------------------
 
 # encode_delimiter(text): replaces delimiter within quoted text with dummy token
-# EX: ($delimiter == "," && encode_delimiter('"1, 2, 3", cuatro, cinco')) => '"1<DELIM> 2<DELIM> 3", cuatro, cinco'
-# EX: ($delimiter == "," && encode_delimiter('uno, dos tres, cuatro, cinco')) => 'uno, dos tres, cuatro, cinco'
-# EX: ($delimiter == "|" && encode_delimiter('pme_reference_no|pmrnote_enttyp_txt|pmnote_dscrptn_txt|pmrnote_estpstd_dt')) => 'pme_reference_no|pmrnote_enttyp_txt|pmrnote_subjct_txt|pmnote_dscrptn_txt|pmrnote_estpstd_dt|pmrnote_estpstd_tm'
+# 
 #
 ## our($delim_token) = "<DELIM>";
 sub DELIM_TOKEN { "<DELIM>"; }
@@ -150,15 +136,13 @@ sub encode_delimiter {
     my($text) = @_;
     &debug_print(&TL_VERY_VERBOSE, "encode_delimiter(@_)\n");
     if ($delimiter !~ /^\s+$/) {
-        ## BAD: my($before) = $_;
-	my($before) = $text;
+        my($before) = $_;
 	my($count) = 0;
-        while (($text =~ /^([^"]*")([^"]*$delimiter[^"]*)(")/) && ($count < &MAX_EMBEDDED)) {
-            my($pre, $value, $post) = ($` + $1, $2, $3 . $');        # emacs quirk: '
+        while (($text =~ /^[^"]*"([^"]*)"/) && ($count < &MAX_EMBEDDED)) {
+            my($pre, $value, $post) = ($`, $1, $');
             $value =~ s/$delimiter/&DELIM_TOKEN/ge;
             $text = $pre . $value . $post;
 	    $count++;
-	    &debug_print(&TL_VERBOSE, "revision $count to text: '$text'\n");
         }
         my($after) = $text;
         if ($before ne $after) {
@@ -168,7 +152,7 @@ sub encode_delimiter {
 	    &warning("max number of delim-embedded fields reached: &MAX_EMBEDDED\n");
 	}
     }
-    &debug_print(&TL_MOST_VERBOSE, "encode_delimiter(@_) => '$text'\n");
+    &debug_print(&TL_MOST_VERBOSE, "encode_delimiter(@_) => '$text'");
     return ($text);
 }
 
