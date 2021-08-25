@@ -1786,7 +1786,7 @@ function script {
     # Restore prompt
     unset SCRIPT_PID;
     reset-prompt "$old_PS_symbol";
-    cd .;
+    cd .
 }
 
 #-------------------------------------------------------------------------------
