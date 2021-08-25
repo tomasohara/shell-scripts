@@ -184,7 +184,7 @@ fi
 ## OLD: if [ "$OSTYPE" = "cygwin" ]; then
 ## if [ "$TERM" = "cygwin" ]; then
 if [ "$TERM" = "cygwin" ]; then
-  TODO: both  ## DEBUG: echo cygwin case
+    ## TODO: both  ## DEBUG: echo cygwin case
     ## TODO: cmd /k title ...?
     cmd /c title $icon
 

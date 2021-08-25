@@ -40,6 +40,7 @@ set command_line = "$0 $argv"
 # Parse command-line arguments
 set ignore = "-i"		# ignore-case flag
 set script_name = `basename $0`
+set egrep = "egrep"
 if ("$1" == "") then
     echo ""
     echo "Usage: $0 options [process_name]"
@@ -104,7 +105,14 @@ while ("$1" =~ -*)
 	## OLD: set user="[a-z][a-z]*"
         ## TODO: support usernames ending in $
         ## BAD: set user="[a-z_][a-z0-9_-]*[\\$]?"
-        set user="[a-z_][a-z0-9_-]*"
+        ## OLD: set user="[a-z_][a-z0-9_-]*"
+	## NOTE: If user ID too long, it is trancated in the ps listing and a + is appended.
+	## EX: thomas_+ 27423  0.0  0.0  14864  1124 pts/1    S+   19:36   0:00 grep -E -i jupyter
+	set user="[a-z_][a-z0-9_-+]*"
+	if ("$OSTYPE" == "linux") then
+	    set user="\S+"
+	    set egrep="grep --perl-regexp"
+	endif
     ## OLD: else if (("$1" == "-a") || ("$1" == "--all")) then
         ## OLD: set pattern_prefix = "."
 	set pattern_prefix = ".*"
@@ -124,7 +132,7 @@ set options = "auxww"
 # NOTE: the ps command itself is filtered out since not active later
 if ($OSTYPE == solaris) set options = "-ef"
 ## OLD: ps $options | grep "^ *$user" | egrep -v "\bps $options\b" | egrep -v "\b$$\b" | egrep -v "$filter" | egrep $ignore "$pattern" > $aux_file0
-ps $options | egrep "^ *$user" | egrep -v "\bps $options\b" | egrep -v "\b$$\b" | egrep -v "$filter" | egrep $ignore "$pattern" > $aux_file0
+ps $options | $egrep "^ *$user" | $egrep -v "\bps $options\b" | $egrep -v "\b$$\b" | $egrep -v "$filter" | $egrep $ignore "$pattern" > $aux_file0
 if ("$verbose_mode" == "1") then
     echo "Candidate processes (prior to parent and current script filtering)"
     cat $aux_file0
@@ -151,7 +159,8 @@ if ("$pattern" == ".") then
 	echo "ERROR: unable to determine parent pid"
 	exit
     endif
-    egrep -v "(egrep )|(kill_em.sh )|($$)|($parent)" $aux_file0 > $aux_file1
+    ## OLD: egrep -v "(egrep )|(kill_em.sh )|($$)|($parent)" $aux_file0 > $aux_file1
+    $egrep -v "(egrep )|(kill_em.sh )|($$)|($parent)" $aux_file0 > $aux_file1
     if ("$verbose_mode" == "1") then
 	echo "Related processes"
 	cat $aux_file1
@@ -173,7 +182,7 @@ endif
 echo "processes:"
 cat $aux_file1
 ## OLD: sed -e "s/^ *$user *//g" < $aux_file1 | sed -e 's/ .*//g' | grep -v '^ *$' | sort -n | perl -00 -n -e 's/\n/ /g; s/^/kill -9 /; print "$_\n";' > $aux_script
-perl -pe "s/^ *$user *//g;" < $aux_file1 | sed -e 's/ .*//g' | egrep -v '^ *$' | sort -n | perl -00 -n -e 's/\n/ /g; s/^/kill -9 /; print "$_\n";' > $aux_script
+perl -pe "s/^ *$user *//g;" < $aux_file1 | sed -e 's/ .*//g' | $egrep -v '^ *$' | sort -n | perl -00 -n -e 's/\n/ /g; s/^/kill -9 /; print "$_\n";' > $aux_script
 if ($test == 1) then
     perl -i.bak -pe 's/^/echo /;' $aux_script
 endif

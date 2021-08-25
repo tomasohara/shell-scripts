@@ -6,6 +6,10 @@
 # This software is Open Source, licensed under the GNU Lesser General Public Version 3 (LGPLv3). See LICENSE.txt in directory (or repository).
 #
 
+# Uncomment the following line(s) for tracing:
+## set -o xtrace
+## echo "in anaconda-aliases.bash"
+
 # add-conda-env-to-xterm-title(): puts conda prompt modifier in xterm title
 # along with python version (e.g., "...; Py3.6:(old_tensorflow)")
 # note: also resets prompt to '$ '
@@ -23,6 +27,7 @@ anaconda2_dir="/home/tomohara/anaconda2"
 # init-condaN([- | dir]): initialize anaconda using specified dir (or ~/anaconda3)
 function init-condaN() {
     local anaconda_dir="$1"
+    ## DEBUG: echo "in: init-condaN($1)"
     ## OLD: if [ "$anaconda_dir" = "" ]; then anaconda_dir="$anaconda3_dir"; fi
     if [ "$anaconda_dir" = "" ]; then echo "Usage: init-condaN anaconda-dir"; return; fi
     if [ "$anaconda_dir" = "-" ]; then anaconda_dir="$anaconda3_dir"; fi
@@ -44,12 +49,34 @@ function init-condaN() {
 
     # HACK: make sure clr aliased to default Unix version of clear (anaconda3 quirk)
     alias cls='/usr/bin/clear'
+
+    ## DEBUG: echo "out: init-condaN()"
 }
 alias init-conda3='init-condaN $anaconda3_dir'
 alias init-conda2='init-condaN $anaconda2_dir'
 alias init-conda=init-conda2
 # TODO: alias init-conda=init-conda3
-alias add-tensorfow='conda activate env_tensorflow_gpu'
+
+# Work around for intermittent problems w/ 'conda activate' requiring 'source activate' instead.
+# activation-helper is to handle deactivate as well
+function activation-helper () {
+    local command="$1"
+    local env="$2"
+    local conda_command="conda"
+    # Note: need to use conda's alias not the script returned by which
+    local conda_path=$(/usr/bin/which $conda) 2> /dev/null
+    if [ "$conda_path" = "" ]; then
+	conda_command="source"
+    fi
+    ## DEBUG:
+    ## echo "Issuing: $conda_command" "$command" "$env"
+    $conda_command "$command" $env
+}
+alias conda-activate='activation-helper activate'
+alias conda-deactivate='activation-helper deactivate'
+#
+## OLD: alias add-tensorfow='conda activate env_tensorflow_gpu'
+alias add-tensorfow='conda-activate env_tensorflow_gpu'
 alias all-conda-to-pythonpath='export PYTHONPATH=$anaconda3_dir/envs/env_tensorflow_gpu/lib/python3.7/site-packages:$anaconda3_dir/lib/python3.7:$PYTHONPATH'
 # OLD: alias init-jsl-conda='init-conda; export PYTHONPATH="$HOME/john-snow-labs/python:$PYTHONPATH"'
 # note: various conda-xyz aliases for sake of tab completion
@@ -69,11 +96,17 @@ function conda-activate-env {
 	conda-list-env-hack | perl -pe 's/^/    /;'
 	echo ""
     fi
-    source activate "$env";
+    ## OLD: source activate "$env";
+    conda-activate "$env"
     add-conda-env-to-xterm-title;
 }
 ## OLD: alias conda-deactivate-env='source deactivate'
-function conda-deactivate-env { source deactivate "$1"; add-conda-env-to-xterm-title; }
+## OLD: function conda-deactivate-env { source deactivate "$1"; add-conda-env-to-xterm-title; }
+## OLD: function conda-deactivate-env { conda deactivate "$1"; add-conda-env-to-xterm-title; }
+function conda-deactivate-env {
+    conda-deactivate
+    add-conda-env-to-xterm-title
+}
 
 # Miniconda3 initializaion
 # <<< conda initialize <<<
@@ -125,10 +158,14 @@ function ensure-conda-loaded {
 function conda-init-env {
     local env_name="$1"
     ensure-conda-loaded
-    source activate $env_name
+    ## OLD: source activate $env_name
+    conda-activate $env_name
     ## OLD: reset-prompt
     add-conda-env-to-xterm-title
 }
 
 # Misc. aliases
 alias conda-info-env='conda info --envs'
+
+# Uncomment the following line for tracing:
+## echo "out anaconda-aliases.bash"
