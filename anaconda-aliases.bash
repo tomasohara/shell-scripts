@@ -169,3 +169,6 @@ alias conda-info-env='conda info --envs'
 
 # Uncomment the following line for tracing:
 ## echo "out anaconda-aliases.bash"
+
+## TODO: delete
+## dummy change for git
