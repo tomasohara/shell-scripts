@@ -245,6 +245,7 @@ esac
 export LESS="-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"
 # Disables full-screen repaints under minimal-installation hosts (e.g., Beowolf nodes)
 if [ "$BAREBONES_HOST" = "1" ]; then export LESS="-cIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"; fi
+## OLD:
 ## export LESSCHARSET=latin1
 export PAGER=less
 export PAGER_CHOPPED="less -S"
@@ -1204,14 +1205,6 @@ trace setup and sorting wrappers
 # Editing and activating new settings
 #
 alias do-setup="conditional-source $HOME/.bashrc"
-## OLD
-## alias ed-setup="em $TOM_BIN/do_setup.bash; do-setup"
-## alias ed-setup-nw="em-nw $TOM_BIN/do_setup.bash; do-setup"
-## alias ed-full-setup="em $TOM_BIN/do_setup.sh $TOM_BIN/do_setup.bash; do-setup"
-## alias ed-full-setup-="em-nw $TOM_BIN/do_setup.sh $TOM_BIN/do_setup.bash; do-setup"
-## # following for backward compatibility
-## alias do_setup='do-setup'
-## alias ed_setup='ed-setup'
 
 # Sorting wrappers
 #
@@ -1344,7 +1337,6 @@ lynx-dump () {
     shift 1
     local base=$(basename "$file" .html)
     #    
-    ## BAD: if (( ("$out_file" = "" ) && ("$1" !~ -*) )); then
     if [[ ("$out_file" = "" ) && (! "$1" =~ -*) ]]; then
         local out_file="$1"
     fi
@@ -2075,6 +2067,3 @@ alias more-tomohara-aliases="source $TOM_BIN/more-tomohara-aliases.bash"
 
 # Optional end tracing
 startup-trace 'out tohara-aliases.bash'
-
-## TODO: delete
-## dummy change for git
