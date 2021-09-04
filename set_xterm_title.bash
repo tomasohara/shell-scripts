@@ -170,8 +170,13 @@ fi
 # TODO: just add that full version (i.e., not minimized)
 #
 if [ "$PS_symbol" != "" ]; then
-    full="$PS_symbol $full"
-    icon="$PS_symbol $icon"
+    ## OLD
+    ## full="$PS_symbol $full"
+    ## icon="$PS_symbol $icon"
+    if [ "$PS_symbol" != "$" ]; then
+	full="$PS_symbol $full"
+	icon="$PS_symbol $icon"
+    fi
 fi
 #
 # Note: *** put other changes above this one (so PS_symbol kept first)

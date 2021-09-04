@@ -274,6 +274,7 @@ function show-path-dir () { (echo "${1}:"; printenv $1 | perl -pe "s/:/\n/g;") |
 alias show-path='show-path-dir PATH'
 # append-path(path): appends PATH to environment variable unless already there
 ## TODO: function in-path { local path=$(tr ":" "\n" | grep "^$1$$"); return ($path != ""); }
+# TODO: add force argument to ensure last (or first)
 function append-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="${PATH}:$1"; fi }
 function prepend-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="$1:${PATH}"; fi }
 # TODO: rework append-/prepend-path and python variants via generic helper
@@ -331,6 +332,7 @@ unset MAIL
 export TEMP=$HOME/temp
 export TMP=$TEMP/tmp
 export TMPDIR=$TMP
+mkdir -p "$TEMP" "$TMP" "$TMPDIR"
 # NOTE: LINE and COLUMNS are in support of ps_sort.perl and h (history).
 # They get reset via resize.
 cond-export LINES 52
@@ -342,6 +344,7 @@ if [ "$DOMAIN_NAME" = "" ]; then export DOMAIN_NAME=`domainname.sh`; fi
 alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
 
 # Note: support for prompt prefix
+# reset-prompt(symbol): resets PS1 to PS_symbol, optionally changed to symbol
 # TODO: document PSn usage (e.g., Bash manual excerpt)
 ## TEST
 ## # PS_prefix should be defined in host-specific file (e.g., ~/.bashrc.<nickname>)
@@ -354,7 +357,8 @@ cond-export PS_symbol '$'
 function reset-prompt {
     local new_PS_symbol="$1"
     if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="$PS_symbol"; fi
-    export PS1="$new_PS_symbol ";
+    export PS_symbol="$new_PS_symbol";
+    export PS1="$PS_symbol "
     set-title-to-current-dir;
 }
 alias root-prompt='reset-prompt "# "'
@@ -1286,10 +1290,22 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 # note: files end in .log[0-9]* or .log and have numeric affix (e.g., do-xyz.log2, do-xyz.2.log, or do-xyz-30may21.log)
 #
 # move-log-files: move "versioned" log files to log-files
-# move-output-files: likewise for output file to ./output
+# move-output-files: likewise for output files with version numbers to ./output
 # note: versioned files are those ending in numerics or with numeric affix
-alias move-log-files='mkdir -p log-files; move *.log[0-9]* *[0-9]*.log ./log-files'
-alias move-output-files='mkdir -p output; move *.{html,json,list,out,output,report}[0-9]* *[0-9]*.{html,json,list,out,output,report} ./output'
+#    examples:                                         fu.log2      fu.1.log     fu.log.14aug21
+## OLD: alias move-log-files='mkdir -p log-files; move *.log[0-9]*  *[0-9]*.log  *.log.*[0-9][0-9]*  ./log-files'
+## OLD: alias move-output-files='mkdir -p output; move *.{html,json,list,out,output,report,xml}[0-9]* *[0-9]*.{html,json,list,out,output,report,xml} ./output'
+function move-versioned-files {
+    local ext_pattern="$1"
+    if [ "$ext_pattern" = "" ]; then ext_pattern="{list,log,txt}"; fi
+    local dir="$2"
+    if [ "$dir" = "" ]; then dir="versioned-files"; fi
+    mkdir -p "$dir";
+    move  $(eval echo *.$ext_pattern[0-9]*  *.*[0-9]*.$ext_pattern  *.$ext_pattern.*[0-9][0-9]* ) "$dir"  2>&1 | grep -v 'No such file'
+}
+alias move-log-files='move-versioned-files "{log}" "log-files"'
+alias move-output-files='move-versioned-files "{html,json,list,out,output,report,xml}" "output"'
+alias move-adhoc-files='move-log-files; move-output-files'
 
 # rename-with-file-date(file, ...): rename each file(s) with .ddMmmYY suffix
 # Notes: 1. If file.ddMmmYY exists, file.ddMmmYY.N tried (for N in 1, 2, ...).
