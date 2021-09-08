@@ -53,7 +53,7 @@ if (!defined($ARGV[0])) {
     $example .= "echo \"a b c d\" | $script_name -restore='\$2' -fields=2 \"(\\S) (\\S)\"\n\n";
 
     my($note) = "";
-    $note .= "notes:\n\nUse -restore to simulate look-ahead.\n";
+    $note .= "notes:\n\nUse -restore to simulate look-ahead (see example).\n";
     $note .= "With - for pattern, it defaults to tab-delimited fields (e.g., via -fields=N).\n";
 
     print STDERR "\nusage: $0 [options] pattern\n\n$options\n\n$example\n$note\n";

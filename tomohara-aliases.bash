@@ -377,8 +377,8 @@ reset-prompt
 # flag for turning off GNOME, which can be flakey at times
 export USE_GNOME=1
 
-# General Settings for my perl scripts
-export DEBUG_LEVEL=3
+# General Settings for my scripts
+export DEBUG_LEVEL=2
 alias debug-on='export DEBUG_LEVEL=3'
 if [ "$PERLLIB" = "" ]; then PERLLIB="."; else PERLLIB="$PERLLIB:."; fi
 # NOTE: perl uses architecture-specific subdirectories under PERLLIB
@@ -1151,16 +1151,29 @@ function image-view () { gpicview "$@" & }
 # FIle conversion
 # note: when ps2ascii hangups, it creates large output files (e.g., > 1gb)
 # TODO: handle filename wit
-function pdf-to-ascii () { cmd.sh --time-out 30 ps2ascii "$1" > "$1.ascii"; }
-function all-pdf-to-ascii () { 
-    for f in *.pdf; do 
-        echo "checking $f.ascii"; 
-        if [ ! -e "$f.ascii" ]; then 
-            echo "converting $f"; 
-            pdf-to-ascii "$f"; 
-        fi; 
-    done; 
+## OLD:
+## function pdf-to-ascii () { cmd.sh --time-out 30 ps2ascii "$1" > "$1.ascii"; }
+## function all-pdf-to-ascii () { 
+##     for f in *.pdf; do
+##         echo "checking $f.ascii"; 
+##         if [ ! -e "$f.ascii" ]; then 
+##             echo "converting $f"; 
+##             pdf-to-ascii "$f"; 
+##         fi; 
+##     done; 
+## }
+##
+function pdf-to-ascii () {
+    local file="$1"
+    local verbose="$2";
+    local target=$(basename "$1" .pdf)".ascii";
+    if [ "$verbose" = "1" ]; then echo "checking $target"; fi
+    if [ ! -s "$target" ]; then
+	if [ "$verbose" = "1" ]; then echo "creating $target"; fi
+	cmd.sh --time-out 30 pdftotext -layout "$file" "$target";
+    fi
 }
+function all-pdf-to-ascii () { for f in *.pdf; do pdf-to-ascii "$f"; done; }
 
 # Specialized file editors
 function run-app {
@@ -1294,9 +1307,11 @@ function move-versioned-files {
     local dir="$2"
     if [ "$dir" = "" ]; then dir="versioned-files"; fi
     mkdir -p "$dir";
-    move  $(eval echo *.$ext_pattern[0-9]*  *.*[0-9]*.$ext_pattern  *.$ext_pattern.*[0-9][0-9]* ) "$dir"  2>&1 | grep -v 'No such file'
+    ## OLD:move  $(eval echo *.$ext_pattern[0-9]*  *.*[0-9]*.$ext_pattern  *.$ext_pattern.*[0-9][0-9]* ) "$dir"  2>&1 | grep -v 'No such file'
+    local D="[.-]"
+    move  $(eval echo *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]* ) "$dir"  2>&1 | grep -v 'No such file'
 }
-alias move-log-files='move-versioned-files "{log}" "log-files"'
+alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
 alias move-output-files='move-versioned-files "{html,json,list,out,output,report,xml}" "output"'
 alias move-adhoc-files='move-log-files; move-output-files'
 
@@ -1344,7 +1359,7 @@ lynx-dump () {
     if [ "$out_file" = "" ]; then out_file="$base.txt"; fi
     #
     lynx-dump-stdout "$@" "$file" > "$out_file" 2> "$out_file.log"
-    if [ ! -z "$out_file.log" ]; then
+    if [ -s "$out_file.log" ]; then
         cat "$out_file.log"
         delete-force "$out_file.log"
     fi
@@ -1720,7 +1735,7 @@ function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$;
 
 # Make sure script appends rather than overwrites.
 # In addition, set SCRIPT_PID, so that set_xterm_title.bash can indicate within script.
-# Also, appends $ to prompt symbol so that typescript greppable with strings command
+# Also, appends $ to prompt symbol so that typescript prompt searchable with strings command
 ## HACK: set envionment for sake of set_xterm_title.bash (TODO check PPID for this)
 function script {
     # Change prompt

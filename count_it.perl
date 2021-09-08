@@ -50,6 +50,7 @@ use strict "refs";			# allow string deferencing (for -occurrences support)
 use vars qw/$utf8 $i $ignore_case $i $ignore_case $foldcase $fold $preserve 
             $para $slurp $multi_per_line $one_per_line $freq_first $alpha $compact $cumulative
             $occurrences $occurrence_field $percents $multiple $nonsingletons $min2 $min_freq $trim $unaccent $pattern_file $pattern $locale $chomp/;
+use vars qw/$restore/;
 
 # Check the command-line options
 # Each variable initialized corresponds to -var=value commandline option
@@ -60,8 +61,6 @@ use vars qw/$utf8 $i $ignore_case $i $ignore_case $foldcase $fold $preserve
 &init_var(*preserve, ! ($foldcase || $fold));	# preserve the case of text matching pattern
 &init_var(*para, &FALSE);		# apply the pattern to paragraphs not lines
 &init_var(*slurp, &FALSE);		# apply the pattern to entire files
-## OLD: &init_var(*multi_per_line, &FALSE);	# count multiple instance of the pattern per line (even when ^ and $ are specified)
-## OLD: &init_var(*one_per_line, ! $multi_per_line); # only count one instance of the pattern per line
 &init_var(*freq_first, &FALSE);		# put frequency counts first (ie, <freq><tab><data>)
 &init_var(*alpha, &FALSE);		# alphabetical sort
 &init_var(*compact, &FALSE);		# compact all whitespace sequences
@@ -82,17 +81,18 @@ my($default_pattern) = (($pattern_file ne "") ? &read_file($pattern_file) : "");
 &init_var_exp(*pattern, $default_pattern); # regex pattern to check for
 &init_var_exp(*locale, &FALSE);		# honor environment locale settings
 &init_var(*chomp, &FALSE);		# strip newline at end (TODO make default unless \n in pattern)
+&init_var(*restore, "");		# portion of matching text to be restored
 
 # Get the pattern and options from the command line
 # Process the command-line options
 if (!defined($ARGV[0])) {
     my($options) = "options = [-i(gnore)] [-alpha] [-freq_first] [-para] [-preserve] [-foldcase]\n";
     $options    .= "          [-compact] [-min_freq=N | -nonsingletons | -min2] [-slurp] [-unaccent] [-chomp]\n";
-    ## OLD: $options    .= "          [-occurrences] [-cumulative] [-one_per_line]\n";
-    $options    .= "          [-occurrences] [-cumulative] [-multi_per_line|-one_per_line]\n";
+    $options    .= "          [-occurrences] [-cumulative] [-multi_per_line|-one_per_line] [-restore]\n";
     my($example) = "examples:\n\nls | $script_name '\\.([^\\.]+)\$'\n\n";
     $example .= "$0 '(outside\/\\S+)' omcsraw.tag\n\n";
     $example .= "perl -CIOE -Sw $script_name '(.)' - < wiki-lang-info/utf8/da  >| /tmp/da.freq\n\n";
+    $example .= "$script_name -restore='\$3' '((\\S+\\s+)((\\S+\\s+){2}\\S+))' time-tracking-aug21.list | head\n\n";
     my($note) = "";
     $note .= "notes:\n\nThe patterns are regular expressions using Perl's extensions\n";
     $note .= "See manual page for details (e.g., 'man perlre')\n\n";
@@ -104,6 +104,7 @@ if (!defined($ARGV[0])) {
     $note .= "-slurp reads the entire file at once (for long-distance patterns)\n";
     $note .= "-occurrences incorporates count field (\$1 for pattern & \$2 count)\n";
     $note .= "-multi_per_line allows for multple occurrences in a line (assumed unless ^ used)\n";
+    $note .= "-restore is used to simulate look-ahead (see example).\n";
     ## TODO: add optional extended help with examples for misc. options
 
     die "\nusage: $script_name [options] pattern file ...\n\n$options\n\n$example\n$note\n";
@@ -113,15 +114,11 @@ if ($pattern eq "") {
     shift @ARGV;
 }
 
-## BAD: my($has_line_anchor) = (($pattern =~ "^\^") || ($pattern =~ /[^\\]\$$/));
+# See if regex has line achor (^ or $)
 ## TODO: exclude \$ at end of string (e.g., "100\$")
 ## TODO: add unit test: (echo "12 34 56 78" | count_it.perl '\d{2}' | wc -l) =>  4
-## BAD: my($has_line_anchor) = ((index($pattern, "^") == 0) || (rindex($pattern, "\$") != $#pattern));
 my($has_line_anchor) = ((index($pattern, "^") == 0) 
 			|| (rindex($pattern, "\$") == length($pattern))); 
-## OLD:
-## &init_var(*multi_per_line, ! $has_line_anchor);	# count multiple instance of the pattern per line (even when ^ and $ are specified)
-## &init_var(*one_per_line, ! $multi_per_line); # only count one instance of the pattern per line
 &init_var(*one_per_line, $has_line_anchor); # only count one instance of the pattern per line
 &init_var(*multi_per_line, ! $one_per_line);	# count multiple instance of the pattern per line (even when ^ and $ are specified)
 &assertion(! ($one_per_line && $multi_per_line));
@@ -134,10 +131,7 @@ if ($locale) {
 # Sanity check for whether one-per-line option might be needed
 # NOTE: checks against pattern need to occur prior to modification (e.g., paren addition)
 # TODO: handle multiple patterns per line (e.g., set line break to null); likewise check for multiple end-of-line matching
-## OLD: if ((&DEBUG_LEVEL > 3) && ($pattern =~ /^\^/) && ($pattern !~ /[\$\n]$/) && (! $multi_per_line)) {
 if ((&DEBUG_LEVEL > 3) && ($pattern =~ /^\^/) && ($pattern !~ /[\$\n]$/) && (! $multi_per_line)) {
-    ## OLD: $one_per_line = &TRUE;
-    ## OLD2: &warning("You might want to specify -one_per_line (or add \\n or \$), as start of line changes with match.\n");
     &warning("You might want to specify -multi_per_line if you want \^ and/or \$ interpretted after match removal.\n");
 }
 
@@ -152,6 +146,7 @@ if ((($pattern =~ /\\\(.*\\\)/) && ($pattern !~ /[^\\]\(.*\)[^\\]/))
 # Process each line of the input stream
 &debug_out(&TL_DETAILED, "searching for pattern '%s'; one_per_line=%d; ignore_case=%d...\n", 
 	   $pattern, $one_per_line, $ignore_case);
+&debug_print(&TL_VERBOSE, "restore=$restore\n");
 my($num) = 0;			# number of distinct cases (pattern instances)
 
 $/ = "" if ($para);		# paragraph input mode
@@ -204,21 +199,33 @@ while (<>) {
 	if (($ignore_case == 1) && ($text =~ /$pattern/si)) {
 	    $tag = $1;
 	    $tag = &to_lower($tag) unless ($preserve);
-	    $text = $';
+	    ## OLD: $text = $';
 	    $found = &TRUE;
 	}
 	elsif (($ignore_case == 0) && ($text =~ /$pattern/s)) {
 	    $tag = $1;
-	    $text = $';
+	    ## OLD: $text = $';
 	    $found = &TRUE;
 	}
+	#
+	# Update the current line being matched
+	if ($found && ($restore ne "")) {
+	    my($restore_text) = eval "$restore";
+	    &debug_print(&TL_DETAILED, "restoring '$restore_text' to current text\n");
+	    $text = $restore_text . $';		# '
+	    &debug_print(&TL_VERBOSE, "current text='$text'\n");
+	}
+	else {
+	    $text = $';				# '
+	}
+
 
 	# Update the hash table of the patterns
 	if ($found) {
 	    $tag = &trim($tag) if ($trim);
 	    ## TODO: add unit test for differences using optional suffixes vs. lookahead (e.g., '\w{3}((, )|$)' vs. '\w{3}(?=(, )|$)'
-	    ## OLD: &debug_print(&TL_VERY_DETAILED, "adding: '$tag'\n");
-	    &debug_print(&TL_VERY_DETAILED, "adding: '$tag'; \$\&='$&'\n");
+	    ## OLD: &debug_print(&TL_VERY_DETAILED, "adding: '$tag'; \$\&='$&'\n");
+	    &debug_print(&TL_VERY_DETAILED, "adding: '$tag'\n\t\$\&='$&'\n");
 	    $num++;
 	    my($count) = 1;
 	    if ($occurrence_field) {
@@ -241,10 +248,6 @@ print("total occurrence count is ${total_count}\n") if ($occurrences);
 
 print("Frequency of $pattern\n") if ($verbose);
 my($sort_function) = ($alpha ? \&sorted_hash_keys_alphabetic : \&sorted_hash_keys_reverse_numeric);
-## OLD:
-## if ($occurrences) {
-##    $sort_function = \&sorted_hash_keys_numeric_keys;
-## }
 my($cumulative_tag_count) = 0;
 foreach my $tag (&$sort_function(\%count)) {
     my($tag_count) = &get_entry(\%count, $tag, 0);
@@ -263,8 +266,6 @@ foreach my $tag (&$sort_function(\%count)) {
 
 	# Show optional cumulative count column
 	if ($cumulative) {
-	    ## OLD: my($occurrence_count) = ($occurrences ? $tag : 1);
-	    ## OLD: $cumulative_tag_count += ($tag_count * $occurrence_count);
 	    $cumulative_tag_count += $tag_count;
 	    print "\t${cumulative_tag_count}";
 	    if ($percents) {
@@ -274,6 +275,4 @@ foreach my $tag (&$sort_function(\%count)) {
 	print "\n";
     }
 }
-
-## print "\n";
 

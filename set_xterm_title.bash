@@ -167,13 +167,16 @@ if [ "$SCRIPT_PID" != "" ]; then
 fi
 
 # If prompt prefix set, include that at very start.
+# Note: excludes dollar sign: regular ($): U+0024, full-width (＄): U+FF04
+# TODO: heavy dollar sign (U+1F4B2)
 # TODO: just add that full version (i.e., not minimized)
 #
 if [ "$PS_symbol" != "" ]; then
     ## OLD
     ## full="$PS_symbol $full"
     ## icon="$PS_symbol $icon"
-    if [ "$PS_symbol" != "$" ]; then
+    ## OLD:  if [ "$PS_symbol" != '$' ]; then
+    if [[ ! ($PS_symbol =~ [$＄]) ]]; then
 	full="$PS_symbol $full"
 	icon="$PS_symbol $icon"
     fi
