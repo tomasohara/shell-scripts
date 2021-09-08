@@ -346,6 +346,7 @@ alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
 
 # Note: support for prompt prefix
 # reset-prompt(symbol): resets PS1 to PS_symbol, optionally changed to symbol
+# ex: reset-prompt '§'                 # section sign [U+00A7]
 # TODO: document PSn usage (e.g., Bash manual excerpt)
 ## TEST
 ## # PS_prefix should be defined in host-specific file (e.g., ~/.bashrc.<nickname>)
