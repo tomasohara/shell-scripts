@@ -1955,6 +1955,7 @@ function filter-random() {
 }
 
 conditional-source $TOM_BIN/anaconda-aliases.bash
+conditional-source $TOM_BIN/git-aliases.bash
 
 # Web access
 #
