@@ -10,7 +10,12 @@
 #...............................................................................
 # Notes:
 #
-# via https://gist.github.com/flc/f867e2b92cc878a55801#file-hg_vs_git-txt:
+# - credentials taken from my-git-credentials-etc.bash:
+#
+#   git_user=username
+#   git_token=personal_access_token
+#
+# - via https://gist.github.com/flc/f867e2b92cc878a55801#file-hg_vs_git-txt:
 #
 #   hg init => git init
 #   hg add <path> => git add <path>
@@ -72,7 +77,7 @@ function git-commit {
     local log="_git-commit-$(TODAY).log"
     local git_user
     local git_token
-    source ./my-git-settings.bash
+    source ./my-git-credentials-etc.bash
     git add "$@" >> $log
     git commit -m "misc. update" >> $log
     # TODO: perl -e "print("$git_user\n$git_token\n");' | git push
@@ -89,8 +94,10 @@ EOF
 # note: gets user credentials from ./.my-git-settings.bash
 # TODO: skip commit if problem with update
 function git-safe-commit {
+    # DEBUG: set -o xtrace
     git-update
     git-commit "$@"
+    # DEBUG: set - -o xtrace
 }
 
 function git-pull-and-update() {
