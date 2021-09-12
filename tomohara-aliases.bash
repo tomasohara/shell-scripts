@@ -357,7 +357,8 @@ alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
 #    export PS_symbol="¢"      # cent sign (U+00A2)
 cond-export PS_symbol '$'
 function reset-prompt {
-    local new_PS_symbol="$1"
+    ## OLD: local new_PS_symbol="$1"
+    local new_PS_symbol="$@"
     if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="$PS_symbol"; fi
     export PS_symbol="$new_PS_symbol";
     export PS1="$PS_symbol "
@@ -1052,6 +1053,9 @@ function tar-dir () {
 ##
 function tar-just-dir () { tar-dir $1 1; }
 #
+# tar-this-dir(): create tar archive into TEMP, for sud-directory tree routed
+# in current directory (using directory basename as file prefix instead of .)
+# ex: TEMP=/mnt/my-external-drive/tmp tar-this-dir
 function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`"; popd-q; }
 # test of resolving problem with tar-this-dir if dir a symbolic link from apparent parent
 function new-tar-this-dir () {
@@ -1742,7 +1746,9 @@ function script {
     # Change prompt
     local old_PS_symbol="$PS_symbol"
     export SCRIPT_PID=$$;
-    reset-prompt "${PS_symbol}\$";
+    ## BAD: reset-prompt "${PS_symbol}\$";
+    ## TODO: reset-prompt "$PS_symbol"'$';
+    reset-prompt "$PS_symbol" '$';
     # Run command
     command script --append "$@";
     # Restore prompt
@@ -1954,6 +1960,8 @@ function filter-random() {
     fi
 }
 
+# Load supporting scripts
+#
 conditional-source $TOM_BIN/anaconda-aliases.bash
 conditional-source $TOM_BIN/git-aliases.bash
 
