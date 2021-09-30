@@ -62,6 +62,7 @@ Notes:
 - Use + prefix before token for longer lines.
 - Use @ prefix before token for prettyprinting (e.g., verb conjugations).
 - Use & prefix before token for multi-line output (assumes @).
+- Use * prefix for all of the above.
 
 USAGE_END
 
@@ -127,7 +128,7 @@ while (<>) {
     my($full_line) = $full;
     my($pretty_print) = $pretty;
     my($multi_line) = $multi;
-    while ($_ =~ /^[\+@&]/) {
+    while ($_ =~ /^[\+@&\*]/) {
 	if ($_ =~ /^\+/) {      # mnemonc: longer length
 	    $_ = $';		# ' (stupid emacs)
 	    $full_line = &TRUE;
@@ -141,6 +142,12 @@ while (<>) {
 	    $pretty_print = &TRUE;
 	    $multi_line = &TRUE;
 	    ## OLD: $full_line = &TRUE;
+	}
+	if ($_ =~ /^\*/) {       # mnemonic: * wildcard ('.' conflict w/ period)
+	    $_ = $';		# ' (stupid emacs)
+	    $full_line = &TRUE;
+	    $pretty_print = &TRUE;
+	    $multi_line = &TRUE;
 	}
     }
 

@@ -161,9 +161,14 @@ function space-check() {
    fi
    case "$1" in *\ *) echo "Error: argument should not contain spaces: $1";; esac
 }
-#
+# downcase-stdin(): convert STDIN to lowercase
+# downcase-text(text, ...): downcase TEXT
+function downcase-stdin() { perl -pe 's/.*/\L$&/;'; }
+function downcase-text() { echo "$@" | downcase-stdin; }
 # todays-date(): outputs date in format DDMmmYY (e.g., 22Apr20)
-function todays-date() { date '+%d%b%y' | perl -pe 's/.*/\L$&/;'; }
+## OLD: function todays-date() { date '+%d%b%y' | perl -pe 's/.*/\L$&/;'; }
+## TODO: drop leading digits in day of month
+function todays-date() { date '+%d%b%y' | downcase-stdin; }
 todays_date=$(todays-date)
 # Convenience alias and bash variable for better tab-completion
 alias hoy=todays-date
@@ -173,6 +178,7 @@ hoy=$(hoy)
 alias TODAY=todays-date
 TODAY=$(todays-date)
 alias date-central='TZ="America/Chicago" date'
+alias em-adhoc-notes='emacs-tpo _it.$(TODAY).log'
 
 # Alias creation helper(s)
 function quiet-unalias () { unalias "$@" 2> /dev/null; }
@@ -364,7 +370,9 @@ function reset-prompt {
     export PS1="$PS_symbol "
     set-title-to-current-dir;
 }
-alias root-prompt='reset-prompt "# "'
+## OLD: alias root-prompt='reset-prompt "# "'
+alias reset-prompt-root='reset-prompt "# "'
+alias reset-prompt-dollar="reset-prompt '$'"
 
 #-------------------------------------------------------------------------------
 # More misc stuff
@@ -1317,7 +1325,7 @@ function move-versioned-files {
     move  $(eval echo *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]* ) "$dir"  2>&1 | grep -v 'No such file'
 }
 alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
-alias move-output-files='move-versioned-files "{html,json,list,out,output,report,xml}" "output"'
+alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,report,xml}" "output-files"'
 alias move-adhoc-files='move-log-files; move-output-files'
 
 # rename-with-file-date(file, ...): rename each file(s) with .ddMmmYY suffix
@@ -1805,7 +1813,7 @@ function python-lint-full() {
 # - the following has two regex: *modify the first* to add more conditions to ignore; the second is just for the extraneous pylint output
 function python-lint-work() { python-lint-full "$@" 2>&1 | egrep -v '\((bad-continuation|bad-option-value|fixme|invalid-name|locally-disabled|too-few-public-methods|too-many-\S+|trailing-whitespace|star-args|unnecessary-pass)\)' | egrep -v '^(([A-Z]:[0-9]+)|(Your code has been rated)|(No config file found)|(\-\-\-\-\-))' | $PAGER; }
 # TODO: rename as python-lint-tpo for clarity (and make python-lint as alias for it)
-function python-lint() { python-lint-work "$@" 2>&1 | egrep -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|missing-final-newline|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
+function python-lint() { python-lint-work "$@" 2>&1 | egrep -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|missing-final-newline|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
 
 # run-python-lint-batched([file_spec="*.py"]: Run python-lint in batch mode over
 # files in FILE_SPEC, placing results in pylint/<today>.

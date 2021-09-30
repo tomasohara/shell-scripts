@@ -51,7 +51,7 @@
 ## DEBUG: set -o verbose
 
 # Show usage statement
-# TODO: convert into a function that get invoked with $1 is empty or --help
+# TODO: convert into a function that get invoked when $1 is empty or --help
 # in $@.
 # NOTE: See sync-loop.sh for an example.
 #

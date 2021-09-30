@@ -176,7 +176,7 @@ if [ "$PS_symbol" != "" ]; then
     ## icon="$PS_symbol $icon"
     ## OLD:  if [ "$PS_symbol" != '$' ]; then
     ## OLD: if [[ ! ($PS_symbol =~ [$＄]) ]]; then
-    if [[ ! ($PS_symbol =~ [﹩＄💲]) ]]; then
+    if [[ ! ($PS_symbol =~ [$﹩＄💲]) ]]; then
 	full="$PS_symbol $full"
 	icon="$PS_symbol $icon"
     fi

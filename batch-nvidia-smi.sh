@@ -1,6 +1,10 @@
 #! /bin/bash
 #
-# Run nvidia-smi in background N times with a delay of S seconds each.
+# Run nvidia-smi in background N times with a delay of N seconds each.
+#
+# Note:
+# - The nvidia-smi utility allows for delay via --loop= or --loop-ms, but this
+#   this script documents the usage better.
 #
 
 # Uncomment following line(s) for tracing:
@@ -17,22 +21,30 @@
 # NOTE: See sync-loop.sh for an example.
 #
 if [ "$1" = "" ]; then
-    base=$(basename "$0")
+    script=$(basename "$0" .sh)
+    base=$(basename "$script")
     echo ""
-    ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--TODO] [--trace] [--help] [--] [num-times] [pause-time]"
+    echo "Usage: $script [--trace] [--help] [--] [num-times] [pause-time]"
     echo ""
     echo "Examples:"
+    echo "- Simple"
+    echo "  $0 1200 0.5"
     echo ""
-    echo "\"$base\" 1200 0.5"
-    echo ""
-    echo "one_day_in_secs=(24 * 3600)"
-    echo "\"$base\" \$one_day_in_secs 1 > _batch-nvidia-smi.log &"
+    echo "- Advanced:"
+    echo "  date_yyyy_mm_dd_hhmm=\"$(date '+%Y-%m-%d_%H%M')\""
+    echo "  log_file=\"$base-\$date_yyyy_mm_dd_hhmm.log\""
+    echo "  let one_day_in_secs=(24 * 3600)"
+    echo "  let delay_time=60"
+    echo "  let num_times=(one_day_in_secs / delay_time)"
+    echo "  $script \$num_times \$delay_time > \$log_file &"
+    # TODO: rework calculation using bc or perlcalc.perl???
+    # alt 1: echo "  num_times=\$(echo \"\$one_day_in_secs * 1.0 / \$delay_time)" | bc -l"
+    # alt 2: echo "  num_times=\$(echo \"round(\$one_day_in_secs * 1.0 / \$delay_time)\" | perlcalc.perl -integer)"
     echo ""
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."
-    ## TODO: add more notes
-    ## echo ""
+    echo "- The advanced example use bash interger math."
+    echo "- Both examples assumes the script name doesn\'t require quoting."
     echo ""
     exit
 fi
@@ -62,7 +74,7 @@ done
 if [ "$1" != "" ]; then n="$1"; fi
 if [ "$2" != "" ]; then s="$2"; fi
 
-for (( i=0; i<$n; i++ )); do
+for (( i=0; i<n; i++ )); do
     nvidia-smi
-    sleep $s
+    sleep "$s"
 done
