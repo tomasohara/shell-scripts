@@ -4,9 +4,15 @@
 #
 # TODO: if interactive, warn that only intended for non-interactive use
 #
-# usage:
-# $ source git-aliases.sh
+# usage example(s):
+#   source git-aliases.bash
 #
+#   git-update
+#
+#   git-safe-commit $(git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)")
+#
+#   git-unsafe-commit
+#    
 #...............................................................................
 # Notes:
 #
@@ -99,6 +105,10 @@ function git-safe-commit {
     git-commit "$@"
     # DEBUG: set - -o xtrace
 }
+#
+# git-unsafe-commit(): adds all files for checkin
+# TODO: add verification before commit
+alias git-unsafe-commit='git-safe-commit *'
 
 function git-pull-and-update() {
     if [ "" = "$(grep ^repo ~/.gitrc)" ]; then echo "*** Warning: fix ~/.gitrc for read-only access ***"; else

@@ -21,8 +21,8 @@
 # NOTE: See sync-loop.sh for an example.
 #
 if [ "$1" = "" ]; then
-    script=$(basename "$0" .sh)
-    base=$(basename "$script")
+    script=$(basename "$0")
+    base=$(basename "$script" sh)
     echo ""
     echo "Usage: $script [--trace] [--help] [--] [num-times] [pause-time]"
     echo ""
@@ -44,7 +44,7 @@ if [ "$1" = "" ]; then
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."
     echo "- The advanced example use bash interger math."
-    echo "- Both examples assumes the script name doesn\'t require quoting."
+    echo "- Both examples assumes the script name doesn't require quoting."
     echo ""
     exit
 fi

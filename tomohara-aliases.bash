@@ -40,6 +40,7 @@
 #               That is, `` $@'' is equivalent to ``$1'' ``$2'' ...
 #               When there are no positional parameters, ``$@'' and
 #               $@ expand to nothing (i.e., they are removed).
+# - $* is like $@ except that it accounts for inter-field separator (IFS)
 # - CygWin takes very long to process this script so certain sections
 #   are not evaluated if under arahomot; TODO: check for CygWin flag.
 # - Variables in function definitions should be declared local to avoid subtle problems
@@ -70,6 +71,8 @@
 # TODO:
 # - *** Purge way-old stuff (e.g., lynx related)!
 # - ** Add option to move alias not to put files in subdirectory of target directory. That is, the move command aborts rather than doing following: 'move sub-dir target-dir' ==> target-dir/sub-dir/sub-dir).
+# - ** Minimize overriding commands like 'cd' and 'script' to avoid confusion.
+# - ** Likewise non-standard usages for variables like 'PS1' (e.g., via 'PS_symbol').
 # - * Drop support for solaris and remove BAREBONES_HOST support.
 # - Get rid of old-work junk (e.g., Intemass, Juju, and JSL)!
 # - Replace backquote evaluation (`...`) with $(...)
@@ -137,7 +140,8 @@ if [ ! -e "$HOME/temp" ]; then
 fi
 #
 # Define simple version of startup tracing
-function startup-trace () { if [ "$STARTUP_TRACING" = "1" ]; then echo $* [$HOSTNAME $(date)] >> $HOME/temp/.startup-$HOSTNAME-$$.log; fi; }
+## OLD: function startup-trace () { if [ "$STARTUP_TRACING" = "1" ]; then echo $* [$HOSTNAME $(date)] >> $HOME/temp/.startup-$HOSTNAME-$$.log; fi; }
+function startup-trace () { if [ "$STARTUP_TRACING" = "1" ]; then echo "$@" [$HOSTNAME $(date)] >> $HOME/temp/.startup-$HOSTNAME-$$.log; fi; }
 # conditional-source(filename): source in bash commands from filename if exists
 function conditional-source () { if [ -e "$1" ]; then source $1; else echo "Warning: bash script file not found (so not sourced):"; echo "    $1"; fi; }
 function quiet-conditional-source { source "$@" > /dev/null 2>&1; }
@@ -176,9 +180,19 @@ hoy=$(hoy)
 # Note: version so Spanish not used in note files
 # TODO: punt on tab-completion (i.e., TODAY => today)???
 alias TODAY=todays-date
-TODAY=$(todays-date)
+## OLD: TODAY=$(todays-date)
 alias date-central='TZ="America/Chicago" date'
 alias em-adhoc-notes='emacs-tpo _it.$(TODAY).log'
+alias T='TODAY'
+T=$(TODAY)
+# update-today-vars() & todays-update: update the various today-related variables
+# aside: descriptive name for function and convenience alias (tab-completion)
+# TODO: try for cron-like bash function to enable such updates automatically
+function update-today-vars {
+    TODAY=$(todays-date)
+    T=$(TODAY)
+}
+alias todays-update='update-today-vars'
 
 # Alias creation helper(s)
 function quiet-unalias () { unalias "$@" 2> /dev/null; }
@@ -188,24 +202,25 @@ function quiet-unalias () { unalias "$@" 2> /dev/null; }
 # - If the histappend shell option is set (see Bash Builtins), the lines are
 # appended to the history file, otherwise the history file is overwritten.
 # - HISTCONTROL
-# A colon-separated list of values controlling how commands are saved on the
-# history list. If the list of values includes ‘ignorespace’, lines which begin
-# with a space character are not saved in the history list. A value of
-# ‘ignoredups’ causes lines which match the previous history entry to not be
-# saved. A value of ‘ignoreboth’ is shorthand for ‘ignorespace’ and
-# ‘ignoredups’. A value of ‘erasedups’ causes all previous lines matching the
+# ... ‘ignoredups’ causes lines which match the previous history entry to not
+# be saved. .... ‘erasedups’ causes all previous lines matching the
 # current line to be removed from the history list before that line is saved.
 # - HISTSIZE
 # The maximum number of commands to remember ... less than zero [means] every
 # command [is] saved ... default value [is] 500...
+# - HISTFILESIZE
+# The maximum number of lines contained in the history file. 
 # TODO: do more excerpting or just summarize above.
 set bell-style none
-export HISTCONTROL=erasedups
+## OLD: export HISTCONTROL=erasedups
+export HISTCONTROL=ignoredups
 export HISTTIMEFORMAT='[%F %T] '
 # Ensure that the history files are merged (n.b., timestamping required for
 # proper sequencing of entries from different shell windows).
 set histappend
+# note: following are 50x the defaults
 export HISTSIZE=50000
+export HISTFILESIZE=100000
 #
 # Note: bash setting(s) in ~/.bash+profile
 # format: shopt [-s | -u] optionname
@@ -297,7 +312,9 @@ if [ "`printenv PATH | grep $TOM_BIN/${OSTYPE}:`" = "" ]; then
 fi
 # TODO: make optional & put append-path later to account for later PERLLIB changes
 append-path $PERLLIB
-prepend-path "$HOME/python/tomas-misc/tomas_misc"
+## OLD: prepend-path "$HOME/python/tomas-misc/tomas_misc"
+## TEST: prepend-path "$HOME/python/mezcla/mezcla"
+prepend-path "$HOME/python/util-mezcla/mezcla"
 append-path "$HOME/python"
 # Put current directoy at end of path; can be overwritting with ./ prefix
 export PATH="$PATH:."
@@ -361,14 +378,20 @@ alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
 # Note: PS_symbol defines the prompt symbol (e.g., '$' vs. '§' [U+00A7])
 # example override (from .bashrc):
 #    export PS_symbol="¢"      # cent sign (U+00A2)
+## TODO: resolve interaction among 'reset-prompt', 'script' and 'add-conda-env-to-xterm-title' (see anacdonda-aliases.bash for latter)
 cond-export PS_symbol '$'
 function reset-prompt {
     ## OLD: local new_PS_symbol="$1"
     local new_PS_symbol="$@"
     if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="$PS_symbol"; fi
+    # Make the change
+    ## DEBUG: echo "reset-prompt: 1. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
     export PS_symbol="$new_PS_symbol";
     export PS1="$PS_symbol "
+    ## DEBUG: echo "reset-prompt: 2. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
+    # Update xterm title
     set-title-to-current-dir;
+    ## DEBUG: echo "reset-prompt: 3. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
 }
 ## OLD: alias root-prompt='reset-prompt "# "'
 alias reset-prompt-root='reset-prompt "# "'
@@ -799,6 +822,7 @@ function todo! () { if [ "$1" == "" ]; then todo; else todo "$@"'!'; fi; }
 #
 # mail-todo: version of todo that also ends email
 # TODO: use lynx to submit send-to type URL
+# TODO: use '$@' for '$*' (or note why not appropriate)
 function mail-todo () { add-todo "$*"; echo TODO: "$*" | mail -s "TODO: $*" ${USER}@${DOMAIN_NAME}; }
 #
 # Likewise for time tracking
@@ -820,6 +844,7 @@ alias calc='perl-calc'
 alias calc-prec6='perl-calc -precision=6'
 alias calc-init='perl-calc-init'
 alias calc-int='perl-calc -integer'
+# TODO: use '$@' for '$*' (or note why not appropriate)
 function old-perl-calc () { perl -e "print $*;"; }
 function hex2dec { perl -e "printf '%d', 0x$1;" -e 'print "\n";'; }
 function dec2hex { perl -e "printf '%x', $1;" -e 'print "\n";'; }
@@ -1205,7 +1230,8 @@ alias do-resize="resize >| $TEMP/resize.sh; conditional-source $TEMP/resize.sh"
 trace alias/function info
 
 # Displaying bash aliases and functions
-# note: $*. used in grep to handle special case of no pattern
+# note: '.' used in grep to handle special case of no pattern;
+# TODO: use '$@' for '$*' (or note why not appropriate)
 #
 alias show-functions-aux='typeset -f | perl -pe "s/^}/}\n/;"'
 # TODO: allow for specifying word-boundary matching
@@ -1224,6 +1250,10 @@ function show-macros-by-word () { pattern="\b$*\b"; if [ "$pattern" = "" ]; then
 alias show-aliases='alias | $PAGER'
 # TODO: see if other aliases were "recursively" defined
 alias show-functions='show-functions-aux | $PAGER'
+# TODO: *** see if way to make bash automatically use less-like pager: too complicated to have to account in specific command aliases/functions
+# TODO??: override 'function' to allow for showing bindings as with 'alias'
+## function function { if ["$2" = "" ]; then show-functions "$1"; else builtin function "$@"
+# NOTE: probably not possible for syntax reasons (e.g., braces)
 
 #-------------------------------------------------------------------------------
 trace setup and sorting wrappers
@@ -1238,6 +1268,7 @@ alias tab-sort="sort -t $'\t'"
 alias colon-sort="sort $SORT_COL2 -t ':'"
 alias colon-sort-rev-num='colon-sort -rn'
 alias freq-sort='tab-sort -rn $SORT_COL2'
+# TODO: use '$@' for '$*' (or note why not appropriate)
 function para-sort() { perl -00 -e '@paras=(); while (<>) {push(@paras,$_);} print join("\n", sort @paras);' $*; }
 alias echoize="perl -pe 's/\n(.)/ $1/;'"
 
@@ -1436,6 +1467,7 @@ alias gtime='/usr/bin/time'
 alias linux-version="cat /etc/os-release"
 alias os-release=linux-version
 alias system-status='system_status.sh -'
+# TODO: use '$@' for '$*' (or note why not appropriate)
 function apropos-command () { apropos $* 2>&1 | $GREP '(1)' | $PAGER; }
 function split-tokens () { perl -pe "s/\s+/\n/g;" "$@"; }
 alias tokenize='split-tokens'
@@ -1531,9 +1563,11 @@ alias explore-dir=nautilus
 # so that closing ad then doing dired brings up that same dir.
 alias em-docs='em-dir ~/Documents'
 # TODO: add tomasohara alias for the aliases as well
-alias em-aliases='em-dir $TOM_BIN/tomohara-aliases.bash'
-alias ed-setup=em-aliases
-alias ed-past-info='start.sh ~/organizer/past-info.odt'
+## OLD: alias em-aliases='em-dir $TOM_BIN/tomohara-aliases.bash'
+## OLD: alias ed-setup=em-aliases
+alias ed-setup='em-dir $TOM_BIN/tomohara-aliases.bash'
+## OLD: alias ed-past-info='start.sh ~/organizer/past-info.odt'
+alias ed-past-info='em-dir ~/organizer/past-info.txt'
 alias ed-tomas='start.sh ~/organizer/tomas.odt'
 
 # Truncate text wider than current terminal window
@@ -1706,7 +1740,8 @@ alias kill-job-trackers=' kill_em.sh -p L$job_tracker_port'
 
 #-------------------------------------------------------------------------------
 # Misc. language related
-alias json-pp='json_pp'
+## OLD: alias json-pp='json_pp'
+alias json-pp='json_pp -json_opt utf8,pretty'
 alias pp-json=json-pp
 
 #-------------------------------------------------------------------------------
@@ -1750,19 +1785,30 @@ function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$;
 # In addition, set SCRIPT_PID, so that set_xterm_title.bash can indicate within script.
 # Also, appends $ to prompt symbol so that typescript prompt searchable with strings command
 ## HACK: set envionment for sake of set_xterm_title.bash (TODO check PPID for this)
+## TODO: use stack for old_PS_symbol maintenance??? (also allows for recursive invocation, such as with '$ $ $')
+## TODO: rename as my-script to avoid confusion
 function script {
     # Change prompt
     local old_PS_symbol="$PS_symbol"
     export SCRIPT_PID=$$;
+    ## Note: the prompt change is not being done properly
     ## BAD: reset-prompt "${PS_symbol}\$";
     ## TODO: reset-prompt "$PS_symbol"'$';
     reset-prompt "$PS_symbol" '$';
+    ## DEBUG: echo "script: 1. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
+    # Change xterm title to match
+    set-title-to-current-dir
+    ## DEBUG: echo "script: 2. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
     # Run command
     command script --append "$@";
     # Restore prompt
     unset SCRIPT_PID;
-    reset-prompt "$old_PS_symbol";
-    cd .
+    ## OK: reset-prompt "$old_PS_symbol";
+    export PS1="$old_PS_symbol ";
+    ## DEBUG: echo "script: 3. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
+    # Get rid of lingering 'script' in xterm title
+    set-title-to-current-dir
+    ## DEBUG: echo "script: 4. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
 }
 
 #-------------------------------------------------------------------------------
@@ -1771,6 +1817,10 @@ function script {
 export PYTHON_CMD="/usr/bin/time python -u"
 export PYTHON="$NICE $PYTHON_CMD"
 export PYTHONPATH="$HOME/python:$PYTHONPATH"
+## HACK: make sure mezcla/mezcla resolves before python/mezcla
+## TODO: rename [distribution] from mezcla/mezcla to mezcla-de-modulos/mezcla???
+## TSEST: export PYTHONPATH="$HOME/python/mezcla:$PYTHONPATH"
+export PYTHONPATH="$HOME/python/util-mezcla:$PYTHONPATH"
 alias ps-python-full='ps-all python'
 # note: excludes ipython and known system-related python scripts
 alias ps-python='ps-python-full | egrep -iv "(screenlet|ipython|egrep|update-manager|software-properties|networkd-dispatcher)"'
@@ -1856,6 +1906,7 @@ function python-import-path() { python-import-path-full "$@" | head -1; }
 #
 ## note: gotta hate python!
 function python-module-version-full { local module="$1"; python -c "import $module; print([v for v in [getattr($module, a, '') for a in '__VERSION__ VERSION __version__ version'.split()] if v][0])"; }
+# TODO: check-error if no value returned
 function python-module-version { python-module-version-full "$@" 2> /dev/null; }
 function python-package-members() { local package="$1"; python -c "import $package; print(dir($package));"; }
 #
@@ -1893,6 +1944,15 @@ function kivy-win32-env {
 alias elide-data='python -m transpose_data --elide'
 alias kill-python="kill_em.sh --filter 'ipython|emacs' python"
 alias kill-python-all="kill_em.sh python"
+## TODO
+## function which-program {
+##     local program="$1"
+##     result=$(which "$programe")
+##     if [[ ("$result" == "") || ("$verbsr ]; then result="$result;$(whereis "$program"); fi
+##     if ...
+##     }
+## alias which-python='which-program python'
+alias which-python='which python'
 
 # run-jupyter-notebook(port=18888): run jupyter notebook on PORT
 function run-jupyter-notebook () {
@@ -2063,6 +2123,23 @@ for _dir_ in /usr/share/wordnet /c/cygwin/lib/wnres/dict; do
         export WNSEARCHDIR=$_dir_
     fi
 done
+
+#........................................................................
+# Miscellaneous bash scripting helpers
+# TODO: move other aliases here
+trace bash helpers
+
+# shell-check[-full](options, script, ...): run script through shellcheck
+# with filtering given it's buggy filtering mecahanism (and anal retentiveness)
+function shell-check-full {
+    shellcheck "$@";
+}
+function shell-check {
+    # note: filters out following
+    # - SC2009: Consider using pgrep instead of grepping ps output.
+    # - SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.    
+    shell-check-full "$@" | perl-grep -para -v 'SC2164|SC2009';
+}
 
 #-------------------------------------------------------------------------------
 # Work-specific stuff (adhoc)

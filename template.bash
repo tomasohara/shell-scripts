@@ -27,6 +27,7 @@
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
 # - if [[ $JAVA_HOME =~ x64 ]]; then echo "64-bit Java"; fi
 # - case "$HOST_NICKNAME" in ec2*) echo "AWS";; hostw*) echo "HW";; *) echo "non-server"; esac
+#   NOTE: each case must end in ';;'
 # - if [[ $1 =~ */ ]]; then echo '$1' ends in slash; fi
 # - if [[ ! $file =~ http ]]; then echo hey; fi
 #

@@ -488,7 +488,9 @@ export CDPATH=.
 
 # Just use $ for Bash prompt
 # NOTE: cd override puts directory name in xterm title
-export PS1="$ "
+## OLD: export PS1="$ "
+## TODO: define conditional-export (see tomohara-aliases.bash)
+if [ "$PS1" = "" ]; then export PS1="$ "; fi
 
 # flag for turning off GNOME, which can be flakey at times
 export USE_GNOME=1

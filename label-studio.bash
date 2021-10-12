@@ -12,6 +12,11 @@
 #   if __name__ == '__main__':
 #       sys.argv[0] = re.sub(r'(-script\.pyw|\.exe)?$', '', sys.argv[0])
 #       sys.exit(main())
+# - Manual startup steps:
+#   normal:
+#       label-studio start --log-level DEBUG --no-browser >> _run-$(TODAY).log 2>&1 &
+#   alternative DB:
+#       port=9999; label-studio start --log-level DEBUG --port $port --no-browser --data-dir . --database ./label_studio.sqlite3 >> _run-port$port-$(TODAY).log 2>&1 &
 #
 
 # Uncomment following line(s) for tracing:
@@ -81,9 +86,14 @@ if [ "$show_usage" = "1" ]; then
     echo ""
     echo "Examples:"
     echo ""
-    echo "$0 --devel"
+    echo "$script --debug > _run-label-studio-\$(TODAY).log 2>&1 &"
     echo ""
-    echo "$script --dir \$PWD"
+    echo "cd ~/programs/python/label-studio"
+    echo "$script --devel > _run-label-studio-\$(TODAY).log 2>&1 &"
+    echo ""
+    echo "port=9999"
+    echo "cp -p PRODUCTION_DIR/label_studio.sqlite3 ."
+    echo "$script --debug --dir \$PWD --port \$port --data-dir . >> _run-port$port-\$(TODAY).log 2>&1 &"
     echo ""
     echo "Notes:"
     echo "- Arguments after -- passed along to label studio. Also use to skip usage."
@@ -104,4 +114,6 @@ if [ "$debug" = "1" ]; then
 fi
 
 # Run label studio
+# TODO: resolve shellcheck warning about $other_args
+#    SC2086: Double quote to prevent globbing and word splitting.
 label-studio $other_args "$@"

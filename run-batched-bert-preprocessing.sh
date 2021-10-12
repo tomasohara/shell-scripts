@@ -19,10 +19,40 @@
 # - The 100k size was chosen to allow for good throughput (compared to original 10k sample) while
 #   allowing for better restarts compared to 500k (e.g., in case GPU server rebooted mid-stream).
 #
+#--------------------------------------------------------------------------------
+# Sample startup sequence:
+#
+#   export PATH="/usr/local/misc/programs/anaconda3/envs/tensorflow-gpu-cuda8-py3-6/bin:$PATH"
+#   export CODE_DIR=$HOME/programs/python/bert          
+#   filename="random-PDF-text.txt"
+#   in_base=$(basename "$filename" .txt)                
+#   out_base="_run-${in_base}"                          
+#   export INPUT_FILE="$filename"                       # input text file
+#   export OUTPUT_BASE="$out_base"                      # result of preprocessing
+#   export OUTPUT_DIR="$out_base"                       # result of pretraining
+#   export PROJECT_DIR="."                              # where ./temp is placed
+#   pkg_dir="$HOME/$USER/.conda/pkgs"                   
+#   export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:/usr/lib/nvidia-450:/usr/local/cuda-11.1/lib64:$pkg_dir/cudatoolkit-10.1.243-h6bb024c_0/lib:$pkg_dir/cudnn-7.6.5-cuda10.1_0/lib:/usr/local/misc/lib/cuda-repo-ubuntu1604-10-0-local-10.0.130-410.48_1.0-1:/usr/local/cuda/extras/CUPTI/lib64"       
+#   export TRAIN_BATCH_SIZE=48 MAX_SEQ_LENGTH=128       
+#   export NUM_TRAIN_INCRS="100000"         
+#   export TF_FORCE_GPU_ALLOW_GROWTH=true     
+#   export CUDA_VISIBLE_DEVICES="0"           
+#   export NVIDIA_VISIBLE_DEVICES="0"         
+#   export SAVE_CHECKPOINTS_STEPS="100"       
+#   export KEEP_CHECKPOINT_MAX="10"           
+#   export BERT_DIR=/usr/local/misc/data/deep-learning/bert/bert_medium          
+#
+#   line_incr=100000
+#   run-batched-bert-preprocessing.sh --trace "$INPUT_FILE" "$OUTPUT_BASE" "$line_incr"
+#   
+#--------------------------------------------------------------------------------
 # TODO:
+# - ** rename (e.g. run-batched-bert-pretraining.sh).
 # - Convert into Python.
 # - Feed into create_pretraining_data.py using "shards" (see https://github.com/google-research/bert).
 # - List environment variables used.
+# - Clarify output_base vs. OUTPUT_DIR (e.g., preprocessing vs. pretraining).
+# - Specify KEEP_CHECKPOINT_MAX in terms of increments???
 #
 
 # Uncomment following line(s) for tracing:
@@ -32,6 +62,9 @@
 ## echo "$@"
 ## set -o xtrace
 ## set -o verbose
+
+# Showing starting time
+date
 
 # Show usage example if insufficient arguments
 if [ "$1" = "" ]; then
@@ -83,6 +116,15 @@ if [ "$increment" = "" ]; then increment="25000"; fi
 #
 starting_offset="$4"
 if [ "$starting_offset" = "" ]; then starting_offset="0"; fi
+
+# Validate arguments
+if [ ! -e "$input_file" ]; then
+    echo "Error: input file not found: $input_file"
+    exit
+fi
+
+# Trace out environment
+printenv
 
 # Initialize
 if [ "$PROJECT_DIR" = "" ]; then PROJECT_DIR="/usr/local/misc"; fi
@@ -168,7 +210,8 @@ fi
 #
 if [ "$SAVE_CHECKPOINTS_STEPS" = "" ]; then SAVE_CHECKPOINTS_STEPS=1000; fi
 # TODO: let KEEP_CHECKPOINT_MAX=($NUM_TRAIN_STEPS / $SAVE_CHECKPOINTS_STEPS)
-if [ "$KEEP_CHECKPOINT_MAX" = "" ]; then KEEP_CHECKPOINT_MAX=125; fi
+## TEST: if [ "$KEEP_CHECKPOINT_MAX" = "" ]; then KEEP_CHECKPOINT_MAX=125; fi
+if [ "$KEEP_CHECKPOINT_MAX" = "" ]; then KEEP_CHECKPOINT_MAX=10; fi
 #
 if [ "$BERT_CONFIG_FILE" = ""  ]; then BERT_CONFIG_FILE=$BERT_DIR/${bert}_config.json; fi
 
@@ -203,6 +246,10 @@ while (( $offset < $total_lines )); do
     ## Send to GPU server (n.b., need to run ssh-agent & then ssh-add beforehand to give passphrase)
     ## scp "$output_base".bert-pp.list  $gpu_server:/temp
 
+    # TODO: Make pre-training output read-only (excluding temporary directories)
+    # Note: this is so that the checkpoints are not deleted in next increment
+    ## chmod -w "$OUTPUT_DIR"/*ckpt*{data,index,meta}*
+
     # Update counters, etc. (e.g., checkpoint file)
     last_checkpoint=$(get-last-checkpoint)
     if [ "$last_checkpoint" != "" ]; then
@@ -210,3 +257,6 @@ while (( $offset < $total_lines )); do
     fi
     let NUM_TRAIN_STEPS+=$NUM_TRAIN_INCRS
 done
+
+# Showing ending time
+date
