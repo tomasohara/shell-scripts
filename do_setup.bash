@@ -1167,9 +1167,10 @@ alias show-functions='show-functions-aux | $PAGER'
 alias do-setup="conditional-source $HOME/.bashrc"
 alias ed-setup="em $BIN/do_setup.bash; do-setup"
 ## OLD: alias ed-setup-="em-nw $BIN/do_setup.bash; do-setup"
-alias ed-setup-nw="em-nw $BIN/do_setup.bash; do-setup"
-alias ed-full-setup="em $BIN/do_setup.sh $BIN/do_setup.bash; do-setup"
-alias ed-full-setup-="em-nw $BIN/do_setup.sh $BIN/do_setup.bash; do-setup"
+## OLD:
+## alias ed-setup-nw="em-nw $BIN/do_setup.bash; do-setup"
+## alias ed-full-setup="em $BIN/do_setup.sh $BIN/do_setup.bash; do-setup"
+## alias ed-full-setup-="em-nw $BIN/do_setup.sh $BIN/do_setup.bash; do-setup"
 # following for backward compatibility
 alias do_setup='do-setup'
 alias ed_setup='ed-setup'

@@ -86,6 +86,8 @@ while (<>) {
     # TODO: relax case sensitivity
     # TODO: rework so that the pattern which matches can be identified (e.g., 'foreach my $pattern (@error_patterns) { if ($line =~ $pattern) { ... }')
     # TODO: rework error in line test to omit files
+    # NOTE: It can be easier to add special-case rules rather than devise a general regex;
+    # ex: 'error' occuring within a line even at word boundaries can be too broad.
     elsif (## &debug_print(7, "here\n", 7) &&
 	   /^(ERROR|Error)\b/
 	   || /command not found/i
@@ -149,6 +151,7 @@ while (<>) {
 	   # Python errors
 	   || /^Traceback/		# stack trace
 	   || /^\S+Error/		# exception (e.g., TypeError)
+	   || /:\s*error\s*:/i          # argparse error (e.g., main.py: error: unrecognized arguments
 
 	   # Cygwin errors
 	   || /\bunable to remap\b/

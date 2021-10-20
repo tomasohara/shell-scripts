@@ -182,7 +182,7 @@ hoy=$(hoy)
 alias TODAY=todays-date
 ## OLD: TODAY=$(todays-date)
 alias date-central='TZ="America/Chicago" date'
-alias em-adhoc-notes='emacs-tpo _it.$(TODAY).log'
+alias em-adhoc-notes='emacs-tpo _adhoc.$(TODAY).log'
 alias T='TODAY'
 T=$(TODAY)
 # update-today-vars() & todays-update: update the various today-related variables
@@ -1456,6 +1456,13 @@ function which { /usr/bin/which "$@" 2> /dev/null; }
 # full-dirname(filename): returns full path of directory for file
 #
 function full-dirname () { local dir=`dirname $1`; case $dir in .*) dir="$PWD/$1";; esac; echo $dir; }
+#
+# base-name-with-dir(file, suffix): version of basename include dir
+function basename-with-dir {
+    local file="$1"
+    local suffix="$2"
+    echo $(dirname "$file")/$(basename "$file" "$suffix");
+}
 # 
 function rpm-extract () { rpm2cpio $1 | cpio --extract --make-directories; }
 #
@@ -1566,9 +1573,12 @@ alias em-docs='em-dir ~/Documents'
 ## OLD: alias em-aliases='em-dir $TOM_BIN/tomohara-aliases.bash'
 ## OLD: alias ed-setup=em-aliases
 alias ed-setup='em-dir $TOM_BIN/tomohara-aliases.bash'
+alias em-setup=ed-setup
 ## OLD: alias ed-past-info='start.sh ~/organizer/past-info.odt'
 alias ed-past-info='em-dir ~/organizer/past-info.txt'
+alias em-past-info=ed-past-info
 alias ed-tomas='start.sh ~/organizer/tomas.odt'
+alias em-tomas=ed-tomas
 
 # Truncate text wider than current terminal window
 # TODO: add truncation indicator (e.g., Unicode character for ...)
