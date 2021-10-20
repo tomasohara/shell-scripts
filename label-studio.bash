@@ -32,6 +32,7 @@
 show_usage=""
 devel=0
 debug=0
+sqlite3="0"
 other_args="--no-browser"
 dir="$HOME/programs/python/label-studio"
 if [ -e "label_studio/server.py" ]; then
@@ -60,6 +61,10 @@ while [ "$moreoptions" = "1" ]; do
     elif [ "$1" = "--port" ]; then
 	other_args="$other_args --port $2"
 	shift
+    elif [ "$1" = "--sqlite3" ]; then
+	sqlite3=1
+    elif [ "$1" = "--postgresql" ]; then
+	sqlite3=0
     elif [ "$1" = "--" ]; then
 	show_usage=0
 	shift
@@ -93,7 +98,7 @@ if [ "$show_usage" = "1" ]; then
     echo ""
     echo "port=9999"
     echo "cp -p PRODUCTION_DIR/label_studio.sqlite3 ."
-    echo "$script --debug --dir \$PWD --port \$port --data-dir . >> _run-port$port-\$(TODAY).log 2>&1 &"
+    echo "$script --debug --dir \$PWD --port \$port --data-dir . >> _run-port\$port-\$(TODAY).log 2>&1 &"
     echo ""
     echo "Notes:"
     echo "- Arguments after -- passed along to label studio. Also use to skip usage."
@@ -113,7 +118,13 @@ if [ "$debug" = "1" ]; then
     other_args="$other_args --debug --log-level DEBUG"
 fi
 
+# Add database option
+if [ "$sqlite3" = "0" ]; then
+    other_args="$other_args --database postgresql"
+fi
+
 # Run label studio
 # TODO: resolve shellcheck warning about $other_args
 #    SC2086: Double quote to prevent globbing and word splitting.
+# shellcheck disable=SC2086
 label-studio $other_args "$@"
