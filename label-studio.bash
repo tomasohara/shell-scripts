@@ -49,7 +49,9 @@ while [ "$moreoptions" = "1" ]; do
     elif [ "$1" = "--help" ]; then
 	show_usage=1
     elif [ "$1" = "--data-dir" ]; then
-	other_args="$other_args --data-dir $2 --database $2/label_studio.sqlite3"
+	# TODO: add support for postgresql equivalent
+	# TODO: straighten out --config vs. --data-dir options
+	other_args="$other_args --config $2 --data-dir $2 --database $2/label_studio.sqlite3"
 	shift
     elif [ "$1" = "--debug" ]; then
 	debug=1
@@ -81,17 +83,26 @@ if [[ ($show_usage = "") ]]; then
     show_usage=1
 fi
 
+## TODO:
+## # Put arguments after -- into #other_args
+## if [ "$1" != "" ]; then
+##     other_args="$other_args $@"
+## fi
+## NOTE: "$@" is used below
+
 # Show usage statement
 # NOTE: See sync-loop.sh for an example.
 #
 if [ "$show_usage" = "1" ]; then
     script=$(basename "$0")
     echo ""
-    echo "Usage: $0 [--devel] [--dir path] [--debug] [--port n] [--data-dir path] [--trace] [--help] [--]"
+    echo "Usage: $0 [[--devel] [--dir path] [--sqllite3 | --postgresql] [--debug] [--port n] [--data-dir path] [--trace] [--help]]  [--]  [label-studio-args]"
     echo ""
     echo "Examples:"
     echo ""
-    echo "$script --debug > _run-label-studio-\$(TODAY).log 2>&1 &"
+    echo "function TODAY { date '+%d%b%y'; }"
+    echo ""
+    echo "$script --postgresql --debug > _run-label-studio-postgresql-\$(TODAY).log 2>&1 &"
     echo ""
     echo "cd ~/programs/python/label-studio"
     echo "$script --devel > _run-label-studio-\$(TODAY).log 2>&1 &"
@@ -103,6 +114,7 @@ if [ "$show_usage" = "1" ]; then
     echo "Notes:"
     echo "- Arguments after -- passed along to label studio. Also use to skip usage."
     echo "- If in the base directory, then assume --devel, --dir ., and --debug"
+    echo "- PostgreSQL is the default DB."
     echo ""
     exit
 fi

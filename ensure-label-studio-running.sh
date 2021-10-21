@@ -54,6 +54,8 @@ while [ "$1" != "" ]; do
             verbose="1"       ;;
         --sqlite3)
             sqlite3="1"       ;;
+        --postgresql)
+            sqlite3="0"       ;;
         --port)
             port="$2";
             shift;
@@ -68,7 +70,7 @@ done
 script_base=$(basename "$0" .sh)
 if [ "$show_usage" = "1" ]; then
     echo ""
-    echo "Usage: $0 [--verbose] [--sqllite3] [--port NNNN] [--debug | --non-debug] [--trace] [--help] [--]"
+    echo "Usage: $0 [--verbose] [--sqllite3 | --postgresql] [--port NNNN] [--debug | --non-debug] [--trace] [--help] [--]"
     echo ""
     echo "Examples:"
     echo "- $script_base.sh --verbose"

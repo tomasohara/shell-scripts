@@ -489,7 +489,13 @@ fi
 alias chdir='cd'
 # cd-realdir(dir): change into the real path for DIR
 # cd-this-realdir: ditto for current directory
-function cd-realdir { local dir="$1";  if [ "$dir" = "" ]; then dir=.; fi;  cd $(realpath "$dir"); }
+## OLD: function cd-realdir { local dir="$1";  if [ "$dir" = "" ]; then dir=.; fi;  cd $(realpath "$dir"); }
+function cd-realdir {
+    local dir="$1";
+    if [ "$dir" = "" ]; then dir=.; fi;
+    cd $(realpath "$dir");
+    pwd;
+}
 alias cd-this-realdir='cd-realdir .'
 
 # pushd-q, popd-q: quiet versions of pushd and popd
