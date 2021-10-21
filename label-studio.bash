@@ -50,8 +50,8 @@ while [ "$moreoptions" = "1" ]; do
 	show_usage=1
     elif [ "$1" = "--data-dir" ]; then
 	# TODO: add support for postgresql equivalent
-	# TODO: straighten out --config vs. --data-dir options
-	other_args="$other_args --config $2 --data-dir $2 --database $2/label_studio.sqlite3"
+	# NOTE: --config is for default_config.json and --data-dir for location of DB
+	other_args="$other_args --data-dir $2 --database $2/label_studio.sqlite3"
 	shift
     elif [ "$1" = "--debug" ]; then
 	debug=1
