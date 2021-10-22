@@ -2,6 +2,8 @@
 #
 # wnb.sh: runs the WordNet 1.6 browser (after setting up the environment)
 #
+# TODO: remove from repo as obsolete.
+#
 
 if ($?GRAPHLING_HOME == 0) setenv GRAPHLING_HOME /home/graphling
 unsetenv WNSEARCHDIR

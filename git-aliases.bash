@@ -4,7 +4,7 @@
 #
 # TODO: if interactive, warn that only intended for non-interactive use
 #
-# usage example(s):
+# Usage example(s):
 #   source git-aliases.bash
 #
 #   git-update
@@ -88,6 +88,7 @@ function git-commit {
 	# TODO: if [ $verbose ]; then echo ...; fi
 	echo "Sourcing $credentials_file"
 	source "$credentials_file"
+	echo "git_user=$git_user;  git_token=$git_token"
     fi
     git add "$@" >> "$log"
     git commit -m "misc. update" >> "$log"
@@ -148,6 +149,7 @@ function git-alias-usage () {
     echo ""
     #
     echo "To check in files different from repo:"
+    echo '    # cd $REPO_ROOT'
     # Note: disable spellcheck SC2016 (n.b., just for next statement)
     #    Expressions don't expand in single quotes, use double quotes for that.
     # shellcheck disable=SC2016
