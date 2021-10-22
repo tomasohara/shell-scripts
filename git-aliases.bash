@@ -69,11 +69,11 @@
 # git-update(): updates local to global repo
 function git-update {
     local log="_git-update-$(TODAY).log"
-    git stash >> $log
-    git pull --all >> $log
-    git stash pop >> $log
-    echo >> $log
-    tail $log
+    git stash >> "$log"
+    git pull --all >> "$log"
+    git stash pop >> "$log"
+    echo >> "$log"
+    tail "$log"
 }
 
 # git-commit(file, ...): commits FILE... to global repo
@@ -83,16 +83,21 @@ function git-commit {
     local log="_git-commit-$(TODAY).log"
     local git_user
     local git_token
-    source ./my-git-credentials-etc.bash
-    git add "$@" >> $log
-    git commit -m "misc. update" >> $log
+    local credentials_file="./my-git-credentials-etc.bash"
+    if [ -e "$credentials_file" ]; then
+	# TODO: if [ $verbose ]; then echo ...; fi
+	echo "Sourcing $credentials_file"
+	source "$credentials_file"
+    fi
+    git add "$@" >> "$log"
+    git commit -m "misc. update" >> "$log"
     # TODO: perl -e "print("$git_user\n$git_token\n");' | git push
-    git push <<EOF >> $log
+    git push <<EOF >> "$log"
 $git_user
 $git_token
 EOF
-    echo >> $log
-    tail $log
+    echo >> "$log"
+    tail "$log"
 }
 
 
@@ -110,11 +115,15 @@ function git-safe-commit {
 # TODO: add verification before commit
 alias git-unsafe-commit='git-safe-commit *'
 
+
 function git-pull-and-update() {
     if [ "" = "$(grep ^repo ~/.gitrc)" ]; then echo "*** Warning: fix ~/.gitrc for read-only access ***"; else
-        git="python -u /usr/bin/git"; log_file=_git-update-$(date '+%d%b%y').log; ($git pull --noninteractive --verbose; $git update --noninteractive --verbose) >| $log_file 2>&1; less $log_file
+        local git="python -u /usr/bin/git";
+	local log="_git-update-$(date '+%d%b%y').log";
+	($git pull --noninteractive --verbose;  $git update --noninteractive --verbose) >| "$log" 2>&1; less "$log"
     fi;
 }
+
 
 function git-push() {
     if [ "" != "$(grep ^repo ~/.gitrc)" ]; then echo "*** Warning: fix ~/.gitrc for read-write access ***"; else 
@@ -122,5 +131,30 @@ function git-push() {
     fi;
 }
 
-function git-diff () { git diff "$@" 2>&1 | less -p '^diff'; }
+function git-diff () {
+    git diff "$@" 2>&1 | less -p '^diff';
+}
 
+
+function git-alias-usage () {
+    echo "Usage examples for git aliases, all assuming following:"
+    echo "   echo 'source git-aliases.bash'"
+    echo ""
+    echo "Get changes from repository:"
+    echo "    git-update"
+    echo ""
+    echo "To check in specified changes:"
+    echo "    git-safe-commit file, ..."
+    echo ""
+    #
+    echo "To check in files different from repo:"
+    # Note: disable spellcheck SC2016 (n.b., just for next statement)
+    #    Expressions don't expand in single quotes, use double quotes for that.
+    # shellcheck disable=SC2016
+    echo '    git-safe-commit $(git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)")'
+    #
+    echo ""
+    echo "To check in all changes:"
+    echo "    git-unsafe-commit"
+    echo ""
+}

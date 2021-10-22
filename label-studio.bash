@@ -32,6 +32,7 @@
 show_usage=""
 devel=0
 debug=0
+verbose=0
 sqlite3="0"
 other_args="--no-browser"
 dir="$HOME/programs/python/label-studio"
@@ -46,6 +47,8 @@ while [ "$moreoptions" = "1" ]; do
     show_usage=0
     if [ "$1" = "--trace" ]; then
 	set -o xtrace
+    elif [ "$1" = "--verbose" ]; then
+	verbose=1
     elif [ "$1" = "--help" ]; then
 	show_usage=1
     elif [ "$1" = "--data-dir" ]; then
@@ -102,7 +105,7 @@ if [ "$show_usage" = "1" ]; then
     echo ""
     echo "function TODAY { date '+%d%b%y'; }"
     echo ""
-    echo "$script --postgresql --debug > _run-label-studio-postgresql-\$(TODAY).log 2>&1 &"
+    echo "$script --postgresql --debug --verbose > _run-label-studio-postgresql-\$(TODAY).log 2>&1 &"
     echo ""
     echo "cd ~/programs/python/label-studio"
     echo "$script --devel > _run-label-studio-\$(TODAY).log 2>&1 &"
@@ -123,6 +126,7 @@ fi
 if [ "$devel" = "1" ]; then
     export PATH="$dir:$PATH"
     export PYTHONPATH="$dir:$PYTHONPATH"
+    if [ "$verbose" = "1" ]; then echo "new env: PATH=$PATH; PYTHONPATH=$PYTHONPATH"; fi
 fi
 
 # Add debug options
@@ -136,7 +140,12 @@ if [ "$sqlite3" = "0" ]; then
 fi
 
 # Run label studio
+if [ "$verbose" = "1" ]; then echo "Issuing: label-studio $other_args $*"; fi
+#
 # TODO: resolve shellcheck warning about $other_args
 #    SC2086: Double quote to prevent globbing and word splitting.
+# note: Unfortunately, shellcheck only applies to the next line!
+#   See https://github.com/koalaman/shellcheck/issues/1295 [Allow directives in trailing comments].
+#
 # shellcheck disable=SC2086
 label-studio $other_args "$@"

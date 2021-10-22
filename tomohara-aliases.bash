@@ -2152,9 +2152,13 @@ function shell-check-full {
 }
 function shell-check {
     # note: filters out following
+    # - SC1090: Can't follow non-constant source. Use a directive to specify location.
+    # - SC1091: Not following: ./my-git-credentials-etc.bash was not specified as input (see shellcheck -x).
     # - SC2009: Consider using pgrep instead of grepping ps output.
-    # - SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.    
-    shell-check-full "$@" | perl-grep -para -v 'SC2164|SC2009';
+    # - SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects.
+    # - SC2155: Declare and assign separately to avoid masking return values
+    # - SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
+    shell-check-full "$@" | perl-grep -para -v '(SC1090|SC1091|SC2009|SC2129|SC2155|SC2164)';
 }
 
 #-------------------------------------------------------------------------------
