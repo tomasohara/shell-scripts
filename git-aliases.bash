@@ -148,13 +148,16 @@ function git-alias-usage () {
     echo "    git-safe-commit file, ..."
     echo ""
     #
-    echo "To check in files different from repo:"
-    echo '    #    TODO: pushd $REPO_ROOT'
-    # Note: disable spellcheck SC2016 (n.b., just for next statement)
+    # Note: disable spellcheck SC2016 (n.b., unfortunately just for next statement, so awkward brace group added)
     #    Expressions don't expand in single quotes, use double quotes for that.
     # shellcheck disable=SC2016
-    echo '    git-safe-commit $(git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)")'
-    echo '    #    TODO: popd'
+    {
+	echo "To check in files different from repo:"
+	echo '    #    TODO: pushd $REPO_ROOT'
+	echo '    #    -OR-: pushd $(realpath .)/..'
+	echo '    git-safe-commit $(git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)")'
+	echo '    #    TODO: popd'
+    }
     #
     echo ""
     echo "To check in all changes:"
