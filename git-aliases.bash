@@ -93,7 +93,7 @@ function git-commit {
     git add "$@" >> "$log"
     git commit -m "misc. update" >> "$log"
     # TODO: perl -e "print("$git_user\n$git_token\n");' | git push
-    git push <<EOF >> "$log"
+    git push --verbose <<EOF >> "$log"
 $git_user
 $git_token
 EOF
