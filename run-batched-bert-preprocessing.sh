@@ -214,6 +214,9 @@ if [ "$SAVE_CHECKPOINTS_STEPS" = "" ]; then SAVE_CHECKPOINTS_STEPS=1000; fi
 if [ "$KEEP_CHECKPOINT_MAX" = "" ]; then KEEP_CHECKPOINT_MAX=10; fi
 #
 if [ "$BERT_CONFIG_FILE" = ""  ]; then BERT_CONFIG_FILE=$BERT_DIR/${bert}_config.json; fi
+#
+if [ "$LEARNING_RATE" = "" ]; then LEARNING_RATE=5e-5; fi
+
 
 # Preprocess in chunks
 # TODO: use split
@@ -241,7 +244,7 @@ while (( $offset < $total_lines )); do
     misc_options=""
     if [ "$TENSORBOARD_LOG_DIR" != "" ]; then misc_options="$misc_options --tensorboard_log_dir '$TENSORBOARD_LOG_DIR'"; fi
     #
-    $PYTHON "$CODE_DIR"/run_pretraining.py --do_train=true --input_file "$output_base".bert-pp.list --output_dir="$OUTPUT_DIR" --${bert}_config_file=$BERT_CONFIG_FILE --num_train_steps=$NUM_TRAIN_STEPS --save_checkpoints_steps=$SAVE_CHECKPOINTS_STEPS --keep_checkpoint_max=$KEEP_CHECKPOINT_MAX --train_batch_size=$TRAIN_BATCH_SIZE --max_seq_length=$MAX_SEQ_LENGTH $init_checkpoint_arg $misc_options > "$output_base".pre-train.log 2>&1
+    $PYTHON "$CODE_DIR"/run_pretraining.py --do_train=true --input_file "$output_base".bert-pp.list --output_dir="$OUTPUT_DIR" --${bert}_config_file=$BERT_CONFIG_FILE --num_train_steps=$NUM_TRAIN_STEPS --save_checkpoints_steps=$SAVE_CHECKPOINTS_STEPS --keep_checkpoint_max=$KEEP_CHECKPOINT_MAX --train_batch_size=$TRAIN_BATCH_SIZE --max_seq_length=$MAX_SEQ_LENGTH --learning_rate=$LEARNING_RATE $init_checkpoint_arg $misc_options > "$output_base".pre-train.log 2>&1
     # TODO:
     ## Send to GPU server (n.b., need to run ssh-agent & then ssh-add beforehand to give passphrase)
     ## scp "$output_base".bert-pp.list  $gpu_server:/temp

@@ -176,7 +176,7 @@ function todays-date() { date '+%d%b%y' | downcase-stdin; }
 todays_date=$(todays-date)
 # Convenience alias and bash variable for better tab-completion
 alias hoy=todays-date
-hoy=$(hoy)
+hoy=$(todays-date)
 # Note: version so Spanish not used in note files
 # TODO: punt on tab-completion (i.e., TODAY => today)???
 alias TODAY=todays-date
@@ -184,7 +184,7 @@ alias TODAY=todays-date
 alias date-central='TZ="America/Chicago" date'
 alias em-adhoc-notes='emacs-tpo _adhoc.$(TODAY).log'
 alias T='TODAY'
-T=$(TODAY)
+## OLD: T=$(TODAY)
 # update-today-vars() & todays-update: update the various today-related variables
 # aside: descriptive name for function and convenience alias (tab-completion)
 # TODO: try for cron-like bash function to enable such updates automatically
@@ -192,6 +192,7 @@ function update-today-vars {
     TODAY=$(todays-date)
     T=$(TODAY)
 }
+update-today-vars
 alias todays-update='update-today-vars'
 
 # Alias creation helper(s)
@@ -312,9 +313,7 @@ if [ "`printenv PATH | grep $TOM_BIN/${OSTYPE}:`" = "" ]; then
 fi
 # TODO: make optional & put append-path later to account for later PERLLIB changes
 append-path $PERLLIB
-## OLD: prepend-path "$HOME/python/tomas-misc/tomas_misc"
-## TEST: prepend-path "$HOME/python/mezcla/mezcla"
-prepend-path "$HOME/python/util-mezcla/mezcla"
+prepend-path "$HOME/python/Mezcla/mezcla"
 append-path "$HOME/python"
 # Put current directoy at end of path; can be overwritting with ./ prefix
 export PATH="$PATH:."
@@ -396,6 +395,7 @@ function reset-prompt {
 ## OLD: alias root-prompt='reset-prompt "# "'
 alias reset-prompt-root='reset-prompt "# "'
 alias reset-prompt-dollar="reset-prompt '$'"
+alias reset-prompt-default="reset-prompt '$PS_symbol'"
 
 #-------------------------------------------------------------------------------
 # More misc stuff
@@ -1759,6 +1759,8 @@ alias kill-job-trackers=' kill_em.sh -p L$job_tracker_port'
 ## OLD: alias json-pp='json_pp'
 alias json-pp='json_pp -json_opt utf8,pretty'
 alias pp-json=json-pp
+## TODO: alias pp-json-sorted=json-pp",canonical"
+alias pp-json-sorted='json_pp -json_opt utf8,pretty,canonical'
 
 #-------------------------------------------------------------------------------
 # Hostwinds related
@@ -1833,10 +1835,8 @@ function script {
 export PYTHON_CMD="/usr/bin/time python -u"
 export PYTHON="$NICE $PYTHON_CMD"
 export PYTHONPATH="$HOME/python:$PYTHONPATH"
-## HACK: make sure mezcla/mezcla resolves before python/mezcla
-## TODO: rename [distribution] from mezcla/mezcla to mezcla-de-modulos/mezcla???
-## TSEST: export PYTHONPATH="$HOME/python/mezcla:$PYTHONPATH"
-export PYTHONPATH="$HOME/python/util-mezcla:$PYTHONPATH"
+## HACK: make sure Mezcla/mezcla resolves before python/mezcla
+export PYTHONPATH="$HOME/python/Mezcla:$PYTHONPATH"
 alias ps-python-full='ps-all python'
 # note: excludes ipython and known system-related python scripts
 alias ps-python='ps-python-full | egrep -iv "(screenlet|ipython|egrep|update-manager|software-properties|networkd-dispatcher)"'
@@ -1926,7 +1926,7 @@ function python-module-version-full { local module="$1"; python -c "import $modu
 function python-module-version { python-module-version-full "$@" 2> /dev/null; }
 function python-package-members() { local package="$1"; python -c "import $package; print(dir($package));"; }
 #
-alias python-setup-install='log=setup-$(hoy).log; uname -a > $log; python setup.py install --record installed-files.list >> $log 2>&1; ltc $log'
+alias python-setup-install='log=setup-$(TODAY).log; uname -a > $log; python setup.py install --record installed-files.list >> $log 2>&1; ltc $log'
 # TODO: add -v (the xargs usage seems to block it)
 alias python-uninstall-setup='cat installed-files.list | xargs /bin/rm -vi; rename_files.perl -regex ^ un installed-files.list'
 
@@ -1974,7 +1974,7 @@ alias which-python='which python'
 function run-jupyter-notebook () {
     local port="$1"; if [ "$port" = "" ]; then port=8888; fi
     local ip="$2"; if [ "$ip" = "" ]; then ip="127.0.0.1"; fi
-    jupyter notebook --port $port --ip $ip >> ~/temp/jupyter-$(hoy).log 2>&1 &
+    jupyter notebook --no-browser --port $port --ip $ip >> ~/temp/jupyter-$(TODAY).log 2>&1 &
 }
 alias jupyter-notebook-redir=run-jupyter-notebook
 alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'
@@ -2078,7 +2078,7 @@ function invoke-browser() {
     ##     if [ "$browser_executable_path" = "" ]; then browser_executable="$_path"; fi   
     ## fi
     local browser_base=$(basename "$browser_executable")
-    $browser_executable "$file" >> $TEMP/$browser_base.$(hoy).log 2>&1 &
+    $browser_executable "$file" >> $TEMP/$browser_base.$(TODAY).log 2>&1 &
 }
 ## TODO: try to get following aliases to work for brevity
 ## alias firefox='invoke-browser command "firefox"'

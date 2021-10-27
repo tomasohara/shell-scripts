@@ -118,6 +118,7 @@ if [ "$show_usage" = "1" ]; then
     echo "- Arguments after -- passed along to label studio. Also use to skip usage."
     echo "- If in the base directory, then assume --devel, --dir ., and --debug"
     echo "- PostgreSQL is the default DB."
+    echo "- The --dir option implies --deve;."
     echo ""
     exit
 fi

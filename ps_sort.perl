@@ -52,10 +52,11 @@ use vars qw/$by $xyz $ps_options $cut_options $num_times $LINES $COLUMNS $max_co
 my($is_solaris) = ($OSTYPE =~ "solaris");
 my($is_linux) = ($OSTYPE =~ "linux");
 &init_var(*ps_options, ($is_solaris ? "-efl" : $is_linux ? "auxgww" : "auxg"));
-&init_var(*cut_options, ($is_solaris ? "-c1-36,46-52,62-70,79-132" : "-c1-132"));
+## OLD: &init_var(*cut_options, ($is_solaris ? "-c1-36,46-52,62-70,79-132" : "-c1-132"));
 &init_var(*num_times, 60);
-&init_var(*LINES, 30);
+&init_var(*LINES, 42);
 &init_var(*COLUMNS, 80);
+&init_var(*cut_options, ($is_solaris ? "-c1-36,46-52,62-70,79-132" : "-c1-$COLUMNS"));
 &init_var(*max_count, $LINES - 5);
 &init_var(*delay, (($num_times > 1) ? 1: 0));
 &init_var(*line_len, $COLUMNS - 2);
@@ -93,12 +94,14 @@ if (!defined($ARGV[0])) {
     $example .= "$script_name -by=mem -\n\n";
     $example .= "$script_name -justuser -\n\n";
     $example .= "$script_name -username=cpuhog -\n\n";
-    $example .= "$script_name -num_times=1 -by=time -\n\n";
+    $example .= "LINES=1000 $script_name -num_times=1 -by=time -\n\n";
 
     my($note) = "";
-    $note .= "Notes:\n- Use -num_times for iterations.\n";
-    $note .= "- Use num_times for number of iterations.\n";
+    $note .= "Notes:\n";
+    $note .= "- Use -num_times for number of iterations.\n";
     $note .= "- Use -max_count for number of process listing entries.\n";
+    $note .= "- env-var LINES determines number of entries.\n";
+    $note .= "- env-var COLUMNS determines width.\n";
 
     # Note: Removes extraneous newline in last example, so that the examples
     # can be reordered without having to worry about newline convention.
