@@ -88,7 +88,7 @@ function git-commit {
 	# TODO: if [ $verbose ]; then echo ...; fi
 	echo "Sourcing $credentials_file"
 	source "$credentials_file"
-	echo "git_user=$git_user;  git_token=$git_token"
+	echo "git_user: $git_user;  git_token: $git_token"
     fi
     git add "$@" >> "$log"
     git commit -m "misc. update" >> "$log"

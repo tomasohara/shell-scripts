@@ -1974,7 +1974,7 @@ alias which-python='which python'
 function run-jupyter-notebook () {
     local port="$1"; if [ "$port" = "" ]; then port=8888; fi
     local ip="$2"; if [ "$ip" = "" ]; then ip="127.0.0.1"; fi
-    jupyter notebook --no-browser --port $port --ip $ip >> ~/temp/jupyter-$(TODAY).log 2>&1 &
+    jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> ~/temp/jupyter-$(TODAY).log 2>&1 &
 }
 alias jupyter-notebook-redir=run-jupyter-notebook
 alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'
