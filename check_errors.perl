@@ -14,6 +14,7 @@ eval 'exec perl -Ssw $0 "$@"'
 # and <<< along with N lines before and after to provide context.
 #
 # TODO:
+# - ** Have option to disable line number
 # - * Change 'error' in filename test as warning.
 # - Don't reproduce lines in case of overlapping context regions.
 # - Have option to make search case-insensitive.

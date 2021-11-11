@@ -1145,6 +1145,10 @@ alias make-full-tar='make-tar'
 # TODO: handle filenames with embedded spaces
 alias recent-tar-this-dir='make-recent-tar $TEMP/recent-`basename "$PWD"`'
 function sort-tar-archive() { (tar tvfz "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
+#
+# TODO: tar-this-dir-there???
+# ex: ¢ TEMP=/mnt/wd6tbp2vfat/backup/tpo-servidor tar-this-dir
+#
 # command-to-pager(command, arg1, ...): helper function for use in aliases: sends command output to $PAGER (e.g., less)
 function command-to-pager { "$@" | $PAGER; }
 alias view-zip='command-to-pager unzip -v'
