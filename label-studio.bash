@@ -35,11 +35,11 @@ debug=0
 verbose=0
 sqlite3="0"
 other_args="--no-browser"
-dir="$HOME/programs/python/label-studio"
+devel_dir="$HOME/programs/python/label-studio"
 if [ -e "label_studio/server.py" ]; then
     devel=1
     debug=1
-    dir="$PWD"
+    devel_dir="$PWD"
     echo "Note: Invoking development version as in base directory."
 fi
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
@@ -60,8 +60,11 @@ while [ "$moreoptions" = "1" ]; do
 	debug=1
     elif [ "$1" = "--devel" ]; then
 	devel=1
-    elif [ "$1" = "--dir" ]; then
-	dir=$(realpath "$2")
+    elif [ "$1" = "--production" ]; then
+	devel=0
+    elif [ "$1" = "--devel-dir" ]; then
+	devel_dir=$(realpath "$2")
+	devel=1
 	shift
     elif [ "$1" = "--port" ]; then
 	other_args="$other_args --port $2"
@@ -97,9 +100,9 @@ fi
 # NOTE: See sync-loop.sh for an example.
 #
 if [ "$show_usage" = "1" ]; then
-    script=$(basename "$0")
+   script=$(basename "$0")
     echo ""
-    echo "Usage: $0 [[--devel] [--dir path] [--sqllite3 | --postgresql] [--debug] [--port n] [--data-dir path] [--trace] [--help]]  [--]  [label-studio-args]"
+    echo "Usage: $0 [[--devel | --production] [--devel-dir path] [--sqlite3 | --postgresql] [--debug] [--port n] [--data-dir path] [--trace] [--help]]  [--]  [label-studio-args]"
     echo ""
     echo "Examples:"
     echo ""
@@ -112,21 +115,21 @@ if [ "$show_usage" = "1" ]; then
     echo ""
     echo "port=9999"
     echo "cp -p PRODUCTION_DIR/label_studio.sqlite3 ."
-    echo "$script --debug --dir \$PWD --port \$port --data-dir . >> _run-port\$port-\$(TODAY).log 2>&1 &"
+    echo "$script --debug --devel-dir \$PWD --port \$port --data-dir . >> _run-port\$port-\$(TODAY).log 2>&1 &"
     echo ""
     echo "Notes:"
     echo "- Arguments after -- passed along to label studio. Also use to skip usage."
-    echo "- If in the base directory, then assume --devel, --dir ., and --debug"
+    echo "- If in the base directory, then assume --devel, --devel-dir ., and --debug"
     echo "- PostgreSQL is the default DB."
-    echo "- The --dir option implies --deve;."
+    echo "- The --devel-dir option implies --devel."
     echo ""
     exit
 fi
 
 # Add development directory to path settings
 if [ "$devel" = "1" ]; then
-    export PATH="$dir:$PATH"
-    export PYTHONPATH="$dir:$PYTHONPATH"
+    export PATH="$devel_dir:$PATH"
+    export PYTHONPATH="$devel_dir:$PYTHONPATH"
     if [ "$verbose" = "1" ]; then echo "new env: PATH=$PATH; PYTHONPATH=$PYTHONPATH"; fi
 fi
 

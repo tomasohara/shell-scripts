@@ -702,7 +702,7 @@ sub debug_out_fmt {
 # debug_out_new(trace_level, text)
 # version of debug_out that doesn't using printf for formatting the results
 # NOTE: this avoids problems with strings containing printf formatting codes
-# TODO: rename debug_out as debug_out_fmt and debug_out_new and debug_out
+# TODO: rename debug_out as debug_out_fmt and debug_out_new as debug_out???
 #
 sub debug_out_new {
     my($level, $text) = @_;

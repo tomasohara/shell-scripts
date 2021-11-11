@@ -8,6 +8,10 @@ eval 'exec perl -Ssw $0 "$@"'
 # Notes:
 # - mem is %MEM for Linux (resident set size as % of physical memory).
 #
+# TODO:
+# - ** Set unbuffered I/O if batch mode.
+# - * Make sure all linux fields handled: this script was started a long time ago!
+#
 #-------------------------------------------------------------------------------
 # Examples:
 # SunOS:
@@ -45,6 +49,7 @@ BEGIN {
 use strict;
 no strict "refs";		# to allow for old-style references to arrays (TODO: use #xyz_ref = \@array)
 use vars qw/$by $xyz $ps_options $cut_options $num_times $LINES $COLUMNS $max_count $delay $line_len $testing $justuser $USER $username/;
+use vars qw/$batch/;
 
 # Check the command-line options
 &init_var(*by, "cpu");
@@ -65,12 +70,16 @@ my($is_linux) = ($OSTYPE =~ "linux");
 &init_var(*USER, "");
 &init_var(*username,		# just show this user
 	  ($justuser ? $USER : ""));
+&init_var(*batch, &FALSE);      # batch mode (don't poll console for early quit)
 
 use vars qw/@uid @xyz @line @line_index @user @pid @cpu @mem @sz @rss @tt @stat @f @s @ppid @pri @ni @stime @time @cmd/;
+use vars qw/@vsz @command @tty @start/;
 # TODO: local => our
 local(@line, @line_index);
 local(@user, @pid, @cpu, @mem, @sz, @rss, @tt, @stat);
 local(@f, @s, @ppid, @pri, @ni, @stime, @time, @cmd);
+# note: additional fields for linux
+local(@vsz, @command, @tty, @start);
 local(*xyz) = *line;
 local(*uid) = *user;
 ## TODO: my($xyz_ref = \@line; my($uid_ref) = \@user;
@@ -126,6 +135,7 @@ for (my $t = 1; $t <= $num_times; $t++) {
 	# Save the process-info command header
 	if (/(^USER)|(^ F)/) {
 	    $header = $_;
+	    # TODO: Make sure fields recognized.
 	    next;
 	}
 
@@ -144,8 +154,11 @@ for (my $t = 1; $t <= $num_times; $t++) {
 	    $mem[$i] = $sz[$i];
 	}
 	elsif ($is_linux) {
-	    ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $sz[$i], $rss[$i], 
-	     $tt[$i], $stat[$i], $stime[$i], $time[$i], $cmd[$i]) = split;
+	    ## OLD:
+	    ## ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $vsz[$i], $rss[$i], 
+	    ##  $tt[$i], $stat[$i], $stime[$i], $time[$i], $command[$i]) = split;
+	    ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $vsz[$i], $rss[$i], 
+	     $tty[$i], $stat[$i], $start[$i], $time[$i], $command[$i]) = split;
 	}
 	else {
 	    ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $sz[$i], $rss[$i], 
@@ -166,12 +179,17 @@ for (my $t = 1; $t <= $num_times; $t++) {
     #
     &debug_print(&TL_VERBOSE, "eval \"*xyz = *$by\"\n");
     eval "*xyz = *$by";
-    *xyz = *cpu if (!defined($xyz[0]));
+    ## OLD: *xyz = *cpu if (!defined($xyz[0]));
+    if (!defined($xyz[0])) {
+	print STDERR "Error: bad sort field ($by): using cpu\n";
+	*xyz = *cpu;
+    }
 
     # Print the information sorted in proper order
     if ($num_times > 1) {
-	&cmd("clear");
+	&cmd("clear") unless ($batch);
 	print "update $t of $num_times\n";
+	&debug_out(&TL_DETAILED, "%s\n", &get_time());
     }
     printf "%s\n", substr($header, 0, $line_len);
     my $count = 0;
@@ -181,12 +199,19 @@ for (my $t = 1; $t <= $num_times; $t++) {
     }
 
     # See if the user wants to quit
-    for (my $i = 0; $i < $delay; $i++) {
-	if (&get_console_char() eq "q") {
-	    last PS_LOOP;
-	}
-
-	sleep(1);
+    # TODO: restructure loop (e.g., with helpers for pause)
+    if ($batch) {
+	sleep($delay);
+    }
+    else {
+        #
+        for (my $i = 0; $i < $delay; $i++) {
+	    if (&get_console_char() eq "q") {
+		last PS_LOOP;
+	    }
+    
+	    sleep(1);
+        }
     }
 }
 
@@ -211,15 +236,19 @@ sub by_xyz {
 	&assert(($value_a !~ /:/) && ($value_b !~ /:/));
     }
 
-    # Do reverse comparison (for numbers if numeric)
+    # Do reverse comparison (for numbers if numeric).
+    # Otherwise, uses ascending sort.
+    # TODO: Add option to override.
     my($comparison) = 0;
     if (&is_numeric($value_b) && &is_numeric($value_a)) {
+	&debug_print(&TL_MOST_VERBOSE, "Using (descending) numeric sort\n");
 	$comparison = ($value_b <=> $value_a);
     }
     else {
-	$comparison = ($value_b cmp $value_a);
+	&debug_print(&TL_MOST_VERBOSE, "Using (ascending) lexicographic sort\n");
+	$comparison = ($value_a cmp $value_b);
     }
-    &debug_print(&TL_MOST_DETAILED, "by_xyz() => comparison\n");
+    &debug_print(&TL_MOST_DETAILED, "by_xyz() => $comparison\n");
 
     return $comparison;
 }
