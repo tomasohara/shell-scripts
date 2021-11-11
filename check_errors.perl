@@ -152,6 +152,7 @@ while (<>) {
 	   || /^Traceback/		# stack trace
 	   || /^\S+Error/		# exception (e.g., TypeError)
 	   || /:\s*error\s*:/i          # argparse error (e.g., main.py: error: unrecognized arguments
+	   || /^FAILED\b/i              # pytest failure
 
 	   # Cygwin errors
 	   || /\bunable to remap\b/

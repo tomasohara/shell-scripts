@@ -206,11 +206,9 @@ function quiet-unalias () { unalias "$@" 2> /dev/null; }
 # ... ‘ignoredups’ causes lines which match the previous history entry to not
 # be saved. .... ‘erasedups’ causes all previous lines matching the
 # current line to be removed from the history list before that line is saved.
-# - HISTSIZE
-# The maximum number of commands to remember ... less than zero [means] every
+# - HISTSIZE: maximum number of commands to remember ... less than zero [means] every
 # command [is] saved ... default value [is] 500...
-# - HISTFILESIZE
-# The maximum number of lines contained in the history file. 
+# - HISTFILESIZE: maximum number of lines contained in the history file. 
 # TODO: do more excerpting or just summarize above.
 set bell-style none
 ## OLD: export HISTCONTROL=erasedups
@@ -220,8 +218,11 @@ export HISTTIMEFORMAT='[%F %T] '
 # proper sequencing of entries from different shell windows).
 set histappend
 # note: following are 50x the defaults
-export HISTSIZE=50000
-export HISTFILESIZE=100000
+## BAD:
+## export HISTSIZE=50000
+## export HISTFILESIZE=100000
+export HISTSIZE=25000
+export HISTFILESIZE=32767
 #
 # Note: bash setting(s) in ~/.bash+profile
 # format: shopt [-s | -u] optionname
@@ -447,6 +448,8 @@ function alt-xterm-title() {
     local dir=$(basename $PWD)
     set-xterm-window "alt: $dir $PWD"; 
 }
+# TODO: see if DEFAULT_HOST used outside of xterm title
+alias set-xterm-default-host='export DEFAULT_HOST=n/a; cd .'
 alias gterm=gnome-terminal
 # background-app(app, arg1, ...): runs APP in background with ARG1, ...
 # note: helper for alias so that arguments can be added by user (e.g., --help)
@@ -583,8 +586,12 @@ function dir-proper () { ls "${dir_options} --directory" "$@" 2>&1 | $PAGER; }
 alias ls-full='ls ${core_dir_options}'
 function dir-full () { ls-full "$@" 2>&1 | $PAGER; }
 function dir-sans-backups () { ls ${dir_options} "$@" 2>&1 | grep -v '~[0-9]*~' | $PAGER; }
-function dir-ro () { ls ${dir_options} "$@" 2>&1 | grep -v '^[^ld].w' | $PAGER; }
-function dir-rw () { ls ${dir_options} "$@" 2>&1 | grep '^[^ld].w' | $PAGER; }
+## OLD
+## function dir-ro () { ls ${dir_options} "$@" 2>&1 | grep -v '^[^ld].w' | $PAGER; }
+## function dir-rw () { ls ${dir_options} "$@" 2>&1 | grep '^[^ld].w' | $PAGER; }
+# dir-ro/dir-rw(spec): show files that are read-only/read-write for the user
+function dir-ro () { ls ${dir_options} "$@" 2>&1 | grep -v '^..w' | $PAGER; }
+function dir-rw () { ls ${dir_options} "$@" 2>&1 | grep '^..w' | $PAGER; }
 
 function subdirs () { ls ${dir_options} "$@" 2>&1 | grep ^d | $PAGER; }
 #
@@ -1216,6 +1223,7 @@ function pdf-to-ascii () {
 	if [ "$verbose" = "1" ]; then echo "creating $target"; fi
 	cmd.sh --time-out 30 pdftotext -layout "$file" "$target";
     fi
+    ls -lt "$target"
 }
 function all-pdf-to-ascii () { for f in *.pdf; do pdf-to-ascii "$f"; done; }
 
@@ -1348,9 +1356,10 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 # move-log-files: move "versioned" log files to log-files
 # move-output-files: likewise for output files with version numbers to ./output
 # note: versioned files are those ending in numerics or with numeric affix
-#    examples:                                         fu.log2      fu.1.log     fu.log.14aug21
 ## OLD: alias move-log-files='mkdir -p log-files; move *.log[0-9]*  *[0-9]*.log  *.log.*[0-9][0-9]*  ./log-files'
 ## OLD: alias move-output-files='mkdir -p output; move *.{html,json,list,out,output,report,xml}[0-9]* *[0-9]*.{html,json,list,out,output,report,xml} ./output'
+## TODO: exclude read-only files
+## TODO: use perl-style regex for more precise matching (effing over-arching glob's)
 function move-versioned-files {
     local ext_pattern="$1"
     if [ "$ext_pattern" = "" ]; then ext_pattern="{list,log,txt}"; fi
@@ -1358,8 +1367,17 @@ function move-versioned-files {
     if [ "$dir" = "" ]; then dir="versioned-files"; fi
     mkdir -p "$dir";
     ## OLD:move  $(eval echo *.$ext_pattern[0-9]*  *.*[0-9]*.$ext_pattern  *.$ext_pattern.*[0-9][0-9]* ) "$dir"  2>&1 | grep -v 'No such file'
-    local D="[.-]"
-    move  $(eval echo *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]* ) "$dir"  2>&1 | grep -v 'No such file'
+    ## OLD: local D="[.-]"
+    local D="[.]"
+    # TODO: fix problem leading to hangup (verification piped to 2>&1)
+    # Notes: eval needed for $ext_pattern resolution
+    # - excludes read-only files (e.g., ls -l => "-r--r--r--   1 tomohara   11K Nov  2 16:30 _master-note-info.list.log")
+    ## BAD: move  $(eval echo *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]* ) "$dir"  2>&1 | grep -v 'No such file'
+    ## BAD: ls *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]* 2>&1 | grep -v 'No such file' | xargs -I {} mv -iv "{}" "$dir"
+    # 
+    ## OK: move  $(eval ls *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*  2>&1 | grep -v 'No such file') "$dir"
+    # EXs:              fu.log2                fu.2.log                  fu.log.14aug21
+    move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*  2>&1 | grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;') "$dir"
 }
 alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
 alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,report,xml}" "output-files"'
@@ -1563,7 +1581,9 @@ function cmd-usage () {
 alias configure='./configure --prefix ~'
 alias pp-xml='xmllint --format'
 alias pp-html='pp-xml --html'
-alias check-xml='xmllint --noout --valid'
+## OLD: alias check-xml='xmllint --noout --valid'
+alias check-xml='xmllint --noout'
+alias check-xml-valid='check-xml --valid'
 alias soffice-calc='/usr/lib/libreoffice/program/soffice.bin --calc'
 alias libreoffice-write='run-app libreoffice --writer'
 alias libreoffice-pdf='run-app libreoffice --draw'
@@ -1650,6 +1670,8 @@ function fix-sudoer-home-permission () {
         $PAGER "$changes_log"
     fi
 }
+
+# alias hibernate='sudo systemctl hibernate'
 
 #-------------------------------------------------------------------------------
 # HTML stuff

@@ -104,7 +104,7 @@ if (!defined($ARGV[0])) {
     $note .= "-slurp reads the entire file at once (for long-distance patterns)\n";
     $note .= "-occurrences incorporates count field (\$1 for pattern & \$2 count)\n";
     $note .= "-multi_per_line allows for multple occurrences in a line (assumed unless ^ used)\n";
-    $note .= "-restore is used to simulate look-ahead (see example).\n";
+    $note .= "-restore is used to simulate look-ahead (see example above).\n";
     ## TODO: add optional extended help with examples for misc. options
 
     die "\nusage: $script_name [options] pattern file ...\n\n$options\n\n$example\n$note\n";
