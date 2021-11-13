@@ -156,7 +156,7 @@ function git-alias-usage () {
 	echo '    #    TODO: pushd $REPO_ROOT'
 	echo '    #    -OR-: pushd $(realpath .)/..'
 	echo '    log=$TMP/_git-diff.$$.list'
-	echo '    git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)" > $log'
+	echo '    git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)" >| $log'
 	echo '    cat $log'
 	echo '    git-safe-commit $(cat $log)'
 	echo '    #    TODO: popd'
