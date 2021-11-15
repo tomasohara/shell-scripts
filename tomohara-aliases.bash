@@ -92,6 +92,7 @@
 # - Document environment variable assumptions (e.g., HOST, DEFAULT_HOST, etc.)!
 #     DEFAULT_HOST: (remote) hostname which gets omitted from xterm title
 #     MY_GREP_OPTIONS: options for grep command (e.g., "-n -d skip -s")
+#     TOM_BIN: directory for shell scripts
 #     TODO: the rest
 # - Make sections more apparent and easier to grep (e.g., use Xyz settings (or Xyz Stuff, along
 #   with section dividers).

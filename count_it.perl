@@ -50,7 +50,7 @@ use strict "refs";			# allow string deferencing (for -occurrences support)
 use vars qw/$utf8 $i $ignore_case $i $ignore_case $foldcase $fold $preserve 
             $para $slurp $multi_per_line $one_per_line $freq_first $alpha $compact $cumulative
             $occurrences $occurrence_field $percents $multiple $nonsingletons $min2 $min_freq $trim $unaccent $pattern_file $pattern $locale $chomp/;
-use vars qw/$restore/;
+use vars qw/$nonsingleton $restore/;
 
 # Check the command-line options
 # Each variable initialized corresponds to -var=value commandline option
@@ -71,7 +71,8 @@ use vars qw/$restore/;
 &init_var(*percents, &FALSE);		# shows the relative percents
 &init_var(*min2, &FALSE);		# alias for -nonsingletons
 &init_var(*multiple, $min2);		# alias for -nonsingletons
-&init_var(*nonsingletons, $multiple);	# omit cases that occur once
+&init_var(*nonsingleton, $multiple);	# alias for -nonsingletons
+&init_var(*nonsingletons, $nonsingleton);	# omit cases that occur once
 &init_var(*min_freq, 			# min frequency show to show in output
 	  $nonsingletons ? 2 : 1);
 &init_var(*trim, &FALSE);		# trim whitespace in matched text
