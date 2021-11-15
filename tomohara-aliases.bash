@@ -1749,7 +1749,7 @@ alias hw2-download=new-hw-download
 # Sample hostnames under AWS is ip-172-31-37-185 and under Hostwinds is ip-172-31-37-185.
 # TODO: Get domainname.sh working (or information partcular to uname -a).
 # NOTE: temporary hack for remote servers until set_xterm_title.bash fixed (7 Feb 2020): echo n/a > ~/.default_host
-if [[ ("$DEFAULT_HOST" = "") && (($HOSTNAME =~ ip-*) || ($HOSTNAME =~ *serv*) || ($HOSTNAME =~ cvps*)) ]]; then export DEFAULT_HOST=n/a; fi
+if [[ ("$DEFAULT_HOST" = "") && (($HOSTNAME =~ ip-*) || ($HOSTNAME = tpo-servidor) || ($HOSTNAME =~ cvps*)) ]]; then export DEFAULT_HOST=n/a; fi
 
 
 function gr-juju-notes () { grepl "$@" /c/work/juju/*notes* $JJDATA/*notes*; }
@@ -1785,7 +1785,7 @@ alias kill-job-trackers=' kill_em.sh -p L$job_tracker_port'
 ## OLD: alias json-pp='json_pp'
 alias json-pp='json_pp -json_opt utf8,pretty'
 alias pp-json=json-pp
-## TODO: alias pp-json-sorted=json-pp",canonical"
+# note: canonical sorts the keys of hashes (utf8 avoids warning and pretty might be the default)
 alias pp-json-sorted='json_pp -json_opt utf8,pretty,canonical'
 
 #-------------------------------------------------------------------------------
