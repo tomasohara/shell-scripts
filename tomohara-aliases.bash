@@ -97,6 +97,7 @@
 # - Miscellaneous environment variables:
 #     GTAR: gnu version of tar (n.b., same as tar under Linux)
 #     NICE: command for running another under nice priority
+#     PYTHON: command for runnng python (e.g., "nice -19 /usr/bin/time python -u")
 #     TPO_SSH_KEY: path to private SSH key
 # - Make sections more apparent and easier to grep (e.g., use Xyz settings (or Xyz Stuff, along
 #   with section dividers).
