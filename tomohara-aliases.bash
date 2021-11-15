@@ -96,6 +96,7 @@
 #     TODO: the rest
 # - Miscellaneous environment variables:
 #     GTAR: gnu version of tar (n.b., same as tar under Linux)
+#     NICE: command for running another under nice priority
 # - Make sections more apparent and easier to grep (e.g., use Xyz settings (or Xyz Stuff, along
 #   with section dividers).
 # - Replace '/bin/cmd ...' with 'command cmd ...' in aliases.
