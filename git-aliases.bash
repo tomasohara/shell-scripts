@@ -84,12 +84,12 @@ function git-commit {
     local git_user
     local git_token
     local credentials_file="./my-git-credentials-etc.bash"
-    if [ -e "$credentials_file" ]; then
+    if [[ ($git_user = "") && (-e "$credentials_file") ]]; then
 	# TODO: if [ $verbose ]; then echo ...; fi
 	echo "Sourcing $credentials_file"
 	source "$credentials_file"
-	echo "git_user: $git_user;  git_token: $git_token"
     fi
+    echo "git_user: $git_user;  git_token: $git_token"
     git add "$@" >> "$log"
     git commit -m "misc. update" >> "$log"
     # TODO: perl -e "print("$git_user\n$git_token\n");' | git push
