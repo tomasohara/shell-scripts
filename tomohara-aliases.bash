@@ -89,11 +89,13 @@
 # - Make sure all function variables use local.
 # - Add upcase alias (perl -pe 's/(.*)/\U$1\e/g;')
 # - Make sure functions don't refer to undefined macros (e.g., defined later).
-# - Document environment variable assumptions (e.g., HOST, DEFAULT_HOST, etc.)!
+# - Main environment variables (e.g., HOST, DEFAULT_HOST, etc.)!
 #     DEFAULT_HOST: (remote) hostname which gets omitted from xterm title
 #     MY_GREP_OPTIONS: options for grep command (e.g., "-n -d skip -s")
 #     TOM_BIN: directory for shell scripts
 #     TODO: the rest
+# - Miscellaneous environment variables:
+#     GTAR: gnu version of tar (n.b., same as tar under Linux)
 # - Make sections more apparent and easier to grep (e.g., use Xyz settings (or Xyz Stuff, along
 #   with section dividers).
 # - Replace '/bin/cmd ...' with 'command cmd ...' in aliases.
