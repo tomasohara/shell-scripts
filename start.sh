@@ -22,6 +22,7 @@
 more_options=0; case "$1" in -*) more_options=1 ;; esac
 show_usage=0;
 for_editting=0
+verbose=0
 while [ "$more_options" = "1" ]; do
     if [ "$1" = "--trace" ]; then
 	set -o xtrace;
@@ -33,6 +34,8 @@ while [ "$more_options" = "1" ]; do
 	for_editting=1;
     elif [ "$1" = "--open" ]; then
 	for_editting=1;
+    elif [ "$1" = "--verbose" ]; then
+	verbose=1;
     elif [ "$1" = "--" ]; then
 	break;
     else
@@ -43,17 +46,17 @@ while [ "$more_options" = "1" ]; do
     shift;
     more_options=0; case "$1" in -*) more_options=1 ;; esac
 done
-file1="$1"
-file2="$2"
+file="$1"
+arg2="$2"
  
 # Show usage statement if explicitly requested, if bad argument specified, or
 # if no file is specified.
-# Note: uses $file2 to check for extraneous 
+# Note: uses $arg2 to check for extraneous args
 #
-if [[ ($show_usage = 1) || ("$file1" = "") || ("$file2" != "") ]]; then
+if [[ ($show_usage = 1) || ("$file" = "") || ("$arg2" != "") ]]; then
     script=`basename $0`
     echo ""
-    echo "Usage: $script [--view|--edit] [--help] file"
+    echo "Usage: $script [--view|[--edit|--open]] [--verbose] [--trace] [--help] file"
     echo ""
     echo "Examples:"
     echo ""
@@ -86,6 +89,7 @@ function invoke () {
     if [ ! -e "log_dir" ]; then mkdir -p "$log_dir"; fi
     local log_file="$log_dir/$(basename "$program")-$(basename "$file")-$today.log"
     if [ ! -e "$log_file" ]; then touch "$log_file"; fi
+    if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" \"$file\" >> \"$log_file\" 2>&1"; fi
     "$program" "$file" >> "$log_file" 2>&1
     }
 
@@ -102,12 +106,12 @@ function invoke () {
 # TODO: try nocasematch to make matching case insensitive
 
 # If a directory, open using file explorer (e.g., nautilus)
-if [ -d "$file1" ]; then
-    nautilus "$file1" &
+if [ -d "$file" ]; then
+    nautilus "$file" &
     exit
 fi
 # Otherwise, use program based on file extension
-lower_file1=$(echo "$file1" | perl -pe 's/(.*)/\L$1/;')
+lower_file=$(echo "$file" | perl -pe 's/(.*)/\L$1/;')
 
 # Change invoked program if different for editing than for viewing
 pdf_program="evince"
@@ -119,7 +123,7 @@ if [ "$for_editting" = "1" ]; then
 fi
     
 #
-case "$lower_file1" in
+case "$lower_file" in
     # PDF and posscript files
     ## OLD: *.pdf | *.ps) invoke evince "$@" & ;;
     ## OLD: *.pdf | *.ps) invoke okular "$@" & ;;
@@ -133,6 +137,9 @@ case "$lower_file1" in
 
     # Video files
     *.mov | *.mp4) invoke vlc "$@" & ;;
+
+    # Audio files
+    *.mp3 | *.wav) invoke vlc "$@" & ;;
     
     # MS Office and LibreOffice files: word processor files, spreadsheets, etc.
     *.doc | *.docx | *.pptx | *.odp | *.odt | *.odg | *.xls | *.xlsx | *.csv) invoke libreoffice "$@" & ;;

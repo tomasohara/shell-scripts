@@ -69,6 +69,7 @@
 #    -- 'realpath file' returns full path for file with relative path.
 #
 # TODO:
+# - ** Add macros to provide cribsheet on usage!
 # - *** Purge way-old stuff (e.g., lynx related)!
 # - ** Add option to move alias not to put files in subdirectory of target directory. That is, the move command aborts rather than doing following: 'move sub-dir target-dir' ==> target-dir/sub-dir/sub-dir).
 # - ** Minimize overriding commands like 'cd' and 'script' to avoid confusion.
@@ -393,7 +394,10 @@ cond-export PS_symbol '$'
 function reset-prompt {
     ## OLD: local new_PS_symbol="$1"
     local new_PS_symbol="$@"
+    ## OLD:
     if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="$PS_symbol"; fi
+    ## TODO: if [ "$new_PS_symbol" = "" ]; then echo $'Usage: reset-prompt symbol\nex: reset-prompt §"\n'; return; fi
+    ## TODO: add options to reset PS1 and to list good symbols for prompts
     # Make the change
     ## DEBUG: echo "reset-prompt: 1. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
     export PS_symbol="$new_PS_symbol";
@@ -419,10 +423,12 @@ export CDPATH=.
 reset-prompt
 
 # flag for turning off GNOME, which can be flakey at times
+# See xterm.sh (e.g., gnome-terminal).
 export USE_GNOME=1
 
 # General Settings for my scripts
 export DEBUG_LEVEL=2
+export PRECISION=3
 alias debug-on='export DEBUG_LEVEL=3'
 if [ "$PERLLIB" = "" ]; then PERLLIB="."; else PERLLIB="$PERLLIB:."; fi
 # NOTE: perl uses architecture-specific subdirectories under PERLLIB
@@ -1006,7 +1012,10 @@ function diff-rev () {
     fi
     local right_file="$1"
     local left_file="$2"
-    if [ -d "$left_file" ]; then left_file="$left_file/$right_file"; fi
+    ## OLD: if [ -d "$left_file" ]; then left_file="$left_file/$right_file"; fi
+    if [ -d "$left_file" ]; then left_file="$left_file"/$(basename "$right_file"); fi
+    # TODO: create helper for resolving one file relative to dir of another
+    ## BAD: if [ ! -e "$left_file" ]; then left_file=$(dirname "$right_file")/"$left_file"; fi
     "$diff_program" "$left_file" "$right_file"
 }
 alias kdiff-rev='diff-rev --diff-prog kdiff'
@@ -1042,7 +1051,11 @@ function signature () {
         echo "ex: signature scrappycito"
         return;
     fi
-    cat $HOME/info/.$1-signature
+    ## TODO: echo filename and then cat??
+    ## OLD: head $HOME/info/.$1-signature
+    local filename="$HOME/info/.$1-signature"
+    echo "$filename:"
+    cat "$filename"
 }
 alias cell-signature='signature cell'
 alias home-signature='signature home'
@@ -1050,6 +1063,8 @@ alias po-signature='signature po'
 alias tpo-signature='signature tpo'
 alias tpo-scrappycito-signature='signature tpo-scrappycito'
 alias scrappycito-signature='signature scrappycito'
+alias farm-signature='signature farm'
+# TODO: automatically derive aliases for ~/info/*.signature*
 
 #-------------------------------------------------------------------------------
 trace file archiving commands
@@ -1246,7 +1261,11 @@ function run-app {
     local path="$1";
     local app=$(basename $path);
     shift;
-    "$app" "$@" >> ~/temp/"$app-$hoy.log" 2>&1 &
+    local log=~/temp/"$app-$hoy.log"
+    "$app" "$@" >> "$log" 2>&1 &
+    ## TODO: make sure command invoked OK and then put into background
+    sleep 5
+    check-errors "$log" | cat
     }
 alias foxit='run-app /opt/foxitsoftware/foxitreader/FoxitReader'
 
@@ -1346,6 +1365,7 @@ alias convert-termstrings='perl- convert_termstrings.perl'
 alias do-rcsdiff='do_rcsdiff.sh'
 alias dobackup='dobackup.sh'
 alias kill-em='kill_em.sh'
+alias kill-it='kill-em --pattern'
 # TODO: see why --filter-dirnames added to ps-mine aliases
 alias ps-mine-='ps-mine "$@" | filter-dirnames'
 alias ps_mine='ps-mine'
@@ -1364,6 +1384,7 @@ alias rename-special-punct='rename-files -q -global -regex "[&\!\*?]" ""'
 # ex: move "05-158-a-20 (1).pdf duplicates
 alias move-duplicates='mkdir -p duplicates; move *\([0-9]\).* duplicates 2>&1 | egrep -iv cannot.stat.*..No.such'
 alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-duplicates'
+alias rename-parens='rename-files -global -regex "[\(\)]" "" *[\(\)]*'
 # move "versioned" log files into ./log-file subdirectory
 # note: files end in .log[0-9]* or .log and have numeric affix (e.g., do-xyz.log2, do-xyz.2.log, or do-xyz-30may21.log)
 #
@@ -1394,7 +1415,7 @@ function move-versioned-files {
     move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*  2>&1 | grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;') "$dir"
 }
 alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
-alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,report,xml}" "output-files"'
+alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,report,tsv,xml}" "output-files"'
 alias move-adhoc-files='move-log-files; move-output-files'
 
 # rename-with-file-date(file, ...): rename each file(s) with .ddMmmYY suffix
@@ -1458,10 +1479,17 @@ alias unexport='unset'
 # Unicode support
 #
 # TODO: put show-unicode-code-info-aux into script (as with other overly-large function definitions like hg-pull-and-update)
+# show-unicode-control-chars(): output Unicode codepoint (ordinal) and UTF-8 encoding for input chars with offset in line
 function show-unicode-code-info-aux() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < $1; }
 function show-unicode-code-info-stdin() { in_file="$TEMP/show-unicode-code-info.$$"; cat >| $in_file;  show-unicode-code-info-aux $in_file; }
 #
 function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
+#
+# show-unicode-control-chars(): Convert ascii control characters to printable Unicode ones (e.g., ␀ for 0x00)
+## BAD: function show-unicode-control-chars { perl -pe 'use Encode "decode_utf8"; s/[\x00-\x1F]/chr($&+0x2400)/e;'; }
+# See https://stackoverflow.com/questions/42193957/errorwide-character-in-print-at-x-at-line-35-fh-read-text-files-from-comm.
+function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr($& + 0x2400)/e;'; }
+
 
 #-------------------------------------------------------------------------------
 trace Unix aliases
@@ -1634,6 +1662,8 @@ alias apt-uninstall='sudo apt-get remove'
 alias dpkg-install='sudo dpkg --install '
 # TODO: disable if on remote host???
 alias restart-network='sudo ifdown eth0; sudo ifup eth0'
+alias hibernate-system='sudo systemctl hibernate'
+alias blank-screen='xset dpms force off'
 
 # get-free-filename(base, [sep=""]): get filename starting with BASE that is not used.
 # Notes: 1. If <base> exists <base><sep><N> checked until the filename not used (for N in 2, 3, ... ).
@@ -1685,6 +1715,7 @@ function fix-sudoer-home-permission () {
     fi
 }
 
+## OLD:
 # alias hibernate='sudo systemctl hibernate'
 
 #-------------------------------------------------------------------------------

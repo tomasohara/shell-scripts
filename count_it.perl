@@ -70,14 +70,14 @@ use vars qw/$nonsingleton $restore/;
 	  $occurrences ? $occurrences + 1 : 0);
 &init_var(*percents, &FALSE);		# shows the relative percents
 &init_var(*min2, &FALSE);		# alias for -nonsingletons
-&init_var(*multiple, $min2);		# alias for -nonsingletons
-&init_var(*nonsingleton, $multiple);	# alias for -nonsingletons
-&init_var(*nonsingletons, $nonsingleton);	# omit cases that occur once
-&init_var(*min_freq, 			# min frequency show to show in output
+&init_var(*multiple, $min2);		#   "
+&init_var(*nonsingleton, $multiple);	#   "
+&init_var(*nonsingletons, $nonsingleton); # omit cases that occur once
+&init_var(*min_freq, 			# min frequency to show in output
 	  $nonsingletons ? 2 : 1);
 &init_var(*trim, &FALSE);		# trim whitespace in matched text
 &init_var(*unaccent, &FALSE);		# remove accent marks from input
-&init_var(*pattern_file, "");		# file with pattern (to cirvumvent shell UTF8 issues)
+&init_var(*pattern_file, "");		# file with pattern (to circumvent shell UTF8 issues)
 my($default_pattern) = (($pattern_file ne "") ? &read_file($pattern_file) : "");
 &init_var_exp(*pattern, $default_pattern); # regex pattern to check for
 &init_var_exp(*locale, &FALSE);		# honor environment locale settings
@@ -126,6 +126,7 @@ my($has_line_anchor) = ((index($pattern, "^") == 0)
 
 if ($locale) {
     &debug_print(&TL_USUAL, "Enabling locale support\n");
+    # note: used for case-insensitive matching
     eval "use locale;'"
 }
 

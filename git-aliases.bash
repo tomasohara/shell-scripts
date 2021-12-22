@@ -66,6 +66,13 @@
 # 3. git push - this pushes your committed changes to a remote
 #
 
+# pause-for-enter(): print message and wait for user to press enter
+function pause-for-enter () {
+    local message="$1"
+    if [ "$message" = "" ]; then message="Press enter to continue"; fi
+    read -p "$message "
+}
+
 # git-update(): updates local to global repo
 function git-update {
     local log="_git-update-$(TODAY).log"
@@ -91,8 +98,14 @@ function git-commit {
     fi
     echo "git_user: $git_user;  git_token: $git_token"
     git add "$@" >> "$log"
-    git commit -m "misc. update" >> "$log"
+    # TODO: rework so that message passed as argument (to avoid stale messages from environment)
+    local message="$GIT_MESSAGE";
+    if [ "$message" = "" ]; then message="misc. update"; fi
+    pause-for-enter "About to commit"
+    git commit -m "$message" >> "$log"
     # TODO: perl -e "print("$git_user\n$git_token\n");' | git push
+    # TODO: see why only intermittently works (e.g., often prompts for user name and password)
+    pause-for-enter "About to push"
     git push --verbose <<EOF >> "$log"
 $git_user
 $git_token
@@ -135,6 +148,7 @@ function git-push() {
 function git-diff () {
     git diff "$@" 2>&1 | less -p '^diff';
 }
+# TODO: add opion for visual dff
 
 
 function git-alias-usage () {

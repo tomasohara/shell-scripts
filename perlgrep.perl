@@ -20,9 +20,11 @@ eval 'exec perl -Ssw $0 "$@"'
 #       Unrecognized escape \T passed through before HERE mark in regex m/\T << HERE ODO {[^}]+}[^\s%]/ at /e/cartera-de-tomas/bin/perlgrep.perl line 79, <> line 1.
 #       
 # TODO:
-# - Have the -n option reflect lines not paragraphs if -para option used
-# - Also, Use P# instead of L# in the display.
-# - Use parentheses around print and printf.
+# - *** Track down missing files:
+#     ex: perl-grep -c '\x00' test_sort_json_annots.d*.19nov21.*.log
+#     [see /home/tomohara/osr/docs/_adhoc.22nov21.log]
+# - ** Add test suite against regular grep.
+# - Use parentheses around print and printf throughout.
 #
 
 # Load in the common module, making sure the script dir is in the Perl lib path
@@ -96,6 +98,7 @@ my($undisplayed_counts) = &TRUE;
 # See http://search.cpan.org/~jv/Iterator-Diamond-1.01/lib/Iterator/Files.pm.
 while (<>) {
     my($num_para_lines) = 0;
+    &debug_print(&TL_VERY_VERBOSE, "[$current_file] ");
     if ($para) {
 	&debug_out(&TL_VERY_DETAILED, "P%d L%d:\t%s", $., $para_line_num, $_);
 	my(@para_lines) = split(/\n/, $_);
@@ -108,7 +111,7 @@ while (<>) {
     }
     $record_num++;
     my($include) = &FALSE;
-    my($filespec) = ($show_filename ? "${current_file}: " : "");
+    ## OLD: my($filespec) = ($show_filename ? "${current_file}: " : "");
 
     # See if the pattern matches the current line
     # NOTE: s qualifier treats string as single line (in case -para specified)
@@ -173,6 +176,8 @@ while (<>) {
 	$undisplayed_counts = &FALSE;
     }
     else {
+	## TEST: $current_file = defined($ARGV[0]) ? $ARGV[0] : "<stdin>";
+	#
 	if ($para) {
 	    $para_line_num += ($num_para_lines + 1);
 	}

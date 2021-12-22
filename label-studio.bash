@@ -135,7 +135,8 @@ fi
 
 # Add debug options
 if [ "$debug" = "1" ]; then
-    other_args="$other_args --debug --log-level DEBUG"
+    ## OLD: other_args="$other_args --debug --log-level DEBUG"
+    other_args="$other_args --log-level DEBUG"
 fi
 
 # Add database option

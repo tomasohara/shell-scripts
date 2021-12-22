@@ -1017,6 +1017,8 @@ sub init_var {
     #       Maintain the package spec ???
     my($env_var) = *var_name;
     $env_var =~ s/^.*:://;
+    ## TODO: make this optional
+    $env_var = &to_upper($env_var);
     my($new_value);
 
     if (!defined($var_name)) {

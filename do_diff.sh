@@ -11,6 +11,7 @@
 # - Work in subdirectory tree comparison example into usage:
 #     find -name '*.java' | foreach.perl 'do_diff.sh -b $f /tmp/$F' -
 # - Make --ignore-all-space optional as ignores tokenization.
+# - * Send all output to stdout (e.g., "No such file or directory" warning).
 #
 #-------------------------------------------------------------------------------
 # via diff info page (GNU diffutils version 3.2):

@@ -68,7 +68,7 @@ fi
 file1="$1"
 file2="$2"
 if [ -d "$file2" ]; then
-    file2="$file2"$(basename "$file1")
+    file2="$file2"/$(basename "$file1")
 fi
 base1="_1_"$(basename "$file1")
 base2="_2_"$(basename "$file2")
