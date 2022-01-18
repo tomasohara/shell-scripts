@@ -81,7 +81,7 @@ function pause-for-enter () {
 
 # git-update(): updates local to global repo
 function git-update {
-    local log="_git-update-$(TODAY).log"
+    local log="_git-update-$(TODAY).$$.log"
     git stash >> "$log"
     git pull --all >> "$log"
     git stash pop >> "$log"
@@ -93,7 +93,7 @@ function git-update {
 # note: gets user credentials from ./_my-git-credentials-etc.bash.list
 # TODO: add message argument
 function git-commit {
-    local log="_git-commit-$(TODAY).log"
+    local log="_git-commit-$(TODAY).$$.log"
     local git_user
     local git_token
     local credentials_file="./_my-git-credentials-etc.bash.list"
@@ -147,7 +147,7 @@ alias git-unsafe-commit='git-safe-commit *'
 function git-pull-and-update() {
     if [ "" = "$(grep ^repo ~/.gitrc)" ]; then echo "*** Warning: fix ~/.gitrc for read-only access ***"; else
         local git="python -u /usr/bin/git";
-	local log="_git-update-$(date '+%d%b%y').log";
+	local log="_git-update-$(date '+%d%b%y').$$.log";
 	($git pull --noninteractive --verbose;  $git update --noninteractive --verbose) >> "$log" 2>&1; less "$log"
     fi;
 }
@@ -176,7 +176,7 @@ function git-alias-usage () {
     echo "Usage examples for git aliases, all assuming following:"
     echo "   echo 'source git-aliases.bash'"
     echo "Each creates log file of the following form:"
-    echo "   _git-label-\$(TODAY).log      # ex: _git-update-$(TODAY).log"
+    echo "   _git-label-\$(TODAY).\$\$.log      # ex: _git-update-$(TODAY).$$.log"
     echo "Use following to update aliases:"
     echo "   source \$TOM_BIN/git-aliases.bash; clear; git-alias-usage"
     echo ""
