@@ -160,15 +160,14 @@ function git-push() {
 }
 
 function git-diff () {
-    git diff "$@" 2>&1 | less -p '^diff';
+    ## OLD: git diff "$@" 2>&1 | less -p '^diff';
+    local log="_git-diff-$(TODAY).$$.log"
+    git diff "$@" >| $log;
+    less -p '^diff' $log;
 }
-# TODO: add option for visual dff
-
-
-## OLD:
-## alias git-difftool='git difftool --no-prompt'
-## alias git-vdiff=git-difftool
+#
 alias git-difftool='git difftool --no-prompt'
+#
 function git-vdiff { git-difftool "$@" & }
 
 
@@ -203,6 +202,8 @@ function git-alias-usage () {
         echo '        mod_file=$(cat "$log" | head -1); git-vdiff "$mod_file"'
         echo '        echo GIT_MESSAGE="..." git-safe-commit "$mod_file"'
 	echo '    # TODO: popd'
+	echo "To generate template from above diff for individual check-in's:"
+	echo '    cat $log | xargs -I "{}" echo GIT_MESSAGE=\"...\" git-safe-commit "{}"'
     }
     #
     echo ""
