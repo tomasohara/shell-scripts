@@ -169,7 +169,7 @@ function git-diff () {
 ## alias git-difftool='git difftool --no-prompt'
 ## alias git-vdiff=git-difftool
 alias git-difftool='git difftool --no-prompt'
-function git-vdiff { git-difftool "$@"; }
+function git-vdiff { git-difftool "$@" & }
 
 
 function git-alias-usage () {
@@ -198,10 +198,10 @@ function git-alias-usage () {
 	echo '    git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)" >| $log'
 	echo '    cat $log'
 	echo '    # To do shamelessly lazy check-in of all modified files:'
-	echo '    #    git-safe-commit $(cat $log)'
+	echo '        echo git-safe-commit $(cat $log)'
 	echo '    # -or- to check in one file (ideally with main differences noted):'
-        echo '    #    mod_file=$(cat "$log" | head -1); git-difftool "$mod_file"'
-        echo '    #    GIT_MESSAGE="..." git-safe-commit "$mod_file"'
+        echo '        mod_file=$(cat "$log" | head -1); git-vdiff "$mod_file"'
+        echo '        echo GIT_MESSAGE="..." git-safe-commit "$mod_file"'
 	echo '    # TODO: popd'
     }
     #
