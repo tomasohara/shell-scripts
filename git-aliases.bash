@@ -191,14 +191,15 @@ function git-alias-usage () {
     #    Expressions don't expand in single quotes, use double quotes for that.
     # shellcheck disable=SC2016
     {
-	echo "To check in files different from repo:"
+	echo "To check in files different from repo (n.b. ¡cuidado!):"
 	echo '    #    TODO: pushd $REPO_ROOT'
 	echo '    #    -OR-: pushd $(realpath .)/..'
 	echo '    log=$TMP/_git-diff.$$.list'
 	echo '    git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)" >| $log'
 	echo '    cat $log'
-	echo '    git-safe-commit $(cat $log)'
-	echo '    # -or-:'
+	echo '    # To do shamelessly lazy check-in of all modified files:'
+	echo '    #    git-safe-commit $(cat $log)'
+	echo '    # -or- to check in one file (ideally with main differences noted):'
         echo '    #    mod_file=$(cat "$log" | head -1); git-difftool "$mod_file"'
         echo '    #    GIT_MESSAGE="..." git-safe-commit "$mod_file"'
 	echo '    # TODO: popd'
