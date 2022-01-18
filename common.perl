@@ -1033,8 +1033,9 @@ sub init_var {
     # Update the environment variable to the value, useful for automatic
     # transfer of parameter values to perl scripts invoked by this script.
     if ($export_var) {
-	my($env_var) = *var_name;
-	$env_var =~ s/^.*:://;
+	## OLD:
+	## my($env_var) = *var_name;
+	## $env_var =~ s/^.*:://;
 	&set_env($env_var, $new_value, &TL_VERY_VERBOSE);
     }
     &debug_out(&TL_DETAILED + 1, "init_var(%s, %s): %s=%s\n", 

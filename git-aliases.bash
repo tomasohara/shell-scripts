@@ -16,10 +16,14 @@
 #...............................................................................
 # Notes:
 #
-# - credentials taken from my-git-credentials-etc.bash:
+# - credentials can be taken from project specific file (_my-git-credentials-etc.bash:.list)
 #
-#   git_user=username
-#   git_token=personal_access_token
+#     git_user=username
+#     git_token=personal_access_token
+#
+# - alternatively git caching is used via
+#     ~/.git-credentials
+#   See https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage.
 #
 # - via https://gist.github.com/flc/f867e2b92cc878a55801#file-hg_vs_git-txt:
 #
@@ -67,6 +71,8 @@
 #
 
 # pause-for-enter(): print message and wait for user to press enter
+# TODO: extend to press-any-key; see
+#    https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
 function pause-for-enter () {
     local message="$1"
     if [ "$message" = "" ]; then message="Press enter to continue"; fi
@@ -84,28 +90,35 @@ function git-update {
 }
 
 # git-commit(file, ...): commits FILE... to global repo
-# note: gets user credentials from ./.my-git-settings.bash
+# note: gets user credentials from ./_my-git-credentials-etc.bash.list
 # TODO: add message argument
 function git-commit {
     local log="_git-commit-$(TODAY).log"
     local git_user
     local git_token
-    local credentials_file="./my-git-credentials-etc.bash"
+    local credentials_file="./_my-git-credentials-etc.bash.list"
+    if [[ -e ~/.git-credentials ]]; then
+	echo "Using git credentials via ~/.git-credentials"
+    fi
     if [[ ($git_user = "") && (-e "$credentials_file") ]]; then
 	# TODO: if [ $verbose ]; then echo ...; fi
-	echo "Sourcing $credentials_file"
+	echo "Sourcing project-specific credentials ($credentials_file)"
 	source "$credentials_file"
     fi
     echo "git_user: $git_user;  git_token: $git_token"
     git add "$@" >> "$log"
     # TODO: rework so that message passed as argument (to avoid stale messages from environment)
     local message="$GIT_MESSAGE";
+    if [ "$message" = "..." ]; then
+	echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
+	return
+    fi
     if [ "$message" = "" ]; then message="misc. update"; fi
-    pause-for-enter "About to commit"
+    pause-for-enter "About to commit (with message '$message')"
     git commit -m "$message" >> "$log"
     # TODO: perl -e "print("$git_user\n$git_token\n");' | git push
     # TODO: see why only intermittently works (e.g., often prompts for user name and password)
-    pause-for-enter "About to push"
+    pause-for-enter 'About to push (n.b., review commit)!'
     git push --verbose <<EOF >> "$log"
 $git_user
 $git_token
@@ -134,7 +147,7 @@ function git-pull-and-update() {
     if [ "" = "$(grep ^repo ~/.gitrc)" ]; then echo "*** Warning: fix ~/.gitrc for read-only access ***"; else
         local git="python -u /usr/bin/git";
 	local log="_git-update-$(date '+%d%b%y').log";
-	($git pull --noninteractive --verbose;  $git update --noninteractive --verbose) >| "$log" 2>&1; less "$log"
+	($git pull --noninteractive --verbose;  $git update --noninteractive --verbose) >> "$log" 2>&1; less "$log"
     fi;
 }
 
@@ -148,18 +161,29 @@ function git-push() {
 function git-diff () {
     git diff "$@" 2>&1 | less -p '^diff';
 }
-# TODO: add opion for visual dff
+# TODO: add option for visual dff
+
+
+## OLD:
+## alias git-difftool='git difftool --no-prompt'
+## alias git-vdiff=git-difftool
+alias git-difftool='git difftool --no-prompt'
+function git-vdiff { git-difftool "$@"; }
 
 
 function git-alias-usage () {
     echo "Usage examples for git aliases, all assuming following:"
     echo "   echo 'source git-aliases.bash'"
+    echo "Each creates log file of the following form:"
+    echo "   _git-label-\$(TODAY).log      # ex: _git-update-$(TODAY).log"
+    echo "Use following to update aliases:"
+    echo "   source \$TOM_BIN/git-aliases.bash; clear; git-alias-usage"
     echo ""
     echo "Get changes from repository:"
     echo "    git-update"
     echo ""
     echo "To check in specified changes:"
-    echo "    git-safe-commit file, ..."
+    echo "    GIT_MESSAGE='...' git-safe-commit file, ..."
     echo ""
     #
     # Note: disable spellcheck SC2016 (n.b., unfortunately just for next statement, so awkward brace group added)
@@ -173,7 +197,10 @@ function git-alias-usage () {
 	echo '    git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)" >| $log'
 	echo '    cat $log'
 	echo '    git-safe-commit $(cat $log)'
-	echo '    #    TODO: popd'
+	echo '    # -or-:'
+        echo '    #    mod_file=$(cat "$log" | head -1); git-difftool "$mod_file"'
+        echo '    #    GIT_MESSAGE="..." git-safe-commit "$mod_file"'
+	echo '    # TODO: popd'
     }
     #
     echo ""

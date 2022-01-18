@@ -85,7 +85,8 @@ function invoke () {
     local program="$1"
     local file="$2"
     local today=$(date '+%d%b%y')
-    local log_dir="$TEMP/invocations"
+    ## OLD: local log_dir="$TEMP/invocations"
+    local log_dir="$TEMP/$USER/invocations"
     if [ ! -e "log_dir" ]; then mkdir -p "$log_dir"; fi
     local log_file="$log_dir/$(basename "$program")-$(basename "$file")-$today.log"
     if [ ! -e "$log_file" ]; then touch "$log_file"; fi

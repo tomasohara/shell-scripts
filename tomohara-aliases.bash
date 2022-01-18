@@ -1650,7 +1650,12 @@ alias em-tomas=ed-tomas
 
 # Truncate text wider than current terminal window
 # TODO: add truncation indicator (e.g., Unicode character for ...)
-alias truncate-width='cut --characters=1-$(calc-int "$COLUMNS - 1")'
+## OLD: alias truncate-width='cut --characters=1-$(calc-int "$COLUMNS - 1")'
+function truncate-width { cut --characters=1-$(calc-int "$COLUMNS - 1") "$@"; }
+
+#-------------------------------------------------------------------------------
+# XWindows stuff
+alias magnifier='run-app kmag'
 
 #-------------------------------------------------------------------------------
 # Linux admin
@@ -1664,6 +1669,7 @@ alias dpkg-install='sudo dpkg --install '
 alias restart-network='sudo ifdown eth0; sudo ifup eth0'
 alias hibernate-system='sudo systemctl hibernate'
 alias blank-screen='xset dpms force off'
+alias stop-service='systemctl stop'
 
 # get-free-filename(base, [sep=""]): get filename starting with BASE that is not used.
 # Notes: 1. If <base> exists <base><sep><N> checked until the filename not used (for N in 2, 3, ... ).
@@ -1873,6 +1879,7 @@ function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$;
 ## TODO: use stack for old_PS_symbol maintenance??? (also allows for recursive invocation, such as with '$ $ $')
 ## TODO: rename as my-script to avoid confusion
 function script {
+    ## THIS function is buggy!
     # Change prompt
     local old_PS_symbol="$PS_symbol"
     export SCRIPT_PID=$$;
@@ -1898,6 +1905,7 @@ function script {
 
 #-------------------------------------------------------------------------------
 # Python related
+## *** Python stufff ***
 
 export PYTHON_CMD="/usr/bin/time python -u"
 export PYTHON="$NICE $PYTHON_CMD"
@@ -1911,7 +1919,13 @@ alias show-python-path='show-path-dir PYTHONPATH'
 
 # Remove compiled files .pyc for regular (debug) version and .pyo for optimized
 # TODO: add option for forced removal; try using '-name "*.py[co]"')
-alias delete-compiled-python-files='find . \( -name "*.pyc" -o -name "*.pyo" \) -exec /bin/rm -v {} \;'
+## OLD: alias delete-compiled-python-files='find . \( -name "*.pyc" -o -name "*.pyo" \) -exec /bin/rm -v {} \;'
+function delete-compiled-python-files-aux {
+    local rm_options=${1:-"-v"}
+    find . \( -name "*.pyc" -o -name "*.pyo" \) -exec /bin/rm $rm_options {} \;
+}
+alias delete-compiled-python-files=delete-compiled-python-files-aux
+alias delete-compiled-python-files-force='delete-compiled-python-files-aux -vf'
 
 # Python-lint filtering
 # python-lint-full(filename): complete output from pylint, with caret-based
