@@ -7,12 +7,12 @@
 # Usage example(s):
 #   source git-aliases.bash
 #
-#   git-update
+#   git-update                       ## git-pull with stashed changes
 #
-#   git-safe-commit $(git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)")
+#   git-commit-and-push file, ...
 #
-#   git-unsafe-commit
-#    
+#   git-update-commit-push $(git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)")
+#
 #...............................................................................
 # Notes:
 #
@@ -79,7 +79,8 @@ function pause-for-enter () {
     read -p "$message "
 }
 
-# git-update(): updates local to global repo
+# git-update(): updates local from global repo. This uses git-stash to hide local changes
+# does a git-pull, and then restores local changes.)
 function git-update {
     local log="_git-update-$(TODAY).$$.log"
     git stash >> "$log"
@@ -89,29 +90,30 @@ function git-update {
     tail "$log"
 }
 
-# git-commit(file, ...): commits FILE... to global repo
+# git-commit-and-push(file, ...): commits FILE... to local repo, which is then
+# pushed to global repo
 # note: gets user credentials from ./_my-git-credentials-etc.bash.list
 # TODO: add message argument
-function git-commit {
-    local log="_git-commit-$(TODAY).$$.log"
+function git-commit-and-push {
+    local log="_git-commit-and-push-$(TODAY).$$.log"
     local git_user
     local git_token
     local credentials_file="./_my-git-credentials-etc.bash.list"
     if [[ -e ~/.git-credentials ]]; then
-	echo "Using git credentials via ~/.git-credentials"
+        echo "Using git credentials via ~/.git-credentials"
     fi
     if [[ ($git_user = "") && (-e "$credentials_file") ]]; then
-	# TODO: if [ $verbose ]; then echo ...; fi
-	echo "Sourcing project-specific credentials ($credentials_file)"
-	source "$credentials_file"
+        # TODO: if [ $verbose ]; then echo ...; fi
+        echo "Sourcing project-specific credentials ($credentials_file)"
+        source "$credentials_file"
     fi
     echo "git_user: $git_user;  git_token: $git_token"
     git add "$@" >> "$log"
     # TODO: rework so that message passed as argument (to avoid stale messages from environment)
     local message="$GIT_MESSAGE";
     if [ "$message" = "..." ]; then
-	echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
-	return
+        echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
+        return
     fi
     if [ "$message" = "" ]; then message="misc. update"; fi
     pause-for-enter "About to commit (with message '$message')"
@@ -129,41 +131,40 @@ EOF
 }
 
 
-# git-safe-commit(file, ...): updates local repo and then commits FILE... to global repo
+# git-update-commit-push(file, ...): updates local repo and then commits FILE... to global repo
 # note: gets user credentials from ./.my-git-settings.bash
 # TODO: skip commit if problem with update
-function git-safe-commit {
+function git-update-commit-push {
     # DEBUG: set -o xtrace
     git-update
-    git-commit "$@"
+    git-commit-and-push "$@"
     # DEBUG: set - -o xtrace
 }
 #
-# git-unsafe-commit(): adds all files for checkin
-# TODO: add verification before commit
-alias git-unsafe-commit='git-safe-commit *'
+# git-update-commit-push-all(): adds all files for checkin
+alias git-update-commit-push-all='git-update-commit-push *'
 
 
 function git-pull-and-update() {
     if [ "" = "$(grep ^repo ~/.gitrc)" ]; then echo "*** Warning: fix ~/.gitrc for read-only access ***"; else
         local git="python -u /usr/bin/git";
-	local log="_git-update-$(date '+%d%b%y').$$.log";
-	($git pull --noninteractive --verbose;  $git update --noninteractive --verbose) >> "$log" 2>&1; less "$log"
+        local log="_git-update-$(date '+%d%b%y').$$.log";
+        ($git pull --noninteractive --verbose;  $git update --noninteractive --verbose) >> "$log" 2>&1; less "$log"
     fi;
 }
 
 
 function git-push() {
     if [ "" != "$(grep ^repo ~/.gitrc)" ]; then echo "*** Warning: fix ~/.gitrc for read-write access ***"; else 
-	git push --verbose
+        git push --verbose
     fi;
 }
 
 function git-diff () {
     ## OLD: git diff "$@" 2>&1 | less -p '^diff';
     local log="_git-diff-$(TODAY).$$.log"
-    git diff "$@" >| $log;
-    less -p '^diff' $log;
+    git diff "$@" >| "$log";
+    less -p '^diff' "$log";
 }
 #
 alias git-difftool='git difftool --no-prompt'
@@ -172,42 +173,41 @@ function git-vdiff { git-difftool "$@" & }
 
 
 function git-alias-usage () {
-    echo "Usage examples for git aliases, all assuming following:"
-    echo "   echo 'source git-aliases.bash'"
-    echo "Each creates log file of the following form:"
-    echo "   _git-label-\$(TODAY).\$\$.log      # ex: _git-update-$(TODAY).$$.log"
-    echo "Use following to update aliases:"
+    echo "Usage examples for git aliases, most of which create log files as follows:"
+    echo "   _git-{label}-\$(TODAY).\$\$.log      # ex: _git-update-$(TODAY).$$.log"
+    echo "To update aliases:"
     echo "   source \$TOM_BIN/git-aliases.bash; clear; git-alias-usage"
     echo ""
     echo "Get changes from repository:"
     echo "    git-update"
     echo ""
     echo "To check in specified changes:"
-    echo "    GIT_MESSAGE='...' git-safe-commit file, ..."
+    echo "    GIT_MESSAGE='...' git-update-commit-push file, ..."
     echo ""
     #
     # Note: disable spellcheck SC2016 (n.b., unfortunately just for next statement, so awkward brace group added)
     #    Expressions don't expand in single quotes, use double quotes for that.
     # shellcheck disable=SC2016
     {
-	echo "To check in files different from repo (n.b. ¡cuidado!):"
-	echo '    #    TODO: pushd $REPO_ROOT'
-	echo '    #    -OR-: pushd $(realpath .)/..'
-	echo '    log=$TMP/_git-diff.$$.list'
-	echo '    git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)" >| $log'
-	echo '    cat $log'
-	echo '    # To do shamelessly lazy check-in of all modified files:'
-	echo '        echo git-safe-commit $(cat $log)'
-	echo '    # -or- to check in one file (ideally with main differences noted):'
+        echo "To check in files different from repo (n.b. ¡cuidado!):"
+        echo '    #    TODO: pushd $REPO_ROOT'
+        echo '    #    -OR-: pushd $(realpath .)/..'
+        echo '    log=$TMP/_git-diff.$$.list'
+        echo '    git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)" >| $log'
+        echo '    cat $log'
+        echo '    # To do shamelessly lazy check-in of all modified files:'
+        echo '        echo git-update-commit-push $(cat $log)'
+        echo '    # -or- to check in one file (ideally with main differences noted):'
         echo '        mod_file=$(cat "$log" | head -1); git-vdiff "$mod_file"'
-        echo '        echo GIT_MESSAGE="..." git-safe-commit "$mod_file"'
-	echo '    # TODO: popd'
-	echo "To generate template from above diff for individual check-in's:"
-	echo '    cat $log | xargs -I "{}" echo GIT_MESSAGE=\"...\" git-safe-commit "{}"'
+        echo '        echo GIT_MESSAGE="..." git-update-commit-push "$mod_file"'
+        echo '    # TODO: popd'
+        echo "To generate template from above diff for individual check-in's:"
+        echo '    cat $log | xargs -I "{}" echo GIT_MESSAGE=\"...\" git-update-commit-push "{}"'
     }
-    #
-    echo ""
-    echo "To check in all changes:"
-    echo "    git-unsafe-commit"
-    echo ""
+    ## OLD:
+    ## #
+    ## echo ""
+    ## echo "To check in all changes:"
+    ## echo "    git-update-commit-push-all"
+    ## echo ""
 }
