@@ -118,7 +118,8 @@ function git-commit {
     git commit -m "$message" >> "$log"
     # TODO: perl -e "print("$git_user\n$git_token\n");' | git push
     # TODO: see why only intermittently works (e.g., often prompts for user name and password)
-    pause-for-enter 'About to push (n.b., review commit)!'
+    perl -pe 's/^/    /;' "$log"
+    pause-for-enter 'About to push: review commit log above!'
     git push --verbose <<EOF >> "$log"
 $git_user
 $git_token
