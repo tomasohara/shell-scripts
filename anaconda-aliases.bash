@@ -140,7 +140,7 @@ function conda-create-env () {
     local python_version="$2"
     if [ "$python_version" = "" ]; then python_version="3.7"; fi
     ensure-conda-loaded
-    conda create --name "$name" python="$python_version"
+    conda create --yes --name "$name" python="$python_version"
 }
 
 # ensure-conda-loaded(): Make sure conda environment loaded (e.g., via miniconda3)

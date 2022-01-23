@@ -1903,6 +1903,15 @@ function script {
     ## DEBUG: echo "script: 4. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
 }
 
+# pause-for-enter(): print message and wait for user to press enter
+# TODO: extend to press-any-key; see
+#    https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
+function pause-for-enter () {
+    local message="$1"
+    if [ "$message" = "" ]; then message="Press enter to continue"; fi
+    read -p "$message "
+}
+
 #-------------------------------------------------------------------------------
 # Python related
 ## *** Python stufff ***
@@ -2007,7 +2016,8 @@ function python-module-version-full { local module="$1"; python -c "import $modu
 function python-module-version { python-module-version-full "$@" 2> /dev/null; }
 function python-package-members() { local package="$1"; python -c "import $package; print(dir($package));"; }
 #
-alias python-setup-install='log=setup-$(TODAY).log; uname -a > $log; python setup.py install --record installed-files.list >> $log 2>&1; ltc $log'
+## OLD: alias python-setup-install='`<log=setup-$(TODAY).log; uname -a > $log; python setup.py install --record installed-files.list >> $log 2>&1; ltc $log'
+alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  python setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
 # TODO: add -v (the xargs usage seems to block it)
 alias python-uninstall-setup='cat installed-files.list | xargs /bin/rm -vi; rename_files.perl -regex ^ un installed-files.list'
 
