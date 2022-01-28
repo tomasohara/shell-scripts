@@ -1064,6 +1064,7 @@ alias tpo-signature='signature tpo'
 alias tpo-scrappycito-signature='signature tpo-scrappycito'
 alias scrappycito-signature='signature scrappycito'
 alias farm-signature='signature farm'
+alias circulo-signature='signature circulo'
 # TODO: automatically derive aliases for ~/info/*.signature*
 
 #-------------------------------------------------------------------------------
@@ -1268,6 +1269,7 @@ function run-app {
     check-errors "$log" | cat
     }
 alias foxit='run-app /opt/foxitsoftware/foxitreader/FoxitReader'
+alias gimp='run-app gimp'
 
 #------------------------------------------------------------------------
 
@@ -1379,7 +1381,8 @@ alias foreach='perl- foreach.perl'
 # rename-spaces: replace spaces in filenames of current dir with underscores
 alias rename-spaces='rename-files -q -global " " "_"'
 alias rename-quotes='rename-files -q -global "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
-alias rename-special-punct='rename-files -q -global -regex "[&\!\*?]" ""'
+## OLD: alias rename-special-punct='rename-files -q -global -regex "[&\!\*?]" ""'
+alias rename-special-punct='rename-files -q -global -regex "[&\!\*?\(\)]" ""'
 # move-duplicates: move duplicate produced via Firefox downloads
 # ex: move "05-158-a-20 (1).pdf duplicates
 alias move-duplicates='mkdir -p duplicates; move *\([0-9]\).* duplicates 2>&1 | egrep -iv cannot.stat.*..No.such'

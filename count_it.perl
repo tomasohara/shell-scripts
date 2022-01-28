@@ -50,7 +50,7 @@ use strict "refs";			# allow string deferencing (for -occurrences support)
 use vars qw/$utf8 $i $ignore_case $i $ignore_case $foldcase $fold $preserve 
             $para $slurp $multi_per_line $one_per_line $freq_first $alpha $compact $cumulative
             $occurrences $occurrence_field $percents $multiple $nonsingletons $min2 $min_freq $trim $unaccent $pattern_file $pattern $locale $chomp/;
-use vars qw/$nonsingleton $restore/;
+use vars qw/$nonsingleton $restore $field/;
 
 # Check the command-line options
 # Each variable initialized corresponds to -var=value commandline option
@@ -68,6 +68,7 @@ use vars qw/$nonsingleton $restore/;
 &init_var(*occurrences, &FALSE);	# the tags being counted are actually occurrence counts
 &init_var(*occurrence_field, 		# field giving occurrence count (e.g., 1 for $1)
 	  $occurrences ? $occurrences + 1 : 0);
+&init_var(*field, 1);	                # field number to use for pattern
 &init_var(*percents, &FALSE);		# shows the relative percents
 &init_var(*min2, &FALSE);		# alias for -nonsingletons
 &init_var(*multiple, $min2);		#   "
@@ -200,12 +201,21 @@ while (<>) {
 	# NOTE: s qualifier treats string as single line (in case -para specified)
 	if (($ignore_case == 1) && ($text =~ /$pattern/si)) {
 	    $tag = $1;
+	    if ($field > 1) {
+		&debug_print(&TL_MOST_VERBOSE, "eval \"\$${field}\"");
+		$tag = eval "\$${field}";
+	    }
 	    $tag = &to_lower($tag) unless ($preserve);
 	    ## OLD: $text = $';
 	    $found = &TRUE;
 	}
 	elsif (($ignore_case == 0) && ($text =~ /$pattern/s)) {
 	    $tag = $1;
+	    ## BAD: $tag = $1 if ($field == 1) else "eval \$${field}";
+	    if ($field > 1) {
+		&debug_print(&TL_MOST_VERBOSE, "eval \"\$${field}\"");
+		$tag = eval "\$${field}";
+	    }
 	    ## OLD: $text = $';
 	    $found = &TRUE;
 	}
@@ -231,7 +241,7 @@ while (<>) {
 	    $num++;
 	    my($count) = 1;
 	    if ($occurrence_field) {
-		$count = eval "$${occurrence_field}";
+		$count = eval "\$${occurrence_field}";
 		&debug_print(&TL_VERY_DETAILED, "count: $count\n");
 	    }
 	    &incr_entry(\%count, $tag, $count);

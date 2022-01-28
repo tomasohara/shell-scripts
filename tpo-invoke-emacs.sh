@@ -54,7 +54,7 @@ while [ "$moreoptions" = "1" ]; do
 	set -o xtrace;
     elif [ "$1" = "--foreground" ]; then
 	in_background="0"
-    elif [ "$1" = "-q" ]; then
+    elif [[ ("$1" = "-q") || ("$1" = "--quick") ]]; then
 	emacs_options="$emacs_options -q";
 	quick=1
     elif [ "$1" = "--" ]; then

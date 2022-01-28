@@ -98,15 +98,19 @@ function git-commit-and-push {
     local log="_git-commit-and-push-$(TODAY).$$.log"
     local git_user
     local git_token
-    local credentials_file="./_my-git-credentials-etc.bash.list"
+    local credentials_file="_my-git-credentials-etc.bash.list"
+    local dir
+    # Note: check stored credentials
     if [[ -e ~/.git-credentials ]]; then
         echo "Using git credentials via ~/.git-credentials"
     fi
-    if [[ ($git_user = "") && (-e "$credentials_file") ]]; then
-        # TODO: if [ $verbose ]; then echo ...; fi
-        echo "Sourcing project-specific credentials ($credentials_file)"
-        source "$credentials_file"
-    fi
+    for dir in . ~; do
+	if [[ ($git_user = "") && (-e "$dir/$credentials_file") ]]; then
+            echo "Sourcing credentials ($dir/$credentials_file)"
+            source "$dir/$credentials_file"
+	    break
+	fi
+    done
     echo "git_user: $git_user;  git_token: $git_token"
     git add "$@" >> "$log"
     # TODO: rework so that message passed as argument (to avoid stale messages from environment)
@@ -116,7 +120,8 @@ function git-commit-and-push {
         return
     fi
     if [ "$message" = "" ]; then message="misc. update"; fi
-    pause-for-enter "About to commit (with message '$message')"
+    local file_spec="$*"
+    pause-for-enter "About to commit $file_spec (with message '$message')"
     git commit -m "$message" >> "$log"
     # TODO: perl -e "print("$git_user\n$git_token\n");' | git push
     # TODO: see why only intermittently works (e.g., often prompts for user name and password)
@@ -160,6 +165,13 @@ function git-push() {
     fi;
 }
 
+# add filename(s) to repository
+function git-add() {
+    local log="_git-diff-$(TODAY).$$.log";
+    git add "$@" >| "$log";
+    tail "$log";
+}
+	
 function git-diff () {
     ## OLD: git diff "$@" 2>&1 | less -p '^diff';
     local log="_git-diff-$(TODAY).$$.log"
@@ -196,7 +208,7 @@ function git-alias-usage () {
         echo '    git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)" >| $log'
         echo '    cat $log'
         echo '    # To do shamelessly lazy check-in of all modified files:'
-        echo '        echo git-update-commit-push $(cat $log)'
+        echo '        echo GIT_MESSAGE="miscellaneous update" git-update-commit-push $(cat $log)'
         echo '    # -or- to check in one file (ideally with main differences noted):'
         echo '        mod_file=$(cat "$log" | head -1); git-vdiff "$mod_file"'
         echo '        echo GIT_MESSAGE="..." git-update-commit-push "$mod_file"'
