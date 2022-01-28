@@ -8,6 +8,7 @@
 
 # Standart packages
 import unittest
+import sys
 
 
 # Local packages
@@ -15,42 +16,35 @@ from mezcla.unittest_wrapper import TestWrapper
 from mezcla import glue_helpers as gh
 
 
-# On test package
-import calc_entropy as ca
-
-
-## TODO: use gh.resolve_path(SCRIPT) instead of relative path on string
-SCRIPT = './../calc_entropy.py'
+# Module being tested
+sys.path.append('..')
+import calc_entropy
 
 
 class TestIt(TestWrapper):
     """Class for testcase definition"""
+    script_module = TestWrapper.derive_tested_module_name(__file__) + '.py'
 
 
     def test_calculate_weight_percentage(self):
         """Test for calculate_weight_percentage(vector)"""
         input_vector  = [5, 10, 15, 20]
         result_vector = [0.100, 0.200, 0.300, 0.400]
-        self.assertEqual(ca.calculate_weight_percentage(input_vector), result_vector)
-
-
-    def test_get_data_from_files(self):
-        """Testing of getting data from files"""
-        # WORK-IN-PROGRESS
+        self.assertEqual(calc_entropy.calculate_weight_percentage(input_vector), result_vector)
 
 
     def test_class_filter(self):
         """Test for class filter option"""
         input_string    = 'deportive-car\t3\nsedan-car\t3\nconvertible-car\t2\ntruck\t12'
         expected_result = '1.561'
-        self.assertEqual(gh.run(f'echo -e "{input_string}" | calc_entropy.py --class_filter="car" --last  -'), expected_result)
+        self.assertEqual(gh.run(f'echo $"{input_string}" |{self.script_module} --class_filter="car" --last  -'), expected_result)
 
 
     def test_max_count(self):
         """Test for max_count option"""
         input_string    = 'deportive-car\t3\nsedan-car\t3\nconvertible-car\t2\ntruck\t12'
         expected_result = '1.561'
-        self.assertEqual(gh.run(f'echo -e "{input_string}" | calc_entropy.py --max_count 3 --last  -'), expected_result)
+        self.assertEqual(gh.run(f'echo $"{input_string}" | {self.script_module} --max_count 3 --last  -'), expected_result)
 
 
     def test_verbose(self):
@@ -64,11 +58,23 @@ class TestIt(TestWrapper):
                            '#\t\ttotal\t20\t1.000\t1.595\n\n'
                            '# word\tclasses\tfreq\tentropy\tmax_prob\n'
                            'n/a\t4\t20\t1.595\t0.600')
-        self.assertEqual(gh.run(f'echo "{input_string}" | calc_entropy.py --verbose --last  -'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --verbose --last  -'), expected_result)
+
+
+    def test_get_data_from_files(self):
+        """Testing of getting data from files"""
+        filename_1      = '/tmp/entropy_test_1.freq'
+        filename_2      = '/tmp/entropy_test_2.freq'
+        input_data_1    = '.perl\t239\n.sh\t152\n.bash\t22\n.py\t3\n.lisp\t3\n.txt\t2\n.csh\t1\n'
+        input_data_2    = '.perl\t123\n.sh\t22\n.bash\t32\n.py\t9\n'
+        expected_result = '1.376\n1.407'
+        gh.run(f'touch {filename_1} && echo $"{input_data_1}" > {filename_1}')
+        gh.run(f'touch {filename_2} && echo $"{input_data_2}" > {filename_2}')
+        self.assertEqual(gh.run(f'{self.script_module} --last {filename_1} {filename_2}'), expected_result)
 
 
     def test_word(self):
-        """Test fo word option"""
+        """Test for word option"""
         # WORK-IN-PROGRESS
 
 
@@ -78,43 +84,63 @@ class TestIt(TestWrapper):
         input_string    = '.perl\t239\n.sh\t152\n.bash\t22\n.py\t3\n.lisp\t3\n.txt\t2\n.csh\t1'
         expected_result = '1.376'
 
-        self.assertEqual(gh.run(f'echo -e "{input_string}" | calc_entropy.py --last -'), expected_result)
-        self.assertEqual(gh.run(f'echo -e "{input_string}" | calc_entropy.py --freq_last -'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --last -'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --freq_last -'), expected_result)
 
 
     def test_frequencies_first(self):
         """Test for freq_first param"""
-        # WORK-IN-PROGRESS
+        input_string    = '239\t.perl\n152\t.sh\n22\t.bash\n3\t.py\n3\t.lisp\n2\t.txt\n1\t.csh'
+        expected_result = '1.376'
+
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --freq_first -'), expected_result)
 
 
     def test_just_freq(self):
         """Test for just_freq option"""
-        # WORK-IN-PROGRESS
+        input_string    = '.perl\t239\n.sh\t152\n.bash\t22\n.py\t3\n.lisp\t3\n.txt\t2\n.csh\t1'
+        expected_result = '0.566\n0.360\n0.052\n0.007\n0.007\n0.005\n0.002\n'
+
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --just_freq --last -'), expected_result)
 
 
     def test_header(self):
         """Test for header related options: header, show_header and skip_header"""
-        # WORK-IN-PROGRESS
+        input_string        = '.perl\t239\n.sh\t152\n.bash\t22\n.py\t3\n.lisp\t3\n.txt\t2\n.csh\t1'
+        header = '# word\tclasses\tfreq\tentropy\tmax_prob'
 
+        gral_command = f'echo "{input_string}" | {self.script_module} --last --verbose'
 
-    def test_classes(self):
-        """Test for classes related options: classes and show_classes"""
-        # WORK-IN-PROGRESS
+        self.assertTrue(header in gh.run(f'{gral_command} -'))
+        self.assertTrue(header in gh.run(f'{gral_command} --header -'))
+        self.assertTrue(header in gh.run(f'{gral_command} --show_header -'))
+        self.assertFalse(header in gh.run(f'{gral_command} --skip_header -'))
 
 
     def test_simple(self):
         """Test for simple option"""
-        self.assertEqual(gh.run(f'python {SCRIPT} --simple --probabilities ".25 .25 .25 .25" -'), 'Entropy\n2.000')
+        self.assertEqual(gh.run(f'python {self.script_module} --simple --probabilities ".25 .25 .25 .25" -'), 'Entropy\n2.000')
 
 
     def test_label(self):
         """Test for label option"""
-        self.assertEqual(gh.run(f'python {SCRIPT} --label "foo" --simple --probabilities ".25 .25 .25 .25" -'), '\tEntropy\nfoo\t2.000')
+        self.assertEqual(gh.run(f'python {self.script_module} --label "foo" --simple --probabilities ".25 .25 .25 .25" -'), '\tEntropy\nfoo\t2.000')
+
+
+    def test_classes(self):
+        """Test for classes related options: classes and show_classes"""
+        expected_result = 'Classes\tEntropy\n4\t2.000'
+        gral_command = f'python {self.script_module} --simple --probabilities ".25 .25 .25 .25"'
+        self.assertEqual(gh.run(f'{gral_command} --classes -'), expected_result)
+        self.assertEqual(gh.run(f'{gral_command} --show_classes -'), expected_result)
 
 
     def test_fix(self):
         """Test for fix option"""
-        # WORK-IN-PROGRESS
+        input_string    = '.perl  239\n.sh      152\n.bash 22\n.py   3\n.lisp\t3\n.txt\t2\n.csh\t1'
+        expected_result = '1.376'
+
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --last --fix -'), expected_result)
 
 
     def test_normalize(self):
