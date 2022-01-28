@@ -148,7 +148,7 @@ class CalcEntropy(Main):
 
 
     def run_main_step(self):
-        """Process just the probabilities"""
+        """Process main script"""
 
 
         # Check for simplified version of data (i.e., just the probabilities)
@@ -193,7 +193,7 @@ class CalcEntropy(Main):
 
 
                     # Check frequencies values are correct
-                    if sum(frequencies.values()):
+                    if not sum(frequencies.values()):
                         print(f'unexpected distribution for {filename} (all 0)')
                         continue
 
@@ -251,7 +251,7 @@ class CalcEntropy(Main):
                 line = re.sub(r'\s+', '\t', line)
 
             if not re.search('\t', line):
-                print(f'unexpected input at line {i} ({line})\nUse -fix if not tab-delimited.')
+                print(f'unexpected input at line {i} ({line})\nUse --{FIX} if not tab-delimited.')
                 continue
 
 
@@ -462,29 +462,29 @@ def calculate_weight_percentage(vector):
 
 if __name__ == '__main__':
     app = CalcEntropy(description     = __doc__,
-                      boolean_options = [(LAST,          f'alias for --{FREQ_LAST}'),
-                                         (FREQ_LAST,      'frequency occurs last in the data'),
-                                         (FREQ_FIRST,     'frequency occurs first in the data'),
-                                         (JUST_FREQ,      'just output relative frequency'),
-                                         (HEADER,         'alias for show_header'),
-                                         (SHOW_HEADER,    'display comment header?'),
-                                         (SKIP_HEADER,    'should the header be skipped?'),
-                                         (CLASSES,        'alias for -show_classes'),
-                                         (SHOW_CLASSES,   'display class information?'),
-                                         (SIMPLE,         'data just contains the probabilities'),
-                                         (FIX,            'ensure tab-delimited input'),
-                                         (NORMALIZE,      'normalize the probabilities?'),
-                                         (ALPHA,          'show keys alphabetized'),
-                                         (PRESERVE,       'preserve order of keys'),
-                                         (CUMULATIVE,     'show cumulative probability'),
-                                         (STRIP_COMMENTS, 'alias for (confusing) -no_comments=0'),
-                                         (NO_COMMENTS,    'used to bypass comment stripping'),
-                                         (VERBOSE,        'show more details')],
-                      int_options     = [(MAX_COUNT,      'maximum number of cases to process')],
-                      text_options    = [(PROBABILITIES, f'probabilities for --{SIMPLE} option, must be an array'),
-                                         (CLASS_FILTER,   'only keep class names that contains a specific word'),
-                                         (LABEL,          'label for entropy display'),
-                                         (WORD,           'word over which distribution is made')],
+                      boolean_options = [(LAST,           f'alias for --{FREQ_LAST}'),
+                                         (FREQ_LAST,       'frequency occurs last in the data'),
+                                         (FREQ_FIRST,      'frequency occurs first in the data'),
+                                         (JUST_FREQ,       'just output relative frequency'),
+                                         (HEADER,          'alias for show_header'),
+                                         (SHOW_HEADER,     'display comment header?'),
+                                         (SKIP_HEADER,     'should the header be skipped?'),
+                                         (CLASSES,        f'alias for --{SHOW_CLASSES}'),
+                                         (SHOW_CLASSES,    'display class information?'),
+                                         (SIMPLE,          'data just contains the probabilities'),
+                                         (FIX,             'ensure tab-delimited input'),
+                                         (NORMALIZE,       'normalize the probabilities?'),
+                                         (ALPHA,           'show keys alphabetized'),
+                                         (PRESERVE,        'preserve order of keys'),
+                                         (CUMULATIVE,      'show cumulative probability'),
+                                         (STRIP_COMMENTS, f'alias for (confusing) --{NO_COMMENTS}=False'),
+                                         (NO_COMMENTS,     'used to bypass comment stripping'),
+                                         (VERBOSE,         'show more details')],
+                      int_options     = [(MAX_COUNT,       'maximum number of cases to process')],
+                      text_options    = [(PROBABILITIES,  f'probabilities for --{SIMPLE} option, must be an array'),
+                                         (CLASS_FILTER,    'only keep class names that contains a specific word'),
+                                         (LABEL,           'label for entropy display'),
+                                         (WORD,            'word over which distribution is made')],
                       multiple_files  =  True,
                       manual_input    =  True,
                       skip_input      =  False)
