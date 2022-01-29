@@ -169,7 +169,10 @@ class CalcEntropy(Main):
 
 
             data = [ float(x) for x in data ]
-            data = calculate_weight_percentage(data)
+
+
+            if self.normalize:
+                data = calculate_weight_percentage(data)
 
 
             self.simple_calc_entropy(data)
@@ -198,13 +201,8 @@ class CalcEntropy(Main):
                         continue
 
 
-                    # Sort frequencies
-                    if self.alpha:
-                        frequencies = sorted(frequencies.items())
-                    elif not self.preserve:
-                        frequencies = mu.sort_weighted_hash(frequencies)
-                    else:
-                        frequencies = frequencies.items()
+                    # Sort
+                    frequencies = sort_dict(frequencies, by_key=self.alpha, by_value=not self.preserve)
 
 
                     # Get word
@@ -221,8 +219,14 @@ class CalcEntropy(Main):
             # Otherwise get and process data from STDIN
             elif not sys.stdin.isatty():
                 data = ''.join(self.input_stream.readlines())
-                frequencies = self.format_frequencies_from_text(data).items()
 
+                # Get frequencies
+                frequencies = self.format_frequencies_from_text(data)
+
+                # Sort frequencies
+                frequencies = sort_dict(frequencies, by_key=self.alpha, by_value=not self.preserve)
+
+                # Process frequencies
                 self.regular_calc_entropy(frequencies, self.word)
 
 
@@ -238,10 +242,12 @@ class CalcEntropy(Main):
             debug.trace(debug.QUITE_DETAILED, f'{line}')
 
 
-            # Remove comments and blank lines
+            # Remove comments
             if self.no_comments:
                 line = re.sub(r'#.*', '', line)
 
+
+            # Skip black and empty input
             if re.search(r'^\s*$', line):
                 continue
 
@@ -458,6 +464,21 @@ def calculate_weight_percentage(vector):
         percentages.append(item/total_sum)
 
     return percentages
+
+
+def sort_dict(dictionary, by_key=False, by_value=False):
+    """Sort dictionary, always returns array"""
+
+    result = []
+
+    if by_key:
+        result = sorted(dictionary.items())
+    elif by_value:
+        result = mu.sort_weighted_hash(dictionary)
+    else:
+        result = dictionary.items()
+
+    return result
 
 
 if __name__ == '__main__':
