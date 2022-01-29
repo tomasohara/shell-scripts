@@ -26,11 +26,11 @@ class TestIt(TestWrapper):
     script_module = TestWrapper.derive_tested_module_name(__file__) + '.py'
 
 
-    def test_calculate_weight_percentage(self):
+    def test_normalize(self):
         """Test for calculate_weight_percentage(vector)"""
         input_vector  = [5, 10, 15, 20]
         result_vector = [0.100, 0.200, 0.300, 0.400]
-        self.assertEqual(calc_entropy.calculate_weight_percentage(input_vector), result_vector)
+        self.assertEqual(calc_entropy.normalize(input_vector), result_vector)
 
 
     def test_class_filter(self):

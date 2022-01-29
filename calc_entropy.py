@@ -172,7 +172,7 @@ class CalcEntropy(Main):
 
 
             if self.normalize:
-                data = calculate_weight_percentage(data)
+                data = normalize(data)
 
 
             self.simple_calc_entropy(data)
@@ -443,27 +443,27 @@ class CalcEntropy(Main):
         print(result)
 
 
-# calculate_weight_percentage
+# normalize
 #
 # this is an adaptation of normalize.perl
 # https://github.com/tomasohara/shell-scripts/blob/main/normalize.perl
 #
-def calculate_weight_percentage(vector):
+def normalize(values):
     """
-    Calculate weight percentage for each item of vector
+    Normalize values
     ex: input  -> [5, 10, 15, 20]
         output -> [0.100, 0.200, 0.300, 0.400]
     """
 
     total_sum = 0
-    for item in vector:
+    for item in values:
         total_sum += item
 
-    percentages = []
-    for item in vector:
-        percentages.append(item/total_sum)
+    normalized_values = []
+    for item in values:
+        normalized_values.append(item/total_sum)
 
-    return percentages
+    return normalized_values
 
 
 def sort_dict(dictionary, by_key=False, by_value=False):
