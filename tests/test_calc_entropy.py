@@ -51,10 +51,10 @@ class TestIt(TestWrapper):
         """Test for verbose option"""
         input_string    =  'deportive-car\t3\nsedan-car\t3\nconvertible-car\t2\ntruck\t12'
         expected_result = ('#\t\tclass\tfreq\tprob\t-p lg(p)\n'
+                           '#\t\ttruck\t12\t0.600\t0.442\n'
                            '#\t\tdeportive-car\t3\t0.150\t0.411\n'
                            '#\t\tsedan-car\t3\t0.150\t0.411\n'
                            '#\t\tconvertible-car\t2\t0.100\t0.332\n'
-                           '#\t\ttruck\t12\t0.600\t0.442\n'
                            '#\t\ttotal\t20\t1.000\t1.595\n\n'
                            '# word\tclasses\tfreq\tentropy\tmax_prob\n'
                            'n/a\t4\t20\t1.595\t0.600')
@@ -145,22 +145,58 @@ class TestIt(TestWrapper):
 
     def test_normalize(self):
         """Test for normalize option"""
-        # WORK-IN-PROGRESS
+        self.assertEqual(gh.run(f'python {self.script_module} --simple --normalize --probabilities "95.5 76.4 114.6 95.5" -'), 'Entropy\n1.985')
 
 
     def test_alpha(self):
         """Test for alpha option"""
-        # WORK-IN-PROGRESS
+        input_string = 'perl\t239\nsh\t152\nbash\t22\npy\t3\nlisp\t3\ntxt\t2\ncsh\t1'
+        alpha_sorted = ('#\t\tbash\t22\t0.052\t0.222\n'
+                        '#\t\tcsh\t1\t0.002\t0.021\n'
+                        '#\t\tlisp\t3\t0.007\t0.051\n'
+                        '#\t\tperl\t239\t0.566\t0.465\n'
+                        '#\t\tpy\t3\t0.007\t0.051\n'
+                        '#\t\tsh\t152\t0.360\t0.531\n'
+                        '#\t\ttxt\t2\t0.005\t0.037\n')
+
+        result = gh.run(f'echo "{input_string}" | {self.script_module} --last --verbose --alpha -')
+
+        self.assertTrue(alpha_sorted in result)
 
 
     def test_preserve(self):
         """Test for preserve option"""
-        # WORK-IN-PROGRESS
+        input_string       = 'perl\t239\nsh\t152\nbash\t22\npy\t3\nlisp\t3\ntxt\t2\ncsh\t1'
+        preserved_expected = ('#\t\tperl\t239\t0.566\t0.465\n'
+                              '#\t\tsh\t152\t0.360\t0.531\n'
+                              '#\t\tbash\t22\t0.052\t0.222\n'
+                              '#\t\tpy\t3\t0.007\t0.051\n'
+                              '#\t\tlisp\t3\t0.007\t0.051\n'
+                              '#\t\ttxt\t2\t0.005\t0.037\n'
+                              '#\t\tcsh\t1\t0.002\t0.021\n')
+
+        result = gh.run(f'echo "{input_string}" | {self.script_module} --last --verbose --preserve -')
+
+        self.assertTrue(preserved_expected in result)
 
 
     def test_cumulative(self):
         """Test for cumulative option"""
-        # WORK-IN-PROGRESS
+        input_string    = 'perl\t239\nsh\t152\nbash\t22\npy\t3\nlisp\t3\ntxt\t2\ncsh\t1'
+        expected_result = ('#\t\tclass\tfreq\tprob\t-p lg(p)\n'
+                           '#\t\tbash\t22\t0.052\t0.222\n'
+                           '#\t\tcsh\t1\t0.055\t0.021\n'
+                           '#\t\tlisp\t3\t0.062\t0.051\n'
+                           '#\t\tperl\t239\t0.628\t0.465\n'
+                           '#\t\tpy\t3\t0.635\t0.051\n'
+                           '#\t\tsh\t152\t0.995\t0.531\n'
+                           '#\t\ttxt\t2\t1.000\t0.037\n'
+                           '#\t\ttotal\t422\t1.000\t1.376\n'
+                           '\n'
+                           '# word\tclasses\tfreq\tentropy\tmax_prob\n'
+                           'n/a\t7\t422\t1.376\t0.566')
+
+        self.assertEquals(gh.run(f'echo "{input_string}" | {self.script_module} --last --verbose --alpha --cumulative -'), expected_result)
 
 
     def test_comments(self):
