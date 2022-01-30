@@ -18,12 +18,9 @@ from mezcla.unittest_wrapper import TestWrapper
 from mezcla import glue_helpers as gh
 
 
-## TODO: use gh.resolve_path(SCRIPT) instead of relative path on string
-SCRIPT = './../tpo_count_it.py'
-
-
 class TestIt(TestWrapper):
     """Class for testcase definition"""
+    script_module = TestWrapper.derive_tested_module_name(__file__) + '.py'
 
 
     def test_count_extensions(self):
@@ -51,12 +48,12 @@ class TestIt(TestWrapper):
                           'kill_all_graphling_jobs.sh kill_em.sh k_vec.perl label-studio.bash lbformat.perl ldoce_lookup.sh lexrel2network.perl LICENSE.txt lispl'
                           'reorganize-dir.sh testsdir resolve_wn_sense_key.perl __pycache__ rev_diff.sh er.sh xterm.sh xv.sh xwn.sh')
         expected_result = 'perl\t65\nsh\t57\nbash\t8\nlisp\t1\ntxt\t1'
-        self.assertEqual(gh.run(f'echo "{input_string}" | tr " " "\\n" | {SCRIPT} "\\.([^\\.]+)$"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | tr " " "\\n" | {self.script_module} "\\.([^\\.]+)$"'), expected_result)
 
 
     def test_count_numbers(self):
         """test count digits from pipe"""
-        self.assertEqual(gh.run(f'echo "12 34 56 78" | {SCRIPT} "\\d\\d" | wc -l'), '4')
+        self.assertEqual(gh.run(f'echo "12 34 56 78" | {self.script_module} "\\d\\d" | wc -l'), '4')
 
 
     def test_parenthesis_check_digits(self):
@@ -65,7 +62,7 @@ class TestIt(TestWrapper):
                            'specified by section 6 of the GNU GPL for conveying Corresponding Source.'
                            'Exception to Section 3 of without being bound by section 3 of the ')
         expected_result = '6\t3\n3\t2'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --i "section (\\d+)"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --i "section (\\d+)"'), expected_result)
 
 
     def test_parenthesis_check_words(self):
@@ -73,7 +70,7 @@ class TestIt(TestWrapper):
         input_string    = ('A suitable mechanism is one that (a) uses at run time a copy'
                            'users computer system, and (b) will operate properly with a')
         expected_result = '(a)\t1\n(b)\t1'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} "\\(\\w+\\)"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} "\\(\\w+\\)"'), expected_result)
 
 
     def test_differences_suffixes_lookahead(self):
@@ -87,7 +84,7 @@ class TestIt(TestWrapper):
         input_file      = '/tmp/test_file.txt'
         expected_result = 'dog\t4\ncat\t3\nfish\t2'
         gh.run(f'touch {input_file} && echo "{input_text}" > {input_file}')
-        self.assertEqual(gh.run(f'{SCRIPT} "\\w+" {input_file}'), expected_result)
+        self.assertEqual(gh.run(f'{self.script_module} "\\w+" {input_file}'), expected_result)
 
 
     def test_get_pattern_from_file(self):
@@ -96,24 +93,24 @@ class TestIt(TestWrapper):
         input_string    = 'dog dog cat cat dog dog cat fish fish'
         expected_result = 'dog\t4\ncat\t3\nfish\t2'
         gh.run(f'touch {pattern_file} && echo -n "\\w+" > {pattern_file}')
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} {pattern_file}'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} {pattern_file}'), expected_result)
 
 
     def test_ignore_case(self):
         """test ignore case option"""
         input_string    = 'BiRd doG cat Cat Dog dOg dog BiRd BiRd Bird BiRd ocean caT oceaN'
         expected_result = 'bird\t5\ndog\t4\ncat\t3\nocean\t2'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --i "[a-z]+"'), expected_result)
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --ignore_case "[a-z]+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --i "[a-z]+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --ignore_case "[a-z]+"'), expected_result)
 
 
     def test_preserve(self):
         """test preserve option"""
         input_string    = 'BiRd doG cat Cat Dog dOg dog BiRd BiRd Bird BiRd ocean caT oceaN'
         expected_result = 'BiRd\t4\ndoG\t1\ncat\t1\nCat\t1\nDog\t1\ndOg\t1\ndog\t1\nBird\t1\nocean\t1\ncaT\t1\noceaN\t1'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} "\\w+"'), expected_result)
-        self.assertNotEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --i "\\w+"'), expected_result)
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --i --preserve "\\w+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} "\\w+"'), expected_result)
+        self.assertNotEqual(gh.run(f'echo "{input_string}" | {self.script_module} --i "\\w+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --i --preserve "\\w+"'), expected_result)
 
 
     def test_freq_first(self):
@@ -121,8 +118,8 @@ class TestIt(TestWrapper):
         input_string        = 'dog dog cat cat dog dog cat fish fish'
         expected_result     = '4\tdog\n3\tcat\n2\tfish'
         not_expected_result = 'dog\t4\ncat\t3\nfish\t2'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --freq_first "\\w+"'), expected_result)
-        self.assertNotEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --freq_first "\\w+"'), not_expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --freq_first "\\w+"'), expected_result)
+        self.assertNotEqual(gh.run(f'echo "{input_string}" | {self.script_module} --freq_first "\\w+"'), not_expected_result)
 
 
     def test_alpha(self):
@@ -130,67 +127,67 @@ class TestIt(TestWrapper):
         input_string        = 'hello this is a test'
         expected_result     = 'a\t1\ne\t2\nh\t2\ni\t2\nl\t2\no\t1\ns\t3\nt\t3'
         not_expected_result = 't\t3\ns\t3\ne\t2\nh\t2\ni\t2\nl\t2\na\t1\no\t1'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --alpha "\\w"'), expected_result)
-        self.assertNotEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --alpha "\\w"'), not_expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --alpha "\\w"'), expected_result)
+        self.assertNotEqual(gh.run(f'echo "{input_string}" | {self.script_module} --alpha "\\w"'), not_expected_result)
 
 
     def test_compact(self):
         """test compact option"""
         input_string    = '   this  ,    words   ,    only   ,    have   ,    one  ,    whitespaces  '
         expected_result = ' this \t1\n words \t1\n only \t1\n have \t1\n one \t1\n whitespaces \t1'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --compact "[^,]+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --compact "[^,]+"'), expected_result)
 
 
     def test_occurrences(self):
         """test count occurrences option"""
         input_string    = 'hello this is a test'
         expected_result = 'total occurrence count is 16'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --occurrences "\\w" | head -n 1'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --occurrences "\\w" | head -n 1'), expected_result)
 
 
     def test_occurrence_field(self):
         """test ocurrence field option"""
         input_string    = 'neo@hotmail.com\nmorfeo@gmail.com\ntrinity@gmail.com\nsmith@hotmail.com\ncypher@hotmail.com\ndozer@yahoo.com'
         expected_result = 'hotmail.com\t3\ngmail.com\t2\nyahoo.com\t1'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --occurrence_field 2 "(\\w+)@(.*$)"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --occurrence_field 2 "(\\w+)@(.*$)"'), expected_result)
 
 
     def test_percents(self):
         """test show percents option"""
         input_string    = 'dog dog cat cat dog dog cat fish fish'
         expected_result = 'dog\t4\t0.444\ncat\t3\t0.333\nfish\t2\t0.222'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --percents "\\w+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --percents "\\w+"'), expected_result)
 
 
     def test_min2_multiple_nonsingleton_nonsingletons(self):
         """test omit cases that occur once with options: min2 multiple nonsingleton nonsingletons"""
         input_string    = 'dog dog cat cat dog dog cat fish fish ocean monkeys plane ship'
         expected_result = 'dog\t4\ncat\t3\nfish\t2'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --min2 "\\w+"'), expected_result)
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --multiple "\\w+"'), expected_result)
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --nonsingleton "\\w+"'), expected_result)
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --nonsingletons "\\w+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --min2 "\\w+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --multiple "\\w+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --nonsingleton "\\w+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --nonsingletons "\\w+"'), expected_result)
 
 
     def test_min_freq(self):
         """test min freq option"""
         input_string    = 'dog dog cat dog dog cat dog dog cat fish cat fish monkey monkey cat fish'
         expected_result = 'dog\t6\ncat\t5'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --min_freq 4 "\\w+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --min_freq 4 "\\w+"'), expected_result)
 
 
     def test_trim(self):
         """test trim whitespaces option"""
         input_string    = ' this , words , not , have , whitespaces '
         expected_result = 'this\t1\nwords\t1\nnot\t1\nhave\t1\nwhitespaces\t1'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --trim "[^,]+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --trim "[^,]+"'), expected_result)
 
 
     def test_unaccent(self):
         """test unaccent option"""
         input_string    = 'dog dóg cat cát dog dog cát fish físh'
         expected_result = 'dog\t4\ncat\t3\nfish\t2'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --unaccent "\\w+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --unaccent "\\w+"'), expected_result)
 
 
     def test_chomp(self):

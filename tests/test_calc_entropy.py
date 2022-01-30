@@ -26,7 +26,7 @@ class TestIt(TestWrapper):
     script_module = TestWrapper.derive_tested_module_name(__file__) + '.py'
 
 
-    def test_normalize(self):
+    def test_normalize_function(self):
         """Test for calculate_weight_percentage(vector)"""
         input_vector  = [5, 10, 15, 20]
         result_vector = [0.100, 0.200, 0.300, 0.400]
@@ -196,7 +196,7 @@ class TestIt(TestWrapper):
                            '# word\tclasses\tfreq\tentropy\tmax_prob\n'
                            'n/a\t7\t422\t1.376\t0.566')
 
-        self.assertEquals(gh.run(f'echo "{input_string}" | {self.script_module} --last --verbose --alpha --cumulative -'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --last --verbose --alpha --cumulative -'), expected_result)
 
 
     def test_comments(self):
