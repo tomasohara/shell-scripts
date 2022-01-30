@@ -726,40 +726,44 @@ function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$
 function fgr () { findgrep . "$@" | egrep -v '((/backup)|(/build))'; }
 function fgr-ext () { findgrep-ext . "$@" | egrep -v '(/(backup)|(build)/)'; }
 alias fgr-py='fgr-ext py'
-#
+
+# OLD
 # prepare-find-files-here(): produces listing(s) of files in current directory
 # tree, in support of find-files-here; this contains full ls entry (as with -l).
 # (The subdirectory listings produced by 'ls -alR' are preceded by blank lines,
 # which is required for find-files-here as explained below.)
 # Notes: Also puts listing proper in ls-R.list (i.e., just list of files).
 # TODO: create external script and have alias call the script
-function prepare-find-files-here () {
-    if [ "$1" != "" ]; then
-        echo "Error: No arguments accepted; did you mean find-files-here?"
-        return
-    fi
-    local brief_opts="R"
-    local full_opts="alR"
-    local brief_file="ls-$brief_opts.list"
-    local full_file="ls-$full_opts.list"
-    local current_files=($full_file $full_file.log $brief_file $brief_file.log)
-    # Rename existing files with file date as suffix (TODO move into ./backup)
-    rename-with-file-date ${current_files[@]}
+#function prepare-find-files-here () {
+#    if [ "$1" != "" ]; then
+#        echo "Error: No arguments accepted; did you mean find-files-here?"
+#        return
+#    fi
+#    local brief_opts="R"
+#    local full_opts="alR"
+#    local brief_file="ls-$brief_opts.list"
+#    local full_file="ls-$full_opts.list"
+#    local current_files=($full_file $full_file.log $brief_file $brief_file.log)
+#    # Rename existing files with file date as suffix (TODO move into ./backup)
+#    rename-with-file-date ${current_files[@]}
+#
+#    # Perform the actual listings, putting errors in the .log file for each listing
+#    # Note: If root directory, filters out special directories (TODO: make optional and/or overridable).
+#    ## TODO: use approach based on filter variable and to avoid redundant hard-coding
+#    ## TODO: ** resolve intermittent problem when running under /
+#    if [ "$PWD" = "/" ]; then
+#        ($NICE ls -$brief_opts | egrep -v '^\.(/(cdrom|dev|media|mnt|proc|run|sys|snap)$)' | perl -pe 's/^\./\n$&/;' > "$brief_file") 2> "$brief_file".log
+#        ($NICE ls -$full_opts | egrep -v '^\.(/(cdrom|dev|media|mnt|proc|run|sys|snap)$)' | perl -pe 's/^\./\n$&/;' > "$full_file") 2> "$full_file".log
+#    else
+#        ($NICE ls -$brief_opts | perl -pe 's/^\./\n$&/;' > "$brief_file") 2> "$brief_file".log
+#        ($NICE ls -$full_opts | perl -pe 's/^\./\n$&/;' > "$full_file") 2> "$full_file".log
+#    fi;
+#    
+#    ls -lh ${current_files[@]}
+#}
+# NEW
+function prepare-find-files-here () { python find_files.py --list-here; }
 
-    # Perform the actual listings, putting errors in the .log file for each listing
-    # Note: If root directory, filters out special directories (TODO: make optional and/or overridable).
-    ## TODO: use approach based on filter variable and to avoid redundant hard-coding
-    ## TODO: ** resolve intermittent problem when running under /
-    if [ "$PWD" = "/" ]; then
-        ($NICE ls -$brief_opts | egrep -v '^\.(/(cdrom|dev|media|mnt|proc|run|sys|snap)$)' | perl -pe 's/^\./\n$&/;' > "$brief_file") 2> "$brief_file".log
-        ($NICE ls -$full_opts | egrep -v '^\.(/(cdrom|dev|media|mnt|proc|run|sys|snap)$)' | perl -pe 's/^\./\n$&/;' > "$full_file") 2> "$full_file".log
-    else
-        ($NICE ls -$brief_opts | perl -pe 's/^\./\n$&/;' > "$brief_file") 2> "$brief_file".log
-        ($NICE ls -$full_opts | perl -pe 's/^\./\n$&/;' > "$full_file") 2> "$full_file".log
-    fi;
-    
-    ls -lh ${current_files[@]}
-}
 #
 # TODO: have variant of prepare-find-files that adds .mmmYY suffix to backup
 #
@@ -875,10 +879,18 @@ alias calc-init='perl-calc-init'
 alias calc-int='perl-calc -integer'
 # TODO: use '$@' for '$*' (or note why not appropriate)
 function old-perl-calc () { perl -e "print $*;"; }
-function hex2dec { perl -e "printf '%d', 0x$1;" -e 'print "\n";'; }
-function dec2hex { perl -e "printf '%x', $1;" -e 'print "\n";'; }
-function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
-function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
+
+# OLD
+#function hex2dec { perl -e "printf '%d', 0x$1;" -e 'print "\n";'; }
+#function dec2hex { perl -e "printf '%x', $1;" -e 'print "\n";'; }
+#function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
+#function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
+#NEW
+function hex2dec { numeric_tools.py --hex2dec --i $1; }
+function dec2hex { numeric_tools.py --dec2hex --i $1; }
+function bin2dec { numeric_tools.py --bin2dec --i $1; }
+function dec2bin { numeric_tools.py --dec2bin --i $1; }
+
 alias hv='hexview.perl'
 
 #-------------------------------------------------------------------------------
@@ -898,9 +910,13 @@ alias fix-keyboard='kbd_mode -a'
 function asctime() { perl -e "print (scalar localtime($1));"; echo ""; }
 function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
 
+# OLD
 # comma-ize-number(): add commas to numbers in stdin
-function comma-ize-number () { perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\d])/\1,\2\3/g; } '; }
-#
+# function comma-ize-number () { perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\d])/\1,\2\3/g; } '; }
+# NEW
+function comma-ize-number () { python numeric_tools.py --comma-ize; }
+
+# OLD
 # apply-numeric-suffixes([once=0]): converts numbers in stdin to use K/M/G suffixes.
 # Notes:
 # - K, M, G and T based on powers of 1024.
@@ -912,24 +928,34 @@ function comma-ize-number () { perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\
 # - Make the trailing context a word-boundry as well (rather than whitespace).
 # EX: echo "1024 1572864 1073741824" | apply-numeric-suffixes => 1K 1.5M 1G
 # EX: echo "1024 1572864 1073741824" | apply-numeric-suffixes 1 => 1K 1572864 1073741824
-function apply-numeric-suffixes () {
-    local just_once="$1"
-    local g="g";
-    if [ "$just_once" = "1" ]; then g=""; fi
-    # TODO: make only sure the first number is converted if just-once applies
-    # NOTE: 3 args to sprintf: coefficient, KMGT suffix, and post-context
-    ## DEBUG; perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = log($1)/log(1024);  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  print STDERR ("s=$suffixes p=$pow nn=$new_num l=$suffix\n"); sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
-    perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = int(log($1)/log(1024));  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
-}
-#
+#function apply-numeric-suffixes () {
+#    local just_once="$1"
+#    local g="g";
+#    if [ "$just_once" = "1" ]; then g=""; fi
+#    # TODO: make only sure the first number is converted if just-once applies
+#    # NOTE: 3 args to sprintf: coefficient, KMGT suffix, and post-context
+#    ## DEBUG; perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = log($1)/log(1024);  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  print STDERR ("s=$suffixes p=$pow nn=$new_num l=$suffix\n"); sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
+#    perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = int(log($1)/log(1024));  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
+#}
+# NEW
+function apply-numeric-suffixes () { }
+
+# OLD
 # apply-usage-numeric-suffixes(): factors in 1k blocksize before applying numeric suffixes
 # note: (?=\s) is lookahead pattern (see perlre manpage)
 #
-function apply-usage-numeric-suffixes() {
-    perl -pe 's@^(\d+)(?=\s)@$1 * 1024@e;' | apply-numeric-suffixes 1
-}
+#function apply-usage-numeric-suffixes() {
+#    perl -pe 's@^(\d+)(?=\s)@$1 * 1024@e;' | apply-numeric-suffixes 1
+#}
+# NEW
+function apply-usage-numeric-suffixes() {}
+
 # TODO: rework so that pp version saved in file
+# OLD
+# alias usage-pp='usage | apply-usage-numeric-suffixes | $PAGER'
+# NEW
 alias usage-pp='usage | apply-usage-numeric-suffixes | $PAGER'
+
 #
 # number-columns(file): number each column in first line of tabular file
 function number-columns () { head -1 "$1" | perl -0777 -pe '$c = 1; s/^/1: /; s/\t/"\t" . ++$c . ": "/eg;'; }
@@ -966,8 +992,17 @@ function byte-usage () { output_file="usage.bytes.list"; backup-file $output_fil
 
 # check[all-]-(errors|warnings): check for known errors, with the check-all
 # variant including more patterns and with warnings subsuming errors.
-function check-errors () { (check_errors.perl -context=5 "$@") 2>&1 | $PAGER; }
-function check-all-errors () { (check_errors.perl -warnings -relaxed -context=5 "$@") 2>&1 | $PAGER; }
+
+## OLD
+## function check-errors () { (check_errors.perl -context=5 "$@") 2>&1 | $PAGER; }
+## NEW
+function check-errors () { (check_errors.py --context=5 "$@") 2>&1 | $PAGER; }
+
+## OLD
+## function check-all-errors () { (check_errors.perl -warnings -relaxed -context=5 "$@") 2>&1 | $PAGER; }
+## NEW
+function check-all-errors () { (check_errors.py --warnings --relaxed --context=5 "$@") 2>&1 | $PAGER; }
+
 alias check-warnings='echo "*** Error: use check-all-errors instead ***"; echo "    check-all-errors"'
 alias check-all-warnings='check-all-errors -strict'
 #
@@ -1181,7 +1216,11 @@ alias un-zip='command-to-pager unzip'
 
 alias color-xterm='rxvt&'
 
-alias count-it='perl- count_it.perl'
+## OLD
+## alias count-it='perl- count_it.perl'
+## NEW
+alias count-it='tpo_count_it.py'
+
 alias count_it=count-it
 function count-tokens () { count-it "\S+" "$@"; }
 # TODO: rework via chomp
@@ -1331,8 +1370,16 @@ function remove-cr-and-backup () { dobackup.sh $1; remove-cr < backup/$1 >| $1; 
 alias perl-remove-cr='perl -i.bak -pn -e "s/\r//;"'
 
 # Text manipulation
+## OLD
+## alias 'difference=intersection.perl -diff'
+## NEW
+function difference () { python -c "from mezcla import misc_utils as mu; print(mu.string_diff('$1', '$2'))"; }
+
 alias 'intersection=intersection.perl'
-alias 'difference=intersection.perl -diff'
+## OLD
+## alias 'difference=intersection.perl -diff'
+## NEW
+alias difference='difference'
 alias 'line-intersection=intersection.perl -line'
 alias 'line-difference=intersection.perl -diff -line'
 function show-line () { tail --lines=+$1 $2 | head -1; }
@@ -1418,27 +1465,34 @@ alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
 alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,report,tsv,xml}" "output-files"'
 alias move-adhoc-files='move-log-files; move-output-files'
 
+# OLD
 # rename-with-file-date(file, ...): rename each file(s) with .ddMmmYY suffix
 # Notes: 1. If file.ddMmmYY exists, file.ddMmmYY.N tried (for N in 1, 2, ...).
 # 2. No warning is issued if the file doesn't exist, so can be used as a no-op.
 # TODO: have option to put suffix before extension
-function rename-with-file-date() {
-    local f new_f
-    local move_command="move"
-    if [ "$1" = "--copy" ]; then
-        ## TODO: move_command="copy"
-        move_command="command cp --interactive --verbose --preserve"
-        shift
-    fi
-    for f in "$@"; do
-        ## DEBUG: echo "f=$f"
-        if [ -e "$f" ]; then
-           new_f=$(get-free-filename "$f".$(date --reference="$f" '+%d%b%y') ".")
-           ## DEBUG: echo
-           eval "$move_command" "$f" "$new_f";
-        fi
-    done;
-}
+#function rename-with-file-date() {
+#    local f new_f
+#    local move_command="move"
+#    if [ "$1" = "--copy" ]; then
+#        ## TODO: move_command="copy"
+#        move_command="command cp --interactive --verbose --preserve"
+#        shift
+#    fi
+#    for f in "$@"; do
+#        ## DEBUG: echo "f=$f"
+#        if [ -e "$f" ]; then
+#           # OLD
+#           # new_f=$(get-free-filename "$f".$(date --reference="$f" '+%d%b%y') ".")
+#           # NEW
+#           new_f=$(python filenames --free --base "$f".$(date --reference="$f" '+%d%b%y') --sep ".")
+#           ## DEBUG: echo
+#           eval "$move_command" "$f" "$new_f";
+#        fi
+#    done;
+#}
+# NEW
+function rename-with-file-date() { python filenames.py --rename --free-with-date --files "$@"; }
+
 alias copy-with-file-date='rename-with-file-date --copy'
 
 # Statistical helpers
@@ -1478,18 +1532,23 @@ alias unexport='unset'
 
 # Unicode support
 #
+# OLD
 # TODO: put show-unicode-code-info-aux into script (as with other overly-large function definitions like hg-pull-and-update)
 # show-unicode-control-chars(): output Unicode codepoint (ordinal) and UTF-8 encoding for input chars with offset in line
-function show-unicode-code-info-aux() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < $1; }
-function show-unicode-code-info-stdin() { in_file="$TEMP/show-unicode-code-info.$$"; cat >| $in_file;  show-unicode-code-info-aux $in_file; }
-#
+#function show-unicode-code-info-aux() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < $1; }
+#function show-unicode-code-info-stdin() { in_file="$TEMP/show-unicode-code-info.$$"; cat >| $in_file;  show-unicode-code-info-aux $in_file; }
+# NEW
+function show-unicode-code-info() { python encoding_tools.py --show-unicode-info $1; }
+
 function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
 #
-# show-unicode-control-chars(): Convert ascii control characters to printable Unicode ones (e.g., ␀ for 0x00)
-## BAD: function show-unicode-control-chars { perl -pe 'use Encode "decode_utf8"; s/[\x00-\x1F]/chr($&+0x2400)/e;'; }
+# OLD
+# BAD: function show-unicode-control-chars { perl -pe 'use Encode "decode_utf8"; s/[\x00-\x1F]/chr($&+0x2400)/e;'; }
 # See https://stackoverflow.com/questions/42193957/errorwide-character-in-print-at-x-at-line-35-fh-read-text-files-from-comm.
-function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr($& + 0x2400)/e;'; }
-
+# function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr($& + 0x2400)/e;'; }
+# NEW
+# show-unicode-control-chars(): Convert ascii control characters to printable Unicode ones (e.g., ␀ for 0x00)
+function show-unicode-control-chars { python encoding_tools.py --show-control-chars $1; }
 
 #-------------------------------------------------------------------------------
 trace Unix aliases
@@ -1675,19 +1734,21 @@ alias stop-service='systemctl stop'
 # Notes: 1. If <base> exists <base><sep><N> checked until the filename not used (for N in 2, 3, ... ).
 # 2. See sudo-admin for sample usage; also see rename-with-file-date.
 #
-function get-free-filename() {
-    local base="$1"
-    local sep="$2"
-    local L=1
-    local filename="$base"
-    ## DEBUG: local -p
-    while [ -e "$filename" ]; do
-        let L++
-        filename="$base$sep$L"
-    done;
-    ## DEBUG: local -p
-    echo "$filename"
-}
+#function get-free-filename() {
+#    local base="$1"
+#    local sep="$2"
+#    local L=1
+#    local filename="$base"
+#    ## DEBUG: local -p
+#    while [ -e "$filename" ]; do
+#        let L++
+#        filename="$base$sep$L"
+#    done;
+#    ## DEBUG: local -p
+#    echo "$filename"
+#}
+# NEW
+function get-free-filename() { python filenames.py --free --base "$1" --sep "$2"; }
 
 # sudo-admin(): create typescript as sudo user using filename based on current
 # date using numeric suffixes if necessary until the filename is free.
@@ -1975,7 +2036,10 @@ function python-lint() { python-lint-work "$@" 2>&1 | egrep -v '(Exactly one spa
 # files in FILE_SPEC, placing results in pylint/<today>.
 #
 function get-python-lint-dir () {
-    local python_version_major=$(pylint --version 2>&1 | extract_matches.perl "Python (\d)")
+    ## OLD
+    ## local python_version_major=$(pylint --version 2>&1 | extract_matches.perl "Python (\d)")
+    ## NEW
+    local python_version_major=$(pylint --version 2>&1 | extract_matches.py "Python (\d)")
     local affix="py${python_version_major}"
     local out_dir="_pylint/$(todays-date)-$affix"
     echo "$out_dir"
@@ -2006,7 +2070,10 @@ function run-python-lint-batched () {
 # Note: this checks output via module initialization output shown with python -v
 # ex: /usr/local/misc/programs/anaconda3/lib/python3.8/site-packages/sklearn/__pycache__/__init__.cpython-38.pyc matches /usr/local/misc/programs/anaconda3/lib/python3.8/site-packages/sklearn/__init__.py
 function python-import-path-all() { local module="$1"; python -u -v -c "import $module" 2>&1; }
-function python-import-path-full() { local module="$1"; python-import-path-all "$@" | extract_matches.perl "((matches (.*\W$module[^/]*[/\.][^/]*))|ModuleNotFoundError)"; }
+## OLD
+## function python-import-path-full() { local module="$1"; python-import-path-all "$@" | extract_matches.perl "((matches (.*\W$module[^/]*[/\.][^/]*))|ModuleNotFoundError)"; }
+## NEW
+function python-import-path-full() { local module="$1"; python-import-path-all "$@" | extract_matches.py "((matches (.*\W$module[^/]*[/\.][^/]*))|ModuleNotFoundError)"; }
 function python-import-path() { python-import-path-full "$@" | head -1; }
 
 #
