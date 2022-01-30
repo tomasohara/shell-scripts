@@ -59,18 +59,23 @@ class EncodingTools(Main):
 def get_unicode_info(text):
     """Show unicode info"""
 
-    unicode_info = 'char\tord\toffset\tencoding\n'
-
     text = system.chomp(text)
 
-    unicode_info += f'{text}: {len(text)}\n'
+    info  = 'char\tord\toffset\tencoding\n'
+    info += f'{text}: {len(text)}\n'
 
-    for offset, char in enumerate(text):
-        ord_char  = (hex(ord(char))).replace('0x', '')
-        utf8_char = hex(ord(char.encode('utf-8'))).replace('0x', '') # TODO: check this.
-        unicode_info += f'{char}\t{ord_char.zfill(4)}\t{offset}\t{utf8_char}\n'
+    offset = 0
 
-    return unicode_info
+    for char in text:
+        hex_char = hex(ord(char))[2:].upper()
+        utf_char = str(char.encode('utf-8')).replace('b', '').replace('\'', '').replace('\\x', '')
+
+        utf_char = utf_char if len(utf_char) > 1 else hex(ord(utf_char))[2:]
+
+        info   += f'{char}\t{hex_char.zfill(4)}\t{offset}\t{utf_char}\n'
+        offset += int(len(utf_char) / 2)
+
+    return info
 
 
 def convert_unicode_control_chars(text):
