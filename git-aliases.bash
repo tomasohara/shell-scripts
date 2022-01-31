@@ -25,6 +25,11 @@
 #     ~/.git-credentials
 #   See https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage.
 #
+# - config needed for using stored credentials (~/.gitconfig):
+#
+#   [credential]
+#   helper = store
+#
 # - via https://gist.github.com/flc/f867e2b92cc878a55801#file-hg_vs_git-txt:
 #
 #   hg init => git init
@@ -183,6 +188,22 @@ alias git-difftool='git difftool --no-prompt'
 #
 function git-vdiff { git-difftool "$@" & }
 
+# Output template for doing checkin of modified files
+function git-checkin-template {
+    echo "    #    TODO: pushd \$REPO_ROOT"
+    echo "    #    -OR-: pushd \$(realpath .)/.."
+    echo "    log=\$TMP/_git-diff.\$\$.list"
+    echo "    git diff 2>&1 | extract_matches.perl '^diff.*b/(.*)' >| \$log"
+    echo "    cat \$log"
+    echo "    # To do shamelessly lazy check-in of all modified files:"
+    echo "        echo GIT_MESSAGE='miscellaneous update' git-update-commit-push \$(cat \$log)"
+    echo "    # -or- to check in one file (ideally with main differences noted):"
+    echo "        mod_file=\$(head -1 < \"\$log\"); git-vdiff \"\$mod_file\""
+    echo "        echo GIT_MESSAGE=\"...\" git-update-commit-push \"\$mod_file\""
+    echo "    # TODO: popd"
+    echo "    cat $log | xargs -I '{}' echo GIT_MESSAGE='...' git-update-commit-push '{}'"
+    echo "    clear; git-checkin-template"
+}
 
 function git-alias-usage () {
     echo "Usage examples for git aliases, most of which create log files as follows:"
@@ -202,19 +223,19 @@ function git-alias-usage () {
     # shellcheck disable=SC2016
     {
         echo "To check in files different from repo (n.b. ¡cuidado!):"
-        echo '    #    TODO: pushd $REPO_ROOT'
-        echo '    #    -OR-: pushd $(realpath .)/..'
-        echo '    log=$TMP/_git-diff.$$.list'
-        echo '    git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)" >| $log'
-        echo '    cat $log'
-        echo '    # To do shamelessly lazy check-in of all modified files:'
-        echo '        echo GIT_MESSAGE="miscellaneous update" git-update-commit-push $(cat $log)'
-        echo '    # -or- to check in one file (ideally with main differences noted):'
-        echo '        mod_file=$(cat "$log" | head -1); git-vdiff "$mod_file"'
-        echo '        echo GIT_MESSAGE="..." git-update-commit-push "$mod_file"'
-        echo '    # TODO: popd'
-        echo "To generate template from above diff for individual check-in's:"
-        echo '    cat $log | xargs -I "{}" echo GIT_MESSAGE=\"...\" git-update-commit-push "{}"'
+	## OLD:
+        ## echo '    #    TODO: pushd $REPO_ROOT'
+        ## echo '    #    -OR-: pushd $(realpath .)/..'
+        ## echo '    log=$TMP/_git-diff.$$.list'
+        ## echo '    git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)" >| $log'
+        ## echo '    cat $log'
+        ## echo '    # To do shamelessly lazy check-in of all modified files:'
+        ## echo '        echo GIT_MESSAGE="miscellaneous update" git-update-commit-push $(cat $log)'
+        ## echo '    # -or- to check in one file (ideally with main differences noted):'
+        ## echo '        mod_file=$(cat "$log" | head -1); git-vdiff "$mod_file"'
+        ## echo '        echo GIT_MESSAGE="..." git-update-commit-push "$mod_file"'
+        ## echo '    # TODO: popd'
+	git-checkin-template
     }
     ## OLD:
     ## #
