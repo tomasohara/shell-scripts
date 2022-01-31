@@ -33,24 +33,23 @@
 #
 
 
- # TODO: put notes before examples as with other scripts
 """
 calculates entropy of a class using the output of a frequency tabulation program
 
 examples:
-calc_entropy.py -d=5 -class_filter=\"pp-bnf pp-dir pp-mnr pp-prp pp-tmp pp=ext pp-loc\" as.freq
-calc_entropy.py -verbose -simple .47 .42 .06 .05
-calc_entropy.py -freq_last all-fe.freq
-ls /etc | count_it.perl '\\w+' | calc_entropy.py -last -verbose -
+calc_entropy.py --class_filter=\"pp-bnf pp-dir pp-mnr pp-prp pp-tmp pp=ext pp-loc\" as.freq
+calc_entropy.py --verbose --simple --probabilities \".47 .42 .06 .05\" -
+calc_entropy.py --freq_last all-fe.freq
+ls /etc | tpo_count_it.py '\\w+' | calc_entropy.py --last --verbose -
 
 file=bridge-over-troubled-waters.chords
-count_it.py '^(\\S+)\\t' file >| file.freq
-calc_entropy.py -no_comments -verbose -last file.freq | cut.perl -f='3,5' - >| file.rfreq\n
+tpo_count_it.py '^(\\S+)\\t' file >| file.freq
+calc_entropy.py --no_comments --verbose --last file.freq | cut.perl -f='3,5' - >| file.rfreq\n
 
 \nusage: calc_entropy.py [options]\n
 notes:
-- The -strip_comments option is an alias for old -no_comments=0.
-- Use -verbose for more details.
+- The --strip_comments option is an alias for old --no_comments=False.
+- Use --verbose for more details.
 """
 
 
@@ -410,7 +409,7 @@ class CalcEntropy(Main):
 
 
         if self.verbose and not self.just_freq:
-            result += '-' * 32
+            result += '#' + '-' * 32 + '\n'
             if not self.skip_header:
                 result += '# word\tclasses\tfreq\tentropy\tmax_prob\n'
             result += (f'#\t{format(sum_p, ".3f")}\t'
