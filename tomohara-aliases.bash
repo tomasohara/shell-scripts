@@ -1626,6 +1626,9 @@ function cmd-usage () {
 alias configure='./configure --prefix ~'
 alias pp-xml='xmllint --format'
 alias pp-html='pp-xml --html'
+# ex: pp-url "www.fu.com?p1=fu&p2=bar" => "www.fu.com\n\t?p1=fu\n\tp2=bar"
+alias pp-url-aux='perl -pe "s/[\&\?]/\n\t$&/g;"'
+function pp-url { echo "$@" | pp-url-aux; }
 ## OLD: alias check-xml='xmllint --noout --valid'
 alias check-xml='xmllint --noout'
 alias check-xml-valid='check-xml --valid'
