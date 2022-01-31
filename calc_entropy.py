@@ -178,6 +178,7 @@ class CalcEntropy(Main):
             self.simple_calc_entropy(data)
 
 
+        # Otherwise check for class name and frequency data.
         else:
             # Get and process data from files
             if self.filename and not self.filename == '-':
@@ -324,13 +325,10 @@ class CalcEntropy(Main):
             result += '#\t\tclass\tfreq\tprob\t-p lg(p)\n'
 
 
-        entropy     = 0.0
-        max_prob    = 0.0
-        sum_p       = 0.0
-        num_classes = 0
+        entropy  = 0.0
+        max_prob = 0.0
+        sum_p    = 0.0
 
-
-        # TODO: refactor this to avoid duplicated code
         for class_name, frequency in data:
             if not frequency:
                 continue
@@ -354,8 +352,6 @@ class CalcEntropy(Main):
                            f'{format(prob_value, ".3f")}\t'
                            f'{format(p_lg_p, ".3f")}\n')
 
-            num_classes += 1
-
 
         if self.just_freq:
             # do nothing
@@ -367,7 +363,7 @@ class CalcEntropy(Main):
             if not self.skip_header:
                 result += f'# word\tclasses\tfreq\tentropy\tmax_prob\n'
             result += (f'{word}\t'
-                       f'{num_classes}\t'
+                       f'{len(data)}\t'
                        f'{total_frequency}\t'
                        f'{format(entropy, ".3f")}\t'
                        f'{format(max_prob, ".3f")}')
@@ -387,16 +383,15 @@ class CalcEntropy(Main):
         result = ''
 
 
+        if (self.verbose and not self.just_freq):
+            result +=  '#\tprob\t-p lg(p)    max p\n'
+            result += f'#' + '-' * 32 + '\n'
+
+
         entropy  = 0.0
         max_prob = 0.0
-        if (self.verbose and not self.just_freq):
-            result += '#\tprob\t-p lg(p)    max p\n'
-            result += '' # TODO: implement equivalent to: printf "#%s\n", "-" x 32;
-        num_classes = len(data)
-        sum_p       = 0.0
+        sum_p    = 0.0
 
-
-        # TODO: refactor this to avoid duplicated code
         for prob in data:
 
             # calculations
@@ -436,7 +431,7 @@ class CalcEntropy(Main):
             if self.label:
                 result += self.label + '\t'
             if self.show_classes:
-                result += str(num_classes) + '\t'
+                result += str(len(data)) + '\t'
             result += str(format(entropy, ".3f"))
 
 
