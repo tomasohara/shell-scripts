@@ -200,14 +200,18 @@ class TestIt(TestWrapper):
         ## WORK-IN-PROGRESS
 
 
-    def test_multi_per_line(self):
-        """test multi per line option"""
-        ## WORK-IN-PROGRESS
-
-
     def test_one_per_line(self):
-        """test one per line"""
-        ## WORK-IN-PROGRESS
+        """test one_per_line option"""
+        input_string      = 'there are two sedan car and a deportive car\nthere are a antique car and a truck'
+        expected_single   = 'car\t2'
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --one_per_line "car"'), expected_single)
+
+
+    def test_multi_per_line(self):
+        """test multi_per_line option"""
+        input_string      = 'there are two sedan car and a deportive car\nthere are a antique car and a truck'
+        expected_multiple = 'car\t3'
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --multi_per_line "car"'), expected_multiple)
 
 
 if __name__ == '__main__':
