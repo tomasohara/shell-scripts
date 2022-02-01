@@ -188,21 +188,43 @@ alias git-difftool='git difftool --no-prompt'
 #
 function git-vdiff { git-difftool "$@" & }
 
-# Output template for doing checkin of modified files
-function git-checkin-template {
-    echo "    #    TODO: pushd \$REPO_ROOT"
-    echo "    #    -OR-: pushd \$(realpath .)/.."
-    echo "    log=\$TMP/_git-diff.\$\$.list"
-    echo "    git diff 2>&1 | extract_matches.perl '^diff.*b/(.*)' >| \$log"
-    echo "    cat \$log"
-    echo "    # To do shamelessly lazy check-in of all modified files:"
-    echo "        echo GIT_MESSAGE='miscellaneous update' git-update-commit-push \$(cat \$log)"
-    echo "    # -or- to check in one file (ideally with main differences noted):"
-    echo "        mod_file=\$(head -1 < \"\$log\"); git-vdiff \"\$mod_file\""
-    echo "        echo GIT_MESSAGE=\"...\" git-update-commit-push \"\$mod_file\""
-    echo "    # TODO: popd"
-    echo "    cat $log | xargs -I '{}' echo GIT_MESSAGE='...' git-update-commit-push '{}'"
-    echo "    clear; git-checkin-template"
+# Produce listing of changed files
+# note: used in check-in templates, so level of indirection involved
+#
+function git-diff-list-template {
+    echo "diff_list_file=\$TMP/_git-diff.\$\$.list"
+    echo "git diff 2>&1 | extract_matches.perl '^diff.*b/(.*)' >| \$diff_list_file"
+}
+function git-diff-list {
+    local diff_list_file
+    local diff_list_script="$TMP/_git-diff-list.$$.bash"
+    git-diff-list-template >| "$diff_list_script"
+    source "$diff_list_script"
+    cat "$diff_list_file"
+#
+
+# Output templates for doing checkin of modified files
+function git-checkin-template-aux {
+    git-diff-list-template
+}
+#
+function git-checkin-single-template {
+    git-checkin-template-aux
+    echo "# To check in one file (ideally with main differences noted):"
+    echo "mod_file=\$(head -1 < \"\$diff_list_file\"); git-vdiff \"\$mod_file\""
+    echo "echo GIT_MESSAGE=\\\"...\\\" git-update-commit-push \"\$mod_file\""
+}
+#    
+function git-checkin-multiple-template {
+    git-checkin-template-aux
+    echo "# To generate template from above diff for individual check-in's:"
+    echo "cat \$diff_list_file | xargs -I \"{}\" echo GIT_MESSAGE=\\\"...\\\" git-update-commit-push \"{}\""
+}
+#
+function git-checkin-all-template {
+    git-checkin-template-aux
+    echo "# To do shamelessly lazy check-in of all modified files:"
+    echo "echo GIT_MESSAGE=\'miscellaneous update\' git-update-commit-push \$(cat \$diff_list_file)"
 }
 
 function git-alias-usage () {
@@ -223,24 +245,10 @@ function git-alias-usage () {
     # shellcheck disable=SC2016
     {
         echo "To check in files different from repo (n.b. ¡cuidado!):"
-	## OLD:
-        ## echo '    #    TODO: pushd $REPO_ROOT'
-        ## echo '    #    -OR-: pushd $(realpath .)/..'
-        ## echo '    log=$TMP/_git-diff.$$.list'
-        ## echo '    git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)" >| $log'
-        ## echo '    cat $log'
-        ## echo '    # To do shamelessly lazy check-in of all modified files:'
-        ## echo '        echo GIT_MESSAGE="miscellaneous update" git-update-commit-push $(cat $log)'
-        ## echo '    # -or- to check in one file (ideally with main differences noted):'
-        ## echo '        mod_file=$(cat "$log" | head -1); git-vdiff "$mod_file"'
-        ## echo '        echo GIT_MESSAGE="..." git-update-commit-push "$mod_file"'
-        ## echo '    # TODO: popd'
-	git-checkin-template
+	echo "#    TODO: pushd \$REPO_ROOT"
+	echo "#    -OR-: pushd \$(realpath .)/.."
+	echo 'git-checkin-single-template >| _git-checkin-template.sh; source _git-checkin-template.sh'
+	echo '# Alt: git-checkin-multiple-template ...'
     }
-    ## OLD:
-    ## #
-    ## echo ""
-    ## echo "To check in all changes:"
-    ## echo "    git-update-commit-push-all"
-    ## echo ""
+
 }
