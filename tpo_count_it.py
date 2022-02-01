@@ -214,10 +214,7 @@ class CountIt(Main):
 
 
             # Try to extract match from the line
-            if self.ignore_case:
-                match = re.search(self.pattern, line, flags=re.IGNORECASE)
-            else:
-                match = re.search(self.pattern, line)
+            match = re.search(self.pattern, line, flags=re.IGNORECASE if self.ignore_case else 0)
 
 
             if match:
