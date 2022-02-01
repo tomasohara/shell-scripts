@@ -170,14 +170,15 @@ function git-push() {
     fi;
 }
 
-# add filename(s) to repository
-function git-add() {
+# git-add: add filename(s) to repository
+function git-add {
     local log="_git-diff-$(TODAY).$$.log";
     git add "$@" >| "$log";
     tail "$log";
 }
-	
-function git-diff () {
+
+# git-diff: show repo diff
+function git-diff {
     ## OLD: git diff "$@" 2>&1 | less -p '^diff';
     local log="_git-diff-$(TODAY).$$.log"
     git diff "$@" >| "$log";
@@ -201,7 +202,7 @@ function git-diff-list {
     git-diff-list-template >| "$diff_list_script"
     source "$diff_list_script"
     cat "$diff_list_file"
-#
+}
 
 # Output templates for doing checkin of modified files
 function git-checkin-template-aux {
@@ -227,9 +228,11 @@ function git-checkin-all-template {
     echo "echo GIT_MESSAGE=\'miscellaneous update\' git-update-commit-push \$(cat \$diff_list_file)"
 }
 
+# git-alias-usage: tips on interactive usage
 function git-alias-usage () {
     echo "Usage examples for git aliases, most of which create log files as follows:"
     echo "   _git-{label}-\$(TODAY).\$\$.log      # ex: _git-update-$(TODAY).$$.log"
+    echo ""
     echo "To update aliases:"
     echo "   source \$TOM_BIN/git-aliases.bash; clear; git-alias-usage"
     echo ""
@@ -237,18 +240,18 @@ function git-alias-usage () {
     echo "    git-update"
     echo ""
     echo "To check in specified changes:"
-    echo "    GIT_MESSAGE='...' git-update-commit-push file, ..."
+    echo "    GIT_MESSAGE='...' git-update-commit-push file ..."
     echo ""
     #
     # Note: disable spellcheck SC2016 (n.b., unfortunately just for next statement, so awkward brace group added)
     #    Expressions don't expand in single quotes, use double quotes for that.
     # shellcheck disable=SC2016
     {
-        echo "To check in files different from repo (n.b. ¡cuidado!):"
-	echo "#    TODO: pushd \$REPO_ROOT"
-	echo "#    -OR-: pushd \$(realpath .)/.."
-	echo 'git-checkin-single-template >| _git-checkin-template.sh; source _git-checkin-template.sh'
-	echo '# Alt: git-checkin-multiple-template ...'
+        echo "To check in files different from repo:"
+	echo "    # TODO: pushd \$REPO_ROOT"
+	echo "    # -OR-: pushd \$(realpath .)/.."
+	echo '    git-checkin-single-template >| _git-checkin-template.sh; source _git-checkin-template.sh'
+	echo '    # ALT: git-checkin-multiple-template and git-checkin-all-template (n.b. ¡cuidado!)'
     }
 
 }
