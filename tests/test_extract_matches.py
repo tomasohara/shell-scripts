@@ -62,14 +62,14 @@ class TestIt(TestWrapper):
         self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --fields 2 "(\\d+) (\\w+)"'), expected_result)
 
 
-    def test_one_per_line(self):
-        """test one_per_line option"""
-        ## WORK-IN-PROGRESS
-
-
-    def test_multi_per_line(self):
-        """test one_per_line option"""
-        ## WORK-IN-PROGRESS
+    def test_n_per_line(self):
+        """test one_per_line and multi_per_line options"""
+        input_string      = 'there are one cement truck and two oil truck\nthere are three truck and one car'
+        expected_single   = "truck\ntruck"
+        expected_multiple = 'truck\ntruck\ntruck'
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --single "truck"'), expected_single)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --one_per_line "truck"'), expected_single)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --multi_per_line "truck"'), expected_multiple)
 
 
     def test_max_count(self):
@@ -81,18 +81,22 @@ class TestIt(TestWrapper):
 
     def test_ignore_case(self):
         """test ignore_case option"""
-        ## WORK-IN-PROGRESS
+        input_string       = 'there are one cement truck and two oil tRuck\nthere are three Truck and one car'
+        expected_ignore    = 'truck\ntruck\ntruck'
+        self.assertNotEqual(gh.run(f'echo "{input_string}" | {self.script_module} "truck"'), expected_ignore)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --i "truck"'), expected_ignore)
 
 
     def test_preserve(self):
         """test preseve option"""
-        ## WORK-IN-PROGRESS
+        input_string    = 'there are one cement tRucK'
+        expected_result = 'tRucK'
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --i --preserve "truck"'), expected_result)
 
 
     def test_chomp(self):
         """test strip newline at end with option: chomp"""
         ## WORK-IN-PROGRESS
-
 
 
 if __name__ == '__main__':
