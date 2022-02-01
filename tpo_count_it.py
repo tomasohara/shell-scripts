@@ -108,7 +108,6 @@ class CountIt(Main):
     restore          = ""
     verbose          = False
     one_per_line     = False
-    multi_per_line   = False
     paragraph_mode   = False # paragraph mode
     file_input_mode  = False # aka file slurping
 
@@ -163,17 +162,17 @@ class CountIt(Main):
 
         # See if regex has line achor (^ or $)
         # NOTE: Escaped $ are ignored.
-        has_line_anchor     = re.search(r'^\^|[^\\]\$$', self.pattern)
-        self.one_per_line   = self.has_parsed_option(ONE_PER_LINE) or has_line_anchor         # only count one instance of the pattern per line
-        self.multi_per_line = self.has_parsed_option(MULTI_PER_LINE) or not self.one_per_line # count multiple instance of the pattern per line (even when ^ and $ are specified)
-        debug.assertion(not (self.one_per_line and self.multi_per_line))
+        has_line_anchor   = re.search(r'^\^|[^\\]\$$', self.pattern)
+        self.one_per_line = self.has_parsed_option(ONE_PER_LINE) or has_line_anchor         # only count one instance of the pattern per line
+        multi_per_line    = self.has_parsed_option(MULTI_PER_LINE) or not self.one_per_line # count multiple instance of the pattern per line (even when ^ and $ are specified)
+        debug.assertion(not (self.one_per_line and multi_per_line))
 
 
         # Sanity check for whether one-per-line option might be needed
         # NOTE: checks against pattern need to occur prior to modification (e.g., paren addition)
         # TODO: handle multiple patterns per line (e.g., set line break to null); likewise check for multiple end-of-line matching
-        if re.search(r'^\^.*[^\$\n]$', self.pattern) and not self.multi_per_line:
-            debug.trace(debug.USUAL, 'You might want to specify -multi_per_line if you want ^ and/or $ interpretted after match removal.')
+        if re.search(r'^\^.*[^\$\n]$', self.pattern) and not multi_per_line:
+            debug.trace(debug.USUAL, f'You might want to specify --{MULTI_PER_LINE} if you want ^ and/or $ interpretted after match removal.')
 
 
         # Put grouping parenthesis around pattern, if none present
