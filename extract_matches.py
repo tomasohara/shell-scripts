@@ -72,8 +72,6 @@ class ExtractMatches(Main):
     paragraph_mode  = False # paragraph mode
     file_input_mode = False # aka file slurping
     fields          = 0
-    one_per_line    = False
-    multi_per_line  = False
     max_count       = 0
     ignore_case     = False
     preserve        = False
@@ -92,9 +90,9 @@ class ExtractMatches(Main):
         self.file_input_mode = self.has_parsed_option(SLURP) or self.has_parsed_option(FILE)
         self.fields          = self.get_parsed_option(FIELDS, 1)
         single               = self.has_parsed_option(SINGLE)
-        self.one_per_line    = self.has_parsed_option(ONE_PER_LINE) or single
-        self.multi_per_line  = self.has_parsed_option(MULTI_PER_LINE) or not single
-        self.max_count       = system.maxint() if self.multi_per_line else 1
+        one_per_line         = self.has_parsed_option(ONE_PER_LINE) or single
+        multi_per_line       = self.has_parsed_option(MULTI_PER_LINE) or not one_per_line
+        self.max_count       = system.maxint() if multi_per_line else 1
         self.max_count       = self.get_parsed_option(MAX_COUNT, self.max_count)
         self.ignore_case     = self.has_parsed_option(IGNORE)
         self.preserve        = self.has_parsed_option(PRESERVE)
@@ -157,8 +155,16 @@ class ExtractMatches(Main):
         # NOTE: glue_helpers.py->extract_matches_from_text() could be used too, but it would be
         #       necessary to implement on this function the params restore and replacement
         count = 0
-        while (self.ignore_case and (match := re.search(self.pattern, line, flags=re.IGNORECASE))) or (match := re.search(self.pattern, line)):
-            debug.trace(debug.QUITE_DETAILED, f'match={match}')
+        while count < self.max_count:
+
+
+            match = re.search(self.pattern, line, flags=re.IGNORECASE if self.ignore_case else 0)
+
+
+            if match:
+                debug.trace(debug.QUITE_DETAILED, f'match={match}')
+            else:
+                break
 
 
             debug_output = ''
@@ -181,22 +187,20 @@ class ExtractMatches(Main):
             # Transform matching text based on replacement pattern (e.g., 'match.group(N)')
             replacement_text = misc_utils.eval_expression(f'f"{self.replacement}"')
             debug.trace(debug.QUITE_DETAILED, f'replacement text: {replacement_text}')
+            result = re.sub(self.pattern, replacement_text, match.group(0), flags=re.IGNORECASE if self.ignore_case else 0)
 
-            output_text = match.group(0)
-            if self.ignore_case:
-                output_text = re.sub(self.pattern, replacement_text, output_text, flags=re.IGNORECASE)
-            else:
-                output_text = re.sub(self.pattern, replacement_text, output_text)
 
-            debug.trace(debug.QUITE_DETAILED, f'resulting text: {output_text}')
-            print(output_text)
+            if self.ignore_case and not self.preserve:
+                result = result.lower()
+
+
+            debug.trace(debug.QUITE_DETAILED, f'resulting text: {result}')
+            print(result)
 
 
             # See if limit for displayed matches reached
             debug.trace(debug.QUITE_DETAILED, f'count={count} max_count={self.max_count}')
             count += 1
-            if count >= self.max_count:
-                break
 
 
         if count == 0:
@@ -205,18 +209,18 @@ class ExtractMatches(Main):
 
 if __name__ == '__main__':
     app = ExtractMatches(description = __doc__,
-                         boolean_options      = [(PARA,           'paragraph input mode'),
-                                                 (SLURP,          'alias for -file'),
-                                                 (FILE,           'entire file input mode'),
-                                                 (SINGLE,         'alias for -one_per_line'),
-                                                 (ONE_PER_LINE,   'only count one instance of the pattern per line'),
-                                                 (MULTI_PER_LINE, 'multiple matches per line'),
-                                                 (IGNORE,         'ignore case'),
-                                                 (PRESERVE,       'preserve case (when -i in effect'),
-                                                 (CHOMP,          'strip newline at end')],
-                         positional_arguments = [(PATTERN,        'regex pattern to check for')],
-                         int_options          = [(FIELDS,         'number of output fields'),
-                                                 (MAX_COUNT,      'maximum number of matches per line')],
-                         text_options         = [(REPLACEMENT,    'pattern for replacement (e.g, \1-\2-method)'),
-                                                 (RESTORE,        'portion of matching text to be restored')])
+                         boolean_options      = [(PARA,            'paragraph input mode'),
+                                                 (SLURP,          f'alias for --{FILE}'),
+                                                 (FILE,            'entire file input mode'),
+                                                 (SINGLE,         f'alias for --{ONE_PER_LINE}'),
+                                                 (ONE_PER_LINE,    'only count one instance of the pattern per line'),
+                                                 (MULTI_PER_LINE,  'multiple matches per line'),
+                                                 (IGNORE,          'ignore case'),
+                                                 (PRESERVE,       f'preserve case (when --{IGNORE} in effect'),
+                                                 (CHOMP,           'strip newline at end')],
+                         positional_arguments = [(PATTERN,         'regex pattern to check for')],
+                         int_options          = [(FIELDS,          'number of output fields'),
+                                                 (MAX_COUNT,       'maximum number of matches per line')],
+                         text_options         = [(REPLACEMENT,     'pattern for replacement (e.g, \\1-\\2-method)'),
+                                                 (RESTORE,         'portion of matching text to be restored')])
     app.run()
