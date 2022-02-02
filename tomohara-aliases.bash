@@ -675,7 +675,7 @@ if [[ $(grep --version) =~ Copyright.*2[0-9][0-9][0-9] ]]; then skip_dirs="-d sk
 # - /bin/grep used to avoid alias and to allow for use with exec
 ## TODO: quiet-unalias grep
 ## TODO: add alias for resolving grep binary with fallback to "command grep"
-GREP="/bin/grep"
+GREP="/bin/grep -E"
 export MY_GREP_OPTIONS="-n $skip_dirs -s"
 function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
 function gr- () { $GREP $MY_GREP_OPTIONS "$@"; }
