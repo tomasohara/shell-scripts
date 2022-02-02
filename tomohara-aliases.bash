@@ -938,7 +938,7 @@ function comma-ize-number () { python numeric_tools.py --comma-ize; }
 #    perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = int(log($1)/log(1024));  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
 #}
 # NEW
-function apply-numeric-suffixes () { }
+function apply-numeric-suffixes () { numeric_tools.py --suffix; }
 
 # OLD
 # apply-usage-numeric-suffixes(): factors in 1k blocksize before applying numeric suffixes
@@ -948,7 +948,8 @@ function apply-numeric-suffixes () { }
 #    perl -pe 's@^(\d+)(?=\s)@$1 * 1024@e;' | apply-numeric-suffixes 1
 #}
 # NEW
-function apply-usage-numeric-suffixes() {}
+function apply-usage-numeric-suffixes () { numeric_tools.py --usage-suffix; }
+
 
 # TODO: rework so that pp version saved in file
 # OLD
