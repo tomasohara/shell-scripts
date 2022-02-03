@@ -1371,16 +1371,8 @@ function remove-cr-and-backup () { dobackup.sh $1; remove-cr < backup/$1 >| $1; 
 alias perl-remove-cr='perl -i.bak -pn -e "s/\r//;"'
 
 # Text manipulation
-## OLD
-## alias 'difference=intersection.perl -diff'
-## NEW
-function difference () { python -c "from mezcla import misc_utils as mu; print(mu.string_diff('$1', '$2'))"; }
-
 alias 'intersection=intersection.perl'
-## OLD
-## alias 'difference=intersection.perl -diff'
-## NEW
-alias difference='difference'
+alias 'difference=intersection.perl -diff'
 alias 'line-intersection=intersection.perl -line'
 alias 'line-difference=intersection.perl -diff -line'
 function show-line () { tail --lines=+$1 $2 | head -1; }
@@ -1492,9 +1484,10 @@ alias move-adhoc-files='move-log-files; move-output-files'
 #    done;
 #}
 # NEW
-function rename-with-file-date() { python filenames.py --rename --free-with-date --files "$@"; }
+function rename-with-file-date () { python filenames.py --rename --free-with-date --files "$@"; }
+function copy-with-file-date () { python filenames.py --rename --free-with-date --copy --files "$@"; }
 
-alias copy-with-file-date='rename-with-file-date --copy'
+alias copy-with-file-date='copy-with-file-date'
 
 # Statistical helpers
 alias bigrams='perl -sw $TOM_BIN/count_bigrams.perl -N=2'
