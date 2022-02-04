@@ -20,8 +20,8 @@ class TestIt(TestWrapper):
     script_module     = TestWrapper.derive_tested_module_name(__file__) + '.py'
 
 
-    def test_list_here(self):
-        """Test for list_here option"""
+    def test_find_files(self):
+        """Test for find_files option"""
 
         # Setup test folders and files
         foldernames = ['main_folder', 'main_folder/another_folder']
