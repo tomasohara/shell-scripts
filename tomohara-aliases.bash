@@ -762,7 +762,7 @@ alias fgr-py='fgr-ext py'
 #    ls -lh ${current_files[@]}
 #}
 # NEW
-function prepare-find-files-here () { python find_files.py --list-here; }
+function prepare-find-files-here () { python find_files.py --find-files; }
 
 #
 # TODO: have variant of prepare-find-files that adds .mmmYY suffix to backup
