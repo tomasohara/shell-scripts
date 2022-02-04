@@ -45,12 +45,18 @@ class FindFiles(Main):
         self.path       = self.get_parsed_argument(PATH, '')
 
 
+        # Check path
+        if len(self.path) > 1 and  self.path[-1] == '/':
+            self.path = self.path[:-1]
+        if self.path in ('', '-'):
+            self.path = system.get_current_directory()
+
+
     def run_main_step(self):
         """Process input stream"""
 
         if self.find_files:
             find_files(path=self.path)
-
 
 
 # list_dir(): produces listing(s) of files in current directory
@@ -61,13 +67,7 @@ class FindFiles(Main):
 def find_files(path='.', full=False, special_dirs=False):
     """List files in current directory tree"""
     # TODO: save errors on .log file.
-	# TODO: simplify this function.
-
-    # Check path param
-    if path in ('', '-'):
-        path = system.get_current_directory()
-    if path[-1] == '/':
-        path = path[:-1]
+    # TODO: simplify this function.
 
     # Setup filenames
     ls_opts       = 'alR' if full else 'R'
