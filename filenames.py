@@ -51,8 +51,9 @@ class Filenames(Main):
 
 
         # Check the command-line options
-        filenames = self.get_parsed_argument(FILENAMES, "")
+        filenames      = self.get_parsed_argument(FILENAMES, "")
         self.rename    = self.has_parsed_option(RENAME)
+        self.copy      = self.has_parsed_option(COPY)
         self.free      = self.has_parsed_option(FREE)
         self.base      = self.get_parsed_argument(BASE, "")
         self.sep       = self.get_parsed_argument(SEP, "")
@@ -158,6 +159,7 @@ def rename_with_file_date(basename, target='./', copy=False):
 
     new_filename = get_free_date_name(basename)
 
+    # TODO: check assertion fail on glue_helpers copy_file and rename_file
     if copy:
         # TODO: implement target path when the file is copied
         gh.copy_file(basename, new_filename)
