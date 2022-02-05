@@ -158,11 +158,11 @@ def rename_with_file_date(basename, target='./', copy=False):
 
     new_filename = get_free_date_name(basename)
 
-    if not copy:
-        gh.rename_file(basename, new_filename)
-    else:
+    if copy:
         # TODO: implement target path when the file is copied
         gh.copy_file(basename, new_filename)
+    else:
+        gh.rename_file(basename, new_filename)
 
 
 if __name__ == '__main__':
