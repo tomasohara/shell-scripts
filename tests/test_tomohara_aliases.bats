@@ -25,29 +25,11 @@ setup() {
 
 
 @test "alias copy-with-file-date" {
-    FILENAME="date_rename_test.txt"
-
-    # Clean
-    rm /tmp/${FILENAME}*
+    FILENAME=$(echo copy-test-"$$".txt)
 
     # Create test file
     touch /tmp/$FILENAME
     copy-with-file-date /tmp/$FILENAME
-
-    # Check
-    [ $(ls /tmp/${FILENAME}.* | wc -l) -eq 1 ]
-}
-
-
-@test "rename-with-file-date" {
-    FILENAME="date_rename_test.txt"
-
-    # Clean
-    rm /tmp/${FILENAME}*
-
-    # Create test file
-    touch /tmp/$FILENAME
-    rename-with-file-date /tmp/$FILENAME
 
     # Check
     [ $(ls /tmp/${FILENAME}.* | wc -l) -eq 1 ]
