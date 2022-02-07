@@ -117,11 +117,12 @@
 # Format: cond-export VAR1 VALUE1 [VAR2 VALUE2] ...
 #
 function conditional-export () {
-    local var valued
+    local var value
     while [ "$1" != "" ]; do
         var="$1" value="$2";
+	## DEBUG: echo "value for env. var. $var: $(printenv "$var")"
         if [ "$(printenv "$var")" == "" ]; then
-            export $var=$value
+            export $var="$value"
         fi
         shift 2
     done
@@ -208,7 +209,19 @@ update-today-vars
 alias todays-update='update-today-vars'
 
 # Alias creation helper(s)
-function quiet-unalias () { unalias "$@" 2> /dev/null; }
+## OLD: function quiet-unalias () { unalias "$@" 2> /dev/null; }
+# Note: does no-op so that status set to 0 for sake of tests/test_tomohara-aliases.bash setup
+# TODO: use more explicit way to set status
+## TODO: function quiet-unalias { unalias "$@" 2> /dev/null; echo > /dev/null; }
+function quiet-unalias {
+    ## HACK: do nothing if running under bats-core
+    if [ "$BATS_TEST_NUMBER" != "" ]; then
+        echo "Ignoring unalias over $@ for sake of bats"
+        return
+    fi
+    unalias "$@" 2> /dev/null;
+    echo > /dev/null;
+}
 
 # Bash customizations (e.g., no beep)
 # via https://www.gnu.org/software/bash/manual/bash.html
@@ -396,7 +409,7 @@ function reset-prompt {
     ## OLD: local new_PS_symbol="$1"
     local new_PS_symbol="$@"
     ## OLD:
-    if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="$PS_symbol"; fi
+    if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="${DEFAULT_PS_SYMBOL:-$PS_symbol}"; fi
     ## TODO: if [ "$new_PS_symbol" = "" ]; then echo $'Usage: reset-prompt symbol\nex: reset-prompt §"\n'; return; fi
     ## TODO: add options to reset PS1 and to list good symbols for prompts
     # Make the change
@@ -618,7 +631,7 @@ function subdirs () { $LS ${dir_options} "$@" 2>&1 | $GREP ^d | $PAGER; }
 # subdirs-proper(): shows subdirs in colymn format omitting ones w/ leading dots
 # note: omits cases like ./ and ./.cpan from find and then removes ./ prefix
 quiet-unalias subdirs-proper
-function subdirs-proper () { find . -maxdepth 1 -type d | $GREP -v '^((\.)|(\.\/\..*))$' | sort | perl -pe "s@^\./@@;" | column; }
+function subdirs-proper () { find . -maxdepth 1 -type d | $EGREP -v '^((\.)|(\.\/\..*))$' | sort | perl -pe "s@^\./@@;" | column; }
 # note: -f option overrides -t: Unix sorts alphabetically by default
 # via man ls:
 #   -f     do not sort, enable -aU, disable -$LS --color
@@ -675,7 +688,8 @@ if [[ $(grep --version) =~ Copyright.*2[0-9][0-9][0-9] ]]; then skip_dirs="-d sk
 # - /bin/grep used to avoid alias and to allow for use with exec
 ## TODO: quiet-unalias grep
 ## TODO: add alias for resolving grep binary with fallback to "command grep"
-GREP="/bin/grep -E"
+GREP="/bin/grep"
+EGREP="$GREP -E"
 export MY_GREP_OPTIONS="-n $skip_dirs -s"
 function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
 function gr- () { $GREP $MY_GREP_OPTIONS "$@"; }
@@ -691,7 +705,8 @@ function gu- () { $GREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0"; }
 #
 # grepl(pattern, [other_grep_args]): invokes grep over PATTERN and OTHER_GREP_ARGS and then pipes into less for PATTERN 
 # TODO: use more general way to ensure pattern given last while readily extractable for less -p usage
-function grep-to-less () { $GREP $MY_GREP_OPTIONS "$@" | $PAGER -p"$1"; }
+## OLD: function grep-to-less () { $GREP $MY_GREP_OPTIONS "$@" | $PAGER -p"$1"; }
+function grep-to-less () { $GREP $MY_GREP_OPTIONS "$@" | $PAGER_NOEXIT -p"$1"; }
 alias grepl-='grep-to-less'
 function grepl () { pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
 
@@ -716,10 +731,10 @@ alias grep-nonascii='perlgrep.perl "[\x80-\xFF]"'
 #
 function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pattern find-option ... "; else /usr/bin/find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 2>&1 | $GREP -v '^find: '; fi; }
 function findspec-all () { find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | $GREP -v '^find: '; }
-function fs () { findspec . "$@" | $GREP -iv '(/(backup|build)/)'; } 
+function fs () { findspec . "$@" | $EGREP -iv '(/(backup|build)/)'; } 
 function fs-ls () { fs "$@" -exec ls -l {} \; ; }
 alias fs-='findspec-all .'
-function fs-ext () { find . -iname \*.$1 | $GREP -iv '(/(backup|build)/)'; } 
+function fs-ext () { find . -iname \*.$1 | $EGREP -iv '(/(backup|build)/)'; } 
 # TODO: extend fs-ext to allow for basename pattern (e.g., fs-ext java ImportXML)
 function fs-ls- () { fs- "$@" -exec ls -l {} \; ; }
 #
@@ -732,8 +747,8 @@ function findgrep () { find $1 -iname \*$2\* -exec $GREP $findgrep_opts "$3" $4 
 function findgrep- () { find $1 -iname $2 -print -exec $GREP $findgrep_opts $3 $4 $5 $6 $7 $8 $9 \{\} \;; }
 function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$dir" -iname "*.$ext" -exec $GREP $findgrep_opts "$@" \{\}  /dev/null \;; }
 # fgr(filename_pattern, line_pattern): $GREP through files matching FILENAME_PATTERN for LINE_PATTERN
-function fgr () { findgrep . "$@" | $GREP -v '((/backup)|(/build))'; }
-function fgr-ext () { findgrep-ext . "$@" | $GREP -v '(/(backup)|(build)/)'; }
+function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
+function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
 alias fgr-py='fgr-ext py'
 #
 # prepare-find-files-here(): produces listing(s) of files in current directory
@@ -760,8 +775,8 @@ function prepare-find-files-here () {
     ## TODO: use approach based on filter variable and to avoid redundant hard-coding
     ## TODO: ** resolve intermittent problem when running under /
     if [ "$PWD" = "/" ]; then
-        ($NICE $LS -$brief_opts | $GREP -v '^\.(/(cdrom|dev|media|mnt|proc|run|sys|snap)$)' | perl -pe 's/^\./\n$&/;' > "$brief_file") 2> "$brief_file".log
-        ($NICE $LS -$full_opts | $GREP -v '^\.(/(cdrom|dev|media|mnt|proc|run|sys|snap)$)' | perl -pe 's/^\./\n$&/;' > "$full_file") 2> "$full_file".log
+        ($NICE $LS -$brief_opts | $EGREP -v '^\.(/(cdrom|dev|media|mnt|proc|run|sys|snap)$)' | perl -pe 's/^\./\n$&/;' > "$brief_file") 2> "$brief_file".log
+        ($NICE $LS -$full_opts | $EGREP -v '^\.(/(cdrom|dev|media|mnt|proc|run|sys|snap)$)' | perl -pe 's/^\./\n$&/;' > "$full_file") 2> "$full_file".log
     else
         ($NICE $LS -$brief_opts | perl -pe 's/^\./\n$&/;' > "$brief_file") 2> "$brief_file".log
         ($NICE $LS -$full_opts | perl -pe 's/^\./\n$&/;' > "$full_file") 2> "$full_file".log
@@ -778,7 +793,7 @@ function prepare-find-files-here () {
 # Note: Perl paragraph-mode search first matches files along with the containing
 # subdirectory, and then line-mode search filters out non-matching files.
 #
-function find-files-there () { perlgrep.perl -para -i "$@" | $GREP -i '((:$)|('$1'))' | $PAGER_NOEXIT -p "$1"; }
+function find-files-there () { perlgrep.perl -para -i "$@" | $EGREP -i '((:$)|('$1'))' | $PAGER_NOEXIT -p "$1"; }
 function find-files-here () { find-files-there "$1" "$PWD/ls-alR.list"; }
 # following variants for sake of tab completion
 alias find-files='find-files-here'
@@ -975,8 +990,11 @@ function byte-usage () { output_file="usage.bytes.list"; backup-file $output_fil
 
 # check[all-]-(errors|warnings): check for known errors, with the check-all
 # variant including more patterns and with warnings subsuming errors.
-function check-errors () { (check_errors.perl -context=5 "$@") 2>&1 | $PAGER; }
-function check-all-errors () { (check_errors.perl -warnings -relaxed -context=5 "$@") 2>&1 | $PAGER; }
+## OLD:
+## function check-errors () { (check_errors.perl -context=5 "$@") 2>&1 | $PAGER; }
+## function check-all-errors () { (check_errors.perl -warnings -relaxed -context=5 "$@") 2>&1 | $PAGER; }
+function check-errors () { (DEBUG_LEVEL=1 check_errors.perl -context=5 "$@") 2>&1 | $PAGER; }
+function check-all-errors () { (DEBUG_LEVEL=1 check_errors.perl -warnings -relaxed -context=5 "$@") 2>&1 | $PAGER; }
 alias check-warnings='echo "*** Error: use check-all-errors instead ***"; echo "    check-all-errors"'
 alias check-all-warnings='check-all-errors -strict'
 #
@@ -1040,7 +1058,8 @@ function most-recent-backup {
     fi
     local file="$1";
     local dir="$BACKUP_DIR"; if [ "$dir" = "" ]; then dir=./backup; fi
-    $LS -t $dir/* | $GREP "/$file(~|.~*)" | head -1;
+    ## TODO: $LS -t $dir/* | $EGREP "/$file(~|.~*)" | head -1;
+    $LS -t $dir/* | /bin/egrep "/$file(~|.~*)?" | head -1;
 }
 #
 # diff-backup(file): compare FILE vs. most recent backup
@@ -1403,9 +1422,6 @@ alias rename-parens='rename-files -global -regex "[\(\)]" "" *[\(\)]*'
 # move-log-files: move "versioned" log files to log-files
 # move-output-files: likewise for output files with version numbers to ./output
 # note: versioned files are those ending in numerics or with numeric affix
-## OLD: alias move-log-files='mkdir -p log-files; move *.log[0-9]*  *[0-9]*.log  *.log.*[0-9][0-9]*  ./log-files'
-## OLD: alias move-output-files='mkdir -p output; move *.{html,json,list,out,output,report,xml}[0-9]* *[0-9]*.{html,json,list,out,output,report,xml} ./output'
-## TODO: exclude read-only files
 ## TODO: use perl-style regex for more precise matching (effing over-arching glob's)
 function move-versioned-files {
     local ext_pattern="$1"
@@ -1413,21 +1429,15 @@ function move-versioned-files {
     local dir="$2"
     if [ "$dir" = "" ]; then dir="versioned-files"; fi
     mkdir -p "$dir";
-    ## OLD:move  $(eval echo *.$ext_pattern[0-9]*  *.*[0-9]*.$ext_pattern  *.$ext_pattern.*[0-9][0-9]* ) "$dir"  2>&1 | $GREP -v 'No such file'
-    ## OLD: local D="[.-]"
     local D="[.]"
     # TODO: fix problem leading to hangup (verification piped to 2>&1)
     # Notes: eval needed for $ext_pattern resolution
     # - excludes read-only files (e.g., ls -l => "-r--r--r--   1 tomohara   11K Nov  2 16:30 _master-note-info.list.log")
-    ## BAD: move  $(eval echo *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]* ) "$dir"  2>&1 | $GREP -v 'No such file'
-    ## BAD: ls *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]* 2>&1 | $GREP -v 'No such file' | xargs -I {} mv -iv "{}" "$dir"
-    # 
-    ## OK: move  $(eval ls *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*  2>&1 | $GREP -v 'No such file') "$dir"
-    # EXs:              fu.log2                fu.2.log                  fu.log.14aug21
-    ## OLD: move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*  2>&1 | $GREP -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;') "$dir"
+    # EXs:              fu.log2                fu.2.log                  fu.log.14aug21    fu.14aug21.log
     local file_list="$TEMP/_move-versioned-files-$$.list"
-    dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*  2>| "$file_list.log" | perl -pe 's/(\S+\s+){6}\S+//;' >| "$file_list"
-    xargs -I "{}" $MV "{}" "$dir" < "$file_list"
+    ## TODO: dir-rw $(eval echo *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*  *$D*[0-9][0-9]*$D$ext_pattern) 2>| "$file_list.log" | perl -pe 's/(\S+\s+){6}\S+//;' >| "$file_list"
+    ## xargs -I "{}" $MV "{}" "$dir" < "$file_list"
+    move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;') "$dir"
 }
 alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
 alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,report,tsv,xml}" "output-files"'
@@ -1438,6 +1448,7 @@ alias move-adhoc-files='move-log-files; move-output-files'
 # 2. No warning is issued if the file doesn't exist, so can be used as a no-op.
 # TODO: have option to put suffix before extension
 function rename-with-file-date() {
+    ## DEBUG: set -o xtrace
     local f new_f
     local move_command="move"
     if [ "$1" = "--copy" ]; then
@@ -1453,8 +1464,11 @@ function rename-with-file-date() {
            eval "$move_command" "$f" "$new_f";
         fi
     done;
+    ## DEBUG: set - -o xtrace
 }
-alias copy-with-file-date='rename-with-file-date --copy'
+## OLD: alias copy-with-file-date='rename-with-file-date --copy'
+## HACK: See if function required for proper handling by bats-core
+function copy-with-file-date { rename-with-file-date --copy "$@"; }
 
 # Statistical helpers
 alias bigrams='perl -sw $TOM_BIN/count_bigrams.perl -N=2'
@@ -1872,7 +1886,7 @@ function ps-all () {
         pattern="."; 
         pager=$PAGER
     fi;
-    ps_mine.sh --all | $GREP -i "((^USER)|($pattern))" | $pager;
+    ps_mine.sh --all | $EGREP -i "((^USER)|($pattern))" | $pager;
     }
 alias ps-script='ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
 function ps-sort-once { ps_sort.perl -num_times=1 -by=time "$@" -; }
@@ -1941,7 +1955,7 @@ export PYTHONPATH="$HOME/python:$PYTHONPATH"
 export PYTHONPATH="$HOME/python/Mezcla:$PYTHONPATH"
 alias ps-python-full='ps-all python'
 # note: excludes ipython and known system-related python scripts
-alias ps-python='ps-python-full | $GREP -iv "(screenlet|ipython|egrep|update-manager|software-properties|networkd-dispatcher)"'
+alias ps-python='ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|update-manager|software-properties|networkd-dispatcher)"'
 alias show-python-path='show-path-dir PYTHONPATH'
 
 # Remove compiled files .pyc for regular (debug) version and .pyo for optimized
@@ -1985,9 +1999,9 @@ function python-lint-full() {
 #   ex: Your code has been rated at 7.43/10 ...
 #   ex: No config file found ...
 # - the following has two regex: *modify the first* to add more conditions to ignore; the second is just for the extraneous pylint output
-function python-lint-work() { python-lint-full "$@" 2>&1 | $GREP -v '\((bad-continuation|bad-option-value|fixme|invalid-name|locally-disabled|too-few-public-methods|too-many-\S+|trailing-whitespace|star-args|unnecessary-pass)\)' | $GREP -v '^(([A-Z]:[0-9]+)|(Your code has been rated)|(No config file found)|(\-\-\-\-\-))' | $PAGER; }
+function python-lint-work() { python-lint-full "$@" 2>&1 | $EGREP -v '\((bad-continuation|bad-option-value|fixme|invalid-name|locally-disabled|too-few-public-methods|too-many-\S+|trailing-whitespace|star-args|unnecessary-pass)\)' | $EGREP -v '^(([A-Z]:[0-9]+)|(Your code has been rated)|(No config file found)|(\-\-\-\-\-))' | $PAGER; }
 # TODO: rename as python-lint-tpo for clarity (and make python-lint as alias for it)
-function python-lint() { python-lint-work "$@" 2>&1 | $GREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|missing-final-newline|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
+function python-lint() { python-lint-work "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|missing-final-newline|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
 
 # run-python-lint-batched([file_spec="*.py"]: Run python-lint in batch mode over
 # files in FILE_SPEC, placing results in pylint/<today>.
