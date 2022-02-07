@@ -34,6 +34,12 @@ eval 'exec perl -Ssw $0 "$@"'
 # - Add more descriptions of options to usage text.
 # - Add automatic carriage return removal to avoid problems such as CR being pulled in for "([^;]+)" (see ~/fast/port-notes.txt).
 # - Add paratheses to print calls.
+# - Fix bug with backslash-style references:
+#   ¢ echo "abba" | count-it -d=6 -restore='\2' '(.(.))' - 2>&1 | grep restoring | head
+#   restoring 'SCALAR(0xa5c900)' to current text
+#   restoring 'SCALAR(0xd32d70)' to current text
+#   ...
+#   restoring 'SCALAR(0xa5caf8)' to current text
 #
 
 # Load in the common module, making sure the script dir is in Perl's lib path
