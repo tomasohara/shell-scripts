@@ -163,18 +163,32 @@ function git-pull-and-update() {
     fi;
 }
 
+# run git COMMAND with output saved to _git-COMMAND-$$.log
+#
+function invoke-git-command {
+    local command="$1"
+    shift
+    local log="_git-$command-$(TODAY).$$.log";
+    git "$command" "$@" >| "$log" 2>&1
+    less "$log"
+}
 
 function git-push() {
-    if [ "" != "$(grep ^repo ~/.gitrc)" ]; then echo "*** Warning: fix ~/.gitrc for read-write access ***"; else 
-        git push --verbose
+    if [ "" != "$(grep ^repo ~/.gitrc)" ]; then
+	echo "*** Warning: fix ~/.gitrc for read-write access ***";
+    else
+        ## OLD: git push --verbose
+	invoke-git-command push --verbose "$@"
     fi;
 }
 
+alias git-status='invoke-git-command status'
+
 # git-add: add filename(s) to repository
 function git-add {
-    local log="_git-diff-$(TODAY).$$.log";
+    local log="_git-add-$(TODAY).$$.log";
     git add "$@" >| "$log";
-    tail "$log";
+    less "$log";
 }
 
 # git-diff: show repo diff
@@ -250,7 +264,7 @@ function git-alias-usage () {
         echo "To check in files different from repo:"
 	echo "    # TODO: pushd \$REPO_ROOT"
 	echo "    # -OR-: pushd \$(realpath .)/.."
-	echo '    git-checkin-single-template >| _git-checkin-template.sh; source _git-checkin-template.sh'
+	echo '    git-checkin-single-template >| _git-checkin-single-template.sh; source _git-checkin-single-template.sh'
 	echo '    # ALT: git-checkin-multiple-template and git-checkin-all-template (n.b. ¡cuidado!)'
     }
 
