@@ -25,7 +25,7 @@ eval 'exec perl -Ssw $0 "$@"'
 #   parsing is not required.
 #
 # TODO:
-# - Work out a way to invoke the main body of the script preior to performing
+# - Work out a way to invoke the main body of the script prior to performing
 #   tests, in case initializations are needed.
 # - Fix processing of list arguments and results
 # - tally up the number of correct tests
