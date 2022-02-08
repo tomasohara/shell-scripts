@@ -124,7 +124,11 @@ function git-commit-and-push {
         echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
         return
     fi
-    if [ "$message" = "" ]; then message="misc. update"; fi
+    ## OLD: if [ "$message" = "" ]; then message="misc. update"; fi
+    if [ "$message" = "" ]; then
+        echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE error)"
+        return
+    fi
     local file_spec="$*"
     pause-for-enter "About to commit $file_spec (with message '$message')"
     git commit -m "$message" >> "$log"
