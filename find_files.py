@@ -13,11 +13,13 @@ ex:
 
 # Standard packages
 import re
+import sys
 
 
 # Local packages
 from mezcla.main import Main
 from mezcla      import system
+from mezcla      import debug
 from mezcla      import file_utils as fu
 from mezcla      import glue_helpers as gh
 import filenames as fn
@@ -46,7 +48,7 @@ class FindFiles(Main):
 
 
         # Check path
-        if len(self.path) > 1 and  self.path[-1] == '/':
+        if len(self.path) > 1 and self.path[-1] == '/':
             self.path = self.path[:-1]
         if self.path in ('', '-'):
             self.path = system.get_current_directory()
@@ -66,8 +68,9 @@ class FindFiles(Main):
 # Notes: Also puts listing proper in ls-R.list (i.e., just list of files).
 def find_files(path='.', full=False, special_dirs=False):
     """List files in current directory tree"""
-    # TODO: save errors on .log file.
     # TODO: simplify this function.
+
+    debug.trace(debug.VERBOSE, f'find_files(path={path}, full={full}, special_dirs={special_dirs})')
 
     # Setup filenames
     ls_opts       = 'alR' if full else 'R'
@@ -76,7 +79,7 @@ def find_files(path='.', full=False, special_dirs=False):
     current_files = [filename, log_filename]
 
     # Rename existing files with file date as suffix and move to a backup folder
-    if fu.path_exist(path + '/' + filename) or fu.path_exist(path + '/' + log_filename):
+    if any(fu.path_exist(path + '/' + filename) for filename in current_files):
         gh.create_directory(path + '/backup')
         for current_file in current_files:
             gh.run(f'mv {path}/{current_file} {path}/backup') # TODO: pure python.
@@ -95,12 +98,16 @@ def find_files(path='.', full=False, special_dirs=False):
         item          = re.sub(r'^\.\/\.', '\n./', item)
         file_content += item + '\n'
 
-    # Save the file
+    # Save the files
     gh.write_file(path + '/' + filename, file_content)
+    sys.stderr = open(path + '/' + log_filename, 'w+')
+    sys.stderr.close()
 
     # Show created files
-    for current_file in current_files:
-        print(fu.get_information(path + '/' + current_file, readable=True, return_string=True))
+    dir_list = fu.get_directory_listing(path, recursive=False, long=True, return_string=True)
+    for item in dir_list:
+        if any(new_file in item for new_file in current_files):
+            print(item)
 
     # Call recursively to do brief and full listing of files
     if not full:
