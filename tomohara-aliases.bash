@@ -762,10 +762,8 @@ alias fgr-py='fgr-ext py'
 #    ls -lh ${current_files[@]}
 #}
 # NEW
-function prepare-find-files-here () { python find_files.py --find-files; }
+function prepare-find-files-here () { python find_files.py --find-files --path "$@"; }
 
-#
-# TODO: have variant of prepare-find-files that adds .mmmYY suffix to backup
 #
 # find-files-there(pattern, ls-alR-files): check for PATTERN in LS-ALR-FILES,
 # showing the directory, which has trailing ':' in listing (i.e., DIR1:\nentry1\n...entryN\n\nDIR2:\n...)
