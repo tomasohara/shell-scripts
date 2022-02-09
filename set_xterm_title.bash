@@ -13,6 +13,8 @@
 # - Under unix, the echoing must be done with -n (DUH)!
 # - Shows original user if running sudo.
 # - Similarly shows suffix defined in environment (via XTERM_TITLE_SUFFIX).
+# - Be careful when modifying code after the $PS_symbol support, which should
+#   go first. That is, put changes before the '=====...===' line,
 #
 # EXAMPLE:
 # - set_xterm_title.bash "/c/cartera-de-tomas/ILIT" "ILIT"
@@ -94,14 +96,49 @@
 
 # Show usage if no arguments or --help
 # TODO: put argument processing in loop (see template.bash)
-if [ "$1" = "--trace" ]; then
-    set -o xtrace
-    shift
+restore_title=0
+## TODO: save_title=0
+save_title=1
+print_full=0
+print_icon=0
+show_usage=0
+moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
+while [ "$moreoptions" = "1" ]; do
+    if [ "$1" = "--trace" ]; then
+        set -o xtrace
+    elif [ "$1" = "--help" ]; then
+        show_usage=1
+    elif [ "$1" = "--restore" ]; then
+        restore_title=1
+    elif [ "$1" = "--save" ]; then
+        save_title=1
+    elif [ "$1" = "--print-full" ]; then
+        print_full=1
+    elif [ "$1" = "--print-icon" ]; then
+        print_icon=1
+    else
+	echo "ERROR: Unknown option: $1";
+	exit
+    fi
+    shift;
+    moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
+done
+if [[ ("$1" = "") && ("$restore_title" = "0") ]]; then
+    show_usage="1"
 fi
-if [[ ("$1" = "") || ("$1" = "--help") ]]; then
-    echo "Usage: [--trace] [--help] $0 title [icon-title]"
-    echo ""
+
+# Show usage statement if --help given or missing option
+if [ "$show_usage" = "1" ]; then
     script=$(basename "$0")
+    echo "Usage: [--trace] [--restore | --save] [--help] $0 title [icon-title]"
+    echo ""
+    echo "Notes:"
+    echo "- -save makes a copy of current title (under $TMP)."
+    echo "- -restore uses previously saved title and icon (see function"
+    echo "script in tomohara-aliases.bash)."
+    echo ""
+    echo "Examples:"
+    echo ""
     # NOTE:
     # - '"'...'"' is used to add double quotes around each double-quoted
     #   argument in case of embedded spaces.
@@ -109,8 +146,11 @@ if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     #     $script     "$(basename $PWD)"        "[$PWD]"
     # EX: set_xterm_title.bash "Documents" "[/home/tomohara/Documents]"
     # TODO: See if clearer way to do this quoting.
-    echo "$script" '"'"$(basename $PWD)"'"'  '"'"[$PWD]"'"'
+    ## OLD: echo "$script" '"'"$(basename $PWD)"'"'  '"'"[$PWD]"'"'
+    echo "$script" \"\$\(basename \$PWD\)\"  \"[\$PWD]\"
     echo ""
+    echo "$script 'ssh tunnel for mysql'"
+    exit
 fi
 
 # Extract the arguments from the command line
@@ -129,10 +169,12 @@ if [ "$TERM" = "screen" ]; then full="SCREEN: $full"; icon="SCREEN: $icon"; fi
 # Make sure hostname set and see if optional default host indicated
 if [ "$HOST" = "" ]; then
     HOST="$HOSTNAME"
-    if [ "$HOST" = "" ]; then HOST=`uname -n`; fi
+    ## OLD: if [ "$HOST" = "" ]; then HOST=`uname -n`; fi
+    if [ "$HOST" = "" ]; then HOST=$(uname -n); fi
 fi
 if [ "$DEFAULT_HOST" = "" ]; then
-    if [ -e $HOME/.default_host ]; then DEFAULT_HOST=`cat $HOME/.default_host`; fi
+    ## OLD: if [ -e $HOME/.default_host ]; then DEFAULT_HOST=`cat $HOME/.default_host`; fi
+    if [ -e "$HOME/.default_host" ]; then DEFAULT_HOST=$(cat "$HOME/.default_host"); fi
 fi
 
 # If default host indicated and not the current host, add name as prefix
@@ -166,10 +208,31 @@ if [ "$SCRIPT_PID" != "" ]; then
     icon="script:$SCRIPT_PID $icon"
 fi
 
+#================================================================================
+# Be careful when modifying remainder of script.
+
+restore_base="$TMP/_set_xterm_title"
+if [ "$save_title" = "1" ]; then
+    echo "$full" >| "${restore_base}.full.list"
+    echo "$icon" >| "${restore_base}.icon.list"
+fi
+if [ "$restore_title" = "1" ]; then
+    full=$(cat "${restore_base}.full.list")
+    icon=$(cat "${restore_base}.icon.list")
+fi
+if [ "$print_full" = "1" ]; then
+    echo "$full"
+    exit
+fi
+if [ "$print_icon" = "1" ]; then
+    echo "$icon"
+    exit
+fi
 # If prompt prefix set, include that at very start.
 # Note: excludes special dollar signs: small (﹩) U+FE69, full-width (＄) U+FF04, or heavy dollar sign (💲) U+1F4B2, where regular ($) is U+0024
 # TODO: just add that full version (i.e., not minimized)
 #
+declare PS_symbol
 if [ "$PS_symbol" != "" ]; then
     ## OLD
     ## full="$PS_symbol $full"
@@ -194,7 +257,7 @@ fi
 if [ "$TERM" = "cygwin" ]; then
     ## TODO: both  ## DEBUG: echo cygwin case
     ## TODO: cmd /k title ...?
-    cmd /c title $icon
+    cmd /c title "$icon"
 
 ## # If not default host, set Window and minimized title to '<host>:<args>'
 ## # TODO: use $full and $icon
@@ -209,7 +272,9 @@ else
     ## echo in else clause
     # TODO: use example based on http://tldp.org/HOWTO/Xterm-Title-4.html#ss4.3
     #    PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD}\007"'
-    #       where \033 is the character code for ESC, and \007 for BEL. 
+    #       where \033 is the character code for ESC, and \007 for BEL.
+    # NOTE: via https://www.gnu.org/software/bash/manual/bash.html:
+    #    PROMPT_COMMAND [is] interpreted as a command to execute before printing the primary prompt ($PS1).
     ## OLD: echo "]1;$icon";
     ## OLD: echo "]2;$full";
     echo -n "]1;$icon";
