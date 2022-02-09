@@ -268,7 +268,8 @@ function git-alias-usage () {
         echo "To check in files different from repo:"
 	echo "    # TODO: pushd \$REPO_ROOT"
 	echo "    # -OR-: pushd \$(realpath .)/.."
-	echo '    git-checkin-single-template >| _git-checkin-single-template.sh; source _git-checkin-single-template.sh'
+	echo '    git-checkin-single-template >| /tmp/_template.sh; source /tmp/_template.sh'
+	# TODO: echo '    git-checkin-single-template | source'
 	echo '    # ALT: git-checkin-multiple-template and git-checkin-all-template (n.b. ¡cuidado!)'
     }
 
