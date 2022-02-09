@@ -120,7 +120,7 @@ function conditional-export () {
     local var value
     while [ "$1" != "" ]; do
         var="$1" value="$2";
-	## DEBUG: echo "value for env. var. $var: $(printenv "$var")"
+        ## DEBUG: echo "value for env. var. $var: $(printenv "$var")"
         if [ "$(printenv "$var")" == "" ]; then
             export $var="$value"
         fi
@@ -459,7 +459,9 @@ export TIME_CMD=/usr/bin/time
 export PERL="$NICE $TIME_CMD perl -Ssw"
 
 # Terminal window title
-alias set-xterm-window='set_xterm_title.bash'
+alias set-xterm-title='set_xterm_title.bash'
+## OLD: alias set-xterm-window='set_xterm_title.bash'
+alias set-xterm-window='set-xterm-title'
 # Set the title for the current xterm, unless if not running X
 function set-title-to-current-dir () { 
     local dir=`basename "$PWD"`; 
@@ -611,7 +613,7 @@ function dir () {
     # note: pattern is POSIX extended regular expression as per bash manual
     local regex="^.*/$";
     if [[ (! (($dir != "") || ($dir =~ $regex))) ]]; then
-	opts="$opts --directory";
+        opts="$opts --directory";
     fi
     $LS ${opts} "$@" 2>&1 | $PAGER;
 }
@@ -1008,8 +1010,8 @@ function check-errors-excerpt () {
     check-errors "$@" | tail >| $tail;
     diff "$head" "$tail" >| /dev/null
     if [ $? != 0 ]; then
-	echo "\$?=$?"
-	cat "$tail";
+        echo "\$?=$?"
+        cat "$tail";
     fi
 }
 
@@ -1166,9 +1168,9 @@ function new-tar-this-dir () {
     # Get real basename                       ff3410d4-5ffc-4c01-a2ca-75244b882aa2
     local real_base="$base"
     if [ -L "$base" ]; then
-	real_base=$($LS -ld "$base" | perl -pe 's@^.* -> (.*/)?([^/]+)@$2@;');
-	# Go to real parent                   /media/tomohara
-	cd $(realpath $dir/..)
+        real_base=$($LS -ld "$base" | perl -pe 's@^.* -> (.*/)?([^/]+)@$2@;');
+        # Go to real parent                   /media/tomohara
+        cd $(realpath $dir/..)
     fi
     # Create tar of real subdir
     # TODO: pass along actual basename so that tar file can be renamed
@@ -1278,8 +1280,8 @@ function pdf-to-ascii () {
     local target=$(basename "$1" .pdf)".ascii";
     if [ "$verbose" = "1" ]; then echo "checking $target"; fi
     if [ ! -s "$target" ]; then
-	if [ "$verbose" = "1" ]; then echo "creating $target"; fi
-	cmd.sh --time-out 30 pdftotext -layout "$file" "$target";
+        if [ "$verbose" = "1" ]; then echo "creating $target"; fi
+        cmd.sh --time-out 30 pdftotext -layout "$file" "$target";
     fi
     $LS -lt "$target"
 }
@@ -1912,27 +1914,31 @@ function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$;
 ## TODO: rename as my-script to avoid confusion
 function script {
     ## THIS function is buggy!
+    # Note: set_xterm_title.bash keeps track of titles for each process, so save copies of current ones
+    local save_full=$(set-xterm-title --restore --print-full)
+    local save_icon=$(set-xterm-title --restore --print-icon)
+    ## DEBUG: echo "save_full='$save_full'; save_icon='$save_icon'"
+  
     # Change prompt
     local old_PS_symbol="$PS_symbol"
-    export SCRIPT_PID=$$;
-    ## Note: the prompt change is not being done properly
-    ## BAD: reset-prompt "${PS_symbol}\$";
-    ## TODO: reset-prompt "$PS_symbol"'$';
-    reset-prompt "$PS_symbol" '$';
+    export SCRIPT_PID=$$
+    # Note: the prompt change is flakey
+    reset-prompt "$PS_symbol\$"
     ## DEBUG: echo "script: 1. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
+    
     # Change xterm title to match
     set-title-to-current-dir
     ## DEBUG: echo "script: 2. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
     # Run command
-    command script --append "$@";
+    command script --append "$@"
+    
     # Restore prompt
-    unset SCRIPT_PID;
-    ## OK: reset-prompt "$old_PS_symbol";
-    export PS1="$old_PS_symbol ";
+    unset SCRIPT_PID
+    reset-prompt "$old_PS_symbol"
     ## DEBUG: echo "script: 3. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
+    
     # Get rid of lingering 'script' in xterm title
-    set-title-to-current-dir
-    ## DEBUG: echo "script: 4. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
+    set-xterm-title "$save_full" "$save_icon"
 }
 
 # pause-for-enter(): print message and wait for user to press enter
@@ -2024,10 +2030,10 @@ function run-python-lint-batched () {
 
     # Run pylint and pipe top section into less
     (for f in $($LS $file_spec); do
-	 # HACK: uses basename of parent prefix if invoked with path
-	 local b=$(basename "$f")
-	 local pre=""
-	 if [[ $f =~ / ]]; then pre="$(basename $(dirname "$f"))-"; fi
+         # HACK: uses basename of parent prefix if invoked with path
+         local b=$(basename "$f")
+         local pre=""
+         if [[ $f =~ / ]]; then pre="$(basename $(dirname "$f"))-"; fi
          DEBUG_LEVEL=5 python-lint "$f" >| "$out_dir/$pre$b".log 2>&1
          head "$out_dir/$pre$b".log
      done) >| "$out_dir/summary.log"
@@ -2191,9 +2197,9 @@ function invoke-browser() {
     local browser_executable="$1"
     local file="$2"
     if [ "$file" != "" ]; then
-	if [[ ! $file =~ http ]]; then
+        if [[ ! $file =~ http ]]; then
             file=$(url-path "$file")
-	fi
+        fi
     fi
     ## TODO?
     ## if [ ! -e "$browser_executable" ]; then
