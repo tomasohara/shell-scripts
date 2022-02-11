@@ -288,6 +288,9 @@ sub init_common {
     }
     $script_dir = &make_full_path($script_dir);
 
+    # Miscellaneous initialization
+    &init_punctuation unless (defined($punctuation_pattern));
+    
     # Temporary directory location
     # TMP: system temporary directory
     # TEMP: either $TMP or current directory if debugging
@@ -323,10 +326,12 @@ sub init_common {
     # TODO: add support for automatic decode_utf8 of input (see count_it.perl)
     &init_var_exp(*utf8, &FALSE);
     if ($utf8) {
-	eval "use Encode;";
-	binmode(STDIN, ":utf8");
-	binmode(STDOUT, ":utf8");
-	binmode(STDERR, ":utf8");
+	## OLD:
+	## eval "use Encode;";
+	## binmode(STDIN, ":utf8");
+	## binmode(STDOUT, ":utf8");
+	## binmode(STDERR, ":utf8");
+	eval 'use open ":std", ":encoding(UTF-8)";';
 	&debug_print(&TL_DETAILED, "Enabled UTF-8 support\n");
     }
 
@@ -341,10 +346,20 @@ sub init_common {
 
     # Setup @PATH global to combination of @INC and $PATH environemnt var
     &trace_array(\@INC, &TL_MOST_DETAILED, "\@INC");
+    &trace_array(\@PATH, &TL_MOST_DETAILED, "default \@PATH");
     &init_var_exp(*PATH, "");
     @PATH = @INC;
-    map { &pushnew(\@PATH, $_); } split($path_delim, $PATH);
+    ## BAD: map { &pushnew(\@PATH, $_); } split($path_delim, $PATH);
+    map { &pushnew(\@PATH, $_); } split($path_var_delim, $PATH);
     &trace_array(\@PATH, &TL_MOST_DETAILED, "\@PATH");
+    ## NOTE: following assertion yields a warning: Useless use of sort in scalar context ..
+    ## TODO: &assertion(sort(&intersection(\@PATH, \@INC)) == sort(@INC)));
+    my(@sorted_PATH_INC_intersection) = sort(&intersection(\@PATH, \@INC));
+    my(@sorted_INC) = sort(@INC);
+    &assertion(@sorted_PATH_INC_intersection == @sorted_INC);
+    &trace_array(\@sorted_PATH_INC_intersection, &TL_MOST_DETAILED, "\@sorted_PATH_INC_intersection");
+    &trace_array(\@sorted_INC, &TL_MOST_DETAILED, "\@sorted_INC");
+	
     
     &init_var_exp(*timeout_script, "cmd.sh"); # script for running commands with timeout check
     &init_var_exp(*timeout, &FALSE);	# check for command timeout
@@ -1175,7 +1190,9 @@ sub find_library_file {
 
 
 # find_program_file(file, [dirs]): search path for program named FILE or FILE.EXE
-# EX: find_program_file("cmd") => "CMD.EXE"
+# OLD: EX: find_program_file("cmd") => "CMD.EXE"
+# TODO: fix
+# EX: find_program_file("ansifilter") => "linux/ansifilter"
 #
 sub find_program_file {
     &debug_print(&TL_VERBOSE, "find_program_file(@_)\n");
@@ -1772,9 +1789,10 @@ sub trim_whitespace {
 # init_punctuation(): initialize data for punctuation stripping
 #
 # EX: init_punctuation(); (index(&PUNCTUATION_PATTERN, "%") != -1) => 1
-# EX: ("abc#def" =~ m/${punctuation_pattern}/) => 1
+# BAD EX: ("abc#def" =~ m/${punctuation_pattern}/) => 1
+# EX: ("abc#def" =~ m/&PUNCTUATION_PATTERN/e) => 1
 #
-my($punctuation_pattern);
+our($punctuation_pattern);
 sub PUNCTUATION_PATTERN { $punctuation_pattern; }
 #
 sub init_punctuation {
@@ -1833,26 +1851,30 @@ sub remove_outer_quotes {
 
 # iso_lower(text): lowercase text accounting for ISO-9660 accents
 # TODO: handle the full-range of accents (not just those for Spanish)
-# EX: iso_lower("AÑO") => "año"
+# BAD EX: iso_lower("AÑO") => "año"
+# EX: iso_lower("A\x{00D1}O") => "a\x{00F1}o"
 #
 sub iso_lower {
     my($text) = @_;
 
     ## OLD: $text =~ tr/A-ZÁÉÍÓÚÑÜÄËÏÖÜ/a-záéíóúñüäëïöü/;
-    $text =~ tr/A-Z\xC1\xC9\xCD\xD3\xDA\xD1\xC4\xCB\xCF\xD6\xDC/a-z\xE1\xE9\xED\xF3\xFA\xF1\xE4\xEB\xEF\xF6\xFC/;
+    ## BAD: $text =~ tr/A-Z\xC1\xC9\xCD\xD3\xDA\xD1\xC4\xCB\xCF\xD6\xDC/a-z\xE1\xE9\xED\xF3\xFA\xF1\xE4\xEB\xEF\xF6\xFC/;
+    $text =~ s/.*/\L$&/g;
 
     return ($text);
 }
 
 # iso_upper(text): uppercase text accounting for ISO-9660 accents
 # TODO: handle the full-range of accents (not just those for Spanish)
-# EX: iso_upper("José") => "JOSÉ"
+# BAD: EX: iso_upper("José") => "JOSÉ"
+# EX: iso_upper("Jos\x{00E9}") => "JOS\x{00C9}"
 #
 sub iso_upper {
     my($text) = @_;
 
     ## OLD: $text =~ tr/a-záéíóúñäëïöü/A-ZÁÉÍÓÚÑÜÄËÏÖÜ/;
-    $text =~ tr/a-z\xE1\xE9\xED\xF3\xFA\xF1\xE4\xEB\xEF\xF6\xFC/A-Z\xC1\xC9\xCD\xD3\xDA\xD1\xC4\xCB\xCF\xD6\xDC/;
+    ## BAD: $text =~ tr/a-z\xE1\xE9\xED\xF3\xFA\xF1\xE4\xEB\xEF\xF6\xFC/A-Z\xC1\xC9\xCD\xD3\xDA\xD1\xC4\xCB\xCF\xD6\xDC/;
+    $text =~ s/.*/\U$&/g;
 
     return ($text);
 }
