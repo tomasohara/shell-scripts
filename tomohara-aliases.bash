@@ -180,6 +180,7 @@ function space-check() {
 }
 # downcase-stdin(): convert STDIN to lowercase
 # downcase-text(text, ...): downcase TEXT
+# EX: echo "Tomás" | downcase-stdin => "tomás"
 function downcase-stdin() { perl -pe 's/.*/\L$&/;'; }
 function downcase-text() { echo "$@" | downcase-stdin; }
 # todays-date(): outputs date in format DDMmmYY (e.g., 22Apr20)
@@ -724,6 +725,7 @@ function gr-less () { gr "$@" | $PAGER; }
 
 # Other grep-related stuff
 #
+# EX: echo $'1 one\n2 \x80\n3 three' | gr-nonascii => $'2: 2 \x80'
 alias grep-nonascii='perlgrep.perl "[\x80-\xFF]"'
 
 # Searching for files
@@ -892,6 +894,7 @@ alias 'track-time:'='track-time'
 
 # Simple calculator commands
 function old-calc () { echo "$@" | bc -l; }
+# EX: perl-calc "2 / 4" => 0.500
 function perl-calc () { perl- perlcalc.perl -args "$@"; }
 # TODO: read up on variable expansion in function environments
 function perl-calc-init () { initexpr=$1; shift; echo "$@" | perl- perlcalc.perl -init="$initexpr" -; }
@@ -905,7 +908,7 @@ function hex2dec { perl -e "printf '%d', 0x$1;" -e 'print "\n";'; }
 function dec2hex { perl -e "printf '%x', $1;" -e 'print "\n";'; }
 function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
 function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
-alias hv='hexview.perl'
+## OLD: alias hv='hexview.perl'
 
 #-------------------------------------------------------------------------------
 trace Miscellaneous commands
@@ -1217,6 +1220,7 @@ alias count_it=count-it
 function count-tokens () { count-it "\S+" "$@"; }
 # TODO: rework via chomp
 function count-line-text () { count-it '^([^\n\r]*)[\n\r]*$' "$@"; }
+# EX: echo $'1 one\n2 two\n3' | perlgrep 'o\w' => $'1 one'
 alias perlgrep='perl- perlgrep.perl'
 alias perl-grep=perlgrep
 function para-grep { perlgrep -para "$@" 2>&1 | $GREP -v "Can't open \*notes\*"; }
@@ -1225,9 +1229,10 @@ alias para-gr='para-grep -i -n'
 function cached-notes-para-gr { para-gr "$@" _master-note-info.list | $PAGER; }
 # TODO: work out better name
 function cached-notes-para-gr-less { cached-notes-para-gr "$@" | less -p "$1"; }
+# EX: echo $'1\n2\n3\n4\n5' | calc-stdev => "num = 5; mean = 3.000; stdev = 1.581; min = 1.000; max = 5.000; sum = 15.000"
 function calc-stdev () { sum_file.perl -stdev "$@" -; }
-alias calc-stdev-file='calc-stdev <'
-alias sum-col2='sum_file.perl -col=2 -'
+## OLD: alias calc-stdev-file='calc-stdev <'
+## OLD: alias sum-col2='sum_file.perl -col=2 -'
 notes_glob="*notes*.txt  *notes*.list *notes*.log"
 function notes-grep() { perlgrep "$@" $notes_glob; }
 #
@@ -1654,7 +1659,7 @@ function cmd-usage () {
 alias configure='./configure --prefix ~'
 alias pp-xml='xmllint --format'
 alias pp-html='pp-xml --html'
-# ex: pp-url "www.fu.com?p1=fu&p2=bar" => "www.fu.com\n\t?p1=fu\n\tp2=bar"
+# ex: pp-url "www.fu.com?p1=fu&p2=bar" => "www.fu.com\n\t?p1=fu\n\t&p2=bar"
 alias pp-url-aux='perl -pe "s/[\&\?]/\n\t$&/g;"'
 function pp-url { echo "$@" | pp-url-aux; }
 ## OLD: alias check-xml='xmllint --noout --valid'
@@ -1915,8 +1920,8 @@ function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$;
 function script {
     ## THIS function is buggy!
     # Note: set_xterm_title.bash keeps track of titles for each process, so save copies of current ones
-    local save_full=$(set-xterm-title --restore --print-full)
-    local save_icon=$(set-xterm-title --restore --print-icon)
+    local save_full=$(set-xterm-title --print-full)
+    local save_icon=$(set-xterm-title --print-icon)
     ## DEBUG: echo "save_full='$save_full'; save_icon='$save_icon'"
   
     # Change prompt
@@ -1938,6 +1943,7 @@ function script {
     ## DEBUG: echo "script: 3. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
     
     # Get rid of lingering 'script' in xterm title
+    ## DEBUG: echo "Restoring xterm title: full=$save_full save=$save_icon"
     set-xterm-title "$save_full" "$save_icon"
 }
 
@@ -2185,6 +2191,7 @@ function curl-dump () {
     local base=`basename $url`;
     curl $url > $base;
 }
+# EX: url-path $BIN/templata.html => "file:///$BIN/template.html"
 function url-path () {
     local file="$1"
     echo $(realpath "$file") | perl -pe 's@^@file:///@;'
