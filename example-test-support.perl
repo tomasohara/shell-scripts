@@ -4,17 +4,46 @@ eval 'exec perl -Ssw $0 "$@"'
 #
 # example-test-support.perl: support code for test-perl-examples.perl
 #
+# This script is used by the dynamically generated testing script (via require):
+# see test-perl-example.perl. In particular, the verify_test() function
+# is implemented here. It is called for each test extracted from the script.
+# The function summarize_tests, also implemented here, is used to output
+# the number of good vs. total tests and the accuracy score.
+#
+# Normally it takes a Perl expression and evaluates it via eval(). However,
+# there is an option to test Bash script in which case run_command() is used.
+# If aliases are defined, the script must be sourced. In both cases, the
+# result is a string that is compared for equality against the evaluated
+# value. (Some postprocessing is included, such as to resolute array or
+# reference references into expressions.)
+#
 
 # Load in the common module, making sure the script dir is in the Perl lib path
 BEGIN { 
     my $dir = `dirname '$0'`; chomp $dir; unshift(@INC, $dir);
     require 'common.perl';
+    use vars qw/$TEMP/;
     require 'extra.perl';
 }
 
-use vars qw/$verbose $max_failures/;
+# Uncomment the following to help track down undeclared variables.
+# Be prepared for a plethora of warnings. One that is important is
+#    'Global symbol "xyz" requires explicit package name'
+# when NOT preceded by 'Global symbol "xyz" requires explicit package name'
+#
+## use strict;
+## no strict "refs";		# to allow for symbolic file handles
+## use diagnostics;
+
+# Note: does not specify 'use strict;' as strict mode is optional.
+# See above for commented out specification (for debugging changes).
+#
+use vars qw/$verbose $max_failures $bash $source_path/;
+#
 &init_var(*verbose, &FALSE);		# verbose output mode
 &init_var(*max_failures, &MAXINT);	# max failures before abort
+&init_var(*bash, &FALSE);               # run test via shell (not perl eval)
+&init_var(*source_path, "");            # path of (Bash) script to source
 my($failed_tests) = 0; 			# count of failed tests
 my($total_tests) = 0;			# total number of tests
 
@@ -30,19 +59,39 @@ sub verify_test {
 
     # Get the result in format compatible with desired result
     my($test_failed) = &FALSE;
-    my($result) = eval $test;
-    if (! defined($result) && ($@ ne "")) {
+    ## OLD: my($result) = eval $test;
+    my($result);
+    if (! $bash) {
+	$result = eval $test;
+    }
+    else {
+	# note: need to ensure the script is sourced prior to each test
+	if ($source_path ne "") {
+	    my($temp_command) = &make_path($TEMP, "_command-${total_tests}.list");
+	    &write_file($temp_command, "$test\n");
+	    $result = &run_command("bash -O expand_aliases -c 'source $source_path > /dev/null 2>&1; source $temp_command'");
+	}
+	else {
+	    $result = &run_command("$test");
+	}
+    }
+    if (! defined($result)) {
 	# Use the error code of the failed evaluation as the result
-	$result = $@;
+	if ($@ ne "") {
+	    $result = $@;
+	}
+	else {
+	    $result = "undef";
+	}
 	$test_failed = &TRUE;
 	
-	&debug_print(&TL_VERBOSE, "failure in test evaluation\n");
+	&debug_print(&TL_VERBOSE, "failure in test evaluation: $result\n");
     }
     else {
 	&debug_print(&TL_VERBOSE, "result='$result'\n");
 	if ($desired_result =~ /^\s*\(.*\)\s*$/) {
 	    # Re-evaluate test expression as list
-	    # TODO: exclude strings with outer parentheses (coordinate with format_unit_tests in test-perl-examples.perl)
+	    # TODO: Exclude strings with outer parentheses (coordinate with format_unit_tests in test-perl-examples.perl).
 	    # NOTE: Separate evaluation required so that error can be detected
 	    # via undef since in list environment undef same as empty list.
 	    my(@result) = eval $test;
@@ -52,12 +101,13 @@ sub verify_test {
 	    $result = "(" . join(", ", @result) . ")";
 	}
 	elsif (!defined($result)) {
-	    &debug_print(&TL_VERBOSE, "test failure due to scalar undef\n");;
+	    &debug_print(&TL_VERBOSE, "Warning: test failure due to scalar undef\n");;
 	    $result = "undef";
 	    $test_failed = &TRUE;
 	}
 	else {
-	    # Treat "" as zero is number expected
+	    # Treat "" as zero if number expected
+	    # TODO: Make this result conversiob optional.
 	    $result = 0 if (($result eq "") && (&is_numeric($desired_result)));
 
 	    # Resolve array and hash references
@@ -78,8 +128,8 @@ sub verify_test {
 	    my($unquoted_desired_result) = &remove_outer_quotes($desired_result);
 	    my($unquoted_result) = &remove_outer_quotes($result);
 
-	    # Compare versus desired result (via eval for extra flexibility)
-	    # TODO: make sure the unqouted-result check doesn't lead to false positives
+	    # Compare versus desired result (via eval for extra flexibility).
+	    # TODO: Make sure the unqouted-result check doesn't lead to false positives.
 	    $test_failed = (($result ne $desired_result)
 			    && ($result ne $unquoted_desired_result)
 			    && ($unquoted_result ne $desired_result)
@@ -122,6 +172,7 @@ sub isnum {
 
     my($OK) = &boolean((length($text) > 0) 
 		       && ($text =~ /\d+/)
+		                           ## note: (?:pattern) groups without capturing
 		       && ($text =~ /^\s*-?\d*\.?\d*(?:e[+-]?\d+)?\s*$/i));
     &debug_print(&TL_VERY_VERBOSE, "isnum(@_) => $OK\n");
 
