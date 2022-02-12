@@ -24,6 +24,9 @@
 #    $ calc_entropy.py -simple .25 .25 .25 .25
 #    2.000
 #
+## Tom: Good to add pointer to original script
+# Note: Based on calc_entropy.perl.
+#
 # TODO:
 # - Remove assumptions about word-oriented data.
 # - Move just_freq code into separate script (new calc_relative_frequency.perl).
@@ -344,6 +347,8 @@ class CalcEntropy(Main):
             if self.just_freq:
                 if self.verbose:
                     result += 'class\t'
+                ## Tom: use system.round_num so that PRECISION env. var. used
+                ##    result += str(system.round_num(prob_value))
                 result += f'{format(prob_value, ".3f")}\n'
             elif self.verbose:
                 result += (f'#\t\t{class_name}\t'
