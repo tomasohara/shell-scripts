@@ -15,10 +15,6 @@ from mezcla.unittest_wrapper import TestWrapper
 from mezcla import glue_helpers as gh
 
 
-## TODO: use gh.resolve_path(SCRIPT) instead of relative path on string
-SCRIPT = './../check_errors.py'
-
-
 class TestIt(TestWrapper):
     """Class for testcase definition"""
     script_module = TestWrapper.derive_tested_module_name(__file__) + '.py'
