@@ -5,6 +5,8 @@
 #     function extract_matches () { perl -ne "while (/$1/) { printf \"%s\\n\", \$1; s/$1//; }" $2 }
 # See count_it.py for a similar script for counting the frequency of such patterns.
 #
+# NOTE: Based on extract_matches.perl.
+#
 # Portions Copyright (c) 2001 Cycorp, Inc.  All rights reserved.
 # Portions Copyright (c) 2002-2004 Tom O'Hara  All rights reserved.
 #

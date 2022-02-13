@@ -6,6 +6,8 @@
 # NOTE: This is a simple script that turns out to be very useful
 # for a variety of tasks, especially in corpus analysis.
 #
+# NOTE: Based on count_it.perl
+#
 # examples:
 #
 # tabulating most commonly used commands:
