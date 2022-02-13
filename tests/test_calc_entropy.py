@@ -63,8 +63,8 @@ class TestIt(TestWrapper):
 
     def test_get_data_from_files(self):
         """Testing of getting data from files"""
-        filename_1      = '/tmp/entropy_test_1.freq'
-        filename_2      = '/tmp/entropy_test_2.freq'
+        filename_1      = self.temp_file + '-1.freq'
+        filename_2      = self.temp_file + '-2.freq'
         input_data_1    = '.perl\t239\n.sh\t152\n.bash\t22\n.py\t3\n.lisp\t3\n.txt\t2\n.csh\t1\n'
         input_data_2    = '.perl\t123\n.sh\t22\n.bash\t32\n.py\t9\n'
         expected_result = '1.376\n1.407'

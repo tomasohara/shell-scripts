@@ -31,9 +31,8 @@ class TestIt(TestWrapper):
         """test extract matches"""
         input_string    = '  cat\n  dog\n  cat\n  whale'
         expected_result = 'cat\ndog\ncat\nwhale'
-        filename        = '/tmp/test_file.txt '
-        gh.run(f'touch {filename} && echo "{input_string}" > {filename}')
-        self.assertEqual(gh.run(f'{self.script_module} "^\\s*(\\S+)" {filename}'), expected_result)
+        gh.run(f'touch {self.temp_file} && echo "{input_string}" > {self.temp_file}')
+        self.assertEqual(gh.run(f'{self.script_module} "^\\s*(\\S+)" {self.temp_file}'), expected_result)
 
 
     def test_auto_pattern(self):

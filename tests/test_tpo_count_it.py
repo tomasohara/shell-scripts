@@ -81,19 +81,17 @@ class TestIt(TestWrapper):
     def test_input_from_file(self):
         """test count patterns from file"""
         input_text      = 'dog\ndog\ncat\ncat\ndog\ndog\ncat\nfish\nfish'
-        input_file      = '/tmp/test_file.txt'
         expected_result = 'dog\t4\ncat\t3\nfish\t2'
-        gh.run(f'touch {input_file} && echo "{input_text}" > {input_file}')
-        self.assertEqual(gh.run(f'{self.script_module} "\\w+" {input_file}'), expected_result)
+        gh.run(f'touch {self.temp_file} && echo "{input_text}" > {self.temp_file}')
+        self.assertEqual(gh.run(f'{self.script_module} "\\w+" {self.temp_file}'), expected_result)
 
 
     def test_get_pattern_from_file(self):
         """test get pattern from file"""
-        pattern_file    = '/tmp/test_pattern_file.txt'
         input_string    = 'dog dog cat cat dog dog cat fish fish'
         expected_result = 'dog\t4\ncat\t3\nfish\t2'
-        gh.run(f'touch {pattern_file} && echo -n "\\w+" > {pattern_file}')
-        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} {pattern_file}'), expected_result)
+        gh.run(f'touch {self.temp_file} && echo -n "\\w+" > {self.temp_file}')
+        self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} {self.temp_file}'), expected_result)
 
 
     def test_ignore_case(self):

@@ -23,21 +23,21 @@ class TestIt(TestWrapper):
 
     def test_find_files(self):
         """Test for find_files option"""
+        use_temp_base_dir = True
 
         # Setup test folders and files
-        test_folder = gh.run('echo test-find-files-$$')
-        foldernames = [test_folder, f'{test_folder}/another_folder']
+        foldernames = [self.temp_base, f'{self.temp_base}/another_folder']
         filenames  = ['arrows.bash', 'numeric.py', 'calc_entropy.c']
 
         for folder in foldernames:
-            gh.run(f'mkdir /tmp/{folder}')
+            gh.run(f'mkdir {folder}')
             for filename in filenames:
-                gh.run(f'touch /tmp/{folder}/{filename}')
+                gh.run(f'touch {folder}/{filename}')
 
         # Run twice to test the backup folder
         result = ''
         for _ in range(2):
-            result = gh.run(f'python {self.script_module} --find-files --path "/tmp/{test_folder}"').split('\n')
+            result = gh.run(f'python {self.script_module} --find-files --path "{self.temp_base}"').split('\n')
 
         # Check output
         self.assertEqual(len(result), 4)
@@ -54,7 +54,7 @@ class TestIt(TestWrapper):
         expected_new_files += ['backup' + new_file + '.' for new_file in expected_new_files]
 
         # Check if new files exist
-        file_list = gh.run(f'ls -R /tmp/{test_folder}')
+        file_list = gh.run(f'ls -R {self.temp_base}')
 
         for expected_file in expected_new_files:
             expected_file = expected_file.replace('backup/', '')
@@ -63,7 +63,7 @@ class TestIt(TestWrapper):
         # Check content of created files
         for new_file in expected_new_files:
             if '.log' not in new_file:
-                for line in gh.run(f'cat /tmp/{test_folder}/{filename}'):
+                for line in gh.run(f'cat {self.temp_base}/{filename}'):
                     self.assertTrue(bool(re.search(r"[drwx-]+\s+\d+\s+\w+\s+\w+\s+\d+\s+\w+\s+\d+\s+\d\d:\d\d\s+[\w/]+", line)))
 
 
