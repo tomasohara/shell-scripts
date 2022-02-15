@@ -122,6 +122,7 @@ class CalcEntropy(Main):
 
     def setup(self):
         """Process arguments"""
+        debug.trace(5, f"Script.setup(): self={self}")
 
         # Check the command-line options
         self.probabilities = self.get_parsed_argument(PROBABILITIES, '')
@@ -151,18 +152,18 @@ class CalcEntropy(Main):
 
     def run_main_step(self):
         """Process main script"""
+        debug.trace(5, f"Script.run_main_step(): self={self}")
 
 
         # Check for simplified version of data (i.e., just the probabilities)
         if self.simple:
-
 
             data = []
 
 
             # See if command-line probabilities should be used
             if self.probabilities:
-                data = self.probabilities.split(' ')
+                data = [system.to_float(v) for v in self.probabilities]
 
 
             # Otherwise get from standard input
@@ -182,9 +183,10 @@ class CalcEntropy(Main):
 
         # Otherwise check for class name and frequency data.
         else:
+            filenames = [self.filename] + self.other_filenames
             # Get and process data from files
-            if self.filename and not self.filename == '-':
-                for filename in self.parsed_args['filename']:
+            if (filenames != ['-']):
+                for filename in filenames:
 
 
                     # Read file
@@ -235,7 +237,7 @@ class CalcEntropy(Main):
 
     def format_frequencies_from_text(self, text):
         """Get frequencies from text"""
-
+        debug.trace(7, 'format_frequencies_from_text(_)')
 
         frequencies_extracted = {}
 
@@ -308,7 +310,7 @@ class CalcEntropy(Main):
     # data should be [(class_name, frequency), ...]
     def regular_calc_entropy(self, data, word):
         """Calculate entropy for the probability distribution"""
-
+        debug.trace(debug.VERBOSE, f'regular_calc_entropy({data}, {word})')
 
         result = ''
 
@@ -365,7 +367,7 @@ class CalcEntropy(Main):
                        f'1.000\t'
                        f'{format(entropy, ".3f")}\n\n')
             if not self.skip_header:
-                result += f'# word\tclasses\tfreq\tentropy\tmax_prob\n'
+                result += '# word\tclasses\tfreq\tentropy\tmax_prob\n'
             result += (f'{word}\t'
                        f'{len(data)}\t'
                        f'{total_frequency}\t'
@@ -389,7 +391,7 @@ class CalcEntropy(Main):
 
         if (self.verbose and not self.just_freq):
             result +=  '#\tprob\t-p lg(p)    max p\n'
-            result += f'#' + '-' * 32 + '\n'
+            result += f'#{"-" * 32}\n'
 
 
         entropy  = 0.0
@@ -453,6 +455,7 @@ def normalize(values):
     ex: input  -> [5, 10, 15, 20]
         output -> [0.100, 0.200, 0.300, 0.400]
     """
+    debug.trace(7, 'normalize(_)')
 
     total_sum = 0
     for item in values:
@@ -467,6 +470,7 @@ def normalize(values):
 
 def sort_dict(dictionary, by_key=False, by_value=False):
     """Sort dictionary, always returns array"""
+    debug.trace(7, 'sort_dict(_)')
 
     result = []
 
@@ -481,6 +485,9 @@ def sort_dict(dictionary, by_key=False, by_value=False):
 
 
 if __name__ == '__main__':
+    # note: peeks at command line and enables probabilities if --simple
+    simple_format = (f"--{SIMPLE}" in " ".join(sys.argv))
+    #
     app = CalcEntropy(description     = __doc__,
                       boolean_options = [(LAST,           f'alias for --{FREQ_LAST}'),
                                          (FREQ_LAST,       'frequency occurs last in the data'),
@@ -501,11 +508,11 @@ if __name__ == '__main__':
                                          (NO_COMMENTS,     'used to bypass comment stripping'),
                                          (VERBOSE,         'show more details')],
                       int_options     = [(MAX_COUNT,       'maximum number of cases to process')],
-                      text_options    = [(PROBABILITIES,  f'probabilities for --{SIMPLE} option, must be an array'),
-                                         (CLASS_FILTER,    'only keep class names that contains a specific word'),
+                      text_options    = [(CLASS_FILTER,    'only keep class names that contains a specific word'),
                                          (LABEL,           'label for entropy display'),
                                          (WORD,            'word over which distribution is made')],
+                      positional_options = ([(PROBABILITIES,  f'probabilities for --{SIMPLE} option, must be an array', [], "*")] if simple_format else None),
                       multiple_files  =  True,
                       manual_input    =  True,
-                      skip_input      =  False)
+                      skip_input      =  simple_format)
     app.run()
