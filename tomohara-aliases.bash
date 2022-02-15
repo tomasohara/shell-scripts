@@ -458,6 +458,7 @@ append-path $HOME/perl/bin
 # used at Convera).
 export TIME_CMD=/usr/bin/time
 export PERL="$NICE $TIME_CMD perl -Ssw"
+export BRIEF_USAGE=1
 
 # Terminal window title
 alias set-xterm-title='set_xterm_title.bash'
@@ -908,23 +909,26 @@ function hex2dec { perl -e "printf '%d', 0x$1;" -e 'print "\n";'; }
 function dec2hex { perl -e "printf '%x', $1;" -e 'print "\n";'; }
 function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
 function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
-## OLD: alias hv='hexview.perl'
+## MISC: alias hv='hexview.perl'
 
 #-------------------------------------------------------------------------------
 trace Miscellaneous commands
 
-alias startx-='startx >| startx.log 2>&1'
-alias xt='xterm.sh &'
-alias gt='gnome-terminal &'
+## MISC:
+## alias startx-='startx >| startx.log 2>&1'
+## alias xt='xterm.sh &'
+## alias gt='gnome-terminal &'
 alias hist='history $LINES'
 # Removes timestamp from history (e.g., " 1972  [2014-05-02 14:34:12] dir *py" => " 1972  dir *py")
 # TEST: function hist { h | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
 # note: funciton used to simplify specification of quotes
 quiet-unalias h
 function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
-alias new-lynx='lynx-2.8.4'
-alias fix-keyboard='kbd_mode -a'
+## MISC
+## alias new-lynx='lynx-2.8.4'
+## alias fix-keyboard='kbd_mode -a'
 function asctime() { perl -e "print (scalar localtime($1));"; echo ""; }
+# filter-dirnames: strip directory names from ps listing
 function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
 
 # comma-ize-number(): add commas to numbers in stdin
@@ -1231,8 +1235,8 @@ function cached-notes-para-gr { para-gr "$@" _master-note-info.list | $PAGER; }
 function cached-notes-para-gr-less { cached-notes-para-gr "$@" | less -p "$1"; }
 # EX: echo $'1\n2\n3\n4\n5' | calc-stdev => "num = 5; mean = 3.000; stdev = 1.581; min = 1.000; max = 5.000; sum = 15.000"
 function calc-stdev () { sum_file.perl -stdev "$@" -; }
-## OLD: alias calc-stdev-file='calc-stdev <'
-## OLD: alias sum-col2='sum_file.perl -col=2 -'
+## MISC: alias calc-stdev-file='calc-stdev <'
+## MISC: alias sum-col2='sum_file.perl -col=2 -'
 notes_glob="*notes*.txt  *notes*.list *notes*.log"
 function notes-grep() { perlgrep "$@" $notes_glob; }
 #
@@ -1330,7 +1334,7 @@ function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
 # TODO: figure out how to exclude env. vars from show-variables output
 function show-variables () { set | $GREP -i '^[a-z].*='; }
 
-function show-macros-by-word () { pattern="\b$*\b"; if [ "$pattern" = "" ]; then pattern=.; fi; alias | $GREP $pattern ; show-functions-aux | perlgrep -para $pattern; }
+## MISC: function show-macros-by-word () { pattern="\b$*\b"; if [ "$pattern" = "" ]; then pattern=.; fi; alias | $GREP $pattern ; show-functions-aux | perlgrep -para $pattern; }
 alias show-aliases='alias | $PAGER'
 # TODO: see if other aliases were "recursively" defined
 alias show-functions='show-functions-aux | $PAGER'
@@ -1404,9 +1408,10 @@ alias dobackup='dobackup.sh'
 alias kill-em='kill_em.sh'
 alias kill-it='kill-em --pattern'
 # TODO: see why --filter-dirnames added to ps-mine aliases
-alias ps-mine-='ps-mine "$@" | filter-dirnames'
+## BAD: alias ps-mine-='ps-mine "$@" | filter-dirnames'
+function ps-mine- { ps-mine "$@" | filter-dirnames; }
 alias ps_mine='ps-mine'
-alias ps-mine-='ps-mine "$@" | filter-dirnames'
+## DUP: alias ps-mine-='ps-mine "$@" | filter-dirnames'
 alias ps-mine-all='ps-mine --all'
 alias rename-files='perl- rename_files.perl'
 alias rename_files='rename-files'
