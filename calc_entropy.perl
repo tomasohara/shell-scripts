@@ -176,7 +176,8 @@ sub regular_calc_entropy {
 	chomp;
 
 	# Skip comments and blank lines
-	s/#.*// unless ($no_comments);
+	## BAD: s/#.*// unless ($no_comments);
+	s/#.*// if ($no_comments);
 	next if (/^\s*$/);
 	## OLD: s/\s\s+/\t/g if ($fix);		# make sure input is tab-delimited
 	s/\s+/\t/g if ($fix);		# make sure input is tab-delimited
