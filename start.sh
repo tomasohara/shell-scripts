@@ -122,6 +122,9 @@ if [ "$for_editting" = "1" ]; then
     pdf_program="okular"
     image_program="pinta"
 fi
+if [[ $lower_file =~ .*xcf ]]; then
+    image_program="gimp"
+fi
     
 #
 case "$lower_file" in
