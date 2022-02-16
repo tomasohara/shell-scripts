@@ -9,6 +9,7 @@
 # Standart packages
 import unittest
 import sys
+import os
 
 
 # Local packages
@@ -25,6 +26,12 @@ class TestIt(TestWrapper):
     """Class for testcase definition"""
     script_module = TestWrapper.derive_tested_module_name(__file__) + '.py'
     maxDiff       = None
+
+
+    def setUp(self):
+        """Per-test setup"""
+        super().setUp()
+        os.environ['PRECISION'] = '3'
 
 
     def test_normalize_function(self):
