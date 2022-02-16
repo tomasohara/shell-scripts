@@ -246,6 +246,12 @@ function git-checkin-all-template {
     echo "echo GIT_MESSAGE=\'miscellaneous update\' git-update-commit-push \$(cat \$diff_list_file)"
 }
 
+# invoke-next-single-checkin: outputs and runs the next single-checking template
+function invoke-next-single-checkin {
+    git-checkin-single-template >| $TMP/_template.sh;
+    source $TMP/_template.sh
+    }
+
 # git-alias-usage: tips on interactive usage
 function git-alias-usage () {
     echo "Usage examples for git aliases, most of which create log files as follows:"
@@ -268,9 +274,10 @@ function git-alias-usage () {
         echo "To check in files different from repo:"
 	echo "    # TODO: pushd \$REPO_ROOT"
 	echo "    # -OR-: pushd \$(realpath .)/.."
-	echo '    git-checkin-single-template >| /tmp/_template.sh; source /tmp/_template.sh'
+	echo "    git-checkin-single-template >| /tmp/_template.sh; source $TMP/_template.sh"
 	# TODO: echo '    git-checkin-single-template | source'
 	echo '    # ALT: git-checkin-multiple-template and git-checkin-all-template (n.b. ¡cuidado!)'
+	echo '    invoke-next-single-checkin'
     }
 
 }
