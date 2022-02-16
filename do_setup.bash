@@ -2,9 +2,10 @@
 # *** OLD: DO NOT MODIFY: use tomohara-aliases.bash instead! ***
 #
 # NOTES:
-#
-# - This gets invoked from $BIN/tomohara-aliases.bash
-#
+# - Obsolete old code flagged with '## OLD': either older definition
+#   or no longer used).
+# - Misc. old code flagged with '## MISC' (e.g., old but potentially useful).
+# - This gets invoked from $BIN/tomohara-aliases.bash.
 # - from bash manual:
 #   Special Parameters
 #   ...
@@ -18,8 +19,6 @@
 #   are not evaluated if under arahomot; TODO: check for CygWin flag.
 # - Variables in function definitions should be declared local to avoid subtle problems
 #   due to retained values.
-#
-# NOTES:
 # - Function definition syntax:
 #      [ function ] name () { command-list; }
 #   where () is optional if 'function' given
@@ -196,41 +195,42 @@ export TMPDIR=$TEMP
 #
 if [ "$DOMAIN_NAME" = "" ]; then export DOMAIN_NAME=`domainname.sh`; fi
 
-# NMSU CS settings
-if [ "$DOMAIN_NAME" = "cs.nmsu.edu" ]; then
-    export TOM=/home/ch1/tomohara
-    export GRAPHLING_TOM=/home/ch2/graphling/USERS/TOM
-    export OTHER_TOM=/home/ch3/graphling2/USER/TOM
-    # PRINTER is set in do_setup.sh
-    # TODO: figure out out to use a pattern; also use separate variable
-    # based on OSTYPE (to avoid problems with other programs that rely on it)
-    ## if [ "$OSTYPE" = "solaris2.6" ]; then export OSTYPE=solaris; fi
-    ## if [ "$OSTYPE" = "solaris2.7" ]; then export OSTYPE=solaris; fi
-    alias cs-hosts='echo `cat $HOME/cs/cs-hosts.list`'
-    alias cs-load='cs-load.sh --all'
-    ## alias p4-load='cs-load.sh --p4'
-    alias p4-load='cs-load.sh `cat $HOME/cs/cs-summer-p4-linux-hosts.list`'
-    alias p4-free='p4-load | grep " 0 users "'
-    alias p4-busy='p4-load | grep "load average: [0-9].[1-9]"'
-    alias wb-load='cs-load.sh --wb'
-    ## alias bw-load='cs-load.sh --bw'
-    alias bw-load='cs-load.sh --reverse --bw'
-    alias bw-load-half1='cs-load.sh --bw1'
-    alias bw-load-half2='cs-load.sh --bw2'
-    ## alias bw-load='cs-load.sh --bw'
-    ## alias dominica-load='rup.sh dominica'
-    alias bangkok-load='rup.sh bangkok'
-    alias mount-cd='mount /dev/cdrom'
-    alias unmount-cd='umount /dev/cdrom'
-    alias ml='/local/ml-110/bin/sml'
-    ## alias set-home-display-export='export DISPLAY=128.123.63.127:0.0; echo "DISPLAY set to $DISPLAY"'
-    ## if [ "$BEOWULF_NODE" = "1" ]; then
-       ## alias emacs='xemacs'
-    ## fi
-    export DEFAULT_HOST=thoth
-    if [ -e $HOME/.default_host ]; then export DEFAULT_HOST=`cat $HOME/.default_host`; fi
-fi
-alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
+## OLD:
+## # NMSU CS settings
+## if [ "$DOMAIN_NAME" = "cs.nmsu.edu" ]; then
+##     export TOM=/home/ch1/tomohara
+##     export GRAPHLING_TOM=/home/ch2/graphling/USERS/TOM
+##     export OTHER_TOM=/home/ch3/graphling2/USER/TOM
+##     # PRINTER is set in do_setup.sh
+##     # TODO: figure out out to use a pattern; also use separate variable
+##     # based on OSTYPE (to avoid problems with other programs that rely on it)
+##     ## if [ "$OSTYPE" = "solaris2.6" ]; then export OSTYPE=solaris; fi
+##     ## if [ "$OSTYPE" = "solaris2.7" ]; then export OSTYPE=solaris; fi
+##     alias cs-hosts='echo `cat $HOME/cs/cs-hosts.list`'
+##     alias cs-load='cs-load.sh --all'
+##     ## alias p4-load='cs-load.sh --p4'
+##     alias p4-load='cs-load.sh `cat $HOME/cs/cs-summer-p4-linux-hosts.list`'
+##     alias p4-free='p4-load | grep " 0 users "'
+##     alias p4-busy='p4-load | grep "load average: [0-9].[1-9]"'
+##     alias wb-load='cs-load.sh --wb'
+##     ## alias bw-load='cs-load.sh --bw'
+##     alias bw-load='cs-load.sh --reverse --bw'
+##     alias bw-load-half1='cs-load.sh --bw1'
+##     alias bw-load-half2='cs-load.sh --bw2'
+##     ## alias bw-load='cs-load.sh --bw'
+##     ## alias dominica-load='rup.sh dominica'
+##     alias bangkok-load='rup.sh bangkok'
+##     alias mount-cd='mount /dev/cdrom'
+##     alias unmount-cd='umount /dev/cdrom'
+##     alias ml='/local/ml-110/bin/sml'
+##     ## alias set-home-display-export='export DISPLAY=128.123.63.127:0.0; echo "DISPLAY set to $DISPLAY"'
+##     ## if [ "$BEOWULF_NODE" = "1" ]; then
+##        ## alias emacs='xemacs'
+##     ## fi
+##     export DEFAULT_HOST=thoth
+##     if [ -e $HOME/.default_host ]; then export DEFAULT_HOST=`cat $HOME/.default_host`; fi
+## fi
+## alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
 
 #-------------------------------------------------------------------------------
 # Tex settings
@@ -244,233 +244,237 @@ export LATEX=/usr/share/texmf/tex/latex
 
 
 #-------------------------------------------------------------------------------
-# GraphLing-related environment variables
-#
-trace host-specific settings
-if [ "$DOMAIN_NAME" = "cs.nmsu.edu" ]; then
-    trace GraphLing-related environment variables
-    # Commonly used directories
-    if [ "$GRAPHLING_HOME" = "" ]; then export GRAPHLING_HOME=/home/graphling; fi
-    export GL_HOME=$GRAPHLING_HOME
-    export DATA=$GL_HOME/DATA
-    export GL_TOOLS=$GL_HOME/TOOLS
-    export SCRIPT_DIR=$GL_HOME/USERS/TOM/UTILITIES
-    export GL_UTILITIES=$GL_HOME/USERS/TOM/UTILITIES
-    export EXPERIMENTS=$GL_HOME/EXPERIMENTS
-    export HUGIN_SERVER=$GL_TOOLS/HUGIN/PCSOL_HUGIN/SERVER
-    export SOURCE=$GL_HOME/SOURCE
-    export FEATURE_SOURCE=$SOURCE/FEATURE_TOOLS
-    #
-    # Those for some common experiment directories
-    export FRAMENET_PREPOSITION=$EXPERIMENTS/FRAMENET-PREPOSITION
-    export TREEBANK_PREPOSITION=$EXPERIMENTS/TREEBANK-PREPOSITION
-    export SENSEVAL2=$EXPERIMENTS/SENSEVAL2
-    export SENSEVAL3=$EXPERIMENTS/SENSEVAL3
-    export SENSEVAL=$SENSEVAL3
-    export BN_EXAMPLES=$EXPERIMENTS/EXAMPLE-BAYES-NETS
-    ## export COOKING=$EXAMPLE_BAYES_NETS/COOKING
-    export DSO_BAYES=$GL_HOME/EXPERIMENTS/DSO/BAYESIAN-NETWORKS
-    ## export SENSEVAL2_BAYES=$GL_HOME/EXPERIMENTS/SENSEVAL2/BAYESIAN-NETWORKS
-    ## export FACTOTUM=$EXPERIMENTS/FACTOTUM
-    ## export LYRICS=$EXPERIMENTS/LYRICS
-    export SOYBEAN=$GL_HOME/USERS/TOM/SOYBEAN
-    export DIFFERENTIA=$EXPERIMENTS/DIFFERENTIA
-    export SETENV_SCRIPTS=$EXPERIMENTS/SETENV_SCRIPTS
-    export LEXICAL=$DATA/LEXICAL_RELATIONS
-    export WSJ=$DATA/WSJ
-    #
-    # Cyc-related directories
-    export SPEECH_PART=/home/ch1/tomohara/speech-part-inference
-    export CYC_SPEECH_PART=/home/ch1/tomohara/speech-part-inference/cyc
 
-    # Personal file settings
-    #
-    # Environment variables pointing to commonly used directories
-    export TOM=/home/ch1/tomohara
-    export CARTERA_DE_TOMAS=$TOM/cartera-de-tomas
-    export TOMAS=$CARTERA_DE_TOMAS
+## # GraphLing-related environment variables
+## #
+## trace host-specific settings
+## if [ "$DOMAIN_NAME" = "cs.nmsu.edu" ]; then
+##     trace GraphLing-related environment variables
+##     # Commonly used directories
+##     if [ "$GRAPHLING_HOME" = "" ]; then export GRAPHLING_HOME=/home/graphling; fi
+##     export GL_HOME=$GRAPHLING_HOME
+##     export DATA=$GL_HOME/DATA
+##     export GL_TOOLS=$GL_HOME/TOOLS
+##     export SCRIPT_DIR=$GL_HOME/USERS/TOM/UTILITIES
+##     export GL_UTILITIES=$GL_HOME/USERS/TOM/UTILITIES
+##     export EXPERIMENTS=$GL_HOME/EXPERIMENTS
+##     export HUGIN_SERVER=$GL_TOOLS/HUGIN/PCSOL_HUGIN/SERVER
+##     export SOURCE=$GL_HOME/SOURCE
+##     export FEATURE_SOURCE=$SOURCE/FEATURE_TOOLS
+##     #
+##     # Those for some common experiment directories
+##     export FRAMENET_PREPOSITION=$EXPERIMENTS/FRAMENET-PREPOSITION
+##     export TREEBANK_PREPOSITION=$EXPERIMENTS/TREEBANK-PREPOSITION
+##     export SENSEVAL2=$EXPERIMENTS/SENSEVAL2
+##     export SENSEVAL3=$EXPERIMENTS/SENSEVAL3
+##     export SENSEVAL=$SENSEVAL3
+##     export BN_EXAMPLES=$EXPERIMENTS/EXAMPLE-BAYES-NETS
+##     ## export COOKING=$EXAMPLE_BAYES_NETS/COOKING
+##     export DSO_BAYES=$GL_HOME/EXPERIMENTS/DSO/BAYESIAN-NETWORKS
+##     ## export SENSEVAL2_BAYES=$GL_HOME/EXPERIMENTS/SENSEVAL2/BAYESIAN-NETWORKS
+##     ## export FACTOTUM=$EXPERIMENTS/FACTOTUM
+##     ## export LYRICS=$EXPERIMENTS/LYRICS
+##     export SOYBEAN=$GL_HOME/USERS/TOM/SOYBEAN
+##     export DIFFERENTIA=$EXPERIMENTS/DIFFERENTIA
+##     export SETENV_SCRIPTS=$EXPERIMENTS/SETENV_SCRIPTS
+##     export LEXICAL=$DATA/LEXICAL_RELATIONS
+##     export WSJ=$DATA/WSJ
+##     #
+##     # Cyc-related directories
+##     export SPEECH_PART=/home/ch1/tomohara/speech-part-inference
+##     export CYC_SPEECH_PART=/home/ch1/tomohara/speech-part-inference/cyc
+## 
+##     # Personal file settings
+##     #
+##     # Environment variables pointing to commonly used directories
+##     export TOM=/home/ch1/tomohara
+##     export CARTERA_DE_TOMAS=$TOM/cartera-de-tomas
+##     export TOMAS=$CARTERA_DE_TOMAS
+## 
+##     # Other commonly used directories
+##     export ELISP=/usr/share/emacs/21.2/lisp
+## 
+##     # Allegro Common Lisp
+##     export ACL=$GL_TOOLS/ACL
+##     alias acl='$ACL/bin/pb_cl'
+## fi
 
-    # Other commonly used directories
-    export ELISP=/usr/share/emacs/21.2/lisp
+## OLD:
+## # ILIT-specific initializations
+## export ILIT_HOST=0
+## if [ "$HOST" = "arahomot" ]; then
+##     export THOTH=thoth.ilit.umbc.edu
+##     export YAVIN=yavin.ilit.umbc.edu
+##     export NABOO=naboo.ilit.umbc.edu
+##     export BACKUP_SERVER=$NABOO
+##     export ILIT_SERVER=$THOTH
+## fi
+## 
+## if [ "$HOST" = "thoth" ]; then
+##    echo "WARNING: unexpected host THOTH (should now be YAVIN)"
+##    export ILIT_HOST=1
+## elif [ "$HOST" = "yavin" ]; then
+##    export ILIT_HOST=1
+##    append-path /home/shared/bin:/usr/java/j2sdk1.4.2_01/bin:/usr/local/ant/bin
+##    export SHARED=/home/shared
+##    export _CATALINA_HOME=/usr/tomcat4
+##    export CVSROOT=$SHARED/cvsroot
+##    export POSTGRES_HOME=/home/pgsql
+## elif [ "$HOST" = "naboo" ]; then
+##    export ILIT_HOST=1
+##    export JAVA_HOME=/usr/java/jdk1.5.0_05
+##    ## append-path /home/shared/bin:/usr/java/jdk1.5.0_05/bin
+##    append-path /home/shared/bin
+##    prepend-path /usr/java/jdk1.5.0_05/bin
+##    prepend-path /naboo/data/shared/source/apache-ant-1.6.5/bin
+##    ## append-path /usr/site/ant-1.6.5/bin
+##    ## export SHARED=/naboo/data/shared
+##    export SHARED=/home/shared
+##    export _CATALINA_HOME=/usr/tomcat5
+## 
+##    # TODO: create mirror of thoth /home under naboo (w/ dummy dirs for users and other private directories)
+##    export CVSROOT=:ext:$USER@yavin.ilit.umbc.edu:/home/shared/cvsroot
+##    export MAVEN_HOME=$SHARED/source/maven-1.0.2
+##    append-path $MAVEN_HOME/bin
+##    export POSTGRES_HOME=/var/lib/pgsql
+##    export THOTH_BACKUP=/usr/site/backups/thoth_home
+## 
+##    export ACL=/usr/local/acl/acl62
+##    alias acl='$ACL/alisp'
+## fi
+## 
+## if [ "$ILIT_HOST" = "1" ]; then
+##    ## export DOMAIN_NAME=ilit.umbc.edu
+##    export DOMAIN_NAME=umbc.edu
+##    
+##    export CVSROOT=$SHARED/cvsroot
+##    export PREP_SRC=$SHARED/Text-preprocessor-v4.0a/Projects/prep
+##    export PREP_DATA=$SHARED/data/prep
+##    export ARCHIVE=$SHARED/archive
+##    export BIN=$SHARED/bin
+##    export FULL_ANALYZER=$BIN/Full_Analyzer
+##    export REFERENCE=$ANALYZER/reference
+##    export WWW=/home/www
+##    export LOOKUP_SRC=$SHARED/Text-preprocessor-v4.0a/Projects/lookup
+##    export GRAPHLING_HOME=$SHARED/graphling
+## 
+##    export GRAPHLING_HOME=$SHARED/graphling
+##    export GL_HOME=$GRAPHLING_HOME
+##    export GL_DATA=$GL_HOME/DATA
+##    export GL_TOOLS=$GL_HOME/TOOLS
+##    export GL_EXPERIMENTS=$GL_HOME/EXPERIMENTS
+##    export GL_UTILITIES=$GL_HOME/UTILITIES
+##    append-path $GL_UTILITIES
+##    export LINK_GRAMMAR_HOME=$GL_TOOLS/LINK_GRAMMAR
+## 
+##    export BUGZILLA=$WWW/bugzilla
+##    export SOURCE=$SHARED/source
+##    export DEKADE=$SOURCE/tpo/dekade
+##    DEDAKE_SERVER_PORT=16777
+##    MY_DEDAKE_SERVER_PORT=16778
+##    export ANALYZER=$BIN/tpo-Full_Analyzer
+##    export SCRIPTS=$ANALYZER/scripts
+##    export TOMCAT_LOGS=$_CATALINA_HOME/logs
+##    export DEKADE_LOGS=/home/tmp/log-files
+##    export STORAGE_DIR=/home/tmp/tpo-dekade_storage
+##    export VP=$SOURCE/tpo/virtual-patient/VP-Tutor
+##    export VP_=$SOURCE/virtual-patient/VP-Tutor
+## 
+##    export SWING_TUTORIAL=$SHARED/source/swing-tutotial
+##    export SWING_TUTORIAL_COMPONENTS=$SWING_TUTORIAL/uiswing/components/example-swing
+## 
+##    export FRAMENET_PREPOSITION=$GL_EXPERIMENTS/TEST-FRAMENET
+## 
+##    alias openoffice='/naboo/data/openoffice/program/soffice'
+## 
+##    export EMACSDIR='/usr/share/emacs/21.3'
+## 
+##    export UMBC_WEB_HOST="gl.umbc.edu"
+## 
+##    # Remove special language settings (e.g., UTF)
+##    # TODO: set the encoding explicitly
+##    unset LANG
+## fi
+## #
+## function host-upload () { local host=$1; shift; $scpcmd "$@" $host:temp; }
+## function host-download-dir () {
+##          local host=$1; shift;
+##          local dir="$1"; shift;
+##          local files=`echo " $@ " | perl -pe "s@ (\\S+)@$host:temp/\\$1 @g;"`;
+##          $scpcmd $files $dir; echo "downloaded to $dir"; }
+## #
+## # TODO: 
+## if [ "$HOST" != "thoth" ]; then
+##    alias ilit-upload='host-upload $THOTH'
+##    alias ilit-download='host-download-dir $THOTH ~/xfer'
+##    alias ilit-download-here='host-download-dir $THOTH .'
+## fi
+## #
+## if [ "$HOST" != "naboo" ]; then
+##    alias naboo-upload='host-upload $NABOO'
+##    alias naboo-download='host-download-dir $NABOO ~/xfer'
+##    alias naboo-download-here='host-download-dir $NABOO .'
+## fi
+## #
+## ## OLD: alias ssh-tunnel-db='set_xterm_title.bash "ssh tunnel for Postgress access"; ssh -L 5432:localhost:5432 thoth.ilit.umbc.edu'
 
-    # Allegro Common Lisp
-    export ACL=$GL_TOOLS/ACL
-    alias acl='$ACL/bin/pb_cl'
-fi
+## OLD:
+## # Convera stuff
+## # TODO: see why domainname is 'converanis' and not 'convera.com'
+## if [ "$DOMAIN_NAME" = "converanis" ]; then
+##    export GRAPHLING_HOME=/mdhome/tohara/graphling;
+##    export GL_DATA=$GRAPHLING_HOME/DATA
+##    export GL_TOOLS=$GRAPHLING_HOME/TOOLS
+##    export GL_EXPERIMENTS=$GRAPHLING_HOME/EXPERIMENTS
+##    export GL_UTILITIES=$GRAPHLING_HOME/UTILITIES
+##    ## append-path $GL_UTILITIES
+##    alias gv=/usr/bin/ggv
+##    alias xterm-utf8="xterm -u8 -fn '-b&h-lucidatypewriter-medium-r-normal-sans-0-0-75-75-m-0-iso10646-1'"
+##    #
+##    if [ "$INSTALL_DIR" = "" ]; then export INSTALL_DIR=$HOME/Convera/rware; fi
+##    rware_dir="$INSTALL_DIR"
+##    #
+##    alias start-jboss='(pushd $rware_dir/jboss-4.0.3/bin; run.sh >| run-jboss.log 2>&1; popd) &'
+##    alias stop-jboss='$rware_dir/jboss-4.0.3/bin/shutdown.sh'
+##    alias kill-jboss='kill_em.sh -p "java.*jboss"'
+##    alias view-jboss-log='less $rware_dir/jboss-4.0.3/server/rware/log/server.log'
+##    #
+##    alias rware-env-here='export INSTALL_DIR=$PWD; source set_rware_env.sh; do-setup'
+##    #
+##    rware_bin=$rware_dir/bin
+##    rware_lib=$rware_dir/lib
+##    alias start-admind='$rware_dir/admin/manage_admind start'
+##    alias stop-admind='$rware_dir/admin/manage_admind stop'
+##    alias restart-admind="stop-admind; start-admind"
+##    alias query-admind="ps_mine.sh | grep execd"
+##    alias kill-admind="kill_em.sh -p execd"
+##    #
+##    function kill-rware-forcibly() { foreach.perl 'kill_em.sh $f' execd cqdh cqindex cqns cqquery cqsched cqserv cqxref cqkey cqcred rwadmin DefaultCluster DefaultIndexCluster DefaultCluster_SearchService NameService_default CrossRef_default; ps_mine.sh; }
+##    #
+##    alias ssh-neon='ssh -X neon'
+##    #
+##    alias start-dcw="$rware_dir/bin/start_dcw"
+##    #
+##    prepend-path /SCM/3rd_party/ant/1.6.5/bin
+##    export ANT_HOME=/SCM/3rd_party/ant/1.6.5
+##    export CLASSPATH=$CLASSPATH:/SCM/3rd_party/junit/3.8.1/
+##    #
+##    # Miscellaneous directories
+##    NIGHTLY=/SCM/available/v82/nightly
+## 
+##    # X Windows related
+##    # TODO: alias=enable-remote-hosts="xterm -e '/usr/bin/bash -c /usr/X11R6/bin/xhost +'"
+##    alias set-tohara-display='export DISPLAY=10.0.34.33:0.0'
+## 
+##    # Remove special language settings (e.g., UTF)
+##    # TODO: set the encoding explicitly
+##    unset LANG
+## fi
 
-# ILIT-specific initializations
-export ILIT_HOST=0
-if [ "$HOST" = "arahomot" ]; then
-    export THOTH=thoth.ilit.umbc.edu
-    export YAVIN=yavin.ilit.umbc.edu
-    export NABOO=naboo.ilit.umbc.edu
-    export BACKUP_SERVER=$NABOO
-    export ILIT_SERVER=$THOTH
-fi
+#-------------------------------------------------------------------------------
+# Java related stuff
 
-if [ "$HOST" = "thoth" ]; then
-   echo "WARNING: unexpected host THOTH (should now be YAVIN)"
-   export ILIT_HOST=1
-elif [ "$HOST" = "yavin" ]; then
-   export ILIT_HOST=1
-   append-path /home/shared/bin:/usr/java/j2sdk1.4.2_01/bin:/usr/local/ant/bin
-   export SHARED=/home/shared
-   export _CATALINA_HOME=/usr/tomcat4
-   export CVSROOT=$SHARED/cvsroot
-   export POSTGRES_HOME=/home/pgsql
-elif [ "$HOST" = "naboo" ]; then
-   export ILIT_HOST=1
-   export JAVA_HOME=/usr/java/jdk1.5.0_05
-   ## append-path /home/shared/bin:/usr/java/jdk1.5.0_05/bin
-   append-path /home/shared/bin
-   prepend-path /usr/java/jdk1.5.0_05/bin
-   prepend-path /naboo/data/shared/source/apache-ant-1.6.5/bin
-   ## append-path /usr/site/ant-1.6.5/bin
-   ## export SHARED=/naboo/data/shared
-   export SHARED=/home/shared
-   export _CATALINA_HOME=/usr/tomcat5
-
-   # TODO: create mirror of thoth /home under naboo (w/ dummy dirs for users and other private directories)
-   export CVSROOT=:ext:$USER@yavin.ilit.umbc.edu:/home/shared/cvsroot
-   export MAVEN_HOME=$SHARED/source/maven-1.0.2
-   append-path $MAVEN_HOME/bin
-   export POSTGRES_HOME=/var/lib/pgsql
-   export THOTH_BACKUP=/usr/site/backups/thoth_home
-
-   export ACL=/usr/local/acl/acl62
-   alias acl='$ACL/alisp'
-fi
-
-if [ "$ILIT_HOST" = "1" ]; then
-   ## export DOMAIN_NAME=ilit.umbc.edu
-   export DOMAIN_NAME=umbc.edu
-   
-   export CVSROOT=$SHARED/cvsroot
-   export PREP_SRC=$SHARED/Text-preprocessor-v4.0a/Projects/prep
-   export PREP_DATA=$SHARED/data/prep
-   export ARCHIVE=$SHARED/archive
-   export BIN=$SHARED/bin
-   export FULL_ANALYZER=$BIN/Full_Analyzer
-   export REFERENCE=$ANALYZER/reference
-   export WWW=/home/www
-   export LOOKUP_SRC=$SHARED/Text-preprocessor-v4.0a/Projects/lookup
-   export GRAPHLING_HOME=$SHARED/graphling
-
-   export GRAPHLING_HOME=$SHARED/graphling
-   export GL_HOME=$GRAPHLING_HOME
-   export GL_DATA=$GL_HOME/DATA
-   export GL_TOOLS=$GL_HOME/TOOLS
-   export GL_EXPERIMENTS=$GL_HOME/EXPERIMENTS
-   export GL_UTILITIES=$GL_HOME/UTILITIES
-   append-path $GL_UTILITIES
-   export LINK_GRAMMAR_HOME=$GL_TOOLS/LINK_GRAMMAR
-
-   export BUGZILLA=$WWW/bugzilla
-   export SOURCE=$SHARED/source
-   export DEKADE=$SOURCE/tpo/dekade
-   DEDAKE_SERVER_PORT=16777
-   MY_DEDAKE_SERVER_PORT=16778
-   export ANALYZER=$BIN/tpo-Full_Analyzer
-   export SCRIPTS=$ANALYZER/scripts
-   export TOMCAT_LOGS=$_CATALINA_HOME/logs
-   export DEKADE_LOGS=/home/tmp/log-files
-   export STORAGE_DIR=/home/tmp/tpo-dekade_storage
-   export VP=$SOURCE/tpo/virtual-patient/VP-Tutor
-   export VP_=$SOURCE/virtual-patient/VP-Tutor
-
-   export SWING_TUTORIAL=$SHARED/source/swing-tutotial
-   export SWING_TUTORIAL_COMPONENTS=$SWING_TUTORIAL/uiswing/components/example-swing
-
-   export FRAMENET_PREPOSITION=$GL_EXPERIMENTS/TEST-FRAMENET
-
-   alias openoffice='/naboo/data/openoffice/program/soffice'
-
-   export EMACSDIR='/usr/share/emacs/21.3'
-
-   export UMBC_WEB_HOST="gl.umbc.edu"
-
-   # Remove special language settings (e.g., UTF)
-   # TODO: set the encoding explicitly
-   unset LANG
-fi
-#
-function host-upload () { local host=$1; shift; $scpcmd "$@" $host:temp; }
-function host-download-dir () {
-         local host=$1; shift;
-         local dir="$1"; shift;
-         local files=`echo " $@ " | perl -pe "s@ (\\S+)@$host:temp/\\$1 @g;"`;
-         $scpcmd $files $dir; echo "downloaded to $dir"; }
-#
-# TODO: 
-if [ "$HOST" != "thoth" ]; then
-   alias ilit-upload='host-upload $THOTH'
-   alias ilit-download='host-download-dir $THOTH ~/xfer'
-   alias ilit-download-here='host-download-dir $THOTH .'
-fi
-#
-if [ "$HOST" != "naboo" ]; then
-   alias naboo-upload='host-upload $NABOO'
-   alias naboo-download='host-download-dir $NABOO ~/xfer'
-   alias naboo-download-here='host-download-dir $NABOO .'
-fi
-#
-## OLD: alias ssh-tunnel-db='set_xterm_title.bash "ssh tunnel for Postgress access"; ssh -L 5432:localhost:5432 thoth.ilit.umbc.edu'
-
-# Convera stuff
-# TODO: see why domainname is 'converanis' and not 'convera.com'
-if [ "$DOMAIN_NAME" = "converanis" ]; then
-   export GRAPHLING_HOME=/mdhome/tohara/graphling;
-   export GL_DATA=$GRAPHLING_HOME/DATA
-   export GL_TOOLS=$GRAPHLING_HOME/TOOLS
-   export GL_EXPERIMENTS=$GRAPHLING_HOME/EXPERIMENTS
-   export GL_UTILITIES=$GRAPHLING_HOME/UTILITIES
-   ## append-path $GL_UTILITIES
-   alias gv=/usr/bin/ggv
-   alias xterm-utf8="xterm -u8 -fn '-b&h-lucidatypewriter-medium-r-normal-sans-0-0-75-75-m-0-iso10646-1'"
-   #
-   if [ "$INSTALL_DIR" = "" ]; then export INSTALL_DIR=$HOME/Convera/rware; fi
-   rware_dir="$INSTALL_DIR"
-   #
-   alias start-jboss='(pushd $rware_dir/jboss-4.0.3/bin; run.sh >| run-jboss.log 2>&1; popd) &'
-   alias stop-jboss='$rware_dir/jboss-4.0.3/bin/shutdown.sh'
-   alias kill-jboss='kill_em.sh -p "java.*jboss"'
-   alias view-jboss-log='less $rware_dir/jboss-4.0.3/server/rware/log/server.log'
-   #
-   alias rware-env-here='export INSTALL_DIR=$PWD; source set_rware_env.sh; do-setup'
-   #
-   rware_bin=$rware_dir/bin
-   rware_lib=$rware_dir/lib
-   alias start-admind='$rware_dir/admin/manage_admind start'
-   alias stop-admind='$rware_dir/admin/manage_admind stop'
-   alias restart-admind="stop-admind; start-admind"
-   alias query-admind="ps_mine.sh | grep execd"
-   alias kill-admind="kill_em.sh -p execd"
-   #
-   function kill-rware-forcibly() { foreach.perl 'kill_em.sh $f' execd cqdh cqindex cqns cqquery cqsched cqserv cqxref cqkey cqcred rwadmin DefaultCluster DefaultIndexCluster DefaultCluster_SearchService NameService_default CrossRef_default; ps_mine.sh; }
-   #
-   alias ssh-neon='ssh -X neon'
-   #
-   alias start-dcw="$rware_dir/bin/start_dcw"
-   #
-   prepend-path /SCM/3rd_party/ant/1.6.5/bin
-   export ANT_HOME=/SCM/3rd_party/ant/1.6.5
-   export CLASSPATH=$CLASSPATH:/SCM/3rd_party/junit/3.8.1/
-   #
-   # Miscellaneous directories
-   NIGHTLY=/SCM/available/v82/nightly
-
-   # X Windows related
-   # TODO: alias=enable-remote-hosts="xterm -e '/usr/bin/bash -c /usr/X11R6/bin/xhost +'"
-   alias set-tohara-display='export DISPLAY=10.0.34.33:0.0'
-
-   # Remove special language settings (e.g., UTF)
-   # TODO: set the encoding explicitly
-   unset LANG
-fi
-
-## OLD
-## #-------------------------------------------------------------------------------
-## # Java related stuff
+## OLD:
 ## trace Java settings
 ## alias ant-rebuild-war='(/bin/rm /tmp/$USER/*; ant dist; remove; install) >| ant-war-rebuild.log 2>&1; $PAGE +G ant-war-rebuild.log'
 ## alias ant-rebuild='(ant clean compile; ant remove; ant install-build) >| ant-rebuild.log 2>&1; $PAGER +G ant-rebuild.log'
@@ -928,8 +932,9 @@ function track-time () { if [ "$1" == "" ]; then echo add-track-time '"..."'; el
 # TODO: automatically do this for all aliases and scripts!
 # TODO: see if bash has some translation option that would handle this transparently
 #
-# TODO: create separate env-var for info directory (eg, $INFO)
-function gr-tidbits () { gr "$@" $HOME/info/tidbits.text; }
+## OLD:
+## # TODO: create separate env-var for info directory (eg, $INFO)
+## function gr-tidbits () { gr "$@" $HOME/info/tidbits.text; }
 
 # Mail commands
 trace mail commands
@@ -939,7 +944,7 @@ function view-mail- () { $ZPAGER $HOME/mail/OLD/mail_$1.gz; }
 alias view-mail-log='$PAGER $HOME/mail/sent-mail'
 function view-mail-log- () { $ZPAGER $HOME/mail/OLD/logged_messages_$1.gz; }
 alias view-mail-aliases='$PAGER $HOME/.mailrc'
-## OLD
+## OLD:
 ## function mail-tpo () { mail -s $1 tom_o_hara@msn.com < $1; }
 ## function mail-tpo () { mail -s $1 tomohara@umbc.edu < $1; }
 
@@ -1122,17 +1127,18 @@ alias perlgrep='perl- perlgrep.perl'
 function calc-stdev () { sum_file.perl -stdev "$@" -; }
 alias calc-stdev-file='calc-stdev <'
 
-alias hotbot-freq='perl- web_freq.perl -hotbot'
-alias altavista-freq='perl- web_freq.perl -altavista'
-function get-hotbot-blurbs () { web_freq.perl -full $1 | perlgrep -A=1 '^ *\d+\.' | $PAGER; }
-function show-hotbot-precontext () { web_freq.perl -full $1 | count-it -i "\w+ $1" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
-function show-hotbot-precontext () { web_freq.perl -full $1 | count-it -i "\w+ $1" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
-function show-hotbot-precontext- () { web_freq.perl -full $1 | count-it -i -foldcase "\w+ $1" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
-function show-hotbot-postcontext () { web_freq.perl -full $1 | count-it -i "$1 \w+" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
-function show-hotbot-postcontext- () { web_freq.perl -full $1 | count-it -i -foldcase "$1 \w+" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
-
-function show-altavista-precontext () { web_freq.perl -download_urls -altavista -full $1 | count-it -i "\w+ $1" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
-function show-altavista-postcontext () { web_freq.perl -download_urls -altavista -full $1 | count-it -i "$1 \w+" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
+## OLD:
+## alias hotbot-freq='perl- web_freq.perl -hotbot'
+## alias altavista-freq='perl- web_freq.perl -altavista'
+## function get-hotbot-blurbs () { web_freq.perl -full $1 | perlgrep -A=1 '^ *\d+\.' | $PAGER; }
+## function show-hotbot-precontext () { web_freq.perl -full $1 | count-it -i "\w+ $1" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
+## function show-hotbot-precontext () { web_freq.perl -full $1 | count-it -i "\w+ $1" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
+## function show-hotbot-precontext- () { web_freq.perl -full $1 | count-it -i -foldcase "\w+ $1" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
+## function show-hotbot-postcontext () { web_freq.perl -full $1 | count-it -i "$1 \w+" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
+## function show-hotbot-postcontext- () { web_freq.perl -full $1 | count-it -i -foldcase "$1 \w+" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
+## 
+## function show-altavista-precontext () { web_freq.perl -download_urls -altavista -full $1 | count-it -i "\w+ $1" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
+## function show-altavista-postcontext () { web_freq.perl -download_urls -altavista -full $1 | count-it -i "$1 \w+" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
 
 #------------------------------------------------------------------------
 
@@ -1334,7 +1340,7 @@ function pdf-print () { acroread -toPostScript < "$1" | lpr; lpq; }
 function ps-print () { lpr < "$1"; }
 alias ps-view='gv'
 ## OLD: alias pv='pdf-view'
-## OLD
+## OLD:
 ## function pdf-to-ascii () { ps2ascii "$1" > "$1.ascii"; }
 ## function all-pdf-to-ascii () { 
 ##     for f in *.pdf; do 
@@ -1557,7 +1563,7 @@ function trace-cmd() { bash-trace-on; eval "$@"; bash-trace-off; }
 ## ALT: function trace-cmd() { bash-trace-on; @_; bash-trace-off; }
 alias cmd-trace='trace-cmd'
 
-## OLD
+## OLD:
 ## # Compressing/uncompressing a subdirectory tree (ignoring symbolic links) 
 ## # TODO: write scripts for this (given the comlexity)
 ## # TODO: don't uncompress compressed archives (.tar.gz files)
@@ -1618,26 +1624,28 @@ alias cs-download='cs-download-dir ~/xfer'
 alias cs-download-here='cs-download-dir .'
 
 #------------------------------------------------------------------------
-# GraphLing settings
-if [ "$DOMAIN_NAME" = "cs.nmsu.edu" ]; then
-    trace GraphLing settings
-    # note: this sets base for some other utilities (e.g., GRAPHLING_HOME)
-    # see do_setup.sh
-    ## alias graphling-env='source $UTILITIES/setenv.sh'
-    alias graphling-path='export PATH=$GL_UTILITIES:$PATH; export PERLLIB=$GL_UTILITIES:$PERLLIB;'
-    alias graphling-debug='export DEBUG_LEVEL=5; export GRAPHLING_TRACE=1;'
-    unset GRAPHLING_SETENV
-    function check-wsd-errors () { (log_file=$1/$1-*.log; echo $log_file; check_errors.perl -skip_warnings -context=5 $log_file) 2>&1 | $PAGER; }
-    function check-all-wsd-errors () { (log_file=$1/$1-*.log; echo $log_file; check_errors.perl -skip_warnings=0 -context=5 $log_file) 2>&1 | $PAGER; }
-    alias check-accuracy='grep total [A-Z]*/SAMPLEALL.REPORT.SUMMARY | extract_matches.perl -replacement="\L\1\t\2" "^([A-Z]+)\S+\s+(\S+)"'
-    function compare-accuracy () { perl- paste.perl -keys  $1 $2 | $GREP -v 'n/a' | perl- sum_file.perl -labels -diff -f1=2 -f2=3; }
-    alias weka-env='export CLASSPATH=$GL_TOOLS/WEKA/weka-3-2-3/weka.jar'
 
-    alias kill-graphling='kill_em.sh --graphling'
-    function gr-all-util () { gr $* $GL_UTILITIES/*.perl $GL_UTILITIES/*.prl $GL_UTILITIES/*.sh; }
-    function gr-util () { gr $* $GL_UTILITIES/*.perl; }
-    alias gr-out-of-mem='grep -i "out of memory" *.log'
-fi
+## OLD:
+## # GraphLing settings
+## if [ "$DOMAIN_NAME" = "cs.nmsu.edu" ]; then
+##     trace GraphLing settings
+##     # note: this sets base for some other utilities (e.g., GRAPHLING_HOME)
+##     # see do_setup.sh
+##     ## alias graphling-env='source $UTILITIES/setenv.sh'
+##     alias graphling-path='export PATH=$GL_UTILITIES:$PATH; export PERLLIB=$GL_UTILITIES:$PERLLIB;'
+##     alias graphling-debug='export DEBUG_LEVEL=5; export GRAPHLING_TRACE=1;'
+##     unset GRAPHLING_SETENV
+##     function check-wsd-errors () { (log_file=$1/$1-*.log; echo $log_file; check_errors.perl -skip_warnings -context=5 $log_file) 2>&1 | $PAGER; }
+##     function check-all-wsd-errors () { (log_file=$1/$1-*.log; echo $log_file; check_errors.perl -skip_warnings=0 -context=5 $log_file) 2>&1 | $PAGER; }
+##     alias check-accuracy='grep total [A-Z]*/SAMPLEALL.REPORT.SUMMARY | extract_matches.perl -replacement="\L\1\t\2" "^([A-Z]+)\S+\s+(\S+)"'
+##     function compare-accuracy () { perl- paste.perl -keys  $1 $2 | $GREP -v 'n/a' | perl- sum_file.perl -labels -diff -f1=2 -f2=3; }
+##     alias weka-env='export CLASSPATH=$GL_TOOLS/WEKA/weka-3-2-3/weka.jar'
+## 
+##     alias kill-graphling='kill_em.sh --graphling'
+##     function gr-all-util () { gr $* $GL_UTILITIES/*.perl $GL_UTILITIES/*.prl $GL_UTILITIES/*.sh; }
+##     function gr-util () { gr $* $GL_UTILITIES/*.perl; }
+##     alias gr-out-of-mem='grep -i "out of memory" *.log'
+## fi
 
 #------------------------------------------------------------------------
 # WordNet settings
@@ -1690,137 +1698,140 @@ alias wn-def-gr='wn-data-gr'
 # MSVC stuff
 alias vcvars='source $BIN/vcvars.sh'
 
-# ClearCase stuff
-#
-# TODO
-# - add _new_dir hack to .bashrc in order to fource cd change
-# try using cleartool -exec option to set the view
-# TODO: function sv-rware() { sv $1; cd /vobs/rware; }
-# $ cleartool help setview
-# Usage: setview [-login] [-exec command-invocation] view-tag
-#
-# function sv-rware() { echo "TODO: cd /vobs/rware"; sv $1; }
-#
-if [ "$INCLUDE_MISC_ALIASES" = "1" ]; then
-    function cc-errors () { (check-errors -verbose "$@"; check-all-errors -verbose "$@"; echo -n "Log: "; head -10000000 "$@" /dev/null;) 2>&1 | less; }
-    #
-    if [ "$OSTYPE" != "cygwin" ]; then
-        function sv-rware() { echo "Issue:"; echo "cd /vobs/rware"; cleartool setview $1; }
-        #
-        alias rware='sv-rware tohara'
-        alias rware1='sv-rware tohara1'
-        alias ct=cleartool
-        alias sv='ct setview'
-        alias cc='ct'
-        alias cc-help='ct help'
-        alias cc-config='ct catcs'
-        # NOTE: -pre works OK for checked-out items, but unintuitively shows difference
-        # for those not checked out (i.e., not always comparison of local version vs. master as in cvs diff).
-        alias cc-diff='ct diff -gra -pre'
-        alias cc-diff-='ct diff -diff -pre -options "-blank_ignore"'
-        alias cc-tree='ct lsvtree -g'
-        alias cc-ci='ct ci'
-        alias cc-co-reserved='ct co -c test'
-        alias cc-unco='ct unco'
-        alias cc-co-unreserved='ct co -unreserved -c test'
-        alias cc-co='cc-co-unreserved'
-        alias cc-add='cc mkelem'
-        alias cc-add-dir='cc-add -eltype directory'
-        alias cc-checkouts-full='ct lsco -avobs -cview'
-        #
-        ## function cc-checkouts() { cc-checkouts-full | extract_matches.perl '/vobs/rware/([^"]+)' -; }
-        alias cc-checkouts-rware='cc-checkouts-full | extract_matches.perl "/vobs/rware/(\S+). from"'
-        alias cc-checkouts-ce='cc-checkouts-full | extract_matches.perl "/vobs/ce/(\S+). from"'
-        alias cc-checkouts-all='cc-checkouts-full | extract_matches.perl "/vobs/(\S+). from"'
-        alias cc-checkouts-here='cc-checkouts-full | extract_matches.perl "$PWD/(\S+). from"'
-        alias fix-bin-scripts='chmod go-w ~/bin/*'
-        alias fix-permissions='chmod ugo-st'
-        alias cc-checkouts-='fix-bin-scripts; cc-checkouts'
-        #
-        function old-cc-errors () { (chmod go-w ~/bin/*; echo -n "Errors: "; check-errors -verbose "$@"; echo -n "Warnings: "; check-all-errors -verbose "$@"; echo -n "Log: "; head -10000000 "$@" /dev/null;) 2>&1 | less; }
-        alias cc-errors-='fix-bin-scripts; cc-errors'
-        #
-        function cc-all-diffs () { cc-checkouts-here | foreach.perl -trace 'cleartool diff -diff_format -pre $f' - >| _diff.list 2>&1; less _diff.list; }
-        #
-        function cc-bad-permissions () { ls -alR . | perlgrep "^[d\-]\S+[tSs]"; }
-        #
-        alias conv-setup='source ~/unix-bin/convera-setup.bash'
-        #
-        ## TODO: conv-setup
-        #
-        alias view-system-log='sudo emacs --no-windows /var/log/messages'
-    fi
-fi
+## OLD:
+## # ClearCase stuff
+## #
+## # TODO
+## # - add _new_dir hack to .bashrc in order to fource cd change
+## # try using cleartool -exec option to set the view
+## # TODO: function sv-rware() { sv $1; cd /vobs/rware; }
+## # $ cleartool help setview
+## # Usage: setview [-login] [-exec command-invocation] view-tag
+## #
+## # function sv-rware() { echo "TODO: cd /vobs/rware"; sv $1; }
+## #
+## if [ "$INCLUDE_MISC_ALIASES" = "1" ]; then
+##     function cc-errors () { (check-errors -verbose "$@"; check-all-errors -verbose "$@"; echo -n "Log: "; head -10000000 "$@" /dev/null;) 2>&1 | less; }
+##     #
+##     if [ "$OSTYPE" != "cygwin" ]; then
+##         function sv-rware() { echo "Issue:"; echo "cd /vobs/rware"; cleartool setview $1; }
+##         #
+##         alias rware='sv-rware tohara'
+##         alias rware1='sv-rware tohara1'
+##         alias ct=cleartool
+##         alias sv='ct setview'
+##         alias cc='ct'
+##         alias cc-help='ct help'
+##         alias cc-config='ct catcs'
+##         # NOTE: -pre works OK for checked-out items, but unintuitively shows difference
+##         # for those not checked out (i.e., not always comparison of local version vs. master as in cvs diff).
+##         alias cc-diff='ct diff -gra -pre'
+##         alias cc-diff-='ct diff -diff -pre -options "-blank_ignore"'
+##         alias cc-tree='ct lsvtree -g'
+##         alias cc-ci='ct ci'
+##         alias cc-co-reserved='ct co -c test'
+##         alias cc-unco='ct unco'
+##         alias cc-co-unreserved='ct co -unreserved -c test'
+##         alias cc-co='cc-co-unreserved'
+##         alias cc-add='cc mkelem'
+##         alias cc-add-dir='cc-add -eltype directory'
+##         alias cc-checkouts-full='ct lsco -avobs -cview'
+##         #
+##         ## function cc-checkouts() { cc-checkouts-full | extract_matches.perl '/vobs/rware/([^"]+)' -; }
+##         alias cc-checkouts-rware='cc-checkouts-full | extract_matches.perl "/vobs/rware/(\S+). from"'
+##         alias cc-checkouts-ce='cc-checkouts-full | extract_matches.perl "/vobs/ce/(\S+). from"'
+##         alias cc-checkouts-all='cc-checkouts-full | extract_matches.perl "/vobs/(\S+). from"'
+##         alias cc-checkouts-here='cc-checkouts-full | extract_matches.perl "$PWD/(\S+). from"'
+##         alias fix-bin-scripts='chmod go-w ~/bin/*'
+##         alias fix-permissions='chmod ugo-st'
+##         alias cc-checkouts-='fix-bin-scripts; cc-checkouts'
+##         #
+##         function old-cc-errors () { (chmod go-w ~/bin/*; echo -n "Errors: "; check-errors -verbose "$@"; echo -n "Warnings: "; check-all-errors -verbose "$@"; echo -n "Log: "; head -10000000 "$@" /dev/null;) 2>&1 | less; }
+##         alias cc-errors-='fix-bin-scripts; cc-errors'
+##         #
+##         function cc-all-diffs () { cc-checkouts-here | foreach.perl -trace 'cleartool diff -diff_format -pre $f' - >| _diff.list 2>&1; less _diff.list; }
+##         #
+##         function cc-bad-permissions () { ls -alR . | perlgrep "^[d\-]\S+[tSs]"; }
+##         #
+##         alias conv-setup='source ~/unix-bin/convera-setup.bash'
+##         #
+##         ## TODO: conv-setup
+##         #
+##         alias view-system-log='sudo emacs --no-windows /var/log/messages'
+##     fi
+## fi
 
-# GNU C compiler aliases
-if [ "$INCLUDE_MISC_ALIASES" = "1" ]; then
-    if [ "$HOST" != "arahomot" ]; then
-        trace compiler aliases
-        # gcc options:
-        # 	-g	produce debugging information
-        #	-pedantic	Issue all the  warnings  demanded  by  strict  ANSI standard  C; reject all programs that use forbidden extensions.
-        #	-Wall	issue all types of warning
-        #	-O	optimize (needed for catching unitialized variables -Wuninitialized)
-        ## OLD: function compile () { gcc -pedantic -g -Wall -O -o `basename $1 .c` $1; }
-        function compile () { gcc -g -Wall -O -o `basename $1 .c` $1; }
-        function anal-compile () { gcc -pedantic -g -Wall -O -o `basename $1 .c` $1; }
-        function anal-compile++ () { g++ -pedantic -include cstdlib -g -Wall -O -o `basename $1 .cpp` $1; }
-        function compile++ () { g++ -include cstdlib -g -Wall -O -o `basename $1 .cpp` $1; }
-        function preprocess () { gcc -E -o `basename $1 .cpp`.pp "$1"; }
-        alias debug-compile='compile'
-        function release-compile () { gcc -pedantic -Wall -O4 -o `basename $1 .c` $1; }
-        function math-compile () { gcc -pedantic -lm -g -Wall -O -o `basename $1 .c` $1; }
-    fi
-fi
+## MISC:
+## # GNU C compiler aliases
+## if [ "$INCLUDE_MISC_ALIASES" = "1" ]; then
+##     if [ "$HOST" != "arahomot" ]; then
+##         trace compiler aliases
+##         # gcc options:
+##         # 	-g	produce debugging information
+##         #	-pedantic	Issue all the  warnings  demanded  by  strict  ANSI standard  C; reject all programs that use forbidden extensions.
+##         #	-Wall	issue all types of warning
+##         #	-O	optimize (needed for catching unitialized variables -Wuninitialized)
+##         ## OLD: function compile () { gcc -pedantic -g -Wall -O -o `basename $1 .c` $1; }
+##         function compile () { gcc -g -Wall -O -o `basename $1 .c` $1; }
+##         function anal-compile () { gcc -pedantic -g -Wall -O -o `basename $1 .c` $1; }
+##         function anal-compile++ () { g++ -pedantic -include cstdlib -g -Wall -O -o `basename $1 .cpp` $1; }
+##         function compile++ () { g++ -include cstdlib -g -Wall -O -o `basename $1 .cpp` $1; }
+##         function preprocess () { gcc -E -o `basename $1 .cpp`.pp "$1"; }
+##         alias debug-compile='compile'
+##         function release-compile () { gcc -pedantic -Wall -O4 -o `basename $1 .c` $1; }
+##         function math-compile () { gcc -pedantic -lm -g -Wall -O -o `basename $1 .c` $1; }
+##     fi
+## fi
 
 #........................................................................
 # Miscellaneous local environment helpers
 trace misc local helpers
 
-if [ "$DOMAIN_NAME" = "cs.nmsu.edu" ]; then
-    # CS 167/467 stuff
-    # TODO: define alias for invoking Netscape composed with course page index
-    alias print-course-page='echo $HOME/html/cs167-467/index.html'
-    
-    # CS Stuff
-    function print () { a2ps $1 | lpr | lpq; }
-    function lpq-all () { foreach.perl 'echo \"\"; lpq -Plex$f' draft fine dual quad; echo ""; }
-    # TODO: use a function for lprm-all as done for lpq-all
-    alias lprm-all="foreach.perl 'lprm -Plex\$f' draft fine dual quad"
-    function set-printer () { export PRINTER=$1; lpq; }
-    alias lexfine='set-printer lexfine'
-    alias lexquad='set-printer lexquad'
-    alias lexdraft='set-printer lexdraft'
-    alias lexdual='set-printer lexdual'
-    alias swap-caps='xmodmap $HOME/.xmodmap_caps'
-    alias soffice='/local/Office52/program/soffice'
-
-    function remote-processes () { foreach.perl -trace -remote -busy_load=0 'ps_mine.sh '; }
-    function remote-processes-logged () { remote-processes >| $HOME/temp/remote_processes.log 2>&1; $PAGER $HOME/temp/remote_processes.log; }
-      
-    function find-TOM-file () { $GREP -i "(:\$|$1)" $HOME/TOM/.ls-alR.list | $PAGER -p $1; }
-    function find-OTHER-TOM-file () { $GREP -i "(:\$|$1)" $OTHER_TOM/.ls-alR.list | $PAGER -p $1; }
-    function find-graphling-file () { $GREP -i "(:\$|$1)" /home/graphling/ls-alR.list | $PAGER -p $1; }
-
-    # CRL Stuff
-    alias crl-telnet='telnet kimmerion.nmsu.edu'
-    
-    # Pitt Stuff
-    alias pitt-telnet='ssh -l tomohara gomez.cs.pitt.edu'
-    
-    # Internet aliases
-    alias show-ip-address='host $HOST'
-
-    # Cyc stuff
-    alias open-cyc-setup='conditional-source $BIN/opencyc_setup.bash'
-    alias cyc-setup='conditional-source $BIN/cyc_setup.bash'
-    export OPENCYC=$GL_TOOLS/OpenCyc/opencyc-0.7.0
-    export RKF_CYC=$TOM/cyc-home
-    export MASS_COUNT=$TOM/mass-count-experiments
-    
-    # WWW Stuff
-    alias add-htpasswd='/home/httpbin/htpasswd -m $HOME/html/.htpasswd'
-fi
+## OLD:
+## if [ "$DOMAIN_NAME" = "cs.nmsu.edu" ]; then
+##     # CS 167/467 stuff
+##     # TODO: define alias for invoking Netscape composed with course page index
+##     alias print-course-page='echo $HOME/html/cs167-467/index.html'
+##     
+##     # CS Stuff
+##     function print () { a2ps $1 | lpr | lpq; }
+##     function lpq-all () { foreach.perl 'echo \"\"; lpq -Plex$f' draft fine dual quad; echo ""; }
+##     # TODO: use a function for lprm-all as done for lpq-all
+##     alias lprm-all="foreach.perl 'lprm -Plex\$f' draft fine dual quad"
+##     function set-printer () { export PRINTER=$1; lpq; }
+##     alias lexfine='set-printer lexfine'
+##     alias lexquad='set-printer lexquad'
+##     alias lexdraft='set-printer lexdraft'
+##     alias lexdual='set-printer lexdual'
+##     alias swap-caps='xmodmap $HOME/.xmodmap_caps'
+##     alias soffice='/local/Office52/program/soffice'
+## 
+##     function remote-processes () { foreach.perl -trace -remote -busy_load=0 'ps_mine.sh '; }
+##     function remote-processes-logged () { remote-processes >| $HOME/temp/remote_processes.log 2>&1; $PAGER $HOME/temp/remote_processes.log; }
+##       
+##     function find-TOM-file () { $GREP -i "(:\$|$1)" $HOME/TOM/.ls-alR.list | $PAGER -p $1; }
+##     function find-OTHER-TOM-file () { $GREP -i "(:\$|$1)" $OTHER_TOM/.ls-alR.list | $PAGER -p $1; }
+##     function find-graphling-file () { $GREP -i "(:\$|$1)" /home/graphling/ls-alR.list | $PAGER -p $1; }
+## 
+##     # CRL Stuff
+##     alias crl-telnet='telnet kimmerion.nmsu.edu'
+##     
+##     # Pitt Stuff
+##     alias pitt-telnet='ssh -l tomohara gomez.cs.pitt.edu'
+##     
+##     # Internet aliases
+##     alias show-ip-address='host $HOST'
+## 
+##     # Cyc stuff
+##     alias open-cyc-setup='conditional-source $BIN/opencyc_setup.bash'
+##     alias cyc-setup='conditional-source $BIN/cyc_setup.bash'
+##     export OPENCYC=$GL_TOOLS/OpenCyc/opencyc-0.7.0
+##     export RKF_CYC=$TOM/cyc-home
+##     export MASS_COUNT=$TOM/mass-count-experiments
+##     
+##     # WWW Stuff
+##     alias add-htpasswd='/home/httpbin/htpasswd -m $HOME/html/.htpasswd'
+## fi
 
 # Optional end tracing
 trace 'out do_setup.bash'
