@@ -24,6 +24,7 @@ import calc_entropy
 class TestIt(TestWrapper):
     """Class for testcase definition"""
     script_module = TestWrapper.derive_tested_module_name(__file__) + '.py'
+    maxDiff       = None
 
 
     def test_normalize_function(self):
@@ -119,20 +120,22 @@ class TestIt(TestWrapper):
 
     def test_simple(self):
         """Test for simple option"""
-        self.assertEqual(gh.run(f'python {self.script_module} --simple --probabilities ".25 .25 .25 .25" -'), 'Entropy\n2.000')
+        self.assertEqual(gh.run(f'python {self.script_module} --simple .25 .25 .25 .25'), 'Entropy\n2.000')
+        self.assertEqual(gh.run(f'echo .25 .25 .25 .25 | {self.script_module} --simple'), 'Entropy\n2.000')
 
 
     def test_label(self):
         """Test for label option"""
-        self.assertEqual(gh.run(f'python {self.script_module} --label "foo" --simple --probabilities ".25 .25 .25 .25" -'), '\tEntropy\nfoo\t2.000')
+        self.assertEqual(gh.run(f'python {self.script_module} --label "foo" --simple .25 .25 .25 .25'), '\tEntropy\nfoo\t2.000')
 
 
     def test_classes(self):
         """Test for classes related options: classes and show_classes"""
         expected_result = 'Classes\tEntropy\n4\t2.000'
-        gral_command = f'python {self.script_module} --simple --probabilities ".25 .25 .25 .25"'
-        self.assertEqual(gh.run(f'{gral_command} --classes -'), expected_result)
-        self.assertEqual(gh.run(f'{gral_command} --show_classes -'), expected_result)
+        gral_command  = f'python {self.script_module} --simple'
+        probabilities = '.25 .25 .25 .25'
+        self.assertEqual(gh.run(f'{gral_command} --classes {probabilities}'), expected_result)
+        self.assertEqual(gh.run(f'{gral_command} --show_classes {probabilities}'), expected_result)
 
 
     def test_fix(self):
@@ -145,7 +148,7 @@ class TestIt(TestWrapper):
 
     def test_normalize(self):
         """Test for normalize option"""
-        self.assertEqual(gh.run(f'python {self.script_module} --simple --normalize --probabilities "95.5 76.4 114.6 95.5" -'), 'Entropy\n1.985')
+        self.assertEqual(gh.run(f'python {self.script_module} --simple --normalize 95.5 76.4 114.6 95.5'), 'Entropy\n1.985')
 
 
     def test_alpha(self):
