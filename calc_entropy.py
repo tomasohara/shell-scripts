@@ -290,7 +290,7 @@ class CalcEntropy(Main):
             if re.search('^total', class_name, flags=re.IGNORECASE) and frequency == sum(frequencies_extracted.values()):
                 debug.trace(debug.DETAILED, f"skipping totals class '{class_name}'")
                 continue
-            if self.class_filter and not (self.class_filter in class_name):
+            if self.class_filter and self.class_filter not in class_name:
                 debug.trace(debug.DETAILED, f"skipping filtered class '{class_name}'")
                 continue
 
@@ -351,12 +351,12 @@ class CalcEntropy(Main):
                     result += 'class\t'
                 ## Tom: use system.round_num so that PRECISION env. var. used
                 ##    result += str(system.round_num(prob_value))
-                result += f'{format(prob_value, ".3f")}\n'
+                result += f'{system.round_num(prob_value)}\n'
             elif self.verbose:
                 result += (f'#\t\t{class_name}\t'
                            f'{frequency}\t'
-                           f'{format(prob_value, ".3f")}\t'
-                           f'{format(p_lg_p, ".3f")}\n')
+                           f'{system.round_num(prob_value)}\t'
+                           f'{system.round_num(p_lg_p)}\n')
 
 
         if self.just_freq:
@@ -365,16 +365,16 @@ class CalcEntropy(Main):
         elif self.verbose:
             result += (f'#\t\ttotal\t{total_frequency}\t'
                        f'1.000\t'
-                       f'{format(entropy, ".3f")}\n\n')
+                       f'{system.round_num(entropy)}\n\n')
             if not self.skip_header:
                 result += '# word\tclasses\tfreq\tentropy\tmax_prob\n'
             result += (f'{word}\t'
                        f'{len(data)}\t'
                        f'{total_frequency}\t'
-                       f'{format(entropy, ".3f")}\t'
-                       f'{format(max_prob, ".3f")}')
+                       f'{system.round_num(entropy)}\t'
+                       f'{system.round_num(max_prob)}')
         else:
-            result += str(format(entropy, ".3f"))
+            result += str(system.round_num(entropy))
 
 
         print(result)
@@ -409,19 +409,19 @@ class CalcEntropy(Main):
 
             # Print
             if self.verbose and not self.just_freq:
-                result += (f'#\t{format(prob_value, ".3f")}\t'
-                           f'{format(p_lg_p, ".3f")}\n')
+                result += (f'#\t{system.round_num(prob_value)}\t'
+                           f'{system.round_num(p_lg_p)}\n')
             if self.just_freq:
-                result += str(format(prob_value, ".3f")) + '\n'
+                result += str(system.round_num(prob_value)) + '\n'
 
 
         if self.verbose and not self.just_freq:
-            result += '#' + '-' * 32 + '\n'
+            result += f'#{"-" * 32}\n'
             if not self.skip_header:
                 result += '# word\tclasses\tfreq\tentropy\tmax_prob\n'
-            result += (f'#\t{format(sum_p, ".3f")}\t'
-                       f'{format(entropy, ".3f")}\t   '
-                       f'{format(max_prob, ".3f")}\n')
+            result += (f'#\t{system.round_num(sum_p)}\t'
+                       f'{system.round_num(entropy)}\t   '
+                       f'{system.round_num(max_prob)}\n')
         debug.trace(debug.VERBOSE, f'simple_calc_entropy({data}) => {entropy}')
 
 
@@ -438,7 +438,7 @@ class CalcEntropy(Main):
                 result += self.label + '\t'
             if self.show_classes:
                 result += str(len(data)) + '\t'
-            result += str(format(entropy, ".3f"))
+            result += str(system.round_num(entropy))
 
 
         print(result)
