@@ -29,6 +29,9 @@
 #         echo 666
 #     }
 #
+# - Obsolete old code flagged with '## OLD': either older definition
+#   or no longer used).
+# - Misc. old code flagged with '## MISC' (e.g., old but potentially useful).
 # - See extra-tomohara-aliases.bash for aliases for adhoc aliases (e.g., not
 #   used on a regular basis and/or special purpose).
 # - This gets invoked from $HOME/.bashrc.local.
@@ -188,9 +191,10 @@ function downcase-text() { echo "$@" | downcase-stdin; }
 ## TODO: drop leading digits in day of month
 function todays-date() { date '+%d%b%y' | downcase-stdin; }
 todays_date=$(todays-date)
-# Convenience alias and bash variable for better tab-completion
-alias hoy=todays-date
-hoy=$(todays-date)
+## MISC:
+## # Convenience alias and bash variable for better tab-completion
+## alias hoy=todays-date
+## hoy=$(todays-date)
 # Note: version so Spanish not used in note files
 # TODO: punt on tab-completion (i.e., TODAY => today)???
 alias TODAY=todays-date
@@ -623,7 +627,7 @@ function dir-proper () { $LS "${dir_options} --directory" "$@" 2>&1 | $PAGER; }
 alias ls-full='$LS ${core_dir_options}'
 function dir-full () { ls-full "$@" 2>&1 | $PAGER; }
 function dir-sans-backups () { $LS ${dir_options} "$@" 2>&1 | $GREP -v '~[0-9]*~' | $PAGER; }
-## OLD
+## OLD:
 ## function dir-ro () { $LS ${dir_options} "$@" 2>&1 | $GREP -v '^[^ld].w' | $PAGER; }
 ## function dir-rw () { $LS ${dir_options} "$@" 2>&1 | $GREP '^[^ld].w' | $PAGER; }
 # dir-ro/dir-rw(spec): show files that are read-only/read-write for the user
@@ -1301,7 +1305,8 @@ function run-app {
     local path="$1";
     local app=$(basename $path);
     shift;
-    local log=~/temp/"$app-$hoy.log"
+    ## OLD: local log=~/temp/"$app-$hoy.log"
+    local log=~/temp/"$app-"$(TODAY)".log"
     "$app" "$@" >> "$log" 2>&1 &
     ## TODO: make sure command invoked OK and then put into background
     sleep 5
@@ -1851,9 +1856,10 @@ alias uname-node='uname -n'
 alias pwd-host-info='pwd; echo $HOST_NICKNAME; uname-node'
 
 # TODO: put following elsewhere
-conditional-export SANDBOX ~/python/tohara
-conditional-export MISC_TRACING_LEVEL 4
-alias restart-screen='screen-startup.sh >| $TEMP/screen-startup.$$.log 2>&1'
+## MISC
+## conditional-export SANDBOX ~/python/tohara
+## conditional-export MISC_TRACING_LEVEL 4
+## alias restart-screen='screen-startup.sh >| $TEMP/screen-startup.$$.log 2>&1'
 
 #-------------------------------------------------------------------------------
 
