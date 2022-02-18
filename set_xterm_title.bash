@@ -7,14 +7,13 @@
 # - Includes hostname in title if not default host (from environment or file).
 # - Assumes DEFAULT_HOST environment variable specifies the default HOST
 #   in full format (eg., dime-box.cyc.com) or specified in ~/.default-host.
-#   -- See ~/.bashrc and ~/bin/tomohara-aliases.bash.
 # - under CygWin the Windows interepreter (CMD) title built-in command is used
 # - See http://tldp.org/HOWTO/Xterm-Title-4.html#ss4.3 for an explanation of doing
 #   this under bash and other Unix shells.
 # - Under unix, the echoing must be done with -n (DUH)!
 # - Shows original user if running sudo (via SUDO_USER).
 # - Similarly shows suffix defined in environment (via XTERM_TITLE_SUFFIX).
-#   -- See add-conda-env-to-xterm-title in anaconda-aliases.bash
+#   -- see add-conda-env-to-xterm-title in anaconda-aliases.bash
 # - Be careful when modifying code after the $PS_symbol support, which should
 #   go first. That is, put changes before the '=====...===' line,
 #
