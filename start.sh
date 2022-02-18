@@ -54,7 +54,7 @@ arg2="$2"
 # Note: uses $arg2 to check for extraneous args
 #
 if [[ ($show_usage = 1) || ("$file" = "") || ("$arg2" != "") ]]; then
-    script=`basename $0`
+    script=$(basename $0)
     echo ""
     echo "Usage: $script [--view|[--edit|--open]] [--verbose] [--trace] [--help] file"
     echo ""
@@ -122,7 +122,7 @@ if [ "$for_editting" = "1" ]; then
     pdf_program="okular"
     image_program="pinta"
 fi
-if [[ $lower_file =~ .*xcf ]]; then
+if [[ $lower_file =~ ^.*\.xcf$ ]]; then
     image_program="gimp"
 fi
     
