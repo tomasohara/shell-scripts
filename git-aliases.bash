@@ -84,10 +84,24 @@ function pause-for-enter () {
     read -p "$message "
 }
 
+# downcase-stdin: return stdin made lowercase
+function downcase-stdin () 
+{ 
+    perl -pe 's/.*/\L$&/;'
+}
+
+# get-temp-log-name([label=temp]: Return unique file name of the form _git-LABEL-TODAY-NNN.log
+function get-temp-log-name {
+    local label=${1:-temp}
+    local now_mmddyyhhmm=$(date '+%d%b%y-%H%M' | downcase-stdin);
+    # TODO: use integral suffix (not hex)
+    mktemp "_git-$label-${now_mmddyyhhmm}-XXX.log"
+}
+
 # git-update(): updates local from global repo. This uses git-stash to hide local changes
 # does a git-pull, and then restores local changes.)
 function git-update {
-    local log="_git-update-$(TODAY).$$.log"
+    local log=$(get-temp-log-name "update")	## OLD: log="_git-update-$(TODAY).$$.log";
     git stash >> "$log"
     git pull --all >> "$log"
     git stash pop >> "$log"
@@ -100,7 +114,7 @@ function git-update {
 # note: gets user credentials from ./_my-git-credentials-etc.bash.list
 # TODO: add message argument
 function git-commit-and-push {
-    local log="_git-commit-and-push-$(TODAY).$$.log"
+    local log=$(get-temp-log-name "commit")	## OLD: log="_git-commit-$(TODAY).$$.log";
     local git_user
     local git_token
     local credentials_file="_my-git-credentials-etc.bash.list"
@@ -162,7 +176,7 @@ alias git-update-commit-push-all='git-update-commit-push *'
 function git-pull-and-update() {
     if [ "" = "$(grep ^repo ~/.gitrc)" ]; then echo "*** Warning: fix ~/.gitrc for read-only access ***"; else
         local git="python -u /usr/bin/git";
-        local log="_git-update-$(date '+%d%b%y').$$.log";
+        local log=$(get-temp-log-name "update")	  ## OLD: log="_git-update-$(TODAY).$$.log";
         ($git pull --noninteractive --verbose;  $git update --noninteractive --verbose) >> "$log" 2>&1; less "$log"
     fi;
 }
@@ -172,7 +186,7 @@ function git-pull-and-update() {
 function invoke-git-command {
     local command="$1"
     shift
-    local log="_git-$command-$(TODAY).$$.log";
+    local log="_git-$command-$(TODAY).$$.log";   ## OLD: log="_git-$command-$(TODAY).$$.log";
     git "$command" "$@" >| "$log" 2>&1
     less "$log"
 }
@@ -190,7 +204,7 @@ alias git-status='invoke-git-command status'
 
 # git-add: add filename(s) to repository
 function git-add {
-    local log="_git-add-$(TODAY).$$.log";
+    local log=$(get-temp-log-name "add")	## OLD: log="_git-add-$(TODAY).$$.log";
     git add "$@" >| "$log";
     less "$log";
 }
@@ -198,7 +212,7 @@ function git-add {
 # git-diff: show repo diff
 function git-diff {
     ## OLD: git diff "$@" 2>&1 | less -p '^diff';
-    local log="_git-diff-$(TODAY).$$.log"
+    local log=$(get-temp-log-name "diff")	## OLD: log="_git-diff-$(TODAY).$$.log"
     git diff "$@" >| "$log";
     less -p '^diff' "$log";
 }
@@ -248,9 +262,42 @@ function git-checkin-all-template {
 
 # invoke-next-single-checkin: outputs and runs the next single-checking template
 function invoke-next-single-checkin {
-    git-checkin-single-template >| $TMP/_template.sh;
-    source $TMP/_template.sh
-    }
+    git-checkin-single-template >| "$TMP/_template.sh"
+    source "$TMP/_template.sh"
+}
+#
+# alt-invoke-next-single-checkin([filename]) alternative version that uses readline
+# with template text for checking in next change (or FILENAME if given)
+# NOTE: although potentially dangerous given eval environnment, the user still needs to
+# confirm the commit operation (and thus can verify done OK).
+function alt-invoke-next-single-checkin {
+    # Determine file to check in
+    local mod_file="$1"
+    if [ "$mod_file" = "" ]; then
+	mod_file=$(git-diff-list | head -1);
+    fi
+    if [ "$mod_file" = "" ]; then
+	mod_file="???";
+    fi
+
+    # Read the user's commit message
+    ## TODO:
+    git-vdiff "$mod_file"
+    local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
+    local command
+    echo "Warning: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
+    read -e -i "$prompt" command
+
+    # Evaluate the user's checkin command
+    # TODO: rework using a safer approach with reading checking comment and issuing git-update-commit-push directly
+    ## DEBUG:
+    ## echo "Running (n,b, *** be careful nothing lost ***):"
+    ## echo "   $command"
+    eval "$command"
+}
+#
+# invoke-alt-checkin(filename): run alternative template-bsed checkin for filename
+function invoke-alt-checkin { alt-invoke-next-single-checkin "$1"; }
 
 # git-alias-usage: tips on interactive usage
 function git-alias-usage () {
@@ -267,17 +314,20 @@ function git-alias-usage () {
     echo "    GIT_MESSAGE='...' git-update-commit-push file ..."
     echo ""
     #
-    # Note: disable spellcheck SC2016 (n.b., unfortunately just for next statement, so awkward brace group added)
+    # Note: disable spurious spellcheck SC2016 (n.b., unfortunately just for next statement, so awkward brace group added)
     #    Expressions don't expand in single quotes, use double quotes for that.
     # shellcheck disable=SC2016
     {
         echo "To check in files different from repo:"
 	echo "    # TODO: pushd \$REPO_ROOT"
 	echo "    # -OR-: pushd \$(realpath .)/.."
-	echo "    git-checkin-single-template >| /tmp/_template.sh; source $TMP/_template.sh"
+	echo "    git-checkin-single-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
 	# TODO: echo '    git-checkin-single-template | source'
 	echo '    # ALT: git-checkin-multiple-template and git-checkin-all-template (n.b. ¡cuidado!)'
 	echo '    invoke-next-single-checkin'
+	echo '    # -or-: alt-invoke-next-single-checkin'
+	local next_mod_file=$(git-diff-list | head -1)
+	if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
+	echo '    invoke-alt-checkin "'${next_mod_file}'"'
     }
-
 }
