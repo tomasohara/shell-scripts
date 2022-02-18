@@ -27,6 +27,7 @@
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
 # - if [[ $JAVA_HOME =~ x64 ]]; then echo "64-bit Java"; fi
+#   note: need to use .* not * for filename patterns (e.g., $fname =~ ^.*xcf$)
 # - case "$HOST_NICKNAME" in ec2*) echo "AWS";; hostw*) echo "HW";; *) echo "non-server"; esac
 #   NOTE: each case must end in ';;'
 # - if [[ $1 =~ */ ]]; then echo '$1' ends in slash; fi
