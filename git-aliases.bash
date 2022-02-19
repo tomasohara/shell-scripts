@@ -143,13 +143,17 @@ function git-commit-and-push {
         echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE error)"
         return
     fi
+
+    # Push the changes after showing synopsis and getting user confirmation
     local file_spec="$*"
+    echo ""
     pause-for-enter "About to commit $file_spec (with message '$message')"
     git commit -m "$message" >> "$log"
     # TODO: perl -e "print("$git_user\n$git_token\n");' | git push
     # TODO: see why only intermittently works (e.g., often prompts for user name and password)
     perl -pe 's/^/    /;' "$log"
     pause-for-enter 'About to push: review commit log above!'
+    #
     git push --verbose <<EOF >> "$log"
 $git_user
 $git_token
@@ -200,7 +204,9 @@ function git-push() {
     fi;
 }
 
+# Misc git commands (redirected to log file)
 alias git-status='invoke-git-command status'
+alias git-log='invoke-git-command log --name-status'
 
 # git-add: add filename(s) to repository
 function git-add {
@@ -324,8 +330,8 @@ function git-alias-usage () {
 	echo "    git-checkin-single-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
 	# TODO: echo '    git-checkin-single-template | source'
 	echo '    # ALT: git-checkin-multiple-template and git-checkin-all-template (n.b. ¡cuidado!)'
-	echo '    invoke-next-single-checkin'
-	echo '    # -or-: alt-invoke-next-single-checkin'
+	echo '    # old: invoke-next-single-checkin'
+	echo '    alt-invoke-next-single-checkin'
 	local next_mod_file=$(git-diff-list | head -1)
 	if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
 	echo '    invoke-alt-checkin "'${next_mod_file}'"'
