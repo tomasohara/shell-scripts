@@ -1961,6 +1961,19 @@ function script {
     set-xterm-title "$save_full" "$save_icon"
 }
 
+# ansi-filter(filename]: wrapper around ansifilter with stdio and stdout instead of files
+# TODO: issue request for proper Unix stdin support (n.b., this function is much ado about nothing)
+function ansi-filter {
+    local input_file="$1"
+    if [ "$input_file" = "" ]; then
+        input_file="$TMP/ansi-filter-in-$$.list"
+        cat > "$input_file"
+    fi
+    local output_file="$TMP/ansi-filter-out-$$.list";
+    ansifilter --input="$input_file" --output="$output_file"
+    cat "$output_file"
+}
+
 # pause-for-enter(): print message and wait for user to press enter
 # TODO: extend to press-any-key; see
 #    https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
