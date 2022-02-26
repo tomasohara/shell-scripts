@@ -17,13 +17,14 @@
 #   -- See add-conda-env-to-xterm-title in anaconda-aliases.bash
 # - Be careful when modifying code after the $PS_symbol support, which should
 #   go first. That is, put changes before the '=====...===' line,
+# - HACK: Output not down if $BATCH_MODE or $UNDER_EMACS is 1 (but still goes through motions).
 #
 # EXAMPLE:
 # - set_xterm_title.bash "/c/cartera-de-tomas/ILIT" "ILIT"
 #
 # TODO:
 # - Document environment variable usage:
-#   HOST PWD TERM DEFAULT_HOST USER HOST_NICKNAME OSTYPE HOSTNAME SUDO_USER HOME
+#   HOST PWD TERM DEFAULT_HOST USER HOST_NICKNAME OSTYPE HOSTNAME SUDO_USER HOME BATCH_MODE UNDER_EMACS
 # - Add environment variables for prefix (and affix?) analagous to XTERM_TITLE_SUFFIX.
 #   
 #........................................................................
@@ -88,13 +89,15 @@
 #
 
 
-# Uncomment following line(s) for tracing:
+# Uncomment following line(s) for tracing (in order of verbosity):
+# - echo args to show invocation (e.g., testing multiple invocations as with in anaconda-aliases.bash)
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #  
-## set -o xtrace
-## set -o verbose
-## echo args: "$@"
+## BASIC: echo "in $0: args: $@"
+## HACK: echo "BATCH_MODE=$BATCH_MODE"
+## USUAL: set -o xtrace
+## DEBUG: set -o verbose
 
 # Show usage if no arguments or --help
 # TODO: put argument processing in loop (see template.bash)
@@ -270,11 +273,15 @@ fi
 #...............................................................................
 # Do the actual title change
 
+# Note: Disable ansi terminal output if running in pseudo-interactive
+# mode (i.e., $BATCH_MODE=1 and 'i' in $-)
+if [[ ("$BATCH_MODE" = "1") || ("$UNDER_EMACS" = "1") ]]; then
+    ## DEBUG: echo "Ignoring ansi terminal update"
+    true
+
 # Under CygWin, set title using Win32 cmd command to set title to '<args>'
 # NOTE: title is a built-in command of the XP shell
-## OLD: if [ "$OSTYPE" = "cygwin" ]; then
-## if [ "$TERM" = "cygwin" ]; then
-if [ "$TERM" = "cygwin" ]; then
+elif [ "$TERM" = "cygwin" ]; then
     ## TODO: both  ## DEBUG: echo cygwin case
     ## TODO: cmd /k title ...?
     cmd /c title "$icon"
