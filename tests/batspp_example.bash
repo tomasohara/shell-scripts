@@ -15,14 +15,13 @@
 # 15
 
 
-# Also you can test bash functions with
-# using [functions + args] => [expected]
+# Also you can test bash functions:
 #
 # This test should work fine:
 # fibonacci 9 => "0 1 1 2 3 5 8 13 21 34"
 #
-# This test should fail:
-# fibonacci 3 => "8 2 45 34 3 5"
+# This is a negative test:
+# fibonacci 3 =/> "8 2 45 34 3 5"
 #
 function fibonacci () {
     result=""
@@ -43,8 +42,8 @@ function fibonacci () {
 
 # And you can test aliases too:
 #
-# $ fibonacci 9
+# $ run-fibonacci 9
 # The Fibonacci series is:
 # 0 1 1 2 3 5 8 13 21 34
 #
-alias fibonacci='echo "The Fibonacci series is: "; fibonacci'
+alias run-fibonacci='echo "The Fibonacci series is: "; fibonacci'
