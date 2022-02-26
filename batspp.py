@@ -7,8 +7,7 @@
 # NOTE: It is only necessary to have installed bats-core
 #       no need for bats-assertions library.
 #
-## TODO: solve test alias.
-##       pretty result.
+## TODO: pretty result.
 ##       debug tests.
 ##       negative assertion (=/>).
 ##       --save PATH for bats file?.
