@@ -112,8 +112,8 @@
 #
 
 # For debugging: Uncomment the following line for tracing.
+## echo in tomohara-aliases.bash
 ## set -o xtrace
-## echo do_setup.bash
 
 #...............................................................................
 # Conditional environment variable setting
@@ -200,7 +200,8 @@ todays_date=$(todays-date)
 alias TODAY=todays-date
 ## OLD: TODAY=$(todays-date)
 alias date-central='TZ="America/Chicago" date'
-alias em-adhoc-notes='emacs-tpo _adhoc.$(TODAY).log'
+## OLD: alias em-adhoc-notes='emacs-tpo _adhoc.$(TODAY).log'
+alias em-adhoc-notes='emacs-tpo _adhoc-notes.$(TODAY).txt'
 alias T='TODAY'
 ## OLD: T=$(TODAY)
 # update-today-vars() & todays-update: update the various today-related variables
@@ -208,7 +209,7 @@ alias T='TODAY'
 # TODO: try for cron-like bash function to enable such updates automatically
 function update-today-vars {
     TODAY=$(todays-date)
-    T=$(TODAY)
+    T=$TODAY
 }
 update-today-vars
 alias todays-update='update-today-vars'
@@ -221,7 +222,9 @@ alias todays-update='update-today-vars'
 function quiet-unalias {
     ## HACK: do nothing if running under bats-core
     if [ "$BATS_TEST_NUMBER" != "" ]; then
-        echo "Ignoring unalias over $@ for sake of bats"
+	if [ "$BATCH_MODE" != "1" ]; then
+            echo "Ignoring unalias over $@ for sake of bats"
+	fi
         return
     fi
     unalias "$@" 2> /dev/null;
@@ -437,9 +440,15 @@ alias reset-prompt-default="reset-prompt '$PS_symbol'"
 # reset CDPATH to just current directory
 export CDPATH=.
 
-# Just use $ for Bash prompt
-# NOTE: cd override puts directory name in xterm title
-reset-prompt
+## OLD
+## # Just use $ for Bash prompt
+## # NOTE: cd override puts directory name in xterm title
+## OLD: reset-prompt
+##
+
+# If interactive session, change prompt to $PS1 (via $PS_symbol).
+# Note: directory is instead put in xterm title (via set_xterm_title.bash)
+if [[ $- =~ i ]]; then reset-prompt; fi
 
 # flag for turning off GNOME, which can be flakey at times
 # See xterm.sh (e.g., gnome-terminal).
@@ -1228,6 +1237,7 @@ alias count_it=count-it
 function count-tokens () { count-it "\S+" "$@"; }
 # TODO: rework via chomp
 function count-line-text () { count-it '^([^\n\r]*)[\n\r]*$' "$@"; }
+alias extract-matches='extract_matches.perl'
 # EX: echo $'1 one\n2 two\n3' | perlgrep 'o\w' => $'1 one'
 alias perlgrep='perl- perlgrep.perl'
 alias perl-grep=perlgrep
@@ -1434,7 +1444,7 @@ alias move-duplicates='mkdir -p duplicates; move *\([0-9]\).* duplicates 2>&1 | 
 alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-duplicates'
 alias rename-parens='rename-files -global -regex "[\(\)]" "" *[\(\)]*'
 # move "versioned" log files into ./log-file subdirectory
-# note: files end in .log[0-9]* or .log and have numeric affix (e.g., do-xyz.log2, do-xyz.2.log, or do-xyz-30may21.log)
+#    *** files end in .log[0-9]+ or .log and have numeric affix (e.g., do-xyz.log2, do-xyz.2.log, or do-xyz-30may21.log)
 #
 # move-log-files: move "versioned" log files to log-files
 # move-output-files: likewise for output files with version numbers to ./output
@@ -1459,7 +1469,8 @@ function move-versioned-files {
     move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;' | sort -u) "$dir"
 }
 alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
-alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,report,tsv,xml}" "output-files"'
+# note: * the version regex should be kept quite specific to avoid useful files being moved into ./output
+alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
 alias move-adhoc-files='move-log-files; move-output-files'
 
 # rename-with-file-date(file, ...): rename each file(s) with .ddMmmYY suffix
@@ -1721,6 +1732,7 @@ alias restart-network='sudo ifdown eth0; sudo ifup eth0'
 alias hibernate-system='sudo systemctl hibernate'
 alias blank-screen='xset dpms force off'
 alias stop-service='systemctl stop'
+alias restart-service='sudo systemctl restart'
 
 # get-free-filename(base, [sep=""]): get filename starting with BASE that is not used.
 # Notes: 1. If <base> exists <base><sep><N> checked until the filename not used (for N in 2, 3, ... ).
@@ -1791,9 +1803,10 @@ function check-html-java-script () {
 #
 
 TPO_SSH_KEY=~/.ssh/$USER-key.pem
+SSH_PORT="22"
 #
 # TODO: For cygwin clients, unset TERM so set_xterm_title.bash not confused.
-function ssh-host-aws-aux () { local host="$1"; shift; ssh -X -i $TPO_SSH_KEY $USER@$host "$@"; }
+function ssh-host-aws-aux () { local host="$1"; shift; ssh -X -p $SSH_PORT -i $TPO_SSH_KEY $USER@$host "$@"; }
 #
 function ssh-host-login-aws () {
     local host="$1"
@@ -1803,13 +1816,13 @@ function ssh-host-login-aws () {
 }
 ## TODO: function run-remote-command-aws () { ssh-host-aws-aux "$@"; }
 # Note: /tmp used in case host not setup with ~/temp
-function scp-host-down() { scp -i $TPO_SSH_KEY "$USER@$1:$TMP/$2" .; }
+function scp-host-down() { scp -P $SSH_PORT -i $TPO_SSH_KEY "$USER@$1:$TMP/$2" .; }
 # TODO: rework in terms of id_rsa-tomohara-keypair (as used on others hosts)
-function scp-host-up() { local host="$1"; shift; scp -i $TPO_SSH_KEY "$@" "$USER@$host:$TMP"; }
+function scp-host-up() { local host="$1"; shift; scp -P $SSH_PORT -i $TPO_SSH_KEY "$@" "$USER@$host:$TMP"; }
 #
 function scp-aws-up() { local host="$1"; shift;
-                        ssh -i $TPO_SSH_KEY $USER@$host chmod u+w "~/xfer/"*;
-                        scp -i $TPO_SSH_KEY "$@"  $USER@$host:xfer; }
+                        ssh -p $SSH_PORT -i $TPO_SSH_KEY $USER@$host chmod u+w "~/xfer/"*;
+                        scp -P $SSH_PORT -i $TPO_SSH_KEY "$@"  $USER@$host:xfer; }
 function scp-aws-down() { local host="$1"; shift; for _file in "$@"; do scp -i $TPO_SSH_KEY $USER@$host:xfer/$_file .; done; }
 #
 # TODO: consolidate host keys; reword hostwinds in terms of generic host not AWS
@@ -2136,7 +2149,12 @@ alias which-python='which python'
 function run-jupyter-notebook () {
     local port="$1"; if [ "$port" = "" ]; then port=8888; fi
     local ip="$2"; if [ "$ip" = "" ]; then ip="127.0.0.1"; fi
-    jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> ~/temp/jupyter-$(TODAY).log 2>&1 &
+    local log="$TEMP/jupyter-$(TODAY).log"
+    jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
+    # Show URL
+    echo -n "URL: "
+    sleep 3
+    extract-matches 'http:\S+' "$log" | sort -u
 }
 alias jupyter-notebook-redir=run-jupyter-notebook
 alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'
@@ -2359,4 +2377,4 @@ alias redo-tpo=tomohara-aliases
 alias more-tomohara-aliases="source $TOM_BIN/more-tomohara-aliases.bash"
 
 # Optional end tracing
-startup-trace 'out tohara-aliases.bash'
+startup-trace 'out tomohara-aliases.bash'
