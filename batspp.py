@@ -47,7 +47,8 @@ from mezcla      import glue_helpers as gh
 
 
 # Command-line labels constants
-FILENAME = 'filepath'
+FILENAME = 'filepath' # target test path
+OUTPUT   = 'o'        # output BATS test
 
 
 # Pattern constants
@@ -62,6 +63,7 @@ class Batspp(Main):
     filename     = ''
     file_content = ''
     bats_content = '#!/usr/bin/env bats\n\n'
+    output       = ''
 
 
     def setup(self):
@@ -70,6 +72,7 @@ class Batspp(Main):
         # Check the command-line options
         self.filename     = self.get_parsed_argument(FILENAME, "")
         self.file_content = system.read_file(self.filename)
+        self.output       = self.get_parsed_argument(OUTPUT, "")
 
         debug.trace(7, f'batspp - filename to run tests: {self.filename}')
 
@@ -88,10 +91,13 @@ class Batspp(Main):
         self.__process_tests()
 
 
-        # Save test file and run tests
-        gh.write_file(self.temp_file, self.bats_content)
+        # Save
+        batsfile = self.output if self.output else self.temp_file
+        gh.write_file(batsfile, self.bats_content)
+
+        # Run
         debug.trace(7, f'batspp - running test {self.temp_file}')
-        print(gh.run(f'bats {self.temp_file}'))
+        print(gh.run(f'bats {batsfile}'))
 
 
     def __process_setup(self):
@@ -334,5 +340,6 @@ class FunctionTests(CustomTestsToBats):
 if __name__ == '__main__':
     app = Batspp(description          = __doc__,
                  positional_arguments = [(FILENAME, 'test file path')],
+                 text_options        = [(OUTPUT,   'optional output bats file')],
                  manual_input         = True)
     app.run()
