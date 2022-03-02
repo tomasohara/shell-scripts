@@ -47,3 +47,13 @@ function fibonacci () {
 # 0 1 1 2 3 5 8 13 21 34
 #
 alias run-fibonacci='echo "The Fibonacci series is:"; fibonacci'
+
+
+# Setups for specific test can be done with
+# command lines too, note that these commands
+# must not have an expected output
+#
+# $ filepath=$(echo /tmp/"testfile-$$")
+# $ echo "this is a file content to run an example test" > $filepath
+# $ cat $filepath
+# this is a file content to run an example test
