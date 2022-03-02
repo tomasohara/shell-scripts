@@ -9,8 +9,6 @@
 #
 ## TODO: pretty result.
 ##       setup for functions tests.
-##       debug tests.
-##       --save PATH for bats file?.
 
 
 """
@@ -49,6 +47,7 @@ from mezcla      import glue_helpers as gh
 # Command-line labels constants
 FILENAME = 'filepath' # target test path
 OUTPUT   = 'o'        # output BATS test
+DEBUG    = 'debug'    # show actual and expected values
 
 
 # Pattern constants
@@ -64,6 +63,7 @@ class Batspp(Main):
     file_content = ''
     bats_content = '#!/usr/bin/env bats\n\n'
     output       = ''
+    debug_mode   = False
 
 
     def setup(self):
@@ -73,8 +73,9 @@ class Batspp(Main):
         self.filename     = self.get_parsed_argument(FILENAME, "")
         self.file_content = system.read_file(self.filename)
         self.output       = self.get_parsed_argument(OUTPUT, "")
+        self.debug_mode   = self.has_parsed_option(DEBUG)
 
-        debug.trace(7, f'batspp - filename to run tests: {self.filename}')
+        debug.trace(7, f'batspp - filename: {self.filename}, output: {self.output}, debug_mode: {self.debug_mode}')
 
 
     def run_main_step(self):
@@ -94,6 +95,7 @@ class Batspp(Main):
         # Save
         batsfile = self.output if self.output else self.temp_file
         gh.write_file(batsfile, self.bats_content)
+
 
         # Run
         debug.trace(7, f'batspp - running test {self.temp_file}')
@@ -139,8 +141,8 @@ class Batspp(Main):
         """Process tests"""
         debug.trace(7, f'batspp - processing tests')
 
-        command_tests  = CommandTests()
-        function_tests = FunctionTests()
+        command_tests  = CommandTests(debug_mode=self.debug_mode)
+        function_tests = FunctionTests(debug_mode=self.debug_mode)
 
         self.bats_content += command_tests.get_bats_tests(self.file_content)
         self.bats_content += function_tests.get_bats_tests(self.file_content)
@@ -153,7 +155,8 @@ class CustomTestsToBats:
     _debug_test_number = 0
 
 
-    def __init__(self, pattern, re_flags=0):
+    def __init__(self, pattern, re_flags=0, debug_mode=False):
+        self._debug_mode    = debug_mode
         self._re_flags      = re_flags
         self._pattern       = pattern
         self._assert_equals = True
@@ -225,6 +228,11 @@ class CustomTestsToBats:
         result += f'\tactual=$({actual})\n'
         result += f'\t{expected_var_name}=${repr(expected)}\n'
 
+        # Add debug
+        if self._debug_mode:
+            result +=  '\techo "actual:   $actual"\n'
+            result += f'\techo "expected: ${expected_var_name}"\n'
+
         # Add assertion
         result += f'\t[ "$actual" {"==" if self._assert_equals else "!="} "${expected_var_name}" ]\n'
 
@@ -261,7 +269,7 @@ class CommandTests(CustomTestsToBats):
     """Extract and process specific command tests"""
 
 
-    def __init__(self):
+    def __init__(self, debug_mode=False):
         flags = re.DOTALL | re.MULTILINE
 
         pattern = (fr'(({INDENT_PATTERN}\$\s+[^\n]+\n)*)' # setup
@@ -269,7 +277,7 @@ class CommandTests(CustomTestsToBats):
                    fr'(.+?)\n'                            # expected output
                    fr'{INDENT_PATTERN}$')                 # end test
 
-        super().__init__(pattern, re_flags=flags)
+        super().__init__(pattern, re_flags=flags, debug_mode=debug_mode)
 
 
     def _first_process(self, match):
@@ -291,7 +299,7 @@ class FunctionTests(CustomTestsToBats):
     assert_ne     = r'=\/>'
 
 
-    def __init__(self):
+    def __init__(self, debug_mode=False):
 
         flags = re.MULTILINE
 
@@ -301,7 +309,7 @@ class FunctionTests(CustomTestsToBats):
                    r'((.|\n)+?)'                                 # expected output
                    fr'\n{INDENT_PATTERN}$')                      # blank indent (end test)
 
-        super().__init__(pattern, re_flags=flags)
+        super().__init__(pattern, re_flags=flags, debug_mode=debug_mode)
 
 
     def _first_process(self, match):
@@ -340,6 +348,7 @@ class FunctionTests(CustomTestsToBats):
 if __name__ == '__main__':
     app = Batspp(description          = __doc__,
                  positional_arguments = [(FILENAME, 'test file path')],
-                 text_options        = [(OUTPUT,   'optional output bats file')],
+                 boolean_options      = [(DEBUG,    'show actual and expected values')],
+                 text_options         = [(OUTPUT,   'target output .bats filepath')],
                  manual_input         = True)
     app.run()
