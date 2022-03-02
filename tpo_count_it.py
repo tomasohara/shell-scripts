@@ -314,15 +314,17 @@ class CountIt(Main):
 # Remove diacritic marks from the text
 def remove_diacritics(text):
     """Removes diacritic marks from the text"""
-    return unidecode.unidecode(text)
+    result = unidecode.unidecode(text)
+    debug.trace(7, f'remove_diacritics({text}) => {result}')
+    return result
 
 
 # Removes leading and trailing whitespace
 def trim_whitespaces(text):
     """Removes leading and trailing whitespace"""
-    text = text.lstrip()
-    text = text.rstrip()
-    return text
+    new_text = text.lstrip().rstrip()
+    debug.trace(7, f'trim_whitespaces({text}) => {new_text}')
+    return new_text
 
 
 if __name__ == '__main__':

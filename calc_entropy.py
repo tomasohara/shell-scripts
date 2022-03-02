@@ -455,7 +455,6 @@ def normalize(values):
     ex: input  -> [5, 10, 15, 20]
         output -> [0.100, 0.200, 0.300, 0.400]
     """
-    debug.trace(7, 'normalize(_)')
 
     total_sum = 0
     for item in values:
@@ -465,12 +464,12 @@ def normalize(values):
     for item in values:
         normalized_values.append(item/total_sum)
 
+    debug.trace(7, f'normalize({values}) => {normalized_values}')
     return normalized_values
 
 
 def sort_dict(dictionary, by_key=False, by_value=False):
     """Sort dictionary, always returns array"""
-    debug.trace(7, 'sort_dict(_)')
 
     result = []
 
@@ -481,6 +480,7 @@ def sort_dict(dictionary, by_key=False, by_value=False):
     else:
         result = dictionary.items()
 
+    debug.trace(7, f'sort_dict(dictionary={dictionary}, by_key={by_key}, by_value={by_value}) => {result}')
     return result
 
 

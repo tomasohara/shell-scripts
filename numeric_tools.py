@@ -21,7 +21,7 @@
 ##
 ## Tom: The following is failing
 ##
-##   $ echo 1234 987654321 | comma-ize-number 
+##   $ echo 1234 987654321 | comma-ize-number
 ##   1,234 987,654,321
 ##
 ##   current output:
@@ -36,7 +36,7 @@
 This script groups several tools to deal with numerical systems and more.
 
 ex:
-\t$ python numeric_tools.py --dec2bin 20
+\t$ python numeric_tools.py --dec2bin --i 20
 """
 ## Tom (missing --i above): --dec2bin --i 20
 
@@ -88,6 +88,7 @@ class NumericSystem(Main):
 
     def setup(self):
         """Process arguments"""
+        debug.trace(5, f"Script.process_line(): self={self}")
 
         # Process command-line options
         self.input_string        = self.get_parsed_argument(INPUT_SHORT, "")
@@ -104,8 +105,11 @@ class NumericSystem(Main):
         ## Tom: trace instance after args parsed
         debug.trace_object(5, self, label="Script instance")
 
+
     def run_main_step(self):
         """Process input stream"""
+        debug.trace(5, f"Script.run_main_step(): self={self}")
+
 
         # Read stdin if not positional input provided
         if not self.input_string and not sys.stdin.isatty():
@@ -139,30 +143,39 @@ class NumericSystem(Main):
 
 def hex2dec(number):
     """Convert hexadecimal to decimal"""
-    ## Tom: debug.trace(5, f"hex2dec({number})")
-    return int(str(number), 16)
+    result = int(str(number), 16)
+    debug.trace(5, f"hex2dec({number}) => {result}")
+    return result
 
 
 def dec2hex(number):
     """Convert decimal to hexadecimal"""
-    return hex(int(number)).split('x')[-1]
+    result = hex(int(number)).split('x')[-1]
+    debug.trace(5, f"dec2hex({number}) => {result}")
+    return result
 
 
 def bin2dec(number):
     """Convert binary to decimal"""
-    return int(str(number), 2)
+    result = int(str(number), 2)
+    debug.trace(5, f"bin2dec({number}) => {result}")
+    return result
 
 
 def dec2bin(number):
     """Convert decimal to binary"""
-    return int(bin(int(number)).replace('0b', ''))
+    result = int(bin(int(number)).replace('0b', ''))
+    debug.trace(5, f"dec2bin({number}) => {result}")
+    return result
 
 
 def comma_ize_number(number):
     """Add commas to number"""
     ## Tom: probabily need a loop
     ##   perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\d])/\1,\2\3/g; } ';
-    return re.sub(r'(\d)(\d\d\d)([^\d])', r'\1,\2\3', str(number))
+    result = re.sub(r'(\d)(\d\d\d)([^\d])', r'\1,\2\3', str(number))
+    debug.trace(5, f"comma_ize_number({number}) => {result}")
+    return result
 
 
 # NOTE: this not has command-line option
@@ -177,7 +190,10 @@ def format_bytes(size, precision=1):
         size /= power
         n_power += 1
 
-    return  system.round_num(size, precision), power_labels[n_power]
+    result = system.round_num(size, precision), power_labels[n_power]
+
+    debug.trace(5, f"format_bytes(size={size}, precision={precision}) => {result}")
+    return result
 
 
 # apply suffixes: converts numbers to use K/M/G suffixes.
@@ -195,7 +211,6 @@ def apply_suffixes(numbers, first_only=False, precision=1):
     # Process entered string
     ## Tom: use numbers.split(); also rename to something like numeric_text as it would seem to be a list
     size_list = numbers.split(' ')
-    
 
     # Calculate power labels and append results
     result = ''
@@ -210,19 +225,25 @@ def apply_suffixes(numbers, first_only=False, precision=1):
         for size in size_list[1:]:
             result += str(size) + ' '
 
-    return result.rstrip()
+    result = result.rstrip()
+
+    debug.trace(5, f"apply_suffixes(numbers={numbers}, first_only={first_only}, precision={precision}) => {result}")
+    return result
 
 
 # apply_usage_suffixes(): factors in 1k blocksize before applying numeric suffixes
 def apply_usage_suffixes(numbers, precision=1):
     """Factor 1K blocksize and apply suffixes"""
 
-    numbers          = numbers.split(' ')
-    factored_numbers = str(int(numbers[0]) * 1024)
-    for number in numbers[1:]:
+    numbers_list     = numbers.split(' ')
+    factored_numbers = str(int(numbers_list[0]) * 1024)
+    for number in numbers_list[1:]:
         factored_numbers += ' ' + number
 
-    return apply_suffixes(factored_numbers, first_only=True, precision=precision)
+    result = apply_suffixes(factored_numbers, first_only=True, precision=precision)
+
+    debug.trace(5, f'apply_usage_suffixes(numbers={numbers}, precision={precision}) => {result}')
+    return result
 
 
 if __name__ == '__main__':

@@ -41,6 +41,7 @@ class FindFiles(Main):
 
     def setup(self):
         """Process arguments"""
+        debug.trace(5, f"Script.setup(): self={self}")
 
         # Process command-line options
         self.find_files = self.has_parsed_option(FIND_FILES)
@@ -56,6 +57,7 @@ class FindFiles(Main):
 
     def run_main_step(self):
         """Process input stream"""
+        debug.trace(5, f"Script.run_main_step(): self={self}")
 
         if self.find_files:
             find_files(path=self.path)
@@ -68,7 +70,7 @@ class FindFiles(Main):
 # Notes: Also puts listing proper in ls-R.list (i.e., just list of files).
 def find_files(path='.', full=False, special_dirs=False):
     """List files in current directory tree"""
-    # TODO: simplify this function.
+    debug.trace(5, f"find_files(path={path}, full={full}, special_dirs={special_dirs})")
 
     debug.trace(debug.VERBOSE, f'find_files(path={path}, full={full}, special_dirs={special_dirs})')
 

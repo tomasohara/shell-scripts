@@ -82,6 +82,7 @@ class ExtractMatches(Main):
 
     def setup(self):
         """Process arguments"""
+        debug.trace(5, f"Script.setup(): self={self}")
 
 
         # Check the command-line options
@@ -141,6 +142,8 @@ class ExtractMatches(Main):
 
     def process_line(self, line):
         """Process each line of the input stream"""
+        debug.trace(5, f"Script.process_line({line}): self={self}")
+
         line = system.to_utf8(line)
 
 

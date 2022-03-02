@@ -13,6 +13,7 @@ import sys
 
 # Local packages
 from mezcla.main import Main
+from mezcla      import debug
 from mezcla      import glue_helpers as gh
 from mezcla      import file_utils as fl
 
@@ -48,6 +49,7 @@ class Filenames(Main):
 
     def setup(self):
         """Process arguments"""
+        debug.trace(5, f"Script.setup(): self={self}")
 
 
         # Check the command-line options
@@ -76,6 +78,7 @@ class Filenames(Main):
 
     def run_main_step(self):
         """Process input stream"""
+        debug.trace(5, f"Script.run_main_step(): self={self}")
 
 
         for filename in self.input_string.split(' '):
@@ -113,6 +116,7 @@ def get_free_filename(basename, separation):
         number       += 1
         free_filename = basename + separation + str(number)
 
+    debug.trace(7, f"get_free_filename(basename={basename}, separation={separation}) => {free_filename}")
     return free_filename
 
 
@@ -143,8 +147,10 @@ def get_free_date_name(basename):
         return basename
 
     modification_date = fl.get_modification_date(basename, strftime='%d%b%y')
+    result = get_free_filename(basename + '.' + modification_date, '.')
 
-    return get_free_filename(basename + '.' + modification_date, '.')
+    debug.trace(7, f"get_free_date_name(basename={basename}) => {result}")
+    return result
 
 
 # rename_with_file_date(file, ...): rename each file(s) with .ddMmmYY suffix
@@ -165,6 +171,8 @@ def rename_with_file_date(basename, target='./', copy=False):
         gh.copy_file(basename, new_filename)
     else:
         gh.rename_file(basename, new_filename)
+
+    debug.trace(7, f"rename_with_file_date(basename={basename}, target={target}, copy={copy})")
 
 
 if __name__ == '__main__':
