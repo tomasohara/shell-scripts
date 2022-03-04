@@ -113,6 +113,7 @@
 
 # For debugging: Uncomment the following line for tracing.
 ## echo in tomohara-aliases.bash
+## DEBUG:
 ## set -o xtrace
 
 #...............................................................................
@@ -347,7 +348,7 @@ if [ "`printenv PATH | $GREP $TOM_BIN/${OSTYPE}:`" = "" ]; then
 fi
 # TODO: make optional & put append-path later to account for later PERLLIB changes
 append-path $PERLLIB
-prepend-path "$HOME/python/Mezcla/mezcla"
+## OLD (see below): prepend-path "$HOME/python/Mezcla/mezcla"
 append-path "$HOME/python"
 # Put current directoy at end of path; can be overwritting with ./ prefix
 export PATH="$PATH:."
@@ -402,6 +403,8 @@ alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
 
 # Note: support for prompt prefix
 # reset-prompt(symbol): resets PS1 to PS_symbol, optionally changed to symbol
+# If symbol is empty, then DEFAULT_PS_SYMBOL  is used.
+# This could be a no-op if PS1 already is based on PS_symbol,
 # ex: reset-prompt '§'                 # section sign [U+00A7]
 # TODO: document PSn usage (e.g., Bash manual excerpt)
 ## TEST
@@ -414,6 +417,7 @@ alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
 ## TODO: resolve interaction among 'reset-prompt', 'script' and 'add-conda-env-to-xterm-title' (see anacdonda-aliases.bash for latter)
 cond-export PS_symbol '$'
 function reset-prompt {
+    ## DEBUG: echo "reset-prompt" "$@"
     ## OLD: local new_PS_symbol="$1"
     local new_PS_symbol="$@"
     ## OLD:
@@ -672,6 +676,11 @@ alias ls-R='$LS -R >| ls-R.list; wc -l ls-R.list'
 #
 # TODO: create ls alias that shows file name with symbolic links (as with ls -l but without other information
 # ex: ls -l | perl -pe 's/^.* \d\d:\d\d //;'
+
+# link-symbolic-safe: creates symbolic link and avoids quirks with links to directories
+# EX: link-symbolic-safe /tmp temp-link; link-symbolic-safe --force ~/temp temp-link; ls -l temp-link | grep /tmp => ""
+alias link-symbolic-safe='ln --symbolic --verbose --no-target-directory'
+alias ln-symbolic='link-symbolic-safe'
 
 #-------------------------------------------------------------------------------
 trace grep commands
@@ -1142,6 +1151,7 @@ function make-tar () {
     if [ "$dir" = "" ]; then dir="."; fi;
     if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
     if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
+    if [ "$USE_DATE" = "1" ]; then base="$base-$(TODAY)"; fi
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
     ## OLD:
     (find "$dir" $find_options $depth_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
@@ -1225,6 +1235,11 @@ function sort-tar-archive() { (tar tvfz "$@" | sort --key=3 -rn) 2>&1 | $PAGER; 
 # TODO: tar-this-dir-there???
 # ex: ¢ TEMP=/mnt/wd6tbp2vfat/backup/tpo-servidor tar-this-dir
 #
+alias tar-this-dir-dated='USE_DATE=1 tar-this-dir'
+
+#.......................................
+
+#
 # command-to-pager(command, arg1, ...): helper function for use in aliases: sends command output to $PAGER (e.g., less)
 function command-to-pager { "$@" | $PAGER; }
 alias view-zip='command-to-pager unzip -v'
@@ -1272,6 +1287,7 @@ alias cached-entry-gr='notes-entry-gr-aux _master-note-info.list'
 function cached-entry-gr-less-p { cached-entry-gr "$@" | less -p "$1"; }
 # TODO: * work good scheme for shortcut aliases (e.g. both memorable and easily tab-completable)!
 alias grepl-entry=cached-entry-gr-less-p
+alias grepl-entry-here=entry-notes
 
 # TODO: use .list instead of .log in note files to minimize need for such an awkward move alias/function (n.b., .log files more common due to script usage than .list)
 #
@@ -2003,8 +2019,27 @@ function pause-for-enter () {
 export PYTHON_CMD="/usr/bin/time python -u"
 export PYTHON="$NICE $PYTHON_CMD"
 export PYTHONPATH="$HOME/python:$PYTHONPATH"
+#
+# add-python-path(pkg-dir): add PKG-DIR to PATH and PARENT to PYTHONPATH
 ## HACK: make sure Mezcla/mezcla resolves before python/mezcla
-export PYTHONPATH="$HOME/python/Mezcla:$PYTHONPATH"
+## OLD: export PYTHONPATH="$HOME/python/Mezcla:$PYTHONPATH"
+function add-python-path () {
+    local package_path="$1"
+    local parent_path=$(realpath "$package_path/..")
+    # add package to path (e.g., $HOME/python/Mezcla/mezcla)
+    prepend-path "$package_path"
+    # add parent to python-path spec (e.g., $HOME/python/Mezcla)
+    export PYTHONPATH="$parent_path:$PYTHONPATH"
+}
+# EX: mezcla-devel; which system.py | grep -i Mezcla-main => ""
+alias mezcla-devel='add-python-path $HOME/programs/python/mezcla-tom/mezcla'
+alias mezcla-main='add-python-path $HOME/python/Mezcla-main/mezcla'
+alias mezcla-tom='add-python-path $HOME/python/Mezcla-tom/mezcla'
+# Add mezcla-main unless another version in path
+if [[ ! "$PATH" =~ /mezcla ]]; then
+    mezcla-devel
+fi
+#
 alias ps-python-full='ps-all python'
 # note: excludes ipython and known system-related python scripts
 alias ps-python='ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|update-manager|software-properties|networkd-dispatcher)"'
@@ -2378,3 +2413,4 @@ alias more-tomohara-aliases="source $TOM_BIN/more-tomohara-aliases.bash"
 
 # Optional end tracing
 startup-trace 'out tomohara-aliases.bash'
+## DEBUG: echo 'out tomohara-aliases.bash'
