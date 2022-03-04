@@ -12,7 +12,7 @@
 
 # add-conda-env-to-xterm-title(): puts conda prompt modifier in xterm title
 # along with python version (e.g., "...; Py3.6:(old_tensorflow)")
-# note: also resets prompt to '$ '
+# note: also resets prompt to '$ ' (following change by conda scripts)
 function add-conda-env-to-xterm-title {
     export XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d.\d)'):$CONDA_PROMPT_MODIFIER"
 
@@ -21,13 +21,13 @@ function add-conda-env-to-xterm-title {
 }
 
 # TODO: Put in a separate file (e.g., .bashrc.anaconda)
-anaconda3_dir="/home/tomohara/anaconda3"
-anaconda2_dir="/home/tomohara/anaconda2"
+anaconda3_dir="$HOME/anaconda3"
+anaconda2_dir="$HOME/anaconda2"
 # OLD: init-conda(dir])
 # init-condaN([- | dir]): initialize anaconda using specified dir (or ~/anaconda3)
 function init-condaN() {
     local anaconda_dir="$1"
-    ## DEBUG: echo "in: init-condaN($1)"
+    ## DEBUG: echo "in init-condaN $1*"
     ## OLD: if [ "$anaconda_dir" = "" ]; then anaconda_dir="$anaconda3_dir"; fi
     if [ "$anaconda_dir" = "" ]; then echo "Usage: init-condaN anaconda-dir"; return; fi
     if [ "$anaconda_dir" = "-" ]; then anaconda_dir="$anaconda3_dir"; fi
@@ -87,6 +87,7 @@ alias conda-env-name='conda env list | extract_matches.perl "^(\S+ )  " | echoiz
 ## OLD: alias conda-activate-env='source activate'
 ## OLD: function conda-activate-env { source activate "$1"; add-conda-env-to-xterm-title; }
 function conda-activate-env {
+    ## DEBUG: echo "in conda-activate-env $*"
     local env="$1"
     if [ "$env" = "" ]; then
 	echo "Usage: conda-activate-env"
