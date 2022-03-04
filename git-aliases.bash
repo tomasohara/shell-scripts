@@ -2,8 +2,6 @@
 #
 # Aliases for Git source control (see https://git-scm.com).
 #
-# TODO: if interactive, warn that only intended for non-interactive use
-#
 # Usage example(s):
 #   source git-aliases.bash
 #
@@ -29,32 +27,6 @@
 #
 #   [credential]
 #   helper = store
-#
-# - via https://gist.github.com/flc/f867e2b92cc878a55801#file-hg_vs_git-txt:
-#
-#   hg init => git init
-#   hg add <path> => git add <path>
-#   hg commit -m 'Commit message' => git commit -m 'Commit message'
-#      git add NEW -and/or- OLD; git commit -m <MESSAGE>; git push
-#   hg commit => git commit -a
-#   hg status => git status -s
-#   hg clone <path> => git clone <path>
-#   hg branch <branchname> => git checkout -b <branchname> (-b also switch to new branch)
-#   hg pull & hg update => git pull --all
-#      # TODO: git stash; git pull --all; git stash pop
-#   hg diff => git diff HEAD
-#   hg rm => git rm
-#   hg push => git push
-#   hg update <branch> => git checkout <branchname>
-#   hg branches => git branch
-#   hg revert filename => git checkout filename (This command is also used to checkout branches, and you could happen to have a file with the same name as a branch. All is not lost, you will simply need to type: git checkout -- filename)
-#   hg revert => git reset --hard
-#   hg log -l 5 => git log -n 5
-#   hg merge <branch> => git merge <branch>
-#   hg import <diff_file> => git apply <diff_file>
-#   
-#   set default editor to <editor>:
-#   git config --global core.editor <editor>
 #
 #................................................................................
 # Examples:
@@ -264,7 +236,7 @@ function git-checkin-multiple-template {
 function git-checkin-all-template {
     git-checkin-template-aux
     echo "# To do shamelessly lazy check-in of all modified files:"
-    echo "echo GIT_MESSAGE=\'miscellaneous update\' git-update-commit-push \$(cat \$diff_list_file)"
+    echo "echo GIT_MESSAGE=\'...\' git-update-commit-push \$(cat \$diff_list_file)"
 }
 
 # invoke-next-single-checkin: outputs and runs the next single-checking template
@@ -288,8 +260,10 @@ function alt-invoke-next-single-checkin {
     fi
 
     # Read the user's commit message
-    ## TODO:
+    # note: shows visual diff (TODO: and pauses so user can start message)
+    # TODO: position cursor at start of ... (instead of pause)
     git-vdiff "$mod_file"
+    ## BAD: sleep 3
     local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
     local command
     echo "Warning: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
