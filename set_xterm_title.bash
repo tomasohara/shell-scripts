@@ -8,6 +8,7 @@
 # - Assumes DEFAULT_HOST environment variable specifies the default HOST
 #   in full format (eg., dime-box.cyc.com) or specified in ~/.default-host.
 #   -- See ~/.bashrc and ~/bin/tomohara-aliases.bash.
+#   -- Also see set-title-to-current-dir and reset-prompt in latter.
 # - under CygWin the Windows interepreter (CMD) title built-in command is used
 # - See http://tldp.org/HOWTO/Xterm-Title-4.html#ss4.3 for an explanation of doing
 #   this under bash and other Unix shells.
@@ -17,7 +18,7 @@
 #   -- See add-conda-env-to-xterm-title in anaconda-aliases.bash
 # - Be careful when modifying code after the $PS_symbol support, which should
 #   go first. That is, put changes before the '=====...===' line,
-# - HACK: Output not down if $BATCH_MODE or $UNDER_EMACS is 1 (but still goes through motions).
+# - HACK: Output not done if $BATCH_MODE or $UNDER_EMACS is 1 (but still goes through motions).
 #
 # EXAMPLE:
 # - set_xterm_title.bash "/c/cartera-de-tomas/ILIT" "ILIT"
