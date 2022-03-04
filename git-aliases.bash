@@ -194,6 +194,7 @@ function invoke-git-command {
     git "$command" "$@" >| "$log" 2>&1
     less "$log"
 }
+alias git-command='invoke-git-command'
 
 function git-push() {
     if [ "" != "$(grep ^repo ~/.gitrc)" ]; then
