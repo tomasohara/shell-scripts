@@ -1,3 +1,6 @@
+#! /usr/bin/env bash
+# -*- coding: utf-8 -*-
+#
 # tomohara-aliases.bash: Tom's Initialization file for use with bash,
 # using suppoting scripts from
 #    http://www.cs.nmsu.edu/~tomohara/useful-scripts/tpo-useful-scripts.tar.gz
@@ -119,6 +122,7 @@
 #...............................................................................
 # Conditional environment variable setting
 # Format: cond-export VAR1 VALUE1 [VAR2 VALUE2] ...
+# EX: export FU="bar"; conditional-export FU baz; echo $FU => bar
 #
 function conditional-export () {
     local var value
@@ -126,6 +130,8 @@ function conditional-export () {
         var="$1" value="$2";
         ## DEBUG: echo "value for env. var. $var: $(printenv "$var")"
         if [ "$(printenv "$var")" == "" ]; then
+	    # Note: ignores SC1066 (Don't use $ on the left side of assignments)
+	    # shellcheck disable=SC1066      
             export $var="$value"
         fi
         shift 2
@@ -898,7 +904,9 @@ alias TODO:='todo'
 function TODO1() { todo "$@"'!'; }
 alias todo1=TODO1
 #
-function todo! () { if [ "$1" == "" ]; then todo; else todo "$@"'!'; fi; }
+## NOTE: stupid shellcheck chokes on the exclamation, but it is currently unused
+## TODO:: function todo! () { if [ "$1" == "" ]; then todo; else todo "$@"'!'; fi; }
+
 #
 # mail-todo: version of todo that also ends email
 # TODO: use lynx to submit send-to type URL
@@ -906,7 +914,7 @@ function todo! () { if [ "$1" == "" ]; then todo; else todo "$@"'!'; fi; }
 function mail-todo () { add-todo "$*"; echo TODO: "$*" | mail -s "TODO: $*" ${USER}@${DOMAIN_NAME}; }
 #
 # Likewise for time tracking
-alias view-track-time="tac $HOME/organizer/time_tracking_list.text | $PAGER_CHOPPED"
+alias view-track-time="tac \$HOME/organizer/time_tracking_list.text | $PAGER_CHOPPED"
 alias view-time-tracking=view-track-time
 #
 function add-track-time () { echo "$@" $'\t'`date` >> $HOME/organizer/time_tracking_list.text ; view-track-time; }
