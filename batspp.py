@@ -10,7 +10,6 @@
 ## TODO:
 ## - pretty result.
 ## - setup for functions tests.
-## - add execution permision when output selected.
 ## - multiline commands.
 ## - solve comma sanitization, test poc:
 ##   $ BATCH_MODE=1 bash -i -c 'source ../tomohara-aliases.bash; mkdir -p $TMP/test-$$; cd $TMP/test-$$; touch  F1.txt F2.list F3.txt F4.list F5.txt; ls | old-count-exts'
@@ -79,7 +78,6 @@ class Batspp(Main):
 
         # Check the command-line options
         self.filename     = self.get_parsed_argument(FILENAME, "")
-        self.file_content = system.read_file(self.filename)
         self.output       = self.get_parsed_argument(OUTPUT, "")
         self.debug_mode   = self.has_parsed_option(DEBUG)
 
@@ -88,6 +86,9 @@ class Batspp(Main):
 
     def run_main_step(self):
         """Process main script"""
+
+        # Read file content
+        self.file_content = system.read_file(self.filename)
 
 
         # Check if finish with newline
@@ -103,6 +104,11 @@ class Batspp(Main):
         # Save
         batsfile = self.output if self.output else self.temp_file
         gh.write_file(batsfile, self.bats_content)
+
+
+        # Add execution permission to directly run the result test file
+        if self.output:
+            gh.run(f'chmod +x {batsfile}')
 
 
         # Run
