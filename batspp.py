@@ -16,6 +16,7 @@
 ##   $ BATCH_MODE=1 bash -i -c 'source ../tomohara-aliases.bash; mkdir -p $TMP/test-$$; cd $TMP/test-$$; touch  F1.txt F2.list F3.txt F4.list F5.txt; ls | old-count-exts'
 ##   .txt\t3
 ##   .list\t2
+## - add a tag to avoid running a certain test (example "# OLD").
 
 
 """
