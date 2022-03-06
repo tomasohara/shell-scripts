@@ -7,8 +7,15 @@
 # NOTE: It is only necessary to have installed bats-core
 #       no need for bats-assertions library.
 #
-## TODO: pretty result.
-##       setup for functions tests.
+## TODO:
+## - pretty result.
+## - setup for functions tests.
+## - add execution permision when output selected.
+## - multiline commands.
+## - solve comma sanitization, test poc:
+##   $ BATCH_MODE=1 bash -i -c 'source ../tomohara-aliases.bash; mkdir -p $TMP/test-$$; cd $TMP/test-$$; touch  F1.txt F2.list F3.txt F4.list F5.txt; ls | old-count-exts'
+##   .txt\t3
+##   .list\t2
 
 
 """
