@@ -133,7 +133,7 @@ class Batspp(Main):
         # Load file
         self.bats_content += ('\n\t# Load file\n'
                               '\tshopt -s expand_aliases\n'
-                              f'\tsource {gh.real_path(self.filename)}\n'
+                              f'\tsource {gh.real_path(self.filename)} || true\n'
                               '}\n\n')
 
 
