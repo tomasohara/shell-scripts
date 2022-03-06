@@ -3,13 +3,24 @@
 # This script groups several tools to deal with encodings.
 # This can be used as command-line tool or as module.
 #
-# TODO: add examples on docstring.
 
 
 """
 This script groups several tools to deal with encodings
 
 ex:
+  $ echo "Tomás" | encoding_tools.py --show-unicode-info
+  char\tord\toffset\tencoding\n
+  Tomás: 5\n
+  T\t0054\t0\t54\n
+  o\t006F\t1\t6f\n
+  m\t006D\t2\t6d\n
+  á\t00E1\t3\tc3a1\n
+  s\t0073\t5\t73\n
+
+  $ echo -e "this is a tab: \t" | encoding_tools.py --show-control-chars
+  this is a tab: ␁
+
 """
 
 
