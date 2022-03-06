@@ -8,9 +8,10 @@
 #       no need for bats-assertions library.
 #
 ## TODO:
+## - add multiple assertions per test.
 ## - pretty result.
 ## - setup for functions tests.
-## - multiline commands.
+## - multiline commands?.
 ## - solve comma sanitization, test poc:
 ##   $ BATCH_MODE=1 bash -i -c 'source ../tomohara-aliases.bash; mkdir -p $TMP/test-$$; cd $TMP/test-$$; touch  F1.txt F2.list F3.txt F4.list F5.txt; ls | old-count-exts'
 ##   .txt\t3
