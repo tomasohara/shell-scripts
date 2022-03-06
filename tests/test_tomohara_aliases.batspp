@@ -1,0 +1,29 @@
+#
+# Tests for tomohara-aliases.bash
+#
+## NOTE: "|| true" are a very short temporal fix, must 
+##       be used "BATCH_MODE=1" from tom-dev branch when
+##       the merge into main is done.
+
+
+# Test count-it alias
+$ source tomohara-aliases.bash || true
+$ echo "12 34 56 78" | count-it "\\d\\d" | wc -l
+4
+
+
+# Test copy-with-file-date alias
+$ source tomohara-aliases.bash || true
+$ FILENAME=$(echo $TMP/copy-test-"$$".txt)
+$ touch $FILENAME
+$ copy-with-file-date $FILENAME
+$ ls ${FILENAME}.* | wc -l
+1
+
+# Test old-count-exts alias
+$ source tomohara-aliases.bash || true
+$ mkdir -p $TMP/test-$$ && cd $TMP/test-$$
+$ touch F1.txt F2.list F3.txt F4.list F5.txt
+$ ls | old-count-exts
+.txt	3
+.list	2
