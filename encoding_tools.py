@@ -40,7 +40,7 @@ UNICODE_CONTROL_CHARS = 'show-control-chars'
 
 
 class EncodingTools(Main):
-    """This script groups several tools to deal with encodings"""
+    """Argument processing class"""
 
 
     ## class-level member variables for arguments (avoids need for class constructor)
