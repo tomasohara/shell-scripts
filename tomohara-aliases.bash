@@ -884,10 +884,10 @@ function old-perl-calc () { perl -e "print $*;"; }
 #function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
 #function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
 #NEW
-function hex2dec { numeric_tools.py --hex2dec --i $1; }
-function dec2hex { numeric_tools.py --dec2hex --i $1; }
-function bin2dec { numeric_tools.py --bin2dec --i $1; }
-function dec2bin { numeric_tools.py --dec2bin --i $1; }
+function hex2dec { numeric_tools.py --hex2dec $1; }
+function dec2hex { numeric_tools.py --dec2hex $1; }
+function bin2dec { numeric_tools.py --bin2dec $1; }
+function dec2bin { numeric_tools.py --dec2bin $1; }
 
 alias hv='hexview.perl'
 
