@@ -3,7 +3,8 @@
 # This script groups several tools to deal with numerical systems and more.
 # This can be used as command-line tool or as module.
 #
-# TODO: sanitization of functions input.
+## TODO:
+## - review PRECISION on calls to system.round_num(args), if should be passed as param or env. var.
 #
 ## Tom: here are some comments
 ## - These are low priority so just review them briefly to keeo in mind for future scripts.
@@ -11,15 +12,15 @@
 ##
 ## Tom: Useful to show examples from revised tomohara-aliases.bash (e.g., in header comments)
 ##
-## function hex2dec { numeric_tools.py --hex2dec --i $1; }
-## function dec2hex { numeric_tools.py --dec2hex --i $1; }
-## function bin2dec { numeric_tools.py --bin2dec --i $1; }
-## function dec2bin { numeric_tools.py --dec2bin --i $1; }
+## function hex2dec { numeric_tools.py --hex2dec $1; }
+## function dec2hex { numeric_tools.py --dec2hex $1; }
+## function bin2dec { numeric_tools.py --bin2dec $1; }
+## function dec2bin { numeric_tools.py --dec2bin $1; }
 ## function comma-ize-number () { python numeric_tools.py --comma-ize; }
 ## function apply-numeric-suffixes () { numeric_tools.py --suffix; }
 ## function apply-usage-numeric-suffixes () { numeric_tools.py --usage-suffix; }
 ##
-## Tom: The following is failing
+## TODO: Tom: The following is failing
 ##
 ##   $ echo 1234 987654321 | comma-ize-number
 ##   1,234 987,654,321
@@ -32,13 +33,15 @@
 ## This helps when determining flow of control.
 ##
 
+
 """
 This script groups several tools to deal with numerical systems and more.
 
 ex:
-\t$ python numeric_tools.py --dec2bin --i 20
+\t$ python numeric_tools.py --dec2bin 20
+\t10100
 """
-## Tom (missing --i above): --dec2bin --i 20
+## (OLD, --i is no more used); Tom (missing --i above): --dec2bin --i 20
 
 
 # Standard packages
@@ -56,7 +59,7 @@ from mezcla      import system
 ## Tom: good to have --input w/ --i as alias (i.e., general only use one letter
 ## switches as abbreviations). Note that GNU's convention uses dashes for long
 ## names and -'s for single letter ones), so --i is a little confusing.
-INPUT_SHORT       = 'i'
+INPUT             = 'input'
 HEX2DEC           = 'hex2dec'
 DEC2HEX           = 'dec2hex'
 BIN2DEC           = 'bin2dec'
@@ -68,7 +71,7 @@ COMMA             = 'comma-ize'
 
 
 class NumericSystem(Main):
-    """This script groups several tools to deal with numerical systems and more"""
+    """Argument processing class"""
     ## Tom: misleading comment as really just argument processing
     ## suggestion: """Argument processing class""
 
@@ -91,7 +94,7 @@ class NumericSystem(Main):
         debug.trace(5, f"Script.process_line(): self={self}")
 
         # Process command-line options
-        self.input_string        = self.get_parsed_argument(INPUT_SHORT, "")
+        self.input_string        = self.get_parsed_argument(INPUT, '')
         self.hex2dec             = self.has_parsed_option(HEX2DEC)
         self.dec2hex             = self.has_parsed_option(DEC2HEX)
         self.bin2dec             = self.has_parsed_option(BIN2DEC)
@@ -100,8 +103,20 @@ class NumericSystem(Main):
         self.suffixes_first_only = self.has_parsed_option(SUFFIX_FIRST_ONLY)
         self.usage_suffix        = self.has_parsed_option(USAGE_SUFFIX)
         self.comma               = self.has_parsed_option(COMMA)
+
         ## Tom: good to ensure just one of above used
         ##    debug.assertion((0 < sum([self.hex2dec, ..., self.comma]) <= 1), "Options are mutually exclusive")}
+        option_list = [self.hex2dec,
+                       self.dec2hex,
+                       self.bin2dec,
+                       self.dec2bin,
+                       self.suffixes,
+                       self.suffixes_first_only,
+                       self.usage_suffix,
+                       self.comma]
+        option_sum  = sum(bool(x) for x in option_list)
+        debug.assertion(0 < option_sum <= 1, "Options are mutually exclusive")
+
         ## Tom: trace instance after args parsed
         debug.trace_object(5, self, label="Script instance")
 
@@ -112,12 +127,16 @@ class NumericSystem(Main):
 
 
         # Read stdin if not positional input provided
-        if not self.input_string and not sys.stdin.isatty():
+        if not self.input_string:
             ## Tom: use all of stdin (not just first line)
             ## Also, add a function for tracing input as TL.VERBOSE (e.g., system.read_all_stdin)
-            self.input_string = self.input_stream.readlines()[0]
+            self.input_string = system.read_all_stdin().strip()
 
 
+        debug.assertion(self.input_string, "No value/s entered")
+
+
+        ## TODO: sanitization of self.input_string.
         if self.hex2dec:
             result = hex2dec(self.input_string)
         elif self.dec2hex:
@@ -171,8 +190,8 @@ def dec2bin(number):
 
 def comma_ize_number(number):
     """Add commas to number"""
-    ## Tom: probabily need a loop
-    ##   perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\d])/\1,\2\3/g; } ';
+    ## TODO: Tom: probabily need a loop
+    ##       perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\d])/\1,\2\3/g; } ';
     result = re.sub(r'(\d)(\d\d\d)([^\d])', r'\1,\2\3', str(number))
     debug.trace(5, f"comma_ize_number({number}) => {result}")
     return result
@@ -204,13 +223,12 @@ def format_bytes(size, precision=1):
 # This was added in support of the usage function (e.g., numeric subdirectory names).
 # EX: apply_suffixes("1024, 1572864, 1073741824")                  => "1K 1.5M 1G"
 # EX: apply_suffixes("1024, 1572864, 1073741824", first_only=True) => "1K 1572864 1073741824"
-def apply_suffixes(numbers, first_only=False, precision=1):
-    """Convert number to use K/M/G suffixes"""
-    ## Tom: mention arguments (e.g., """Apply K/M/G/T suffixes to NUMBERS, optionally just FIRST_ONLY and using PRECISION""")
+def apply_suffixes(numeric_text, first_only=False, precision=1):
+    """Apply K/M/G/T suffixes to NUMBERS, optionally just FIRST_ONLY and using PRECISION"""
 
     # Process entered string
     ## Tom: use numbers.split(); also rename to something like numeric_text as it would seem to be a list
-    size_list = numbers.split(' ')
+    size_list = numeric_text.split()
 
     # Calculate power labels and append results
     result = ''
@@ -227,22 +245,22 @@ def apply_suffixes(numbers, first_only=False, precision=1):
 
     result = result.rstrip()
 
-    debug.trace(5, f"apply_suffixes(numbers={numbers}, first_only={first_only}, precision={precision}) => {result}")
+    debug.trace(5, f"apply_suffixes(numeric_text={numeric_text}, first_only={first_only}, precision={precision}) => {result}")
     return result
 
 
 # apply_usage_suffixes(): factors in 1k blocksize before applying numeric suffixes
-def apply_usage_suffixes(numbers, precision=1):
+def apply_usage_suffixes(numeric_text, precision=1):
     """Factor 1K blocksize and apply suffixes"""
 
-    numbers_list     = numbers.split(' ')
+    numbers_list     = numeric_text.split(' ')
     factored_numbers = str(int(numbers_list[0]) * 1024)
     for number in numbers_list[1:]:
         factored_numbers += ' ' + number
 
     result = apply_suffixes(factored_numbers, first_only=True, precision=precision)
 
-    debug.trace(5, f'apply_usage_suffixes(numbers={numbers}, precision={precision}) => {result}')
+    debug.trace(5, f'apply_usage_suffixes(numeric_text={numeric_text}, precision={precision}) => {result}')
     return result
 
 
@@ -256,6 +274,6 @@ if __name__ == '__main__':
                                                 (SUFFIX_FIRST_ONLY, 'suffix only the first number'),
                                                 (USAGE_SUFFIX,      'factor 1k the first number and then apply suffix'),
                                                 (COMMA,             'add commas to numbers')],
-                        text_options         = [(INPUT_SHORT,       'input')],
-                        manual_input         = True)
+                        positional_options   = [(INPUT,            f'input')] if len(sys.argv) >= 3 else None,
+                        skip_input           = True)
     app.run()
