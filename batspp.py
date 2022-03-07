@@ -9,6 +9,7 @@
 #
 ## TODO:
 ## - add multiple assertions per test.
+## - pretty test title.
 ## - pretty result.
 ## - setup for functions tests.
 ## - multiline commands?.
