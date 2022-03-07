@@ -511,7 +511,7 @@ if __name__ == '__main__':
                       text_options    = [(CLASS_FILTER,    'only keep class names that contains a specific word'),
                                          (LABEL,           'label for entropy display'),
                                          (WORD,            'word over which distribution is made')],
-                      positional_options = ([(PROBABILITIES,  f'probabilities for --{SIMPLE} option, must be an array', [], "*")] if simple_format else None),
+                      positional_options = ([(PROBABILITIES,  f'probabilities for --{SIMPLE} option', [], "*")] if simple_format else None),
                       multiple_files  =  True,
                       manual_input    =  True,
                       skip_input      =  simple_format)
