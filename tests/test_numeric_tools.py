@@ -30,7 +30,7 @@ class TestIt(TestWrapper):
         """test hex2dec"""
         input_value     = '287a'
         expected_result = 10362
-        self.assertEqual(gh.run(f'python {self.script_module} --hex2dec --i {input_value}'), str(expected_result))
+        self.assertEqual(gh.run(f'python {self.script_module} --hex2dec {input_value}'), str(expected_result))
         self.assertEqual(gh.run(f'echo {input_value} | {self.script_module} --hex2dec'), str(expected_result))
         self.assertEqual(numeric_tools.hex2dec(input_value), expected_result)
 
@@ -39,7 +39,7 @@ class TestIt(TestWrapper):
         """test dec2hex"""
         input_value     = 28291
         expected_result = '6e83'
-        self.assertEqual(gh.run(f'python {self.script_module} --dec2hex --i {input_value}'), expected_result)
+        self.assertEqual(gh.run(f'python {self.script_module} --dec2hex {input_value}'), expected_result)
         self.assertEqual(gh.run(f'echo {input_value} | {self.script_module} --dec2hex'), expected_result)
         self.assertEqual(numeric_tools.dec2hex(input_value), expected_result)
 
@@ -48,7 +48,7 @@ class TestIt(TestWrapper):
         """test bin2dec"""
         input_value     = 1011110101
         expected_result = 757
-        self.assertEqual(gh.run(f'python {self.script_module} --bin2dec --i {input_value}'), str(expected_result))
+        self.assertEqual(gh.run(f'python {self.script_module} --bin2dec {input_value}'), str(expected_result))
         self.assertEqual(gh.run(f'echo {input_value} | {self.script_module} --bin2dec'), str(expected_result))
         self.assertEqual(numeric_tools.bin2dec(input_value), expected_result)
 
@@ -57,7 +57,7 @@ class TestIt(TestWrapper):
         """test dec2bin"""
         input_value     = 89922
         expected_result = 10101111101000010
-        self.assertEqual(gh.run(f'python {self.script_module} --dec2bin --i {input_value}'), str(expected_result))
+        self.assertEqual(gh.run(f'python {self.script_module} --dec2bin {input_value}'), str(expected_result))
         self.assertEqual(gh.run(f'echo {input_value} | {self.script_module} --dec2bin'), str(expected_result))
         self.assertEqual(numeric_tools.dec2bin(input_value), expected_result)
 
@@ -89,7 +89,7 @@ class TestIt(TestWrapper):
     def test_comma_ize_number(self):
         """test comma ize number option"""
         input_number    = '3234K'
-        expected_result = '3,234K\n'
+        expected_result = '3,234K'
         self.assertEqual(gh.run(f'echo "{input_number}" | {self.script_module} --comma-ize'), expected_result)
 
 
