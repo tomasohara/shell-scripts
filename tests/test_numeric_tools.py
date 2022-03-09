@@ -88,8 +88,8 @@ class TestIt(TestWrapper):
 
     def test_comma_ize_number(self):
         """test comma ize number option"""
-        input_number    = '3234K'
-        expected_result = '3,234K'
+        input_number    = '1234 987654321'
+        expected_result = '1,234 987654,321'
         self.assertEqual(gh.run(f'echo "{input_number}" | {self.script_module} --comma-ize'), expected_result)
 
 

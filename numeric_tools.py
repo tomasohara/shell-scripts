@@ -20,11 +20,10 @@
 ## function apply-numeric-suffixes () { numeric_tools.py --suffix; }
 ## function apply-usage-numeric-suffixes () { numeric_tools.py --usage-suffix; }
 ##
-## TODO: Tom: The following is failing
-##
+## done
+## Tom: The following is failing
 ##   $ echo 1234 987654321 | comma-ize-number
 ##   1,234 987,654,321
-##
 ##   current output:
 ##     1,234 987654,321
 ##
@@ -188,12 +187,17 @@ def dec2bin(number):
     return result
 
 
-def comma_ize_number(number):
+def comma_ize_number(numbers):
     """Add commas to number"""
-    ## TODO: Tom: probabily need a loop
-    ##       perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\d])/\1,\2\3/g; } ';
-    result = re.sub(r'(\d)(\d\d\d)([^\d])', r'\1,\2\3', str(number))
-    debug.trace(5, f"comma_ize_number({number}) => {result}")
+    ## WORK-ON-PROGRESS: review regex pattern
+    ## Tom: probabily need a loop
+    ##   perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\d])/\1,\2\3/g; } ';
+
+    # Ensure that the input is a string
+    numbers = str(numbers)
+
+    result = re.sub(r'(\d*)(\d\d\d)([^\d])*', r'\1,\2\3', numbers)
+    debug.trace(5, f"comma_ize_number({numbers}) => {result}")
     return result
 
 
