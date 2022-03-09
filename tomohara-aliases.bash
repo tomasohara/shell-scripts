@@ -762,7 +762,7 @@ alias fgr-py='fgr-ext py'
 #    ls -lh ${current_files[@]}
 #}
 # NEW
-function prepare-find-files-here () { python find_files.py --find-files --path "$@"; }
+function prepare-find-files-here () { python find_files.py --find-files "$@"; }
 
 #
 # find-files-there(pattern, ls-alR-files): check for PATTERN in LS-ALR-FILES,
@@ -1482,8 +1482,8 @@ alias move-adhoc-files='move-log-files; move-output-files'
 #    done;
 #}
 # NEW
-function rename-with-file-date () { python filenames.py --rename --free-with-date --files "$@"; }
-function copy-with-file-date () { python filenames.py --rename --free-with-date --copy --files "$@"; }
+function rename-with-file-date () { python filenames.py --rename --free-with-date "$@"; }
+function copy-with-file-date () { python filenames.py --rename --free-with-date --copy "$@"; }
 
 alias copy-with-file-date='copy-with-file-date'
 

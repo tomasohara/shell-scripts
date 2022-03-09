@@ -31,10 +31,10 @@ PATH       = 'path'
 
 
 class FindFiles(Main):
-    """This script groups several tools to find files."""
+    """Argument processing class"""
 
 
-    ## class-level member variables for arguments (avoids need for class constructor)
+    # Class-level member variables for arguments (avoids need for class constructor)
     find_files = False
     path       = ''
 
@@ -89,7 +89,7 @@ def find_files(path='.', full=False, special_dirs=False):
 
     # Perform the actual listings, putting errors in the .log file for each listing
     # Note: If root directory and special_dirs is false, filters out special directories.
-    # TODO: ** resolve intermittent problem when running under /
+    ## TODO: ** resolve intermittent problem when running under /
     dir_list           = fu.get_directory_listing(path, recursive=True, long=full, return_string=True)
     is_root_dir        = path == '/'
     regex_special_dirs = '^\\.(/(cdrom|dev|media|mnt|proc|run|sys|snap)$)'
@@ -118,23 +118,23 @@ def find_files(path='.', full=False, special_dirs=False):
 
 def find_files_there():
     """find files there"""
-    # WORK-IN-PROGRESS
-    #
-    # implement equivalent to
-    # function find-files-there () { perlgrep.perl -para -i "$@" | egrep -i '((:$)|('$1'))' | $PAGER_NOEXIT -p "$1"; }
+    ## WORK-IN-PROGRESS
+    ##
+    ## implement equivalent to
+    ## function find-files-there () { perlgrep.perl -para -i "$@" | egrep -i '((:$)|('$1'))' | $PAGER_NOEXIT -p "$1"; }
 
 
 def find_files_here():
     """find files here"""
-    # WORK-IN-PROGRESS
-    #
-    # implement equivalent to
-    # function find-files-here () { find-files-there "$1" "$PWD/ls-alR.list"; }
+    ## WORK-IN-PROGRESS
+    ##
+    ## implement equivalent to
+    ## function find-files-here () { find-files-there "$1" "$PWD/ls-alR.list"; }
 
 
 if __name__ == '__main__':
     app = FindFiles(description     = __doc__,
                     boolean_options = [(FIND_FILES, 'list files in current directory tree and save the result')],
-                    text_options =    [(PATH,       'path target')],
+                    positional_options = [(PATH, 'path target')],
                     manual_input    = True)
     app.run()

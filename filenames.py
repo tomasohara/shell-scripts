@@ -7,12 +7,9 @@
 """This groups several tools to dea with filenames."""
 
 
-# Standart packages
-import sys
-
-
 # Local packages
 from mezcla.main import Main
+from mezcla      import system
 from mezcla      import debug
 from mezcla      import glue_helpers as gh
 from mezcla      import file_utils as fl
@@ -30,10 +27,10 @@ FREE_DATE = 'free-with-date' # get filename with creation date
 
 
 class Filenames(Main):
-    """This groups several tools to dea with filenames."""
+    """Argument processing class"""
 
 
-    ## class-level member variables for arguments (avoids need for class constructor)
+    # Class-level member variables for arguments (avoids need for class constructor)
     rename    = False
     copy      = False
     free      = False
@@ -44,7 +41,7 @@ class Filenames(Main):
 
 
     # Global
-    input_string = ''
+    filenames = ''
 
 
     def setup(self):
@@ -53,7 +50,7 @@ class Filenames(Main):
 
 
         # Check the command-line options
-        filenames      = self.get_parsed_argument(FILENAMES, "")
+        self.filenames = self.get_parsed_argument(FILENAMES, "")
         self.rename    = self.has_parsed_option(RENAME)
         self.copy      = self.has_parsed_option(COPY)
         self.free      = self.has_parsed_option(FREE)
@@ -70,20 +67,18 @@ class Filenames(Main):
 
 
         # Process entered input
-        if filenames:
-            self.input_string = filenames
-        elif not sys.stdin.isatty():
-            self.input_string = self.input_stream.readlines()[0]
+        if not self.filenames:
+            self.filenames = system.read_all_stdin().strip().split()
 
 
     def run_main_step(self):
         """Process input stream"""
         debug.trace(5, f"Script.run_main_step(): self={self}")
 
+        # Loop for options that use filenames
+        for filename in self.filenames:
+            debug.trace(7, f'filenames - processing filename {filename}')
 
-        for filename in self.input_string.split(' '):
-
-            # "Set" options
             if self.rename and self.em:
                 rename_with_em(filename)
                 return
@@ -92,17 +87,17 @@ class Filenames(Main):
                 rename_with_file_date(filename, copy=self.copy)
                 return
 
-
-            # "Get" options
-            if self.free:
-                print(get_free_filename(self.base, self.sep))
-                return
-
             if self.em:
                 print(get_name_em(filename))
 
-            if self.free_date:
-                print(get_free_date_name(self.base))
+        # Other options
+        if self.free_date:
+            print(get_free_date_name(self.base))
+            return
+
+        if self.free:
+            print(get_free_filename(self.base, self.sep))
+            return
 
 
 def get_free_filename(basename, separation):
@@ -122,22 +117,22 @@ def get_free_filename(basename, separation):
 
 def get_name_em(filename):
     """Get filename with current directory set to it's dir"""
-    # WORK-IN-PROGRESS
-    #
-    # implement equivalent to
-    # function em-file() {
-    #	local file="$1"
-    #	local base=$(basename "$file")
-    #	local dir=$(dirname "$file")
-    # 	command pushd $dir
-    # 	em "$base"
-    #	command popd
-    #}
+    ## WORK-IN-PROGRESS
+    ##
+    ## implement equivalent to
+    ## function em-file() {
+    ##	local file="$1"
+    ##	local base=$(basename "$file")
+    ##	local dir=$(dirname "$file")
+    ## 	command pushd $dir
+    ## 	em "$base"
+    ##	command popd
+    ##}
 
 
 def rename_with_em(filename):
     """Edit filename with current directory set to it's dir"""
-    # WORK-IN-PROGRESS
+    ## WORK-IN-PROGRESS
 
 
 def get_free_date_name(basename):
@@ -156,7 +151,7 @@ def get_free_date_name(basename):
 # rename_with_file_date(file, ...): rename each file(s) with .ddMmmYY suffix
 # Notes: 1. If file.ddMmmYY exists, file.ddMmmYY.N tried (for N in 1, 2, ...).
 # 2. No warning is issued if the file doesn't exist, so can be used as a no-op.
-# TODO: have option to put suffix before extension
+## TODO: have option to put suffix before extension
 def rename_with_file_date(basename, target='./', copy=False):
     """Rename or Copy file with date"""
 
@@ -165,9 +160,9 @@ def rename_with_file_date(basename, target='./', copy=False):
 
     new_filename = get_free_date_name(basename)
 
-    # TODO: check assertion fail on glue_helpers copy_file and rename_file
+    ## TODO: check assertion fail on glue_helpers copy_file and rename_file
     if copy:
-        # TODO: implement target path when the file is copied
+        ## TODO: implement target path when the file is copied
         gh.copy_file(basename, new_filename)
     else:
         gh.rename_file(basename, new_filename)
@@ -185,5 +180,6 @@ if __name__ == '__main__':
                     text_options    = [(FILENAMES, 'target files'),
                                        (BASE,      'basename for option FREE'),
                                        (SEP,       'separation text between basenae and N for option FREE')],
-                    manual_input    = True)
+                    positional_arguments = [(FILENAMES, 'target filenames', [], "*")],
+                    skip_input = True)
     app.run()

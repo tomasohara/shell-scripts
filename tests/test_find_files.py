@@ -37,7 +37,7 @@ class TestIt(TestWrapper):
         # Run twice to test the backup folder
         result = ''
         for _ in range(2):
-            result = gh.run(f'python {self.script_module} --find-files --path "{self.temp_base}"').split('\n')
+            result = gh.run(f'python {self.script_module} --find-files {self.temp_base}').split('\n')
 
         # Check output
         self.assertEqual(len(result), 4)

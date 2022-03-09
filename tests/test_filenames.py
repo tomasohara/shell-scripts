@@ -19,6 +19,7 @@ from mezcla import glue_helpers as gh
 class TestIt(TestWrapper):
     """Class for testcase definition"""
     script_module = TestWrapper.derive_tested_module_name(__file__) + '.py'
+    maxDiff       = None
 
 
     def test_get_free_filename(self):
@@ -44,17 +45,24 @@ class TestIt(TestWrapper):
         new_filepath = gh.run(f'python {self.script_module} --free-with-date --base {self.temp_file}')
 
         # First test: without optional params
-        gh.run(f'python {self.script_module} --rename --free-with-date --files {self.temp_file}')
+        gh.run(f'python {self.script_module} --rename --free-with-date {self.temp_file}')
         self.assertTrue(gh.file_exists(new_filepath))
 
         # Second tests: copy param
-        # WORK-IN-PROGRESS
+        ## WORK-IN-PROGRESS
 
         # Third test: target dir
-        # WORK-IN-PROGRESS
+        ## WORK-IN-PROGRESS
 
-        # Four test: multiple files
-        # WORK-IN-PROGRESS
+
+    def test_multiple_files(self):
+        """Test with multiples filenames input"""
+        ## WORK-IN-PROGRESS
+
+
+    def test_stdin_input(self):
+        """Test input via STDIN"""
+        ## WORK-IN-PROGRESS
 
 
 if __name__ == '__main__':
