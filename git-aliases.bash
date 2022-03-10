@@ -28,6 +28,15 @@
 #   [credential]
 #   helper = store
 #
+# - To squalsh shellcheck warning and to help against inadvertant changes,
+#   declarations are separate from assignment involving commands. For example,
+#      local log=$(get-temp-log-name "update")
+#      =>
+#      local log
+#      log=$(get-temp-log-name "update")
+#   See https://unix.stackexchange.com/questions/506352/bash-what-does-masking-return-values-mean. Of course, shellcheck should be refined to check for $?, but
+#   that might take a while.
+#
 #................................................................................
 # Examples:
 # - Update
@@ -62,10 +71,11 @@ function downcase-stdin ()
     perl -pe 's/.*/\L$&/;'
 }
 
-# get-temp-log-name([label=temp]: Return unique file name of the form _git-LABEL-TODAY-NNN.log
+# get-temp-log-name([label=temp]: Return unique file name of the form _git-LABEL-MMDDYY-HHMM-NNN.log
 function get-temp-log-name {
     local label=${1:-temp}
-    local now_mmddyyhhmm=$(date '+%d%b%y-%H%M' | downcase-stdin);
+    local now_mmddyyhhmm
+    now_mmddyyhhmm=$(date '+%d%b%y-%H%M' | downcase-stdin);
     # TODO: use integral suffix (not hex)
     mktemp "_git-$label-${now_mmddyyhhmm}-XXX.log"
 }
@@ -73,7 +83,8 @@ function get-temp-log-name {
 # git-update(): updates local from global repo. This uses git-stash to hide local changes
 # does a git-pull, and then restores local changes.)
 function git-update {
-    local log=$(get-temp-log-name "update")	## OLD: log="_git-update-$(TODAY).$$.log";
+    local log
+    log=$(get-temp-log-name "update")
     git stash >> "$log"
     git pull --all >> "$log"
     git stash pop >> "$log"
@@ -86,7 +97,8 @@ function git-update {
 # note: gets user credentials from ./_my-git-credentials-etc.bash.list
 # TODO: add message argument
 function git-commit-and-push {
-    local log=$(get-temp-log-name "commit")	## OLD: log="_git-commit-$(TODAY).$$.log";
+    local log
+    log=$(get-temp-log-name "commit")
     local git_user
     local git_token
     local credentials_file="_my-git-credentials-etc.bash.list"
@@ -110,7 +122,6 @@ function git-commit-and-push {
         echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
         return
     fi
-    ## OLD: if [ "$message" = "" ]; then message="misc. update"; fi
     if [ "$message" = "" ]; then
         echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE error)"
         return
@@ -152,17 +163,19 @@ alias git-update-commit-push-all='git-update-commit-push *'
 function git-pull-and-update() {
     if [ "" = "$(grep ^repo ~/.gitrc)" ]; then echo "*** Warning: fix ~/.gitrc for read-only access ***"; else
         local git="python -u /usr/bin/git";
-        local log=$(get-temp-log-name "update")	  ## OLD: log="_git-update-$(TODAY).$$.log";
+        local log
+	log=$(get-temp-log-name "update")
         ($git pull --noninteractive --verbose;  $git update --noninteractive --verbose) >> "$log" 2>&1; less "$log"
     fi;
 }
 
-# run git COMMAND with output saved to _git-COMMAND-$$.log
+# run git COMMAND with output saved to command-specific temp file
 #
 function invoke-git-command {
     local command="$1"
     shift
-    local log="_git-$command-$(TODAY).$$.log";   ## OLD: log="_git-$command-$(TODAY).$$.log";
+    ## OLD: local log="_git-$command-$(TODAY).$$.log";   ## OLD: log="_git-$command-$(TODAY).$$.log";
+    local log=$(get-temp-log-name $command)
     git "$command" "$@" >| "$log" 2>&1
     less "$log"
 }
@@ -172,26 +185,26 @@ function git-push() {
     if [ "" != "$(grep ^repo ~/.gitrc)" ]; then
 	echo "*** Warning: fix ~/.gitrc for read-write access ***";
     else
-        ## OLD: git push --verbose
 	invoke-git-command push --verbose "$@"
     fi;
 }
 
 # Misc git commands (redirected to log file)
 alias git-status='invoke-git-command status'
+# TODO: git-log => git-log-changes
 alias git-log='invoke-git-command log --name-status'
+alias git-log-diff='invoke-git-command log --patch'
 
 # git-add: add filename(s) to repository
 function git-add {
-    local log=$(get-temp-log-name "add")	## OLD: log="_git-add-$(TODAY).$$.log";
+    local log=$(get-temp-log-name "add")
     git add "$@" >| "$log";
     less "$log";
 }
 
 # git-diff: show repo diff
 function git-diff {
-    ## OLD: git diff "$@" 2>&1 | less -p '^diff';
-    local log=$(get-temp-log-name "diff")	## OLD: log="_git-diff-$(TODAY).$$.log"
+    local log=$(get-temp-log-name "diff")
     git diff "$@" >| "$log";
     less -p '^diff' "$log";
 }
@@ -283,7 +296,7 @@ function invoke-alt-checkin { alt-invoke-next-single-checkin "$1"; }
 # git-alias-usage: tips on interactive usage
 function git-alias-usage () {
     echo "Usage examples for git aliases, most of which create log files as follows:"
-    echo "   _git-{label}-\$(TODAY).\$\$.log      # ex: _git-update-$(TODAY).$$.log"
+    echo "   _git-CMD-MMDDYY-HHMM-NNN.log      # ex: _git-status-07mar22.339.log"
     echo ""
     echo "To update aliases:"
     echo "   source \$TOM_BIN/git-aliases.bash; clear; git-alias-usage"
