@@ -8,6 +8,7 @@
 This script groups several tools to find files.
 
 ex:
+\t$ python find_files.py --find-files /some/path/to/dir
 """
 
 
