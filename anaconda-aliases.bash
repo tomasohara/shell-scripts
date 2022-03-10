@@ -31,7 +31,10 @@ function init-condaN() {
     ## OLD: if [ "$anaconda_dir" = "" ]; then anaconda_dir="$anaconda3_dir"; fi
     if [ "$anaconda_dir" = "" ]; then echo "Usage: init-condaN anaconda-dir"; return; fi
     if [ "$anaconda_dir" = "-" ]; then anaconda_dir="$anaconda3_dir"; fi
-    local conda_setup="$($anaconda_dir'/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+    # Note: assignment separates so that $? preserved
+    #     https://unix.stackexchange.com/questions/506352/bash-what-does-masking-return-values-mean
+    local conda_setup
+    conda_setup="$($anaconda_dir'/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
     if [ $? -eq 0 ]; then
         eval "$conda_setup"
     else
@@ -114,7 +117,8 @@ function conda-deactivate-env {
 # !! Contents within this block are managed by 'conda init' !!
 function init-miniconda3 () {
     local base="/usr/local/misc/programs/anaconda3"
-    local conda_setup="$("$base/bin/conda" 'shell.bash' 'hook' 2> /dev/null)"
+    local conda_setup
+    conda_setup="$("$base/bin/conda" 'shell.bash' 'hook' 2> /dev/null)"
     if [ $? -eq 0 ]; then
 	eval "$conda_setup"
     else
