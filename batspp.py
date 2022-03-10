@@ -246,8 +246,11 @@ class CustomTestsToBats:
 
         # Add debug
         if self._debug_mode:
-            result +=  '\techo "actual:   $actual"\n'
-            result += f'\techo "expected: ${expected_var_name}"\n'
+            result += ('\techo ========== actual ==========\n'
+                       '\techo "$actual"\n'
+                       '\techo ========= expected =========\n'
+                       f'\techo "${expected_var_name}"\n'
+                       '\techo ============================\n')
 
         # Add assertion
         result += f'\t[ "$actual" {"==" if self._assert_equals else "!="} "${expected_var_name}" ]\n'
