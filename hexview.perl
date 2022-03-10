@@ -52,7 +52,7 @@ BEGIN {
 # for command-line arguments (see init_var's in &init).
 use strict;
 use vars qw/$width $lines $newline $newlines $help/;
-use vars qw/$no_ascii $no_offset $no_hex/;
+use vars qw/$no_ascii $no_offset $no_hex $ptrace/;
 
 $width = 16 unless defined($width); 		# number of hexed characters per line
 my $half_width = $width / 2;			# width of column
@@ -65,6 +65,7 @@ $newlines = ($lines || $newline) unless (defined($newlines));	# end hex section 
 my($show_ascii) = (! $no_ascii);
 my($show_offset) = (! $no_offset);
 my($show_hex) = (! $no_hex);
+&init_var(*ptrace, (&DEBUG_LEVEL >= 7));        # trace steps with letters
 
 my($show_help) = $help;
 
@@ -97,7 +98,10 @@ if ($show_help) {
 #
 sub ptrace {
     my($label) = @_;
-    &debug_print(&TL_DETAILED, $label);
+    ## OLD: &debug_print(&TL_DETAILED, $label);
+    if ($ptrace) {
+	&debug_print(&TL_ALWAYS, $label);
+    }
 }
 
 # Open input file if specified, reporting any errors when doing so.
