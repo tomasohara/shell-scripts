@@ -114,10 +114,9 @@
 # - Change references to grep with $GREP (e.g., egrep) for consistency and to avoid head scratching about extended regex patterns not working 
 #
 
-# For debugging: Uncomment the following line for tracing.
+# For debugging: Uncomment the following line(s)
 ## echo in tomohara-aliases.bash
-## DEBUG:
-## set -o xtrace
+## DEBUG: set -o xtrace
 
 #...............................................................................
 # Conditional environment variable setting
@@ -685,8 +684,10 @@ alias ls-R='$LS -R >| ls-R.list; wc -l ls-R.list'
 
 # link-symbolic-safe: creates symbolic link and avoids quirks with links to directories
 # EX: link-symbolic-safe /tmp temp-link; link-symbolic-safe --force ~/temp temp-link; ls -l temp-link | grep /tmp => ""
-alias link-symbolic-safe='ln --symbolic --verbose --no-target-directory'
-alias ln-symbolic='link-symbolic-safe'
+alias ln-symbolic='ln --symbolic --verbose'
+alias link-symbolic-safe='ln-symbolic --no-target-directory --no-dereference'
+alias link-symbolic-regular='ln-symbolic'
+## TODO: alias ln-symbolic-force='link-symbolic --force'
 
 #-------------------------------------------------------------------------------
 trace grep commands
@@ -1847,7 +1848,7 @@ function scp-host-up() { local host="$1"; shift; scp -P $SSH_PORT -i $TPO_SSH_KE
 function scp-aws-up() { local host="$1"; shift;
                         ssh -p $SSH_PORT -i $TPO_SSH_KEY $USER@$host chmod u+w "~/xfer/"*;
                         scp -P $SSH_PORT -i $TPO_SSH_KEY "$@"  $USER@$host:xfer; }
-function scp-aws-down() { local host="$1"; shift; for _file in "$@"; do scp -i $TPO_SSH_KEY $USER@$host:xfer/$_file .; done; }
+function scp-aws-down() { local host="$1"; shift; for _file in "$@"; do scp -P $SSH_PORT -i $TPO_SSH_KEY $USER@$host:xfer/$_file .; done; }
 #
 # TODO: consolidate host keys; reword hostwinds in terms of generic host not AWS
 #
@@ -2380,9 +2381,8 @@ function shell-check {
     # - SC1091: Not following: ./my-git-credentials-etc.bash was not specified as input (see shellcheck -x).
     # - SC2009: Consider using pgrep instead of grepping ps output.
     # - SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects.
-    # - SC2155: Declare and assign separately to avoid masking return values
     # - SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
-    shell-check-full "$@" | perl-grep -para -v '(SC1090|SC1091|SC2009|SC2129|SC2155|SC2164)';
+    shell-check-full "$@" | perl-grep -para -v '(SC1090|SC1091|SC2009|SC2129|SC2164)';
 }
 
 #-------------------------------------------------------------------------------
