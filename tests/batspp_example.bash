@@ -3,7 +3,6 @@
 # Usage: $ batspp batspp_example.bash
 #
 ## TODO:
-## - multiple assertion per test example.
 ## - test with tag to be avoided example.
 
 
@@ -57,6 +56,16 @@ alias run-fibonacci='echo "The Fibonacci series is:"; fibonacci'
 # must not have an expected output
 #
 # $ filepath=$(echo $TMP/testfile-"$$")
-# $ echo "this is a file content to run an example test" > $filepath
+# $ echo "this is a file content to run an example test" | sudo tee $filepath
 # $ cat $filepath
 # this is a file content to run an example test
+
+
+# Also every test could have multiple assertions:
+#
+# $ filepath=$(echo $TMP/testfile-"$$")
+# $ echo -e "in this test\nwe are using\nmultiple assertions" | sudo tee $filepath
+# $ cat $filepath | wc -l
+# 3
+# $ cat $filepath | wc -c
+# 46
