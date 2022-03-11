@@ -8,16 +8,24 @@
 #       no need for bats-assertions library.
 #
 ## TODO:
+## - Only source the script if it is a shell script.
+## - add an option to source another script.
+## - ignore tests in comments if the file has extension .batspp (i.e., test file not bash script).
+## - Put the commands to be evaluated in a test-specific function. Currently, using actual=$(...) is prone to errors (e.g., if the command includes parentheses).
+## - Add some directives in the test or script comments:
+##        Block of commands used just to setup test and thus without output or if the output should be ignored (e.g., '# Setup').
+##        Tests that should be evaluated in the same environment as the preceding code (e.g., '# Continuation'). For example, you could have multiple assertions in the same @test function.
+##        Name of the test (e.g., '# Test <name>')
+## - Automatically create test directory using test name (e.g., /tmp/test-empty-file).
+## - Add option for outputting debugging information (e.g, echo out actual and expected). And if under verbose debugging output a hexdump of each. 
 ## - find regex match excluding indent directly.
-## - add multiple assertions per test.
-## - pretty test title.
 ## - pretty result.
 ## - setup for functions tests.
 ## - multiline commands?.
 ## - solve comma sanitization, test poc:
-##   $ BATCH_MODE=1 bash -i -c 'source ../tomohara-aliases.bash; mkdir -p $TMP/test-$$; cd $TMP/test-$$; touch  F1.txt F2.list F3.txt F4.list F5.txt; ls | old-count-exts'
-##   .txt\t3
-##   .list\t2
+##        $ BATCH_MODE=1 bash -i -c 'source ../tomohara-aliases.bash; mkdir -p $TMP/test-$$; cd $TMP/test-$$; touch  F1.txt F2.list F3.txt F4.list F5.txt; ls | old-count-exts'
+##        .txt\t3
+##        .list\t2
 ## - add a tag to avoid running a certain test (example "# OLD").
 
 
