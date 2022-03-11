@@ -8,6 +8,7 @@
 #       no need for bats-assertions library.
 #
 ## TODO:
+## - find regex match excluding indent directly.
 ## - add multiple assertions per test.
 ## - pretty test title.
 ## - pretty result.
@@ -48,6 +49,7 @@ import re
 
 # Local packages
 from mezcla.main import Main
+from mezcla.my_regex import my_re
 from mezcla      import system
 from mezcla      import debug
 from mezcla      import glue_helpers as gh
@@ -149,7 +151,7 @@ class Batspp(Main):
     # pylint: disable=no-self-use
     def __process_teardown(self):
         """Process teardown"""
-        debug.trace(7, f'pybats - processing teardown')
+        debug.trace(7, f'batspp - processing teardown')
         # WORK-IN-PROGRESS
 
 
@@ -179,11 +181,11 @@ class CustomTestsToBats:
 
 
     def _first_process(self, match):
-        """First process after match, format matched results into [indent, setup, actual, expected]"""
+        """First process after match, format matched results into [setup, actual, expected]"""
 
         # NOTE: this must be overriden.
         # NOTE: the returned values must be like:
-        result = ['indent', 'setup', 'actual', 'expected']
+        result = ['setup', 'actual', 'expected']
 
         debug.trace(7, f'batspp (test {self._debug_test_number}) - _first_process({match}) => {result}')
         return result
@@ -192,12 +194,18 @@ class CustomTestsToBats:
     def _sanitize(self, test):
         """Remove indent and sanitize test fields"""
 
-        result = [test[0]]
+        result = []
 
-        for field in test[1:]:
+        # Get indent used
+        indent_used = ''
+        if my_re.match(INDENT_PATTERN, test[1]):
+            indent_used = my_re.group(0)
+            debug.trace(7, f'batspp (test {self._debug_test_number}) - indent founded: "{indent_used}"')
+
+        for field in test:
 
             # Remove indent
-            field = re.sub(test[0], '', field)
+            field = re.sub(fr'^{indent_used}', '', field, flags=re.MULTILINE)
 
             # Strip whitespaces
             field = field.strip()
@@ -215,7 +223,7 @@ class CustomTestsToBats:
         """Process test fields before convert into bats"""
 
         # NOTE: if this is overrided, the result must be:
-        # result = ['indent', 'setup', 'actual', 'expected']
+        # result = ['setup', 'actual', 'expected']
 
         result = test
 
@@ -225,7 +233,7 @@ class CustomTestsToBats:
 
     def _convert_to_bats(self, test):
         """Convert tests to bats format"""
-        _, setup, actual, expected = test
+        setup, actual, expected = test
 
         result = ''
 
@@ -270,14 +278,13 @@ class CustomTestsToBats:
         bats_tests = ''
 
         for match in re.findall(self._pattern, text, flags=self._re_flags):
+            debug.trace(7, f'batspp (test {self._debug_test_number}) - processing match: {match}')
+            debug.assertion(len(match) >= 3, f'Insufficient groups, you should review the used regex pattern.')
 
             test = self._first_process(match)
-            if len(test) == 4:
-                test = self._sanitize(test)
-                test = self._last_process(test)
-                bats_tests += self._convert_to_bats(test)
-            else:
-                debug.trace(7, f'batspp (test {self._debug_test_number}) - wrong number of fields ({test}).')
+            test = self._sanitize(test)
+            test = self._last_process(test)
+            bats_tests += self._convert_to_bats(test)
 
             self._debug_test_number += 1
 
@@ -292,7 +299,7 @@ class CommandTests(CustomTestsToBats):
         flags = re.DOTALL | re.MULTILINE
 
         pattern = (fr'(({INDENT_PATTERN}\$\s+[^\n]+\n)*)' # setup
-                   fr'({INDENT_PATTERN})\$\s+([^\n]+)\n'  # command test
+                   fr'({INDENT_PATTERN}\$\s+[^\n]+)\n'    # command test line
                    fr'(.+?)\n'                            # expected output
                    fr'{INDENT_PATTERN}$')                 # end test
 
@@ -300,12 +307,25 @@ class CommandTests(CustomTestsToBats):
 
 
     def _first_process(self, match):
-        """First process after match, format matched results into [indent, setup, actual, expected]"""
+        """First process after match, format matched results into [setup, actual, expected]"""
 
-        #         indent     setup     actual   expected
-        result = [match[2], match[0], match[3], match[4]]
+        #         setup     actual    expected
+        result = [match[0], match[2], match[3]]
 
         debug.trace(7, f'batspp (test {self._debug_test_number}) - _first_process({match}) => {result}')
+        return result
+
+
+    def _last_process(self, test):
+        """Process test fields before convert into bats"""
+        
+        setup, actual, expected = test
+
+        # Remove $
+        actual = re.sub(r'^\$\s*', '', actual)
+
+        result = setup, actual, expected
+        debug.trace(7, f'batspp (test {self._debug_test_number}) - _last_process({test}) => {result}')
         return result
 
 
@@ -322,8 +342,7 @@ class FunctionTests(CustomTestsToBats):
 
         flags = re.MULTILINE
 
-        pattern = (fr'({INDENT_PATTERN})'                        # indent
-                   r'(.+?)'                                      # functions + args
+        pattern = (fr'({INDENT_PATTERN}.+?)'                     # functions + args line
                    fr'\s+({self.assert_eq}|{self.assert_ne})\s+' # assertion
                    r'((.|\n)+?)'                                 # expected output
                    fr'\n{INDENT_PATTERN}$')                      # blank indent (end test)
@@ -332,9 +351,9 @@ class FunctionTests(CustomTestsToBats):
 
 
     def _first_process(self, match):
-        """First process after match, format matched results into [indent, setup, actual, expected]"""
+        """First process after match, format matched results into [setup, actual, expected]"""
 
-        indent, actual, assertion, expected, _ = match
+        actual, assertion, expected, _ = match
 
         # Check assertion
         if assertion == self.assert_eq:
@@ -345,7 +364,7 @@ class FunctionTests(CustomTestsToBats):
             self._assert_equals = None
 
         # Format values
-        result = [indent, '', actual, expected]
+        result = ['', actual, expected]
 
         debug.trace(7, f'batspp (test {self._debug_test_number}) - _first_process({match}) => {result}')
         return result
@@ -354,12 +373,12 @@ class FunctionTests(CustomTestsToBats):
     def _last_process(self, test):
         """Process test fields before convert into bats"""
 
-        indent, setup, actual, expected = test
+        setup, actual, expected = test
 
         # Disable alias adding '//' to functions
         actual = '\\' + actual
 
-        result = [indent, setup, actual, expected]
+        result = [setup, actual, expected]
         debug.trace(7, f'batspp (test {self._debug_test_number}) - _last_process({test}) => {result}')
         return result
 
