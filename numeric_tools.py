@@ -187,17 +187,19 @@ def dec2bin(number):
     return result
 
 
-def comma_ize_number(numbers):
-    """Add commas to number"""
-    ## WORK-ON-PROGRESS: review regex pattern
+def comma_ize_number(text):
+    """Add commas to numbers in text"""
+    ## done
     ## Tom: probabily need a loop
     ##   perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\d])/\1,\2\3/g; } ';
 
     # Ensure that the input is a string
-    numbers = str(numbers)
+    result = str(text)
 
-    result = re.sub(r'(\d*)(\d\d\d)([^\d])*', r'\1,\2\3', numbers)
-    debug.trace(5, f"comma_ize_number({numbers}) => {result}")
+    while re.search(r'\d\d\d\d', result):
+        result = re.sub(r'(\d)(\d\d\d)([^\d]|$)', r'\1,\2\3', result)
+
+    debug.trace(5, f"comma_ize_number({text}) => {result}")
     return result
 
 
