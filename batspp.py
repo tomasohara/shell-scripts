@@ -11,13 +11,12 @@
 ## - Only source the script if it is a shell script.
 ## - add an option to source another script.
 ## - ignore tests in comments if the file has extension .batspp (i.e., test file not bash script).
-## - Put the commands to be evaluated in a test-specific function. Currently, using actual=$(...) is prone to errors (e.g., if the command includes parentheses).
 ## - Add some directives in the test or script comments:
 ##        Block of commands used just to setup test and thus without output or if the output should be ignored (e.g., '# Setup').
 ##        Tests that should be evaluated in the same environment as the preceding code (e.g., '# Continuation'). For example, you could have multiple assertions in the same @test function.
 ##        Name of the test (e.g., '# Test <name>')
 ## - Automatically create test directory using test name (e.g., /tmp/test-empty-file).
-## - Add option for outputting debugging information (e.g, echo out actual and expected). And if under verbose debugging output a hexdump of each. 
+## - Add option for outputting debugging information (e.g, echo out actual and expected). And if under verbose debugging output a hexdump of each.
 ## - find regex match excluding indent directly.
 ## - pretty result.
 ## - setup for functions tests.
@@ -53,6 +52,7 @@ Also you can test bash functions:
 
 # Standard packages
 import re
+import random
 
 
 # Local packages
@@ -65,7 +65,7 @@ from mezcla      import glue_helpers as gh
 
 # Command-line labels constants
 FILENAME = 'filepath' # target test path
-OUTPUT   = 'o'        # output BATS test
+OUTPUT   = 'output'   # output BATS test
 DEBUG    = 'debug'    # show actual and expected values
 
 
@@ -77,12 +77,15 @@ class Batspp(Main):
     """This process and run custom tests using bats-core"""
 
 
-    # Global States
+    # Class-level member variables for arguments (avoids need for class constructor)
     filename     = ''
-    file_content = ''
-    bats_content = '#!/usr/bin/env bats\n\n'
     output       = ''
     debug_mode   = False
+
+
+    # Global States
+    file_content = ''
+    bats_content = '#!/usr/bin/env bats\n\n'
 
 
     def setup(self):
@@ -143,17 +146,18 @@ class Batspp(Main):
         # The structure should be:
         #  project
         #     ├ script.bash
-        #  	  └ tests/test_script.bpp
+        #  	  └ tests/test_script.batspp
         ## TODO: add optional target dir.
         self.bats_content += ('\t# Make executables ./tests/../ visible to PATH\n'
-                              f'\tDIR="{gh.dir_path(gh.real_path(self.filename))}/../:$PATH"\n')
-
+                              f'\tDIR="{gh.dir_path(gh.real_path(self.filename))}/../:$PATH"\n'
+                              '}\n\n')
 
         # Load file
-        self.bats_content += ('\n\t# Load file\n'
-                              '\tshopt -s expand_aliases\n'
-                              f'\tsource {gh.real_path(self.filename)} || true\n'
-                              '}\n\n')
+        # NOTE: this is outside the function setup
+        #       to avoid problems with function commands.
+        self.bats_content += ('\n# Load file\n'
+                              'shopt -s expand_aliases\n'
+                              f'source {gh.real_path(self.filename)} || true\n\n\n')
 
 
     # pylint: disable=no-self-use
@@ -177,15 +181,13 @@ class Batspp(Main):
 class CustomTestsToBats:
     """Base class to extract and process tests"""
 
-    # Debug global class variables
-    _debug_test_number = 0
-
 
     def __init__(self, pattern, re_flags=0, debug_mode=False):
         self._debug_mode    = debug_mode
         self._re_flags      = re_flags
         self._pattern       = pattern
         self._assert_equals = True
+        self._test_id       = random.randint(1, 999999) # differentiate tests
 
 
     def _first_process(self, match):
@@ -193,22 +195,22 @@ class CustomTestsToBats:
 
         # NOTE: this must be overriden.
         # NOTE: the returned values must be like:
-        result = ['setup', 'actual', 'expected']
+        result = ['title', 'setup', 'actual', 'expected']
 
-        debug.trace(7, f'batspp (test {self._debug_test_number}) - _first_process({match}) => {result}')
+        debug.trace(7, f'batspp (test {self._test_id}) - _first_process({match}) => {result}')
         return result
 
 
-    def _sanitize(self, test):
-        """Remove indent and sanitize test fields"""
+    def _common_process(self, test):
+        """Common process for each field in test"""
 
         result = []
 
         # Get indent used
         indent_used = ''
-        if my_re.match(INDENT_PATTERN, test[1]):
+        if my_re.match(INDENT_PATTERN, test[2]):
             indent_used = my_re.group(0)
-            debug.trace(7, f'batspp (test {self._debug_test_number}) - indent founded: "{indent_used}"')
+            debug.trace(7, f'batspp (test {self._test_id}) - indent founded: "{indent_used}"')
 
         for field in test:
 
@@ -223,7 +225,7 @@ class CustomTestsToBats:
 
             result.append(field)
 
-        debug.trace(7, f'batspp (test {self._debug_test_number}) - _sanitize({test}) => {result}')
+        debug.trace(7, f'batspp (test {self._test_id}) - _common_process({test}) => {result}')
         return result
 
 
@@ -231,17 +233,17 @@ class CustomTestsToBats:
         """Process test fields before convert into bats"""
 
         # NOTE: if this is overrided, the result must be:
-        # result = ['setup', 'actual', 'expected']
+        # result = ['title', 'setup', 'actual', 'expected']
 
         result = test
 
-        debug.trace(7, f'batspp (test {self._debug_test_number}) - _last_process({test}) => {result}')
+        debug.trace(7, f'batspp (test {self._test_id}) - _last_process({test}) => {result}')
         return result
 
 
     def _convert_to_bats(self, test):
         """Convert tests to bats format"""
-        setup, actual, expected = test
+        title, setup, actual, expected = test
 
         result = ''
 
@@ -257,8 +259,13 @@ class CustomTestsToBats:
         # Add actual and expected (or not)
         expected_var_name = f'{"" if self._assert_equals else "not_"}expected'
 
-        result += f'\tactual=$({actual})\n'
-        result += f'\t{expected_var_name}=${repr(expected)}\n'
+        title = title if title else f'test-{self._test_id}'
+
+        actual_function_name = f'{title}-actual'
+        expected_function_name = f'{title}-{expected_var_name}'
+
+        result += f'\tactual=$({actual_function_name})\n'
+        result += f'\t{expected_var_name}=$({expected_function_name})\n'
 
         # Add debug
         if self._debug_mode:
@@ -274,7 +281,20 @@ class CustomTestsToBats:
         # End test
         result += '}\n\n'
 
-        debug.trace(7, f'batspp (test {self._debug_test_number}) - _convert_to_bats({test}) =>\n{result}')
+        # Add actual and expected (or not) functions
+        result += self._get_bash_function(actual_function_name, actual)
+        result += self._get_bash_function(expected_function_name, f'echo -e {repr(expected)}')
+
+        debug.trace(7, f'batspp (test {self._test_id}) - _convert_to_bats({test}) =>\n{result}')
+        return result
+
+
+    def _get_bash_function(self, name, content):
+        """Return bash function"""
+        result = (f'function {name} () {{\n'
+                  f'\t{content}\n'
+                  '}\n\n')
+        debug.trace(7, f'batspp (test {self._test_id}) - get_bash_function(name={name}, content={content}) => {result}')
         return result
 
 
@@ -286,15 +306,15 @@ class CustomTestsToBats:
         bats_tests = ''
 
         for match in re.findall(self._pattern, text, flags=self._re_flags):
-            debug.trace(7, f'batspp (test {self._debug_test_number}) - processing match: {match}')
-            debug.assertion(len(match) >= 3, f'Insufficient groups, you should review the used regex pattern.')
+            debug.trace(7, f'batspp (test {self._test_id}) - processing match: {match}')
+            debug.assertion(len(match) >= 4, f'Insufficient groups, you should review the used regex pattern.')
 
             test = self._first_process(match)
-            test = self._sanitize(test)
+            test = self._common_process(test)
             test = self._last_process(test)
             bats_tests += self._convert_to_bats(test)
 
-            self._debug_test_number += 1
+            self._test_id = random.randint(1, 999999)
 
         return bats_tests
 
@@ -317,23 +337,24 @@ class CommandTests(CustomTestsToBats):
     def _first_process(self, match):
         """First process after match, format matched results into [setup, actual, expected]"""
 
-        #         setup     actual    expected
-        result = [match[0], match[2], match[3]]
+        # TODO: add title.
+        #       title  setup    actual    expected
+        result = ['', match[0], match[2], match[3]]
 
-        debug.trace(7, f'batspp (test {self._debug_test_number}) - _first_process({match}) => {result}')
+        debug.trace(7, f'batspp (test {self._test_id}) - _first_process({match}) => {result}')
         return result
 
 
     def _last_process(self, test):
         """Process test fields before convert into bats"""
-        
-        setup, actual, expected = test
+
+        title, setup, actual, expected = test
 
         # Remove $
         actual = re.sub(r'^\$\s*', '', actual)
 
-        result = setup, actual, expected
-        debug.trace(7, f'batspp (test {self._debug_test_number}) - _last_process({test}) => {result}')
+        result = title, setup, actual, expected
+        debug.trace(7, f'batspp (test {self._test_id}) - _last_process({test}) => {result}')
         return result
 
 
@@ -361,6 +382,7 @@ class FunctionTests(CustomTestsToBats):
     def _first_process(self, match):
         """First process after match, format matched results into [setup, actual, expected]"""
 
+        # TODO: add title.
         actual, assertion, expected, _ = match
 
         # Check assertion
@@ -372,22 +394,22 @@ class FunctionTests(CustomTestsToBats):
             self._assert_equals = None
 
         # Format values
-        result = ['', actual, expected]
+        result = ['', '', actual, expected]
 
-        debug.trace(7, f'batspp (test {self._debug_test_number}) - _first_process({match}) => {result}')
+        debug.trace(7, f'batspp (test {self._test_id}) - _first_process({match}) => {result}')
         return result
 
 
     def _last_process(self, test):
         """Process test fields before convert into bats"""
 
-        setup, actual, expected = test
+        title, setup, actual, expected = test
 
         # Disable alias adding '//' to functions
         actual = '\\' + actual
 
-        result = [setup, actual, expected]
-        debug.trace(7, f'batspp (test {self._debug_test_number}) - _last_process({test}) => {result}')
+        result = [title, setup, actual, expected]
+        debug.trace(7, f'batspp (test {self._test_id}) - _last_process({test}) => {result}')
         return result
 
 
