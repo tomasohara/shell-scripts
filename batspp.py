@@ -14,7 +14,6 @@
 ## - Add some directives in the test or script comments:
 ##        Block of commands used just to setup test and thus without output or if the output should be ignored (e.g., '# Setup').
 ##        Tests that should be evaluated in the same environment as the preceding code (e.g., '# Continuation'). For example, you could have multiple assertions in the same @test function.
-##        Name of the test (e.g., '# Test <name>')
 ## - Automatically create test directory using test name (e.g., /tmp/test-empty-file).
 ## - Add option for outputting debugging information (e.g, echo out actual and expected). And if under verbose debugging output a hexdump of each.
 ## - find regex match excluding indent directly.
@@ -187,7 +186,7 @@ class CustomTestsToBats:
         self._re_flags      = re_flags
         self._pattern       = pattern
         self._assert_equals = True
-        self._test_id       = random.randint(1, 999999) # differentiate tests
+        self._test_id       = f'id{random.randint(1, 999999)}' # differentiate tests
 
 
     def _first_process(self, match):
@@ -245,10 +244,12 @@ class CustomTestsToBats:
         """Convert tests to bats format"""
         title, setup, actual, expected = test
 
+        title = title if title else f'test-{self._test_id}'
+
         result = ''
 
         # Add test header
-        result += f'@test {repr(actual)[:-1]} should {"" if self._assert_equals else "NOT "}return {repr(expected)[1:]} {{\n'
+        result += f'@test "{title}" {{\n'
 
         # Add test setup
         for setup_command in setup.splitlines():
@@ -259,10 +260,9 @@ class CustomTestsToBats:
         # Add actual and expected (or not)
         expected_var_name = f'{"" if self._assert_equals else "not_"}expected'
 
-        title = title if title else f'test-{self._test_id}'
-
-        actual_function_name = f'{title}-actual'
-        expected_function_name = f'{title}-{expected_var_name}'
+        title_without_spaces = re.sub(r'\s+', '-', title)
+        actual_function_name = f'{title_without_spaces}-actual'
+        expected_function_name = f'{title_without_spaces}-{expected_var_name}'
 
         result += f'\tactual=$({actual_function_name})\n'
         result += f'\t{expected_var_name}=$({expected_function_name})\n'
@@ -307,14 +307,16 @@ class CustomTestsToBats:
 
         for match in re.findall(self._pattern, text, flags=self._re_flags):
             debug.trace(7, f'batspp (test {self._test_id}) - processing match: {match}')
-            debug.assertion(len(match) >= 4, f'Insufficient groups, you should review the used regex pattern.')
+            debug.assertion(len(match) >= 4, 'Insufficient groups, you should review the used regex pattern.')
 
             test = self._first_process(match)
+            debug.assertion(len(test) == 4, 'Incorrect number of fields, every test should be ("title", "setup", "actual", "expected")')
+
             test = self._common_process(test)
             test = self._last_process(test)
             bats_tests += self._convert_to_bats(test)
 
-            self._test_id = random.randint(1, 999999)
+            self._test_id = f'id{random.randint(1, 999999)}'
 
         return bats_tests
 
@@ -326,7 +328,8 @@ class CommandTests(CustomTestsToBats):
     def __init__(self, debug_mode=False):
         flags = re.DOTALL | re.MULTILINE
 
-        pattern = (fr'(({INDENT_PATTERN}\$\s+[^\n]+\n)*)' # setup
+        pattern = (fr'({INDENT_PATTERN}\s*Test\s*([\w\s]+?)\n)*' # optional test title
+                   fr'(({INDENT_PATTERN}\$\s+[^\n]+\n)*)' # optional setup
                    fr'({INDENT_PATTERN}\$\s+[^\n]+)\n'    # command test line
                    fr'(.+?)\n'                            # expected output
                    fr'{INDENT_PATTERN}$')                 # end test
@@ -337,9 +340,8 @@ class CommandTests(CustomTestsToBats):
     def _first_process(self, match):
         """First process after match, format matched results into [setup, actual, expected]"""
 
-        # TODO: add title.
-        #       title  setup    actual    expected
-        result = ['', match[0], match[2], match[3]]
+        #         title     setup     actual    expected
+        result = [match[1], match[2], match[4], match[5]]
 
         debug.trace(7, f'batspp (test {self._test_id}) - _first_process({match}) => {result}')
         return result
@@ -371,7 +373,8 @@ class FunctionTests(CustomTestsToBats):
 
         flags = re.MULTILINE
 
-        pattern = (fr'({INDENT_PATTERN}.+?)'                     # functions + args line
+        pattern = (fr'({INDENT_PATTERN}\s*Test\s*([\w\s]+?)\n)*' # optional test title
+                   fr'({INDENT_PATTERN}.+?)'                     # functions + args line
                    fr'\s+({self.assert_eq}|{self.assert_ne})\s+' # assertion
                    r'((.|\n)+?)'                                 # expected output
                    fr'\n{INDENT_PATTERN}$')                      # blank indent (end test)
@@ -382,8 +385,7 @@ class FunctionTests(CustomTestsToBats):
     def _first_process(self, match):
         """First process after match, format matched results into [setup, actual, expected]"""
 
-        # TODO: add title.
-        actual, assertion, expected, _ = match
+        _, title, actual, assertion, expected, _ = match
 
         # Check assertion
         if assertion == self.assert_eq:
@@ -394,7 +396,7 @@ class FunctionTests(CustomTestsToBats):
             self._assert_equals = None
 
         # Format values
-        result = ['', '', actual, expected]
+        result = [title, '', actual, expected]
 
         debug.trace(7, f'batspp (test {self._test_id}) - _first_process({match}) => {result}')
         return result

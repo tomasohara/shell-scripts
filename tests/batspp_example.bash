@@ -52,9 +52,10 @@ alias run-fibonacci='echo "The Fibonacci series is:"; fibonacci'
 
 
 # Setups for specific test can be done with
-# command lines too, note that these commands
-# must not have an expected output
+# command lines too without output and you can
+# also add optional titles:
 #
+# Test setup and title
 # $ filepath=$(echo $TMP/testfile-"$$")
 # $ echo "this is a file content to run an example test" | sudo tee $filepath
 # $ cat $filepath
