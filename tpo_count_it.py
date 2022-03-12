@@ -42,7 +42,7 @@ tpo_count_it.py -restore='{match.group(3)}' '((\\S+\\s+)((\\S+\\s+){2}\\S+))' ti
 
 
 # Standard packages
-# TODO: replace re by the local implementation my_re
+## TODO: replace re by the local implementation my_re
 import re
 
 
@@ -85,14 +85,14 @@ RESTORE           = 'restore'           # portion of matching text to be restore
 MULTI_PER_LINE    = 'multi_per_line'    # count multiple instance of the pattern per line (even when ^ and $ are specified)
 ONE_PER_LINE      = 'one_per_line'      # only count one instance of the pattern per line
 VERBOSE           = 'verbose'           # verbose output mode
-# TODO: add optional extended help with examples for misc. options
+## TODO: add optional extended help with examples for misc. options
 
 
 class CountIt(Main):
     """Count the occurrences of a pattern class"""
 
 
-    ## class-level member variables for arguments (avoids need for class constructor)
+    # Class-level member variables for arguments (avoids need for class constructor)
     ignore_case      = False
     preserve         = False
     freq_first       = False
@@ -114,7 +114,7 @@ class CountIt(Main):
     file_input_mode  = False # aka file slurping
 
 
-    ## Global State
+    # Global State
     count_dict  = {} # assoc. dic for pattern counting
 
 
@@ -172,7 +172,7 @@ class CountIt(Main):
 
         # Sanity check for whether one-per-line option might be needed
         # NOTE: checks against pattern need to occur prior to modification (e.g., paren addition)
-        # TODO: handle multiple patterns per line (e.g., set line break to null); likewise check for multiple end-of-line matching
+        ## TODO: handle multiple patterns per line (e.g., set line break to null); likewise check for multiple end-of-line matching
         if re.search(r'^\^.*[^\$\n]$', self.pattern) and not multi_per_line:
             debug.trace(debug.USUAL, f'You might want to specify --{MULTI_PER_LINE} if you want ^ and/or $ interpretted after match removal.')
 
@@ -198,7 +198,7 @@ class CountIt(Main):
 
         # NOTE: a chop isn't performed by default to allow for using the newline in a pattern.
         # This is often more convenient than using $ (e.g., when using csh).
-        # TODO: add sanity check about DOS carriage returns screwing up pattern matching
+        ## TODO: add sanity check about DOS carriage returns screwing up pattern matching
         if self.chomp:
             line = system.chomp(line)
         debug.trace(debug.QUITE_DETAILED, f'{line}')
