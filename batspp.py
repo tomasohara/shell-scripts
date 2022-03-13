@@ -100,7 +100,10 @@ class Batspp(Main):
         self.source       = self.get_parsed_argument(SOURCE, "")
         self.debug_mode   = self.has_parsed_option(DEBUG)
 
-        debug.trace(7, f'batspp - testfile: {self.testfile}, output: {self.output}, source: {self.source}, debug_mode: {self.debug_mode}')
+        debug.trace(7, (f'batspp - testfile: {self.testfile}, '
+                        f'output: {self.output}, '
+                        f'source: {self.source}, '
+                        f'debug_mode: {self.debug_mode}'))
 
 
     def run_main_step(self):
@@ -438,7 +441,6 @@ class FunctionTests(CustomTestsToBats):
 
 
 if __name__ == '__main__':
-    # Check if test file should be passed via positional arg or text option
     app = Batspp(description          = __doc__,
                  positional_arguments = [(TESTFILE, 'test file path')],
                  boolean_options      = [(DEBUG,    'show actual and expected values')],
