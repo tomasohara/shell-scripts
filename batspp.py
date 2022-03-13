@@ -8,8 +8,6 @@
 #       no need for bats-assertions library.
 #
 ## TODO:
-## - Only source the script if it is a shell script.
-## - add an option to source another script.
 ## - ignore tests in comments if the file has extension .batspp (i.e., test file not bash script).
 ## - Add some directives in the test or script comments:
 ##        Block of commands used just to setup test and thus without output or if the output should be ignored (e.g., '# Setup').
@@ -63,13 +61,18 @@ from mezcla      import glue_helpers as gh
 
 
 # Command-line labels constants
-FILENAME = 'filepath' # target test path
+TESTFILE = 'testfile' # target test path
 OUTPUT   = 'output'   # output BATS test
-DEBUG    = 'debug'    # show actual and expected values
+DEBUG    = 'debug'    # show actual and expected
+SOURCE   = 'source'   # source another file
 
 
 # Pattern constants
 INDENT_PATTERN = r'^[^\w\$\(\n\{\}]*'
+
+
+# Other constants
+BATSPP_EXT = '.batspp'
 
 
 class Batspp(Main):
@@ -77,32 +80,34 @@ class Batspp(Main):
 
 
     # Class-level member variables for arguments (avoids need for class constructor)
-    filename     = ''
+    testfile     = ''
     output       = ''
+    source       = ''
     debug_mode   = False
 
 
     # Global States
     file_content = ''
-    bats_content = '#!/usr/bin/env bats\n\n'
+    bats_content = '#!/usr/bin/env bats\n\n\n'
 
 
     def setup(self):
         """Process arguments"""
 
         # Check the command-line options
-        self.filename     = self.get_parsed_argument(FILENAME, "")
+        self.testfile     = self.get_parsed_argument(TESTFILE, "")
         self.output       = self.get_parsed_argument(OUTPUT, "")
+        self.source       = self.get_parsed_argument(SOURCE, "")
         self.debug_mode   = self.has_parsed_option(DEBUG)
 
-        debug.trace(7, f'batspp - filename: {self.filename}, output: {self.output}, debug_mode: {self.debug_mode}')
+        debug.trace(7, f'batspp - testfile: {self.testfile}, output: {self.output}, source: {self.source}, debug_mode: {self.debug_mode}')
 
 
     def run_main_step(self):
         """Process main script"""
 
         # Read file content
-        self.file_content = system.read_file(self.filename)
+        self.file_content = system.read_file(self.testfile)
 
 
         # Check if finish with newline
@@ -135,7 +140,9 @@ class Batspp(Main):
         debug.trace(7, f'batspp - processing setup')
 
 
-        self.bats_content +=  'setup() {\n'
+        # NOTE: files are loaded globally to
+        #       to avoid problems with functions
+        #       commands.
 
 
         # Make executables ./tests/../ visible to PATH
@@ -146,17 +153,21 @@ class Batspp(Main):
         #  project
         #     ├ script.bash
         #  	  └ tests/test_script.batspp
-        ## TODO: add optional target dir.
-        self.bats_content += ('\t# Make executables ./tests/../ visible to PATH\n'
-                              f'\tDIR="{gh.dir_path(gh.real_path(self.filename))}/../:$PATH"\n'
-                              '}\n\n')
+        self.bats_content += ('# Make executables ./tests/../ visible to PATH\n'
+                              f'PATH="{gh.dir_path(gh.real_path(self.testfile))}/../:$PATH"\n\n')
 
-        # Load file
-        # NOTE: this is outside the function setup
-        #       to avoid problems with function commands.
-        self.bats_content += ('\n# Load file\n'
-                              'shopt -s expand_aliases\n'
-                              f'source {gh.real_path(self.filename)} || true\n\n\n')
+
+        # Source Files
+        self.bats_content += ('# Source files\n'
+                              'shopt -s expand_aliases\n')
+
+        if not self.testfile.endswith(BATSPP_EXT):
+            self.bats_content += f'source {gh.real_path(self.testfile)} || true\n'
+
+        if self.source:
+            self.bats_content += f'source {gh.real_path(self.source)} || true\n'
+        
+        self.bats_content += '\n\n'
 
 
     # pylint: disable=no-self-use
@@ -416,9 +427,11 @@ class FunctionTests(CustomTestsToBats):
 
 
 if __name__ == '__main__':
+    # Check if test file should be passed via positional arg or text option
     app = Batspp(description          = __doc__,
-                 positional_arguments = [(FILENAME, 'test file path')],
+                 positional_arguments = [(TESTFILE, 'test file path')],
                  boolean_options      = [(DEBUG,    'show actual and expected values')],
-                 text_options         = [(OUTPUT,   'target output .bats filepath')],
+                 text_options         = [(OUTPUT,   'target output .bats filepath'),
+                                         (SOURCE,   'file to be sourced')],
                  manual_input         = True)
     app.run()
