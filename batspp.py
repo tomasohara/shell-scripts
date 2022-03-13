@@ -166,7 +166,7 @@ class Batspp(Main):
 
         if self.source:
             self.bats_content += f'source {gh.real_path(self.source)} || true\n'
-        
+
         self.bats_content += '\n\n'
 
 
@@ -253,48 +253,59 @@ class CustomTestsToBats:
 
     def _convert_to_bats(self, test):
         """Convert tests to bats format"""
-        title, setup, actual, expected = test
+        title, setup, actual_content, expected_content = test
 
-        title = title if title else f'test-{self._test_id}'
 
-        result = ''
+        # Process title
+        title = title if title else f'test {self._test_id}'
+        unspaced_title = re.sub(r'\s+', '-', title)
 
-        # Add test header
-        result += f'@test "{title}" {{\n'
 
-        # Add test setup
-        for setup_command in setup.splitlines():
-            if setup_command:
-                setup_command = re.sub(r'(^\$\s+|\n+$)', '', setup_command)
-                result       += f'\t{setup_command}\n'
+        # Process setup commands
+        setup_text = '' if setup else '\n'
+        for command in setup.splitlines():
+            if command:
+                command     = re.sub(r'(^\$\s+|\n+$)', '', command)
+                setup_text += f'\t{command}\n'
 
-        # Add actual and expected (or not)
-        expected_var_name = f'{"" if self._assert_equals else "not_"}expected'
 
-        title_without_spaces = re.sub(r'\s+', '-', title)
-        actual_function_name = f'{title_without_spaces}-actual'
-        expected_function_name = f'{title_without_spaces}-{expected_var_name}'
+        # actual and expected
+        actual   = 'actual'
+        expected = 'expected' if self._assert_equals else 'not_expected'
 
-        result += f'\tactual=$({actual_function_name})\n'
-        result += f'\t{expected_var_name}=$({expected_function_name})\n'
 
-        # Add debug
+        # Process debug
+        debug_text = '\n'
         if self._debug_mode:
-            result += ('\techo ========== actual ==========\n'
-                       '\techo "$actual"\n'
-                       '\techo ========= expected =========\n'
-                       f'\techo "${expected_var_name}"\n'
-                       '\techo ============================\n')
+            debug_text = (f'\techo ========== {actual} ==========\n'
+                          f'\techo "${actual}"\n'
+                          f'\techo ========= {expected} =========\n'
+                          f'\techo "${expected}"\n'
+                          '\techo ============================\n')
 
-        # Add assertion
-        result += f'\t[ "$actual" {"==" if self._assert_equals else "!="} "${expected_var_name}" ]\n'
 
-        # End test
-        result += '}\n\n'
+        # Process assertion
+        assertion_text = "==" if self._assert_equals else "!="
 
-        # Add actual and expected (or not) functions
-        result += self._get_bash_function(actual_function_name, actual)
-        result += self._get_bash_function(expected_function_name, f'echo -e {repr(expected)}')
+
+        # Process functions
+        actual_function   = f'{unspaced_title}-actual'
+        expected_function = f'{unspaced_title}-{expected}'
+        functions_text    = ''
+        functions_text   += self._get_bash_function(actual_function, actual_content)
+        functions_text   += self._get_bash_function(expected_function, f'echo -e {repr(expected_content)}')
+
+
+        # Construct bats tests
+        result = (f'@test "{title}" {{\n'
+                  f'{setup_text}'
+                  f'\t{actual}=$({actual_function})\n'
+                  f'\t{expected}=$({expected_function})\n'
+                  f'{debug_text}'
+                  f'\t[ "${actual}" {assertion_text} "${expected}" ]\n'
+                  '}\n\n'
+                  f'{functions_text}\n')
+
 
         debug.trace(7, f'batspp (test {self._test_id}) - _convert_to_bats({test}) =>\n{result}')
         return result
