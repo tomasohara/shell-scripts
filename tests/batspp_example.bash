@@ -2,8 +2,6 @@
 #
 # Usage: $ batspp batspp_example.bash
 #
-## TODO:
-## - test with tag to be avoided example.
 
 
 # You can run tests using the command line 
@@ -13,8 +11,6 @@
 # hello
 # world
 #
-# $ echo "this is a test" | wc -c
-# 15
 
 
 # Also you can test bash functions:
@@ -70,3 +66,10 @@ alias run-fibonacci='echo "The Fibonacci series is:"; fibonacci'
 # 3
 # $ cat $filepath | wc -c
 # 46
+
+
+## Tests with simple '#' on tests files are ignored 
+## and with double # on shell scripts too.
+##
+## $ echo "this is a test" | wc -c
+## 15
