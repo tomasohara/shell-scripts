@@ -12,7 +12,6 @@
 ## - Add some directives in the test or script comments:
 ##        Block of commands used just to setup test and thus without output or if the output should be ignored (e.g., '# Setup').
 ##        Tests that should be evaluated in the same environment as the preceding code (e.g., '# Continuation'). For example, you could have multiple assertions in the same @test function.
-## - Automatically create test directory using test name (e.g., /tmp/test-empty-file).
 ## - Add option for outputting debugging information (e.g, echo out actual and expected). And if under verbose debugging output a hexdump of each.
 ## - find regex match excluding indent directly.
 ## - pretty result.
@@ -265,7 +264,8 @@ class CustomTestsToBats:
 
 
         # Process setup commands
-        setup_text = '' if setup else '\n'
+        setup_text = (f'\ttestfolder=$(echo /tmp/{unspaced_title}-$$)\n'
+                      f'\tmkdir $testfolder && cd $testfolder\n')
         for command in setup.splitlines():
             if command:
                 command     = re.sub(r'(^\$\s+|\n+$)', '', command)
