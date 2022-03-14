@@ -8,11 +8,11 @@
 #       no need for bats-assertions library.
 #
 ## TODO:
+## - extend usage guide or docstring.
 ## - ignore tests in comments if the file has extension .batspp (i.e., test file not bash script).
 ## - Add some directives in the test or script comments:
 ##        Block of commands used just to setup test and thus without output or if the output should be ignored (e.g., '# Setup').
 ##        Tests that should be evaluated in the same environment as the preceding code (e.g., '# Continuation'). For example, you could have multiple assertions in the same @test function.
-## - Add option for outputting debugging information (e.g, echo out actual and expected). And if under verbose debugging output a hexdump of each.
 ## - find regex match excluding indent directly.
 ## - pretty result.
 ## - setup for functions tests.
@@ -62,7 +62,7 @@ from mezcla      import glue_helpers as gh
 # Command-line labels constants
 TESTFILE = 'testfile' # target test path
 OUTPUT   = 'output'   # output BATS test
-DEBUG    = 'debug'    # show actual and expected
+VERBOSE  = 'verbose'  # show verbose debug
 SOURCE   = 'source'   # source another file
 
 
@@ -82,7 +82,7 @@ class Batspp(Main):
     testfile     = ''
     output       = ''
     source       = ''
-    debug_mode   = False
+    verbose      = False
 
 
     # Global States
@@ -97,12 +97,12 @@ class Batspp(Main):
         self.testfile     = self.get_parsed_argument(TESTFILE, "")
         self.output       = self.get_parsed_argument(OUTPUT, "")
         self.source       = self.get_parsed_argument(SOURCE, "")
-        self.debug_mode   = self.has_parsed_option(DEBUG)
+        self.verbose      = self.has_parsed_option(VERBOSE)
 
         debug.trace(7, (f'batspp - testfile: {self.testfile}, '
                         f'output: {self.output}, '
                         f'source: {self.source}, '
-                        f'debug_mode: {self.debug_mode}'))
+                        f'verbose: {self.verbose}'))
 
 
     def run_main_step(self):
@@ -183,8 +183,8 @@ class Batspp(Main):
         """Process tests"""
         debug.trace(7, f'batspp - processing tests')
 
-        command_tests  = CommandTests(debug_mode=self.debug_mode)
-        function_tests = FunctionTests(debug_mode=self.debug_mode)
+        command_tests  = CommandTests(verbose_debug=self.verbose)
+        function_tests = FunctionTests(verbose_debug=self.verbose)
 
         self.bats_content += command_tests.get_bats_tests(self.file_content)
         self.bats_content += function_tests.get_bats_tests(self.file_content)
@@ -194,8 +194,8 @@ class CustomTestsToBats:
     """Base class to extract and process tests"""
 
 
-    def __init__(self, pattern, re_flags=0, debug_mode=False):
-        self._debug_mode    = debug_mode
+    def __init__(self, pattern, re_flags=0, verbose_debug=False):
+        self._verbose       = verbose_debug
         self._re_flags      = re_flags
         self._pattern       = pattern
         self._assert_equals = True
@@ -278,13 +278,12 @@ class CustomTestsToBats:
 
 
         # Process debug
-        debug_text = '\n'
-        if self._debug_mode:
-            debug_text = (f'\techo ========== {actual} ==========\n'
-                          f'\techo "${actual}"\n'
-                          f'\techo ========= {expected} =========\n'
-                          f'\techo "${expected}"\n'
-                          '\techo ============================\n')
+        verbose_print = '| hexview.perl' if  self._verbose else ''
+        debug_text = (f'\techo ========== {actual} ==========\n'
+                      f'\techo "${actual}" {verbose_print}\n'
+                      f'\techo ========= {expected} =========\n'
+                      f'\techo "${expected}" {verbose_print}\n'
+                      '\techo ============================\n')
 
 
         # Process assertion
@@ -350,7 +349,7 @@ class CommandTests(CustomTestsToBats):
     """Extract and process specific command tests"""
 
 
-    def __init__(self, debug_mode=False):
+    def __init__(self, verbose_debug=False):
         flags = re.DOTALL | re.MULTILINE
 
         pattern = (fr'({INDENT_PATTERN}\s*Test\s*([\w\s]+?)\n)*' # optional test title
@@ -359,7 +358,7 @@ class CommandTests(CustomTestsToBats):
                    fr'(.+?)\n'                            # expected output
                    fr'{INDENT_PATTERN}$')                 # end test
 
-        super().__init__(pattern, re_flags=flags, debug_mode=debug_mode)
+        super().__init__(pattern, re_flags=flags, verbose_debug=verbose_debug)
 
 
     def _first_process(self, match):
@@ -394,7 +393,7 @@ class FunctionTests(CustomTestsToBats):
     assert_ne     = r'=\/>'
 
 
-    def __init__(self, debug_mode=False):
+    def __init__(self, verbose_debug=False):
 
         flags = re.MULTILINE
 
@@ -404,7 +403,7 @@ class FunctionTests(CustomTestsToBats):
                    r'((.|\n)+?)'                                 # expected output
                    fr'\n{INDENT_PATTERN}$')                      # blank indent (end test)
 
-        super().__init__(pattern, re_flags=flags, debug_mode=debug_mode)
+        super().__init__(pattern, re_flags=flags, verbose_debug=verbose_debug)
 
 
     def _first_process(self, match):
@@ -443,7 +442,7 @@ class FunctionTests(CustomTestsToBats):
 if __name__ == '__main__':
     app = Batspp(description          = __doc__,
                  positional_arguments = [(TESTFILE, 'test file path')],
-                 boolean_options      = [(DEBUG,    'show actual and expected values')],
+                 boolean_options      = [(VERBOSE,  'show verbose debug')],
                  text_options         = [(OUTPUT,   'target output .bats filepath'),
                                          (SOURCE,   'file to be sourced')],
                  manual_input         = True)
