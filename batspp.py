@@ -9,7 +9,6 @@
 #
 ## TODO:
 ## - extend usage guide or docstring.
-## - ignore tests in comments if the file has extension .batspp (i.e., test file not bash script).
 ## - Add some directives in the test or script comments:
 ##        Block of commands used just to setup test and thus without output or if the output should be ignored (e.g., '# Setup').
 ##        Tests that should be evaluated in the same environment as the preceding code (e.g., '# Continuation'). For example, you could have multiple assertions in the same @test function.
@@ -66,12 +65,9 @@ VERBOSE  = 'verbose'  # show verbose debug
 SOURCE   = 'source'   # source another file
 
 
-# Pattern constants
-INDENT_PATTERN = r'^[^\w\$\(\n\{\}]*'
-
-
-# Other constants
-BATSPP_EXT = '.batspp'
+# Some constants
+INDENT_PATTERN = r'^[^\w\$\(\n\{\}]'
+BATSPP_EXTENSION = '.batspp'
 
 
 class Batspp(Main):
@@ -86,6 +82,7 @@ class Batspp(Main):
 
 
     # Global States
+    is_test_file = False
     file_content = ''
     bats_content = '#!/usr/bin/env bats\n\n\n'
 
@@ -107,6 +104,11 @@ class Batspp(Main):
 
     def run_main_step(self):
         """Process main script"""
+
+        # Check if is test of shell script file
+        self.is_test_file = self.testfile.endswith(BATSPP_EXTENSION)
+        debug.trace(7, f'batspp - {self.testfile} is a test file (not shell script): {self.is_test_file}')
+
 
         # Read file content
         self.file_content = system.read_file(self.testfile)
@@ -163,7 +165,7 @@ class Batspp(Main):
         self.bats_content += ('# Source files\n'
                               'shopt -s expand_aliases\n')
 
-        if not self.testfile.endswith(BATSPP_EXT):
+        if not self.is_test_file:
             self.bats_content += f'source {gh.real_path(self.testfile)} || true\n'
 
         if self.source:
@@ -182,6 +184,15 @@ class Batspp(Main):
     def __process_tests(self):
         """Process tests"""
         debug.trace(7, f'batspp - processing tests')
+
+        # Tests with simple indentation (i.e. #) are ignored on batspp files.
+        # Tests with double indentation (i.e. ##) are ignored on shell scripts.
+        global INDENT_PATTERN
+        if self.is_test_file:
+            INDENT_PATTERN += r'{0}'
+        else:
+            INDENT_PATTERN += r'?'
+        INDENT_PATTERN += r'\s*'
 
         command_tests  = CommandTests(verbose_debug=self.verbose)
         function_tests = FunctionTests(verbose_debug=self.verbose)
@@ -279,11 +290,11 @@ class CustomTestsToBats:
 
         # Process debug
         verbose_print = '| hexview.perl' if  self._verbose else ''
-        debug_text = (f'\techo ========== {actual} ==========\n'
+        debug_text = (f'\techo "========== {actual} =========="\n'
                       f'\techo "${actual}" {verbose_print}\n'
-                      f'\techo ========= {expected} =========\n'
+                      f'\techo "========= {expected} ========="\n'
                       f'\techo "${expected}" {verbose_print}\n'
-                      '\techo ============================\n')
+                      '\techo "============================"\n')
 
 
         # Process assertion
@@ -352,11 +363,11 @@ class CommandTests(CustomTestsToBats):
     def __init__(self, verbose_debug=False):
         flags = re.DOTALL | re.MULTILINE
 
-        pattern = (fr'({INDENT_PATTERN}\s*Test\s*([\w\s]+?)\n)*' # optional test title
-                   fr'(({INDENT_PATTERN}\$\s+[^\n]+\n)*)' # optional setup
-                   fr'({INDENT_PATTERN}\$\s+[^\n]+)\n'    # command test line
+        pattern = (fr'({INDENT_PATTERN}Test\s*([\w\s]+?)\n)*' # optional test title
+                   fr'(({INDENT_PATTERN}\$\s+[^\n]+\n)*)'     # optional setup
+                   fr'({INDENT_PATTERN}\$\s+[^\n]+)\n'        # command test line
                    fr'(.+?)\n'                            # expected output
-                   fr'{INDENT_PATTERN}$')                 # end test
+                   fr'{INDENT_PATTERN}$')              # end test
 
         super().__init__(pattern, re_flags=flags, verbose_debug=verbose_debug)
 
@@ -397,11 +408,11 @@ class FunctionTests(CustomTestsToBats):
 
         flags = re.MULTILINE
 
-        pattern = (fr'({INDENT_PATTERN}\s*Test\s*([\w\s]+?)\n)*' # optional test title
+        pattern = (fr'({INDENT_PATTERN}Test\s*([\w\s]+?)\n)*' # optional test title
                    fr'({INDENT_PATTERN}.+?)'                     # functions + args line
                    fr'\s+({self.assert_eq}|{self.assert_ne})\s+' # assertion
                    r'((.|\n)+?)'                                 # expected output
-                   fr'\n{INDENT_PATTERN}$')                      # blank indent (end test)
+                   fr'\n{INDENT_PATTERN}$')                   # blank indent (end test)
 
         super().__init__(pattern, re_flags=flags, verbose_debug=verbose_debug)
 
