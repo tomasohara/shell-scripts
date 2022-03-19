@@ -66,10 +66,13 @@ function pause-for-enter () {
 }
 
 # downcase-stdin: return stdin made lowercase
-function downcase-stdin () 
-{ 
-    perl -pe 's/.*/\L$&/;'
-}
+# note: only will be defined here if tomohara-aliases not sourced
+if [ "" = "$(typeset -f downcase-stdin)" ]; then
+    function downcase-stdin () 
+    { 
+	perl -pe "use open ':std', ':encoding(UTF-8)'; s/.*/\L$&/;"
+    }
+fi
 
 # get-temp-log-name([label=temp]: Return unique file name of the form _git-LABEL-MMDDYY-HHMM-NNN.log
 function get-temp-log-name {
@@ -275,7 +278,13 @@ function alt-invoke-next-single-checkin {
     # Read the user's commit message
     # note: shows visual diff (TODO: and pauses so user can start message)
     # TODO: position cursor at start of ... (instead of pause)
-    git-vdiff "$mod_file"
+    local is_text=$(file "$mod_file" | grep -i ':.*text')
+    if [ "$is_text" != "" ]; then
+	git-vdiff "$mod_file"
+    else
+        ## TODO: summarize binary differenecs
+        true
+    fi
     ## BAD: sleep 3
     local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
     local command
