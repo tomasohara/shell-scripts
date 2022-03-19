@@ -190,7 +190,11 @@ function space-check() {
 # downcase-stdin(): convert STDIN to lowercase
 # downcase-text(text, ...): downcase TEXT
 # EX: echo "Tomás" | downcase-stdin => "tomás"
-function downcase-stdin() { perl -pe 's/.*/\L$&/;'; }
+## BAD: function downcase-stdin() { perl -pe 's/.*/\L$&/;'; }
+## TODO:
+## alias perl-utf8="perl -e \"use open ':std', ':encoding(UTF-8)'\""
+## function downcase-stdin() { perl-utf8 -pe 's/.*/\L$&/;'; }
+function downcase-stdin { perl -pe "use open ':std', ':encoding(UTF-8)'; s/.*/\L$&/;"; }
 function downcase-text() { echo "$@" | downcase-stdin; }
 # todays-date(): outputs date in format DDMmmYY (e.g., 22Apr20)
 ## OLD: function todays-date() { date '+%d%b%y' | perl -pe 's/.*/\L$&/;'; }
@@ -227,14 +231,15 @@ alias todays-update='update-today-vars'
 ## TODO: function quiet-unalias { unalias "$@" 2> /dev/null; echo > /dev/null; }
 function quiet-unalias {
     ## HACK: do nothing if running under bats-core
-    if [ "$BATS_TEST_NUMBER" != "" ]; then
+    if [ "$BATS_TEST_FILENAME" != "" ]; then
 	if [ "$BATCH_MODE" != "1" ]; then
             echo "Ignoring unalias over $@ for sake of bats"
 	fi
         return
     fi
-    unalias "$@" 2> /dev/null;
-    echo > /dev/null;
+    ## OLD: unalias "$@" 2> /dev/null;
+    unalias "$@" 2> /dev/null || true;
+    ## OLD: echo > /dev/null;
 }
 
 # Bash customizations (e.g., no beep)
@@ -570,7 +575,15 @@ function popd-q () { builtin popd "$@" >| /dev/null; }
 # - other options for cp, mv, and rm: -i interactive; and -v verbose.
 other_file_args="-v"
 if [ "$OSTYPE" = "solaris" ]; then other_file_args=""; fi
-alias cls='clear'
+## OLD: alias cls='clear'
+## NOTE: Unfortunately clear clobbers the terminal scrollback buffer.
+## via https://askubuntu.com/questions/792453/how-to-stop-clear-from-clearing-scrollback-buffer:
+##    type CTRL+L instead of clear
+## TAKE1: alias cls="printf '\33[H\33[2J'"
+##   where \33 is octal code for Escape (i.e., 0x1B)
+## TAKE2
+alias clear="echo 'use cls instead (or /bin/clear)'"
+alias cls="command clear -x"
 MV="/bin/mv -i $other_file_args"
 alias mv='$MV'
 alias move='mv'
@@ -958,11 +971,13 @@ function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
 ## MISC
 ## alias new-lynx='lynx-2.8.4'
 ## alias fix-keyboard='kbd_mode -a'
+# EX: $ asctime | perl -pe 's/\d/N/g; s/\w+ \w+/DDD MMM/;' => "DDD MMM NN NN:NN:NN NNNN"
 function asctime() { perl -e "print (scalar localtime($1));"; echo ""; }
-# filter-dirnames: strip directory names from ps listing
+# filter-dirnames: strip directory names from ps listing (TODO: rename as strip-dirnames)
 function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
 
 # comma-ize-number(): add commas to numbers in stdin
+# EX: echo "1234567890" | comma-ize-number => 1,234,567,890
 function comma-ize-number () { perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\d])/\1,\2\3/g; } '; }
 #
 # apply-numeric-suffixes([once=0]): converts numbers in stdin to use K/M/G suffixes.
@@ -997,6 +1012,7 @@ alias usage-pp='usage | apply-usage-numeric-suffixes | $PAGER'
 #
 # number-columns(file): number each column in first line of tabular file
 function number-columns () { head -1 "$1" | perl -0777 -pe '$c = 1; s/^/1: /; s/\t/"\t" . ++$c . ": "/eg;'; }
+# TODO: s/\t/\\t/g;
 function number-columns-comma () { head -1 "$1" | perl -pe 's/,/\t/g;' | number-columns -; }
 # alias type='cat'  # interferes with type command
 alias reverse='tac'
@@ -1361,7 +1377,9 @@ trace alias/function info
 # note: '.' used in grep to handle special case of no pattern;
 # TODO: use '$@' for '$*' (or note why not appropriate)
 #
+# note: adds newline after '}' to support paragraph grep
 alias show-functions-aux='typeset -f | perl -pe "s/^}/}\n/;"'
+#
 # TODO: allow for specifying word-boundary matching
 function show-all-macros () {
     pattern="$*";
@@ -1396,9 +1414,15 @@ alias tab-sort="sort -t $'\t'"
 alias colon-sort="sort $SORT_COL2 -t ':'"
 alias colon-sort-rev-num='colon-sort -rn'
 alias freq-sort='tab-sort -rn $SORT_COL2'
+#
+# para-sort: sort paragraphs alphabetically
 # TODO: use '$@' for '$*' (or note why not appropriate)
 function para-sort() { perl -00 -e '@paras=(); while (<>) {push(@paras,$_);} print join("\n", sort @paras);' $*; }
-alias echoize="perl -pe 's/\n(.)/ $1/;'"
+#
+# echoize: output stdin (e.g., command output) on single line, as if echo $(command)
+## BAD: alias echoize="perl -pe 's/\n(.)/ $1/;'"
+## TODO: alias echoize="perl -pe 's/\n(.)/ \$1/;'"
+function echoize { perl -00 -pe 's/\n(.)/ $1/g;'; }
 
 #-------------------------------------------------------------------------------
 trace file manipulation and conversions
@@ -1424,10 +1448,11 @@ function last-n-with-header () { head --lines=1 "$2"; tail --lines=$1 "$2"; }
 #-------------------------------------------------------------------------------
 trace line/word count, etc. commands
 
-# alias for counting words on individual lines thoughout a file
+# line-wc; alias for counting words on individual lines thoughout a file
 # (Gotta hate csh)
 function line-wc () { perl -n -e '@_ = split; printf("%d\t%s", 1 + $#_, $_);' "$@"; }
 alias line-word-len='line-wc'
+# 
 function line-len () { perl -ne 'printf("%d\t%s", length($_) - 1, $_);' "$@"; }
 function para-len () { perl -00 -ne 'printf("%d\t%s", length($_) - 1, $_);' "$@"; }
 alias ls-line-len='$LS | line-len | sort -rn | less'
@@ -1447,7 +1472,8 @@ alias do-rcsdiff='do_rcsdiff.sh'
 alias dobackup='dobackup.sh'
 alias kill-em='kill_em.sh'
 alias kill-it='kill-em --pattern'
-# TODO: see why --filter-dirnames added to ps-mine aliases
+# NOTE: see filter-dirnames added to strip directory names
+# TODO: rename as ps-mine-sans-dirs
 ## BAD: alias ps-mine-='ps-mine "$@" | filter-dirnames'
 function ps-mine- { ps-mine "$@" | filter-dirnames; }
 alias ps_mine='ps-mine'
@@ -1565,6 +1591,7 @@ alias unexport='unset'
 # TODO: put show-unicode-code-info-aux into script (as with other overly-large function definitions like hg-pull-and-update)
 # show-unicode-control-chars(): output Unicode codepoint (ordinal) and UTF-8 encoding for input chars with offset in line
 function show-unicode-code-info-aux() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < $1; }
+function show-unicode-code-info { show-unicode-code-info-aux "$@"; }
 function show-unicode-code-info-stdin() { in_file="$TEMP/show-unicode-code-info.$$"; cat >| $in_file;  show-unicode-code-info-aux $in_file; }
 #
 function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
@@ -1572,7 +1599,8 @@ function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
 # show-unicode-control-chars(): Convert ascii control characters to printable Unicode ones (e.g., ␀ for 0x00)
 ## BAD: function show-unicode-control-chars { perl -pe 'use Encode "decode_utf8"; s/[\x00-\x1F]/chr($&+0x2400)/e;'; }
 # See https://stackoverflow.com/questions/42193957/errorwide-character-in-print-at-x-at-line-35-fh-read-text-files-from-comm.
-function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr($& + 0x2400)/e;'; }
+## BAD: function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr($& + 0x2400)/eg;'; }
+function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
 
 
 #-------------------------------------------------------------------------------
@@ -1624,24 +1652,38 @@ alias gtime='/usr/bin/time'
 alias linux-version="cat /etc/os-release"
 alias os-release=linux-version
 alias system-status='system_status.sh -'
+#
+# apropos-command: show apropos output for lExecutable programs or shell commands (i.e., man section 1)
 # TODO: use '$@' for '$*' (or note why not appropriate)
+# TODO: 'apropos --section 1'
+# EX: apropos-command time | grep asctime | wc -l => 0
 function apropos-command () { apropos $* 2>&1 | $GREP '(1)' | $PAGER; }
+#
+# 
 function split-tokens () { perl -pe "s/\s+/\n/g;" "$@"; }
 alias tokenize='split-tokens'
 #
+# perl-echo(arg1): print arg1 via perl
+# NOTE: Usually Bash $'string' special tokens can be used instead
+#       (e.g., perl-echo "A\tB" => echo $'A\tB').
 # TODO: try to minimize use of quotes in perl-echo (e.g., need to mix single with double) due to bash quirks
 function perl-echo () { perl -e 'print "'$1'\n";'; }
+## MISC
 function perl-echo-sans-newline () { perl -e 'print "'$1'";'; }
 #
+# perl-printf(format, arg): output ARG2 via perl format ARG1
 ## TODO: generalize perl-printf to more than 2 args
 ## function perl-printf () { perl -e 'printf "$1\n", @_[1..$#_];';  }
 ##
 ## function perl-printf () { perl -e "printf \"$1\"", qw/$2 $3 $4 $5 $6 $7 $8 $9/; }
+## MISC
 function perl-printf () { perl -e "printf \"$1\", $2;"; }
 ##
 ## TODO: get following to work for 'perl-print "how now\nbrown cow\n"'
 ## function perl-print () { perl -e "print $1"; -e 'print "\n";'; }
+## MISC
 function perl-print () { perl -e "printf \"$1\";" -e 'print "\n";'; }
+## MISC
 function perl-print-n () { perl -e "printf \"$1\";"; }
 #
 # quote-tokens(): puts double quote around each token on commnd line
