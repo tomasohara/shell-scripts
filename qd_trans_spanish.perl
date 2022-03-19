@@ -14,8 +14,10 @@ eval 'exec perl -Ssw $0 "$@"'
 # - via spanish.perl:
 #      $sp_word_chars = "\\wáéíóúñü-";
 #      $sp_word_pattern = "([$sp_word_chars]+)([^$sp_word_chars])"
+# - The UNDER_EMACS environment variable is defined via my ~/.emacs config.
 #
 # TODO:
+# - * Make utf8 the default.
 # - Use strict-mode w/ variable-specific import exceptions.
 # - Remove verb conjugations during -pretty -first_sense output.
 # - Use edit distance to suggest terms when no results (e.g., tearal => teatral).
@@ -29,7 +31,7 @@ eval 'exec perl -Ssw $0 "$@"'
 # - Put verb conjugation on separate line (from last verbal sense). For example,
 #      "\t7. to make a slip, to blunder. \ Conjug. like contar." => "\t7. to make a slip, to blunder.\n\tConjug. like contar."
 #
-# Copyright (c) 2005-2019 Tom O'Hara and New Mexico State University.
+# Copyright (c) 2005-2022 Tom O'Hara and New Mexico State University.
 # Freely available via GNU General Public License (see GNU_public_license.txt).
 #
 
@@ -39,7 +41,7 @@ BEGIN {
 }
 require 'spanish.perl';
 use vars qw/$sp_options $sp_word_pattern $first_sense $subsenses $redirect $sp_remove_diacritics $verbose/;
-use vars qw/$utf8/;
+use vars qw/$utf8 $prompt/;
 
 my($misc_usage_notes) = <<END_MISC_NOTES;
 Notes:
@@ -58,7 +60,7 @@ sub usage {
 
 Usage: $program_name [options] spanish_file ...
 
-options = $sp_options [-sp_make_dict=0|1] [-pretty] [-brief] [-maxlen=N] [-full] [-multi]
+options = $sp_options [-sp_make_dict=0|1] [-pretty] [-brief] [-maxlen=N] [-full] [-multi] [-prompt=text]
 
 Quick and dirty (word-level) translation for the Spanish text.
 
@@ -88,6 +90,23 @@ if ($#ARGV < 0) {
 &init_var(*multi, &FALSE);      # show output on multine lines
 &init_var(*pretty, $multi);	# pretty print the entry
 &init_var(*maxlen, ($multi ? 1024 : 512));  # maximum length for translation output
+# Note: Special processing for prompt to support usage under Emacs shell
+# (n.b, UNDER_EMACS must be set explicitly).
+# TODO: just default to "> " regardless
+## TEST
+## my($prompt_default) = (&get_env("UNDER_EMACS") ? "> " : "");
+## &init_var(*prompt, $prompt_default);       # prompt for input
+## TODO: disable buffering
+&init_var(*prompt, "");          # prompt for input
+
+# Set stdout unbuffered if prompt used
+if ($prompt ne "") {
+    &debug_print(&TL_DETAILED, "Setting STDOUT unbuffered\n");
+    select(STDOUT); $| = 1;
+    ## TEST
+    ## select(STDIN); $| = 1;             
+    ## select(STDERR); $| = 1;             
+}
 
 # Set defaults for the dictionary, etc. These can be specified on command
 # line, as follows:
@@ -129,6 +148,7 @@ if ($verbose) {
 # Get the translations for each word in the text. Output each word with
 # its translation on a separate line.
 #
+print($prompt);
 while (<>) {
     chomp;	s/\r//;		# TODO: define my_chomp
     &dump_line();
@@ -236,6 +256,7 @@ while (<>) {
     }
     print "$text\n";		# print remainder
 
+    print($prompt) if (! eof);
 }
 
 # Cleanup
