@@ -17,7 +17,8 @@
 #     while [ expr ] ; do commands ; done
 #     $((arithmetic))              evaluate arithmetic expression
 #     $(command ...)               same as `command ...`
-#     ${var:-default}               use $var or "default"
+#     ${var:-default}              use $var or "default"
+#     true                         no-op
 # TODO: variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
 #     note: EXPR is C style;
 #         Format                    Example
