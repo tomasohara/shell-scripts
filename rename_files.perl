@@ -66,6 +66,11 @@ my $new_pattern = shift @ARGV;
 ##     $new_pattern = "";
 ## }
 
+# TEMP: warn about options not yet working
+if ($evalre) {
+    &debug_print(&TL_ALWAYS, "Warning: -evalre not yet working right\n")
+}
+
 # Normalize the patterns
 ## TODO: rework -ignore processing
 if ($ignore) {
@@ -107,18 +112,35 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
     if ($evalre) {
 	## ($global ? (eval { $new_file =~ s/$old_pattern/$new_pattern/g }) : (eval { $new_file =~ s/$old_pattern/$new_pattern/; })); &debug_print(&TL_VERBOSE, "\$1 = $1\n"); };
 	## TODO: my $quals = ($global ? "g" : ""); eval { $new_file =~ s/$old_pattern/$new_pattern/$quals; &debug_print(&TL_VERBOSE, "\$1 = $1\n"); };
-	eval { if ($global) { $new_file =~ s/$old_pattern/$new_pattern/ig; } else { $new_file =~  s/$old_pattern/$new_pattern/; };
-	       &debug_print(&TL_VERBOSE, "\$1 = $1\n"); 
-	};
-    }
+	## OLD:
+	## eval { if ($global) { $new_file =~ s/$old_pattern/$new_pattern/ig; } else { $new_file =~  s/$old_pattern/$new_pattern/; };
+	##        &debug_print(&TL_VERBOSE, "\$1 = $1\n"); 
+	## };
+	&debug_print(&TL_VERY_VERBOSE, "evalre replacement\n");
+	## TODO: if ($global) { $new_file =~ s/$old_pattern/$new_pattern/ge; } else { $new_file =~  s/$old_pattern/$new_pattern/e; };
+	while ( $new_file =~ m/$old_pattern/ ) {
+	    ## TODO: resolve issue with replacement '-p-$1'
+	    my($replacement) = eval "$new_pattern";
+	    if (! defined($replacement)) {
+		&debug_print(&TL_ERROR, "Error: bad replacement\n");
+		last;
+	    }
+	    &debug_print(&TL_VERBOSE, "replacement: $replacement\n");
+	    my($last_name) = $new_file;
+	    $new_file =~ s/$old_pattern/$replacement/;
+	    last if ((! $global) || ($new_file eq $last_name));
+	}
+     }
     elsif ($regex) {
-	if ($global) { $new_file =~ s/$old_pattern/$new_pattern/ig; } else { $new_file =~ s/$old_pattern/$new_pattern/; };
+	&debug_print(&TL_VERY_VERBOSE, "regex replacement\n");
+	if ($global) { $new_file =~ s/$old_pattern/$new_pattern/g; } else { $new_file =~ s/$old_pattern/$new_pattern/; };
 	## BAD: $new_file =~ s/$old_pattern/$new_pattern/;
-	if (&VERBOSE_DEBUGGING) { &debug_print(-1, "\$1 = $1\n"); }
+	## BAD (not appropriate for loop): if (&VERBOSE_DEBUGGING) { &debug_print(-1, "\$1 = $1\n"); }
     }
     else {
 	## ($global ne "" ? ($new_file =~ s/\Q$old_pattern/$new_pattern/g) : ($new_file =~ s/\Q$old_pattern/$new_pattern/));
-	if ($global) { $new_file =~ s/\Q$old_pattern/$new_pattern/ig; } else { $new_file =~ s/\Q$old_pattern/$new_pattern/; }
+	&debug_print(&TL_VERY_VERBOSE, "quoted-regex replacement\n");
+	if ($global) { $new_file =~ s/\Q$old_pattern/$new_pattern/g; } else { $new_file =~ s/\Q$old_pattern/$new_pattern/; }
     }
 
     # If the file names are the same, do nothing
