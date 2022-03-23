@@ -178,7 +178,8 @@ function invoke-git-command {
     local command="$1"
     shift
     ## OLD: local log="_git-$command-$(TODAY).$$.log";   ## OLD: log="_git-$command-$(TODAY).$$.log";
-    local log=$(get-temp-log-name $command)
+    local log
+    log=$(get-temp-log-name "$command")
     git "$command" "$@" >| "$log" 2>&1
     less "$log"
 }
@@ -200,14 +201,16 @@ alias git-log-diff='invoke-git-command log --patch'
 
 # git-add: add filename(s) to repository
 function git-add {
-    local log=$(get-temp-log-name "add")
+    local log
+    log=$(get-temp-log-name "add")
     git add "$@" >| "$log";
     less "$log";
 }
 
 # git-diff: show repo diff
 function git-diff {
-    local log=$(get-temp-log-name "diff")
+    local log
+    log=$(get-temp-log-name "diff")
     git diff "$@" >| "$log";
     less -p '^diff' "$log";
 }
@@ -266,19 +269,22 @@ function invoke-next-single-checkin {
 # NOTE: although potentially dangerous given eval environnment, the user still needs to
 # confirm the commit operation (and thus can verify done OK).
 function alt-invoke-next-single-checkin {
-    # Determine file to check in
+    # If unspecified, determine file to check in, based on next modified file
     local mod_file="$1"
     if [ "$mod_file" = "" ]; then
 	mod_file=$(git-diff-list | head -1);
-    fi
-    if [ "$mod_file" = "" ]; then
-	mod_file="???";
+	if [ "$mod_file" = "" ]; then
+	    echo "Warning: unable to infer mod_file. Perhaps,"
+            echo "    Tha-tha-that's all folks"'!'
+	    return;
+	fi
     fi
 
     # Read the user's commit message
     # note: shows visual diff (TODO: and pauses so user can start message)
     # TODO: position cursor at start of ... (instead of pause)
-    local is_text=$(file "$mod_file" | grep -i ':.*text')
+    local is_text
+    is_text=$(file "$mod_file" | grep -i ':.*text')
     if [ "$is_text" != "" ]; then
 	git-vdiff "$mod_file"
     else
@@ -333,7 +339,8 @@ function git-alias-usage () {
 	echo '    # ALT: git-checkin-multiple-template and git-checkin-all-template (n.b. ¡cuidado!)'
 	echo '    # old: invoke-next-single-checkin'
 	echo '    alt-invoke-next-single-checkin'
-	local next_mod_file=$(git-diff-list | head -1)
+	local next_mod_file
+	next_mod_file=$(git-diff-list | head -1)
 	if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
 	echo '    invoke-alt-checkin "'${next_mod_file}'"'
     }
