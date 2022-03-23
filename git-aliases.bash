@@ -274,7 +274,7 @@ function alt-invoke-next-single-checkin {
     if [ "$mod_file" = "" ]; then
 	mod_file=$(git-diff-list | head -1);
 	if [ "$mod_file" = "" ]; then
-	    echo "Warning: unable to infer mod_file. Perhaps,"
+	    echo "Warning: unable to infer modified file. Perhaps,"
             echo "    Tha-tha-that's all folks"'!'
 	    return;
 	fi
