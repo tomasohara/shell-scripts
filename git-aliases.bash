@@ -307,8 +307,9 @@ function git-alias-usage () {
     echo "Usage examples for git aliases, most of which create log files as follows:"
     echo "   _git-CMD-MMDDYY-HHMM-NNN.log      # ex: _git-status-07mar22.339.log"
     echo ""
+    # note: 'clear's -x option doesn't clobber (to work around a disruptive change that feel through effing cracks!)'
     echo "To update aliases:"
-    echo "   source \$TOM_BIN/git-aliases.bash; clear; git-alias-usage"
+    echo "   source \$TOM_BIN/git-aliases.bash; clear -x; git-alias-usage"
     echo ""
     echo "Get changes from repository:"
     echo "    git-update"
@@ -337,3 +338,5 @@ function git-alias-usage () {
 	echo '    invoke-alt-checkin "'${next_mod_file}'"'
     }
 }
+#
+alias git-template=git-alias-usage
