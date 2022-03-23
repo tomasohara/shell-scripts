@@ -2087,7 +2087,7 @@ alias mezcla-devel='add-python-path $HOME/programs/python/mezcla-tom/mezcla'
 alias mezcla-main='add-python-path $HOME/python/Mezcla-main/mezcla'
 alias mezcla-tom='add-python-path $HOME/python/Mezcla-tom/mezcla'
 # Add mezcla-main unless another version in path
-if [[ ! "$PATH" =~ /mezcla ]]; then
+if [[ ! "$PATH" =~ mezcla ]]; then
     mezcla-devel
 fi
 #
