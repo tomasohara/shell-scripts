@@ -2040,6 +2040,8 @@ function script {
     ## DEBUG: echo "Restoring xterm title: full=$save_full save=$save_icon"
     set-xterm-title "$save_full" "$save_icon"
 }
+# TODO: put this in a separate file
+alias script-update='script _update-$(T).log'
 
 # ansi-filter(filename]: wrapper around ansifilter with stdio and stdout instead of files
 # TODO: issue request for proper Unix stdin support (n.b., this function is much ado about nothing)
