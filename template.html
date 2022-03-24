@@ -9,7 +9,7 @@
 
   <BODY>
 
-    <!------------------------------------------------------------------------->
+    <!--.....................................................................-->
     <H3>TODO: Title</H3>
 
     <p>
@@ -20,22 +20,25 @@
 
       <!-- TODO: add optional table
            Notes:
-	   - Under emacs, use this regex replacement via query-replace-regexp
-	     for converting a tab-delimited file:
-               from: ^\([^	]+\)	\([^]+\)
-                 to: <tr><td>\1</td> <td>\2</td></tr>
-	   - Alternatively via Perl, use following:
-               perl -pe 's/^([^\t]+)\t(([^\n]+)/<tr><td>\1</td> <td>\2</td></tr>/;' < {input-file} > {temp-output-file}
+           - Under emacs, use this regex replacement via query-replace-regexp
+           for converting a tab-delimited file:
+              from: ^\([^^Q-TAB^Q-NL\]+\)^Q-TAB\([^Q-NL]+\)
+              to: <tr><td>\1</td> <td>\2</td></tr>
+	   -or-:
+	      (query-replace-regexp "^\([^\t\n]+\)\t\([^\n]+\)\n" "\t<tr><td>\1</td> <td>\2</td></tr>\n")
+	      TODO: fix tab and newline specification
+           - Alternatively via Perl, use following:
+             perl -pe 's@^([^\t]+)\t([^\n]+)@\t<tr><td>\1</td> <td>\2</td></tr>@;' < {input-file} > {temp-output-file}
         -->
       <table>
-	<!-- TODO: See whether th should be used in place of td in thead -->
-	<thead>
-	  <tr><td>TODO:Column-1</td> <td>TODO:Column-2</td></tr>
-	</thead>
-	<tbody>
-	  <tr><td>TODO:Item-1-1</td> <td>TODO:Item-1-2</td></tr>
-	  <tr><td>TODO:Item-2-1</td> <td>TODO:Item-2-2</td></tr>
-	</tbody>
+        <!-- TODO: See whether th should be used in place of td in thead -->
+        <thead>
+          <tr><td>TODO:Column-1</td> <td>TODO:Column-2</td></tr>
+        </thead>
+        <tbody>
+          <tr><td>TODO:Item-1-1</td> <td>TODO:Item-1-2</td></tr>
+          <tr><td>TODO:Item-2-1</td> <td>TODO:Item-2-2</td></tr>
+        </tbody>
       </table>
 
       <H3>Disclaimer</H3>
