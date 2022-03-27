@@ -289,12 +289,13 @@ function alt-invoke-next-single-checkin {
 	git-vdiff "$mod_file"
     else
         ## TODO: summarize binary differenecs
+	git diff --numstat "$mod_file" | head
         true
     fi
     ## BAD: sleep 3
     local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
     local command
-    echo "Warning: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
+    echo "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
     read -e -i "$prompt" command
 
     # Evaluate the user's checkin command
