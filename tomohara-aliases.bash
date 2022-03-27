@@ -2239,9 +2239,10 @@ function run-jupyter-notebook () {
     local ip="$2"; if [ "$ip" = "" ]; then ip="127.0.0.1"; fi
     local log="$TEMP/jupyter-$(TODAY).log"
     jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
+    echo "$log"
     # Show URL
     echo -n "URL: "
-    sleep 3
+    sleep 5
     extract-matches 'http:\S+' "$log" | sort -u
 }
 alias jupyter-notebook-redir=run-jupyter-notebook
