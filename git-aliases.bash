@@ -338,12 +338,12 @@ function git-alias-usage () {
 	echo "    git-checkin-single-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
 	# TODO: echo '    git-checkin-single-template | source'
 	echo '    # ALT: git-checkin-multiple-template and git-checkin-all-template (n.b. ¡cuidado!)'
-	echo '    # old: invoke-next-single-checkin'
 	echo '    alt-invoke-next-single-checkin'
 	local next_mod_file
 	next_mod_file=$(git-diff-list | head -1)
 	if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
 	echo '    invoke-alt-checkin "'${next_mod_file}'"'
+	echo '    invoke-alt-checkin'
     }
 }
 #
