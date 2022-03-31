@@ -28,6 +28,7 @@ BEGIN {
 use strict;
 use vars qw/$q $f $regex $quick $force $test $evalre $global $i $ignore/;
 use vars qw/$t $para/;
+use vars qw/$rename_old/;
 
 &init_var(*q, &FALSE);		# alias for -q
 &init_var(*quick, $q);		# quick spec: infer files from old pattern
@@ -43,6 +44,12 @@ use vars qw/$t $para/;
 &init_var(*t, &FALSE);          # alias for -test
 &init_var(*test, $t);	        # just test the rename operation
 &init_var(*global, &FALSE);	# global replacement
+&init_var(*rename_old, &FALSE); # rename old file as {old}.{MMDDDYY}
+
+# Refuse to process buggy -rename_old
+if ($rename_old) {
+    &exit("Error: The -rename_old is not yet functional\n");
+}
 
 ## TEST:
 # TODO: put $para support in common.perl (likewise for slurp, as in count_it.perl)
@@ -59,6 +66,7 @@ if (!defined($ARGV[1])) {
 }
 my $old_pattern = shift @ARGV;
 my $new_pattern = shift @ARGV;
+my $test_spec = ($test ? "test " : "");
 
 ## OLD:
 ## $new_pattern = "" if (! defined($new_pattern));
@@ -148,6 +156,16 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
 	&debug_print(&TL_DETAILED, "File names are the same for \"$old_file\"\n");
 	next;
     }
+
+    # Move target to target.{today}
+    # note: get_file_ddmmmyy returns current year 2022 as 1971!
+    if ((-e $new_file) && $rename_old) {
+	my($old_file_dated) = $new_file . "." . &get_file_ddmmmyy($new_file);
+	&debug_print(&TL_BASIC, "${test_spec}renaming existing target \"$new_file\" as \"$old_file_dated\"\n");
+	if (! $test) {
+	    rename $new_file, $old_file_dated;
+	}
+    }
     
     # If file with new name exists, don't overwrite unless force specified
     if ((-e $new_file) && ($force == &FALSE)) {
@@ -165,7 +183,7 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
 
 	# Execute the rename command
 	## &cmd("mv $old_file' '$new_file'", &TL_USUAL);
-	my $test_spec = ($test ? "test " : "");
+	## OLD: my $test_spec = ($test ? "test " : "");
 	&debug_print(&TL_BASIC, "${test_spec}renaming \"$old_file\" to \"$new_file\"\n");
 	next if ($test);
 	my($OK) = rename $old_file, $new_file;
@@ -182,11 +200,13 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
 sub usage {
     my($options) = "main options = [-q | -quick] [-f | -force] [-i | -ignore] [-global] [-regex]";
     $options .= "\nother options = [-evalre] [-t | -test] [-para]";
+    ## TODO: $options .= "\nother options = [-evalre] [-t | -test] [-para] [-rename_old]";
     $options .= "\ncommon options = " . &COMMON_OPTIONS;
     my($example) = "Example(s):\n\n$script_name rename_files ' - Shortcut' '' *Shortcut*\n\n";
     $example .= "$0 rename-files -q -- '--' '-'\n\n";
     my($note) = "";
     $note .= "Notes:\n\n-- Use -- for first argument if dashes occur in old-pattern.\n-- By default only a single occurrence of the pattern is replaced.\n\n- The -ignore option is with respect to old vs. new comparison).\n";
+    ## TODO: $note .= "- Use -rename_old to rename existing target file with date-based suffix (e.g., fubar to fubar.22mar22).\n";
 
     print STDERR "\nUsage: $script_name [options] old-pattern new-pattern [file] ...\\n\n$options\n\n$example\n$note";
 }
