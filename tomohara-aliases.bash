@@ -111,7 +111,6 @@
 # - Make sections more apparent and easier to grep (e.g., use Xyz settings (or Xyz Stuff, along
 #   with section dividers).
 # - Replace '/bin/cmd ...' with 'command cmd ...' in aliases.
-# - Change references to grep with $GREP (e.g., egrep) for consistency and to avoid head scratching about extended regex patterns not working 
 #
 
 # For debugging: Uncomment the following line(s)
@@ -196,9 +195,10 @@ function space-check() {
 ## function downcase-stdin() { perl-utf8 -pe 's/.*/\L$&/;'; }
 function downcase-stdin { perl -pe "use open ':std', ':encoding(UTF-8)'; s/.*/\L$&/;"; }
 function downcase-text() { echo "$@" | downcase-stdin; }
-# todays-date(): outputs date in format DDMmmYY (e.g., 22Apr20)
+# todays-date(): outputs date in format DDmmmYY (e.g., 22Apr20)
 ## OLD: function todays-date() { date '+%d%b%y' | perl -pe 's/.*/\L$&/;'; }
 ## TODO: drop leading digits in day of month
+## NOTE: keep in synch with common.perl get_file_ddmmmyy and .emacs edit-adhoc-notes-file
 function todays-date() { date '+%d%b%y' | downcase-stdin; }
 todays_date=$(todays-date)
 ## MISC:
@@ -732,6 +732,7 @@ if [[ $(grep --version) =~ Copyright.*2[0-9][0-9][0-9] ]]; then skip_dirs="-d sk
 #   -s       suppress error messages (e.g., unreadable files)
 #   -E       extended regex support (i.e., old egrep)
 # - /bin/grep used to avoid alias and to allow for use with exec
+# - egrep is normally used unless the pattern will never use extended regex's
 ## TODO: quiet-unalias grep
 ## TODO: add alias for resolving grep binary with fallback to "command grep"
 GREP="/bin/grep"
@@ -749,10 +750,11 @@ function gu-all () { grep-unique "$@" * | $PAGER; }
 #
 function gu- () { $GREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0"; }
 #
-# grepl(pattern, [other_grep_args]): invokes grep over PATTERN and OTHER_GREP_ARGS and then pipes into less for PATTERN 
+# grepl(pattern, [other_grep_args]): invokes grep over PATTERN and OTHER_GREP_ARGS and then pipes into less for PATTERN
+# NOTE: actually uses egrep
 # TODO: use more general way to ensure pattern given last while readily extractable for less -p usage
 ## OLD: function grep-to-less () { $GREP $MY_GREP_OPTIONS "$@" | $PAGER -p"$1"; }
-function grep-to-less () { $GREP $MY_GREP_OPTIONS "$@" | $PAGER_NOEXIT -p"$1"; }
+function grep-to-less () { $EGREP $MY_GREP_OPTIONS "$@" | $PAGER_NOEXIT -p"$1"; }
 alias grepl-='grep-to-less'
 function grepl () { pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
 
@@ -1487,13 +1489,18 @@ alias foreach='perl- foreach.perl'
 # rename-spaces: replace spaces in filenames of current dir with underscores
 alias rename-spaces='rename-files -q -global " " "_"'
 alias rename-quotes='rename-files -q -global "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
-## OLD: alias rename-special-punct='rename-files -q -global -regex "[&\!\*?]" ""'
 alias rename-special-punct='rename-files -q -global -regex "[&\!\*?\(\)]" ""'
+## TODO:
+## alias rename-spaces='rename-files -rename_old -q -global " " "_"'
+## alias rename-quotes='rename-files -rename_old -q -global "'"'"'" ""'   # where "'"'"'" is concatenated dou## OLD: alias rename-special-punct='rename-files -q -global -regex "[&\!\*?]" ""'
+## alias rename-special-punct='rename-files -rename_old -q -global -regex "[&\!\*?\(\)]" ""'
 # move-duplicates: move duplicate produced via Firefox downloads
 # ex: move "05-158-a-20 (1).pdf duplicates
 alias move-duplicates='mkdir -p duplicates; move *\([0-9]\).* duplicates 2>&1 | $GREP -iv cannot.stat.*..No.such'
-alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-duplicates'
+# TODO: rename existing files with file date (instead of blocking rename)
 alias rename-parens='rename-files -global -regex "[\(\)]" "" *[\(\)]*'
+alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-duplicates'
+## TODO: alias rename-parens='rename-files -rename_old -global -regex "[\(\)]" "" *[\(\)]*'
 # move "versioned" log files into ./log-file subdirectory
 #    *** files end in .log[0-9]+ or .log and have numeric affix (e.g., do-xyz.log2, do-xyz.2.log, or do-xyz-30may21.log)
 #
