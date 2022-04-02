@@ -284,6 +284,7 @@ function alt-invoke-next-single-checkin {
     # note: shows visual diff (TODO: and pauses so user can start message)
     # TODO: position cursor at start of ... (instead of pause)
     local is_text
+    ## TODO: fix problem identifing scripts with UTF-8 as text (e.g., common.perl reported as data by file command)
     is_text=$(file "$mod_file" | grep -i ':.*text')
     if [ "$is_text" != "" ]; then
 	git-vdiff "$mod_file"
