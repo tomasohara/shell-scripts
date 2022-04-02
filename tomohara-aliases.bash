@@ -2092,12 +2092,16 @@ function add-python-path () {
     export PYTHONPATH="$parent_path:$PYTHONPATH"
 }
 # EX: mezcla-devel; which system.py | grep -i Mezcla-main => ""
-alias mezcla-devel='add-python-path $HOME/programs/python/mezcla-tom/mezcla'
+# note: mezcla-devel should be stable version of mezcla-tom
+## OLD: alias mezcla-devel='add-python-path $HOME/programs/python/mezcla-tom/mezcla'
+alias mezcla-devel='add-python-path $HOME/python/Mezcla/mezcla'
 alias mezcla-main='add-python-path $HOME/python/Mezcla-main/mezcla'
 alias mezcla-tom='add-python-path $HOME/python/Mezcla-tom/mezcla'
-# Add mezcla-main unless another version in path
+# Add mezcla-devel unless another version in path
 if [[ ! "$PATH" =~ mezcla ]]; then
-    mezcla-devel
+    ## OLD: mezcla-devel
+    ## TODO: echo "Warning: mezcla not in PATH"
+    true
 fi
 #
 alias ps-python-full='ps-all python'
