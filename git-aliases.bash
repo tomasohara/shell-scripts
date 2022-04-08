@@ -88,8 +88,11 @@ function get-temp-log-name {
 function git-update {
     local log
     log=$(get-temp-log-name "update")
+    echo "issuing: git stash"
     git stash >> "$log"
+    echo "issuing: git pull --all"
     git pull --all >> "$log"
+    echo "issuing: git stash pop"
     git stash pop >> "$log"
     echo >> "$log"
     tail "$log"
@@ -118,6 +121,7 @@ function git-commit-and-push {
 	fi
     done
     echo "git_user: $git_user;  git_token: $git_token"
+    echo "issuing: git add \"$*\""
     git add "$@" >> "$log"
     # TODO: rework so that message passed as argument (to avoid stale messages from environment)
     local message="$GIT_MESSAGE";
@@ -140,6 +144,7 @@ function git-commit-and-push {
     perl -pe 's/^/    /;' "$log"
     pause-for-enter 'About to push: review commit log above!'
     #
+    echo "issuing: git push --verbose"
     git push --verbose <<EOF >> "$log"
 $git_user
 $git_token
@@ -168,7 +173,12 @@ function git-pull-and-update() {
         local git="python -u /usr/bin/git";
         local log
 	log=$(get-temp-log-name "update")
-        ($git pull --noninteractive --verbose;  $git update --noninteractive --verbose) >> "$log" 2>&1; less "$log"
+        ## OLD: ($git pull --noninteractive --verbose;  $git update --noninteractive --verbose) >> "$log" 2>&1; less "$log"
+	echo "issuing: $git --noninteractive --verbose"
+        $git pull --noninteractive --verbose >> "$log" 2>&1
+	echo "issuing: $git update --noninteractive --verbose"
+        $git update --noninteractive --verbose >> "$log" 2>&1; 
+        less "$log"
     fi;
 }
 
@@ -180,6 +190,7 @@ function invoke-git-command {
     ## OLD: local log="_git-$command-$(TODAY).$$.log";   ## OLD: log="_git-$command-$(TODAY).$$.log";
     local log
     log=$(get-temp-log-name "$command")
+    echo "issuing: git $command \"$*\""
     git "$command" "$@" >| "$log" 2>&1
     less "$log"
 }
@@ -215,7 +226,11 @@ function git-diff {
     less -p '^diff' "$log";
 }
 #
-alias git-difftool='git difftool --no-prompt'
+## OLD: alias git-difftool='git difftool --no-prompt'
+function git-difftool {
+    echo "issuing: git difftool --no-prompt"
+    git difftool --no-prompt
+}
 #
 function git-vdiff { git-difftool "$@" & }
 
@@ -334,8 +349,6 @@ function git-alias-usage () {
     # shellcheck disable=SC2016
     {
         echo "To check in files different from repo:"
-	echo "    # TODO: pushd \$REPO_ROOT"
-	echo "    # -OR-: pushd \$(realpath .)/.."
 	echo "    git-checkin-single-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
 	# TODO: echo '    git-checkin-single-template | source'
 	echo '    # ALT: git-checkin-multiple-template and git-checkin-all-template (n.b. ¡cuidado!)'
@@ -344,8 +357,16 @@ function git-alias-usage () {
 	next_mod_file=$(git-diff-list | head -1)
 	if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
 	echo '    invoke-alt-checkin "'${next_mod_file}'"'
+	echo '    git-cd-root'
 	echo '    invoke-alt-checkin'
     }
 }
-#
+
+# Various aliases
+## TODO: include suffix to better differentiate from regular git-xyz commands
 alias git-template=git-alias-usage
+alias git-root='git rev-parse --show-toplevel'
+alias git-cd-root='cd $(git-root)'
+alias git-invoke-next-single-checkin=invoke-next-single-checkin
+alias git-alias-refresh="source ${BASH_SOURCE[0]}"
+
