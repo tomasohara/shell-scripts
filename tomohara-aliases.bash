@@ -2178,6 +2178,7 @@ function run-python-lint-batched () {
          # HACK: uses basename of parent prefix if invoked with path
          local b=$(basename "$f")
          local pre=""
+	 # Note: uses directory name as prefix if file not in current dir
          if [[ $f =~ / ]]; then pre="$(basename $(dirname "$f"))-"; fi
          DEBUG_LEVEL=5 python-lint "$f" >| "$out_dir/$pre$b".log 2>&1
          head "$out_dir/$pre$b".log
