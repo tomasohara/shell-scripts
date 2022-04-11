@@ -39,6 +39,8 @@ if [ "$1" = "--help" ]; then
     echo ""
     echo "ex: $0 -- --geometry 80x50"
     echo ""
+    echo "Note: put emacs arguments after --"
+    echo ""
     exit
 fi
 
