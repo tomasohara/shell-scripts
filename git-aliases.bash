@@ -190,7 +190,7 @@ function invoke-git-command {
     ## OLD: local log="_git-$command-$(TODAY).$$.log";   ## OLD: log="_git-$command-$(TODAY).$$.log";
     local log
     log=$(get-temp-log-name "$command")
-    echo "issuing: git $command \"$*\""
+    echo "issuing: git $command $*"
     git "$command" "$@" >| "$log" 2>&1
     less "$log"
 }
@@ -228,11 +228,13 @@ function git-diff {
 #
 ## OLD: alias git-difftool='git difftool --no-prompt'
 function git-difftool {
-    echo "issuing: git difftool --no-prompt"
+    ## TODO: echo "issuing: git difftool --no-prompt"
     git difftool --no-prompt
 }
 #
-function git-vdiff { git-difftool "$@" & }
+function git-vdiff {
+    git-difftool "$@" &
+}
 
 # Produce listing of changed files
 # note: used in check-in templates, so level of indirection involved
@@ -302,7 +304,12 @@ function alt-invoke-next-single-checkin {
     ## TODO: fix problem identifing scripts with UTF-8 as text (e.g., common.perl reported as data by file command)
     is_text=$(file "$mod_file" | grep -i ':.*text')
     if [ "$is_text" != "" ]; then
-	git-vdiff "$mod_file"
+	## OLD: git-vdiff "$mod_file"
+	# note: pauses a little so that user can update cursor before focus shifts
+	# TODO: see how to keep focus on terminal window for git update
+	local delay=5
+	echo "issuing: (sleep $delay; git-vdiff \"$mod_file\") &"
+	(sleep $delay; git-vdiff "$mod_file") &
     else
         ## TODO: summarize binary differenecs
 	git diff --numstat "$mod_file" | head
@@ -351,14 +358,16 @@ function git-alias-usage () {
         echo "To check in files different from repo:"
 	echo "    git-checkin-single-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
 	# TODO: echo '    git-checkin-single-template | source'
-	echo '    # ALT: git-checkin-multiple-template and git-checkin-all-template (n.b. ¡cuidado!)'
+	echo '    # ALT: git-checkin-multiple-template/git-checkin-all-template (¡cuidado!)'
 	echo '    alt-invoke-next-single-checkin'
 	local next_mod_file
 	next_mod_file=$(git-diff-list | head -1)
 	if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
 	echo '    invoke-alt-checkin "'${next_mod_file}'"'
+	echo ''
+	echo 'Usual check-in:'
 	echo '    git-cd-root'
-	echo '    invoke-alt-checkin'
+	echo '    invoke-alt-checkin                      # repeat ...'
     }
 }
 
