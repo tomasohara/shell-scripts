@@ -203,8 +203,9 @@ function todays-date() { date '+%d%b%y' | downcase-stdin; }
 todays_date=$(todays-date)
 ## MISC:
 ## # Convenience alias and bash variable for better tab-completion
-## alias hoy=todays-date
-## hoy=$(todays-date)
+## OLD
+alias hoy=todays-date
+hoy=$(todays-date)
 # Note: version so Spanish not used in note files
 # TODO: punt on tab-completion (i.e., TODAY => today)???
 alias TODAY=todays-date
@@ -862,10 +863,11 @@ alias make-file-listing='listing="ls-aR.list"; dobackup.sh "$listing"; $LS -aR >
 #
 alias emacs-tpo='tpo-invoke-emacs.sh'
 alias em=emacs-tpo
-function em-fn () { em -fn "$1" $2 $3 $4 $5 $6 $7 $8 $9; }
+function em-fn () { em -- -fn "$1" $2 $3 $4 $5 $6 $7 $8 $9; }
 alias em-tags=etags
 #
-alias em-misc='em-fn -misc-fixed-medium-r-normal--14-110-100-100-c-70-iso8859-1'
+## OLD: alias em-misc='em-fn -misc-fixed-medium-r-normal--14-110-100-100-c-70-iso8859-1'
+alias em-large='em-fn "-DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"'
 alias em-nw='emacs -l ~/.emacs --no-windows'
 ## TODO: alias em-tpo='emacs -l ~/.emacs'
 alias em-tpo-nw='emacs -l ~/.emacs --no-windows'
@@ -2473,7 +2475,8 @@ alias sleepy='sleepyhead'
 #------------------------------------------------------------------------
 # Aliases for [re-]invoking aliases
 alias tomohara-aliases="source $TOM_BIN/tomohara-aliases.bash"
-alias redo-tpo=tomohara-aliases
+alias tomohara-settings="source $TOM_BIN/tomohara-settings.bash"
+## OLD: alias redo-tpo=tomohara-aliases
 alias more-tomohara-aliases="source $TOM_BIN/more-tomohara-aliases.bash"
 
 # Optional end tracing
