@@ -76,6 +76,7 @@
 #    -- 'realpath file' returns full path for file with relative path.
 #
 # TODO:
+# - ***** Fix problems noted by shellcheck (and rework false positives)!.
 # - ** Add macros to provide cribsheet on usage!
 # - *** Purge way-old stuff (e.g., lynx related)!
 # - ** Add option to move alias not to put files in subdirectory of target directory. That is, the move command aborts rather than doing following: 'move sub-dir target-dir' ==> target-dir/sub-dir/sub-dir).
@@ -152,7 +153,7 @@ if [ ! -d "$TOM_DIR" ]; then export TOM_DIR=$HOME; fi
 #
 cond-export TOM_BIN "$TOM_DIR/bin"
 if [ ! -e "$TOM_BIN/tomohara-aliases.bash" ]; then echo "*** Unable to resolve Tom's bin directory ***"; fi
-alias tomohara-setup="source $TOM_BIN/tomohara-aliases.bash"
+alias tomohara-setup='source $TOM_BIN/tomohara-aliases.bash'
 
 # Alias for startup-script tracing via startup-trace function
 if [ ! -e "$HOME/temp" ]; then
@@ -162,14 +163,14 @@ fi
 #
 # Define simple version of startup tracing
 ## OLD: function startup-trace () { if [ "$STARTUP_TRACING" = "1" ]; then echo $* [$HOSTNAME $(date)] >> $HOME/temp/.startup-$HOSTNAME-$$.log; fi; }
-function startup-trace () { if [ "$STARTUP_TRACING" = "1" ]; then echo "$@" [$HOSTNAME $(date)] >> $HOME/temp/.startup-$HOSTNAME-$$.log; fi; }
+function startup-trace () { if [ "$STARTUP_TRACING" = "1" ]; then echo "$@" "[$HOSTNAME $(date)]" >> "$HOME/temp/.startup-$HOSTNAME-$$.log"; fi; }
 # conditional-source(filename): source in bash commands from filename if exists
-function conditional-source () { if [ -e "$1" ]; then source $1; else echo "Warning: bash script file not found (so not sourced):"; echo "    $1"; fi; }
+function conditional-source () { if [ -e "$1" ]; then source "$1"; else echo "Warning: bash script file not found (so not sourced):"; echo "    $1"; fi; }
 function quiet-conditional-source { source "$@" > /dev/null 2>&1; }
 #
 # Enable full-blown startup tracing if evailable
 # note: kept separate for use in other scripts
-conditional-source $TOM_BIN/startup-tracing.bash
+conditional-source "$TOM_BIN/startup-tracing.bash"
 #
 alias trace='startup-trace'
 alias enable-startup-tracing='export STARTUP_TRACING=1'
@@ -200,7 +201,8 @@ function downcase-text() { echo "$@" | downcase-stdin; }
 ## TODO: drop leading digits in day of month
 ## NOTE: keep in synch with common.perl get_file_ddmmmyy and .emacs edit-adhoc-notes-file
 function todays-date() { date '+%d%b%y' | downcase-stdin; }
-todays_date=$(todays-date)
+## OLD
+## todays_date=$(todays-date)
 ## MISC:
 ## # Convenience alias and bash variable for better tab-completion
 ## OLD
@@ -214,7 +216,7 @@ alias date-central='TZ="America/Chicago" date'
 ## OLD: alias em-adhoc-notes='emacs-tpo _adhoc.$(TODAY).log'
 alias em-adhoc-notes='emacs-tpo _adhoc-notes.$(TODAY).txt'
 alias T='TODAY'
-## OLD: T=$(TODAY)
+T=$(TODAY)
 # update-today-vars() & todays-update: update the various today-related variables
 # aside: descriptive name for function and convenience alias (tab-completion)
 # TODO: try for cron-like bash function to enable such updates automatically
@@ -224,6 +226,10 @@ function update-today-vars {
 }
 update-today-vars
 alias todays-update='update-today-vars'
+#
+# reference-variable(var, ...): use to mark VAR as used in order to silence bash liners like shell check (e.g., for variables only used interactively)
+function reference-variable { true; }
+reference-variable "$hoy, $T"
 
 # Alias creation helper(s)
 ## OLD: function quiet-unalias () { unalias "$@" 2> /dev/null; }
@@ -234,7 +240,7 @@ function quiet-unalias {
     ## HACK: do nothing if running under bats-core
     if [ "$BATS_TEST_FILENAME" != "" ]; then
 	if [ "$BATCH_MODE" != "1" ]; then
-            echo "Ignoring unalias over $@ for sake of bats"
+            echo "Ignoring unalias over $* for sake of bats"
 	fi
         return
     fi
