@@ -32,10 +32,17 @@
 **/log-files
 **/output-files
 
+# Jupyter
+.ipynb_checkpoints
+
+#...............................................................................
 # Idiosyncratic stuff for Tom
-#
+
+# Personal note files
 # ex: reempl-notes.txt
-**/*notes*txt
+**/*-notes*txt
+
+# Dated backup files
 # ex: html_utils.py.09mar22
 **/*.[0-9][0-9][A-Za-z]*[0-9][0-9]
 # ex: usage.list.08Jan22.2
@@ -43,3 +50,7 @@
 
 # Emacs
 TAGS
+
+# OS-specific directories
+linux
+win32
