@@ -212,16 +212,16 @@ alias git-log-diff='invoke-git-command log --patch'
 
 # git-add: add filename(s) to repository
 function git-add {
-    local log
-    log=$(get-temp-log-name "add")
+    local log;
+    log=$(get-temp-log-name "add");
     git add "$@" >| "$log";
     less "$log";
 }
 
 # git-diff: show repo diff
 function git-diff {
-    local log
-    log=$(get-temp-log-name "diff")
+    local log;
+    log=$(get-temp-log-name "diff");
     git diff "$@" >| "$log";
     less -p '^diff' "$log";
 }
@@ -229,12 +229,15 @@ function git-diff {
 ## OLD: alias git-difftool='git difftool --no-prompt'
 function git-difftool {
     ## TODO: echo "issuing: git difftool --no-prompt"
-    git difftool --no-prompt
+    ## BAD: git difftool --no-prompt
+    git difftool --no-prompt "$@";
 }
 #
-function git-vdiff {
-    git-difftool "$@" &
-}
+# OLD:
+## function git-vdiff {
+##     git-difftool "$@" &
+## }
+alias git-vdiff=git-difftool
 
 # Produce listing of changed files
 # note: used in check-in templates, so level of indirection involved
@@ -367,7 +370,7 @@ function git-alias-usage () {
 	echo ''
 	echo 'Usual check-in:'
 	echo '    git-cd-root'
-	echo '    invoke-alt-checkin                      # repeat ...'
+	echo '    git-next-checkin                      # repeat ...'
     }
 }
 
@@ -377,5 +380,5 @@ alias git-template=git-alias-usage
 alias git-root='git rev-parse --show-toplevel'
 alias git-cd-root='cd $(git-root)'
 alias git-invoke-next-single-checkin=invoke-next-single-checkin
-alias git-alias-refresh="source ${BASH_SOURCE[0]}"
-
+alias git-alias-refresh='source ${BASH_SOURCE[0]}'
+alias git-next-checkin='invoke-alt-checkin'
