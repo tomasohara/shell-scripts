@@ -1,0 +1,113 @@
+This is a set of adhoc tests using a simple format based on the interaction
+in a terminal session. It is designed for ease of preparation rather than
+generality.
+
+--------------------------------------------------------------------------------
+
+¢ calc_entropy.perl -simple .25 .25 .25 .25
+Entropy
+2.000
+
+--------------------------------------------------------------------------------
+
+¢ head ~/bin/tests/calc_entropy.*input*
+==> /home/tomohara/bin/tests/calc_entropy.input <==
+# Frequency of 'between' in Penn Treebank II WSJ annotations
+24	pp-clr
+6	pp-dir
+4	pp-ext
+35	pp-loc
+2	pp-nom
+7	pp-prd
+42	pp-tmp
+
+==> /home/tomohara/bin/tests/calc_entropy.simple.input <==
+.25 .25 .25 .25
+
+==> /home/tomohara/bin/tests/calc_entropy.simple.input2 <==
+.47 .42 .06 .05
+
+--------------------------------------------------------------------------------
+
+¢ calc_entropy.perl -simple - < ~/bin/tests/calc_entropy.simple.input
+Entropy
+2.000
+
+--------------------------------------------------------------------------------
+
+¢ calc_entropy.perl -simple - < ~/bin/tests/calc_entropy.simple.input2
+Entropy
+1.497
+
+--------------------------------------------------------------------------------
+
+$ calc_entropy.perl -verbose -simple - < ~/bin/tests/calc_entropy.simple.input2
+#	prob	-p lg(p)    max p
+#--------------------------------
+#	0.470	0.512
+#	0.420	0.526
+#	0.060	0.244
+#	0.050	0.216
+#--------------------------------
+# word	classes	freq	entropy	max_prob
+#	1.000	1.497	   0.470
+Entropy
+1.497
+
+--------------------------------------------------------------------------------
+
+¢ cat ~/bin/tests/calc_entropy.input
+# Frequency of 'between' in Penn Treebank II WSJ annotations
+24	pp-clr
+6	pp-dir
+4	pp-ext
+35	pp-loc
+2	pp-nom
+7	pp-prd
+42	pp-tmp
+
+--------------------------------------------------------------------------------
+
+¢ calc_entropy.perl - < ~/bin/tests/calc_entropy.input
+2.230
+
+--------------------------------------------------------------------------------
+
+¢ calc_entropy.perl -verbose - < ~/bin/tests/calc_entropy.input
+#		class	freq	prob	-p lg(p)
+#		pp-tmp	42	0.350	0.530
+#		pp-loc	35	0.292	0.518
+#		pp-clr	24	0.200	0.464
+#		pp-prd	7	0.058	0.239
+#		pp-dir	6	0.050	0.216
+#		pp-ext	4	0.033	0.164
+#		pp-nom	2	0.017	0.098
+#		total	120	1.000	2.230
+
+# word	classes	freq	entropy	max_prob
+-	7	120	2.230	0.350
+
+--------------------------------------------------------------------------------
+
+¢ calc_entropy.perl ~/bin/tests/calc_entropy.input ~/bin/tests/calc_entropy.input2
+2.230
+1.750
+
+================================================================================
+
+$ echo 2520878057 | comma-ize-number 
+2,520,878,057
+ 
+$ echo 2520878057 | apply-numeric-suffixes 
+2.348G
+
+$ calc "403.4 * 1000**3" | comma-ize-number 
+403,400,000,000.000
+
+================================================================================
+
+# simple test for mezcla system
+# note: used to check that mezcla accessible
+
+¢ python -c 'from mezcla import system; system.print_error("hey"); print("joe")' 2> /dev/null
+joe
