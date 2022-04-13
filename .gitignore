@@ -1,5 +1,5 @@
-# Rules for telling git which files to ignore, mainly based on
-# extension but also accounting for some idiosyncratic usages.
+# Rules for telling git which untracked files to ignore, mainly based on
+# file extension but also accounting for some idiosyncratic usages.
 #
 # Note:
 # - This is shared across projects, so there might seem to be
@@ -16,10 +16,9 @@
 **/*.log
 **/*.list
 
-# Any files with _
-# note: "I know, I know, ... what about __init__.py?!"
-# TODO: whitelist command cases
+# Any files with _, except specified cases
 **/_*
+!**/*__init__.py
 
 # Backup file
 **/*.bak
@@ -39,3 +38,8 @@
 **/*notes*txt
 # ex: html_utils.py.09mar22
 **/*.[0-9][0-9][A-Za-z]*[0-9][0-9]
+# ex: usage.list.08Jan22.2
+**/*.[0-9][0-9][A-Za-z]*[0-9][0-9].*
+
+# Emacs
+TAGS
