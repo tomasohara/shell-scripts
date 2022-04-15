@@ -74,6 +74,9 @@
 #    -- 'ENV_VAR=value command ...' runs command with temp. environment setting.
 # - Likewise commonly used Unix features which might not be familiar:
 #    -- 'realpath file' returns full path for file with relative path.
+# - Selectively ignore following shellchek warnings
+#    -- SC2155: Declare and assign separately to avoid masking return values
+#    -- SC2139: This expands when defined, not when used. Consider escaping.
 #
 # TODO:
 # - ***** Fix problems noted by shellcheck (and rework false positives)!.
@@ -287,7 +290,7 @@ shopt -s nocasematch
 trace do_setup.bash invocation
 
 # Get initital settings from ~/bin/do_setup.bash
-if [ -e $TOM_BIN/do_setup.bash ]; then source $TOM_BIN/do_setup.bash; fi
+if [ -e "$TOM_BIN/do_setup.bash" ]; then source "$TOM_BIN/do_setup.bash"; fi
 
 #-------------------------------------------------------------------------------
 trace 'in tomohara-aliases.bash'
@@ -332,10 +335,10 @@ function zhead () {
     shift
     zcat "$file" | head "$@"
 }
-alias less-="$PAGER_NOEXIT"
-alias less-clipped="$PAGER_NOEXIT -S"
-alias less-tail="$PAGER_NOEXIT +G"
-alias less-tail-clipped="$PAGER_NOEXIT +G -S"
+alias less-='$PAGER_NOEXIT'
+alias less-clipped='$PAGER_NOEXIT -S'
+alias less-tail='$PAGER_NOEXIT +G'
+alias less-tail-clipped='$PAGER_NOEXIT +G -S'
 alias ltc=less-tail-clipped
 export ZPAGER=zless
 
@@ -345,7 +348,7 @@ trace start of main settings
 # Path settings
 # TODO: define a function for removing duplicates from the PATH while
 # preserving the order
-function show-path-dir () { (echo "${1}:"; printenv $1 | perl -pe "s/:/\n/g;") | $PAGER; }
+function show-path-dir () { (echo "${1}:"; printenv "$1" | perl -pe "s/:/\n/g;") | $PAGER; }
 alias show-path='show-path-dir PATH'
 # append-path(path): appends PATH to environment variable unless already there
 ## TODO: function in-path { local path=$(tr ":" "\n" | $GREP "^$1$$"); return ($path != ""); }
@@ -357,14 +360,14 @@ function append-python-path () { export PYTHONPATH=${PYTHONPATH}:"$1"; }
 function prepend-python-path () { export PYTHONPATH="$1":${PYTHONPATH}; }
 
 # TODO: develop a function for doing this
-if [ "`printenv PATH | $GREP $TOM_BIN:`" = "" ]; then
+if [ "$(printenv PATH | $GREP "$TOM_BIN":)" = "" ]; then
    export PATH="$TOM_BIN:$PATH"
 fi
-if [ "`printenv PATH | $GREP $TOM_BIN/${OSTYPE}:`" = "" ]; then
+if [ "$(printenv PATH | $GREP "$TOM_BIN/${OSTYPE}":)" = "" ]; then
    export PATH="$TOM_BIN/${OSTYPE}:$PATH"
 fi
 # TODO: make optional & put append-path later to account for later PERLLIB changes
-append-path $PERLLIB
+append-path "$PERLLIB"
 ## OLD (see below): prepend-path "$HOME/python/Mezcla/mezcla"
 append-path "$HOME/python"
 # Put current directoy at end of path; can be overwritting with ./ prefix
@@ -412,10 +415,15 @@ mkdir -p "$TEMP" "$TMP" "$TMPDIR"
 # They get reset via resize.
 cond-export LINES 52
 cond-export COLUMNS 80
-
-# NOTE: resize used to set lines below
 #
-if [ "$DOMAIN_NAME" = "" ]; then export DOMAIN_NAME=`domainname.sh`; fi
+# NOTE: resize used to set LINES below
+
+## OLD: if [ "$DOMAIN_NAME" = "" ]; then export DOMAIN_NAME=`domainname.sh`; fi
+if [ "$DOMAIN_NAME" = "" ]; then
+    # shellcheck disable=SC2155
+    # TODO: cond-export
+    export DOMAIN_NAME=$(domainname.sh);
+fi
 alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
 
 # Note: support for prompt prefix
@@ -435,8 +443,8 @@ alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
 cond-export PS_symbol '$'
 function reset-prompt {
     ## DEBUG: echo "reset-prompt" "$@"
-    ## OLD: local new_PS_symbol="$1"
-    local new_PS_symbol="$@"
+    ## OLD: local new_PS_symbol="$@"
+    local new_PS_symbol="$*"
     ## OLD:
     if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="${DEFAULT_PS_SYMBOL:-$PS_symbol}"; fi
     ## TODO: if [ "$new_PS_symbol" = "" ]; then echo $'Usage: reset-prompt symbol\nex: reset-prompt §"\n'; return; fi
@@ -452,8 +460,13 @@ function reset-prompt {
 }
 ## OLD: alias root-prompt='reset-prompt "# "'
 alias reset-prompt-root='reset-prompt "# "'
-alias reset-prompt-dollar="reset-prompt '$'"
-alias reset-prompt-default="reset-prompt '$PS_symbol'"
+alias reset-prompt-dollar='reset-prompt "\$"'
+## OLD: alias reset-prompt-default="reset-prompt '$PS_symbol'"
+{
+    # shellcheck disable=SC2139
+    alias reset-prompt-default="reset-prompt '$PS_symbol'"
+}
+## TODO: alias reset-prompt-default='reset-prompt "\$PS_symbol"'
 
 #-------------------------------------------------------------------------------
 # More misc stuff
@@ -486,7 +499,7 @@ export PERLLIB="$TOM_BIN:$PERLLIB:$HOME/perl/lib/perl5/site_perl/5.8"
 export PERLLIB="$HOME/perl/lib/perl5/5.16:$HOME/perl/lib/perl5/5.16/vender_perl:$PERLLIB"
 alias perl-='perl -Ssw'
 export MANPATH="$HOME/perl/share/man/man1:$MANPATH"
-append-path $HOME/perl/bin
+append-path "$HOME/perl/bin"
 # Note: TIME is used for changing output format, so TIME_CMD used instead.
 # TODO: Do check for environment variable overlap (as with DEBUG_LEVEL clash with software
 # used at Convera).
@@ -1378,6 +1391,8 @@ alias gimp='run-app gimp'
 
 #------------------------------------------------------------------------
 
+# Resets terminal window size (LINES and COLUMNS)
+## MISC???:
 alias do-resize="resize >| $TEMP/resize.sh; conditional-source $TEMP/resize.sh"
 
 #-------------------------------------------------------------------------------
