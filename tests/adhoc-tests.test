@@ -105,6 +105,101 @@ $ calc "403.4 * 1000**3" | comma-ize-number
 403,400,000,000.000
 
 ================================================================================
+# Inspired by idiot-in-chief making anal retentive changes to quiet shellcheck
+
+¢ echo $core_dir_options
+--all -l -t --human-readable
+
+¢$ echo $dir_options
+--all -l -t --human-readable --no-group
+
+¢ dir_options_sans_t
+--all -l   --human-readable --no-group
+
+$ test_dir="$TMP/test-dir"
+$ mkdir "$test_dir"
+$ cd "$test_dir"
+$ mkdir abc def
+$ touch ghi jkl
+$ echo > mno
+$ this_month=$(date +b)
+$ dir | grep ??? | perl -pe "s/$this_month.*( [a-z]{3})/\1/;"
+-rw-rw-r--   1 tomohara    1 Apr 16 01:13 mno
+-rw-rw-r--   1 tomohara    0 Apr 16 01:13 ghi
+-rw-rw-r--   1 tomohara    0 Apr 16 01:13 jkl
+drwxrwxr-x   2 tomohara 4.0K Apr 16 01:13 abc
+drwxrwxr-x   2 tomohara 4.0K Apr 16 01:13 def
+## TODO: note discovered via followingL
+##   $ git-diff tomohara-aliases.bash | count-it -i '([a-z0-9_-]+)' - 
+## 
+
+$ tar-this-dir
+TODO
+
+# TODO : all of following
+
+pushd-q
+
+popd-q
+
+copy-readonly
+
+delete-force
+
+ed-past-info
+
+sublinks-alpha
+
+tar-dir
+cd-this-realdi
+
+clear
+delete
+
+cd-realdir
+
+em-aliases
+
+copy
+
+update-today-vars
+
+
+pushd
+popd
+
+usage
+
+quiet-unalias
+
+tar-dir
+
+set-xterm-title
+
+tar-this-dir    2
+
+cd-this-realdir 2
+
+
+alt-xterm-title
+
+ls-full
+
+copy-readonly-to-dir
+
+tar-just-dir
+
+new-tar-this-dir
+
+
+
+================================================================================
+# Stuff that is currently broken
+
+¢ run-jupyter-notebook 
+URL: http://127.0.0.1:8888
+
+================================================================================
 
 # simple test for mezcla system
 # note: used to check that mezcla accessible
