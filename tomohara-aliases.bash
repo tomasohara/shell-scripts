@@ -231,8 +231,12 @@ update-today-vars
 alias todays-update='update-today-vars'
 #
 # reference-variable(var, ...): use to mark VAR as used in order to silence bash liners like shell check (e.g., for variables only used interactively)
+# usage: reference-variable "$var1, ..."
+# TODO: figure out way to do without quotes (e.g., to avoid SC2086: Double quote to prevent globbing ...)
 function reference-variable { true; }
+## OLD:
 reference-variable "$hoy, $T"
+## TODO: reference-variable $hoy, $T
 
 # Alias creation helper(s)
 ## OLD: function quiet-unalias () { unalias "$@" 2> /dev/null; }
@@ -513,7 +517,8 @@ alias set-xterm-title='set_xterm_title.bash'
 alias set-xterm-window='set-xterm-title'
 # Set the title for the current xterm, unless if not running X
 function set-title-to-current-dir () { 
-    local dir=`basename "$PWD"`; 
+    local dir
+    dir=$(basename "$PWD"); 
     local other_info=""; 
     if [ "$CLEARCASE_ROOT" != "" ]; then other_info="; $other_info cc=$CLEARCASE_ROOT"; fi
     set-xterm-window "$dir [$PWD]$other_info";
@@ -526,7 +531,8 @@ if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-
 alias reset-xterm-title='set-xterm-window "$HOSTNAME $PWD"'
 quiet-unalias alt-xterm-title
 function alt-xterm-title() { 
-    local dir=$(basename $PWD)
+    local dir
+    dir=$(basename "$PWD")
     set-xterm-window "alt: $dir $PWD"; 
 }
 # TODO: see if DEFAULT_HOST used outside of xterm title
@@ -547,7 +553,7 @@ alias gdisk-mgr='background-app gnome-disks'
 ## TODO: umask ug=rwx,o=r
 
 # Settings for the Language Toolkit that comes with Open Office
-cond-export LANGUAGE_TOOL_HOME $TOM_DIR/programs/java/LanguageTool-2.1
+cond-export LANGUAGE_TOOL_HOME "$TOM_DIR/programs/java/LanguageTool-2.1"
 
 #------------------------------------------------------------------------
 # Shell aliases for overriding commands, etc
@@ -577,7 +583,7 @@ alias chdir='cd'
 function cd-realdir {
     local dir="$1";
     if [ "$dir" = "" ]; then dir=.; fi;
-    cd $(realpath "$dir");
+    cd "$(realpath "$dir")";
     pwd;
 }
 alias cd-this-realdir='cd-realdir .'
@@ -585,7 +591,7 @@ alias cd-this-realdir='cd-realdir .'
 # pushd-q, popd-q: quiet versions of pushd and popd
 #
 function pushd-q () { builtin pushd "$@" >| /dev/null; }
-function popd-q () { builtin popd "$@" >| /dev/null; }
+function popd-q () { builtin popd >| /dev/null; }
 #
 
 # Command overrides for moving and copying files
@@ -604,19 +610,25 @@ if [ "$OSTYPE" = "solaris" ]; then other_file_args=""; fi
 ## TAKE2
 alias clear="echo 'use cls instead (or /bin/clear)'"
 alias cls="command clear -x"
-MV="/bin/mv -i $other_file_args"
+{
+    # TODO: see if this is a shellcheck bug
+    #    SC2034: MV appears unused. Verify it or export it.
+    # shellcheck disable=SC2034
+    MV="/bin/mv -i $other_file_args"
+}
 alias mv='$MV'
 alias move='mv'
 alias move-force='move -f'
 # TODO: make sure symbolic links are copied as-is (ie, not dereferenced)
-CP="/bin/cp -ip $other_file_args"
-alias copy="$CP"
-alias copy-force="/bin/cp -fp $other_file_args"
-alias cp="/bin/cp -i $other_file_args"
-alias rm="/bin/rm -i $other_file_args"
-alias delete="/bin/rm -i $other_file_args"
+CP="/bin/cp -ip \$other_file_args"
+reference-variable "$CP"
+alias copy="\$CP"
+alias copy-force='/bin/cp -fp $other_file_args'
+alias cp='/bin/cp -i $other_file_args'
+alias rm='/bin/rm -i $other_file_args'
+alias delete='/bin/rm -i $other_file_args'
 alias del="delete"
-alias delete-force="/bin/rm -f $other_file_args"
+alias delete-force='/bin/rm -f $other_file_args'
 #
 alias remove-force='delete-force'
 # TODO: make sure that rellowing only applied to directories
@@ -633,6 +645,8 @@ function copy-readonly-spec () {
         echo "Usage: copy-readonly-spec pattern dir";
         return
     fi
+    # effing shellcheck (SC2086: Double quote to prevent globbing)
+    # shellcheck disable=SC2086
     for f in $($LS $spec); do copy-readonly "$f" "$dir"; done
 }
 # copy-readonly-to-dir(dir, file, ...): variant of copy-readonly-spec with
@@ -640,8 +654,7 @@ function copy-readonly-spec () {
 function copy-readonly-to-dir () {
     local dir="$1"
     shift
-    ## TODO: copy-readonly-spec "'" "$@" "'"  "$dir"
-    for f in $@; do copy-readonly "$f" "$dir"; done
+    for f in "$@"; do copy-readonly "$f" "$dir"; done
 }
 #
 export NICE="nice -19"
@@ -677,6 +690,7 @@ function dir () {
 function dir-proper () { $LS "${dir_options} --directory" "$@" 2>&1 | $PAGER; }
 alias ls-full='$LS ${core_dir_options}'
 function dir-full () { ls-full "$@" 2>&1 | $PAGER; }
+## TODO: WH with the grep (i.e., isn't there a simpler way)?
 function dir-sans-backups () { $LS ${dir_options} "$@" 2>&1 | $GREP -v '~[0-9]*~' | $PAGER; }
 ## OLD:
 ## function dir-ro () { $LS ${dir_options} "$@" 2>&1 | $GREP -v '^[^ld].w' | $PAGER; }
@@ -694,10 +708,11 @@ function subdirs-proper () { find . -maxdepth 1 -type d | $EGREP -v '^((\.)|(\.\
 # note: -f option overrides -t: Unix sorts alphabetically by default
 # via man ls:
 #   -f     do not sort, enable -aU, disable -$LS --color
-function dir_options_san_t () { echo "$dir_options" | perl -pe 's/t//;'; }
-function subdirs-alpha () { $LS $(dir_options_san_t) "$@" 2>&1 | $GREP ^d | $PAGER; }
+# TODO: simplify -t removal (WTH with perl regex replacement?!)
+function dir_options_sans_t () { echo "$dir_options" | perl -pe 's/\-t//;'; }
+function subdirs-alpha () { $LS $dir_options_sans_t "$@" 2>&1 | $GREP ^d | $PAGER; }
 function sublinks () { $LS ${dir_options} "$@" 2>&1 | $GREP ^l | $PAGER; }
-function sublinks-alpha () { $LS $(dir_options_san_t) "$@" 2>&1 | $GREP ^l | $PAGER; }
+function sublinks-alpha () { $LS $dir_options_sans_t "$@" 2>&1 | $GREP ^l | $PAGER; }
 # TODO: show non-work-related directory example
 #
 alias symlinks='sublinks'
@@ -1239,8 +1254,9 @@ function tar-just-dir () { tar-dir $1 1; }
 function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`"; popd-q; }
 # test of resolving problem with tar-this-dir if dir a symbolic link from apparent parent
 function new-tar-this-dir () {
-    local dir="$PWD";                   # ex: /home/tomohara/tpo-magro-p3 [=> /media/tomohara/ff3410d4-5ffc-4c01-a2ca-75244b882aa2]
-    local base=$(basename "$PWD")
+    # example dir change: /home/tomohara/tpo-magro-p3 [=> /media/tomohara/ff3410d4-5ffc-4c01-a2ca-75244b882aa2]
+    local dir
+    dir=$(basename "$PWD"); 
     # Go to parent dir                        /home/tomohara
     pushd-q ..
     # Get real basename                       ff3410d4-5ffc-4c01-a2ca-75244b882aa2
@@ -1799,7 +1815,7 @@ alias em-docs='em-dir ~/Documents'
 # TODO: add tomasohara alias for the aliases as well
 ## OLD: alias em-aliases='em-dir $TOM_BIN/tomohara-aliases.bash'
 ## OLD: alias ed-setup=em-aliases
-alias ed-setup='em-dir $TOM_BIN/tomohara-aliases.bash'
+alias ed-setup='em-dir "$TOM_BIN/tomohara-aliases.bash"'
 alias em-setup=ed-setup
 ## OLD: alias ed-past-info='start.sh ~/organizer/past-info.odt'
 alias ed-past-info='em-dir ~/organizer/past-info.txt'
@@ -1827,6 +1843,7 @@ alias dpkg-install='sudo dpkg --install '
 # TODO: disable if on remote host???
 alias restart-network='sudo ifdown eth0; sudo ifup eth0'
 alias hibernate-system='sudo systemctl hibernate'
+alias suspend-system='sudo systemctl suspend'
 alias blank-screen='xset dpms force off'
 alias stop-service='systemctl stop'
 alias restart-service='sudo systemctl restart'
