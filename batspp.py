@@ -8,19 +8,15 @@
 #       no need for bats-assertions library.
 #
 ## TODO:
+## - print test line number to help debugging.
 ## - extend usage guide or docstring.
-## - Add some directives in the test or script comments:
-##        Block of commands used just to setup test and thus without output or if the output should be ignored (e.g., '# Setup').
-##        Tests that should be evaluated in the same environment as the preceding code (e.g., '# Continuation'). For example, you could have multiple assertions in the same @test function.
-## - find regex match excluding indent directly.
+## - Block of commands used just to setup test and thus without output or if the output should be ignored (e.g., '# Setup').
 ## - pretty result.
 ## - setup for functions tests.
 ## - multiline commands?.
-## - solve comma sanitization, test poc:
-##        $ BATCH_MODE=1 bash -i -c 'source ../tomohara-aliases.bash; mkdir -p $TMP/test-$$; cd $TMP/test-$$; touch  F1.txt F2.list F3.txt F4.list F5.txt; ls | old-count-exts'
-##        .txt\t3
-##        .list\t2
-## - add a tag to avoid running a certain test (example "# OLD").
+##   treat whitespace as single space  (e.g., '# normalize-whitespace')
+##   treat output as is (e.g., '# verbatim')
+## - get batspp.py fixed so that first empty line after $-based run line terminates output
 
 
 """
@@ -52,22 +48,39 @@ import random
 
 # Local packages
 from mezcla.main import Main
-from mezcla.my_regex import my_re
 from mezcla      import system
 from mezcla      import debug
 from mezcla      import glue_helpers as gh
 
 
 # Command-line labels constants
-TESTFILE = 'testfile' # target test path
+TEST_FILE = 'test_file' # target test path
 OUTPUT   = 'output'   # output BATS test
-VERBOSE  = 'verbose'  # show verbose debug
 SOURCE   = 'source'   # source another file
 
 
-# Some constants
-INDENT_PATTERN = r'^[^\w\$\(\n\{\}]'
+# Common constants
 BATSPP_EXTENSION = '.batspp'
+TITLE     = 'title'
+SETUP     = 'setup'
+ASSERT_EQ = 'assert_eq'
+ASSERT_NE = 'assert_ne'
+ACTUAL    = 'actual'
+EXPECTED  = 'expected'
+TAGS      = [('<blank>', ' '),
+             ('<blank-line>', '\n'),
+             ('<tab>', '\t')]
+
+
+# Regex constants
+## TODO:
+## - add comments pattern next to continuation.
+## - improve patterns readability.
+## - add FUN_BLOCK_PATTERN
+## - add FUN_ITEMS_PATTERN
+RE_INDENT = r'^[^\w\$\(\n\{\}]'
+RE_TITLE = r'[Tt]est'
+RE_CONTINUATION = r'(?:[Cc]ontinue|[Cc]ontinuation|[Ss]etup)'
 
 
 class Batspp(Main):
@@ -75,10 +88,9 @@ class Batspp(Main):
 
 
     # Class-level member variables for arguments (avoids need for class constructor)
-    testfile     = ''
-    output       = ''
-    source       = ''
-    verbose      = False
+    test_file = ''
+    output   = ''
+    source   = ''
 
 
     # Global States
@@ -89,29 +101,29 @@ class Batspp(Main):
 
     def setup(self):
         """Process arguments"""
+        debug.trace(7, f'batspp.setup({self})')
 
         # Check the command-line options
-        self.testfile     = self.get_parsed_argument(TESTFILE, "")
-        self.output       = self.get_parsed_argument(OUTPUT, "")
-        self.source       = self.get_parsed_argument(SOURCE, "")
-        self.verbose      = self.has_parsed_option(VERBOSE)
+        self.test_file = self.get_parsed_argument(TEST_FILE, self.test_file)
+        self.output   = self.get_parsed_argument(OUTPUT, self.output)
+        self.source   = self.get_parsed_argument(SOURCE, self.source)
 
-        debug.trace(7, (f'batspp - testfile: {self.testfile}, '
+        debug.trace(7, (f'batspp - test_file: {self.test_file}, '
                         f'output: {self.output}, '
-                        f'source: {self.source}, '
-                        f'verbose: {self.verbose}'))
+                        f'source: {self.source}'))
 
 
     def run_main_step(self):
         """Process main script"""
+        debug.trace(7, f'batspp.run_main_step({self})')
 
         # Check if is test of shell script file
-        self.is_test_file = self.testfile.endswith(BATSPP_EXTENSION)
-        debug.trace(7, f'batspp - {self.testfile} is a test file (not shell script): {self.is_test_file}')
+        self.is_test_file = self.test_file.endswith(BATSPP_EXTENSION)
+        debug.trace(7, f'batspp - {self.test_file} is a test file (not shell script): {self.is_test_file}')
 
 
         # Read file content
-        self.file_content = system.read_file(self.testfile)
+        self.file_content = system.read_file(self.test_file)
 
 
         # Check if finish with newline
@@ -119,12 +131,19 @@ class Batspp(Main):
             self.file_content += '\n'
 
 
-        self.__process_setup()
+        self.__process_global_setup()
         self.__process_teardown()
         self.__process_tests()
 
 
+        # Check if tests was founded
+        if not re.search(r'\@[Tt]est', self.bats_content):
+            print(f'Error: no tests founded on {self.test_file}.')
+            return
+
+
         # Save
+        ## TODO: check if output is a filename, otherwise append a filename.
         batsfile = self.output if self.output else self.temp_file
         gh.write_file(batsfile, self.bats_content)
 
@@ -135,13 +154,13 @@ class Batspp(Main):
 
 
         # Run
-        debug.trace(7, f'batspp - running test {self.temp_file}')
+        debug.trace(7, f'batspp - running test {batsfile}')
         print(gh.run(f'bats {batsfile}'))
 
 
-    def __process_setup(self):
-        """Process tests setup"""
-        debug.trace(7, f'batspp - processing setup')
+    def __process_global_setup(self):
+        """Process tests global setup"""
+        debug.trace(7, f'batspp.__process_global_setup({self})')
 
 
         # NOTE: files are loaded globally to
@@ -158,7 +177,7 @@ class Batspp(Main):
         #     ├ script.bash
         #  	  └ tests/test_script.batspp
         self.bats_content += ('# Make executables ./tests/../ visible to PATH\n'
-                              f'PATH="{gh.dir_path(gh.real_path(self.testfile))}/../:$PATH"\n\n')
+                              f'PATH="{gh.dir_path(gh.real_path(self.test_file))}/../:$PATH"\n\n')
 
 
         # Source Files
@@ -166,7 +185,7 @@ class Batspp(Main):
                               'shopt -s expand_aliases\n')
 
         if not self.is_test_file:
-            self.bats_content += f'source {gh.real_path(self.testfile)} || true\n'
+            self.bats_content += f'source {gh.real_path(self.test_file)} || true\n'
 
         if self.source:
             self.bats_content += f'source {gh.real_path(self.source)} || true\n'
@@ -174,286 +193,251 @@ class Batspp(Main):
         self.bats_content += '\n\n'
 
 
-    # pylint: disable=no-self-use
+        # Debug function
+        ## TODO: refactor: add bash function to print actual and expected debug.
+        ## f'\techo "========== {actual} =========="\n'
+        ## f'\techo "${actual}" | hexview.perl\n'
+        ## f'\techo "========= {expected} ========="\n'
+        ## f'\techo "${expected}" | hexview.perl\n'
+        ## '\techo "============================"\n'
+        ## f'\t[ "${actual}" {assertion} "${expected}" ]\n'
+
+
+    ## pylint: disable=no-self-use
     def __process_teardown(self):
         """Process teardown"""
-        debug.trace(7, f'batspp - processing teardown')
-        # WORK-IN-PROGRESS
+        ## debug.trace(7, f'batspp - processing teardown')
+        ## WORK-IN-PROGRESS
 
 
     def __process_tests(self):
         """Process tests"""
-        debug.trace(7, f'batspp - processing tests')
+        debug.trace(7, f'batspp.__process_tests({self})')
+
 
         # Tests with simple indentation (i.e. #) are ignored on batspp files.
         # Tests with double indentation (i.e. ##) are ignored on shell scripts.
-        global INDENT_PATTERN
-        if self.is_test_file:
-            INDENT_PATTERN += r'{0}'
-        else:
-            INDENT_PATTERN += r'?'
-        INDENT_PATTERN += r'\s*'
-
-        command_tests  = CommandTests(verbose_debug=self.verbose)
-        function_tests = FunctionTests(verbose_debug=self.verbose)
-
-        self.bats_content += command_tests.get_bats_tests(self.file_content)
-        self.bats_content += function_tests.get_bats_tests(self.file_content)
+        global RE_INDENT
+        RE_INDENT += r'{0}' if self.is_test_file else r'?'
 
 
-class CustomTestsToBats:
-    """Base class to extract and process tests"""
+        # Extract raw tests
+        # Simplified regex example: https://regex101.com/r/jceKgu/1
+        re_pattern       = fr'(?P<test>(?:(?:{RE_INDENT} +{RE_TITLE} +(?P<title1>[^\n]+) *$\n)?(?:{RE_INDENT} +(?P<continuation>{RE_CONTINUATION}) *$\n)?(?:(?:{RE_INDENT} *\$ *[^\n]+$\n)+(?:{RE_INDENT} *[^\n]+$\n)*?)+(?:{RE_INDENT} *$\n))|(?:{RE_INDENT}+ +{RE_TITLE} +(?P<title2>[^\n]+) *$\n))'
+        re_flags         = re.DOTALL | re.MULTILINE
+        tests            = []
+        last_title_index = 0
+        ## TODO: refactor: replace by finditer.
+        debug.trace(7, f'batspp - extract raw tests using flags => {re_flags} and pattern => {re_pattern}')
+        for match in re.findall(re_pattern, self.file_content, flags=re_flags):
+            test, _, continuation, _ = match
+            title = match[1] or match[3]
+            if title:
+                tests.append(test)
+                last_title_index = len(tests) - 1
+            elif continuation:
+                tests[last_title_index] += f'\n{test}'
+            else:
+                tests.append(test)
 
 
-    def __init__(self, pattern, re_flags=0, verbose_debug=False):
-        self._verbose       = verbose_debug
-        self._re_flags      = re_flags
-        self._pattern       = pattern
-        self._assert_equals = True
-        self._test_id       = f'id{random.randint(1, 999999)}' # differentiate tests
+        # Process tests
+        # Simplified regex example: https://regex101.com/r/a4psxP/1
+        re_pattern = fr'{RE_INDENT} *(?:(?:\$ *(?P<setup>[^\n]+) *$\n(?=(?:{RE_INDENT} \$ *[^\n]+)?$\n))|(?:(?P<assert_eq>\$) *(?P<actual>[^\n]+) *$\n(?={RE_INDENT} *\w+))|(?:(?:{RE_TITLE} +(?P<title>.+?)$\n)|[Cc]ontinue|[Cc]ontinuation|[Ss]etup)|(?:(?P<expected>[^\n]+)$\n))'
+        for test in tests:
+            test = extract_test_data(re_pattern, re_flags, test)
+            test = format_bats_test(test)
+            test = replace_tags(TAGS, test)
+            self.bats_content += test
 
 
-    def _first_process(self, match):
-        """First process after match, format matched results into [setup, actual, expected]"""
+def extract_test_data(pattern, flags, text):
+    """
+    Extract test in TEXT and return the test data.
 
-        # NOTE: this must be overriden.
-        # NOTE: the returned values must be like:
-        result = ['title', 'setup', 'actual', 'expected']
+    the provided PATTERN must contain at least
+    one of the following groups:
+    - 'title' (optional)
+    - 'setup' (optional)
+    - 'assert_eq' and/or 'assert_ne'
+    - 'actual' and 'expected'
 
-        debug.trace(7, f'batspp (test {self._test_id}) - _first_process({match}) => {result}')
-        return result
+    e.g. of returned DATA:
+    [('title', 'print file content'),
+     ('setup', 'touch /tmp/test_file.txt'),
+     ('setup', 'echo "this is an example" > /tmp/test_file.txt'),
+     ('assert_eq', 'echo /tmp/test_file.txt', 'this is an example')]
+    """
+    debug.trace(7, f'batspp.extract_test_data(pattern={pattern}, flags={flags}, text={text})')
 
+    data = []
 
-    def _common_process(self, test):
-        """Common process for each field in test"""
+    # Assertion vars
+    last_assertion = ''
+    last_actual    = ''
+    last_expected  = ''
 
-        result = []
+    # Remove indented lines without text
+    text = re.sub(fr'{RE_INDENT}$\n', r'\n', text, flags=flags)
 
-        # Get indent used
-        indent_used = ''
-        if my_re.match(INDENT_PATTERN, test[2]):
-            indent_used = my_re.group(0)
-            debug.trace(7, f'batspp (test {self._test_id}) - indent founded: "{indent_used}"')
+    # Extract test groups
+    for match in re.finditer(pattern, text, flags=flags):
+        match = match.groupdict()
 
-        for field in test:
+        if not any(match.values()):
+            continue
 
-            # Remove indent
-            field = re.sub(fr'^{indent_used}', '', field, flags=re.MULTILINE)
-
-            # Strip whitespaces
-            field = field.strip()
-
-            # Remove initial and trailing quotes
-            field = re.sub(f'^(\"|\')(.*)(\"|\')$', r'\2', field)
-
-            result.append(field)
-
-        debug.trace(7, f'batspp (test {self._test_id}) - _common_process({test}) => {result}')
-        return result
-
-
-    def _last_process(self, test):
-        """Process test fields before convert into bats"""
-
-        # NOTE: if this is overrided, the result must be:
-        # result = ['title', 'setup', 'actual', 'expected']
-
-        result = test
-
-        debug.trace(7, f'batspp (test {self._test_id}) - _last_process({test}) => {result}')
-        return result
-
-
-    def _convert_to_bats(self, test):
-        """Convert tests to bats format"""
-        title, setup, actual_content, expected_content = test
-
+        debug.trace(7, f'batspp.extract_test_data() - match: {match}')
 
         # Process title
-        title = title if title else f'test {self._test_id}'
-        unspaced_title = re.sub(r'\s+', '-', title)
+        # tests always must contain a title; a random
+        # title is asigned if there is no title
+        if not data:
+            data.append((TITLE, match.get(TITLE) or f'id{random.randint(1, 999999)}'))
+
+        # Process local test setup
+        if match.get(SETUP):
+            data.append((SETUP, match.get(SETUP)))
+
+        # Process actual
+        if match.get(ACTUAL):
+            if last_actual and last_assertion:
+                data.append((last_assertion, last_actual, last_expected))
+                last_assertion = last_actual = last_expected = ''
+            last_actual = match.get(ACTUAL)
+
+        # Process assertion type
+        if match.get(ASSERT_EQ):
+            if last_actual and last_assertion:
+                data.append((last_assertion, last_actual, last_expected))
+                last_assertion = last_actual = last_expected = ''
+            last_assertion = ASSERT_EQ
+        elif match.get(ASSERT_NE):
+            if last_actual and last_assertion:
+                data.append((last_assertion, last_actual, last_expected))
+                last_assertion = last_actual = last_expected = ''
+            last_assertion = ASSERT_NE
+
+        # Process expected
+        if match.get(EXPECTED) and last_actual:
+            last_expected += match.get(EXPECTED)
+
+    # Add remain assertion
+    if last_assertion and last_actual and last_expected:
+        data.append((last_assertion, last_actual, last_expected))
+
+    debug.trace(7, f'batspp.extract_test_data( ... ) => {data}')
+    return data
 
 
-        # Process setup commands
-        setup_text = (f'\ttestfolder=$(echo /tmp/{unspaced_title}-$$)\n'
-                      f'\tmkdir $testfolder && cd $testfolder\n')
-        for command in setup.splitlines():
-            if command:
-                command     = re.sub(r'(^\$\s+|\n+$)', '', command)
-                setup_text += f'\t{command}\n'
+def format_bats_test(data):
+    """
+    Convert DATA and return Bats test string,
+    DATA should be: [ ('directive', 'content', 'content') ... ]
+
+    e.g. of DATA:
+    [('title', 'print file content'),
+     ('setup', 'touch /tmp/test_file.txt'),
+     ('setup', 'echo "this is an example" > /tmp/test_file.txt'),
+     ('assert_eq', 'echo /tmp/test_file.txt', 'this is an example')]
+
+    directives can be:
+    - 'title': must be one per test.
+    - 'setup': this is a single line command, could be multiples per test.
+    - 'assert_eq': must contain the 'actual' and 'expected', could be multiples per test.
+    - 'assert_ne': same as 'assert_eq' but negative, could be multiples per test.
+    """
+
+    result         = ''
+    title          = ''
+    unspaced_title = ''
+    functions      = ''
+
+    for index, element in enumerate(data):
+
+        # Process title
+        if TITLE in element[0]:
+            title          = element[1]
+            unspaced_title = re.sub(r'\s+', '-', title)
+            result        += (f'@test "{title}" {{\n'
+                              f'\ttest_folder=$(echo /tmp/{unspaced_title}-$$)\n'
+                              f'\tmkdir $test_folder && cd $test_folder\n\n')
+
+        # Process local test setup
+        if SETUP in element[0]:
+            result += f'\t{element[1]}\n'
+
+        # Process assertions
+        if 'assert' in element[0]:
+
+            assertion = ''
+            actual    = ACTUAL
+            expected  = ''
+
+            # Assertion type
+            if element[0] == ASSERT_EQ:
+                assertion = '=='
+                expected  = EXPECTED
+            elif element[0] == ASSERT_NE:
+                assertion = '!='
+                expected  = f'not-{EXPECTED}'
+            else:
+                continue
+
+            # Actual and expected functions
+            actual_function   = f'{unspaced_title}-{index}-{actual}'
+            expected_function = f'{unspaced_title}-{index}-{expected}'
+            functions        += get_bash_function(actual_function, element[1])
+            functions        += get_bash_function(expected_function, f'echo -e {repr(element[2])}')
+
+            # Append actual, expected and debug
+            ## TODO: refactor: convert to bash function in setup.
+            result += (f'\t{actual}=$({actual_function})\n'
+                       f'\t{expected}=$({expected_function})\n'
+                       f'\techo "========== {actual} =========="\n'
+                       f'\techo "${actual}" | hexview.perl\n'
+                       f'\techo "========= {expected} ========="\n'
+                       f'\techo "${expected}" | hexview.perl\n'
+                       '\techo "============================"\n'
+                       f'\t[ "${actual}" {assertion} "${expected}" ]\n\n')
+
+    result += f'}}\n\n{functions}\n'
+
+    debug.trace(7, f'batspp.format_bats_test(data={data}) => {result}')
+    return result
 
 
-        # actual and expected
-        actual   = 'actual'
-        expected = 'expected' if self._assert_equals else 'not_expected'
+def get_bash_function(name, content):
+    """Return bash function string"""
+
+    result = f'function {name} () {{\n'
+    for line in content.splitlines():
+        result += f'\t{line}\n'
+    result += '}\n'
+
+    debug.trace(7, f'batspp.get_bash_function(name={name}, content={content}) => {result}')
+    return result
 
 
-        # Process debug
-        verbose_print = '| hexview.perl' if  self._verbose else ''
-        debug_text = (f'\techo "========== {actual} =========="\n'
-                      f'\techo "${actual}" {verbose_print}\n'
-                      f'\techo "========= {expected} ========="\n'
-                      f'\techo "${expected}" {verbose_print}\n'
-                      '\techo "============================"\n')
+def replace_tags(tags, text):
+    """
+    Convert TAGS in TEXT into its respective value.
+    e.g.:
+    <blank> => ' '
+    <tab>   => '\t'
+    """
 
+    result = text
+    for tag, replacement in tags:
+        result = re.sub(tag, replacement, result)
 
-        # Process assertion
-        assertion_text = "==" if self._assert_equals else "!="
-
-
-        # Process functions
-        actual_function   = f'{unspaced_title}-actual'
-        expected_function = f'{unspaced_title}-{expected}'
-        functions_text    = ''
-        functions_text   += self._get_bash_function(actual_function, actual_content)
-        functions_text   += self._get_bash_function(expected_function, f'echo -e {repr(expected_content)}')
-
-
-        # Construct bats tests
-        result = (f'@test "{title}" {{\n'
-                  f'{setup_text}'
-                  f'\t{actual}=$({actual_function})\n'
-                  f'\t{expected}=$({expected_function})\n'
-                  f'{debug_text}'
-                  f'\t[ "${actual}" {assertion_text} "${expected}" ]\n'
-                  '}\n\n'
-                  f'{functions_text}\n')
-
-
-        debug.trace(7, f'batspp (test {self._test_id}) - _convert_to_bats({test}) =>\n{result}')
-        return result
-
-
-    def _get_bash_function(self, name, content):
-        """Return bash function"""
-        result = (f'function {name} () {{\n'
-                  f'\t{content}\n'
-                  '}\n\n')
-        debug.trace(7, f'batspp (test {self._test_id}) - get_bash_function(name={name}, content={content}) => {result}')
-        return result
-
-
-    def get_bats_tests(self, text):
-        """Returns BATS tests"""
-
-        debug.trace(7, f'batspp - pattern used ({self._re_flags}): {self._pattern}')
-
-        bats_tests = ''
-
-        for match in re.findall(self._pattern, text, flags=self._re_flags):
-            debug.trace(7, f'batspp (test {self._test_id}) - processing match: {match}')
-            debug.assertion(len(match) >= 4, 'Insufficient groups, you should review the used regex pattern.')
-
-            test = self._first_process(match)
-            debug.assertion(len(test) == 4, 'Incorrect number of fields, every test should be ("title", "setup", "actual", "expected")')
-
-            test = self._common_process(test)
-            test = self._last_process(test)
-            bats_tests += self._convert_to_bats(test)
-
-            self._test_id = f'id{random.randint(1, 999999)}'
-
-        return bats_tests
-
-
-class CommandTests(CustomTestsToBats):
-    """Extract and process specific command tests"""
-
-
-    def __init__(self, verbose_debug=False):
-        flags = re.DOTALL | re.MULTILINE
-
-        pattern = (fr'({INDENT_PATTERN}Test\s*([\w\s]+?)\n)*' # optional test title
-                   fr'(({INDENT_PATTERN}\$\s+[^\n]+\n)*)'     # optional setup
-                   fr'({INDENT_PATTERN}\$\s+[^\n]+)\n'        # command test line
-                   fr'(.+?)\n'                            # expected output
-                   fr'{INDENT_PATTERN}$')              # end test
-
-        super().__init__(pattern, re_flags=flags, verbose_debug=verbose_debug)
-
-
-    def _first_process(self, match):
-        """First process after match, format matched results into [setup, actual, expected]"""
-
-        #         title     setup     actual    expected
-        result = [match[1], match[2], match[4], match[5]]
-
-        debug.trace(7, f'batspp (test {self._test_id}) - _first_process({match}) => {result}')
-        return result
-
-
-    def _last_process(self, test):
-        """Process test fields before convert into bats"""
-
-        title, setup, actual, expected = test
-
-        # Remove $
-        actual = re.sub(r'^\$\s*', '', actual)
-
-        result = title, setup, actual, expected
-        debug.trace(7, f'batspp (test {self._test_id}) - _last_process({test}) => {result}')
-        return result
-
-
-class FunctionTests(CustomTestsToBats):
-    """Extract and process specific function tests"""
-
-
-    # Class globals
-    assert_eq     = r'=>'
-    assert_ne     = r'=\/>'
-
-
-    def __init__(self, verbose_debug=False):
-
-        flags = re.MULTILINE
-
-        pattern = (fr'({INDENT_PATTERN}Test\s*([\w\s]+?)\n)*' # optional test title
-                   fr'({INDENT_PATTERN}.+?)'                     # functions + args line
-                   fr'\s+({self.assert_eq}|{self.assert_ne})\s+' # assertion
-                   r'((.|\n)+?)'                                 # expected output
-                   fr'\n{INDENT_PATTERN}$')                   # blank indent (end test)
-
-        super().__init__(pattern, re_flags=flags, verbose_debug=verbose_debug)
-
-
-    def _first_process(self, match):
-        """First process after match, format matched results into [setup, actual, expected]"""
-
-        _, title, actual, assertion, expected, _ = match
-
-        # Check assertion
-        if assertion == self.assert_eq:
-            self._assert_equals = True
-        elif assertion == self.assert_ne:
-            self._assert_equals = False
-        else:
-            self._assert_equals = None
-
-        # Format values
-        result = [title, '', actual, expected]
-
-        debug.trace(7, f'batspp (test {self._test_id}) - _first_process({match}) => {result}')
-        return result
-
-
-    def _last_process(self, test):
-        """Process test fields before convert into bats"""
-
-        title, setup, actual, expected = test
-
-        # Disable alias adding '//' to functions
-        actual = '\\' + actual
-
-        result = [title, setup, actual, expected]
-        debug.trace(7, f'batspp (test {self._test_id}) - _last_process({test}) => {result}')
-        return result
+    debug.trace(7, f'batspp.replace_tags(tags={tags}, text={text}) => {result}')
+    return result
 
 
 if __name__ == '__main__':
     app = Batspp(description          = __doc__,
-                 positional_arguments = [(TESTFILE, 'test file path')],
-                 boolean_options      = [(VERBOSE,  'show verbose debug')],
+                 positional_arguments = [(TEST_FILE, 'test file path')],
                  text_options         = [(OUTPUT,   'target output .bats filepath'),
                                          (SOURCE,   'file to be sourced')],
                  manual_input         = True)
