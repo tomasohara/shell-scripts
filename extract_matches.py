@@ -86,9 +86,9 @@ class ExtractMatches(Main):
 
 
         # Check the command-line options
-        self.pattern         = self.get_parsed_argument(PATTERN, "")
-        self.replacement     = self.get_parsed_argument(REPLACEMENT, "")
-        self.restore         = self.get_parsed_argument(RESTORE, "")
+        self.pattern         = self.get_parsed_argument(PATTERN, self.pattern)
+        self.replacement     = self.get_parsed_argument(REPLACEMENT, self.replacement)
+        self.restore         = self.get_parsed_argument(RESTORE, self.restore)
         self.paragraph_mode  = self.has_parsed_option(PARA)
         self.file_input_mode = self.has_parsed_option(SLURP) or self.has_parsed_option(FILE)
         self.fields          = self.get_parsed_option(FIELDS, 1)

@@ -50,12 +50,12 @@ class Filenames(Main):
 
 
         # Check the command-line options
-        self.filenames = self.get_parsed_argument(FILENAMES, "")
+        self.filenames = self.get_parsed_argument(FILENAMES, self.filenames)
         self.rename    = self.has_parsed_option(RENAME)
         self.copy      = self.has_parsed_option(COPY)
         self.free      = self.has_parsed_option(FREE)
-        self.base      = self.get_parsed_argument(BASE, "")
-        self.sep       = self.get_parsed_argument(SEP, "")
+        self.base      = self.get_parsed_argument(BASE, self.base)
+        self.sep       = self.get_parsed_argument(SEP, self.sep)
         self.em        = self.has_parsed_option(EM)
         self.free_date = self.has_parsed_option(FREE_DATE)
 

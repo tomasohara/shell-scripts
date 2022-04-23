@@ -93,7 +93,7 @@ class NumericSystem(Main):
         debug.trace(5, f"Script.process_line(): self={self}")
 
         # Process command-line options
-        self.input_string        = self.get_parsed_argument(INPUT, '')
+        self.input_string        = self.get_parsed_argument(INPUT, self.input_string)
         self.hex2dec             = self.has_parsed_option(HEX2DEC)
         self.dec2hex             = self.has_parsed_option(DEC2HEX)
         self.bin2dec             = self.has_parsed_option(BIN2DEC)

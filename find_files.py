@@ -46,7 +46,7 @@ class FindFiles(Main):
 
         # Process command-line options
         self.find_files = self.has_parsed_option(FIND_FILES)
-        self.path       = self.get_parsed_argument(PATH, '')
+        self.path       = self.get_parsed_argument(PATH, self.path)
 
 
         # Check path

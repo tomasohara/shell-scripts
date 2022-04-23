@@ -152,13 +152,13 @@ class CountIt(Main):
         self.trim             =  self.has_parsed_option(TRIM)
         self.unaccent         =  self.has_parsed_option(UNACCENT)
 
-        self.pattern          =  self.get_parsed_argument(PATTERN, "")
+        self.pattern          =  self.get_parsed_argument(PATTERN, self.pattern)
         self.pattern          =  system.read_file(self.pattern) if system.file_exists(self.pattern) else self.pattern # check if is a file with pattern (to cirvumvent shell UTF8 issues)
 
         self.chomp            = (self.has_parsed_option(CHOMP) or
                                  not re.match('\\n', self.pattern))
 
-        self.restore          =  self.get_parsed_argument(RESTORE, "")
+        self.restore          =  self.get_parsed_argument(RESTORE, self.restore)
         self.verbose          =  self.get_parsed_option(VERBOSE)
 
 

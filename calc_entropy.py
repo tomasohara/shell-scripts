@@ -105,7 +105,7 @@ class CalcEntropy(Main):
     class_filter  = ''
     max_count     = 0
     label         = ''
-    word          = ''
+    word          = 'n/a'
     freq_first    = False
     just_freq     = False
     skip_header   = False
@@ -125,11 +125,11 @@ class CalcEntropy(Main):
         debug.trace(5, f"Script.setup(): self={self}")
 
         # Check the command-line options
-        self.probabilities = self.get_parsed_argument(PROBABILITIES, '')
-        self.class_filter  = self.get_parsed_argument(CLASS_FILTER, '').lower()
+        self.probabilities = self.get_parsed_argument(PROBABILITIES, self.probabilities)
+        self.class_filter  = self.get_parsed_argument(CLASS_FILTER, self.class_filter).lower()
         self.max_count     = self.get_parsed_option(MAX_COUNT, system.maxint())
-        self.label         = self.get_parsed_argument(LABEL, '')
-        self.word          = self.get_parsed_argument(WORD, 'n/a')
+        self.label         = self.get_parsed_argument(LABEL, self.label)
+        self.word          = self.get_parsed_argument(WORD, self.word)
         last               = self.has_parsed_option(LAST)
         freq_last          = self.has_parsed_option(FREQ_LAST) or last
         self.freq_first    = self.has_parsed_option(FREQ_FIRST) or not freq_last
