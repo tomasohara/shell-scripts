@@ -226,18 +226,21 @@ function git-diff {
     less -p '^diff' "$log";
 }
 #
-## OLD: alias git-difftool='git difftool --no-prompt'
+# git-difftool: visual repo diff
+# git-vdiff: alias w/ &
 function git-difftool {
     ## TODO: echo "issuing: git difftool --no-prompt"
-    ## BAD: git difftool --no-prompt
     git difftool --no-prompt "$@";
 }
 #
-# OLD:
-## function git-vdiff {
-##     git-difftool "$@" &
-## }
-alias git-vdiff=git-difftool
+# effing Bash:
+quiet-unalias git-vdiff
+# TODO: see if way to have functions trump aliases
+#
+function git-vdiff {
+    ## DEBUG: echo in git-vdiff;
+    git-difftool "$@" &
+    }
 
 # Produce listing of changed files
 # note: used in check-in templates, so level of indirection involved
@@ -262,7 +265,7 @@ function git-checkin-template-aux {
 function git-checkin-single-template {
     git-checkin-template-aux
     echo "# To check in one file (ideally with main differences noted):"
-    echo "mod_file=\$(head -1 < \"\$diff_list_file\"); git-vdiff \"\$mod_file\""
+    echo "mod_file=\$(head -1 < \"\$diff_list_file\"); git-difftool \"\$mod_file\""
     echo "echo GIT_MESSAGE=\\\"...\\\" git-update-commit-push \"\$mod_file\""
 }
 #    
@@ -311,8 +314,8 @@ function alt-invoke-next-single-checkin {
 	# note: pauses a little so that user can update cursor before focus shifts
 	# TODO: see how to keep focus on terminal window for git update
 	local delay=5
-	echo "issuing: (sleep $delay; git-vdiff \"$mod_file\") &"
-	(sleep $delay; git-vdiff "$mod_file") &
+	echo "issuing: (sleep $delay; git-difftool \"$mod_file\") &"
+	(sleep $delay; git-difftool "$mod_file") &
     else
         ## TODO: summarize binary differenecs
 	git diff --numstat "$mod_file" | head
@@ -371,6 +374,9 @@ function git-alias-usage () {
 	echo 'Usual check-in:'
 	echo '    git-cd-root'
 	echo '    git-next-checkin                      # repeat ...'
+
+	echo '*** Fix effing git quirk causing file timestamp to change!!!'
+	echo '* invoke git-cd-root automatically!'
     }
 }
 
@@ -380,5 +386,7 @@ alias git-template=git-alias-usage
 alias git-root='git rev-parse --show-toplevel'
 alias git-cd-root='cd $(git-root)'
 alias git-invoke-next-single-checkin=invoke-next-single-checkin
-alias git-alias-refresh='source ${BASH_SOURCE[0]}'
+# TODO: squash effing shellcheck warning
+alias git-alias-refresh="source ${BASH_SOURCE[0]}"
+alias git-refresh=git-alias-refresh
 alias git-next-checkin='invoke-alt-checkin'
