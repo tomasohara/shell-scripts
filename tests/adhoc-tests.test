@@ -161,6 +161,7 @@ cd-realdir
 em-aliases
 
 copy
+move
 
 update-today-vars
 
@@ -190,6 +191,19 @@ copy-readonly-to-dir
 tar-just-dir
 
 new-tar-this-dir
+
+# Make sure the following doesn't hang
+cond-export _ENV_VAR_=123
+
+--------------------------------------------------------------------------------
+
+$ touch it5; cmd-trace move it5 _it5 | cat
+start: Sat Apr 16 20:47:38 CDT 2022
++ eval move it5 _it5
+++ /bin/mv -i -v it5 _it5
+'it5' -> '_it5'
++ set - -o xtrace
+end: Sat Apr 16 20:47:38 CDT 2022
 
 
 
