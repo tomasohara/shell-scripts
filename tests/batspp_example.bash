@@ -4,7 +4,7 @@
 #
 
 
-# You can run tests using the command line 
+# You can run simple tests using the command line 
 # With '$ [command]' followed by the expected output.
 #
 # $ echo -e "hello\nworld"
@@ -47,29 +47,28 @@ function fibonacci () {
 alias run-fibonacci='echo "The Fibonacci series is:"; fibonacci'
 
 
-# Setups for specific test can be done with
-# command lines too without output and you can
-# also add optional titles:
+# Setups can be done with command lines too without output
+# and you can also add optional titles:
 #
 # Test setup and title
 # $ filepath=$(echo $TMP/testfile-"$$")
 # $ echo "this is a file content to run an example test" | sudo tee $filepath
 # $ cat $filepath
 # this is a file content to run an example test
-
-
-# Also every test could have multiple assertions:
 #
-# $ filepath=$(echo $TMP/testfile-"$$")
-# $ echo -e "in this test\nwe are using\nmultiple assertions" | sudo tee $filepath
-# $ cat $filepath | wc -l
-# 3
-# $ cat $filepath | wc -c
+# If you want to append another assertions or setup to the last test
+# you can use Setup, Continuation or Continue tags, for example:
+#
+# Continue
+# $ cat $filepath | wc -m
 # 46
+# $ cat $filepath | wc -w
+# 10
+#
 
 
-## Tests with simple '#' on tests files are ignored 
-## and with double # on shell scripts too.
+## Tests with simple '#' on .batspp files are ignored
+## and with double '#' on shell scripts too.
 ##
-## $ echo "this is a test" | wc -c
+## $ echo "this is a ignored test" | wc -c
 ## 15
