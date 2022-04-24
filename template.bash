@@ -8,7 +8,7 @@
 #     if [ EXPR_a ]; then STMT_a; elif [ EXPR_a  ]; then STMT_b; else STMT_c; fi
 #     if [[ (EXPR1) && (EXPR2) ]]; then STMT; fi
 #     if [[ $var =~ pattern ]]; then STMT; fi       note: requires Bash 3.0+
-#        where pattern is unquoted egrep regex expression
+#        where pattern is unquoted egrep regex (n.b., use .*.ext not *.ext)
 #     if (( ARITH_EXPR )); then STMT; fi
 #     if [ -s "file" ]; then ...; fi
 #     case EXPR in PATTERN_a) STMT_a;; PATTERN_b) STMT_b;; ... esac
@@ -31,7 +31,7 @@
 #   note: need to use .* not * for filename patterns (e.g., $fname =~ ^.*xcf$)
 # - case "$HOST_NICKNAME" in ec2*) echo "AWS";; hostw*) echo "HW";; *) echo "non-server"; esac
 #   NOTE: each case must end in ';;'
-# - if [[ $1 =~ */ ]]; then echo '$1' ends in slash; fi
+# - if [[ $1 =~ .*/ ]]; then echo "$1" ends in slash; fi
 # - if [[ ! $file =~ http ]]; then echo hey; fi
 #
 # TODO:
