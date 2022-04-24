@@ -359,10 +359,10 @@ function git-alias-usage () {
     echo "    git-update"
     echo ""
     echo "To add files (implicit git-add):"
-    echo "    GIT_MESSAGE='initial version' git-update-commit-push file ..."
+    echo "    GIT_MESSAGE='initial version' git-update-commit-push file..."
     echo ""
     echo "To check in specified changes:"
-    echo "    GIT_MESSAGE='...' git-update-commit-push file ..."
+    echo "    GIT_MESSAGE='...' git-update-commit-push file..."
     echo ""
     #
     # Note: disable spurious spellcheck SC2016 (n.b., unfortunately just for next statement, so awkward brace group added)
@@ -381,7 +381,7 @@ function git-alias-usage () {
 	echo ''
 	echo 'Usual check-in:'
 	echo '    git-cd-root'
-	echo '    git-next-checkin                      # repeat ...'
+	echo '    git-next-checkin                      # repeat, as needed'
 
 	echo '*** Fix effing git quirk causing file timestamp to change!!!'
 	echo '* invoke git-cd-root automatically!'
