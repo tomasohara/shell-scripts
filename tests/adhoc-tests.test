@@ -220,3 +220,10 @@ URL: http://127.0.0.1:8888
 
 ¢ python -c 'from mezcla import system; system.print_error("hey"); print("joe")' 2> /dev/null
 joe
+
+================================================================================
+
+¢ alt-randomize-lines.perl -seed=13 alt-randomize-lines.perl | head -3
+    ## $note .= "notes:\n\nSome usage note.\n";		     # TODO: usage note
+    my($options) = "main options = [-seed=real] [-timeseed]";
+# *-*-perl-*-*
