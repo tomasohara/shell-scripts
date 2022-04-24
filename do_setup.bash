@@ -585,7 +585,7 @@ function popd-q () { builtin popd "$@" >| /dev/null; }
 # - other options for cp, mv, and rm: -i interactive; and -v verbose.
 other_file_args="-v"
 if [ "$OSTYPE" = "solaris" ]; then other_file_args=""; fi
-alias cls='clear'
+## OLD: alias cls='clear'
 alias mv='/bin/mv -i $other_file_args'
 alias move='mv'
 alias move-force='move -f'
