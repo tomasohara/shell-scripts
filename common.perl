@@ -1017,6 +1017,7 @@ sub blocking_stdin {
 # - create init_local_var for non-commandline variables
 # - Make export_var false by default and require explicit usage in those scripts
 #   requiring it (e.g., those that call helper scripts with same arguments).
+# - Add option to disable environment variable usage.
 #
 sub EXPORT {&TRUE;}
 #
