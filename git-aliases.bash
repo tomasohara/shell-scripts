@@ -309,6 +309,13 @@ function alt-invoke-next-single-checkin {
     local is_text
     ## TODO: fix problem identifing scripts with UTF-8 as text (e.g., common.perl reported as data by file command)
     is_text=$(file "$mod_file" | grep -i ':.*text')
+    ## HACK: add special case exceptions
+    ## TODO: figure out how to get file to check the effing extensions!
+    ## TAKE1: if [[ ("$is_text" = "") && ($mod_file =~ .*.(css|csv|html|java|js|perl|py|[a-z]*sh|text|txt)$) ]]; then
+    ## TAKE2: effing Bash
+    if [ "$is_text" == "" ]; then
+	case "$mod_file" in *.css | *.csv | *.html | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
+    fi;
     if [ "$is_text" != "" ]; then
 	## OLD: git-vdiff "$mod_file"
 	# note: pauses a little so that user can update cursor before focus shifts
@@ -318,6 +325,7 @@ function alt-invoke-next-single-checkin {
 	(sleep $delay; git-difftool "$mod_file") &
     else
         ## TODO: summarize binary differenecs
+	echo "Note: binary file so bypassing diff"
 	git diff --numstat "$mod_file" | head
         true
     fi
@@ -386,7 +394,8 @@ alias git-template=git-alias-usage
 alias git-root='git rev-parse --show-toplevel'
 alias git-cd-root='cd $(git-root)'
 alias git-invoke-next-single-checkin=invoke-next-single-checkin
-# TODO: squash effing shellcheck warning
+# NOTE: squashes effing shellcheck warning (i.e., SC2139: This expands when defined)
+# shellcheck disable=SC2139
 alias git-alias-refresh="source ${BASH_SOURCE[0]}"
 alias git-refresh=git-alias-refresh
 alias git-next-checkin='invoke-alt-checkin'
