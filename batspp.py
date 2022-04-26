@@ -43,7 +43,6 @@ Also you can test bash functions:
 
 # Standard packages
 import re
-import random
 
 
 # Local packages
@@ -72,17 +71,6 @@ TAGS      = [('<blank>', ' '),
              ('<tab>', '\t')]
 
 
-# Regex constants
-## TODO:
-## - add comments pattern next to continuation.
-## - improve patterns readability.
-## - add FUN_BLOCK_PATTERN
-## - add FUN_ITEMS_PATTERN
-RE_INDENT = r'^[^\w\$\(\n\{\}]'
-RE_TITLE = r'[Tt]est'
-RE_CONTINUATION = r'(?:[Cc]ontinue|[Cc]ontinuation|[Ss]etup)'
-
-
 class Batspp(Main):
     """This process and run custom tests using bats-core"""
 
@@ -97,6 +85,7 @@ class Batspp(Main):
     is_test_file = False
     file_content = ''
     bats_content = '#!/usr/bin/env bats\n\n\n'
+    test_count   = 0
 
 
     def setup(self):
@@ -215,15 +204,19 @@ class Batspp(Main):
         debug.trace(7, f'batspp.__process_tests({self})')
 
 
+        # Regex common patterns
+        RE_TITLE = r'[Tt]est'
+        RE_CONTINUATION = r'(?:[Cc]ontinue|[Cc]ontinuation|[Ss]etup)'
+        re_indent = r'^[^\w\$\(\n\{\}]'
+
         # Tests with simple indentation (i.e. #) are ignored on batspp files.
         # Tests with double indentation (i.e. ##) are ignored on shell scripts.
-        global RE_INDENT
-        RE_INDENT += r'{0}' if self.is_test_file else r'?'
+        re_indent += r'{0}' if self.is_test_file else r'?'
 
 
         # Extract raw tests
         # Simplified regex example: https://regex101.com/r/jceKgu/1
-        re_pattern       = fr'(?P<test>(?:(?:{RE_INDENT} +{RE_TITLE} +(?P<title1>[^\n]+) *$\n)?(?:{RE_INDENT} +(?P<continuation>{RE_CONTINUATION}) *$\n)?(?:(?:{RE_INDENT} *\$ *[^\n]+$\n)+(?:{RE_INDENT} *[^\n]+$\n)*?)+(?:{RE_INDENT} *$\n))|(?:{RE_INDENT}+ +{RE_TITLE} +(?P<title2>[^\n]+) *$\n))'
+        re_pattern       = fr'(?P<test>(?:(?:{re_indent} +{RE_TITLE} +(?P<title1>[^\n]+) *$\n)?(?:{re_indent} +(?P<continuation>{RE_CONTINUATION}) *$\n)?(?:(?:{re_indent} *\$ *[^\n]+$\n)+(?:{re_indent} *[^\n]+$\n)*?)+(?:{re_indent} *$\n))|(?:{re_indent} +{RE_TITLE} +(?P<title2>[^\n]+) *$\n))'
         re_flags         = re.DOTALL | re.MULTILINE
         tests            = []
         last_title_index = 0
@@ -242,16 +235,17 @@ class Batspp(Main):
 
 
         # Process tests
-        # Simplified regex example: https://regex101.com/r/a4psxP/1
-        re_pattern = fr'{RE_INDENT} *(?:(?:\$ *(?P<setup>[^\n]+) *$\n(?=(?:{RE_INDENT} \$ *[^\n]+)?$\n))|(?:(?P<assert_eq>\$) *(?P<actual>[^\n]+) *$\n(?={RE_INDENT} *\w+))|(?:(?:{RE_TITLE} +(?P<title>.+?)$\n)|[Cc]ontinue|[Cc]ontinuation|[Ss]etup)|(?:(?P<expected>[^\n]+)$\n))'
+        # Simplified regex example: https://regex101.com/r/tliu64/1
+        re_pattern = fr'{re_indent} *(?:(?:\$ *(?P<setup>[^\n]+) *$\n(?={re_indent} *(?:\$ *[^\n]+)?$\n))|(?:(?P<assert_eq>\$) *(?P<actual>[^\n]+) *$\n(?={re_indent} *\w+))|(?:(?:{RE_TITLE} +(?P<title>.+?)$\n)|[Cc]ontinue|[Cc]ontinuation|[Ss]etup)|(?:(?P<expected>[^\n]+)?$\n))'
         for test in tests:
-            test = extract_test_data(re_pattern, re_flags, test)
-            test = format_bats_test(test)
+            test = extract_test_data(test, re_pattern, re_flags)
+            test = format_bats_test(test, default_title=f"test{self.test_count}")
             test = replace_tags(TAGS, test)
             self.bats_content += test
+            self.test_count   += 1
 
 
-def extract_test_data(pattern, flags, text):
+def extract_test_data(text, pattern, flags):
     """
     Extract test in TEXT and return the test data.
 
@@ -278,7 +272,8 @@ def extract_test_data(pattern, flags, text):
     last_expected  = ''
 
     # Remove indented lines without text
-    text = re.sub(fr'{RE_INDENT}$\n', r'\n', text, flags=flags)
+    ## TODO: check if this is necessary.
+    ## text = re.sub(fr'{re_indent}$\n', r'\n', text, flags=flags)
 
     # Extract test groups
     for match in re.finditer(pattern, text, flags=flags):
@@ -290,10 +285,10 @@ def extract_test_data(pattern, flags, text):
         debug.trace(7, f'batspp.extract_test_data() - match: {match}')
 
         # Process title
-        # tests always must contain a title; a random
-        # title is asigned if there is no title
+        # resulted tests always will contain a title,
+        # a default title is asigned if there is no title
         if not data:
-            data.append((TITLE, match.get(TITLE) or f'id{random.randint(1, 999999)}'))
+            data.append((TITLE, match.get(TITLE)))
 
         # Process local test setup
         if match.get(SETUP):
@@ -330,7 +325,7 @@ def extract_test_data(pattern, flags, text):
     return data
 
 
-def format_bats_test(data):
+def format_bats_test(data, default_title=""):
     """
     Convert DATA and return Bats test string,
     DATA should be: [ ('directive', 'content', 'content') ... ]
@@ -357,7 +352,7 @@ def format_bats_test(data):
 
         # Process title
         if TITLE in element[0]:
-            title          = element[1]
+            title          = element[1] if element[1] else default_title
             unspaced_title = re.sub(r'\s+', '-', title)
             result        += (f'@test "{title}" {{\n'
                               f'\ttest_folder=$(echo /tmp/{unspaced_title}-$$)\n'
@@ -385,8 +380,8 @@ def format_bats_test(data):
                 continue
 
             # Actual and expected functions
-            actual_function   = f'{unspaced_title}-{index}-{actual}'
-            expected_function = f'{unspaced_title}-{index}-{expected}'
+            actual_function   = f'{unspaced_title}-assert{index}-{actual}'
+            expected_function = f'{unspaced_title}-assert{index}-{expected}'
             functions        += get_bash_function(actual_function, element[1])
             functions        += get_bash_function(expected_function, f'echo -e {repr(element[2])}')
 

@@ -64,7 +64,7 @@ class TestIt(TestWrapper):
         pattern = r'^# *(?:(?:\$ *(?P<setup>[^\n]+) *$\n(?=(?:^# \$ *[^\n]+)?$\n))|(?:(?P<assert_eq>\$) *(?P<actual>[^\n]+) *$\n(?=^# *\w+))|(?:(?:[Tt]est +(?P<title>.+?)$\n)|[Cc]ontinue|[Cc]ontinuation|[Ss]etup)|(?:(?P<expected>[^\n]+)$\n))'
         flags   = re.DOTALL | re.MULTILINE
 
-        self.assertEqual(batspp.extract_test_data(pattern, flags, text), expected)
+        self.assertEqual(batspp.extract_test_data(text, pattern, flags), expected)
 
 
     def test_format_bats_test(self):
@@ -81,16 +81,16 @@ class TestIt(TestWrapper):
                     '\tmkdir $test_folder && cd $test_folder\n\n'
                     '\tfilepath=$(echo $TMP/testfile-"$$")\n'
                     '\techo "this is a file content to run an example test" | sudo tee $filepath\n'
-                    '\tactual=$(setup-and-title-3-actual)\n'
-                    '\texpected=$(setup-and-title-3-expected)\n'
+                    '\tactual=$(setup-and-title-assert3-actual)\n'
+                    '\texpected=$(setup-and-title-assert3-expected)\n'
                     '\techo "========== actual =========="\n'
                     '\techo "$actual" | hexview.perl\n'
                     '\techo "========= expected ========="\n'
                     '\techo "$expected" | hexview.perl\n'
                     '\techo "============================"\n'
                     '\t[ "$actual" == "$expected" ]\n\n'
-                    '\tactual=$(setup-and-title-4-actual)\n'
-                    '\texpected=$(setup-and-title-4-expected)\n'
+                    '\tactual=$(setup-and-title-assert4-actual)\n'
+                    '\texpected=$(setup-and-title-assert4-expected)\n'
                     '\techo "========== actual =========="\n'
                     '\techo "$actual" | hexview.perl\n'
                     '\techo "========= expected ========="\n'
@@ -98,16 +98,16 @@ class TestIt(TestWrapper):
                     '\techo "============================"\n'
                     '\t[ "$actual" == "$expected" ]\n\n'
                     '}\n\n'
-                    'function setup-and-title-3-actual () {\n'
+                    'function setup-and-title-assert3-actual () {\n'
                     '\tcat $filepath\n'
                     '}\n'
-                    'function setup-and-title-3-expected () {\n'
+                    'function setup-and-title-assert3-expected () {\n'
                     '\techo -e \'this is a file content to run an example test\'\n'
                     '}\n'
-                    'function setup-and-title-4-actual () {\n'
+                    'function setup-and-title-assert4-actual () {\n'
                     '\tcat $filepath | wc -c\n'
                     '}\n'
-                    'function setup-and-title-4-expected () {\n'
+                    'function setup-and-title-assert4-expected () {\n'
                     '\techo -e \'46\'\n'
                     '}\n\n')
 
@@ -172,8 +172,6 @@ class TestIt(TestWrapper):
         """End to end test for simple assert"""
         debug.trace(debug.DETAILED, f"TestIt.test_simple_assert({self})")
 
-        ## TODO: WORK-IN-PROGRESS
-
         test_file   = self.temp_file + '.batspp'
         result_file = self.temp_file + '.result'
 
@@ -184,8 +182,11 @@ class TestIt(TestWrapper):
         gh.run(f'python {self.script_module} --output {result_file} {test_file}')
 
         result   = gh.read_file(result_file)
-        expected = ('')
-        ## self.assertEqual(result, expected)
+
+        self.assertEqual(result.count('[ "$actual" == "$expected" ]'),1 )
+        self.assertEqual(result.count('function'), 2)
+        self.assertTrue('function test0-assert1-actual () {\n\techo "hello world"\n}\n' in result)
+        self.assertTrue('function test0-assert1-expected () {\n\techo -e \'hello world\'\n}' in result)
 
 
     def test_multiple_assertion(self):
@@ -260,12 +261,11 @@ class TestIt(TestWrapper):
         gh.run(f'python {self.script_module} --output {result_file} {test_file}')
         result = gh.read_file(result_file)
 
-        ## TODO: WORK-IN-PROGRESS
-        ## self.assertTrue('@test "setup and title"' in result)
-        ## self.assertTrue('\tfilepath=$(echo $TMP/testfile-"$$")' in result)
-        ## self.assertTrue('\techo "this is a file content to run an example test" | sudo tee $filepath' in result)
-        ## self.assertTrue('\tcat $filepath | wc -m' in result)
-        ## self.assertTrue('\techo -e \'46\'' in result)
+        self.assertTrue('@test "setup and title"' in result)
+        self.assertTrue('\tfilepath=$(echo $TMP/testfile-"$$")' in result)
+        self.assertTrue('\techo "this is a file content to run an example test" | sudo tee $filepath' in result)
+        self.assertTrue('\tcat $filepath | wc -m' in result)
+        self.assertTrue('\techo -e \'46\'' in result)
 
 
     def test_local_setup(self):
