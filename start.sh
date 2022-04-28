@@ -54,7 +54,7 @@ arg2="$2"
 # Note: uses $arg2 to check for extraneous args
 #
 if [[ ($show_usage = 1) || ("$file" = "") || ("$arg2" != "") ]]; then
-    script=`basename $0`
+    script=$(basename $0)
     echo ""
     echo "Usage: $script [--view|[--edit|--open]] [--verbose] [--trace] [--help] file"
     echo ""
@@ -85,7 +85,6 @@ function invoke () {
     local program="$1"
     local file="$2"
     local today=$(date '+%d%b%y')
-    ## OLD: local log_dir="$TEMP/invocations"
     local log_dir="$TEMP/$USER/invocations"
     if [ ! -e "log_dir" ]; then mkdir -p "$log_dir"; fi
     local log_file="$log_dir/$(basename "$program")-$(basename "$file")-$today.log"
@@ -122,19 +121,18 @@ if [ "$for_editting" = "1" ]; then
     pdf_program="okular"
     image_program="pinta"
 fi
+if [[ $lower_file =~ ^.*\.xcf$ ]]; then
+    image_program="gimp"
+fi
     
 #
 case "$lower_file" in
     # PDF and posscript files
-    ## OLD: *.pdf | *.ps) invoke evince "$@" & ;;
-    ## OLD: *.pdf | *.ps) invoke okular "$@" & ;;
     *.pdf | *.ps) invoke "$pdf_program" "$@" & ;;
 
     # Image files
     # note: uses viewer that Files invokes (eog, the "eye of GNOME")
-    ## OLD: *.jpeg | *.jpg | *.png | *.gif | *.xcf) invoke /usr/lib/pinta/Pinta.exe "$@" & ;;
-    ## OLD: *.jpeg | *.jpg | *.png | *.gif | *.xcf) invoke eog "$@" & ;;
-    *.jpeg | *.jpg | *.png | *.gif | *.svg | *.xcf) invoke "$image_program"  "$@" & ;;
+    *.gif | *.ico | *.jpeg | *.jpg | *.png | .svg | *.xcf) invoke "$image_program"  "$@" & ;;
 
     # Video files
     *.mov | *.mp4) invoke vlc "$@" & ;;

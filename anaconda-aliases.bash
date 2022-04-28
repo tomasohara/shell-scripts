@@ -12,7 +12,7 @@
 
 # add-conda-env-to-xterm-title(): puts conda prompt modifier in xterm title
 # along with python version (e.g., "...; Py3.6:(old_tensorflow)")
-# note: also resets prompt to '$ '
+# note: also resets prompt to '$ ' (following change by conda scripts)
 function add-conda-env-to-xterm-title {
     export XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d.\d)'):$CONDA_PROMPT_MODIFIER"
 
@@ -21,17 +21,20 @@ function add-conda-env-to-xterm-title {
 }
 
 # TODO: Put in a separate file (e.g., .bashrc.anaconda)
-anaconda3_dir="/home/tomohara/anaconda3"
-anaconda2_dir="/home/tomohara/anaconda2"
+anaconda3_dir="$HOME/anaconda3"
+anaconda2_dir="$HOME/anaconda2"
 # OLD: init-conda(dir])
 # init-condaN([- | dir]): initialize anaconda using specified dir (or ~/anaconda3)
 function init-condaN() {
     local anaconda_dir="$1"
-    ## DEBUG: echo "in: init-condaN($1)"
+    ## DEBUG: echo "in init-condaN $1*"
     ## OLD: if [ "$anaconda_dir" = "" ]; then anaconda_dir="$anaconda3_dir"; fi
     if [ "$anaconda_dir" = "" ]; then echo "Usage: init-condaN anaconda-dir"; return; fi
     if [ "$anaconda_dir" = "-" ]; then anaconda_dir="$anaconda3_dir"; fi
-    local conda_setup="$($anaconda_dir'/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+    # Note: assignment separates so that $? preserved
+    #     https://unix.stackexchange.com/questions/506352/bash-what-does-masking-return-values-mean
+    local conda_setup
+    conda_setup="$($anaconda_dir'/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
     if [ $? -eq 0 ]; then
         eval "$conda_setup"
     else
@@ -47,8 +50,9 @@ function init-condaN() {
     ## OLD: reset-prompt
     add-conda-env-to-xterm-title
 
-    # HACK: make sure clr aliased to default Unix version of clear (anaconda3 quirk)
-    alias cls='/usr/bin/clear'
+    # HACK: make sure cls aliased to default Unix version of clear (anaconda3 quirk) and also that it doesn't clear the terminal buffer [n.b., effing stupid feature introduction in long-stading utility!]
+    ## OLD: alias cls='/usr/bin/clear'
+    alias cls='/usr/bin/clear -x'
 
     ## DEBUG: echo "out: init-condaN()"
 }
@@ -87,6 +91,7 @@ alias conda-env-name='conda env list | extract_matches.perl "^(\S+ )  " | echoiz
 ## OLD: alias conda-activate-env='source activate'
 ## OLD: function conda-activate-env { source activate "$1"; add-conda-env-to-xterm-title; }
 function conda-activate-env {
+    ## DEBUG: echo "in conda-activate-env $*"
     local env="$1"
     if [ "$env" = "" ]; then
 	echo "Usage: conda-activate-env"
@@ -113,7 +118,8 @@ function conda-deactivate-env {
 # !! Contents within this block are managed by 'conda init' !!
 function init-miniconda3 () {
     local base="/usr/local/misc/programs/anaconda3"
-    local conda_setup="$("$base/bin/conda" 'shell.bash' 'hook' 2> /dev/null)"
+    local conda_setup
+    conda_setup="$("$base/bin/conda" 'shell.bash' 'hook' 2> /dev/null)"
     if [ $? -eq 0 ]; then
 	eval "$conda_setup"
     else

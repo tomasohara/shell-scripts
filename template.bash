@@ -8,7 +8,7 @@
 #     if [ EXPR_a ]; then STMT_a; elif [ EXPR_a  ]; then STMT_b; else STMT_c; fi
 #     if [[ (EXPR1) && (EXPR2) ]]; then STMT; fi
 #     if [[ $var =~ pattern ]]; then STMT; fi       note: requires Bash 3.0+
-#        where pattern is unquoted egrep regex expression
+#        where pattern is unquoted egrep regex (n.b., use .*.ext not *.ext)
 #     if (( ARITH_EXPR )); then STMT; fi
 #     if [ -s "file" ]; then ...; fi
 #     case EXPR in PATTERN_a) STMT_a;; PATTERN_b) STMT_b;; ... esac
@@ -17,7 +17,8 @@
 #     while [ expr ] ; do commands ; done
 #     $((arithmetic))              evaluate arithmetic expression
 #     $(command ...)               same as `command ...`
-#     ${var:-default}               use $var or "default"
+#     ${var:-default}              use $var or "default"
+#     true                         no-op
 # TODO: variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
 #     note: EXPR is C style;
 #         Format                    Example
@@ -27,9 +28,10 @@
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
 # - if [[ $JAVA_HOME =~ x64 ]]; then echo "64-bit Java"; fi
+#   note: need to use .* not * for filename patterns (e.g., $fname =~ ^.*xcf$)
 # - case "$HOST_NICKNAME" in ec2*) echo "AWS";; hostw*) echo "HW";; *) echo "non-server"; esac
 #   NOTE: each case must end in ';;'
-# - if [[ $1 =~ */ ]]; then echo '$1' ends in slash; fi
+# - if [[ $1 =~ .*/ ]]; then echo "$1" ends in slash; fi
 # - if [[ ! $file =~ http ]]; then echo hey; fi
 #
 # TODO:

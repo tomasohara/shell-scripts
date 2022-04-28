@@ -33,16 +33,20 @@
 # TODO: Show usage statement
 #
 if [ "$1" = "--help" ]; then
+    script=$(basename "$0")
     echo ""
-    echo "usage: `basename $0` [--trace] [--foreground]"
+    echo "usage: $script [--trace] [--options token-or-string] [--foreground] [--quick] [--]"
     echo ""
-    echo "ex: `basename $0` --trace"
+    echo "ex: $0 -- --geometry 80x50"
+    echo ""
+    echo "Note: put emacs arguments after --"
     echo ""
     exit
 fi
 
 # Setup Emacs options (50 rows, 80 columns, and use background process)
-emacs_options="--geometry 80x50"
+## OLD: emacs_options="--geometry 80x50"
+emacs_options=""
 in_background="1"
 
 # Parse command-line options
@@ -57,7 +61,11 @@ while [ "$moreoptions" = "1" ]; do
     elif [[ ("$1" = "-q") || ("$1" = "--quick") ]]; then
 	emacs_options="$emacs_options -q";
 	quick=1
+    elif [ "$1" = "--options" ]; then
+	emacs_options="$emacs_options $2";
+	shift;
     elif [ "$1" = "--" ]; then
+	shift;
 	break;
     else
 	echo "ERROR: Unknown option: $1";
@@ -66,6 +74,7 @@ while [ "$moreoptions" = "1" ]; do
     shift 1;
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 done
+# note: remainder of "$@" used below
 
 # Force console model if DISPLAY environment not set
 if [ "$DISPLAY" = "" ]; then 
@@ -74,13 +83,17 @@ if [ "$DISPLAY" = "" ]; then
 fi
 
 # Use ~/.emacs.tpo (in place of ~/.emacs) if available
-if [[ ($quick = "0") && (-e "~/.emacs.tpo") ]]; then
-     emacs_options="$emacs_options -l ~/.emacs.tpo"
+if [[ ($quick = "0") && (-e "$HOME/.emacs.tpo") ]]; then
+     emacs_options="$emacs_options -l $HOME/.emacs.tpo"
 fi
 
 # Invoke emacs
+# note: disables warning "Double quote to prevent globbing"
+# shellcheck disable=SC2086
 if [ "$in_background" = "1" ]; then
     # note: eval not used with variable for "&" in case spaces in filenames
+    # TODO: rework so that no-op option added if empty (to avoid SC2086 disabled)
+    #   ex: emacs "${emacs_options:- --eval 1}" "$@" &
     emacs $emacs_options "$@" &
 else
     emacs $emacs_options "$@"

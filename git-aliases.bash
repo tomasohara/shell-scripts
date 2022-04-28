@@ -2,8 +2,6 @@
 #
 # Aliases for Git source control (see https://git-scm.com).
 #
-# TODO: if interactive, warn that only intended for non-interactive use
-#
 # Usage example(s):
 #   source git-aliases.bash
 #
@@ -30,31 +28,14 @@
 #   [credential]
 #   helper = store
 #
-# - via https://gist.github.com/flc/f867e2b92cc878a55801#file-hg_vs_git-txt:
-#
-#   hg init => git init
-#   hg add <path> => git add <path>
-#   hg commit -m 'Commit message' => git commit -m 'Commit message'
-#      git add NEW -and/or- OLD; git commit -m <MESSAGE>; git push
-#   hg commit => git commit -a
-#   hg status => git status -s
-#   hg clone <path> => git clone <path>
-#   hg branch <branchname> => git checkout -b <branchname> (-b also switch to new branch)
-#   hg pull & hg update => git pull --all
-#      # TODO: git stash; git pull --all; git stash pop
-#   hg diff => git diff HEAD
-#   hg rm => git rm
-#   hg push => git push
-#   hg update <branch> => git checkout <branchname>
-#   hg branches => git branch
-#   hg revert filename => git checkout filename (This command is also used to checkout branches, and you could happen to have a file with the same name as a branch. All is not lost, you will simply need to type: git checkout -- filename)
-#   hg revert => git reset --hard
-#   hg log -l 5 => git log -n 5
-#   hg merge <branch> => git merge <branch>
-#   hg import <diff_file> => git apply <diff_file>
-#   
-#   set default editor to <editor>:
-#   git config --global core.editor <editor>
+# - To squalsh shellcheck warning and to help against inadvertant changes,
+#   declarations are separate from assignment involving commands. For example,
+#      local log=$(get-temp-log-name "update")
+#      =>
+#      local log
+#      log=$(get-temp-log-name "update")
+#   See https://unix.stackexchange.com/questions/506352/bash-what-does-masking-return-values-mean. Of course, shellcheck should be refined to check for $?, but
+#   that might take a while.
 #
 #................................................................................
 # Examples:
@@ -84,12 +65,34 @@ function pause-for-enter () {
     read -p "$message "
 }
 
+# downcase-stdin: return stdin made lowercase
+# note: only will be defined here if tomohara-aliases not sourced
+if [ "" = "$(typeset -f downcase-stdin)" ]; then
+    function downcase-stdin () 
+    { 
+	perl -pe "use open ':std', ':encoding(UTF-8)'; s/.*/\L$&/;"
+    }
+fi
+
+# get-temp-log-name([label=temp]: Return unique file name of the form _git-LABEL-MMDDYY-HHMM-NNN.log
+function get-temp-log-name {
+    local label=${1:-temp}
+    local now_mmddyyhhmm
+    now_mmddyyhhmm=$(date '+%d%b%y-%H%M' | downcase-stdin);
+    # TODO: use integral suffix (not hex)
+    mktemp "_git-$label-${now_mmddyyhhmm}-XXX.log"
+}
+
 # git-update(): updates local from global repo. This uses git-stash to hide local changes
 # does a git-pull, and then restores local changes.)
 function git-update {
-    local log="_git-update-$(TODAY).$$.log"
+    local log
+    log=$(get-temp-log-name "update")
+    echo "issuing: git stash"
     git stash >> "$log"
+    echo "issuing: git pull --all"
     git pull --all >> "$log"
+    echo "issuing: git stash pop"
     git stash pop >> "$log"
     echo >> "$log"
     tail "$log"
@@ -100,7 +103,8 @@ function git-update {
 # note: gets user credentials from ./_my-git-credentials-etc.bash.list
 # TODO: add message argument
 function git-commit-and-push {
-    local log="_git-commit-and-push-$(TODAY).$$.log"
+    local log
+    log=$(get-temp-log-name "commit")
     local git_user
     local git_token
     local credentials_file="_my-git-credentials-etc.bash.list"
@@ -117,6 +121,7 @@ function git-commit-and-push {
 	fi
     done
     echo "git_user: $git_user;  git_token: $git_token"
+    echo "issuing: git add \"$*\""
     git add "$@" >> "$log"
     # TODO: rework so that message passed as argument (to avoid stale messages from environment)
     local message="$GIT_MESSAGE";
@@ -124,18 +129,22 @@ function git-commit-and-push {
         echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
         return
     fi
-    ## OLD: if [ "$message" = "" ]; then message="misc. update"; fi
     if [ "$message" = "" ]; then
         echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE error)"
         return
     fi
+
+    # Push the changes after showing synopsis and getting user confirmation
     local file_spec="$*"
+    echo ""
     pause-for-enter "About to commit $file_spec (with message '$message')"
     git commit -m "$message" >> "$log"
     # TODO: perl -e "print("$git_user\n$git_token\n");' | git push
     # TODO: see why only intermittently works (e.g., often prompts for user name and password)
     perl -pe 's/^/    /;' "$log"
     pause-for-enter 'About to push: review commit log above!'
+    #
+    echo "issuing: git push --verbose"
     git push --verbose <<EOF >> "$log"
 $git_user
 $git_token
@@ -162,50 +171,76 @@ alias git-update-commit-push-all='git-update-commit-push *'
 function git-pull-and-update() {
     if [ "" = "$(grep ^repo ~/.gitrc)" ]; then echo "*** Warning: fix ~/.gitrc for read-only access ***"; else
         local git="python -u /usr/bin/git";
-        local log="_git-update-$(date '+%d%b%y').$$.log";
-        ($git pull --noninteractive --verbose;  $git update --noninteractive --verbose) >> "$log" 2>&1; less "$log"
+        local log
+	log=$(get-temp-log-name "update")
+        ## OLD: ($git pull --noninteractive --verbose;  $git update --noninteractive --verbose) >> "$log" 2>&1; less "$log"
+	echo "issuing: $git --noninteractive --verbose"
+        $git pull --noninteractive --verbose >> "$log" 2>&1
+	echo "issuing: $git update --noninteractive --verbose"
+        $git update --noninteractive --verbose >> "$log" 2>&1; 
+        less "$log"
     fi;
 }
 
-# run git COMMAND with output saved to _git-COMMAND-$$.log
+# run git COMMAND with output saved to command-specific temp file
 #
 function invoke-git-command {
     local command="$1"
     shift
-    local log="_git-$command-$(TODAY).$$.log";
+    ## OLD: local log="_git-$command-$(TODAY).$$.log";   ## OLD: log="_git-$command-$(TODAY).$$.log";
+    local log
+    log=$(get-temp-log-name "$command")
+    echo "issuing: git $command $*"
     git "$command" "$@" >| "$log" 2>&1
     less "$log"
 }
+alias git-command='invoke-git-command'
 
 function git-push() {
     if [ "" != "$(grep ^repo ~/.gitrc)" ]; then
 	echo "*** Warning: fix ~/.gitrc for read-write access ***";
     else
-        ## OLD: git push --verbose
 	invoke-git-command push --verbose "$@"
     fi;
 }
 
+# Misc git commands (redirected to log file)
 alias git-status='invoke-git-command status'
+# TODO: git-log => git-log-changes
+alias git-log='invoke-git-command log --name-status'
+alias git-log-diff='invoke-git-command log --patch'
 
 # git-add: add filename(s) to repository
 function git-add {
-    local log="_git-add-$(TODAY).$$.log";
+    local log;
+    log=$(get-temp-log-name "add");
     git add "$@" >| "$log";
     less "$log";
 }
 
 # git-diff: show repo diff
 function git-diff {
-    ## OLD: git diff "$@" 2>&1 | less -p '^diff';
-    local log="_git-diff-$(TODAY).$$.log"
+    local log;
+    log=$(get-temp-log-name "diff");
     git diff "$@" >| "$log";
     less -p '^diff' "$log";
 }
 #
-alias git-difftool='git difftool --no-prompt'
+# git-difftool: visual repo diff
+# git-vdiff: alias w/ &
+function git-difftool {
+    ## TODO: echo "issuing: git difftool --no-prompt"
+    git difftool --no-prompt "$@";
+}
 #
-function git-vdiff { git-difftool "$@" & }
+# effing Bash:
+quiet-unalias git-vdiff
+# TODO: see if way to have functions trump aliases
+#
+function git-vdiff {
+    ## DEBUG: echo in git-vdiff;
+    git-difftool "$@" &
+    }
 
 # Produce listing of changed files
 # note: used in check-in templates, so level of indirection involved
@@ -230,7 +265,7 @@ function git-checkin-template-aux {
 function git-checkin-single-template {
     git-checkin-template-aux
     echo "# To check in one file (ideally with main differences noted):"
-    echo "mod_file=\$(head -1 < \"\$diff_list_file\"); git-vdiff \"\$mod_file\""
+    echo "mod_file=\$(head -1 < \"\$diff_list_file\"); git-difftool \"\$mod_file\""
     echo "echo GIT_MESSAGE=\\\"...\\\" git-update-commit-push \"\$mod_file\""
 }
 #    
@@ -243,33 +278,124 @@ function git-checkin-multiple-template {
 function git-checkin-all-template {
     git-checkin-template-aux
     echo "# To do shamelessly lazy check-in of all modified files:"
-    echo "echo GIT_MESSAGE=\'miscellaneous update\' git-update-commit-push \$(cat \$diff_list_file)"
+    echo "echo GIT_MESSAGE=\'...\' git-update-commit-push \$(cat \$diff_list_file)"
 }
+
+# invoke-next-single-checkin: outputs and runs the next single-checking template
+function invoke-next-single-checkin {
+    git-checkin-single-template >| "$TMP/_template.sh"
+    source "$TMP/_template.sh"
+}
+#
+# alt-invoke-next-single-checkin([filename]) alternative version that uses readline
+# with template text for checking in next change (or FILENAME if given)
+# NOTE: although potentially dangerous given eval environnment, the user still needs to
+# confirm the commit operation (and thus can verify done OK).
+function alt-invoke-next-single-checkin {
+    # If unspecified, determine file to check in, based on next modified file
+    local mod_file="$1"
+    if [ "$mod_file" = "" ]; then
+	mod_file=$(git-diff-list | head -1);
+	if [ "$mod_file" = "" ]; then
+	    echo "Warning: unable to infer modified file. Perhaps,"
+            echo "    Tha-tha-that's all folks"'!'
+	    return;
+	fi
+    fi
+
+    # Read the user's commit message
+    # note: shows visual diff (TODO: and pauses so user can start message)
+    # TODO: position cursor at start of ... (instead of pause)
+    local is_text
+    ## TODO: fix problem identifing scripts with UTF-8 as text (e.g., common.perl reported as data by file command)
+    is_text=$(file "$mod_file" | grep -i ':.*text')
+    ## HACK: add special case exceptions
+    ## TODO: figure out how to get file to check the effing extensions!
+    ## TAKE1: if [[ ("$is_text" = "") && ($mod_file =~ .*.(css|csv|html|java|js|perl|py|[a-z]*sh|text|txt)$) ]]; then
+    ## TAKE2: effing Bash
+    if [ "$is_text" == "" ]; then
+	case "$mod_file" in *.css | *.csv | *.html | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
+    fi;
+    if [ "$is_text" != "" ]; then
+	## OLD: git-vdiff "$mod_file"
+	# note: pauses a little so that user can update cursor before focus shifts
+	# TODO: see how to keep focus on terminal window for git update
+	local delay=5
+	echo "issuing: (sleep $delay; git-difftool \"$mod_file\") &"
+	(sleep $delay; git-difftool "$mod_file") &
+    else
+        ## TODO: summarize binary differenecs
+	echo "Note: binary file so bypassing diff"
+	git diff --numstat "$mod_file" | head
+        true
+    fi
+    ## BAD: sleep 3
+    local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
+    local command
+    echo "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
+    read -e -i "$prompt" command
+
+    # Evaluate the user's checkin command
+    # TODO: rework using a safer approach with reading checking comment and issuing git-update-commit-push directly
+    ## DEBUG:
+    ## echo "Running (n,b, *** be careful nothing lost ***):"
+    ## echo "   $command"
+    eval "$command"
+}
+#
+# invoke-alt-checkin(filename): run alternative template-bsed checkin for filename
+function invoke-alt-checkin { alt-invoke-next-single-checkin "$1"; }
 
 # git-alias-usage: tips on interactive usage
 function git-alias-usage () {
     echo "Usage examples for git aliases, most of which create log files as follows:"
-    echo "   _git-{label}-\$(TODAY).\$\$.log      # ex: _git-update-$(TODAY).$$.log"
+    echo "   _git-CMD-MMDDYY-HHMM-NNN.log      # ex: _git-status-07mar22.339.log"
     echo ""
+    # note: 'clear's -x option doesn't clobber (to work around a disruptive change that feel through effing cracks!)'
     echo "To update aliases:"
-    echo "   source \$TOM_BIN/git-aliases.bash; clear; git-alias-usage"
+    echo "   source \$TOM_BIN/git-aliases.bash; clear -x; git-alias-usage"
     echo ""
     echo "Get changes from repository:"
     echo "    git-update"
     echo ""
+    echo "To add files (implicit git-add):"
+    echo "    GIT_MESSAGE='initial version' git-update-commit-push file..."
+    echo ""
     echo "To check in specified changes:"
-    echo "    GIT_MESSAGE='...' git-update-commit-push file ..."
+    echo "    GIT_MESSAGE='...' git-update-commit-push file..."
     echo ""
     #
-    # Note: disable spellcheck SC2016 (n.b., unfortunately just for next statement, so awkward brace group added)
+    # Note: disable spurious spellcheck SC2016 (n.b., unfortunately just for next statement, so awkward brace group added)
     #    Expressions don't expand in single quotes, use double quotes for that.
     # shellcheck disable=SC2016
     {
         echo "To check in files different from repo:"
-	echo "    # TODO: pushd \$REPO_ROOT"
-	echo "    # -OR-: pushd \$(realpath .)/.."
-	echo '    git-checkin-single-template >| _git-checkin-single-template.sh; source _git-checkin-single-template.sh'
-	echo '    # ALT: git-checkin-multiple-template and git-checkin-all-template (n.b. ¡cuidado!)'
-    }
+	echo "    git-checkin-single-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
+	# TODO: echo '    git-checkin-single-template | source'
+	echo '    # ALT: git-checkin-multiple-template/git-checkin-all-template (¡cuidado!)'
+	echo '    alt-invoke-next-single-checkin'
+	local next_mod_file
+	next_mod_file=$(git-diff-list | head -1)
+	if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
+	echo '    invoke-alt-checkin "'${next_mod_file}'"'
+	echo ''
+	echo 'Usual check-in:'
+	echo '    git-cd-root'
+	echo '    git-next-checkin                      # repeat, as needed'
 
+	echo '*** Fix effing git quirk causing file timestamp to change!!!'
+	echo '* invoke git-cd-root automatically!'
+    }
 }
+
+# Various aliases
+## TODO: include suffix to better differentiate from regular git-xyz commands
+alias git-template=git-alias-usage
+alias git-root='git rev-parse --show-toplevel'
+alias git-cd-root='cd $(git-root)'
+alias git-invoke-next-single-checkin=invoke-next-single-checkin
+# NOTE: squashes effing shellcheck warning (i.e., SC2139: This expands when defined)
+# shellcheck disable=SC2139
+alias git-alias-refresh="source ${BASH_SOURCE[0]}"
+alias git-refresh=git-alias-refresh
+alias git-next-checkin='invoke-alt-checkin'

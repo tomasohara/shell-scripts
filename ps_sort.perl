@@ -49,7 +49,7 @@ BEGIN {
 use strict;
 no strict "refs";		# to allow for old-style references to arrays (TODO: use #xyz_ref = \@array)
 use vars qw/$by $xyz $ps_options $cut_options $num_times $LINES $COLUMNS $max_count $delay $line_len $testing $justuser $USER $username/;
-use vars qw/$batch/;
+use vars qw/$batch $full $once $lines $columns/;
 
 # Check the command-line options
 &init_var(*by, "cpu");
@@ -58,13 +58,23 @@ my($is_solaris) = ($OSTYPE =~ "solaris");
 my($is_linux) = ($OSTYPE =~ "linux");
 &init_var(*ps_options, ($is_solaris ? "-efl" : $is_linux ? "auxgww" : "auxg"));
 ## OLD: &init_var(*cut_options, ($is_solaris ? "-c1-36,46-52,62-70,79-132" : "-c1-132"));
-&init_var(*num_times, 60);
+## OLD: &init_var(*num_times, 60);
+&init_var(*once, &FALSE);      # alias for -num_times=1
+&init_var(*full, &FALSE);      # disable row/column truncation
+&init_var(*num_times, ($once ? 1 : 60));
+## HACK: use lowercase lines/columns so that not trumped by environment
+## TODO: add option to init_var to disable environment value check
 &init_var(*LINES, 42);
 &init_var(*COLUMNS, 80);
-&init_var(*cut_options, ($is_solaris ? "-c1-36,46-52,62-70,79-132" : "-c1-$COLUMNS"));
-&init_var(*max_count, $LINES - 5);
+$lines = ($full ? &MAXINT : $LINES) if ! defined($lines);
+$columns = ($full ? &MAXINT : $COLUMNS) if ! defined($columns);
+&debug_print(&TL_VERBOSE, "#rows/#colums: ($lines/$columns)\n");
+## TODO: &init_var(*lines, ($full ? &MAXINT : $LINES));
+## TODO: &init_var(*columns, ($full ? &MAXINT : $COLUMNS));
+&init_var(*cut_options, ($is_solaris ? "-c1-36,46-52,62-70,79-132" : "-c1-$columns"));
+&init_var(*max_count, $lines - 5);
 &init_var(*delay, (($num_times > 1) ? 1: 0));
-&init_var(*line_len, $COLUMNS - 2);
+&init_var(*line_len, $columns - 2);
 &init_var(*testing, &FALSE);	# script testing mode
 &init_var(*justuser, &FALSE);	# just show current user
 &init_var(*USER, "");
@@ -89,6 +99,7 @@ local(*uid) = *user;
 # NOTE: By convention - is used when no arguments are required
 if (!defined($ARGV[0])) {
     my($options) = "main options = [-by=FIELD] [-username=user] [-num_times=N] [-max_count=N] [-delay=B] [-justuser]";
+    $options .= " [-batch] [-once] [-full]";
     if ($is_solaris) {
 	$options .= "\nfield = [f|s|uid|pid|ppid|c|pri|ni|addr|sz|wchan|stime|tty|time|cmd]";
     }
@@ -104,11 +115,13 @@ if (!defined($ARGV[0])) {
     $example .= "$script_name -justuser -\n\n";
     $example .= "$script_name -username=cpuhog -\n\n";
     $example .= "LINES=1000 $script_name -num_times=1 -by=time -\n\n";
+    $example .= "$script_name -once -full -by=command -\n\n";
 
     my($note) = "";
     $note .= "Notes:\n";
     $note .= "- Use -num_times for number of iterations.\n";
     $note .= "- Use -max_count for number of process listing entries.\n";
+    $note .= "- Use -once and -full for stdout: uses -num_times=1 and no row/col truncation).\n";
     $note .= "- env-var LINES determines number of entries.\n";
     $note .= "- env-var COLUMNS determines width.\n";
 
@@ -121,8 +134,16 @@ if (!defined($ARGV[0])) {
 }
 
 PS_LOOP:
-for (my $t = 1; $t <= $num_times; $t++) {
-
+## TODO (resolve stupid perl strict-mode warning regarding $t):
+##    for (my $t = 1; $t <= $num_times; $t++) { ... }
+##
+## TEST1:
+## my($t);
+## for ($t = 1; $t <= $num_times; $t++) {
+## TEST2: local($t);
+use vars qw/$t/;
+for ($t = 1; $t <= $num_times; $t++) {
+	
     my($header) = "";
 
     my $i = 0;
@@ -187,7 +208,7 @@ for (my $t = 1; $t <= $num_times; $t++) {
 
     # Print the information sorted in proper order
     if ($num_times > 1) {
-	&cmd("clear") unless ($batch);
+	&cmd("clear -x") unless ($batch);
 	print "update $t of $num_times\n";
 	&debug_out(&TL_DETAILED, "%s\n", &get_time());
     }

@@ -88,7 +88,7 @@ setenv DEBUG_MODE 1
 setenv DEBUG_LEVEL 3
 
 # define aliases for DOS commands
-alias cls clear
+## OLD: alias cls clear
 #alias dir 'ls -l -t'
 alias dir 'ls -alt \!* | more'
 alias dir_ 'ls -alt \!* | cut -c33-132 | more'

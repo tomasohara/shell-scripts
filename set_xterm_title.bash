@@ -7,21 +7,25 @@
 # - Includes hostname in title if not default host (from environment or file).
 # - Assumes DEFAULT_HOST environment variable specifies the default HOST
 #   in full format (eg., dime-box.cyc.com) or specified in ~/.default-host.
+#   -- See ~/.bashrc and ~/bin/tomohara-aliases.bash.
+#   -- Also see set-title-to-current-dir and reset-prompt in latter.
 # - under CygWin the Windows interepreter (CMD) title built-in command is used
 # - See http://tldp.org/HOWTO/Xterm-Title-4.html#ss4.3 for an explanation of doing
 #   this under bash and other Unix shells.
 # - Under unix, the echoing must be done with -n (DUH)!
-# - Shows original user if running sudo.
+# - Shows original user if running sudo (via SUDO_USER).
 # - Similarly shows suffix defined in environment (via XTERM_TITLE_SUFFIX).
+#   -- See add-conda-env-to-xterm-title in anaconda-aliases.bash
 # - Be careful when modifying code after the $PS_symbol support, which should
 #   go first. That is, put changes before the '=====...===' line,
+# - HACK: Output not done if $BATCH_MODE or $UNDER_EMACS is 1 (but still goes through motions).
 #
 # EXAMPLE:
 # - set_xterm_title.bash "/c/cartera-de-tomas/ILIT" "ILIT"
 #
 # TODO:
 # - Document environment variable usage:
-#   HOST PWD TERM DEFAULT_HOST USER HOST_NICKNAME OSTYPE HOSTNAME SUDO_USER HOME
+#   HOST PWD TERM DEFAULT_HOST USER HOST_NICKNAME OSTYPE HOSTNAME SUDO_USER HOME BATCH_MODE UNDER_EMACS
 # - Add environment variables for prefix (and affix?) analagous to XTERM_TITLE_SUFFIX.
 #   
 #........................................................................
@@ -86,56 +90,70 @@
 #
 
 
-# Uncomment following line(s) for tracing:
+# Uncomment following line(s) for tracing (in order of verbosity):
+# - echo args to show invocation (e.g., testing multiple invocations as with in anaconda-aliases.bash)
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #  
-## set -o xtrace
-## set -o verbose
-## echo args: "$@"
+## BASIC: echo "in $0: args: $@"
+## HACK: echo "BATCH_MODE=$BATCH_MODE"
+## USUAL: set -o xtrace
+## DEBUG: set -o verbose
 
 # Show usage if no arguments or --help
 # TODO: put argument processing in loop (see template.bash)
+restore_base="$TMP/_set_xterm_title.$PPID"
 restore_title=0
 ## TODO: save_title=0
 save_title=1
 print_full=0
 print_icon=0
 show_usage=0
+debug=0
+## DEBUG: debug=1
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 while [ "$moreoptions" = "1" ]; do
     if [ "$1" = "--trace" ]; then
         set -o xtrace
     elif [ "$1" = "--help" ]; then
         show_usage=1
+    elif [ "$1" = "--debug" ]; then
+        debug=1
     elif [ "$1" = "--restore" ]; then
         restore_title=1
+    elif [ "$1" = "--no-save" ]; then
+        save_title=0
     elif [ "$1" = "--save" ]; then
         save_title=1
     elif [ "$1" = "--print-full" ]; then
         print_full=1
+	restore_title=1
+	save_title=0
     elif [ "$1" = "--print-icon" ]; then
         print_icon=1
+	restore_title=1
+	save_title=0
     else
 	echo "ERROR: Unknown option: $1";
-	exit
     fi
     shift;
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 done
-if [[ ("$1" = "") && ("$restore_title" = "0") ]]; then
+if [[ ("$1" = "")
+    && (("$restore_title" = "0") && ("$print_full" = "0") && ("$print_icon" = "0")) ]]; then
     show_usage="1"
 fi
 
 # Show usage statement if --help given or missing option
 if [ "$show_usage" = "1" ]; then
     script=$(basename "$0")
-    echo "Usage: [--trace] [--restore | --save] [--help] $0 title [icon-title]"
+    ## TODO: echo "Usage: [--trace] [--restore | --save] [--print-[full|icon]] [--help] $0 title [icon-title]"
+    echo "Usage: [--trace] [--restore] [--[no]-save] [--print-[full|icon]] [--help] $0 title [icon-title]"
     echo ""
     echo "Notes:"
-    echo "- -save makes a copy of current title (under $TMP)."
-    echo "- -restore uses previously saved title and icon (see function"
-    echo "script in tomohara-aliases.bash)."
+    ## TODO: echo "- -save makes a copy of current title (under $TMP)."
+    echo "- Use --no-save to block automatic --save"
+    echo "- -restore uses previously saved title and icon (see function script in tomohara-aliases.bash)."
     echo ""
     echo "Examples:"
     echo ""
@@ -147,7 +165,7 @@ if [ "$show_usage" = "1" ]; then
     # EX: set_xterm_title.bash "Documents" "[/home/tomohara/Documents]"
     # TODO: See if clearer way to do this quoting.
     ## OLD: echo "$script" '"'"$(basename $PWD)"'"'  '"'"[$PWD]"'"'
-    echo "$script" \"\$\(basename \$PWD\)\"  \"[\$PWD]\"
+    echo "$script" \"\$\(basename \$PWD\)\"  \"\$PWD\"
     echo ""
     echo "$script 'ssh tunnel for mysql'"
     exit
@@ -208,15 +226,21 @@ if [ "$SCRIPT_PID" != "" ]; then
     icon="script:$SCRIPT_PID $icon"
 fi
 
+# Show derived titles
+if [ "$debug" = "1" ]; then
+    echo "new titles: full='$full'; icon='$icon'"
+fi
+
 #================================================================================
 # Be careful when modifying remainder of script.
 
-restore_base="$TMP/_set_xterm_title"
 if [ "$save_title" = "1" ]; then
+    if [ "$debug" = "1" ]; then echo "Updating title cache (${restore_base}*)"; fi
     echo "$full" >| "${restore_base}.full.list"
     echo "$icon" >| "${restore_base}.icon.list"
 fi
 if [ "$restore_title" = "1" ]; then
+    ## DEBUG: echo "Restoring from title cache (${restore_base}*)";
     full=$(cat "${restore_base}.full.list")
     icon=$(cat "${restore_base}.icon.list")
 fi
@@ -250,11 +274,15 @@ fi
 #...............................................................................
 # Do the actual title change
 
+# Note: Disable ansi terminal output if running in pseudo-interactive
+# mode (i.e., $BATCH_MODE=1 and 'i' in $-)
+if [[ ("$BATCH_MODE" = "1") || ("$UNDER_EMACS" = "1") ]]; then
+    ## DEBUG: echo "Ignoring ansi terminal update"
+    true
+
 # Under CygWin, set title using Win32 cmd command to set title to '<args>'
 # NOTE: title is a built-in command of the XP shell
-## OLD: if [ "$OSTYPE" = "cygwin" ]; then
-## if [ "$TERM" = "cygwin" ]; then
-if [ "$TERM" = "cygwin" ]; then
+elif [ "$TERM" = "cygwin" ]; then
     ## TODO: both  ## DEBUG: echo cygwin case
     ## TODO: cmd /k title ...?
     cmd /c title "$icon"

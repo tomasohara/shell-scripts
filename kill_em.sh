@@ -171,7 +171,7 @@ endif
 
 # Do sanity check on processes to kill
 if (-z $aux_file1) then
-    echo "ERROR: No processes matched the pattern"
+    echo "Warning: No processes matched the pattern"
     exit
 endif
 

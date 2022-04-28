@@ -1,6 +1,7 @@
 # *-*-perl-*-*
 eval 'exec perl -Ssw $0 "$@"'
     if 0;
+# -*- coding: utf-8 -*-
 #!/usr/bin/perl -sw
 #
 # qd_trans_spanish.perl: quick and dirty translation of Spanish text.
@@ -11,16 +12,18 @@ eval 'exec perl -Ssw $0 "$@"'
 #
 # NOTE:
 # - via spanish.perl:
-#      $sp_word_chars = "\\w·ÈÌÛ˙Ò¸-";
+#      $sp_word_chars = "\\w√°√©√≠√≥√∫√±√º-";
 #      $sp_word_pattern = "([$sp_word_chars]+)([^$sp_word_chars])"
+# - The UNDER_EMACS environment variable is defined via my ~/.emacs config.
 #
 # TODO:
+# - * Make utf8 the default.
 # - Use strict-mode w/ variable-specific import exceptions.
 # - Remove verb conjugations during -pretty -first_sense output.
 # - Use edit distance to suggest terms when no results (e.g., tearal => teatral).
 # - add support for UTF-8 input as done in spanish.perl (also see count_it.perl)
 # - Make sure space after semicolons in verb conjugations:
-#   ex: +reir => ... Subj. Pres.: rÌa, rÌas, rÌa, rÌamos, ri·is, rÌan.
+#   ex: +reir => ... Subj. Pres.: r√≠a, r√≠as, r√≠a, r√≠amos, ri√°is, r√≠an.
 # - Record words looked up in order to find out which words not being learned (i.e., requiring repeated lookups).
 # - Make sure global and/or ignore is used for regex changes involving listing optonally with word in pattern.
 # - Put word at start of line if past or present participle. For example,
@@ -28,7 +31,7 @@ eval 'exec perl -Ssw $0 "$@"'
 # - Put verb conjugation on separate line (from last verbal sense). For example,
 #      "\t7. to make a slip, to blunder. \ Conjug. like contar." => "\t7. to make a slip, to blunder.\n\tConjug. like contar."
 #
-# Copyright (c) 2005-2019 Tom O'Hara and New Mexico State University.
+# Copyright (c) 2005-2022 Tom O'Hara and New Mexico State University.
 # Freely available via GNU General Public License (see GNU_public_license.txt).
 #
 
@@ -38,8 +41,15 @@ BEGIN {
 }
 require 'spanish.perl';
 use vars qw/$sp_options $sp_word_pattern $first_sense $subsenses $redirect $sp_remove_diacritics $verbose/;
-use vars qw/$utf8/;
+use vars qw/$utf8 $prompt/;
 
+my($misc_usage_notes) = <<END_MISC_NOTES;
+Notes:
+- Use + prefix before token for longer lines.
+- Use @ prefix before token for prettyprinting (e.g., verb conjugations).
+- Use & prefix before token for multi-line output (assumes @).
+- Use * prefix for all of the above.
+END_MISC_NOTES
 
 sub usage {
     local ($program_name) = $0;
@@ -50,7 +60,7 @@ sub usage {
 
 Usage: $program_name [options] spanish_file ...
 
-options = $sp_options [-sp_make_dict=0|1] [-pretty] [-brief] [-maxlen=N] [-full] [-multi]
+options = $sp_options [-sp_make_dict=0|1] [-pretty] [-brief] [-maxlen=N] [-full] [-multi] [-prompt=text]
 
 Quick and dirty (word-level) translation for the Spanish text.
 
@@ -58,13 +68,9 @@ Example:
 
 $program_name luna_y_sol.text >! luna_y_sol.info
 
-Notes:
-- Use + prefix before token for longer lines.
-- Use @ prefix before token for prettyprinting (e.g., verb conjugations).
-- Use & prefix before token for multi-line output (assumes @).
-- Use * prefix for all of the above.
-
 USAGE_END
+
+    print($misc_usage_notes);
 
     &exit();
 }
@@ -84,6 +90,23 @@ if ($#ARGV < 0) {
 &init_var(*multi, &FALSE);      # show output on multine lines
 &init_var(*pretty, $multi);	# pretty print the entry
 &init_var(*maxlen, ($multi ? 1024 : 512));  # maximum length for translation output
+# Note: Special processing for prompt to support usage under Emacs shell
+# (n.b, UNDER_EMACS must be set explicitly).
+# TODO: just default to "> " regardless
+## TEST
+## my($prompt_default) = (&get_env("UNDER_EMACS") ? "> " : "");
+## &init_var(*prompt, $prompt_default);       # prompt for input
+## TODO: disable buffering
+&init_var(*prompt, "");          # prompt for input
+
+# Set stdout unbuffered if prompt used
+if ($prompt ne "") {
+    &debug_print(&TL_DETAILED, "Setting STDOUT unbuffered\n");
+    select(STDOUT); $| = 1;
+    ## TEST
+    ## select(STDIN); $| = 1;             
+    ## select(STDERR); $| = 1;             
+}
 
 # Set defaults for the dictionary, etc. These can be specified on command
 # line, as follows:
@@ -108,10 +131,15 @@ if ($sp_make_dict == &TRUE) {
 # TODO: reconcile the notes here with the ones in the usage statement.
 if ($verbose) {
     print "# qd_trans_spanish\n";
-    print "# Notes:\n";
-    print "# - Use + prefix to show entire translation (instead of $maxlen chars).\n";
-    print "# - Use @ prefix to prettyprint the entry.\n";
-    print "# - Use & prefix to use multiple lines when prettyprinting.\n";
+    my($misc_usage_comments) = $misc_usage_notes;
+    # note: m modifier treats string as multiple lines.
+    $misc_usage_comments =~ s/^/# /gm;
+    print($misc_usage_comments);
+    ## OLD:
+    ## print "# Notes:\n";
+    ## print "# - Use + prefix to show entire translation (instead of $maxlen chars).\n";
+    ## print "# - Use @ prefix to prettyprint the entry.\n";
+    ## print "# - Use & prefix to use multiple lines when prettyprinting.\n";
     print "#\n";
     print "# word:	translation\n";
     print "#\n";
@@ -120,6 +148,7 @@ if ($verbose) {
 # Get the translations for each word in the text. Output each word with
 # its translation on a separate line.
 #
+print($prompt);
 while (<>) {
     chomp;	s/\r//;		# TODO: define my_chomp
     &dump_line();
@@ -165,7 +194,7 @@ while (<>) {
 	}
 	&debug_print(5, "$word ");
 
-	## $word =~ tr/A-Z ¡…Õ”⁄—‹/a-z·ÈÌÛ˙Ò¸/;
+	## $word =~ tr/A-Z √Å√â√ç√ì√ö√ë√ú/a-z√°√©√≠√≥√∫√±√º/;
 	$word_lower = &sp_to_lower($word);
 
 	# Get the word translation and truncate if necessary
@@ -227,6 +256,7 @@ while (<>) {
     }
     print "$text\n";		# print remainder
 
+    print($prompt) if (! eof);
 }
 
 # Cleanup

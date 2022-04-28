@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<HTML lang="en">
+  <!-- Template for simple HTML files -->
+  <!-- TODO: revise based on changes in ~/technical/multiple-image-fading.html -->
+  <HEAD>
+    <META charset="UTF-8">
+    <META name="viewport" content="width=device-width, initial-scale=1.0">
+    <TITLE>TODO: Title</TITLE>
+    <!-- Following is for debugging (e.g., console usage of $) -->
+    <SCRIPT src="https://code.jquery.com/jquery-1.12.4.js"></SCRIPT>
+
+    <STYLE>
+      body {
+         /* Use a Sans-Serif font (so better on low resolutions) */
+         font-family: Arial, Helvetica, sans-serif;
+      }
+
+      /* For debugging, add border around each element */
+      * {
+         /* TODO: border: dotted 1px yellowgreen; */     /* #9ACD32 */
+      }
+    </STYLE>
+
+  </HEAD>
+
+  <BODY>
+
+    <!--.....................................................................-->
+    <H3>TODO: Title</H3>
+
+    <P>
+      TODO: para1
+
+    <P>
+      TODO: para2
+
+      <!-- TODO: add optional table
+           Notes:
+           - Under emacs, use this regex replacement via query-replace-regexp
+           for converting a tab-delimited file:
+              from: ^\([^^Q<TAB>^Q<NEWLINE>\]+\)^Q<TAB>\([^Q<NEWLINE>]+\)
+              to: <tr><td>\1</td> <td>\2</td></tr>
+	   -or-:
+              (query-replace-regexp (format "%s" "^\\([^\n\t]+\\)\t\\([^\n]+\\)\n")   (format "%s" "\t<tr><td>\\1</td> <td>\\2</td></tr>\n"))
+	    TODO: fix tab and newline specification
+           - Alternatively via Perl, use following:
+             perl -pe 's@^([^\t]+)\t([^\n]+)@\t<tr><td>\1</td> <td>\2</td></tr>@;' < {input-file} > {temp-output-file}
+        -->
+      <TABLE>
+        <!-- TODO: See whether th should be used in place of td in thead -->
+        <THEAD>
+          <TR><TD>TODO:column-1</TD> <TD>TODO:column-2</TD></TR>
+        </THEAD>
+        <TBODY>
+          <TR><TD>TODO:item-1-1</TD> <TD>TODO:item-1-2</TD></TR>
+          <TR><TD>TODO:item-2-1</TD> <TD>TODO:item-2-2</TD></TR>
+        </TBODY>
+      </TABLE>
+
+      <H3>Disclaimer</H3>
+      TODO: All code is freely available in the <A HREF="http://www.gnu.org">GNU</A> sense:
+
+      <!--...................................................................-->
+
+      <SCRIPT>
+       <!-- DEBUG: trace out screen and window dimensions
+         var height, width
+         height = $(window).height();
+         width = $(window).width();
+         $("#browser-dim-id").text(width + "x" + height);
+         console.debug("Browser window dimensions: " + width + "x" + height);
+         //
+         height = window.screen.height;
+         width = window.screen.width;
+         $("#screen-dim-id").text(width + "x" + height);
+         console.debug("Screen dimensions: " + width + "x" + height);
+       -->
+      </SCRIPT>
+
+      
+  </BODY>
+</HTML>

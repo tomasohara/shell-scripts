@@ -11,8 +11,16 @@ eval 'exec perl -Ssw $0 "$@"'
 #      perl -e  'print "1\n2\n3\n4\n5\n";' | randomize-lines.perl -
 
 # Load in the common module, making sure the script dir is in the Perl lib path
-BEGIN { my $dir = `dirname $0`; chomp $dir; unshift(@INC, $dir); }
-require 'common.perl';
+BEGIN { 
+    my $dir = $0; $dir =~ s/[^\\\/]*$//; unshift(@INC, $dir);
+    require 'common.perl';
+    use vars qw/$script_name/;
+}
+
+# Specify additional diagnostics and strict variable usage, excepting those
+# for command-line arguments (see init_var's in &init).
+use strict;
+use vars qw/$timeseed $seed/;
 
 # Show a usage statement if no arguments given
 # NOTE: By convention - is used when no arguments are required
@@ -33,7 +41,7 @@ if (!defined($ARGV[0])) {
 
 # Read the entire file
 my @file = <ARGV>;
-$num_lines = scalar @file;
+my($num_lines) = scalar @file;
 &debug_out(&TL_VERY_VERBOSE, "file={@file}\n");
 
 # Optionally, seed the random number generator

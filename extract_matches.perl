@@ -151,7 +151,7 @@ while (<>) {
 
 	# Update the current line being matched
 	if ($restore ne "") {
-	    ## my($restore_text) = eval { "$restore"; };
+	    ## OLD: my($restore_text) = eval { "$restore"; };
 	    my($restore_text) = eval "$restore";
 	    &debug_print(&TL_DETAILED, "restoring $restore_text to line\n");
 	    $_ = $restore_text . $';		# '
@@ -162,6 +162,7 @@ while (<>) {
 	}
 
 	# Transform matching text based on replacement pattern (e.g., '$1')
+	## OLD:
 	## my($qualifier) = ($ignore_case ? "i" : "");
 	## eval "\$matching_text =~ s/\$pattern/$replacement/s$qualifier";
 	## my($replacement_text) = eval { $replacement; };
