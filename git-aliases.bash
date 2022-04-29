@@ -346,8 +346,12 @@ function alt-invoke-next-single-checkin {
 # invoke-alt-checkin(filename): run alternative template-bsed checkin for filename
 function invoke-alt-checkin { alt-invoke-next-single-checkin "$1"; }
 
-# git-alias-usage: tips on interactive usage
+# git-alias-usage (): tips on interactive usage (n.b., aka git-template)
 function git-alias-usage () {
+    # Refresh
+    git-alias-refresh
+
+    # Show start of usage
     echo "Usage examples for git aliases, most of which create log files as follows:"
     echo "   _git-CMD-MMDDYY-HHMM-NNN.log      # ex: _git-status-07mar22.339.log"
     echo ""
@@ -364,6 +368,9 @@ function git-alias-usage () {
     echo "To check in specified changes:"
     echo "    GIT_MESSAGE='...' git-update-commit-push file..."
     echo ""
+
+    # Show usage requiring stupid extraenous {} for shellcheck filtering.
+    # See https://github.com/koalaman/shellcheck/issues/1295 [Allow directives in trailing comments].
     #
     # Note: disable spurious spellcheck SC2016 (n.b., unfortunately just for next statement, so awkward brace group added)
     #    Expressions don't expand in single quotes, use double quotes for that.
