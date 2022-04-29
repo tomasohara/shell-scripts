@@ -844,8 +844,9 @@ function em-file () { set_xterm_title.bash "`basename $1` [`full-dirname $1`]"; 
 alias em-this-dir='em .'
 alias em-devel='em --devel'
 #
-function em-debug () { em -debug-init "$@"; }
-function em-quick () { em -q "$@"; }
+## OLD
+## function em-debug () { em -debug-init "$@"; }
+## function em-quick () { em -q "$@"; }
 function em-small () { em -fn "-adobe-courier-bold-r-normal--12-120-75-75-m-70-iso8859-1" "$@"; }
 function em-large () { em -fn "-adobe-courier-bold-r-normal--18-180-75-75-m-110-iso8859-1" -geometry 70x30 "$@"; }
 function em-very-large () { em -fn "-adobe-courier-bold-r-normal--24-240-75-75-m-150-iso8859-1" -geometry 60x20 "$@"; }
