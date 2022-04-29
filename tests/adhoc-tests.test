@@ -206,6 +206,23 @@ start: Sat Apr 16 20:47:38 CDT 2022
 end: Sat Apr 16 20:47:38 CDT 2022
 
 
+================================================================================
+# Tests for find-related aliases
+
+# setup
+$ mkdir -p $TMP/fs/dir1 $TMP/fs/DIR1 $TMP/backup/dir1
+$ cd $TMP/fs
+$ fs dir
+./dir1
+
+# test
+$ fs dir
+./dir1
+
+# continuation
+$ fs- dir
+./dir1
+./dir1/backup/dir1
 
 ================================================================================
 # Stuff that is currently broken
