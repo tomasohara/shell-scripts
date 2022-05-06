@@ -10,6 +10,14 @@ eval 'exec perl -Ssw $0 "$@"'
 # names first, which simplifies reviewing.
 # 
 # TODO: re-implement suppport for personal spelling file via posthoc difference check
+#...............................................................................
+# Note: sample spell file for aspell (via https://blog.samat.org/2008/11/02/creating-your-own-personal-aspell-dictionary):
+#    personal_ws-1.1 en 0
+#    Samat
+#    quasirhombicosidodecahedron
+#................................................................................
+# TOOD:
+# - allow for numbers in user dictionary tokens (e.g., word2vec)
 #
 
 # Load in the common module, making sure the script dir is in the Perl lib path
@@ -20,10 +28,10 @@ BEGIN {
 }
 
 use strict;
-use vars qw/$nosort $spell_file $latex $ispell $gnu $fold_case/;
+use vars qw/$nosort $spell_file $latex $ispell $gnu $fold_case $speller/;
 
 if (!defined($ARGV[0])) {
-    my($options) = "options = [-spell_file=file] [-latex] [-nosort] [-fold_case]";
+    my($options) = "options = [-spell_file=file] [-latex] [-nosort] [-fold_case] [-speller=command]";
     my($example) = "ex: $script_name report.text\n";
 
     die "\nusage: $script_name [options]\n\n$options\n\n$example\n\n";
@@ -34,10 +42,13 @@ my($file) = $ARGV[0];
 &init_var_exp(*spell_file, "");		# user spelling file
 my($user_spell_file) = ($spell_file ne "") ? $spell_file : &replace_extension($file, ".spell");
 &init_var_exp(*latex, 			# latex mode
-	  &boolean($file =~ /\.tex$/));
+	      &boolean($file =~ /\.tex$/));
 &init_var_exp(*gnu, &FALSE);		# use gnu spell instead of ispell
 &init_var_exp(*ispell, ! $gnu);		# use ispell rather than spell
 &init_var(*fold_case, &FALSE);		# sorts with case ignored (folding)
+&init_var(*speller,                     # command for spell checking
+	  # HACK: uses aspell as ispell still doesn't support interactive usage
+	  ($ispell ? "aspell" : "spell"));
 
 # If the input file is specified as '-', re-invoke over a temporary file based on STDIN
 # TODO: write function for creating temporary file from standard input
@@ -54,12 +65,10 @@ if ($ARGV[0] eq "-") {
 }
 
 # Setup up options for the system spell command
-my($spell_command) = "spell";
+my($spell_command) = $speller;
 my($spell_options) = "";
 my($temp_spell_file) = "";
 if ($ispell) {
-    ## OLD: $spell_command = "ispell";
-    $spell_command = "aspell";
 
     # Set up the options for ispell
     # -l:	just list the spelling errors
@@ -73,7 +82,10 @@ if ($ispell) {
 	# TODO: make this support optional
 	$temp_spell_file = "$TEMP/temp-spell-file.list";
 	&debug_print(&TL_WARNING, "Assuming '$user_spell_file' as user spell file\n");
-	&issue_command("grep -v '^#' '$user_spell_file' > '$temp_spell_file'");
+	## OLD: &issue_command("grep -v '^#' '$user_spell_file' > '$temp_spell_file'");
+	&issue_command("echo personal_ws-1.1 en 0 > '$temp_spell_file'");
+	# TODO: support utf8
+	&issue_command("grep -v '^#' '$user_spell_file' | perlgrep.perl -v '[\\x8F-\\xFF]' >> '$temp_spell_file'");
 	$user_spell_file = $temp_spell_file;
 
 	# Specify the spell-file to use
