@@ -244,3 +244,13 @@ joe
     ## $note .= "notes:\n\nSome usage note.\n";		     # TODO: usage note
     my($options) = "main options = [-seed=real] [-timeseed]";
 # *-*-perl-*-*
+
+================================================================================
+# TODO: make sure aliases sourcing doesn't hang (e.g., due to missing startup-trace alias)
+# See bad-download-and-test-tomohara-aliases.ipynb
+
+# setup
+$ copy tomohara-aliases.bash $TMP
+# test
+$ PATH=fubar BATCH_MODE=1 bash -i -c "source $TMP/tomohara-aliases.bash; echo done" 2> /dev/null
+done
