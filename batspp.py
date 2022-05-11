@@ -363,7 +363,7 @@ class CommandTests(CustomTestsToBats):
     def __init__(self, verbose_debug=False):
         flags = re.DOTALL | re.MULTILINE
 
-        pattern = (fr'({INDENT_PATTERN}Test\s*([\w\s]+?)\n)*' # optional test title
+        pattern = (fr'({INDENT_PATTERN} *# Test\s*([\w\s]+?)\n)*' # optional test title
                    fr'(({INDENT_PATTERN}\$\s+[^\n]+\n)*)'     # optional setup
                    fr'({INDENT_PATTERN}\$\s+[^\n]+)\n'        # command test line
                    fr'(.+?)\n'                            # expected output
@@ -408,7 +408,7 @@ class FunctionTests(CustomTestsToBats):
 
         flags = re.MULTILINE
 
-        pattern = (fr'({INDENT_PATTERN}Test\s*([\w\s]+?)\n)*' # optional test title
+        pattern = (fr'({INDENT_PATTERN} *Test\s*([\w\s]+?)\n)*' # optional test title
                    fr'({INDENT_PATTERN}.+?)'                     # functions + args line
                    fr'\s+({self.assert_eq}|{self.assert_ne})\s+' # assertion
                    r'((.|\n)+?)'                                 # expected output
