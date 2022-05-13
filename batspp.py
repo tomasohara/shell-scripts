@@ -124,8 +124,17 @@ class Batspp(Main):
         self.__process_tests()
 
 
-        # Save
-        batsfile = self.output if self.output else self.temp_file
+        # Set Bats filename
+        if self.output:
+            batsfile = self.output
+            if batsfile.endswith('/'):
+                name = re.search(r"\/(\w+)\.", self.test_file).group(0)
+                batsfile += f'{name}.bats'
+        else:
+            batsfile = self.temp_file
+
+
+        # Save Bats file
         gh.write_file(batsfile, self.bats_content)
 
 
