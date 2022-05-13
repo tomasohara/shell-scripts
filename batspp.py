@@ -43,6 +43,7 @@ Also you can test bash functions:
 
 # Standard packages
 import re
+from socket import VMADDR_CID_HOST
 
 
 # Local packages
@@ -131,9 +132,17 @@ class Batspp(Main):
             return
 
 
-        # Save
-        ## TODO: check if output is a filename, otherwise append a filename.
-        batsfile = self.output if self.output else self.temp_file
+        # Set Bats filename
+        if self.output:
+            batsfile = self.output
+            if batsfile.endswith('/'):
+                name = re.search(r"\/(\w+)\.", self.test_file).group(0)
+                batsfile += f'{name}.bats'
+        else:
+            batsfile = self.temp_file
+
+
+        # Save Bats file
         gh.write_file(batsfile, self.bats_content)
 
 
