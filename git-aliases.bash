@@ -55,6 +55,10 @@
 # 2. git commit - this commits your staged changes locally
 # 3. git push - this pushes your committed changes to a remote
 #
+#-------------------------------------------------------------------------------
+# TODO:
+# - git-revert (e.g., rename, discard, and re-checkout w/ 'git checkout -- ...')
+#
 
 # pause-for-enter(): print message and wait for user to press enter
 # TODO: extend to press-any-key; see
