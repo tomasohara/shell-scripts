@@ -5,9 +5,10 @@
 # using suppoting scripts from
 #    http://www.cs.nmsu.edu/~tomohara/useful-scripts/tpo-useful-scripts.tar.gz
 #
+# This is in the process of being re-organized to make it easier to test and to
+# isolate the isolate the stuff specific to my workflow (i.e., "idiosyncratic").
+#
 # NOTES:
-# - ***** Put work-specific stuff in separate file!"
-# - **** Add EX-bases tests for all numeric aliases!
 # - *** This is a pruned down version of do_setup.bash. It should be renamed to tohara-setup.bash as it includes more than just just aliases!
 # - ** Put overly large function definitions into scripts (e.g., prepare-find-files-here, hg-pull-and-update, show-unicode-code-info-aux, and init-condaN)!
 #   These can be identified as follows:
@@ -35,6 +36,8 @@
 # - Obsolete old code flagged with '## OLD': either older definition
 #   or no longer used).
 # - Misc. old code flagged with '## MISC' (e.g., old but potentially useful).
+# - Exceptionally idiosyncratic aliases are flagged with '## TOM'. (These
+#   should be considered as experiemental.)
 # - See extra-tomohara-aliases.bash for aliases for adhoc aliases (e.g., not
 #   used on a regular basis and/or special purpose).
 # - This gets invoked from $HOME/.bashrc.local.
@@ -79,6 +82,8 @@
 #    -- SC2139: This expands when defined, not when used. Consider escaping.
 #
 # TODO:
+# - ***** Put work-specific stuff in separate file!"
+# - **** Add EX-bases tests for all numeric aliases!
 # - ***** Fix problems noted by shellcheck (and rework false positives)!.
 # - ** Add macros to provide cribsheet on usage!
 # - *** Purge way-old stuff (e.g., lynx related)!
@@ -220,7 +225,9 @@ hoy=$(todays-date)
 # TODO: punt on tab-completion (i.e., TODAY => today)???
 alias TODAY=todays-date
 alias date-central='TZ="America/Chicago" date'
-alias em-adhoc-notes='emacs-tpo _adhoc-notes.$(TODAY).txt'
+# em-adhoc-notes(): edit adhoc ntoes file using format _{host}-adhoc-{date} (e.g., _reempl-adhoc-notes.13may22.txt)
+## OLD: alias em-adhoc-notes='emacs-tpo _adhoc-notes.$(TODAY).txt'
+alias em-adhoc-notes='emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes.$(TODAY).txt'
 alias T='TODAY'
 # update-today-vars() & todays-update: update the various today-related variables
 # aside: descriptive name for function and convenience alias (tab-completion)
@@ -638,7 +645,7 @@ function copy-readonly-spec () {
         echo "Usage: copy-readonly-spec pattern dir";
         return
     fi
-    # effing shellcheck (SC2086: Double quote to prevent globbing)
+    # maldito shellcheck (SC2086: Double quote to prevent globbing)
     # shellcheck disable=SC2086
     for f in $($LS $spec); do copy-readonly "$f" "$dir"; done
 }
@@ -666,7 +673,7 @@ trace directory commands
 LS="/bin/ls"
 core_dir_options="--all -l -t  --human-readable"
 dir_options="${core_dir_options} --no-group"
-# effing shellcheck: SC2046 [Quote this to prevent word splitting] and SC2086 [Double quote to prevent globbing]
+# maldito shellcheck: SC2046 [Quote this to prevent word splitting] and SC2086 [Double quote to prevent globbing]
 # shellcheck disable=SC2046,SC2086
 {
 if [ "$OSTYPE" = "solaris" ]; then dir_options="-alt"; fi
@@ -767,7 +774,7 @@ if [[ $(grep --version) =~ Copyright.*2[0-9][0-9][0-9] ]]; then skip_dirs="-d sk
 GREP="/bin/grep"
 EGREP="$GREP -E"
 export MY_GREP_OPTIONS="-n $skip_dirs -s"
-# effing shellcheck (SC2086: Double quote to prevent globbing)
+# maldito shellcheck (SC2086: Double quote to prevent globbing)
 # shellcheck disable=SC2086
 {
 function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
@@ -961,7 +968,7 @@ function view-todo () {
     perl -SSw reverse.perl "$HOME/organizer/todo_list.text" | $PAGER_CHOPPED $search_arg; 
 }
 }
-# effing shellcheck: SC2119 [Use view-todo "$@" if function's $1 should mean script'1 $1]
+# maldito shellcheck: SC2119 [Use view-todo "$@" if function's $1 should mean script'1 $1]
 # and SC2181 [Check exit code directly]
 # shellcheck disable=SC2119,SC2181
 {
@@ -1144,7 +1151,7 @@ function kdiff () { kdiff.sh "$@" & }
 alias vdiff='kdiff'
 #
 # diff(): run diff command w/ --ignore-all-space (-w) and --ignore-space-change (-b)
-# effing shellcheck: SC2034: diff_options appears unused. Verify it or export it.
+# maldito shellcheck: SC2034: diff_options appears unused. Verify it or export it.
 # shellcheck disable=SC2034
 {
 diff_options="--ignore-space-change --ignore-blank-lines"
@@ -1246,7 +1253,7 @@ function make-tar () {
     if [ "$USE_DATE" = "1" ]; then base="$base-$(TODAY)"; fi
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
     ## OLD:
-    # effing shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
+    # maldito shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2086
     (find "$dir" $find_options $depth_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     ## DUH: -L added to support tar-this-dir in directory that is symbolic link, but unfortunately
@@ -1363,7 +1370,7 @@ function calc-stdev () { sum_file.perl -stdev "$@" -; }
 ## MISC: alias calc-stdev-file='calc-stdev <'
 ## MISC: alias sum-col2='sum_file.perl -col=2 -'
 notes_glob="*notes*.txt  *notes*.list *notes*.log"
-# effing shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
+# maldito shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
 # shellcheck disable=SC2086
 {
 function notes-grep() { perlgrep "$@" $notes_glob; }
@@ -1589,7 +1596,7 @@ function move-versioned-files {
     ## dir-rw $(eval echo *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*  *$D*[0-9][0-9]*$D$ext_pattern) 2>| "$file_list.log" | perl -pe 's/(\S+\s+){6}\S+//;' >| "$file_list"
     ## xargs -I "{}" $MV "{}" "$dir" < "$file_list"
     ## OLD: move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;') "$dir"
-    # effing shellcheck: SC2035 [Use ./*glob* or -- *glob* so names with dashes won't become options]
+    # maldito shellcheck: SC2035 [Use ./*glob* or -- *glob* so names with dashes won't become options]
     # SC2046 [Quote this to prevent word splitting], and SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2035,SC2046,SC2086
     move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;' | sort -u) "$dir"
@@ -1626,8 +1633,8 @@ function rename-with-file-date() {
 function copy-with-file-date { rename-with-file-date --copy "$@"; }
 
 # Statistical helpers
-alias bigrams='perl -sw $TOM_BIN/count_bigrams.perl -N=2'
-alias unigrams='perl -sw $TOM_BIN/count_bigrams.perl -N=1'
+alias bigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=2'
+alias unigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=1'
 alias word-count=unigrams
 
 # Lynx stuff
@@ -1916,7 +1923,7 @@ function sudo-admin () {
     sudo chmod ugo-w "$prefix"*.log*
     local script_log
     script_log=$(get-free-filename "$base")
-    # effing shellcheck: SC2033 [Shell functions can't be passed to external commands]
+    # maldito shellcheck: SC2033 [Shell functions can't be passed to external commands]
     # shellcheck disable=SC2033
     sudo --set-home   script --flush "$script_log"
 }
@@ -1965,7 +1972,11 @@ TPO_SSH_KEY=~/.ssh/$USER-key.pem
 SSH_PORT="22"
 #
 # TODO: For cygwin clients, unset TERM so set_xterm_title.bash not confused.
-function ssh-host-aws-aux () { local host="$1"; shift; ssh -X -p $SSH_PORT -i $TPO_SSH_KEY $USER@$host "$@"; }
+# Maldito shellcheck [SC2029: Note that, unescaped, this expands on the client side]
+# shellcheck disable=SC2029
+{
+function ssh-host-aws-aux () { local host="$1"; shift; ssh -X -p $SSH_PORT -i "$TPO_SSH_KEY" "$USER@$host" "$@"; }
+}
 #
 function ssh-host-login-aws () {
     local host="$1"
@@ -1975,19 +1986,20 @@ function ssh-host-login-aws () {
 }
 ## TODO: function run-remote-command-aws () { ssh-host-aws-aux "$@"; }
 # Note: /tmp used in case host not setup with ~/temp
-function scp-host-down() { scp -P $SSH_PORT -i $TPO_SSH_KEY "$USER@$1:$TMP/$2" .; }
+function scp-host-down() { scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$USER@$1:$TMP/$2" .; }
 # TODO: rework in terms of id_rsa-tomohara-keypair (as used on others hosts)
-function scp-host-up() { local host="$1"; shift; scp -P $SSH_PORT -i $TPO_SSH_KEY "$@" "$USER@$host:$TMP"; }
+function scp-host-up() { local host="$1"; shift; scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@" "$USER@$host:$TMP"; }
 #
 function scp-aws-up() { local host="$1"; shift;
-                        ssh -p $SSH_PORT -i $TPO_SSH_KEY $USER@$host chmod u+w "~/xfer/"*;
-                        scp -P $SSH_PORT -i $TPO_SSH_KEY "$@"  $USER@$host:xfer; }
-function scp-aws-down() { local host="$1"; shift; for _file in "$@"; do scp -P $SSH_PORT -i $TPO_SSH_KEY $USER@$host:xfer/$_file .; done; }
+                        ssh -p $SSH_PORT -i "$TPO_SSH_KEY" "$USER@$host" chmod u+w ~/xfer/*;
+                        scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@"  "$USER@$host":xfer; }
+function scp-aws-down() { local host="$1"; shift; for _file in "$@"; do scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$USER@$host":xfer/$_file .; done; }
 #
 # TODO: consolidate host keys; reword hostwinds in terms of generic host not AWS
 #
 export AWS_HOST="52.15.125.52"
 aws_micro_host=ec2-52-15-125-52.us-east-2.compute.amazonaws.com
+reference-variable $aws_micro_host
 alias aws-login-micro='ssh-host-login-aws $aws_micro_host'
 alias aws-upload-micro='scp-aws-up $aws_micro_host'
 alias aws-download-micro='scp-aws-down $aws_micro_host'
@@ -2023,9 +2035,10 @@ alias hw2-download=new-hw-download
 if [[ ("$DEFAULT_HOST" = "") && (($HOSTNAME =~ ip-*) || ($HOSTNAME =~ cvps*)) ]]; then export DEFAULT_HOST=n/a; fi
 
 
-function gr-juju-notes () { grepl "$@" /c/work/juju/*notes* $JJDATA/*notes*; }
-function gr-juju-notes-archive () { MY_GREP_OPTIONS="" grepl "$@" /c/work/juju/_note-archive.list; }
-alias gr-juju-archive-notes=gr-juju-notes-archive
+## OLD
+## function gr-juju-notes () { grepl "$@" /c/work/juju/*notes* $JJDATA/*notes*; }
+## function gr-juju-notes-archive () { MY_GREP_OPTIONS="" grepl "$@" /c/work/juju/_note-archive.list; }
+## alias gr-juju-archive-notes=gr-juju-notes-archive
 
 alias uname-node='uname -n'
 alias pwd-host-info='pwd; echo $HOST_NICKNAME; uname-node'
@@ -2036,21 +2049,24 @@ alias pwd-host-info='pwd; echo $HOST_NICKNAME; uname-node'
 ## conditional-export MISC_TRACING_LEVEL 4
 ## alias restart-screen='screen-startup.sh >| $TEMP/screen-startup.$$.log 2>&1'
 
-#-------------------------------------------------------------------------------
-
-# MRJob stuff (python-based map-reduce)
-#
-# show-job-tracker([port=40001]): enable tunneling for job tracker on temp EC2 host
-# and then invoke firefox for link using corresponding port
-# note: ssh options: -f background; -n redirect stdin; -N no command; -T disable pseudo-tty; -L port forwarding specification
-job_tracker_port=40001
-function show-job-tracker() {
-    local port="$1"
-    if [ "$port" == "" ]; then port=$job_tracker_port; fi
-    ssh -fnNT -i $TPO_SSH_KEY -L$port:localhost:$port $USER@$mrjob_ec2_host
-    firefox http://localhost:$port/jobtracker.jsp &
-}
-alias kill-job-trackers=' kill_em.sh -p L$job_tracker_port'
+## OLD
+## #-------------------------------------------------------------------------------
+## 
+## # MRJob stuff (python-based map-reduce)
+## #
+## # show-job-tracker([port=40001]): enable tunneling for job tracker on temp EC2 host
+## # and then invoke firefox for link using corresponding port
+## # note: ssh options: -f background; -n redirect stdin; -N no command; -T disable pseudo-tty; -L port forwarding specification
+## job_tracker_port=40001
+## function show-job-tracker() {
+##     local port="$1"
+##     if [ "$port" == "" ]; then port=$job_tracker_port; fi
+##     # Maldito shellcheck [SC2029: Note that, unescaped, this expands on the client side]
+##     # shellcheck disable=SC2029
+##     ssh -fnNT -i "$TPO_SSH_KEY" -L$port:localhost:$port "$USER@$mrjob_ec2_host"
+##     firefox http://localhost:$port/jobtracker.jsp &
+## }
+## alias kill-job-trackers=' kill_em.sh -p L$job_tracker_port'
 
 #-------------------------------------------------------------------------------
 # Misc. language related
@@ -2102,11 +2118,67 @@ function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$;
 ## HACK: set envionment for sake of set_xterm_title.bash (TODO check PPID for this)
 ## TODO: use stack for old_PS_symbol maintenance??? (also allows for recursive invocation, such as with '$ $ $')
 ## TODO: rename as my-script to avoid confusion
+## Maldito shellcheck [
+#-------------------------------------------------------------------------------
+# Misc. language related
+alias json-pp='json_pp -json_opt utf8,pretty'
+alias pp-json=json-pp
+# note: canonical sorts the keys of hashes (utf8 avoids warning and pretty might be the default)
+alias pp-json-sorted='json_pp -json_opt utf8,pretty,canonical'
+
+#-------------------------------------------------------------------------------
+# Hostwinds related
+# cvps6185033409: old Ubuntu 12.04.02 i866
+export HOSTWINDS_HOST=23.254.204.34
+# hwsrv-592788.hostwindsdns.com: Ubuntu 16.04.02 x64
+export NEW_HOSTWINDS_HOST=142.11.227.157
+
+#-------------------------------------------------------------------------------
+# General unix
+#
+# ps-all(pattern): show processes from all users matching PATTERN (or . in which case piped to less)
+# TODO: have option to restrict to current user
+function ps-all () { 
+    local pattern="$1";
+    local pager=cat;
+    if [ "$pattern" = "" ]; then 
+        pattern="."; 
+        pager=$PAGER
+    fi;
+    ps_mine.sh --all | $EGREP -i "((^USER)|($pattern))" | $pager;
+    }
+alias ps-script='ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
+function ps-sort-once { ps_sort.perl -num_times=1 -by=time "$@" -; }
+alias ps-sort-time='ps-sort-once -by=time'
+alias ps-time=ps-sort-time
+alias ps-sort-mem='ps-sort-once -by=mem '
+alias ps-mem=ps-sort-mem
+
+# get-process-parent(pid): return parent process-id for PID
+# ¢ ps al | egrep "(PID|$$)"
+# F   UID   PID  PPID PRI  NI    VSZ   RSS WCHAN  STAT TTY        TIME COMMAND
+# 0  1000  3723  3840  20   0  25136  7724 wait   Ss   pts/51     0:01 bash
+# 4  1000 25056  3723  20   0  28920  1612 -      R+   pts/51     0:00 ps al
+# 0  1000 25057  3723  20   0  14228  1024 pipe_w S+   pts/51     0:00 grep -E --color=auto (PID|372
+# 
+function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$; fi; ps al | perl -Ssw extract_matches.perl "^\d+\s+\d+\s+$pid\s+(\d+)"; }
+
+# Make sure script appends rather than overwrites.
+# In addition, set SCRIPT_PID, so that set_xterm_title.bash can indicate within script.
+# Also, appends $ to prompt symbol so that typescript prompt searchable with strings command
+## HACK: set envionment for sake of set_xterm_title.bash (TODO check PPID for this)
+## TODO: use stack for old_PS_symbol maintenance??? (also allows for recursive invocation, such as with '$ $ $')
+## TODO: rename as my-script to avoid confusion
+## Maldito shellcheck [SC2032: Use own script or sh -c '..' to run this from sudo.]
+# shellcheck disable=SC2032
+{
 function script {
     ## THIS function is buggy!
     # Note: set_xterm_title.bash keeps track of titles for each process, so save copies of current ones
-    local save_full=$(set-xterm-title --print-full)
-    local save_icon=$(set-xterm-title --print-icon)
+    local save_full
+    save_full=$(set-xterm-title --print-full)
+    local save_icon
+    save_icon=$(set-xterm-title --print-icon)
     ## DEBUG: echo "save_full='$save_full'; save_icon='$save_icon'"
   
     # Change prompt
@@ -2131,6 +2203,7 @@ function script {
     ## DEBUG: echo "Restoring xterm title: full=$save_full save=$save_icon"
     set-xterm-title "$save_full" "$save_icon"
 }
+}
 # TODO: put this in a separate file
 alias script-update='script _update-$(T).log'
 
@@ -2153,7 +2226,8 @@ function ansi-filter {
 function pause-for-enter () {
     local message="$1"
     if [ "$message" = "" ]; then message="Press enter to continue"; fi
-    read -p "$message "
+    # note: -r is raw [avoids shellcheck backslash warning] and -p for prompt
+    read -r -p "$message "
 }
 
 #-------------------------------------------------------------------------------
@@ -2168,7 +2242,8 @@ export PYTHONPATH="$HOME/python:$PYTHONPATH"
 ## HACK: make sure Mezcla/mezcla resolves before python/mezcla
 function add-python-path () {
     local package_path="$1"
-    local parent_path=$(realpath "$package_path/..")
+    local parent_path
+    parent_path=$(realpath "$package_path/..")
     # add package to path (e.g., $HOME/python/Mezcla/mezcla)
     prepend-path "$package_path"
     # add parent to python-path spec (e.g., $HOME/python/Mezcla)
@@ -2194,6 +2269,8 @@ alias show-python-path='show-path-dir PYTHONPATH'
 # TODO: add option for forced removal; try using '-name "*.py[co]"')
 function delete-compiled-python-files-aux {
     local rm_options=${1:-"-v"}
+    # Maldito shellcheck [SC2086: Double quote to prevent globbing and word splitting]
+    # shellcheck disable=SC2086
     find . \( -name "*.pyc" -o -name "*.pyo" \) -exec /bin/rm $rm_options {} \;
 }
 alias delete-compiled-python-files=delete-compiled-python-files-aux
@@ -2217,7 +2294,8 @@ alias delete-compiled-python-files-force='delete-compiled-python-files-aux -vf'
 #                                      ^ (bad-whitespace)
 
 function python-lint-full() { 
-    local root=$(hg root 2> /dev/null);
+    local root
+    root=$(hg root 2> /dev/null);
     ## TODO: --persistent=n (to avoid caching)
     PYTHONPATH="$root:.:$PYTHONPATH" $NICE pylint "$@" | perl -00 -ne 'while (/(\n\S+:\s*\d+[^\n]+)\n( +)/) { s/(\n\S+:\s*\d+[^\n]+)\n( +)/$1\r$2/mg; } print("$_");' 2>&1 | $PAGER;
 }
@@ -2238,28 +2316,36 @@ function python-lint() { python-lint-work "$@" 2>&1 | $EGREP -v '(Exactly one sp
 # files in FILE_SPEC, placing results in pylint/<today>.
 #
 function get-python-lint-dir () {
-    local python_version_major=$(pylint --version 2>&1 | extract_matches.perl "Python (\d)")
+    local python_version_major
+    python_version_major=$(pylint --version 2>&1 | extract_matches.perl "Python (\d)")
     local affix="py${python_version_major}"
-    local out_dir="_pylint/$(todays-date)-$affix"
+    local out_dir
+    out_dir="_pylint/$(todays-date)-$affix"
     echo "$out_dir"
 }
 #
 function run-python-lint-batched () {
     # TODO: support files with embedded spaces
-    local file_spec="$@"
+    local file_spec="$*"
     if [ "$file_spec" = "" ]; then file_spec="*.py"; fi
 
     # Create output directory if needed
-    local out_dir=$(get-python-lint-dir)
+    local out_dir
+    out_dir=$(get-python-lint-dir)
     mkdir -p "$out_dir"
 
     # Run pylint and pipe top section into less
+    # Maldito shellcheck [SC2086: Double quote to prevent globbing and word splitting]
+    # shellcheck disable=SC2086
     (for f in $($LS $file_spec); do
          # HACK: uses basename of parent prefix if invoked with path
-         local b=$(basename "$f")
+         local b
+	 b=$(basename "$f")
          local pre=""
 	 # Note: uses directory name as prefix if file not in current dir
-         if [[ $f =~ / ]]; then pre="$(basename $(dirname "$f"))-"; fi
+	 local d
+	 d=$(dirname "$f")
+         if [[ $f =~ / ]]; then pre="$(basename "$d")-"; fi
          DEBUG_LEVEL=5 python-lint "$f" >| "$out_dir/$pre$b".log 2>&1
          head "$out_dir/$pre$b".log
      done) >| "$out_dir/summary.log"
@@ -2286,7 +2372,8 @@ alias python-uninstall-setup='cat installed-files.list | xargs /bin/rm -vi; rena
 
 # ipython(): overrides ipython command to set xterm title
 function ipython() { 
-    local ipython=$(which ipython)
+    local ipython
+    ipython=$(which ipython)
     if [ "$ipython" = "" ]; then echo "Error: install ipython first"; return; fi
     set-xterm-window "ipython [$PWD]"
     $ipython "$@"
@@ -2296,20 +2383,23 @@ function ipython() {
 function python-trace {
     local script="$1"
     shift
-    $PYTHON -m trace --trace $(which "$script") "$@"
+    # maldito shellcheck (SC2086: Double quote to prevent globbing)
+    # shellcheck disable=SC2086
+    $PYTHON -m trace --trace "$(which "$script")" "$@"
     }
 
 # py-diff(dir): check for difference in python scripts versus those in target
 # TODO: specify options before the pattern (or modify do_diff.sh to allow after)
 function py-diff () { do_diff.sh '*.py *.mako' "$@" 2>&1 | $PAGER; }
 
-# kivy-win32-env(): enables environment variabless for Kivy under cyggwin, using win32 python
-function kivy-win32-env {
-   export PYTHONPATH='c:/cartera-de-tomas/python;c:/Program-Misc/python/kivy-1-9-0/kivy27'
-   kivy_dir="/c/Program-Misc/python/kivy-1-9-0"
-   python_dir="$kivy_dir/Python27"
-   prepend-path "$kivy_dir:$kivy_dir/Python27:$kivy_dir/tools:$kivy_dir/Python27/Scripts:$kivy_dir/gstreamer/bin:$kivy_dir/MinGW/bin:$kivy_dir/SDL2/bin"
-}
+## OLD
+## # kivy-win32-env(): enables environment variabless for Kivy under cyggwin, using win32 python
+## function kivy-win32-env {
+##    export PYTHONPATH='c:/cartera-de-tomas/python;c:/Program-Misc/python/kivy-1-9-0/kivy27'
+##    kivy_dir="/c/Program-Misc/python/kivy-1-9-0"
+##    python_dir="$kivy_dir/Python27"
+##    prepend-path "$kivy_dir:$kivy_dir/Python27:$kivy_dir/tools:$kivy_dir/Python27/Scripts:$kivy_dir/gstreamer/bin:$kivy_dir/MinGW/bin:$kivy_dir/SDL2/bin"
+## }
 
 alias elide-data='python -m transpose_data --elide'
 alias kill-python="kill_em.sh --filter 'ipython|emacs' python"
@@ -2328,7 +2418,8 @@ alias which-python='which python'
 function run-jupyter-notebook () {
     local port="$1"; if [ "$port" = "" ]; then port=8888; fi
     local ip="$2"; if [ "$ip" = "" ]; then ip="127.0.0.1"; fi
-    local log="$TEMP/jupyter-$(TODAY).log"
+    local log
+    log="$TEMP/jupyter-$(TODAY).log"
     jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
     echo "$log"
     # Let jupyter initialize
@@ -2355,12 +2446,17 @@ alias xtract-text='extract-text'
 # TODO: rework to take the actual test script and to pipe results to pager
 #
 function test-script () {
-    local base=$(basename "$1" .py)
-    local date=$(todays-date)
+    local base
+    base=$(basename "$1" .py)
+    local date
+    date=$(todays-date)
     # note: uses both Mercurial root and . (in case not in repository)
-    local root=$(hg root)
-    PYTHONPATH="$root:.:$SANDBOX/tests:$PYTHONPATH" $NICE $PYTHON tests/test_$base.py --verbose >| tests/_test_$base.$date.log 2>&1;
-    less-tail tests/_test_$base.$date.log;
+    local root
+    root=$(hg root)
+    # maldito shellcheck (SC2086: Double quote to prevent globbing)
+    # shellcheck disable=SC2086
+    PYTHONPATH="$root:.:$SANDBOX/tests:$PYTHONPATH" $NICE $PYTHON tests/"test_$base.py" --verbose >| tests/"_test_$base.$date.log" 2>&1;
+    less-tail tests/"_test_$base.$date.log";
 }
 #
 alias test-script-debug='ALLOW_SUBCOMMAND_TRACING=1 DEBUG_LEVEL=5 MISC_TRACING_LEVEL=5 test-script'
@@ -2373,7 +2469,7 @@ function randomize-datafile() {
     if [ "$num_lines" = "" ]; then num_lines=$(wc -l "$file"); fi
     #
     head -1 "$file"
-    tail --lines=+2 "$file" | python -m randomize_lines | head -$num_lines
+    tail --lines=+2 "$file" | python -m randomize_lines | head -"$num_lines"
 }
 
 # filter-random(pct, file, [include_header=1])Randomize lines based on percentages, using output lile (e.g., _r10pct-fubar.data).
@@ -2387,13 +2483,18 @@ function filter-random() {
     if [ "$include_header" == "" ]; then include_header=1; fi
 
     # Derive settings from input arguments
-    local ratio=$(perl -e "printf('%.3f', ($pct / 100.0));")
+    local ratio
+    ratio=$(perl -e "printf('%.3f', ($pct / 100.0));")
     local compressed=0
     if [[ $file =~ .gz ]]; then compressed=1; fi
-    local dir=$(dirname $file)
-    local base=$(basename $file)
-    local type="cat"
-    local result="$dir/_r${pct}pct-$base"
+    local dir
+    dir=$(dirname "$file")
+    local base
+    base=$(basename "$file")
+    local type
+    type="cat"
+    local result
+    result="$dir/_r${pct}pct-$base"
 
     # Filter the file, optionally uncompressing
     if [ "$compressed" = "1" ]; then 
@@ -2401,8 +2502,10 @@ function filter-random() {
        result=$(echo "$result" | perl -pe 's/.gz$//;')
     fi
     local opts=""
-    if [ "$include_header" = "1" ]; then opts="$opt --include-header"; fi
-    $type "$file" | $PYTHON -m filter_random $opts --ratio $ratio - > "$result" 2> "$result.log"
+    if [ "$include_header" = "1" ]; then opts="$opts --include-header"; fi
+    # maldito shellcheck (SC2086: Double quote to prevent globbing)
+    # shellcheck disable=SC2086
+    $type "$file" | $PYTHON -m filter_random "$opts" --ratio "$ratio" - > "$result" 2> "$result.log"
 
     # Compress result if original compressed
     if [ "$compressed" = "1" ]; then 
@@ -2412,20 +2515,22 @@ function filter-random() {
 
 # Load supporting scripts
 #
-conditional-source $TOM_BIN/anaconda-aliases.bash
-conditional-source $TOM_BIN/git-aliases.bash
+conditional-source "$TOM_BIN/anaconda-aliases.bash"
+conditional-source "$TOM_BIN/git-aliases.bash"
 
 # Web access
 #
 function curl-dump () {
     local url="$1";
-    local base=$(basename $url);
-    curl $url > $base;
+    local base
+    base=$(basename "$url");
+    curl "$url" > "$base";
 }
 # EX: url-path $BIN/templata.html => "file:///$BIN/template.html"
 function url-path () {
     local file="$1"
-    echo $(realpath "$file") | perl -pe 's@^@file:///@;'
+    ## OLD: echo "$(realpath "$file")" | perl -pe 's@^@file:///@;'
+    realpath "$file" | perl -pe 's@^@file:///@;'
 }
 # invoke-browser(executable, [file]): Invokes browser EXECUTABLE, optionally
 # to open local FILE.
@@ -2444,8 +2549,9 @@ function invoke-browser() {
     ##     browser_executable_path=$(which "browser_executable")
     ##     if [ "$browser_executable_path" = "" ]; then browser_executable="$_path"; fi   
     ## fi
-    local browser_base=$(basename "$browser_executable")
-    $browser_executable "$file" >> $TEMP/$browser_base.$(TODAY).log 2>&1 &
+    local browser_base
+    browser_base=$(basename "$browser_executable")
+    $browser_executable "$file" >> "$TEMP/$browser_base.$(TODAY).log" 2>&1 &
 }
 ## TODO: try to get following aliases to work for brevity
 ## alias firefox='invoke-browser command "firefox"'
@@ -2456,11 +2562,15 @@ alias chromium='invoke-browser /usr/lib/chromium-browser/chromium-browser'
 ## TODO: drop which's
 ## BAD: function which { builtin which "$1" 2> /dev/null; }
 function which { command which "$1" 2> /dev/null; }
+# maldito shellcheck: SC2139: [This expands when defined, not when used. Consider escaping]
+# shellcheck disable=SC2139
+{
 ## TEST: alias firefox='invoke-browser "'"$(which firefox 2> /dev/null)"'"'
 alias firefox='invoke-browser "'"$(which firefox)"'"'
 ## TEST: alias opera='invoke-browser "'"$(which opera 2> /dev/null)"'"'
 alias opera='invoke-browser "'"$(which opera)"'"'
 alias tor-browser='invoke-browser "'"$(which tor-browser-en.sh)"'"'
+}
 alias run-tor-browser=tor-browser
 alias run-epiphany-browser='invoke-browser epiphany-browser'
 
@@ -2486,7 +2596,8 @@ alias ed-trans-sp=em-trans-sp
 
 function make-lilypond-png () {
     local file="$1"
-    local base=$(basename "$file" .ly)
+    local base
+    base=$(basename "$file" .ly)
     # note follpwing doesn't work as lilypond puts temporary files in current dir
     ## TODO: local base=$(dirname "$file")/$(basename "$file" .ly)
     lilypond_dir="/c/Program-Misc/music/lilypond"
@@ -2536,9 +2647,11 @@ function shell-check {
 #-------------------------------------------------------------------------------
 # System administration
 # TODO: do for ???
-if [ "$USER" = "root" ]; then
-    alias kill-software-updater='kill_em.sh --all --pattern "(software-properties-gtk|gnome-software|update-manager)"'
-fi
+## OLD:
+## if [ "$USER" = "root" ]; then
+##     alias kill-software-updater='kill_em.sh --all --pattern "(software-properties-gtk|gnome-software|update-manager)"'
+## fi
+alias kill-software-updater='kill_em.sh --all --pattern "(software-properties-gtk|gnome-software|update-manager)"'
 alias update-software='/usr/bin/update-manager'
 alias kill-clam-antivirus='kill_em.sh --all -p clamd'
 
@@ -2557,9 +2670,9 @@ alias sleepy='sleepyhead'
 
 #------------------------------------------------------------------------
 # Aliases for [re-]invoking aliases
-alias tomohara-aliases="source $TOM_BIN/tomohara-aliases.bash"
-alias tomohara-settings="source $TOM_BIN/tomohara-settings.bash"
-alias more-tomohara-aliases="source $TOM_BIN/more-tomohara-aliases.bash"
+alias tomohara-aliases='source "$TOM_BIN/tomohara-aliases.bash"'
+alias tomohara-settings='source "$TOM_BIN/tomohara-settings.bash"'
+alias more-tomohara-aliases='source "$TOM_BIN/more-tomohara-aliases.bash"'
 
 # Optional end tracing
 startup-trace 'out tomohara-aliases.bash'
