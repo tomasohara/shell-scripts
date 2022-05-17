@@ -120,6 +120,8 @@ while (<>) {
 	   || /command not found/
 	   || /^sh: /
            || /\[Errno \d+\]/
+	   || /Operation not permitted/
+	   || /Command exited with non-zero status/
 
 	   # Perl interpretation errors
 	   # TODO: Add more examples like not-a-number, which might not be apparent.
