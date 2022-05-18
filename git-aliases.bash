@@ -57,7 +57,7 @@
 #
 #-------------------------------------------------------------------------------
 # TODO:
-# - git-revert (e.g., rename, discard, and re-checkout w/ 'git checkout -- ...')
+# - * Get a git guru to critique (e.g., how to make more standard)!
 #
 
 # pause-for-enter(): print message and wait for user to press enter
@@ -66,6 +66,8 @@
 function pause-for-enter () {
     local message="$1"
     if [ "$message" = "" ]; then message="Press enter to continue"; fi
+    # Maldito shellcheck: SC2162 [read without -r will mangle backslashes].
+    # shellcheck disable=SC2162
     read -p "$message "
 }
 
@@ -222,6 +224,26 @@ function git-add {
     less "$log";
 }
 
+
+# git-revert(file, ...): move FILE(s) out of way and revert to version in repo
+function git-revert {
+    local log;
+    log=$(get-temp-log-name "revert");
+
+    # Isolate old versions
+    mkdir -p _git-trash >| "$log";
+    echo "issuing: mv -ivf $*  _git-trash";
+    mv -ivf "$@" _git-trash >> "$log";
+
+    # Forget state
+    echo "git reset HEAD $*";
+    git reset HEAD "$@" >> "$log";
+    
+    # Re-checkout
+    echo "issuing: git checkout -- $*";
+    git checkout -- "$@" >> "$log";
+}
+
 # git-diff: show repo diff
 function git-diff {
     local log;
@@ -337,7 +359,8 @@ function alt-invoke-next-single-checkin {
     local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
     local command
     echo "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
-    read -e -i "$prompt" command
+    # note: options: -e use readline; -i initialize readline buffer; -r backslash is not an escape
+    read -r -e -i "$prompt" command
 
     # Evaluate the user's checkin command
     # TODO: rework using a safer approach with reading checking comment and issuing git-update-commit-push directly
