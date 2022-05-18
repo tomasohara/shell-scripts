@@ -36,8 +36,8 @@
 # - Obsolete old code flagged with '## OLD': either older definition
 #   or no longer used).
 # - Misc. old code flagged with '## MISC' (e.g., old but potentially useful).
-# - Exceptionally idiosyncratic aliases are flagged with '## TOM'. (These
-#   should be considered as experiemental.)
+# - Exceptionally idiosyncratic aliases are flagged with '## TOM-IDIOSYNCRATIC'. (These
+#   should be considered as experimental.)
 # - See extra-tomohara-aliases.bash for aliases for adhoc aliases (e.g., not
 #   used on a regular basis and/or special purpose).
 # - This gets invoked from $HOME/.bashrc.local.
@@ -476,6 +476,7 @@ alias reset-prompt-dollar='reset-prompt "\$"'
 
 #-------------------------------------------------------------------------------
 # More misc stuff
+## TOM-IDIOSYNCRATIC
 
 # reset CDPATH to just current directory
 export CDPATH=.
@@ -1967,6 +1968,7 @@ function check-html-java-script () {
 # Remote host-related stuff
 # TODO: straighten out private key to be used (e.g., was thomaspaulohara just used for intemass?)
 #
+## TOM-IDIOSYNCRATIC
 
 TPO_SSH_KEY=~/.ssh/$USER-key.pem
 SSH_PORT="22"
@@ -1988,10 +1990,12 @@ function ssh-host-login-aws () {
 # Note: /tmp used in case host not setup with ~/temp
 function scp-host-down() { scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$USER@$1:$TMP/$2" .; }
 # TODO: rework in terms of id_rsa-tomohara-keypair (as used on others hosts)
+# scp-host-up(host, file, ...): upload FILES to HOST
 function scp-host-up() { local host="$1"; shift; scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@" "$USER@$host:$TMP"; }
 #
+# scp-aws-up(host, file, ...): updload FILES to HOST, after making sure ~/xfer directory files writable
 function scp-aws-up() { local host="$1"; shift;
-                        ssh -p $SSH_PORT -i "$TPO_SSH_KEY" "$USER@$host" chmod u+w ~/xfer/*;
+                        ssh -p $SSH_PORT -i "$TPO_SSH_KEY" "$USER@$host" chmod u+w ~/xfer/'*';
                         scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@"  "$USER@$host":xfer; }
 function scp-aws-down() { local host="$1"; shift; for _file in "$@"; do scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$USER@$host":xfer/$_file .; done; }
 #
@@ -2034,6 +2038,10 @@ alias hw2-download=new-hw-download
 ## TEMP: if [[ ("$DEFAULT_HOST" = "") && (($HOSTNAME =~ ip-*) || ($HOSTNAME = tpo-servidor) || ($HOSTNAME =~ cvps*)) ]]; then export DEFAULT_HOST=n/a; fi
 if [[ ("$DEFAULT_HOST" = "") && (($HOSTNAME =~ ip-*) || ($HOSTNAME =~ cvps*)) ]]; then export DEFAULT_HOST=n/a; fi
 
+
+#................................................................................
+# Other host-related stuff
+# TODO: make generic (e.g., by making nickname optional)
 
 ## OLD
 ## function gr-juju-notes () { grepl "$@" /c/work/juju/*notes* $JJDATA/*notes*; }
@@ -2226,7 +2234,7 @@ function ansi-filter {
 function pause-for-enter () {
     local message="$1"
     if [ "$message" = "" ]; then message="Press enter to continue"; fi
-    # note: -r is raw [avoids shellcheck backslash warning] and -p for prompt
+    # note: with -p for prompt and -r makes backslash not an escape [avoids shellcheck warning]
     read -r -p "$message "
 }
 
@@ -2251,6 +2259,7 @@ function add-python-path () {
 }
 # EX: mezcla-devel; which system.py | grep -i Mezcla-main => ""
 # note: mezcla-devel should be stable version of mezcla-tom
+## TOM-IDIOSYNCRATIC
 alias mezcla-devel='add-python-path $HOME/python/Mezcla/mezcla'
 alias mezcla-main='add-python-path $HOME/python/Mezcla-main/mezcla'
 alias mezcla-tom='add-python-path $HOME/python/Mezcla-tom/mezcla'
@@ -2605,6 +2614,8 @@ function make-lilypond-png () {
     tail -5 "$base.log"
 }
 
+#-------------------------------------------------------------------------------
+# WordNet related
 
 # Adhoc fixup's
 wn="$(which wn > /dev/null 2>&1)"
