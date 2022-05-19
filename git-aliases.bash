@@ -92,6 +92,11 @@ function get-temp-log-name {
 # git-update(): updates local from global repo. This uses git-stash to hide local changes
 # does a git-pull, and then restores local changes.)
 function git-update {
+    local git_user
+    local git_token
+    set-global-credentials
+    echo "git_user: $git_user;  git_token: $git_token"
+    #
     local log
     log=$(get-temp-log-name "update")
     echo "issuing: git stash"
@@ -104,17 +109,10 @@ function git-update {
     tail "$log"
 }
 
-# git-commit-and-push(file, ...): commits FILE... to local repo, which is then
-# pushed to global repo
-# note: gets user credentials from ./_my-git-credentials-etc.bash.list
-# TODO: add message argument
-function git-commit-and-push {
-    local log
-    log=$(get-temp-log-name "commit")
-    local git_user
-    local git_token
+# sets globals for user, password (or token), etc. by sourcing external file
+# note: checks for _my-git-credentials-etc.bash.list in current dir and home dir
+function set-global-credentials {
     local credentials_file="_my-git-credentials-etc.bash.list"
-    local dir
     # Note: check stored credentials
     if [[ -e ~/.git-credentials ]]; then
         echo "Using git credentials via ~/.git-credentials"
@@ -126,7 +124,22 @@ function git-commit-and-push {
 	    break
 	fi
     done
+}
+
+# git-commit-and-push(file, ...): commits FILE... to local repo, which is then
+# pushed to global repo
+# note: gets user credentials from ./_my-git-credentials-etc.bash.list
+# TODO: add message argument
+function git-commit-and-push {
+    local log
+    log=$(get-temp-log-name "commit")
+    #
+    local git_user
+    local git_token
+    set-global-credentials
     echo "git_user: $git_user;  git_token: $git_token"
+    #
+    local dir
     echo "issuing: git add \"$*\""
     git add "$@" >> "$log"
     # TODO: rework so that message passed as argument (to avoid stale messages from environment)
