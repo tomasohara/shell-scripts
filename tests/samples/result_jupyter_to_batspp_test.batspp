@@ -1,0 +1,36 @@
+# Illustration of using Jupyter bash kernel for specifying example-based tests.
+#
+# Notes:
+# - Get kernel from https://github.com/takluyver/bash_kernel.
+# - This is run via an interactive bash session, so no need to source aliases
+#   provided done so by ~/.bashrc.
+# - Setup code preceded by '# setup' comment.
+# - For clarity, output is also redirected here (e.g., /dev/null).
+
+# setup
+# Disables output from tomohara-aliases.bash and set_xterm_title.bash (under tom-dev)
+$ export BATCH_MODE=1
+
+# Test move-adhoc-files
+
+# setup
+# note: directory name is fixed
+$ temp_dir=$(mktemp --directory --tmpdir _move-adhoc-files-XXX)
+$ cd $temp_dir
+$ pwd
+/home/tomohara/temp/tmp/_move-adhoc-files-1Ew
+$ echo hey > $temp_dir/hey.1.log
+$ echo you > $temp_dir/you.1.output
+$ move-adhoc-files
+'hey.1.log' -> 'log-files/hey.1.log'
+'you.1.output' -> 'output-files/you.1.output'
+$ ls
+log-files  output-files
+
+# continuation
+$ ls log-files
+hey.1.log
+
+# continuation
+$ ls output-files
+you.1.output
