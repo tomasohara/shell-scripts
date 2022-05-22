@@ -245,8 +245,8 @@ function git-revert {
 
     # Isolate old versions
     mkdir -p _git-trash >| "$log";
-    echo "issuing: mv -ivf $*  _git-trash";
-    mv -ivf "$@" _git-trash >> "$log";
+    echo "issuing: mv -iv $* _git-trash";
+    mv -iv "$@" _git-trash >> "$log";
 
     # Forget state
     echo "git reset HEAD $*";
