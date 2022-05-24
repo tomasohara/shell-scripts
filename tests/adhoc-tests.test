@@ -280,3 +280,25 @@ done
 $ rename-with-file-date fubar | grep -i warning | wc -l;
 1
 
+================================================================================
+
+TODO: make sure script alias doesn't mess up the prompt when changed to '$$'
+
+# NOTE: This occurs due to interpretation of $$ as PID, as demonstrated here:
+# ¢ bash
+# ¢ echo $PS1
+# ¢
+# ¢ PS1='$$ '
+# 23139 exit
+# ¢ 
+
+$ reset-prompt '$'
+$ script _test-script-$$.log
+$$ exit
+
+#................................................................................
+# Other prompt-related tests
+
+$ reset-prompt '¢'
+¢
+
