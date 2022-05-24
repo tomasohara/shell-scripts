@@ -2193,7 +2193,11 @@ function script {
     local old_PS_symbol="$PS_symbol"
     export SCRIPT_PID=$$
     # Note: the prompt change is flakey
-    reset-prompt "$PS_symbol\$"
+    ## BAD: reset-prompt "$PS_symbol\$"
+    ## NOTE: The sequence should not be interpretable (e.g., '$$' is PID if PS_symbol is '$')
+    ## Therefore, ':' now added to block '$$' being int when PS_symbol is '$',
+    ## TODO: use thin Unicode space to make this closer to the bad but simpler case.
+    reset-prompt "$PS_symbol:\$"
     ## DEBUG: echo "script: 1. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
     
     # Change xterm title to match
