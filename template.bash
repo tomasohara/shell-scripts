@@ -19,11 +19,15 @@
 #     $(command ...)               same as `command ...`
 #     ${var:-default}              use $var or "default"
 #     true                         no-op
-# TODO: variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
+# TODO:
+#  - variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
 #     note: EXPR is C style;
 #         Format                    Example
 #         let EXPR                  let i++
 #         let VAR=(EXPR)            let max_mem=(4 * 1024)
+#   - array variable
+#         list=(value1 value2 ... valueN
+#         ${list[i]}
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
