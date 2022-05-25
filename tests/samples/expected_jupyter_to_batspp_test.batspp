@@ -18,14 +18,10 @@ $ export BATCH_MODE=1
 $ temp_dir=$(mktemp --directory --tmpdir _move-adhoc-files-XXX)
 $ cd $temp_dir
 $ pwd
-/home/tomohara/temp/tmp/_move-adhoc-files-1Ew
 $ echo hey > $temp_dir/hey.1.log
 $ echo you > $temp_dir/you.1.output
 $ move-adhoc-files
-'hey.1.log' -> 'log-files/hey.1.log'
-'you.1.output' -> 'output-files/you.1.output'
 $ ls
-log-files  output-files
 
 # continuation
 $ ls log-files

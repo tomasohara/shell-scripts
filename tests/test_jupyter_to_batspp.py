@@ -27,10 +27,12 @@ class TestIt(TestWrapper):
         """End test for jupiter_to_batspp.py"""
         debug.trace(4, 'test.test_jupyter_to_batspp()')
 
-        expected = gh.read_file('./tests/samples/result_jupyter_to_batspp_test.batspp')
-        ## TODO: add exception when expected is empty.
+        expected_file = './tests/samples/expected_jupyter_to_batspp_test.batspp'
+        expected = gh.read_file(expected_file)
+        assert expected != '', f'The file {expected_file} cannot be empty.'
 
-        expected += f'Resulting Batspp tests saved on {self.temp_file}.batspp'
+        expected += ('\n\n==============================================================\n'
+                    f'Resulting Batspp tests saved on {self.temp_file}.batspp')
 
         actual = gh.run(f'python3 {self.script_module} --output {self.temp_file}.batspp ./tests/samples/jupyter_batspp_test.ipynb')
         self.assertEqual(expected, actual)

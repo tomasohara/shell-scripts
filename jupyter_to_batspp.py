@@ -12,7 +12,7 @@ Jupyter to Batspp
 This converts Jupyter to Batspp tests
 
 usage example:
-$ python3 jupyter_to_batspp.py TODO
+$ python3 --output ./result.batspp jupyter_to_batspp.py
 """
 
 
@@ -31,6 +31,11 @@ from mezcla import glue_helpers as gh
 JUPYTER_FILE = 'jupyter_file'
 OUTPUT       = 'output'
 VERBOSE      = 'verbose'
+
+
+# Constants
+JUPYTER_EXTENSION = 'ipynb'
+BATSPP_EXTENSION  = 'batspp'
 
 
 class JupyterToBatspp(Main):
@@ -61,9 +66,9 @@ class JupyterToBatspp(Main):
         """Process main script"""
 
         # Get Jupyter content
+        assert self.jupyter_file.endswith(JUPYTER_EXTENSION), f'the file {self.jupyter_file} must be an Jupyter notebook'
         jupyter_content = gh.read_file(self.jupyter_file)
-        if not jupyter_content:
-            print(f'Error: {self.jupyter_file} not founded or is empty')
+        assert jupyter_content != '', f'Error: {self.jupyter_file} not founded or is empty'
 
 
         # Format Jupyter string into JSON
@@ -75,16 +80,21 @@ class JupyterToBatspp(Main):
         batspp_content  = ''
         for cell in jupyter_json['cells']:
 
-            print('>>>', cell)
-
             # Process code cells
             if cell['cell_type'] == 'code':
+
+                is_setup = False
 
                 # Append source lines
                 for line in cell['source']:
 
                     if not line or line.isspace():
                         continue
+
+                    if line.lower() == '# setup\n':
+                        is_setup = True
+                    elif line.lower() in ['# continuation\n', '# continue\n', '# test']:
+                        is_setup = False
 
                     # Check if line is a comment or command
                     if not line.startswith('#'):
@@ -93,10 +103,11 @@ class JupyterToBatspp(Main):
                     batspp_content += ensure_new_line(line)
 
                 # Append output lines
-                for output in cell['outputs']:
+                if not is_setup:
+                    for output in cell['outputs']:
 
-                    for line in output['text']:
-                        batspp_content += ensure_new_line(line)
+                        for line in output['text']:
+                            batspp_content += ensure_new_line(line)
 
             # Markdown cells are considered as comments or directives
             elif cell['cell_type'] == 'markdown':
@@ -110,22 +121,20 @@ class JupyterToBatspp(Main):
 
 
         # Set Batspp filename
-        batspp_file = ''
-        if self.output:
-            batspp_file = self.output
-        else:
-            batspp_file = re.sub(r'\.ipynb$', '.batspp', self.jupyter_file)
+        self.output = self.output if self.output else re.sub(fr'\.{JUPYTER_EXTENSION}$', f'.{BATSPP_EXTENSION}', self.jupyter_file)
 
-        ## TODO: set batspp file if not provided on output path
 
         # Save Batspp file
-        gh.write_file(batspp_file, batspp_content)
+        gh.write_file(self.output, batspp_content)
 
 
         # Print output
         if self.verbose:
             print(batspp_content)
-        print(f'Resulting Batspp tests saved on {self.output}')
+
+        final_stdout = f'Resulting Batspp tests saved on {self.output}'
+        print('=' * len(final_stdout))
+        print(final_stdout)
 
 
 def ensure_new_line(string):
@@ -136,7 +145,7 @@ def ensure_new_line(string):
 if __name__ == '__main__':
     app = JupyterToBatspp(description          = __doc__,
                           positional_arguments = [(JUPYTER_FILE, 'test file path')],
-                          text_options         = [(OUTPUT,   'target output .batspp file path')],
-                          boolean_options      = [(VERBOSE,  'show verbose debug')],
+                          text_options         = [(OUTPUT,      f'target output .{BATSPP_EXTENSION} file path')],
+                          boolean_options      = [(VERBOSE,      'show verbose debug')],
                           manual_input         = True)
     app.run()
