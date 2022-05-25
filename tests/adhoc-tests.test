@@ -302,3 +302,20 @@ $$ exit
 $ reset-prompt '¢'
 ¢
 
+#................................................................................
+# tests for python module aliases (e.g., python-import-path)
+
+$ python-import-path six | extract-matches "(/lib.*)"
+/lib/python3.8/site-packages/six.py
+
+# ¢ python -c "import eldar"
+# ¢ python -c "import eldar; print(eldar)"
+# <module 'eldar' from '/home/tomohara/anaconda3/envs/nlp-py-3-8/lib/python3.8/site-packages/eldar-0.0.7-py3.8.egg/eldar/__init__.py'>
+
+# setup
+$ python -m easy_install eldar-0.0.7-py3.8.egg
+# command
+$ python-import-path eldar | grep -ic egg
+1
+
+
