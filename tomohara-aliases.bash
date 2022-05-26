@@ -1883,6 +1883,7 @@ alias magnifier='run-app kmag'
 # Linux admin
 
 alias apt-install='sudo apt-get install --yes --fix-missing --no-remove'
+alias apt-update='sudo apt-get update'
 alias apt-search='sudo apt-cache search'
 alias apt-installed='sudo apt list --installed'
 alias apt-uninstall='sudo apt-get remove'
