@@ -949,90 +949,91 @@ alias view-mail-aliases='$PAGER $HOME/.mailrc'
 ## function mail-tpo () { mail -s $1 tom_o_hara@msn.com < $1; }
 ## function mail-tpo () { mail -s $1 tomohara@umbc.edu < $1; }
 
-# Simple calculator commands
-function old-calc () { echo "$@" | bc -l; }
-## function perl-calc () { echo "$@" | perl- perlcalc.perl -; }
-function perl-calc () { perl- perlcalc.perl -args "$@"; }
-# TODO: read up on variable expansion in function environments
-function perl-calc-init () { initexpr=$1; shift; echo "$@" | perl- perlcalc.perl -init="$initexpr" -; }
-alias calc='perl-calc'
-alias calc-init='perl-calc-init'
-alias calc-int='perl-calc -integer'
-function old-perl-calc () { perl -e "print $*;"; }
-function hex2dec { perl -e "printf '%d', 0x$1;" -e 'print "\n";'; }
-## OLD: function oct2dec { perl -e "printf '%d', 0$1;" -e 'print "\n";'; }
-## OLD: function oct2hex { perl -e "printf '%x', oct(q/$1/);" -e 'print "\n";'; }
-function dec2hex { perl -e "printf '%x', $1;" -e 'print "\n";'; }
-## OLD: function dec2oct { perl -e "printf '%o', $1;" -e 'print "\n";'; }
-function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
-function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
-alias hv='hexview.perl'
-
-# Miscellaneous commands
-trace Miscellaneous commands
-#
-alias startx-='startx >| startx.log 2>&1'
-alias xt='xterm.sh &'
-alias gt='gnome-terminal &'
-## OLD: alias h='history $LINES'
-alias hist='history $LINES'
-# Removes timestamp from history (e.g., " 1972  [2014-05-02 14:34:12] dir *py" => " 1972  dir *py")
-# TEST: function hist { h | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
-# note: funciton used to simplify specification of quotes
-function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
-## alias lynx='lynx -cookies'
-alias new-lynx='lynx-2.8.4'
-alias fix-keyboard='kbd_mode -a'
-function asctime() { perl -e "print (scalar localtime($1));"; echo ""; }
-function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
-## alias ns="nice -10 netscape &"
-## alias ns="netscape &"
-alias ns="$NICE netscape >| $HOME/temp/netscape-$$.log 2>&1 &"
-## alias netscape-6.1='/opt/local/pkg/netscape6.1/netscape >| /tmp/netscape-6.1.log 2>&1 &'
-## alias ns6.1='netscape-6.1'
-## alias netscape-6.2='/opt/local/pkg/netscape6.2/netscape >| /tmp/netscape-6.2.log 2>&1 &'
-## alias ns6.2='netscape-6.2'
-
-# alias type='cat'  # interferes with type command
-alias reverse='tac'
-function backup-file () { local file="$1"; if [ -e "$file" ]; then dobackup.sh "$file"; fi; }
-alias tpo-backup='make-tpo-backup.sh'
-function relativize-path () { echo "$@" | perl -pe "s@(^| )$HOME/@~/@;g"; }
-#
-## OLDER: function usage () { du --kilobytes --one-file-system 2>&1 | sort -rn >| usage.list 2>&1; $PAGER usage.list; }
-## OLD: function usage () { $NICE du --kilobytes --one-file-system 2>&1 | $NICE sort -rn >| usage.list 2>&1; $PAGER usage.list; }
-function usage () { output_file="usage.list"; backup-file $output_file; $NICE du --block-size=1K --one-file-system 2>&1 | $NICE sort -rn >| $output_file 2>&1; $PAGER $output_file; }
-## TODO: function usage () { du --one-file-system --human-readable 2>&1 | sort -rn >| usage.list 2>&1; $PAGER usage.list; }
-#
-## OLD: function check-errors () { (check_errors.perl -skip_warnings -context=5 "$@") 2>&1 | $PAGER; }
-function check-errors () { (check_errors.perl -context=5 "$@") 2>&1 | $PAGER; }
-## function check-all-errors () { (check_errors.perl -skip_warnings=0 -context=5 "$@") 2>&1 | $PAGER; }
-function check-all-errors () { (check_errors.perl -warnings -context=5 "$@") 2>&1 | $PAGER; }
-    ## function check-all-warnings () { (check_errors.perl -skip_warnings=0 -context=5 -all_possible_warnings "$@") 2>&1 | $PAGER; }
-alias check-all-warnings='echo use check-all-errors instead; check-all-errors'
-
-## OLD: alias clock='xclock -geom 80x80+6+62 -analog -fg black -bg ivory &'
-
-function tkdiff () { wish -f $BIN/tkdiff.tcl "$@" & }
-function old-tkdiff () { wish -f $BIN/old_tkdiff.tcl "$@" & }
-function new-tkdiff () { wish -f $BIN/tkdiff.tcl "$@" & }
-## OLD: alias vdiff='tkdiff'
-alias vdiff='kdiff'
-alias rdiff='rev_vdiff.sh'
-alias tkdiff-='tkdiff -noopt'
-alias vd=tkdiff
-alias vd-=tkdiff-
-alias diff='command diff -wb'
-function diff-verbose () { echo "Issuing: diff -wb ..."; command diff -wb "$@"; }
-alias diff-='command diff'
 ## OLD:
-## function vdiff-rev () {
-##     local left_file="$2"
-##     local right_file="$1"
-##     if [ -d "$left_file" ]; then left_file="$left_file/$right_file"; fi
-##     vdiff "$left_file" "$right_file"
-## }
- 
+## # Simple calculator commands
+## function old-calc () { echo "$@" | bc -l; }
+## ## function perl-calc () { echo "$@" | perl- perlcalc.perl -; }
+## function perl-calc () { perl- perlcalc.perl -args "$@"; }
+## # TODO: read up on variable expansion in function environments
+## function perl-calc-init () { initexpr=$1; shift; echo "$@" | perl- perlcalc.perl -init="$initexpr" -; }
+## alias calc='perl-calc'
+## alias calc-init='perl-calc-init'
+## alias calc-int='perl-calc -integer'
+## function old-perl-calc () { perl -e "print $*;"; }
+## function hex2dec { perl -e "printf '%d', 0x$1;" -e 'print "\n";'; }
+## ## OLD: function oct2dec { perl -e "printf '%d', 0$1;" -e 'print "\n";'; }
+## ## OLD: function oct2hex { perl -e "printf '%x', oct(q/$1/);" -e 'print "\n";'; }
+## function dec2hex { perl -e "printf '%x', $1;" -e 'print "\n";'; }
+## ## OLD: function dec2oct { perl -e "printf '%o', $1;" -e 'print "\n";'; }
+## function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
+## function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
+## alias hv='hexview.perl'
+## 
+## # Miscellaneous commands
+## trace Miscellaneous commands
+## #
+## alias startx-='startx >| startx.log 2>&1'
+## alias xt='xterm.sh &'
+## alias gt='gnome-terminal &'
+## ## OLD: alias h='history $LINES'
+## alias hist='history $LINES'
+## # Removes timestamp from history (e.g., " 1972  [2014-05-02 14:34:12] dir *py" => " 1972  dir *py")
+## # TEST: function hist { h | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
+## # note: funciton used to simplify specification of quotes
+## function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
+## ## alias lynx='lynx -cookies'
+## alias new-lynx='lynx-2.8.4'
+## alias fix-keyboard='kbd_mode -a'
+## function asctime() { perl -e "print (scalar localtime($1));"; echo ""; }
+## function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
+## ## alias ns="nice -10 netscape &"
+## ## alias ns="netscape &"
+## alias ns="$NICE netscape >| $HOME/temp/netscape-$$.log 2>&1 &"
+## ## alias netscape-6.1='/opt/local/pkg/netscape6.1/netscape >| /tmp/netscape-6.1.log 2>&1 &'
+## ## alias ns6.1='netscape-6.1'
+## ## alias netscape-6.2='/opt/local/pkg/netscape6.2/netscape >| /tmp/netscape-6.2.log 2>&1 &'
+## ## alias ns6.2='netscape-6.2'
+## 
+## # alias type='cat'  # interferes with type command
+## alias reverse='tac'
+## function backup-file () { local file="$1"; if [ -e "$file" ]; then dobackup.sh "$file"; fi; }
+## alias tpo-backup='make-tpo-backup.sh'
+## function relativize-path () { echo "$@" | perl -pe "s@(^| )$HOME/@~/@;g"; }
+## #
+## ## OLDER: function usage () { du --kilobytes --one-file-system 2>&1 | sort -rn >| usage.list 2>&1; $PAGER usage.list; }
+## ## OLD: function usage () { $NICE du --kilobytes --one-file-system 2>&1 | $NICE sort -rn >| usage.list 2>&1; $PAGER usage.list; }
+## function usage () { output_file="usage.list"; backup-file $output_file; $NICE du --block-size=1K --one-file-system 2>&1 | $NICE sort -rn >| $output_file 2>&1; $PAGER $output_file; }
+## ## TODO: function usage () { du --one-file-system --human-readable 2>&1 | sort -rn >| usage.list 2>&1; $PAGER usage.list; }
+## #
+## ## OLD: function check-errors () { (check_errors.perl -skip_warnings -context=5 "$@") 2>&1 | $PAGER; }
+## function check-errors () { (check_errors.perl -context=5 "$@") 2>&1 | $PAGER; }
+## ## function check-all-errors () { (check_errors.perl -skip_warnings=0 -context=5 "$@") 2>&1 | $PAGER; }
+## function check-all-errors () { (check_errors.perl -warnings -context=5 "$@") 2>&1 | $PAGER; }
+##     ## function check-all-warnings () { (check_errors.perl -skip_warnings=0 -context=5 -all_possible_warnings "$@") 2>&1 | $PAGER; }
+## alias check-all-warnings='echo use check-all-errors instead; check-all-errors'
+## 
+## ## OLD: alias clock='xclock -geom 80x80+6+62 -analog -fg black -bg ivory &'
+## 
+## function tkdiff () { wish -f $BIN/tkdiff.tcl "$@" & }
+## function old-tkdiff () { wish -f $BIN/old_tkdiff.tcl "$@" & }
+## function new-tkdiff () { wish -f $BIN/tkdiff.tcl "$@" & }
+## ## OLD: alias vdiff='tkdiff'
+## alias vdiff='kdiff'
+## alias rdiff='rev_vdiff.sh'
+## alias tkdiff-='tkdiff -noopt'
+## alias vd=tkdiff
+## alias vd-=tkdiff-
+## alias diff='command diff -wb'
+## function diff-verbose () { echo "Issuing: diff -wb ..."; command diff -wb "$@"; }
+## alias diff-='command diff'
+## ## OLD:
+## ## function vdiff-rev () {
+## ##     local left_file="$2"
+## ##     local right_file="$1"
+## ##     if [ -d "$left_file" ]; then left_file="$left_file/$right_file"; fi
+## ##     vdiff "$left_file" "$right_file"
+## ## }
+
 # Bookmark commands
 # TODO: have version that just uses a single bookmark source
 function view-bookmarks () { perl- bookmark2ascii.perl "$@" $HOME/.netscape/bookmarks.html $HOME/lynx_bookmarks.html | $PAGER; }
