@@ -9,3 +9,6 @@
 ## OLD: prepend-path "$HOME/python/Mezcla/mezcla"
 add-python-path $HOME/python/Mezcla/mezcla
 append-path "$TOM_BIN/bruno"
+
+# Enable timestamp preservation during git-update alias operations (n.b., stash pop quirk)
+export PRESERVE_GIT_STASH=1
