@@ -37,7 +37,7 @@
 #   See https://unix.stackexchange.com/questions/506352/bash-what-does-masking-return-values-mean. Of course, shellcheck should be refined to check for $?, but
 #   that might take a while.
 #
-# - Git updates optionally preserves the timestamps if PRESERVE_GIT_STASH env-var is 1:
+# - Git updates optionally preserves the timestamps if PRESERVE_GIT_STASH env-var is 1 (TODO: rename to something like PRESERVE_STASH_TIMESTAMPS):
 #   export PRESERVE_GIT_STASH=1
 #
 # - Most aliases start with git- for sake of tab completion.
