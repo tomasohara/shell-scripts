@@ -5,25 +5,25 @@
 # Usage example(s):
 #   source git-aliases.bash
 #
+#   git-template                     ## show detailed usage template
+#
 #   git-update                       ## git-pull with stashed changes
 #
-#   git-commit-and-push file, ...
-#
-#   git-update-commit-push $(git diff 2>&1 | extract_matches.perl "^diff.*b/(.*)")
+#   git-commit-and-push file...      ## commits file and pushes to remote
 #
 #...............................................................................
 # Notes:
 #
-# - credentials can be taken from project specific file (_my-git-credentials-etc.bash:.list)
+# - Credentials can be taken from project specific file (_my-git-credentials-etc.bash:.list)
 #
 #     git_user=username
 #     git_token=personal_access_token
 #
-# - alternatively git caching is used via
+# - Alternatively, git caching is used via
 #     ~/.git-credentials
 #   See https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage.
 #
-# - config needed for using stored credentials (~/.gitconfig):
+# - Configuration needed for using stored credentials (~/.gitconfig):
 #
 #   [credential]
 #   helper = store
@@ -36,6 +36,12 @@
 #      log=$(get-temp-log-name "update")
 #   See https://unix.stackexchange.com/questions/506352/bash-what-does-masking-return-values-mean. Of course, shellcheck should be refined to check for $?, but
 #   that might take a while.
+#
+# - Git updates optionally preserves the timestamps if PRESERVE_GIT_STASH env-var is 1:
+#   export PRESERVE_GIT_STASH=1
+#
+# - Most aliases start with git- for sake of tab completion.
+#   TODO: Use a unique suffix (e.g., gitx-).
 #
 #................................................................................
 # Examples:
@@ -58,6 +64,7 @@
 #-------------------------------------------------------------------------------
 # TODO:
 # - * Get a git guru to critique (e.g., how to make more standard)!
+# - Add an option for verbose tracing (and for quiet mode).
 #
 
 # pause-for-enter(): print message and wait for user to press enter
@@ -90,7 +97,8 @@ function get-temp-log-name {
 }
 
 # git-update(): updates local from global repo. This uses git-stash to hide local changes
-# does a git-pull, and then restores local changes.)
+# does a git-pull, and then restores local changes.
+# Note: If PRESERVE_GIT_STASH is 1, then timestamps are preserved.
 function git-update {
     local git_user
     local git_token
@@ -99,16 +107,49 @@ function git-update {
     #
     local log
     log=$(get-temp-log-name "update")
-    ## NOTE: The stash-pop causes the timestamps to be changes. A workaround to this quirk
-    ## would be to backup and restore the modified files (e.g., via zip).
-    ## TODO (-d delete; -y retain links): zip -d -y _stash.zip $(git-diff-list)
+
+    # Optionally preserve timestamps for changed files
+    # NOTES:
+    # - The stash-pop causes the timestamps to be changes. The workaround to this quirk
+    #- would be to backup and restore the modified files (e.g., via zip).
+    local changed_files
+    changed_files="$(git-diff-list)"
+    if [ "$changed_files" != "" ]; then
+        if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
+   	    echo "issuing: zip over changed files (for later restore)"
+	    echo "zip -v -y _stash.zip $(git-diff-list)" >> "$log"
+	    zip -v -y _stash.zip "$(git-diff-list)" >> "$log"
+       else
+            # note: zip options: -y retain links; -v verbose
+	    echo "Not zipping changes because PRESERVE_GIT_STASH not 1"
+	fi
+    else
+	echo "No changed files so no pre-stash-pop timestamp check"
+    fi
+
+    # Do the stash[-push]/pull/stash-pop
     echo "issuing: git stash"
     git stash >> "$log"
     echo "issuing: git pull --all"
     git pull --all >> "$log"
     echo "issuing: git stash pop"
     git stash pop >> "$log"
-    ## TODO (-o overwrite): zip -o _stash.zip
+
+    # Optionally restore timestamps for changed files
+    if [ "$changed_files" != "" ]; then
+        if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then 
+    	    echo "issuing: unzip over _stash.zip (to restore timestamps)"
+            # note: unzip options: -o overwrite; -v verbose:
+    	    echo "unzip -v -o _stash.zip" >> "$log"
+    	    unzip -v -o _stash.zip >> "$log"
+        else
+    	    echo "Not unzipping changes (because PRESERVE_GIT_STASH not 1)"
+        fi
+    else
+	echo "No changed files so no post-stash-pop timestamp check"
+    fi
+
+    # Show end of log
     echo >> "$log"
     tail "$log"
 }
@@ -356,7 +397,7 @@ function alt-invoke-next-single-checkin {
     ## TODO: figure out how to get file to check the maldito extensions!
     ## TAKE1: if [[ ("$is_text" = "") && ($mod_file =~ .*.(css|csv|html|java|js|perl|py|[a-z]*sh|text|txt)$) ]]; then
     ## TAKE2: maldito Bash
-    if [ "$is_text" == "" ]; then
+    if [ "$is_text" = "" ]; then
 	case "$mod_file" in *.css | *.csv | *.html | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
     fi;
     if [ "$is_text" != "" ]; then
@@ -390,6 +431,20 @@ function alt-invoke-next-single-checkin {
 # invoke-alt-checkin(filename): run alternative template-bsed checkin for filename
 function invoke-alt-checkin { alt-invoke-next-single-checkin "$1"; }
 
+# Various miscellaneous aliases
+## TODO: include suffix to better differentiate from regular git-xyz commands
+alias git-template=git-alias-usage
+alias git-root='git rev-parse --show-toplevel'
+alias git-cd-root='cd $(git-root)'
+alias git-invoke-next-single-checkin=invoke-next-single-checkin
+# NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
+# shellcheck disable=SC2139
+alias git-alias-refresh="source ${BASH_SOURCE[0]}"
+alias git-refresh=git-alias-refresh
+alias git-next-checkin='invoke-alt-checkin'
+
+#-------------------------------------------------------------------------------
+
 # git-alias-usage (): tips on interactive usage (n.b., aka git-template)
 function git-alias-usage () {
     # Refresh
@@ -403,7 +458,7 @@ function git-alias-usage () {
     echo "To update aliases:"
     echo "   source \$TOM_BIN/git-aliases.bash; clear -x; git-alias-usage"
     echo ""
-    echo "Get changes from repository:"
+    echo "Get changes from repository (set PRESERVE_GIT_STASH=1 to keep timestamps)":
     echo "    git-update"
     echo ""
     echo "To add files (implicit git-add):"
@@ -434,19 +489,20 @@ function git-alias-usage () {
 	echo '    git-cd-root'
 	echo '    git-next-checkin                      # repeat, as needed'
 
-	echo '*** Fix maldito git quirk causing file timestamp to change (the stash???)!!!'
-	echo '* invoke git-cd-root automatically!'
+	## OLD: echo '*** Fix maldito git quirk causing file timestamp to change (the stash???)!!!'
+	## TODO: echo '* invoke git-cd-root automatically!'
     }
 }
 
-# Various aliases
-## TODO: include suffix to better differentiate from regular git-xyz commands
-alias git-template=git-alias-usage
-alias git-root='git rev-parse --show-toplevel'
-alias git-cd-root='cd $(git-root)'
-alias git-invoke-next-single-checkin=invoke-next-single-checkin
-# NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
-# shellcheck disable=SC2139
-alias git-alias-refresh="source ${BASH_SOURCE[0]}"
-alias git-refresh=git-alias-refresh
-alias git-next-checkin='invoke-alt-checkin'
+## OLD (Put above so available for use in template)
+## # Various aliases
+## ## TODO: include suffix to better differentiate from regular git-xyz commands
+## alias git-template=git-alias-usage
+## alias git-root='git rev-parse --show-toplevel'
+## alias git-cd-root='cd $(git-root)'
+## alias git-invoke-next-single-checkin=invoke-next-single-checkin
+## # NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
+## # shellcheck disable=SC2139
+## alias git-alias-refresh="source ${BASH_SOURCE[0]}"
+## alias git-refresh=git-alias-refresh
+## alias git-next-checkin='invoke-alt-checkin'
