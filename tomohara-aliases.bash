@@ -227,7 +227,7 @@ alias TODAY=todays-date
 alias date-central='TZ="America/Chicago" date'
 # em-adhoc-notes(): edit adhoc ntoes file using format _{host}-adhoc-{date} (e.g., _reempl-adhoc-notes.13may22.txt)
 ## OLD: alias em-adhoc-notes='emacs-tpo _adhoc-notes.$(TODAY).txt'
-alias em-adhoc-notes='emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes.$(TODAY).txt'
+alias em-adhoc-notes='emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes-$(TODAY).txt'
 alias T='TODAY'
 # update-today-vars() & todays-update: update the various today-related variables
 # aside: descriptive name for function and convenience alias (tab-completion)
