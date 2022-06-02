@@ -41,10 +41,14 @@ if [ "$1" = "" ]; then
     # alt 1: echo "  num_times=\$(echo \"\$one_day_in_secs * 1.0 / \$delay_time)" | bc -l"
     # alt 2: echo "  num_times=\$(echo \"round(\$one_day_in_secs * 1.0 / \$delay_time)\" | perlcalc.perl -integer)"
     echo ""
+    echo "- Usual:"
+    echo "  $script n/a \$(calc-int '5 * 60')"
+    echo ""
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."
     echo "- The advanced example use bash interger math."
     echo "- Both examples assumes the script name doesn't require quoting."
+    echo "- Use n/a for num-times to indicate indefinite."
     echo ""
     exit
 fi
@@ -73,6 +77,10 @@ done
 #
 if [ "$1" != "" ]; then n="$1"; fi
 if [ "$2" != "" ]; then s="$2"; fi
+
+# Use max-int if - (i.e., 2^64)
+## TODO: if [ "$n" = "n/a" ]; then n=18446744073709551616; fi
+if [ "$n" = "n/a" ]; then n=1000000; fi
 
 for (( i=0; i<n; i++ )); do
     nvidia-smi
