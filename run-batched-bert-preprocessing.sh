@@ -130,6 +130,7 @@ printenv
 if [ "$PROJECT_DIR" = "" ]; then PROJECT_DIR="/usr/local/misc"; fi
 export PATH="$PATH:$PROJECT_DIR/scripts/tomohara-scripts"
 TEMP_DIR="$PROJECT_DIR/temp"
+mkdir -p "$TEMP_DIR"
 #
 if [ "$CODE_DIR" = "" ]; then CODE_DIR="$PROJECT_DIR"/programs/python/bert; fi
 if [ "$DATA_DIR" = "" ]; then DATA_DIR="$PROJECT_DIR"/data/deep-learning; fi
@@ -146,6 +147,7 @@ if [ "$PYTHON" = "" ]; then PYTHON="$NICE $TIME_CMD python -u"; fi
 #
 # TODO: conda-activate-env bert-tensorflow-gpu
 if [ "$OUTPUT_DIR" = "" ]; then OUTPUT_DIR="."; fi
+mkdir -p "$OUTPUT_DIR"
 
 # Derive options not specified
 if [ "$vocab_file" = "" ]; then
