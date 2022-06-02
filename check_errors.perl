@@ -137,8 +137,9 @@ while (<>) {
 	   || /Unmatched .* in regex/
 	   || /at .*\.(perl|prl|pl|pm) line \d+/	# catch-all for other perl errors
 
-	   # Build errors
+	   # Build errors (also cp, etc.)
 	   || /(Make|Dependency) .* failed/
+	   || /cannot create/
 	   || /cannot open/
 	   || /cannot find/
 	   || /:( fatal)? error /
