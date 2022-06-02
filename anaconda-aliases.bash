@@ -14,6 +14,7 @@
 # along with python version (e.g., "...; Py3.6:(old_tensorflow)")
 # note: also resets prompt to '$ ' (following change by conda scripts)
 function add-conda-env-to-xterm-title {
+    ## DEBUG: echo "in add-conda-env-to-xterm-title"
     export XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d.\d)'):$CONDA_PROMPT_MODIFIER"
 
     reset-prompt
@@ -68,7 +69,7 @@ function activation-helper () {
     local env="$2"
     local conda_command="conda"
     # Note: need to use conda's alias not the script returned by which
-    local conda_path=$(/usr/bin/which $conda) 2> /dev/null
+    local conda_path=$(/usr/bin/which conda) 2> /dev/null
     if [ "$conda_path" = "" ]; then
 	conda_command="source"
     fi
@@ -77,7 +78,8 @@ function activation-helper () {
     $conda_command "$command" $env
 }
 alias conda-activate='activation-helper activate'
-alias conda-deactivate='activation-helper deactivate'
+## OLD: alias conda-deactivate='activation-helper deactivate'
+alias conda-deactivate='source deactivate'
 #
 ## OLD: alias add-tensorfow='conda activate env_tensorflow_gpu'
 alias add-tensorfow='conda-activate env_tensorflow_gpu'
