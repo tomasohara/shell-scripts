@@ -69,7 +69,8 @@ function activation-helper () {
     local env="$2"
     local conda_command="conda"
     # Note: need to use conda's alias not the script returned by which
-    local conda_path=$(/usr/bin/which conda) 2> /dev/null
+    ## TODO: local conda_path=$(/usr/bin/which conda 2> /dev/null)
+    local conda_path=""    
     if [ "$conda_path" = "" ]; then
 	conda_command="source"
     fi
