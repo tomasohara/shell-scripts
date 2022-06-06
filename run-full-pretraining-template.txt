@@ -1,0 +1,113 @@
+#! /usr/bin/env bash
+#
+# Adhoc script template for running BERT pretraining. The default values are based
+# on training over 10% of the preprocessed Simple English Wikipedia from December
+# 2020. The full data has roughy 2 million tokens:
+#    $ wc < simplewiki-20201201-pages-articles-multistream.txt
+#    912547  22829397 136932828
+#
+# TODO: change all the lines with TODO:customize below
+#
+# NOTE:
+# - The pretraining could take days or weeks to run, so trial and error
+#   might be required based on size of input.
+# - The script should be copied as illustrated below before running
+#   in order to avoid execution problems if changed when running.
+# - The to-do notes below are put on each individual setting to avoid
+#   inadvertant omissions (e.g., in case section blocks instead tagged).
+#
+#--------------------------------------------------------------------------------
+# Usage example:
+#
+#   script_base=run-full-pretraining-template
+#   out_base="$script_base-$TODAY"
+#   /bin/cp -vp $script_base.txt $out_base.sh
+#   echo modify $out_base.sh
+#   read
+#   nice -19 bash -c "source $out_base.sh > $out_base.log 2>&1" &
+#   # note: a week's worth of GPU/CPU process checks evey 15 minutes
+#       batch-nvidia-smi.sh 672 900 > _batch-nvidia-smi-$(TODAY).log 2>&1 &
+#       LINES=15 ps_sort.perl -num_times=672 -delay=900 -by=cpu - > _ps_sort-$(TODAY).log 2>&1 &
+#   # later
+#       move $out_base.sh $OUTPUT_DIR
+#--------------------------------------------------------------------------------
+# TODO:
+# - Rework via configuration file.
+#
+
+## TODO: conda activate tensorflow-gpu-cuda8-py3-6           # TODO:customize
+export PATH="/usr/local/misc/programs/anaconda3/envs/tensorflow-gpu-cuda8-py3-6/bin:$PATH"
+
+export CODE_DIR=$HOME/programs/python/bert          # TODO:customize
+filename="job-description.txt"                      # TODO:customize (must use .txt exension)
+in_base=$(basename "$filename" .txt)                # TODO:customize
+out_base="_run-${in_base}"                          # TODO:customize
+# ...
+mkdir -p "$out_base"
+export INPUT_FILE="$filename"                       # input text file
+export OUTPUT_BASE="$out_base"                      # result of preprocessing
+export OUTPUT_DIR="$out_base"                       # result of pretraining
+export PROJECT_DIR="."                              # where ./temp is placed
+
+# CUDA settings
+# Notes:
+# 1. The actual library file are based on the GPU: see NVIDIA SDK.
+# 2. Unfortunately, BERT requires Tensorflow 1.15 which uses old CUDA.
+pkg_dir="$HOME/$USER/.conda/pkgs"                   # TODO:customize
+export LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:/usr/lib/nvidia-450:/usr/local/cuda-11.1/lib64:$pkg_dir/cudatoolkit-10.1.243-h6bb024c_0/lib:$pkg_dir/cudnn-7.6.5-cuda10.1_0/lib:/usr/local/misc/lib/cuda-repo-ubuntu1604-10-0-local-10.0.130-410.48_1.0-1:/usr/local/cuda/extras/CUPTI/lib64"       # TODO:customize
+
+# BERT Settings
+export TRAIN_BATCH_SIZE=72 MAX_SEQ_LENGTH=128       # TODO:customize
+# TODO: let run-batched-bert-preprocessing.sh derive NUM_TRAIN_STEPS
+# Note: Use following formula to derive number of steps:
+#    num_steps = num_epochs * (num_words_corpus / num_tokens_per_batch)
+#      where num_tokens_per_batch = batch_size * max_seq_len
+#      and an epoch is a pass through the data
+# See https://github.com/google-research/bert/issues/1025 (BERT pretraining num_train_steps)
+#
+# Suggestions:
+# percent  Total steps  expected time
+# 100      1000000          10 days
+# 10       100000           1 day
+# 1        10000            2 hours
+#
+## 1%
+## export NUM_TRAIN_INCRS="1000"          # TODO:customize
+## 10%
+## export NUM_TRAIN_INCRS="10000"         # TODO:customize
+## 100%
+export NUM_TRAIN_INCRS="100000"           # TODO:customize
+export TF_FORCE_GPU_ALLOW_GROWTH=true     # TODO:customize
+export CUDA_VISIBLE_DEVICES="0"           # TODO:customize
+export NVIDIA_VISIBLE_DEVICES="0"         # TODO:customize
+#
+# Suggestions:
+# percent  SAVE_CHECKPOINTS_STEPS   update interval
+# 100      10000                    2.4 hours
+# 10       1000                     15 minutes
+# 1        100                      12 minutes
+export SAVE_CHECKPOINTS_STEPS="100"       # TODO:customize
+#
+# Suggestions                             disk space
+# KEEP_CHECKPOINT_MAX         10          ~6gb
+export KEEP_CHECKPOINT_MAX="10"           # TODO:customize
+#
+# Suggestions                 model       GPU type
+# BERT_DIR                    medium      commodity
+#                             base        modern
+export BERT_DIR=/usr/local/misc/data/deep-learning/bert/bert_medium          # TODO:customize
+
+# Other parameters
+# See https://wandb.ai/jack-morris/david-vs-goliath/reports/Does-Model-Size-Matter-A-Comparison-of-BERT-and-DistilBERT--VmlldzoxMDUxNzU.
+# TODO: add more hyperparameters
+## export LEARNING_RATE=3e-5               # initial learning rate for Adam (default is 5e-5)
+
+# create pretraining data and pretrain in batches (works around memory hog create_pretraining.py)
+line_incr=1000000                          # 100%
+## line_incr=100000                        # 10%
+## line_incr=85000                         # alt 10%
+## line_incr=8500                          # 1%
+run_batched_script=run-batched-bert-preprocessing.sh
+script_path=$(which "$run_batched_script")
+/bin/cp -vp "$script_path" "$OUTPUT_DIR"
+"$OUTPUT_DIR/$run_batched_script" --trace "$INPUT_FILE" "$OUTPUT_BASE" "$line_incr"
