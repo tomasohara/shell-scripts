@@ -1049,74 +1049,75 @@ alias lynx-bookmarks='lynx-bookmarks- | $PAGER'
 ## alias lynx-book-marks=lynx-bookmarks
 function lookup-lynx-bookmark () { lynx-bookmarks- | $GREP $MY_GREP_OPTIONS -A1 "$@"; }
 
-# Tar archive creation and manipulation
-# tar options:
-# -x extract; -v verbose; -f file source; -z compressed; -k don't overwrite files
-trace tar archive commands
-GTAR="tar"
-alias gtar="$GTAR"
-#
-# ls-relative(file): show pathname of FILE relative to $HOME (e.g., ~/xfer/do_setup.bash)
-function ls-relative () { ls -d "$1" | perl -pe "s@$HOME@~@;"; }
-#
-# make-tar(archive_basename, [dir=.], [depth=max], [filter=pattern]): tar up directory with results placed 
-#   in archive_base.tar.gz and log file in base.log; afterwards display the tar size, log, and path.
-# Filenames matching the optional filter are excluded.
-# EX: make-tar ~/xfer/program-files-structure 'C:\Program Files' 1
-#   
-find_options=""
-function make-tar () { 
-	 local base=$1; local dir=$2; local depth=$3; local filter=$4;
-	 local depth_arg=""; local filter_arg="."
-	 if [ "$dir" = "" ]; then dir="."; fi;
-	 if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
-	 if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
-	 # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
-	 (find "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.log" 2>&1; 
-	 (ls -l "$base.tar.gz"; cat "$base.log") 2>&1 | $PAGER; 
-	 ls-full "$base.tar.gz";
-	 ls-relative "$base.tar.gz"; 
-}
-# TODO: handle filenames with embedded spaces
-#
-# tar-dir(dir, depth, [filter]): create archive of DIR in ~/xfer, using subdirectories up to DEPTH, and optionally 
-# filtering files matching exlusion filter.
-#
-function tar-dir () {
-	local dir=$1; local depth=$2;
-	local archive_base=$TEMP/`basename "$dir"`
-	make-tar "$archive_base" "$dir" $depth
-}
-function tar-just-dir () { tar-dir $1 1; }
-#
-function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`"; popd-q; }
-#
-# tar-this-dir-normal: creates archive of directory, excluding archive, backup, and temp subdirectories
-function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`" "" "/(archive|backup|temp)/"; popd-q; }
-#
-function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`" 1; popd-q; }
-function make-recent-tar () { (find . -type f -mtime -$2 | $GTAR cvfzT $1 -; ) 2>&1 | $PAGER; ls-relative $1; }
-#
-# " (for Emacs)
-# NOTE: above quote needed to correct for Emacs color coding
-# TODO: rework basename extraction
-#
-function view-tar () { $GTAR tvfz "$@" 2>&1 | $PAGER; }
-function extract-tar () { $NICE $GTAR xvfzk "$@" 2>&1 | $PAGER; }
-function extract-tar-force () { $NICE $GTAR xvfz "$@" 2>&1 | $PAGER; }
-function extract-tar-here () { pushd ..; $NICE $GTAR xvfzk "$@" 2>&1 | $PAGER; popd; }
-alias untar='extract-tar'
-alias untar-here='extract-tar-here'
-alias un-tar=untar
-alias untar-force='extract-tar-force'
-## alias make-tar='make-tar-with-subdirs'
-alias create-tar='make-tar-with-subdirs'
-alias make-full-tar='make-tar'
-# TODO: handle filenames with embedded spaces
-## alias tar-this-dir='make-tar-with-subdirs $TEMP/`basename "$PWD"`'
-## alias tar-just-this-dir='make-tar-sans-subdirs $TEMP/`basename $PWD`'
-alias recent-tar-this-dir='make-recent-tar $TEMP/recent-`basename "$PWD"`'
-function sort-tar-archive() { (tar tvfz "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
+## OLD:
+## # Tar archive creation and manipulation
+## # tar options:
+## # -x extract; -v verbose; -f file source; -z compressed; -k don't overwrite files
+## trace tar archive commands
+## GTAR="tar"
+## alias gtar="$GTAR"
+## #
+## # ls-relative(file): show pathname of FILE relative to $HOME (e.g., ~/xfer/do_setup.bash)
+## function ls-relative () { ls -d "$1" | perl -pe "s@$HOME@~@;"; }
+## #
+## # make-tar(archive_basename, [dir=.], [depth=max], [filter=pattern]): tar up directory with results placed 
+## #   in archive_base.tar.gz and log file in base.log; afterwards display the tar size, log, and path.
+## # Filenames matching the optional filter are excluded.
+## # EX: make-tar ~/xfer/program-files-structure 'C:\Program Files' 1
+## #   
+## find_options=""
+## function make-tar () { 
+## 	 local base=$1; local dir=$2; local depth=$3; local filter=$4;
+## 	 local depth_arg=""; local filter_arg="."
+## 	 if [ "$dir" = "" ]; then dir="."; fi;
+## 	 if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
+## 	 if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
+## 	 # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
+## 	 (find "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.log" 2>&1; 
+## 	 (ls -l "$base.tar.gz"; cat "$base.log") 2>&1 | $PAGER; 
+## 	 ls-full "$base.tar.gz";
+## 	 ls-relative "$base.tar.gz"; 
+## }
+## # TODO: handle filenames with embedded spaces
+## #
+## # tar-dir(dir, depth, [filter]): create archive of DIR in ~/xfer, using subdirectories up to DEPTH, and optionally 
+## # filtering files matching exlusion filter.
+## #
+## function tar-dir () {
+## 	local dir=$1; local depth=$2;
+## 	local archive_base=$TEMP/`basename "$dir"`
+## 	make-tar "$archive_base" "$dir" $depth
+## }
+## function tar-just-dir () { tar-dir $1 1; }
+## #
+## function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`"; popd-q; }
+## #
+## # tar-this-dir-normal: creates archive of directory, excluding archive, backup, and temp subdirectories
+## function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`" "" "/(archive|backup|temp)/"; popd-q; }
+## #
+## function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`" 1; popd-q; }
+## function make-recent-tar () { (find . -type f -mtime -$2 | $GTAR cvfzT $1 -; ) 2>&1 | $PAGER; ls-relative $1; }
+## #
+## # " (for Emacs)
+## # NOTE: above quote needed to correct for Emacs color coding
+## # TODO: rework basename extraction
+## #
+## function view-tar () { $GTAR tvfz "$@" 2>&1 | $PAGER; }
+## function extract-tar () { $NICE $GTAR xvfzk "$@" 2>&1 | $PAGER; }
+## function extract-tar-force () { $NICE $GTAR xvfz "$@" 2>&1 | $PAGER; }
+## function extract-tar-here () { pushd ..; $NICE $GTAR xvfzk "$@" 2>&1 | $PAGER; popd; }
+## alias untar='extract-tar'
+## alias untar-here='extract-tar-here'
+## alias un-tar=untar
+## alias untar-force='extract-tar-force'
+## ## alias make-tar='make-tar-with-subdirs'
+## alias create-tar='make-tar-with-subdirs'
+## alias make-full-tar='make-tar'
+## # TODO: handle filenames with embedded spaces
+## ## alias tar-this-dir='make-tar-with-subdirs $TEMP/`basename "$PWD"`'
+## ## alias tar-just-this-dir='make-tar-sans-subdirs $TEMP/`basename $PWD`'
+## alias recent-tar-this-dir='make-recent-tar $TEMP/recent-`basename "$PWD"`'
+## function sort-tar-archive() { (tar tvfz "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
 
 alias color-xterm='rxvt&'
 
