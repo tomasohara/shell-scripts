@@ -98,11 +98,13 @@ fi
 function startup-trace () { if [ "$STARTUP_TRACING" = "1" ]; then echo $* [$HOST `date`] >> $HOME/temp/.startup-$HOST-$$.log; fi; }
 conditional-source $BIN/startup-tracing.bash
 #
-alias trace='startup-trace'
-alias enable-startup-tracing='export STARTUP_TRACING=1'
-alias disable-startup-tracing='export STARTUP_TRACING=0'
-alias enable-console-tracing='export CONSOLE_TRACING=1'
-alias disable-console-tracing='export CONSOLE_TRACING=0'
+
+## OLD
+## alias trace='startup-trace'
+## alias enable-startup-tracing='export STARTUP_TRACING=1'
+## alias disable-startup-tracing='export STARTUP_TRACING=0'
+## alias enable-console-tracing='export CONSOLE_TRACING=1'
+## alias disable-console-tracing='export CONSOLE_TRACING=0'
 
 #-------------------------------------------------------------------------------
 trace 'in do_setup.bash'
