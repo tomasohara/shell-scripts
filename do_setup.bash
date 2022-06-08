@@ -608,58 +608,59 @@ alias copy-readonly='copy-readonly.sh'
 #
 NICE="nice -19"
 
-#------------------------------------------------------------------------
-# Directory commands (via ls):
-trace directory commands
-
- 
-# ls options: # -a all files; -l long listing; -t by time; -k in KB; -h human readable; -G no group; -d no subdirectory listings
-#
-core_dir_options="-altkh"
-dir_options="${core_dir_options}G"
-if [ "$OSTYPE" = "solaris" ]; then dir_options="-alt"; fi
-if [ "$BAREBONES_HOST" = "1" ]; then dir_options="-altk"; fi
-function dir () { ls ${dir_options} "$@" 2>&1 | $PAGER; }
-alias ls-full='ls ${core_dir_options}'
-function dir-full () { ls-full "$@" 2>&1 | $PAGER; }
-## OLD: alias dir-='dir-full'
-alias dir-='ls ${dir_options}'
-function dir-sans-backups () { ls ${dir_options} "$@" 2>&1 | grep -v '~[0-9]*~' | $PAGER; }
-#
-# Miscellaneous directory helpers
-# Shows read-only files (for user)
-# ex: -r-xr-xr-x  1 root 4.7K 2013-12-13 17:18 ngram_filter.py
-function dir-ro () { ls ${dir_options} "$@" 2>&1 | grep -v '^[^ld].w' | $PAGER; }
-# Shows writable files (for user)
-# ex: -rwxr-x--x  1 root 9.4K 2014-06-26 20:18 gensim_test.py
-function dir-rw () { ls ${dir_options} "$@" 2>&1 | grep '^[^ld].w' | $PAGER; }
-# Shows files not executable
-# ex -rw-r--r-- 1 root 3.9K 2014-06-09 01:54 /mnt/tohara/src/sandbox/tohara/randomize_lines.py
-function dir-non-executable () { ls ${dir_options} "$@" 2>&1 | grep -v '^[^ld]..x' | $PAGER; }
-
-function subdirs () { ls ${dir_options} "$@" 2>&1 | grep ^d | $PAGER; }
-## OLD: alias subdirs-proper='find . -maxdepth 1 -type d | grep -v "^\.\$"'
-alias subdirs-proper='find . -maxdepth 1 -type d | grep -v "^\.\$" | perl -pe "s@^\./@@;" | column'
-# note: -f option overrides -t: Unix sorts alphabetically by default; via ls manpage:
-#    -f     do not sort, enable -aU, disable -ls --color
-## OLD: function subdirs-alpha () { ls ${dir_options} -f "$@" 2>&1 | grep ^d | $PAGER; }
-# drwxr-xr-x   3 root root     4096 Jun 12 02:39 boot
-# 1            2 3    4        5    6   7  8     9
-## TEST: function subdirs-alpha () { ls -al "$@" 2>&1 | grep ^d | cut -d' ' -f9- | $PAGER; }
-function subdirs-alpha () { ls -al "$@" 2>&1 | grep ^d | $PAGER; }
-function sublinks () { ls ${dir_options} "$@" 2>&1 | grep ^l | $PAGER; }
-## OLD: function sublinks-alpha () { ls ${dir_options} -f "$@" 2>&1 | grep ^l | $PAGER; }
-## TEST: function sublinks-alpha () { ls -al "$@" 2>&1 | grep ^l | cut -d' ' -f9- | $PAGER; }
-function sublinks-alpha () { ls -al "$@" 2>&1 | grep ^l | $PAGER; }
-#
-alias glob-links='find . -maxdepth 1 -type l | sed -e "s/.\///g"'
-alias glob-subdirs='find . -mindepth 1 -maxdepth 1 -type d | sed -e "s/.\///g"'
-
-#
-alias ls-R='ls -R >| ls-R.list; wc -l ls-R.list'
-#
-# TODO: create ls alias that shows file name with symbolic links (as with ls -l but without other information
-# ex: ls -l | perl -pe 's/^.* \d\d:\d\d //;'
+## OLD:
+## #------------------------------------------------------------------------
+## # Directory commands (via ls):
+## trace directory commands
+## 
+##  
+## # ls options: # -a all files; -l long listing; -t by time; -k in KB; -h human readable; -G no group; -d no subdirectory listings
+## #
+## core_dir_options="-altkh"
+## dir_options="${core_dir_options}G"
+## if [ "$OSTYPE" = "solaris" ]; then dir_options="-alt"; fi
+## if [ "$BAREBONES_HOST" = "1" ]; then dir_options="-altk"; fi
+## function dir () { ls ${dir_options} "$@" 2>&1 | $PAGER; }
+## alias ls-full='ls ${core_dir_options}'
+## function dir-full () { ls-full "$@" 2>&1 | $PAGER; }
+## ## OLD: alias dir-='dir-full'
+## alias dir-='ls ${dir_options}'
+## function dir-sans-backups () { ls ${dir_options} "$@" 2>&1 | grep -v '~[0-9]*~' | $PAGER; }
+## #
+## # Miscellaneous directory helpers
+## # Shows read-only files (for user)
+## # ex: -r-xr-xr-x  1 root 4.7K 2013-12-13 17:18 ngram_filter.py
+## function dir-ro () { ls ${dir_options} "$@" 2>&1 | grep -v '^[^ld].w' | $PAGER; }
+## # Shows writable files (for user)
+## # ex: -rwxr-x--x  1 root 9.4K 2014-06-26 20:18 gensim_test.py
+## function dir-rw () { ls ${dir_options} "$@" 2>&1 | grep '^[^ld].w' | $PAGER; }
+## # Shows files not executable
+## # ex -rw-r--r-- 1 root 3.9K 2014-06-09 01:54 /mnt/tohara/src/sandbox/tohara/randomize_lines.py
+## function dir-non-executable () { ls ${dir_options} "$@" 2>&1 | grep -v '^[^ld]..x' | $PAGER; }
+## 
+## function subdirs () { ls ${dir_options} "$@" 2>&1 | grep ^d | $PAGER; }
+## ## OLD: alias subdirs-proper='find . -maxdepth 1 -type d | grep -v "^\.\$"'
+## alias subdirs-proper='find . -maxdepth 1 -type d | grep -v "^\.\$" | perl -pe "s@^\./@@;" | column'
+## # note: -f option overrides -t: Unix sorts alphabetically by default; via ls manpage:
+## #    -f     do not sort, enable -aU, disable -ls --color
+## ## OLD: function subdirs-alpha () { ls ${dir_options} -f "$@" 2>&1 | grep ^d | $PAGER; }
+## # drwxr-xr-x   3 root root     4096 Jun 12 02:39 boot
+## # 1            2 3    4        5    6   7  8     9
+## ## TEST: function subdirs-alpha () { ls -al "$@" 2>&1 | grep ^d | cut -d' ' -f9- | $PAGER; }
+## function subdirs-alpha () { ls -al "$@" 2>&1 | grep ^d | $PAGER; }
+## function sublinks () { ls ${dir_options} "$@" 2>&1 | grep ^l | $PAGER; }
+## ## OLD: function sublinks-alpha () { ls ${dir_options} -f "$@" 2>&1 | grep ^l | $PAGER; }
+## ## TEST: function sublinks-alpha () { ls -al "$@" 2>&1 | grep ^l | cut -d' ' -f9- | $PAGER; }
+## function sublinks-alpha () { ls -al "$@" 2>&1 | grep ^l | $PAGER; }
+## #
+## alias glob-links='find . -maxdepth 1 -type l | sed -e "s/.\///g"'
+## alias glob-subdirs='find . -mindepth 1 -maxdepth 1 -type d | sed -e "s/.\///g"'
+## 
+## #
+## alias ls-R='ls -R >| ls-R.list; wc -l ls-R.list'
+## #
+## # TODO: create ls alias that shows file name with symbolic links (as with ls -l but without other information
+## # ex: ls -l | perl -pe 's/^.* \d\d:\d\d //;'
 
 # Grep commands
 trace grep commands
