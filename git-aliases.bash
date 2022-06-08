@@ -150,6 +150,7 @@ function git-update {
     fi
 
     # Show end of log
+    # TODO: filter unzip output
     echo >> "$log"
     tail "$log"
 }

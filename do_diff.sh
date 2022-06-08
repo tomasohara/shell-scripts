@@ -73,7 +73,7 @@ if ("$2" == "") then
     ## OLD
     ## echo "$script .perl" '$SCRIPT_DIR >| _perl_diff.list 2>&1'
     ## echo ""
-    echo "$script" '--match-dot-files .*bash* dot-file-archive >| _bash-dot-file-diff.list 2>&1'
+    echo "$script" '--match-dot-files ".*bash*" dot-file-archive >| _bash-dot-file-diff.list 2>&1'
     echo ""
     ## echo "$script --diff diff.sh ./Parser/prune.lisp ../new-Full_Analyzer"
     ## echo ""

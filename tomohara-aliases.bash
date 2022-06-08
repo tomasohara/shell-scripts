@@ -1977,6 +1977,7 @@ SSH_PORT="22"
 # TODO: For cygwin clients, unset TERM so set_xterm_title.bash not confused.
 # Maldito shellcheck [SC2029: Note that, unescaped, this expands on the client side]
 # shellcheck disable=SC2029
+## TOM-IDIOSYNCRATIC
 {
 function ssh-host-aws-aux () { local host="$1"; shift; ssh -X -p $SSH_PORT -i "$TPO_SSH_KEY" "$USER@$host" "$@"; }
 }
@@ -1989,11 +1990,14 @@ function ssh-host-login-aws () {
 }
 ## TODO: function run-remote-command-aws () { ssh-host-aws-aux "$@"; }
 # Note: /tmp used in case host not setup with ~/temp
+## TOM-IDIOSYNCRATIC
 function scp-host-down() { scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$USER@$1:$TMP/$2" .; }
 # TODO: rework in terms of id_rsa-tomohara-keypair (as used on others hosts)
+## TOM-IDIOSYNCRATIC
 # scp-host-up(host, file, ...): upload FILES to HOST
 function scp-host-up() { local host="$1"; shift; scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@" "$USER@$host:$TMP"; }
 #
+## TOM-IDIOSYNCRATIC
 # scp-aws-up(host, file, ...): updload FILES to HOST, after making sure ~/xfer directory files writable
 function scp-aws-up() { local host="$1"; shift;
                         ssh -p $SSH_PORT -i "$TPO_SSH_KEY" "$USER@$host" chmod u+w ~/xfer/'*';
@@ -2180,6 +2184,7 @@ function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$;
 ## TODO: rename as my-script to avoid confusion
 ## Maldito shellcheck [SC2032: Use own script or sh -c '..' to run this from sudo.]
 # shellcheck disable=SC2032
+## TOM-IDIOSYNCRATIC
 {
 function script {
     ## THIS function is buggy!
@@ -2462,6 +2467,7 @@ alias xtract-text='extract-text'
 # and outputs to file given by tests/_test-<script_basename>.<date>.log.
 # note: run in verbose mode with unbuffered I/O so output synchronized.
 # TODO: rework to take the actual test script and to pipe results to pager
+## TOM-IDIOSYNCRATIC
 #
 function test-script () {
     local base
@@ -2680,6 +2686,7 @@ alias kill-clam-antivirus='kill_em.sh --all -p clamd'
 trace misc local helpers
 
 # sleepyhead: Invoke SleepyHead with debug trace sent to log file under ~/temp.
+## TOM-IDIOSYNCRATIC
 function sleepyhead() {
     log_file="$TEMP/sleepyhead.$(todays-date).log"
     echo "start: $(date)" >> "$log_file"
