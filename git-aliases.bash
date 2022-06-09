@@ -487,7 +487,7 @@ function git-alias-usage () {
 	echo '    invoke-alt-checkin "'${next_mod_file}'"'
 	echo ''
 	echo 'Usual check-in:'
-	echo '    git-cd-root'
+	echo '    git-cd-root; git-update'
 	echo '    git-next-checkin                      # repeat, as needed'
 
 	## OLD: echo '*** Fix maldito git quirk causing file timestamp to change (the stash???)!!!'
