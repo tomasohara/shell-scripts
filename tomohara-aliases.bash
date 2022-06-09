@@ -364,6 +364,10 @@ alias show-path='show-path-dir PATH'
 # TODO: add force argument to ensure last (or first)
 function append-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="${PATH}:$1"; fi }
 function prepend-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="$1:${PATH}"; fi }
+#
+function append-path-force () { export PATH="${PATH}:$1"; }
+function prepend-path-force () { export PATH="$1:${PATH}"; }
+
 # TODO: rework append-/prepend-path and python variants via generic helper
 function append-python-path () { export PYTHONPATH=${PYTHONPATH}:"$1"; }
 function prepend-python-path () { export PYTHONPATH="$1":${PYTHONPATH}; }
@@ -2602,6 +2606,7 @@ alias run-epiphany-browser='invoke-browser epiphany-browser'
 # NVidia GPU
 
 alias nvidia-smi-loop='nvidia-smi --loop=1'
+alias nvidia-loop=nvidia-smi-loop
 
 # Multilingual
 # TODO: put other common ones from do_setup.sh here
