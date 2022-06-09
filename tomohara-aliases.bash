@@ -85,6 +85,7 @@
 # - ***** Put work-specific stuff in separate file!"
 # - **** Add EX-bases tests for all numeric aliases!
 # - ***** Fix problems noted by shellcheck (and rework false positives)!.
+# - *** Indent [maldito] shell-check blocks.
 # - ** Add macros to provide cribsheet on usage!
 # - *** Purge way-old stuff (e.g., lynx related)!
 # - ** Add option to move alias not to put files in subdirectory of target directory. That is, the move command aborts rather than doing following: 'move sub-dir target-dir' ==> target-dir/sub-dir/sub-dir).
