@@ -322,7 +322,7 @@ $ python-import-path eldar | grep -ic egg
 1
 
 
---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # tests for path manipulation
 
 $ prepend-path /usr/local/fubar/bin
@@ -379,4 +379,3 @@ dir-proper ()
 
 ¢ show-macros | grep -c ^} | grep -c ^3[0-9][0-9]
 1
-
