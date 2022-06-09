@@ -694,6 +694,7 @@ function dir () {
         opts="$opts --directory";
     fi
     $LS ${opts} "$@" 2>&1 | $PAGER;
+}
 function dir-proper () { $LS ${dir_options} --directory "$@" 2>&1 | $PAGER; }
 alias ls-full='$LS ${core_dir_options}'
 function dir-full () { ls-full "$@" 2>&1 | $PAGER; }
@@ -717,7 +718,6 @@ function dir_options_sans_t () { echo "$dir_options" | perl -pe 's/\-t//;'; }
 function subdirs-alpha () { $LS $(dir_options_sans_t) "$@" 2>&1 | $GREP ^d | $PAGER; }
 function sublinks () { $LS ${dir_options} "$@" 2>&1 | $GREP ^l | $PAGER; }
 function sublinks-alpha () { $LS $(dir_options_sans_t) "$@" 2>&1 | $GREP ^l | $PAGER; }
-}
 # TODO: show non-work-related directory example
 #
 alias symlinks='sublinks'
