@@ -91,17 +91,27 @@ alias conda-list-env='conda list env'
 alias conda-list-env-hack='ls ~/.conda/envs'
 alias conda-env-list='conda env list'
 alias conda-env-name='conda env list | extract_matches.perl "^(\S+ )  " | echoize'
+
+# conda-activate-env(name, [use_hack=0]): Activate NAME or show list of environment if empty or "-"
+# Note: 'conda env list' is slow, so USE_HACK resorts to 'ls ~/.conda/envs'
 ## OLD: alias conda-activate-env='source activate'
 ## OLD: function conda-activate-env { source activate "$1"; add-conda-env-to-xterm-title; }
 function conda-activate-env {
     ## DEBUG: echo "in conda-activate-env $*"
     local env="$1"
-    if [ "$env" = "" ]; then
+    local use_hack="${2:-0}"
+    ## if [ "$env" = "" ]; then
+    if [[ ("$env" = "") || ("$env" = "-") ]]; then
 	echo "Usage: conda-activate-env"
 	echo ""
 	echo "Note: available environments:"
 	## TODO: use columns
-	conda-list-env-hack | perl -pe 's/^/    /;'
+	## BAD:
+	if [ "$use_hack" != "0" ]; then
+	    conda-list-env-hack | perl -pe 's/^/    /;'
+	else
+	    conda-env-name
+	fi
 	echo ""
     fi
     ## OLD: source activate "$env";
@@ -109,6 +119,8 @@ function conda-activate-env {
     add-conda-env-to-xterm-title;
 }
 ## OLD: alias conda-deactivate-env='source deactivate'
+function conda-activate-env-hack { conda-activate-env "$1" "1"; }
+#
 ## OLD: function conda-deactivate-env { source deactivate "$1"; add-conda-env-to-xterm-title; }
 ## OLD: function conda-deactivate-env { conda deactivate "$1"; add-conda-env-to-xterm-title; }
 function conda-deactivate-env {
