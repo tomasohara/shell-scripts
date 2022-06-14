@@ -699,7 +699,7 @@ function dir () {
 function dir-proper () { $LS ${dir_options} --directory "$@" 2>&1 | $PAGER; }
 alias ls-full='$LS ${core_dir_options}'
 function dir-full () { ls-full "$@" 2>&1 | $PAGER; }
-## TODO: WH with the grep (i.e., isn't there a simpler way)?
+## TODO: WTH with the grep (i.e., isn't there a simpler way)?
 function dir-sans-backups () { $LS ${dir_options} "$@" 2>&1 | $GREP -v '~[0-9]*~' | $PAGER; }
 # dir-ro/dir-rw(spec): show files that are read-only/read-write for the user
 function dir-ro () { $LS ${dir_options} "$@" 2>&1 | $GREP -v '^..w' | $PAGER; }
@@ -1897,6 +1897,8 @@ alias dpkg-install='sudo dpkg --install '
 alias restart-network='sudo ifdown eth0; sudo ifup eth0'
 alias hibernate-system='sudo systemctl hibernate'
 alias suspend-system='sudo systemctl suspend'
+alias shutdown-system='sudo shutdown'
+alias restart-system='shutdown-system --reboot'
 alias blank-screen='xset dpms force off'
 alias stop-service='systemctl stop'
 alias restart-service='sudo systemctl restart'
@@ -2448,6 +2450,7 @@ function run-jupyter-notebook () {
     local ip="$2"; if [ "$ip" = "" ]; then ip="127.0.0.1"; fi
     local log
     log="$TEMP/jupyter-$(TODAY).log"
+    # note: clears notebook token to disable authentication
     jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
     echo "$log"
     # Let jupyter initialize
