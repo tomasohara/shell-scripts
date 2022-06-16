@@ -2444,6 +2444,19 @@ alias kill-python-all="kill_em.sh python"
 ## alias which-python='which-program python'
 alias which-python='which python'
 
+# run-jupyter-notebook-posthoc(): try to show log info previously not shown via run-jupyter-notebook
+function run-jupyter-notebook-posthoc() {
+    local log
+    log="$TEMP/jupyter-$(TODAY).log"
+    echo "checking log: $log"
+    # TODO: resolve problem extracting URL
+    # TEMP:
+    tail "$log"
+    # Show URL
+    echo -n "URL: "
+    extract-matches 'http:\S+' "$log" | sort -u    
+}
+
 # run-jupyter-notebook(port=18888): run jupyter notebook on PORT
 function run-jupyter-notebook () {
     local port="$1"; if [ "$port" = "" ]; then port=8888; fi
@@ -2452,17 +2465,20 @@ function run-jupyter-notebook () {
     log="$TEMP/jupyter-$(TODAY).log"
     # note: clears notebook token to disable authentication
     jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
-    echo "$log"
+    ## OLD
+    ## echo "$log"
     # Let jupyter initialize
     local delay=5
     echo "sleeping $delay seconds for log to stabalize (effing jupyter)"
     sleep $delay
-    # TODO: resolve problem extracting URL
-    # TEMP:
-    tail "$log"
-    # Show URL
-    echo -n "URL: "
-    extract-matches 'http:\S+' "$log" | sort -u
+    ## OLD
+    ## # TODO: resolve problem extracting URL
+    ## # TEMP:
+    ## tail "$log"
+    ## # Show URL
+    ## echo -n "URL: "
+    ## extract-matches 'http:\S+' "$log" | sort -u    
+    run-jupyter-notebook-posthoc
 }
 alias jupyter-notebook-redir=run-jupyter-notebook
 alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'
