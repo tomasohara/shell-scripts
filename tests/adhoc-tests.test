@@ -1,8 +1,15 @@
 # This is a set of adhoc tests using a simple format based on the interaction
 # in a terminal session. It is designed for ease of preparation rather than
 # generality.
+#
+# TODO: convert to Jupyter format (using bash kernel)
+#
 
-# ------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+# Tests for calc_entropy.perl script
+#
+# note: this is the simplified input for batspp
+#
 
 $ calc_entropy.perl -simple .25 .25 .25 .25
 Entropy
@@ -13,8 +20,11 @@ Entropy
 # TODO (encode blank lines, here and below):
 # head ~/bin/tests/calc_entropy.*input* | perl -pe 's/^$/;;/;'
 
-$ head ~/bin/tests/calc_entropy.*input*
-==> /home/tomohara/bin/tests/calc_entropy.input <==
+#----------
+# Input data
+
+$ head calc_entropy.*input* | perl -pe 's/^$/<nl>/;'
+==> calc_entropy.input <==
 # Frequency of 'between' in Penn Treebank II WSJ annotations
 24	pp-clr
 6	pp-dir
@@ -23,28 +33,32 @@ $ head ~/bin/tests/calc_entropy.*input*
 2	pp-nom
 7	pp-prd
 42	pp-tmp
-
-==> /home/tomohara/bin/tests/calc_entropy.simple.input <==
+<NL>
+==> calc_entropy.simple.input <==
 .25 .25 .25 .25
-
-==> /home/tomohara/bin/tests/calc_entropy.simple.input2 <==
+<NL>
+==> calc_entropy.simple.input2 <==
 .47 .42 .06 .05
 
 #-------------------------------------------------------------------------------
 
-$ calc_entropy.perl -simple - < ~/bin/tests/calc_entropy.simple.input
+#----------
+# Simple input format
+
+$ calc_entropy.perl -simple - < calc_entropy.simple.input
 Entropy
 2.000
 
---------------------------------------------------------------------------------
 
-$ calc_entropy.perl -simple - < ~/bin/tests/calc_entropy.simple.input2
+$ calc_entropy.perl -simple - < calc_entropy.simple.input2
 Entropy
 1.497
 
---------------------------------------------------------------------------------
+#---------
+# Verbose output
 
-$ calc_entropy.perl -verbose -simple - < ~/bin/tests/calc_entropy.simple.input2
+
+$ calc_entropy.perl -verbose -simple - < calc_entropy.simple.input2
 #	prob	-p lg(p)    max p
 #--------------------------------
 #	0.470	0.512
@@ -57,9 +71,9 @@ $ calc_entropy.perl -verbose -simple - < ~/bin/tests/calc_entropy.simple.input2
 Entropy
 1.497
 
---------------------------------------------------------------------------------
 
-$ cat ~/bin/tests/calc_entropy.input
+# TODO: drop as shown above
+$ cat calc_entropy.input
 # Frequency of 'between' in Penn Treebank II WSJ annotations
 24	pp-clr
 6	pp-dir
@@ -69,14 +83,10 @@ $ cat ~/bin/tests/calc_entropy.input
 7	pp-prd
 42	pp-tmp
 
---------------------------------------------------------------------------------
-
-$ calc_entropy.perl - < ~/bin/tests/calc_entropy.input
+$ calc_entropy.perl - < calc_entropy.input
 2.230
 
---------------------------------------------------------------------------------
-
-$ calc_entropy.perl -verbose - < ~/bin/tests/calc_entropy.input
+$ calc_entropy.perl -verbose - < calc_entropy.input  | perl -pe 's/^$/<nl>/;'
 #		class	freq	prob	-p lg(p)
 #		pp-tmp	42	0.350	0.530
 #		pp-loc	35	0.292	0.518
@@ -86,17 +96,19 @@ $ calc_entropy.perl -verbose - < ~/bin/tests/calc_entropy.input
 #		pp-ext	4	0.033	0.164
 #		pp-nom	2	0.017	0.098
 #		total	120	1.000	2.230
-
+<nl>
 # word	classes	freq	entropy	max_prob
 -	7	120	2.230	0.350
 
---------------------------------------------------------------------------------
+#----------
+# multiple input files
 
-$ calc_entropy.perl ~/bin/tests/calc_entropy.input ~/bin/tests/calc_entropy.input2
+$ calc_entropy.perl calc_entropy.input calc_entropy.input2
 2.230
 1.750
 
-================================================================================
+#===============================================================================
+# Numeric text processing
 
 $ echo 2520878057 | comma-ize-number 
 2,520,878,057
@@ -107,13 +119,13 @@ $ echo 2520878057 | apply-numeric-suffixes
 $ calc "403.4 * 1000**3" | comma-ize-number 
 403,400,000,000.000
 
-================================================================================
+#===============================================================================
 # Inspired by idiot-in-chief making anal retentive changes to quiet shellcheck
 
 $ echo $core_dir_options
 --all -l -t --human-readable
 
-$$ echo $dir_options
+$ echo $dir_options
 --all -l -t --human-readable --no-group
 
 $ dir_options_sans_t
@@ -135,6 +147,31 @@ drwxrwxr-x   2 tomohara 4.0K Apr 16 01:13 def
 ## TODO: note discovered via followingL
 ##   $ git-diff tomohara-aliases.bash | count-it -i '([a-z0-9_-]+)' - 
 ## 
+
+#===============================================================================
+
+# Make sure copy and move trace operations, preserve timestamps, and confirms overwrites or deletions (e.g., a la cp -ivp)
+
+# copy alias traces operation
+$ cd $TMP
+$ touch file1
+$ copy file1 file1-copy
+'file1' -> 'file1-copy'
+
+# copy alias doesn't overwrite files
+$ cd $TMP
+$ touch file1 file2
+$ echo | copy file1 file2
+/bin/cp: overwrite 'file2'? $ 
+
+$ move file1 file3
+'file1' -> 'file3'
+
+$ echo | move file2 file3
+/bin/cp: overwrite 'file3'? $ 
+
+#===============================================================================
+# stuff todo
 
 $ tar-this-dir
 TODO
@@ -163,30 +200,12 @@ cd-realdir
 
 em-aliases
 
-#...............................................................................
-
-# Make sure copy and move trace operations, preserve timestamps, and confirms overwrites or deletions (e.g., a la cp -ivp)
-
-# copy alias traces operation
-$ cd $TMP
-$ touch file1
-$ copy file1 file1-copy
-'file1' -> 'file1-copy'
-
-# copy alias doesn't overwrite files
-$ cd $TMP
-$ touch file1 file2
-$ echo | copy file1 file2
-/bin/cp: overwrite 'file2'? $ 
-
+#-------------------------------------------------------------------------------
 # TODO:
 
 move
 
-#...............................................................................
-
 update-today-vars
-
 
 pushd
 popd
@@ -199,10 +218,9 @@ tar-dir
 
 set-xterm-title
 
-tar-this-dir    2
+tar-this-dir
 
-cd-this-realdir 2
-
+cd-this-realdir
 
 alt-xterm-title
 
@@ -217,7 +235,7 @@ new-tar-this-dir
 # Make sure the following doesn't hang
 cond-export _ENV_VAR_=123
 
---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 $ touch it5; cmd-trace move it5 _it5 | cat
 start: Sat Apr 16 20:47:38 CDT 2022
@@ -228,39 +246,22 @@ start: Sat Apr 16 20:47:38 CDT 2022
 end: Sat Apr 16 20:47:38 CDT 2022
 
 
-================================================================================
-# Tests for find-related aliases
 
-# setup
-$ mkdir -p $TMP/fs/dir1 $TMP/fs/DIR1 $TMP/backup/dir1
-$ cd $TMP/fs
-$ fs dir
-./dir1
-
-# test
-$ fs dir
-./dir1
-
-# continuation
-$ fs- dir
-./dir1
-./dir1/backup/dir1
-
-================================================================================
+#================================================================================
 # Stuff that is currently broken
 
-$ run-jupyter-notebook 
+$ run-jupyter-notebook | grep ^URL
 URL: http://127.0.0.1:8888
 
-================================================================================
-
+#================================================================================
 # simple test for mezcla system
 # note: used to check that mezcla accessible
 
 $ python -c 'from mezcla import system; system.print_error("hey"); print("joe")' 2> /dev/null
 joe
 
-================================================================================
+#===============================================================================
+# randomization
 
 $ alt-randomize-lines.perl -seed=13 alt-randomize-lines.perl | head -3
     ## $note .= "notes:\n\nSome usage note.\n";		     # TODO: usage note
@@ -321,7 +322,6 @@ $ python -m easy_install eldar-0.0.7-py3.8.egg
 $ python-import-path eldar | grep -ic egg
 1
 
-
 #-------------------------------------------------------------------------------
 # tests for path manipulation
 
@@ -379,3 +379,4 @@ dir-proper ()
 
 ¢ show-macros | grep -c ^} | grep -c ^3[0-9][0-9]
 1
+
