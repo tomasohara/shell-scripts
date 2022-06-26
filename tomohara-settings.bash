@@ -10,5 +10,8 @@
 add-python-path $HOME/python/Mezcla/mezcla
 append-path "$HOME/mezcla-tom/examples:$HOME/python/examples:$TOM_BIN/bruno"
 
+# HACK: make sure ~/mezcla-tom used if available
+add-python-path $HOME/mezcla-tom
+
 # Enable timestamp preservation during git-update alias operations (n.b., stash pop quirk)
 export PRESERVE_GIT_STASH=1
