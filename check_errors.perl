@@ -142,6 +142,7 @@ while (<>) {
 	   || /cannot create/
 	   || /cannot open/
 	   || /cannot find/
+	   || /cannot overwrite/
 	   || /:( fatal)? error /
 
 	   # Java errors
