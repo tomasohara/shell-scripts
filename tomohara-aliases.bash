@@ -634,14 +634,22 @@ alias cp='/bin/cp -i $other_file_args'
 alias rm='/bin/rm -i $other_file_args'
 alias delete='/bin/rm -i $other_file_args'
 alias del="delete"
-alias delete-force='/bin/rm -f $other_file_args'
+## OLD: alias delete-force='/bin/rm -f $other_file_args'
+alias disable-forced-deletons='force_echo="echo run enable-forced-deletons or issue: "'
+alias enable-forced-deletons='force_echo=""'
+disable-forced-deletons
+#
+alias delete-force='$force_echo /bin/rm -f $other_file_args'
 #
 alias remove-force='delete-force'
 # TODO: make sure that rellowing only applied to directories
 alias remove-dir='/bin/rm -rv'
 alias delete-dir='remove-dir'
-alias remove-dir-force='/bin/rm -rfv'
-alias delete-dir-force='remove-dir-force'
+## OLD
+## alias remove-dir-force='/bin/rm -rfv'
+## alias delete-dir-force='remove-dir-force'
+alias remove-dir-force='$echo /bin/rm -rfv'
+alias delete-dir-force='$echo remove-dir-force'
 #
 alias copy-readonly='copy-readonly.sh'
 function copy-readonly-spec () {
@@ -822,7 +830,7 @@ function gr-less () { gr "$@" | $PAGER; }
 
 # Other grep-related stuff
 #
-# EX: echo $'1 one\n2 \x80\n3 three' | gr-nonascii => $'2: 2 \x80'
+# EX: echo $'L1: one\nL2: \xC3\xBE \nL3: three' | gr-nonascii => "2: L2: þ"
 alias grep-nonascii='perlgrep.perl "[\x80-\xFF]"'
 
 # Searching for files
@@ -1199,6 +1207,7 @@ function most-recent-backup {
 }
 #
 # diff-backup(file): compare FILE vs. most recent backup
+# TODO: fix handling of dot files
 function diff-backup-helper {
     local diff="$1"; local file="$2"; 
     "$diff" "$(most-recent-backup "$file")" "$file";
@@ -1362,7 +1371,7 @@ function count-tokens () { count-it "\S+" "$@"; }
 # TODO: rework via chomp
 function count-line-text () { count-it '^([^\n\r]*)[\n\r]*$' "$@"; }
 alias extract-matches='extract_matches.perl'
-# EX: echo $'1 one\n2 two\n3' | perlgrep 'o\w' => $'1 one'
+# EX: echo $'1 one\n2 two\n3' | perlgrep 'o\w' => "1 one"
 alias perlgrep='perl- perlgrep.perl'
 alias perl-grep=perlgrep
 function para-grep { perlgrep -para "$@" 2>&1 | $GREP -v "Can't open \*notes\*"; }
@@ -2270,7 +2279,8 @@ function add-python-path () {
     local parent_path
     parent_path=$(realpath "$package_path/..")
     # add package to path (e.g., $HOME/python/Mezcla/mezcla)
-    prepend-path "$package_path"
+    ## TODO: prepend-path-force "$package_path"
+    export PATH="$package_path:$PATH"
     # add parent to python-path spec (e.g., $HOME/python/Mezcla)
     export PYTHONPATH="$parent_path:$PYTHONPATH"
 }
