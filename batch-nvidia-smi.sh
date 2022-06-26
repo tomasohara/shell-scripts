@@ -28,7 +28,7 @@ if [ "$1" = "" ]; then
     echo ""
     echo "Examples:"
     echo "- Simple"
-    echo "  $0 1200 0.5"
+    echo "  batch-nvidia-smi.sh n/a 60 > \$TMP/batch-nvidia-smi-\$(T).log &"
     echo ""
     echo "- Advanced:"
     echo "  date_yyyy_mm_dd_hhmm=\"$(date '+%Y-%m-%d_%H%M')\""
