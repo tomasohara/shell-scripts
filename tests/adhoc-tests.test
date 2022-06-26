@@ -260,6 +260,14 @@ URL: http://127.0.0.1:8888
 $ python -c 'from mezcla import system; system.print_error("hey"); print("joe")' 2> /dev/null
 joe
 
+# Make sure ngram_tfidf runs
+# note: stupid problem under AWS server
+# 
+$ python -m mezcla.ngram_tfidf
+Warning: not intended for command-line use; simple test follows
+Usage: /home/tomohara/python/Mezcla/mezcla/ngram_tfidf.py [--help] [-]
+
+
 #===============================================================================
 # randomization
 
@@ -322,6 +330,17 @@ $ python -m easy_install eldar-0.0.7-py3.8.egg
 $ python-import-path eldar | grep -ic egg
 1
 
+
+#----------
+
+# bug w/ resolving some imports
+# $ python-import-path re 
+# matches /home/tomohara/anaconda3/envs/nlp-py-3-8/lib/python3.8/reprlib.py
+
+$ python-import-path re | extract-matches "\w+.py$"
+re.py
+
+
 #-------------------------------------------------------------------------------
 # tests for path manipulation
 
@@ -380,3 +399,13 @@ dir-proper ()
 ¢ show-macros | grep -c ^} | grep -c ^3[0-9][0-9]
 1
 
+#===============================================================================
+# diff-based aliases
+
+# TODO: regression test for dot-file issue
+#
+# $ cd
+# $ diff-backup .bashrc
+# =/>
+# diff: : No such file or directory
+#
