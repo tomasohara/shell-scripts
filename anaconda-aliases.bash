@@ -51,7 +51,7 @@ function init-condaN() {
     ## OLD: reset-prompt
     add-conda-env-to-xterm-title
 
-    # HACK: make sure cls aliased to default Unix version of clear (anaconda3 quirk) and also that it doesn't clear the terminal buffer [n.b., effing stupid feature introduction in long-stading utility!]
+    # HACK: make sure cls aliased to default Unix version of clear (anaconda3 quirk) and also that it doesn't clear the terminal buffer [n.b., maldito stupid feature introduction in long-stading utility!]
     ## OLD: alias cls='/usr/bin/clear'
     alias cls='/usr/bin/clear -x'
 

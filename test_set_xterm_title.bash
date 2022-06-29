@@ -154,7 +154,7 @@ if [  "$DEFAULT_HOST" != "" ]; then
 	## if (( ("$full_title" != "0") && ("$HOST_NICKNAME" != "") )); then
     	##     HOST="$HOST ($HOST_NICKNAME)"
 	## fi
-	## Note: effing Bash!
+	## Note: maldito Bash!
 	if [ "$full_title" = "1" ]; then if [ "$HOST_NICKNAME" != "" ]; then HOST="$HOST ($HOST_NICKNAME)"; fi; fi
 
 	# Make the settings for the xerm title
