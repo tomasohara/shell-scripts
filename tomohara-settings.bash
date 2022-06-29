@@ -15,3 +15,9 @@ add-python-path $HOME/mezcla-tom
 
 # Enable timestamp preservation during git-update alias operations (n.b., stash pop quirk)
 export PRESERVE_GIT_STASH=1
+
+# Misc bash options
+# make file globs cases insensitve
+# note: also include 'set completion-ignore-case on' in ~/.inputrc (see http://www.cygwin.com/cygwin-ug-net/setup-files.html)
+shopt -s nocaseglob
+
