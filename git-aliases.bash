@@ -284,8 +284,10 @@ function git-add {
 }
 
 
-# git-revert(file, ...): move FILE(s) out of way and revert to version in repo
-function git-revert {
+# git-reset-file(file, ...): move FILE(s) out of way and "revert" to version in repo (i.e., reset)
+# NOTE: via https://www.atlassian.com/git/tutorials/undoing-changes/git-reset
+#     If git revert is a “safe” way to undo changes, you can think of git reset as the dangerous method. 
+function git-reset-file {
     local log;
     log=$(get-temp-log-name "revert");
 
@@ -302,6 +304,11 @@ function git-revert {
     echo "issuing: git checkout -- $*";
     git checkout -- "$@" >> "$log";
 }
+#
+alias git-revert-file='git-reset-file'
+
+# git-revert-commit(commit): effectively undoes COMMIT(s) by issuing new commits
+alias git-revert-commit='git-command revert'
 
 # git-diff: show repo diff
 function git-diff {
