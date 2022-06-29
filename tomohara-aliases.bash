@@ -635,9 +635,9 @@ alias rm='/bin/rm -i $other_file_args'
 alias delete='/bin/rm -i $other_file_args'
 alias del="delete"
 ## OLD: alias delete-force='/bin/rm -f $other_file_args'
-alias disable-forced-deletons='force_echo="echo run enable-forced-deletons or issue: "'
-alias enable-forced-deletons='force_echo=""'
-disable-forced-deletons
+alias disable-forced-deletions='force_echo="echo run enable-forced-deletions or issue: "'
+alias enable-forced-deletions='force_echo=""'
+disable-forced-deletions
 #
 alias delete-force='$force_echo /bin/rm -f $other_file_args'
 #
@@ -648,8 +648,8 @@ alias delete-dir='remove-dir'
 ## OLD
 ## alias remove-dir-force='/bin/rm -rfv'
 ## alias delete-dir-force='remove-dir-force'
-alias remove-dir-force='$echo /bin/rm -rfv'
-alias delete-dir-force='$echo remove-dir-force'
+alias remove-dir-force='$force_echo /bin/rm -rfv'
+alias delete-dir-force='$force_echo remove-dir-force'
 #
 alias copy-readonly='copy-readonly.sh'
 function copy-readonly-spec () {
@@ -1469,6 +1469,7 @@ trace alias/function info
 # note: adds newline after '}' to support paragraph grep
 alias show-functions-aux='typeset -f | perl -pe "s/^}/}\n/;"'
 #
+# show-all-macros(pattern): show aliases or functions matching PATTERN
 # TODO: allow for specifying word-boundary matching
 function show-all-macros () {
     pattern="$*";
@@ -1477,7 +1478,9 @@ function show-all-macros () {
     show-functions-aux | perlgrep -i -para $pattern;
 }
 
+# show-macros(pattern): like show-all-macros, exlcuding leading _ in name
 function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
+# show-variables(): show defined variables
 # TODO: figure out how to exclude env. vars from show-variables output
 function show-variables () { set | $GREP -i '^[a-z].*='; }
 
@@ -1594,7 +1597,7 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 # move-log-files: move "versioned" log files to log-files
 # move-output-files: likewise for output files with version numbers to ./output
 # note: versioned files are those ending in numerics or with numeric affix
-## TODO: use perl-style regex for more precise matching (effing over-arching glob's)
+## TODO: use perl-style regex for more precise matching (maldito over-arching glob's)
 function move-versioned-files {
     local ext_pattern="$1"
     if [ "$ext_pattern" = "" ]; then ext_pattern="{list,log,txt}"; fi
@@ -2479,7 +2482,7 @@ function run-jupyter-notebook () {
     ## echo "$log"
     # Let jupyter initialize
     local delay=5
-    echo "sleeping $delay seconds for log to stabalize (effing jupyter)"
+    echo "sleeping $delay seconds for log to stabilize (maldito jupyter)"
     sleep $delay
     ## OLD
     ## # TODO: resolve problem extracting URL
