@@ -1753,7 +1753,11 @@ function basename-with-dir {
 # 
 function rpm-extract () { rpm2cpio "$1" | cpio --extract --make-directories; }
 #
+# dump-url(URL): dump URL tree to local dir
 alias dump-url='wget --recursive --relative'
+# get-url(URL): outputs URL contents
+alias get-url=curl
+# TODO: rename as simple-dump-url???
 #
 alias gtime='/usr/bin/time'
 
