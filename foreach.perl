@@ -48,7 +48,9 @@ use vars qw/$kill $status $remote $no_files $pause $all $busy_load $trace
 &init_var(*remote, ($kill || $status));
 &debug_out(5, "remote=$remote (\$\#ARGV == 0)=%s\n", ($#ARGV == 0));
 &init_var(*no_files, $remote && ($#ARGV == 0));
-&init_var(*pause, 60);
+## &init_var(*pause, 60);
+&init_var(*pause,               # number of seconds to sleep after issuing command
+	  ($remote ? 60 : 0));
 my($file_required) = (!($kill || $status));
 &init_var(*all, &FALSE);	# use all available host
 &init_var(*busy_load, 0.50);
@@ -232,6 +234,9 @@ foreach $f (@ARGV) {
 	printf STDERR "issuing: %s\n", eval "\"$command_line\"";
 	}
     eval("issue_command(\"$command_line\", &TL_DETAILED);");
+    if ($pause) {
+	&cmd("sleep $pause");
+    }
 }
 
 &exit();
