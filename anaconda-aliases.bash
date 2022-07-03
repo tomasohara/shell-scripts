@@ -65,6 +65,7 @@ alias init-conda=init-conda2
 # Work around for intermittent problems w/ 'conda activate' requiring 'source activate' instead.
 # activation-helper is to handle deactivate as well
 function activation-helper () {
+    ## DEBUG: echo "in activation-helper($@)"
     local command="$1"
     local env="$2"
     local conda_command="conda"
@@ -77,6 +78,7 @@ function activation-helper () {
     ## DEBUG:
     ## echo "Issuing: $conda_command" "$command" "$env"
     $conda_command "$command" $env
+    ## DEBUG: echo "out activation-helper($@)"
 }
 alias conda-activate='activation-helper activate'
 ## OLD: alias conda-deactivate='activation-helper deactivate'
