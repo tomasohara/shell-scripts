@@ -17,10 +17,12 @@
 #...............................................................................
 # Notes:
 #
-# - Credentials can be taken from project specific file (_my-git-credentials-etc.bash:.list)
+# - [Deprecated] Credentials can be taken from project specific file (_my-git-credentials-etc.bash:.list)
 #
 #     git_user=username
 #     git_token=personal_access_token
+#
+#     *** Warning: This is not secure, and should be avoided in multi-user evironments. ***
 #
 # - Alternatively, git caching is used via
 #     ~/.git-credentials
@@ -40,11 +42,17 @@
 #   See https://unix.stackexchange.com/questions/506352/bash-what-does-masking-return-values-mean. Of course, shellcheck should be refined to check for $?, but
 #   that might take a while.
 #
-# - Git updates optionally preserves the timestamps if PRESERVE_GIT_STASH env-var is 1 (TODO: rename to something like PRESERVE_STASH_TIMESTAMPS):
+# - Git updates optionally preserves the timestamps if PRESERVE_GIT_STASH env-var is 1 (TODO: rename to something like PRESERVE_GIT_STASH_TIMESTAMPS):
 #   export PRESERVE_GIT_STASH=1
 #
 # - Most aliases start with git- for sake of tab completion.
 #   TODO: Use a unique suffix (e.g., gitx-).
+#
+# - Environment options:
+#   PRESERVE_GIT_STASH           preserve timestamps of stashed files
+#   UNSAFE_GIT_CREDENTIALS       use old-style credentials file
+#   -- internal
+#      GIT_MESSAGE               message for update (TODO: rework to use optional arg)
 #
 #................................................................................
 # Examples:
@@ -103,18 +111,20 @@ function get-temp-log-name {
 # does a git-pull, and then restores local changes.
 # Note: If PRESERVE_GIT_STASH is 1, then timestamps are preserved.
 function git-update {
-    local git_user
-    local git_token
-    set-global-credentials
-    echo "git_user: $git_user;  git_token: $git_token"
+    local git_user="n/a"
+    local git_token="n/a"
+    if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
+       set-global-credentials
+       echo "git_user: $git_user;  git_token: $git_token"
+    fi
     #
     local log
     log=$(get-temp-log-name "update")
 
     # Optionally preserve timestamps for changed files
     # NOTES:
-    # - The stash-pop causes the timestamps to be changes. The workaround to this quirk
-    #- would be to backup and restore the modified files (e.g., via zip).
+    # - The stash-pop causes the timestamps to be changed. The workaround to this quirk
+    # - backups and restore the modified files via zip (for subdirs and symbolic links).
     local changed_files
     changed_files="$(git-diff-list)"
     if [ "$changed_files" != "" ]; then
@@ -122,7 +132,7 @@ function git-update {
    	    echo "issuing: zip over changed files (for later restore)"
 	    echo "zip -v -y _stash.zip $(git-diff-list)" >> "$log"
 	    zip -v -y _stash.zip "$(git-diff-list)" >> "$log"
-       else
+	else
             # note: zip options: -y retain links; -v verbose
 	    echo "Not zipping changes because PRESERVE_GIT_STASH not 1"
 	fi
@@ -164,15 +174,17 @@ function set-global-credentials {
     local credentials_file="_my-git-credentials-etc.bash.list"
     # Note: check stored credentials
     if [[ -e ~/.git-credentials ]]; then
-        echo "Using git credentials via ~/.git-credentials"
-    fi
-    for dir in . ~; do
-	if [[ ($git_user = "") && (-e "$dir/$credentials_file") ]]; then
-            echo "Sourcing credentials ($dir/$credentials_file)"
-            source "$dir/$credentials_file"
-	    break
-	fi
-    done
+        echo "Using git-based credentials via ~/.git-credentials"
+    else
+	echo "Warning: use deprecated credentials file sourcing"
+	for dir in . ~; do
+	    if [[ ($git_user = "") && (-e "$dir/$credentials_file") ]]; then
+		echo "Sourcing credentials ($dir/$credentials_file)"
+		source "$dir/$credentials_file"
+		break
+	    fi
+	done
+   fi
 }
 
 # git-commit-and-push(file, ...): commits FILE... to local repo, which is then
@@ -183,10 +195,12 @@ function git-commit-and-push {
     local log
     log=$(get-temp-log-name "commit")
     #
-    local git_user
-    local git_token
-    set-global-credentials
-    echo "git_user: $git_user;  git_token: $git_token"
+    local git_user="n/a"
+    local git_token="n/a"
+    if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
+       set-global-credentials
+       echo "git_user: $git_user;  git_token: $git_token"
+    fi
     #
     local dir
     echo "issuing: git add \"$*\""
@@ -213,10 +227,14 @@ function git-commit-and-push {
     pause-for-enter 'About to push: review commit log above!'
     #
     echo "issuing: git push --verbose"
-    git push --verbose <<EOF >> "$log"
+    if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
+       git push --verbose <<EOF >> "$log"
 $git_user
 $git_token
 EOF
+    else
+       git push --verbose >> "$log"
+    fi
     echo >> "$log"
     tail "$log"
 }
