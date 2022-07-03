@@ -1,6 +1,9 @@
 #! /bin/bash
 #
-# Aliases for Git source control (see https://git-scm.com).
+# Aliases for Git source control (see https://git-scm.com). For the most part, these
+# composite operations such as git-update-commit-push. In some cases, the aliases are
+# a thin wrapper around the git command of the same name, such as creating log files
+# named accordingly.
 #
 # Usage example(s):
 #   source git-aliases.bash
@@ -442,12 +445,13 @@ function invoke-alt-checkin { alt-invoke-next-single-checkin "$1"; }
 # Various miscellaneous aliases
 ## TODO: include suffix to better differentiate from regular git-xyz commands
 alias git-template=git-alias-usage
+alias git-misc-template=git-misc-alias-usage
 alias git-root='git rev-parse --show-toplevel'
 alias git-cd-root='cd $(git-root)'
 alias git-invoke-next-single-checkin=invoke-next-single-checkin
 # NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
 # shellcheck disable=SC2139
-alias git-alias-refresh="source ${BASH_SOURCE[0]}"
+alias git-alias-refresh="source ${BASH_SOURCE[0]}"      # bash idiom for current script filename
 alias git-refresh=git-alias-refresh
 alias git-next-checkin='invoke-alt-checkin'
 
@@ -460,9 +464,9 @@ function git-alias-usage () {
 
     # Show start of usage
     echo "Usage examples for git aliases, most of which create log files as follows:"
-    echo "   _git-CMD-MMDDYY-HHMM-NNN.log      # ex: _git-status-07mar22.339.log"
+    echo "   _git-CMD-MMDDYY-HHMM-tmp.log      # ex: _git-status-03jul22-1105-HTV.log"
     echo ""
-    # note: 'clear's -x option doesn't clobber (to work around a disruptive change that feel through maldito cracks!)'
+    # note: 'clear's -x option doesn't clobber history (to work around a disruptive change that feel through maldito cracks!)'
     echo "To update aliases:"
     echo "   source \$TOM_BIN/git-aliases.bash; clear -x; git-alias-usage"
     echo ""
@@ -475,8 +479,24 @@ function git-alias-usage () {
     echo "To check in specified changes:"
     echo "    GIT_MESSAGE='...' git-update-commit-push file..."
     echo ""
+    echo "Miscellaneous alias template (e.g., for deletions):"
+    echo "    git-misc-template"
+    echo ""
+    echo 'Usual check-in:'
+    echo '    git-cd-root; git-update'
+    echo '    git-next-checkin                      # repeat, as needed'
 
-    # Show usage requiring stupid extraenous {} for shellcheck filtering.
+    ## TODO: echo '* invoke git-cd-root automatically!'
+}
+
+# Show miscelleanous tips
+function git-misc-alias-usage() {
+    echo "To move or delete files:"
+    echo "   git mv file..."
+    echo "   GIT_MESSAGE='move' git-update-commit-push file..."
+    echo ""
+
+    # Show usage, including stupid extraenous {} for shellcheck filtering.
     # See https://github.com/koalaman/shellcheck/issues/1295 [Allow directives in trailing comments].
     #
     # Note: disable spurious spellcheck SC2016 (n.b., unfortunately just for next statement, so awkward brace group added)
@@ -493,24 +513,5 @@ function git-alias-usage () {
 	if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
 	echo '    invoke-alt-checkin "'${next_mod_file}'"'
 	echo ''
-	echo 'Usual check-in:'
-	echo '    git-cd-root; git-update'
-	echo '    git-next-checkin                      # repeat, as needed'
-
-	## OLD: echo '*** Fix maldito git quirk causing file timestamp to change (the stash???)!!!'
-	## TODO: echo '* invoke git-cd-root automatically!'
     }
 }
-
-## OLD (Put above so available for use in template)
-## # Various aliases
-## ## TODO: include suffix to better differentiate from regular git-xyz commands
-## alias git-template=git-alias-usage
-## alias git-root='git rev-parse --show-toplevel'
-## alias git-cd-root='cd $(git-root)'
-## alias git-invoke-next-single-checkin=invoke-next-single-checkin
-## # NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
-## # shellcheck disable=SC2139
-## alias git-alias-refresh="source ${BASH_SOURCE[0]}"
-## alias git-refresh=git-alias-refresh
-## alias git-next-checkin='invoke-alt-checkin'
