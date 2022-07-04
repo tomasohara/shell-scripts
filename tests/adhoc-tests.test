@@ -429,3 +429,13 @@ $ get-url fubar.html > fubar.txt; wc -l fubar.html 2>&1
 # \302\242 reset-prompt '$'
 # ^^^^^^^^
 # $ 
+
+#===============================================================================
+# Error checking
+
+$ echo "Error: ..." | check-errors
+1    >>> Error: ... <<<
+
+$ echo "DUH: ..." | check-errors -
+$
+
