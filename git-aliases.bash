@@ -469,7 +469,7 @@ function git-checkin-multiple-template {
 function git-checkin-all-template {
     git-checkin-template-aux
     echo "# To do shamelessly lazy check-in of all modified files:"
-    echo "echo GIT_MESSAGE=\'...\' git-update-commit-push \$(cat \$diff_list_file)"
+    echo "echo GIT_MESSAGE=\'misc. update\' git-update-commit-push \$(cat \$diff_list_file)"
 }
 
 # invoke-next-single-checkin: outputs and runs the next single-checking template
@@ -558,7 +558,7 @@ function git-alias-usage () {
     # Refresh
     git-alias-refresh
 
-    # Show start of usage
+    # Show usage
     echo "Usage examples for git aliases, most of which create log files as follows:"
     echo "   _git-CMD-MMDDYY-HHMM-tmp.log      # ex: _git-status-03jul22-1105-HTV.log"
     echo ""
@@ -578,7 +578,13 @@ function git-alias-usage () {
     echo "Miscellaneous alias template (e.g., for deletions):"
     echo "    git-template-misc"
     echo ""
-    echo 'Usual check-in:'
+    echo "Check-in specific file:"
+    local next_mod_file
+    next_mod_file=$(git-diff-list | head -1)
+    if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
+    echo '    invoke-alt-checkin "'${next_mod_file}'"'
+    echo ''
+    echo 'Usual check-in process:'
     echo '    git-cd-root-alias; git-update-plus'
     echo '    git-next-checkin                      # repeat, as needed'
 
@@ -613,14 +619,8 @@ function git-misc-alias-usage() {
     echo "   git rm old-file"
     echo "   GIT_MESSAGE='deleted' git-update-commit-push old-file"
     echo ""
-    echo "To check in files different from repo:"
-    echo "    git-checkin-single-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
-    # TODO: echo '    git-checkin-single-template | source'
-    echo '    # ALT: git-checkin-multiple-template/git-checkin-all-template (¡cuidado!)'
-    echo '    alt-invoke-next-single-checkin'
-    local next_mod_file
-    next_mod_file=$(git-diff-list | head -1)
-    if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
-    echo '    invoke-alt-checkin "'${next_mod_file}'"'
-    echo ''
+    echo "To check in all tracked with changed:"
+    echo "    git-checkin-multiple-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
+    echo "A lazy-man's alternative, only recommended for single-user repos:"
+    echo "    git-checkin-all-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
 }
