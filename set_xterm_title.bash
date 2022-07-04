@@ -95,7 +95,7 @@
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #  
-## BASIC: echo "in $0: args: $@"
+## BASIC: echo "in $0: args=$@"
 ## HACK: echo "BATCH_MODE=$BATCH_MODE"
 ## USUAL: set -o xtrace
 ## DEBUG: set -o verbose
@@ -258,12 +258,12 @@ fi
 #
 declare PS_symbol
 if [ "$PS_symbol" != "" ]; then
-    ## OLD
-    ## full="$PS_symbol $full"
-    ## icon="$PS_symbol $icon"
-    ## OLD:  if [ "$PS_symbol" != '$' ]; then
-    ## OLD: if [[ ! ($PS_symbol =~ [$＄]) ]]; then
-    if [[ ! ($PS_symbol =~ [$﹩＄💲]) ]]; then
+    ## BAD: if [[ ! ($PS_symbol =~ [$﹩＄💲]) ]]; then
+    if [[ ($PS_symbol =~ ^.*[﹩＄💲].*$) ]]; then
+	## DEBUG:
+	echo "Omitting special dollar-sign PS_symbol ($PS_symbol) from title"
+	true
+    else
 	full="$PS_symbol $full"
 	icon="$PS_symbol $icon"
     fi
