@@ -15,7 +15,7 @@ $ calc_entropy.perl -simple .25 .25 .25 .25
 Entropy
 2.000
 
-#-------------------------------------------------------------------------------
+#...............................................................................
 
 # TODO (encode blank lines, here and below):
 # head ~/bin/tests/calc_entropy.*input* | perl -pe 's/^$/;;/;'
@@ -40,9 +40,7 @@ $ head calc_entropy.*input* | perl -pe 's/^$/<nl>/;'
 ==> calc_entropy.simple.input2 <==
 .47 .42 .06 .05
 
-#-------------------------------------------------------------------------------
-
-#----------
+#...............................................................................
 # Simple input format
 
 $ calc_entropy.perl -simple - < calc_entropy.simple.input
@@ -201,7 +199,23 @@ cd-realdir
 em-aliases
 
 #-------------------------------------------------------------------------------
-# TODO:
+
+# Make sure copy and move trace operations, preserve timestamps, and confirms overwrites or deletions (e.g., a la cp -ivp)
+
+# copy alias traces operation
+$ cd $TMP
+$ touch file1
+$ copy file1 file1-copy
+'file1' -> 'file1-copy'
+
+# copy alias doesn't overwrite files
+$ cd $TMP
+$ touch file1 file2
+$ echo | copy file1 file2
+/bin/cp: overwrite 'file2'? $ 
+
+#===============================================================================
+# TODO: following aliases
 
 move
 
@@ -276,7 +290,7 @@ $ alt-randomize-lines.perl -seed=13 alt-randomize-lines.perl | head -3
     my($options) = "main options = [-seed=real] [-timeseed]";
 # *-*-perl-*-*
 
-================================================================================
+#===============================================================================
 # TODO: make sure aliases sourcing doesn't hang (e.g., due to missing startup-trace alias)
 # See bad-download-and-test-tomohara-aliases.ipynb
 
@@ -286,13 +300,13 @@ $ copy tomohara-aliases.bash $TMP
 $ PATH=fubar BATCH_MODE=1 bash -i -c "source $TMP/tomohara-aliases.bash; echo done" 2> /dev/null
 done
 
---------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # TODO: rename/copy reports unknown files (at least if DEBUG_LEVEL > 2)
 
 $ rename-with-file-date fubar | grep -i warning | wc -l;
 1
 
-================================================================================
+#===============================================================================
 
 # TODO: make sure script alias doesn't mess up the prompt when changed to '$$'
 
@@ -329,7 +343,6 @@ $ python -m easy_install eldar-0.0.7-py3.8.egg
 # command
 $ python-import-path eldar | grep -ic egg
 1
-
 
 #----------
 
@@ -438,4 +451,3 @@ $ echo "Error: ..." | check-errors
 
 $ echo "DUH: ..." | check-errors -
 $
-
