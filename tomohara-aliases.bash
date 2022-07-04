@@ -1129,10 +1129,30 @@ function usage-alt {
 function byte-usage () { output_file="usage.bytes.list"; backup-file $output_file; $NICE du --bytes --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1; $PAGER $output_file; }
 ## TODO: function usage () { du --one-file-system --human-readable 2>&1 | sort -rn >| usage.list 2>&1; $PAGER usage.list; }
 
-# check[all-]-(errors|warnings): check for known errors, with the check-all
-# variant including more patterns and with warnings subsuming errors.
-function check-errors () { (DEBUG_LEVEL=1 check_errors.perl -context=5 "$@") 2>&1 | $PAGER; }
-function check-all-errors () { (DEBUG_LEVEL=1 check_errors.perl -warnings -relaxed -context=5 "$@") 2>&1 | $PAGER; }
+# check-errors(LOG-FILE): in check for known errors in LOG-FILE...
+# also: check-all-errors|warnings: variants including more patterns and with warnings subsuming errors.
+#  HACK: quiet added to disable filename with multiple files
+## OLD:
+## function check-errors () { (DEBUG_LEVEL=1 check_errors.perl -context=5 "$@") 2>&1 | $PAGE
+## function check-all-errors () { (DEBUG_LEVEL=1 check_errors.perl -warnings -relaxed -context=5 "$@") 2>&1 | $PAGER; }
+## TODO: make check-errors check stdin if no files given
+check_errors_script='check_errors.perl'
+# -or-: check_errors_script='PERL_SWITCH_PARSING=1 check_errors.py'
+alias_debug_level=${DEBUG_LEVEL}
+function check-errors () {
+    ## NOTE: gotta hate bash)
+    ## TODO: if [ "$1" = "" ]; then @=("-"); fi
+    ## BAD: QUIET=1 DEBUG_LEVEL=1 CONTEXT=5 $check_errors_script $@ 2>&1 | $PAGER;
+    ## BAD:: local args=($@); if [ ${#args[@]} -eq 0 ]; then args+=("-"); fi;
+    local args=("$@");
+    ## DEBUG: echo "args: ${args[@]}"; echo "len(args): ${#args[@]}"
+    if [ ${#args[@]} -eq 0 ]; then
+	## DEBUG: echo "Addin stdin"
+	args+=("-");
+    fi;
+    QUIET=1 DEBUG_LEVEL=$alias_debug_level CONTEXT=5 $check_errors_script ${args[@]} 2>&1 | $PAGER;
+}
+alias check-all-errors='check-errors -warnings'
 alias check-warnings='echo "*** Error: use check-all-errors instead ***"; echo "    check-all-errors"'
 alias check-all-warnings='check-all-errors -strict'
 #
@@ -1488,6 +1508,7 @@ function show-variables () { set | $GREP -i '^[a-z].*='; }
 alias show-aliases='alias | $PAGER'
 # TODO: see if other aliases were "recursively" defined
 alias show-functions='show-functions-aux | $PAGER'
+function show-functions-proper { show-functions | extract-matches "^(\S+) \(" | $PAGER; }
 # TODO: *** see if way to make bash automatically use less-like pager: too complicated to have to account in specific command aliases/functions
 # TODO??: override 'function' to allow for showing bindings as with 'alias'
 ## function function { if ["$2" = "" ]; then show-functions "$1"; else builtin function "$@"
