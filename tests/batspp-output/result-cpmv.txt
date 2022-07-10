@@ -1,0 +1,11 @@
+#!/usr/bin/env bats
+
+
+# Make executables ./tests/../ visible to PATH
+PATH="/home/aveey/tom-project/shell-scripts/tests/../:$PATH"
+
+# Enable aliases
+shopt -s expand_aliases
+
+# Source files
+source /home/aveey/tom-project/shell-scripts/tests/command-override-cp-mv.ipynb || true
