@@ -649,7 +649,7 @@ alias delete-dir='remove-dir'
 ## alias remove-dir-force='/bin/rm -rfv'
 ## alias delete-dir-force='remove-dir-force'
 alias remove-dir-force='$force_echo /bin/rm -rfv'
-alias delete-dir-force='$force_echo remove-dir-force'
+alias delete-dir-force='remove-dir-force'
 #
 alias copy-readonly='copy-readonly.sh'
 function copy-readonly-spec () {
