@@ -10,6 +10,13 @@
 ## set -o xtrace
 ## echo "in anaconda-aliases.bash"
 
+# Find directory for conda
+# TODO: Use a more standard fallback location
+export ANACONDA_HOME=$(realpath $(dirname $(which conda) 2> /dev/null)/../)
+if [ "$ANACONDA_HOME" = "" ]; then
+    export ANACONDA_HOME=/usr/local/misc/programs/anaconda3
+fi
+
 # add-conda-env-to-xterm-title(): puts conda prompt modifier in xterm title
 # along with python version (e.g., "...; Py3.6:(old_tensorflow)")
 # note: also resets prompt to '$ ' (following change by conda scripts)
@@ -89,8 +96,13 @@ alias add-tensorfow='conda-activate env_tensorflow_gpu'
 alias all-conda-to-pythonpath='export PYTHONPATH=$anaconda3_dir/envs/env_tensorflow_gpu/lib/python3.7/site-packages:$anaconda3_dir/lib/python3.7:$PYTHONPATH'
 # OLD: alias init-jsl-conda='init-conda; export PYTHONPATH="$HOME/john-snow-labs/python:$PYTHONPATH"'
 # note: various conda-xyz aliases for sake of tab completion
+# conda-list-env: show environent names
 alias conda-list-env='conda list env'
-alias conda-list-env-hack='ls ~/.conda/envs'
+#
+## OLD: alias conda-list-env-hack='ls ~/.conda/envs'
+# conda-list-env-hack(): show environent names from typical directories
+function conda-list-env-hack () { ls ~/.conda/envs ${ANACONDA_HOME}/envs 2> /dev/null | grep -v ':$' | sort | echoize; }
+#
 alias conda-env-list='conda env list'
 alias conda-env-name='conda env list | extract_matches.perl "^(\S+ )  " | echoize'
 
@@ -110,7 +122,8 @@ function conda-activate-env {
 	## TODO: use columns
 	## BAD:
 	if [ "$use_hack" != "0" ]; then
-	    conda-list-env-hack | perl -pe 's/^/    /;'
+	    ## OLD: conda-list-env-hack | perl -pe 's/^/    /;'
+	    conda-list-env-hack | perl -pe 's/ /  /;'
 	else
 	    conda-env-name
 	fi
@@ -134,7 +147,8 @@ function conda-deactivate-env {
 # <<< conda initialize <<<
 # !! Contents within this block are managed by 'conda init' !!
 function init-miniconda3 () {
-    local base="/usr/local/misc/programs/anaconda3"
+    ## OLD: local base="/usr/local/misc/programs/anaconda3"
+    local base="$ANACONDA_HOME"
     local conda_setup
     conda_setup="$("$base/bin/conda" 'shell.bash' 'hook' 2> /dev/null)"
     if [ $? -eq 0 ]; then
