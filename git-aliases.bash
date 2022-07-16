@@ -491,6 +491,11 @@ function alt-invoke-next-single-checkin {
         if [ "$mod_file" = "" ]; then
             echo "Warning: unable to infer modified file. Perhaps,"
             echo "    Tha-tha-that's all folks"'!'
+	    echo ""
+	    local divider=$(perl -e 'print("." x 80);')
+	    echo "$divider"
+	    git-status | head
+	    echo "..."
             return;
         fi
     fi
