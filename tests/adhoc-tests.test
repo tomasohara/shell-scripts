@@ -451,3 +451,43 @@ $ echo "Error: ..." | check-errors
 
 $ echo "DUH: ..." | check-errors -
 $
+
+#===============================================================================
+# pylint support
+
+¢ python-lint template.py | grep -c "too long"
+0
+
+¢ python-lint-work template.py | grep -c "too long"
+2
+
+# note: make sure line-continuation filtering support works
+
+## ¢ pylint _it.py | cat
+## ************* Module _it
+## _it.py:4:9: C0326: Exactly one space required after assignment
+## SKIP_ADS =  (IS_GI_JOB_SEARCH or system.getenv_bool("SKIP_ADS", False))
+##          ^ (bad-whitespace)
+## 
+## ------------------------------------------------------------------
+## Your code has been rated at 6.67/10 (previous run: 6.67/10, +0.00)
+## 
+
+
+$ cat >_it.py <<END_IT
+"""it"""
+import system
+IS_GI_JOB_SEARCH = False
+SKIP_ADS =  (IS_GI_JOB_SEARCH or system.getenv_bool("SKIP_ADS", False))
+END_IT
+
+## BAD:
+## ¢ python-lint _it.py | cat
+## ************* Module _it
+## SKIP_ADS =  (IS_GI_JOB_SEARCH or system.getenv_bool("SKIP_ADS", False))
+
+¢ python-lint _it.py | cat
+************* Module _it
+
+
+
