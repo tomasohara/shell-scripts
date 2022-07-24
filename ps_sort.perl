@@ -49,7 +49,7 @@ BEGIN {
 use strict;
 no strict "refs";		# to allow for old-style references to arrays (TODO: use #xyz_ref = \@array)
 use vars qw/$by $xyz $ps_options $cut_options $num_times $LINES $COLUMNS $max_count $delay $line_len $testing $justuser $USER $username/;
-use vars qw/$batch $full $once $lines $columns/;
+use vars qw/$batch $full $once $lines $columns $alpha/;
 
 # Check the command-line options
 &init_var(*by, "cpu");
@@ -81,6 +81,7 @@ $columns = ($full ? &MAXINT : $COLUMNS) if ! defined($columns);
 &init_var(*username,		# just show this user
 	  ($justuser ? $USER : ""));
 &init_var(*batch, &FALSE);      # batch mode (don't poll console for early quit)
+&init_var(*alpha, &FALSE);      # sort alphabetically (i.e., lexicographic)
 
 use vars qw/@uid @xyz @line @line_index @user @pid @cpu @mem @sz @rss @tt @stat @f @s @ppid @pri @ni @stime @time @cmd/;
 use vars qw/@vsz @command @tty @start/;
@@ -98,8 +99,9 @@ local(*uid) = *user;
 # Show a usage statement if no arguments given
 # NOTE: By convention - is used when no arguments are required
 if (!defined($ARGV[0])) {
-    my($options) = "main options = [-by=FIELD] [-username=user] [-num_times=N] [-max_count=N] [-delay=B] [-justuser]";
-    $options .= " [-batch] [-once] [-full]";
+    my($options) = "main options = [-by=FIELD] [-username=user] [-num_times=N] [-max_count=N] [-delay=N] [-justuser]";
+    # TODO: show defaults
+    $options .= " [-batch] [-once] [-full] [-alpha]";
     if ($is_solaris) {
 	$options .= "\nfield = [f|s|uid|pid|ppid|c|pri|ni|addr|sz|wchan|stime|tty|time|cmd]";
     }
@@ -261,7 +263,8 @@ sub by_xyz {
     # Otherwise, uses ascending sort.
     # TODO: Add option to override.
     my($comparison) = 0;
-    if (&is_numeric($value_b) && &is_numeric($value_a)) {
+    ## OLD: if (&is_numeric($value_b) && &is_numeric($value_a)) {
+    if ((! $alpha) && (&is_numeric($value_b) && &is_numeric($value_a))) {
 	&debug_print(&TL_MOST_VERBOSE, "Using (descending) numeric sort\n");
 	$comparison = ($value_b <=> $value_a);
     }

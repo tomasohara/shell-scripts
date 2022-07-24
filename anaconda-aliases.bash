@@ -10,10 +10,18 @@
 ## set -o xtrace
 ## echo "in anaconda-aliases.bash"
 
+# Find directory for conda
+# TODO: Use a more standard fallback location
+export ANACONDA_HOME=$(realpath $(dirname $(which conda) 2> /dev/null)/../)
+if [ "$ANACONDA_HOME" = "" ]; then
+    export ANACONDA_HOME=/usr/local/misc/programs/anaconda3
+fi
+
 # add-conda-env-to-xterm-title(): puts conda prompt modifier in xterm title
 # along with python version (e.g., "...; Py3.6:(old_tensorflow)")
 # note: also resets prompt to '$ ' (following change by conda scripts)
 function add-conda-env-to-xterm-title {
+    ## DEBUG: echo "in add-conda-env-to-xterm-title"
     export XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d.\d)'):$CONDA_PROMPT_MODIFIER"
 
     reset-prompt
@@ -50,7 +58,7 @@ function init-condaN() {
     ## OLD: reset-prompt
     add-conda-env-to-xterm-title
 
-    # HACK: make sure cls aliased to default Unix version of clear (anaconda3 quirk) and also that it doesn't clear the terminal buffer [n.b., effing stupid feature introduction in long-stading utility!]
+    # HACK: make sure cls aliased to default Unix version of clear (anaconda3 quirk) and also that it doesn't clear the terminal buffer [n.b., maldito stupid feature introduction in long-stading utility!]
     ## OLD: alias cls='/usr/bin/clear'
     alias cls='/usr/bin/clear -x'
 
@@ -64,41 +72,61 @@ alias init-conda=init-conda2
 # Work around for intermittent problems w/ 'conda activate' requiring 'source activate' instead.
 # activation-helper is to handle deactivate as well
 function activation-helper () {
+    ## DEBUG: echo "in activation-helper($@)"
     local command="$1"
     local env="$2"
     local conda_command="conda"
     # Note: need to use conda's alias not the script returned by which
-    local conda_path=$(/usr/bin/which $conda) 2> /dev/null
+    ## TODO: local conda_path=$(/usr/bin/which conda 2> /dev/null)
+    local conda_path=""    
     if [ "$conda_path" = "" ]; then
 	conda_command="source"
     fi
     ## DEBUG:
     ## echo "Issuing: $conda_command" "$command" "$env"
     $conda_command "$command" $env
+    ## DEBUG: echo "out activation-helper($@)"
 }
 alias conda-activate='activation-helper activate'
-alias conda-deactivate='activation-helper deactivate'
+## OLD: alias conda-deactivate='activation-helper deactivate'
+alias conda-deactivate='source deactivate'
 #
 ## OLD: alias add-tensorfow='conda activate env_tensorflow_gpu'
 alias add-tensorfow='conda-activate env_tensorflow_gpu'
 alias all-conda-to-pythonpath='export PYTHONPATH=$anaconda3_dir/envs/env_tensorflow_gpu/lib/python3.7/site-packages:$anaconda3_dir/lib/python3.7:$PYTHONPATH'
 # OLD: alias init-jsl-conda='init-conda; export PYTHONPATH="$HOME/john-snow-labs/python:$PYTHONPATH"'
 # note: various conda-xyz aliases for sake of tab completion
+# conda-list-env: show environent names
 alias conda-list-env='conda list env'
-alias conda-list-env-hack='ls ~/.conda/envs'
+#
+## OLD: alias conda-list-env-hack='ls ~/.conda/envs'
+# conda-list-env-hack(): show environent names from typical directories
+function conda-list-env-hack () { ls ~/.conda/envs ${ANACONDA_HOME}/envs 2> /dev/null | grep -v ':$' | sort | echoize; }
+#
 alias conda-env-list='conda env list'
 alias conda-env-name='conda env list | extract_matches.perl "^(\S+ )  " | echoize'
+
+# conda-activate-env(name, [use_hack=0]): Activate NAME or show list of environment if empty or "-"
+# Note: 'conda env list' is slow, so USE_HACK resorts to 'ls ~/.conda/envs'
 ## OLD: alias conda-activate-env='source activate'
 ## OLD: function conda-activate-env { source activate "$1"; add-conda-env-to-xterm-title; }
 function conda-activate-env {
     ## DEBUG: echo "in conda-activate-env $*"
     local env="$1"
-    if [ "$env" = "" ]; then
+    local use_hack="${2:-0}"
+    ## if [ "$env" = "" ]; then
+    if [[ ("$env" = "") || ("$env" = "-") ]]; then
 	echo "Usage: conda-activate-env"
 	echo ""
 	echo "Note: available environments:"
 	## TODO: use columns
-	conda-list-env-hack | perl -pe 's/^/    /;'
+	## BAD:
+	if [ "$use_hack" != "0" ]; then
+	    ## OLD: conda-list-env-hack | perl -pe 's/^/    /;'
+	    conda-list-env-hack | perl -pe 's/ /  /;'
+	else
+	    conda-env-name
+	fi
 	echo ""
     fi
     ## OLD: source activate "$env";
@@ -106,6 +134,8 @@ function conda-activate-env {
     add-conda-env-to-xterm-title;
 }
 ## OLD: alias conda-deactivate-env='source deactivate'
+function conda-activate-env-hack { conda-activate-env "$1" "1"; }
+#
 ## OLD: function conda-deactivate-env { source deactivate "$1"; add-conda-env-to-xterm-title; }
 ## OLD: function conda-deactivate-env { conda deactivate "$1"; add-conda-env-to-xterm-title; }
 function conda-deactivate-env {
@@ -117,7 +147,8 @@ function conda-deactivate-env {
 # <<< conda initialize <<<
 # !! Contents within this block are managed by 'conda init' !!
 function init-miniconda3 () {
-    local base="/usr/local/misc/programs/anaconda3"
+    ## OLD: local base="/usr/local/misc/programs/anaconda3"
+    local base="$ANACONDA_HOME"
     local conda_setup
     conda_setup="$("$base/bin/conda" 'shell.bash' 'hook' 2> /dev/null)"
     if [ $? -eq 0 ]; then

@@ -35,11 +35,11 @@ BEGIN {
 # for command-line arguments (see init_var's in &init).
 use strict;
 use vars qw/$warning $warnings $skip_warnings $context $no_asterisks $skip_ruby_lib $ruby/;
-use vars qw/$relaxed $strict/;
+use vars qw/$relaxed $strict $quiet/;
 
 if (!defined($ARGV[0])) {
     my $options = "options = [-warnings] [-context=N] [-no_astericks] [-skip_ruby_lib]";
-    $options .= " [-relaxed | -strict]";
+    $options .= " [-relaxed | -strict] [-verbose] [-quiet]";
     my $example = "ex: $script_name whatever\n";
     my $note = "Notes:\n";
     $note .= "- The default context is 1\n";
@@ -60,7 +60,8 @@ my $asterisks = (! $no_asterisks);
 &init_var(*ruby, &FALSE);	   	# alias for -skip_ruby_lib
 &init_var(*skip_ruby_lib, $ruby);	# skip Ruby library related errors
 &init_var(*relaxed, &FALSE);            # relaxed for special cases
-&init_var(*strict, ! $relaxed);         # alias for relaxed=0
+&init_var(*strict, ! $relaxed);         # alias for relaxed=0 
+&init_var(*quiet, &FALSE);              # just output errors proper (e.g., no filenames)
 
 my $NULL = chr(0);			# null character ('\0')
 my(@before_context);			# prior context
@@ -120,6 +121,8 @@ while (<>) {
 	   || /command not found/
 	   || /^sh: /
            || /\[Errno \d+\]/
+	   || /Operation not permitted/
+	   || /Command exited with non-zero status/
 
 	   # Perl interpretation errors
 	   # TODO: Add more examples like not-a-number, which might not be apparent.
@@ -135,12 +138,17 @@ while (<>) {
 	   || /Unmatched .* in regex/
 	   || /at .*\.(perl|prl|pl|pm) line \d+/	# catch-all for other perl errors
 
-	   # Build errors
+	   # Build errors (also cp, etc.)
 	   || /(Make|Dependency) .* failed/
+	   || /cannot create/
 	   || /cannot open/
 	   || /cannot find/
+	   || /cannot overwrite/
 	   || /:( fatal)? error /
 
+	   # Git errors (WTH: can't modern tools say 'error'???)
+	   || /^fatal:/
+	   
 	   # Java errors
 	   || /^Exception\b/
 
@@ -233,7 +241,7 @@ print "\n" if ($verbose);
 # show_current_file_info(): display name of current file (and warning inclusion status)
 #
 sub show_current_file_info {
-    if ($current_file ne "") {
+    if (($current_file ne "") && ($quiet == &FALSE)) {
 	if ($verbose) {
 	    print "========================================================================\n";
 	    printf "Errors%s\n\n", ($skip_warnings ? "" : " and Warnings");

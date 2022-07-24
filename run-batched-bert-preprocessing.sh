@@ -1,23 +1,23 @@
 #! /bin/bash
 #
-# Adhoc script for preprocessing text and sending the result thorugh BERT (or ALBERT) for
+# Adhoc script for preprocessing text and running the result through BERT (or ALBERT) for
 # pretraining. This works around extreme memory limitations of the BERT preprocessing scripts,
 # namely gobbling up most of the available memory.
 #
-# notes:
+# Notes:
 # - This script is far from general purpose; however, it should be a useful starting point
 #   (e.g., rather than you having to creating a similar script from scratch).
 # - My utility scripts need to be installed locally:
 #      https://github.com/tomasohara/misc-utility
-#   Put them in /usr/local/misc/tomohara-scripts
+#   Make sure they are in the shell's path or put them in following directory:
+#      /usr/local/misc/programs/bash/shell-scripts
 # - There are a few other directories assumed under /usr/local/misc:
 #   programs/python/bert: BERT distribution
 #   data/deep-learning/bert: BERT models
-# - See ~/python/run_batched_pretraining.py for script that receives the result
-#   and then invokes the GPU pretraining.
-# - Preprocesses text in batches of 25k lines for subsequent pretraining on GPU server.
+# - Preprocesses text in batches (e.g., 25k lines) and invokes BERT pretraining.
 # - The 100k size was chosen to allow for good throughput (compared to original 10k sample) while
 #   allowing for better restarts compared to 500k (e.g., in case GPU server rebooted mid-stream).
+# - By default, pretraining is done from scratch (unless INIT_CHECKPOINT set, see below).
 #
 #--------------------------------------------------------------------------------
 # Sample startup sequence:
@@ -128,8 +128,9 @@ printenv
 
 # Initialize
 if [ "$PROJECT_DIR" = "" ]; then PROJECT_DIR="/usr/local/misc"; fi
-export PATH="$PATH:$PROJECT_DIR/scripts/tomohara-scripts"
+export PATH="$PATH:$PROJECT_DIR/programs/bash/shell-scripts"
 TEMP_DIR="$PROJECT_DIR/temp"
+mkdir -p "$TEMP_DIR"
 #
 if [ "$CODE_DIR" = "" ]; then CODE_DIR="$PROJECT_DIR"/programs/python/bert; fi
 if [ "$DATA_DIR" = "" ]; then DATA_DIR="$PROJECT_DIR"/data/deep-learning; fi
@@ -146,6 +147,7 @@ if [ "$PYTHON" = "" ]; then PYTHON="$NICE $TIME_CMD python -u"; fi
 #
 # TODO: conda-activate-env bert-tensorflow-gpu
 if [ "$OUTPUT_DIR" = "" ]; then OUTPUT_DIR="."; fi
+mkdir -p "$OUTPUT_DIR"
 
 # Derive options not specified
 if [ "$vocab_file" = "" ]; then
@@ -206,6 +208,9 @@ if [ "$INIT_CHECKPOINT" = "" ]; then
     	    let NUM_TRAIN_STEPS=($last_num_steps + $NUM_TRAIN_INCRS)
         fi
     fi
+else
+    # TODO: make FYI
+    echo "Warning: Training from scratch (i.e., no initial checkpoint)"
 fi
 #
 if [ "$SAVE_CHECKPOINTS_STEPS" = "" ]; then SAVE_CHECKPOINTS_STEPS=1000; fi
@@ -245,10 +250,12 @@ while (( $offset < $total_lines )); do
     if [ "$TENSORBOARD_LOG_DIR" != "" ]; then misc_options="$misc_options --tensorboard_log_dir '$TENSORBOARD_LOG_DIR'"; fi
     #
     $PYTHON "$CODE_DIR"/run_pretraining.py --do_train=true --input_file "$output_base".bert-pp.list --output_dir="$OUTPUT_DIR" --${bert}_config_file=$BERT_CONFIG_FILE --num_train_steps=$NUM_TRAIN_STEPS --save_checkpoints_steps=$SAVE_CHECKPOINTS_STEPS --keep_checkpoint_max=$KEEP_CHECKPOINT_MAX --train_batch_size=$TRAIN_BATCH_SIZE --max_seq_length=$MAX_SEQ_LENGTH --learning_rate=$LEARNING_RATE $init_checkpoint_arg $misc_options > "$output_base".pre-train.log 2>&1
-    # TODO:
-    ## Send to GPU server (n.b., need to run ssh-agent & then ssh-add beforehand to give passphrase)
-    ## scp "$output_base".bert-pp.list  $gpu_server:/temp
-
+    out_of_memory=$(grep "Resource exhausted: OOM" "$output_base".pre-train.log)
+    if [ "$out_of_memory" != "" ]; then
+	echo "Error: insufficient GPU memory"
+	break
+    fi
+    
     # TODO: Make pre-training output read-only (excluding temporary directories)
     # Note: this is so that the checkpoints are not deleted in next increment
     ## chmod -w "$OUTPUT_DIR"/*ckpt*{data,index,meta}*

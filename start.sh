@@ -144,6 +144,7 @@ case "$lower_file" in
     *.doc | *.docx | *.pptx | *.odp | *.odt | *.odg | *.xls | *.xlsx | *.csv) invoke libreoffice "$@" & ;;
 
     # HTML files and XML files
+    # TODO: convert filename arguments to use file:// prefix (to distinguish from URL's)
     *.html | *.xml) invoke firefox "$@" & ;;
 
     # Text files

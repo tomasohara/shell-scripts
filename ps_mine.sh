@@ -30,6 +30,8 @@
 #
 # TODO:
 # - Have option to duplicate headers at end.
+# - *** Optionally make the filters case insensitive.
+# - ** Cleanup source (remove comments flagged with OLD).
 #
 
 

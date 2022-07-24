@@ -87,7 +87,7 @@ if ($#ARGV < 0) {
 ## OLD: &init_var(*pretty, $brief);	# pretty print the entry
 ## OLD: &init_var(*maxlen, 512);	# maximum line length for translation output
 &init_var(*full, &FALSE);       # show full line (i.e., no truncation at $maxlen)
-&init_var(*multi, &FALSE);      # show output on multine lines
+&init_var(*multi, &FALSE);      # show output on multiple lines
 &init_var(*pretty, $multi);	# pretty print the entry
 &init_var(*maxlen, ($multi ? 1024 : 512));  # maximum length for translation output
 # Note: Special processing for prompt to support usage under Emacs shell
@@ -158,7 +158,7 @@ while (<>) {
     my($pretty_print) = $pretty;
     my($multi_line) = $multi;
     while ($_ =~ /^[\+@&\*]/) {
-	if ($_ =~ /^\+/) {      # mnemonc: longer length
+	if ($_ =~ /^\+/) {      # mnemonic: longer length
 	    $_ = $';		# ' (stupid emacs)
 	    $full_line = &TRUE;
 	}
