@@ -19,6 +19,7 @@
 #     $(command ...)               same as `command ...`
 #     ${var:-default}              use $var or "default"
 #     true                         no-op
+#     $#                           number of positional arguments
 # TODO:
 #  - variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
 #     note: EXPR is C style;
@@ -30,6 +31,7 @@
 #         ${list[1]}                second element
 #         ${list[*]}                all elements
 #         list+=value               append value
+#   - conditional expression
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
