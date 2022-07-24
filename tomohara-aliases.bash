@@ -1134,14 +1134,17 @@ function byte-usage () { output_file="usage.bytes.list"; backup-file $output_fil
 # HACK: quiet added to disable filename with multiple files
 function check-errors-aux { check_errors.perl "$@"; }
 ## # -or-:
-## function check-errors-aux { PERL_SWITCH_PARSING=1 check_errors.py -"$@"; };
+## function check-errors-aux { PERL_SWITCH_PARSING=1 check_errors.py "$@"; };
 # note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
 ALIAS_DEBUG_LEVEL=${DEBUG_LEVEL}
 function check-errors () {
-    ## NOTE: gotta hate bash!
+    ## NOTE: gotta dislike bash!
     local args=("$@");
     ## DEBUG: echo "args: ${args[@]}"; echo "len(args): ${#args[@]}"
-    if [ ${#args[@]} -eq 0 ]; then
+    ## OLD: if [ (${#args[@]} -eq 0) ]; then
+    ## Add - if no args or last arg not file (i.e., not -)
+    ## TEST: if [[ ($# -eq 0) || (! ${args[$# - 1]} =~ ^[^-]) ]]; then
+    if [[ ($# -eq 0) || (${args[$# - 1]} != "-") ]]; then
 	## DEBUG: echo "Adding stdin"
 	args+=("-");
     fi;
@@ -2357,6 +2360,7 @@ function python-lint-full() {
     root=$(hg root 2> /dev/null);
     ## TODO: --persistent=n (to avoid caching)
     PYTHONPATH="$root:.:$PYTHONPATH" $NICE pylint "$@" | perl -00 -ne 'while (/(\n\S+:\s*\d+[^\n]+)\n( +)/) { s/(\n\S+:\s*\d+[^\n]+)\n( +)/$1\r$2/mg; } print("$_");' 2>&1 | $PAGER;
+    ## TODO1: explain and fix the above while loop (e.g., line-continuation support)!
 }
 # Notes:
 # - filters out context in addition to warning proper, as in following:
