@@ -1131,26 +1131,21 @@ function byte-usage () { output_file="usage.bytes.list"; backup-file $output_fil
 
 # check-errors(LOG-FILE): in check for known errors in LOG-FILE...
 # also: check-all-errors|warnings: variants including more patterns and with warnings subsuming errors.
-#  HACK: quiet added to disable filename with multiple files
-## OLD:
-## function check-errors () { (DEBUG_LEVEL=1 check_errors.perl -context=5 "$@") 2>&1 | $PAGE
-## function check-all-errors () { (DEBUG_LEVEL=1 check_errors.perl -warnings -relaxed -context=5 "$@") 2>&1 | $PAGER; }
-## TODO: make check-errors check stdin if no files given
-check_errors_script='check_errors.perl'
-# -or-: check_errors_script='PERL_SWITCH_PARSING=1 check_errors.py'
-alias_debug_level=${DEBUG_LEVEL}
+# HACK: quiet added to disable filename with multiple files
+function check-errors-aux { check_errors.perl "$@"; }
+## # -or-:
+## function check-errors-aux { PERL_SWITCH_PARSING=1 check_errors.py -"$@"; };
+# note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
+ALIAS_DEBUG_LEVEL=${DEBUG_LEVEL}
 function check-errors () {
-    ## NOTE: gotta hate bash)
-    ## TODO: if [ "$1" = "" ]; then @=("-"); fi
-    ## BAD: QUIET=1 DEBUG_LEVEL=1 CONTEXT=5 $check_errors_script $@ 2>&1 | $PAGER;
-    ## BAD:: local args=($@); if [ ${#args[@]} -eq 0 ]; then args+=("-"); fi;
+    ## NOTE: gotta hate bash!
     local args=("$@");
     ## DEBUG: echo "args: ${args[@]}"; echo "len(args): ${#args[@]}"
     if [ ${#args[@]} -eq 0 ]; then
-	## DEBUG: echo "Addin stdin"
+	## DEBUG: echo "Adding stdin"
 	args+=("-");
     fi;
-    QUIET=1 DEBUG_LEVEL=$alias_debug_level CONTEXT=5 $check_errors_script ${args[@]} 2>&1 | $PAGER;
+    (QUIET=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL CONTEXT=5 check-errors-aux ${args[@]}) 2>&1 | $PAGER;
 }
 alias check-all-errors='check-errors -warnings'
 alias check-warnings='echo "*** Error: use check-all-errors instead ***"; echo "    check-all-errors"'
