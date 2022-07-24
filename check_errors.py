@@ -1,12 +1,18 @@
 #! /usr/bin/env python
 #
-# check_errors.perl: Scan the error log for errors, warnings and other
+# check_errors.py: Scan the error log for errors, warnings and other
 # suspicious results. This prints the offending line bracketted by >>>
 # and <<< along with N lines before and after to provide context.
+#
+# NOTE:
+# - To facilitate testing this and other scripts converted from Perl,
+#   the environment variable PERL_SWITCH_PARSING can be used (see main.py).
 #
 # TODO:
 # - ** Have option to disable line number
 # - * Change 'error' in filename test as warning.
+# - * Fix comments to reflect Python option spec. (e.g., -opt => --opt).
+# - Update overview comments to reflect current version.
 # - Don't reproduce lines in case of overlapping context regions.
 # - Have option to make search case-insensitive.
 # - Add option to show which case is being violated (since context display can be confusing, especially when control characters occur in context [as with output form linux script command]).
@@ -25,7 +31,7 @@ ex: check_errors.py whatever\n
 Notes:\n
 - The default context is 1\n
 - Warnings are skipped by default\n
-- Use -no_astericks if input uses ***'s outside of error contexts\n
+- Use -no_asterisks if input uses ***'s outside of error contexts\n
 Use -relaxed to exclude special cases (e.g., xyz='error')\n
 """
 
@@ -60,7 +66,7 @@ class CheckErrors(Main):
     # class-level member variables for arguments (avoids need for class constructor)
     show_warnings = False
     context       = 0
-    astericks     = False
+    asterisks     = False
     skip_ruby_lib = False
     strict        = False
     verbose       = False
@@ -81,10 +87,11 @@ class CheckErrors(Main):
         skip_warnings      = self.has_parsed_option(SKIP_WARNINGS) or not warnings
         self.show_warnings = not skip_warnings
         self.context       = self.get_parsed_option(CONTEXT, 3)
-        self.astericks     = not self.has_parsed_option(NO_ASTERISKS)
+        self.asterisks     = not self.has_parsed_option(NO_ASTERISKS)
         self.skip_ruby_lib = self.has_parsed_option(RUBY) or self.has_parsed_option(SKIP_RUBY_LIB)
         self.strict        = self.has_parsed_option(STRICT) or not self.has_parsed_option(RELAXED)
         self.verbose       = self.has_parsed_option(VERBOSE)
+        debug.trace_object(5, self, label="Script instance")
 
 
     def process_line(self, line):
@@ -113,6 +120,7 @@ class CheckErrors(Main):
         # TODO: rework error in line test to omit files
         # NOTE: It can be easier to add special-case rules rather than devise a general regex;
         # ex: 'error' occuring within a line even at word boundaries can be too broad.
+        # TODO1: rework so that individual regex's are used as in Perl version
         known_errors            = ('^(ERROR|Error)\b'    '|'
                                    'No space'            '|'
                                    'Segmentation fault'  '|'
@@ -206,11 +214,11 @@ class CheckErrors(Main):
                 re.search(': warning\b', line) or                                             # Ruby warnings
                 re.search('^bash: ', line) or                                                 # ex: "bash: [: : unary operator expected"
                 re.search('Traceback|\\S+Error', line) or                                     # Python exceptions (caught)
-                (self.astericks and re.search('\\*\\*\\*', line)))):
+                (self.asterisks and re.search('\\*\\*\\*', line)))):
             has_error = True
 
 
-        # Filter certain case
+        # Filter certain cases (e.g., posthoc fixup)
         if has_error and self.skip_ruby_lib and re.search('\\/usr\\/lib\\/ruby', line):
             debug.trace(debug.DETAILED, f'Skipping ruby library error at line ({line})')
             has_error = False
