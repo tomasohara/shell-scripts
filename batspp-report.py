@@ -11,6 +11,7 @@ import os
 
 TEST_PATH = r"./tests/"
 REPORT_PATH = f"{TEST_PATH}reports/"
+#REPORT_PATH = f"./tests/reports/"
 TEST_EXTENSION = (".batspp", ".ipynb")
 
 files_TEST_PATH = os.listdir(TEST_PATH)
@@ -21,7 +22,7 @@ for file in files_TEST_PATH:
     is_batspp = file.endswith(TEST_EXTENSION) 
     
     if is_batspp:
-        os.system(f"batspp {file} > {REPORT_PATH}/rpt-{file}.txt")
+        os.system(f"batspp {file} --output {REPORT_PATH}/rpt-{file}.txt")
     
 
 

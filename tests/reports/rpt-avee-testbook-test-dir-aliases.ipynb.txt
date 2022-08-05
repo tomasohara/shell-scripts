@@ -1,0 +1,9 @@
+#!/usr/bin/env bats
+
+
+# Make executables ./tests/../ visible to PATH
+PATH="/home/aveey/tom-project/shell-scripts/../:$PATH"
+
+# Source files
+shopt -s expand_aliases
+source /home/aveey/tom-project/shell-scripts/avee-testbook-test-dir-aliases.ipynb || true

@@ -1,5 +1,0 @@
-1..1
-not ok 1 setup_file failed
-# (in test file /tmp/main-yr0fmwyg, line 8)
-#   `shopt -s expand_aliases' failed with status 0
-# /tmp/main-yr0fmwyg: line 25: syntax error near unexpected token `e.g.,'

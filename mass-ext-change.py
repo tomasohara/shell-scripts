@@ -14,18 +14,19 @@ TEST_DIR= r"./tests"
 IPYNB_EXCLUSIVE_AREA  = "ipynb-area"
 BATSPP_REPORT_DIR = f"{TEST_DIR}/{IPYNB_EXCLUSIVE_AREA}"
 EXE_REPORT_DIR = f"{TEST_DIR}/reports"
+IPYNB_EXT_PATH = f"{TEST_DIR}/*.ipynb"
 
 files = os.listdir(TEST_DIR)
+ipynb_files = glob.glob(IPYNB_EXT_PATH)
 
 for file in files:
-        file_name_ipynb = str(file)
-        file_name_batspp = file_name_ipynb.replace(".ipynb", ".batspp")
-        if ".ipynb" in file_name_ipynb:
-            
-            os.system(f"mv {TEST_DIR}/{file_name_ipynb} {TEST_DIR}/{file_name_batspp}")
-            os.system(f"batspp {TEST_DIR}/{file_name_batspp} --output {BATSPP_REPORT_DIR}/bpp_report-{file_name_batspp}.txt > {EXE_REPORT_DIR}/exe_report-{file_name_batspp}.txt")
-            os.system(f"mv {TEST_DIR}/{file_name_batspp} {TEST_DIR}/{file_name_ipynb}")
+        file_name = str(file)
+        file_name_ipynb = file_name.replace(".batspp", ".ipynb")
+        if ".batspp" in file_name:
+            print (file_name)
+            os.system(f"mv {TEST_DIR}/{file_name} {TEST_DIR}/{file_name_ipynb}")
 
+    
 ## OLD CODE
 # #! /usr/bin/env python
 # #

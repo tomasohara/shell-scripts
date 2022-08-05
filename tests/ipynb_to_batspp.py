@@ -15,7 +15,7 @@ def batspp_rename():
 
 # START OF MAIN #
 if ".ipynb" in file_in_ipynb:
-    batspp_rename();
+    batspp_rename()
 else:
     print (f"The selected file is not an IPython file.\nNo changes were made to the file: {file_in_ipynb}")    
 # END OF MAIN #
