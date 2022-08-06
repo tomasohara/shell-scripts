@@ -7,7 +7,6 @@
 
 # Standard modules
 import os
-import glob
 
 # STEP 1 - Converting Jupyter files to batspp test files
 TEST_DIR= r"./tests"
