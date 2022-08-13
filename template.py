@@ -1,8 +1,8 @@
 #! /usr/bin/env python
+## TODO: handle case when env installed elsehere (e.g., maldito mac)
+## #! env python
 # 
 # TODO what the script does (detailed)
-#
-# The software is Open Source, licensed under the GNU Lesser General Public Version 3 (LGPLv3). See LICENSE.txt in repository.
 #
 ## TODO: see example/template.py for simpler version suitable for cut-n-paste from online examples
 #
@@ -23,6 +23,10 @@ from mezcla import system
 ## TODO:
 ## from mezcla.my_regex import my_re
 ## from mezcla import glue_helpers as gh
+##
+## Optional:
+## # Increase trace level for regex searching, etc. (e.g., from 6 to 7)
+## my_re.TRACE_LEVEL = debug.QUITE_VERBOSE
 
 ## TODO: Constants for switches omitting leading dashes (e.g., DEBUG_MODE = "debug-mode")
 ## Note: Run following in Emacs to interactively replace TODO_ARG with option label
@@ -30,7 +34,7 @@ from mezcla import system
 ## where M-: is the emacs keystroke short-cut for eval-expression.
 TODO_ARG = "TODO-arg"
 ## ALT_TODO_ARG = "alt-todo-arg"
-## TODO_FILENAME = "TODO-filename"
+## TODO_FILENAME = "TODO_filename"
 
 ## TODO:
 ## # Environment options
