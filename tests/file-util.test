@@ -1,0 +1,9 @@
+# Test for file-utility aliases
+
+#-------------------------------------------------------------------------------
+# Wed 27 Jul 22
+
+# TODO: fix following
+$ move-adhoc-files 
+/bin/mv: missing destination file operand after 'log-files'
+Try '/bin/mv --help' for more information.
