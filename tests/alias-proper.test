@@ -1,0 +1,27 @@
+# Tests for aliases proper
+#
+# Use to support planned conversion of all aliases to functions via
+# utility given maldito Bash's lack of first class aliases
+
+¢ echo fu='echo $FU'
+fu=echo $FU
+¢ alias fu='echo $FU'
+¢ fu
+
+¢ FU=bar fu
+
+¢ function bar { echo $f; }
+¢ function bar { echo $BAR; }
+¢ bar
+
+¢ BAR=bar bar
+bar
+
+## TODO: convert-alias-to-function
+
+$ alias-to-function fu
+
+$ alias fu
+
+$ FU=bar fu
+bar

@@ -1,0 +1,48 @@
+# Tests for various perl scripts
+
+# paste.perl: pasting columns with row exclusion
+
+# Setup
+$ echo $'ABC\nJKL' > $TMP/_col1.list
+$ echo $'DEF\nMNO' > $TMP/_col2.list
+$ echo $'GHI\nPQR' > $TMP/_col3.list
+
+$ paste.perl -cols="1,2,3" $TMP/_col*.list
+ABC	DEF	GHI
+JKL	MNO	PQR
+
+$ paste.perl -cols="2,3" $TMP/_col*.list
+DEF	GHI
+MNO	PQR
+
+#...............................................................................
+# paste.perl: pasting columns by key
+
+# TODO: work out a more intuitive example
+
+# Setup
+cd $TMP
+echo $'ABC\tR1C2\tR1C3\nJKL\tR2C2\tR2C3' > _f1.tsv
+echo $'DEF\tR1C2\tR1C3\nMNO\tR2C2\tR2C3' > _f2.tsv
+echo $'GHI\tR1C2\tR1C3\nPQR\tR2C2\tR2C3' > _f3.tsv
+echo $'ABC\tr1c2\tr1c3\nPQR\tr3c2\tr2c3' > _f4.tsv
+
+# Continuation
+$ paste.perl -keys -default="-" _f*.tsv
+# key	_f1.tsv	_f2.tsv	_f3.tsv	_f4.tsv
+ABC	R1C2, R1C3	-	-	r1c2, r1c3
+DEF	-	R1C2, R1C3	-	-
+GHI	-	-	R1C2, R1C3	-
+JKL	R2C2, R2C3	-	-	-
+MNO	-	R2C2, R2C3	-	-
+PQR	-	-	R2C2, R2C3	r3c2, r2c3
+
+# Continuation
+$ paste.perl -keys -cols="3" -default="-" _f*.tsv
+# key	_f1.tsv	_f2.tsv	_f3.tsv	_f4.tsv
+ABC	R1C3	-	-	r1c3
+DEF	-	R1C3	-	-
+GHI	-	-	R1C3	-
+JKL	R2C3	-	-	-
+MNO	-	R2C3	-	-
+PQR	-	-	R2C3	r2c3
