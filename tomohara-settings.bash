@@ -25,3 +25,6 @@ shopt -s nocaseglob
 cond-export SKIP_DEFAULT_BASHRC 1
 # Don't enable tab completion (n.b., due to slow init)
 cond-export SKIP_TAB_COMPLETION 1
+
+# Get idiosyncratic aliases
+conditional-source "$TOM_BIN/tomohara-proper-aliases.bash"
