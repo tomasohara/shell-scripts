@@ -116,6 +116,7 @@ while ("$1" =~ -*)
 	shift
     else if ("$1" == "--quiet") then
 	set quiet = "1"
+	set verbose_mode = "0"
     else if ("$1" == "--verbose") then
 	set verbose_mode = "1"
     else if ("$1" == "--nopattern") then
