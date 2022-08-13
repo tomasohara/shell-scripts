@@ -28,3 +28,7 @@ cond-export SKIP_TAB_COMPLETION 1
 
 # Get idiosyncratic aliases
 conditional-source "$TOM_BIN/tomohara-proper-aliases.bash"
+
+# User-specific mount directory
+cond-export MNT /media/$USER
+
