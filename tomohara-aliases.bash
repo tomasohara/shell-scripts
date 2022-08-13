@@ -1141,10 +1141,10 @@ function check-errors () {
     ## NOTE: gotta dislike bash!
     local args=("$@");
     ## DEBUG: echo "args: ${args[@]}"; echo "len(args): ${#args[@]}"
-    ## OLD: if [ (${#args[@]} -eq 0) ]; then
-    ## Add - if no args or last arg not file (i.e., not -)
-    ## TEST: if [[ ($# -eq 0) || (! ${args[$# - 1]} =~ ^[^-]) ]]; then
-    if [[ ($# -eq 0) || (${args[$# - 1]} != "-") ]]; then
+
+    # Add - if no args or last arg is option (e.g., -warnings)
+    ## BAD: if [[ ($# -eq 0) || (${args[$# - 1]} != "-") ]]; then
+    if [[ ($# -eq 0) || (${args[$# - 1]} =~ ^-+) ]]; then
 	## DEBUG: echo "Adding stdin"
 	args+=("-");
     fi;
@@ -2482,6 +2482,7 @@ alias kill-python-all="kill_em.sh python"
 alias which-python='which python'
 
 # run-jupyter-notebook-posthoc(): try to show log info previously not shown via run-jupyter-notebook
+# TODO: enable multiple-versions backups
 function run-jupyter-notebook-posthoc() {
     local log
     log="$TEMP/jupyter-$(TODAY).log"
