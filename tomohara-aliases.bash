@@ -1438,8 +1438,15 @@ function prep-brill() { prep_brill.perl "$1" > "$1".pp; }
 function pdf-view () { okular "$@" & }
 function image-view () { gpicview "$@" & }
 
-# FIle conversion
-# note: when ps2ascii hangups, it creates large output files (e.g., > 1gb)
+# File conversion
+
+# pdf-to-ascii(filename): convert basename.pdf to basename.ascii
+# TOM-IDIOSYNCRATIC
+# notes:
+# - The -layout option is default to make output match PDF layout
+# - Any existing file is not overwritten.
+# - When ps2ascii command hangs up, it creates large output files (e.g., > 1gb)
+#   so timeout included.
 # TODO: handle filename wit
 function pdf-to-ascii () {
     local file="$1"
