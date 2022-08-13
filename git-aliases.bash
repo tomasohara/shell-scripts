@@ -58,6 +58,7 @@
 #
 #................................................................................
 # Examples:
+# TODO2: show the corresponding alias; also move git-mv example later to this section)
 # - Update
 #     git stash;  git pull --all;  git stash pop
 # - Commit changes
@@ -77,19 +78,20 @@
 #...............................................................................
 # based on https://stackoverflow.com/questions/2641146/handling-file-renames-in-git:
 #
-# 1: rename the file from oldfile to newfile
+# 1: rename the file from old-file to new-file
 #     git mv old-file new-file
 # 1.5 mark old file as changed
 #     git add old-file
 # 2: commit and add comments
 #     git commit -m "renamed old-file to new-file"
-# 3: push this change to the remote sever
+# 3: push this change to the remote server
 #     git push
 #
 #................................................................................
 # Aliases from tomohara-aliaes.bash:
 #-------------------------------------------------------------------------------
 # TODO:
+# - ** TODO: diagnose problem with git checkin for simple_batspp.py [Fri 15 Jul 22].
 # - * Get a git guru to critique (e.g., how to make more standard)!
 # - Add an option for verbose tracing (and for quiet mode).
 #
@@ -339,6 +341,7 @@ function invoke-git-command {
     less "$log"
     # TODO: git-alias-review-log "$log"
 }
+# TODO: git-command => git-command-alias
 alias git-command='invoke-git-command'
 
 ## OLD
@@ -382,8 +385,8 @@ function git-reset-file {
 
     # Isolate old versions
     mkdir -p _git-trash >| "$log";
-    echo "issuing: mv -iv $* _git-trash";
-    mv -iv "$@" _git-trash >> "$log";
+    echo "issuing: cp -vp $* _git-trash";
+    cp -vp "$@" _git-trash >> "$log";
 
     # Forget state
     echo "git reset HEAD $*";
@@ -555,6 +558,17 @@ alias git-invoke-next-single-checkin=invoke-next-single-checkin
 alias git-alias-refresh="source ${BASH_SOURCE[0]}"      # bash idiom for current script filename
 alias git-refresh-aliases=git-alias-refresh
 alias git-next-checkin='invoke-alt-checkin'
+# TODO:
+# NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
+## OLD: alias git-checkout-branch='git-command checkout'
+function git-checkout-branch {
+    git branch | grep -c "$1";
+    if [ $? ]; then
+	git-command checkout "$1";
+    else
+	echo "Error: unknown branch"
+    fi;
+}
 
 #-------------------------------------------------------------------------------
 
@@ -618,7 +632,7 @@ function git-misc-alias-usage() {
     echo ""
     echo "To move or rename (cuidado):"
     echo "   git mv --verbose old-file new-file"
-    echo "   GIT_MESSAGE='renamed' git-update-commit-push old-file"
+    echo "   GIT_MESSAGE='renamed' git-update-commit-push new-file"
     echo ""
     echo "To delete files (mucho cuidado):"
     echo "   git rm old-file"
