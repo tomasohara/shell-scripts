@@ -20,17 +20,17 @@ BEGIN {
 # Specify additional diagnostics and strict variable usage, excepting those
 # for command-line arguments (see init_var's in &init).
 use strict;
-use vars qw/$WSJ $drop_at_lines $end_tag_newline $strip/;
+use vars qw/$WSJ $drop_at_lines $end_tag_newline $strip $space/;
 
 # Show a usage statement if no arguments given.
 # NOTE: By convention '-' is used when no arguments are required.
 if (!defined($ARGV[0])) {
-    my($options) = "main options = [-WSJ] [-drop_at_lines] [-strip] [-end_tag_newline]";
+    my($options) = "main options = [-WSJ] [-drop_at_lines] [-strip] [-end_tag_newline] [-space]";
     $options .= "\nother options = " . &COMMON_OPTIONS;
     my($example) = "Example(s):\n\n$script_name example\n\n";  # TODO: example
     ## $example .= "$0 example2\n\n";		   	     # TODO: 2nd example
     my($note) = "";
-    ## $note .= "Notes:\n\nSome usage note.\n\n";	     # TODO: usage note
+    $note .= "Notes:\n\n- Use -space to replace tags with ' ' rather than stripping.\n\n";
 
     print STDERR "\nUsage: $script_name [options]\n\n$options\n\n$example\n$note";
     &exit();
@@ -42,6 +42,7 @@ if (!defined($ARGV[0])) {
 &init_var(*drop_at_lines, &TRUE);
 &init_var(*end_tag_newline, &FALSE);
 &init_var(*strip, ! $end_tag_newline);
+&init_var(*space, &FALSE);
 
 # process each line of the input stream
 while (<>) {
