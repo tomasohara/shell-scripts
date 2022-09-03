@@ -1,5 +1,0 @@
-1..1
-not ok 1 setup_file failed
-# (in test file tests/ipynb-area/bpp_report-json-related-alias.batspp.txt, line 8)
-#   `shopt -s expand_aliases' failed with status 0
-# /home/aveey/tom-project/shell-scripts/tests/ipynb-area/bpp_report-json-related-alias.batspp.txt: line 29: syntax error near unexpected token `('

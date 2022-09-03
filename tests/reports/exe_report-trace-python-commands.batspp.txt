@@ -1,5 +1,0 @@
-1..1
-not ok 1 test id118171
-# (in test file tests/ipynb-area/bpp_report-trace-python-commands.batspp.txt, line 14)
-#   `actual=$(test-id118171-actual)' failed
-# /home/aveey/tom-project/shell-scripts/tests/ipynb-area/bpp_report-trace-python-commands.batspp.txt: line 25: "#: command not found
