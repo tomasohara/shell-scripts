@@ -7,7 +7,7 @@ filename_arg = sys.argv
 file_in_ipynb = filename_arg[1]
 
 def batspp_rename():
-    file_in_batspp = file_in_ipynb.replace(".ipynb", ".batspp")#<--CONVERTS EXTENSION TO BATSPP
+    file_in_batspp = file_in_ipynb.replace(".ipynb", ".bats")#<--CONVERTS EXTENSION TO BATSPP
     RENAME_COMMAND = f"mv {file_in_ipynb} {file_in_batspp}"#<--COMMAND TO BE EXECUTED
     
     os.system(RENAME_COMMAND)

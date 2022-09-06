@@ -1,0 +1,112 @@
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+# $ echo 'Hi'
+# | Hi?2004l
+$ bind 'set enable-bracketed-paste off'
+[?2004h[?2004l[?2004l[?2004l[?2004l[?2004l
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+# Setting a temp directory for tests
+$ TMP=/tmp/test-json
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+$ alias | wc -l
+0
+
+# SETUP
+$ shopt -s expand_aliases
+#source ./json-related-alias.ipynb
+
+# Count aliases proper
+$ alias | wc -l
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+## TEST 1 - TESTS FOR JSON FILE FORMAT
+#Misc. language related
+$ alias json-pp='json_pp -json_opt utf8,pretty'
+$ alias pp-json=json-pp
+# note: canonical sorts the keys of hashes (utf8 avoids warning and pretty might be the default)
+$ alias pp-json-sorted='json_pp -json_opt utf8,pretty,canonical'
+
+## EXAMPLES FOR TEST 1 - FROM https://metacpan.org/dist/JSON-PP/view/bin/json_pp
+$ perl -e'print q|{"foo":"HI MOM!","bar":1234567890000000000000000}|' | pp-json -f json -t dumper
+{
+  bar => "1234567890000000000000000",
+  foo => "HI MOM!"
+}
+
+# json-pp WORKS SAME AS pp-json
+$ perl -e'print q|{"foo":"あい","bar":1234567890000000000000000}|' | json-pp -f json -t dumper -json_opt pretty,utf8,allow_bignum
+{
+  bar => bless( {
+    sign => "+",
+    value => bless( [
+      0,
+      890000000,
+      1234567
+    ], 'Math::BigInt::Calc' )
+  }, 'Math::BigInt' ),
+  foo => "\x{3042}\x{3044}"
+}
+
+# note: canonical sorts the keys of hashes (utf8 avoids warning and pretty might be the default
+$ perl -e'print q|{"foo":"あい","bar":1234567890000000000000000}|' | pp-json-sorted -f json -t dumper
+{
+  bar => "1234567890000000000000000",
+  foo => "\x{3042}\x{3044}"
+}
+
+## TEST 2 - TEXT MANIPULATION
+$ function asc-it () { dobackup.sh "$1"; asc < BACKUP/"$1" >| "$1"; }
+# TODO: use dos2unix under CygWin
+$ alias remove-cr='tr -d "\r"'
+$ alias perl-slurp='perl -0777'
+$ alias alt-remove-cr='perl-slurp -pe "s/\r//g;"'
+$ function remove-cr-and-backup () { dobackup.sh "$1"; remove-cr < backup/"$1" >| "$1"; }
+$ alias perl-remove-cr='perl -i.bak -pn -e "s/\r//;"'
+# Text manipulation
+$ alias 'intersection=intersection.perl'
+$ alias 'difference=intersection.perl -diff'
+$ alias 'line-intersection=intersection.perl -line'
+$ alias 'line-difference=intersection.perl -diff -line'
+$ function show-line () { tail --lines=+"$1" "$2" | head -1; }
+#
+# last-n-with-header(num, file): create sub-file with last NUM lines plus header from FILE
+$ function last-n-with-header () { head --lines=1 "$2"; tail --lines="$1" "$2"; }
+
+# THIS IS THE DEFAULT PRINT STATEMENT WITH /r (RETURN)
+$ printf "Hi Mom, \rI am using Ubuntu\n"
+Hi Mom, 
+I am using Ubuntu
+
+# remove-cr REMOVES RETURNS (or /r)
+$ printf "Hi Mom,\r I am using Ubuntu\n" | remove-cr
+Hi Mom, I am using Ubuntu
+
+# alt-remove-cr IS AN ALTERNATIVE OF remove-cr
+$ printf "Hi Mom,\r I am using Ubuntu\n" | alt-remove-cr
+Hi Mom, I am using Ubuntu
+
+# perl-remove-cr ACTS AS remove-cr USING PERL
+#printf "Hi Mom,\r I am using Ubuntu\n" | perl-remove-cr
+
+$ printf "Hi Mom,\nThs is the use of printf\nI can use a backslash n to start a new line.n1\n2\n3"> abc-test.txt
+#last-n-with-header(5, abc-test.txt)

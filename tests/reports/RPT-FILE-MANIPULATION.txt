@@ -1,0 +1,393 @@
+#!/usr/bin/env bats
+
+
+# Make executables ./tests/../ visible to PATH
+PATH="/home/aveey/tom-project/shell-scripts/tests/../:$PATH"
+
+# Source files
+shopt -s expand_aliases
+
+
+@test "test id972988" {
+	testfolder=$(echo /tmp/test-id972988-$$)
+	mkdir $testfolder && cd $testfolder
+	unalias -a
+	alias | wc -l
+	for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+	actual=$(test-id972988-actual)
+	expected=$(test-id972988-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id972988-actual () {
+	typeset -f | egrep '^\w+' | wc -l
+}
+
+function test-id972988-expected () {
+	echo -e '0\n0'
+}
+
+
+@test "test id852717" {
+	testfolder=$(echo /tmp/test-id852717-$$)
+	mkdir $testfolder && cd $testfolder
+	actual=$(test-id852717-actual)
+	expected=$(test-id852717-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id852717-actual () {
+	TMP=/tmp/test-file-manipulation
+}
+
+function test-id852717-expected () {
+	echo -e '## NOTE: Source it directly from the ./tests directory.\n$ BIN_DIR=$PWD/..\n$ alias | wc -l\n0'
+}
+
+
+@test "test id928427" {
+	testfolder=$(echo /tmp/test-id928427-$$)
+	mkdir $testfolder && cd $testfolder
+	temp_dir=$TMP/test-9890
+	actual=$(test-id928427-actual)
+	expected=$(test-id928427-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id928427-actual () {
+	mkdir -p "$temp_dir"
+}
+
+function test-id928427-expected () {
+	echo -e '# TODO: /bin/rm -rvf "$temp_dir"\n$ cd "$temp_dir"\n$ pwd\n#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)\n$ alias linebr="printf \'%*s\\n\' "${COLUMNS:-$(tput cols)}" \'\' | tr \' \' -"\n/tmp/test-file-manipulation/test-9890'
+}
+
+
+@test "test id31183" {
+	testfolder=$(echo /tmp/test-id31183-$$)
+	mkdir $testfolder && cd $testfolder
+	actual=$(test-id31183-actual)
+	expected=$(test-id31183-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id31183-actual () {
+	alias | wc -l
+}
+
+function test-id31183-expected () {
+	echo -e "# Count functions\n$ typeset -f | egrep '^\\w+' | wc -l\n1\n0"
+}
+
+
+@test "test id539477" {
+	testfolder=$(echo /tmp/test-id539477-$$)
+	mkdir $testfolder && cd $testfolder
+	function asc-it () { dobackup.sh "$1"; asc < BACKUP/"$1" >| "$1"; }
+	rm -rf ./*
+	free -m > freemem_mb.txt
+	actual=$(test-id539477-actual)
+	expected=$(test-id539477-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id539477-actual () {
+	asc-it freemem_mb.txt
+}
+
+function test-id539477-expected () {
+	echo -e "#(NEED SOLUTION FOR bash: BACKUP/freemem_mb.txt: No such file or directory)\n#(IN CASE OF 'BACKUP'->'backup' IN asc-it, ERROR = bash: asc: command not found)\n$ linebr\n$ ls -l ./backup/\n$ linebr\n$ cat ./backup/freemem_mb.txt\nBacking up 'freemem_mb.txt' to './backup/freemem_mb.txt'\nbash: BACKUP/freemem_mb.txt: No such file or directory\n--------------------------------------------------------------------------------\ntotal 4\n-r--r--r-- 1 aveey aveey 207 Sep  6 21:32 freemem_mb.txt\n--------------------------------------------------------------------------------\n               total        used        free      shared  buff/cache   available\nMem:            3597        2051         301         145        1245        1164\nSwap:            511          57         454"
+}
+
+
+@test "test id957579" {
+	testfolder=$(echo /tmp/test-id957579-$$)
+	mkdir $testfolder && cd $testfolder
+	alias remove-cr='tr -d "\r"'
+	alias perl-slurp='perl -0777'
+	alias alt-remove-cr='perl-slurp -pe "s/\r//g;"'
+	function remove-cr-and-backup () { dobackup.sh "$1"; remove-cr < backup/"$1" >| "$1"; }
+	actual=$(test-id957579-actual)
+	expected=$(test-id957579-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id957579-actual () {
+	alias perl-remove-cr='perl -i.bak -pn -e "s/\r//;"'
+}
+
+function test-id957579-expected () {
+	echo -e "# perl-slurp IS AN ALIAS FOR 'perl -0777'\n$ perl-slurp -v"
+}
+
+
+@test "test id587762" {
+	testfolder=$(echo /tmp/test-id587762-$$)
+	mkdir $testfolder && cd $testfolder
+	function test-text () { printf "THIS IS A TEST. \rTHIS IS ALSO A TEST\r. THIS IS A TEST TOO."; }
+	test-text
+	printf "\n"
+	linebr
+	test-text | remove-cr
+	printf "\n"
+	linebr
+	actual=$(test-id587762-actual)
+	expected=$(test-id587762-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id587762-actual () {
+	test-text | alt-remove-cr
+}
+
+function test-id587762-expected () {
+	echo -e '. THIS IS A TEST TOO.\n--------------------------------------------------------------------------------\nTHIS IS A TEST. THIS IS ALSO A TEST. THIS IS A TEST TOO.\n--------------------------------------------------------------------------------\nTHIS IS A TEST. THIS IS ALSO A TEST. THIS IS A TEST TOO.'
+}
+
+
+@test "test id391744" {
+	testfolder=$(echo /tmp/test-id391744-$$)
+	mkdir $testfolder && cd $testfolder
+	ps -l > process_list.txt
+	actual=$(test-id391744-actual)
+	expected=$(test-id391744-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id391744-actual () {
+	remove-cr-and-backup process_list.txt
+}
+
+function test-id391744-expected () {
+	echo -e "Backing up 'process_list.txt' to './backup/process_list.txt'"
+}
+
+
+@test "test id598735" {
+	testfolder=$(echo /tmp/test-id598735-$$)
+	mkdir $testfolder && cd $testfolder
+	actual=$(test-id598735-actual)
+	expected=$(test-id598735-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id598735-actual () {
+	test-text | perl-remove-cr
+}
+
+function test-id598735-expected () {
+	echo -e '-i used with no filenames on the command line, reading from STDIN.\n. THIS IS A TEST TOO.IS ALSO A TEST'
+}
+
+
+@test "test id687430" {
+	testfolder=$(echo /tmp/test-id687430-$$)
+	mkdir $testfolder && cd $testfolder
+	alias intersection='intersection.perl'
+	alias difference='intersection.perl -diff'
+	alias line-intersection='intersection.perl -line'
+	alias line-difference='intersection.perl -diff -line'
+	actual=$(test-id687430-actual)
+	expected=$(test-id687430-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id687430-actual () {
+	function show-line () { tail --lines=+"$1" "$2" | head -1; }
+}
+
+function test-id687430-expected () {
+	echo -e '#\n# last-n-with-header(num, file): create sub-file with last NUM lines plus header from FILE\n$ function last-n-with-header () { head --lines=1 "$2"; tail --lines="$1" "$2"; }'
+}
+
+
+@test "test id221884" {
+	testfolder=$(echo /tmp/test-id221884-$$)
+	mkdir $testfolder && cd $testfolder
+	ps -u > ntest1.txt
+	ps -l > ntest2.txt
+	actual=$(test-id221884-actual)
+	expected=$(test-id221884-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id221884-actual () {
+	intersection ntest1.txt ntest2.txt
+}
+
+function test-id221884-expected () {
+	echo -e 'PID\nTTY\nTIME\nbash\nbash\n11535\npts/4\npts/4\nps'
+}
+
+
+@test "test id744584" {
+	testfolder=$(echo /tmp/test-id744584-$$)
+	mkdir $testfolder && cd $testfolder
+	actual=$(test-id744584-actual)
+	expected=$(test-id744584-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id744584-actual () {
+	difference ntest1.txt ntest2.txt
+}
+
+function test-id744584-expected () {
+	echo -e '%CPU\n%MEM\n--rcfile\n-u\n/usr/bin/bash\n/usr/bin/jupyter-notebook\n/usr/bin/python3\n/usr/lib/python3/dist-packages/pexpect/bashrc.sh\n0.0\n0.1\n0.5\n0.9\n0:00\n0:07\n10268\n10783\n11430\n11480\n11596\n11597\n12668\n1556\n2.0\n21:11\n21:12\n21:20\n21:26\n21:31\n21:32\n390480\n5420\n5524\n5548\n5700\n5812\n76016\n8355\n8510\nCOMMAND\nR+\nRSS\nSTART\nSTAT\nSl+\nSs\nSs+\nUSER\nVSZ\naveey\npts/0\npts/1\npts/2\npts/3'
+}
+
+
+@test "test id987545" {
+	testfolder=$(echo /tmp/test-id987545-$$)
+	mkdir $testfolder && cd $testfolder
+	free -m > free1.txt
+	free > free2.txt
+	actual=$(test-id987545-actual)
+	expected=$(test-id987545-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id987545-actual () {
+	line-intersection free1.txt free2.txt
+}
+
+function test-id987545-expected () {
+	echo -e 'total        used        free      shared  buff/cache   available'
+}
+
+
+@test "test id63705" {
+	testfolder=$(echo /tmp/test-id63705-$$)
+	mkdir $testfolder && cd $testfolder
+	line-difference free1.txt free2.txt
+	linebr
+	actual=$(test-id63705-actual)
+	expected=$(test-id63705-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id63705-actual () {
+	line-difference free2.txt free1.txt
+}
+
+function test-id63705-expected () {
+	echo -e 'Mem:            3597        2048         303         145        1245        1167\nSwap:            511          57         454\n--------------------------------------------------------------------------------\nMem:         3684144     2097184      311080      148604     1275880     1195924\nSwap:         524284       58460      465824'
+}
+
+
+@test "test id759471" {
+	testfolder=$(echo /tmp/test-id759471-$$)
+	mkdir $testfolder && cd $testfolder
+	cat ntest1.txt
+	linebr
+	actual=$(test-id759471-actual)
+	expected=$(test-id759471-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id759471-actual () {
+	show-line 4 ntest1.txt
+}
+
+function test-id759471-expected () {
+	echo -e 'USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\naveey       8355  0.0  0.1  11480  5700 pts/1    Ss   21:11   0:00 bash\naveey       8510  0.5  2.0 390480 76016 pts/1    Sl+  21:12   0:07 /usr/bin/python3 /usr/bin/jupyter-notebook\naveey      10268  0.0  0.1  11596  5812 pts/0    Ss+  21:20   0:00 bash\naveey      10783  0.0  0.1  11480  5420 pts/2    Ss+  21:26   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh\naveey      11430  0.0  0.1  11480  5524 pts/3    Ss+  21:31   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh\naveey      11535  0.9  0.1  11480  5548 pts/4    Ss   21:32   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh\naveey      11597  0.0  0.0  12668  1556 pts/4    R+   21:32   0:00 ps -u\n--------------------------------------------------------------------------------\naveey      10268  0.0  0.1  11596  5812 pts/0    Ss+  21:20   0:00 bash'
+}
+
+
+@test "test id211309" {
+	testfolder=$(echo /tmp/test-id211309-$$)
+	mkdir $testfolder && cd $testfolder
+	last-n-with-header 4 ntest1.txt
+	linebr
+	actual=$(test-id211309-actual)
+	expected=$(test-id211309-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id211309-actual () {
+	last-n-with-header 2 ntest2.txt
+}
+
+function test-id211309-expected () {
+	echo -e 'USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\naveey      10783  0.0  0.1  11480  5420 pts/2    Ss+  21:26   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh\naveey      11430  0.0  0.1  11480  5524 pts/3    Ss+  21:31   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh\naveey      11535  0.9  0.1  11480  5548 pts/4    Ss   21:32   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh\naveey      11597  0.0  0.0  12668  1556 pts/4    R+   21:32   0:00 ps -u\n--------------------------------------------------------------------------------\nF S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD\n0 S  1000   11535   11525  0  80   0 -  2870 do_wai pts/4    00:00:00 bash\n4 R  1000   11598   11535  0  80   0 -  3167 -      pts/4    00:00:00 ps'
+}

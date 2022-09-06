@@ -1,0 +1,5 @@
+Hi Mom,
+Ths is the use of printf
+I can use a backslash n to start a new line.n1
+2
+3
