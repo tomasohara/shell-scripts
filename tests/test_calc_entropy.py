@@ -59,13 +59,13 @@ class TestIt(TestWrapper):
         """Test for verbose option"""
         input_string    =  'deportive-car\t3\nsedan-car\t3\nconvertible-car\t2\ntruck\t12'
         expected_result = ('#\t\tclass\tfreq\tprob\t-p lg(p)\n'
-                           '#\t\ttruck\t12\t0.600\t0.442\n'
-                           '#\t\tdeportive-car\t3\t0.150\t0.411\n'
-                           '#\t\tsedan-car\t3\t0.150\t0.411\n'
-                           '#\t\tconvertible-car\t2\t0.100\t0.332\n'
+                           '#\t\ttruck\t12\t0.6\t0.442\n'
+                           '#\t\tdeportive-car\t3\t0.15\t0.411\n'
+                           '#\t\tsedan-car\t3\t0.15\t0.411\n'
+                           '#\t\tconvertible-car\t2\t0.1\t0.332\n'
                            '#\t\ttotal\t20\t1.000\t1.595\n\n'
                            '# word\tclasses\tfreq\tentropy\tmax_prob\n'
-                           'n/a\t4\t20\t1.595\t0.600')
+                           'n/a\t4\t20\t1.595\t0.6')
         self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --verbose --last  -'), expected_result)
 
 
@@ -107,7 +107,7 @@ class TestIt(TestWrapper):
     def test_just_freq(self):
         """Test for just_freq option"""
         input_string    = '.perl\t239\n.sh\t152\n.bash\t22\n.py\t3\n.lisp\t3\n.txt\t2\n.csh\t1'
-        expected_result = '0.566\n0.360\n0.052\n0.007\n0.007\n0.005\n0.002\n'
+        expected_result = '0.566\n0.36\n0.052\n0.007\n0.007\n0.005\n0.002\n'
 
         self.assertEqual(gh.run(f'echo "{input_string}" | {self.script_module} --just_freq --last -'), expected_result)
 
@@ -127,18 +127,18 @@ class TestIt(TestWrapper):
 
     def test_simple(self):
         """Test for simple option"""
-        self.assertEqual(gh.run(f'python {self.script_module} --simple .25 .25 .25 .25'), 'Entropy\n2.000')
-        self.assertEqual(gh.run(f'echo .25 .25 .25 .25 | {self.script_module} --simple'), 'Entropy\n2.000')
+        self.assertEqual(gh.run(f'python {self.script_module} --simple .25 .25 .25 .25'), 'Entropy\n2.0')
+        self.assertEqual(gh.run(f'echo .25 .25 .25 .25 | {self.script_module} --simple'), 'Entropy\n2.0')
 
 
     def test_label(self):
         """Test for label option"""
-        self.assertEqual(gh.run(f'python {self.script_module} --label "foo" --simple .25 .25 .25 .25'), '\tEntropy\nfoo\t2.000')
+        self.assertEqual(gh.run(f'python {self.script_module} --label "foo" --simple .25 .25 .25 .25'), '\tEntropy\nfoo\t2.0')
 
 
     def test_classes(self):
         """Test for classes related options: classes and show_classes"""
-        expected_result = 'Classes\tEntropy\n4\t2.000'
+        expected_result = 'Classes\tEntropy\n4\t2.0'
         gral_command  = f'python {self.script_module} --simple'
         probabilities = '.25 .25 .25 .25'
         self.assertEqual(gh.run(f'{gral_command} --classes {probabilities}'), expected_result)
@@ -166,7 +166,7 @@ class TestIt(TestWrapper):
                         '#\t\tlisp\t3\t0.007\t0.051\n'
                         '#\t\tperl\t239\t0.566\t0.465\n'
                         '#\t\tpy\t3\t0.007\t0.051\n'
-                        '#\t\tsh\t152\t0.360\t0.531\n'
+                        '#\t\tsh\t152\t0.36\t0.531\n'
                         '#\t\ttxt\t2\t0.005\t0.037\n')
 
         result = gh.run(f'echo "{input_string}" | {self.script_module} --last --verbose --alpha -')
@@ -178,7 +178,7 @@ class TestIt(TestWrapper):
         """Test for preserve option"""
         input_string       = 'perl\t239\nsh\t152\nbash\t22\npy\t3\nlisp\t3\ntxt\t2\ncsh\t1'
         preserved_expected = ('#\t\tperl\t239\t0.566\t0.465\n'
-                              '#\t\tsh\t152\t0.360\t0.531\n'
+                              '#\t\tsh\t152\t0.36\t0.531\n'
                               '#\t\tbash\t22\t0.052\t0.222\n'
                               '#\t\tpy\t3\t0.007\t0.051\n'
                               '#\t\tlisp\t3\t0.007\t0.051\n'
@@ -200,7 +200,7 @@ class TestIt(TestWrapper):
                            '#\t\tperl\t239\t0.628\t0.465\n'
                            '#\t\tpy\t3\t0.635\t0.051\n'
                            '#\t\tsh\t152\t0.995\t0.531\n'
-                           '#\t\ttxt\t2\t1.000\t0.037\n'
+                           '#\t\ttxt\t2\t1.0\t0.037\n'
                            '#\t\ttotal\t422\t1.000\t1.376\n'
                            '\n'
                            '# word\tclasses\tfreq\tentropy\tmax_prob\n'
