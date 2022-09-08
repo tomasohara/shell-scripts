@@ -38,6 +38,8 @@ use {match.group(N)} in --replacement as pointer to N match group.
 # TODO: replace re by the local implementation my_re
 import re
 
+# Installed packages
+## NOTE: this is empty for now
 
 # Local packages
 from mezcla.main import Main
@@ -47,77 +49,72 @@ from mezcla import misc_utils
 
 
 # Command-line labels constants
-PATTERN        = 'pattern'        # regex pattern to check for
-REPLACEMENT    = 'replacement'    # pattern for replacement (e.g, \1-\2-method)
-RESTORE        = 'restore'        # portion of matching text to be restored
-PARA           = 'para'           # paragraph input mode
-SLURP          = 'slurp'          # alias for -file
-FILE           = 'file'           # entire file input mode
-FIELDS         = 'fields'         # number of output fields
-SINGLE         = 'single'         # alias for -one_per_line
-ONE_PER_LINE   = 'one_per_line'   # only count one instance of the pattern per line
+PATTERN = 'pattern' # regex pattern to check for
+REPLACEMENT = 'replacement' # pattern for replacement (e.g, \1-\2-method)
+RESTORE = 'restore' # portion of matching text to be restored
+PARA = 'para' # paragraph input mode
+SLURP = 'slurp' # alias for -file
+FILE = 'file' # entire file input mode
+FIELDS = 'fields' # number of output fields
+SINGLE = 'single' # alias for -one_per_line
+ONE_PER_LINE = 'one_per_line' # only count one instance of the pattern per line
 MULTI_PER_LINE = 'multi_per_line' # multiple matches per line
-MAX_COUNT      = 'max_count'      # maximum number of matches per line
-IGNORE         = 'i'              # ignore case
-PRESERVE       = 'preserve'       # preserve case (when -i in effect)
-CHOMP          = 'chomp'          # strip newline at end
+MAX_COUNT = 'max_count' # maximum number of matches per line
+IGNORE = 'i' # ignore case
+PRESERVE = 'preserve' # preserve case (when -i in effect)
+CHOMP = 'chomp' # strip newline at end
 
 
 class ExtractMatches(Main):
     """Extract text in a file matching a particuar pattern"""
 
-
     ## class-level member variables for arguments (avoids need for class constructor)
-    pattern         = ""
-    replacement     = ""
-    restore         = ""
-    paragraph_mode  = False # paragraph mode
+    pattern = ""
+    replacement = ""
+    restore = ""
+    paragraph_mode = False # paragraph mode
     file_input_mode = False # aka file slurping
-    fields          = 0
-    max_count       = 0
-    ignore_case     = False
-    preserve        = False
-    chomp           = False
-
+    fields = 0
+    max_count = 0
+    ignore_case = False
+    preserve = False
+    chomp = False
 
     def setup(self):
         """Process arguments"""
         debug.trace(5, f"Script.setup(): self={self}")
 
-
         # Check the command-line options
-        self.pattern         = self.get_parsed_argument(PATTERN, self.pattern)
-        self.replacement     = self.get_parsed_argument(REPLACEMENT, self.replacement)
-        self.restore         = self.get_parsed_argument(RESTORE, self.restore)
-        self.paragraph_mode  = self.has_parsed_option(PARA)
+        self.pattern = self.get_parsed_argument(PATTERN, self.pattern)
+        self.replacement = self.get_parsed_argument(REPLACEMENT, self.replacement)
+        self.restore = self.get_parsed_argument(RESTORE, self.restore)
+        self.paragraph_mode = self.has_parsed_option(PARA)
         self.file_input_mode = self.has_parsed_option(SLURP) or self.has_parsed_option(FILE)
-        self.fields          = self.get_parsed_option(FIELDS, 1)
-        single               = self.has_parsed_option(SINGLE)
-        one_per_line         = self.has_parsed_option(ONE_PER_LINE) or single
-        multi_per_line       = self.has_parsed_option(MULTI_PER_LINE) or not one_per_line
-        self.max_count       = system.maxint() if multi_per_line else 1
-        self.max_count       = self.get_parsed_option(MAX_COUNT, self.max_count)
-        self.ignore_case     = self.has_parsed_option(IGNORE)
-        self.preserve        = self.has_parsed_option(PRESERVE)
-        self.chomp           = (self.has_parsed_option(CHOMP) or
-                                not re.match('\\n', self.pattern))
-
+        self.fields = self.get_parsed_option(FIELDS, 1)
+        single = self.has_parsed_option(SINGLE)
+        one_per_line = self.has_parsed_option(ONE_PER_LINE) or single
+        multi_per_line = self.has_parsed_option(MULTI_PER_LINE) or not one_per_line
+        self.max_count = system.maxint() if multi_per_line else 1
+        self.max_count= self.get_parsed_option(MAX_COUNT, self.max_count)
+        self.ignore_case = self.has_parsed_option(IGNORE)
+        self.preserve = self.has_parsed_option(PRESERVE)
+        self.chomp = (
+            self.has_parsed_option(CHOMP)
+            or not re.match('\\n', self.pattern)
+        )
 
         if not self.preserve:
             debug.trace(debug.DETAILED, f'Note: --{PRESERVE} not implemented')
 
-
         auto_pattern = False # automatically derive pattern (for tab-delimited fields)
         if self.pattern == '-':
             auto_pattern = True
-            self.pattern =  "(\\S+)" if self.fields else "(.*)"
-
+            self.pattern = "(\\S+)" if self.fields else "(.*)"
 
         # Enforce a single pattern per line when beginning-of-line pattern (^) used
         if re.search(r'^\^.*|.*\$$', self.pattern):
             self.max_count = 1
         debug.trace(debug.QUITE_DETAILED, f'max_count={self.max_count}')
-
 
         # For multiple-field patterns, generate a replacement with tab separated fillers
         # note: this assumes that replacement is same as "{match.group(1)}" default
@@ -130,22 +127,18 @@ class ExtractMatches(Main):
             if auto_pattern:
                 self.pattern += '\t(\\S+)'
 
-
         # Put grouping parenthesis around pattern, if none present
         # NOTE: Escaped parentheses are ignored.
         if not re.search(r'^\(|[^\\]\(.*[^\\]\)', self.pattern):
             self.pattern = '(' + self.pattern + ')'
 
-
         debug.trace(debug.QUITE_DETAILED, f'pattern={self.pattern}; replacement={self.replacement}; restore={self.restore}')
-
 
     def process_line(self, line):
         """Process each line of the input stream"""
         debug.trace(5, f"Script.process_line({line}): self={self}")
 
         line = system.to_utf8(line)
-
 
         # NOTE: a chop isn't performed by default to allow for using the newline in a pattern.
         # This is often more convenient than using $ (e.g., when using csh).
@@ -154,7 +147,6 @@ class ExtractMatches(Main):
             line = system.chomp(line)
         debug.trace(debug.QUITE_DETAILED, f'{line}')
 
-
         # Print the text instances that matches the pattern, each on a separate line
         # NOTE: s qualifier treats string as single line (in case -para specified)
         # NOTE: glue_helpers.py->extract_matches_from_text() could be used too, but it would be
@@ -162,21 +154,17 @@ class ExtractMatches(Main):
         count = 0
         while count < self.max_count:
 
-
             match = re.search(self.pattern, line, flags=re.IGNORECASE if self.ignore_case else 0)
-
 
             if match:
                 debug.trace(debug.QUITE_DETAILED, f'match={match}')
             else:
                 break
 
-
             debug_output = ''
             for i in range(self.fields):
                 debug_output += str(i) + ' = ' + match.group(i) + '; '
             debug.trace(debug.QUITE_DETAILED, debug_output)
-
 
             # Update the current line being
             postmatch = line[match.end():]
@@ -188,44 +176,49 @@ class ExtractMatches(Main):
             else:
                 line = postmatch
 
-
             # Transform matching text based on replacement pattern (e.g., 'match.group(N)')
             replacement_text = misc_utils.eval_expression(f'f"{self.replacement}"')
             debug.trace(debug.QUITE_DETAILED, f'replacement text: {replacement_text}')
             result = re.sub(self.pattern, replacement_text, match.group(0), flags=re.IGNORECASE if self.ignore_case else 0)
 
-
             if self.ignore_case and not self.preserve:
                 result = result.lower()
-
 
             debug.trace(debug.QUITE_DETAILED, f'resulting text: {result}')
             print(result)
 
-
             # See if limit for displayed matches reached
             debug.trace(debug.QUITE_DETAILED, f'count={count} max_count={self.max_count}')
             count += 1
-
 
         if count == 0:
             debug.trace(debug.QUITE_VERBOSE, f'line not matched: {line}')
 
 
 if __name__ == '__main__':
-    app = ExtractMatches(description = __doc__,
-                         boolean_options      = [(PARA,            'paragraph input mode'),
-                                                 (SLURP,          f'alias for --{FILE}'),
-                                                 (FILE,            'entire file input mode'),
-                                                 (SINGLE,         f'alias for --{ONE_PER_LINE}'),
-                                                 (ONE_PER_LINE,    'only count one instance of the pattern per line'),
-                                                 (MULTI_PER_LINE,  'multiple matches per line'),
-                                                 (IGNORE,          'ignore case'),
-                                                 (PRESERVE,       f'preserve case (when --{IGNORE} in effect'),
-                                                 (CHOMP,           'strip newline at end')],
-                         positional_arguments = [(PATTERN,         'regex pattern to check for')],
-                         int_options          = [(FIELDS,          'number of output fields'),
-                                                 (MAX_COUNT,       'maximum number of matches per line')],
-                         text_options         = [(REPLACEMENT,     'pattern for replacement (e.g, \\1-\\2-method)'),
-                                                 (RESTORE,         'portion of matching text to be restored')])
+    app = ExtractMatches(
+        description = __doc__,
+        boolean_options = [
+            (PARA, 'paragraph input mode'),
+            (SLURP, f'alias for --{FILE}'),
+            (FILE, 'entire file input mode'),
+            (SINGLE, f'alias for --{ONE_PER_LINE}'),
+            (ONE_PER_LINE, 'only count one instance of the pattern per line'),
+            (MULTI_PER_LINE, 'multiple matches per line'),
+            (IGNORE, 'ignore case'),
+            (PRESERVE, f'preserve case (when --{IGNORE} in effect'),
+            (CHOMP, 'strip newline at end'),
+        ],
+        positional_arguments = [
+            (PATTERN, 'regex pattern to check for'),
+        ],
+        int_options = [
+            (FIELDS, 'number of output fields'),
+            (MAX_COUNT, 'maximum number of matches per line'),
+        ],
+        text_options = [
+            (REPLACEMENT, 'pattern for replacement (e.g, \\1-\\2-method)'),
+            (RESTORE, 'portion of matching text to be restored'),
+        ],
+    )
     app.run()
