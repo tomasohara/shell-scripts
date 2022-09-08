@@ -1,0 +1,8 @@
+# Pip dependencies for modules and scripts
+#
+# Usage:
+#   $ pip install -r pip_requirements.txt
+#
+
+unidecode
+mezcla
