@@ -4,6 +4,8 @@
 # suspicious results. This prints the offending line bracketted by >>>
 # and <<< along with N lines before and after to provide context.
 #
+# NOTE: Based on check_errors.perl
+#
 # TODO:
 # - ** Have option to disable line number
 # - * Change 'error' in filename test as warning.
