@@ -1,15 +1,17 @@
 #! /usr/bin/env python
 #
-# Tests for find_files.py module
+# Tests for find_files module
 
 
-"""Test find_files.py module"""
+"""Test find_files module"""
 
 
-# Standart packages
+# Standard packages
 import unittest
 import re
 
+# Installed packages
+## NOTE: this is empty for now
 
 # Local packages
 from mezcla.unittest_wrapper import TestWrapper
@@ -50,7 +52,7 @@ class TestIt(TestWrapper):
         new_short_file = 'ls-alR.list'
 
         expected_new_files  = [new_long_file, new_short_file]
-        expected_new_files += [new_file + '.log'         for new_file in expected_new_files]
+        expected_new_files += [new_file + '.log' for new_file in expected_new_files]
         expected_new_files += ['backup' + new_file + '.' for new_file in expected_new_files]
 
         # Check if new files exist

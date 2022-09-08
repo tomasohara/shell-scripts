@@ -27,35 +27,34 @@ ex:
 # Standard packages
 import re
 
+# Installed packages
+## NOTE: this is empty for now
 
 # Local packages
 from mezcla.main import Main
-from mezcla      import system
-from mezcla      import debug
+from mezcla import system
+from mezcla import debug
 
 
 # Command-line labels constants
-UNICODE_INFO          = 'show-unicode-info'
+UNICODE_INFO = 'show-unicode-info'
 UNICODE_CONTROL_CHARS = 'show-control-chars'
 
 
 class EncodingTools(Main):
     """Argument processing class"""
 
-
     ## class-level member variables for arguments (avoids need for class constructor)
-    unicode_info          = False
+    unicode_info = False
     unicode_control_chars = False
-
 
     def setup(self):
         """Process arguments"""
         debug.trace(5, f"Script.setup(): self={self}")
 
         # Check the command-line options
-        self.unicode_info          = self.has_parsed_option(UNICODE_INFO)
+        self.unicode_info = self.has_parsed_option(UNICODE_INFO)
         self.unicode_control_chars = self.has_parsed_option(UNICODE_CONTROL_CHARS)
-
 
     def process_line(self, line):
         """Process each line of the input stream"""
@@ -76,7 +75,7 @@ def get_unicode_info(text):
 
     new_text = system.chomp(text)
 
-    info  = 'char\tord\toffset\tencoding\n'
+    info = 'char\tord\toffset\tencoding\n'
     info += f'{new_text}: {len(new_text)}\n'
 
     offset = 0
@@ -87,7 +86,7 @@ def get_unicode_info(text):
 
         utf_char = utf_char if len(utf_char) > 1 else hex(ord(utf_char))[2:]
 
-        info   += f'{char}\t{hex_char.zfill(4)}\t{offset}\t{utf_char}\n'
+        info += f'{char}\t{hex_char.zfill(4)}\t{offset}\t{utf_char}\n'
         offset += int(len(utf_char) / 2)
 
     debug.trace(7, f'get_unicode_info({text}) => {info}')
@@ -102,7 +101,11 @@ def convert_unicode_control_chars(text):
 
 
 if __name__ == '__main__':
-    app = EncodingTools(description     = __doc__,
-                        boolean_options = [(UNICODE_INFO,          'show unicode info'),
-                                           (UNICODE_CONTROL_CHARS, 'convert ascii control characters to printable Unicode ones')])
+    app = EncodingTools(
+        description = __doc__,
+        boolean_options = [
+            (UNICODE_INFO, 'show unicode info'),
+            (UNICODE_CONTROL_CHARS, 'convert ascii control characters to printable Unicode ones'),
+        ],
+    )
     app.run()

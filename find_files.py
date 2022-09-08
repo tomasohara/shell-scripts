@@ -16,29 +16,29 @@ ex:
 import re
 import sys
 
+# Installed packages
+## NOTE: this is empty for now
 
 # Local packages
 from mezcla.main import Main
-from mezcla      import system
-from mezcla      import debug
-from mezcla      import file_utils as fu
-from mezcla      import glue_helpers as gh
+from mezcla import system
+from mezcla import debug
+from mezcla import file_utils as fu
+from mezcla import glue_helpers as gh
 import filenames as fn
 
 
 # Command-line labels constants
 FIND_FILES = 'find-files'
-PATH       = 'path'
+PATH = 'path'
 
 
 class FindFiles(Main):
     """Argument processing class"""
 
-
     # Class-level member variables for arguments (avoids need for class constructor)
     find_files = False
-    path       = ''
-
+    path = ''
 
     def setup(self):
         """Process arguments"""
@@ -46,15 +46,13 @@ class FindFiles(Main):
 
         # Process command-line options
         self.find_files = self.has_parsed_option(FIND_FILES)
-        self.path       = self.get_parsed_argument(PATH, self.path)
-
+        self.path = self.get_parsed_argument(PATH, self.path)
 
         # Check path
         if len(self.path) > 1 and self.path[-1] == '/':
             self.path = self.path[:-1]
         if self.path in ('', '-'):
             self.path = system.get_current_directory()
-
 
     def run_main_step(self):
         """Process input stream"""
@@ -76,9 +74,9 @@ def find_files(path='.', full=False, special_dirs=False):
     debug.trace(debug.VERBOSE, f'find_files(path={path}, full={full}, special_dirs={special_dirs})')
 
     # Setup filenames
-    ls_opts       = 'alR' if full else 'R'
-    filename      = 'ls-' + ls_opts + '.list'
-    log_filename  = filename + '.log'
+    ls_opts = 'alR' if full else 'R'
+    filename = 'ls-' + ls_opts + '.list'
+    log_filename = filename + '.log'
     current_files = [filename, log_filename]
 
     # Rename existing files with file date as suffix and move to a backup folder
@@ -91,14 +89,14 @@ def find_files(path='.', full=False, special_dirs=False):
     # Perform the actual listings, putting errors in the .log file for each listing
     # Note: If root directory and special_dirs is false, filters out special directories.
     ## TODO: ** resolve intermittent problem when running under /
-    dir_list           = fu.get_directory_listing(path, recursive=True, long=full, return_string=True)
-    is_root_dir        = path == '/'
+    dir_list = fu.get_directory_listing(path, recursive=True, long=full, return_string=True)
+    is_root_dir = path == '/'
     regex_special_dirs = '^\\.(/(cdrom|dev|media|mnt|proc|run|sys|snap)$)'
-    file_content       = ''
+    file_content = ''
     for item in dir_list:
         if is_root_dir and not special_dirs and re.search(regex_special_dirs, item):
             continue
-        item          = re.sub(r'^\.\/\.', '\n./', item)
+        item = re.sub(r'^\.\/\.', '\n./', item)
         file_content += item + '\n'
 
     # Save the files
@@ -134,8 +132,14 @@ def find_files_here():
 
 
 if __name__ == '__main__':
-    app = FindFiles(description     = __doc__,
-                    boolean_options = [(FIND_FILES, 'list files in current directory tree and save the result')],
-                    positional_options = [(PATH, 'path target')],
-                    manual_input    = True)
+    app = FindFiles(
+        description = __doc__,
+        boolean_options = [
+            (FIND_FILES, 'list files in current directory tree and save the result'),
+        ],
+        positional_options = [
+            (PATH, 'path target'),
+        ],
+        manual_input = True,
+    )
     app.run()

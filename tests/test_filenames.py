@@ -1,15 +1,17 @@
 #! /usr/bin/env python
 #
-# Tests for filenames.py module
+# Tests for filenames module
 
 
-"""Test filenames.py module"""
+"""Test filenames module"""
 
 
-# Standart packages
+# Standard packages
 import unittest
 import re
 
+# Installed packages
+## NOTE: this is empty for now
 
 # Local packages
 from mezcla.unittest_wrapper import TestWrapper
@@ -21,7 +23,6 @@ class TestIt(TestWrapper):
     script_module = TestWrapper.derive_tested_module_name(__file__) + '.py'
     maxDiff       = None
 
-
     def test_get_free_filename(self):
         """Test for get_free_filename(basename, separation)"""
         basename        =  self.temp_file
@@ -30,12 +31,10 @@ class TestIt(TestWrapper):
         gh.run(f'touch {basename} {basename}{separation}1')
         self.assertEqual(gh.run(f'python {self.script_module} --free --base "{basename}" --sep "{separation}"'), expected_result)
 
-
     def test_get_name_with_date(self):
         """Test for get_name_with_date(filename)"""
         gh.run(f'touch {self.temp_file}')
         self.assertTrue(re.search(f'{self.temp_file}\\.\\d\\d\\w\\w\\w\\d\\d', gh.run(f'python {self.script_module} --free-with-date --base {self.temp_file}')))
-
 
     def test_rename_with_file_date(self):
         """Test for rename_with_file_date(basename, target='./', copy=False)"""
@@ -54,11 +53,9 @@ class TestIt(TestWrapper):
         # Third test: target dir
         ## WORK-IN-PROGRESS
 
-
     def test_multiple_files(self):
         """Test with multiples filenames input"""
         ## WORK-IN-PROGRESS
-
 
     def test_stdin_input(self):
         """Test input via STDIN"""

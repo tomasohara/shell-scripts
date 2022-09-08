@@ -50,23 +50,23 @@ import sys
 
 # Local packages
 from mezcla.main import Main
-from mezcla      import debug
-from mezcla      import system
+from mezcla import debug
+from mezcla import system
 
 
 # Command-line labels constants
 ## Tom: good to have --input w/ --i as alias (i.e., general only use one letter
 ## switches as abbreviations). Note that GNU's convention uses dashes for long
 ## names and -'s for single letter ones), so --i is a little confusing.
-INPUT             = 'input'
-HEX2DEC           = 'hex2dec'
-DEC2HEX           = 'dec2hex'
-BIN2DEC           = 'bin2dec'
-DEC2BIN           = 'dec2bin'
-SUFFIX            = 'suffix'       # convert number to use K/M/G suffixes
+INPUT = 'input'
+HEX2DEC = 'hex2dec'
+DEC2HEX = 'dec2hex'
+BIN2DEC = 'bin2dec'
+DEC2BIN = 'dec2bin'
+SUFFIX = 'suffix' # convert number to use K/M/G suffixes
 SUFFIX_FIRST_ONLY = 'suffix-first'
-USAGE_SUFFIX      = 'usage-suffix' # factor 1k the first number and then apply suffix
-COMMA             = 'comma-ize'
+USAGE_SUFFIX = 'usage-suffix' # factor 1k the first number and then apply suffix
+COMMA = 'comma-ize'
 
 
 class NumericSystem(Main):
@@ -74,56 +74,54 @@ class NumericSystem(Main):
     ## Tom: misleading comment as really just argument processing
     ## suggestion: """Argument processing class""
 
-
     ## class-level member variables for arguments (avoids need for class constructor)
     ## Tom: reserve '##' for temporary comments. I used this in template.py for TODO notes.
-    input_string        = ''
-    hex2dec             = False
-    dec2hex             = False
-    bin2dec             = False
-    dec2bin             = False
-    suffixes            = False
+    input_string = ''
+    hex2dec = False
+    dec2hex = False
+    bin2dec = False
+    dec2bin = False
+    suffixes = False
     suffixes_first_only = False
-    usage_suffix        = False
-    comma               = False
-
+    usage_suffix = False
+    comma = False
 
     def setup(self):
         """Process arguments"""
         debug.trace(5, f"Script.process_line(): self={self}")
 
         # Process command-line options
-        self.input_string        = self.get_parsed_argument(INPUT, self.input_string)
-        self.hex2dec             = self.has_parsed_option(HEX2DEC)
-        self.dec2hex             = self.has_parsed_option(DEC2HEX)
-        self.bin2dec             = self.has_parsed_option(BIN2DEC)
-        self.dec2bin             = self.has_parsed_option(DEC2BIN)
-        self.suffixes            = self.has_parsed_option(SUFFIX)
+        self.input_string = self.get_parsed_argument(INPUT, self.input_string)
+        self.hex2dec = self.has_parsed_option(HEX2DEC)
+        self.dec2hex = self.has_parsed_option(DEC2HEX)
+        self.bin2dec = self.has_parsed_option(BIN2DEC)
+        self.dec2bin = self.has_parsed_option(DEC2BIN)
+        self.suffixes = self.has_parsed_option(SUFFIX)
         self.suffixes_first_only = self.has_parsed_option(SUFFIX_FIRST_ONLY)
-        self.usage_suffix        = self.has_parsed_option(USAGE_SUFFIX)
-        self.comma               = self.has_parsed_option(COMMA)
+        self.usage_suffix = self.has_parsed_option(USAGE_SUFFIX)
+        self.comma = self.has_parsed_option(COMMA)
 
         ## Tom: good to ensure just one of above used
         ##    debug.assertion((0 < sum([self.hex2dec, ..., self.comma]) <= 1), "Options are mutually exclusive")}
-        option_list = [self.hex2dec,
-                       self.dec2hex,
-                       self.bin2dec,
-                       self.dec2bin,
-                       self.suffixes,
-                       self.suffixes_first_only,
-                       self.usage_suffix,
-                       self.comma]
-        option_sum  = sum(bool(x) for x in option_list)
+        option_list = [
+            self.hex2dec,
+            self.dec2hex,
+            self.bin2dec,
+            self.dec2bin,
+            self.suffixes,
+            self.suffixes_first_only,
+            self.usage_suffix,
+            self.comma
+        ]
+        option_sum = sum(bool(x) for x in option_list)
         debug.assertion(0 < option_sum <= 1, "Options are mutually exclusive")
 
         ## Tom: trace instance after args parsed
         debug.trace_object(5, self, label="Script instance")
 
-
     def run_main_step(self):
         """Process input stream"""
         debug.trace(5, f"Script.run_main_step(): self={self}")
-
 
         # Read stdin if not positional input provided
         if not self.input_string:
@@ -131,9 +129,7 @@ class NumericSystem(Main):
             ## Also, add a function for tracing input as TL.VERBOSE (e.g., system.read_all_stdin)
             self.input_string = system.read_all_stdin().strip()
 
-
         debug.assertion(self.input_string, "No value/s entered")
-
 
         ## TODO: sanitization of self.input_string.
         if self.hex2dec:
@@ -259,7 +255,7 @@ def apply_suffixes(numeric_text, first_only=False, precision=1):
 def apply_usage_suffixes(numeric_text, precision=1):
     """Factor 1K blocksize and apply suffixes"""
 
-    numbers_list     = numeric_text.split(' ')
+    numbers_list = numeric_text.split(' ')
     factored_numbers = str(int(numbers_list[0]) * 1024)
     for number in numbers_list[1:]:
         factored_numbers += ' ' + number
@@ -271,15 +267,20 @@ def apply_usage_suffixes(numeric_text, precision=1):
 
 
 if __name__ == '__main__':
-    app = NumericSystem(description          = __doc__,
-                        boolean_options      = [(HEX2DEC,           'convert hexadecimal to decimal'),
-                                                (DEC2HEX,           'convert decimal to hexadecimal'),
-                                                (BIN2DEC,           'convert binary to decimal'),
-                                                (DEC2BIN,           'convert decimal to binary'),
-                                                (SUFFIX,            'convert number to use K/M/G suffixes'),
-                                                (SUFFIX_FIRST_ONLY, 'suffix only the first number'),
-                                                (USAGE_SUFFIX,      'factor 1k the first number and then apply suffix'),
-                                                (COMMA,             'add commas to numbers')],
-                        positional_options   = [(INPUT,            f'input')] if len(sys.argv) >= 3 else None,
-                        skip_input           = True)
+    app = NumericSystem(
+        description = __doc__,
+        boolean_options = [
+            (HEX2DEC, 'convert hexadecimal to decimal'),
+            (DEC2HEX, 'convert decimal to hexadecimal'),
+            (BIN2DEC, 'convert binary to decimal'),
+            (DEC2BIN, 'convert decimal to binary'),
+            (SUFFIX, 'convert number to use K/M/G suffixes'),
+            (SUFFIX_FIRST_ONLY, 'suffix only the first number'),
+            (USAGE_SUFFIX, 'factor 1k the first number and then apply suffix'),
+            (COMMA, 'add commas to numbers'),
+        ],
+        positional_options = [
+            (INPUT, 'input'),
+        ] if len(sys.argv) >= 3 else None,
+        skip_input = True)
     app.run()
