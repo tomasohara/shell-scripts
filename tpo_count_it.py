@@ -6,6 +6,8 @@
 # NOTE: This is a simple script that turns out to be very useful
 # for a variety of tasks, especially in corpus analysis.
 #
+# NOTE: Based on count_it.perl
+#
 # examples:
 #
 # tabulating most commonly used commands:
@@ -40,7 +42,7 @@ tpo_count_it.py -restore='{match.group(3)}' '((\\S+\\s+)((\\S+\\s+){2}\\S+))' ti
 
 
 # Standard packages
-# TODO: replace re by the local implementation my_re
+## TODO: replace re by the local implementation my_re
 import re
 
 
@@ -83,14 +85,14 @@ RESTORE           = 'restore'           # portion of matching text to be restore
 MULTI_PER_LINE    = 'multi_per_line'    # count multiple instance of the pattern per line (even when ^ and $ are specified)
 ONE_PER_LINE      = 'one_per_line'      # only count one instance of the pattern per line
 VERBOSE           = 'verbose'           # verbose output mode
-# TODO: add optional extended help with examples for misc. options
+## TODO: add optional extended help with examples for misc. options
 
 
 class CountIt(Main):
     """Count the occurrences of a pattern class"""
 
 
-    ## class-level member variables for arguments (avoids need for class constructor)
+    # Class-level member variables for arguments (avoids need for class constructor)
     ignore_case      = False
     preserve         = False
     freq_first       = False
@@ -108,12 +110,11 @@ class CountIt(Main):
     restore          = ""
     verbose          = False
     one_per_line     = False
-    multi_per_line   = False
     paragraph_mode   = False # paragraph mode
     file_input_mode  = False # aka file slurping
 
 
-    ## Global State
+    # Global State
     count_dict  = {} # assoc. dic for pattern counting
 
 
@@ -151,29 +152,29 @@ class CountIt(Main):
         self.trim             =  self.has_parsed_option(TRIM)
         self.unaccent         =  self.has_parsed_option(UNACCENT)
 
-        self.pattern          =  self.get_parsed_argument(PATTERN, "")
+        self.pattern          =  self.get_parsed_argument(PATTERN, self.pattern)
         self.pattern          =  system.read_file(self.pattern) if system.file_exists(self.pattern) else self.pattern # check if is a file with pattern (to cirvumvent shell UTF8 issues)
 
         self.chomp            = (self.has_parsed_option(CHOMP) or
                                  not re.match('\\n', self.pattern))
 
-        self.restore          =  self.get_parsed_argument(RESTORE, "")
+        self.restore          =  self.get_parsed_argument(RESTORE, self.restore)
         self.verbose          =  self.get_parsed_option(VERBOSE)
 
 
         # See if regex has line achor (^ or $)
         # NOTE: Escaped $ are ignored.
-        has_line_anchor     = re.search(r'^\^|[^\\]\$$', self.pattern)
-        self.one_per_line   = self.has_parsed_option(ONE_PER_LINE) or has_line_anchor         # only count one instance of the pattern per line
-        self.multi_per_line = self.has_parsed_option(MULTI_PER_LINE) or not self.one_per_line # count multiple instance of the pattern per line (even when ^ and $ are specified)
-        debug.assertion(not (self.one_per_line and self.multi_per_line))
+        has_line_anchor   = re.search(r'^\^|[^\\]\$$', self.pattern)
+        self.one_per_line = self.has_parsed_option(ONE_PER_LINE) or has_line_anchor         # only count one instance of the pattern per line
+        multi_per_line    = self.has_parsed_option(MULTI_PER_LINE) or not self.one_per_line # count multiple instance of the pattern per line (even when ^ and $ are specified)
+        debug.assertion(not (self.one_per_line and multi_per_line))
 
 
         # Sanity check for whether one-per-line option might be needed
         # NOTE: checks against pattern need to occur prior to modification (e.g., paren addition)
-        # TODO: handle multiple patterns per line (e.g., set line break to null); likewise check for multiple end-of-line matching
-        if re.search(r'^\^.*[^\$\n]$', self.pattern) and not self.multi_per_line:
-            debug.trace(debug.USUAL, 'You might want to specify -multi_per_line if you want ^ and/or $ interpretted after match removal.')
+        ## TODO: handle multiple patterns per line (e.g., set line break to null); likewise check for multiple end-of-line matching
+        if re.search(r'^\^.*[^\$\n]$', self.pattern) and not multi_per_line:
+            debug.trace(debug.USUAL, f'You might want to specify --{MULTI_PER_LINE} if you want ^ and/or $ interpretted after match removal.')
 
 
         # Put grouping parenthesis around pattern, if none present
@@ -197,7 +198,7 @@ class CountIt(Main):
 
         # NOTE: a chop isn't performed by default to allow for using the newline in a pattern.
         # This is often more convenient than using $ (e.g., when using csh).
-        # TODO: add sanity check about DOS carriage returns screwing up pattern matching
+        ## TODO: add sanity check about DOS carriage returns screwing up pattern matching
         if self.chomp:
             line = system.chomp(line)
         debug.trace(debug.QUITE_DETAILED, f'{line}')
@@ -214,10 +215,7 @@ class CountIt(Main):
 
 
             # Try to extract match from the line
-            if self.ignore_case:
-                match = re.search(self.pattern, line, flags=re.IGNORECASE)
-            else:
-                match = re.search(self.pattern, line)
+            match = re.search(self.pattern, line, flags=re.IGNORECASE if self.ignore_case else 0)
 
 
             if match:
@@ -316,23 +314,25 @@ class CountIt(Main):
 # Remove diacritic marks from the text
 def remove_diacritics(text):
     """Removes diacritic marks from the text"""
-    return unidecode.unidecode(text)
+    result = unidecode.unidecode(text)
+    debug.trace(7, f'remove_diacritics({text}) => {result}')
+    return result
 
 
 # Removes leading and trailing whitespace
 def trim_whitespaces(text):
     """Removes leading and trailing whitespace"""
-    text = text.lstrip()
-    text = text.rstrip()
-    return text
+    new_text = text.lstrip().rstrip()
+    debug.trace(7, f'trim_whitespaces({text}) => {new_text}')
+    return new_text
 
 
 if __name__ == '__main__':
     app = CountIt(description = __doc__,
                   boolean_options      = [(IGNORE_SHORT,     'ignore case in the pattern matching'),
-                                          (IGNORE_LONG,      'alias for --i option'),
+                                          (IGNORE_LONG,     f'alias for --{IGNORE_SHORT} option'),
                                           (FOLDCASE,         'fold (convert) text to lowercase'),
-                                          (FOLD,             'alias for --foldcase'),
+                                          (FOLD,            f'alias for --{FOLDCASE}'),
                                           (PRESERVE,         'preserve the case of text matching pattern'),
                                           (PARA,             'reads text in paragraph mode (rather than line)'),
                                           (SLURP,            'reads the entire file at once (for long-distance patterns)'),
@@ -342,9 +342,9 @@ if __name__ == '__main__':
                                           (CUMULATIVE,       'include column for cumulative counts'),
                                           (OCCURRENCES,      'incorporates count field'),
                                           (PERCENTS,         'shows the relative percents'),
-                                          (MIN2,             'alias for --nonsingletons'),
-                                          (MULTIPLE,         'alias for --nonsingletons'),
-                                          (NONSINGLETON,     'alias for --nonsingletons'),
+                                          (MIN2,            f'alias for --{NONSINGLETONS}'),
+                                          (MULTIPLE,        f'alias for --{NONSINGLETONS}'),
+                                          (NONSINGLETON,    f'alias for --{NONSINGLETONS}'),
                                           (NONSINGLETONS,    'ignore item occurring just once'),
                                           (TRIM,             'trim whitespace in matched text'),
                                           (UNACCENT,         'remove accent marks from input'),
