@@ -354,7 +354,7 @@ class CalcEntropy(Main):
                 result += f'{system.round_as_str(prob_value)}\n'
             elif self.verbose:
                 result += (f'#\t\t{class_name}\t'
-                           f'{frequency}\t'
+                           f'{system.round_as_str(frequency)}\t'
                            f'{system.round_as_str(prob_value)}\t'
                            f'{system.round_as_str(p_lg_p)}\n')
 
@@ -363,14 +363,14 @@ class CalcEntropy(Main):
             # do nothing
             pass
         elif self.verbose:
-            result += (f'#\t\ttotal\t{total_frequency}\t'
+            result += (f'#\t\ttotal\t{system.round_as_str(total_frequency)}\t'
                        f'1.000\t'
                        f'{system.round_as_str(entropy)}\n\n')
             if not self.skip_header:
                 result += '# word\tclasses\tfreq\tentropy\tmax_prob\n'
             result += (f'{word}\t'
                        f'{len(data)}\t'
-                       f'{total_frequency}\t'
+                       f'{system.round_as_str(total_frequency)}\t'
                        f'{system.round_as_str(entropy)}\t'
                        f'{system.round_as_str(max_prob)}')
         else:
