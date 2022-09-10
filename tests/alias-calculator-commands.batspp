@@ -1,0 +1,170 @@
+# Setup
+$ bind 'set enable-bracketed-paste off'
+
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+# $ echo 'Hii'
+# | Hi?2004l
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+# Setting a temp directory for tests
+$ TMP=/tmp/test-calc
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+$ alias | wc -l
+0
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 1210)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-1210
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-calc/test-1210
+
+# Count aliases proper
+$ alias | wc -l
+1
+
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+0
+
+## THE CORE OF CALCULATOR COMMAND FUNCTIONS
+$ function old-calc () { echo "$@" | bc -l; }
+# EX: perl-calc "2 / 4" => 0.500
+## REPLACED perl- wth perl (BEFORE perlcalc.perl) & ADDED $BIN_DIR/ DUE TO COMMAND NOT FOUND ERROR
+$ function perl-calc () { perl $BIN_DIR/perlcalc.perl -args "$@"; }
+# TODO: read up on variable expansion in function environments
+$ function perl-calc-init () { initexpr="$1"; shift; echo "$@" | perl perlcalc.perl -init="$initexpr" -; }
+$ alias calc='perl-calc'
+$ alias calc-prec6='perl-calc -precision=6'
+$ alias calc-init='perl-calc-init'
+$ alias calc-int='perl-calc -integer'
+# TODO: use '$@' for '$*' (or note why not appropriate)
+$ function old-perl-calc () { perl -e "print $*;"; }
+$ function hex2dec { perl -e "printf '%d', 0x$1;" -e 'print "\n";'; }
+$ function dec2hex { perl -e "printf '%x', $1;" -e 'print "\n";'; }
+$ function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
+$ function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
+$ alias hv='hexview.perl'
+
+## TEST 1 - old-calc SEEMS TO WORK PRETTY WELL
+$ old-calc "24 / 4.0 - (35 / 7.0) * 5" # returns -19 as float
+$ linebr
+$ old-calc "(2^3)*(2^2)" # returns 32
+$ linebr
+$ old-calc "5*4*3*2*1+1" # returns 121
+-19.00000000000000000000
+--------------------------------------------------------------------------------
+32
+--------------------------------------------------------------------------------
+121
+
+## TEST 2 - old-perl-calc WORKS TOO
+$ old-perl-calc "70 + 69 + 68"
+$ printf "\n"
+$ linebr
+$ old-perl-calc "8/8/8/8/8"
+$ printf "\n"
+$ linebr
+207
+--------------------------------------------------------------------------------
+0.001953125
+--------------------------------------------------------------------------------
+
+## TEST 3A - hex2dec
+$ hex2dec "42Df5D144" 
+#cases don't matter in the number
+$ linebr
+$ hex2dec "F"
+# ERROR: COMPLETE STUPIDITY
+# $ hex2dec "FG" 
+# | Bareword found where operator expected at -e line 1, near "0xFG"
+# | 	(Missing operator before G?)
+# | syntax error at -e line 1, near "0xFG"
+# | Execution of -e aborted due to compilation errors.
+17950953796
+--------------------------------------------------------------------------------
+15
+
+## TEST 3B - hex2dec
+$ dec2hex "128"
+#inclusion of non-decimal numbers yield 0 as a result
+$ dec2hex "A12" 
+80
+0
+
+## TEST 3C - bin2dec
+$ bin2dec "11110011"
+$ linebr
+#inclusion of non-binary numbers leads to error
+$ bin2dec "0110" 
+243
+--------------------------------------------------------------------------------
+6
+
+## TEST 3D - dec2bin
+$ dec2bin "70419"
+#inclusion of non-decimal number leads to error
+$ dec2bin "10"
+10001001100010011
+1010
+
+## TEST 4 - hv
+# creates hexview of ping.sh file
+$ pwd
+$ rm -rf ./*
+# $ hv "ping.sh"
+# | Can't open ping.sh: No such file or directory
+$ ps -l > testforhv.txt
+$ hv testforhv.txt
+/tmp/test-calc/test-1210
+00000000  46 20 53 20 20 20 55 49 - 44 20 20 20 20 20 50 49  F S   UID     PI
+00000010  44 20 20 20 20 50 50 49 - 44 20 20 43 20 50 52 49  D    PPID  C PRI
+00000020  20 20 4E 49 20 41 44 44 - 52 20 53 5A 20 57 43 48    NI ADDR SZ WCH
+00000030  41 4E 20 20 54 54 59 20 - 20 20 20 20 20 20 20 20  AN  TTY         
+00000040  20 54 49 4D 45 20 43 4D - 44 0A 30 20 53 20 20 31   TIME CMD.0 S  1
+00000050  30 30 30 20 20 20 31 30 - 34 38 32 20 20 20 31 30  000   10482   10
+00000060  34 37 32 20 20 33 20 20 - 38 30 20 20 20 30 20 2D  472  3  80   0 -
+00000070  20 20 32 38 37 30 20 64 - 6F 5F 77 61 69 20 70 74    2870 do_wai pt
+00000080  73 2F 34 20 20 20 20 30 - 30 3A 30 30 3A 30 30 20  s/4    00:00:00 
+00000090  62 61 73 68 0A 34 20 52 - 20 20 31 30 30 30 20 20  bash.4 R  1000  
+000000A0  20 31 30 35 34 32 20 20 - 20 31 30 34 38 32 20 20   10542   10482  
+000000B0  30 20 20 38 30 20 20 20 - 30 20 2D 20 20 33 31 36  0  80   0 -  316
+000000C0  37 20 2D 20 20 20 20 20 - 20 70 74 73 2F 34 20 20  7 -      pts/4  
+000000D0  20 20 30 30 3A 30 30 3A - 30 30 20 70 73 0A          00:00:00 ps.
+
+## TEST 5 - calc AND ITS ALIASES
+## ERROR IN CODE 
+# $ calc "9+10"
+# | Number found where operator expected at (eval 34) line 1, near "args 9"
+# |         (Do you need to predeclare args?)
+# | Missing argument in printf at /home/aveey/bin/perlcalc.perl line 117, <> line 1.
+# | 0.000
+# $ echo "12+3" > calculateit.txt
+# $ perl-calc "2 / 4"
+
+## ERROR
+# $ perl-calc-init "9+10"
+# | Missing argument in printf at /home/aveey/bin/perlcalc.perl line 117, <> line 1.
+# | 0.000 

@@ -1,0 +1,380 @@
+#!/usr/bin/env bats
+
+
+# Make executables ./tests/../ visible to PATH
+PATH="/home/aveey/tom-project/shell-scripts/tests/../:$PATH"
+
+# Source files
+shopt -s expand_aliases
+
+
+@test "test id968659" {
+	testfolder=$(echo /tmp/test-id968659-$$)
+	mkdir $testfolder && cd $testfolder
+	actual=$(test-id968659-actual)
+	expected=$(test-id968659-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id968659-actual () {
+	bind 'set enable-bracketed-paste off'
+}
+
+function test-id968659-expected () {
+	echo -e '\x1b[?2004h\x1b[?2004l\x1b[?2004l\x1b[?2004l\x1b[?2004l\x1b[?2004l\x1b[?2004l\x1b[?2004l'
+}
+
+
+@test "test id136185" {
+	testfolder=$(echo /tmp/test-id136185-$$)
+	mkdir $testfolder && cd $testfolder
+	actual=$(test-id136185-actual)
+	expected=$(test-id136185-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id136185-actual () {
+	echo $PS1
+}
+
+function test-id136185-expected () {
+	echo -e '[PEXP\\[\\]ECT_PROMPT>'
+}
+
+
+@test "test id475870" {
+	testfolder=$(echo /tmp/test-id475870-$$)
+	mkdir $testfolder && cd $testfolder
+	unalias -a
+	alias | wc -l
+	for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+	actual=$(test-id475870-actual)
+	expected=$(test-id475870-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id475870-actual () {
+	typeset -f | egrep '^\w+' | wc -l
+}
+
+function test-id475870-expected () {
+	echo -e '0\n0'
+}
+
+
+@test "test id243176" {
+	testfolder=$(echo /tmp/test-id243176-$$)
+	mkdir $testfolder && cd $testfolder
+	actual=$(test-id243176-actual)
+	expected=$(test-id243176-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id243176-actual () {
+	TMP=/tmp/test-unix
+}
+
+function test-id243176-expected () {
+	echo -e '## NOTE: Source it directly from the ./tests directory.\n$ BIN_DIR=$PWD/..\n$ alias | wc -l\n0'
+}
+
+
+@test "test id450812" {
+	testfolder=$(echo /tmp/test-id450812-$$)
+	mkdir $testfolder && cd $testfolder
+	temp_dir=$TMP/test-3245
+	actual=$(test-id450812-actual)
+	expected=$(test-id450812-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id450812-actual () {
+	mkdir -p "$temp_dir"
+}
+
+function test-id450812-expected () {
+	echo -e '# TODO: /bin/rm -rvf "$temp_dir"\n$ cd "$temp_dir"\n$ pwd\n#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)\n$ alias linebr="printf \'%*s\\n\' "${COLUMNS:-$(tput cols)}" \'\' | tr \' \' -"\n/tmp/test-unix/test-3245'
+}
+
+
+@test "test id235912" {
+	testfolder=$(echo /tmp/test-id235912-$$)
+	mkdir $testfolder && cd $testfolder
+	actual=$(test-id235912-actual)
+	expected=$(test-id235912-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id235912-actual () {
+	alias | wc -l
+}
+
+function test-id235912-expected () {
+	echo -e "# Count functions\n$ typeset -f | egrep '^\\w+' | wc -l\n1\n0"
+}
+
+
+@test "test id426497" {
+	testfolder=$(echo /tmp/test-id426497-$$)
+	mkdir $testfolder && cd $testfolder
+	function ps-all () { 
+	local pattern="$1";
+	local pager=cat;
+	if [ "$pattern" = "" ]; then 
+	pattern="."; 
+	pager=$PAGER
+	fi;
+	ps_mine.sh --all | $EGREP -i "((^USER)|($pattern))" | $pager;
+	}
+	alias ps-script='ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
+	function ps-sort-once { ps_sort.perl -num_times=1 -by=time "$@" -; }
+	alias ps-sort-time='ps-sort-once -by=time'
+	alias ps-time=ps-sort-time
+	alias ps-sort-mem='ps-sort-once -by=mem '
+	alias ps-mem=ps-sort-mem
+	alias ps-script='ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
+	function ps-sort-once { ps_sort.perl -num_times=1 -by=time "$@" -; }
+	alias ps-sort-time='ps-sort-once -by=time'
+	alias ps-time=ps-sort-time
+	alias ps-sort-mem='ps-sort-once -by=mem '
+	actual=$(test-id426497-actual)
+	expected=$(test-id426497-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id426497-actual () {
+	alias ps-mem=ps-sort-mem
+}
+
+function test-id426497-expected () {
+	echo -e '# SORTS ALL PROCESS BY TIME\n$ ps-sort-time\nError: bad sort field (time): using cpu\nUSER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\naveey       1708 16.6 12.2 3750168 451212 ?      Ssl  12:35  14:12 /snap/firef\naveey       7253  7.0  1.4 672904 51852 ?        Ssl  14:00   0:01 /usr/bin/py\nroot         883  4.0  2.8 681108 103556 tty1    Ssl+ 12:33   3:31 /usr/lib/xo\naveey       2355  2.3  8.5 30101932 314728 ?     Sl   12:35   2:01 /opt/Upwork\naveey       7266  1.3  0.1  11412  5400 pts/4    Ss   14:00   0:00 /usr/bin/ba\naveey       6367  0.7  5.3 2557656 195760 ?      Sl   13:24   0:16 /snap/firef\naveey       3307  0.6  1.3 376012 49876 ?        Sl   12:37   0:30 /snap/firef\naveey       1306  0.5  2.1 246112 79732 pts/0    Sl+  12:35   0:29 /usr/bin/py\naveey       2203  0.5  4.4 4827552 164000 ?      Sl   12:35   0:27 /opt/Upwork\naveey       2432  0.4  3.6 19525172 133860 ?     Sl   12:36   0:21 /snap/firef\naveey       3124  0.4  3.7 2485448 138144 ?      Sl   12:36   0:22 /snap/firef\naveey       1076  0.1  2.7 1206132 100716 ?      Sl   12:34   0:06 /usr/bin/lx\naveey       2333  0.1  1.9 286016 71492 ?        Sl   12:35   0:05 /opt/Upwork\naveey       5282  0.1  1.4 675084 53224 ?        Ssl  12:48   0:04 /usr/bin/py\naveey       6412  0.1  3.8 2508092 141004 ?      Sl   13:24   0:03 /snap/firef\nroot           1  0.0  0.3 166328 11596 ?        Ss   12:32   0:01 /sbin/init \nroot           2  0.0  0.0      0     0 ?        S    12:32   0:00 [kthreadd]\nroot           3  0.0  0.0      0     0 ?        I<   12:32   0:00 [rcu_gp]\nroot           4  0.0  0.0      0     0 ?        I<   12:32   0:00 [rcu_par_gp\nroot           5  0.0  0.0      0     0 ?        I<   12:32   0:00 [netns]\nroot           7  0.0  0.0      0     0 ?        I<   12:32   0:00 [kworker/0:\nroot           9  0.0  0.0      0     0 ?        I<   12:32   0:00 [mm_percpu_\nroot          10  0.0  0.0      0     0 ?        S    12:32   0:00 [rcu_tasks_\nroot          11  0.0  0.0      0     0 ?        S    12:32   0:00 [rcu_tasks_\nroot          12  0.0  0.0      0     0 ?        S    12:32   0:00 [ksoftirqd/\nroot          13  0.0  0.0      0     0 ?        I    12:32   0:02 [rcu_sched]\nroot          14  0.0  0.0      0     0 ?        S    12:32   0:00 [migration/\nroot          15  0.0  0.0      0     0 ?        S    12:32   0:00 [idle_injec\nroot          17  0.0  0.0      0     0 ?        S    12:32   0:00 [cpuhp/0]\nroot          18  0.0  0.0      0     0 ?        S    12:32   0:00 [cpuhp/1]\nroot          19  0.0  0.0      0     0 ?        S    12:32   0:00 [idle_injec\nroot          20  0.0  0.0      0     0 ?        S    12:32   0:00 [migration/\nroot          21  0.0  0.0      0     0 ?        S    12:32   0:00 [ksoftirqd/\nroot          23  0.0  0.0      0     0 ?        I<   12:32   0:00 [kworker/1:\nroot          24  0.0  0.0      0     0 ?        S    12:32   0:00 [cpuhp/2]\nroot          25  0.0  0.0      0     0 ?        S    12:32   0:00 [idle_injec\nroot          26  0.0  0.0      0     0 ?        S    12:32   0:00 [migration/\nroot          27  0.0  0.0      0     0 ?        S    12:32   0:00 [ksoftirqd/'
+}
+
+
+@test "test id621384" {
+	testfolder=$(echo /tmp/test-id621384-$$)
+	mkdir $testfolder && cd $testfolder
+	actual=$(test-id621384-actual)
+	expected=$(test-id621384-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id621384-actual () {
+	ps-time
+}
+
+function test-id621384-expected () {
+	echo -e 'Error: bad sort field (time): using cpu\nUSER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\naveey       1708 16.6 12.2 3750168 451208 ?      Ssl  12:35  14:12 /snap/firef\naveey       7253  7.3  1.4 672904 51888 ?        Ssl  14:00   0:01 /usr/bin/py\nroot         883  4.0  2.8 681108 103556 tty1    Rsl+ 12:33   3:31 /usr/lib/xo\naveey       2355  2.3  8.0 30084272 297092 ?     Sl   12:35   2:01 /opt/Upwork\naveey       7266  1.3  0.1  11412  5400 pts/4    Ss   14:00   0:00 /usr/bin/ba\naveey       6367  0.7  5.3 2557656 196064 ?      Rl   13:24   0:17 /snap/firef\naveey       3307  0.6  1.3 376012 49876 ?        Sl   12:37   0:30 /snap/firef\naveey       1306  0.5  2.1 246112 79732 pts/0    Sl+  12:35   0:29 /usr/bin/py\naveey       2203  0.5  4.4 4827552 164000 ?      Sl   12:35   0:27 /opt/Upwork\naveey       2432  0.4  3.6 19525172 133860 ?     Sl   12:36   0:21 /snap/firef\naveey       3124  0.4  3.7 2485448 138144 ?      Sl   12:36   0:22 /snap/firef\naveey       1076  0.1  2.7 1206132 100716 ?      Sl   12:34   0:06 /usr/bin/lx\naveey       2333  0.1  1.9 286016 71492 ?        Sl   12:35   0:05 /opt/Upwork\naveey       5282  0.1  1.4 675084 53224 ?        Ssl  12:48   0:04 /usr/bin/py\naveey       6412  0.1  3.8 2508092 141004 ?      Sl   13:24   0:03 /snap/firef\nroot           1  0.0  0.3 166328 11596 ?        Ss   12:32   0:01 /sbin/init \nroot           2  0.0  0.0      0     0 ?        S    12:32   0:00 [kthreadd]\nroot           3  0.0  0.0      0     0 ?        I<   12:32   0:00 [rcu_gp]\nroot           4  0.0  0.0      0     0 ?        I<   12:32   0:00 [rcu_par_gp\nroot           5  0.0  0.0      0     0 ?        I<   12:32   0:00 [netns]\nroot           7  0.0  0.0      0     0 ?        I<   12:32   0:00 [kworker/0:\nroot           9  0.0  0.0      0     0 ?        I<   12:32   0:00 [mm_percpu_\nroot          10  0.0  0.0      0     0 ?        S    12:32   0:00 [rcu_tasks_\nroot          11  0.0  0.0      0     0 ?        S    12:32   0:00 [rcu_tasks_\nroot          12  0.0  0.0      0     0 ?        S    12:32   0:00 [ksoftirqd/\nroot          13  0.0  0.0      0     0 ?        I    12:32   0:02 [rcu_sched]\nroot          14  0.0  0.0      0     0 ?        S    12:32   0:00 [migration/\nroot          15  0.0  0.0      0     0 ?        S    12:32   0:00 [idle_injec\nroot          17  0.0  0.0      0     0 ?        S    12:32   0:00 [cpuhp/0]\nroot          18  0.0  0.0      0     0 ?        S    12:32   0:00 [cpuhp/1]\nroot          19  0.0  0.0      0     0 ?        S    12:32   0:00 [idle_injec\nroot          20  0.0  0.0      0     0 ?        S    12:32   0:00 [migration/\nroot          21  0.0  0.0      0     0 ?        S    12:32   0:00 [ksoftirqd/\nroot          23  0.0  0.0      0     0 ?        I<   12:32   0:00 [kworker/1:\nroot          24  0.0  0.0      0     0 ?        S    12:32   0:00 [cpuhp/2]\nroot          25  0.0  0.0      0     0 ?        S    12:32   0:00 [idle_injec\nroot          26  0.0  0.0      0     0 ?        S    12:32   0:00 [migration/\nroot          27  0.0  0.0      0     0 ?        S    12:32   0:00 [ksoftirqd/'
+}
+
+
+@test "test id649613" {
+	testfolder=$(echo /tmp/test-id649613-$$)
+	mkdir $testfolder && cd $testfolder
+	actual=$(test-id649613-actual)
+	expected=$(test-id649613-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id649613-actual () {
+	ps-sort-mem
+}
+
+function test-id649613-expected () {
+	echo -e 'USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\naveey       1708 16.6 12.2 3750168 451276 ?      Ssl  12:35  14:12 /snap/firef\naveey       2355  2.3  8.0 30084272 297092 ?     Sl   12:35   2:01 /opt/Upwork\naveey       6367  0.7  5.3 2557656 196472 ?      Sl   13:24   0:17 /snap/firef\naveey       2203  0.5  4.4 4827552 164000 ?      Sl   12:35   0:27 /opt/Upwork\naveey       6412  0.1  3.8 2508092 141004 ?      Sl   13:24   0:03 /snap/firef\naveey       3124  0.4  3.7 2485448 138144 ?      Sl   12:36   0:22 /snap/firef\naveey       2432  0.4  3.6 19525172 133860 ?     Sl   12:36   0:21 /snap/firef\naveey       2961  0.0  2.9 2452892 109820 ?      Sl   12:36   0:04 /snap/firef\nroot         883  4.0  2.8 681108 103556 tty1    Ssl+ 12:33   3:31 /usr/lib/xo\naveey       1076  0.1  2.7 1206132 100716 ?      Sl   12:34   0:06 /usr/bin/lx\naveey       1072  0.0  2.6 1590500 97416 ?       Sl   12:34   0:01 /usr/bin/pc\naveey       2456  0.0  2.6 2433180 96196 ?       Sl   12:36   0:01 /snap/firef\naveey       5645  0.0  2.6 860436 99228 ?        Sl   13:00   0:02 /usr/bin/fe\naveey       1257  0.0  2.3 756148 84792 ?        Sl   12:34   0:01 xfce4-termi\naveey       1306  0.5  2.1 246112 79732 pts/0    Sl+  12:35   0:29 /usr/bin/py\naveey       2333  0.1  1.9 286016 71492 ?        Sl   12:35   0:05 /opt/Upwork\naveey       2499  0.0  1.9 4505372 71004 ?       Sl   12:36   0:00 /opt/Upwork\naveey       2568  0.0  1.8 4511520 69228 ?       Sl   12:36   0:00 /opt/Upwork\naveey       2746  0.0  1.8 4503324 68092 ?       Sl   12:36   0:00 /opt/Upwork\naveey       7103  0.0  1.7 2406604 64688 ?       Sl   13:55   0:00 /snap/firef\naveey       7135  0.0  1.7 2406612 64796 ?       Sl   13:55   0:00 /snap/firef\naveey       7172  0.0  1.7 2406628 65076 ?       Sl   13:55   0:00 /snap/firef\naveey       2320  0.0  1.5 275604 58848 ?        Sl   12:35   0:04 /opt/Upwork\naveey       2485  0.0  1.4 522836 53412 ?        Sl   12:36   0:00 /opt/Upwork\naveey       5282  0.1  1.4 675084 53224 ?        Ssl  12:48   0:04 /usr/bin/py\naveey       7253  7.1  1.4 672904 51888 ?        Ssl  14:00   0:01 /usr/bin/py\naveey       3307  0.6  1.3 376012 49876 ?        Sl   12:37   0:30 /snap/firef\naveey       5223  0.0  1.3 672904 51032 ?        Ssl  12:48   0:02 /usr/bin/py\naveey       1078  0.0  1.2 576532 47620 ?        Sl   12:34   0:01 /usr/bin/lx\naveey       2221  0.0  1.2 207348 44792 ?        S    12:35   0:00 /opt/Upwork\naveey       2222  0.0  1.2 207348 45168 ?        S    12:35   0:00 /opt/Upwork\naveey       1228  0.0  1.1 504152 44180 ?        Sl   12:34   0:01 /usr/bin/lx\nroot         695  0.0  1.0 1169944 38612 ?       Ssl  12:33   0:03 /usr/lib/sn\naveey       1007  0.0  1.0 336628 37736 ?        Sl   12:34   0:01 lxqt-sessio\naveey       1075  0.0  1.0 275848 39492 ?        Sl   12:34   0:00 /usr/bin/lx\naveey       1230  0.0  1.0 271444 38272 ?        Sl   12:34   0:00 /usr/bin/ql\naveey       1232  0.0  1.0 272556 37788 ?        Sl   12:34   0:01 /usr/bin/nm\naveey       1074  0.0  0.9 336148 36240 ?        Sl   12:34   0:00 /usr/bin/lx'
+}
+
+
+@test "test id784272" {
+	testfolder=$(echo /tmp/test-id784272-$$)
+	mkdir $testfolder && cd $testfolder
+	actual=$(test-id784272-actual)
+	expected=$(test-id784272-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id784272-actual () {
+	ps-mem
+}
+
+function test-id784272-expected () {
+	echo -e 'USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND\naveey       1708 16.6 12.2 3750168 450932 ?      Ssl  12:35  14:13 /snap/firef\naveey       2355  2.3  8.0 30084272 297092 ?     Sl   12:35   2:01 /opt/Upwork\naveey       6367  0.7  5.3 2557656 195932 ?      Sl   13:24   0:17 /snap/firef\naveey       2203  0.5  4.4 4827552 164000 ?      Sl   12:35   0:27 /opt/Upwork\naveey       6412  0.1  3.8 2508092 141004 ?      Sl   13:24   0:03 /snap/firef\naveey       3124  0.4  3.7 2485448 138144 ?      Sl   12:36   0:22 /snap/firef\naveey       2432  0.4  3.6 19525172 133860 ?     Sl   12:36   0:21 /snap/firef\naveey       2961  0.0  2.9 2452892 109820 ?      Sl   12:36   0:04 /snap/firef\nroot         883  4.0  2.8 681108 103556 tty1    Rsl+ 12:33   3:31 /usr/lib/xo\naveey       1076  0.1  2.7 1206132 100716 ?      Sl   12:34   0:06 /usr/bin/lx\naveey       1072  0.0  2.6 1590500 97416 ?       Sl   12:34   0:01 /usr/bin/pc\naveey       2456  0.0  2.6 2433180 96196 ?       Sl   12:36   0:01 /snap/firef\naveey       5645  0.0  2.6 860436 99228 ?        Sl   13:00   0:02 /usr/bin/fe\naveey       1257  0.0  2.3 756148 84792 ?        Sl   12:34   0:01 xfce4-termi\naveey       1306  0.5  2.1 246112 79732 pts/0    Sl+  12:35   0:30 /usr/bin/py\naveey       2333  0.1  1.9 286016 71492 ?        Sl   12:35   0:05 /opt/Upwork\naveey       2499  0.0  1.9 4505372 71004 ?       Sl   12:36   0:00 /opt/Upwork\naveey       2568  0.0  1.8 4511520 69228 ?       Sl   12:36   0:00 /opt/Upwork\naveey       2746  0.0  1.8 4503324 68092 ?       Sl   12:36   0:00 /opt/Upwork\naveey       7103  0.0  1.7 2406604 64688 ?       Sl   13:55   0:00 /snap/firef\naveey       7135  0.0  1.7 2406612 64796 ?       Sl   13:55   0:00 /snap/firef\naveey       7172  0.0  1.7 2406628 65076 ?       Sl   13:55   0:00 /snap/firef\naveey       2320  0.0  1.5 275604 58848 ?        Sl   12:35   0:04 /opt/Upwork\naveey       2485  0.0  1.4 522836 53412 ?        Sl   12:36   0:00 /opt/Upwork\naveey       5282  0.1  1.4 675084 53224 ?        Ssl  12:48   0:04 /usr/bin/py\naveey       7253  7.3  1.4 672904 51888 ?        Ssl  14:00   0:01 /usr/bin/py\naveey       3307  0.6  1.3 376012 49876 ?        Sl   12:37   0:30 /snap/firef\naveey       5223  0.0  1.3 672904 51032 ?        Ssl  12:48   0:02 /usr/bin/py\naveey       1078  0.0  1.2 576532 47620 ?        Sl   12:34   0:01 /usr/bin/lx\naveey       2221  0.0  1.2 207348 44792 ?        S    12:35   0:00 /opt/Upwork\naveey       2222  0.0  1.2 207348 45168 ?        S    12:35   0:00 /opt/Upwork\naveey       1228  0.0  1.1 504152 44180 ?        Sl   12:34   0:01 /usr/bin/lx\nroot         695  0.0  1.0 1169944 38612 ?       Ssl  12:33   0:03 /usr/lib/sn\naveey       1007  0.0  1.0 336628 37736 ?        Sl   12:34   0:01 lxqt-sessio\naveey       1075  0.0  1.0 275848 39492 ?        Sl   12:34   0:00 /usr/bin/lx\naveey       1230  0.0  1.0 271444 38272 ?        Sl   12:34   0:00 /usr/bin/ql\naveey       1232  0.0  1.0 272556 37788 ?        Sl   12:34   0:01 /usr/bin/nm\naveey       1074  0.0  0.9 336148 36240 ?        Sl   12:34   0:00 /usr/bin/lx'
+}
+
+
+@test "test id232757" {
+	testfolder=$(echo /tmp/test-id232757-$$)
+	mkdir $testfolder && cd $testfolder
+	function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$; fi; ps al | perl -Ssw extract_matches.perl "^\d+\s+\d+\s+$pid\s+(\d+)"; }
+	ps al | egrep "(PID|$$)"
+	actual=$(test-id232757-actual)
+	expected=$(test-id232757-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id232757-actual () {
+	linebr
+}
+
+function test-id232757-expected () {
+	echo -e '# get-process-parent : return parent process-id for PID\n$ get-process-parent\nF   UID     PID    PPID PRI  NI    VSZ   RSS WCHAN  STAT TTY        TIME COMMAND\n0  1000    7266    7253  20   0  11412  5400 do_wai Ss   pts/4      0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh\n4  1000    7322    7266  20   0  12668  1588 -      R+   pts/4      0:00 ps al\n0  1000    7323    7266  20   0   9076  2300 pipe_r S+   pts/4      0:00 grep -E (PID|7266)\n--------------------------------------------------------------------------------\n7253'
+}
+
+
+@test "test id627672" {
+	testfolder=$(echo /tmp/test-id627672-$$)
+	mkdir $testfolder && cd $testfolder
+	function script {
+	## THIS function is buggy!
+	# Note: set_xterm_title.bash keeps track of titles for each process, so save copies of current ones
+	local save_full=$(set-xterm-title --print-full)
+	local save_icon=$(set-xterm-title --print-icon)
+	## DEBUG: echo "save_full='$save_full'; save_icon='$save_icon'"
+	# Change prompt
+	local old_PS_symbol="$PS_symbol"
+	export SCRIPT_PID=$$
+	# Note: the prompt change is flakey
+	reset-prompt "$PS_symbol\$"
+	## DEBUG: echo "script: 1. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
+	# Change xterm title to match
+	set-title-to-current-dir
+	## DEBUG: echo "script: 2. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
+	# Run command
+	command script --append "$@"
+	# Restore prompt
+	unset SCRIPT_PID
+	reset-prompt "$old_PS_symbol"
+	## DEBUG: echo "script: 3. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
+	# Get rid of lingering 'script' in xterm title
+	## DEBUG: echo "Restoring xterm title: full=$save_full save=$save_icon"
+	set-xterm-title "$save_full" "$save_icon"
+	}
+	actual=$(test-id627672-actual)
+	expected=$(test-id627672-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id627672-actual () {
+	alias script-update='script _update-$(T).log'
+}
+
+function test-id627672-expected () {
+	echo -e "## ERROR - NEED TO SOURCE tomohara-aliases.bash FILE\n# $ script-update\n# | bash: T: command not found\n#   bash: set-xterm-title: command not found\n#   bash: set-xterm-title: command not found\n#   bash: reset-prompt: command not found\n#   bash: set-title-to-current-dir: command not found\n#   Script started, output log file is '_update-.log'."
+}
+
+
+@test "test id829663" {
+	testfolder=$(echo /tmp/test-id829663-$$)
+	mkdir $testfolder && cd $testfolder
+	function ansi-filter {
+	local input_file="$1"
+	if [ "$input_file" = "" ]; then
+	input_file="$TMP/ansi-filter-in-$$.list"
+	cat > "$input_file"
+	fi
+	local output_file="$TMP/ansi-filter-out-$$.list";
+	ansifilter --input="$input_file" --output="$output_file"
+	cat "$output_file"
+	actual=$(test-id829663-actual)
+	expected=$(test-id829663-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id829663-actual () {
+	}
+}
+
+function test-id829663-expected () {
+	echo -e '## EXAMPLE FOR ansi-filter\n# ERROR: COMMAND NOT FOUND\n# $ echo "How to use the ansi-filter?" > ansi-filter-test.txt\n# $ ansi-filter ansi-filter-test.txt\n# | bash: ansifilter: command not found\n# | cat: /tmp/test-unix/ansi-filter-out-7384.list: No such file or directory'
+}
+
+
+@test "test id715535" {
+	testfolder=$(echo /tmp/test-id715535-$$)
+	mkdir $testfolder && cd $testfolder
+	function pause-for-enter () {
+	local message="$1"
+	if [ "$message" = "" ]; then message="Press enter to continue"; fi
+	read -p "$message "
+	actual=$(test-id715535-actual)
+	expected=$(test-id715535-expected)
+	echo "========== actual =========="
+	echo "$actual" 
+	echo "========= expected ========="
+	echo "$expected" 
+	echo "============================"
+	[ "$actual" == "$expected" ]
+}
+
+function test-id715535-actual () {
+	}
+}
+
+function test-id715535-expected () {
+	echo -e "## DOESN'T WORK FOR JUPYTER, WORKS FOR TERMINAL\n# $ pause-for-enter\n# | Press enter to continue \n## (program terminates after pressing Enter Key)"
+}

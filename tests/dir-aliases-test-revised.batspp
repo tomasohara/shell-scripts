@@ -1,6 +1,5 @@
+# Setup
 $ bind 'set enable-bracketed-paste off'
-$ shopt -s expand_aliases
-[?2004l
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -18,12 +17,9 @@ $ typeset -f | egrep '^\w+' | wc -l
 0
 0
 
-## NOTE: All directory references should be standard directories
-## (e.g., /home/aveey/bin => /tmp/test-alias/bin). 
-## In addition, avoid using personal directories to help weed out local usages
-## OLD: AVEE_BIN=/home/aveey/bin
-# SPECIFYING AN IDENTIFIER FOR TMP
-## OLD: TMP=temp/tmp
+$ mkdir -p tmp/test-dir-aliases
+
+# Setting a temp directory for tests
 $ TMP=/tmp/test-dir-aliases
 ## NOTE: Source it directly from the ./tests directory.
 $ BIN_DIR=$PWD/..
@@ -60,6 +56,7 @@ $ pwd
 ## OLD: /bin/rm -rvf "$temp_dir"/*
 $ /bin/rm -rvf /tmp/test-dir-aliases/test-7919/* >| /tmp/_cleanup-test-dir-aliases.log 2>&1
 
+## TESTING SYMBOLIC LINKS
 # The first case succeed
 $ touch file1
 $ ln-symbolic file1 link1
@@ -75,8 +72,8 @@ ln: failed to create symbolic link 'link1': File exists
 3
 
 # FYI: the current aliases and functions
-## OLD: cat $AVEE_BIN/_dir-aliases.bash
-$ cat $BIN_DIR/tests/_dir-aliases.bash
+# ERROR IN BATSPP
+$ cat $BIN_DIR/tests/_dir-aliases.bash 
 ## TODO: convert this to inline comments (to avoid clutter in the output)
 #! /usr/bin/env bash
 # -*- coding: utf-8 -*-
@@ -158,67 +155,62 @@ alias link-symbolic-regular='ln-symbolic'
 ## TODO: alias ln-symbolic-force='link-symbolic --force'
 
 
+##EXECUTING _dir-aliases.bash
 $ bash $BIN_DIR/tests/_dir-aliases.bash
 
-## Note: to make reproducible, only show pemrissions and the file info shown at end,
-## omitting details like the user and time that could be different.
-##
-## $ cd test-7919
-## /tmp/test-dir-aliases/test-7919
-##
-## $ ls -l
-## total 0
-## -rw-rw-r-- 1 tomohara tomohara 0 Jun 12 18:48 file1
-## lrwxrwxrwx 1 tomohara tomohara 5 Jun 12 18:48 link1 -> file1
-##
-## $ echo 123456789-123456789-123456789-123456789-123456789-123456789-123456789-
-## 123456789-123456789-123456789-123456789-123456789-123456789-123456789-
-##
-## # ls -l | cut --characters=12-46 --complement
-## total 0
-## -rw-rw-r-- file1
-## lrwxrwxrwx link1 -> file1
-## OLD: ls -l
-$ ls -l | cut --characters=12-46 --complement
-total 0
--rw-rw-r-- 
-lrwxrwxrwx -> file1
+## Some of the aliases do not work due to the absence of 'sublinks' command
+$ symlinks-proper
+bash: sublinks: command not found
 
+# SYMBOLIC LINK temp-link CREATED WHICH LINKS /tmp DIRECTORY 
 $ ln-symbolic /tmp temp-link
 'temp-link' -> '/tmp'
 
-## OLD: ls -l
+## OLD: ls -l | cut CUTS characters between x-y
 $ ls -l | cut --characters=12-46 --complement
 total 0
 -rw-rw-r-- 
 lrwxrwxrwx -> file1
 lrwxrwxrwx ink -> /tmp
 
-$ link-symbolic-safe --force /tmp/tmp temp-link
-'temp-link' -> '/tmp/tmp'
-
-## OLD: ls -l
-$ ls -l | cut --characters=12-46 --complement
-total 0
--rw-rw-r-- 
-lrwxrwxrwx -> file1
-lrwxrwxrwx ink -> /tmp/tmp
-
+## CREATES A SYMBOLIC LINK FORCEFULLY
 $ alias ln-symbolic-force='ln-symbolic --force'
 
-# # SINCE temp-link EXISTS, THE COMMAND FAILS
-# $ ln-symbolic /tmp temp-link
-# | ln: failed to create symbolic link 'temp-link': File exists
-
+# ln-symbolic SHOULD GENERATE AN ERROR AS PREVIOUS LINK WITH SAME NAME EXISTS
+# ln: failed to create symbolic link 'temp-link': File exist
+$ ln-symbolic /tmp temp-link
+# ln-symbolic-force SHOULD BYPASS THE CONDITION
+# ln: failed to create symbolic link 'temp-link': File exist
 $ ln-symbolic-force /tmp temp-link
-'temp-link' -> '/tmp'
+'temp-link/tmp' -> '/tmp'
+'temp-link/tmp' -> '/tmp'
 
-$ link-symbolic-safe --force /tmp/tmp temp-link
-'temp-link' -> '/tmp/tmp'
+## CREATES A SAFE SYMBOLIC LINK (link-symbolic-safe='ln-symbolic --no-target-directory --no-dereference')
+$ link-symbolic-safe /tmp/tmp temp-link-safe
+'temp-link-safe' -> '/tmp/tmp'
 
-## OLD: ls -l
+## SAFE SYMBOLIC LINK BUT FORCEFUL
+$ link-symbolic-safe --force /tmp/tmp temp-link-safe
+'temp-link-safe' -> '/tmp/tmp'
+
+## REVIEWING ALL THE RESULTS IN THE DIRECTORY (RESULTS ARE FILTERED)| OLD: ls -l
 $ ls -l | cut --characters=12-46 --complement
 total 0
 -rw-rw-r-- 
 lrwxrwxrwx -> file1
-lrwxrwxrwx ink -> /tmp/tmp
+lrwxrwxrwx ink -> /tmp
+lrwxrwxrwx ink-safe -> /tmp/tmp
+
+#TO VIEW ALL THE SUBLINKS IN THE TESTING DIRECTORY
+$ glob-links
+temp-link
+link1
+temp-link-safe
+
+## TO VIEW SUBDIRECTORIES IN THE TESTING DIRECTORY
+$ pwd
+$ mkdir test-7919-a test-7919-b
+$ glob-subdirs
+/tmp/test-dir-aliases/test-7919
+test-7919-b
+test-7919-a

@@ -1,9 +1,10 @@
+# Setup
+$ bind 'set enable-bracketed-paste off'
+
 ## Bracketed Paste is disabled to prevent characters after output
 ## Example: 
 # $ echo 'Hii'
 # | Hi?2004l
-$ bind 'set enable-bracketed-paste off'
-[?2004h[?2004l[?2004l[?2004l[?2004l[?2004l
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "

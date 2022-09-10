@@ -1,9 +1,11 @@
+# SETUP
+$ bind 'set enable-bracketed-paste off'
+$ shopt -s expand_aliases
+
 ## Bracketed Paste is disabled to prevent characters after output
 ## Example: 
 # $ echo 'Hii'
 # | Hi?2004l
-$ bind 'set enable-bracketed-paste off'
-[?2004h[?2004l[?2004l[?2004l[?2004l[?2004l
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -234,7 +236,6 @@ $     fi;
 $     # shellcheck disable=SC2068
 $     $LS -lh ${current_files[@]}
 $ }
-
 
 # TODO: have variant of prepare-find-files that adds .mmmYY suffix to backup
 #

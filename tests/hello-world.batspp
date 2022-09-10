@@ -1,8 +1,0 @@
-$ bind 'set enable-bracketed-paste off'
-[?2004l
-
-$ echo "Hi Mom!"
-Hi Mom!
-
-$ echo 'Hello world' | wc -l
-1

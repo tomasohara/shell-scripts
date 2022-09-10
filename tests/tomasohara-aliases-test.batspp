@@ -1,8 +1,0 @@
-$ ls *.html
-template.html
-
-$ url-path template.html
-file:////home/tomohara/bin/template.html
-
-#===============================================================================
-# TODO: find jupyter way to do divider line (or at least bash)
