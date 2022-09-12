@@ -1,0 +1,223 @@
+# Setup
+$ bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+## NOTE: All directory references should be standard directories
+## (e.g., /home/aveey/bin => /tmp/test-alias/bin). 
+## In addition, avoid using personal directories to help weed out local usages
+## OLD: AVEE_BIN=/home/aveey/bin
+# SPECIFYING AN IDENTIFIER FOR TMP
+## OLD: TMP=temp/tmp
+$ TMP=/tmp/test-dir-aliases
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+## You will need to run jupyter from that directory.
+## source $TEMP_BIN/_dir-aliases.bash
+$ source _dir-aliases.bash
+$ alias | wc -l
+8
+
+# Count aliases proper
+$ alias | wc -l
+8
+
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+2
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 7919)
+## *** All output from one run to the next needs to be the same ***
+# Test safe symbolic links
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-7919
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+/tmp/test-dir-aliases/test-7919
+
+# Clean up temp dir
+#
+# NOTE: To place it safe, the directory path is reproduced here.
+# IN addition, the output is omitted.
+## OLD: /bin/rm -rvf "$temp_dir"/*
+$ /bin/rm -rvf /tmp/test-dir-aliases/test-7919/* >| /tmp/_cleanup-test-dir-aliases.log 2>&1
+
+# The first case succeed
+$ touch file1
+$ ln-symbolic file1 link1
+# 'link1' -> 'file1'
+# The second case should should fail
+$ ln-symbolic file1 link1
+# => "ln: failed to create symbolic link 'link1': File exists?"
+# Should only be four files total (along with . and ..)
+$ ls -R | wc -l
+# => 3
+'link1' -> 'file1'
+ln: failed to create symbolic link 'link1': File exists
+3
+
+# FYI: the current aliases and functions
+## OLD: cat $AVEE_BIN/_dir-aliases.bash
+$ cat $BIN_DIR/tests/_dir-aliases.bash
+## TODO: convert this to inline comments (to avoid clutter in the output)
+#! /usr/bin/env bash
+# -*- coding: utf-8 -*-
+
+## via tomohara-aliases.bash
+## trace directory commands
+
+# Support for ls (list directory contents)
+# 
+# ls options: # --all: all files; -l long listing; -t by time; --human-readable: uses numeric suffixes like MB; --no-group: omit file permision group; --directory: no subdirectory listings.
+# TODO: Add --long as alias for -l to ls source control and check-in [WTH?]! Likweise, all aliases for other common options without long names (e.g., -t).
+#
+LS="/bin/ls"
+core_dir_options="--all -l -t  --human-readable"
+dir_options="${core_dir_options} --no-group"
+# maldito shellcheck: SC2046 [Quote this to prevent word splitting] and SC2086 [Double quote to prevent globbing]
+# shellcheck disable=SC2046,SC2086
+{
+if [ "$OSTYPE" = "solaris" ]; then dir_options="-alt"; fi
+if [ "$BAREBONES_HOST" = "1" ]; then dir_options="-altk"; fi
+function dir () {
+    local opts="$dir_options"
+    # note: see https://stackoverflow.com/questions/1853946/getting-the-last-argument-passed-to-a-shell-script
+    local dir="${!#}"
+    # hack: only shows directory contents if name ends in slash (e.g., /etc/)
+    # note: pattern is POSIX extended regular expression as per bash manual
+    local regex="^.*/$";
+    if [[ (! (($dir != "") || ($dir =~ $regex))) ]]; then
+        opts="$opts --directory";
+    fi
+    $LS ${opts} "$@" 2>&1 | $PAGER;
+function dir-proper () { $LS ${dir_options} --directory "$@" 2>&1 | $PAGER; }
+alias ls-full='$LS ${core_dir_options}'
+function dir-full () { ls-full "$@" 2>&1 | $PAGER; }
+## TODO: WH with the grep (i.e., isn't there a simpler way)?
+function dir-sans-backups () { $LS ${dir_options} "$@" 2>&1 | $GREP -v '~[0-9]*~' | $PAGER; }
+# dir-ro/dir-rw(spec): show files that are read-only/read-write for the user
+function dir-ro () { $LS ${dir_options} "$@" 2>&1 | $GREP -v '^..w' | $PAGER; }
+function dir-rw () { $LS ${dir_options} "$@" 2>&1 | $GREP '^..w' | $PAGER; }
+
+function subdirs () { $LS ${dir_options} "$@" 2>&1 | $GREP ^d | $PAGER; }
+#
+# subdirs-proper(): shows subdirs in colymn format omitting ones w/ leading dots
+# note: omits cases like ./ and ./.cpan from find and then removes ./ prefix
+quiet-unalias subdirs-proper
+function subdirs-proper () { find . -maxdepth 1 -type d | $EGREP -v '^((\.)|(\.\/\..*))$' | sort | perl -pe "s@^\./@@;" | column; }
+# note: -f option overrides -t: Unix sorts alphabetically by default
+# via man ls:
+#   -f     do not sort, enable -aU, disable -$LS --color
+# TODO: simplify -t removal (WTH with perl regex replacement?!)
+function dir_options_sans_t () { echo "$dir_options" | perl -pe 's/\-t//;'; }
+function subdirs-alpha () { $LS $(dir_options_sans_t) "$@" 2>&1 | $GREP ^d | $PAGER; }
+function sublinks () { $LS ${dir_options} "$@" 2>&1 | $GREP ^l | $PAGER; }
+function sublinks-alpha () { $LS $(dir_options_sans_t) "$@" 2>&1 | $GREP ^l | $PAGER; }
+}
+# TODO: show non-work-related directory example
+#
+alias symlinks='sublinks'
+# symlinks-proper: just show file name info for symbolic links, which starts at column 43
+alias symlinks-proper='symlinks | cut --characters=43-'
+#
+function sublinks-proper { sublinks "$@" | cut --characters=42-  | $PAGER; }
+alias symlinks-proper=sublinks-proper
+#
+alias glob-links='find . -maxdepth 1 -type l | sed -e "s/.\///g"'
+alias glob-subdirs='find . -mindepth 1 -maxdepth 1 -type d | sed -e "s/.\///g"'
+#
+alias ls-R='$LS -R >| ls-R.list; wc -l ls-R.list'
+#
+# TODO: create ls alias that shows file name with symbolic links (as with ls -l but without other information
+# ex: ls -l | perl -pe 's/^.* \d\d:\d\d //;'
+}
+
+# link-symbolic-safe: creates symbolic link and avoids quirks with links to directories
+# EX: link-symbolic-safe /tmp temp-link; link-symbolic-safe --force ~/temp temp-link; ls -l temp-link | grep /tmp => ""
+alias ln-symbolic='ln --symbolic --verbose'
+alias link-symbolic-safe='ln-symbolic --no-target-directory --no-dereference'
+alias link-symbolic-regular='ln-symbolic'
+## TODO: alias ln-symbolic-force='link-symbolic --force'
+
+
+$ bash $BIN_DIR/tests/_dir-aliases.bash
+
+## Note: to make reproducible, only show pemrissions and the file info shown at end,
+## omitting details like the user and time that could be different.
+##
+## $ cd test-7919
+## /tmp/test-dir-aliases/test-7919
+##
+## $ ls -l
+## total 0
+## -rw-rw-r-- 1 tomohara tomohara 0 Jun 12 18:48 file1
+## lrwxrwxrwx 1 tomohara tomohara 5 Jun 12 18:48 link1 -> file1
+##
+## $ echo 123456789-123456789-123456789-123456789-123456789-123456789-123456789-
+## 123456789-123456789-123456789-123456789-123456789-123456789-123456789-
+##
+## # ls -l | cut --characters=12-46 --complement
+## total 0
+## -rw-rw-r-- file1
+## lrwxrwxrwx link1 -> file1
+## OLD: ls -l
+$ ls -l | cut --characters=12-46 --complement
+total 0
+-rw-rw-r-- 
+lrwxrwxrwx -> file1
+
+$ ln-symbolic /tmp temp-link
+'temp-link' -> '/tmp'
+
+## OLD: ls -l
+$ ls -l | cut --characters=12-46 --complement
+total 0
+-rw-rw-r-- 
+lrwxrwxrwx -> file1
+lrwxrwxrwx ink -> /tmp
+
+$ link-symbolic-safe --force /tmp/tmp temp-link
+'temp-link' -> '/tmp/tmp'
+
+## OLD: ls -l
+$ ls -l | cut --characters=12-46 --complement
+total 0
+-rw-rw-r-- 
+lrwxrwxrwx -> file1
+lrwxrwxrwx ink -> /tmp/tmp
+
+$ alias ln-symbolic-force='ln-symbolic --force'
+
+# # SINCE temp-link EXISTS, THE COMMAND FAILS
+# $ ln-symbolic /tmp temp-link
+# | ln: failed to create symbolic link 'temp-link': File exists
+
+$ ln-symbolic-force /tmp temp-link
+'temp-link' -> '/tmp'
+
+$ link-symbolic-safe --force /tmp/tmp temp-link
+'temp-link' -> '/tmp/tmp'
+
+## OLD: ls -l
+$ ls -l | cut --characters=12-46 --complement
+total 0
+-rw-rw-r-- 
+lrwxrwxrwx -> file1
+lrwxrwxrwx ink -> /tmp/tmp

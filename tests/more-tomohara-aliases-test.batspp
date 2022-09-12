@@ -1,0 +1,33 @@
+# More tests for tomohara-aliases.bash
+
+## TEST: cd /usr/local/misc/programs/bash/shell-scripts-aviyan/tests
+
+$ basename $PWD
+tests
+
+# Setup temp. dir
+# note: variable not used in rm as a precaution
+$ /bin/rm -rf "/tmp/test-dir-15485863"
+$ test_dir="/tmp/test-dir-15485863"
+$ mkdir -p "$test_dir"
+$ command cd "$test_dir"
+
+#===============================================================================
+# TODO: find jupyter way to do divider line (or at least bash)
+
+# test url-path
+
+$ ls ../*.html
+../template.html
+
+$ dir=$(realpath "..")
+$ url-path ../template.html | perl -pe "s@$dir@/x/y/z@;"
+file:////x/y/z/template.html
+
+# Test dir alias 
+# note: time-dependent details changed
+$ umask ug=rwx,o=r
+$ mkdir abc def
+$ touch ghi jkl
+$ echo > mno
+$ dir | perl -pe "s/ (\d+) [\w ]{2,8}/ \1 username /; s/\w\w\w \d+ \d\d:\d\d/mon \1 hh:mm/;";

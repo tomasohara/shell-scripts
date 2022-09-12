@@ -1,0 +1,51 @@
+# Setup
+$ bind 'set enable-bracketed-paste off'
+
+$ echo "Hi Mom!"
+Hi Mom!
+
+$ echo 'Hello world' | wc -l
+1
+
+$ pwd
+/home/aveey/tom-project/shell-scripts/tests
+
+# THIS IS A COMMENT
+
+$ which systemd
+/usr/bin/systemd
+
+$ ls
+[32m [1m_dir-aliases.bash[0m                  re
+ abc-test.txt                      [33m [1;4mREADME.txt[0m
+ adhoc-tests.test                  [34m [1mreports[0m
+ alias-calculator-commands.ipynb   [32m [1msimple_batspp.py[0m
+ alias-cd-commands.ipynb           [34m [1mtemp[0m
+ alias-grep-commands.ipynb         [34m [1mtemp-alias-test[0m
+ alias-trace-misc-commands.ipynb    test-check-errors.ipynb
+[34m [1mbatspp-output[0m                      test-cond-env-setting.ipynb
+[32m [1mbatspp-report.py[0m                   test-dir-alias.ipynb
+ calc-entropy-tests.ipynb          [32m [1mtest-dir-output.txt[0m
+ calc_entropy.input                [32m [1mtest_check_errors.py[0m
+ calc_entropy.input2               [32m [1mtest_extract_matches.py[0m
+ calc_entropy.simple.input         [32m [1mtest_tomohara_aliases.bats[0m
+ calc_entropy.simple.input2        [32m [1mtest_tpo_count_it.py[0m
+ command-override-cp-mv.ipynb       testbook-test-dir-aliases.ipynb
+ dir-aliases-test-revised.ipynb    [32m [1mtestpy.txt[0m
+ docshtest.rst                     [34m [1mtmp[0m
+ hello-world-basic.batspp           tomasohara-aliases-test.ipynb
+ hello-world-basic.ipynb            trace-extensionless-shortcut.ipynb
+ hello-world-revised.batspp         trace-file-manipulation.ipynb
+ hello-world-revised.ipynb          trace-line-words-commands.ipynb
+[32m [1mhello-world_test.txt[0m               trace-linux-admin-alias.ipynb
+ json-related-alias.ipynb           trace-python-commands.ipynb
+[32m [1mjupyter_to_batspp.py[0m               trace-setup-sorting-wrappers.ipynb
+ misc-bash-helpers.ipynb            trace-unix-alias.ipynb
+ more-tomohara-aliases-test.ipynb   trace-unix-general.ipynb
+ os                                [32m [1mtrace-unix-general.txt[0m
+ random                            
+
+$ ps -l
+F S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
+0 S  1000   42020   42009  1  80   0 -  2870 do_wai pts/3    00:00:00 bash
+4 R  1000   42039   42020  0  80   0 -  3167 -      pts/3    00:00:00 ps

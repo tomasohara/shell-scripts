@@ -1,9 +1,10 @@
+# Setup
+$ bind 'set enable-bracketed-paste off'
+
 ## Bracketed Paste is disabled to prevent characters after output
 ## Example: 
 # $ echo 'Hii'
 # | Hi?2004l
-$ bind 'set enable-bracketed-paste off'
-[?2004h[?2004l[?2004l[?2004l[?2004l[?2004l
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -166,20 +167,18 @@ $ ls -l
 $ linebr
 $ ls -l ./mvtest_dir1
 $ linebr
-removed './testdir1/.bashrc'
-removed directory './testdir1'
 --------------------------------------------------------------------------------
 renamed 'abc' -> './mvtest_dir1/abc'
 renamed 'def' -> './mvtest_dir1/def'
 renamed 'ghi' -> './mvtest_dir1/ghi'
 --------------------------------------------------------------------------------
 total 4
-drwxrwsr-x 2 aveey aveey 4096 Jul  4 21:45 mvtest_dir1
+drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 mvtest_dir1
 --------------------------------------------------------------------------------
 total 0
--rw-rw-r-- 1 aveey aveey 0 Jul  4 21:45 abc
--rw-rw-r-- 1 aveey aveey 0 Jul  4 21:45 def
--rw-rw-r-- 1 aveey aveey 0 Jul  4 21:45 ghi
+-rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 abc
+-rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 def
+-rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 ghi
 --------------------------------------------------------------------------------
 
 # TEST 2 - COPY ALIASES
@@ -209,15 +208,15 @@ removed directory './mvtest_dir1'
 'ghi' -> './cptest_dir1/ghi'
 --------------------------------------------------------------------------------
 total 4
--rw-rw-r-- 1 aveey aveey    0 Jul  4 21:45 abc
-drwxrwsr-x 2 aveey aveey 4096 Jul  4 21:45 cptest_dir1
--rw-rw-r-- 1 aveey aveey    0 Jul  4 21:45 def
--rw-rw-r-- 1 aveey aveey    0 Jul  4 21:45 ghi
+-rw-rw-r-- 1 aveey aveey    0 Sep 10 22:57 abc
+drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 cptest_dir1
+-rw-rw-r-- 1 aveey aveey    0 Sep 10 22:57 def
+-rw-rw-r-- 1 aveey aveey    0 Sep 10 22:57 ghi
 --------------------------------------------------------------------------------
 total 0
--rw-rw-r-- 1 aveey aveey 0 Jul  4 21:45 abc
--rw-rw-r-- 1 aveey aveey 0 Jul  4 21:45 def
--rw-rw-r-- 1 aveey aveey 0 Jul  4 21:45 ghi
+-rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 abc
+-rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 def
+-rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 ghi
 --------------------------------------------------------------------------------
 
 # #=================(TEST ERROR: "/bin/rm: remove regular empty file 'f1'?")=========================#
@@ -263,13 +262,13 @@ removed './def'
 removed './ghi'
 --------------------------------------------------------------------------------
 total 16
--rw-rw-r-- 1 aveey aveey    0 Jul  4 21:45 abc
--rw-rw-r-- 1 aveey aveey    0 Jul  4 21:45 def
--rw-rw-r-- 1 aveey aveey    0 Jul  4 21:45 ghi
-drwxrwsr-x 2 aveey aveey 4096 Jul  4 21:45 TDIR1
-drwxrwsr-x 2 aveey aveey 4096 Jul  4 21:45 TDIR2
-drwxrwsr-x 2 aveey aveey 4096 Jul  4 21:45 TDIR3
-drwxrwsr-x 2 aveey aveey 4096 Jul  4 21:45 TDIR4
+-rw-rw-r-- 1 aveey aveey    0 Sep 10 22:57 abc
+-rw-rw-r-- 1 aveey aveey    0 Sep 10 22:57 def
+-rw-rw-r-- 1 aveey aveey    0 Sep 10 22:57 ghi
+drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 TDIR1
+drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 TDIR2
+drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 TDIR3
+drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 TDIR4
 --------------------------------------------------------------------------------
 removed directory 'TDIR1'
 removed directory 'TDIR2'
@@ -277,9 +276,9 @@ removed directory 'TDIR3'
 removed directory 'TDIR4'
 --------------------------------------------------------------------------------
 total 0
--rw-rw-r-- 1 aveey aveey 0 Jul  4 21:45 abc
--rw-rw-r-- 1 aveey aveey 0 Jul  4 21:45 def
--rw-rw-r-- 1 aveey aveey 0 Jul  4 21:45 ghi
+-rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 abc
+-rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 def
+-rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 ghi
 --------------------------------------------------------------------------------
 
 ## TEST 5 - COPY READONLY
@@ -328,10 +327,10 @@ Examples (under Bash):
 removed './abc'
 removed './def'
 removed './ghi'
--r--r--r-- 1 aveey aveey 4409 Jun  8 08:08 ./testdir1/.bashrc
+-r--r--r-- 1 aveey aveey 5005 Sep 10 22:37 ./testdir1/.bashrc
 --------------------------------------------------------------------------------
 total 4
-drwxrwsr-x 2 aveey aveey 4096 Jul  4 21:45 testdir1
+drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 testdir1
 --------------------------------------------------------------------------------
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
@@ -473,6 +472,14 @@ fi
 unset __conda_setup
 # <<< conda initialize <<<
 
+# ALIAS FOR BATSPP & ITS DEBUG MODE
+alias gb="./jupyter_to_batspp.py"
+alias simple-batspp="./simple_batspp.py"
+alias simple-batspp-debug='VERBOSE=1 BATS_OPTIONS="--no-tempdir-cleanup --pretty --verbose-run --show-output-of-passing-tests" simple-batspp'
+alias debugpp='VERBOSE=1 BATS_OPTIONS="--no-tempdir-cleanup --pretty --verbose-run --show-output-of-passing-tests" batspp'
+# A NEWER VERSION OF BATSPP WAS IMPORTED FROM THOMAS-DEV BRANCH
+alias simpp="./simple-bpp.py"
+alias simpp-debug='VERBOSE=1 BATS_OPTIONS="--no-tempdir-cleanup --pretty --verbose-run --show-output-of-passing-tests" simpp'
 
 $ export NICE="nice -19"
 $ export TIME_CMD="/usr/bin/time"
@@ -487,4 +494,4 @@ $ fix-dir-permissions
 # # AFTER fix-dir-permissions
 $ ls -l 
 total 4
-drwxrwsr-x 2 aveey aveey 4096 Jul  4 21:45 testdir1
+drwxrwsr-x 2 aveey aveey 4096 Sep 10 22:57 testdir1
