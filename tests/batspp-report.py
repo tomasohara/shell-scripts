@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# batspp_report.py 
+# batspp_report.py
 # NOTE: USES BATSPP 1.5 (simple_batspp.py) | DIRECTORY NOT SPECIFIED
 """ SELECTS AN IPYNB FILE,
     USES jupyter_to_batspp.py TO GENERATE BATSPP FILE,
@@ -17,19 +17,18 @@ i = 1
 
 files_TEST_PATH = os.listdir(TEST_PATH)
 
-
 # 1) IDENTIFY IPYNB FILES
 all_testfiles = []
 print("\n=== BATSPP REPORT GENERATOR (simple_batspp.py) ===\n")
 
-for file in files_TEST_PATH:    
-    is_ipynb = file.endswith(IPYNB_EXTENSION) 
+for file in files_TEST_PATH:
+    is_ipynb = file.endswith(IPYNB_EXTENSION)
     if is_ipynb:
         #os.system(f"batspp {file} --output {REPORT_PATH}/REPORT-{file}.txt")
-        print(f"JUPYTER TESTFILE FOUND [{i}]: {file}") 
+        print(f"JUPYTER TESTFILE FOUND [{i}]: {file}")
         all_testfiles += [file]
         i += 1
-    
+
 print(f"\nTOTAL JUPYTER FILE FOUND: {i}\n")
 
 
@@ -86,7 +85,3 @@ print(f"\nFAULTY TESTFILES:")
 for tf in error_testfiles:
     print(f"{tf}")
 print(f"======================================================")
-
-    
-
-
