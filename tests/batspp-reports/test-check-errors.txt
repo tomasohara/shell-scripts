@@ -208,3 +208,25 @@ function test10-assert1-actual () {
 function test10-assert1-expected () {
 	echo -e 'Processing input'
 }
+
+@test "test11" {
+	test_folder=$(echo /tmp/test11-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test11-assert1-actual)
+	expected=$(test11-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test11-assert1-actual () {
+	python3 $BIN_DIR/check_errors.py --warning ./test_check_errors.py
+}
+function test11-assert1-expected () {
+	echo -e 'Processing input26           def test_python_error(self):27               """check python error"""28               input_string    = \'python -c "print(1\\\\2)" 2>&1\'29   >>>         expected_result = \'1          File "<string>", line 1\\n2            print(1\\\\2)\\n3                     ^\\n4    >>> SyntaxError: unexpected character after line continuation character <<<\' <<<30               self.assertEqual(gh.run(f\'{input_string} | {SCRIPT} -\'), expected_result)31       32       '
+}

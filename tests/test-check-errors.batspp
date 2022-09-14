@@ -163,3 +163,23 @@ Processing input
 # 53               self.assertEqual(gh.run(f'{input_string} | {SCRIPT} --context 1 -'), result_context_1)
 # 54               self.assertEqual(gh.run(f'{input_string} | {SCRIPT} --context 2 -'), result_context_2)
 # 55 
+
+# WORKS FOR test_check_errors.py
+$ python3 $BIN_DIR/check_errors.py --warning ./test_check_errors.py
+Processing input
+26           def test_python_error(self):
+27               """check python error"""
+28               input_string    = 'python -c "print(1\\2)" 2>&1'
+29   >>>         expected_result = '1          File "<string>", line 1\n2            print(1\\2)\n3                     ^\n4    >>> SyntaxError: unexpected character after line continuation character <<<' <<<
+30               self.assertEqual(gh.run(f'{input_string} | {SCRIPT} -'), expected_result)
+31       
+32       
+
+48           def test_context_lines(self):
+49               """test context lines"""
+50               input_string     = 'python -c "print(1\\2)" 2>&1'
+51   >>>         result_context_1 = '3                     ^\n4    >>> SyntaxError: unexpected character after line continuation character <<<' <<<
+52   >>>         result_context_2 = '2            print(1\\2)\n3                     ^\n4    >>> SyntaxError: unexpected character after line continuation character <<<' <<<
+53               self.assertEqual(gh.run(f'{input_string} | {SCRIPT} --context 1 -'), result_context_1)
+54               self.assertEqual(gh.run(f'{input_string} | {SCRIPT} --context 2 -'), result_context_2)
+55       

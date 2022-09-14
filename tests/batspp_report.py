@@ -83,5 +83,5 @@ print(f"BATSPP FILES GENERATED: {batspp_c}")
 print(f"NO. OF FAULTY TESTFILES: {ipynb_c - batspp_c}")
 print(f"\nFAULTY TESTFILES:")
 for tf in error_testfiles:
-    print(f"{tf}")
+    print(f">> {tf}")
 print(f"======================================================")

@@ -83,10 +83,10 @@ make: Nothing to be done for 'hidad.txt'.
 make: Nothing to be done for 'hidad.txt'.
 --------------------------------------------------------------------------------
 total 16
--rw-rw-r-- 1 aveey aveey  8 Sep 13 22:40 hidad.txt
--rw-rw-r-- 1 aveey aveey  8 Sep 13 22:40 himom.txt
--rw-rw-r-- 1 aveey aveey 42 Sep 13 22:40 _make.log
--rw-rw-r-- 1 aveey aveey 42 Sep 13 22:40 _old_make.log
+-rw-rw-r-- 1 aveey aveey  8 Sep 14 21:27 hidad.txt
+-rw-rw-r-- 1 aveey aveey  8 Sep 14 21:27 himom.txt
+-rw-rw-r-- 1 aveey aveey 42 Sep 14 21:27 _make.log
+-rw-rw-r-- 1 aveey aveey 42 Sep 14 21:27 _old_make.log
 
 ## TEST 2 - MERGING ALIASAS & FUNCTIONS
 # $ man merge
@@ -175,20 +175,20 @@ $ alias system-status='system_status.sh -'
 
 ## 4A) dump-url GIVES 
 $ dump-url https://www.google.com/
---2022-09-13 22:40:13--  https://www.google.com/
+--2022-09-14 21:27:31--  https://www.google.com/
 Resolving www.google.com (www.google.com)... 142.250.195.132, 2404:6800:4007:825::2004
 Connecting to www.google.com (www.google.com)|142.250.195.132|:443... connected.
 HTTP request sent, awaiting response... 200 OK
 Length: unspecified [text/html]
 Saving to: ‘www.google.com/index.html’
 
-www.google.com/inde     [ <=>                ]  16.10K  --.-KB/s    in 0.01s   
+www.google.com/inde     [ <=>                ]  16.05K  --.-KB/s    in 0.007s  
 
-2022-09-13 22:40:13 (1.23 MB/s) - ‘www.google.com/index.html’ saved [16482]
+2022-09-14 21:27:31 (2.37 MB/s) - ‘www.google.com/index.html’ saved [16434]
 
-FINISHED --2022-09-13 22:40:13--
-Total wall clock time: 0.3s
-Downloaded: 1 files, 16K in 0.01s (1.23 MB/s)
+FINISHED --2022-09-14 21:27:31--
+Total wall clock time: 0.4s
+Downloaded: 1 files, 16K in 0.007s (2.37 MB/s)
 
 ## 4B) gtime
 # ERROR - VI 
@@ -347,18 +347,18 @@ $ trace-cmd
 + trace-cmd
 + cat
 ++ date
-+ echo 'start: Tue Sep 13 10:40:19 PM +0545 2022'
-start: Tue Sep 13 10:40:19 PM +0545 2022
++ echo 'start: Wed Sep 14 09:27:37 PM +0545 2022'
+start: Wed Sep 14 09:27:37 PM +0545 2022
 + set -o xtrace
 + eval
 + set - -o xtrace
-end: Tue Sep 13 10:40:19 PM +0545 2022
+end: Wed Sep 14 09:27:37 PM +0545 2022
 + set - -o xtrace
 --------------------------------------------------------------------------------
-start: Tue Sep 13 10:40:19 PM +0545 2022
+start: Wed Sep 14 09:27:37 PM +0545 2022
 + eval
 + set - -o xtrace
-end: Tue Sep 13 10:40:19 PM +0545 2022
+end: Wed Sep 14 09:27:37 PM +0545 2022
 
 # cmd-usage(command): output usage for command to _command.list (with spaces
 # replaced by underscores)
@@ -410,3 +410,14 @@ $ alias kill-iceweasel='kill_em.sh iceweasel'
 # | filter=/($)(^)/
 # | OSTYPE: Undefined variable.
 #kill-iceweasel
+
+# cmd-usage(command): output usage for command to _command.list (with spaces
+# replaced by underscores)
+$ function cmd-usage () {
+$     local command="$@"
+$     local usage_file="_$(echo "$command" | tr ' ' '_')-usage.list"
+$     $command --help  2>&1 | ansifilter > "$usage_file"
+$     $PAGER_NOEXIT "$usage_file"
+$ }
+
+# cmd-usage (HELP REQUIRED)
