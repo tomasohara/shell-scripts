@@ -123,6 +123,7 @@ function test5-assert1-expected () {
 	mkdir $test_folder && cd $test_folder
 
 	rm -rf ./*
+	mkdir testfolder
 	echo "Hi Mom!" > himom.txt
 	echo "Hi Dad!" > hidad.txt
 	linebr
@@ -153,8 +154,10 @@ function test5-assert1-expected () {
 	test_folder=$(echo /tmp/test10-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test10-assert1-actual)
-	expected=$(test10-assert1-expected)
+	printf "THIS IS THE 1ST FILE." > tf1.txt
+	printf "THIS IS THE 2ND FILE." > tf2.txt
+	actual=$(test10-assert3-actual)
+	expected=$(test10-assert3-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -164,11 +167,11 @@ function test5-assert1-expected () {
 
 }
 
-function test10-assert1-actual () {
-	merge abc def ghi
+function test10-assert3-actual () {
+	merge tf1.txt tf2.txt
 }
-function test10-assert1-expected () {
-	echo -e 'do-merge MODFILE1 OLDFILE MODFILE2 > NEWFILE abc def ghi'
+function test10-assert3-expected () {
+	echo -e 'do-merge MODFILE1 OLDFILE MODFILE2 > NEWFILE tf1.txt tf2.txt'
 }
 
 @test "test11" {
@@ -204,7 +207,7 @@ function test12-assert3-actual () {
 	full-dirname "himom.txt"
 }
 function test12-assert3-expected () {
-	echo -e 'abc  def  ghi  hidad.txt  himom.txt  _make.log\t_old_make.log--------------------------------------------------------------------------------/tmp/test-unix-alias/test-2899/himom.txt'
+	echo -e 'hidad.txt  _make.log\t  testfolder  tf2.txthimom.txt  _old_make.log  tf1.txt     tf3.txt--------------------------------------------------------------------------------/tmp/test-unix-alias/test-2899/himom.txt'
 }
 
 @test "test13" {

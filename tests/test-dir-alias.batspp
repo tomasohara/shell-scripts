@@ -1,12 +1,10 @@
-# Setup
-$ bind 'set enable-bracketed-paste off'
-
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
 ## TODO: PS1="> "
+$ bind 'set enable-bracketed-paste off'
 ## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
 $ echo $PS1
-[PEXP\[\]ECT_PROMPT>
+[PEXP\[\]ECT_PROMPT>004l[?2004l
 
 # Delete all aliases and function
 # TODO: Instead start from pristine environment

@@ -55,7 +55,7 @@ $ function group-members () { ypcat group | $GREP -i "$1"; }
 
 ## ERROR I - group-members
 # $ group-members
-# | bash: ypcat: command not found
+# | ypcat: can't get local yp domain: Local domain name not set
 # | bash: -i: command not found
 
 ## TEST 1 - do-make
@@ -63,6 +63,7 @@ $ function do-make () { /bin/mv -f _make.log _old_make.log; make "$@" >| _make.l
 
 ## 1A) do-make
 $ rm -rf ./*
+$ mkdir testfolder
 $ echo "Hi Mom!" > himom.txt
 $ echo "Hi Dad!" > hidad.txt
 $ linebr
@@ -82,11 +83,12 @@ make: Nothing to be done for 'himom.txt'.
 make: Nothing to be done for 'hidad.txt'.
 make: Nothing to be done for 'hidad.txt'.
 --------------------------------------------------------------------------------
-total 16
--rw-rw-r-- 1 aveey aveey  8 Sep 14 21:27 hidad.txt
--rw-rw-r-- 1 aveey aveey  8 Sep 14 21:27 himom.txt
--rw-rw-r-- 1 aveey aveey 42 Sep 14 21:27 _make.log
--rw-rw-r-- 1 aveey aveey 42 Sep 14 21:27 _old_make.log
+total 20
+-rw-rw-r-- 1 aveey aveey    8 Sep 15 19:37 hidad.txt
+-rw-rw-r-- 1 aveey aveey    8 Sep 15 19:37 himom.txt
+-rw-rw-r-- 1 aveey aveey   42 Sep 15 19:37 _make.log
+-rw-rw-r-- 1 aveey aveey   42 Sep 15 19:37 _old_make.log
+drwxrwxr-x 2 aveey aveey 4096 Sep 15 19:37 testfolder
 
 ## TEST 2 - MERGING ALIASAS & FUNCTIONS
 # $ man merge
@@ -108,21 +110,25 @@ $ }
 
 # 2A) merge REPLACED BY do-merge 
 ## INITIAL FILES TO TEST THE ALIASES
-$ touch abc def ghi
+$ printf "THIS IS THE 1ST FILE." > tf1.txt
+$ printf "THIS IS THE 2ND FILE." > tf2.txt
+$ printf "THIS IS THE 3RD FILE." > tf3.txt
 # MESSAGE SHOWN IF MERGE IS USED
-$ merge abc def ghi
-do-merge MODFILE1 OLDFILE MODFILE2 > NEWFILE abc def ghi
+$ merge tf1.txt tf2.txt
+do-merge MODFILE1 OLDFILE MODFILE2 > NEWFILE tf1.txt tf2.txt
 
 # 2B) do-merge
 ## ERROR II - do-merge DOESN'T SEEM TO WORK
-# $ do-merge abc def ghi
+# $ do-merge tf1.txt tf2.txt tf3.txt
 # | bash: /usr/bin/merge: No such file or directory
 
 # 2C) diff3-merge
 ## ERROR III - Undefined variable (TMP)
-# $ diff3-merge abc def ghi
+# /usr/bin/diff3 --help
+# $ diff3-merge tf1.txt tf2.txt tf2.txt -A
 # | TMP: Undefined variable.
 # | TMP: Undefined variable.
+# | THIS IS THE 1ST FILE.
 
 # 2D) kdiff-merge
 #kdiff-merge "abc" "def" "ghi" "himom.txt"
@@ -148,7 +154,8 @@ $ }
 $ ls
 $ linebr
 $ full-dirname "himom.txt"
-abc  def  ghi  hidad.txt  himom.txt  _make.log	_old_make.log
+hidad.txt  _make.log	  testfolder  tf2.txt
+himom.txt  _old_make.log  tf1.txt     tf3.txt
 --------------------------------------------------------------------------------
 /tmp/test-unix-alias/test-2899/himom.txt
 
@@ -175,20 +182,20 @@ $ alias system-status='system_status.sh -'
 
 ## 4A) dump-url GIVES 
 $ dump-url https://www.google.com/
---2022-09-14 21:27:31--  https://www.google.com/
-Resolving www.google.com (www.google.com)... 142.250.195.132, 2404:6800:4007:825::2004
+--2022-09-15 19:37:56--  https://www.google.com/
+Resolving www.google.com (www.google.com)... 142.250.195.132, 2404:6800:4007:803::2004
 Connecting to www.google.com (www.google.com)|142.250.195.132|:443... connected.
 HTTP request sent, awaiting response... 200 OK
 Length: unspecified [text/html]
 Saving to: ‘www.google.com/index.html’
 
-www.google.com/inde     [ <=>                ]  16.05K  --.-KB/s    in 0.007s  
+www.google.com/inde     [ <=>                ]  16.08K  --.-KB/s    in 0.02s   
 
-2022-09-14 21:27:31 (2.37 MB/s) - ‘www.google.com/index.html’ saved [16434]
+2022-09-15 19:37:57 (713 KB/s) - ‘www.google.com/index.html’ saved [16465]
 
-FINISHED --2022-09-14 21:27:31--
-Total wall clock time: 0.4s
-Downloaded: 1 files, 16K in 0.007s (2.37 MB/s)
+FINISHED --2022-09-15 19:37:57--
+Total wall clock time: 0.5s
+Downloaded: 1 files, 16K in 0.02s (713 KB/s)
 
 ## 4B) gtime
 # ERROR - VI 
@@ -227,8 +234,10 @@ BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
 PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
 UBUNTU_CODENAME=jammy
 
-## 4D) system-status
+## 4D) system-status - ERROR (STUCK DUE TO OSTYPE: Undefined variable)
 # $ system-status (# STUCK DUE TO OSTYPE: Undefined variable.)
+# | Linux ASPIRE5742GLUBU 5.15.0-47-generic #51-Ubuntu SMP Thu Aug 11 07:51:15 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux
+# | OSTYPE: Undefined variable.
 
 ## 5A)
 # propos-command: show apropos output for lExecutable programs or shell commands (i.e., man section 1)
@@ -347,18 +356,18 @@ $ trace-cmd
 + trace-cmd
 + cat
 ++ date
-+ echo 'start: Wed Sep 14 09:27:37 PM +0545 2022'
-start: Wed Sep 14 09:27:37 PM +0545 2022
++ echo 'start: Thu Sep 15 07:38:03 PM +0545 2022'
+start: Thu Sep 15 07:38:03 PM +0545 2022
 + set -o xtrace
 + eval
 + set - -o xtrace
-end: Wed Sep 14 09:27:37 PM +0545 2022
+end: Thu Sep 15 07:38:03 PM +0545 2022
 + set - -o xtrace
 --------------------------------------------------------------------------------
-start: Wed Sep 14 09:27:37 PM +0545 2022
+start: Thu Sep 15 07:38:03 PM +0545 2022
 + eval
 + set - -o xtrace
-end: Wed Sep 14 09:27:37 PM +0545 2022
+end: Thu Sep 15 07:38:03 PM +0545 2022
 
 # cmd-usage(command): output usage for command to _command.list (with spaces
 # replaced by underscores)
@@ -369,9 +378,8 @@ $     $command --help  2>&1 | ansifilter > "$usage_file"
 $     $PAGER_NOEXIT "$usage_file"
 $ }
 ## ERROR DETECTED
-# $ cmd-usage dir
-# | bash: ansifilter: command not found
-# | bash: _dir-usage.list: command not found
+# $ cmd-usage ./testfolder
+# | bash: _testfolder-usage.list: command not found
 
 # 9A)
 # Compressing/uncompressing a subdirectory tree (ignoring symbolic links) 
@@ -390,12 +398,15 @@ $ }
 $ alias compress-this-dir='compress-dir $PWD'
 $ alias ununcompress-this-dir='uncompress-dir $PWD'
 
-## ERROR (PERMISSION DENIED - NEED TO STUDY)
-# compress-this-dir ./*
-# linebr
-# ls
-# linebr
-# ununcompress-this-dir ./*
+## ERROR (PERMISSION DENIED - NEED TO OBSERVE)
+# $ ls
+# $ cp tf2.txt testfolder/
+# $ linebr
+# $ compress-this-dir ./testfolder
+# $ linebr
+# $ ls
+# $ linebr
+# $ ununcompress-this-dir ./testfolder
 
 # TEST 9B)
 $ alias old-count-exts='$LS | count-it "\.[^.]*\w" | sort $SORT_COL2 -rn | $PAGER'

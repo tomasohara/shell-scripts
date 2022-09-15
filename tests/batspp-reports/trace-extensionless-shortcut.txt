@@ -13,6 +13,7 @@ shopt -s expand_aliases
 	mkdir $test_folder && cd $test_folder
 
 	bind 'set enable-bracketed-paste off'
+	shopt -s expand_aliases
 }
 
 
@@ -27,12 +28,11 @@ shopt -s expand_aliases
 	test_folder=$(echo /tmp/test2-$$)
 	mkdir $test_folder && cd $test_folder
 
-	GREP='grep'
 	unalias -a
 	alias | wc -l
 	for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
-	actual=$(test2-assert5-actual)
-	expected=$(test2-assert5-expected)
+	actual=$(test2-assert4-actual)
+	expected=$(test2-assert4-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -42,10 +42,10 @@ shopt -s expand_aliases
 
 }
 
-function test2-assert5-actual () {
+function test2-assert4-actual () {
 	typeset -f | egrep '^\w+' | wc -l
 }
-function test2-assert5-expected () {
+function test2-assert4-expected () {
 	echo -e '00'
 }
 
@@ -107,6 +107,7 @@ function test5-assert1-expected () {
 	test_folder=$(echo /tmp/test6-$$)
 	mkdir $test_folder && cd $test_folder
 
+	alias perl-=""
 	alias convert-termstrings='perl- convert_termstrings.perl'
 	alias do-rcsdiff='do_rcsdiff.sh'
 	alias dobackup='dobackup.sh'
@@ -336,7 +337,7 @@ function test17-assert7-actual () {
 	ls
 }
 function test17-assert7-expected () {
-	echo -e "abc1.xyz  abc2.xyz  abc3.xyz  abc4.xyz\tabc5.xyz.19Aug22  abc6.xyz.19Aug22--------------------------------------------------------------------------------'abc1.xyz' -> 'abc1.xyz.09Sep22''abc2.xyz' -> 'abc2.xyz.09Sep22''abc3.xyz' -> 'abc3.xyz.09Sep22''abc4.xyz' -> 'abc4.xyz.09Sep22'--------------------------------------------------------------------------------abc1.xyz\t  abc2.xyz.09Sep22  abc4.xyz\t      abc6.xyz.19Aug22abc1.xyz.09Sep22  abc3.xyz\t    abc4.xyz.09Sep22abc2.xyz\t  abc3.xyz.09Sep22  abc5.xyz.19Aug22"
+	echo -e "abc1.xyz  abc2.xyz  abc3.xyz  abc4.xyz\tabc5.xyz.19Aug22  abc6.xyz.19Aug22--------------------------------------------------------------------------------'abc1.xyz' -> 'abc1.xyz.15Sep22''abc2.xyz' -> 'abc2.xyz.15Sep22''abc3.xyz' -> 'abc3.xyz.15Sep22''abc4.xyz' -> 'abc4.xyz.15Sep22'--------------------------------------------------------------------------------abc1.xyz\t  abc2.xyz.15Sep22  abc4.xyz\t      abc6.xyz.19Aug22abc1.xyz.15Sep22  abc3.xyz\t    abc4.xyz.15Sep22abc2.xyz\t  abc3.xyz.15Sep22  abc5.xyz.19Aug22"
 }
 
 @test "test18" {
@@ -354,30 +355,12 @@ function test17-assert7-expected () {
 	mkdir $test_folder && cd $test_folder
 
 	rm -rf ./*
-	man cat > catmanual.txt
+	uname -r > catmanual.txt
 	bigrams catmanual.txt
 	ls
 	word-count catmanual.txt
 	actual=$(test19-assert6-actual)
 	expected=$(test19-assert6-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-	actual=$(test19-assert7-actual)
-	expected=$(test19-assert7-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-	actual=$(test19-assert8-actual)
-	expected=$(test19-assert8-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -391,19 +374,7 @@ function test19-assert6-actual () {
 	ls
 }
 function test19-assert6-expected () {
-	echo -e "equivalent:to\t3to:standard\t2standard:output.\t2gnu:coreutils\t2output:lines\t2and:exit\t2cat(1):user\t1<https://translationproject.org/team/>:copyright\t1coreutils:8.32\t1tab:characters\t1file,:or\t1use:^\t1file(s):to\t1translation:bugs\t1extent:permitted\t1end:of\t1print:on\t12020:free\t1except:for\t1--version:output\t1exit:examples\t1lines,:overrides\t1software:foundation,\t1display:tab\t1suppress:repeated\t1line:-n,\t1lines:-s,\t13:or\t1free:software:\t1version:3\t1[option]...:[file]...\t1and:m-\t1cat(1):name\t1standard:input.\t1cat:-\t1richard:m.\t1output:version\t1by:law.\t1-n:-e\t1display:this\t1output:f's\t1to:-ve\t1online:help:\t1-b,:--number-nonblank\t1nonempty:output\t1gnu:gpl\t1exit:--version\t1output.:with\t1<https://www.gnu.org/software/coreutils/>:report\t1-e,:--show-ends\t1m.:stallman.\t1-vt:-t,\t1-v,:--show-nonprinting\t1license:gplv3+:\t1and:richard\t1copyright:copyright\t1-a,:--show-all\t1^:and\t1-s,:--squeeze-blank\t1standard:input\t1permitted:by\t1<https://www.gnu.org/software/coreutils/cat>:or\t1g's:contents.\t1this:is\t1--show-nonprinting:use\t1read:standard\t1at:end\t1inc.:license\t1gpl:version\t1is:no\t1locally:via:\t1bugs:gnu\t1lfd:and\t1documentation:<https://www.gnu.org/software/coreutils/cat>\t1"
-}
-function test19-assert7-actual () {
-	:at	1
-}
-function test19-assert7-expected () {
-	echo -e "n/a:n/a\t1author:written\t1name:cat\t1coreutils:online\t1with:no\t1or:later\t1tac(1):full\t1also:tac(1)\t1-:g\t1input.:-a,\t1it.:there\t1(ignored):-v,\t1each:line\t1redistribute:it.\t1or:when\t1standard:output\t1tab:--help\t1help::<https://www.gnu.org/software/coreutils/>\t1f:-\t1--squeeze-blank:suppress\t1©:2020\t1warranty,:to\t1via::info\t1no:file,\t1-u:(ignored)\t1copy:standard\t1available:locally\t1are:free\t1synopsis:cat\t1all:output\t1then:standard\t1g:output\t1cat:copy\t1to:<https://translationproject.org/team/>\t1display:$\t1for:lfd\t1gplv3+::gnu\t1software::you\t1there:is\t1full:documentation\t1--show-ends:display\t1standard:input,\t1version:information\t1n/a:cat(1)\t1-t:equivalent\t1-,:read\t1user:commands\t1stallman.:reporting\t1description:concatenate\t1overrides:-n\t1by:torbjorn\t1output:synopsis\t1as:^i\t18.32:february\t1help:and\t1to:change\t1cat:f\t1contents,:then\t1and:print\t1-e:equivalent\t1concatenate:files\t1output:lines,\t1repeated:empty\t1input:to\t1on:the\t1torbjorn:granlund\t1any:translation\t1later:<https://gnu.org/licenses/gpl.html>.\t1and:tab\t1cat:[option]...\t1change:and\t1is:free\t1characters:as\t1or:available\t1notation,:except\t1information:and\t1concatenate:file(s)\t1report:any\t1and:redistribute\t1is:-,\t1to:the\t1number:nonempty\t1bugs:to\t1february:2022\t1free:software\t1files:and\t1reporting:bugs\t1-vet:-b,\t1input,:then\t1m-:notation,\t1--number-nonblank:number\t1of:each\t1invocation':gnu\t1-ve:-e,\t1examples:cat\t1see:also\t1the:extent\t1--help:display\t1[file]...:description\t1to:-vt\t1-n,:--number\t1--number:number\t1cat:invocation'\t1--show-all:equivalent\t1granlund:and\t1written:by\t1file:is\t1number:all\t1-:concatenate\t1then:g's\t1f's:contents,\t1info:'(coreutils)\t1output.:author\t1<https://gnu.org/licenses/gpl.html>.:this\t1no:warranty,\t1lines:-t\t1when:file\t1the:standard\t1law.:see\t1'(coreutils):cat\t1--show-tabs:display\t1this:help\t1^i:-u\t1copyright:©\t1commands:cat(1)\t1free:to\t1foundation,:inc.\t1-t,:--show-tabs\t1to:-vet\t1empty:output\t1contents.:cat\t1you:are\t1catmanual.txtto\t8and\t7standard\t6output\t6cat\t5or\t3gnu\t3is\t3display\t3equivalent\t3free\t3concatenate\t2-\t2version\t2cat(1)\t2output.\t2exit\t2no\t2by\t2number\t2lines\t2the\t2coreutils\t2bugs\t2copyright\t2tab\t2this\t2then\t2--version\t1each\t1file,\t1-t,\t1<https://www.gnu.org/software/coreutils/cat>\t1reporting\t1lfd\t1read\t1file\t1--show-ends\t1on\t18.32\t1granlund\t1see\t1software\t1synopsis\t1info\t1locally\t1of\t1contents,\t1"
-}
-function test19-assert8-actual () {
-		1
-}
-function test19-assert8-expected () {
-	echo -e "online\t1n/a\t1(ignored)\t1overrides\t1input,\t1also\t1-n,\t1input\t1description\t1notation,\t1as\t1m.\t1extent\t1-n\t1name\t1--number\t1you\t1-vt\t1-ve\t1files\t12020\t1when\t1february\t1repeated\t1f's\t1m-\t1--help\t1software:\t1torbjorn\t12022\t1help\t1later\t1are\t1copy\t1except\t1documentation\t1-t\t1g\t1-a,\t1for\t1at\t1nonempty\t1available\t1-,\t1<https://translationproject.org/team/>\t1lines,\t1empty\t1input.\t1<https://gnu.org/licenses/gpl.html>.\t1law.\t1suppress\t1--show-tabs\t13\t1'(coreutils)\t1--show-nonprinting\t1via:\t1stallman.\t1--squeeze-blank\t1foundation,\t1change\t1end\t1-e,\t1author\t1report\t1warranty,\t1^i\t1help:\t1redistribute\t1gplv3+:\t1commands\t1f\t1information\t1line\t1-s,\t1it.\t1written\t1^\t1[option]...\t1richard\t1--number-nonblank\t1tac(1)\t1use\t1©\t1-e\t1--show-all\t1license\t1-b,\t1there\t1any\t1permitted\t1gpl\t1-vet\t1translation\t1g's\t1<https://www.gnu.org/software/coreutils/>\t1with\t1file(s)\t1-u\t1[file]...\t1examples\t1print\t1user\t1inc.\t1contents.\t1full\t1all\t1characters\t1invocation'\t1-v,\t1catmanual.txt"
+	echo -e 'n/a:n/a\t1catmanual.txtn/a\t1catmanual.txt'
 }
 
 @test "test20" {
@@ -512,22 +483,15 @@ function test26-assert1-actual () {
 	show-unicode-code-info-aux ./catmanual.txt
 }
 function test26-assert1-expected () {
-	echo -e 'char\tord\toffset\tencodingCAT(1)                           User Commands                          CAT(1): 78C\t0043\t0\t43A\t0041\t1\t41T\t0054\t2\t54(\t0028\t3\t281\t0031\t4\t31)\t0029\t5\t29\t0020\t6\t20\t0020\t7\t20\t0020\t8\t20\t0020\t9\t20\t0020\t10\t20\t0020\t11\t20\t0020\t12\t20\t0020\t13\t20\t0020\t14\t20\t0020\t15\t20\t0020\t16\t20\t0020\t17\t20\t0020\t18\t20\t0020\t19\t20\t0020\t20\t20\t0020\t21\t20\t0020\t22\t20\t0020\t23\t20\t0020\t24\t20\t0020\t25\t20\t0020\t26\t20\t0020\t27\t20\t0020\t28\t20\t0020\t29\t20\t0020\t30\t20\t0020\t31\t20\t0020\t32\t20U\t0055\t33\t55s\t0073\t34\t73e\t0065\t35\t65r\t0072\t36\t72\t0020\t37\t20C\t0043\t38\t43o\t006F\t39\t6fm\t006D\t40\t6dm\t006D\t41\t6da\t0061\t42\t61n\t006E\t43\t6ed\t0064\t44\t64s\t0073\t45\t73\t0020\t46\t20\t0020\t47\t20\t0020\t48\t20\t0020\t49\t20\t0020\t50\t20\t0020\t51\t20\t0020\t52\t20\t0020\t53\t20\t0020\t54\t20\t0020\t55\t20\t0020\t56\t20\t0020\t57\t20\t0020\t58\t20\t0020\t59\t20\t0020\t60\t20\t0020\t61\t20\t0020\t62\t20\t0020\t63\t20\t0020\t64\t20\t0020\t65\t20\t0020\t66\t20\t0020\t67\t20\t0020\t68\t20\t0020\t69\t20\t0020\t70\t20\t0020\t71\t20C\t0043\t72\t43A\t0041\t73\t41T\t0054\t74\t54(\t0028\t75\t281\t0031\t76\t31)\t0029\t77\t29'
+	echo -e 'char\tord\toffset\tencoding5.15.0-47-generic: 175\t0035\t0\t35.\t002E\t1\t2e1\t0031\t2\t315\t0035\t3\t35.\t002E\t4\t2e0\t0030\t5\t30-\t002D\t6\t2d4\t0034\t7\t347\t0037\t8\t37-\t002D\t9\t2dg\t0067\t10\t67e\t0065\t11\t65n\t006E\t12\t6ee\t0065\t13\t65r\t0072\t14\t72i\t0069\t15\t69c\t0063\t16\t63'
 }
 
 @test "test27" {
 	test_folder=$(echo /tmp/test27-$$)
 	mkdir $test_folder && cd $test_folder
 
-}
-
-
-@test "test28" {
-	test_folder=$(echo /tmp/test28-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test28-assert1-actual)
-	expected=$(test28-assert1-expected)
+	actual=$(test27-assert1-actual)
+	expected=$(test27-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -537,23 +501,15 @@ function test26-assert1-expected () {
 
 }
 
-function test28-assert1-actual () {
+function test27-assert1-actual () {
 	show-unicode-code-info ./catmanual.txt
 }
-function test28-assert1-expected () {
-	echo -e 'char\tord\toffset\tencodingCAT(1)                           User Commands                          CAT(1): 78C\t0043\t0\t43A\t0041\t1\t41T\t0054\t2\t54(\t0028\t3\t281\t0031\t4\t31)\t0029\t5\t29\t0020\t6\t20\t0020\t7\t20\t0020\t8\t20\t0020\t9\t20\t0020\t10\t20\t0020\t11\t20\t0020\t12\t20\t0020\t13\t20\t0020\t14\t20\t0020\t15\t20\t0020\t16\t20\t0020\t17\t20\t0020\t18\t20\t0020\t19\t20\t0020\t20\t20\t0020\t21\t20\t0020\t22\t20\t0020\t23\t20\t0020\t24\t20\t0020\t25\t20\t0020\t26\t20\t0020\t27\t20\t0020\t28\t20\t0020\t29\t20\t0020\t30\t20\t0020\t31\t20\t0020\t32\t20U\t0055\t33\t55s\t0073\t34\t73e\t0065\t35\t65r\t0072\t36\t72\t0020\t37\t20C\t0043\t38\t43o\t006F\t39\t6fm\t006D\t40\t6dm\t006D\t41\t6da\t0061\t42\t61n\t006E\t43\t6ed\t0064\t44\t64s\t0073\t45\t73\t0020\t46\t20\t0020\t47\t20\t0020\t48\t20\t0020\t49\t20\t0020\t50\t20\t0020\t51\t20\t0020\t52\t20\t0020\t53\t20\t0020\t54\t20\t0020\t55\t20\t0020\t56\t20\t0020\t57\t20\t0020\t58\t20\t0020\t59\t20\t0020\t60\t20\t0020\t61\t20\t0020\t62\t20\t0020\t63\t20\t0020\t64\t20\t0020\t65\t20\t0020\t66\t20\t0020\t67\t20\t0020\t68\t20\t0020\t69\t20\t0020\t70\t20\t0020\t71\t20C\t0043\t72\t43A\t0041\t73\t41T\t0054\t74\t54(\t0028\t75\t281\t0031\t76\t31)\t0029\t77\t29'
+function test27-assert1-expected () {
+	echo -e 'char\tord\toffset\tencoding5.15.0-47-generic: 175\t0035\t0\t35.\t002E\t1\t2e1\t0031\t2\t315\t0035\t3\t35.\t002E\t4\t2e0\t0030\t5\t30-\t002D\t6\t2d4\t0034\t7\t347\t0037\t8\t37-\t002D\t9\t2dg\t0067\t10\t67e\t0065\t11\t65n\t006E\t12\t6ee\t0065\t13\t65r\t0072\t14\t72i\t0069\t15\t69c\t0063\t16\t63'
 }
 
-@test "test29" {
-	test_folder=$(echo /tmp/test29-$$)
+@test "test28" {
+	test_folder=$(echo /tmp/test28-$$)
 	mkdir $test_folder && cd $test_folder
 
-}
-
-
-@test "test30" {
-	test_folder=$(echo /tmp/test30-$$)
-	mkdir $test_folder && cd $test_folder
-
-	output-BOM ./catmanual.txt
 }

@@ -106,7 +106,13 @@ $ printf "Hi Mom,\r I am using Ubuntu\n" | alt-remove-cr
 Hi Mom, I am using Ubuntu
 
 # perl-remove-cr ACTS AS remove-cr USING PERL
-#printf "Hi Mom,\r I am using Ubuntu\n" | perl-remove-cr
+$ printf "Hi Mom,\r I am using Ubuntu\n" | perl-remove-cr
+-i used with no filenames on the command line, reading from STDIN.
+Hi Mom, I am using Ubuntu
 
-$ printf "Hi Mom,\nThs is the use of printf\nI can use a backslash n to start a new line.n1\n2\n3"> abc-test.txt
-#last-n-with-header(5, abc-test.txt)
+$ printf "Hi Mom,\nThs is the use of printf\nI can use a backslash n to start a new line.\n1\n2\n3"> abc-test.txt
+$ last-n-with-header 3 abc-test.txt
+Hi Mom,
+1
+2
+3

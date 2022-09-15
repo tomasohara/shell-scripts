@@ -13,6 +13,7 @@ shopt -s expand_aliases
 	mkdir $test_folder && cd $test_folder
 
 	bind 'set enable-bracketed-paste off'
+	shopt -s expand_aliases
 }
 
 
