@@ -1427,10 +1427,11 @@ function clisp-apropos() { $GREP -i "$@" $HOME/info/online-reference-works/clisp
 #------------------------------------------------------------------------
 # Bilingual dictionary access
 trace bilingual dict support
-multiling_dir=$HOME/multilingual
+## OLD: multiling_dir=$HOME/multilingual
+multiling_dir=${MULTILINGUAL_DIR:-"$HOME/multilingual"}
 cond-setenv SPANISH_DICT $multiling_dir/spanish/spanish_english.dict
-cond-setenv SPANISH_IRREG_DICT $multiling_dir/spanish/spanish_irregular.dict;
-cond-setenv ENGLISH_DICT $multiling_dir/spanish/english_spanish.dict;
+cond-setenv SPANISH_IRREG_DICT $multiling_dir/spanish/spanish_irregular.dict
+cond-setenv ENGLISH_DICT $multiling_dir/spanish/english_spanish.dict
 # NOTE: grep flags file UTF-8 indicator at top as binary
 dict_grep="zegrep --ignore-case --text"
 dict_word_grep="$dict_grep --word-regexp"
