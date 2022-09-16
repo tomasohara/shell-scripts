@@ -27,7 +27,10 @@
 #
 #     *** Warning: This is not secure, and should be avoided in multi-user environments. ***
 #
-# - Alternatively, git caching is used via
+# - [New] To use platform-native data stores to control sensitive information:
+#   https://github.com/GitCredentialManager/git-credential-manager
+#
+# - [Old] Alternatively, git caching is used via
 #     ~/.git-credentials
 #   See https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage.
 #
