@@ -33,6 +33,9 @@
 #         list+=value               append value
 #   - conditional expression
 #   - echo to stderr (or print)
+#   - expression evaluation
+#         (( EXPR ))                (( L++ ))
+#     Preferred for arithmetic: see https://wiki.bash-hackers.org/commands/builtin/let.
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
