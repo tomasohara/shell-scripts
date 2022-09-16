@@ -1,5 +1,11 @@
 # Anaconda support based on conda installation
 #
+# usage example:
+#    source ~/bin/tomohara-aliases.bash
+#    source ~/bin/anaconda-aliases.bash
+#
+# TODO: reproduce alias definitions from tomohara-aliases.bash here so independend
+#
 #------------------------------------------------------------------------
 # Copyright (c) 2020 Thomas P. O'Hara
 #
@@ -47,11 +53,11 @@ function init-condaN() {
         eval "$conda_setup"
     else
         if [ -f "$anaconda_dir/etc/profile.d/conda.sh" ]; then
-	    . "$anaconda_dir/etc/profile.d/conda.sh"
+            . "$anaconda_dir/etc/profile.d/conda.sh"
         ## OLD: else
             ## OLD: export PATH="$anaconda_dir/bin:$PATH"
         fi
-	prepend-path "$anaconda_dir/bin"
+        prepend-path "$anaconda_dir/bin"
     fi
 
     # Restore Bash prompt and put conda environment in xterm title instead
@@ -66,7 +72,7 @@ function init-condaN() {
 }
 alias init-conda3='init-condaN $anaconda3_dir'
 alias init-conda2='init-condaN $anaconda2_dir'
-alias init-conda=init-conda2
+## OLD: alias init-conda=init-conda2
 # TODO: alias init-conda=init-conda3
 
 # Work around for intermittent problems w/ 'conda activate' requiring 'source activate' instead.
@@ -80,7 +86,7 @@ function activation-helper () {
     ## TODO: local conda_path=$(/usr/bin/which conda 2> /dev/null)
     local conda_path=""    
     if [ "$conda_path" = "" ]; then
-	conda_command="source"
+        conda_command="source"
     fi
     ## DEBUG:
     ## echo "Issuing: $conda_command" "$command" "$env"
@@ -116,18 +122,18 @@ function conda-activate-env {
     local use_hack="${2:-0}"
     ## if [ "$env" = "" ]; then
     if [[ ("$env" = "") || ("$env" = "-") ]]; then
-	echo "Usage: conda-activate-env"
-	echo ""
-	echo "Note: available environments:"
-	## TODO: use columns
-	## BAD:
-	if [ "$use_hack" != "0" ]; then
-	    ## OLD: conda-list-env-hack | perl -pe 's/^/    /;'
-	    conda-list-env-hack | perl -pe 's/ /  /;'
-	else
-	    conda-env-name
-	fi
-	echo ""
+        echo "Usage: conda-activate-env"
+        echo ""
+        echo "Note: available environments:"
+        ## TODO: use columns
+        ## BAD:
+        if [ "$use_hack" != "0" ]; then
+            ## OLD: conda-list-env-hack | perl -pe 's/^/    /;'
+            conda-list-env-hack | perl -pe 's/ /  /;'
+        else
+            conda-env-name
+        fi
+        echo ""
     fi
     ## OLD: source activate "$env";
     conda-activate "$env"
@@ -143,22 +149,25 @@ function conda-deactivate-env {
     add-conda-env-to-xterm-title
 }
 
-# Miniconda3 initializaion
+# older Miniconda3-based initializaion
 # <<< conda initialize <<<
 # !! Contents within this block are managed by 'conda init' !!
-function init-miniconda3 () {
+## OLD: function init-miniconda3 () {
+function old-init-conda () {
     ## OLD: local base="/usr/local/misc/programs/anaconda3"
     local base="$ANACONDA_HOME"
     local conda_setup
     conda_setup="$("$base/bin/conda" 'shell.bash' 'hook' 2> /dev/null)"
     if [ $? -eq 0 ]; then
-	eval "$conda_setup"
+        eval "$conda_setup"
     else
-	if [ -f "$base/etc/profile.d/conda.sh" ]; then
+        if [ -f "$base/etc/profile.d/conda.sh" ]; then
             . "$base/etc/profile.d/conda.sh"
-	else
-            export PATH="$base/bin:$PATH"
-	fi
+        ## OLD
+        ## else
+        ##     export PATH="$base/bin:$PATH"    
+        fi
+        prepend-path "$base/bin"
     fi
 
     # Restore Bash prompt and put conda environment in xterm title instead
@@ -170,22 +179,23 @@ function init-miniconda3 () {
 # TODO: determine the version, make sure ipython gets installed
 function conda-create-env () {
     if [ "$1" = "" ]; then
-	echo "usage: conda-create-env name [python_version=3.7]"
-	return
+        echo "usage: conda-create-env name [python_version=3.9]"
+        return
     fi
     local name="$1"
     local python_version="$2"
-    if [ "$python_version" = "" ]; then python_version="3.7"; fi
+    if [ "$python_version" = "" ]; then python_version="3.9"; fi
     ensure-conda-loaded
+    echo "issuing: conda create --yes --name '$name' python='$python_version'"
     conda create --yes --name "$name" python="$python_version"
 }
 
-# ensure-conda-loaded(): Make sure conda environment loaded (e.g., via miniconda3)
+# ensure-conda-loaded(): Make sure conda environment loaded (e.g., via old-init-conda)
 #
 function ensure-conda-loaded {
     if [ "$CONDA_PYTHON_EXE" = "" ]; then
-	echo "Warning: Conda not initialized so using miniconda3"
-	init-miniconda3;
+        echo "Warning: Conda not initialized so using old-init-conda"
+        old-init-conda;
     fi
 }
 
