@@ -216,3 +216,27 @@ function test13-assert1-expected () {
 	mkdir $test_folder && cd $test_folder
 
 }
+
+
+@test "test15" {
+	test_folder=$(echo /tmp/test15-$$)
+	mkdir $test_folder && cd $test_folder
+
+	printf "Hi Mom,\nThs is the use of printf\nI can use a backslash n to start a new line.\n1\n2\n3"> abc-test.txt
+	actual=$(test15-assert2-actual)
+	expected=$(test15-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test15-assert2-actual () {
+	last-n-with-header 3 abc-test.txt
+}
+function test15-assert2-expected () {
+	echo -e 'Hi Mom,123'
+}
