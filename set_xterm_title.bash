@@ -1,3 +1,4 @@
+#! /usr/bin/env bash
 #! /bin/bash
 #
 # Sets the xterm title bar to the string given on the command line.
@@ -209,14 +210,17 @@ if [  "$DEFAULT_HOST" != "" ]; then
 fi
 
 # If sudo being used, add current user name to end (e.g., "...; user=root")
-if [[ ("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER") ]]; then
-   full="$full; user=$USER"
-   icon="$icon; user=$USER"
+# OLD: (("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER"))
+# TODO: just use LOGNAME test???
+if [[ ((("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER")) || ("$LOGNAME" != "$USER")) ]]; then
+    ## DEBUG: echo "adding user"
+    full="$full; user=$USER"
+    icon="$icon; user=$USER"
 fi
 # Add suffix from XTERM_TITLE_SUFFIX env. var.:
 if [ "$XTERM_TITLE_SUFFIX" != "" ]; then
-   full="$full; $XTERM_TITLE_SUFFIX"
-   icon="$icon; $XTERM_TITLE_SUFFIX"
+    full="$full; $XTERM_TITLE_SUFFIX"
+    icon="$icon; $XTERM_TITLE_SUFFIX"
 fi
 
 # If SCRIPT_PID set, add this at start
