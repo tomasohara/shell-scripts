@@ -1,7 +1,6 @@
 # Setup
-$ shopt -s expand_aliases
 $ bind 'set enable-bracketed-paste off'
-$ echo "BIND ON!"
+$ shopt -s expand_aliases
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -155,49 +154,60 @@ $ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dup
 # move "versioned" log files into ./log-file subdirectory
 #    *** files end in .log[0-9]+ or .log and have numeric affix (e.g., do-xyz.log2, do-xyz.2.log, or do-xyz-30may21.log)
 
-# HALTED DUE TO BATSPP - WORKS FINE #
-# rm -rf ./*
-# # CREATING DUPLICATES 
-# touch 'abc(1).111' 'abc(2).111' 'xyz(3).111' 'xyz(4).111' '*abc.xyz' '&*abcdefg.xyz'
-# ls
+$ rm -rf ./*
+# CREATING DUPLICATES 
+$ touch 'abc(1).111' 'abc(2).111' 'xyz(3).111' 'xyz(4).111' '*abc.xyz' '&*abcdefg.xyz'
+$ ls
+'abc(1).111'  '&*abcdefg.xyz'  'xyz(3).111'
+'abc(2).111'  '*abc.xyz'       'xyz(4).111'
 
-# HALTED DUE TO BATSPP - WORKS FINE #
-# # REMOVES PARENTHESES () FROM FILENAMES
-# rename-parens
-# linebr
-# rename-special-punct
-# # rename-etc DOESN'T WORK WELL (move COMMAND NOT FOUND)
-# linebr
-# ls
+# REMOVES PARENTHESES () FROM FILENAMES
+$ rename-parens
+$ linebr
+$ rename-special-punct
+# rename-etc DOESN'T WORK WELL (move COMMAND NOT FOUND)
+$ linebr
+$ ls
+renaming "abc(1).111" to "abc1.111"
+renaming "abc(2).111" to "abc2.111"
+renaming "xyz(3).111" to "xyz3.111"
+renaming "xyz(4).111" to "xyz4.111"
+--------------------------------------------------------------------------------
+renaming "&*abcdefg.xyz" to "abcdefg.xyz"
+renaming "*abc.xyz" to "abc.xyz"
+--------------------------------------------------------------------------------
+abc1.111  abc2.111  abcdefg.xyz  abc.xyz  xyz3.111  xyz4.111
 
-## CAUSES TROUBLE IN BATSPP GENERATION
-# # move-log-files: move "versioned" log files to log-files
-# # move-output-files: likewise for output files with version numbers to ./output
-# #THESE ARE THE CUSTOM CHANGES MADE TO THE FILE
-# alias perl-grep='perl $BIN_DIR/perlgrep.perl'
-# alias dir-rw='dir -rw'
-# alias move='mv'
-# # note: versioned files are those ending in numerics or with numeric affix
-# ## TODO: use perl-style regex for more precise matching (effing over-arching glob's)
-# function move-versioned-files {
-#     local ext_pattern="$1"
-#     if [ "$ext_pattern" = "" ]; then ext_pattern="{list,log,txt}"; fi
-#     local dir="$2"
-#     if [ "$dir" = "" ]; then dir="versioned-files"; fi
-#     mkdir -p "$dir";
-#     ## OLD: local D="[.]"
-#     local D="[-.]"
-#     # TODO: fix problem leading to hangup (verification piped to 2>&1)
-#     # Notes: eval needed for $ext_pattern resolution
-#     # - excludes read-only files (e.g., ls -l => "-r--r--r--   1 tomohara   11K Nov  2 16:30 _master-note-info.list.log")
-#     # EXs:              fu.log2                fu.2.log                  fu.log.14aug21    fu.14aug21.log
-#     local file_list="$TEMP/_move-versioned-files-$$.list"
-#     move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;' | sort -u) "$dir"
-# }
-# alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
-# # note: * the version regex should be kept quite specific to avoid useful files being moved into ./output
-# alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
-# alias move-adhoc-files='move-log-files; move-output-files'
+# move-log-files: move "versioned" log files to log-files
+# move-output-files: likewise for output files with version numbers to ./output
+#THESE ARE THE CUSTOM CHANGES MADE TO THE FILE
+$ alias perl-grep='perl $BIN_DIR/perlgrep.perl'
+$ alias dir-rw='dir -rw'
+$ alias move='mv'
+# note: versioned files are those ending in numerics or with numeric affix
+## TODO: use perl-style regex for more precise matching (effing over-arching glob's)
+$ function move-versioned-files {
+$     local ext_pattern="$1"
+$     if [ "$ext_pattern" = "" ]; then ext_pattern="{list,log,txt}"; fi
+$     local dir="$2"
+$     if [ "$dir" = "" ]; then dir="versioned-files"; fi
+$     mkdir -p "$dir";
+$     ## OLD: local D="[.]"
+$     local D="[-.]"
+$     # TODO: fix problem leading to hangup (verification piped to 2>&1)
+$     # Notes: eval needed for $ext_pattern resolution
+$     # - excludes read-only files (e.g., ls -l => "-r--r--r--   1 tomohara   11K Nov  2 16:30 _master-note-info.list.log")
+$     # EXs:              fu.log2                fu.2.log                  fu.log.14aug21    fu.14aug21.log
+$     local file_list="$TEMP/_move-versioned-files-$$.list"
+$     ## TODO: dir-rw $(eval echo *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*  *$D*[0-9][0-9]*$D$ext_pattern) 2>| "$file_list.log" | perl -pe 's/(\S+\s+){6}\S+//;' >| "$file_list"
+$     ## xargs -I "{}" $MV "{}" "$dir" < "$file_list"
+$     ## OLD: move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;') "$dir"
+$     move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;' | sort -u) "$dir"
+$ }
+$ alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
+# note: * the version regex should be kept quite specific to avoid useful files being moved into ./output
+$ alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
+$ alias move-adhoc-files='move-log-files; move-output-files'
 
 # # SIMULATING THE CREATION OF LOG FILES AND OUTPUT FILES (need help)
 # rm -rf ./*
@@ -269,14 +279,14 @@ $ linebr
 $ ls
 abc1.xyz  abc2.xyz  abc3.xyz  abc4.xyz	abc5.xyz.19Aug22  abc6.xyz.19Aug22
 --------------------------------------------------------------------------------
-'abc1.xyz' -> 'abc1.xyz.16Sep22'
-'abc2.xyz' -> 'abc2.xyz.16Sep22'
-'abc3.xyz' -> 'abc3.xyz.16Sep22'
-'abc4.xyz' -> 'abc4.xyz.16Sep22'
+'abc1.xyz' -> 'abc1.xyz.15Sep22'
+'abc2.xyz' -> 'abc2.xyz.15Sep22'
+'abc3.xyz' -> 'abc3.xyz.15Sep22'
+'abc4.xyz' -> 'abc4.xyz.15Sep22'
 --------------------------------------------------------------------------------
-abc1.xyz	  abc2.xyz.16Sep22  abc4.xyz	      abc6.xyz.19Aug22
-abc1.xyz.16Sep22  abc3.xyz	    abc4.xyz.16Sep22
-abc2.xyz	  abc3.xyz.16Sep22  abc5.xyz.19Aug22
+abc1.xyz	  abc2.xyz.15Sep22  abc4.xyz	      abc6.xyz.19Aug22
+abc1.xyz.15Sep22  abc3.xyz	    abc4.xyz.15Sep22
+abc2.xyz	  abc3.xyz.15Sep22  abc5.xyz.19Aug22
 
 # Statistical helpers
 $ alias bigrams='perl -sw $BIN_DIR/count_bigrams.perl -N=2'
@@ -376,35 +386,36 @@ References
 $ printf "https://www.google.com/" > lynxin.txt
 # lynx-dump lynxin.txt (need help)
 
-## WORKS FINE : HALTED BY BATSPP ##
-# # CSH-like aliases
-# #
-# function setenv () { export $1="$2"; }
-# alias unsetenv='unset'
-# alias unexport='unset'
+# CSH-like aliases
+#
+$ function setenv () { export $1="$2"; }
+$ alias unsetenv='unset'
+$ alias unexport='unset'
 
-## WORKS FINE : HALTED BY BATSPP ##
-# setenv MY_USERNAME aveey-temp
-# echo $MY_USERNAME
-# unexport MY_USERNAME
-# echo $MY_USERNAME
+$ setenv MY_USERNAME aveey-temp
+$ echo $MY_USERNAME
+$ linebr
+$ unexport MY_USERNAME
+$ echo $MY_USERNAME
+aveey-temp
+--------------------------------------------------------------------------------
 
-# === HALTED DUE TO BATSPP === #
-# # Unicode support
-# #
-# # TODO: put show-unicode-code-info-aux into script (as with other overly-large function definitions like hg-pull-and-update)
-# # show-unicode-control-chars(): output Unicode codepoint (ordinal) and UTF-8 encoding for input chars with offset in line
-# function show-unicode-code-info-aux() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < "$1"; }
-# function show-unicode-code-info { show-unicode-code-info-aux "$@"; }
-# function show-unicode-code-info-stdin() { in_file="$TEMP/show-unicode-code-info.$$"; cat >| $in_file;  show-unicode-code-info-aux $in_file; }
-# #
-# function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
-# #
-# # show-unicode-control-chars(): Convert ascii control characters to printable Unicode ones (e.g., ␀ for 0x00)
-# ## BAD: function show-unicode-control-chars { perl -pe 'use Encode "decode_utf8"; s/[\x00-\x1F]/chr($&+0x2400)/e;'; }
-# # See https://stackoverflow.com/questions/42193957/errorwide-character-in-print-at-x-at-line-35-fh-read-text-files-from-comm.
-# ## BAD: function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr($& + 0x2400)/eg;'; }
-# function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
+
+# Unicode support
+#
+# TODO: put show-unicode-code-info-aux into script (as with other overly-large function definitions like hg-pull-and-update)
+# show-unicode-control-chars(): output Unicode codepoint (ordinal) and UTF-8 encoding for input chars with offset in line
+$ function show-unicode-code-info-aux() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < "$1"; }
+$ function show-unicode-code-info { show-unicode-code-info-aux "$@"; }
+$ function show-unicode-code-info-stdin() { in_file="$TEMP/show-unicode-code-info.$$"; cat >| $in_file;  show-unicode-code-info-aux $in_file; }
+#
+$ function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
+#
+# show-unicode-control-chars(): Convert ascii control characters to printable Unicode ones (e.g., ␀ for 0x00)
+## BAD: function show-unicode-control-chars { perl -pe 'use Encode "decode_utf8"; s/[\x00-\x1F]/chr($&+0x2400)/e;'; }
+# See https://stackoverflow.com/questions/42193957/errorwide-character-in-print-at-x-at-line-35-fh-read-text-files-from-comm.
+## BAD: function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr($& + 0x2400)/eg;'; }
+$ function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
 
 # ## UNICODE ALIASES (need help for implementation)
 # show-unicode-code-info-aux
@@ -413,11 +424,49 @@ $ printf "https://www.google.com/" > lynxin.txt
 # output-BOM
 # show-unicode-control-chars
 
-## WORKS FINE: HALTED BY BATSPP ##
-# show-unicode-code-info-aux ./catmanual.txt
+$ show-unicode-code-info-aux ./catmanual.txt
+char	ord	offset	encoding
+5.15.0-47-generic: 17
+5	0035	0	35
+.	002E	1	2e
+1	0031	2	31
+5	0035	3	35
+.	002E	4	2e
+0	0030	5	30
+-	002D	6	2d
+4	0034	7	34
+7	0037	8	37
+-	002D	9	2d
+g	0067	10	67
+e	0065	11	65
+n	006E	12	6e
+e	0065	13	65
+r	0072	14	72
+i	0069	15	69
+c	0063	16	63
 
-## WORKS FINE: HALTED BY BATSPP ##
-#show-unicode-code-info ./catmanual.txt
+
+$ show-unicode-code-info ./catmanual.txt
+char	ord	offset	encoding
+5.15.0-47-generic: 17
+5	0035	0	35
+.	002E	1	2e
+1	0031	2	31
+5	0035	3	35
+.	002E	4	2e
+0	0030	5	30
+-	002D	6	2d
+4	0034	7	34
+7	0037	8	37
+-	002D	9	2d
+g	0067	10	67
+e	0065	11	65
+n	006E	12	6e
+e	0065	13	65
+r	0072	14	72
+i	0069	15	69
+c	0063	16	63
+
 
 # # ERROR GENERATED (shown below)
 # $ show-unicode-code-info-stdin ./catmanual.txt
@@ -428,4 +477,5 @@ $ printf "https://www.google.com/" > lynxin.txt
 # $ show-unicode-control-chars ./catmanual.txt
 
 ## NO OUTPUT GENERATED
-#output-BOM ./catmanual.txt
+$ output-BOM ./catmanual.txt
+﻿

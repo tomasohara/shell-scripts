@@ -1,6 +1,3 @@
-# Setup
-$ bind 'set enable-bracketed-paste off'
-
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
 ## TODO: PS1="> "
@@ -51,30 +48,30 @@ $ typeset -f | egrep '^\w+' | wc -l
 ##1 SHOWS HISTORY OF BASH COMMANDS
 $ alias hist='history $LINES'
 $ hist
- 2013  source _dir-aliases.bash
- 2014  alias | wc -l
- 2015  echo $?
- 2016  ## NOTE: For reproducability, the directory name needs to be fixed
- 2017  ## In place of $$, use a psuedo random number (e,g., 1210)
- 2018  ## *** All output from one run to the next needs to be the same ***
- 2019  ## temp_dir=$TMP/test-$$
- 2020  temp_dir=$TMP/test-1210
- 2021  mkdir -p "$temp_dir"
- 2022  # TODO: /bin/rm -rvf "$temp_dir"
- 2023  cd "$temp_dir"
- 2024  pwd
- 2025  #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
- 2026  alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+ 2010  source _dir-aliases.bash
+ 2011  alias | wc -l
+ 2012  echo $?
+ 2013  ## NOTE: For reproducability, the directory name needs to be fixed
+ 2014  ## In place of $$, use a psuedo random number (e,g., 1210)
+ 2015  ## *** All output from one run to the next needs to be the same ***
+ 2016  ## temp_dir=$TMP/test-$$
+ 2017  temp_dir=$TMP/test-1210
+ 2018  mkdir -p "$temp_dir"
+ 2019  # TODO: /bin/rm -rvf "$temp_dir"
+ 2020  cd "$temp_dir"
+ 2021  pwd
+ 2022  #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+ 2023  alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+ 2024  echo $?
+ 2025  # Count aliases proper
+ 2026  alias | wc -l
  2027  echo $?
- 2028  # Count aliases proper
- 2029  alias | wc -l
+ 2028  # Count functions
+ 2029  typeset -f | egrep '^\w+' | wc -l
  2030  echo $?
- 2031  # Count functions
- 2032  typeset -f | egrep '^\w+' | wc -l
- 2033  echo $?
- 2034  ##1 SHOWS HISTORY OF BASH COMMANDS
- 2035  alias hist='history $LINES'
- 2036  hist
+ 2031  ##1 SHOWS HISTORY OF BASH COMMANDS
+ 2032  alias hist='history $LINES'
+ 2033  hist
 
 ##2 SHOWS HISTORY WITHOUT TIMESTAMPS
 # Removes timestamp from history (e.g., " 1972  [2014-05-02 14:34:12] dir *py" => " 1972  dir *py")
@@ -83,30 +80,30 @@ $ hist
 # quiet-unalias h #COMMAND NOT FOUND
 $ function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
 $ h
- 2021  mkdir -p "$temp_dir"
- 2022  # TODO: /bin/rm -rvf "$temp_dir"
- 2023  cd "$temp_dir"
- 2024  pwd
- 2025  #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
- 2026  alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+ 2018  mkdir -p "$temp_dir"
+ 2019  # TODO: /bin/rm -rvf "$temp_dir"
+ 2020  cd "$temp_dir"
+ 2021  pwd
+ 2022  #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+ 2023  alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+ 2024  echo $?
+ 2025  # Count aliases proper
+ 2026  alias | wc -l
  2027  echo $?
- 2028  # Count aliases proper
- 2029  alias | wc -l
+ 2028  # Count functions
+ 2029  typeset -f | egrep '^\w+' | wc -l
  2030  echo $?
- 2031  # Count functions
- 2032  typeset -f | egrep '^\w+' | wc -l
- 2033  echo $?
- 2034  ##1 SHOWS HISTORY OF BASH COMMANDS
- 2035  alias hist='history $LINES'
- 2036  hist
- 2037  echo $?
- 2038  ##2 SHOWS HISTORY WITHOUT TIMESTAMPS
- 2039  # Removes timestamp from history (e.g., " 1972  [2014-05-02 14:34:12] dir *py" => " 1972  dir *py")
- 2040  # TEST: function hist { h | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
- 2041  # note: funciton used to simplify specification of quotes
- 2042  # quiet-unalias h #COMMAND NOT FOUND
- 2043  function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
- 2044  h
+ 2031  ##1 SHOWS HISTORY OF BASH COMMANDS
+ 2032  alias hist='history $LINES'
+ 2033  hist
+ 2034  echo $?
+ 2035  ##2 SHOWS HISTORY WITHOUT TIMESTAMPS
+ 2036  # Removes timestamp from history (e.g., " 1972  [2014-05-02 14:34:12] dir *py" => " 1972  dir *py")
+ 2037  # TEST: function hist { h | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
+ 2038  # note: funciton used to simplify specification of quotes
+ 2039  # quiet-unalias h #COMMAND NOT FOUND
+ 2040  function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
+ 2041  h
 
 ##3 ASCTIME
 # EX: $ asctime | perl -pe 's/\d/N/g; s/\w+ \w+/DDD MMM/;' => "DDD MMM NN NN:NN:NN NNNN"
@@ -119,10 +116,10 @@ DDD MMM NN NN:NN:NN NNNN
 $ function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
 $ ps | filter-dirnames
     PID TTY          TIME CMD
-  27306 pts/2    00:00:00 bash
-  27335 pts/2    00:00:00 ps
-  27336 pts/2    00:00:00 bash
-  27337 pts/2    00:00:00 perl
+  31232 pts/6    00:00:00 bash
+  31262 pts/6    00:00:00 ps
+  31263 pts/6    00:00:00 bash
+  31264 pts/6    00:00:00 perl
 
 ##5 COMMAIZE NUMBERS
 # comma-ize-number(): add commas to numbers in stdin
@@ -252,7 +249,7 @@ $ byte-usage process.txt
 # | bash: /home/aveey/bin/dobackup.sh: /bin/csh: bad interpreter: No such file or directory
 # | 30.4M	.
 # (Same output for 'byte-usage "Hi Mom"' and 'byte-usage thisisatest.txt')
-36M	.
+36.5M	.
 4.11M	./backup
 
 # check[all-]-(errors|warnings): check for known errors, with the check-all

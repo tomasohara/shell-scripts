@@ -1,0 +1,771 @@
+# Setup
+$ bind 'set enable-bracketed-paste off'
+
+## TESTS START FROM LINE 2156 (tomohara-aliases.bash)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+# $ echo 'Hi'
+# | Hi?2004l
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+# Setting a temp directory for tests
+$ TMP=/tmp/test-py-commands
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+$ alias | wc -l
+0
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 3443)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-3443
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-py-commands/test-3443
+
+# Count aliases proper
+$ alias | wc -l
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+1
+0
+
+$ export PYTHON_CMD="/usr/bin/time python -u"
+$ export PYTHON="$NICE $PYTHON_CMD"
+$ export PYTHONPATH="$HOME/python:$PYTHONPATH"
+
+# add-python-path(pkg-dir): add PKG-DIR to PATH and PARENT to PYTHONPATH
+## HACK: make sure Mezcla/mezcla resolves before python/mezcla
+## OLD: export PYTHONPATH="$HOME/python/Mezcla:$PYTHONPATH"
+$ function add-python-path () {
+$     local package_path="$1"
+$     local parent_path=$(realpath "$package_path/..")
+$     # add package to path (e.g., $HOME/python/Mezcla/mezcla)
+$     prepend-path "$package_path"
+$     # add parent to python-path spec (e.g., $HOME/python/Mezcla)
+$     export PYTHONPATH="$parent_path:$PYTHONPATH"
+$ }
+# EX: mezcla-devel; which system.py | grep -i Mezcla-main => ""
+# note: mezcla-devel should be stable version of mezcla-tom
+## OLD: alias mezcla-devel='add-python-path $HOME/programs/python/mezcla-tom/mezcla'
+$ alias mezcla-devel='add-python-path $HOME/python/Mezcla/mezcla'
+$ alias mezcla-main='add-python-path $HOME/python/Mezcla-main/mezcla'
+$ alias mezcla-tom='add-python-path $HOME/python/Mezcla-tom/mezcla'
+# Add mezcla-devel unless another version in path
+$ if [[ ! "$PATH" =~ mezcla ]]; then
+$     ## OLD: mezcla-devel
+$     ## TODO: echo "Warning: mezcla not in PATH"
+$     true
+$ fi
+
+## FUNCTIONS REQUIRED FOR SMOOTH RUNNING OF THE TESTS
+$ function ps-all () { 
+$     local pattern="$1";
+$     local pager=cat;
+$     if [ "$pattern" = "" ]; then 
+$         pattern="."; 
+$         pager=$PAGER
+$     fi;
+$     ps_mine.sh --all | $EGREP -i "((^USER)|($pattern))" | $pager;
+$     }
+# Path settings
+# TODO: define a function for removing duplicates from the PATH while
+# preserving the order
+$ function show-path-dir () { (echo "${1}:"; printenv "$1" | perl -pe "s/:/\n/g;") | $PAGER; }
+$ alias show-path='show-path-dir PATH'
+# append-path(path): appends PATH to environment variable unless already there
+## TODO: function in-path { local path=$(tr ":" "\n" | $GREP "^$1$$"); return ($path != ""); }
+# TODO: add force argument to ensure last (or first)
+$ function append-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="${PATH}:$1"; fi }
+$ function prepend-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="$1:${PATH}"; fi }
+# TODO: rework append-/prepend-path and python variants via generic helper
+$ function append-python-path () { export PYTHONPATH=${PYTHONPATH}:"$1"; }
+$ function prepend-python-path () { export PYTHONPATH="$1":${PYTHONPATH}; }
+
+# add-python-path $temp_dir
+$ add-python-path $temp_dir
+
+$ alias ps-python-full='ps-all python'
+# note: excludes ipython and known system-related python scripts
+$ alias ps-python='ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|update-manager|software-properties|networkd-dispatcher)"'
+$ alias show-python-path='show-path-dir PYTHONPATH'
+
+## ERROR 1 - process ID list syntax error
+# $ ps-python-full
+# | error: process ID list syntax error
+# | 
+# | Usage:
+# |  ps [options]
+# | 
+# |  Try 'ps --help <simple|list|output|threads|misc|all>'
+# |   or 'ps --help <s|l|o|t|m|a>'
+# |  for additional help text.
+# | 
+# | For more details see ps(1).
+
+## ERROR 2 - bash : command not found and process ID list syntax error
+# $ ps-python
+# | bash: -iv: command not found
+# | error: process ID list syntax error
+# | 
+# | Usage:
+# |  ps [options]
+# | 
+# |  Try 'ps --help <simple|list|output|threads|misc|all>'
+# |   or 'ps --help <s|l|o|t|m|a>'
+# |  for additional help text.
+# | 
+# | For more details see ps(1).
+
+## show-python-path DISPLAYS ALL THE AVAILABLE PATHS OF PYTHON
+$ show-python-path
+PYTHONPATH:
+/tmp/test-py-commands
+/home/aveey/python
+
+
+# Python-lint filtering
+# python-lint-full(filename): complete output from pylint, with caret-based
+# context indicators retained by substiting carriage return for newline.
+# python-lint-work(filename): pylint with moderate filtering
+# python-lint(filename): pylint with usual filtering
+# TODO: specify exclusion types in pylint command line (e.g., invalid-name)
+# example: "C:674, 0: Invalid constant name "term_freq" (invalid-name)"
+# example: "run_ner.py:413:0: C0330: Wrong continued indentation (add 8 spaces).
+#                   'B-DATE', 'I-DATE', 'B-DOCTOR', 'I-DOCTOR', 'B-LOCATION', 'I-LOCATION', 'B-AGE', 'I-AGE',
+#                   ^       | (bad-continuation)
+# TODO: make Mercurial root-to-python-path hack optional
+# TODO: add similar aliases for pep8 and pyflakes
+# TODO: handle continutations of statements without indentation:
+#   ner_eval/ner_detokenize.py:11:45: C0326: Exactly one space required after comma
+#   parser.add_argument('--output_file', type=str,  help='')
+#                                      ^ (bad-whitespace)
+$ function python-lint-full() { 
+$     local root=$(hg root 2> /dev/null);
+$     ## TODO: --persistent=n (to avoid caching)
+$     PYTHONPATH="$root:.:$PYTHONPATH" $NICE pylint "$@" | perl -00 -ne 'while (/(\n\S+:\s*\d+[^\n]+)\n( +)/) { s/(\n\S+:\s*\d+[^\n]+)\n( +)/$1\r$2/mg; } print("$_");' 2>&1 | $PAGER;
+$ }
+
+# python-lint-full (scores the code on the basis of effectiveness)
+$ python-lint-full $BIN_DIR/tests/batspp.py
+bash: pylint: command not found
+
+# Notes:
+# - filters out context in addition to warning proper, as in following:
+#    ex: C:244, 0: Exactly one space required after assignment
+#    SKIP_ADS =  (IS_GI_JOB_SEARCH or system.getenv_bool("SKIP_ADS", False))
+#             ^ (bad-whitespace)
+# - filters out other extraneous output
+#   ex: Your code has been rated at 7.43/10 ...
+#   ex: No config file found ...
+# - the following has two regex: *modify the first* to add more conditions to ignore; the second is just for the extraneous pylint output
+$ function python-lint-work() { python-lint-full "$@" 2>&1 | $EGREP -v '\((bad-continuation|bad-option-value|fixme|invalid-name|locally-disabled|too-few-public-methods|too-many-\S+|trailing-whitespace|star-args|unnecessary-pass)\)' | $EGREP -v '^(([A-Z]:[0-9]+)|(Your code has been rated)|(No config file found)|(\-\-\-\-\-))' | $PAGER; }
+# TODO: rename as python-lint-tpo for clarity (and make python-lint as alias for it)
+$ function python-lint() { python-lint-work "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|missing-final-newline|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
+
+## ERROR GENERATED : -v COMMAND NOT FOUND
+# $ python-lint-work $BIN_DIR/tests/batspp.py
+# | bash: -v: command not found
+
+## ERROR GENERATED : -v COMMAND NOT FOUND
+# $ python-lint $BIN_DIR/tests/batspp.py
+# | bash: -v: command not found
+
+# run-python-lint-batched([file_spec="*.py"]: Run python-lint in batch mode over
+# files in FILE_SPEC, placing results in pylint/<today>.
+#
+$ function get-python-lint-dir () {
+$     local python_version_major=$(pylint --version 2>&1 | extract_matches.perl "Python (\d)")
+$     local affix="py${python_version_major}"
+$     local out_dir="_pylint/$(todays-date)-$affix"
+$     echo "$out_dir"
+$ }
+#
+$ function run-python-lint-batched () {
+$     # TODO: support files with embedded spaces
+$     local file_spec="$@"
+$     if [ "$file_spec" = "" ]; then file_spec="*.py"; fi
+$     # Create output directory if needed
+$     local out_dir=$(get-python-lint-dir)
+$     mkdir -p "$out_dir"
+$     # Run pylint and pipe top section into less
+$     (for f in $($LS $file_spec); do
+$          # HACK: uses basename of parent prefix if invoked with path
+$          local b=$(basename "$f")
+$          local pre=""
+$ 	 # Note: uses directory name as prefix if file not in current dir
+$          if [[ $f =~ / ]]; then pre="$(basename $(dirname "$f"))-"; fi
+$          DEBUG_LEVEL=5 python-lint "$f" >| "$out_dir/$pre$b".log 2>&1
+$          head "$out_dir/$pre$b".log
+$      done) >| "$out_dir/summary.log"
+$     less -p '^\** Module' "$out_dir/summary.log";
+$ }
+
+# (REQUIRED BY run-python-lint-batched)
+$ function downcase-stdin { perl -pe "use open ':std', ':encoding(UTF-8)'; s/.*/\L$&/;"; }
+$ function downcase-text() { echo "$@" | downcase-stdin; }
+# todays-date(): outputs date in format DDmmmYY (e.g., 22Apr20)
+## OLD: function todays-date() { date '+%d%b%y' | perl -pe 's/.*/\L$&/;'; }
+## TODO: drop leading digits in day of month
+## NOTE: keep in synch with common.perl get_file_ddmmmyy and .emacs edit-adhoc-notes-file
+$ function todays-date() { date '+%d%b%y' | downcase-stdin; }
+
+# ERROR: Pattern not found  (press RETURN)
+# run-python-lint-batched ./print.py 
+
+# python-import-path(module): find path for package directory of MODULE
+# Note: this checks output via module initialization output shown with python -v
+# ex: /usr/local/misc/programs/anaconda3/lib/python3.8/site-packages/sklearn/__pycache__/__init__.cpython-38.pyc matches /usr/local/misc/programs/anaconda3/lib/python3.8/site-packages/sklearn/__init__.py
+$ function python-import-path-all() { local module="$1"; python -u -v -c "import $module" 2>&1; }
+$ function python-import-path-full() { local module="$1"; python-import-path-all "$@" | extract_matches.perl "((matches (.*\W$module[^/]*[/\.][^/]*))|ModuleNotFoundError)"; }
+$ function python-import-path() { python-import-path-full "$@" | head -1; }
+
+# RETURNS A LIST OF PYTHON MODULES
+$ rm -rf ./*
+$ pip3 freeze
+anyio==3.6.1
+appdirs==1.4.4
+apturl==0.5.2
+argon2-cffi==21.3.0
+argon2-cffi-bindings==21.2.0
+asttokens==2.0.8
+attrs==22.1.0
+ayatana-settings==21.1.28
+Babel==2.10.3
+backcall==0.2.0
+bash_kernel==0.8.0
+beautifulsoup4==4.11.1
+beniget==0.4.1
+bleach==5.0.1
+blinker==1.4
+Brlapi==0.8.3
+Brotli==1.0.9
+cajarename==21.11.24
+certifi==2022.9.14
+cffi==1.15.1
+chardet==4.0.0
+charset-normalizer==2.1.1
+click==8.0.3
+colorama==0.4.4
+command-not-found==0.3
+cryptography==3.4.8
+cupshelpers==1.0
+cycler==0.11.0
+dbus-python==1.2.18
+debugpy==1.6.3
+decorator==5.1.1
+defer==1.0.6
+defusedxml==0.7.1
+distro==1.7.0
+distro-info===1.1build1
+entrypoints==0.4
+executing==1.0.0
+fastjsonschema==2.16.1
+folder-color-caja==0.0.86
+folder-color-common==0.0.86
+fonttools==4.29.1
+fs==2.4.12
+gast==0.5.2
+gpg===1.16.0-unknown
+greenlet==1.1.2
+html5lib==1.1
+httplib2==0.20.2
+idna==3.4
+importlib-metadata==4.6.4
+ipykernel==6.15.3
+ipython==8.5.0
+ipython_genutils==0.2.0
+ipywidgets==6.0.0
+jedi==0.18.1
+jeepney==0.7.1
+Jinja2==3.1.2
+json5==0.9.10
+jsonschema==4.16.0
+jupyter-core==4.11.1
+jupyter-server==1.18.1
+jupyter_client==7.3.5
+jupyterlab==3.4.7
+jupyterlab-pygments==0.2.2
+jupyterlab_server==2.15.1
+keyring==23.5.0
+kiwisolver==1.3.2
+language-selector==0.1
+launchpadlib==1.10.16
+lazr.restfulclient==0.14.4
+lazr.uri==1.0.6
+louis==3.20.0
+lxml==4.9.1
+lz4==3.1.3+dfsg
+Magnus==1.0.3
+MarkupSafe==2.1.1
+mate-hud==22.4.4
+mate-tweak==22.4.8
+matplotlib==3.5.1
+matplotlib-inline==0.1.6
+mezcla==1.3.1
+mistune==2.0.4
+more-itertools==8.10.0
+mpmath==0.0.0
+msgpack==1.0.3
+nbclassic==0.4.3
+nbclient==0.6.8
+nbconvert==7.0.0
+nbformat==5.5.0
+nest-asyncio==1.5.5
+netifaces==0.11.0
+notebook==6.4.12
+notebook-shim==0.1.0
+numpy==1.21.5
+oauthlib==3.2.0
+olefile==0.46
+onboard==1.4.1
+packaging==21.3
+pandocfilters==1.5.0
+parso==0.8.3
+pexpect==4.8.0
+pickleshare==0.7.5
+Pillow==9.0.1
+ply==3.11
+prometheus-client==0.14.1
+prompt-toolkit==3.0.31
+psutil==5.9.0
+ptyprocess==0.7.0
+pulsemixer==1.5.1
+pure-eval==0.2.2
+py==1.10.0
+pycairo==1.20.1
+pycparser==2.21
+pycups==2.0.1
+Pygments==2.13.0
+PyGObject==3.42.1
+PyJWT==2.3.0
+pynvim==0.4.2
+pyparsing==2.4.7
+pyrsistent==0.18.1
+python-apt==2.3.0+ubuntu2.1
+python-dateutil==2.8.2
+python-debian===0.1.43ubuntu1
+python-xlib==0.29
+pythran==0.10.0
+pytz==2022.2.1
+pyxdg==0.27
+PyYAML==5.4.1
+pyzmq==24.0.0
+reportlab==3.6.8
+requests==2.28.1
+scipy==1.8.0
+SecretStorage==3.3.1
+Send2Trash==1.8.0
+setproctitle==1.2.2
+six==1.16.0
+sniffio==1.3.0
+soupsieve==2.3.2.post1
+stack-data==0.5.0
+sympy==1.9
+systemd-python==234
+terminado==0.15.0
+testpath==0.5.0
+tinycss2==1.1.1
+tomli==2.0.1
+tornado==6.2
+traitlets==5.4.0
+ubuntu-advantage-tools==27.10
+ubuntu-drivers-common==0.0.0
+ufoLib2==0.13.1
+ufw==0.36.1
+unattended-upgrades==0.1
+unicodedata2==14.0.0
+urllib3==1.26.12
+wadllib==1.3.6
+wcwidth==0.2.5
+webencodings==0.5.1
+websocket-client==1.4.1
+widgetsnbextension==2.0.0
+xdg==5
+xkit==0.0.0
+zipp==1.0.0
+
+# conda MODULE IS USED FOR TEST
+$ python-import-path 'conda'
+$ linebr
+$ python-import-path-full 'conda'
+$ linebr
+$ python-import-path-all 'conda' | grep 'conda'
+ModuleNotFoundError
+--------------------------------------------------------------------------------
+ModuleNotFoundError
+--------------------------------------------------------------------------------
+ModuleNotFoundError: No module named 'conda'
+
+# note: gotta hate python!
+$ function python-module-version-full { local module="$1"; python -c "import $module; print([v for v in [getattr($module, a, '') for a in '__VERSION__ VERSION __version__ version'.split()] if v][0])"; }
+# TODO: check-error if no value returned
+$ function python-module-version { python-module-version-full "$@" 2> /dev/null; }
+$ function python-package-members() { local package="$1"; python -c "import $package; print(dir($package));"; }
+#
+$ alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  python setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
+# TODO: add -v (the xargs usage seems to block it)
+$ alias python-uninstall-setup='cat installed-files.list | xargs /bin/rm -vi; rename_files.perl -regex ^ un installed-files.list'
+
+# MODULE USED: mezcla
+$ python-module-version-full mezcla
+$ linebr
+$ python-module-version mezcla
+$ linebr
+$ python-package-members mezcla
+$ linebr
+1.3.1
+--------------------------------------------------------------------------------
+1.3.1
+--------------------------------------------------------------------------------
+['PYTHON3_PLUS', 'TL', '__VERSION__', '__all__', '__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__path__', '__spec__', '__version__', 'debug', 'gh', 'glue_helpers', 'mezcla', 'sys', 'sys_version_info_hack', 'system', 'tpo_common']
+--------------------------------------------------------------------------------
+
+## rename-with-file-date REQUIRED
+$ function rename-with-file-date() {
+$     ## DEBUG: set -o xtrace
+$     local f new_f
+$     local move_command="move"
+$     if [ "$1" = "--copy" ]; then
+$         ## TODO: move_command="copy"
+$         move_command="command cp --interactive --verbose --preserve"
+$         shift
+$     fi
+$     for f in "$@"; do
+$         ## DEBUG: echo "f=$f"
+$         if [ -e "$f" ]; then
+$            new_f=$(get-free-filename "$f".$(date --reference="$f" '+%d%b%y') ".")
+$            ## DEBUG: echo
+$            eval "$move_command" "$f" "$new_f";
+$         fi
+$     done;
+$     ## DEBUG: set - -o xtrace
+$ }
+$ function get-free-filename() {
+$     local base="$1"
+$     local sep="$2"
+$     local L=1
+$     local filename="$base"
+$     ## DEBUG: local -p
+$     while [ -e "$filename" ]; do
+$         let L++
+$         filename="$base$sep$L"
+$     done;
+$     ## DEBUG: local -p
+$     echo "$filename"
+$ }
+$ alias move='mv'
+$ export PAGER=less
+$ export PAGER_CHOPPED="less -S"
+$ export PAGER_NOEXIT="less -+F"
+$ function zless () { zcat "$@" | $PAGER; }
+# 
+# zhead(file, head-opts)
+$ function zhead () {
+$     local file="$1"
+$     shift
+$     zcat "$file" | head "$@"
+$ }
+$ alias less-='$PAGER_NOEXIT'
+$ alias less-clipped='$PAGER_NOEXIT -S'
+$ alias less-tail='$PAGER_NOEXIT +G'
+$ alias less-tail-clipped='$PAGER_NOEXIT +G -S'
+$ alias ltc=less-tail-clipped
+
+## REQUIRES setup.py (TBC)
+#python-setup-install
+$ linebr
+#python-uninstall-setup
+--------------------------------------------------------------------------------
+
+# ipython(): overrides ipython command to set xterm title
+$ alias set-xterm-window='set_xterm_title.bash'
+$ function ipython() { 
+$     local ipython=$(which ipython)
+$     if [ "$ipython" = "" ]; then echo "Error: install ipython first"; return; fi
+$     set-xterm-window "ipython [$PWD]"
+$     $ipython "$@"
+$ }
+# python-trace(script, arg, ...): Run python SCRIPT with statement tracing
+$ function python-trace {
+$     local script="$1"
+$     shift
+$     $PYTHON -m trace --trace $(which "$script") "$@"
+$     }
+
+# ipython COMMAND SEEMS TO WORK (may take some time)
+#ipython -h
+
+#python-trace l $BIN_DIR/template.py 
+#(need some help to test it properly - works / extremely time consuming)
+
+# which-python SHOWS THE PATH OF PYTHON
+$ alias which-python='which python'
+$ which-python
+$ linebr
+$ alias which-py3='which python3' #(ADDED FOR PYTHON3)
+$ which-py3
+/usr/bin/python
+--------------------------------------------------------------------------------
+/usr/bin/python3
+
+# py-diff : CHECKS THE DIFFERENCE BETWEEN THE PYTHON FILES
+# TODO: specify options before the pattern (or modify do_diff.sh to allow after)
+$ function py-diff () { do_diff.sh '*.py *.mako' "$@" 2>&1 | $PAGER; }
+$ pwd
+/tmp/test-py-commands/test-3443
+
+#py-diff $BIN_DIR/tests/batspp.py $BIN_DIR/tests/ipynb_to_batspp.py (NEVER USE abc.py)
+$ rm -rf ./*
+$ printf "print('THIS IS A TEST')" > atest.py
+$ printf "print('THIS IS A TEST')" > xyz.py
+$ printf "print('THIS IS A TEST11')" > abc1.py
+$ ls
+abc1.py  atest.py  xyz.py
+
+# $ py-diff ./ 
+#(help required - process not ending)
+
+# TEST NOT APPLICABLE RN 
+$ function kivy-win32-env {
+$    export PYTHONPATH='c:/cartera-de-tomas/python;c:/Program-Misc/python/kivy-1-9-0/kivy27'
+$    kivy_dir="/c/Program-Misc/python/kivy-1-9-0"
+$    python_dir="$kivy_dir/Python27"
+$    prepend-path "$kivy_dir:$kivy_dir/Python27:$kivy_dir/tools:$kivy_dir/Python27/Scripts:$kivy_dir/gstreamer/bin:$kivy_dir/MinGW/bin:$kivy_dir/SDL2/bin"
+$ }
+
+$ alias elide-data='python -m transpose_data --elide'
+$ alias kill-python="kill_em.sh --filter 'ipython|emacs' python"
+$ alias kill-python-all="kill_em.sh python"
+
+# # ERRORS = OSTYPE is 'undefined variable' 
+# # NOTE: elide-data shows RuntimeError if any testfile is named abc.py
+# $ echo $OSTYPE
+#   linebr
+#   elide-data $BIN_DIR/template.py
+#   linebr
+#   kill-python
+#   linebr
+#   kill-python-all
+# | linux-gnu
+# | --------------------------------------------------------------------------------
+# | /home/aveey/miniconda3/bin/python: No module named transpose_data
+# | --------------------------------------------------------------------------------
+# | pattern=/:[0-9][0-9] [^ ]*python/
+# | filter=/ipython|emacs/
+# | OSTYPE: Undefined variable.
+# | --------------------------------------------------------------------------------
+# | pattern=/:[0-9][0-9] [^ ]*python/
+# | filter=/($)(^)/
+# | OSTYPE: Undefined variable.
+
+# run-jupyter-notebook(port=18888): run jupyter notebook on PORT
+$ alias TODAY='date'
+$ alias extract-matches='extract_matches.perl'
+$ function run-jupyter-notebook () {
+$     local port="$1"; if [ "$port" = "" ]; then port=8888; fi
+$     local ip="$2"; if [ "$ip" = "" ]; then ip="127.0.0.1"; fi
+$     local log="$TEMP/jupyter-$(TODAY).log"
+$     jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
+$     echo "$log"
+$     # Let jupyter initialize
+$     local delay=5
+$     echo "sleeping $delay seconds for log to stabalize (effing jupyter)"
+$     sleep $delay
+$     # TODO: resolve problem extracting URL
+$     # TEMP:
+$     tail "$log"
+$     # Show URL
+$     echo -n "URL: "
+$     extract-matches 'http:\S+' "$log" | sort -u
+$ }
+$ alias jupyter-notebook-redir=run-jupyter-notebook
+$ alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'
+
+# # ERROR GENERATED (see below)
+# $ jupyter-notebook-redir-open
+# | [1] 5335
+# | /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log
+# | sleeping 5 seconds for log to stabalize (effing jupyter)
+# | bash: /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log: Permission denied
+# | [1]+  Exit 1                  jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1
+# | tail: cannot open '/jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log' for reading: No such file or directory
+# | URL: Can't open /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log: No such file or directory at /home/aveey/bin/extract_matches.perl line 132.
+
+# Python-based utilities
+$ function extract-text() { python -m extract_document_text "$@"; }
+$ alias xtract-text='extract-text'
+
+# # ERROR - MODULE NOT FOUND
+# $ rm -rf ./*
+#   printf "print('THIS IS A TEST FOR TEXT EXTRACT ALIAS.')" > textex.py
+#   xtract-text ./textex.py
+# | /home/aveey/miniconda3/bin/python: No module named extract_document_text
+
+$ function test-script () {
+$     local base=$(basename "$1" .py)
+$     local date=$(todays-date)
+$     # note: uses both Mercurial root and . (in case not in repository)
+$     local root=$(hg root)
+$     PYTHONPATH="$root:.:$SANDBOX/tests:$PYTHONPATH" $NICE $PYTHON tests/test_$base.py --verbose >| tests/_test_$base.$date.log 2>&1;
+$     less-tail tests/_test_$base.$date.log;
+$ }
+#
+$ alias test-script-debug='ALLOW_SUBCOMMAND_TRACING=1 DEBUG_LEVEL=5 MISC_TRACING_LEVEL=5 test-script'
+
+# # ERROR (LOG FILE NOT FOUND)
+# $ test-script ./textex.py
+# | abort: no repository found in '/tmp/test-py-commands/test-3443' (.hg not found)
+# | bash: tests/_test_textex.03sep22.log: No such file or directory
+# | tests/_test_textex.03sep22.log: No such file or directory
+
+# randomize-datafie(file, [num[): randomize datafile optionally pruned to NUM lines, preserving header line
+#
+$ function randomize-datafile() {
+$     local file="$1"
+$     local num_lines="$2"
+$     if [ "$num_lines" = "" ]; then num_lines=$(wc -l "$file"); fi
+$     #
+$     head -1 "$file"
+$     tail --lines=+2 "$file" | python -m randomize_lines | head -$num_lines
+$ }
+
+# TESTING A PYTHON SCRIPT
+$ printf "print('THIS IS A TEST10')\nprint('THIS IS A TEST11')\nprint('THIS IS A TEST12')\nprint('THIS IS A TEST13')" > random_line_test.py
+$ ls
+abc1.py  atest.py  random_line_test.py	xyz.py
+
+# ERROR : MISSING MODULE (No module named randomize_lines)
+# $ randomize-datafile random_line_test.py
+# | print('THIS IS A TEST10')
+# | print('THIS IS A TEST11')
+# | print('THIS IS A TEST12')
+# | /home/aveey/miniconda3/bin/python: No module named randomize_lines
+
+# filter-random(pct, file, [include_header=1])Randomize lines based on percentages, using output lile (e.g., _r10pct-fubar.data).
+# Notes:
+# - By default, includes first line assuming it is header line.
+# - Includes support for compressed files (both input and output).
+$ function filter-random() {
+$     local pct="$1"
+$     local file="$2"
+$     local include_header="$3"
+$     if [ "$include_header" == "" ]; then include_header=1; fi
+$     # Derive settings from input arguments
+$     local ratio=$(perl -e "printf('%.3f', ($pct / 100.0));")
+$     local compressed=0
+$     if [[ $file =~ .gz ]]; then compressed=1; fi
+$     local dir=$(dirname $file)
+$     local base=$(basename $file)
+$     local type="cat"
+$     local result="$dir/_r${pct}pct-$base"
+$     # Filter the file, optionally uncompressing
+$     if [ "$compressed" = "1" ]; then 
+$        type="zcat"; 
+$        result=$(echo "$result" | perl -pe 's/.gz$//;')
+$     fi
+$     local opts=""
+$     if [ "$include_header" = "1" ]; then opts="$opt --include-header"; fi
+$     $type "$file" | $PYTHON -m filter_random $opts --ratio $ratio - > "$result" 2> "$result.log"
+$     # Compress result if original compressed
+$     if [ "$compressed" = "1" ]; then 
+$        gzip --force "$result"; 
+$     fi
+$ }
+
+# filter-random _r10pct-fubar.data (TBF - NEED HELP OPERATING)
+
+# Load supporting scripts
+#
+$ function conditional-source () { if [ -e "$1" ]; then source "$1"; else echo "Warning: bash script file not found (so not sourced):"; echo "    $1"; fi; }
+$ function quiet-unalias {
+$     ## HACK: do nothing if running under bats-core
+$     if [ "$BATS_TEST_FILENAME" != "" ]; then
+$         if [ "$BATCH_MODE" != "1" ]; then
+$             echo "Ignoring unalias over $* for sake of bats"
+$         fi
+$         return
+$     fi
+$     ## OLD: unalias "$@" 2> /dev/null;
+$     unalias "$@" 2> /dev/null || true;
+$     ## OLD: echo > /dev/null;
+$ }
+$ conditional-source $BIN_DIR/anaconda-aliases.bash
+$ conditional-source $BIN_DIR/git-aliases.bash
+
+$ function curl-dump () {
+$     local url="$1";
+$     local base=$(basename $url);
+$     curl $url > $base;
+$ }
+# EX: url-path $BIN/templata.html => "file:///$BIN/template.html"
+$ function url-path () {
+$     local file="$1"
+$     echo $(realpath "$file") | perl -pe 's@^@file:///@;'
+$ }
+
+# TESTS FOR curl-dump AND url-path
+$ curl-dump https://www.google.com/
+$ linebr
+$ ls -l
+$ linebr
+$ url-path $BIN_DIR/tests/batspp.py
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 16532    0 16532    0     0  40156      0 --:--:-- --:--:-- --:--:-- 40223
+--------------------------------------------------------------------------------
+total 36
+-rw-rw-r-- 1 aveey aveey    25 सितम्बर 18 21:04 abc1.py
+-rw-rw-r-- 1 aveey aveey    23 सितम्बर 18 21:04 atest.py
+-rw-rw-r-- 1 aveey aveey   103 सितम्बर 18 21:04 random_line_test.py
+-rw-rw-r-- 1 aveey aveey 16532 सितम्बर 18 21:04 www.google.com
+-rw-rw-r-- 1 aveey aveey    23 सितम्बर 18 21:04 xyz.py
+--------------------------------------------------------------------------------
+file:////home/aveey/tom-project/shell-scripts/tests/batspp.py
+
+$ function invoke-browser() {
+$     local browser_executable="$1"
+$     local file="$2"
+$     if [ "$file" != "" ]; then
+$         if [[ ! $file =~ http ]]; then
+$             file=$(url-path "$file")
+$         fi
+$     fi
+$     ## TODO?
+$     ## if [ ! -e "$browser_executable" ]; then
+$     ##     browser_executable_path=$(which "browser_executable")
+$     ##     if [ "$browser_executable_path" = "" ]; then browser_executable="$_path"; fi   
+$     ## fi
+$     local browser_base=$(basename "$browser_executable")
+$     $browser_executable "$file" >> $TEMP/$browser_base.$(TODAY).log 2>&1 &
+$ }
+$ function which { command which "$1" 2> /dev/null; }
+## TEST: alias firefox='invoke-browser "'"$(which firefox 2> /dev/null)"'"'
+$ alias firefox='invoke-browser "'"$(which firefox)"'"'
+
+# # WORKS WELL - HALTS TESTING
+# $ firefox #(#TESTS REMAINS FOR invoke-browser)
+# | [1] 15869
+
+$ echo "DONE"
+DONE
