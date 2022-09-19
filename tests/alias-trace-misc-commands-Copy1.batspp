@@ -27,6 +27,7 @@ $ alias | wc -l
 ## NOTE: For reproducability, the directory name needs to be fixed
 ## In place of $$, use a psuedo random number (e,g., 1210)
 ## *** All output from one run to the next needs to be the same ***
+$ $LS='/bin/ls'
 ## temp_dir=$TMP/test-$$
 $ temp_dir=$TMP/test-1210
 $ mkdir -p "$temp_dir"
@@ -35,6 +36,7 @@ $ cd "$temp_dir"
 $ pwd
 #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
 $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+bash: /bin/ls=/bin/ls: No such file or directory
 /tmp/test-trace-misc/test-1210
 
 # Count aliases proper
@@ -48,30 +50,30 @@ $ typeset -f | egrep '^\w+' | wc -l
 ##1 SHOWS HISTORY OF BASH COMMANDS
 $ alias hist='history $LINES'
 $ hist
- 2010  source _dir-aliases.bash
- 2011  alias | wc -l
- 2012  echo $?
- 2013  ## NOTE: For reproducability, the directory name needs to be fixed
- 2014  ## In place of $$, use a psuedo random number (e,g., 1210)
- 2015  ## *** All output from one run to the next needs to be the same ***
- 2016  ## temp_dir=$TMP/test-$$
- 2017  temp_dir=$TMP/test-1210
- 2018  mkdir -p "$temp_dir"
- 2019  # TODO: /bin/rm -rvf "$temp_dir"
- 2020  cd "$temp_dir"
- 2021  pwd
- 2022  #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
- 2023  alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
- 2024  echo $?
- 2025  # Count aliases proper
- 2026  alias | wc -l
- 2027  echo $?
- 2028  # Count functions
- 2029  typeset -f | egrep '^\w+' | wc -l
- 2030  echo $?
- 2031  ##1 SHOWS HISTORY OF BASH COMMANDS
- 2032  alias hist='history $LINES'
- 2033  hist
+ 1989  alias | wc -l
+ 1990  echo $?
+ 1991  ## NOTE: For reproducability, the directory name needs to be fixed
+ 1992  ## In place of $$, use a psuedo random number (e,g., 1210)
+ 1993  ## *** All output from one run to the next needs to be the same ***
+ 1994  $LS='/bin/ls'
+ 1995  ## temp_dir=$TMP/test-$$
+ 1996  temp_dir=$TMP/test-1210
+ 1997  mkdir -p "$temp_dir"
+ 1998  # TODO: /bin/rm -rvf "$temp_dir"
+ 1999  cd "$temp_dir"
+ 2000  pwd
+ 2001  #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+ 2002  alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+ 2003  echo $?
+ 2004  # Count aliases proper
+ 2005  alias | wc -l
+ 2006  echo $?
+ 2007  # Count functions
+ 2008  typeset -f | egrep '^\w+' | wc -l
+ 2009  echo $?
+ 2010  ##1 SHOWS HISTORY OF BASH COMMANDS
+ 2011  alias hist='history $LINES'
+ 2012  hist
 
 ##2 SHOWS HISTORY WITHOUT TIMESTAMPS
 # Removes timestamp from history (e.g., " 1972  [2014-05-02 14:34:12] dir *py" => " 1972  dir *py")
@@ -80,46 +82,45 @@ $ hist
 # quiet-unalias h #COMMAND NOT FOUND
 $ function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
 $ h
- 2018  mkdir -p "$temp_dir"
- 2019  # TODO: /bin/rm -rvf "$temp_dir"
- 2020  cd "$temp_dir"
- 2021  pwd
- 2022  #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
- 2023  alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
- 2024  echo $?
- 2025  # Count aliases proper
- 2026  alias | wc -l
- 2027  echo $?
- 2028  # Count functions
- 2029  typeset -f | egrep '^\w+' | wc -l
- 2030  echo $?
- 2031  ##1 SHOWS HISTORY OF BASH COMMANDS
- 2032  alias hist='history $LINES'
- 2033  hist
- 2034  echo $?
- 2035  ##2 SHOWS HISTORY WITHOUT TIMESTAMPS
- 2036  # Removes timestamp from history (e.g., " 1972  [2014-05-02 14:34:12] dir *py" => " 1972  dir *py")
- 2037  # TEST: function hist { h | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
- 2038  # note: funciton used to simplify specification of quotes
- 2039  # quiet-unalias h #COMMAND NOT FOUND
- 2040  function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
- 2041  h
+ 1997  mkdir -p "$temp_dir"
+ 1998  # TODO: /bin/rm -rvf "$temp_dir"
+ 1999  cd "$temp_dir"
+ 2000  pwd
+ 2001  #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+ 2002  alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+ 2003  echo $?
+ 2004  # Count aliases proper
+ 2005  alias | wc -l
+ 2006  echo $?
+ 2007  # Count functions
+ 2008  typeset -f | egrep '^\w+' | wc -l
+ 2009  echo $?
+ 2010  ##1 SHOWS HISTORY OF BASH COMMANDS
+ 2011  alias hist='history $LINES'
+ 2012  hist
+ 2013  echo $?
+ 2014  ##2 SHOWS HISTORY WITHOUT TIMESTAMPS
+ 2015  # Removes timestamp from history (e.g., " 1972  [2014-05-02 14:34:12] dir *py" => " 1972  dir *py")
+ 2016  # TEST: function hist { h | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
+ 2017  # note: funciton used to simplify specification of quotes
+ 2018  # quiet-unalias h #COMMAND NOT FOUND
+ 2019  function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
+ 2020  h
 
-##3 ASCTIME
-# EX: $ asctime | perl -pe 's/\d/N/g; s/\w+ \w+/DDD MMM/;' => "DDD MMM NN NN:NN:NN NNNN"
-$ function asctime() { perl -e "print (scalar localtime($1));"; echo ""; }
-$ asctime | perl -pe 's/\d/N/g; s/\w+ \w+/DDD MMM/;'
-DDD MMM NN NN:NN:NN NNNN
+# ##3 ASCTIME
+# # EX: $ asctime | perl -pe 's/\d/N/g; s/\w+ \w+/DDD MMM/;' => "DDD MMM NN NN:NN:NN NNNN"
+# function asctime() { perl -e "print (scalar localtime($1));"; echo ""; }
+# asctime 0 | perl -pe 's/\d/N/g; s/\w+ \w+/DDD MMM/;'
 
 ##4 FILTER DIRECTORY NAMES
 # filter-dirnames: strip directory names from ps listing (TODO: rename as strip-dirnames)
 $ function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
 $ ps | filter-dirnames
     PID TTY          TIME CMD
-  31232 pts/6    00:00:00 bash
-  31262 pts/6    00:00:00 ps
-  31263 pts/6    00:00:00 bash
-  31264 pts/6    00:00:00 perl
+  11073 pts/3    00:00:00 bash
+  11103 pts/3    00:00:00 ps
+  11104 pts/3    00:00:00 bash
+  11105 pts/3    00:00:00 perl
 
 ##5 COMMAIZE NUMBERS
 # comma-ize-number(): add commas to numbers in stdin
@@ -249,7 +250,7 @@ $ byte-usage process.txt
 # | bash: /home/aveey/bin/dobackup.sh: /bin/csh: bad interpreter: No such file or directory
 # | 30.4M	.
 # (Same output for 'byte-usage "Hi Mom"' and 'byte-usage thisisatest.txt')
-36.5M	.
+37.5M	.
 4.11M	./backup
 
 # check[all-]-(errors|warnings): check for known errors, with the check-all
@@ -443,7 +444,6 @@ $ alias scrappycito-signature='signature scrappycito'
 $ alias farm-signature='signature farm'
 $ alias circulo-signature='signature circulo'
 # TODO: automatically derive aliases for ~/info/*.signature*
-
 $ signature noice
 /home/aveey/info/.noice-signature:
 THIS IS A NOICE SIGNATURE
@@ -457,33 +457,22 @@ $         return
 $     fi
 $     local file="$1";
 $     local dir="$BACKUP_DIR"; if [ "$dir" = "" ]; then dir=./backup; fi
-$     ## TODO: $LS -t $dir/* | $EGREP "/$file(~|.~*)" | head -1;
-$     $LS -t $dir/* | /bin/egrep "/$file(~|.~*)?" | head -1;
+$     $LS -t $dir/* | /bin/egrep '/$file(~|.~*)?' | head -1;
 $ }
 #
 # diff-backup(file): compare FILE vs. most recent backup
 $ function diff-backup-helper {
-$     local diff="$1"; local file="$2"; 
-$     "$diff" $(most-recent-backup "$file") "$file";
+$     local diff='$1'; local file='$2'; 
+$     '$diff' $(most-recent-backup '$file') '$file';
 $ }
 $ alias diff-backup='diff-backup-helper diff'
 $ alias kdiff-backup='diff-backup-helper kdiff'
-
-$ dobackup.sh process1.txt
-$ linebr
+#dobackup.sh process1.txt
 $ most-recent-backup process1.txt
-$ linebr
 $ ps -u > process1.txt
-Backing up 'process1.txt' to './backup/process1.txt'
---------------------------------------------------------------------------------
-./backup/process1.txt
---------------------------------------------------------------------------------
 
 ## WORKS FINE - HALTS THE NOTEBOOK TESTS
 # $ diff-backup process1.txt
 
 ## WORKS FINE - HALTS THE NOTEBOOK TESTS
 # $ kdiff-backup process1.txt
-
-$ echo "Done"
-Done

@@ -1,0 +1,467 @@
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+$ shopt -s expand_aliases
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+# Setting a temp directory for tests
+$ TMP=/tmp/test-cp-mv
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+## You will need to run jupyter from that directory.
+## source $TEMP_BIN/_dir-aliases.bash
+$ source _dir-aliases.bash
+$ alias | wc -l
+8
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 1210)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-1210
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-cp-mv/test-1210
+
+# Count aliases proper
+$ alias | wc -l
+9
+
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+2
+
+# Command overrides for moving and copying files
+# NOTE: -p option of cp (i.e., --preserve  "preserve file attributes if possible")
+# leads to problems when copying files owner by others (although group writable)
+#    cp: preserving times for /usr/local/httpd/internal/cgi-bin/phone-list: Operation not permitted
+# - other options for cp, mv, and rm: -i interactive; and -v verbose.
+$ other_file_args="-v"
+
+$ if [ "$OSTYPE" = "solaris" ]; then other_file_args=""; fi
+
+## OLD: alias cls='clear'
+## NOTE: Unfortunately clear clobbers the terminal scrollback buffer.
+## via https://askubuntu.com/questions/792453/how-to-stop-clear-from-clearing-scrollback-buffer:
+##    type CTRL+L instead of clear
+## TAKE1: alias cls="printf '\33[H\33[2J'"
+##   where \33 is octal code for Escape (i.e., 0x1B)
+## TAKE2
+$ alias clear="echo 'use cls instead (or /bin/clear)'"
+$ alias cls="command clear -x"
+
+#Shows that cls must be used instead of clear
+$ clear
+use cls instead (or /bin/clear)
+
+#Shows that cls is the new method of clearing screen
+$ alias | grep cls
+alias clear='echo '\''use cls instead (or /bin/clear)'\'''
+alias cls='command clear -x'
+
+$ {
+$     # TODO: see if this is a shellcheck bug
+$     #    SC2034: MV appears unused. Verify it or export it.
+$     # shellcheck disable=SC2034
+$     MV="/bin/mv -i $other_file_args"
+$ }
+
+#All move aliases
+$ alias mv='$MV'
+$ alias move='mv'
+$ alias move-force='move -f'
+
+# TODO: make sure symbolic links are copied as-is (ie, not dereferenced)
+$ CP="/bin/cp -ip $other_file_args"
+##reference-variable "$CP"
+
+#All Copy Aliases
+$ alias copy='$CP'
+$ alias copy-force='/bin/cp -fp $other_file_args'
+$ alias cp='/bin/cp -i $other_file_args'
+
+#All Remove Aliases
+$ alias rm='/bin/rm -i $other_file_args'
+$ alias delete='/bin/rm -i $other_file_args'
+$ alias del="delete"
+$ alias delete-force='/bin/rm -f $other_file_args'
+$ alias remove-force='delete-force'
+
+#All remove-dir aliases
+$ alias remove-dir='/bin/rm -rv'
+$ alias delete-dir='remove-dir'
+$ alias remove-dir-force='/bin/rm -rfv'
+$ alias delete-dir-force='remove-dir-force'
+
+#Aliases set for copy and readonly
+$ alias copy-readonly='copy-readonly.sh'
+$ function copy-readonly-spec () {
+$     local spec="$1"
+$     local dir="$2"
+$     if [[ ("$3" != "") || ($dir = "") || ($spec == "") ]]; then
+$         echo "Usage: copy-readonly-spec pattern dir";
+$         return
+$     fi
+$     # effing shellcheck (SC2086: Double quote to prevent globbing)
+$     # shellcheck disable=SC2086
+$     for f in $($LS $spec); do copy-readonly "$f" "$dir"; done
+$ }
+# copy-readonly-to-dir(dir, file, ...): variant of copy-readonly-spec with
+# directory first and files given in args 2, 3, etc.
+$ function copy-readonly-to-dir () {
+$     local dir="$1"
+$     shift
+$     for f in "$@"; do copy-readonly "$f" "$dir"; done
+$ }
+
+#Exporting NICE and TIME_CMD
+$ export NICE="nice -19"
+$ export TIME_CMD="/usr/bin/time"
+
+#Fixing Dir Permissions
+$ alias fix-dir-permissions="find . -type d -exec chmod go+xs {} \;"
+
+$ linebr
+--------------------------------------------------------------------------------
+
+## MOVE INTO $TMP FOR TESTING
+$ pwd
+/tmp/test-cp-mv/test-1210
+
+# TEST 1 - MOVE ALIASES
+## CLEARS TEST FOLDER
+$ rm -rf ./*
+$ linebr
+## CREATES TEST SUBJECTS
+$ touch abc def ghi
+$ mkdir mvtest_dir1
+## WORK OF ALIASES
+$ mv abc ./mvtest_dir1
+$ move def ./mvtest_dir1
+$ move-force ghi ./mvtest_dir1
+$ linebr
+## VIEWING THE CHANGES MADE
+$ ls -l
+$ linebr
+$ ls -l ./mvtest_dir1
+$ linebr
+removed './testdir1/.bashrc'
+removed directory './testdir1'
+--------------------------------------------------------------------------------
+renamed 'abc' -> './mvtest_dir1/abc'
+renamed 'def' -> './mvtest_dir1/def'
+renamed 'ghi' -> './mvtest_dir1/ghi'
+--------------------------------------------------------------------------------
+total 4
+drwxrwsr-x 2 aveey aveey 4096 Sep 19 21:25 mvtest_dir1
+--------------------------------------------------------------------------------
+total 0
+-rw-rw-r-- 1 aveey aveey 0 Sep 19 21:25 abc
+-rw-rw-r-- 1 aveey aveey 0 Sep 19 21:25 def
+-rw-rw-r-- 1 aveey aveey 0 Sep 19 21:25 ghi
+--------------------------------------------------------------------------------
+
+# TEST 2 - COPY ALIASES
+## CLEARS TEST FOLDER
+$ rm -rf ./*
+$ linebr
+## CREATES TEST SUBJECTS
+$ touch abc def ghi
+$ mkdir cptest_dir1
+## WORK OF ALIASES
+$ cp abc ./cptest_dir1
+$ copy def ./cptest_dir1
+$ copy-force ghi ./cptest_dir1
+$ linebr
+## VIEWING THE CHANGES MADE
+$ ls -l
+$ linebr
+$ ls -l ./cptest_dir1
+$ linebr
+removed './mvtest_dir1/abc'
+removed './mvtest_dir1/ghi'
+removed './mvtest_dir1/def'
+removed directory './mvtest_dir1'
+--------------------------------------------------------------------------------
+'abc' -> './cptest_dir1/abc'
+'def' -> './cptest_dir1/def'
+'ghi' -> './cptest_dir1/ghi'
+--------------------------------------------------------------------------------
+total 4
+-rw-rw-r-- 1 aveey aveey    0 Sep 19 21:25 abc
+drwxrwsr-x 2 aveey aveey 4096 Sep 19 21:25 cptest_dir1
+-rw-rw-r-- 1 aveey aveey    0 Sep 19 21:25 def
+-rw-rw-r-- 1 aveey aveey    0 Sep 19 21:25 ghi
+--------------------------------------------------------------------------------
+total 0
+-rw-rw-r-- 1 aveey aveey 0 Sep 19 21:25 abc
+-rw-rw-r-- 1 aveey aveey 0 Sep 19 21:25 def
+-rw-rw-r-- 1 aveey aveey 0 Sep 19 21:25 ghi
+--------------------------------------------------------------------------------
+
+# #=================(TEST ERROR: "/bin/rm: remove regular empty file 'f1'?")=========================#
+# # TEST 3 - REMOVE/DELETE ALIASES
+# ## CLEARS TEST FOLDER
+# rm -rf ./*
+# linebr
+# ## CREATES TEST SUBJECTS
+# touch f1 f2 f3 f4 f5
+# ## WORK OF ALIASES
+# rm f1
+# delete f2
+# remove-force f3
+# linebr
+# ## VIEWING THE CHANGES MADE
+# ls -l
+# linebr
+
+# TEST 4 - REMOVE DIRECTORY ALIASES
+## CLEARS TEST FOLDER
+$ rm -rf ./*
+$ linebr
+## CREATES TEST SUBJECTS
+$ touch abc def ghi
+$ mkdir TDIR1 TDIR2 TDIR3 TDIR4
+$ ls -l
+$ linebr
+## WORK OF ALIASES
+$ remove-dir "TDIR1"
+$ delete-dir "TDIR2"
+$ remove-dir-force TDIR3
+$ delete-dir-force TDIR4
+$ linebr
+## VIEWING THE CHANGES MADE
+$ ls -l
+$ linebr
+removed './abc'
+removed './cptest_dir1/abc'
+removed './cptest_dir1/ghi'
+removed './cptest_dir1/def'
+removed directory './cptest_dir1'
+removed './def'
+removed './ghi'
+--------------------------------------------------------------------------------
+total 16
+-rw-rw-r-- 1 aveey aveey    0 Sep 19 21:25 abc
+-rw-rw-r-- 1 aveey aveey    0 Sep 19 21:25 def
+-rw-rw-r-- 1 aveey aveey    0 Sep 19 21:25 ghi
+drwxrwsr-x 2 aveey aveey 4096 Sep 19 21:25 TDIR1
+drwxrwsr-x 2 aveey aveey 4096 Sep 19 21:25 TDIR2
+drwxrwsr-x 2 aveey aveey 4096 Sep 19 21:25 TDIR3
+drwxrwsr-x 2 aveey aveey 4096 Sep 19 21:25 TDIR4
+--------------------------------------------------------------------------------
+removed directory 'TDIR1'
+removed directory 'TDIR2'
+removed directory 'TDIR3'
+removed directory 'TDIR4'
+--------------------------------------------------------------------------------
+total 0
+-rw-rw-r-- 1 aveey aveey 0 Sep 19 21:25 abc
+-rw-rw-r-- 1 aveey aveey 0 Sep 19 21:25 def
+-rw-rw-r-- 1 aveey aveey 0 Sep 19 21:25 ghi
+--------------------------------------------------------------------------------
+
+## TEST 5 - COPY READONLY
+$ alias copy-readonly='copy-readonly.sh'
+$ function copy-readonly-spec () {
+$     local spec="$1"
+$     local dir="$2"
+$     if [[ ("$3" != "") || ($dir = "") || ($spec == "") ]]; then
+$         echo "Usage: copy-readonly-spec pattern dir";
+$         return
+$     fi
+$     # effing shellcheck (SC2086: Double quote to prevent globbing)
+$     # shellcheck disable=SC2086
+$     for f in $($LS $spec); do copy-readonly "$f" "$dir"; done
+$ }
+# copy-readonly-to-dir(dir, file, ...): variant of copy-readonly-spec with
+# directory first and files given in args 2, 3, etc.
+$ function copy-readonly-to-dir () {
+$     local dir="$1"
+$     shift
+$     for f in "$@"; do copy-readonly "$f" "$dir"; done
+$ }
+
+# RUNNING FOR DETAILS
+$ copy-readonly
+$ linebr
+# COPYING .bashrc TO TEST DIRECTORY
+$ rm -rf ./*
+$ mkdir testdir1
+$ copy-readonly ~/.bashrc ./testdir1
+$ linebr
+# VIEWING THE COPIED FILE (IN DIR AND CAT)
+$ ls -l 
+$ linebr
+$ cat ./testdir1/.bashrc
+
+Usage: /home/aveey/bin/copy-readonly.sh source-file [--force] [--verbose] [file | directory]
+
+Examples (under Bash):
+
+  /home/aveey/bin/copy-readonly.sh ~/.bashrc ~/dot-file-archive
+
+  for f in copyright.py search_page.mako index.mako visual_diff_server.py; do copy-readonly $f ~/visual-diff; done
+
+--------------------------------------------------------------------------------
+removed './abc'
+removed './def'
+removed './ghi'
+-r--r--r-- 1 aveey aveey 3881 Sep 18 17:43 ./testdir1/.bashrc
+--------------------------------------------------------------------------------
+total 4
+drwxrwsr-x 2 aveey aveey 4096 Sep 19 21:25 testdir1
+--------------------------------------------------------------------------------
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# for examples
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+# don't put duplicate lines or lines starting with space in the history.
+# See bash(1) for more options
+HISTCONTROL=ignoreboth
+
+# append to the history file, don't overwrite it
+shopt -s histappend
+
+# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+HISTSIZE=1000
+HISTFILESIZE=2000
+
+# check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+shopt -s checkwinsize
+
+# If set, the pattern "**" used in a pathname expansion context will
+# match all files and zero or more directories and subdirectories.
+#shopt -s globstar
+
+# make less more friendly for non-text input files, see lesspipe(1)
+[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
+
+# set variable identifying the chroot you work in (used in the prompt below)
+if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+    debian_chroot=$(cat /etc/debian_chroot)
+fi
+
+# set a fancy prompt (non-color, unless we know we "want" color)
+case "$TERM" in
+    xterm-color|*-256color) color_prompt=yes;;
+esac
+
+# uncomment for a colored prompt, if the terminal has the capability; turned
+# off by default to not distract the user: the focus in a terminal window
+# should be on the output of commands, not on the prompt
+#force_color_prompt=yes
+
+if [ -n "$force_color_prompt" ]; then
+    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+	# We have color support; assume it's compliant with Ecma-48
+	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+	# a case would tend to support setf rather than setaf.)
+	color_prompt=yes
+    else
+	color_prompt=
+    fi
+fi
+
+if [ "$color_prompt" = yes ]; then
+    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+else
+    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+fi
+unset color_prompt force_color_prompt
+
+# If this is an xterm set the title to user@host:dir
+case "$TERM" in
+xterm*|rxvt*)
+    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+    ;;
+*)
+    ;;
+esac
+
+# enable color support of ls and also add handy aliases
+if [ -x /usr/bin/dircolors ]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    #alias dir='dir --color=auto'
+    #alias vdir='vdir --color=auto'
+
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# colored GCC warnings and errors
+#export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
+
+# some more ls aliases
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+# Alias definitions.
+# You may want to put all your additions into a separate file like
+# ~/.bash_aliases, instead of adding them here directly.
+# See /usr/share/doc/bash-doc/examples in the bash-doc package.
+
+if [ -f ~/.bash_aliases ]; then
+    . ~/.bash_aliases
+fi
+
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+alias lc='colorls'
+
+# ALIASES FOR BATSPP
+alias simpp="./simple_batspp.py"
+alias gb="./jupyter_to_batspp.py"
+
+
+$ export NICE="nice -19"
+$ export TIME_CMD="/usr/bin/time"
+$ alias fix-dir-permissions='find . -type d -exec chmod go+xs {} \;'
+
+# # BEFORE fix-dir-permissions 
+# $ ls -l  
+# | total 4
+# | drwxrwxr-x 2 aveey aveey 4096 Jul  4 21:41 testdir1
+$ fix-dir-permissions
+# # AFTER fix-dir-permissions
+$ ls -l 
+total 4
+drwxrwsr-x 2 aveey aveey 4096 Sep 19 21:25 testdir1
