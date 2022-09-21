@@ -128,6 +128,8 @@
 ## DEBUG: set -o xtrace
 
 #...............................................................................
+# Bash wrappers
+
 # Conditional environment variable setting
 # Format: cond-export VAR1 VALUE1 [VAR2 VALUE2] ...
 # EX: export FU="bar"; conditional-export FU baz; echo $FU => bar
@@ -160,6 +162,19 @@ alias cond-setenv='conditional-export'
 
 # For debugging: Uncomment the following to display the environment variables (TODO: rework via startup-trace).
 ## printenv.sh
+
+# alias-fn(name, statement, ...): define NAME alias via function def w/ STATEMENT ...
+# NOTE:
+# - Variable intended for run-time evaluation should be passed inside a single quoted string (or escaped with \)
+# - This is so that the alias becomes a "first class" citizen, such as allowing for
+#   environment variables to be set as in 'alias-fn echo-ENV1 'echo "$ENV1"'; ENV1=one echo-ENV1
+# ex: alias-fn trace-PS1 'echo \$PS1="$PS1" 1>&2'
+function alias-fn {
+    local alias="$1"
+    shift
+    local body="$*"
+    eval "function $alias { $body; }"
+    }
 
 #...............................................................................
 # Directory for Tom O'Hara's scripts, defaulting to /home/tomohara if available
@@ -213,10 +228,12 @@ function space-check() {
 ## function downcase-stdin() { perl-utf8 -pe 's/.*/\L$&/;'; }
 function downcase-stdin { perl -pe "use open ':std', ':encoding(UTF-8)'; s/.*/\L$&/;"; }
 function downcase-text() { echo "$@" | downcase-stdin; }
-# todays-date(): outputs date in format DDmmmYY (e.g., 22Apr20)
+# todays-date(): outputs date in format DDmmmYY (e.g., 22apr20)
 ## TODO: drop leading digits in day of month
 ## NOTE: keep in synch with common.perl get_file_ddmmmyy and .emacs edit-adhoc-notes-file
 function todays-date() { date '+%d%b%y' | downcase-stdin; }
+# todays-date-mmmYY(): date in format mmmYY (e.g., sep20)
+function todays-date-mmmYY { todays-date | perl -pe 's/^\d\d//;'; }
 ## OLD
 ## todays_date=$(todays-date)
 ## MISC:
@@ -228,9 +245,13 @@ hoy=$(todays-date)
 # TODO: punt on tab-completion (i.e., TODAY => today)???
 alias TODAY=todays-date
 alias date-central='TZ="America/Chicago" date'
+
+## TOM-IDIOSYNCRATIC
 # em-adhoc-notes(): edit adhoc ntoes file using format _{host}-adhoc-{date} (e.g., _reempl-adhoc-notes.13may22.txt)
 ## OLD: alias em-adhoc-notes='emacs-tpo _adhoc-notes.$(TODAY).txt'
-alias em-adhoc-notes='emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes-$(TODAY).txt'
+## OLD: alias em-adhoc-notes='emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes-$(TODAY).txt'
+alias-fn em-adhoc-notes 'emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes-$(TODAY).txt'
+
 alias T='TODAY'
 # update-today-vars() & todays-update: update the various today-related variables
 # aside: descriptive name for function and convenience alias (tab-completion)
@@ -484,7 +505,7 @@ function reset-prompt {
     set-title-to-current-dir;
     ## DEBUG: echo "reset-prompt: 3. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
 }
-alias reset-prompt-root='reset-prompt "# "'
+alias reset-prompt-root='reset-prompt "#"'
 alias reset-prompt-dollar='reset-prompt "\$"'
 ## OLD: alias reset-prompt-default="reset-prompt '$PS_symbol'"
 {
@@ -530,7 +551,12 @@ append-path "$HOME/perl/bin"
 # TODO: Do check for environment variable overlap (as with DEBUG_LEVEL clash with software
 # used at Convera).
 ## OLD: export TIME_CMD=/usr/bin/time
+## BAD: export TIME_CMD="command time"
+# note: command is a binary under MacOs built just a shell builtin under Linux
 export TIME_CMD="command time"
+if [ "$(which "command" 2> /dev/null)" == "" ]; then
+    export TIME_CMD=/usr/bin/time fi
+fi
 export PERL="$NICE $TIME_CMD perl -Ssw"
 export BRIEF_USAGE=1
 
@@ -969,7 +995,9 @@ alias find-files-='find-files-there'
 # TODO: function conditional-backup() { if [ -e backup/"$1" ]; then dobackup.sh "$1"; fi; }
 ## OLD: alias make-file-listing='listing="ls-aR.list"; dobackup.sh "$listing"; $LS -aR >| "$listing" 2>&1'
 
+#--------------------------------------------------------------------------------
 # Emacs commands
+## TOM-IDIOSYNCRATIC
 #
 # emacs-tpo([args] [file]...) invokes emacs w/ ~.emacs.tpo if exists otherwise ~/.emacs
 # em: alias for emacs (or emacs-tpo) with dired for current directory if no file given
@@ -978,19 +1006,16 @@ alias find-files-='find-files-there'
 #
 alias emacs-tpo='tpo-invoke-emacs.sh'
 ## OLD: alias em=emacs-tpo
-# alias-fn(name, statement, ...): define NAME alias via function def w/ STATEMENT ...
-function alias-fn {
-    local alias="$1"
-    shift
-    local body="$*"
-    eval "function $alias { $body; }"
-    }
 alias-fn em tpo-invoke-emacs.sh
 # em-fn(font, [file ...]): invoke emcas with specified font
 function em-fn () { em -- -fn "$@"; }
 alias em-tags=etags
 #
-alias em-large='em-fn "-DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"'
+## alias em-large='em-fn "-DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"'
+## OLD: alias em-large='em-fn "-DAMA-Ubuntu Mono-normal-normal-normal-*-28-*-*-*-m-0-iso10646-1"'
+## OLD: function em-large { em-fn "-DAMA-Ubuntu Mono-normal-normal-normal-*-28-*-*-*-m-0-iso10646-1" "$@"; }
+## Note: Bash construct ${VAR:-VAL} use VAL if VAR not defined, and here VAL starts with -!
+function em-large { em-fn "${EMACS_LARGE_FONT:--DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1}" "$@"; }
 alias em-nw='emacs -l ~/.emacs --no-windows'
 ## TODO: alias em-tpo='emacs -l ~/.emacs'
 alias em-tpo-nw='emacs -l ~/.emacs --no-windows'
@@ -1015,6 +1040,7 @@ alias em-devel='em --devel'
 function em-debug () { em --debug-init "$@"; }
 function em-quick () { em --quick "$@"; }
 
+#--------------------------------------------------------------------------------
 # Simple TODO-list maintenance commands
 #
 # add-todo(text): adds text<TAB><timestamp> to to-do list
@@ -2419,7 +2445,7 @@ function pause-for-enter () {
 ## *** Python stufff ***
 
 ## OLD: export PYTHON_CMD="/usr/bin/time python -u"
-export PYTHON_CMD="command time python -u"
+export PYTHON_CMD="$TIME_CMD python -u"
 export PYTHON="$NICE $PYTHON_CMD"
 export PYTHONPATH="$HOME/python:$PYTHONPATH"
 #
@@ -2497,7 +2523,7 @@ function python-lint-full() {
 #   ex: Your code has been rated at 7.43/10 ...
 #   ex: No config file found ...
 # - the following has two regex: *modify the first* to add more conditions to ignore; the second is just for the extraneous pylint output
-function python-lint-work() { python-lint-full "$@" 2>&1 | $EGREP -v '\((bad-continuation|bad-option-value|fixme|invalid-name|locally-disabled|too-few-public-methods|too-many-\S+|trailing-whitespace|star-args|unnecessary-pass)\)' | $EGREP -v '^(([A-Z]:[0-9]+)|(Your code has been rated)|(No config file found)|(\-\-\-\-\-))' | $PAGER; }
+function python-lint-work() { python-lint-full "$@" 2>&1 | $EGREP -v '\((bad-continuation|bad-option-value|fixme|invalid-name|locally-disabled|too-few-public-methods|too-many-\S+|trailing-whitespace|star-args|unnecessary-pass)\)' | $EGREP -v '^(([A-Z]:[0-9]+)|(Your code has been rated)|(No config file found)|(PYLINTHOME is now)|(\-\-\-\-\-))' | $PAGER; }
 # TODO: rename as python-lint-tpo for clarity (and make python-lint as alias for it)
 function python-lint() { python-lint-work "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|missing-final-newline|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
 
