@@ -14,11 +14,18 @@
 # - There are a few other directories assumed under /usr/local/misc:
 #   programs/python/bert: BERT distribution
 #   data/deep-learning/bert: BERT models
+# - See ~/python/run_batched_pretraining.py for script that receives the result
+#   and then invokes the GPU pretraining (TODO: add to repo).
 # - Preprocesses text in batches (e.g., 25k lines) and invokes BERT pretraining.
 # - The 100k size was chosen to allow for good throughput (compared to original 10k sample) while
 #   allowing for better restarts compared to 500k (e.g., in case GPU server rebooted mid-stream).
 # - By default, pretraining is done from scratch (unless INIT_CHECKPOINT set, see below).
-#
+# - Following shellcheck warnings selectively ignored:
+#     SC2004: $/${} is unnecessary on arithmetic variables
+#     SC2012: Use find instead of ls to better handle non-alphanumeric filenames
+#     SC2086: Double quote to prevent globbing and word splitting
+#     SC2089: Quotes/backslashes will be treated literally. Use an array
+#     SC2090: Quotes/backslashes in this variable will not be respected.
 #--------------------------------------------------------------------------------
 # Sample startup sequence:
 #
@@ -63,24 +70,62 @@
 ## set -o xtrace
 ## set -o verbose
 
-# Showing starting time
-date
+#..............................................................................
 
-# Show usage example if insufficient arguments
-if [ "$1" = "" ]; then
+# Helper functions
+#
+
+function show_usage {
     echo "Usage: $0 [options] input-file [output-basename [increment [starting-offset]]]"
-    echo "    options: [--albert] [--trace] [--vocab-file file] [--quick]"
+    echo "    options: [--albert] [--trace] [--vocab-file file] [--verbose] [--quick] [--]"
     echo ""
     script=$(basename "$0")
     echo "example: $script simplewiki-20201201-pages-articles-multistream.txt simple-english-wiki 100000 0"
     echo ""
-    exit
-fi
-#
+    # TODO: add notes (e.g., --quick and also use of sentence piece for Albert)
+    echo "Notes:"
+    echo "- Use - for vocabulary file to auto-generate (--albert only);"
+    echo "  otherwise existing voabulary file used (e.g., from repo)."
+    echo "- The --quick option re-uses existing preprocessed files."
+    echo "- Environment variables:"
+    echo "-   OUTPUT_DIR: directory for intermediate and final output files"
+    echo "-   CODE_DIR: base directory for installed programs, etc."
+    echo "-   PROJECT_DIR: base directory for pretraining project"
+    echo "-   BERT_CONFIG_FILE: customized [al]bert_config.json"
+    echo "-   CODE_DIR: BERT code directory"
+    echo "-   BERT_DIR: BERT data directory"
+    echo "-   MAX_TRACED: number of eamples to show"
+    echo "-   NUM_TRAIN_STEPS: number of training steps"
+    echo "-   NUM_TRAIN_INCRS: numbers of training steps ub each batch"
+    echo "-   TRAIN_BATCH_SIZE: Number of batches per training step"
+    echo "-   MAX_SEQ_LENGTH: size of context window"
+    echo "-   KEEP_CHECKPOINT_MAX: Number of checkpoint files (.ckpt) to preserve"
+    echo "-   VOCAB_SIZE_K: size of vocabulary in 1000s (albert only)"
+    echo "-   See run_pretraining.py from BERT distribution"
+    echo "- Temporary filed are placed in $PROJECT_DIR/temp:"
+    echo "    ex: /usr/local/misc/temp"
+}
+
+# Return basename for last checkpoint file created (e.g., model.ckpt-100000)
+function get-last-checkpoint() {
+    # shellcheck disable=SC2012
+    last_checkpoint=$(ls -t "$OUTPUT_DIR"/*ckpt*meta 2> /dev/null | head -1 | perl -pe 's/.meta//;')
+    ## OLD: last_checkpoint=$(ls -t "$OUTPUT_DIR"/*ckpt*meta | head -1 | perl -pe 's/.meta//;')
+    echo "$last_checkpoint"
+}
+
+#................................................................................
+
+# Parse command line arguments
 bert="bert"
 use_albert=0
 vocab_file=""
 quick_mode="0"
+show_usage="0"
+verbose="0"
+if [ "$1" = "" ]; then
+    show_usage="1";
+fi
 while [[ "$1" =~ ^-+ ]]; do
     if [ "$1" = "--albert" ]; then
         use_albert=1
@@ -90,19 +135,22 @@ while [[ "$1" =~ ^-+ ]]; do
         shift
     elif [ "$1" = "--quick" ]; then
         quick_mode="1"
+    elif [ "$1" = "--help" ]; then
+        show_usage="1"
     elif [ "$1" = "--trace" ]; then
         set -o xtrace
+    elif [ "$1" = "--verbose" ]; then
+        verbose="1"
     fi
     shift
 done
 
-# Helper functions
+# Show usage example if insufficient arguments
+if [ "$show_usage" = "1" ]; then
+    show_usage
+    exit
+fi
 #
-# Return basename for last checkpoint file created (e.g., model.ckpt-100000)
-function get-last-checkpoint() {
-    last_checkpoint=$(ls -t "$OUTPUT_DIR"/*ckpt*meta | head -1 | perl -pe 's/.meta//;')
-    echo "$last_checkpoint"
-}
 
 # Extract command-line arguments
 input_file="$1"
@@ -123,21 +171,28 @@ if [ ! -e "$input_file" ]; then
     exit
 fi
 
+# Showing starting time
+date
+
 # Trace out environment
-printenv
+if [ "$verbose" == "1" ]; then
+   printenv
+fi
 
 # Initialize
-if [ "$PROJECT_DIR" = "" ]; then PROJECT_DIR="/usr/local/misc"; fi
-export PATH="$PATH:$PROJECT_DIR/programs/bash/shell-scripts"
+## OLD: if [ "$PROJECT_DIR" = "" ]; then PROJECT_DIR="/usr/local/misc"; fi
+if [ "$CODE_BASE" = "" ]; then CODE_BASE="/usr/local/misc"; fi
+if [ "$PROJECT_DIR" = "" ]; then PROJECT_DIR="."; fi
+export PATH="$PATH:$CODE_BASE/programs/bash/shell-scripts"
 TEMP_DIR="$PROJECT_DIR/temp"
 mkdir -p "$TEMP_DIR"
 #
-if [ "$CODE_DIR" = "" ]; then CODE_DIR="$PROJECT_DIR"/programs/python/bert; fi
-if [ "$DATA_DIR" = "" ]; then DATA_DIR="$PROJECT_DIR"/data/deep-learning; fi
+if [ "$CODE_DIR" = "" ]; then CODE_DIR="$CODE_BASE"/programs/python/bert; fi
+if [ "$DATA_DIR" = "" ]; then DATA_DIR="$CODE_BASE"/data/deep-learning; fi
 if [ "$BERT_DIR" = "" ]; then BERT_DIR="$DATA_DIR"/bert/bert_base; fi
 if [ "$use_albert" = "1" ]; then
-    if [ "$CODE_DIR" = "" ]; then CODE_DIR="$PROJECT_DIR"/programs/python/albert; fi
-    if [ "$DATA_DIR" = "" ]; then DATA_DIR="$PROJECT_DIR"/data/deep-learning; fi
+    if [ "$CODE_DIR" = "" ]; then CODE_DIR="$CODE_BASE"/programs/python/albert; fi
+    if [ "$DATA_DIR" = "" ]; then DATA_DIR="$CODE_BASE"/data/deep-learning; fi
     if [ "$BERT_DIR" = "" ]; then BERT_DIR="$DATA_DIR"/albert/albert_base; fi
 fi
 #
@@ -162,12 +217,15 @@ if [ "$use_albert" = "1" ]; then
 fi
 
 # Generate vocabulary if '-' specified for vocabulary file
-# TODO: parameterize vocaulary size (30k), etc.
+# TOOD: add explicit error check for vocabulary size issue with small files
 if [ "$vocab_file" = "-" ]; then
-    vocab_base=30k-clean
+    vocab_size="${VOCAB_SIZE_K:-30}"
+    ## OLD: vocab_base=30k-clean
+    vocab_base="${vocab_size}k-clean"
     if [[ ("$quick_mode" = "0") || ( ! -e "$OUTPUT_DIR/$vocab_base.model") ]]; then
-        LD_LIBRARY_PATH=/home/tomohara/programs/sentencepiece-oct20/build/src:$LD_LIBRARY_PATH $TIME_CMD /home/tomohara/programs/sentencepiece-oct20/build/src/spm_train \
-            --input "$input_file" --model_prefix="$OUTPUT_DIR/$vocab_base" --vocab_size=30000 \
+        ## LD_LIBRARY_PATH=/home/tomohara/programs/sentencepiece-oct20/build/src:$LD_LIBRARY_PATH $TIME_CMD /home/tomohara/programs/sentencepiece-oct20/build/src/spm_train \
+	LD_LIBRARY_PATH=$CODE_BASE/programs/sentencepiece-oct20/build/src:$LD_LIBRARY_PATH $TIME_CMD $CODE_BASE/programs/sentencepiece-oct20/build/src/spm_train \
+            --input "$input_file" --model_prefix="$OUTPUT_DIR/$vocab_base" --vocab_size="${vocab_size}000" \
     	--pad_id=0 --unk_id=1 --eos_id=-1 --bos_id=-1 \
     		   --control_symbols='[CLS],[SEP],[MASK]' \
             --user_defined_symbols="(,),\",-,.,–,£,€" \
@@ -198,14 +256,15 @@ if [ "$INIT_CHECKPOINT" = "" ]; then
     INIT_CHECKPOINT=$(get-last-checkpoint)
     if [ "$INIT_CHECKPOINT" != "" ]; then
 
-	# Determine number of steps that from filename plus increment
+	# Determine number of steps from filename plus increment
 	# ex: "model.ckpt-12500" => 13750
 	init_checkpoint_arg="--init_checkpoint=$INIT_CHECKPOINT"
         last_num_steps=$(echo "$INIT_CHECKPOINT" | extract_matches.perl "ckpt-(\d+)")
         if [ "$last_num_steps" = "" ]; then
     	    echo "Warning: unable to determine num steps from last checkpoint ($INIT_CHECKPOINT)"
         else
-    	    let NUM_TRAIN_STEPS=($last_num_steps + $NUM_TRAIN_INCRS)
+    	    ## OLD: let NUM_TRAIN_STEPS=($last_num_steps + $NUM_TRAIN_INCRS)
+    	    (( NUM_TRAIN_STEPS=(last_num_steps + NUM_TRAIN_INCRS) ))
         fi
     fi
 else
@@ -220,6 +279,8 @@ if [ "$KEEP_CHECKPOINT_MAX" = "" ]; then KEEP_CHECKPOINT_MAX=10; fi
 #
 if [ "$BERT_CONFIG_FILE" = ""  ]; then BERT_CONFIG_FILE=$BERT_DIR/${bert}_config.json; fi
 #
+if [ "$MAX_TRACED" = "" ]; then MAX_TRACED=20; fi
+#
 if [ "$LEARNING_RATE" = "" ]; then LEARNING_RATE=5e-5; fi
 
 
@@ -229,11 +290,14 @@ temp_base="$TEMP_DIR/$output_base"
 cp -vp "$input_file" "$temp_base.txt"
 total_lines=$(wc -l < "$input_file")
 #
+num_cases=0
 offset="$starting_offset"
+# shellcheck disable=SC2004
 while (( $offset < $total_lines )); do
     output_base="$temp_base.from${offset}.size$increment"
     tail --lines=+$offset "$temp_base.txt" | head --lines=$increment > "$output_base".list
     let offset+=$increment
+    let num_cases++
 
     # Place sentences on separate lines
     if [[ ("$quick_mode" = "0") || ( ! -e "$output_base".prep.list) ]]; then
@@ -242,14 +306,17 @@ while (( $offset < $total_lines )); do
 
     # Convert input into masked-LM format
     if [[ ("$quick_mode" = "0") || ( ! -e "$output_base".bert-pp.list) ]]; then
-	$PYTHON "$CODE_DIR"/create_pretraining_data.py --vocab_file "$vocab_file" $spm_arg --do_lower_case=false --input_file "$output_base".prep.list --output_file "$output_base".bert-pp.list --max_seq_length=$MAX_SEQ_LENGTH > "$output_base".bert-pp.log 2>&1
+	# shellcheck disable=SC2086
+	$PYTHON "$CODE_DIR"/create_pretraining_data.py --vocab_file "$vocab_file" $spm_arg --do_lower_case=false --input_file "$output_base".prep.list --output_file "$output_base".bert-pp.list --max_traced="$MAX_TRACED" --max_seq_length=$MAX_SEQ_LENGTH > "$output_base".bert-pp.log 2>&1
     fi
 
     # Run pretraining
     misc_options=""
+    # shellcheck disable=SC2089
     if [ "$TENSORBOARD_LOG_DIR" != "" ]; then misc_options="$misc_options --tensorboard_log_dir '$TENSORBOARD_LOG_DIR'"; fi
     #
-    $PYTHON "$CODE_DIR"/run_pretraining.py --do_train=true --input_file "$output_base".bert-pp.list --output_dir="$OUTPUT_DIR" --${bert}_config_file=$BERT_CONFIG_FILE --num_train_steps=$NUM_TRAIN_STEPS --save_checkpoints_steps=$SAVE_CHECKPOINTS_STEPS --keep_checkpoint_max=$KEEP_CHECKPOINT_MAX --train_batch_size=$TRAIN_BATCH_SIZE --max_seq_length=$MAX_SEQ_LENGTH --learning_rate=$LEARNING_RATE $init_checkpoint_arg $misc_options > "$output_base".pre-train.log 2>&1
+    # shellcheck disable=SC2086,SC2090
+    $PYTHON "$CODE_DIR"/run_pretraining.py --do_train=true --input_file "$output_base".bert-pp.list --output_dir="$OUTPUT_DIR" --${bert}_config_file="$BERT_CONFIG_FILE" --num_train_steps="$NUM_TRAIN_STEPS" --save_checkpoints_steps="$SAVE_CHECKPOINTS_STEPS" --keep_checkpoint_max="$KEEP_CHECKPOINT_MAX" --train_batch_size="$TRAIN_BATCH_SIZE" --max_seq_length="$MAX_SEQ_LENGTH" --learning_rate="$LEARNING_RATE" $init_checkpoint_arg $misc_options > "$output_base".pre-train.log 2>&1
     out_of_memory=$(grep "Resource exhausted: OOM" "$output_base".pre-train.log)
     if [ "$out_of_memory" != "" ]; then
 	echo "Error: insufficient GPU memory"
@@ -267,6 +334,10 @@ while (( $offset < $total_lines )); do
     fi
     let NUM_TRAIN_STEPS+=$NUM_TRAIN_INCRS
 done
+#
+if [ $num_cases -eq 0 ]; then
+    echo "Error: no increments run"
+fi
 
 # Showing ending time
 date
