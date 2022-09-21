@@ -75,6 +75,11 @@ emacs="${EMACS:-emacs}"
 #
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 quick=0
+emacs_args=0
+under_mac="0"
+if [[ "$OSTYPE" =~ darwin.* ]]; then
+    under_mac="1"
+fi
 while [ "$moreoptions" = "1" ]; do
     if [ "$1" = "--trace" ]; then
         set -o xtrace;
@@ -83,6 +88,8 @@ while [ "$moreoptions" = "1" ]; do
         shift
     elif [ "$1" = "--foreground" ]; then
         in_background="0"
+    elif [ "$1" = "--mac" ]; then
+        under_mac="1"
     elif [ "$1" = "--nohup" ]; then
         use_nohup="1"
     elif [ "$1" = "--skip-nohup" ]; then
@@ -95,6 +102,7 @@ while [ "$moreoptions" = "1" ]; do
         shift;
     elif [ "$1" = "--" ]; then
         shift;
+	emacs_args=1
         break;
     else
         echo "ERROR: Unknown option: $1";
@@ -121,7 +129,8 @@ fi
 # resolve-path(filename) => absolute filename
 function resolve-path() {
     local filename="$1"
-    local new_filename="$(realpath "$filename")"
+    local new_filename
+    new_filename="$(realpath "$filename")"
     ## DEBUG: echo "resolving '$filename' => '$new_filename'" 1>&2
     echo "$new_filename"
 }
@@ -134,16 +143,19 @@ if [ "$in_background" = "1" ]; then
     # note: eval not used with variable for "&" in case spaces in filenames
     # TODO: rework so that no-op option added if empty (to avoid SC2086 disabled)
     #   ex: emacs "${emacs_options:- --eval 1}" "$@" &
-    ## OLD: args=("$@");
-    args=()
-    if [ $# == 0 ]; then args+="$(resolve-path .)"; fi
-    # note: resolve fullpath for non-option filename due to quirk under macos
-    for filename in "$@"; do
-        if [[ $filename =~ [^-]* ]]; then
-            filename=$(resolve-path "$filename")
-        fi
-        args+=("$filename")
-    done
+    args=("$@");
+    if [ "$under_mac" = "1" ]; then
+        args=()
+        if [ $# == 0 ]; then args+=("$(resolve-path .)"); fi
+        # note: resolve fullpath for non-option filename due to quirk under macos
+        for filename in "$@"; do
+    	    ## DEBUG: echo "filename=$filename"
+            if [[ ("$emacs_args" = "0") && ($filename =~ [^-]*) ]]; then
+                filename=$(resolve-path "$filename")
+            fi
+            args+=("$filename")
+        done
+    fi
     #
     if [ "$use_nohup" = "1" ]; then
         ## BAD: nohup emacs $emacs_options "$@" >> $TEMP/nohub.log 2>&1 &
@@ -154,11 +166,14 @@ if [ "$in_background" = "1" ]; then
         ## OLD2: $nohup emacs $emacs_options $(realpath "${args[*]}") >> $TEMP/nohub.log 2>&1 &
         ## DEBUG: echo "background w/ nohub"
         ## DEBUG: echo "issuing: $emacs $emacs_options '$(realpath ${args[*]})' \>\> $TEMP/nohub.log 2>&1 &"
-        nohup "$emacs" $emacs_options $(realpath "${args[*]}") >> $TEMP/nohub.log 2>&1 &
+        ## OLD: nohup "$emacs" $emacs_options $(realpath "${args[*]}") >> $TEMP/nohub.log 2>&1 &
+	nohup "$emacs" $emacs_options "${args[*]}" >> $TEMP/nohub.log 2>&1 &
     else
         ## DEBUG: echo "regular background (i.e., non-nohub)"
         ## DEBUG: echo "issuing: $emacs $emacs_options ${args[*]} &"
-        "$emacs" $emacs_options "${args[*]}" &
+	## DEBUG: set -o xtrace
+	## DEBUG: echo "${args[@]}"
+        "$emacs" $emacs_options "${args[@]}" &
     fi
 else
     ## DEBUG: echo "in foreground"
