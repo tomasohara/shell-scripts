@@ -157,10 +157,6 @@ $ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dup
 $ rm -rf ./*
 # CREATING DUPLICATES 
 $ touch 'abc(1).111' 'abc(2).111' 'xyz(3).111' 'xyz(4).111' '*abc.xyz' '&*abcdefg.xyz'
-$ ls
-'abc(1).111'  '&*abcdefg.xyz'  'xyz(3).111'
-'abc(2).111'  '*abc.xyz'       'xyz(4).111'
-
 # REMOVES PARENTHESES () FROM FILENAMES
 $ rename-parens
 $ linebr
@@ -279,14 +275,14 @@ $ linebr
 $ ls
 abc1.xyz  abc2.xyz  abc3.xyz  abc4.xyz	abc5.xyz.19Aug22  abc6.xyz.19Aug22
 --------------------------------------------------------------------------------
-'abc1.xyz' -> 'abc1.xyz.19Sep22'
-'abc2.xyz' -> 'abc2.xyz.19Sep22'
-'abc3.xyz' -> 'abc3.xyz.19Sep22'
-'abc4.xyz' -> 'abc4.xyz.19Sep22'
+'abc1.xyz' -> 'abc1.xyz.20Sep22'
+'abc2.xyz' -> 'abc2.xyz.20Sep22'
+'abc3.xyz' -> 'abc3.xyz.20Sep22'
+'abc4.xyz' -> 'abc4.xyz.20Sep22'
 --------------------------------------------------------------------------------
-abc1.xyz	  abc2.xyz.19Sep22  abc4.xyz	      abc6.xyz.19Aug22
-abc1.xyz.19Sep22  abc3.xyz	    abc4.xyz.19Sep22
-abc2.xyz	  abc3.xyz.19Sep22  abc5.xyz.19Aug22
+abc1.xyz	  abc2.xyz.20Sep22  abc4.xyz	      abc6.xyz.19Aug22
+abc1.xyz.20Sep22  abc3.xyz	    abc4.xyz.20Sep22
+abc2.xyz	  abc3.xyz.20Sep22  abc5.xyz.19Aug22
 
 # Statistical helpers
 $ alias bigrams='perl -sw $BIN_DIR/count_bigrams.perl -N=2'
