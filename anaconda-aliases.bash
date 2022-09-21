@@ -107,7 +107,8 @@ alias conda-list-env='conda list env'
 #
 ## OLD: alias conda-list-env-hack='ls ~/.conda/envs'
 # conda-list-env-hack(): show environent names from typical directories
-function conda-list-env-hack () { ls ~/.conda/envs ${ANACONDA_HOME}/envs 2> /dev/null | grep -v ':$' | sort | echoize; }
+function conda-list-env-hack-aux { ls ~/.conda/envs ${ANACONDA_HOME}/envs 2> /dev/null | grep -v ':$' | sort; }
+function conda-list-env-hack { conda-list-env-hack-aux | echoize; }
 #
 alias conda-env-list='conda env list'
 alias conda-env-name='conda env list | extract_matches.perl "^(\S+ )  " | echoize'
