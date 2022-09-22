@@ -1,11 +1,11 @@
 #! /usr/bin/env python
 
 # batspp_report.py
-# NOTE: USES BATSPP 1.5 (simple_batspp.py) | DIRECTORY NOT SPECIFIED
+# NOTE: USES BATSPP 1.5 (simple_batspp.py) & KCOV | DIRECTORY NOT SPECIFIED
 """ SELECTS AN IPYNB FILE,
-    USES jupyter_to_batspp.py TO GENERATE BATSPP FILE at batspp-storage/,
-    EXECUTES BATSPP FILE,
-    REPORTS STORED AT ./tests/batspp-reports
+    USES jupyter_to_batspp.py TO GENERATE BATSPP FILE,
+    BATS FILE IS GENERATED FROM BATSPP FILE
+    KCOV REPORTS GENERATED IN ./tests/kcov-output/
 """
 
 import os
@@ -45,7 +45,7 @@ for testfile in files_TEST_PATH:
 
 ipynb_c = i - 1
 
-# 3) DISPLAY AND EXECUTE BATSPP FILES | ALSO NOTIFY FOR ANY ERROR IN TESTFILE     
+# 3) DISPLAY AND EXECUTE BATSPP FILES TO STORE BATS FILE| ALSO NOTIFY FOR ANY ERROR IN TESTFILE      
 print(f"\n\n***** BATSPP GENERATED *****\n")
 i = 1
 
@@ -53,9 +53,13 @@ for batsfile in files_TEST_PATH:
     is_batspp = batsfile.endswith(BATSPP_EXTENSION)
 
     if is_batspp:
-        bats_RPT = batsfile.replace(".batspp", ".txt")
+        bats_from_batspp = batsfile.replace(".batspp", ".bats")
+        kcov_folder = batsfile.replace(".batspp", "")
         print(f"\nBATSPP FILE DETECTED [{i}]: {batsfile}\n")
-        os.system(f"./simple_batspp.py ./{batsfile} --output ./batspp-reports/{bats_RPT}")
+        os.system(f"./simple_batspp.py ./{batsfile} --output ./bats-storage/{bats_from_batspp}")
+        
+        # GENERATE KCOV REPORT FROM BATS FILE IN bats-storage DIRECTORY 
+        os.system(f'kcov ./kcov-output/{kcov_folder}/ bats ./bats-storage/{bats_from_batspp}')
         i += 1
 batspp_c = i - 1
 

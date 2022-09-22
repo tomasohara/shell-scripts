@@ -1,6 +1,3 @@
-# Setup
-# bind 'set enable-bracketed-paste off'
-
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
 ## TODO: PS1="> "
@@ -133,6 +130,7 @@ $ alias show-python-path='show-path-dir PYTHONPATH'
 ## show-python-path DISPLAYS ALL THE AVAILABLE PATHS OF PYTHON
 $ show-python-path
 PYTHONPATH:
+/tmp/test-py-commands
 /home/aveey/python
 
 
@@ -216,18 +214,18 @@ matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/tpo_common.py
 # code object from '/home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/debug.cpython-310.pyc'
 # /home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/sys_version_info_hack.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/sys_version_info_hack.py
 # code object from '/home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/sys_version_info_hack.cpython-310.pyc'
-import 'mezcla.sys_version_info_hack' # <_frozen_importlib_external.SourceFileLoader object at 0x7f78ce768be0>
-import 'mezcla.debug' # <_frozen_importlib_external.SourceFileLoader object at 0x7f78ce92fdc0>
+import 'mezcla.sys_version_info_hack' # <_frozen_importlib_external.SourceFileLoader object at 0x7f6be1140dc0>
+import 'mezcla.debug' # <_frozen_importlib_external.SourceFileLoader object at 0x7f6be1307dc0>
 # /home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/glue_helpers.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/glue_helpers.py
 # code object from '/home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/glue_helpers.cpython-310.pyc'
 # /home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/system.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/system.py
 # code object from '/home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/system.cpython-310.pyc'
-import 'mezcla.system' # <_frozen_importlib_external.SourceFileLoader object at 0x7f78ce51f7c0>
+import 'mezcla.system' # <_frozen_importlib_external.SourceFileLoader object at 0x7f6be0ef77c0>
 # /home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/tpo_common.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/tpo_common.py
 # code object from '/home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/tpo_common.cpython-310.pyc'
-import 'mezcla.tpo_common' # <_frozen_importlib_external.SourceFileLoader object at 0x7f78ce561e70>
-import 'mezcla.glue_helpers' # <_frozen_importlib_external.SourceFileLoader object at 0x7f78ce65f2e0>
-import 'mezcla' # <_frozen_importlib_external.SourceFileLoader object at 0x7f78ce92fa00>
+import 'mezcla.tpo_common' # <_frozen_importlib_external.SourceFileLoader object at 0x7f6be0f39e70>
+import 'mezcla.glue_helpers' # <_frozen_importlib_external.SourceFileLoader object at 0x7f6be1037370>
+import 'mezcla' # <_frozen_importlib_external.SourceFileLoader object at 0x7f6be1307a00>
 # cleanup[2] removing mezcla.sys_version_info_hack
 # cleanup[2] removing mezcla.debug
 # cleanup[2] removing mezcla.system
@@ -517,8 +515,8 @@ $ ipython --version
 $ linebr
 # STATEMENT TRACING WORKS WELL
 $ python-trace l $BIN_DIR/tests/batspp_report.py
-/home/aveey/bin/set_xterm_title.bash: line 239: /_set_xterm_title.11030.full.list: Permission denied
-/home/aveey/bin/set_xterm_title.bash: line 240: /_set_xterm_title.11030.icon.list: Permission denied
+/home/aveey/bin/set_xterm_title.bash: line 239: /_set_xterm_title.34109.full.list: Permission denied
+/home/aveey/bin/set_xterm_title.bash: line 240: /_set_xterm_title.34109.icon.list: Permission denied
 ]1;ipython [/tmp/test-py-commands/test-3443]]2;ipython [/tmp/test-py-commands/test-3443]8.5.0
 --------------------------------------------------------------------------------
  --- modulename: batspp_report, funcname: <module>
@@ -578,8 +576,8 @@ FAULTY TESTFILES:
 batspp_report.py(85): for tf in error_testfiles:
 batspp_report.py(87): print(f"======================================================")
 ======================================================
-0.06user 0.01system 0:00.08elapsed 97%CPU (0avgtext+0avgdata 12312maxresident)k
-0inputs+0outputs (0major+1763minor)pagefaults 0swaps
+0.07user 0.00system 0:00.11elapsed 68%CPU (0avgtext+0avgdata 12200maxresident)k
+96inputs+0outputs (0major+1765minor)pagefaults 0swaps
 
 # which-python SHOWS THE PATH OF PYTHON
 $ alias which-python='which python'
@@ -661,13 +659,6 @@ $ alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'
 
 # # ERROR GENERATED (see below)
 # $ jupyter-notebook-redir-open
-# | [1] 5335
-# | /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log
-# | sleeping 5 seconds for log to stabalize (effing jupyter)
-# | bash: /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log: Permission denied
-# | [1]+  Exit 1                  jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1
-# | tail: cannot open '/jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log' for reading: No such file or directory
-# | URL: Can't open /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log: No such file or directory at /home/aveey/bin/extract_matches.perl line 132.
 
 # # Python-based utilities
 $ function extract-text() { python -m extract_document_text "$@"; }
@@ -788,14 +779,14 @@ $ linebr
 $ url-path $BIN_DIR/tests/batspp_report.py
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100 16481    0 16481    0     0  27476      0 --:--:-- --:--:-- --:--:-- 27468
+100 16436    0 16436    0     0  27427      0 --:--:-- --:--:-- --:--:-- 27439
 --------------------------------------------------------------------------------
 total 36
--rw-rw-r-- 1 aveey aveey    25 Sep 20 22:20 abc1.py
--rw-rw-r-- 1 aveey aveey    23 Sep 20 22:20 atest.py
--rw-rw-r-- 1 aveey aveey   103 Sep 20 22:20 random_line_test.py
--rw-rw-r-- 1 aveey aveey 16481 Sep 20 22:20 www.google.com
--rw-rw-r-- 1 aveey aveey    23 Sep 20 22:20 xyz.py
+-rw-rw-r-- 1 aveey aveey    25 Sep 22 22:36 abc1.py
+-rw-rw-r-- 1 aveey aveey    23 Sep 22 22:36 atest.py
+-rw-rw-r-- 1 aveey aveey   103 Sep 22 22:36 random_line_test.py
+-rw-rw-r-- 1 aveey aveey 16436 Sep 22 22:36 www.google.com
+-rw-rw-r-- 1 aveey aveey    23 Sep 22 22:36 xyz.py
 --------------------------------------------------------------------------------
 file:////home/aveey/tom-project/shell-scripts/tests/batspp_report.py
 
