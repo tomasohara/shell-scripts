@@ -850,9 +850,9 @@ alias em-devel='em --devel'
 ## OLD
 ## function em-debug () { em -debug-init "$@"; }
 ## function em-quick () { em -q "$@"; }
-function em-small () { em -fn "-adobe-courier-bold-r-normal--12-120-75-75-m-70-iso8859-1" "$@"; }
-function em-large () { em -fn "-adobe-courier-bold-r-normal--18-180-75-75-m-110-iso8859-1" -geometry 70x30 "$@"; }
-function em-very-large () { em -fn "-adobe-courier-bold-r-normal--24-240-75-75-m-150-iso8859-1" -geometry 60x20 "$@"; }
+## function em-small () { em -fn "-adobe-courier-bold-r-normal--12-120-75-75-m-70-iso8859-1" "$@"; }
+## function em-large () { em -fn "-adobe-courier-bold-r-normal--18-180-75-75-m-110-iso8859-1" -geometry 70x30 "$@"; }
+## function em-very-large () { em -fn "-adobe-courier-bold-r-normal--24-240-75-75-m-150-iso8859-1" -geometry 60x20 "$@"; }
 
 # Simple TODO-list maintenance commands
 #
