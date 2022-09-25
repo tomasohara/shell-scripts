@@ -52,10 +52,21 @@ use vars qw/$by $xyz $ps_options $cut_options $num_times $LINES $COLUMNS $max_co
 use vars qw/$batch $full $once $lines $columns $alpha/;
 
 # Check the command-line options
+# note: OSTYPE needs to be in environment for this to work (see tomohara-aliases.bash)
 &init_var(*by, "cpu");
 &init_var(*OSTYPE, "???");
-my($is_solaris) = ($OSTYPE =~ "solaris");
-my($is_linux) = ($OSTYPE =~ "linux");
+## TEST:
+## $OSTYPE = "n/a" if ($OSTYPE = "???");
+&debug_print(&TL_DETAILED, "OSTYPE=$OSTYPE\n");
+## OLD:
+## my($is_solaris) = ($OSTYPE =~ "solaris");
+## my($is_linux) = ($OSTYPE =~ "linux");
+## my($is_mac) = ($OSTYPE =~ "darwin");
+my($is_solaris) = ($OSTYPE =~ "solaris") ? 1 : 0;
+my($is_linux) = ($OSTYPE =~ "linux") ? 1 : 0;
+my($is_mac) = ($OSTYPE =~ ".*darwin.*") ? 1 : 0;
+## TODO:
+&debug_print(&TL_DETAILED, "is_solaris=$is_solaris is_linux=$is_linux is_mac=$is_mac\n");
 &init_var(*ps_options, ($is_solaris ? "-efl" : $is_linux ? "auxgww" : "auxg"));
 ## OLD: &init_var(*cut_options, ($is_solaris ? "-c1-36,46-52,62-70,79-132" : "-c1-132"));
 ## OLD: &init_var(*num_times, 60);
@@ -96,6 +107,8 @@ local(*uid) = *user;
 ## TODO: my($xyz_ref = \@line; my($uid_ref) = \@user;
 &debug_out(&TL_VERBOSE, "\$#uid = %d\n", $#uid);
 
+## TEMP: &debug_print(&TL_VERBOSE, "is_solaris=$is_solaris is_linux=$is_linux is_mac=$is_mac\n");
+
 # Show a usage statement if no arguments given
 # NOTE: By convention - is used when no arguments are required
 if (!defined($ARGV[0])) {
@@ -105,7 +118,7 @@ if (!defined($ARGV[0])) {
     if ($is_solaris) {
 	$options .= "\nfield = [f|s|uid|pid|ppid|c|pri|ni|addr|sz|wchan|stime|tty|time|cmd]";
     }
-    elsif ($is_linux) {
+    elsif ($is_linux || $is_mac) {
 	$options .= "\nfield = [user|pid|cpu|mem|vsz|rss|tty|stat|start|time|command]";
     }
     else {
@@ -176,12 +189,19 @@ for ($t = 1; $t <= $num_times; $t++) {
 		= split;
 	    $mem[$i] = $sz[$i];
 	}
-	elsif ($is_linux) {
+	elsif ($is_linux || $is_mac) {
 	    ## OLD:
 	    ## ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $vsz[$i], $rss[$i], 
 	    ##  $tt[$i], $stat[$i], $stime[$i], $time[$i], $command[$i]) = split;
 	    ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $vsz[$i], $rss[$i], 
 	     $tty[$i], $stat[$i], $start[$i], $time[$i], $command[$i]) = split;
+
+	    # Make sure hour is two digits for proper sorting
+	    # Note: it is still printed as is
+	    if (($by = "time") && ($time[$i] =~ /^\d:/)) {
+		$time[$i] = ("0" . $time[$i]);
+		&debug_print(7, "Make hour two digit: $time[$i]\n");
+	    }
 	}
 	else {
 	    ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $sz[$i], $rss[$i], 
@@ -195,10 +215,12 @@ for ($t = 1; $t <= $num_times; $t++) {
     # Determine the array to sort by
     #
     # *by_xyz = ($by eq "cpu" ? *by_cpu :
-    #	       $by eq "mem" ? *by_mem :
-    #	       $by eq "sz" ? *by_sz :
-    #	       $by eq "rss" ? *by_rss :
-    #	       *by_default);
+    #	         $by eq "mem" ? *by_mem :
+    #	         $by eq "sz" ? *by_sz :
+    #	         $by eq "rss" ? *by_rss :
+    #	         *by_default);
+    #
+    # Note: See by_xyz function below.
     #
     &debug_print(&TL_VERBOSE, "eval \"*xyz = *$by\"\n");
     eval "*xyz = *$by";
@@ -241,6 +263,7 @@ for ($t = 1; $t <= $num_times; $t++) {
 #------------------------------------------------------------------------------
 
 # Sort routines for the processor status arrays
+# TODO: add support for time
 # Notes:
 # - The global parameters ($a, $b) give the indices of the index array.
 # - The global @xyz is alias to array of values for metric given by global $by.
