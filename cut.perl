@@ -109,7 +109,8 @@ while (<>) {
 	## TODO: $value = "" if (! defined($value));
 	# HACK: Restore delimiter within value (e.g., ',' within address)
 	if (! defined($value)) {
-	    $value = "???";
+	    ## BAD: $value = "???";
+	    $value = $missing;
 	    if (! defined($missing_columns{$col})) {
 		&debug_print(&TL_USUAL, "Warning: Missing value at line $. column $col\n");
 		$missing_columns{$col} = &TRUE;
