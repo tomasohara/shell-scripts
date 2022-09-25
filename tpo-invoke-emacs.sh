@@ -135,6 +135,9 @@ function resolve-path() {
     echo "$new_filename"
 }
 
+# Reset bash flags
+export BASHRC_PROCESSED=0 PROFILE_PROCESSED=0
+
 # Invoke emacs, adding current directory if no args (so dired invoked)
 ## DEBUG: echo "FYI: which '$emacs' => '$(which "$emacs")'"
 # note: disables shellcheck SC2046 [Quote this to prevent word splitting], SC2048 [Use $... (with quotes) to prevent whitespace problems], and SC2086 [Double quote to prevent globbing]
