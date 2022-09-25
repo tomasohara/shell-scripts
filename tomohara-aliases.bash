@@ -331,6 +331,11 @@ trace 'in tomohara-aliases.bash'
 # # HACK: load in older tpo-setup.bash
 # conditional-source $TOM_BIN/tpo-setup.bash
 
+# Ensure OSTYPE environment variable for script usage
+if [ "$(printenv OSTYPE)" = "" ]; then
+    export OSTYPE="$OSTYPE";
+fi
+
 # Fixup for Linux OSTYPE setting (likewise for solaris)
 # TODO: use ${OSTYPE/[0-9]*/}
 # TODO: use OSTYPE_BRIEF instead of trumping environment
@@ -339,6 +344,7 @@ case "$OSTYPE" in solaris*)
      export OSTYPE=solaris; 
      alias printenv='printenv.sh'
 esac
+#
 
 # under-macos() => boolean: whether running under maldito macintosh
 # EX: (under-macos; wc -l /vmlinuz 2> /dev/null) =/=> $'0\n1'
