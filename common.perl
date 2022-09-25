@@ -25,6 +25,7 @@ eval 'exec perl -Ssw $0 "$@"'
 # New Mexico State University
 #
 # TODO:
+# - * Add gotcha's for modification (e.g., consider Python port instead)!
 # - Make changes to take advantage of Perl 6???.
 # - Have common.pm be a wrapper around this.
 # - Add additional common arguments like -verbose (e.g., -para).
@@ -248,7 +249,7 @@ sub init_common {
     # See if running under Windows NT or Win95 instead of Unix
     # note: OSTYPE normally not set in this case
     &init_var_exp(*OSTYPE, "???");		# Unix operating system type
-    &init_var_exp(*OS, "???");		# Windows operating system
+    &init_var_exp(*OS, "???");		        # Windows operating system
     &init_var_exp(*HOST, "???");		# system host name
     $osname = (defined($^O) ? $^O : "???");	# name of OS under which Perl built
     if ($osname =~ /Win32/i) {
