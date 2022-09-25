@@ -381,7 +381,8 @@ function git-add-plus {
 
 # git-reset-file(file, ...): move FILE(s) out of way and "revert" to version in repo (i.e., reset)
 # NOTE: via https://www.atlassian.com/git/tutorials/undoing-changes/git-reset
-#     If git revert is a “safe” way to undo changes, you can think of git reset as the dangerous method. 
+#     If git revert is a “safe” way to undo changes, you can think of git reset as the dangerous method.
+# TODO: clarify whether git add needed as well (due to maldito git)
 function git-reset-file {
     local log;
     log=$(get-temp-log-name "revert");
@@ -392,7 +393,7 @@ function git-reset-file {
     cp -vp "$@" _git-trash >> "$log";
 
     # Forget state
-    echo "git reset HEAD $*";
+    echo "issuing: git reset HEAD $*";
     git reset HEAD "$@" >> "$log";
     
     # Re-checkout
@@ -597,6 +598,9 @@ function git-alias-usage () {
     echo "To check in specified changes:"
     echo "    GIT_MESSAGE='...' git-update-commit-push file..."
     echo ""
+    echo "To switch to another branch (n.b., to list, use 'git branch --list --all'):"
+    echo "    git-checkout-branch"
+    echo ""
     echo "Miscellaneous alias template (e.g., for deletions):"
     echo "    git-template-misc"
     echo ""
@@ -622,13 +626,23 @@ function git-alias-usage () {
 #
 # shellcheck disable=SC2016
 function git-misc-alias-usage() {
-    echo "Warning: "
+    # Refresh
+    git-alias-refresh
+
+    # Show usage
+    echo "Warning: Some of these can be dangerous!"
+    echo "   Incorrect usage might be undoable (e.g., disconnected histories with mv)."
     echo "   *** It is safer to git github web inteface!"
-    echo "   The following can lead to information loss (e.g., disconnected histories)."
     echo ""
-    echo "To override file additions:"
+    echo "To revert modified file (n.b., during merge fix, dummy change might be needed):"
+    echo "    git-revert-file-alias file"
+    echo ""
+    echo "To override file additions (e.g., blocked by .gitignore):"
     echo "    git add --force file..."""
     echo "    GIT_MESSAGE='initial version' git-update-commit-push file..."
+    echo ""
+    echo "To use git manual merge resolution (n.b., trial and error required):"
+    echo "    git mergetool"
     echo ""
     echo "To add regular files via git-add (n.b., ignored if matches .gitignore):"
     echo "    GIT_MESSAGE='initial version' git-update-commit-push file..."
