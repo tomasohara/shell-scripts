@@ -1,0 +1,124 @@
+## STARTS FROM LINE 2511 & 2546(tomohara-aliases.bash)
+# ONLY 1 TEST AVAILABLE FOR bash helpers - AS MENTIONED IN LINE 2512
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+# $ echo 'Hi'
+# | Hi?2004l
+$ bind 'set enable-bracketed-paste off'
+[?2004h[?2004l[?2004l[?2004l[?2004l[?2004l[?2004l[?2004l
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+# Setting a temp directory for tests
+$ TMP=/tmp/test-bash-helpers-misc
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+$ alias | wc -l
+0
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 2800)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-2800
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-bash-helpers-misc/test-2800
+
+# Count aliases proper
+$ alias | wc -l
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+1
+0
+
+# REQUIRED ALIASES
+$ alias perlgrep='perlgrep.perl'
+$ alias perl-grep=perlgrep
+# shell-check[-full](options, script, ...): run script through shellcheck
+# with filtering given it's buggy filtering mecahanism (and anal retentiveness)
+$ function shell-check-full {
+$     shellcheck "$@";
+$ }
+$ function shell-check {
+$     # note: filters out following
+$     # - SC1090: Can't follow non-constant source. Use a directive to specify location.
+$     # - SC1091: Not following: ./my-git-credentials-etc.bash was not specified as input (see shellcheck -x).
+$     # - SC2009: Consider using pgrep instead of grepping ps output.
+$     # - SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects.
+$     # - SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
+$     shell-check-full "$@" | perl-grep -para -v '(SC1090|SC1091|SC2009|SC2129|SC2164)';
+$ }
+
+## shellcheck MUST BE INSTALLED
+$ shell-check --version
+ShellCheck - shell script analysis tool
+version: 0.8.0
+license: GNU General Public License, version 3
+website: https://www.shellcheck.net
+
+## shellcheck TEST1
+$ shell-check $BIN_DIR/tomohara-settings.bash
+In /home/aveey/tom-project/shell-scripts/tests/../tomohara-settings.bash line 10:
+add-python-path $HOME/python/Mezcla/mezcla
+                ^---^ SC2086 (info): Double quote to prevent globbing and word splitting.
+
+Did you mean: 
+add-python-path "$HOME"/python/Mezcla/mezcla
+
+For more information:
+  https://www.shellcheck.net/wiki/SC2086 -- Double quote to prevent globbing ...
+
+## shellcheck ONLY WORKS FOR sh/bash/dash/ksh SCRIPTS
+$ shell-check $BIN_DIR/cs_setup.sh
+In /home/aveey/tom-project/shell-scripts/tests/../cs_setup.sh line 1:
+#! /bin/csh -f
+^-- SC1071 (error): ShellCheck only supports sh/bash/dash/ksh scripts. Sorry!
+
+For more information:
+  https://www.shellcheck.net/wiki/SC1071 -- ShellCheck only supports sh/bash/...
+
+# sleepyhead: Invoke SleepyHead with debug trace sent to log file under ~/temp.
+$ function downcase-stdin { perl -pe "use open ':std', ':encoding(UTF-8)'; s/.*/\L$&/;"; }
+$ function downcase-text() { echo "$@" | downcase-stdin; }
+# todays-date(): outputs date in format DDmmmYY (e.g., 22Apr20)
+## OLD: function todays-date() { date '+%d%b%y' | perl -pe 's/.*/\L$&/;'; }
+## TODO: drop leading digits in day of month
+## NOTE: keep in synch with common.perl get_file_ddmmmyy and .emacs edit-adhoc-notes-file
+$ function todays-date() { date '+%d%b%y' | downcase-stdin; }
+## OLD
+## todays_date=$(todays-date)
+## MISC:
+## # Convenience alias and bash variable for better tab-completion
+## OLD
+$ alias hoy=todays-date
+$ function sleepyhead() {
+$     log_file="$HOME/temp/sleepyhead.$(todays-date).log"
+$     echo "start: $(date)" >> "$log_file"
+$     command sleepyhead >> "$log_file" 2>&1 &
+$     echo "end: $(date)" $'\n' >> "$log_file"
+$ }
+$ alias sleepy='sleepyhead'
+
+# WORKING OF SLEEPYHEAD
+$ sleepyhead
+[1] 20527
+[1]+  Exit 127                command sleepyhead >> "$log_file" 2>&1

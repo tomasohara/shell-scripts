@@ -444,16 +444,8 @@ function test25-assert10-expected () {
 	test_folder=$(echo /tmp/test30-$$)
 	mkdir $test_folder && cd $test_folder
 
-	fix-dir-permissions
-}
-
-
-@test "test31" {
-	test_folder=$(echo /tmp/test31-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test31-assert1-actual)
-	expected=$(test31-assert1-expected)
+	actual=$(test30-assert1-actual)
+	expected=$(test30-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -463,9 +455,9 @@ function test25-assert10-expected () {
 
 }
 
-function test31-assert1-actual () {
+function test30-assert1-actual () {
 	ls -l 
 }
-function test31-assert1-expected () {
+function test30-assert1-expected () {
 	echo -e 'total 4drwxrwsr-x 2 aveey aveey 4096 Sep 10 22:57 testdir1'
 }

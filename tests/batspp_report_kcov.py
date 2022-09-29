@@ -57,7 +57,7 @@ for batsfile in files_TEST_PATH:
         kcov_folder = batsfile.replace(".batspp", "")
         print(f"\nBATSPP FILE DETECTED [{i}]: {batsfile}\n")
         os.system(f"./simple_batspp.py ./{batsfile} --output ./bats-storage/{bats_from_batspp}")
-        
+        print(f"\n=+=+=+=+=+=\n")
         # GENERATE KCOV REPORT FROM BATS FILE IN bats-storage DIRECTORY 
         os.system(f'kcov ./kcov-output/{kcov_folder}/ bats ./bats-storage/{bats_from_batspp}')
         i += 1

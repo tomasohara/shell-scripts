@@ -1,0 +1,95 @@
+# Setup
+$ bind 'set enable-bracketed-paste off'
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+
+$ AVEE_BIN=/home/aveey/bin
+# SPECIFYING AN IDENTIFIER FOR TMP
+$ TMP=temp/tmp
+$ source $AVEE_BIN/_dir-aliases.bash
+$ alias | wc -l
+8
+
+# Count aliases proper
+$ alias | wc -l
+8
+
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+2
+
+# Test safe symbolic links
+$ temp_dir=$TMP/test-$$
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+/home/aveey/tom-project/shell-scripts/tests/temp/tmp/test-16840
+
+# The first case succeed
+$ touch file1
+$ ln-symbolic file1 link1
+# 'link1' -> 'file1'
+# The second case should should fail
+$ ln-symbolic file1 link1
+# => "ln: failed to create symbolic link 'link1': File exists?"
+# Should only be four files total (along with . and ..)
+$ ls -R | wc -l
+# => 3
+'link1' -> 'file1'
+ln: failed to create symbolic link 'link1': File exists
+3
+
+## FYI: the current aliases and functions
+## ERROR PRONE COMMAND (BATSPP) - WORKS WELL
+# $ cat $AVEE_BIN/_dir-aliases.bash
+
+$ bash $AVEE_BIN/_dir-aliases.bash
+
+$ ls -l
+total 0
+-rw-rw-r-- 1 aveey aveey 0 Sep 19 21:59 file1
+lrwxrwxrwx 1 aveey aveey 5 Sep 19 21:59 link1 -> file1
+
+$ ln-symbolic /tmp temp-link
+'temp-link' -> '/tmp'
+
+$ ls -l
+total 0
+-rw-rw-r-- 1 aveey aveey 0 Sep 19 21:59 file1
+lrwxrwxrwx 1 aveey aveey 5 Sep 19 21:59 link1 -> file1
+lrwxrwxrwx 1 aveey aveey 4 Sep 19 21:59 temp-link -> /tmp
+
+$ link-symbolic-safe --force ~/temp temp-link
+'temp-link' -> '/home/aveey/temp'
+
+$ ls -l
+total 0
+-rw-rw-r-- 1 aveey aveey  0 Sep 19 21:59 file1
+lrwxrwxrwx 1 aveey aveey  5 Sep 19 21:59 link1 -> file1
+lrwxrwxrwx 1 aveey aveey 16 Sep 19 21:59 temp-link -> /home/aveey/temp
+
+$ alias ln-symbolic-force='ln-symbolic --force'
+
+# # THIS THROWS AN ERROR AS A SYMBOLIC LINK ALREADY EXISTS
+# $ ln-symbolic /tmp temp-link
+# | ln: failed to create symbolic link 'temp-link/tmp': File exists
+
+# ln CANNOT OVERWRITE DIRECTORY AS WELL, EVEN ON FORCE
+# $ ln-symbolic-force /tmp temp-link
+# | ln: temp-link/tmp: cannot overwrite directory
+
+$ ln-symbolic-force /tmp1 temp-link
+'temp-link' -> '/tmp1'
+
+$ link-symbolic-safe --force ~/temp temp-link
+'temp-link' -> '/home/aveey/temp'
+
+$ ls -l
+total 0
+-rw-rw-r-- 1 aveey aveey  0 Sep 19 21:59 file1
+lrwxrwxrwx 1 aveey aveey  5 Sep 19 21:59 link1 -> file1
+lrwxrwxrwx 1 aveey aveey 16 Sep 19 21:59 temp-link -> /home/aveey/temp

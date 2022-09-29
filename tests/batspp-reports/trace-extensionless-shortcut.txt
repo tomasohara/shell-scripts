@@ -200,7 +200,7 @@ function test11-assert8-actual () {
 	ls
 }
 function test11-assert8-expected () {
-	echo -e 'renaming "ooo.ppp" to "ooo.qqq"\'abcdef\\.txt\'  \'abc nounderscore.txt\'   abc.xyz   def.xyz   ooo.qqq--------------------------------------------------------------------------------renaming "./abc.xyz" to "./abc.harry"renaming "./def.xyz" to "./def.harry"\'abcdef\\.txt\'   abc.harry  \'abc nounderscore.txt\'   def.harry   ooo.qqq--------------------------------------------------------------------------------WARNING: Ignoring -quick mode as files specified\'abcdef\\.txt\'   abc.harry  \'abc nounderscore.txt\'   def.harry   ooo.qqq--------------------------------------------------------------------------------WARNING: Ignoring -quick mode as files specified\'abcdef\\.txt\'   abc.harry  \'abc nounderscore.txt\'   def.harry   ooo.qqq'
+	echo -e 'renaming "ooo.ppp" to "ooo.qqq"\'abcdef\\.txt\'  \'abc nounderscore.txt\'   abc.xyz   def.xyz   ooo.qqq--------------------------------------------------------------------------------renaming "./abc.xyz" to "./abc.harry"renaming "./def.xyz" to "./def.harry"\'abcdef\\.txt\'   abc.harry  \'abc nounderscore.txt\'   def.harry   ooo.qqq--------------------------------------------------------------------------------'
 }
 
 @test "test12" {
@@ -216,6 +216,7 @@ function test11-assert8-expected () {
 	mkdir $test_folder && cd $test_folder
 
 	touch 'abc(1).111' 'abc(2).111' 'xyz(3).111' 'xyz(4).111' '*abc.xyz' '&*abcdefg.xyz'
+	ls
 }
 
 
@@ -226,23 +227,9 @@ function test11-assert8-expected () {
 	rename-parens
 	linebr
 	linebr
-	actual=$(test14-assert4-actual)
-	expected=$(test14-assert4-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test14-assert4-actual () {
 	ls
 }
-function test14-assert4-expected () {
-	echo -e 'renaming "abc(1).111" to "abc1.111"renaming "abc(2).111" to "abc2.111"renaming "xyz(3).111" to "xyz3.111"renaming "xyz(4).111" to "xyz4.111"--------------------------------------------------------------------------------renaming "&*abcdefg.xyz" to "abcdefg.xyz"renaming "*abc.xyz" to "abc.xyz"--------------------------------------------------------------------------------abc1.111  abc2.111  abcdefg.xyz  abc.xyz  xyz3.111  xyz4.111'
-}
+
 
 @test "test15" {
 	test_folder=$(echo /tmp/test15-$$)
@@ -322,23 +309,9 @@ function test14-assert4-expected () {
 	linebr
 	copy-with-file-date *.xyz 
 	linebr
-	actual=$(test17-assert7-actual)
-	expected=$(test17-assert7-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test17-assert7-actual () {
 	ls
 }
-function test17-assert7-expected () {
-	echo -e "abc1.xyz  abc2.xyz  abc3.xyz  abc4.xyz\tabc5.xyz.19Aug22  abc6.xyz.19Aug22--------------------------------------------------------------------------------'abc1.xyz' -> 'abc1.xyz.15Sep22''abc2.xyz' -> 'abc2.xyz.15Sep22''abc3.xyz' -> 'abc3.xyz.15Sep22''abc4.xyz' -> 'abc4.xyz.15Sep22'--------------------------------------------------------------------------------abc1.xyz\t  abc2.xyz.15Sep22  abc4.xyz\t      abc6.xyz.19Aug22abc1.xyz.15Sep22  abc3.xyz\t    abc4.xyz.15Sep22abc2.xyz\t  abc3.xyz.15Sep22  abc5.xyz.19Aug22"
-}
+
 
 @test "test18" {
 	test_folder=$(echo /tmp/test18-$$)
@@ -359,23 +332,9 @@ function test17-assert7-expected () {
 	bigrams catmanual.txt
 	ls
 	word-count catmanual.txt
-	actual=$(test19-assert6-actual)
-	expected=$(test19-assert6-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test19-assert6-actual () {
 	ls
 }
-function test19-assert6-expected () {
-	echo -e 'n/a:n/a\t1catmanual.txtn/a\t1catmanual.txt'
-}
+
 
 @test "test20" {
 	test_folder=$(echo /tmp/test20-$$)
@@ -408,6 +367,7 @@ function test19-assert6-expected () {
 	test_folder=$(echo /tmp/test21-$$)
 	mkdir $test_folder && cd $test_folder
 
+	lynx-dump-stdout
 }
 
 
@@ -436,23 +396,9 @@ function test19-assert6-expected () {
 	echo $MY_USERNAME
 	linebr
 	unexport MY_USERNAME
-	actual=$(test24-assert5-actual)
-	expected=$(test24-assert5-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test24-assert5-actual () {
 	echo $MY_USERNAME
 }
-function test24-assert5-expected () {
-	echo -e 'aveey-temp--------------------------------------------------------------------------------'
-}
+
 
 @test "test25" {
 	test_folder=$(echo /tmp/test25-$$)
@@ -468,48 +414,21 @@ function test24-assert5-expected () {
 	test_folder=$(echo /tmp/test26-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test26-assert1-actual)
-	expected=$(test26-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test26-assert1-actual () {
 	show-unicode-code-info-aux ./catmanual.txt
 }
-function test26-assert1-expected () {
-	echo -e 'char\tord\toffset\tencoding5.15.0-47-generic: 175\t0035\t0\t35.\t002E\t1\t2e1\t0031\t2\t315\t0035\t3\t35.\t002E\t4\t2e0\t0030\t5\t30-\t002D\t6\t2d4\t0034\t7\t347\t0037\t8\t37-\t002D\t9\t2dg\t0067\t10\t67e\t0065\t11\t65n\t006E\t12\t6ee\t0065\t13\t65r\t0072\t14\t72i\t0069\t15\t69c\t0063\t16\t63'
-}
+
 
 @test "test27" {
 	test_folder=$(echo /tmp/test27-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test27-assert1-actual)
-	expected=$(test27-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test27-assert1-actual () {
 	show-unicode-code-info ./catmanual.txt
 }
-function test27-assert1-expected () {
-	echo -e 'char\tord\toffset\tencoding5.15.0-47-generic: 175\t0035\t0\t35.\t002E\t1\t2e1\t0031\t2\t315\t0035\t3\t35.\t002E\t4\t2e0\t0030\t5\t30-\t002D\t6\t2d4\t0034\t7\t347\t0037\t8\t37-\t002D\t9\t2dg\t0067\t10\t67e\t0065\t11\t65n\t006E\t12\t6ee\t0065\t13\t65r\t0072\t14\t72i\t0069\t15\t69c\t0063\t16\t63'
-}
+
 
 @test "test28" {
 	test_folder=$(echo /tmp/test28-$$)
 	mkdir $test_folder && cd $test_folder
 
+	output-BOM ./catmanual.txt
 }

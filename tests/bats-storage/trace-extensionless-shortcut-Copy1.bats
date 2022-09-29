@@ -12,8 +12,6 @@ shopt -s expand_aliases
 	test_folder=$(echo /tmp/test0-$$)
 	mkdir $test_folder && cd $test_folder
 
-	bind 'set enable-bracketed-paste off'
-	shopt -s expand_aliases
 }
 
 
@@ -21,18 +19,34 @@ shopt -s expand_aliases
 	test_folder=$(echo /tmp/test1-$$)
 	mkdir $test_folder && cd $test_folder
 
+	unalias -a
+	alias | wc -l
+	for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+	actual=$(test1-assert4-actual)
+	expected=$(test1-assert4-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test1-assert4-actual () {
+	typeset -f | egrep '^\w+' | wc -l
+}
+function test1-assert4-expected () {
+	echo -e '00'
+}
 
 @test "test2" {
 	test_folder=$(echo /tmp/test2-$$)
 	mkdir $test_folder && cd $test_folder
 
-	unalias -a
-	alias | wc -l
-	for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
-	actual=$(test2-assert4-actual)
-	expected=$(test2-assert4-expected)
+	BIN_DIR=$PWD/..
+	actual=$(test2-assert2-actual)
+	expected=$(test2-assert2-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -42,38 +56,15 @@ shopt -s expand_aliases
 
 }
 
-function test2-assert4-actual () {
-	typeset -f | egrep '^\w+' | wc -l
+function test2-assert2-actual () {
+	alias | wc -l
 }
-function test2-assert4-expected () {
-	echo -e '00'
+function test2-assert2-expected () {
+	echo -e '0'
 }
 
 @test "test3" {
 	test_folder=$(echo /tmp/test3-$$)
-	mkdir $test_folder && cd $test_folder
-
-	BIN_DIR=$PWD/..
-	actual=$(test3-assert2-actual)
-	expected=$(test3-assert2-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test3-assert2-actual () {
-	alias | wc -l
-}
-function test3-assert2-expected () {
-	echo -e '0'
-}
-
-@test "test4" {
-	test_folder=$(echo /tmp/test4-$$)
 	mkdir $test_folder && cd $test_folder
 
 	temp_dir=$TMP/test-3573
@@ -81,12 +72,12 @@ function test3-assert2-expected () {
 }
 
 
-@test "test5" {
-	test_folder=$(echo /tmp/test5-$$)
+@test "test4" {
+	test_folder=$(echo /tmp/test4-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test5-assert1-actual)
-	expected=$(test5-assert1-expected)
+	actual=$(test4-assert1-actual)
+	expected=$(test4-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -96,15 +87,15 @@ function test3-assert2-expected () {
 
 }
 
-function test5-assert1-actual () {
+function test4-assert1-actual () {
 	typeset -f | egrep '^\w+' | wc -l
 }
-function test5-assert1-expected () {
+function test4-assert1-expected () {
 	echo -e '10'
 }
 
-@test "test6" {
-	test_folder=$(echo /tmp/test6-$$)
+@test "test5" {
+	test_folder=$(echo /tmp/test5-$$)
 	mkdir $test_folder && cd $test_folder
 
 	alias perl-=""
@@ -116,16 +107,16 @@ function test5-assert1-expected () {
 }
 
 
-@test "test7" {
-	test_folder=$(echo /tmp/test7-$$)
+@test "test6" {
+	test_folder=$(echo /tmp/test6-$$)
 	mkdir $test_folder && cd $test_folder
 
 	rm -rf ./*
 	printf "TOP\nTHIS IS A TEST\nBOTTOM" > test.txt
 	dobackup test.txt
 	linebr
-	actual=$(test7-assert5-actual)
-	expected=$(test7-assert5-expected)
+	actual=$(test6-assert5-actual)
+	expected=$(test6-assert5-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -135,15 +126,15 @@ function test5-assert1-expected () {
 
 }
 
-function test7-assert5-actual () {
+function test6-assert5-actual () {
 	ls
 }
-function test7-assert5-expected () {
+function test6-assert5-expected () {
 	echo -e "Backing up 'test.txt' to './backup/test.txt'--------------------------------------------------------------------------------backup\ttest.txt"
 }
 
-@test "test8" {
-	test_folder=$(echo /tmp/test8-$$)
+@test "test7" {
+	test_folder=$(echo /tmp/test7-$$)
 	mkdir $test_folder && cd $test_folder
 
 	function ps-mine- { ps-mine "$@" | filter-dirnames; }
@@ -151,8 +142,8 @@ function test7-assert5-expected () {
 }
 
 
-@test "test9" {
-	test_folder=$(echo /tmp/test9-$$)
+@test "test8" {
+	test_folder=$(echo /tmp/test8-$$)
 	mkdir $test_folder && cd $test_folder
 
 	alias rename-files='perl- rename_files.perl'
@@ -164,8 +155,8 @@ function test7-assert5-expected () {
 }
 
 
-@test "test10" {
-	test_folder=$(echo /tmp/test10-$$)
+@test "test9" {
+	test_folder=$(echo /tmp/test9-$$)
 	mkdir $test_folder && cd $test_folder
 
 	rm -rf ./*
@@ -174,8 +165,8 @@ function test7-assert5-expected () {
 }
 
 
-@test "test11" {
-	test_folder=$(echo /tmp/test11-$$)
+@test "test10" {
+	test_folder=$(echo /tmp/test10-$$)
 	mkdir $test_folder && cd $test_folder
 
 	rename_files -q ooo.ppp ooo.qqq
@@ -185,8 +176,8 @@ function test7-assert5-expected () {
 	rename-spaces -f
 	ls
 	rename-quotes -f 'abc nounderscore.txt'
-	actual=$(test11-assert8-actual)
-	expected=$(test11-assert8-expected)
+	actual=$(test10-assert8-actual)
+	expected=$(test10-assert8-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -196,30 +187,30 @@ function test7-assert5-expected () {
 
 }
 
-function test11-assert8-actual () {
+function test10-assert8-actual () {
 	ls
 }
-function test11-assert8-expected () {
+function test10-assert8-expected () {
 	echo -e 'renaming "ooo.ppp" to "ooo.qqq"\'abcdef\\.txt\'  \'abc nounderscore.txt\'   abc.xyz   def.xyz   ooo.qqq--------------------------------------------------------------------------------renaming "./abc.xyz" to "./abc.harry"renaming "./def.xyz" to "./def.harry"\'abcdef\\.txt\'   abc.harry  \'abc nounderscore.txt\'   def.harry   ooo.qqq--------------------------------------------------------------------------------WARNING: Ignoring -quick mode as files specified\'abcdef\\.txt\'   abc.harry  \'abc nounderscore.txt\'   def.harry   ooo.qqq--------------------------------------------------------------------------------WARNING: Ignoring -quick mode as files specified\'abcdef\\.txt\'   abc.harry  \'abc nounderscore.txt\'   def.harry   ooo.qqq'
 }
 
-@test "test12" {
-	test_folder=$(echo /tmp/test12-$$)
+@test "test11" {
+	test_folder=$(echo /tmp/test11-$$)
 	mkdir $test_folder && cd $test_folder
 
 	alias rename-parens='rename-files -global -regex "[\(\)]" "" *[\(\)]*'
 }
 
 
-@test "test13" {
-	test_folder=$(echo /tmp/test13-$$)
+@test "test12" {
+	test_folder=$(echo /tmp/test12-$$)
 	mkdir $test_folder && cd $test_folder
 
 	rename-parens
 	linebr
 	linebr
-	actual=$(test13-assert4-actual)
-	expected=$(test13-assert4-expected)
+	actual=$(test12-assert4-actual)
+	expected=$(test12-assert4-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -229,44 +220,37 @@ function test11-assert8-expected () {
 
 }
 
-function test13-assert4-actual () {
+function test12-assert4-actual () {
 	ls
 }
-function test13-assert4-expected () {
+function test12-assert4-expected () {
 	echo -e 'renaming "abc(1).111" to "abc1.111"renaming "abc(2).111" to "abc2.111"renaming "xyz(3).111" to "xyz3.111"renaming "xyz(4).111" to "xyz4.111"--------------------------------------------------------------------------------renaming "&*abcdefg.xyz" to "abcdefg.xyz"renaming "*abc.xyz" to "abc.xyz"--------------------------------------------------------------------------------abc1.111  abc2.111  abcdefg.xyz  abc.xyz  xyz3.111  xyz4.111'
 }
 
-@test "test14" {
-	test_folder=$(echo /tmp/test14-$$)
+@test "test13" {
+	test_folder=$(echo /tmp/test13-$$)
 	mkdir $test_folder && cd $test_folder
 
+	function move-versioned-files {
 	alias perl-grep='perl $BIN_DIR/perlgrep.perl'
 	alias dir-rw='dir -rw'
-	function move-versioned-files {
+	alias move='mv'
 	local ext_pattern="$1"
 	if [ "$ext_pattern" = "" ]; then ext_pattern="{list,log,txt}"; fi
 	local dir="$2"
 	if [ "$dir" = "" ]; then dir="versioned-files"; fi
 	mkdir -p "$dir";
-	## OLD: local D="[.]"
 	local D="[-.]"
-	# TODO: fix problem leading to hangup (verification piped to 2>&1)
-	# Notes: eval needed for $ext_pattern resolution
-	# - excludes read-only files (e.g., ls -l => "-r--r--r--   1 tomohara   11K Nov  2 16:30 _master-note-info.list.log")
-	# EXs:              fu.log2                fu.2.log                  fu.log.14aug21    fu.14aug21.log
 	local file_list="$TEMP/_move-versioned-files-$$.list"
-	## TODO: dir-rw $(eval echo *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*  *$D*[0-9][0-9]*$D$ext_pattern) 2>| "$file_list.log" | perl -pe 's/(\S+\s+){6}\S+//;' >| "$file_list"
-	## xargs -I "{}" $MV "{}" "$dir" < "$file_list"
-	## OLD: move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;') "$dir"
-	move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;' | sort -u) "$dir"
+	move $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;' | sort -u) "$dir"
 	}
 	alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
 	alias move-adhoc-files='move-log-files; move-output-files'
 }
 
 
-@test "test15" {
-	test_folder=$(echo /tmp/test15-$$)
+@test "test14" {
+	test_folder=$(echo /tmp/test14-$$)
 	mkdir $test_folder && cd $test_folder
 
 	function get-free-filename() {
@@ -288,7 +272,7 @@ function test13-assert4-expected () {
 	local move_command="move"
 	if [ "$1" = "--copy" ]; then
 	## TODO: move_command="copy"
-	move_command="command cp --interactive --verbose --preserve"
+	move_command='command cp --interactive --verbose --preserve'
 	shift
 	fi
 	for f in "$@"; do
@@ -300,22 +284,14 @@ function test13-assert4-expected () {
 	fi
 	done;
 	## DEBUG: set - -o xtrace
-	function copy-with-file-date { rename-with-file-date --copy "$@"; }
-}
-
-
-@test "test16" {
-	test_folder=$(echo /tmp/test16-$$)
-	mkdir $test_folder && cd $test_folder
-
 	rm -rf ./*
 	touch abc1.xyz abc2.xyz abc3.xyz abc4.xyz abc5.xyz.19Aug22 abc6.xyz.19Aug22
 	ls
 	linebr
 	copy-with-file-date *.xyz 
 	linebr
-	actual=$(test16-assert7-actual)
-	expected=$(test16-assert7-expected)
+	actual=$(test14-assert38-actual)
+	expected=$(test14-assert38-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -325,15 +301,15 @@ function test13-assert4-expected () {
 
 }
 
-function test16-assert7-actual () {
+function test14-assert38-actual () {
 	ls
 }
-function test16-assert7-expected () {
-	echo -e "abc1.xyz  abc2.xyz  abc3.xyz  abc4.xyz\tabc5.xyz.19Aug22  abc6.xyz.19Aug22--------------------------------------------------------------------------------'abc1.xyz' -> 'abc1.xyz.20Sep22''abc2.xyz' -> 'abc2.xyz.20Sep22''abc3.xyz' -> 'abc3.xyz.20Sep22''abc4.xyz' -> 'abc4.xyz.20Sep22'--------------------------------------------------------------------------------abc1.xyz\t  abc2.xyz.20Sep22  abc4.xyz\t      abc6.xyz.19Aug22abc1.xyz.20Sep22  abc3.xyz\t    abc4.xyz.20Sep22abc2.xyz\t  abc3.xyz.20Sep22  abc5.xyz.19Aug22"
+function test14-assert38-expected () {
+	echo -e "abc1.xyz  abc2.xyz  abc3.xyz  abc4.xyz\tabc5.xyz.19Aug22  abc6.xyz.19Aug22--------------------------------------------------------------------------------'abc1.xyz' -> 'abc1.xyz.22Sep22''abc2.xyz' -> 'abc2.xyz.22Sep22''abc3.xyz' -> 'abc3.xyz.22Sep22''abc4.xyz' -> 'abc4.xyz.22Sep22'--------------------------------------------------------------------------------abc1.xyz\t  abc2.xyz.22Sep22  abc4.xyz\t      abc6.xyz.19Aug22abc1.xyz.22Sep22  abc3.xyz\t    abc4.xyz.22Sep22abc2.xyz\t  abc3.xyz.22Sep22  abc5.xyz.19Aug22"
 }
 
-@test "test17" {
-	test_folder=$(echo /tmp/test17-$$)
+@test "test15" {
+	test_folder=$(echo /tmp/test15-$$)
 	mkdir $test_folder && cd $test_folder
 
 	alias bigrams='perl -sw $BIN_DIR/count_bigrams.perl -N=2'
@@ -342,8 +318,8 @@ function test16-assert7-expected () {
 }
 
 
-@test "test18" {
-	test_folder=$(echo /tmp/test18-$$)
+@test "test16" {
+	test_folder=$(echo /tmp/test16-$$)
 	mkdir $test_folder && cd $test_folder
 
 	rm -rf ./*
@@ -351,8 +327,8 @@ function test16-assert7-expected () {
 	bigrams catmanual.txt
 	ls
 	word-count catmanual.txt
-	actual=$(test18-assert6-actual)
-	expected=$(test18-assert6-expected)
+	actual=$(test16-assert6-actual)
+	expected=$(test16-assert6-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -362,15 +338,15 @@ function test16-assert7-expected () {
 
 }
 
-function test18-assert6-actual () {
+function test16-assert6-actual () {
 	ls
 }
-function test18-assert6-expected () {
+function test16-assert6-expected () {
 	echo -e 'n/a:n/a\t1catmanual.txtn/a\t1catmanual.txt'
 }
 
-@test "test19" {
-	test_folder=$(echo /tmp/test19-$$)
+@test "test17" {
+	test_folder=$(echo /tmp/test17-$$)
 	mkdir $test_folder && cd $test_folder
 
 	lynx-dump-stdout () { lynx -width=512 -dump "$@"; }
@@ -396,22 +372,22 @@ function test18-assert6-expected () {
 }
 
 
+@test "test18" {
+	test_folder=$(echo /tmp/test18-$$)
+	mkdir $test_folder && cd $test_folder
+
+}
+
+
+@test "test19" {
+	test_folder=$(echo /tmp/test19-$$)
+	mkdir $test_folder && cd $test_folder
+
+}
+
+
 @test "test20" {
 	test_folder=$(echo /tmp/test20-$$)
-	mkdir $test_folder && cd $test_folder
-
-}
-
-
-@test "test21" {
-	test_folder=$(echo /tmp/test21-$$)
-	mkdir $test_folder && cd $test_folder
-
-}
-
-
-@test "test22" {
-	test_folder=$(echo /tmp/test22-$$)
 	mkdir $test_folder && cd $test_folder
 
 	function setenv () { export $1="$2"; }
@@ -420,16 +396,16 @@ function test18-assert6-expected () {
 }
 
 
-@test "test23" {
-	test_folder=$(echo /tmp/test23-$$)
+@test "test21" {
+	test_folder=$(echo /tmp/test21-$$)
 	mkdir $test_folder && cd $test_folder
 
 	setenv MY_USERNAME aveey-temp
 	echo $MY_USERNAME
 	linebr
 	unexport MY_USERNAME
-	actual=$(test23-assert5-actual)
-	expected=$(test23-assert5-expected)
+	actual=$(test21-assert5-actual)
+	expected=$(test21-assert5-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -439,15 +415,15 @@ function test18-assert6-expected () {
 
 }
 
-function test23-assert5-actual () {
+function test21-assert5-actual () {
 	echo $MY_USERNAME
 }
-function test23-assert5-expected () {
+function test21-assert5-expected () {
 	echo -e 'aveey-temp--------------------------------------------------------------------------------'
 }
 
-@test "test24" {
-	test_folder=$(echo /tmp/test24-$$)
+@test "test22" {
+	test_folder=$(echo /tmp/test22-$$)
 	mkdir $test_folder && cd $test_folder
 
 	function show-unicode-code-info-aux() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < "$1"; }
@@ -456,12 +432,12 @@ function test23-assert5-expected () {
 }
 
 
-@test "test25" {
-	test_folder=$(echo /tmp/test25-$$)
+@test "test23" {
+	test_folder=$(echo /tmp/test23-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test25-assert1-actual)
-	expected=$(test25-assert1-expected)
+	actual=$(test23-assert1-actual)
+	expected=$(test23-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -471,19 +447,19 @@ function test23-assert5-expected () {
 
 }
 
-function test25-assert1-actual () {
+function test23-assert1-actual () {
 	show-unicode-code-info-aux ./catmanual.txt
 }
-function test25-assert1-expected () {
+function test23-assert1-expected () {
 	echo -e 'char\tord\toffset\tencoding5.15.0-47-generic: 175\t0035\t0\t35.\t002E\t1\t2e1\t0031\t2\t315\t0035\t3\t35.\t002E\t4\t2e0\t0030\t5\t30-\t002D\t6\t2d4\t0034\t7\t347\t0037\t8\t37-\t002D\t9\t2dg\t0067\t10\t67e\t0065\t11\t65n\t006E\t12\t6ee\t0065\t13\t65r\t0072\t14\t72i\t0069\t15\t69c\t0063\t16\t63'
 }
 
-@test "test26" {
-	test_folder=$(echo /tmp/test26-$$)
+@test "test24" {
+	test_folder=$(echo /tmp/test24-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test26-assert1-actual)
-	expected=$(test26-assert1-expected)
+	actual=$(test24-assert1-actual)
+	expected=$(test24-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -493,15 +469,15 @@ function test25-assert1-expected () {
 
 }
 
-function test26-assert1-actual () {
+function test24-assert1-actual () {
 	show-unicode-code-info ./catmanual.txt
 }
-function test26-assert1-expected () {
+function test24-assert1-expected () {
 	echo -e 'char\tord\toffset\tencoding5.15.0-47-generic: 175\t0035\t0\t35.\t002E\t1\t2e1\t0031\t2\t315\t0035\t3\t35.\t002E\t4\t2e0\t0030\t5\t30-\t002D\t6\t2d4\t0034\t7\t347\t0037\t8\t37-\t002D\t9\t2dg\t0067\t10\t67e\t0065\t11\t65n\t006E\t12\t6ee\t0065\t13\t65r\t0072\t14\t72i\t0069\t15\t69c\t0063\t16\t63'
 }
 
-@test "test27" {
-	test_folder=$(echo /tmp/test27-$$)
+@test "test25" {
+	test_folder=$(echo /tmp/test25-$$)
 	mkdir $test_folder && cd $test_folder
 
 }

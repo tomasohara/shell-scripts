@@ -1,0 +1,24 @@
+{
+  "files": [
+    {"file": "/tmp/bats-run-tOKf1Q/bats.20751.src", "percent_covered": "1.34", "covered_lines": "2", "total_lines": "149"},
+    {"file": "/usr/local/lib/bats-core/tracing.bash", "percent_covered": "60.61", "covered_lines": "100", "total_lines": "165"},
+    {"file": "/usr/local/lib/bats-core/warnings.bash", "percent_covered": "8.70", "covered_lines": "2", "total_lines": "23"},
+    {"file": "/usr/local/lib/bats-core/preprocessing.bash", "percent_covered": "62.50", "covered_lines": "5", "total_lines": "8"},
+    {"file": "/usr/local/lib/bats-core/common.bash", "percent_covered": "20.75", "covered_lines": "22", "total_lines": "106"},
+    {"file": "/usr/local/libexec/bats-core/bats-exec-suite", "percent_covered": "37.12", "covered_lines": "85", "total_lines": "229"},
+    {"file": "/usr/local/libexec/bats-core/bats-preprocess", "percent_covered": "49.30", "covered_lines": "35", "total_lines": "71"},
+    {"file": "/usr/local/libexec/bats-core/bats-format-cat", "percent_covered": "100.00", "covered_lines": "3", "total_lines": "3"},
+    {"file": "/usr/local/libexec/bats-core/bats-exec-file", "percent_covered": "46.59", "covered_lines": "82", "total_lines": "176"},
+    {"file": "/usr/local/lib/bats-core/validator.bash", "percent_covered": "92.86", "covered_lines": "13", "total_lines": "14"},
+    {"file": "/usr/local/lib/bats-core/test_functions.bash", "percent_covered": "1.45", "covered_lines": "2", "total_lines": "138"},
+    {"file": "/usr/local/libexec/bats-core/bats", "percent_covered": "37.61", "covered_lines": "85", "total_lines": "226"},
+    {"file": "/usr/local/bin/bats", "percent_covered": "23.33", "covered_lines": "7", "total_lines": "30"}
+  ],
+  "percent_covered": "33.11",
+  "covered_lines": 443,
+  "total_lines": 1338,
+  "percent_low": 25,
+  "percent_high": 75,
+  "command": "bats",
+  "date": "2022-09-26 10:25:05"
+}
