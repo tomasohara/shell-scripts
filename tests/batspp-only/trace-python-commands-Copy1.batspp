@@ -5,21 +5,12 @@
 $ echo $PS1
 [PEXP\[\]ECT_PROMPT>
 
-# Delete all aliases and function
-# TODO: Instead start from pristine environment
-$ unalias -a
-$ alias | wc -l
-$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
-$ typeset -f | egrep '^\w+' | wc -l
-0
-0
-
 # Setting a temp directory for tests
 $ TMP=/tmp/test-py-commands
 ## NOTE: Source it directly from the ./tests directory.
 $ BIN_DIR=$PWD/..
 $ alias | wc -l
-0
+11
 
 ## NOTE: For reproducability, the directory name needs to be fixed
 ## In place of $$, use a psuedo random number (e,g., 3443)
@@ -33,13 +24,6 @@ $ pwd
 #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
 $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
 /tmp/test-py-commands/test-3443
-
-# Count aliases proper
-$ alias | wc -l
-# Count functions
-$ typeset -f | egrep '^\w+' | wc -l
-1
-0
 
 $ export PYTHON_CMD="/usr/bin/time python -u"
 $ export PYTHON="$NICE $PYTHON_CMD"
@@ -208,36 +192,36 @@ matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/glue_helpers.py
 matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/system.py
 matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/tpo_common.py
 --------------------------------------------------------------------------------
-# /home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/__init__.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/__init__.py
-# code object from '/home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/__init__.cpython-310.pyc'
-# /home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/debug.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/debug.py
-# code object from '/home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/debug.cpython-310.pyc'
-# /home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/sys_version_info_hack.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/sys_version_info_hack.py
-# code object from '/home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/sys_version_info_hack.cpython-310.pyc'
-import 'mezcla.sys_version_info_hack' # <_frozen_importlib_external.SourceFileLoader object at 0x7ff5b0a37ee0>
-import 'mezcla.debug' # <_frozen_importlib_external.SourceFileLoader object at 0x7ff5b0e73ca0>
-# /home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/glue_helpers.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/glue_helpers.py
-# code object from '/home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/glue_helpers.cpython-310.pyc'
-# /home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/system.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/system.py
-# code object from '/home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/system.cpython-310.pyc'
-import 'mezcla.system' # <_frozen_importlib_external.SourceFileLoader object at 0x7ff5b0c2d3f0>
-# /home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/tpo_common.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/mezcla/tpo_common.py
-# code object from '/home/aveey/.local/lib/python3.10/site-packages/mezcla/__pycache__/tpo_common.cpython-310.pyc'
-import 'mezcla.tpo_common' # <_frozen_importlib_external.SourceFileLoader object at 0x7ff5b0c2fa90>
-import 'mezcla.glue_helpers' # <_frozen_importlib_external.SourceFileLoader object at 0x7ff5b0a37f10>
-import 'mezcla' # <_frozen_importlib_external.SourceFileLoader object at 0x7ff5b0e73e50>
-# cleanup[2] removing mezcla.sys_version_info_hack
-# cleanup[2] removing mezcla.debug
-# cleanup[2] removing mezcla.system
-# cleanup[2] removing mezcla.tpo_common
-# cleanup[2] removing mezcla.glue_helpers
-# cleanup[2] removing mezcla
-# destroy mezcla.sys_version_info_hack
-# destroy mezcla.glue_helpers
-# destroy mezcla
-# destroy mezcla.system
-# destroy mezcla.tpo_common
-# destroy mezcla.debug
+# /home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/__pycache__/__init__.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/__init__.py
+# code object from '/home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/__pycache__/__init__.cpython-310.pyc'
+# /home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/__pycache__/debug.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/debug.py
+# code object from '/home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/__pycache__/debug.cpython-310.pyc'
+# /home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/__pycache__/sys_version_info_hack.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/sys_version_info_hack.py
+# code object from '/home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/__pycache__/sys_version_info_hack.cpython-310.pyc'
+import '[01;31m[Kmezcla[m[K.sys_version_info_hack' # <_frozen_importlib_external.SourceFileLoader object at 0x7f157fc5fee0>
+import '[01;31m[Kmezcla[m[K.debug' # <_frozen_importlib_external.SourceFileLoader object at 0x7f1580093ca0>
+# /home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/__pycache__/glue_helpers.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/glue_helpers.py
+# code object from '/home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/__pycache__/glue_helpers.cpython-310.pyc'
+# /home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/__pycache__/system.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/system.py
+# code object from '/home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/__pycache__/system.cpython-310.pyc'
+import '[01;31m[Kmezcla[m[K.system' # <_frozen_importlib_external.SourceFileLoader object at 0x7f157fc558d0>
+# /home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/__pycache__/tpo_common.cpython-310.pyc matches /home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/tpo_common.py
+# code object from '/home/aveey/.local/lib/python3.10/site-packages/[01;31m[Kmezcla[m[K/__pycache__/tpo_common.cpython-310.pyc'
+import '[01;31m[Kmezcla[m[K.tpo_common' # <_frozen_importlib_external.SourceFileLoader object at 0x7f157fc57e80>
+import '[01;31m[Kmezcla[m[K.glue_helpers' # <_frozen_importlib_external.SourceFileLoader object at 0x7f157fc5faf0>
+import '[01;31m[Kmezcla[m[K' # <_frozen_importlib_external.SourceFileLoader object at 0x7f1580093e50>
+# cleanup[2] removing [01;31m[Kmezcla[m[K.sys_version_info_hack
+# cleanup[2] removing [01;31m[Kmezcla[m[K.debug
+# cleanup[2] removing [01;31m[Kmezcla[m[K.system
+# cleanup[2] removing [01;31m[Kmezcla[m[K.tpo_common
+# cleanup[2] removing [01;31m[Kmezcla[m[K.glue_helpers
+# cleanup[2] removing [01;31m[Kmezcla[m[K
+# destroy [01;31m[Kmezcla[m[K.sys_version_info_hack
+# destroy [01;31m[Kmezcla[m[K.glue_helpers
+# destroy [01;31m[Kmezcla[m[K
+# destroy [01;31m[Kmezcla[m[K.system
+# destroy [01;31m[Kmezcla[m[K.tpo_common
+# destroy [01;31m[Kmezcla[m[K.debug
 
 # RETURNS A LIST OF PYTHON MODULES
 $ rm -rf ./*
@@ -516,8 +500,8 @@ $ ipython --version
 $ linebr
 # STATEMENT TRACING WORKS WELL
 $ python-trace l $BIN_DIR/tests/batspp_report.py
-/home/aveey/bin/set_xterm_title.bash: line 239: /_set_xterm_title.40106.full.list: Permission denied
-/home/aveey/bin/set_xterm_title.bash: line 240: /_set_xterm_title.40106.icon.list: Permission denied
+/home/aveey/bin/set_xterm_title.bash: line 239: /_set_xterm_title.32143.full.list: Permission denied
+/home/aveey/bin/set_xterm_title.bash: line 240: /_set_xterm_title.32143.icon.list: Permission denied
 ]1;ipython [/tmp/test-py-commands/test-3443]]2;ipython [/tmp/test-py-commands/test-3443]8.5.0
 --------------------------------------------------------------------------------
  --- modulename: batspp_report, funcname: <module>
@@ -577,8 +561,8 @@ FAULTY TESTFILES:
 batspp_report.py(85): for tf in error_testfiles:
 batspp_report.py(87): print(f"======================================================")
 ======================================================
-0.06user 0.01system 0:00.12elapsed 70%CPU (0avgtext+0avgdata 12160maxresident)k
-48inputs+0outputs (0major+1774minor)pagefaults 0swaps
+0.07user 0.01system 0:00.12elapsed 68%CPU (0avgtext+0avgdata 12404maxresident)k
+312inputs+0outputs (0major+1771minor)pagefaults 0swaps
 
 # which-python SHOWS THE PATH OF PYTHON
 $ alias which-python='which python'
@@ -709,7 +693,7 @@ $ }
 # TESTING A PYTHON SCRIPT
 $ printf "print('THIS IS A TEST10')\nprint('THIS IS A TEST11')\nprint('THIS IS A TEST12')\nprint('THIS IS A TEST13')" > random_line_test.py
 $ ls
-abc1.py  atest.py  random_line_test.py	xyz.py
+abc1.py  atest.py  random_line_test.py  xyz.py
 
 # ERROR : MISSING MODULE (No module named randomize_lines)
 # $ randomize-datafile random_line_test.py
@@ -787,14 +771,14 @@ $ linebr
 $ url-path $BIN_DIR/tests/batspp_report.py
   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
                                  Dload  Upload   Total   Spent    Left  Speed
-100 16485    0 16485    0     0  35867      0 --:--:-- --:--:-- --:--:-- 35915
+100 16547    0 16547    0     0  27494      0 --:--:-- --:--:-- --:--:-- 28677
 --------------------------------------------------------------------------------
 total 36
--rw-rw-r-- 1 aveey aveey    25 Sep 23 21:47 abc1.py
--rw-rw-r-- 1 aveey aveey    23 Sep 23 21:47 atest.py
--rw-rw-r-- 1 aveey aveey   103 Sep 23 21:47 random_line_test.py
--rw-rw-r-- 1 aveey aveey 16485 Sep 23 21:47 www.google.com
--rw-rw-r-- 1 aveey aveey    23 Sep 23 21:47 xyz.py
+-rw-rw-r-- 1 aveey aveey    25 Sep 26 10:30 abc1.py
+-rw-rw-r-- 1 aveey aveey    23 Sep 26 10:30 atest.py
+-rw-rw-r-- 1 aveey aveey   103 Sep 26 10:30 random_line_test.py
+-rw-rw-r-- 1 aveey aveey 16547 Sep 26 10:30 www.google.com
+-rw-rw-r-- 1 aveey aveey    23 Sep 26 10:30 xyz.py
 --------------------------------------------------------------------------------
 file:////home/aveey/tom-project/shell-scripts/tests/batspp_report.py
 
