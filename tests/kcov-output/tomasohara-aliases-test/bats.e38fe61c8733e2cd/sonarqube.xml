@@ -416,36 +416,6 @@
 		<lineToCover lineNumber="31" covered="false"/>
 		<lineToCover lineNumber="35" covered="false"/>
 	</file>
-	<file path="/tmp/bats-run-xNfzZv/bats.30570.src">
-		<lineToCover lineNumber="5" covered="true"/>
-		<lineToCover lineNumber="8" covered="true"/>
-		<lineToCover lineNumber="12" covered="true"/>
-		<lineToCover lineNumber="13" covered="true"/>
-		<lineToCover lineNumber="15" covered="true"/>
-		<lineToCover lineNumber="16" covered="false"/>
-		<lineToCover lineNumber="17" covered="false"/>
-		<lineToCover lineNumber="18" covered="false"/>
-		<lineToCover lineNumber="19" covered="false"/>
-		<lineToCover lineNumber="20" covered="false"/>
-		<lineToCover lineNumber="21" covered="false"/>
-		<lineToCover lineNumber="22" covered="false"/>
-		<lineToCover lineNumber="27" covered="true"/>
-		<lineToCover lineNumber="30" covered="false"/>
-		<lineToCover lineNumber="34" covered="true"/>
-		<lineToCover lineNumber="35" covered="true"/>
-		<lineToCover lineNumber="37" covered="true"/>
-		<lineToCover lineNumber="38" covered="false"/>
-		<lineToCover lineNumber="39" covered="false"/>
-		<lineToCover lineNumber="40" covered="false"/>
-		<lineToCover lineNumber="41" covered="false"/>
-		<lineToCover lineNumber="42" covered="false"/>
-		<lineToCover lineNumber="43" covered="false"/>
-		<lineToCover lineNumber="44" covered="false"/>
-		<lineToCover lineNumber="49" covered="true"/>
-		<lineToCover lineNumber="52" covered="false"/>
-		<lineToCover lineNumber="55" covered="true"/>
-		<lineToCover lineNumber="56" covered="true"/>
-	</file>
 	<file path="/usr/local/libexec/bats-core/bats-exec-file">
 		<lineToCover lineNumber="2" covered="true"/>
 		<lineToCover lineNumber="4" covered="true"/>
@@ -1421,5 +1391,35 @@
 		<lineToCover lineNumber="391" covered="false"/>
 		<lineToCover lineNumber="392" covered="false"/>
 		<lineToCover lineNumber="393" covered="false"/>
+	</file>
+	<file path="/tmp/bats-run-w2R9Ck/bats.81692.src">
+		<lineToCover lineNumber="5" covered="true"/>
+		<lineToCover lineNumber="8" covered="true"/>
+		<lineToCover lineNumber="12" covered="true"/>
+		<lineToCover lineNumber="13" covered="true"/>
+		<lineToCover lineNumber="15" covered="true"/>
+		<lineToCover lineNumber="16" covered="false"/>
+		<lineToCover lineNumber="17" covered="false"/>
+		<lineToCover lineNumber="18" covered="false"/>
+		<lineToCover lineNumber="19" covered="false"/>
+		<lineToCover lineNumber="20" covered="false"/>
+		<lineToCover lineNumber="21" covered="false"/>
+		<lineToCover lineNumber="22" covered="false"/>
+		<lineToCover lineNumber="27" covered="true"/>
+		<lineToCover lineNumber="30" covered="false"/>
+		<lineToCover lineNumber="34" covered="true"/>
+		<lineToCover lineNumber="35" covered="true"/>
+		<lineToCover lineNumber="37" covered="true"/>
+		<lineToCover lineNumber="38" covered="false"/>
+		<lineToCover lineNumber="39" covered="false"/>
+		<lineToCover lineNumber="40" covered="false"/>
+		<lineToCover lineNumber="41" covered="false"/>
+		<lineToCover lineNumber="42" covered="false"/>
+		<lineToCover lineNumber="43" covered="false"/>
+		<lineToCover lineNumber="44" covered="false"/>
+		<lineToCover lineNumber="49" covered="true"/>
+		<lineToCover lineNumber="52" covered="false"/>
+		<lineToCover lineNumber="55" covered="true"/>
+		<lineToCover lineNumber="56" covered="true"/>
 	</file>
 </coverage>
