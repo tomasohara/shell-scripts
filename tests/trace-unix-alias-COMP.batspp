@@ -51,11 +51,11 @@ make: Nothing to be done for 'himom.txt'.
 make: Nothing to be done for 'hidad.txt'.
 make: Nothing to be done for 'hidad.txt'.
 total 20
--rw-rw-r-- 1 aveey aveey    8 Oct  6 21:45 hidad.txt
--rw-rw-r-- 1 aveey aveey    8 Oct  6 21:45 himom.txt
--rw-rw-r-- 1 aveey aveey   42 Oct  6 21:45 _make.log
--rw-rw-r-- 1 aveey aveey   42 Oct  6 21:45 _old_make.log
-drwxrwxr-x 2 aveey aveey 4096 Oct  6 21:45 testfolder
+-rw-rw-r-- 1 aveey aveey    8 Oct  6 22:12 hidad.txt
+-rw-rw-r-- 1 aveey aveey    8 Oct  6 22:12 himom.txt
+-rw-rw-r-- 1 aveey aveey   42 Oct  6 22:12 _make.log
+-rw-rw-r-- 1 aveey aveey   42 Oct  6 22:12 _old_make.log
+drwxrwxr-x 2 aveey aveey 4096 Oct  6 22:12 testfolder
 
 ## TEST 2 - MERGING ALIASAS & FUNCTIONS
 # $ man merge
@@ -265,9 +265,6 @@ $ set-display-local
 $ echo $DISPLAY
 localhost:0.0
 
-# 7A)
-# Bash aliases
-# Note: '- -o' is idiom for turning off
 $ alias bash-trace-on='set -o xtrace'
 $ alias bash-trace-off='set - -o xtrace'
 $ function trace-cmd() {
@@ -281,53 +278,39 @@ $     ) 2>&1 | $PAGER;
 $ }
 $ alias cmd-trace='trace-cmd'
 
-# bash-trace-on ENABLES bash tracing
+## bash-trace-on ENABLES bash tracing
 $ bash-trace-on
-# trace-cmd TRACES COMMANDS AND STATS (TIME) OF THE USER
+## trace-cmd TRACES COMMANDS AND STATS (TIME) OF THE USER
 $ trace-cmd
-# bash-trace-on DISABLES bash tracing
+## bash-trace-on DISABLES bash tracing
 $ bash-trace-off
 $ trace-cmd
 + trace-cmd
 + cat
-++ date
-+ echo 'start: Thu Oct  6 09:45:40 PM +0545 2022'
-start: Thu Oct  6 09:45:40 PM +0545 2022
++ echo 'start: $(date)'
+start: $(date)
 + set -o xtrace
-+ eval
++ eval '$@'
 + set - -o xtrace
-end: Thu Oct  6 09:45:40 PM +0545 2022
+end: $(date)
 + set - -o xtrace
-bash: linebr: command not found
-start: Thu Oct  6 09:45:41 PM +0545 2022
-+ eval
+start: $(date)
++ eval '$@'
 + set - -o xtrace
-end: Thu Oct  6 09:45:41 PM +0545 2022
+end: $(date)
 
-## EXCEPTION ERROR FOR TOKEN - BATSPP 2.1.X
-# cmd-usage(command): output usage for command to _command.list (with spaces
-# replaced by underscores)
 $ function cmd-usage () {
 $     local command="$@";
 $     local usage_file="_$(echo "$command" | tr ' ' '_')-usage.list"
 $     $command --help  2>&1 | ansifilter > "$usage_file"
 $     $PAGER_NOEXIT "$usage_file"
 $ }
-## ERROR DETECTED
-# $ cmd-usage ./testfolder
-# | bash: _testfolder-usage.list: command not found
 
-## EXCEPTION ERROR FOR TOKEN - BATSPP 2.1.X
-# 9A)
-# Compressing/uncompressing a subdirectory tree (ignoring symbolic links) 
-# TODO: write scripts for this (given the complexity)
-# TODO: don't uncompress compressed archives (.tar.gz files)
 $ function compress-dir() {
 $     log_file=$TEMP/compress_$(basename "$1").log
 $     find "$1" \( -not -type l \) -exec gzip -vf {} \; >| "$log_file" 2>&1 
 $     $PAGER "$log_file"
 $ }
-# NOTE: zipped archived are kept compressed
 $ function uncompress-dir() {
 $     log_file=$TEMP/uncompress_$(basename "$1").log;
 $     find "$1" \( -not -type l \) \( -not -name \*.tar.gz \) -exec gunzip -vf {} \; >| "$log_file" 2>&1; $PAGER "$log_file";
@@ -345,7 +328,7 @@ $ alias ununcompress-this-dir='uncompress-dir $PWD'
 # $ linebr
 # $ ununcompress-this-dir ./testfolder
 
-# TEST 9B)
+## TEST 9B)
 $ alias old-count-exts='$LS | count-it "\.[^.]*\w" | sort $SORT_COL2 -rn | $PAGER'
 $ function count-exts () { $LS | count-it '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
 $ alias kill-iceweasel='kill_em.sh iceweasel'
@@ -360,8 +343,7 @@ $ alias kill-iceweasel='kill_em.sh iceweasel'
 #kill-iceweasel
 
 ## EXCEPTION ERROR FOR TOKEN - BATSPP 2.1.X
-# cmd-usage(command): output usage for command to _command.list (with spaces
-# replaced by underscores)
+## cmd-usage(command): output usage for command to _command.list (with spaces replaced by underscores)
 $ function cmd-usage () {
 $     local command="$@"
 $     local usage_file="_$(echo "$command" | tr ' ' '_')-usage.list"
@@ -369,7 +351,7 @@ $     $command --help  2>&1 | ansifilter > "$usage_file"
 $     $PAGER_NOEXIT "$usage_file"
 $ }
 
-# cmd-usage (HELP REQUIRED)
+## cmd-usage (HELP REQUIRED)
 
 $ echo "Done!"
 Done!

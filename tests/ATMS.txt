@@ -1,0 +1,299 @@
+#!/usr/bin/env bats
+
+
+# Make executables ./tests/../ visible to PATH
+PATH="/home/aveey/tom-project/shell-scripts/tests/../:$PATH"
+
+# Source files
+shopt -s expand_aliases
+
+
+@test "test0" {
+	test_folder=$(echo /tmp/test0-$$)
+	mkdir $test_folder && cd $test_folder
+
+}
+
+
+@test "test1" {
+	test_folder=$(echo /tmp/test1-$$)
+	mkdir $test_folder && cd $test_folder
+
+	unalias -a
+	alias | wc -l
+	for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+	actual=$(test1-assert4-actual)
+	expected=$(test1-assert4-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test1-assert4-actual () {
+	typeset -f | egrep '^\w+' | wc -l
+}
+function test1-assert4-expected () {
+	echo -e '00'
+}
+
+@test "test2" {
+	test_folder=$(echo /tmp/test2-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test2-assert1-actual)
+	expected=$(test2-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test2-assert1-actual () {
+	alias | wc -l
+}
+function test2-assert1-expected () {
+	echo -e '0'
+}
+
+@test "test3" {
+	test_folder=$(echo /tmp/test3-$$)
+	mkdir $test_folder && cd $test_folder
+
+	temp_dir=$TMP/test-1210
+	cd "$temp_dir"
+}
+
+
+@test "test4" {
+	test_folder=$(echo /tmp/test4-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test4-assert1-actual)
+	expected=$(test4-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test4-assert1-actual () {
+	typeset -f | egrep '^\w+' | wc -l
+}
+function test4-assert1-expected () {
+	echo -e '10'
+}
+
+@test "test5" {
+	test_folder=$(echo /tmp/test5-$$)
+	mkdir $test_folder && cd $test_folder
+
+}
+
+
+@test "test6" {
+	test_folder=$(echo /tmp/test6-$$)
+	mkdir $test_folder && cd $test_folder
+
+	function asctime() { perl -e 'print (scalar localtime($1));'; echo ''; }
+	actual=$(test6-assert2-actual)
+	expected=$(test6-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test6-assert2-actual () {
+	asctime | perl -pe 's/\d/N/g; s/\w+ \w+/DDD MMM/;'
+}
+function test6-assert2-expected () {
+	echo -e 'DDD MMM  N NN:NN:NN NNNN'
+}
+
+@test "test7" {
+	test_folder=$(echo /tmp/test7-$$)
+	mkdir $test_folder && cd $test_folder
+
+	function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
+	actual=$(test7-assert2-actual)
+	expected=$(test7-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test7-assert2-actual () {
+	ps | filter-dirnames
+}
+function test7-assert2-expected () {
+	echo -e 'PID TTY          TIME CMD21874 pts/10   00:00:00 bash23177 pts/10   00:00:00 ps23178 pts/10   00:00:00 bash23179 pts/10   00:00:00 perl'
+}
+
+@test "test8" {
+	test_folder=$(echo /tmp/test8-$$)
+	mkdir $test_folder && cd $test_folder
+
+	function comma-ize-number () { perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\d])/\1,\2\3/g; } '; }
+	actual=$(test8-assert2-actual)
+	expected=$(test8-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test8-assert2-actual () {
+	echo '99012342305324254' | comma-ize-number
+}
+function test8-assert2-expected () {
+	echo -e '99,012,342,305,324,254'
+}
+
+@test "test9" {
+	test_folder=$(echo /tmp/test9-$$)
+	mkdir $test_folder && cd $test_folder
+
+	function apply-numeric-suffixes () {
+	local just_once="$1"
+	local g="g";
+	if [ "$just_once" = "1" ]; then g=""; fi
+	perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = int(log($1)/log(1024));  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
+	}
+	actual=$(test9-assert7-actual)
+	expected=$(test9-assert7-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test9-assert7-actual () {
+	echo '8000000000' | apply-numeric-suffixes
+}
+function test9-assert7-expected () {
+	echo -e '7.45G'
+}
+
+@test "test10" {
+	test_folder=$(echo /tmp/test10-$$)
+	mkdir $test_folder && cd $test_folder
+
+	function apply-usage-numeric-suffixes() {
+	perl -pe 's@^(\d+)(?=\s)@$1 * 1024@e;' | apply-numeric-suffixes 1
+	}
+	echo '8000000000' | apply-usage-numeric-suffixes
+	actual=$(test10-assert5-actual)
+	expected=$(test10-assert5-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test10-assert5-actual () {
+	echo '8000000' | apply-usage-numeric-suffixes 
+}
+function test10-assert5-expected () {
+	echo -e '7.45T7.63G'
+}
+
+@test "test11" {
+	test_folder=$(echo /tmp/test11-$$)
+	mkdir $test_folder && cd $test_folder
+
+	function usage {
+	output_file=$(default_assignment "$1" "usage.list")
+	rename-with-file-date "$output_file";
+	$NICE du --block-size=1K --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1;
+	$PAGER $output_file;
+	}
+	function usage-alt {
+	local output_file=$TEMP/$(basename $PWD)"-usage.list";
+	usage "$output_file"
+	}
+	function byte-usage () { output_file="usage.bytes.list"; backup-file $output_file; $NICE du --bytes --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1; $PAGER $output_file; }
+	alias usage-pp='usage | apply-usage-numeric-suffixes | $PAGER'
+}
+
+
+@test "test12" {
+	test_folder=$(echo /tmp/test12-$$)
+	mkdir $test_folder && cd $test_folder
+
+	function number-columns () { head -1 "$1" | perl -0777 -pe '$c = 1; s/^/1: /; s/\t/"\t" . ++$c . ": "/eg;'; };
+	function number-columns-comma () { head -1 "$1" | perl -pe 's/,/\t/g;' | number-columns -; }
+}
+
+
+@test "test13" {
+	test_folder=$(echo /tmp/test13-$$)
+	mkdir $test_folder && cd $test_folder
+
+	rm -rf ./*
+	mkdir backup
+	printf "THIS IS THE START\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS THE END\n" > thisisatest.txt
+	ps -aux > process.txt
+	number-columns thisisatest.txt
+	number-columns-comma process.txt
+}
+
+
+@test "test14" {
+	test_folder=$(echo /tmp/test14-$$)
+	mkdir $test_folder && cd $test_folder
+
+	alias reverse='tac'
+	cat thisisatest.txt
+	linebr
+	reverse thisisatest.txt
+}
+
+
+@test "test15" {
+	test_folder=$(echo /tmp/test15-$$)
+	mkdir $test_folder && cd $test_folder
+
+	function backup-file () { local file="$1"; if [ -e "$file" ]; then dobackup.sh "$file"; fi; }
+}
+
+
+@test "test16" {
+	test_folder=$(echo /tmp/test16-$$)
+	mkdir $test_folder && cd $test_folder
+
+	backup-file thisisatest.txt
+}
+
+
+@test "test17" {
+	test_folder=$(echo /tmp/test17-$$)
+	mkdir $test_folder && cd $test_folder
+
+	function byte-usage () { output_file="usage.bytes.list"; backup-file $output_file; $NICE du --bytes --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1; $PAGER $output_file; }
+}
