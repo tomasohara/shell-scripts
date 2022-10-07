@@ -3,7 +3,6 @@
 # $ echo 'Hi'
 # | Hi?2004l
 $ bind 'set enable-bracketed-paste off'
-[?2004h[?2004l[?2004l[?2004l[?2004l[?2004l
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -47,7 +46,7 @@ $ alias pp-json=json-pp
 $ alias pp-json-sorted='json_pp -json_opt utf8,pretty,canonical'
 
 ## EXAMPLES FOR TEST 1 - FROM https://metacpan.org/dist/JSON-PP/view/bin/json_pp
-$ perl -e'print q|{"foo":"HI MOM!","bar":1234567890000000000000000}|' | pp-json -f json -t dumper
+$ perl -e 'print q|{"foo":"HI MOM!","bar":1234567890000000000000000}|' | pp-json -f json -t dumper
 {
   bar => "1234567890000000000000000",
   foo => "HI MOM!"

@@ -1,22 +1,6 @@
-# Setup
-$ bind 'set enable-bracketed-paste off'
-
-## FOR GENERAL UNIX FUNCTIONS SEE trace-unix-general.ipynb 
-## STARTS FROM LINE 1687 (tomohara-aliases.bash)
-## Bracketed Paste is disabled to prevent characters after output
-## Example: 
-# $ echo 'Hi'
-# | Hi?2004l
-
-## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
-## PS1="$ "
-## TODO: PS1="> "
-## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
-$ echo $PS1
+$  echo $PS1
 [PEXP\[\]ECT_PROMPT>
 
-# Delete all aliases and function
-# TODO: Instead start from pristine environment
 $ unalias -a
 $ alias | wc -l
 $ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
@@ -24,31 +8,21 @@ $ typeset -f | egrep '^\w+' | wc -l
 0
 0
 
-# Setting a temp directory for tests
 $ TMP=/tmp/test-unix-alias
-## NOTE: Source it directly from the ./tests directory.
 $ BIN_DIR=$PWD/..
 $ alias | wc -l
-0
-
-## NOTE: For reproducability, the directory name needs to be fixed
-## In place of $$, use a psuedo random number (e,g., 2899)
-## *** All output from one run to the next needs to be the same ***
-## temp_dir=$TMP/test-$$
 $ temp_dir=$TMP/test-2899
 $ mkdir -p "$temp_dir"
-# TODO: /bin/rm -rvf "$temp_dir"
 $ cd "$temp_dir"
 $ pwd
-#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
-$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+0
 /tmp/test-unix-alias/test-2899
 
 # Count aliases proper
 $ alias | wc -l
 # Count functions
 $ typeset -f | egrep '^\w+' | wc -l
-1
+0
 0
 
 $ function group-members () { ypcat group | $GREP -i "$1"; }
@@ -66,29 +40,22 @@ $ rm -rf ./*
 $ mkdir testfolder
 $ echo "Hi Mom!" > himom.txt
 $ echo "Hi Dad!" > hidad.txt
-$ linebr
 $ do-make "himom.txt"
-## THIS SHOWS THE LATEST LOG OF do-make
-$ linebr
 $ cat _make.log
 $ do-make "hidad.txt"
 $ cat _make.log
-$ linebr
 $ ls -l
---------------------------------------------------------------------------------
 /bin/mv: cannot stat '_make.log': No such file or directory
 make: Nothing to be done for 'himom.txt'.
---------------------------------------------------------------------------------
 make: Nothing to be done for 'himom.txt'.
 make: Nothing to be done for 'hidad.txt'.
 make: Nothing to be done for 'hidad.txt'.
---------------------------------------------------------------------------------
 total 20
--rw-rw-r-- 1 aveey aveey    8 Sep 15 19:37 hidad.txt
--rw-rw-r-- 1 aveey aveey    8 Sep 15 19:37 himom.txt
--rw-rw-r-- 1 aveey aveey   42 Sep 15 19:37 _make.log
--rw-rw-r-- 1 aveey aveey   42 Sep 15 19:37 _old_make.log
-drwxrwxr-x 2 aveey aveey 4096 Sep 15 19:37 testfolder
+-rw-rw-r-- 1 aveey aveey    8 Oct  6 22:12 hidad.txt
+-rw-rw-r-- 1 aveey aveey    8 Oct  6 22:12 himom.txt
+-rw-rw-r-- 1 aveey aveey   42 Oct  6 22:12 _make.log
+-rw-rw-r-- 1 aveey aveey   42 Oct  6 22:12 _old_make.log
+drwxrwxr-x 2 aveey aveey 4096 Oct  6 22:12 testfolder
 
 ## TEST 2 - MERGING ALIASAS & FUNCTIONS
 # $ man merge
@@ -150,17 +117,12 @@ $     local suffix="$2"
 $     echo $(dirname "$file")/$(basename "$file" "$suffix");
 $ }
 
+### TO FIX THE ERROR USE "himom.txt" --> himom.txt ###
 # 3A) full-dirname RETURNS THE FULL PATH OF THE FILE
-$ ls
-$ linebr
-$ full-dirname "himom.txt"
-hidad.txt  _make.log	  testfolder  tf2.txt
-himom.txt  _old_make.log  tf1.txt     tf3.txt
---------------------------------------------------------------------------------
-/tmp/test-unix-alias/test-2899/himom.txt
-
+$ full-dirname himom.txt
 # 3B) base-name-with-dir RETURNS THE BASENAME INCLUDING dir
-$ basename-with-dir "himom.txt" 2
+$ basename-with-dir himom.txt
+/tmp/test-unix-alias/test-2899/himom.txt
 ./himom.txt
 
 ## 3C) rpm-extract IS USED FOR RED HAT BASED DISTROS (RHEL, Fedora) 
@@ -180,22 +142,8 @@ $ alias os-release=linux-version
 $ alias system-status='system_status.sh -'
 #
 
-## 4A) dump-url GIVES 
-$ dump-url https://www.google.com/
---2022-09-15 19:37:56--  https://www.google.com/
-Resolving www.google.com (www.google.com)... 142.250.195.132, 2404:6800:4007:803::2004
-Connecting to www.google.com (www.google.com)|142.250.195.132|:443... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: unspecified [text/html]
-Saving to: ‘www.google.com/index.html’
-
-www.google.com/inde     [ <=>                ]  16.08K  --.-KB/s    in 0.02s   
-
-2022-09-15 19:37:57 (713 KB/s) - ‘www.google.com/index.html’ saved [16465]
-
-FINISHED --2022-09-15 19:37:57--
-Total wall clock time: 0.5s
-Downloaded: 1 files, 16K in 0.02s (713 KB/s)
+## 4A) dump-url GIVES ERROR FOR BATSPP 2.1.X 
+#dump-url https://www.example.com/
 
 ## 4B) gtime
 # ERROR - VI 
@@ -205,7 +153,6 @@ Downloaded: 1 files, 16K in 0.02s (713 KB/s)
 
 ## 4C) linux-version GIVES INFO ALL INFO ABOUT THE OS INSTALLED
 $ linux-version
-$ linebr
 # os-release ALSO WORKS SAME AS linux-version
 $ os-release
 PRETTY_NAME="Ubuntu 22.04.1 LTS"
@@ -220,7 +167,6 @@ SUPPORT_URL="https://help.ubuntu.com/"
 BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
 PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
 UBUNTU_CODENAME=jammy
---------------------------------------------------------------------------------
 PRETTY_NAME="Ubuntu 22.04.1 LTS"
 NAME="Ubuntu"
 VERSION_ID="22.04"
@@ -272,7 +218,7 @@ $ function perl-echo-sans-newline () { perl -e 'print "'$1'";'; }
 #
 
 # perl-echo ONLY PRINTS OUT THE 1ST ARGUMENT
-$ PERL_PRINT="This is Ubuntu!"
+$ PERL_PRINT='This is Ubuntu!'
 $ perl-echo $PERL_PRINT
 $ perl-echo-sans-newline $PERL_PRINT
 This
@@ -298,23 +244,17 @@ $ function perl-print-n () { perl -e "printf \"$1\";"; }
 # note: used to circumvent google search's annoying search term dropping
 $ function quote-tokens () { echo "$@" | perl -pe 's/(\S+)/"\1"/g;'; }
 
-$ perl-printf "ONE KISS IS ALL IT TAKES\n"
-$ linebr
-$ perl-print "2\n3\n5\n7\n11"
-$ linebr
-$ perl-print-n "A B C D E F G\n"
-$ linebr
-$ quote-tokens "HELP ME!"
+$ perl-printf 'ONE KISS IS ALL IT TAKES\n'
+$ perl-print '2\n3\n5\n7\n11'
+$ perl-print-n 'A B C D E F G\n'
+$ quote-tokens 'HELP ME!'
 ONE KISS IS ALL IT TAKES
---------------------------------------------------------------------------------
 2
 3
 5
 7
 11
---------------------------------------------------------------------------------
 A B C D E F G
---------------------------------------------------------------------------------
 "HELP" "ME!"
 
 # 6A)
@@ -325,72 +265,52 @@ $ set-display-local
 $ echo $DISPLAY
 localhost:0.0
 
-# 7A)
-# Bash aliases
-# Note: '- -o' is idiom for turning off
 $ alias bash-trace-on='set -o xtrace'
 $ alias bash-trace-off='set - -o xtrace'
-#
-# trace-cmd(command-line): runs command-line with bash tracing enable to
-# show argument expansion with result piped into less
 $ function trace-cmd() {
 $     (
-$         echo "start: $(date)";
+$         echo 'start: $(date)';
 $         bash-trace-on; 
-$         eval "$@"; 
+$         eval '$@'; 
 $         bash-trace-off;
-$         echo "end: $(date)";
+$         echo 'end: $(date)';
 $     ) 2>&1 | $PAGER;
 $ }
-## ALT: function trace-cmd() { bash-trace-on; @_; bash-trace-off; }
 $ alias cmd-trace='trace-cmd'
 
-# bash-trace-on ENABLES bash tracing
+## bash-trace-on ENABLES bash tracing
 $ bash-trace-on
-# trace-cmd TRACES COMMANDS AND STATS (TIME) OF THE USER
+## trace-cmd TRACES COMMANDS AND STATS (TIME) OF THE USER
 $ trace-cmd
-# bash-trace-on DISABLES bash tracing
+## bash-trace-on DISABLES bash tracing
 $ bash-trace-off
-$ linebr
 $ trace-cmd
 + trace-cmd
 + cat
-++ date
-+ echo 'start: Thu Sep 15 07:38:03 PM +0545 2022'
-start: Thu Sep 15 07:38:03 PM +0545 2022
++ echo 'start: $(date)'
+start: $(date)
 + set -o xtrace
-+ eval
++ eval '$@'
 + set - -o xtrace
-end: Thu Sep 15 07:38:03 PM +0545 2022
+end: $(date)
 + set - -o xtrace
---------------------------------------------------------------------------------
-start: Thu Sep 15 07:38:03 PM +0545 2022
-+ eval
+start: $(date)
++ eval '$@'
 + set - -o xtrace
-end: Thu Sep 15 07:38:03 PM +0545 2022
+end: $(date)
 
-# cmd-usage(command): output usage for command to _command.list (with spaces
-# replaced by underscores)
 $ function cmd-usage () {
-$     local command="$@"
+$     local command="$@";
 $     local usage_file="_$(echo "$command" | tr ' ' '_')-usage.list"
 $     $command --help  2>&1 | ansifilter > "$usage_file"
 $     $PAGER_NOEXIT "$usage_file"
 $ }
-## ERROR DETECTED
-# $ cmd-usage ./testfolder
-# | bash: _testfolder-usage.list: command not found
 
-# 9A)
-# Compressing/uncompressing a subdirectory tree (ignoring symbolic links) 
-# TODO: write scripts for this (given the complexity)
-# TODO: don't uncompress compressed archives (.tar.gz files)
 $ function compress-dir() {
-$     log_file=$TEMP/compress_$(basename "$1").log;
-$     find "$1" \( -not -type l \) -exec gzip -vf {} \; >| "$log_file" 2>&1; 
-$     $PAGER "$log_file";
+$     log_file=$TEMP/compress_$(basename "$1").log
+$     find "$1" \( -not -type l \) -exec gzip -vf {} \; >| "$log_file" 2>&1 
+$     $PAGER "$log_file"
 $ }
-# NOTE: zipped archived are kept compressed
 $ function uncompress-dir() {
 $     log_file=$TEMP/uncompress_$(basename "$1").log;
 $     find "$1" \( -not -type l \) \( -not -name \*.tar.gz \) -exec gunzip -vf {} \; >| "$log_file" 2>&1; $PAGER "$log_file";
@@ -408,7 +328,7 @@ $ alias ununcompress-this-dir='uncompress-dir $PWD'
 # $ linebr
 # $ ununcompress-this-dir ./testfolder
 
-# TEST 9B)
+## TEST 9B)
 $ alias old-count-exts='$LS | count-it "\.[^.]*\w" | sort $SORT_COL2 -rn | $PAGER'
 $ function count-exts () { $LS | count-it '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
 $ alias kill-iceweasel='kill_em.sh iceweasel'
@@ -422,8 +342,8 @@ $ alias kill-iceweasel='kill_em.sh iceweasel'
 # | OSTYPE: Undefined variable.
 #kill-iceweasel
 
-# cmd-usage(command): output usage for command to _command.list (with spaces
-# replaced by underscores)
+## EXCEPTION ERROR FOR TOKEN - BATSPP 2.1.X
+## cmd-usage(command): output usage for command to _command.list (with spaces replaced by underscores)
 $ function cmd-usage () {
 $     local command="$@"
 $     local usage_file="_$(echo "$command" | tr ' ' '_')-usage.list"
@@ -431,4 +351,7 @@ $     $command --help  2>&1 | ansifilter > "$usage_file"
 $     $PAGER_NOEXIT "$usage_file"
 $ }
 
-# cmd-usage (HELP REQUIRED)
+## cmd-usage (HELP REQUIRED)
+
+$ echo "Done!"
+Done!

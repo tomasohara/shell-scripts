@@ -32,11 +32,8 @@ $ typeset -f | egrep '^\w+' | wc -l
 0
 
 ## TESTS 1 - EXTENSIONLESS SHORTCUTS PT. 1
-#perl- gives problems rn (tbf) 
 $ alias perl-=""
 $ GREP='grep'
-# TODO: generate aliases for .sh and .perl scripts automatically
-# ls *.sh *.perl | perl -pe "s/(\w+)\.\w+/alias \1='$&'/g; s/(\w+.perl)/perl- \1/g;" >| _all_alias.list
 $ alias convert-termstrings='perl- convert_termstrings.perl'
 $ alias do-rcsdiff='do_rcsdiff.sh'
 $ alias dobackup='dobackup.sh'
@@ -70,10 +67,8 @@ backup	test.txt
 # $ do-rcsdiff Makefile
 # | foreach: No match.
 
-## BAD: alias ps-mine-='ps-mine "$@" | filter-dirnames'
 $ function ps-mine- { ps-mine "$@" | filter-dirnames; }
 $ alias ps_mine='ps-mine'
-## DUP: alias ps-mine-='ps-mine "$@" | filter-dirnames'
 $ alias ps-mine-all='ps-mine --all'
 
 ## ERROR - ps-mine COMMAND NOT FOUND
@@ -84,13 +79,8 @@ $ alias rename_files='rename-files'
 $ alias testwn='perl- testwn.perl'
 $ alias perlgrep='perl- perlgrep.perl'
 $ alias foreach='perl- foreach.perl'
-# rename-spaces: replace spaces in filenames of current dir with underscores
 $ alias rename-spaces='rename-files -q global " " "_"'
-#alias rename-quotes='rename-files -q -global "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
 $ alias rename-special-punct='rename-files -q -global -regex "[&\!\*?\(\)]" ""'
-## TODO:
-## alias rename-spaces='rename-files -rename_old -q -global " " "_"'
-## alias rename-quotes='rename-files -rename_old -q -global "'"'"'" ""'   # where "'"'"'" is concatenated dou## OLD: alias rename-special-punct='rename-files -q -global -regex "[&\!\*?]" ""'
 
 $ rm -rf ./*
 $ touch abc.xyz def.xyz ooo.ppp
@@ -156,26 +146,21 @@ bash: move: command not found
 --------------------------------------------------------------------------------
 abc1.111  abc2.111  abcdefg.xyz  abc.xyz  duplicates  xyz3.111	xyz4.111
 
-# move-log-files: move "versioned" log files to log-files
-# move-output-files: likewise for output files with version numbers to ./output
-# note: versioned files are those ending in numerics or with numeric affix
-## TODO: use perl-style regex for more precise matching (effing over-arching glob's)
 $ function move-versioned-files {
 $     alias perl-grep='perl $BIN_DIR/perlgrep.perl'
 $     alias dir-rw='dir -rw'
 $     alias move='mv'
-$     local ext_pattern="$1"
-$     if [ "$ext_pattern" = "" ]; then ext_pattern="{list,log,txt}"; fi
-$     local dir="$2"
-$     if [ "$dir" = "" ]; then dir="versioned-files"; fi
-$     mkdir -p "$dir";
-$     local D="[-.]"
-$     local file_list="$TEMP/_move-versioned-files-$$.list"
-$     eval_middle="$(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;' | sort -u)"
-$     move "$eval_middle" "$dir"
+$     local ext_pattern='$1'
+$     if [ '$ext_pattern' = '' ]; then ext_pattern='{list,log,txt}'; fi
+$     local dir='$2'
+$     if [ '$dir' = '' ]; then dir='versioned-files'; fi
+$     mkdir -p '$dir';
+$     local D='[-.]'
+$     local file_list='$TEMP/_move-versioned-files-$$.list'
+$     eval_middle='$(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v "No such file" | perl -pe "s/(\S+\s+){6}\S+//;" | sort -u)'
+$     move '$eval_middle' '$dir'
 $ }
 $ alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
-# note: * the version regex should be kept quite specific to avoid useful files being moved into ./output
 $ alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
 $ alias move-adhoc-files='move-log-files; move-output-files'
 
@@ -198,11 +183,6 @@ $ alias move-adhoc-files='move-log-files; move-output-files'
 # mv: cannot stat 'width:': No such file or directory
 # mv: cannot stat '‘*[-.]csv[0-9]*’': No such file or directory
 
-# rename-with-file-date(file, ...): rename each file(s) with .ddMmmYY suffix
-# Notes: 1. If file.ddMmmYY exists, file.ddMmmYY.N tried (for N in 1, 2, ...).
-# 2. No warning is issued if the file doesn't exist, so can be used as a no-op.
-# TODO: have option to put suffix before extension
-# MISSING FUNCTION: get-free-filename
 $ function get-free-filename() {
 $     local base="$1"
 $     local sep="$2"
@@ -228,10 +208,8 @@ $            eval "$move_command" "$f" "$new_f";
 $         fi
 $     done;
 $ }
-## OLD: alias copy-with-file-date='rename-with-file-date --copy'
-## HACK: See if function required for proper handling by bats-core
+$ e
 $ function copy-with-file-date { rename-with-file-date --copy "$@"; }
-# ADDING DATES TO THE EXTENSION
 $ rm -rf ./*
 $ touch abc1.xyz abc2.xyz abc3.xyz abc4.xyz abc5.xyz.19Aug22 abc6.xyz.19Aug22
 $ ls
@@ -239,16 +217,17 @@ $ linebr
 $ copy-with-file-date *.xyz 
 $ linebr
 $ ls
+bash: e: command not found
 abc1.xyz  abc2.xyz  abc3.xyz  abc4.xyz	abc5.xyz.19Aug22  abc6.xyz.19Aug22
 --------------------------------------------------------------------------------
-'abc1.xyz' -> 'abc1.xyz.06Oct22'
-'abc2.xyz' -> 'abc2.xyz.06Oct22'
-'abc3.xyz' -> 'abc3.xyz.06Oct22'
-'abc4.xyz' -> 'abc4.xyz.06Oct22'
+'abc1.xyz' -> 'abc1.xyz.07Oct22'
+'abc2.xyz' -> 'abc2.xyz.07Oct22'
+'abc3.xyz' -> 'abc3.xyz.07Oct22'
+'abc4.xyz' -> 'abc4.xyz.07Oct22'
 --------------------------------------------------------------------------------
-abc1.xyz	  abc2.xyz.06Oct22  abc4.xyz	      abc6.xyz.19Aug22
-abc1.xyz.06Oct22  abc3.xyz	    abc4.xyz.06Oct22
-abc2.xyz	  abc3.xyz.06Oct22  abc5.xyz.19Aug22
+abc1.xyz	  abc2.xyz.07Oct22  abc4.xyz	      abc6.xyz.19Aug22
+abc1.xyz.07Oct22  abc3.xyz	    abc4.xyz.07Oct22
+abc2.xyz	  abc3.xyz.07Oct22  abc5.xyz.19Aug22
 
 # Statistical helpers
 $ alias bigrams='perl -sw $BIN_DIR/count_bigrams.perl -N=2'
@@ -266,9 +245,6 @@ catmanual.txt
 n/a	1
 catmanual.txt
 
-# Lynx stuff
-# lynx-dump-stdout(option, ...): Run lynx with textual output to stdout
-# lynx-dump(file, [[out-file], option, ...]): Run lynx over base.html with output to base.txt
 $ lynx-dump-stdout () { lynx -width=512 -dump "$@"; }
 $ lynx-dump () { 
 $     local in_file="$1"
@@ -309,28 +285,12 @@ aveey-temp
 --------------------------------------------------------------------------------
 
 
-# Unicode support
-#
-# TODO: put show-unicode-code-info-aux into script (as with other overly-large function definitions like hg-pull-and-update)
-# show-unicode-control-chars(): output Unicode codepoint (ordinal) and UTF-8 encoding for input chars with offset in line
+# Unicode support - ERROR PRONE PIECE OF CODE (BATSPP 1.5.X - not ok 1 setup_file failed)
 $ function show-unicode-code-info-aux() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < "$1"; }
 $ function show-unicode-code-info { show-unicode-code-info-aux "$@"; }
 $ function show-unicode-code-info-stdin() { in_file="$TEMP/show-unicode-code-info.$$"; cat >| $in_file;  show-unicode-code-info-aux $in_file; }
-#
 $ function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
-#
-# show-unicode-control-chars(): Convert ascii control characters to printable Unicode ones (e.g., ␀ for 0x00)
-## BAD: function show-unicode-control-chars { perl -pe 'use Encode "decode_utf8"; s/[\x00-\x1F]/chr($&+0x2400)/e;'; }
-# See https://stackoverflow.com/questions/42193957/errorwide-character-in-print-at-x-at-line-35-fh-read-text-files-from-comm.
-## BAD: function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr($& + 0x2400)/eg;'; }
 $ function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
-
-# ## UNICODE ALIASES (need help for implementation)
-# show-unicode-code-info-aux
-# show-unicode-code-info
-# show-unicode-code-info-stdin
-# output-BOM
-# show-unicode-control-chars
 
 $ show-unicode-code-info-aux ./catmanual.txt
 char	ord	offset	encoding

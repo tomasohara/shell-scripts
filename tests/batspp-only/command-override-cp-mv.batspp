@@ -1,14 +1,7 @@
-# Setup
-$ bind 'set enable-bracketed-paste off'
-
-## Bracketed Paste is disabled to prevent characters after output
-## Example: 
-# $ echo 'Hii'
-# | Hi?2004l
-
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
 ## TODO: PS1="> "
+$ shopt -s expand_aliases
 ## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
 $ echo $PS1
 [PEXP\[\]ECT_PROMPT>
@@ -81,12 +74,7 @@ $ alias | grep cls
 alias clear='echo '\''use cls instead (or /bin/clear)'\'''
 alias cls='command clear -x'
 
-$ {
-$     # TODO: see if this is a shellcheck bug
-$     #    SC2034: MV appears unused. Verify it or export it.
-$     # shellcheck disable=SC2034
-$     MV="/bin/mv -i $other_file_args"
-$ }
+$ MV="/bin/mv -i $other_file_args"
 
 #All move aliases
 $ alias mv='$MV'
@@ -115,7 +103,6 @@ $ alias delete-dir='remove-dir'
 $ alias remove-dir-force='/bin/rm -rfv'
 $ alias delete-dir-force='remove-dir-force'
 
-#Aliases set for copy and readonly
 $ alias copy-readonly='copy-readonly.sh'
 $ function copy-readonly-spec () {
 $     local spec="$1"
@@ -124,12 +111,8 @@ $     if [[ ("$3" != "") || ($dir = "") || ($spec == "") ]]; then
 $         echo "Usage: copy-readonly-spec pattern dir";
 $         return
 $     fi
-$     # effing shellcheck (SC2086: Double quote to prevent globbing)
-$     # shellcheck disable=SC2086
 $     for f in $($LS $spec); do copy-readonly "$f" "$dir"; done
 $ }
-# copy-readonly-to-dir(dir, file, ...): variant of copy-readonly-spec with
-# directory first and files given in args 2, 3, etc.
 $ function copy-readonly-to-dir () {
 $     local dir="$1"
 $     shift
@@ -167,18 +150,20 @@ $ ls -l
 $ linebr
 $ ls -l ./mvtest_dir1
 $ linebr
+removed './testdir1/.bashrc'
+removed directory './testdir1'
 --------------------------------------------------------------------------------
 renamed 'abc' -> './mvtest_dir1/abc'
 renamed 'def' -> './mvtest_dir1/def'
 renamed 'ghi' -> './mvtest_dir1/ghi'
 --------------------------------------------------------------------------------
 total 4
-drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 mvtest_dir1
+drwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 mvtest_dir1
 --------------------------------------------------------------------------------
 total 0
--rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 abc
--rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 def
--rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 ghi
+-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 abc
+-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 def
+-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 ghi
 --------------------------------------------------------------------------------
 
 # TEST 2 - COPY ALIASES
@@ -208,15 +193,15 @@ removed directory './mvtest_dir1'
 'ghi' -> './cptest_dir1/ghi'
 --------------------------------------------------------------------------------
 total 4
--rw-rw-r-- 1 aveey aveey    0 Sep 10 22:57 abc
-drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 cptest_dir1
--rw-rw-r-- 1 aveey aveey    0 Sep 10 22:57 def
--rw-rw-r-- 1 aveey aveey    0 Sep 10 22:57 ghi
+-rw-rw-r-- 1 aveey aveey    0 Oct  6 22:46 abc
+drwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 cptest_dir1
+-rw-rw-r-- 1 aveey aveey    0 Oct  6 22:46 def
+-rw-rw-r-- 1 aveey aveey    0 Oct  6 22:46 ghi
 --------------------------------------------------------------------------------
 total 0
--rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 abc
--rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 def
--rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 ghi
+-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 abc
+-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 def
+-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 ghi
 --------------------------------------------------------------------------------
 
 # #=================(TEST ERROR: "/bin/rm: remove regular empty file 'f1'?")=========================#
@@ -262,13 +247,13 @@ removed './def'
 removed './ghi'
 --------------------------------------------------------------------------------
 total 16
--rw-rw-r-- 1 aveey aveey    0 Sep 10 22:57 abc
--rw-rw-r-- 1 aveey aveey    0 Sep 10 22:57 def
--rw-rw-r-- 1 aveey aveey    0 Sep 10 22:57 ghi
-drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 TDIR1
-drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 TDIR2
-drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 TDIR3
-drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 TDIR4
+-rw-rw-r-- 1 aveey aveey    0 Oct  6 22:46 abc
+-rw-rw-r-- 1 aveey aveey    0 Oct  6 22:46 def
+-rw-rw-r-- 1 aveey aveey    0 Oct  6 22:46 ghi
+drwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 TDIR1
+drwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 TDIR2
+drwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 TDIR3
+drwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 TDIR4
 --------------------------------------------------------------------------------
 removed directory 'TDIR1'
 removed directory 'TDIR2'
@@ -276,9 +261,9 @@ removed directory 'TDIR3'
 removed directory 'TDIR4'
 --------------------------------------------------------------------------------
 total 0
--rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 abc
--rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 def
--rw-rw-r-- 1 aveey aveey 0 Sep 10 22:57 ghi
+-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 abc
+-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 def
+-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 ghi
 --------------------------------------------------------------------------------
 
 ## TEST 5 - COPY READONLY
@@ -290,12 +275,8 @@ $     if [[ ("$3" != "") || ($dir = "") || ($spec == "") ]]; then
 $         echo "Usage: copy-readonly-spec pattern dir";
 $         return
 $     fi
-$     # effing shellcheck (SC2086: Double quote to prevent globbing)
-$     # shellcheck disable=SC2086
 $     for f in $($LS $spec); do copy-readonly "$f" "$dir"; done
 $ }
-# copy-readonly-to-dir(dir, file, ...): variant of copy-readonly-spec with
-# directory first and files given in args 2, 3, etc.
 $ function copy-readonly-to-dir () {
 $     local dir="$1"
 $     shift
@@ -313,7 +294,7 @@ $ linebr
 # VIEWING THE COPIED FILE (IN DIR AND CAT)
 $ ls -l 
 $ linebr
-$ cat ./testdir1/.bashrc
+$ cat ./testdir1/.bashrc | head
 
 Usage: /home/aveey/bin/copy-readonly.sh source-file [--force] [--verbose] [file | directory]
 
@@ -327,10 +308,10 @@ Examples (under Bash):
 removed './abc'
 removed './def'
 removed './ghi'
--r--r--r-- 1 aveey aveey 5005 Sep 10 22:37 ./testdir1/.bashrc
+-r--r--r-- 1 aveey aveey 3881 Oct  6 14:09 ./testdir1/.bashrc
 --------------------------------------------------------------------------------
 total 4
-drwxrwxr-x 2 aveey aveey 4096 Sep 10 22:57 testdir1
+drwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 testdir1
 --------------------------------------------------------------------------------
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
@@ -342,148 +323,10 @@ case $- in
       *) return;;
 esac
 
-# don't put duplicate lines or lines starting with space in the history.
-# See bash(1) for more options
-HISTCONTROL=ignoreboth
-
-# append to the history file, don't overwrite it
-shopt -s histappend
-
-# for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
-HISTSIZE=1000
-HISTFILESIZE=2000
-
-# check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
-shopt -s checkwinsize
-
-# If set, the pattern "**" used in a pathname expansion context will
-# match all files and zero or more directories and subdirectories.
-#shopt -s globstar
-
-# make less more friendly for non-text input files, see lesspipe(1)
-[ -x /usr/bin/lesspipe ] && eval "$(SHELL=/bin/sh lesspipe)"
-
-# set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
-fi
-
-# set a fancy prompt (non-color, unless we know we "want" color)
-case "$TERM" in
-    xterm-color|*-256color) color_prompt=yes;;
-esac
-
-# uncomment for a colored prompt, if the terminal has the capability; turned
-# off by default to not distract the user: the focus in a terminal window
-# should be on the output of commands, not on the prompt
-#force_color_prompt=yes
-
-if [ -n "$force_color_prompt" ]; then
-    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-	# We have color support; assume it's compliant with Ecma-48
-	# (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-	# a case would tend to support setf rather than setaf.)
-	color_prompt=yes
-    else
-	color_prompt=
-    fi
-fi
-
-if [ "$color_prompt" = yes ]; then
-    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
-else
-    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-fi
-unset color_prompt force_color_prompt
-
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
-esac
-
-# enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='exa --icons'
-    alias ll='exa --icons -la'
-    alias tree='exa --icons --tree'
-    #alias dir='dir --color=auto'
-    #alias vdir='vdir --color=auto'
-
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
-
-# colored GCC warnings and errors
-#export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
-
-# some more ls aliases
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
-# Alias definitions.
-# You may want to put all your additions into a separate file like
-# ~/.bash_aliases, instead of adding them here directly.
-# See /usr/share/doc/bash-doc/examples in the bash-doc package.
-
-if [ -f ~/.bash_aliases ]; then
-    . ~/.bash_aliases
-fi
-
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
-if ! shopt -oq posix; then
-  if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-  fi
-fi
-# Alias for clearing screen
-alias cls='clear'
-
-#Alias to display directory
-alias lsd='ls -d */'
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/aveey/miniconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
-    eval "$__conda_setup"
-else
-    if [ -f "/home/aveey/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/aveey/miniconda3/etc/profile.d/conda.sh"
-    else
-        export PATH="/home/aveey/miniconda3/bin:$PATH"
-    fi
-fi
-unset __conda_setup
-# <<< conda initialize <<<
-
-# ALIAS FOR BATSPP & ITS DEBUG MODE
-alias gb="./jupyter_to_batspp.py"
-alias simple-batspp="./simple_batspp.py"
-alias simple-batspp-debug='VERBOSE=1 BATS_OPTIONS="--no-tempdir-cleanup --pretty --verbose-run --show-output-of-passing-tests" simple-batspp'
-alias debugpp='VERBOSE=1 BATS_OPTIONS="--no-tempdir-cleanup --pretty --verbose-run --show-output-of-passing-tests" batspp'
-# A NEWER VERSION OF BATSPP WAS IMPORTED FROM THOMAS-DEV BRANCH
-alias simpp="./simple-bpp.py"
-alias simpp-debug='VERBOSE=1 BATS_OPTIONS="--no-tempdir-cleanup --pretty --verbose-run --show-output-of-passing-tests" simpp'
 
 $ export NICE="nice -19"
 $ export TIME_CMD="/usr/bin/time"
-$ alias fix-dir-permissions="find . -type d -exec chmod go+xs {} \;"
+$ alias fix-dir-permissions='find . -type d -exec chmod go+xs {} \;'
 
 # # BEFORE fix-dir-permissions 
 # $ ls -l  
@@ -493,4 +336,4 @@ $ fix-dir-permissions
 # # AFTER fix-dir-permissions
 $ ls -l 
 total 4
-drwxrwsr-x 2 aveey aveey 4096 Sep 10 22:57 testdir1
+drwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 testdir1

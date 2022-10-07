@@ -2,7 +2,7 @@
 
 
 # Make executables ./tests/../ visible to PATH
-PATH="/home/aveey/tom-project/shell-scripts/tests/batspp-only/../:$PATH"
+PATH="/home/aveey/tom-project/shell-scripts/tests/../:$PATH"
 
 # Source files
 shopt -s expand_aliases

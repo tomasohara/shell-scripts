@@ -12,6 +12,7 @@ shopt -s expand_aliases
 	test_folder=$(echo /tmp/test0-$$)
 	mkdir $test_folder && cd $test_folder
 
+	bind 'set enable-bracketed-paste off'
 }
 
 

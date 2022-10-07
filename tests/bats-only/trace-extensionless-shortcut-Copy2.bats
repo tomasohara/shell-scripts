@@ -100,6 +100,7 @@ function test4-assert1-expected () {
 	mkdir $test_folder && cd $test_folder
 
 	alias perl-=""
+	GREP='grep'
 	alias convert-termstrings='perl- convert_termstrings.perl'
 	alias do-rcsdiff='do_rcsdiff.sh'
 	alias dobackup='dobackup.sh'
@@ -139,6 +140,7 @@ function test6-assert5-expected () {
 	mkdir $test_folder && cd $test_folder
 
 	function ps-mine- { ps-mine "$@" | filter-dirnames; }
+	alias ps_mine='ps-mine'
 	alias ps-mine-all='ps-mine --all'
 }
 
@@ -151,6 +153,9 @@ function test6-assert5-expected () {
 	alias rename_files='rename-files'
 	alias testwn='perl- testwn.perl'
 	alias perlgrep='perl- perlgrep.perl'
+	alias foreach='perl- foreach.perl'
+	alias rename-spaces='rename-files -q global " " "_"'
+	alias rename-special-punct='rename-files -q -global -regex "[&\!\*?\(\)]" ""'
 }
 
 
@@ -238,16 +243,17 @@ function test12-assert6-expected () {
 	alias perl-grep='perl $BIN_DIR/perlgrep.perl'
 	alias dir-rw='dir -rw'
 	alias move='mv'
-	local ext_pattern="$1"
-	if [ "$ext_pattern" = "" ]; then ext_pattern="{list,log,txt}"; fi
-	local dir="$2"
-	if [ "$dir" = "" ]; then dir="versioned-files"; fi
-	mkdir -p "$dir";
-	local D="[-.]"
-	local file_list="$TEMP/_move-versioned-files-$$.list"
-	eval_middle="$(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;' | sort -u)"
-	move "$eval_middle" "$dir"
+	local ext_pattern='$1'
+	if [ '$ext_pattern' = '' ]; then ext_pattern='{list,log,txt}'; fi
+	local dir='$2'
+	if [ '$dir' = '' ]; then dir='versioned-files'; fi
+	mkdir -p '$dir';
+	local D='[-.]'
+	local file_list='$TEMP/_move-versioned-files-$$.list'
+	eval_middle='$(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v "No such file" | perl -pe "s/(\S+\s+){6}\S+//;" | sort -u)'
+	move '$eval_middle' '$dir'
 	}
+	alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
 	alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
 	alias move-adhoc-files='move-log-files; move-output-files'
 }
@@ -281,14 +287,17 @@ function test12-assert6-expected () {
 	eval "$move_command" "$f" "$new_f";
 	fi
 	done;
+	}
+	e
+	function copy-with-file-date { rename-with-file-date --copy "$@"; }
 	rm -rf ./*
 	touch abc1.xyz abc2.xyz abc3.xyz abc4.xyz abc5.xyz.19Aug22 abc6.xyz.19Aug22
 	ls
 	linebr
 	copy-with-file-date *.xyz 
 	linebr
-	actual=$(test14-assert31-actual)
-	expected=$(test14-assert31-expected)
+	actual=$(test14-assert34-actual)
+	expected=$(test14-assert34-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -298,11 +307,11 @@ function test12-assert6-expected () {
 
 }
 
-function test14-assert31-actual () {
+function test14-assert34-actual () {
 	ls
 }
-function test14-assert31-expected () {
-	echo -e "abc1.xyz  abc2.xyz  abc3.xyz  abc4.xyz\tabc5.xyz.19Aug22  abc6.xyz.19Aug22--------------------------------------------------------------------------------'abc1.xyz' -> 'abc1.xyz.06Oct22''abc2.xyz' -> 'abc2.xyz.06Oct22''abc3.xyz' -> 'abc3.xyz.06Oct22''abc4.xyz' -> 'abc4.xyz.06Oct22'--------------------------------------------------------------------------------abc1.xyz\t  abc2.xyz.06Oct22  abc4.xyz\t      abc6.xyz.19Aug22abc1.xyz.06Oct22  abc3.xyz\t    abc4.xyz.06Oct22abc2.xyz\t  abc3.xyz.06Oct22  abc5.xyz.19Aug22"
+function test14-assert34-expected () {
+	echo -e "bash: e: command not foundabc1.xyz  abc2.xyz  abc3.xyz  abc4.xyz\tabc5.xyz.19Aug22  abc6.xyz.19Aug22--------------------------------------------------------------------------------'abc1.xyz' -> 'abc1.xyz.07Oct22''abc2.xyz' -> 'abc2.xyz.07Oct22''abc3.xyz' -> 'abc3.xyz.07Oct22''abc4.xyz' -> 'abc4.xyz.07Oct22'--------------------------------------------------------------------------------abc1.xyz\t  abc2.xyz.07Oct22  abc4.xyz\t      abc6.xyz.19Aug22abc1.xyz.07Oct22  abc3.xyz\t    abc4.xyz.07Oct22abc2.xyz\t  abc3.xyz.07Oct22  abc5.xyz.19Aug22"
 }
 
 @test "test15" {
@@ -407,80 +416,4 @@ function test20-assert5-actual () {
 }
 function test20-assert5-expected () {
 	echo -e 'aveey-temp--------------------------------------------------------------------------------'
-}
-
-@test "test21" {
-	test_folder=$(echo /tmp/test21-$$)
-	mkdir $test_folder && cd $test_folder
-
-	function show-unicode-code-info-aux() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < "$1"; }
-	function show-unicode-code-info { show-unicode-code-info-aux "$@"; }
-	function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
-}
-
-
-@test "test22" {
-	test_folder=$(echo /tmp/test22-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test22-assert1-actual)
-	expected=$(test22-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test22-assert1-actual () {
-	show-unicode-code-info-aux ./catmanual.txt
-}
-function test22-assert1-expected () {
-	echo -e 'char\tord\toffset\tencoding5.15.0-48-generic: 175\t0035\t0\t35.\t002E\t1\t2e1\t0031\t2\t315\t0035\t3\t35.\t002E\t4\t2e0\t0030\t5\t30-\t002D\t6\t2d4\t0034\t7\t348\t0038\t8\t38-\t002D\t9\t2dg\t0067\t10\t67e\t0065\t11\t65n\t006E\t12\t6ee\t0065\t13\t65r\t0072\t14\t72i\t0069\t15\t69c\t0063\t16\t63'
-}
-
-@test "test23" {
-	test_folder=$(echo /tmp/test23-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test23-assert1-actual)
-	expected=$(test23-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test23-assert1-actual () {
-	show-unicode-code-info ./catmanual.txt
-}
-function test23-assert1-expected () {
-	echo -e 'char\tord\toffset\tencoding5.15.0-48-generic: 175\t0035\t0\t35.\t002E\t1\t2e1\t0031\t2\t315\t0035\t3\t35.\t002E\t4\t2e0\t0030\t5\t30-\t002D\t6\t2d4\t0034\t7\t348\t0038\t8\t38-\t002D\t9\t2dg\t0067\t10\t67e\t0065\t11\t65n\t006E\t12\t6ee\t0065\t13\t65r\t0072\t14\t72i\t0069\t15\t69c\t0063\t16\t63'
-}
-
-@test "test24" {
-	test_folder=$(echo /tmp/test24-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test24-assert1-actual)
-	expected=$(test24-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test24-assert1-actual () {
-	echo "END"
-}
-function test24-assert1-expected () {
-	echo -e 'END'
 }
