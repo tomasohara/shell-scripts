@@ -46,3 +46,10 @@ GHI	-	-	R1C3	-
 JKL	R2C3	-	-	-
 MNO	-	R2C3	-	-
 PQR	-	-	R2C3	r2c3
+
+#................................................................................
+# cut.perl
+# TOOD: mucho mas
+
+$ echo "\t" | cut.perl -f=2 -missing=FU -
+FU
