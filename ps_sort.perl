@@ -129,7 +129,7 @@ if (!defined($ARGV[0])) {
     $example .= "$script_name -by=mem -\n\n";
     $example .= "$script_name -justuser -\n\n";
     $example .= "$script_name -username=cpuhog -\n\n";
-    $example .= "LINES=1000 $script_name -num_times=1 -by=time -\n\n";
+    $example .= "LINES=1000 $script_name -num_times=1 -by=time - | less\n\n";
     $example .= "$script_name -once -full -by=command -\n\n";
 
     my($note) = "";
@@ -198,7 +198,7 @@ for ($t = 1; $t <= $num_times; $t++) {
 
 	    # Make sure hour is two digits for proper sorting
 	    # Note: it is still printed as is
-	    if (($by = "time") && ($time[$i] =~ /^\d:/)) {
+	    if (($by eq "time") && ($time[$i] =~ /^\d:/)) {
 		$time[$i] = ("0" . $time[$i]);
 		&debug_print(7, "Make hour two digit: $time[$i]\n");
 	    }
