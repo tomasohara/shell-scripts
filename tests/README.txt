@@ -3,6 +3,10 @@ Adhoc tests
 TODO:
 - Add non-trivial tests as separate scripts.
 - Add simple tests to scripts themselves (e.g., via EX comments as in disambiguate-parses.perl).
+- Add requirements (e.g., bash_kernel) 
+  via https://github.com/takluyver/bash_kernel).
+    pip install bash_kernel
+    python -m bash_kernel.install
 
 --------------------------------------------------------------------------------
 
