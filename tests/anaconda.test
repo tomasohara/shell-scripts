@@ -35,3 +35,23 @@ usage: jupyter [-h] [--version] [--config-dir] [--data-dir] [--runtime-dir]
                [--paths] [--json] [--debug]
                [subcommand]
 jupyter: error: one of the arguments --version subcommand --config-dir --data-dir --runtime-dir --paths is required
+
+#-------------------------------------------------------------------------------
+# check for problem with activation
+
+## $ conda-activate-env pando-nlp-py-3-8
+## $ which pip
+## /home/tomohara/.conda/envs/nlp-py-3-9/bin/pip
+##                            ^^^^^^^^^^
+## 
+## $ prepend-path /home/tomohara/anaconda3/envs/pando-nlp-py-3-8/bin
+## 
+## $ which pip
+## /home/tomohara/anaconda3/envs/pando-nlp-py-3-8/bin/pip
+##
+
+$ TEST_ENV=nlp-py-3-9
+$ conda-activate-env $TEST_ENV
+$ which pip | grep -c $TEST_ENV
+1
+ 
