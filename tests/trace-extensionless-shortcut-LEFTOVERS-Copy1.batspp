@@ -1,0 +1,162 @@
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+# Setting a temp directory for tests
+$ TMP=/tmp/test-extensionless
+$ BIN_DIR=$PWD/..
+0
+0
+
+$ alias | wc -l
+0
+
+$ temp_dir=$TMP/test-3570
+$ mkdir -p "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-extensionless/test-3570
+
+# Count aliases proper
+$ alias | wc -l
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+1
+0
+
+## TESTS 1 - EXTENSIONLESS SHORTCUTS PT. 1
+$ alias perl-=""
+$ GREP='grep'
+$ alias move='mv'
+$ alias convert-termstrings='perl- convert_termstrings.perl'
+$ alias do-rcsdiff='do_rcsdiff.sh'
+$ alias dobackup='dobackup.sh'
+$ alias kill-em='kill_em.sh'
+$ alias kill-it='kill-em --pattern'
+
+# # 1.1) NO EXAMPLES RN FOR kill-em and kill-it
+# kill-em
+# linebr
+# kill-it
+# # 1.2) TEST STOPS
+# $ kill-em --pattern kcalc
+# | pattern=/kcalc/
+# | filter=/($)(^)/
+# | OSTYPE: Undefined variable.
+
+## 1.2) ERROR GENERATED - SCRIPT MISSING
+# $ convert-termstrings
+# | Can't open perl script "convert_termstrings.perl": No such file or directory
+
+$ rm -rf ./*
+$ printf "TOP\nTHIS IS A TEST\nBOTTOM" > test.txt
+$ ls
+$ dobackup test.txt
+$ linebr
+$ ls
+test.txt
+Backing up 'test.txt' to './backup/test.txt'
+--------------------------------------------------------------------------------
+backup	test.txt
+
+$ function ps-mine- { ps-mine "$@" | filter-dirnames; }
+$ alias ps_mine='ps-mine'
+$ alias ps-mine-all='ps-mine --all'
+
+## ERROR - ps-mine COMMAND NOT FOUND
+# ps_mine
+
+$ alias rename-files='perl- rename_files.perl'
+$ alias rename_files='rename-files'
+$ alias testwn='perl- testwn.perl'
+$ alias perlgrep='perl- perlgrep.perl'
+$ alias foreach='perl- foreach.perl'
+$ alias rename-spaces='rename-files -q -global " " "_"'
+$ alias rename-special-punct='rename-files -q -global -regex "[&\!\*?\(\)]" ""'
+
+$ rename-files
+
+Usage: rename_files.perl [options] old-pattern new-pattern [file] ...\n
+main options = [-q | -quick] [-f | -force] [-i | -ignore] [-global] [-regex]
+other options = [-evalre] [-t | -test] [-para]
+common options = [-verbose] [-help]
+
+Example(s):
+
+rename_files.perl rename_files ' - Shortcut' '' *Shortcut*
+
+/home/aveey/bin/rename_files.perl rename-files -q -- '--' '-'
+
+
+Notes:
+
+-- Use -- for first argument if dashes occur in old-pattern.
+-- By default only a single occurrence of the pattern is replaced.
+
+- The -ignore option is with respect to old vs. new comparison).
+
+# HELP REQUIRED FOR RCS FILES (TBC)
+$ do-rcsdiff
+
+usage: do_rcsdiff.sh [-v] [-c] [--brief] [-p file_pattern] [-f] file ...
+
+examples:
+
+do_rcsdiff.sh Makefile
+
+do_rcsdiff.sh \* >| _rcs.diff 2>&1
+
+do_rcsdiff.sh *.[ch] >| _rcs.diff 2>&1
+
+NOTES:
+- Patterns are relative to the RCS subdirectory
+- The rcsdiff command lists the rcs file before the current one, as in:
+      diff RCS-file file
+
+
+$ uname -r > versionR.txt
+$ uname -a > versionA.txta
+$ uname -v > versionV.txt
+$ uname -i > versionI.txt
+$ uname > "version none.txt"
+$ uname -ra > "version?.txt"
+$ ps -aux > processlist.txt
+$ ls
+ backup		   versionA.txta       versionR.txt
+ processlist.txt   versionI.txt       'version?.txt'
+ test.txt	  'version none.txt'   versionV.txt
+
+$ rename-files -q test.txt harry.txt
+$ ls
+renaming "test.txt" to "harry.txt"
+ backup      processlist.txt   versionI.txt	   versionR.txt    versionV.txt
+ harry.txt   versionA.txta    'version none.txt'  'version?.txt'
+
+# # NEED HELP (TBC)
+# $ testwn
+# | Undefined subroutine &main::NO_OP called at /home/aveey/bin/common.perl line 2172.
+
+$ perlgrep "bash" ./processlist.txt
+aveey       2415  0.0  0.0  17612  2020 pts/0    Ss   17:40   0:00 bash
+aveey       2440  0.0  0.1  17612  4856 pts/1    Ss+  17:40   0:00 bash
+aveey       4508  0.0  1.6 691220 57840 ?        Ssl  17:50   0:02 /usr/bin/python3 -m bash_kernel -f /home/aveey/.local/share/jupyter/runtime/kernel-c9deb3b8-c656-45df-a2c2-d9f85ff318ab.json
+aveey       4519  0.0  0.1  17480  4904 pts/3    Ss+  17:50   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh
+aveey       5078  0.0  0.1  17668  5048 pts/4    Ss   17:54   0:00 bash
+aveey       8448  0.0  0.1  17536  4856 pts/5    Ss+  18:21   0:00 bash
+aveey      10931 19.2  1.7 691220 60860 ?        Ssl  21:08   0:01 /usr/bin/python3 -m bash_kernel -f /home/aveey/.local/share/jupyter/runtime/kernel-7d6eccc1-4db7-4f69-b592-329e0b2bcb25.json
+aveey      10942  1.8  0.1  17540  5440 pts/2    Ss   21:08   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh
+
+$ foreach "echo $f" *.txt
+
+$ rename-spaces
+renaming "version none.txt" to "version_none.txt"
+
+$ rename-special-punct
+renaming "version?.txt" to "version.txt"
