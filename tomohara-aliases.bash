@@ -227,11 +227,11 @@ function space-check() {
 ## alias perl-utf8="perl -e \"use open ':std', ':encoding(UTF-8)'\""
 ## function downcase-stdin() { perl-utf8 -pe 's/.*/\L$&/;'; }
 function downcase-stdin { perl -pe "use open ':std', ':encoding(UTF-8)'; s/.*/\L$&/;"; }
-function downcase-text() { echo "$@" | downcase-stdin; }
+function downcase-text { echo "$@" | downcase-stdin; }
 # todays-date(): outputs date in format DDmmmYY (e.g., 22apr20)
 ## TODO: drop leading digits in day of month
 ## NOTE: keep in synch with common.perl get_file_ddmmmyy and .emacs edit-adhoc-notes-file
-function todays-date() { date '+%d%b%y' | downcase-stdin; }
+function todays-date { date '+%d%b%y' | downcase-stdin; }
 # todays-date-mmmYY(): date in format mmmYY (e.g., sep20)
 function todays-date-mmmYY { todays-date | perl -pe 's/^\d\d//;'; }
 ## OLD
@@ -1010,7 +1010,8 @@ alias find-files-='find-files-there'
 # em-nw: emacs with --no-windows
 # TODO: add synopsis for others
 #
-alias emacs-tpo='tpo-invoke-emacs.sh'
+## OLD: alias emacs-tpo='tpo-invoke-emacs.sh'
+alias-fn emacs-tpo 'tpo-invoke-emacs.sh'
 ## OLD: alias em=emacs-tpo
 alias-fn em tpo-invoke-emacs.sh
 # em-fn(font, [file ...]): invoke emcas with specified font
@@ -2897,11 +2898,12 @@ function shell-check {
     # - SC1090: Can't follow non-constant source. Use a directive to specify location.
     # - SC1091: Not following: ./my-git-credentials-etc.bash was not specified as input (see shellcheck -x).
     # - SC2009: Consider using pgrep instead of grepping ps output.
+    # - SC2012: Use find instead of ls to better handle non-alphanumeric filenames
     # - SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects.
     # - SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
     # - SC2181 (style): Check exit code directly with e.g. 'if mycmd;' ...
-    # - TODO2: -e 'SC1090,SC1091,SC2009,SC2129,SC2164,SC2181'
-    shell-check-full "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;' | perl-grep -para -v '(SC1090|SC1091|SC2009|SC2129|SC2164|SC2181)';
+    # - TODO2: -e 'SC1090,SC1091,SC2009,SC2012,SC2129,SC2164,SC2181'
+    shell-check-full "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;' | perl-grep -para -v '(SC1090|SC1091|SC2009|SC2012|SC2129|SC2164|SC2181)';
 }
 
 #-------------------------------------------------------------------------------
