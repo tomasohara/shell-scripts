@@ -859,10 +859,10 @@ function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
 function gr- () { $GREP $MY_GREP_OPTIONS "$@"; }
 SORT_COL2="--key=2"
 # grep-unique(pattern, file, ...): count occurrence of pattern in file...
-function grep-unique () { $GREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0" | sort -rn $SORT_COL2 -t':'; }
+function grep-unique () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0" | sort -rn $SORT_COL2 -t':'; }
 # grep-missing(pattern, file, ...): show files without pattern 
 # TODO: archive
-function grep-missing () { $GREP -c $MY_GREP_OPTIONS "$@" | $GREP ":0"; }
+function grep-missing () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP ":0"; }
 alias gu='grep-unique -i'
 ## OLD
 ## alias gru='gu'
@@ -1270,6 +1270,13 @@ alias tkdiff-='tkdiff -noopt'
 function kdiff () { kdiff.sh "$@" & }
 alias vdiff='kdiff'
 #
+# TOM-IDIOSYNCRATIC
+#
+# TODO: standardize the convention for overriding commands (e.g., following diff).
+# In general, that should be avoid except for cases like 'clear' where new defaults
+# led to destructive consequences (i.e., clearing scrollback buffer).
+# TODO: maintain table with alias changes over time (e.g., diff- => diff-default)
+#
 # diff(): run diff command w/ --ignore-all-space (-w) and --ignore-space-change (-b)
 # maldito shellcheck: SC2034: diff_options appears unused. Verify it or export it.
 # shellcheck disable=SC2034
@@ -1381,15 +1388,18 @@ find_options="-xdev"
 function make-tar () { 
     local base="$1"; local dir="$2"; local depth="$3"; local filter="$4";
     local depth_arg=""; local filter_arg="."
+    local size_arg="";
     if [ "$dir" = "" ]; then dir="."; fi;
     if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
     if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
     if [ "$USE_DATE" = "1" ]; then base="$base-$(TODAY)"; fi
+    if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
     ## OLD:
     # maldito shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2086
-    (find "$dir" $find_options $depth_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+    ## OLD: (find "$dir" $find_options $depth_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+    (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     ## DUH: -L added to support tar-this-dir in directory that is symbolic link, but unfortunately
     ## that leads to symbolic links in the directory itself to be included
     ## BAD: (find -L "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1; 
