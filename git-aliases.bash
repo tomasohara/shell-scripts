@@ -425,7 +425,8 @@ function git-diff-plus {
 #       trustExitCode = false
 #
 function git-difftool-plus {
-    ## TODO: echo "issuing: git difftool --no-prompt"
+    ## TODO:
+    echo "issuing: git difftool --no-prompt ..."
     git difftool --no-prompt "$@";
 }
 #
