@@ -1,0 +1,8 @@
+# Tests for idiosyncratic aliases
+
+# Make sure adhoc notes use MMMYY not DDMMMYY
+# _$ cmd-trace em-adhoc-notes 2>&1 | perl-grep 'notes-\w\w\w\d\d'
+++ tpo-invoke-emacs.sh _reempl-adhoc-notes-oct22.txt
+
+$ cmd-trace em-adhoc-notes 2>&1 | perl-grep -c 'notes-\w\w\w\d\d'
+1
