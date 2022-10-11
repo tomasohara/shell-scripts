@@ -71,6 +71,11 @@ emacs="${EMACS:-emacs}"
 ##     fi
 ## fi
 
+# Use nohup if under Mac OS
+if [[ "$OSTYPE" =~ darwin.* ]]; then
+    use_nohup="1"
+fi
+
 # Parse command-line options
 #
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
