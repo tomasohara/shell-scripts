@@ -3,7 +3,8 @@
 # note:
 # - New place for settings previously put in tomohara-aliases.bash.
 # TODO:
-# - flesh out
+# - ** Move misc. settings from .bashrc and tomohara-aliases.bash here.
+# - Flesh out.
 #
 
 ## OLD: prepend-path "$HOME/python/Mezcla/mezcla"
@@ -31,4 +32,3 @@ conditional-source "$TOM_BIN/tomohara-proper-aliases.bash"
 
 # User-specific mount directory
 cond-export MNT /media/$USER
-
