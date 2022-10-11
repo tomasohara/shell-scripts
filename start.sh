@@ -38,6 +38,8 @@ while [ "$more_options" = "1" ]; do
 	for_editting=1;
     elif [ "$1" = "--open" ]; then
 	for_editting=1;
+    elif [ "$1" = "--not-mac" ]; then
+	under_mac=0;
     elif [ "$1" = "--verbose" ]; then
 	verbose=1;
     elif [ "$1" = "--" ]; then
@@ -60,7 +62,8 @@ arg2="$2"
 if [[ ($show_usage = 1) || ("$file" = "") || ("$arg2" != "") ]]; then
     script=$(basename "$0")
     echo ""
-    echo "Usage: $script [--view|[--edit|--open]] [--verbose] [--trace] [--help] file"
+    echo "Usage: $script [--view|[--edit|--open]] [--verbose] [--trace] [misc-options] file"
+    echo "    misc-options: [--help] [--not-mac]"
     echo ""
     echo "Examples:"
     echo ""
@@ -106,7 +109,6 @@ function invoke () {
 
 #...............................................................................
 # Start of main processing
-
 
 # Run extension-specific program over arguments
 # Notes:
