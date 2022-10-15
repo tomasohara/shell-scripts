@@ -120,5 +120,5 @@ var data = {lines:[
 {"lineNum":"  119","line":"exit $exit_code","class":"lineCov","hits":"2","order":"183","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-11 20:50:20", "instrumented" : 71, "covered" : 35,};
+var header = { "command" : "bats", "date" : "2022-10-15 21:04:07", "instrumented" : 71, "covered" : 35,};
 var merged_data = [];

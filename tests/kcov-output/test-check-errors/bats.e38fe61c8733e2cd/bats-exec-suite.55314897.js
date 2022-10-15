@@ -436,5 +436,5 @@ var data = {lines:[
 {"lineNum":"  435","line":"exit \"$bats_exec_suite_status\"","class":"lineCov","hits":"2","order":"619","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-11 20:50:11", "instrumented" : 229, "covered" : 85,};
+var header = { "command" : "bats", "date" : "2022-10-15 21:03:58", "instrumented" : 229, "covered" : 85,};
 var merged_data = [];

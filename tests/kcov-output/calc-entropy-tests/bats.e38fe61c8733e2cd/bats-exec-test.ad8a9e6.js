@@ -158,8 +158,8 @@ var data = {lines:[
 {"lineNum":"  157","line":"      rm -r \"$BATS_TEST_TMPDIR\" # clean up for retry","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  158","line":"    else"},
 {"lineNum":"  159","line":"      printf \'not ok %d %s%s\\n\' \"$BATS_SUITE_TEST_NUMBER\" \"${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}\" \"$exit_metadata\" >&3","class":"lineCov","hits":"5","order":"453","possible_hits":"0",},
-{"lineNum":"  160","line":"      local stack_trace","class":"lineCov","hits":"5","order":"456","possible_hits":"0",},
-{"lineNum":"  161","line":"      bats_get_failure_stack_trace stack_trace","class":"lineCov","hits":"5","order":"457","possible_hits":"0",},
+{"lineNum":"  160","line":"      local stack_trace","class":"lineCov","hits":"5","order":"454","possible_hits":"0",},
+{"lineNum":"  161","line":"      bats_get_failure_stack_trace stack_trace","class":"lineCov","hits":"5","order":"455","possible_hits":"0",},
 {"lineNum":"  162","line":"      bats_print_stack_trace \"${stack_trace[@]}\" >&3","class":"lineCov","hits":"5","order":"461","possible_hits":"0",},
 {"lineNum":"  163","line":"      bats_print_failed_command \"${stack_trace[@]}\" >&3","class":"lineCov","hits":"5","order":"488","possible_hits":"0",},
 {"lineNum":"  164","line":""},
@@ -336,5 +336,5 @@ var data = {lines:[
 {"lineNum":"  335","line":"bats_perform_test","class":"lineCov","hits":"9","order":"395","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-11 20:50:20", "instrumented" : 177, "covered" : 95,};
+var header = { "command" : "bats", "date" : "2022-10-15 21:04:07", "instrumented" : 177, "covered" : 95,};
 var merged_data = [];

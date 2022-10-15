@@ -2,9 +2,9 @@ var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
 {"lineNum":"    2","line":""},
 {"lineNum":"    3","line":"bats_test_count_validator() {"},
-{"lineNum":"    4","line":"  trap \'\' INT # continue forwarding","class":"lineCov","hits":"1","order":"120","possible_hits":"0",},
-{"lineNum":"    5","line":"  header_pattern=\'[0-9]+\\.\\.[0-9]+\'","class":"lineCov","hits":"1","order":"121","possible_hits":"0",},
-{"lineNum":"    6","line":"  IFS= read -r header","class":"lineCov","hits":"2","order":"122","possible_hits":"0",},
+{"lineNum":"    4","line":"  trap \'\' INT # continue forwarding","class":"lineCov","hits":"1","order":"90","possible_hits":"0",},
+{"lineNum":"    5","line":"  header_pattern=\'[0-9]+\\.\\.[0-9]+\'","class":"lineCov","hits":"1","order":"91","possible_hits":"0",},
+{"lineNum":"    6","line":"  IFS= read -r header","class":"lineCov","hits":"2","order":"92","possible_hits":"0",},
 {"lineNum":"    7","line":"  # repeat the header"},
 {"lineNum":"    8","line":"  printf \"%s\\n\" \"$header\"","class":"lineCov","hits":"1","order":"198","possible_hits":"0",},
 {"lineNum":"    9","line":""},
@@ -16,8 +16,8 @@ var data = {lines:[
 {"lineNum":"   15","line":"    local actual_number_of_tests=0","class":"lineCov","hits":"1","order":"201","possible_hits":"0",},
 {"lineNum":"   16","line":"    while IFS= read -r line; do","class":"lineCov","hits":"186","order":"202","possible_hits":"0",},
 {"lineNum":"   17","line":"        # forward line"},
-{"lineNum":"   18","line":"        printf \"%s\\n\" \"$line\"","class":"lineCov","hits":"92","order":"446","possible_hits":"0",},
-{"lineNum":"   19","line":"        case \"$line\" in","class":"lineCov","hits":"92","order":"447","possible_hits":"0",},
+{"lineNum":"   18","line":"        printf \"%s\\n\" \"$line\"","class":"lineCov","hits":"92","order":"445","possible_hits":"0",},
+{"lineNum":"   19","line":"        case \"$line\" in","class":"lineCov","hits":"92","order":"446","possible_hits":"0",},
 {"lineNum":"   20","line":"        \'ok \'*)"},
 {"lineNum":"   21","line":"        (( ++actual_number_of_tests ))"},
 {"lineNum":"   22","line":"        ;;"},
@@ -38,5 +38,5 @@ var data = {lines:[
 {"lineNum":"   37","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-11 20:49:28", "instrumented" : 14, "covered" : 11,};
+var header = { "command" : "bats", "date" : "2022-10-15 21:02:45", "instrumented" : 14, "covered" : 11,};
 var merged_data = [];

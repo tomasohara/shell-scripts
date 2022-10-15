@@ -1,6 +1,6 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
-{"lineNum":"    2","line":"set -e","class":"lineCov","hits":"2","order":"124","possible_hits":"0",},
+{"lineNum":"    2","line":"set -e","class":"lineCov","hits":"2","order":"126","possible_hits":"0",},
 {"lineNum":"    3","line":""},
 {"lineNum":"    4","line":"bats_encode_test_name() {"},
 {"lineNum":"    5","line":"  local name=\"$1\"","class":"lineCov","hits":"32","order":"147","possible_hits":"0",},
@@ -120,5 +120,5 @@ var data = {lines:[
 {"lineNum":"  119","line":"exit $exit_code","class":"lineCov","hits":"2","order":"183","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-11 20:50:24", "instrumented" : 71, "covered" : 35,};
+var header = { "command" : "bats", "date" : "2022-10-15 21:04:13", "instrumented" : 71, "covered" : 35,};
 var merged_data = [];

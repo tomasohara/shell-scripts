@@ -180,11 +180,11 @@ var data = {lines:[
 {"lineNum":"  179","line":"    printf \'ok %d %s%s\\n\' \"$BATS_SUITE_TEST_NUMBER\" \"${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}\" \\","class":"lineCov","hits":"6","order":"441","possible_hits":"0",},
 {"lineNum":"  180","line":"      \"$exit_metadata\" >&3"},
 {"lineNum":"  181","line":"    status=0","class":"lineCov","hits":"6","order":"442","possible_hits":"0",},
-{"lineNum":"  182","line":"    local state=passed","class":"lineCov","hits":"6","order":"445","possible_hits":"0",},
+{"lineNum":"  182","line":"    local state=passed","class":"lineCov","hits":"6","order":"443","possible_hits":"0",},
 {"lineNum":"  183","line":"  fi"},
 {"lineNum":"  184","line":""},
-{"lineNum":"  185","line":"  if [[ -z \"$should_retry\" ]]; then","class":"lineCov","hits":"6","order":"446","possible_hits":"0",},
-{"lineNum":"  186","line":"    printf \"%s %s\\t%s\\n\" \"$state\" \"$BATS_TEST_FILENAME\" \"$BATS_TEST_NAME\" >> \"$BATS_RUNLOG_FILE\"","class":"lineCov","hits":"6","order":"447","possible_hits":"0",},
+{"lineNum":"  185","line":"  if [[ -z \"$should_retry\" ]]; then","class":"lineCov","hits":"6","order":"444","possible_hits":"0",},
+{"lineNum":"  186","line":"    printf \"%s %s\\t%s\\n\" \"$state\" \"$BATS_TEST_FILENAME\" \"$BATS_TEST_NAME\" >> \"$BATS_RUNLOG_FILE\"","class":"lineCov","hits":"6","order":"445","possible_hits":"0",},
 {"lineNum":"  187","line":""},
 {"lineNum":"  188","line":"    if [[ $print_bats_out ]]; then","class":"lineCov","hits":"6","order":"448","possible_hits":"0",},
 {"lineNum":"  189","line":"      bats_prefix_lines_for_tap_output < \"$BATS_OUT\" | bats_replace_filename >&3","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -336,5 +336,5 @@ var data = {lines:[
 {"lineNum":"  335","line":"bats_perform_test","class":"lineCov","hits":"3","order":"389","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-11 20:49:00", "instrumented" : 177, "covered" : 83,};
+var header = { "command" : "bats", "date" : "2022-10-15 21:01:53", "instrumented" : 177, "covered" : 83,};
 var merged_data = [];

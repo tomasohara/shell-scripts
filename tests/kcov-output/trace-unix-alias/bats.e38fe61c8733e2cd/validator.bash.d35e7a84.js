@@ -2,11 +2,11 @@ var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
 {"lineNum":"    2","line":""},
 {"lineNum":"    3","line":"bats_test_count_validator() {"},
-{"lineNum":"    4","line":"  trap \'\' INT # continue forwarding","class":"lineCov","hits":"1","order":"105","possible_hits":"0",},
-{"lineNum":"    5","line":"  header_pattern=\'[0-9]+\\.\\.[0-9]+\'","class":"lineCov","hits":"1","order":"106","possible_hits":"0",},
-{"lineNum":"    6","line":"  IFS= read -r header","class":"lineCov","hits":"2","order":"107","possible_hits":"0",},
+{"lineNum":"    4","line":"  trap \'\' INT # continue forwarding","class":"lineCov","hits":"1","order":"120","possible_hits":"0",},
+{"lineNum":"    5","line":"  header_pattern=\'[0-9]+\\.\\.[0-9]+\'","class":"lineCov","hits":"1","order":"121","possible_hits":"0",},
+{"lineNum":"    6","line":"  IFS= read -r header","class":"lineCov","hits":"2","order":"122","possible_hits":"0",},
 {"lineNum":"    7","line":"  # repeat the header"},
-{"lineNum":"    8","line":"  printf \"%s\\n\" \"$header\"","class":"lineCov","hits":"1","order":"200","possible_hits":"0",},
+{"lineNum":"    8","line":"  printf \"%s\\n\" \"$header\"","class":"lineCov","hits":"1","order":"201","possible_hits":"0",},
 {"lineNum":"    9","line":""},
 {"lineNum":"   10","line":"  # if we detect a TAP plan"},
 {"lineNum":"   11","line":"  if [[ \"$header\" =~ $header_pattern ]]; then","class":"lineCov","hits":"1","order":"202","possible_hits":"0",},
@@ -16,8 +16,8 @@ var data = {lines:[
 {"lineNum":"   15","line":"    local actual_number_of_tests=0","class":"lineCov","hits":"1","order":"204","possible_hits":"0",},
 {"lineNum":"   16","line":"    while IFS= read -r line; do","class":"lineCov","hits":"150","order":"205","possible_hits":"0",},
 {"lineNum":"   17","line":"        # forward line"},
-{"lineNum":"   18","line":"        printf \"%s\\n\" \"$line\"","class":"lineCov","hits":"74","order":"466","possible_hits":"0",},
-{"lineNum":"   19","line":"        case \"$line\" in","class":"lineCov","hits":"74","order":"467","possible_hits":"0",},
+{"lineNum":"   18","line":"        printf \"%s\\n\" \"$line\"","class":"lineCov","hits":"74","order":"465","possible_hits":"0",},
+{"lineNum":"   19","line":"        case \"$line\" in","class":"lineCov","hits":"74","order":"466","possible_hits":"0",},
 {"lineNum":"   20","line":"        \'ok \'*)"},
 {"lineNum":"   21","line":"        (( ++actual_number_of_tests ))"},
 {"lineNum":"   22","line":"        ;;"},
@@ -38,5 +38,5 @@ var data = {lines:[
 {"lineNum":"   37","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-11 20:50:02", "instrumented" : 14, "covered" : 11,};
+var header = { "command" : "bats", "date" : "2022-10-15 21:03:46", "instrumented" : 14, "covered" : 11,};
 var merged_data = [];
