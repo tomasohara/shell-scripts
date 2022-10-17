@@ -12,8 +12,8 @@ var data = {files:[
 {"link":"warnings.bash.92955179.html","title":"warnings.bash","summary_name":"/usr/local/lib/bats-core/warnings.bash","covered_class":"lineNoCov","covered":"8.7","covered_lines":"2","uncovered_lines":"21","total_lines" : "23"},
 {"link":"bats-preprocess.c89b1ce6.html","title":"bats-preprocess","summary_name":"/usr/local/libexec/bats-core/bats-preprocess","covered_class":"linePartCov","covered":"49.3","covered_lines":"35","uncovered_lines":"36","total_lines" : "71"},
 {"link":"tracing.bash.d47fd49d.html","title":"tracing.bash","summary_name":"/usr/local/lib/bats-core/tracing.bash","covered_class":"linePartCov","covered":"29.1","covered_lines":"48","uncovered_lines":"117","total_lines" : "165"},
-{"link":"bats.40965.src.fdac6220.html","title":"bats.40965.src","summary_name":"/tmp/bats-run-okKlx2/bats.40965.src","covered_class":"lineCov","covered":"100.0","covered_lines":"33","uncovered_lines":"0","total_lines" : "33"},
+{"link":"bats.275839.src.965d90f1.html","title":"bats.275839.src","summary_name":"/tmp/bats-run-9q6Z34/bats.275839.src","covered_class":"lineCov","covered":"100.0","covered_lines":"33","uncovered_lines":"0","total_lines" : "33"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-15 21:01:53", "instrumented" : 1399, "covered" : 515,};
+var header = { "command" : "bats", "date" : "2022-10-17 21:43:14", "instrumented" : 1399, "covered" : 515,};
 var merged_data = [];

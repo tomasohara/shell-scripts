@@ -1,6 +1,5 @@
 var data = {files:[
 {"link":"bats.51601793.html","title":"bats","summary_name":"/usr/local/bin/bats","covered_class":"lineNoCov","covered":"23.3","covered_lines":"7","uncovered_lines":"23","total_lines" : "30"},
-{"link":"bats.41802.src.4a41e3c3.html","title":"bats.41802.src","summary_name":"/tmp/bats-run-RnFA6Y/bats.41802.src","covered_class":"linePartCov","covered":"63.7","covered_lines":"93","uncovered_lines":"53","total_lines" : "146"},
 {"link":"bats.b5ee664b.html","title":"bats","summary_name":"/usr/local/libexec/bats-core/bats","covered_class":"linePartCov","covered":"37.6","covered_lines":"85","uncovered_lines":"141","total_lines" : "226"},
 {"link":"test_functions.bash.e2c749da.html","title":"test_functions.bash","summary_name":"/usr/local/lib/bats-core/test_functions.bash","covered_class":"lineNoCov","covered":"6.5","covered_lines":"9","uncovered_lines":"129","total_lines" : "138"},
 {"link":"validator.bash.d35e7a84.html","title":"validator.bash","summary_name":"/usr/local/lib/bats-core/validator.bash","covered_class":"lineCov","covered":"78.6","covered_lines":"11","uncovered_lines":"3","total_lines" : "14"},
@@ -13,7 +12,8 @@ var data = {files:[
 {"link":"warnings.bash.92955179.html","title":"warnings.bash","summary_name":"/usr/local/lib/bats-core/warnings.bash","covered_class":"lineNoCov","covered":"8.7","covered_lines":"2","uncovered_lines":"21","total_lines" : "23"},
 {"link":"bats-preprocess.c89b1ce6.html","title":"bats-preprocess","summary_name":"/usr/local/libexec/bats-core/bats-preprocess","covered_class":"linePartCov","covered":"49.3","covered_lines":"35","uncovered_lines":"36","total_lines" : "71"},
 {"link":"tracing.bash.d47fd49d.html","title":"tracing.bash","summary_name":"/usr/local/lib/bats-core/tracing.bash","covered_class":"linePartCov","covered":"66.1","covered_lines":"109","uncovered_lines":"56","total_lines" : "165"},
+{"link":"bats.276666.src.88d03704.html","title":"bats.276666.src","summary_name":"/tmp/bats-run-eRMVAq/bats.276666.src","covered_class":"linePartCov","covered":"63.7","covered_lines":"93","uncovered_lines":"53","total_lines" : "146"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-15 21:02:04", "instrumented" : 1512, "covered" : 660,};
+var header = { "command" : "bats", "date" : "2022-10-17 21:43:24", "instrumented" : 1512, "covered" : 660,};
 var merged_data = [];

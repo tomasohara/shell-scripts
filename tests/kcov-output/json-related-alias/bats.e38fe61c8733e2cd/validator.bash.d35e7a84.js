@@ -16,8 +16,8 @@ var data = {lines:[
 {"lineNum":"   15","line":"    local actual_number_of_tests=0","class":"lineCov","hits":"1","order":"204","possible_hits":"0",},
 {"lineNum":"   16","line":"    while IFS= read -r line; do","class":"lineCov","hits":"92","order":"205","possible_hits":"0",},
 {"lineNum":"   17","line":"        # forward line"},
-{"lineNum":"   18","line":"        printf \"%s\\n\" \"$line\"","class":"lineCov","hits":"45","order":"454","possible_hits":"0",},
-{"lineNum":"   19","line":"        case \"$line\" in","class":"lineCov","hits":"45","order":"455","possible_hits":"0",},
+{"lineNum":"   18","line":"        printf \"%s\\n\" \"$line\"","class":"lineCov","hits":"45","order":"455","possible_hits":"0",},
+{"lineNum":"   19","line":"        case \"$line\" in","class":"lineCov","hits":"45","order":"456","possible_hits":"0",},
 {"lineNum":"   20","line":"        \'ok \'*)"},
 {"lineNum":"   21","line":"        (( ++actual_number_of_tests ))"},
 {"lineNum":"   22","line":"        ;;"},
@@ -38,5 +38,5 @@ var data = {lines:[
 {"lineNum":"   37","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-15 21:04:13", "instrumented" : 14, "covered" : 11,};
+var header = { "command" : "bats", "date" : "2022-10-17 21:47:15", "instrumented" : 14, "covered" : 11,};
 var merged_data = [];

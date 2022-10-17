@@ -214,5 +214,5 @@ var data = {lines:[
 {"lineNum":"  213","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-15 21:03:30", "instrumented" : 106, "covered" : 22,};
+var header = { "command" : "bats", "date" : "2022-10-17 21:45:45", "instrumented" : 106, "covered" : 22,};
 var merged_data = [];

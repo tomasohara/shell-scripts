@@ -1,15 +1,15 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
 {"lineNum":"    2","line":""},
-{"lineNum":"    3","line":"set -euo pipefail","class":"lineCov","hits":"1","order":"1","possible_hits":"0",},
+{"lineNum":"    3","line":"set -euo pipefail","class":"lineCov","hits":"2","order":"1","possible_hits":"0",},
 {"lineNum":"    4","line":""},
-{"lineNum":"    5","line":"if command -v greadlink >/dev/null; then","class":"lineCov","hits":"1","order":"2","possible_hits":"0",},
+{"lineNum":"    5","line":"if command -v greadlink >/dev/null; then","class":"lineCov","hits":"2","order":"2","possible_hits":"0",},
 {"lineNum":"    6","line":"  bats_readlinkf() {"},
 {"lineNum":"    7","line":"    greadlink -f \"$1\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    8","line":"  }"},
 {"lineNum":"    9","line":"else"},
 {"lineNum":"   10","line":"  bats_readlinkf() {"},
-{"lineNum":"   11","line":"    readlink -f \"$1\"","class":"lineCov","hits":"1","order":"4","possible_hits":"0",},
+{"lineNum":"   11","line":"    readlink -f \"$1\"","class":"lineCov","hits":"2","order":"3","possible_hits":"0",},
 {"lineNum":"   12","line":"  }"},
 {"lineNum":"   13","line":"fi"},
 {"lineNum":"   14","line":""},
@@ -50,15 +50,15 @@ var data = {lines:[
 {"lineNum":"   49","line":"  }"},
 {"lineNum":"   50","line":"}"},
 {"lineNum":"   51","line":""},
-{"lineNum":"   52","line":"if ! BATS_PATH=$(bats_readlinkf \"${BASH_SOURCE[0]}\" 2>/dev/null); then","class":"lineCov","hits":"2","order":"3","possible_hits":"0",},
+{"lineNum":"   52","line":"if ! BATS_PATH=$(bats_readlinkf \"${BASH_SOURCE[0]}\" 2>/dev/null); then","class":"lineCov","hits":"4","order":"4","possible_hits":"0",},
 {"lineNum":"   53","line":"  fallback_to_readlinkf_posix","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   54","line":"  BATS_PATH=$(bats_readlinkf \"${BASH_SOURCE[0]}\")","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   55","line":"fi"},
 {"lineNum":"   56","line":""},
-{"lineNum":"   57","line":"export BATS_ROOT=${BATS_PATH%/*/*}","class":"lineCov","hits":"2","order":"5","possible_hits":"0",},
-{"lineNum":"   58","line":"export -f bats_readlinkf","class":"lineCov","hits":"1","order":"6","possible_hits":"0",},
-{"lineNum":"   59","line":"exec env BATS_ROOT=\"$BATS_ROOT\" \"$BATS_ROOT/libexec/bats-core/bats\" \"$@\"","class":"lineCov","hits":"1","order":"7","possible_hits":"0",},
+{"lineNum":"   57","line":"export BATS_ROOT=${BATS_PATH%/*/*}","class":"lineCov","hits":"4","order":"5","possible_hits":"0",},
+{"lineNum":"   58","line":"export -f bats_readlinkf","class":"lineCov","hits":"2","order":"6","possible_hits":"0",},
+{"lineNum":"   59","line":"exec env BATS_ROOT=\"$BATS_ROOT\" \"$BATS_ROOT/libexec/bats-core/bats\" \"$@\"","class":"lineCov","hits":"2","order":"7","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-15 21:01:53", "instrumented" : 30, "covered" : 7,};
+var header = { "command" : "bats", "date" : "2022-10-17 21:43:14", "instrumented" : 30, "covered" : 7,};
 var merged_data = [];

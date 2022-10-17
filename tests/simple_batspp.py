@@ -106,15 +106,12 @@ class Batspp(Main):
         self.is_test_file = self.test_file.endswith(BATSPP_EXTENSION)
         debug.trace(7, f'batspp - {self.test_file} is a test file (not shell script): {self.is_test_file}')
 
-
         # Read file content
         self.file_content = system.read_file(self.test_file)
-
 
         # Check if finish with newline
         if not self.file_content.endswith('\n\n'):
             self.file_content += '\n'
-
 
         self.__process_global_setup()
         self.__process_teardown()

@@ -459,11 +459,11 @@ var data = {lines:[
 {"lineNum":"  458","line":"    bats_test_count_validator | \\"},
 {"lineNum":"  459","line":"    \"$interpolated_formatter\" \"${formatter_flags[@]}\""},
 {"lineNum":"  460","line":"else"},
-{"lineNum":"  461","line":"  exec bats-exec-suite \"${flags[@]}\" \"${filenames[@]}\" | \\","class":"lineCov","hits":"1","order":"89","possible_hits":"0",},
+{"lineNum":"  461","line":"  exec bats-exec-suite \"${flags[@]}\" \"${filenames[@]}\" | \\","class":"lineCov","hits":"1","order":"92","possible_hits":"0",},
 {"lineNum":"  462","line":"    bats_test_count_validator | \\"},
 {"lineNum":"  463","line":"    \"$interpolated_formatter\" \"${formatter_flags[@]}\""},
 {"lineNum":"  464","line":"fi"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-15 21:03:46", "instrumented" : 226, "covered" : 85,};
+var header = { "command" : "bats", "date" : "2022-10-17 21:46:12", "instrumented" : 226, "covered" : 85,};
 var merged_data = [];
