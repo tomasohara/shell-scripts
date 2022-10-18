@@ -132,7 +132,7 @@ fi
 lower_file=$(echo "$file" | perl -pe 's/(.*)/\L$1/;')
 
 # Change invoked program if different for editing than for viewing
-office_progrram="libreoffice"
+office_program="libreoffice"
 pdf_program="evince"
 image_program="eog"
 # TODO: doc_program="libreoffice"
@@ -143,7 +143,7 @@ fi
 if [ "$under_mac" = "1" ]; then
     pdf_program="open"
     image_program="open"
-    office_progrram="open"
+    office_program="open"
 fi
 if [[ $lower_file =~ ^.*\.xcf$ ]]; then
     image_program="gimp"
