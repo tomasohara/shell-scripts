@@ -42,10 +42,10 @@ if (!defined($ARGV[0])) {
     $options .= " [-relaxed | -strict] [-verbose] [-quiet]";
     my $example = "ex: $script_name whatever\n";
     my $note = "Notes:\n";
-    $note .= "- The default context is 1\n";
-    $note .= "- Warnings are skipped by default\n";
-    $note .= "- Use -no_astericks if input uses ***'s outside of error contexts\n";
-    $note .= "Use -relaxed to exclude special cases (e.g., xyz='error')\n";
+    $note .= "- The default context is 1.\n";
+    $note .= "- Warnings are skipped by default.\n";
+    $note .= "- Use -no_astericks if input uses ***'s outside of error contexts.\n";
+    $note .= "- Use -relaxed to include special cases (e.g., xyz='error').\n";
 
     die "\nusage: $script_name [options]\n\n$options\n\n$example\n\n$note\n";
 }
