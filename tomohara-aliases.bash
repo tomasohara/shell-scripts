@@ -1248,18 +1248,22 @@ function check-errors () {
     ## OLD: (QUIET=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL CONTEXT=5 check-errors-aux ${args[@]}) 2>&1 | $PAGER;
     (QUIET=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | $PAGER;
 }
-alias check-all-errors='check-errors -warnings'
-alias check-warnings='echo "*** Error: use check-all-errors instead ***"; echo "    check-all-errors"'
-alias check-all-warnings='check-all-errors -strict'
+## OLD:
+## alias check-all-errors='check-errors -warnings'
+## alias check-warnings='echo "*** Error: use check-all-errors instead ***"; echo "    check-all-errors"'
+# note: with -relaxed, the pattern matching is looser (hence more errors show)
+alias check-all-errors='check-errors -relaxed'
+alias check-warnings='check-errors -warnings -strict'
+alias check-all-warnings='check-all-errors -warnings -relaxed'
 #
 # check-errors-excerpt(log-file): show errors are start of log-file and at end if different
 function check-errors-excerpt () {
     local base="$TMP/check-errors-excerpt-$$"
     local head="$base.head"
     local tail="$base.tail"
-    check-errors "$@" | head >| "$head";
+    check-errors "$@" | head | truncate-width >| "$head";
     cat "$head"
-    check-errors "$@" | tail >| "$tail";
+    check-errors "$@" | tail | truncate-width >| "$tail";
     diff "$head" "$tail" >| /dev/null
     
     # Show tail unless same as head
