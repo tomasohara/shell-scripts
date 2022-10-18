@@ -700,7 +700,7 @@ alias rm='command rm -i $other_file_args'
 alias delete='command rm -i $other_file_args'
 ## OLD: alias delete-force='/bin/rm -f $other_file_args'
 force_echo=""
-alias disable-forced-deletions='force_echo="echo run enable-forced-deletions or issue: "'
+alias disable-forced-deletions='force_echo="echo Warning: run enable-forced-deletions or issue: "'
 alias enable-forced-deletions='force_echo=""'
 disable-forced-deletions
 #
@@ -1601,7 +1601,7 @@ function run-app {
     local log
     log=$TEMP/"$app-$(TODAY).log"
     if [ -e "$log" ]; then
-	echo "Updating $log"
+	echo "FYI: Updating $app's log $log"
     fi
     "$app" "$@" >> "$log" 2>&1 &
     ## TODO: make sure command invoked OK and then put into background
