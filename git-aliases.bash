@@ -613,6 +613,7 @@ function git-alias-usage () {
     echo ''
     echo 'Usual check-in process:'
     echo '    git-cd-root-alias; git-update-plus'
+    # TODO: ...; git-update-; gr ^'<<<<<' *
     echo '    git-next-checkin                      # repeat, as needed'
 
     ## TODO: echo '* invoke git-cd-root-alias automatically!'
