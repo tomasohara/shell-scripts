@@ -196,6 +196,10 @@ if [ "$use_albert" = "1" ]; then
     if [ "$BERT_DIR" = "" ]; then BERT_DIR="$DATA_DIR"/albert/albert_base; fi
 fi
 #
+# Make sure $CODE_BASE version of [al]bert used instead of default for environment
+export PYTHONPATH="$(realpath $CODE_DIR/..):$PYTHONPATH"
+export PATH="$(realpath $CODE_DIR/..):$PATH"
+#
 TIME_CMD=/usr/bin/time
 if [ "$NICE" = "" ]; then NICE="nice -19"; fi
 if [ "$PYTHON" = "" ]; then PYTHON="$NICE $TIME_CMD python -u"; fi
