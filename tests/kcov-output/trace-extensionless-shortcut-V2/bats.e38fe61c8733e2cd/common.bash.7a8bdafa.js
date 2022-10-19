@@ -2,17 +2,17 @@ var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
 {"lineNum":"    2","line":""},
 {"lineNum":"    3","line":"bats_prefix_lines_for_tap_output() {"},
-{"lineNum":"    4","line":"    while IFS= read -r line; do","class":"lineCov","hits":"160","order":"564","possible_hits":"0",},
-{"lineNum":"    5","line":"      printf \'# %s\\n\' \"$line\" || break # avoid feedback loop when errors are redirected into BATS_OUT (see #353)","class":"lineCov","hits":"61","order":"565","possible_hits":"0",},
+{"lineNum":"    4","line":"    while IFS= read -r line; do","class":"lineCov","hits":"160","order":"562","possible_hits":"0",},
+{"lineNum":"    5","line":"      printf \'# %s\\n\' \"$line\" || break # avoid feedback loop when errors are redirected into BATS_OUT (see #353)","class":"lineCov","hits":"61","order":"563","possible_hits":"0",},
 {"lineNum":"    6","line":"    done"},
-{"lineNum":"    7","line":"    if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"19","order":"566","possible_hits":"0",},
+{"lineNum":"    7","line":"    if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"19","order":"564","possible_hits":"0",},
 {"lineNum":"    8","line":"      printf \'# %s\\n\' \"$line\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    9","line":"    fi"},
 {"lineNum":"   10","line":"}"},
 {"lineNum":"   11","line":""},
 {"lineNum":"   12","line":"function bats_replace_filename() {"},
-{"lineNum":"   13","line":"  local line","class":"lineCov","hits":"19","order":"562","possible_hits":"0",},
-{"lineNum":"   14","line":"  while read -r line; do","class":"lineCov","hits":"80","order":"563","possible_hits":"0",},
+{"lineNum":"   13","line":"  local line","class":"lineCov","hits":"19","order":"565","possible_hits":"0",},
+{"lineNum":"   14","line":"  while read -r line; do","class":"lineCov","hits":"80","order":"566","possible_hits":"0",},
 {"lineNum":"   15","line":"    printf \"%s\\n\" \"${line//$BATS_TEST_SOURCE/$BATS_TEST_FILENAME}\"","class":"lineCov","hits":"61","order":"567","possible_hits":"0",},
 {"lineNum":"   16","line":"  done"},
 {"lineNum":"   17","line":"  if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"19","order":"568","possible_hits":"0",},
@@ -214,5 +214,5 @@ var data = {lines:[
 {"lineNum":"  213","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-17 21:45:45", "instrumented" : 106, "covered" : 22,};
+var header = { "command" : "bats", "date" : "2022-10-19 20:15:42", "instrumented" : 106, "covered" : 22,};
 var merged_data = [];

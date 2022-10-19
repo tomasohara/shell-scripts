@@ -124,16 +124,16 @@ var data = {lines:[
 {"lineNum":"  123","line":"      if [[ ! \"$line\" =~ ^bats_test_function\\  ]]; then","class":"lineCov","hits":"605","order":"141","possible_hits":"0",},
 {"lineNum":"  124","line":"        continue","class":"lineCov","hits":"569","order":"142","possible_hits":"0",},
 {"lineNum":"  125","line":"      fi"},
-{"lineNum":"  126","line":"      line=\"${line%$\'\\r\'}\"","class":"lineCov","hits":"35","order":"176","possible_hits":"0",},
-{"lineNum":"  127","line":"      line=\"${line#* }\"","class":"lineCov","hits":"35","order":"177","possible_hits":"0",},
-{"lineNum":"  128","line":"      TAG_REGEX=\"--tags \'(.*)\' (.*)\"","class":"lineCov","hits":"35","order":"178","possible_hits":"0",},
-{"lineNum":"  129","line":"      if [[ \"$line\" =~ $TAG_REGEX ]]; then","class":"lineCov","hits":"35","order":"179","possible_hits":"0",},
-{"lineNum":"  130","line":"        IFS=, read -ra tags <<<\"${BASH_REMATCH[1]}\" || true","class":"lineCov","hits":"70","order":"180","possible_hits":"0",},
-{"lineNum":"  131","line":"        line=\"${BASH_REMATCH[2]}\"","class":"lineCov","hits":"35","order":"181","possible_hits":"0",},
+{"lineNum":"  126","line":"      line=\"${line%$\'\\r\'}\"","class":"lineCov","hits":"35","order":"177","possible_hits":"0",},
+{"lineNum":"  127","line":"      line=\"${line#* }\"","class":"lineCov","hits":"35","order":"178","possible_hits":"0",},
+{"lineNum":"  128","line":"      TAG_REGEX=\"--tags \'(.*)\' (.*)\"","class":"lineCov","hits":"35","order":"179","possible_hits":"0",},
+{"lineNum":"  129","line":"      if [[ \"$line\" =~ $TAG_REGEX ]]; then","class":"lineCov","hits":"35","order":"180","possible_hits":"0",},
+{"lineNum":"  130","line":"        IFS=, read -ra tags <<<\"${BASH_REMATCH[1]}\" || true","class":"lineCov","hits":"70","order":"181","possible_hits":"0",},
+{"lineNum":"  131","line":"        line=\"${BASH_REMATCH[2]}\"","class":"lineCov","hits":"35","order":"182","possible_hits":"0",},
 {"lineNum":"  132","line":"      else"},
 {"lineNum":"  133","line":"        tags=()"},
 {"lineNum":"  134","line":"      fi"},
-{"lineNum":"  135","line":"      if [[ ${#filter_tags_list[@]} -gt 0 ]]; then","class":"lineCov","hits":"35","order":"182","possible_hits":"0",},
+{"lineNum":"  135","line":"      if [[ ${#filter_tags_list[@]} -gt 0 ]]; then","class":"lineCov","hits":"35","order":"183","possible_hits":"0",},
 {"lineNum":"  136","line":"        local match=","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  137","line":"        for filter_tags in \"${filter_tags_list[@]}\"; do","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  138","line":"            # empty search tags only match empty test tags!"},
@@ -436,5 +436,5 @@ var data = {lines:[
 {"lineNum":"  435","line":"exit \"$bats_exec_suite_status\"","class":"lineCov","hits":"2","order":"790","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-17 21:45:45", "instrumented" : 229, "covered" : 85,};
+var header = { "command" : "bats", "date" : "2022-10-19 20:15:42", "instrumented" : 229, "covered" : 85,};
 var merged_data = [];

@@ -190,12 +190,12 @@ var data = {lines:[
 {"lineNum":"  189","line":""},
 {"lineNum":"  190","line":"# a helper function to work around unbound variable errors with ${arr[@]} on Bash 3"},
 {"lineNum":"  191","line":"bats_append_arrays_as_args () { # <array...> -- <command ...>"},
-{"lineNum":"  192","line":"  local -a trailing_args=()","class":"lineCov","hits":"68","order":"155","possible_hits":"0",},
-{"lineNum":"  193","line":"  while (( $# > 0)) && [[ $1 != -- ]]; do","class":"lineCov","hits":"204","order":"156","possible_hits":"0",},
-{"lineNum":"  194","line":"    local array=$1","class":"lineCov","hits":"68","order":"157","possible_hits":"0",},
-{"lineNum":"  195","line":"    shift","class":"lineCov","hits":"68","order":"158","possible_hits":"0",},
+{"lineNum":"  192","line":"  local -a trailing_args=()","class":"lineCov","hits":"68","order":"157","possible_hits":"0",},
+{"lineNum":"  193","line":"  while (( $# > 0)) && [[ $1 != -- ]]; do","class":"lineCov","hits":"204","order":"158","possible_hits":"0",},
+{"lineNum":"  194","line":"    local array=$1","class":"lineCov","hits":"68","order":"159","possible_hits":"0",},
+{"lineNum":"  195","line":"    shift","class":"lineCov","hits":"68","order":"160","possible_hits":"0",},
 {"lineNum":"  196","line":""},
-{"lineNum":"  197","line":"    if eval \"(( \\${#${array}[@]} > 0 ))\"; then","class":"lineCov","hits":"136","order":"159","possible_hits":"0",},
+{"lineNum":"  197","line":"    if eval \"(( \\${#${array}[@]} > 0 ))\"; then","class":"lineCov","hits":"136","order":"161","possible_hits":"0",},
 {"lineNum":"  198","line":"      eval \"trailing_args+=(\\\"\\${${array}[@]}\\\")\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  199","line":"    fi"},
 {"lineNum":"  200","line":"  done"},
@@ -214,5 +214,5 @@ var data = {lines:[
 {"lineNum":"  213","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-17 21:47:06", "instrumented" : 106, "covered" : 22,};
+var header = { "command" : "bats", "date" : "2022-10-19 20:16:18", "instrumented" : 106, "covered" : 22,};
 var merged_data = [];

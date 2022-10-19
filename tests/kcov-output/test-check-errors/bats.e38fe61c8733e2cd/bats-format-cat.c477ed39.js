@@ -7,5 +7,5 @@ var data = {lines:[
 {"lineNum":"    6","line":"cat","class":"lineCov","hits":"1","order":"124","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-17 21:46:58", "instrumented" : 3, "covered" : 3,};
+var header = { "command" : "bats", "date" : "2022-10-19 20:16:11", "instrumented" : 3, "covered" : 3,};
 var merged_data = [];

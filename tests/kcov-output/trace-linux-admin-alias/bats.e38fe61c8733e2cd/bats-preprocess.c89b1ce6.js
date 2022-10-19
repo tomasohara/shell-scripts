@@ -79,7 +79,7 @@ var data = {lines:[
 {"lineNum":"   78","line":"{"},
 {"lineNum":"   79","line":"  while IFS= read -r line; do","class":"lineCov","hits":"980","order":"135","possible_hits":"0",},
 {"lineNum":"   80","line":"    (( ++line_number ))","class":"lineCov","hits":"488","order":"136","possible_hits":"0",},
-{"lineNum":"   81","line":"    line=\"${line//$\'\\r\'/}\"","class":"lineCov","hits":"488","order":"137","possible_hits":"0",},
+{"lineNum":"   81","line":"    line=\"${line//$\'\\r\'/}\"","class":"lineCov","hits":"487","order":"137","possible_hits":"0",},
 {"lineNum":"   82","line":"    if [[ \"$line\" =~ $BATS_TEST_PATTERN ]] || [[ \"$line\" =~ $BATS_TEST_PATTERN_COMMENT ]]; then","class":"lineCov","hits":"946","order":"138","possible_hits":"0",},
 {"lineNum":"   83","line":"      name=\"${BASH_REMATCH[1]#[\\\'\\\"]}\"","class":"lineCov","hits":"30","order":"143","possible_hits":"0",},
 {"lineNum":"   84","line":"      name=\"${name%[\\\'\\\"]}\"","class":"lineCov","hits":"30","order":"144","possible_hits":"0",},
@@ -117,8 +117,8 @@ var data = {lines:[
 {"lineNum":"  116","line":"  printf \'bats_test_function %s\\n\' \"$test_name\"","class":"lineCov","hits":"30","order":"175","possible_hits":"0",},
 {"lineNum":"  117","line":"done"},
 {"lineNum":"  118","line":""},
-{"lineNum":"  119","line":"exit $exit_code","class":"lineCov","hits":"2","order":"176","possible_hits":"0",},
+{"lineNum":"  119","line":"exit $exit_code","class":"lineCov","hits":"2","order":"188","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-17 21:47:31", "instrumented" : 71, "covered" : 35,};
+var header = { "command" : "bats", "date" : "2022-10-19 20:16:43", "instrumented" : 71, "covered" : 35,};
 var merged_data = [];
