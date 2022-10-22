@@ -1748,9 +1748,13 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 ## TODO: alias rename-parens='rename-files -rename_old -global -regex "[\(\)]" "" *[\(\)]*'
 #
 
+#-------------------------------------------------------------------------------
+## TOM-IDIOSYNCRATIC
+
 # move-versioned-files(pattern, dir): move files matching PATTERN into DIR (created if need be)
 # move "versioned" log files into ./log-file subdirectory
 #    *** files end in .log[0-9]+ or .log and have numeric affix (e.g., do-xyz.log2, do-xyz.2.log, or do-xyz-30may21.log)
+# if - specified for pattern, then [a-z]* used
 #
 # move-log-files: move "versioned" log files to log-files
 # move-output-files: likewise for output files with version numbers to ./output
@@ -1762,7 +1766,7 @@ function move-versioned-files {
 	return
     fi
     local ext_pattern="$1"
-    if [ "$ext_pattern" = "" ]; then ext_pattern="{list,log,txt}"; fi
+    if [ "$ext_pattern" = "-" ]; then ext_pattern="[a-z]*"; fi
     local dir="$2"
     if [ "$dir" = "" ]; then dir="versioned-files"; fi
     mkdir -p "$dir";
@@ -1785,6 +1789,8 @@ alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
 # note: * the version regex should be kept quite specific to avoid useful files being moved into ./output
 alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
 alias move-adhoc-files='move-log-files; move-output-files'
+
+#--------------------------------------------------------------------------------
 
 # rename-with-file-date(file, ...): rename each file(s) with .ddMmmYY suffix
 # Notes: 1. If file.ddMmmYY exists, file.ddMmmYY.N tried (for N in 1, 2, ...).
