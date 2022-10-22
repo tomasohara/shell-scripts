@@ -97,14 +97,21 @@ function invoke () {
     if [ ! -e "log_dir" ]; then mkdir -p "$log_dir"; fi
     local log_file
     log_file="$log_dir/$(basename "$program")-$(basename "$file")-$today.log"
+    local program_arg=""
     if [ ! -e "$log_file" ]; then touch "$log_file"; fi
     if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" \"$file\" >> \"$log_file\" 2>&1"; fi
     if [[ (! -e "$program") && ("$program" != "open") ]]; then
 	if [ "$under_mac" = "1" ]; then
-	    program="open -a '$program'"
+	    ## OLD: program="open -a '$program'"
+	    ## TODO: program_arg="-a '$program'"
+	    program_arg="-a $program"
+	    program="open"
 	fi
     fi
-    "$program" "$file" >> "$log_file" 2>&1
+    ## OLD: "$program" "$file" >> "$log_file" 2>&1
+    # disable shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
+    # shellcheck disable=SC2086
+    "$program" $program_arg "$file" >> "$log_file" 2>&1
     }
 
 #...............................................................................
