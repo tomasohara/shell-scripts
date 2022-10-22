@@ -2271,7 +2271,8 @@ if [[ ("$DEFAULT_HOST" = "") && (($HOSTNAME =~ ip-*) || ($HOSTNAME =~ cvps*)) ]]
 ## alias gr-juju-archive-notes=gr-juju-notes-archive
 
 alias uname-node='uname -n'
-alias pwd-host-info='pwd; echo $HOST_NICKNAME; uname-node'
+## OLD: alias pwd-host-info='pwd; echo $HOST_NICKNAME; uname-node'
+alias pwd-host-info='pwd; echo "${HOST_NICKNAME:-n/a}"; uname-node'
 
 # TODO: put following elsewhere
 ## MISC
