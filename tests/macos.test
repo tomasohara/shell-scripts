@@ -1,0 +1,37 @@
+#-------------------------------------------------------------------------------
+# notes/drafts on tests needed to account for Mac differences compared to Linux
+
+
+## TODO: work out way to specify plaform
+
+#-------------------------------------------------------------------------------
+# WordNet CLI
+
+## $ wn- dog | cat
+## -bash: /usr/bin/wn: No such file or directory
+## 
+## $ which wn
+## /opt/homebrew/bin/wn
+
+#-------------------------------------------------------------------------------
+# host nickname
+
+## default is tpo-host
+## $ pwd-host-info
+## /Users/tomohara/bin
+## tpo-host
+## TOhara-2.loca
+
+## TODO: prepare checklist of additional configuration files
+# .bash_profile:   HOST_NICKNAME
+# .default_host    for xterm title in multihost environment
+
+#-------------------------------------------------------------------------------
+# mezcla setup
+
+## quirk: aliases assume $HOME/python/Mezcla/mezcla
+##    alias mezcla-devel='add-python-path $HOME/python/Mezcla/mezcla'
+## TODO: /Users/tomohara/python/Mezcla/mezcla => ~/programs/python/Mezcla/
+##
+## workaround:
+## mkdir ~/python; cd ~/python; ln-symbolic ~/programs/python/Mezcla

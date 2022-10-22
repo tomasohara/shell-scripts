@@ -1,0 +1,16 @@
+## Mon 05 Sep 22
+
+## TODO: operationalize the following
+## before editing macros:
+##   $ show-macros > ~/temp/bash-macros-$(T).log1
+## after editing macros:
+##   $ show-macros > ~/temp/bash-macros-$(T).log1
+## test
+##   $ diff ~/temp/bash-macros-$(T).log1 ~/temp/bash-macros-$(T).log2 | wc -l
+##   65
+## note:
+##   $ wc -l < ~/bin/tomohara-aliases.bash
+##   2900
+##   $ calc "65 / 2900"
+##   0.022
+## so: test should be for less than 0.05 relative difference
