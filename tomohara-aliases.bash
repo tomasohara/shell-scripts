@@ -2113,11 +2113,13 @@ function get-free-filename() {
 }
 
 # sudo-admin(): create typescript as sudo user using filename based on current
-# date using numeric suffixes if necessary until the filename is free.
+# date using numeric suffixes if necessary until the filename is free (e.g., _config.30aug22.log2)
 # note: exsting _config*.log files are made read-only so not later overwritten
 # by accident
+# TOM-IDIOSYNCRATIC
 function sudo-admin () {
-    local prefix="_config-"
+    ## OLD: local prefix="_config-"
+    local prefix="_config."
     local base
     base="$prefix$(todays-date).log"
     sudo chmod ugo-w "$prefix"*.log* 2> /dev/null
