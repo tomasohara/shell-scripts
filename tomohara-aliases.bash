@@ -169,6 +169,7 @@ alias cond-setenv='conditional-export'
 # - This is so that the alias becomes a "first class" citizen, such as allowing for
 #   environment variables to be set as in 'alias-fn echo-ENV1 'echo "$ENV1"'; ENV1=one echo-ENV1
 # ex: alias-fn trace-PS1 'echo \$PS1="$PS1" 1>&2'
+# TODO: fix problem with embedded invocations (see em-adhoc-notes below)
 function alias-fn {
     local alias="$1"
     shift
@@ -250,7 +251,8 @@ alias date-central='TZ="America/Chicago" date'
 # em-adhoc-notes(): edit adhoc ntoes file using format _{host}-adhoc-{date} (e.g., _reempl-adhoc-notes.13may22.txt)
 ## OLD: alias em-adhoc-notes='emacs-tpo _adhoc-notes.$(TODAY).txt'
 ## OLD: alias em-adhoc-notes='emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes-$(TODAY).txt'
-alias-fn em-adhoc-notes 'emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes-$(todays-date-mmmYY).txt'
+## BAD: alias-fn em-adhoc-notes 'emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes-$(todays-date-mmmYY).txt'
+function em-adhoc-notes { emacs-tpo "_${HOST_NICKNAME:misc}-adhoc-notes-$(todays-date-mmmYY).txt"; }
 
 alias T='TODAY'
 # update-today-vars() & todays-update: update the various today-related variables
@@ -331,20 +333,21 @@ trace 'in tomohara-aliases.bash'
 # # HACK: load in older tpo-setup.bash
 # conditional-source $TOM_BIN/tpo-setup.bash
 
-# Ensure OSTYPE environment variable for script usage
-if [ "$(printenv OSTYPE)" = "" ]; then
-    export OSTYPE="$OSTYPE";
-fi
-
-# Fixup for Linux OSTYPE setting (likewise for solaris)
-# TODO: use ${OSTYPE/[0-9]*/}
-# TODO: use OSTYPE_BRIEF instead of trumping environment
-case "$OSTYPE" in linux-*) export OSTYPE=linux; esac
-case "$OSTYPE" in solaris*) 
-     export OSTYPE=solaris; 
-     alias printenv='printenv.sh'
-esac
-#
+## OLD
+## 
+## # Ensure OSTYPE environment variable for script usage
+## if [ "$(printenv OSTYPE)" = "" ]; then
+##     export OSTYPE="$OSTYPE";
+## fi
+## 
+## # Fixup for Linux OSTYPE setting (likewise for solaris)
+## # TODO: use ${OSTYPE/[0-9]*/}
+## # TODO: use OSTYPE_BRIEF instead of trumping environment
+## case "$OSTYPE" in linux-*) export OSTYPE=linux; esac
+## case "$OSTYPE" in solaris*) 
+##      export OSTYPE=solaris; 
+##      alias printenv='printenv.sh'
+## esac
 
 # under-macos() => boolean: whether running under maldito macintosh
 # EX: (under-macos; wc -l /vmlinuz 2> /dev/null) =/=> $'0\n1'
@@ -413,22 +416,23 @@ alias prepend-path=prepend-path-force
 function append-python-path () { export PYTHONPATH=${PYTHONPATH}:"$1"; }
 function prepend-python-path () { export PYTHONPATH="$1":${PYTHONPATH}; }
 
-# TODO: develop a function for doing this
-if [ "$(printenv PATH | $GREP "$TOM_BIN":)" = "" ]; then
-   export PATH="$TOM_BIN:$PATH"
-fi
-if [ "$(printenv PATH | $GREP "$TOM_BIN/${OSTYPE}":)" = "" ]; then
-   export PATH="$TOM_BIN/${OSTYPE}:$PATH"
-fi
-# TODO: make optional & put append-path later to account for later PERLLIB changes
-append-path "$PERLLIB"
-## OLD (see below): prepend-path "$HOME/python/Mezcla/mezcla"
-append-path "$HOME/python"
-# Put current directoy at end of path; can be overwritting with ./ prefix
-export PATH="$PATH:."
-# Note: ~/lib only used to augment existing library, not pre-empt
-## OLD: export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib:$HOME/lib/linux
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib:$HOME/lib/$OSTYPE
+## OLD:
+## # TODO: develop a function for doing this
+## if [ "$(printenv PATH | $GREP "$TOM_BIN":)" = "" ]; then
+##    export PATH="$TOM_BIN:$PATH"
+## fi
+## if [ "$(printenv PATH | $GREP "$TOM_BIN/${OSTYPE}":)" = "" ]; then
+##    export PATH="$TOM_BIN/${OSTYPE}:$PATH"
+## fi
+## # TODO: make optional & put append-path later to account for later PERLLIB changes
+## append-path "$PERLLIB"
+## ## OLD (see below): prepend-path "$HOME/python/Mezcla/mezcla"
+## append-path "$HOME/python"
+## # Put current directoy at end of path; can be overwritting with ./ prefix
+## export PATH="$PATH:."
+## # Note: ~/lib only used to augment existing library, not pre-empt
+## ## OLD: export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib:$HOME/lib/linux
+## export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib:$HOME/lib/$OSTYPE
 
 #-------------------------------------------------------------------------------
 # Bash stuff (settings, etc.)
@@ -561,7 +565,7 @@ append-path "$HOME/perl/bin"
 # note: command is a binary under MacOs built just a shell builtin under Linux
 export TIME_CMD="command time"
 if [ "$(which "command" 2> /dev/null)" == "" ]; then
-    export TIME_CMD=/usr/bin/time fi
+    export TIME_CMD=/usr/bin/time
 fi
 export PERL="$NICE $TIME_CMD perl -Ssw"
 export BRIEF_USAGE=1
@@ -911,7 +915,7 @@ alias grep-nonascii='perlgrep.perl "[\x80-\xFF]"'
 #
 # Ignores shellcheck SC2086 [Double quote to prevent globbing] in find aliases.
 # shellcheck disable=SC2086
-{
+{         # start shellcheck block
 ## OLD: function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pattern find-option ... "; else /usr/bin/find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 2>&1 | $GREP -v '^find: '; fi; }
 function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pattern find-option ... "; else command find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 2>&1 | $GREP -v '^find: '; fi; }
 # findspec[-all](dir, pattern, option): find files in directory tried, optionally following links (-all)
@@ -937,7 +941,7 @@ function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$
 function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
 function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
 alias fgr-py='fgr-ext py'
-}
+## OLD: }
 #
 # prepare-find-files-here([--out-dir out_dir_spec]): produces listing(s) of files in current directory
 # tree, in support of find-files-here; this contains full ls entry (as with -l).
@@ -1000,6 +1004,7 @@ alias find-files-='find-files-there'
 # TODO: add --quiet option to dobackup.sh (and port to bash)
 # TODO: function conditional-backup() { if [ -e backup/"$1" ]; then dobackup.sh "$1"; fi; }
 ## OLD: alias make-file-listing='listing="ls-aR.list"; dobackup.sh "$listing"; $LS -aR >| "$listing" 2>&1'
+}         # end shellcheck block
 
 #--------------------------------------------------------------------------------
 # Emacs commands
@@ -1011,7 +1016,8 @@ alias find-files-='find-files-there'
 # TODO: add synopsis for others
 #
 ## OLD: alias emacs-tpo='tpo-invoke-emacs.sh'
-alias-fn emacs-tpo 'tpo-invoke-emacs.sh'
+## TODO: alias-fn emacs-tpo 'tpo-invoke-emacs.sh'
+function emacs-tpo { tpo-invoke-emacs.sh; }
 ## OLD: alias em=emacs-tpo
 alias-fn em tpo-invoke-emacs.sh
 # em-fn(font, [file ...]): invoke emcas with specified font
@@ -1058,8 +1064,8 @@ function em-quick () { em --quick "$@"; }
 # TODO: document all bash aliases (and functions) for benefit of others (and yourself!)
 # TODO: revert to using tac; why was reverse.perl used instead???
 quiet-unalias view-todo
-# TODO: track down source of following warningL
-#    SC2120: view-todo references arguments, but none are ever passed
+# TODO: track down source of following warning
+# maldito shellcheck: [SC2120: ... references arguments, but none are ever passed]
 # shellcheck disable=SC2120
 {
 function view-todo () {
@@ -1070,7 +1076,7 @@ function view-todo () {
     perl -SSw reverse.perl "$HOME/organizer/todo_list.text" | $PAGER_CHOPPED $search_arg; 
 }
 }
-# maldito shellcheck: SC2119 [Use view-todo "$@" if function's $1 should mean script'1 $1]
+# maldito shellcheck: SC2119 [Use ... "$@" if function's $1 should mean script'1 $1]
 # and SC2181 [Check exit code directly]
 # shellcheck disable=SC2119,SC2181
 {
@@ -1248,6 +1254,9 @@ alias check-warnings='check-errors -warnings -strict'
 alias check-all-warnings='check-all-errors -warnings -relaxed'
 #
 # check-errors-excerpt(log-file): show errors are start of log-file and at end if different
+# maldito shellcheck: SC2119 [Use ... "$@" if function's $1 should mean script'1 $1]
+# shellcheck disable=SC2119
+{         # start shellcheck block
 function check-errors-excerpt () {
     local base="$TMP/check-errors-excerpt-$$"
     local head="$base.head"
@@ -1265,6 +1274,7 @@ function check-errors-excerpt () {
         cat "$tail";
     fi
 }
+}         # end shellcheck block
 
 # Note: various aliases for doing diff-based comparisons
 #
@@ -2074,6 +2084,8 @@ alias em-tomas=ed-tomas
 
 # Truncate text wider than current terminal window
 # TODO: add truncation indicator (e.g., Unicode character for ...)
+# maldito shellcheck: [SC2120: ... references arguments, but none are ever passed]
+# shellcheck disable=SC2120
 function truncate-width { cut --characters=1-"$(calc-int "$COLUMNS - 1")" "$@"; }
 
 #-------------------------------------------------------------------------------
