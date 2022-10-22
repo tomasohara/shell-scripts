@@ -355,15 +355,6 @@ function under-macos {
     echo "$under_mac"
 }
 
-# under-macos() => boolean: whether running under maldito macintosh
-# EX: (under-macos; wc -l /vmlinuz 2> /dev/null) =/=> $'0\n1'
-function under-macos {
-    local under_mac=0
-    if [[ "$OSTYPE" =~ darwin.* ]]; then under_mac=1; fi
-    ## TODO: return $under_mac
-    echo "$under_mac"
-}
-
 # Settings for less command 
 # LESS="-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"
 #
