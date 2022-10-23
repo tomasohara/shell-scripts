@@ -38,27 +38,32 @@
 ## set -o xtrace
 ## DEBUG: set -o verbose
 
-# TODO: Show usage statement
+# Show usage statement
 #
 if [ "$1" = "--help" ]; then
     script=$(basename "$0")
     echo ""
-    echo "usage: $script [--trace] [--[skip-]nohup] [--options token-or-string] [--foreground] [--quick] [--emacs program] [--]"
+    echo "usage: $script [--trace] [--[skip-]nohup] [--options token-or-string] [--foreground] [--quick] [--emacs program] [--] [emacs-arguments]"
     echo ""
     echo "ex: $0 -- --geometry 80x50"
     echo ""
-    echo "Note: put emacs arguments after --"
+    echo "Notes:"
+    echo "- Put any emacs arguments after the -- spec."
+    echo "- You can also use EMACS_PROGRAM environment variable to override program."
     echo ""
     exit
 fi
 
 # Setup Emacs options (50 rows, 80 columns, and use background process)
+# Note: Emacs sets EMACS env. var in terminal session, so EMACS_PROGRAM used instead
+# Aside: in general longer names preferred to minimize conflicts as with DEBUG vs. DEBUG_LEVEL.
 ## OLD: emacs_options="--geometry 80x50"
 use_nohup="0"
 emacs_options=""
 in_background="1"
 ## OLD: emacs="emacs"
-emacs="${EMACS:-emacs}"
+## BAD: emacs="${EMACS:-emacs}"
+emacs="${EMACS_PROGRAM:-emacs}"
 
 ## TEST
 ## # Use nohup if under Mac OS
