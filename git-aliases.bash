@@ -426,8 +426,7 @@ function git-diff-plus {
 #
 function git-difftool-plus {
     ## TODO: add trace-command function
-    ## TODO:
-    echo "issuing: git difftool --no-prompt ..." 1>&2
+    ## TODO: echo "issuing: git difftool --no-prompt ..." 1>&2
     git difftool --no-prompt "$@";
 }
 #
@@ -564,9 +563,8 @@ alias git-invoke-next-single-checkin=invoke-next-single-checkin
 # shellcheck disable=SC2139
 alias git-alias-refresh="source ${BASH_SOURCE[0]}"      # bash idiom for current script filename
 alias git-refresh-aliases=git-alias-refresh
-## OLD: alias git-next-checkin='invoke-alt-checkin'
-## TEMP: hide tracing output
-alias git-next-checkin='invoke-alt-checkin 2> /dev/null'
+alias git-next-checkin='invoke-alt-checkin'
+## TEST: hide tracing output alias git-next-checkin='invoke-alt-checkin 2> /dev/null'
 # TODO:
 # NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
 ## OLD: alias git-checkout-branch='git-command checkout'
