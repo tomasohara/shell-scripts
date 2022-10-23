@@ -123,7 +123,7 @@ function conda-activate-env {
     local use_hack="${2:-0}"
     ## if [ "$env" = "" ]; then
     if [[ ("$env" = "") || ("$env" = "-") ]]; then
-        echo "Usage: conda-activate-env"
+        echo "Usage: conda-activate-env env [use_hack=0]"
         echo ""
         echo "Note: available environments:"
         ## TODO: use columns
