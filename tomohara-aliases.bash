@@ -248,7 +248,7 @@ alias TODAY=todays-date
 alias date-central='TZ="America/Chicago" date'
 
 ## TOM-IDIOSYNCRATIC
-# em-adhoc-notes(): edit adhoc ntoes file using format _{host}-adhoc-{date} (e.g., _reempl-adhoc-notes.13may22.txt)
+# em-adhoc-notes(): edit adhoc notes file using format _{host}-adhoc-{date} (e.g., _reempl-adhoc-notes.13may22.txt)
 ## OLD: alias em-adhoc-notes='emacs-tpo _adhoc-notes.$(TODAY).txt'
 ## OLD: alias em-adhoc-notes='emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes-$(TODAY).txt'
 ## BAD: alias-fn em-adhoc-notes 'emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes-$(todays-date-mmmYY).txt'
@@ -1017,7 +1017,7 @@ alias find-files-='find-files-there'
 #
 ## OLD: alias emacs-tpo='tpo-invoke-emacs.sh'
 ## TODO: alias-fn emacs-tpo 'tpo-invoke-emacs.sh'
-function emacs-tpo { tpo-invoke-emacs.sh; }
+function emacs-tpo { tpo-invoke-emacs.sh "$@"; }
 ## OLD: alias em=emacs-tpo
 alias-fn em tpo-invoke-emacs.sh
 # em-fn(font, [file ...]): invoke emcas with specified font
@@ -1520,14 +1520,22 @@ alias perlgrep='perl- perlgrep.perl'
 alias perl-grep=perlgrep
 function para-grep { perlgrep -para "$@" 2>&1 | $GREP -v "Can't open \*notes\*"; }
 alias para-gr='para-grep -i -n'
+
+#................................................................................
+# Note grepping (e.g., using timestamp sorted excerpts)
+# TOM-IDIOSYNCRATIC
+
 ## TODO: make a pass to ensure aliases have unique leading prefix, as well as being easy to remember (n.b., ease of tab completion vs. recall)
 function cached-notes-para-gr { para-gr "$@" _master-note-info.list | $PAGER; }
 # TODO: work out better name
 function cached-notes-para-gr-less { cached-notes-para-gr "$@" | less -p "$1"; }
-# EX: echo $'1\n2\n3\n4\n5' | calc-stdev => "num = 5; mean = 3.000; stdev = 1.581; min = 1.000; max = 5.000; sum = 15.000"
-function calc-stdev () { sum_file.perl -stdev "$@" -; }
-## MISC: alias calc-stdev-file='calc-stdev <'
-## MISC: alias sum-col2='sum_file.perl -col=2 -'
+##
+## OLD
+## # EX: echo $'1\n2\n3\n4\n5' | calc-stdev => "num = 5; mean = 3.000; stdev = 1.581; min = 1.000; max = 5.000; sum = 15.000"
+## function calc-stdev () { sum_file.perl -stdev "$@" -; }
+## ## MISC: alias calc-stdev-file='calc-stdev <'
+## ## MISC: alias sum-col2='sum_file.perl -col=2 -'
+##
 notes_glob="*notes*.txt  *notes*.list *notes*.log"
 # maldito shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
 # shellcheck disable=SC2086
@@ -1543,7 +1551,8 @@ function para-notes-gr-less-p { para-notes-gr "$@" | less -p "$1"; }
 function notes-entry-gr-aux() {
     local glob="$1"
     shift
-    perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" -  2>&1 | $PAGER;
+    ## OLD: perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" -  2>&1 | $PAGER;
+    perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" -  2>&1 | less -p "$1";
 }
 }
 alias notes-entry-gr='notes-entry-gr-aux "$notes_glob"'
@@ -1554,6 +1563,8 @@ function cached-entry-gr-less-p { cached-entry-gr "$@" | less -p "$1"; }
 # TODO: * work good scheme for shortcut aliases (e.g. both memorable and easily tab-completable)!
 alias grepl-entry=cached-entry-gr-less-p
 alias grepl-entry-here=entry-notes
+
+#................................................................................
 
 # TODO: use .list instead of .log in note files to minimize need for such an awkward move alias/function (n.b., .log files more common due to script usage than .list)
 #
@@ -1832,6 +1843,11 @@ function copy-with-file-date { rename-with-file-date --copy "$@"; }
 alias bigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=2'
 alias unigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=1'
 alias word-count=unigrams
+
+# EX: echo $'1\n2\n3\n4\n5' | calc-stdev => "num = 5; mean = 3.000; stdev = 1.581; min = 1.000; max = 5.000; sum = 15.000"
+function calc-stdev () { sum_file.perl -stdev "$@" -; }
+## MISC: alias calc-stdev-file='calc-stdev <'
+## MISC: alias sum-col2='sum_file.perl -col=2 -'
 
 # Lynx stuff
 # lynx-dump-stdout(option, ...): Run lynx with textual output to stdout
