@@ -425,8 +425,9 @@ function git-diff-plus {
 #       trustExitCode = false
 #
 function git-difftool-plus {
+    ## TODO: add trace-command function
     ## TODO:
-    echo "issuing: git difftool --no-prompt ..."
+    echo "issuing: git difftool --no-prompt ..." 1>&2
     git difftool --no-prompt "$@";
 }
 #
@@ -502,7 +503,8 @@ function alt-invoke-next-single-checkin {
 	    echo ""
 	    local divider=$(perl -e 'print("." x 80);')
 	    echo "$divider"
-	    git-status | head
+	    ## OLD: git-status | head
+	    git-status
 	    echo "..."
             return;
         fi
@@ -562,7 +564,9 @@ alias git-invoke-next-single-checkin=invoke-next-single-checkin
 # shellcheck disable=SC2139
 alias git-alias-refresh="source ${BASH_SOURCE[0]}"      # bash idiom for current script filename
 alias git-refresh-aliases=git-alias-refresh
-alias git-next-checkin='invoke-alt-checkin'
+## OLD: alias git-next-checkin='invoke-alt-checkin'
+## TEMP: hide tracing output
+alias git-next-checkin='invoke-alt-checkin 2> /dev/null'
 # TODO:
 # NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
 ## OLD: alias git-checkout-branch='git-command checkout'
