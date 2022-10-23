@@ -16,7 +16,7 @@ fi
 # TODO: use ${OSTYPE/[0-9]*/}
 OSTYPE_BRIEF="$OSTYPE"
 case "$OSTYPE_BRIEF" in
-    linux-*) export OSTYPE_BRIEF=linux; ;;
+    linux*) export OSTYPE_BRIEF=linux; ;;
     solaris*) export OSTYPE_BRIEF=solaris;  alias printenv='printenv.sh' ;;
     darwin*) export OSTYPE_BRIEF=mac-os;  ;;
     *) echo "Warning: unknown OS type"; ;;
