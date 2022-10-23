@@ -1,6 +1,6 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
-{"lineNum":"    2","line":"set -e","class":"lineCov","hits":"2","order":"126","possible_hits":"0",},
+{"lineNum":"    2","line":"set -e","class":"lineCov","hits":"2","order":"123","possible_hits":"0",},
 {"lineNum":"    3","line":""},
 {"lineNum":"    4","line":"bats_encode_test_name() {"},
 {"lineNum":"    5","line":"  local name=\"$1\"","class":"lineCov","hits":"28","order":"147","possible_hits":"0",},
@@ -32,14 +32,14 @@ var data = {lines:[
 {"lineNum":"   31","line":"  printf -v \"$2\" \'%s\' \"$result\"","class":"lineCov","hits":"28","order":"155","possible_hits":"0",},
 {"lineNum":"   32","line":"}"},
 {"lineNum":"   33","line":""},
-{"lineNum":"   34","line":"BATS_TEST_PATTERN=\"^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\\{(.*)\\$\"","class":"lineCov","hits":"2","order":"127","possible_hits":"0",},
+{"lineNum":"   34","line":"BATS_TEST_PATTERN=\"^[[:blank:]]*@test[[:blank:]]+(.*[^[:blank:]])[[:blank:]]+\\{(.*)\\$\"","class":"lineCov","hits":"2","order":"124","possible_hits":"0",},
 {"lineNum":"   35","line":"BATS_TEST_PATTERN_COMMENT=\"[[:blank:]]*([^[:blank:]()]+)[[:blank:]]*\\(?\\)?[[:blank:]]+\\{[[:blank:]]+#[[:blank:]]*@test[[:blank:]]*\\$\""},
-{"lineNum":"   36","line":"BATS_COMMENT_COMMAND_PATTERN=\"^[[:blank:]]*#[[:blank:]]*bats[[:blank:]]+(.*)$\"","class":"lineCov","hits":"2","order":"128","possible_hits":"0",},
-{"lineNum":"   37","line":"BATS_VALID_TAG_PATTERN=\"[-_:[:alnum:]]+\"","class":"lineCov","hits":"2","order":"129","possible_hits":"0",},
-{"lineNum":"   38","line":"BATS_VALID_TAGS_PATTERN=\"^ *($BATS_VALID_TAG_PATTERN)?( *, *$BATS_VALID_TAG_PATTERN)* *$\"","class":"lineCov","hits":"2","order":"130","possible_hits":"0",},
+{"lineNum":"   36","line":"BATS_COMMENT_COMMAND_PATTERN=\"^[[:blank:]]*#[[:blank:]]*bats[[:blank:]]+(.*)$\"","class":"lineCov","hits":"2","order":"125","possible_hits":"0",},
+{"lineNum":"   37","line":"BATS_VALID_TAG_PATTERN=\"[-_:[:alnum:]]+\"","class":"lineCov","hits":"2","order":"126","possible_hits":"0",},
+{"lineNum":"   38","line":"BATS_VALID_TAGS_PATTERN=\"^ *($BATS_VALID_TAG_PATTERN)?( *, *$BATS_VALID_TAG_PATTERN)* *$\"","class":"lineCov","hits":"2","order":"127","possible_hits":"0",},
 {"lineNum":"   39","line":""},
 {"lineNum":"   40","line":"# shellcheck source=lib/bats-core/common.bash"},
-{"lineNum":"   41","line":"source \"$BATS_ROOT/lib/bats-core/common.bash\"","class":"lineCov","hits":"2","order":"131","possible_hits":"0",},
+{"lineNum":"   41","line":"source \"$BATS_ROOT/lib/bats-core/common.bash\"","class":"lineCov","hits":"2","order":"128","possible_hits":"0",},
 {"lineNum":"   42","line":""},
 {"lineNum":"   43","line":"extract_tags() { # <tag_type/return_var> <tags-string>"},
 {"lineNum":"   44","line":"  local -r tag_type=$1 tags_string=$2","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -69,13 +69,13 @@ var data = {lines:[
 {"lineNum":"   68","line":"  fi"},
 {"lineNum":"   69","line":"}"},
 {"lineNum":"   70","line":""},
-{"lineNum":"   71","line":"test_file=\"$1\"","class":"lineCov","hits":"2","order":"132","possible_hits":"0",},
+{"lineNum":"   71","line":"test_file=\"$1\"","class":"lineCov","hits":"2","order":"129","possible_hits":"0",},
 {"lineNum":"   72","line":"tests=()"},
 {"lineNum":"   73","line":"test_tags=()"},
 {"lineNum":"   74","line":"# shellcheck disable=SC2034 # used in `bats_sort tags`/`extract_tags``"},
 {"lineNum":"   75","line":"file_tags=()"},
-{"lineNum":"   76","line":"line_number=0","class":"lineCov","hits":"2","order":"133","possible_hits":"0",},
-{"lineNum":"   77","line":"exit_code=0","class":"lineCov","hits":"2","order":"134","possible_hits":"0",},
+{"lineNum":"   76","line":"line_number=0","class":"lineCov","hits":"2","order":"130","possible_hits":"0",},
+{"lineNum":"   77","line":"exit_code=0","class":"lineCov","hits":"2","order":"131","possible_hits":"0",},
 {"lineNum":"   78","line":"{"},
 {"lineNum":"   79","line":"  while IFS= read -r line; do","class":"lineCov","hits":"1024","order":"135","possible_hits":"0",},
 {"lineNum":"   80","line":"    (( ++line_number ))","class":"lineCov","hits":"510","order":"136","possible_hits":"0",},
@@ -120,5 +120,5 @@ var data = {lines:[
 {"lineNum":"  119","line":"exit $exit_code","class":"lineCov","hits":"2","order":"183","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-19 20:14:34", "instrumented" : 71, "covered" : 35,};
+var header = { "command" : "bats", "date" : "2022-10-23 20:32:11", "instrumented" : 71, "covered" : 35,};
 var merged_data = [];

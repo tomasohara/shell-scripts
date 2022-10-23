@@ -86,6 +86,9 @@ files = system.read_directory("./")
 ## FUBAR = system.getenv_bool("FUBAR", False,
 ##                             description="Fouled Up Beyond All Recognition processing")
 
+# DEBUG_LEVEL WORKS FROM 4 TO 5 TO ...
+
+
 #--------------------------------------------------------------------------------
 
 def auto_batspp(NO_OPTION, KCOV_OPTION, TXT_OPTION):
@@ -144,7 +147,7 @@ def auto_batspp(NO_OPTION, KCOV_OPTION, TXT_OPTION):
                 print (gh.indent(TXT_MESSAGE, indentation="  >>  ", max_width=512))
                 
             def bats_report_func(FILE, BATSPP_2_BATS):
-                BATS_MESSAGE = f"BATSFILE PATH: ./{TXT_STORE}/{BATSPP_2_BATS}"
+                BATS_MESSAGE = f"BATSFILE PATH: ./{BATS_STORE}/{BATSPP_2_BATS}"
                 print (gh.indent(BATS_MESSAGE, indentation="  >>  ", max_width=512))
                 gh.run(f"./simple_batspp.py ./{BATSPP_STORE}/{FILE} --output ./{BATS_STORE}/{BATSPP_2_BATS}")
 
@@ -165,10 +168,8 @@ def auto_batspp(NO_OPTION, KCOV_OPTION, TXT_OPTION):
                     
                     print(f"\nBATSPP FILE DETECTED [{i}]: {file}\n")
                     
-                    # [UNUSUAL]: ROLES OF --txt AND --kcov SWITCHED IF if TXT_OPTION and KCOV_OPTION IS TRUE
                     if TXT_OPTION:
                         text_report_func(file, batspp_to_txt)
-                        i += 1
                     else:
                         bats_report_func(file, batspp_to_bats)
 
@@ -179,12 +180,12 @@ def auto_batspp(NO_OPTION, KCOV_OPTION, TXT_OPTION):
             
             batspp_count = i - 1
         
-        print ("\n\n==========BATS GENERATED==========\n")   
-        if NO_OPTION:
+        print ("\n\n========== BATS GENERATED ==========\n")   
+        if not NO_OPTION:
+            not_no_option()
+        else:
             NO_REPORT_MESSAGE = f"Skipping batspp check (no-reports option provided)"
             print(gh.indent(NO_REPORT_MESSAGE, indentation="  >>  ", max_width=512))
-        else:
-            not_no_option()
     
     # 4) Mentioning any errors in ipynb testfiles
     def working_tests():
@@ -206,11 +207,11 @@ def auto_batspp(NO_OPTION, KCOV_OPTION, TXT_OPTION):
         print(f"\n======================================================")
         print(f"SUMMARY STATISTICS:\n")
         print(f"IPYNB FILES PRESENT: {ipynb_count}")
-        print(f"BATSPP FILES GENERATED: {batspp_count if TXT_OPTION or NO_OPTION != True else 'NaN'}")
-        print(f"NO. OF FAULTY TESTFILES: {faulty_count if TXT_OPTION or NO_OPTION != True else 'NaN'}")
+        print(f"BATSPP FILES GENERATED: {batspp_count if TXT_OPTION or NO_OPTION != True else 'N/A'}")
+        print(f"NO. OF FAULTY TESTFILES: {faulty_count if TXT_OPTION or NO_OPTION != True else 'N/A'}")
         print(f"\nFAULTY TESTFILES:")
         if faulty_count == 0:
-            print ("NaN")
+            print ("None")
         else: 
             for tf in error_testfiles:  
                 print(f">> {tf}")

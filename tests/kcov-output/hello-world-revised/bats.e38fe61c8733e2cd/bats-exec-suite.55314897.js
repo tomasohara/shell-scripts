@@ -121,8 +121,8 @@ var data = {lines:[
 {"lineNum":"  120","line":"    test_names=()"},
 {"lineNum":"  121","line":"    test_dupes=()"},
 {"lineNum":"  122","line":"    while read -r line; do","class":"lineCov","hits":"113","order":"125","possible_hits":"0",},
-{"lineNum":"  123","line":"      if [[ ! \"$line\" =~ ^bats_test_function\\  ]]; then","class":"lineCov","hits":"112","order":"172","possible_hits":"0",},
-{"lineNum":"  124","line":"        continue","class":"lineCov","hits":"105","order":"173","possible_hits":"0",},
+{"lineNum":"  123","line":"      if [[ ! \"$line\" =~ ^bats_test_function\\  ]]; then","class":"lineCov","hits":"112","order":"141","possible_hits":"0",},
+{"lineNum":"  124","line":"        continue","class":"lineCov","hits":"105","order":"142","possible_hits":"0",},
 {"lineNum":"  125","line":"      fi"},
 {"lineNum":"  126","line":"      line=\"${line%$\'\\r\'}\"","class":"lineCov","hits":"7","order":"176","possible_hits":"0",},
 {"lineNum":"  127","line":"      line=\"${line#* }\"","class":"lineCov","hits":"7","order":"177","possible_hits":"0",},
@@ -305,12 +305,12 @@ var data = {lines:[
 {"lineNum":"  304","line":"printf \'1..%d\\n\' \"${test_count}\"","class":"lineCov","hits":"1","order":"197","possible_hits":"0",},
 {"lineNum":"  305","line":""},
 {"lineNum":"  306","line":"# No point on continuing if there\'s no tests."},
-{"lineNum":"  307","line":"if [[ \"${test_count}\" == 0 ]]; then","class":"lineCov","hits":"1","order":"198","possible_hits":"0",},
+{"lineNum":"  307","line":"if [[ \"${test_count}\" == 0 ]]; then","class":"lineCov","hits":"1","order":"203","possible_hits":"0",},
 {"lineNum":"  308","line":"  exit","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  309","line":"fi"},
 {"lineNum":"  310","line":""},
-{"lineNum":"  311","line":"export BATS_SUITE_TMPDIR=\"${BATS_RUN_TMPDIR}/suite\"","class":"lineCov","hits":"2","order":"199","possible_hits":"0",},
-{"lineNum":"  312","line":"if ! mkdir \"$BATS_SUITE_TMPDIR\"; then","class":"lineCov","hits":"1","order":"201","possible_hits":"0",},
+{"lineNum":"  311","line":"export BATS_SUITE_TMPDIR=\"${BATS_RUN_TMPDIR}/suite\"","class":"lineCov","hits":"2","order":"204","possible_hits":"0",},
+{"lineNum":"  312","line":"if ! mkdir \"$BATS_SUITE_TMPDIR\"; then","class":"lineCov","hits":"1","order":"205","possible_hits":"0",},
 {"lineNum":"  313","line":"  printf \'%s\\n\' \"Failed to create BATS_SUITE_TMPDIR\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  314","line":"  exit 1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  315","line":"fi"},
@@ -436,5 +436,5 @@ var data = {lines:[
 {"lineNum":"  435","line":"exit \"$bats_exec_suite_status\"","class":"lineCov","hits":"2","order":"610","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-19 20:15:11", "instrumented" : 229, "covered" : 85,};
+var header = { "command" : "bats", "date" : "2022-10-23 20:33:03", "instrumented" : 229, "covered" : 85,};
 var merged_data = [];

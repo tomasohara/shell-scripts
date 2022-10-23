@@ -825,7 +825,7 @@
 		<lineToCover lineNumber="354" covered="true"/>
 		<lineToCover lineNumber="356" covered="true"/>
 	</file>
-	<file path="/tmp/bats-run-bEeK2e/bats.17686.src">
+	<file path="/tmp/bats-run-6c8jQa/bats.10748.src">
 		<lineToCover lineNumber="5" covered="true"/>
 		<lineToCover lineNumber="8" covered="true"/>
 		<lineToCover lineNumber="12" covered="true"/>
@@ -1519,9 +1519,9 @@
 		<lineToCover lineNumber="371" covered="false"/>
 		<lineToCover lineNumber="372" covered="false"/>
 		<lineToCover lineNumber="375" covered="true"/>
-		<lineToCover lineNumber="380" covered="true"/>
-		<lineToCover lineNumber="381" covered="true"/>
-		<lineToCover lineNumber="384" covered="true"/>
+		<lineToCover lineNumber="380" covered="false"/>
+		<lineToCover lineNumber="381" covered="false"/>
+		<lineToCover lineNumber="384" covered="false"/>
 		<lineToCover lineNumber="390" covered="false"/>
 		<lineToCover lineNumber="391" covered="false"/>
 		<lineToCover lineNumber="392" covered="false"/>

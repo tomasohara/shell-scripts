@@ -135,7 +135,7 @@ else:
                 i += 1
                 
                 if KCOV_OPTION == 1:
-                    KCOV_MESSAGE = f"KCOV REPORT PATH: ./{KCOV_STORE}/{kcov_folder}/"
+                    KCOV_MESSAGE = f"KCOV REPORT PATH\: ./{KCOV_STORE}/{kcov_folder}/"
                     print(gh.indent(KCOV_MESSAGE, indentation="  >>  ", max_width=512))
                     gh.run(f"kcov ./{KCOV_STORE}/{kcov_folder} bats ./{BATS_STORE}/{bats_from_batspp}")
                 

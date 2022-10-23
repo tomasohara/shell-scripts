@@ -400,6 +400,22 @@
 		<lineToCover lineNumber="334" covered="true"/>
 		<lineToCover lineNumber="335" covered="true"/>
 	</file>
+	<file path="/usr/local/lib/bats-core/validator.bash">
+		<lineToCover lineNumber="4" covered="true"/>
+		<lineToCover lineNumber="5" covered="true"/>
+		<lineToCover lineNumber="6" covered="true"/>
+		<lineToCover lineNumber="8" covered="true"/>
+		<lineToCover lineNumber="11" covered="true"/>
+		<lineToCover lineNumber="13" covered="true"/>
+		<lineToCover lineNumber="15" covered="true"/>
+		<lineToCover lineNumber="16" covered="true"/>
+		<lineToCover lineNumber="18" covered="true"/>
+		<lineToCover lineNumber="19" covered="true"/>
+		<lineToCover lineNumber="29" covered="true"/>
+		<lineToCover lineNumber="30" covered="false"/>
+		<lineToCover lineNumber="31" covered="false"/>
+		<lineToCover lineNumber="35" covered="false"/>
+	</file>
 	<file path="/usr/local/libexec/bats-core/bats-exec-file">
 		<lineToCover lineNumber="2" covered="true"/>
 		<lineToCover lineNumber="4" covered="true"/>
@@ -1376,23 +1392,7 @@
 		<lineToCover lineNumber="392" covered="false"/>
 		<lineToCover lineNumber="393" covered="false"/>
 	</file>
-	<file path="/usr/local/lib/bats-core/validator.bash">
-		<lineToCover lineNumber="4" covered="true"/>
-		<lineToCover lineNumber="5" covered="true"/>
-		<lineToCover lineNumber="6" covered="true"/>
-		<lineToCover lineNumber="8" covered="true"/>
-		<lineToCover lineNumber="11" covered="true"/>
-		<lineToCover lineNumber="13" covered="true"/>
-		<lineToCover lineNumber="15" covered="true"/>
-		<lineToCover lineNumber="16" covered="true"/>
-		<lineToCover lineNumber="18" covered="true"/>
-		<lineToCover lineNumber="19" covered="true"/>
-		<lineToCover lineNumber="29" covered="true"/>
-		<lineToCover lineNumber="30" covered="false"/>
-		<lineToCover lineNumber="31" covered="false"/>
-		<lineToCover lineNumber="35" covered="false"/>
-	</file>
-	<file path="/tmp/bats-run-bhGeqi/bats.103303.src">
+	<file path="/tmp/bats-run-eM3a1u/bats.12643.src">
 		<lineToCover lineNumber="5" covered="true"/>
 		<lineToCover lineNumber="8" covered="true"/>
 		<lineToCover lineNumber="12" covered="true"/>

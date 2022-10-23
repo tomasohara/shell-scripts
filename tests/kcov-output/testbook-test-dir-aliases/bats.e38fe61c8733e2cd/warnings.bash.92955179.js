@@ -2,7 +2,7 @@ var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
 {"lineNum":"    2","line":""},
 {"lineNum":"    3","line":"# shellcheck source=lib/bats-core/tracing.bash"},
-{"lineNum":"    4","line":"source \"$BATS_ROOT/lib/bats-core/tracing.bash\"","class":"lineCov","hits":"39","order":"300","possible_hits":"0",},
+{"lineNum":"    4","line":"source \"$BATS_ROOT/lib/bats-core/tracing.bash\"","class":"lineCov","hits":"21","order":"300","possible_hits":"0",},
 {"lineNum":"    5","line":""},
 {"lineNum":"    6","line":"# generate a warning report for the parent call\'s call site"},
 {"lineNum":"    7","line":"bats_generate_warning() { # <warning number> [--no-stacktrace] [<printf args for warning string>...]"},
@@ -42,8 +42,8 @@ var data = {lines:[
 {"lineNum":"   41","line":"  \"\\`run\\`\'s command \\`%s\\` exited with code 127, indicating \'Command not found\'. Use run\'s return code checks, e.g. \\`run -127\\`, to fix this message.\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   42","line":"  \"%s requires at least BATS_VERSION=%s. Use \\`bats_require_minimum_version %s\\` to fix this message.\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   43","line":"  \"\\`setup_suite\\` is visible to test file \'%s\', but was not executed. It belongs into \'setup_suite.bash\' to be picked up automatically.\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   44","line":")","class":"lineCov","hits":"39","order":"301","possible_hits":"0",},
+{"lineNum":"   44","line":")","class":"lineCov","hits":"21","order":"301","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-20 20:34:31", "instrumented" : 23, "covered" : 2,};
+var header = { "command" : "bats", "date" : "2022-10-23 20:31:41", "instrumented" : 23, "covered" : 2,};
 var merged_data = [];

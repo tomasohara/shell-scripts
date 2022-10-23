@@ -2,7 +2,7 @@ var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
 {"lineNum":"    2","line":""},
 {"lineNum":"    3","line":"bats_prefix_lines_for_tap_output() {"},
-{"lineNum":"    4","line":"    while IFS= read -r line; do","class":"lineCov","hits":"30","order":"540","possible_hits":"0",},
+{"lineNum":"    4","line":"    while IFS= read -r line; do","class":"lineCov","hits":"30","order":"538","possible_hits":"0",},
 {"lineNum":"    5","line":"      printf \'# %s\\n\' \"$line\" || break # avoid feedback loop when errors are redirected into BATS_OUT (see #353)","class":"lineCov","hits":"10","order":"541","possible_hits":"0",},
 {"lineNum":"    6","line":"    done"},
 {"lineNum":"    7","line":"    if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"5","order":"543","possible_hits":"0",},
@@ -11,8 +11,8 @@ var data = {lines:[
 {"lineNum":"   10","line":"}"},
 {"lineNum":"   11","line":""},
 {"lineNum":"   12","line":"function bats_replace_filename() {"},
-{"lineNum":"   13","line":"  local line","class":"lineCov","hits":"5","order":"538","possible_hits":"0",},
-{"lineNum":"   14","line":"  while read -r line; do","class":"lineCov","hits":"15","order":"539","possible_hits":"0",},
+{"lineNum":"   13","line":"  local line","class":"lineCov","hits":"5","order":"539","possible_hits":"0",},
+{"lineNum":"   14","line":"  while read -r line; do","class":"lineCov","hits":"15","order":"540","possible_hits":"0",},
 {"lineNum":"   15","line":"    printf \"%s\\n\" \"${line//$BATS_TEST_SOURCE/$BATS_TEST_FILENAME}\"","class":"lineCov","hits":"10","order":"542","possible_hits":"0",},
 {"lineNum":"   16","line":"  done"},
 {"lineNum":"   17","line":"  if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"5","order":"544","possible_hits":"0",},
@@ -214,5 +214,5 @@ var data = {lines:[
 {"lineNum":"  213","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-19 20:15:46", "instrumented" : 106, "covered" : 22,};
+var header = { "command" : "bats", "date" : "2022-10-23 20:34:05", "instrumented" : 106, "covered" : 22,};
 var merged_data = [];
