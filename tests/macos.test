@@ -1,6 +1,13 @@
-#-------------------------------------------------------------------------------
-# notes/drafts on tests needed to account for Mac differences compared to Linux
+# tests inspired by MacOS differences form Linux
 
+## TODO: fix reference to xfer dir (e.g., /home/$USER/xfer => ~/xfer)
+##
+## @ reempl-upload wadeandwendy.atlassian.net-_DS-2__Skill_Extraction_Performance_Comparison_-_JIRA-2022-08-20.html
+## Warning: untrusted X11 forwarding setup failed: xauth key data not generated
+## chmod: cannot access '/Users/tomohara/xfer/*': No such file or directory
+## wadeandwendy.atlassian.net-_DS-2__Skill_Extraction_Performance_Comparison_-_JIRA-2022-08-20.html                100%   28MB  31.2MB/s   00:00    
+
+#...............................................................................
 
 ## TODO: work out way to specify plaform
 
