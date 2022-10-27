@@ -168,7 +168,7 @@ var data = {lines:[
 {"lineNum":"  167","line":"\telse"},
 {"lineNum":"  168","line":"\t\tNORMALIZED_INPUT=\"$path\"","class":"lineCov","hits":"3087","order":"231","possible_hits":"0",},
 {"lineNum":"  169","line":"\tfi"},
-{"lineNum":"  170","line":"\tprintf -v \"$output_var\" \"%s\" \"$NORMALIZED_INPUT\"","class":"lineCov","hits":"3087","order":"232","possible_hits":"0",},
+{"lineNum":"  170","line":"\tprintf -v \"$output_var\" \"%s\" \"$NORMALIZED_INPUT\"","class":"lineCov","hits":"3086","order":"232","possible_hits":"0",},
 {"lineNum":"  171","line":"}"},
 {"lineNum":"  172","line":""},
 {"lineNum":"  173","line":"bats_emit_trace() {"},
@@ -395,5 +395,5 @@ var data = {lines:[
 {"lineNum":"  394","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-23 20:33:47", "instrumented" : 165, "covered" : 109,};
+var header = { "command" : "bats", "date" : "2022-10-25 17:17:11", "instrumented" : 165, "covered" : 109,};
 var merged_data = [];

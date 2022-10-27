@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.410" lines-covered="571" lines-valid="1394" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1666536601">
+<coverage line-rate="0.410" lines-covered="571" lines-valid="1394" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1666697604">
 	<sources>
 		<source>/</source>
 	</sources>
@@ -1142,18 +1142,6 @@
 						<line number="211" hits="4"/>
 					</lines>
 				</class>
-				<class name="preprocessing_bash" filename="usr/local/lib/bats-core/preprocessing.bash" branch-rate="1.0" complexity="1.0" line-rate="0.875">
-					<lines>
-						<line number="3" hits="3"/>
-						<line number="4" hits="3"/>
-						<line number="6" hits="3"/>
-						<line number="11" hits="2"/>
-						<line number="12" hits="2"/>
-						<line number="16" hits="2"/>
-						<line number="17" hits="0"/>
-						<line number="21" hits="2"/>
-					</lines>
-				</class>
 				<class name="warnings_bash" filename="usr/local/lib/bats-core/warnings.bash" branch-rate="1.0" complexity="1.0" line-rate="0.087">
 					<lines>
 						<line number="4" hits="3"/>
@@ -1425,7 +1413,19 @@
 						<line number="393" hits="0"/>
 					</lines>
 				</class>
-				<class name="bats_23608_src" filename="tmp/bats-run-1b1csq/bats.23608.src" branch-rate="1.0" complexity="1.0" line-rate="0.429">
+				<class name="preprocessing_bash" filename="usr/local/lib/bats-core/preprocessing.bash" branch-rate="1.0" complexity="1.0" line-rate="0.875">
+					<lines>
+						<line number="3" hits="3"/>
+						<line number="4" hits="3"/>
+						<line number="6" hits="3"/>
+						<line number="11" hits="2"/>
+						<line number="12" hits="2"/>
+						<line number="16" hits="2"/>
+						<line number="17" hits="0"/>
+						<line number="21" hits="2"/>
+					</lines>
+				</class>
+				<class name="bats_33181_src" filename="tmp/bats-run-G3lMVR/bats.33181.src" branch-rate="1.0" complexity="1.0" line-rate="0.429">
 					<lines>
 						<line number="5" hits="4"/>
 						<line number="8" hits="4"/>

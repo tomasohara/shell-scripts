@@ -81,7 +81,7 @@ var data = {lines:[
 {"lineNum":"   80","line":"    (( ++line_number ))","class":"lineCov","hits":"126","order":"136","possible_hits":"0",},
 {"lineNum":"   81","line":"    line=\"${line//$\'\\r\'/}\"","class":"lineCov","hits":"126","order":"137","possible_hits":"0",},
 {"lineNum":"   82","line":"    if [[ \"$line\" =~ $BATS_TEST_PATTERN ]] || [[ \"$line\" =~ $BATS_TEST_PATTERN_COMMENT ]]; then","class":"lineCov","hits":"246","order":"138","possible_hits":"0",},
-{"lineNum":"   83","line":"      name=\"${BASH_REMATCH[1]#[\\\'\\\"]}\"","class":"lineCov","hits":"6","order":"143","possible_hits":"0",},
+{"lineNum":"   83","line":"      name=\"${BASH_REMATCH[1]#[\\\'\\\"]}\"","class":"lineCov","hits":"6","order":"141","possible_hits":"0",},
 {"lineNum":"   84","line":"      name=\"${name%[\\\'\\\"]}\"","class":"lineCov","hits":"6","order":"144","possible_hits":"0",},
 {"lineNum":"   85","line":"      body=\"${BASH_REMATCH[2]:-}\"","class":"lineCov","hits":"6","order":"145","possible_hits":"0",},
 {"lineNum":"   86","line":"      bats_encode_test_name \"$name\" \'encoded_name\'","class":"lineCov","hits":"6","order":"146","possible_hits":"0",},
@@ -120,5 +120,5 @@ var data = {lines:[
 {"lineNum":"  119","line":"exit $exit_code","class":"lineCov","hits":"2","order":"183","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-23 20:32:00", "instrumented" : 71, "covered" : 35,};
+var header = { "command" : "bats", "date" : "2022-10-25 17:15:46", "instrumented" : 71, "covered" : 35,};
 var merged_data = [];

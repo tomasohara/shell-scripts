@@ -1127,31 +1127,6 @@
 		<lineToCover lineNumber="17" covered="false"/>
 		<lineToCover lineNumber="21" covered="true"/>
 	</file>
-	<file path="/usr/local/lib/bats-core/warnings.bash">
-		<lineToCover lineNumber="4" covered="true"/>
-		<lineToCover lineNumber="8" covered="false"/>
-		<lineToCover lineNumber="9" covered="false"/>
-		<lineToCover lineNumber="10" covered="false"/>
-		<lineToCover lineNumber="11" covered="false"/>
-		<lineToCover lineNumber="12" covered="false"/>
-		<lineToCover lineNumber="13" covered="false"/>
-		<lineToCover lineNumber="15" covered="false"/>
-		<lineToCover lineNumber="17" covered="false"/>
-		<lineToCover lineNumber="18" covered="false"/>
-		<lineToCover lineNumber="19" covered="false"/>
-		<lineToCover lineNumber="20" covered="false"/>
-		<lineToCover lineNumber="22" covered="false"/>
-		<lineToCover lineNumber="24" covered="false"/>
-		<lineToCover lineNumber="25" covered="false"/>
-		<lineToCover lineNumber="31" covered="false"/>
-		<lineToCover lineNumber="32" covered="false"/>
-		<lineToCover lineNumber="37" covered="false"/>
-		<lineToCover lineNumber="39" covered="false"/>
-		<lineToCover lineNumber="41" covered="false"/>
-		<lineToCover lineNumber="42" covered="false"/>
-		<lineToCover lineNumber="43" covered="false"/>
-		<lineToCover lineNumber="44" covered="true"/>
-	</file>
 	<file path="/usr/local/libexec/bats-core/bats-preprocess">
 		<lineToCover lineNumber="2" covered="true"/>
 		<lineToCover lineNumber="5" covered="true"/>
@@ -1392,7 +1367,32 @@
 		<lineToCover lineNumber="392" covered="false"/>
 		<lineToCover lineNumber="393" covered="false"/>
 	</file>
-	<file path="/tmp/bats-run-a8c3JS/bats.13141.src">
+	<file path="/usr/local/lib/bats-core/warnings.bash">
+		<lineToCover lineNumber="4" covered="true"/>
+		<lineToCover lineNumber="8" covered="false"/>
+		<lineToCover lineNumber="9" covered="false"/>
+		<lineToCover lineNumber="10" covered="false"/>
+		<lineToCover lineNumber="11" covered="false"/>
+		<lineToCover lineNumber="12" covered="false"/>
+		<lineToCover lineNumber="13" covered="false"/>
+		<lineToCover lineNumber="15" covered="false"/>
+		<lineToCover lineNumber="17" covered="false"/>
+		<lineToCover lineNumber="18" covered="false"/>
+		<lineToCover lineNumber="19" covered="false"/>
+		<lineToCover lineNumber="20" covered="false"/>
+		<lineToCover lineNumber="22" covered="false"/>
+		<lineToCover lineNumber="24" covered="false"/>
+		<lineToCover lineNumber="25" covered="false"/>
+		<lineToCover lineNumber="31" covered="false"/>
+		<lineToCover lineNumber="32" covered="false"/>
+		<lineToCover lineNumber="37" covered="false"/>
+		<lineToCover lineNumber="39" covered="false"/>
+		<lineToCover lineNumber="41" covered="false"/>
+		<lineToCover lineNumber="42" covered="false"/>
+		<lineToCover lineNumber="43" covered="false"/>
+		<lineToCover lineNumber="44" covered="true"/>
+	</file>
+	<file path="/tmp/bats-run-2o8ioa/bats.22799.src">
 		<lineToCover lineNumber="5" covered="true"/>
 		<lineToCover lineNumber="8" covered="true"/>
 		<lineToCover lineNumber="12" covered="true"/>

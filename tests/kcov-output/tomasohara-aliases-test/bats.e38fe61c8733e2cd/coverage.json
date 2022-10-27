@@ -9,11 +9,11 @@
     {"file": "/usr/local/libexec/bats-core/bats-exec-test", "percent_covered": "50.28", "covered_lines": "89", "total_lines": "177"},
     {"file": "/usr/local/libexec/bats-core/bats-format-cat", "percent_covered": "100.00", "covered_lines": "3", "total_lines": "3"},
     {"file": "/usr/local/lib/bats-core/common.bash", "percent_covered": "20.75", "covered_lines": "22", "total_lines": "106"},
-    {"file": "/usr/local/lib/bats-core/preprocessing.bash", "percent_covered": "87.50", "covered_lines": "7", "total_lines": "8"},
     {"file": "/usr/local/lib/bats-core/warnings.bash", "percent_covered": "8.70", "covered_lines": "2", "total_lines": "23"},
     {"file": "/usr/local/libexec/bats-core/bats-preprocess", "percent_covered": "49.30", "covered_lines": "35", "total_lines": "71"},
     {"file": "/usr/local/lib/bats-core/tracing.bash", "percent_covered": "65.45", "covered_lines": "108", "total_lines": "165"},
-    {"file": "/tmp/bats-run-1b1csq/bats.23608.src", "percent_covered": "42.86", "covered_lines": "12", "total_lines": "28"}
+    {"file": "/usr/local/lib/bats-core/preprocessing.bash", "percent_covered": "87.50", "covered_lines": "7", "total_lines": "8"},
+    {"file": "/tmp/bats-run-G3lMVR/bats.33181.src", "percent_covered": "42.86", "covered_lines": "12", "total_lines": "28"}
   ],
   "percent_covered": "40.96",
   "covered_lines": 571,
@@ -21,5 +21,5 @@
   "percent_low": 25,
   "percent_high": 75,
   "command": "bats",
-  "date": "2022-10-23 20:35:01"
+  "date": "2022-10-25 17:18:24"
 }

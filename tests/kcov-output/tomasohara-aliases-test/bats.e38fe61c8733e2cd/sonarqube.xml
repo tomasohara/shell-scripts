@@ -1117,16 +1117,6 @@
 		<lineToCover lineNumber="209" covered="false"/>
 		<lineToCover lineNumber="211" covered="true"/>
 	</file>
-	<file path="/usr/local/lib/bats-core/preprocessing.bash">
-		<lineToCover lineNumber="3" covered="true"/>
-		<lineToCover lineNumber="4" covered="true"/>
-		<lineToCover lineNumber="6" covered="true"/>
-		<lineToCover lineNumber="11" covered="true"/>
-		<lineToCover lineNumber="12" covered="true"/>
-		<lineToCover lineNumber="16" covered="true"/>
-		<lineToCover lineNumber="17" covered="false"/>
-		<lineToCover lineNumber="21" covered="true"/>
-	</file>
 	<file path="/usr/local/lib/bats-core/warnings.bash">
 		<lineToCover lineNumber="4" covered="true"/>
 		<lineToCover lineNumber="8" covered="false"/>
@@ -1392,7 +1382,17 @@
 		<lineToCover lineNumber="392" covered="false"/>
 		<lineToCover lineNumber="393" covered="false"/>
 	</file>
-	<file path="/tmp/bats-run-1b1csq/bats.23608.src">
+	<file path="/usr/local/lib/bats-core/preprocessing.bash">
+		<lineToCover lineNumber="3" covered="true"/>
+		<lineToCover lineNumber="4" covered="true"/>
+		<lineToCover lineNumber="6" covered="true"/>
+		<lineToCover lineNumber="11" covered="true"/>
+		<lineToCover lineNumber="12" covered="true"/>
+		<lineToCover lineNumber="16" covered="true"/>
+		<lineToCover lineNumber="17" covered="false"/>
+		<lineToCover lineNumber="21" covered="true"/>
+	</file>
+	<file path="/tmp/bats-run-G3lMVR/bats.33181.src">
 		<lineToCover lineNumber="5" covered="true"/>
 		<lineToCover lineNumber="8" covered="true"/>
 		<lineToCover lineNumber="12" covered="true"/>

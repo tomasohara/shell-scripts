@@ -1,46 +1,12 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.433" lines-covered="642" lines-valid="1483" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1666536425">
+<coverage line-rate="0.433" lines-covered="642" lines-valid="1483" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1666697450">
 	<sources>
 		<source>/</source>
 	</sources>
 	<packages>
 		<package name="bats" line-rate="0.433" lines-covered="642" lines-valid="1483" branch-rate="1.0" complexity="1.0">
 			<classes>
-				<class name="bats" filename="usr/local/bin/bats" branch-rate="1.0" complexity="1.0" line-rate="0.233">
-					<lines>
-						<line number="3" hits="1"/>
-						<line number="5" hits="1"/>
-						<line number="7" hits="0"/>
-						<line number="11" hits="1"/>
-						<line number="17" hits="0"/>
-						<line number="18" hits="0"/>
-						<line number="19" hits="0"/>
-						<line number="21" hits="0"/>
-						<line number="22" hits="0"/>
-						<line number="23" hits="0"/>
-						<line number="25" hits="0"/>
-						<line number="26" hits="0"/>
-						<line number="27" hits="0"/>
-						<line number="28" hits="0"/>
-						<line number="29" hits="0"/>
-						<line number="30" hits="0"/>
-						<line number="32" hits="0"/>
-						<line number="35" hits="0"/>
-						<line number="36" hits="0"/>
-						<line number="37" hits="0"/>
-						<line number="38" hits="0"/>
-						<line number="45" hits="0"/>
-						<line number="46" hits="0"/>
-						<line number="48" hits="0"/>
-						<line number="52" hits="2"/>
-						<line number="53" hits="0"/>
-						<line number="54" hits="0"/>
-						<line number="57" hits="2"/>
-						<line number="58" hits="1"/>
-						<line number="59" hits="1"/>
-					</lines>
-				</class>
 				<class name="bats" filename="usr/local/libexec/bats-core/bats" branch-rate="1.0" complexity="1.0" line-rate="0.376">
 					<lines>
 						<line number="2" hits="1"/>
@@ -1425,7 +1391,41 @@
 						<line number="393" hits="0"/>
 					</lines>
 				</class>
-				<class name="bats_12643_src" filename="tmp/bats-run-eM3a1u/bats.12643.src" branch-rate="1.0" complexity="1.0" line-rate="0.641">
+				<class name="bats" filename="usr/local/bin/bats" branch-rate="1.0" complexity="1.0" line-rate="0.233">
+					<lines>
+						<line number="3" hits="1"/>
+						<line number="5" hits="1"/>
+						<line number="7" hits="0"/>
+						<line number="11" hits="1"/>
+						<line number="17" hits="0"/>
+						<line number="18" hits="0"/>
+						<line number="19" hits="0"/>
+						<line number="21" hits="0"/>
+						<line number="22" hits="0"/>
+						<line number="23" hits="0"/>
+						<line number="25" hits="0"/>
+						<line number="26" hits="0"/>
+						<line number="27" hits="0"/>
+						<line number="28" hits="0"/>
+						<line number="29" hits="0"/>
+						<line number="30" hits="0"/>
+						<line number="32" hits="0"/>
+						<line number="35" hits="0"/>
+						<line number="36" hits="0"/>
+						<line number="37" hits="0"/>
+						<line number="38" hits="0"/>
+						<line number="45" hits="0"/>
+						<line number="46" hits="0"/>
+						<line number="48" hits="0"/>
+						<line number="52" hits="2"/>
+						<line number="53" hits="0"/>
+						<line number="54" hits="0"/>
+						<line number="57" hits="2"/>
+						<line number="58" hits="1"/>
+						<line number="59" hits="1"/>
+					</lines>
+				</class>
+				<class name="bats_22295_src" filename="tmp/bats-run-6KFYqj/bats.22295.src" branch-rate="1.0" complexity="1.0" line-rate="0.641">
 					<lines>
 						<line number="5" hits="14"/>
 						<line number="8" hits="14"/>

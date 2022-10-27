@@ -7,13 +7,13 @@ var data = {files:[
 {"link":"bats-exec-suite.55314897.html","title":"bats-exec-suite","summary_name":"/usr/local/libexec/bats-core/bats-exec-suite","covered_class":"linePartCov","covered":"37.1","covered_lines":"85","uncovered_lines":"144","total_lines" : "229"},
 {"link":"bats-exec-test.ad8a9e6.html","title":"bats-exec-test","summary_name":"/usr/local/libexec/bats-core/bats-exec-test","covered_class":"linePartCov","covered":"53.7","covered_lines":"95","uncovered_lines":"82","total_lines" : "177"},
 {"link":"bats-format-cat.c477ed39.html","title":"bats-format-cat","summary_name":"/usr/local/libexec/bats-core/bats-format-cat","covered_class":"lineCov","covered":"100.0","covered_lines":"3","uncovered_lines":"0","total_lines" : "3"},
-{"link":"bats.23966.src.39c66d73.html","title":"bats.23966.src","summary_name":"/tmp/bats-run-kcXzq2/bats.23966.src","covered_class":"linePartCov","covered":"66.2","covered_lines":"94","uncovered_lines":"48","total_lines" : "142"},
 {"link":"common.bash.7a8bdafa.html","title":"common.bash","summary_name":"/usr/local/lib/bats-core/common.bash","covered_class":"lineNoCov","covered":"20.8","covered_lines":"22","uncovered_lines":"84","total_lines" : "106"},
 {"link":"preprocessing.bash.6dd62e59.html","title":"preprocessing.bash","summary_name":"/usr/local/lib/bats-core/preprocessing.bash","covered_class":"lineCov","covered":"87.5","covered_lines":"7","uncovered_lines":"1","total_lines" : "8"},
 {"link":"warnings.bash.92955179.html","title":"warnings.bash","summary_name":"/usr/local/lib/bats-core/warnings.bash","covered_class":"lineNoCov","covered":"8.7","covered_lines":"2","uncovered_lines":"21","total_lines" : "23"},
 {"link":"bats-preprocess.c89b1ce6.html","title":"bats-preprocess","summary_name":"/usr/local/libexec/bats-core/bats-preprocess","covered_class":"linePartCov","covered":"49.3","covered_lines":"35","uncovered_lines":"36","total_lines" : "71"},
 {"link":"tracing.bash.d47fd49d.html","title":"tracing.bash","summary_name":"/usr/local/lib/bats-core/tracing.bash","covered_class":"linePartCov","covered":"66.1","covered_lines":"109","uncovered_lines":"56","total_lines" : "165"},
+{"link":"bats.33524.src.c5dc2b27.html","title":"bats.33524.src","summary_name":"/tmp/bats-run-Ku9ckC/bats.33524.src","covered_class":"linePartCov","covered":"66.2","covered_lines":"94","uncovered_lines":"48","total_lines" : "142"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-23 20:35:08", "instrumented" : 1508, "covered" : 661,};
+var header = { "command" : "bats", "date" : "2022-10-25 17:18:30", "instrumented" : 1508, "covered" : 661,};
 var merged_data = [];

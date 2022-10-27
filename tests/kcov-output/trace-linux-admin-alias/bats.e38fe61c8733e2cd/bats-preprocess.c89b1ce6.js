@@ -77,10 +77,10 @@ var data = {lines:[
 {"lineNum":"   76","line":"line_number=0","class":"lineCov","hits":"2","order":"133","possible_hits":"0",},
 {"lineNum":"   77","line":"exit_code=0","class":"lineCov","hits":"2","order":"134","possible_hits":"0",},
 {"lineNum":"   78","line":"{"},
-{"lineNum":"   79","line":"  while IFS= read -r line; do","class":"lineCov","hits":"980","order":"135","possible_hits":"0",},
-{"lineNum":"   80","line":"    (( ++line_number ))","class":"lineCov","hits":"488","order":"136","possible_hits":"0",},
-{"lineNum":"   81","line":"    line=\"${line//$\'\\r\'/}\"","class":"lineCov","hits":"488","order":"137","possible_hits":"0",},
-{"lineNum":"   82","line":"    if [[ \"$line\" =~ $BATS_TEST_PATTERN ]] || [[ \"$line\" =~ $BATS_TEST_PATTERN_COMMENT ]]; then","class":"lineCov","hits":"946","order":"138","possible_hits":"0",},
+{"lineNum":"   79","line":"  while IFS= read -r line; do","class":"lineCov","hits":"978","order":"135","possible_hits":"0",},
+{"lineNum":"   80","line":"    (( ++line_number ))","class":"lineCov","hits":"487","order":"136","possible_hits":"0",},
+{"lineNum":"   81","line":"    line=\"${line//$\'\\r\'/}\"","class":"lineCov","hits":"487","order":"137","possible_hits":"0",},
+{"lineNum":"   82","line":"    if [[ \"$line\" =~ $BATS_TEST_PATTERN ]] || [[ \"$line\" =~ $BATS_TEST_PATTERN_COMMENT ]]; then","class":"lineCov","hits":"945","order":"138","possible_hits":"0",},
 {"lineNum":"   83","line":"      name=\"${BASH_REMATCH[1]#[\\\'\\\"]}\"","class":"lineCov","hits":"30","order":"143","possible_hits":"0",},
 {"lineNum":"   84","line":"      name=\"${name%[\\\'\\\"]}\"","class":"lineCov","hits":"30","order":"144","possible_hits":"0",},
 {"lineNum":"   85","line":"      body=\"${BASH_REMATCH[2]:-}\"","class":"lineCov","hits":"30","order":"145","possible_hits":"0",},
@@ -108,7 +108,7 @@ var data = {lines:[
 {"lineNum":"  107","line":"          ;;"},
 {"lineNum":"  108","line":"        esac"},
 {"lineNum":"  109","line":"      fi"},
-{"lineNum":"  110","line":"      printf \'%s\\n\' \"$line\"","class":"lineCov","hits":"458","order":"140","possible_hits":"0",},
+{"lineNum":"  110","line":"      printf \'%s\\n\' \"$line\"","class":"lineCov","hits":"457","order":"140","possible_hits":"0",},
 {"lineNum":"  111","line":"    fi"},
 {"lineNum":"  112","line":"  done"},
 {"lineNum":"  113","line":"} <<<\"$(<\"$test_file\")\"$\'\\n\'","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -120,5 +120,5 @@ var data = {lines:[
 {"lineNum":"  119","line":"exit $exit_code","class":"lineCov","hits":"2","order":"176","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-23 20:35:08", "instrumented" : 71, "covered" : 35,};
+var header = { "command" : "bats", "date" : "2022-10-25 17:18:30", "instrumented" : 71, "covered" : 35,};
 var merged_data = [];

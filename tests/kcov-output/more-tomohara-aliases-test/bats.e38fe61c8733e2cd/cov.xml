@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.434" lines-covered="613" lines-valid="1413" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1666536548">
+<coverage line-rate="0.434" lines-covered="613" lines-valid="1413" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1666697553">
 	<sources>
 		<source>/</source>
 	</sources>
@@ -1032,57 +1032,6 @@
 						<line number="6" hits="1"/>
 					</lines>
 				</class>
-				<class name="bats_19575_src" filename="tmp/bats-run-4rZMOX/bats.19575.src" branch-rate="1.0" complexity="1.0" line-rate="1.000">
-					<lines>
-						<line number="5" hits="7"/>
-						<line number="8" hits="7"/>
-						<line number="12" hits="4"/>
-						<line number="13" hits="4"/>
-						<line number="15" hits="4"/>
-						<line number="16" hits="4"/>
-						<line number="17" hits="2"/>
-						<line number="18" hits="4"/>
-						<line number="19" hits="2"/>
-						<line number="20" hits="4"/>
-						<line number="21" hits="2"/>
-						<line number="22" hits="4"/>
-						<line number="27" hits="2"/>
-						<line number="30" hits="2"/>
-						<line number="34" hits="4"/>
-						<line number="35" hits="4"/>
-						<line number="37" hits="2"/>
-						<line number="38" hits="2"/>
-						<line number="39" hits="2"/>
-						<line number="40" hits="2"/>
-						<line number="45" hits="4"/>
-						<line number="46" hits="4"/>
-						<line number="52" hits="4"/>
-						<line number="53" hits="4"/>
-						<line number="55" hits="4"/>
-						<line number="56" hits="4"/>
-						<line number="57" hits="4"/>
-						<line number="58" hits="2"/>
-						<line number="59" hits="4"/>
-						<line number="60" hits="2"/>
-						<line number="61" hits="4"/>
-						<line number="62" hits="2"/>
-						<line number="63" hits="4"/>
-						<line number="68" hits="4"/>
-						<line number="71" hits="2"/>
-						<line number="75" hits="4"/>
-						<line number="76" hits="4"/>
-						<line number="78" hits="2"/>
-						<line number="79" hits="2"/>
-						<line number="80" hits="2"/>
-						<line number="81" hits="2"/>
-						<line number="82" hits="4"/>
-						<line number="85" hits="7"/>
-						<line number="86" hits="7"/>
-						<line number="87" hits="7"/>
-						<line number="88" hits="7"/>
-						<line number="89" hits="7"/>
-					</lines>
-				</class>
 				<class name="common_bash" filename="usr/local/lib/bats-core/common.bash" branch-rate="1.0" complexity="1.0" line-rate="0.208">
 					<lines>
 						<line number="4" hits="28"/>
@@ -1474,6 +1423,57 @@
 						<line number="391" hits="0"/>
 						<line number="392" hits="0"/>
 						<line number="393" hits="0"/>
+					</lines>
+				</class>
+				<class name="bats_29113_src" filename="tmp/bats-run-e9PY4m/bats.29113.src" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+					<lines>
+						<line number="5" hits="7"/>
+						<line number="8" hits="7"/>
+						<line number="12" hits="4"/>
+						<line number="13" hits="4"/>
+						<line number="15" hits="4"/>
+						<line number="16" hits="4"/>
+						<line number="17" hits="2"/>
+						<line number="18" hits="4"/>
+						<line number="19" hits="2"/>
+						<line number="20" hits="4"/>
+						<line number="21" hits="2"/>
+						<line number="22" hits="4"/>
+						<line number="27" hits="2"/>
+						<line number="30" hits="2"/>
+						<line number="34" hits="4"/>
+						<line number="35" hits="4"/>
+						<line number="37" hits="2"/>
+						<line number="38" hits="2"/>
+						<line number="39" hits="2"/>
+						<line number="40" hits="2"/>
+						<line number="45" hits="4"/>
+						<line number="46" hits="4"/>
+						<line number="52" hits="4"/>
+						<line number="53" hits="4"/>
+						<line number="55" hits="4"/>
+						<line number="56" hits="4"/>
+						<line number="57" hits="4"/>
+						<line number="58" hits="2"/>
+						<line number="59" hits="4"/>
+						<line number="60" hits="2"/>
+						<line number="61" hits="4"/>
+						<line number="62" hits="2"/>
+						<line number="63" hits="4"/>
+						<line number="68" hits="4"/>
+						<line number="71" hits="2"/>
+						<line number="75" hits="4"/>
+						<line number="76" hits="4"/>
+						<line number="78" hits="2"/>
+						<line number="79" hits="2"/>
+						<line number="80" hits="2"/>
+						<line number="81" hits="2"/>
+						<line number="82" hits="4"/>
+						<line number="85" hits="7"/>
+						<line number="86" hits="7"/>
+						<line number="87" hits="7"/>
+						<line number="88" hits="7"/>
+						<line number="89" hits="7"/>
 					</lines>
 				</class>
 			</classes>

@@ -32,7 +32,7 @@ var data = {lines:[
 {"lineNum":"   31","line":"\tlocal stack_trace_var","class":"lineCov","hits":"5","order":"456","possible_hits":"0",},
 {"lineNum":"   32","line":"\t# See bats_debug_trap for details."},
 {"lineNum":"   33","line":"\tif [[ -n \"${BATS_DEBUG_LAST_STACK_TRACE_IS_VALID:-}\" ]]; then","class":"lineCov","hits":"5","order":"457","possible_hits":"0",},
-{"lineNum":"   34","line":"\t\tstack_trace_var=BATS_DEBUG_LAST_STACK_TRACE","class":"lineCov","hits":"5","order":"459","possible_hits":"0",},
+{"lineNum":"   34","line":"\t\tstack_trace_var=BATS_DEBUG_LAST_STACK_TRACE","class":"lineCov","hits":"5","order":"458","possible_hits":"0",},
 {"lineNum":"   35","line":"\telse"},
 {"lineNum":"   36","line":"\t\tstack_trace_var=BATS_DEBUG_LASTLAST_STACK_TRACE","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   37","line":"\tfi"},
@@ -395,5 +395,5 @@ var data = {lines:[
 {"lineNum":"  394","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-23 20:34:43", "instrumented" : 165, "covered" : 109,};
+var header = { "command" : "bats", "date" : "2022-10-25 17:18:05", "instrumented" : 165, "covered" : 109,};
 var merged_data = [];

@@ -179,7 +179,7 @@ var data = {lines:[
 {"lineNum":"  178","line":"  else"},
 {"lineNum":"  179","line":"    printf \'ok %d %s%s\\n\' \"$BATS_SUITE_TEST_NUMBER\" \"${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}\" \\","class":"lineCov","hits":"22","order":"455","possible_hits":"0",},
 {"lineNum":"  180","line":"      \"$exit_metadata\" >&3"},
-{"lineNum":"  181","line":"    status=0","class":"lineCov","hits":"22","order":"458","possible_hits":"0",},
+{"lineNum":"  181","line":"    status=0","class":"lineCov","hits":"22","order":"456","possible_hits":"0",},
 {"lineNum":"  182","line":"    local state=passed","class":"lineCov","hits":"22","order":"459","possible_hits":"0",},
 {"lineNum":"  183","line":"  fi"},
 {"lineNum":"  184","line":""},
@@ -336,5 +336,5 @@ var data = {lines:[
 {"lineNum":"  335","line":"bats_perform_test","class":"lineCov","hits":"17","order":"403","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-23 20:34:40", "instrumented" : 177, "covered" : 95,};
+var header = { "command" : "bats", "date" : "2022-10-25 17:18:02", "instrumented" : 177, "covered" : 95,};
 var merged_data = [];

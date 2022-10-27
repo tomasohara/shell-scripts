@@ -13,7 +13,7 @@
     {"file": "/usr/local/lib/bats-core/warnings.bash", "percent_covered": "8.70", "covered_lines": "2", "total_lines": "23"},
     {"file": "/usr/local/libexec/bats-core/bats-preprocess", "percent_covered": "49.30", "covered_lines": "35", "total_lines": "71"},
     {"file": "/usr/local/lib/bats-core/tracing.bash", "percent_covered": "66.06", "covered_lines": "109", "total_lines": "165"},
-    {"file": "/tmp/bats-run-dXICFU/bats.22365.src", "percent_covered": "74.81", "covered_lines": "101", "total_lines": "135"}
+    {"file": "/tmp/bats-run-K2iCEv/bats.31862.src", "percent_covered": "74.81", "covered_lines": "101", "total_lines": "135"}
   ],
   "percent_covered": "44.50",
   "covered_lines": 668,
@@ -21,5 +21,5 @@
   "percent_low": 25,
   "percent_high": 75,
   "command": "bats",
-  "date": "2022-10-23 20:34:50"
+  "date": "2022-10-25 17:18:11"
 }
