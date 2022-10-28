@@ -1,10 +1,34 @@
 #! /usr/bin/env python
 
+## SCRIPT_NAME: kcov_result.py (Indev Name: kcov_test_coverage.py)
+
 ## DESCRIPTION:
+# This script is used for generating results and summary statistics of the testfiles reports generated using KCOV.
+# Doesn't work in the absence of ./kcov-output/ directory.
+
+## REQUIREMENTS:
+# 1) mezcla 1.X.X for script usage
+# 2) Test reports inside ./kcov-output/ directory (as well as ./kcov-output/ directory) 
+
+## USAGE
+# =======
+# NOTE: By default, reports of each testfiles and overall summary stats are printed 
+# 
+# Syntax: ./kcov_result.py <options>
+# 
+# Options:
+#   -h, --help  show this help message and exit
+#   --summary   Generates summary only
+#   --ro        Generates individual reports of testfiles only
+#   --list      Generates lists of testfiles according to the success rate (desc)
+
+## BUGS & ISSUES
+# 1) Issue regarding repetitive outputs in --list option
 
 """
-Calculates and prints the success rate of tests (and other info) using kcov reports
+Calculates and prints the summary of tests results (and other info) using kcov reports
 """
+
 # Standard modules
 import os
 import json
@@ -24,16 +48,19 @@ SUMMARY_MODE = "summary"
 INCLUDE_MODE = "in"
 EXCLUDE_MODE = "ex"
 LIST_MODE = "list"
+REPORT_ONLY_MODE = "ro"
 
 # Function Constants
 JS_PATTERN = f"bats.*/bats.*.src.*.js"
 JSON_REGEX = r'\{[^}]*\}'
 KCOV_FOLDER = "kcov-output"
+LIST_MODE_INS = "instrumented_line"
+LIST_MODE_RATIO = "ratio"
 
-## Main function: kcov_test_coverage(SUMMARY_OPT, LIST_OPT, INCLUDE_OPT, EXCLUDE_OPT)
+## Main function: kcov_test_coverage(SUMMARY_OPT, LIST_OPT, REPORT_MODE, INCLUDE_OPT, EXCLUDE_OPT)
 kcov_folder_exists = gh.file_exists(KCOV_FOLDER)
 
-def kcov_test_coverage(SUMMARY_OPT, LIST_OPT):
+def kcov_test_coverage(SUMMARY_OPT, LIST_OPT, REPORT_ONLY_OPT):
     
     global facts_array
     facts_array = []
@@ -70,10 +97,6 @@ kcov REPORT [{i}]: {report_name}
 
         if not SUMMARY_OPT:
             print (REPORT_PATTERN)
-
-            
-        # print (REPORT_PATTERN)
-
 
     # 2. report_process() uses extract_report(report); act as a calculating function
     def report_process():
@@ -124,9 +147,9 @@ kcov REPORT [{i}]: {report_name}
                 LOWEST_SUCCESS_TESTFILE = fact["report_name"]    
         
         if SUMMARY_OPT: print ("\n[SUMMARY MODE (--summary) ENABLED]")
-        print (f"\n====================================")
+        print (f"\n===============================================\n")
         print (f"SUMMARY STATISTICS: ")
-        print (f"------------------------------------")
+        print (f"------------------------------------\n")
         print (f"REPORTS DETECTED: [{file_quantity}]")
         print (f"Total Instrumented Lines = {INSTRUMENTED_TOTAL}")
         print (f"Total Covered Lines = {COVERED_TOTAL}")
@@ -135,46 +158,68 @@ kcov REPORT [{i}]: {report_name}
         print (f"   2. MEDIAN = {RATIO_MEDIAN}")
         print (f"   3. TOTAL LINES (COV/INS) = {round(COVERED_TOTAL/INSTRUMENTED_TOTAL, 4)}")
         print (f"\nFILES FACTS:")
-        print (f"------------------------------------")
+        print (f"------------------------------------\n")
         print (f"Largest Testile:\n>> {LARGEST_TESTFILE} [LINES = {INSTRUMENTED_MAX}]")
         print (f"\nSmallest Testfile:\n>> {SMALLEST_TESTFILE} [LINES = {INSTRUMENTED_MIN}]")
         print (f"\nHighest Success Rate:\n>> {HIGHEST_SUCCESS_TESTFILE} [RATIO = {HIGHEST_RATIO}]")
         print (f"\nLowest Success Rate:\n>> {LOWEST_SUCCESS_TESTFILE} [RATIO = {LOWEST_RATIO}]")
-        print (f"====================================")
+        print (f"\n===============================================\n")
         
-        def list_summary_mode():
-            SUMMARY_INS = []
-            SUMMARY_COV = []
-            SUMMARY_RATIO = []
-            
-            for fact in facts_array:
-                SUMMARY_INS += [fact["instrumented_line"]]
-                SUMMARY_COV += [fact["covered_line"]]
-                SUMMARY_RATIO += [fact["ratio"]]
-            
-            SUMMARY_INS.sort(reverse=True)
-            SUMMARY_COV.sort(reverse=True)
-            SUMMARY_RATIO.sort(reverse=True)
+    def list_summary_mode():
+        print (f"\n====================================")
+        print ("    LIST MODE (--list) ENABLED")
+        SUMMARY_INS = []
+        SUMMARY_COV = []
+        SUMMARY_RATIO = []
+        
+        for fact in facts_array:
+            SUMMARY_INS += [fact["instrumented_line"]]
+            SUMMARY_COV += [fact["covered_line"]]
+            SUMMARY_RATIO += [fact["ratio"]]
+        
+        SUMMARY_INS.sort(reverse=True)
+        SUMMARY_COV.sort(reverse=True)
+        SUMMARY_RATIO.sort(reverse=True)
 
-            ## TO BE CONTINUED - FOR LIST_MODE
-            # for fact in facts_array:
-            #     for value in SUMMARY_INS:
-            #         print ()
- 
-        list_summary_mode()
-                
-            
+        def report_name_by_value(v, mode):
+            for fact in facts_array:
+                if fact[mode] == v:
+                    return f"{fact['report_name']} [{fact[mode]}]"
+        
+        print ("\nLARGEST TESTFILES (DESC): ")
+        print (f"------------------------------------")
+        c = 1
+        for value_INS in SUMMARY_INS:
+            print (f"{c}) {report_name_by_value(value_INS, LIST_MODE_INS)}")
+            c += 1
+        
+        print ("\nMOST SUCCESSFUL TESTFILES (DESC): ")
+        print (f"------------------------------------")
+        c = 1
+        for value_RATIO in SUMMARY_RATIO:
+            print (f"{c}) {report_name_by_value(value_RATIO, LIST_MODE_RATIO)}")
+            c += 1
+        print (f"\n=====================================\n")
+
+                         
     ## main function - Work it later on
-    if kcov_folder_exists:
+    if kcov_folder_exists: 
         report_process()
-        summary_stats()
+        if not REPORT_ONLY_OPT:
+            if SUMMARY_OPT or not LIST_OPT:
+                summary_stats()
+            if LIST_OPT:
+                list_summary_mode()
+        else:
+            print ("[REPORT ONLY MODE (--ro) ENABLED]\n")
+
     else:
         raise Exception(f"Directory Not Found: {KCOV_FOLDER}/ doesn't exist.")
     
     
 
 ## END OF MAIN
-# =============================================================================================================== #
+# ===============================================================================================================
 
 class Script(Main):
     """Adhoc script class (e.g., no I/O loop): just parses args"""
@@ -182,20 +227,22 @@ class Script(Main):
     # include_mode = False
     # exclude_mode = False
     list_mode = False
+    report_only_mode = False
 
     def setup(self):
         """Check results of command line processing"""
         debug.trace_fmtd(5, "Script.setup(): self={s}", s=self)
         self.summary_mode = self.get_parsed_option(SUMMARY_MODE, self.summary_mode)
         self.list_mode = self.get_parsed_option(LIST_MODE, self.list_mode)
+        self.report_only_mode = self.get_parsed_option(REPORT_ONLY_MODE, self.report_only_mode)
         # self.include_mode = self.get_parsed_argument(INCLUDE_MODE, self.include_mode)
-        # self.exclude_mode = self.get_parsed_option(TEXT_REPORT, self.exclude_mode)
+        # self.exclude_mode = self.get_parsed_argument(EXCLUDE_MODE, self.exclude_mode)
         debug.trace_object(5, self, label="Script instance")
 
     def run_main_step(self):
         """Main processing step"""
         debug.trace_fmtd(5, "Script.run_main_step(): self={s}", s=self)
-        kcov_test_coverage(self.summary_mode, self.list_mode)
+        kcov_test_coverage(self.summary_mode, self.list_mode, self.report_only_mode)
 
 #-------------------------------------------------------------------------------
     
@@ -211,7 +258,8 @@ if __name__ == '__main__':
         boolean_options=[(SUMMARY_MODE, f"Generates summary only"),
         #                  (INCLUDE_MODE, f"Only include the tests mentioned in the command")],
         #                  (EXCLUDE_MODE, f"Excludes any tests mentioned in the command")]
-                          (LIST_MODE, f"Lists all the testfiles according to the success rate (desc)")]
+                          (REPORT_ONLY_MODE, f"Generates individual reports of testfiles only"),
+                          (LIST_MODE, f"Generates lists of testfiles according to the success rate (desc)")]
         )
     
     app.run()
