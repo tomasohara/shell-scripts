@@ -76,18 +76,6 @@ ESSENTIAL_DIRS = [BATSPP_STORE, BATS_STORE, KCOV_STORE, TXT_STORE]
 ESSENTIAL_DIRS_present = all(gh.file_exists(dir) for dir in ESSENTIAL_DIRS)
 files = system.read_directory("./")
 
-## TODO:
-## # Environment options
-## # Note: These are just intended for internal options, not for end users.
-## # It also allows for enabling options in one place rather than four
-## # (e.g., [Main member] initialization, run-time value, and argument spec., along
-## # with string constant definition).
-## #
-## FUBAR = system.getenv_bool("FUBAR", False,
-##                             description="Fouled Up Beyond All Recognition processing")
-
-# DEBUG_LEVEL WORKS FROM 4 TO 5 TO ...
-
 
 #--------------------------------------------------------------------------------
 
@@ -228,19 +216,107 @@ def auto_batspp(NO_OPTION, KCOV_OPTION, TXT_OPTION):
 
 #................................................................................
 
+## Constants for environment variables
+
+FILE = 'file'
+SAVE = 'save'
+SOURCES = 'sources'
+OUTPUT = 'output'
+DEBUG = 'debug'
+HEXDUMP_DEBUG = 'hexdump_debug'
+VERBOSE_DEBUG = 'verbose_debug'
+TMP = 'TMP'
+TEMP_DIR = 'temp_dir'
+COPY_DIR = 'copy_dir'
+VISIBLE_PATHS = 'visible_paths'
+RUN_OPTS = 'run_options'
+SKIP_RUN = 'skip_run'
+OMIT_TRACE = 'omit_trace'
+DISABLE_ALIASES = 'disable_aliases'
+VERSION = 'version'
+
 class Script(Main):
     """Adhoc script class (e.g., no I/O loop): just parses args.
     Note: invokes auto_batspp above to do real processing"""
+    # For options
     no_report = False
     kcov_report = False
     text_report = False
 
+    ## Functions for Environment Variables
+    def get_entered_bool(
+            self,
+            label:str,
+            default:bool=False,
+            ) -> bool:
+            
+            """
+            Return entered LABEL var/arg bool by command-line or enviroment variable,
+            also can be specified a DEFAULT value
+            """
+            
+            result = (self.has_parsed_option(label.lower()) or
+                    system.getenv_bool(var=label.upper()))
+            result = result if result else default
+            debug.trace(7, f'batspp.get_entered_bool(label={label}) => {result}')
+            return result
+
+    def get_entered_text(
+        self,
+        label:str,
+        default:str='',
+        ) -> str:
+        
+        """
+        Return entered LABEL var/arg text by command-line or enviroment variable,
+        also can be specified a DEFAULT value
+        """
+        
+        result = (self.get_parsed_argument(label=label.lower()) or
+                    system.getenv_text(var=label.upper()))
+        result = result if result else default
+        debug.trace(7, f'batspp.get_entered_text(label={label}) => {result}')
+        return result
+
+    # For environment variables
+    file = ''
+    save_path = ''
+    sources = []
+    output = False
+    hexdump_debug = False
+    verbose_debug = False
+    debug = ''
+    temp_dir = ''
+    copy_dir = ''
+    visible_paths = []
+    run_opts = ''
+    skip_run = False
+    omit_trace = False
+    disable_aliases = False
+    version = False
+
     def setup(self):
         """Check results of command line processing"""
         debug.trace_fmtd(5, "Script.setup(): self={s}", s=self)
+        
+        self.file = self.get_parsed_argument(FILE, self.file)
+        self.save_path = self.get_entered_text(SAVE, self.temp_file)
+        self.output = self.get_entered_bool(OUTPUT, self.output)
+        self.hexdump_debug = self.get_entered_bool(HEXDUMP_DEBUG, self.hexdump_debug)
+        self.verbose_debug = self.get_entered_bool(VERBOSE_DEBUG, self.verbose_debug)
+        self.debug = self.get_entered_text(DEBUG, self.debug)
+        self.copy_dir = self.get_entered_text(COPY_DIR, self.copy_dir)
+        self.run_opts = self.get_entered_text(RUN_OPTS, self.run_opts)
+        self.skip_run = self.get_entered_bool(SKIP_RUN, self.skip_run)
+        self.omit_trace = self.get_entered_bool(OMIT_TRACE,  self.omit_trace)
+        self.disable_aliases = self.get_entered_bool(DISABLE_ALIASES,  self.disable_aliases)
+        self.version = self.has_parsed_option(VERSION)
+
+        # For options
         self.no_report = self.get_parsed_option(NO_REPORT, self.no_report)
         self.kcov_report = self.get_parsed_option(KCOV_REPORT, self.kcov_report)
         self.text_report = self.get_parsed_option(TEXT_REPORT, self.text_report)
+        
         debug.trace_object(5, self, label="Script instance")
 
     def run_main_step(self):
