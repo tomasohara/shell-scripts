@@ -955,6 +955,7 @@ function prepare-find-files-here () {
     if [ "$1" = "--out-dir" ]; then
 	dir="$2"
 	shift 2;
+	mkdir -p "$dir"
     fi
     if [ "$1" != "" ]; then
         echo "Error: No arguments accepted; did you mean find-files-here?"
@@ -1216,7 +1217,10 @@ function usage {
 }
 function usage-alt {
     local output_file
-    output_file=$TEMP/$(basename "$PWD")"-usage.list";
+    local basename
+    basename="$(basename "$PWD")"
+    if [ "$basename" = "" ]; then basename="fs-root"; fi
+    output_file="$TEMP/$basename-usage.list";
     usage "$output_file"
 }
 
@@ -1585,20 +1589,31 @@ function image-view () { gpicview "$@" & }
 # - When ps2ascii command hangs up, it creates large output files (e.g., > 1gb)
 #   so timeout included.
 # NOTE: pass in space for options to disable default of -layout
-# TODO: handle filename wit
+# TODO: handle filename with ... (e.g., special punctuation)???
 function pdf-to-ascii () {
+    if [ "$1" = "" ]; then
+	echo "usage: pdf-to-ascii file [verbose=0] [options='-layout']"
+	echo "note: use ' ' for options to use default"
+	echo "ex: pdf-to-ascii zhang-skillspan-naccl2022.pdf 1 ' '"
+	return
+    fi
     local file="$1"
     local verbose="$2";
     local options="$3"
     if [ "$options" = "" ]; then options="-layout"; fi
     local target
     target=$(basename "$1" .pdf)".ascii";
-    if [ "$verbose" = "1" ]; then echo "checking $target"; fi
+    ## OLD: if [ "$verbose" = "1" ]; then echo "checking $target"; fi
     if [ ! -s "$target" ]; then
-        if [ "$verbose" = "1" ]; then echo "creating $target"; fi
+        ## OLD: if [ "$verbose" = "1" ]; then echo "creating $target"; fi
+        if [ "$verbose" = "1" ]; then
+	    echo "creating $target w/ options '$options'";
+	fi
 	# quiet shellcheck on quoting args
 	# shellcheck disable=SC2046,SC2086
         cmd.sh --time-out 30 pdftotext $options "$file" "$target";
+    else
+	if [ "$verbose" = "1" ]; then echo "skipping existing $target"; fi
     fi
     $LS -lt "$target"
 }
