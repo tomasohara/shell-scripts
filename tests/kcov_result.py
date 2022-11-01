@@ -45,8 +45,8 @@ from mezcla import glue_helpers as gh
 
 # Constants for argparsing
 SUMMARY_MODE = "summary"
-# INCLUDE_MODE = "in"
-# EXCLUDE_MODE = "ex"
+INCLUDE_MODE = "include"
+EXCLUDE_MODE = "exclude"
 LIST_MODE = "list"
 REPORT_ONLY_MODE = "ro"
 
@@ -60,10 +60,24 @@ LIST_MODE_RATIO = "ratio"
 ## Main function: kcov_test_coverage(SUMMARY_OPT, LIST_OPT, REPORT_MODE, INCLUDE_OPT, EXCLUDE_OPT)
 kcov_folder_exists = gh.file_exists(KCOV_FOLDER)
 
-def kcov_test_coverage(SUMMARY_OPT, LIST_OPT, REPORT_ONLY_OPT):
+def kcov_test_coverage(
+    SUMMARY_OPT, 
+    LIST_OPT, 
+    REPORT_ONLY_OPT, 
+    INCLUDE_OPT, 
+    EXCLUDE_OPT
+    ):
     
     global facts_array
     facts_array = []
+
+    # 0. get_test_name_from_testfile()
+    def get_name_from_testfile(FILE):
+        return gh.basename(FILE, ".ipynb")
+
+    def get_index_number(LIST, ITEM):
+        return LIST.index(ITEM) + 1
+
 
     # 1. extract_report()
     def extract_report(report_name, i):
@@ -105,7 +119,7 @@ kcov REPORT [{i}]: {report_name}
         """Extracts information from extract_report(report_name); calculates total lines and ratios"""
 
         i = 1
-        global ratio_array, instrumented_array, covered_array
+        global ratio_array, instrumented_array, covered_array, REPORT_LIST
         ratio_array = []
         instrumented_array = []
         covered_array = []
@@ -113,6 +127,13 @@ kcov REPORT [{i}]: {report_name}
 
         reports = system.read_directory(f"./{KCOV_FOLDER}/")
         
+        # Error prone area
+        if EXCLUDE_OPT:
+            reports.remove(get_name_from_testfile(EXCLUDE_OPT))
+            print (reports)
+        elif INCLUDE_OPT:
+            reports = [get_name_from_testfile(INCLUDE_OPT)]
+
         for report in reports:
             extract_report(report, i)
             ratio_array += [report_RatioLine]
@@ -121,9 +142,21 @@ kcov REPORT [{i}]: {report_name}
             i += 1
 
         file_quantity = i - 1
-        
+
+        REPORT_LIST = reports
+        # END OF Error prone area
+
     def summary_stats():
         """Prints out the overall summary stats of file calculations"""
+        
+        # Needs rework
+        def print_included_files(REPORT_ARRAY):
+            # if OPT == INCLUDE_OPT:
+            #     print (report for report in REPORT_ARRAY)
+            # else:
+            for report in REPORT_ARRAY:
+                print (report)
+        # END OF Needs Rework
 
         RATIO_MEAN = round(np.mean(ratio_array), 4)
         RATIO_MEDIAN = round(np.median(ratio_array), 4)
@@ -151,8 +184,14 @@ kcov REPORT [{i}]: {report_name}
         if SUMMARY_OPT: print ("\n[SUMMARY MODE (--summary) ENABLED]")
         print (f"\n===============================================\n")
         print (f"SUMMARY STATISTICS: ")
+        
         print (f"------------------------------------\n")
-        print (f"REPORTS DETECTED: [{file_quantity}]")
+        print (f"EXCLUDED TESTS: {get_name_from_testfile(EXCLUDE_OPT) if EXCLUDE_OPT else 'NaN'}")
+        
+        # print (f"\nEXCLUSIVE INCLUDED TESTS: \n")
+        # print_included_files(REPORT_LIST) # Needs rework
+
+        print (f"\nREPORTS DETECTED: [{file_quantity}]")
         print (f"Total Instrumented Lines = {INSTRUMENTED_TOTAL}")
         print (f"Total Covered Lines = {COVERED_TOTAL}")
         print (f"Coverage Ratio: ")
@@ -161,7 +200,7 @@ kcov REPORT [{i}]: {report_name}
         print (f"   3. TOTAL LINES (COV/INS) = {round(COVERED_TOTAL/INSTRUMENTED_TOTAL, 4)}")
         print (f"\nFILES FACTS:")
         print (f"------------------------------------\n")
-        print (f"Largest Testile:\n>> {LARGEST_TESTFILE} [LINES = {INSTRUMENTED_MAX}]")
+        print (f"Largest Testfile:\n>> {LARGEST_TESTFILE} [LINES = {INSTRUMENTED_MAX}]")
         print (f"\nSmallest Testfile:\n>> {SMALLEST_TESTFILE} [LINES = {INSTRUMENTED_MIN}]")
         print (f"\nHighest Success Rate:\n>> {HIGHEST_SUCCESS_TESTFILE} [RATIO = {HIGHEST_RATIO}]")
         print (f"\nLowest Success Rate:\n>> {LOWEST_SUCCESS_TESTFILE} [RATIO = {LOWEST_RATIO}]")
@@ -176,7 +215,7 @@ kcov REPORT [{i}]: {report_name}
                 if fact[mode] == v:
                     report_title = fact['report_name']
                     fact_list.pop(fact_list.index(fact))
-                    return f"{report_title} [{fact[mode]}]"
+                    return f"{report_title}\n\t\t\t\t\t\t[{fact[mode]}]"
                     
 
         print (f"\n====================================")
@@ -199,7 +238,7 @@ kcov REPORT [{i}]: {report_name}
         fa1 = facts_array.copy()
         
         for value_INS in SUMMARY_INS:
-            print (f"{SUMMARY_INS.index(value_INS) + 1}) {report_name_by_value(fa1, value_INS, LIST_MODE_INS)}")
+            print (f"{get_index_number(SUMMARY_INS, value_INS)}) {report_name_by_value(fa1, value_INS, LIST_MODE_INS)}")
         
         print (f"\n------------------------------------")
         print ("MOST SUCCESSFUL TESTFILES (DESC): ")
@@ -207,7 +246,7 @@ kcov REPORT [{i}]: {report_name}
         fa2 = facts_array.copy()
         
         for value_RATIO in SUMMARY_RATIO:
-            print (f"{SUMMARY_RATIO.index(value_RATIO) + 1}) {report_name_by_value(fa2, value_RATIO, LIST_MODE_RATIO)}")
+            print (f"{get_index_number(SUMMARY_RATIO, value_RATIO)}) {report_name_by_value(fa2, value_RATIO, LIST_MODE_RATIO)}")
        
         print (f"\n=====================================\n")
 
@@ -221,7 +260,7 @@ kcov REPORT [{i}]: {report_name}
             if LIST_OPT:
                 list_summary_mode()
         else:
-            print ("[     REPORTS ONLY MODE (--ro) ENABLED     ]\n")
+            print ("\n[\tREPORTS ONLY MODE (--ro) enabled\t]\n")
 
     else:
         raise Exception(f"Directory Not Found: {KCOV_FOLDER}/ doesn't exist.")
@@ -231,113 +270,52 @@ kcov REPORT [{i}]: {report_name}
 ## END OF MAIN
 # ===============================================================================================================
 
-## Constants for environment variables
-FILE = 'file'
-SAVE = 'save'
-SOURCES = 'sources'
-OUTPUT = 'output'
-DEBUG = 'debug'
-HEXDUMP_DEBUG = 'hexdump_debug'
-VERBOSE_DEBUG = 'verbose_debug'
-TMP = 'TMP'
-TEMP_DIR = 'temp_dir'
-COPY_DIR = 'copy_dir'
-VISIBLE_PATHS = 'visible_paths'
-RUN_OPTS = 'run_options'
-SKIP_RUN = 'skip_run'
-OMIT_TRACE = 'omit_trace'
-DISABLE_ALIASES = 'disable_aliases'
-VERSION = 'version'
-
 class Script(Main):
     """Adhoc script class (e.g., no I/O loop): just parses args"""
     summary_mode = False
-    # include_mode = False
-    # exclude_mode = False
     list_mode = False
     report_only_mode = False
-
-        ## Functions for Environment Variables
-    def get_entered_bool(
-        self,
-        label:str,
-        default:bool=False,
-        ) -> bool:
-            
-        """
-        Return entered LABEL var/arg bool by command-line or enviroment variable,
-        also can be specified a DEFAULT value
-        """
-        
-        result = (self.has_parsed_option(label.lower()) or
-                system.getenv_bool(var=label.upper()))
-        result = result if result else default
-        debug.trace(7, f'batspp.get_entered_bool(label={label}) => {result}')
-        return result
+    include_mode = ""
+    exclude_mode = ""
 
     def get_entered_text(
         self,
         label:str,
         default:str='',
         ) -> str:
-        
         """
         Return entered LABEL var/arg text by command-line or enviroment variable,
         also can be specified a DEFAULT value
         """
-        
         result = (self.get_parsed_argument(label=label.lower()) or
                     system.getenv_text(var=label.upper()))
         result = result if result else default
         debug.trace(7, f'batspp.get_entered_text(label={label}) => {result}')
         return result
 
-    # For environment variables
-    file = ''
-    save_path = ''
-    sources = []
-    output = False
-    hexdump_debug = False
-    verbose_debug = False
-    debug = ''
-    temp_dir = ''
-    copy_dir = ''
-    visible_paths = []
-    run_opts = ''
-    skip_run = False
-    omit_trace = False
-    disable_aliases = False
-    version = False
-
     def setup(self):
         """Check results of command line processing"""
         debug.trace_fmtd(5, "Script.setup(): self={s}", s=self)
-        
-        self.file = self.get_parsed_argument(FILE, self.file)
-        self.save_path = self.get_entered_text(SAVE, self.temp_file)
-        self.output = self.get_entered_bool(OUTPUT, self.output)
-        self.hexdump_debug = self.get_entered_bool(HEXDUMP_DEBUG, self.hexdump_debug)
-        self.verbose_debug = self.get_entered_bool(VERBOSE_DEBUG, self.verbose_debug)
-        self.debug = self.get_entered_text(DEBUG, self.debug)
-        self.copy_dir = self.get_entered_text(COPY_DIR, self.copy_dir)
-        self.run_opts = self.get_entered_text(RUN_OPTS, self.run_opts)
-        self.skip_run = self.get_entered_bool(SKIP_RUN, self.skip_run)
-        self.omit_trace = self.get_entered_bool(OMIT_TRACE,  self.omit_trace)
-        self.disable_aliases = self.get_entered_bool(DISABLE_ALIASES,  self.disable_aliases)
-        self.version = self.has_parsed_option(VERSION)
 
         # For options
         self.summary_mode = self.get_parsed_option(SUMMARY_MODE, self.summary_mode)
         self.list_mode = self.get_parsed_option(LIST_MODE, self.list_mode)
         self.report_only_mode = self.get_parsed_option(REPORT_ONLY_MODE, self.report_only_mode)
-        # self.include_mode = self.get_parsed_argument(INCLUDE_MODE, self.include_mode)
-        # self.exclude_mode = self.get_parsed_argument(EXCLUDE_MODE, self.exclude_mode)
+        self.include_mode = self.get_entered_text(INCLUDE_MODE, self.include_mode)
+        self.exclude_mode = self.get_entered_text(EXCLUDE_MODE, self.exclude_mode)
+        
         debug.trace_object(5, self, label="Script instance")
 
     def run_main_step(self):
         """Main processing step"""
         debug.trace_fmtd(5, "Script.run_main_step(): self={s}", s=self)
-        kcov_test_coverage(self.summary_mode, self.list_mode, self.report_only_mode)
+        kcov_test_coverage(
+            self.summary_mode, 
+            self.list_mode, 
+            self.report_only_mode, 
+            self.include_mode,
+            self.exclude_mode
+        )
 
 #-------------------------------------------------------------------------------
     
@@ -345,17 +323,24 @@ if __name__ == '__main__':
     debug.trace_current_context(level=debug.QUITE_DETAILED)
     debug.trace_fmt(4, "Environment options: {eo}",
                     eo=system.formatted_environment_option_descriptions())
+    
     app = Script(
         description=__doc__,
         skip_input=True,
         manual_input=True,
         auto_help=False,
-        boolean_options=[(SUMMARY_MODE, f"Generates summary only"),
-        #                  (INCLUDE_MODE, f"Only include the tests mentioned in the command")],
-        #                  (EXCLUDE_MODE, f"Excludes any tests mentioned in the command")]
-                          (REPORT_ONLY_MODE, f"Generates individual reports of testfiles only"),
-                          (LIST_MODE, f"Generates lists of testfiles according to the success rate (desc)")]
-        )
+        
+        boolean_options=[
+            (SUMMARY_MODE, f"Generates summary only"),
+            (REPORT_ONLY_MODE, f"Generates individual reports of testfiles only"),
+            (LIST_MODE, f"Generates lists of testfiles according to the success rate (desc)")
+        ],
+        
+        text_options=[
+            (INCLUDE_MODE, f"Only includes the tests mentioned in the command"),
+            (EXCLUDE_MODE, f"Excludes any tests mentioned in the command")
+        ]
+    )
     
     app.run()
 

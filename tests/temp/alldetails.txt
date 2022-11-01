@@ -1,0 +1,1 @@
+Linux INS-15-3573-UMATE 5.15.0-52-generic #58-Ubuntu SMP Thu Oct 13 08:03:55 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux

@@ -278,39 +278,11 @@ class Script(Main):
         debug.trace(7, f'batspp.get_entered_text(label={label}) => {result}')
         return result
 
-    # For environment variables
-    file = ''
-    save_path = ''
-    sources = []
-    output = False
-    hexdump_debug = False
-    verbose_debug = False
-    debug = ''
-    temp_dir = ''
-    copy_dir = ''
-    visible_paths = []
-    run_opts = ''
-    skip_run = False
-    omit_trace = False
-    disable_aliases = False
-    version = False
+    
 
     def setup(self):
         """Check results of command line processing"""
         debug.trace_fmtd(5, "Script.setup(): self={s}", s=self)
-        
-        self.file = self.get_parsed_argument(FILE, self.file)
-        self.save_path = self.get_entered_text(SAVE, self.temp_file)
-        self.output = self.get_entered_bool(OUTPUT, self.output)
-        self.hexdump_debug = self.get_entered_bool(HEXDUMP_DEBUG, self.hexdump_debug)
-        self.verbose_debug = self.get_entered_bool(VERBOSE_DEBUG, self.verbose_debug)
-        self.debug = self.get_entered_text(DEBUG, self.debug)
-        self.copy_dir = self.get_entered_text(COPY_DIR, self.copy_dir)
-        self.run_opts = self.get_entered_text(RUN_OPTS, self.run_opts)
-        self.skip_run = self.get_entered_bool(SKIP_RUN, self.skip_run)
-        self.omit_trace = self.get_entered_bool(OMIT_TRACE,  self.omit_trace)
-        self.disable_aliases = self.get_entered_bool(DISABLE_ALIASES,  self.disable_aliases)
-        self.version = self.has_parsed_option(VERSION)
 
         # For options
         self.no_report = self.get_parsed_option(NO_REPORT, self.no_report)
