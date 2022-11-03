@@ -127,12 +127,13 @@ kcov REPORT [{i}]: {report_name}
 
         reports = system.read_directory(f"./{KCOV_FOLDER}/")
         
-        # Error prone area
+        # REWORK: Inclusion of multiple testfiles in OPTIONS --include / --exclude
         if EXCLUDE_OPT:
             reports.remove(get_name_from_testfile(EXCLUDE_OPT))
-            print (reports)
+            # print (reports)
         elif INCLUDE_OPT:
             reports = [get_name_from_testfile(INCLUDE_OPT)]
+        # END OF Rework
 
         for report in reports:
             extract_report(report, i)
@@ -144,19 +145,18 @@ kcov REPORT [{i}]: {report_name}
         file_quantity = i - 1
 
         REPORT_LIST = reports
-        # END OF Error prone area
 
     def summary_stats():
         """Prints out the overall summary stats of file calculations"""
         
-        # Needs rework
-        def print_included_files(REPORT_ARRAY):
-            # if OPT == INCLUDE_OPT:
-            #     print (report for report in REPORT_ARRAY)
-            # else:
-            for report in REPORT_ARRAY:
-                print (report)
-        # END OF Needs Rework
+        # # Needs rework
+        # def print_included_files(REPORT_ARRAY):
+        #     # if OPT == INCLUDE_OPT:
+        #     #     print (report for report in REPORT_ARRAY)
+        #     # else:
+        #     for report in REPORT_ARRAY:
+        #         print (report)
+        # # END OF Needs Rework
 
         RATIO_MEAN = round(np.mean(ratio_array), 4)
         RATIO_MEDIAN = round(np.median(ratio_array), 4)
@@ -186,8 +186,8 @@ kcov REPORT [{i}]: {report_name}
         print (f"SUMMARY STATISTICS: ")
         
         print (f"------------------------------------\n")
-        print (f"EXCLUDED TESTS: {get_name_from_testfile(EXCLUDE_OPT) if EXCLUDE_OPT else 'NaN'}")
-        
+        print (f"EXCLUDED TESTS: {get_name_from_testfile(EXCLUDE_OPT) if EXCLUDE_OPT else None}")
+        print (f"EXCLUSIVELY INCLUDED TESTS: {get_name_from_testfile(INCLUDE_OPT) if INCLUDE_OPT else None}")
         # print (f"\nEXCLUSIVE INCLUDED TESTS: \n")
         # print_included_files(REPORT_LIST) # Needs rework
 
@@ -217,7 +217,6 @@ kcov REPORT [{i}]: {report_name}
                     fact_list.pop(fact_list.index(fact))
                     return f"{report_title}\n\t\t\t\t\t\t[{fact[mode]}]"
                     
-
         print (f"\n====================================")
         print ("    LIST MODE (--list) ENABLED")
         
@@ -260,7 +259,7 @@ kcov REPORT [{i}]: {report_name}
             if LIST_OPT:
                 list_summary_mode()
         else:
-            print ("\n[\tREPORTS ONLY MODE (--ro) enabled\t]\n")
+            print ("\n\t[REPORTS ONLY MODE (--ro) enabled]\t\n")
 
     else:
         raise Exception(f"Directory Not Found: {KCOV_FOLDER}/ doesn't exist.")
@@ -319,17 +318,18 @@ class Script(Main):
 
 #-------------------------------------------------------------------------------
     
-if __name__ == '__main__':
+if __name__ == "__main__":
     debug.trace_current_context(level=debug.QUITE_DETAILED)
     debug.trace_fmt(4, "Environment options: {eo}",
                     eo=system.formatted_environment_option_descriptions())
     
     app = Script(
         description=__doc__,
-        skip_input=True,
+        skip_input= True,
         manual_input=True,
         auto_help=False,
-        
+        multiple_files=False,
+
         boolean_options=[
             (SUMMARY_MODE, f"Generates summary only"),
             (REPORT_ONLY_MODE, f"Generates individual reports of testfiles only"),
