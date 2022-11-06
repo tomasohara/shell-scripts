@@ -1666,6 +1666,7 @@ function show-all-macros () {
 
 # show-macros(pattern): like show-all-macros, exlcuding leading _ in name
 function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
+alias-fn show-macros-proper 'show-macros | $GREP "^\w"'
 # show-variables(): show defined variables
 # TODO: figure out how to exclude env. vars from show-variables output
 function show-variables () { set | $GREP -i '^[a-z].*='; }
