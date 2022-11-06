@@ -190,6 +190,7 @@ sub sp_init {
 #
 
 sub sp_read_dicts {
+    &debug_print(4, "sp_read_dicts(@_)\n");
     &sp_read_dict();
     if (-e $sp_irreg_dict) {
 	&sp_read_dict($sp_irreg_dict);
