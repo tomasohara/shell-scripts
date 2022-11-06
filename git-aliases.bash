@@ -615,7 +615,9 @@ function git-alias-usage () {
     echo ''
     echo 'Usual check-in process:'
     echo '    git-cd-root-alias; git-update-plus'
-    # TODO: ...; git-update-; gr ^'<<<<<' *
+    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-plus'
+    echo '    # alt: grep "^<<<<< " $(git-diff-list)'
+    # TODO: xargs -I{} 'grep "^<<<<< {} | head -5' $(git-list-text-files)
     echo '    git-next-checkin                      # repeat, as needed'
 
     ## TODO: echo '* invoke git-cd-root-alias automatically!'
