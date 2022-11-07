@@ -218,23 +218,6 @@ def auto_batspp(NO_OPTION, KCOV_OPTION, TXT_OPTION):
 
 ## Constants for environment variables
 
-FILE = 'file'
-SAVE = 'save'
-SOURCES = 'sources'
-OUTPUT = 'output'
-DEBUG = 'debug'
-HEXDUMP_DEBUG = 'hexdump_debug'
-VERBOSE_DEBUG = 'verbose_debug'
-TMP = 'TMP'
-TEMP_DIR = 'temp_dir'
-COPY_DIR = 'copy_dir'
-VISIBLE_PATHS = 'visible_paths'
-RUN_OPTS = 'run_options'
-SKIP_RUN = 'skip_run'
-OMIT_TRACE = 'omit_trace'
-DISABLE_ALIASES = 'disable_aliases'
-VERSION = 'version'
-
 class Script(Main):
     """Adhoc script class (e.g., no I/O loop): just parses args.
     Note: invokes auto_batspp above to do real processing"""

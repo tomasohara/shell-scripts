@@ -5,7 +5,6 @@
 # $ echo 'Hi'
 # | Hi?2004l
 $ bind 'set enable-bracketed-paste off'
-[?2004h[?2004l[?2004l[?2004l[?2004l[?2004l[?2004l[?2004l[?2004l
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -64,117 +63,139 @@ $ alias dpkg-install='dpkg --install '
 $ apt-installed *python3*
 Listing... Done
 [32mipython3[0m/jammy,jammy,now 7.31.1-1 all [installed]
-[32mlibpython3-dev[0m/jammy,now 3.10.4-0ubuntu2 amd64 [installed,automatic]
-[32mlibpython3-stdlib[0m/jammy,now 3.10.4-0ubuntu2 amd64 [installed,automatic]
-[32mlibpython3.10-dev[0m/jammy-updates,jammy-security,now 3.10.4-3ubuntu0.1 amd64 [installed,automatic]
-[32mlibpython3.10-minimal[0m/jammy-updates,jammy-security,now 3.10.4-3ubuntu0.1 amd64 [installed,automatic]
-[32mlibpython3.10-stdlib[0m/jammy-updates,jammy-security,now 3.10.4-3ubuntu0.1 amd64 [installed,automatic]
-[32mlibpython3.10[0m/jammy-updates,jammy-security,now 3.10.4-3ubuntu0.1 amd64 [installed,automatic]
+[32mlibpython3-dev[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed,automatic]
+[32mlibpython3-stdlib[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed,automatic]
+[32mlibpython3.10-dev[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed,automatic]
+[32mlibpython3.10-minimal[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed,automatic]
+[32mlibpython3.10-stdlib[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed,automatic]
+[32mlibpython3.10[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed,automatic]
+[32mpython-is-python3[0m/jammy,jammy,now 3.9.2-2 all [installed]
+[32mpython3-anyio[0m/jammy,jammy,now 3.5.0-3ubuntu2 all [installed,automatic]
 [32mpython3-appdirs[0m/jammy,jammy,now 1.4.4-2 all [installed,automatic]
 [32mpython3-apport[0m/jammy-updates,jammy-updates,jammy-security,jammy-security,now 2.20.11-0ubuntu82.1 all [installed,automatic]
 [32mpython3-apt[0m/jammy-updates,now 2.3.0ubuntu2.1 amd64 [installed,automatic]
+[32mpython3-aptdaemon.gtk3widgets[0m/jammy,jammy,now 1.1.1+bzr982-0ubuntu39 all [installed]
 [32mpython3-aptdaemon[0m/jammy,jammy,now 1.1.1+bzr982-0ubuntu39 all [installed,automatic]
 [32mpython3-argon2[0m/jammy,now 21.1.0-1 amd64 [installed,automatic]
+[32mpython3-astroid[0m/jammy,jammy,now 2.9.3-1 all [installed,automatic]
 [32mpython3-attr[0m/jammy,jammy,now 21.2.0-1 all [installed,automatic]
 [32mpython3-babel[0m/jammy,jammy,now 2.8.0+dfsg.1-7 all [installed,automatic]
 [32mpython3-backcall[0m/jammy,jammy,now 0.2.0-2 all [installed,automatic]
 [32mpython3-beniget[0m/jammy,jammy,now 0.4.1-2 all [installed,automatic]
 [32mpython3-bleach[0m/jammy,jammy,now 4.1.0-1 all [installed,automatic]
 [32mpython3-blinker[0m/jammy,jammy,now 1.4+dfsg1-0.4 all [installed,automatic]
+[32mpython3-brlapi[0m/jammy-updates,now 6.4-4ubuntu3 amd64 [installed,automatic]
 [32mpython3-brotli[0m/jammy,now 1.0.9-2build6 amd64 [installed,automatic]
 [32mpython3-bs4[0m/jammy,jammy,now 4.10.0-2 all [installed,automatic]
 [32mpython3-cairo[0m/jammy,now 1.20.1-3build1 amd64 [installed,automatic]
+[32mpython3-caja[0m/jammy,now 1.26.0-1 amd64 [installed,automatic]
 [32mpython3-certifi[0m/jammy,jammy,now 2020.6.20-1 all [installed,automatic]
 [32mpython3-cffi-backend[0m/jammy,now 1.15.0-1build2 amd64 [installed,automatic]
 [32mpython3-chardet[0m/jammy,jammy,now 4.0.0-1 all [installed,automatic]
+[32mpython3-charset-normalizer[0m/jammy,jammy,now 2.0.6-2 all [installed,automatic]
 [32mpython3-click[0m/jammy,jammy,now 8.0.3-1 all [installed,automatic]
 [32mpython3-colorama[0m/jammy,jammy,now 0.4.4-1 all [installed,automatic]
 [32mpython3-commandnotfound[0m/jammy,jammy,now 22.04.0 all [installed,automatic]
-[32mpython3-configobj[0m/jammy,jammy,now 5.0.6-5 all [installed,automatic]
+[32mpython3-commonmark[0m/jammy,jammy,now 0.9.1-3 all [installed,automatic]
+[32mpython3-cov-core[0m/jammy,jammy,now 1.15.0-3build1 all [installed,automatic]
+[32mpython3-coverage[0m/jammy,now 6.2+dfsg1-2build1 amd64 [installed,automatic]
 [32mpython3-cryptography[0m/jammy,now 3.4.8-1ubuntu2 amd64 [installed,automatic]
 [32mpython3-cups[0m/jammy,now 2.0.1-5build1 amd64 [installed,automatic]
 [32mpython3-cupshelpers[0m/jammy,jammy,now 1.5.16-0ubuntu3 all [installed,automatic]
 [32mpython3-cycler[0m/jammy,jammy,now 0.11.0-1 all [installed,automatic]
 [32mpython3-dateutil[0m/jammy,jammy,now 2.8.1-6 all [installed,automatic]
-[32mpython3-dbus.mainloop.pyqt5[0m/jammy,now 5.15.6+dfsg-1ubuntu3 amd64 [installed,automatic]
 [32mpython3-dbus[0m/jammy,now 1.2.18-3build1 amd64 [installed,automatic]
 [32mpython3-debconf[0m/jammy,jammy,now 1.5.79ubuntu1 all [installed,automatic]
 [32mpython3-debian[0m/jammy,jammy,now 0.1.43ubuntu1 all [installed,automatic]
 [32mpython3-decorator[0m/jammy,jammy,now 4.4.2-0ubuntu1 all [installed,automatic]
 [32mpython3-defer[0m/jammy,jammy,now 1.0.6-2.1ubuntu1 all [installed,automatic]
 [32mpython3-defusedxml[0m/jammy,jammy,now 0.7.1-1 all [installed,automatic]
-[32mpython3-dev[0m/jammy,now 3.10.4-0ubuntu2 amd64 [installed,automatic]
+[32mpython3-dev[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed,automatic]
 [32mpython3-distro-info[0m/jammy,jammy,now 1.1build1 all [installed,automatic]
 [32mpython3-distro[0m/jammy,jammy,now 1.7.0-1 all [installed,automatic]
-[32mpython3-distupgrade[0m/now 1:22.04.12 all [installed,upgradable to: 1:22.04.13]
-[32mpython3-distutils[0m/jammy,jammy,now 3.10.4-0ubuntu1 all [installed,automatic]
+[32mpython3-distupgrade[0m/jammy-updates,jammy-updates,now 1:22.04.14 all [installed,automatic]
+[32mpython3-distutils[0m/jammy-updates,jammy-updates,now 3.10.6-1~22.04 all [installed,automatic]
 [32mpython3-entrypoints[0m/jammy,jammy,now 0.4-1 all [installed,automatic]
-[32mpython3-exif[0m/jammy,jammy,now 2.3.2-1 all [installed,automatic]
-[32mpython3-exifread[0m/jammy,jammy,now 2.3.2-1 all [installed,automatic]
-[32mpython3-flask[0m/jammy,jammy,now 2.0.1-2ubuntu1 all [installed,automatic]
+[32mpython3-ewmh[0m/jammy,jammy,now 0.1.6-2 all [installed,automatic]
+[32mpython3-execnet[0m/jammy,jammy,now 1.9.0-1 all [installed,automatic]
+[32mpython3-flake8[0m/jammy,jammy,now 4.0.1-2 all [installed,automatic]
 [32mpython3-fonttools[0m/jammy,now 4.29.1-2build1 amd64 [installed,automatic]
 [32mpython3-fs[0m/jammy,jammy,now 2.4.12-1 all [installed,automatic]
 [32mpython3-gast[0m/jammy,jammy,now 0.5.2-2 all [installed,automatic]
-[32mpython3-gdbm[0m/jammy,now 3.10.4-0ubuntu1 amd64 [installed,automatic]
+[32mpython3-gdbm[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed,automatic]
 [32mpython3-gi-cairo[0m/jammy-updates,now 3.42.1-0ubuntu1 amd64 [installed,automatic]
 [32mpython3-gi[0m/jammy-updates,now 3.42.1-0ubuntu1 amd64 [installed,automatic]
+[32mpython3-gpg[0m/jammy,now 1.16.0-1.2ubuntu4 amd64 [installed,automatic]
 [32mpython3-greenlet[0m/jammy,now 1.1.2-3build1 amd64 [installed,automatic]
+[32mpython3-h11[0m/jammy,jammy,now 0.13.0-1 all [installed,automatic]
 [32mpython3-html5lib[0m/jammy,jammy,now 1.1-3 all [installed,automatic]
+[32mpython3-httpcore[0m/jammy,jammy,now 0.14.5-1 all [installed,automatic]
 [32mpython3-httplib2[0m/jammy,jammy,now 0.20.2-2 all [installed,automatic]
+[32mpython3-httpx[0m/jammy,jammy,now 0.22.0-1 all [installed,automatic]
 [32mpython3-idna[0m/jammy,jammy,now 3.3-1 all [installed,automatic]
 [32mpython3-importlib-metadata[0m/jammy,jammy,now 4.6.4-1 all [installed,automatic]
-[32mpython3-inifile[0m/jammy,jammy,now 0.4.1-1 all [installed,automatic]
+[32mpython3-iniconfig[0m/jammy,jammy,now 1.1.1-2 all [installed,automatic]
 [32mpython3-ipykernel[0m/jammy,jammy,now 6.7.0-1 all [installed,automatic]
 [32mpython3-ipython-genutils[0m/jammy,jammy,now 0.2.0-5 all [installed,automatic]
 [32mpython3-ipython[0m/jammy,jammy,now 7.31.1-1 all [installed,automatic]
 [32mpython3-ipywidgets[0m/jammy,jammy,now 6.0.0-9 all [installed,automatic]
-[32mpython3-itsdangerous[0m/jammy,jammy,now 2.1.0-1 all [installed,automatic]
+[32mpython3-isort[0m/jammy,jammy,now 5.6.4-1 all [installed,automatic]
 [32mpython3-jedi[0m/jammy,jammy,now 0.18.0-1 all [installed,automatic]
 [32mpython3-jeepney[0m/jammy,jammy,now 0.7.1-3 all [installed,automatic]
 [32mpython3-jinja2[0m/jammy,jammy,now 3.0.3-1 all [installed,automatic]
 [32mpython3-jsonschema[0m/jammy,jammy,now 3.2.0-0ubuntu2 all [installed,automatic]
 [32mpython3-jupyter-client[0m/jammy,jammy,now 7.1.2-1 all [installed,automatic]
-[32mpython3-jupyter-console[0m/jammy,jammy,now 6.4.0-3 all [installed,automatic]
 [32mpython3-jupyter-core[0m/jammy,jammy,now 4.9.1-1 all [installed,automatic]
 [32mpython3-jupyterlab-pygments[0m/jammy,jammy,now 0.1.2-8 all [installed,automatic]
 [32mpython3-jwt[0m/jammy-updates,jammy-updates,jammy-security,jammy-security,now 2.3.0-1ubuntu0.2 all [installed,automatic]
 [32mpython3-keyring[0m/jammy,jammy,now 23.5.0-1 all [installed,automatic]
 [32mpython3-kiwisolver[0m/jammy,now 1.3.2-1build1 amd64 [installed,automatic]
-[32mpython3-launchpadlib[0m/jammy,jammy,now 1.10.16-1 all [installed]
+[32mpython3-launchpadlib[0m/jammy,jammy,now 1.10.16-1 all [installed,automatic]
 [32mpython3-lazr.restfulclient[0m/jammy,jammy,now 0.14.4-1 all [installed,automatic]
 [32mpython3-lazr.uri[0m/jammy,jammy,now 1.0.6-2 all [installed,automatic]
+[32mpython3-lazy-object-proxy[0m/jammy,now 1.7.1-1build1 amd64 [installed,automatic]
 [32mpython3-ldb[0m/jammy-updates,jammy-security,now 2:2.4.4-0ubuntu0.1 amd64 [installed,automatic]
-[32mpython3-lib2to3[0m/jammy,jammy,now 3.10.4-0ubuntu1 all [installed,automatic]
+[32mpython3-lib2to3[0m/jammy-updates,jammy-updates,now 3.10.6-1~22.04 all [installed,automatic]
+[32mpython3-livereload[0m/jammy,jammy,now 2.6.3-2 all [installed,automatic]
+[32mpython3-logilab-common[0m/jammy,jammy,now 1.8.2-1 all [installed,automatic]
+[32mpython3-louis[0m/jammy-updates,jammy-updates,jammy-security,jammy-security,now 3.20.0-2ubuntu0.1 all [installed,automatic]
 [32mpython3-lxml[0m/jammy,now 4.8.0-1build1 amd64 [installed,automatic]
 [32mpython3-lz4[0m/jammy,now 3.1.3+dfsg-1build3 amd64 [installed,automatic]
+[32mpython3-mako[0m/jammy-updates,jammy-updates,jammy-security,jammy-security,now 1.1.3+ds1-2ubuntu0.1 all [installed,automatic]
+[32mpython3-markdown[0m/jammy,jammy,now 3.3.6-1 all [installed,automatic]
 [32mpython3-markupsafe[0m/jammy,now 2.0.1-2build1 amd64 [installed,automatic]
 [32mpython3-matplotlib-inline[0m/jammy,jammy,now 0.1.3-1 all [installed,automatic]
 [32mpython3-matplotlib[0m/jammy,now 3.5.1-2build1 amd64 [installed,automatic]
-[32mpython3-minimal[0m/jammy,now 3.10.4-0ubuntu2 amd64 [installed,automatic]
-[32mpython3-mistune[0m/jammy,jammy,now 2.0.0-1+really0.8.4-1 all [installed,automatic]
+[32mpython3-mccabe[0m/jammy,jammy,now 0.6.1-3 all [installed,automatic]
+[32mpython3-mediainfodll[0m/jammy,jammy,now 21.09+dfsg-4 all [installed,automatic]
+[32mpython3-minimal[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed,automatic]
 [32mpython3-more-itertools[0m/jammy,jammy,now 8.10.0-2 all [installed,automatic]
 [32mpython3-mpmath[0m/jammy,jammy,now 1.2.1-2 all [installed,automatic]
 [32mpython3-msgpack[0m/jammy,now 1.0.3-1build1 amd64 [installed,automatic]
+[32mpython3-mypy-extensions[0m/jammy,jammy,now 0.4.3-2 all [installed,automatic]
+[32mpython3-mypy[0m/jammy-updates,now 0.942-1ubuntu1 amd64 [installed,automatic]
 [32mpython3-nbclient[0m/jammy,jammy,now 0.5.6-2 all [installed,automatic]
 [32mpython3-nbconvert[0m/jammy,jammy,now 6.4.0-1 all [installed,automatic]
 [32mpython3-nbformat[0m/jammy,jammy,now 5.1.3-1 all [installed,automatic]
-[32mpython3-neovim[0m/jammy,jammy,now 0.4.2-1 all [installed,automatic]
 [32mpython3-nest-asyncio[0m/jammy,jammy,now 1.5.4-1 all [installed,automatic]
 [32mpython3-netifaces[0m/jammy,now 0.11.0-1build2 amd64 [installed,automatic]
+[32mpython3-nose2[0m/jammy,jammy,now 0.9.2-1 all [installed,automatic]
 [32mpython3-notebook[0m/jammy-updates,jammy-updates,jammy-security,jammy-security,now 6.4.8-1ubuntu0.1 all [installed,automatic]
 [32mpython3-numpy[0m/jammy,now 1:1.21.5-1build2 amd64 [installed,automatic]
-[32mpython3-oauthlib[0m/jammy,jammy,now 3.2.0-1 all [installed,automatic]
+[32mpython3-oauthlib[0m/jammy-updates,jammy-updates,jammy-security,jammy-security,now 3.2.0-1ubuntu0.1 all [installed,automatic]
 [32mpython3-olefile[0m/jammy,jammy,now 0.46-3 all [installed,automatic]
-[32mpython3-openssl[0m/jammy,jammy,now 21.0.0-1 all [installed,automatic]
 [32mpython3-packaging[0m/jammy,jammy,now 21.3-1 all [installed,automatic]
 [32mpython3-pandocfilters[0m/jammy,jammy,now 1.5.0-1 all [installed,automatic]
 [32mpython3-parso[0m/jammy,jammy,now 0.8.1-1 all [installed,automatic]
+[32mpython3-pathspec[0m/jammy,jammy,now 0.9.0-1 all [installed,automatic]
 [32mpython3-pexpect[0m/jammy,jammy,now 4.8.0-2ubuntu1 all [installed,automatic]
 [32mpython3-pickleshare[0m/jammy,jammy,now 0.7.5-5 all [installed,automatic]
 [32mpython3-pil.imagetk[0m/jammy,now 9.0.1-1build1 amd64 [installed,automatic]
 [32mpython3-pil[0m/jammy,now 9.0.1-1build1 amd64 [installed,automatic]
 [32mpython3-pip[0m/jammy,jammy,now 22.0.2+dfsg-1 all [installed]
 [32mpython3-pkg-resources[0m/jammy,jammy,now 59.6.0-1.2 all [installed,automatic]
+[32mpython3-platformdirs[0m/jammy,jammy,now 2.5.1-1 all [installed,automatic]
+[32mpython3-pluggy[0m/jammy,jammy,now 0.13.0-7.1 all [installed,automatic]
 [32mpython3-ply[0m/jammy,jammy,now 3.11-5 all [installed,automatic]
 [32mpython3-problem-report[0m/jammy-updates,jammy-updates,jammy-security,jammy-security,now 2.20.11-0ubuntu82.1 all [installed,automatic]
 [32mpython3-prometheus-client[0m/jammy,jammy,now 0.9.0-1 all [installed,automatic]
@@ -182,57 +203,75 @@ Listing... Done
 [32mpython3-psutil[0m/jammy,now 5.9.0-1build1 amd64 [installed,automatic]
 [32mpython3-ptyprocess[0m/jammy,jammy,now 0.7.0-3 all [installed,automatic]
 [32mpython3-py[0m/jammy,jammy,now 1.10.0-1 all [installed,automatic]
+[32mpython3-pyatspi[0m/jammy,jammy,now 2.38.2-1 all [installed,automatic]
+[32mpython3-pycodestyle[0m/jammy,jammy,now 2.8.0-2 all [installed,automatic]
+[32mpython3-pycryptodome[0m/jammy,now 3.11.0+dfsg1-3build1 amd64 [installed,auto-removable]
+[32mpython3-pyflakes[0m/jammy,jammy,now 2.4.0-2 all [installed,automatic]
 [32mpython3-pygments[0m/jammy,jammy,now 2.11.2+dfsg-2 all [installed,automatic]
 [32mpython3-pyinotify[0m/jammy,jammy,now 0.9.6-1.3 all [installed,automatic]
 [32mpython3-pynvim[0m/jammy,jammy,now 0.4.2-1 all [installed,automatic]
 [32mpython3-pyparsing[0m/jammy,jammy,now 2.4.7-1 all [installed,automatic]
-[32mpython3-pyqt5.sip[0m/jammy,now 12.9.1-1build1 amd64 [installed,automatic]
-[32mpython3-pyqt5[0m/jammy,now 5.15.6+dfsg-1ubuntu3 amd64 [installed,automatic]
 [32mpython3-pyrsistent[0m/jammy,now 0.18.1-1build1 amd64 [installed,automatic]
+[32mpython3-pytest-cov[0m/jammy,jammy,now 3.0.0-1 all [installed,automatic]
+[32mpython3-pytest-forked[0m/jammy,jammy,now 1.4.0-1 all [installed,automatic]
+[32mpython3-pytest-sugar[0m/jammy,jammy,now 0.9.4-1ubuntu1 all [installed,automatic]
+[32mpython3-pytest-xdist[0m/jammy,jammy,now 2.5.0-1 all [installed,automatic]
+[32mpython3-pytest[0m/jammy,jammy,now 6.2.5-1ubuntu2 all [installed,automatic]
 [32mpython3-pythran[0m/jammy,now 0.10.0+ds2-1 amd64 [installed,automatic]
+[32mpython3-pyxattr[0m/jammy,now 0.7.2-2ubuntu2 amd64 [installed,auto-removable]
 [32mpython3-renderpm[0m/jammy,now 3.6.8-1 amd64 [installed,automatic]
 [32mpython3-reportlab-accel[0m/jammy,now 3.6.8-1 amd64 [installed,automatic]
 [32mpython3-reportlab[0m/jammy,jammy,now 3.6.8-1 all [installed,automatic]
-[32mpython3-requests[0m/jammy,jammy,now 2.25.1+dfsg-2 all [installed,automatic]
+[32mpython3-rfc3986[0m/jammy,jammy,now 1.5.0-2 all [installed,automatic]
+[32mpython3-rich[0m/jammy,jammy,now 11.2.0-1 all [installed,automatic]
+[32mpython3-samba[0m/jammy-updates,jammy-security,now 2:4.15.9+dfsg-0ubuntu0.2 amd64 [installed,automatic]
 [32mpython3-scipy[0m/jammy,now 1.8.0-1exp2ubuntu1 amd64 [installed,automatic]
 [32mpython3-secretstorage[0m/jammy,jammy,now 3.3.1-1 all [installed,automatic]
 [32mpython3-send2trash[0m/jammy,jammy,now 1.8.1~b0-1 all [installed,automatic]
+[32mpython3-setproctitle[0m/jammy,now 1.2.2-2build1 amd64 [installed,automatic]
 [32mpython3-setuptools[0m/jammy,jammy,now 59.6.0-1.2 all [installed,automatic]
-[32mpython3-simplejson[0m/jammy,now 3.17.6-1build1 amd64 [installed,automatic]
+[32mpython3-shellingham[0m/jammy,jammy,now 1.4.0-1 all [installed,automatic]
 [32mpython3-six[0m/jammy,jammy,now 1.16.0-3ubuntu1 all [installed,automatic]
-[32mpython3-software-properties[0m/now 0.99.22.2 all [installed,upgradable to: 0.99.22.3]
+[32mpython3-sniffio[0m/jammy,jammy,now 1.2.0-1 all [installed,automatic]
+[32mpython3-socksio[0m/jammy-backports,jammy-backports,now 1.0.0-2~bpo22.04.1 all [installed,automatic]
+[32mpython3-software-properties[0m/jammy-updates,jammy-updates,now 0.99.22.3 all [installed,automatic]
 [32mpython3-soupsieve[0m/jammy,jammy,now 2.3.1-1 all [installed,automatic]
+[32mpython3-speechd[0m/jammy-updates,jammy-updates,now 0.11.1-1ubuntu2 all [installed,automatic]
 [32mpython3-sympy[0m/jammy,jammy,now 1.9-1 all [installed,automatic]
 [32mpython3-systemd[0m/jammy,now 234-3ubuntu2 amd64 [installed,automatic]
 [32mpython3-talloc[0m/jammy,now 2.3.3-2build1 amd64 [installed,automatic]
+[32mpython3-tdb[0m/jammy,now 1.4.5-2build1 amd64 [installed,automatic]
+[32mpython3-termcolor[0m/jammy,jammy,now 1.1.0-3 all [installed,automatic]
 [32mpython3-terminado[0m/jammy,jammy,now 0.13.1-1 all [installed,automatic]
 [32mpython3-testpath[0m/jammy,jammy,now 0.5.0+dfsg-1 all [installed,automatic]
-[32mpython3-tk[0m/jammy,now 3.10.4-0ubuntu1 amd64 [installed,automatic]
+[32mpython3-tk[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed,automatic]
+[32mpython3-toml[0m/jammy,jammy,now 0.10.2-1 all [installed,automatic]
+[32mpython3-tomli[0m/jammy,jammy,now 1.2.2-2 all [installed,automatic]
 [32mpython3-tornado[0m/jammy,now 6.1.0-3build1 amd64 [installed,automatic]
 [32mpython3-traitlets[0m/jammy,jammy,now 5.1.1-1 all [installed,automatic]
+[32mpython3-typed-ast[0m/jammy,now 1.4.3-1build1 amd64 [installed,automatic]
+[32mpython3-typer[0m/jammy,jammy,now 0.4.0-1 all [installed,automatic]
+[32mpython3-typing-extensions[0m/jammy,jammy,now 3.10.0.2-1 all [installed,automatic]
 [32mpython3-tz[0m/jammy,jammy,now 2022.1-1 all [installed,automatic]
 [32mpython3-ufolib2[0m/jammy,jammy,now 0.13.1+dfsg1-1 all [installed,automatic]
 [32mpython3-unicodedata2[0m/jammy,now 14.0.0+ds-8 amd64 [installed,automatic]
-[32mpython3-uno[0m/jammy-updates,now 1:7.3.5-0ubuntu0.22.04.1 amd64 [installed,automatic]
 [32mpython3-update-manager[0m/jammy,jammy,now 1:22.04.9 all [installed,automatic]
-[32mpython3-urllib3[0m/jammy,jammy,now 1.26.5-1~exp1 all [installed,automatic]
 [32mpython3-wadllib[0m/jammy,jammy,now 1.3.6-1 all [installed,automatic]
-[32mpython3-watchdog[0m/jammy,jammy,now 2.1.6-1 all [installed,automatic]
 [32mpython3-wcwidth[0m/jammy,jammy,now 0.2.5+dfsg1-1 all [installed,automatic]
 [32mpython3-webencodings[0m/jammy,jammy,now 0.5.1-4 all [installed,automatic]
-[32mpython3-werkzeug[0m/jammy,jammy,now 2.0.2+dfsg1-1 all [installed,automatic]
 [32mpython3-wheel[0m/jammy,jammy,now 0.37.1-2 all [installed,automatic]
 [32mpython3-widgetsnbextension[0m/jammy,jammy,now 6.0.0-9 all [installed,automatic]
-[32mpython3-xapian[0m/jammy,now 1.4.18-2build3 amd64 [installed,automatic]
+[32mpython3-wrapt[0m/jammy,now 1.13.3-1build1 amd64 [installed,automatic]
 [32mpython3-xdg[0m/jammy,jammy,now 0.27-2 all [installed,automatic]
 [32mpython3-xkit[0m/jammy,jammy,now 0.5.0ubuntu5 all [installed,automatic]
+[32mpython3-xlib[0m/jammy,jammy,now 0.29-1 all [installed,automatic]
 [32mpython3-yaml[0m/jammy,now 5.4.1-1ubuntu1 amd64 [installed,automatic]
 [32mpython3-zipp[0m/jammy,jammy,now 1.0.0-3 all [installed,automatic]
 [32mpython3-zmq[0m/jammy,now 22.3.0-1build1 amd64 [installed,automatic]
-[32mpython3.10-dev[0m/jammy-updates,jammy-security,now 3.10.4-3ubuntu0.1 amd64 [installed,automatic]
-[32mpython3.10-minimal[0m/jammy-updates,jammy-security,now 3.10.4-3ubuntu0.1 amd64 [installed,automatic]
-[32mpython3.10[0m/jammy-updates,jammy-security,now 3.10.4-3ubuntu0.1 amd64 [installed,automatic]
-[32mpython3[0m/jammy,now 3.10.4-0ubuntu2 amd64 [installed]
+[32mpython3.10-dev[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed,automatic]
+[32mpython3.10-minimal[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed,automatic]
+[32mpython3.10[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed,automatic]
+[32mpython3[0m/jammy-updates,now 3.10.6-1~22.04 amd64 [installed]
 
 ## 1B) apt-search : SEARCHES DESIRED PACKAGES IN THE apt REPO
 # Example: Searching for rolldice, a simple apt package
@@ -281,38 +320,44 @@ $ list-all-service
   acpid.service               loaded active running ACPI event daemon
   alsa-restore.service        loaded active exited  Save/Restore Sound Card Sta…
   apparmor.service            loaded active exited  Load AppArmor profiles
+[0;1;31m●[0m[0;1;31m [0m[0;1;31mapport-autoreport.service  [0m[0;1;31m [0mloaded [0;1;31mfailed[0m[0;1;31m [0m[0;1;31mfailed [0m[0;1;31m [0mProcess error reports when …
   apport.service              loaded active exited  LSB: automatic crash report…
   avahi-daemon.service        loaded active running Avahi mDNS/DNS-SD Stack
-  blk-availability.service    loaded active exited  Availability of block devic…
+  bluetooth.service           loaded active running Bluetooth service
   console-setup.service       loaded active exited  Set console font and keymap
   cron.service                loaded active running Regular background program …
   cups-browsed.service        loaded active running Make remote CUPS printers a…
   cups.service                loaded active running CUPS Scheduler
   dbus.service                loaded active running D-Bus System Message Bus
-  haveged.service             loaded active running Entropy Daemon based on the…
+  fwupd.service               loaded active running Firmware update daemon
+  getty@tty1.service          loaded active running Getty on tty1
+  ifupdown-pre.service        loaded active exited  Helper to synchronize boot …
   irqbalance.service          loaded active running irqbalance daemon
   kerneloops.service          loaded active running Tool to automatically colle…
   keyboard-setup.service      loaded active exited  Set the console keyboard la…
   kmod-static-nodes.service   loaded active exited  Create List of Static Devic…
-  lvm2-monitor.service        loaded active exited  Monitoring of LVM2 mirrors,…
+  lightdm.service             loaded active running Light Display Manager
+  lm-sensors.service          loaded active exited  Initialize hardware monitor…
   ModemManager.service        loaded active running Modem Manager
   networkd-dispatcher.service loaded active running Dispatcher daemon for syste…
+  networking.service          loaded active exited  Raise network interfaces
   NetworkManager-wait-online… loaded active exited  Network Manager Wait Online
   NetworkManager.service      loaded active running Network Manager
-  packagekit.service          loaded active running PackageKit Daemon
-  plymouth-quit.service       loaded active exited  Terminate Plymouth Boot Scr…
+  nscd.service                loaded active running Name Service Cache Daemon
+  openvpn.service             loaded active exited  OpenVPN service
+  plymouth-quit-wait.service  loaded active exited  Hold until boot process fin…
   plymouth-read-write.service loaded active exited  Tell Plymouth To Write Out …
   plymouth-start.service      loaded active exited  Show Plymouth Boot Screen
   polkit.service              loaded active running Authorization Manager
+  rpcbind.service             loaded active running RPC bind portmap service
   rsyslog.service             loaded active running System Logging Service
   rtkit-daemon.service        loaded active running RealtimeKit Scheduling Poli…
-  sddm.service                loaded active running Simple Desktop Display Mana…
   setvtrgb.service            loaded active exited  Set console scheme
   snapd.apparmor.service      loaded active exited  Load AppArmor profiles mana…
   snapd.seeded.service        loaded active exited  Wait until snapd is fully s…
   snapd.service               loaded active running Snap Daemon
   systemd-backlight@backligh… loaded active exited  Load/Save Screen Backlight …
-  systemd-backlight@backligh… loaded active exited  Load/Save Screen Backlight …
+  systemd-fsck@dev-disk-by\x… loaded active exited  File System Check on /dev/d…
   systemd-journal-flush.serv… loaded active exited  Flush Journal to Persistent…
   systemd-journald.service    loaded active running Journal Service
   systemd-logind.service      loaded active running User Login Management
@@ -329,6 +374,7 @@ $ list-all-service
   systemd-udevd.service       loaded active running Rule-based Manager for Devi…
   systemd-update-utmp.service loaded active exited  Record System Boot/Shutdown…
   systemd-user-sessions.serv… loaded active exited  Permit User Sessions
+  thermald.service            loaded active running Thermal Daemon Service
   udisks2.service             loaded active running Disk Manager
   ufw.service                 loaded active exited  Uncomplicated firewall
   unattended-upgrades.service loaded active running Unattended Upgrades Shutdown
@@ -340,7 +386,7 @@ $ list-all-service
 LOAD   = Reflects whether the unit definition was properly loaded.
 ACTIVE = The high-level unit activation state, i.e. generalization of SUB.
 SUB    = The low-level unit activation state, values depend on unit type.
-[0;1;39m59 loaded units listed.[0m Pass --all to see loaded but inactive units, too.
+[0;1;39m66 loaded units listed.[0m Pass --all to see loaded but inactive units, too.
 To show all installed unit files use 'systemctl list-unit-files'.
 
 # # 2B) stop-service : STOPS DESIRED SERVICE (password prompt appears; p/w required to start/stop the service)
@@ -354,18 +400,17 @@ $ start-service unattended-upgrades
 # service-status OR status-service VIEWS STATUS OF THE SERVICE
 $ service-status unattended-upgrades
 [0;1;32m●[0m unattended-upgrades.service - Unattended Upgrades Shutdown
-     Loaded: loaded (]8;;file://ASPIRE5742GLUBU/lib/systemd/system/unattended-upgrades.service/lib/systemd/system/unattended-upgrades.service]8;;; enabled; vendor preset: enabled)
-     Active: [0;1;32mactive (running)[0m since Thu 2022-09-08 22:04:06 +0545; 1min 40s ago
+     Loaded: loaded (]8;;file://INS-15-3573-UMATE/lib/systemd/system/unattended-upgrades.service/lib/systemd/system/unattended-upgrades.service]8;;; enabled; vendor preset: enabled)
+     Active: [0;1;32mactive (running)[0m since Thu 2022-11-03 18:27:17 +0545; 5h 0min ago
        Docs: ]8;;man:unattended-upgrade(8)man:unattended-upgrade(8)]8;;
-   Main PID: 20223 (unattended-upgr)
-      Tasks: 2 (limit: 4174)
-     Memory: 8.9M
-        CPU: 95ms
+   Main PID: 930 (unattended-upgr)
+      Tasks: 2 (limit: 4039)
+     Memory: 3.5M
+        CPU: 235ms
      CGroup: /system.slice/unattended-upgrades.service
-             └─20223 /usr/bin/python3 /usr/share/unattended-upgrades/unattended…
+             └─930 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-u…
 
-Sep 08 22:04:06 ASPIRE5742GLUBU systemd[1]: Started Unattended Upgrades Shut…wn.
-Hint: Some lines were ellipsized, use -l to show in full.
+Warning: some journal files were not opened due to insufficient permissions.
 
 # 2D) restart-service-sudoless : SUDO-LESS METHOD TO RESTART DESIRED SERVICE 
 # NOTE: password prompt appears; p/w required to start/stop the service 
@@ -374,18 +419,15 @@ $ restart-service-sudoless unattended-upgrades
 $ service-status unattended-upgrades
 # requires password but tests completes after (check need for batspp)
 [0;1;32m●[0m unattended-upgrades.service - Unattended Upgrades Shutdown
-     Loaded: loaded (]8;;file://ASPIRE5742GLUBU/lib/systemd/system/unattended-upgrades.service/lib/systemd/system/unattended-upgrades.service]8;;; enabled; vendor preset: enabled)
-     Active: [0;1;32mactive (running)[0m since Thu 2022-09-08 22:05:49 +0545; 176ms ago
+     Loaded: loaded (]8;;file://INS-15-3573-UMATE/lib/systemd/system/unattended-upgrades.service/lib/systemd/system/unattended-upgrades.service]8;;; enabled; vendor preset: enabled)
+     Active: [0;1;32mactive (running)[0m since Thu 2022-11-03 23:27:37 +0545; 235ms ago
        Docs: ]8;;man:unattended-upgrade(8)man:unattended-upgrade(8)]8;;
-   Main PID: 20367 (unattended-upgr)
-      Tasks: 1 (limit: 4174)
-     Memory: 6.8M
-        CPU: 92ms
+   Main PID: 27349 (unattended-upgr)
+      Tasks: 1 (limit: 4039)
+     Memory: 4.8M
+        CPU: 52ms
      CGroup: /system.slice/unattended-upgrades.service
-             └─20367 /usr/bin/python3 /usr/share/unattended-upgrades/unattended…
-
-Sep 08 22:05:49 ASPIRE5742GLUBU systemd[1]: Started Unattended Upgrades Shut…wn.
-Hint: Some lines were ellipsized, use -l to show in full.
+             └─27349 /usr/bin/python3 /usr/share/unattended-upgrades/unattended…
 
 ## TEST 3 - GET FREE FILENAME
 # get-free-filename(base, [sep=""]): get filename starting with BASE that is not used.
@@ -416,7 +458,7 @@ $ cat "abc.txt"
 abc.txt22
 --------------------------------------------------------------------------------
 total 4
--rw-rw-r-- 1 aveey aveey 50 Sep  8 22:05 abc.txt
+-rw-rw-r-- 1 test3513 test3513 50 Nov  3 23:27 abc.txt
 --------------------------------------------------------------------------------
 HELLO THERE,
 I AM EXTREMELY PLEASED TO USE UBUNTU.

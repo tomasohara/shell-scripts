@@ -51,11 +51,11 @@ make: Nothing to be done for 'himom.txt'.
 make: Nothing to be done for 'hidad.txt'.
 make: Nothing to be done for 'hidad.txt'.
 total 20
--rw-rw-r-- 1 aveey aveey    8 Oct  6 22:12 hidad.txt
--rw-rw-r-- 1 aveey aveey    8 Oct  6 22:12 himom.txt
--rw-rw-r-- 1 aveey aveey   42 Oct  6 22:12 _make.log
--rw-rw-r-- 1 aveey aveey   42 Oct  6 22:12 _old_make.log
-drwxrwxr-x 2 aveey aveey 4096 Oct  6 22:12 testfolder
+-rw-rw-r-- 1 test3513 test3513    8 Nov  4 21:06 hidad.txt
+-rw-rw-r-- 1 test3513 test3513    8 Nov  4 21:06 himom.txt
+-rw-rw-r-- 1 test3513 test3513   42 Nov  4 21:06 _make.log
+-rw-rw-r-- 1 test3513 test3513   42 Nov  4 21:06 _old_make.log
+drwxrwxr-x 2 test3513 test3513 4096 Nov  4 21:06 testfolder
 
 ## TEST 2 - MERGING ALIASAS & FUNCTIONS
 # $ man merge

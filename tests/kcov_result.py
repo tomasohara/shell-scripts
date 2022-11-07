@@ -60,27 +60,62 @@ LIST_MODE_RATIO = "ratio"
 ## Main function: kcov_test_coverage(SUMMARY_OPT, LIST_OPT, REPORT_MODE, INCLUDE_OPT, EXCLUDE_OPT)
 kcov_folder_exists = gh.file_exists(KCOV_FOLDER)
 
-def kcov_test_coverage(
-    SUMMARY_OPT, 
-    LIST_OPT, 
-    REPORT_ONLY_OPT, 
-    INCLUDE_OPT, 
-    EXCLUDE_OPT
-    ):
+class KcovTestCoverage:
+    """Consists of functions for the necessary result operations and summary"""
     
-    global facts_array
-    facts_array = []
+    def __init__ (
+        self,
+        SUMMARY_OPT, 
+        LIST_OPT, 
+        REPORT_ONLY_OPT, 
+        INCLUDE_OPT, 
+        EXCLUDE_OPT
+    ):
+        """Initializer for KcovTestCoverage class"""
+        self.SUMMARY_OPT = SUMMARY_OPT
+        self.LIST_OPT = LIST_OPT
+        self.REPORT_ONLY_OPT = REPORT_ONLY_OPT
+        self.INCLUDE_OPT = INCLUDE_OPT
+        self.EXCLUDE_OPT = EXCLUDE_OPT
 
-    # 0. get_test_name_from_testfile()
-    def get_name_from_testfile(FILE):
+
+    ## TROUBLESOME AREA (argument issues) : AttributeError: 'KcovTestCoverage' object has no attribute 'FILE'
+    def do_it(self):
+        """Main method for KcovTestCoverage class"""
+
+        ## Workflow
+        global facts_array
+        facts_array = []
+        
+        if kcov_folder_exists: 
+            self.report_process()
+            
+            if not self.REPORT_ONLY_OPT:
+                if self.SUMMARY_OPT or not self.LIST_OPT:
+                    self.summary_stats()
+                
+                if self.LIST_OPT:
+                    self.list_summary_mode()
+            else:
+                print ("\n\t[REPORTS ONLY MODE (--ro) enabled]\t\n")
+        else:
+            raise Exception(f"Directory Not Found: {KCOV_FOLDER}/ doesn't exist.")
+
+    ## Helper functions for do_it function
+
+    # 0.1. get_test_name_from_testfile
+    def get_name_from_testfile(self, FILE):
+        """Returns basename from .ipynb testfiles"""
         return gh.basename(FILE, ".ipynb")
 
-    def get_index_number(LIST, ITEM):
+    # 0.2. get_index_number
+    def get_index_number(self, LIST, ITEM):
+        """Returns index number from list of items (counts from 1)"""
         return LIST.index(ITEM) + 1
 
 
-    # 1. extract_report()
-    def extract_report(report_name, i):
+    # 1. extract_report
+    def extract_report(self, report_name, i):
         """Extracts the required line of code from each report by accessing required .js"""
 
         global report_InsLine, report_CovLine, report_RatioLine, report_JSON, facts_JSON
@@ -111,11 +146,11 @@ kcov REPORT [{i}]: {report_name}
         facts_JSON["ratio"] = report_RatioLine
         facts_array.append(facts_JSON)
 
-        if not SUMMARY_OPT:
+        if not self.SUMMARY_OPT:
             print (REPORT_PATTERN)
 
     # 2. report_process() uses extract_report(report); act as a calculating function
-    def report_process():
+    def report_process(self):
         """Extracts information from extract_report(report_name); calculates total lines and ratios"""
 
         i = 1
@@ -127,16 +162,16 @@ kcov REPORT [{i}]: {report_name}
 
         reports = system.read_directory(f"./{KCOV_FOLDER}/")
         
-        # REWORK: Inclusion of multiple testfiles in OPTIONS --include / --exclude
-        if EXCLUDE_OPT:
-            reports.remove(get_name_from_testfile(EXCLUDE_OPT))
+        # REWORK TBD: Inclusion of multiple testfiles in OPTIONS --include / --exclude
+        if self.EXCLUDE_OPT:
+            reports.remove(self.get_name_from_testfile(self.EXCLUDE_OPT))
             # print (reports)
-        elif INCLUDE_OPT:
-            reports = [get_name_from_testfile(INCLUDE_OPT)]
+        elif self.INCLUDE_OPT:
+            reports = [self.get_name_from_testfile(self.INCLUDE_OPT)]
         # END OF Rework
 
         for report in reports:
-            extract_report(report, i)
+            self.extract_report(report, i)
             ratio_array += [report_RatioLine]
             instrumented_array += [report_InsLine]
             covered_array += [report_CovLine]
@@ -146,17 +181,9 @@ kcov REPORT [{i}]: {report_name}
 
         REPORT_LIST = reports
 
-    def summary_stats():
+    # 3. summary_stats() prints the required summary stats and facts of the report
+    def summary_stats(self):
         """Prints out the overall summary stats of file calculations"""
-        
-        # # Needs rework
-        # def print_included_files(REPORT_ARRAY):
-        #     # if OPT == INCLUDE_OPT:
-        #     #     print (report for report in REPORT_ARRAY)
-        #     # else:
-        #     for report in REPORT_ARRAY:
-        #         print (report)
-        # # END OF Needs Rework
 
         RATIO_MEAN = round(np.mean(ratio_array), 4)
         RATIO_MEDIAN = round(np.median(ratio_array), 4)
@@ -170,7 +197,6 @@ kcov REPORT [{i}]: {report_name}
         HIGHEST_RATIO = np.max(ratio_array)
         LOWEST_RATIO = round (np.min(ratio_array), 4)
 
-        ## TODO: Work for list-mode (list all the files in descending order [success rate])
         for fact in facts_array:
             if fact["instrumented_line"] == INSTRUMENTED_MAX:
                 LARGEST_TESTFILE = fact["report_name"]
@@ -181,15 +207,15 @@ kcov REPORT [{i}]: {report_name}
             if fact["ratio"] == LOWEST_RATIO:
                 LOWEST_SUCCESS_TESTFILE = fact["report_name"]    
         
-        if SUMMARY_OPT: print ("\n[SUMMARY MODE (--summary) ENABLED]")
+        if self.SUMMARY_OPT: print ("\n[SUMMARY MODE (--summary) ENABLED]")
+
         print (f"\n===============================================\n")
         print (f"SUMMARY STATISTICS: ")
         
+        ## REWORK TBD: For multiple arguments (--include/--exclude mode)
         print (f"------------------------------------\n")
-        print (f"EXCLUDED TESTS: {get_name_from_testfile(EXCLUDE_OPT) if EXCLUDE_OPT else None}")
-        print (f"EXCLUSIVELY INCLUDED TESTS: {get_name_from_testfile(INCLUDE_OPT) if INCLUDE_OPT else None}")
-        # print (f"\nEXCLUSIVE INCLUDED TESTS: \n")
-        # print_included_files(REPORT_LIST) # Needs rework
+        print (f"EXCLUDED TESTS: {self.get_name_from_testfile(self.EXCLUDE_OPT) if self.EXCLUDE_OPT else None}")
+        print (f"EXCLUSIVELY INCLUDED TESTS: {self.get_name_from_testfile(self.INCLUDE_OPT) if self.INCLUDE_OPT else None}")
 
         print (f"\nREPORTS DETECTED: [{file_quantity}]")
         print (f"Total Instrumented Lines = {INSTRUMENTED_TOTAL}")
@@ -205,8 +231,9 @@ kcov REPORT [{i}]: {report_name}
         print (f"\nHighest Success Rate:\n>> {HIGHEST_SUCCESS_TESTFILE} [RATIO = {HIGHEST_RATIO}]")
         print (f"\nLowest Success Rate:\n>> {LOWEST_SUCCESS_TESTFILE} [RATIO = {LOWEST_RATIO}]")
         print (f"\n===============================================\n")
-        
-    def list_summary_mode():
+
+    # 4. list_summary_mode is enabled for --list option (returns a list of testfiles)    
+    def list_summary_mode(self):
         "Prints out testfiles in a list on the basis of instrumented lines and ratio"
 
         def report_name_by_value(fact_list, v, mode):
@@ -237,7 +264,7 @@ kcov REPORT [{i}]: {report_name}
         fa1 = facts_array.copy()
         
         for value_INS in SUMMARY_INS:
-            print (f"{get_index_number(SUMMARY_INS, value_INS)}) {report_name_by_value(fa1, value_INS, LIST_MODE_INS)}")
+            print (f"{self.get_index_number(SUMMARY_INS, value_INS)}) {report_name_by_value(fa1, value_INS, LIST_MODE_INS)}")
         
         print (f"\n------------------------------------")
         print ("MOST SUCCESSFUL TESTFILES (DESC): ")
@@ -245,27 +272,10 @@ kcov REPORT [{i}]: {report_name}
         fa2 = facts_array.copy()
         
         for value_RATIO in SUMMARY_RATIO:
-            print (f"{get_index_number(SUMMARY_RATIO, value_RATIO)}) {report_name_by_value(fa2, value_RATIO, LIST_MODE_RATIO)}")
+            print (f"{self.get_index_number(SUMMARY_RATIO, value_RATIO)}) {report_name_by_value(fa2, value_RATIO, LIST_MODE_RATIO)}")
        
         print (f"\n=====================================\n")
-
-
-    # Main function
-    if kcov_folder_exists: 
-        report_process()
-        if not REPORT_ONLY_OPT:
-            if SUMMARY_OPT or not LIST_OPT:
-                summary_stats()
-            if LIST_OPT:
-                list_summary_mode()
-        else:
-            print ("\n\t[REPORTS ONLY MODE (--ro) enabled]\t\n")
-
-    else:
-        raise Exception(f"Directory Not Found: {KCOV_FOLDER}/ doesn't exist.")
     
-    
-
 ## END OF MAIN
 # ===============================================================================================================
 
@@ -308,13 +318,22 @@ class Script(Main):
     def run_main_step(self):
         """Main processing step"""
         debug.trace_fmtd(5, "Script.run_main_step(): self={s}", s=self)
-        kcov_test_coverage(
+        # # OLD (For class-less approach):
+        # kcov_test_coverage(
+        #     self.summary_mode, 
+        #     self.list_mode, 
+        #     self.report_only_mode, 
+        #     self.include_mode,
+        #     self.exclude_mode
+        # )
+        kcov_test_coverage = KcovTestCoverage(
             self.summary_mode, 
             self.list_mode, 
             self.report_only_mode, 
             self.include_mode,
             self.exclude_mode
         )
+        kcov_test_coverage.do_it()
 
 #-------------------------------------------------------------------------------
     
@@ -343,8 +362,3 @@ if __name__ == "__main__":
     )
     
     app.run()
-
-
-
-
-

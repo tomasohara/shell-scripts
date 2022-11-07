@@ -8,7 +8,7 @@ $ echo 'Hello world' | wc -l
 1
 
 $ pwd
-/home/aveey/tom-project/shell-scripts/tests
+/home/test3513/tom-project/shell-scripts/tests
 
 # THIS IS A COMMENT
 
@@ -16,36 +16,37 @@ $ which systemd
 /usr/bin/systemd
 
 $ ls
-[32m [1m_dir-aliases.bash[0m                  re
- abc-test.txt                      [33m [1;4mREADME.txt[0m
- adhoc-tests.test                  [34m [1mreports[0m
- alias-calculator-commands.ipynb   [32m [1msimple_batspp.py[0m
- alias-cd-commands.ipynb           [34m [1mtemp[0m
- alias-grep-commands.ipynb         [34m [1mtemp-alias-test[0m
- alias-trace-misc-commands.ipynb    test-check-errors.ipynb
-[34m [1mbatspp-output[0m                      test-cond-env-setting.ipynb
-[32m [1mbatspp-report.py[0m                   test-dir-alias.ipynb
- calc-entropy-tests.ipynb          [32m [1mtest-dir-output.txt[0m
- calc_entropy.input                [32m [1mtest_check_errors.py[0m
- calc_entropy.input2               [32m [1mtest_extract_matches.py[0m
- calc_entropy.simple.input         [32m [1mtest_tomohara_aliases.bats[0m
- calc_entropy.simple.input2        [32m [1mtest_tpo_count_it.py[0m
- command-override-cp-mv.ipynb       testbook-test-dir-aliases.ipynb
- dir-aliases-test-revised.ipynb    [32m [1mtestpy.txt[0m
- docshtest.rst                     [34m [1mtmp[0m
- hello-world-basic.batspp           tomasohara-aliases-test.ipynb
- hello-world-basic.ipynb            trace-extensionless-shortcut.ipynb
- hello-world-revised.batspp         trace-file-manipulation.ipynb
- hello-world-revised.ipynb          trace-line-words-commands.ipynb
-[32m [1mhello-world_test.txt[0m               trace-linux-admin-alias.ipynb
- json-related-alias.ipynb           trace-python-commands.ipynb
-[32m [1mjupyter_to_batspp.py[0m               trace-setup-sorting-wrappers.ipynb
- misc-bash-helpers.ipynb            trace-unix-alias.ipynb
- more-tomohara-aliases-test.ipynb   trace-unix-general.ipynb
- os                                [32m [1mtrace-unix-general.txt[0m
- random                            
+adhoc-tests.test                  os
+alias-calculator-commands.ipynb   random
+alias-cd-commands.ipynb           re
+alias-grep-commands.ipynb         README.txt
+[0m[01;32malias-trace-misc-commands.ipynb[0m   [01;32msimple_batspp.py[0m
+[01;32mauto_batspp_mezcla.py[0m             [01;32msimple_batspp.py.old[0m
+[01;32mauto_batspp.py[0m                    [01;34mstorage-temp-testfiles[0m
+[01;34mbats-only[0m                         [01;34mtemp[0m
+[01;34mbatspp-only[0m                       testbook-test-dir-aliases.ipynb
+batspp_report_kcov.py             test-check-errors.ipynb
+batspp-report-output.txt          [01;32mtest_check_errors.py[0m
+[01;32mbatspp_report.py[0m                  test-cond-env-setting.ipynb
+calc_entropy.input                test-dir-alias.ipynb
+calc_entropy.input2               [01;32mtest_extract_matches.py[0m
+calc_entropy.simple.input         [01;32mtest_tomohara_aliases.bats[0m
+calc_entropy.simple.input2        [01;32mtest_tpo_count_it.py[0m
+calc-entropy-tests.ipynb          tomasohara-aliases-test.ipynb
+command-override-cp-mv.ipynb      [01;32mtom_auto_batspp_mezcla.py[0m
+[01;32m_dir-aliases.bash[0m                 trace-extensionless-shortcut-unicode.ipynb
+dir-aliases-test-revised.ipynb    trace-extensionless-shortcut-V2.ipynb
+docshtest.rst                     trace-file-manipulation.ipynb
+hello-world-basic.ipynb           trace-line-words-commands.ipynb
+hello-world-revised.ipynb         trace-linux-admin-alias.ipynb
+[01;34mimmediate-reports[0m                 trace-python-commands.ipynb
+json-related-alias.ipynb          trace-setup-sorting-wrappers.ipynb
+[01;32mjupyter_to_batspp.py[0m              trace-unix-alias.ipynb
+[01;34mkcov-output[0m                       trace-unix-general.ipynb
+[01;32mkcov_result.py[0m                    [01;34mtxt-reports[0m
+more-tomohara-aliases-test.ipynb
 
 $ ps -l
 F S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
-0 S  1000   42020   42009  1  80   0 -  2870 do_wai pts/3    00:00:00 bash
-4 R  1000   42039   42020  0  80   0 -  3167 -      pts/3    00:00:00 ps
+0 S  1002   21933   21920  1  80   0 -  4386 do_wai pts/5    00:00:00 bash
+0 R  1002   21952   21933  0  80   0 -  4648 -      pts/5    00:00:00 ps
