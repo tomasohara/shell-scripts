@@ -2240,6 +2240,8 @@ TPO_SSH_USER="$USER"
 ## TOM-IDIOSYNCRATIC
 {
 function ssh-host-aws-aux () { local host="$1"; shift; ssh -X -p $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host" "$@"; }
+## TEST: use -q to try to disable hist-key-known-by-other-names warning (with annoying prompt)
+## function ssh-host-aws-aux () { local host="$1"; shift; ssh -X -q -p $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host" "$@"; }
 }
 #
 function ssh-host-login-aws () {
