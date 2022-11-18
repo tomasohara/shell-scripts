@@ -2752,7 +2752,11 @@ alias jupyter-notebook-redir=run-jupyter-notebook
 alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'
 
 # Python-based utilities
-function extract-text() { python -m extract_document_text "$@"; }
+## OLD: function extract-text() { python -m extract_document_text "$@"; }
+# extract-text(document-file): extracts text from structured document file (e.g., Word or PDF)
+# note: to avoid hardcoded 'python -m mezcla.extract_document_text' invovation uses awkward which-based approach
+## TODO: figure out way for python to pull script from path (as with perl -S)
+function extract-text() { python $(which extract_document_text.py) "$@"; }
 alias xtract-text='extract-text'
 
 # test-script(script): run unit test for script (i.e., tests/test_script)
