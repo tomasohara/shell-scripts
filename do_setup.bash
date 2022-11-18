@@ -1452,6 +1452,7 @@ alias eng-='english-'
 function add-multilingual-dicts() {
     ## OLD: cond-setenv SPANISH_IRREG_DICT $multiling_dir/spanish/spanish_irregular.dict;
     ## OLD: cond-setenv ENGLISH_DICT $multiling_dir/spanish/english_spanish.dict;
+    ## TODO: reword lang-lookup- to lang-lookup-loose
     cond-setenv _FRENCH_DICT $multiling_dir/French/french_english.dict;
     cond-setenv GERMAN_DICT $multiling_dir/German/german_english.dict;
     cond-setenv ITALIAN_DICT $multiling_dir/Italian/italian_english.dict;
@@ -1489,9 +1490,12 @@ fi
 alias spanish-='spanish-lookup-'
 alias spanish='spanish-lookup'
 alias sp=spanish
+## TODO: reword sp- to sp-loose
 alias sp-=spanish-
 alias pp-spanish='pp_spanish_entry.perl'
+## TODO: reword sp-pp- to sp-pp-aux
 function sp-pp- () { sp $@ | pp-spanish; }
+function sp-pp-loose () { sp- $@ | pp-spanish; }
 function sp-pp () { sp-pp- $1 >| $1.pp; $PAGER $1.pp; }
 
 function spanish-trans-phrase () { phrase=$1; shift; echo "$phrase" | $multiling_dir/Spanish/qd_trans_spanish.perl "$@" -; }
