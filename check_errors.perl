@@ -176,8 +176,10 @@ while (<>) {
 
     # Check for warnings and starred messages
     # TODO: Have option for restricting ***'s to start of line.
-    # NOTE: $strict includes "error" or "warning" occurring anywhere;
-    # added to excluded keywords usage as in "conflict_handler='error'".
+    # NOTE: $strict includes "error" or "warning" occurring anywhere, etc.;
+    # It was added to excluded keyword usage as in "conflict_handler='error'".
+    # TODO: Put strict in separate section, such as having 4 sections overall :
+    #    {error, warning} x {non-strict, strict}
     elsif ($show_warnings &&
 	   ((/\b(warning)\b/i           # warning token occuring 
 	     && ((! /='warning'/i) || $strict)) # ... includes quotes if strict
@@ -187,6 +189,8 @@ while (<>) {
 	    || /: warning\b/		# Ruby warnings
 	    || /^bash: /                # ex: "bash: [: : unary operator expected"
 	    || /Traceback|\S+Error/     # Python exceptions (caught)
+	    || (/exception|failed/      # logger messages (e.g., "Training job failed")
+		&& $strict)
 	    || ($asterisks && /\*\*\*/))) {
 	$has_error = &TRUE;
 	&debug_print(&TL_VERY_VERBOSE, "3. has_error=$has_error\n");
