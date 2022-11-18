@@ -16,3 +16,6 @@ alias git-vdiff='git-vdiff-alias '
 # Other misc. stuff
 alias nvidia-batched='batch-nvidia-smi.sh'
 alias nvidia-top='nvtop'
+
+# Python stuff
+alias plint=python-lint
