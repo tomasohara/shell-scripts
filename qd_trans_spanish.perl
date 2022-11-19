@@ -104,6 +104,15 @@ if ($#ARGV < 0) {
 ## &init_var(*prompt, $prompt_default);       # prompt for input
 ## TODO: disable buffering
 &init_var(*prompt, "");          # prompt for input
+&init_var(*debug_level, &DEBUG_LEVEL);  # workaround for quirk under Emacs
+
+# Temp workround
+&debug_on(3);
+if ($debug_level != &DEBUG_LEVEL) {
+    &debug_on($debug_level);
+}
+use vars qw/$preserve_temp/;
+&debug_print(3, "preserve_temp=$preserve_temp\n");
 
 # Set stdout unbuffered if prompt used
 if ($prompt ne "") {
@@ -219,7 +228,7 @@ while (<>) {
 	&debug_print(4, "running translation: f='$from' t='$to' t='$text'\n");
 	my($env_spec) = "FROM=$from TO=$to";
 	print(&run_command_over("$env_spec machine_translation.py 2>| $log", 
-				"$text\n"));
+				"$text\n", 3));
 	print("\n");
 	debug_out(6, "log: {\n%s}\n", &read_file($log));
 	next;
