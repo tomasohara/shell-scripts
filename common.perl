@@ -106,6 +106,7 @@ use vars qw/$debug_level $d $o $redirect $script_dir $script_name $TRUE $FALSE $
     $disable_commands $unix $under_WIN32 $delim $path_delim $path_var_delim $precision $verbose $help $TEMP $TMP
     $OSTYPE $OS $HOST $debugging_timestamps $disable_assertions $unbuffered $para $slurp $PATH @PATH
     $force_WIN32 $force_unix $osname $common_options $utf8 $BOM $timeout $timeout_seconds $timeout_script $wait_for_user/;
+use vars qw/$preserve_temp/;
 
 sub COMMON_OPTIONS { $common_options; }
 
@@ -221,7 +222,9 @@ sub init_common {
     #
     &init_var_exp(*unbuffered, &FALSE);	# unbuffered I/O
     &init_var_exp(*debugging_timestamps, &FALSE);   # timestamp all debug output
-    &init_var_exp(*disable_assertions, &FALSE);	#   # don't check for assertions
+    &init_var_exp(*disable_assertions, &FALSE);	    # don't check for assertions
+    &init_var_exp(*preserve_temp,                   # preserve temporary files
+		  &VERBOSE_DEBUGGING);          
 
     # Check options for changing line-input mode
     &init_var_exp(*para, &FALSE);		# read paragraphs not lines
@@ -517,7 +520,8 @@ sub run_command {
     &debug_out($trace_level+1, "run_command => {\n%s\n}\n", $result);
 
     if ($temp_script ne "") {
-	unlink $temp_script unless (&VERBOSE_DEBUGGING);
+	## OLD: unlink $temp_script unless (&VERBOSE_DEBUGGING);
+	unlink $temp_script unless ($preserve_temp);
     }
 
     return ($result);
@@ -551,7 +555,10 @@ sub run_command_win32 {
     $result =~ s/\r\n/\n/g;
     chomp $result;
     &debug_out($trace_level+1, "run_command_win32 => {\n%s\n}\n", $result);
-    unlink $temp_file unless (&DEBUG_LEVEL > &TL_VERY_DETAILED);
+    ## OLD: unlink $temp_file unless (&DEBUG_LEVEL > &TL_VERY_DETAILED);
+    ## TODO: see why following didn't generate warning
+    ## BAD: unlink $temp_temp unless ($preserve_temp);
+    unlink $temp_file unless ($preserve_temp);
 
     return ($result);
 }
@@ -588,6 +595,7 @@ sub run_command_over {
     my($temp_file) = sprintf("%s%s-%d-%d.data", &TEMP_DIR, "temp-run-command", $$, $run_num++);
     &write_file($temp_file, $input);
     my($result) = &run_command(sprintf("%s %s", $command, $temp_file), $trace_level);
+    ## TODO: add $preserve_temp_files option
     unlink $temp_file unless (&DEBUG_LEVEL > &TL_VERY_DETAILED);
 
     return ($result);
@@ -640,7 +648,8 @@ sub issue_command_over {
     my($temp_file) = sprintf "%s%s.%d.%d", &TEMP_DIR, "temp_run_command", $$, $issue_num++;
     &write_file($temp_file, $input);
     my($result) = &issue_command(sprintf "%s %s", $command, $temp_file);
-    unlink $temp_file unless (&DEBUG_LEVEL > &TL_VERBOSE);
+    ## OLD: unlink $temp_file unless (&DEBUG_LEVEL > &TL_VERBOSE);
+    unlink $temp_file unless ($preserve_temp);
     return ($result);
 }
 
