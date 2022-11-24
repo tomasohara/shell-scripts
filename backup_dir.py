@@ -20,9 +20,21 @@ from datetime import date
 import py7zr
 import click
 
+# Local modules
+from mezcla import debug
+from mezcla import system
+
+# Environment constants
+HOME_DIR = system.getenv_text("HOME", "~",
+                              "User home directory")
+BACKUP_DIR = system.getenv_text("BACKUP_DIR", HOME_DIR,
+                                "Base directory for backups")
+
+
 def create_backup_folder(source):
     """Try to create the backup folder if it doesn't exist"""
-    backup_dir = os.path.join(os.environ["HOME"], socket.gethostname())
+    ## OLD: backup_dir = os.path.join(os.environ["HOME"], socket.gethostname())
+    backup_dir = os.path.join(BACKUP_DIR, socket.gethostname())
     base_dir = source.split("/")[-2]
     try:
         os.makedirs(backup_dir, exist_ok=True)
@@ -50,7 +62,8 @@ def backup_derive(source, max_days_old, max_size_chars):
     logging.info("Starts setting basename")
 
     # Backup source, equivalent to $HOME/$HOSTNAME
-    backup_dir = os.path.join(os.environ["HOME"], socket.gethostname())
+    ## OLD: backup_dir = os.path.join(os.environ["HOME"], socket.gethostname())
+    backup_dir = os.path.join(BACKUP_DIR, socket.gethostname())
 
     hostname = socket.gethostname()  ##Get's hostname
     base_dir = source.split("/")[-2]  ##Backup folder name
@@ -116,7 +129,7 @@ def create_tar(basename, lista):
             except OSError as err:  ##Broken links usually gives errors at this point
                 logging.warning(err)
                 pass
-            except Exception as err:
+            except Exception as err:              # pylint: disable=broad-except
                 logging.critical(err)
                 print(err)
     logging.info("Finish creating tar.gz file")
@@ -132,9 +145,10 @@ def create_encrypted_7z(password, basename, lista):
             except OSError as err:
                 logging.warning(err)
                 pass
-            except Exception as err:
+            except Exception as err:              # pylint: disable=broad-except
                 logging.critical(err)
-                print("Unable to continue. Please see log")
+                ## OLD: print("Unable to continue. Please see log")
+                system.print_error("Unable to continue:\n\t{err}")
     logging.info("Finish creating encrypted 7z file")
 
 
@@ -170,5 +184,8 @@ def main(password, source, full, days, size):
 
 
 if __name__ == "__main__":
+    debug.trace_current_context(level=debug.QUITE_DETAILED)
+    debug.trace_fmt(4, "Environment options: {eo}",
+                    eo=system.formatted_environment_option_descriptions())
     # pylint: disable=no-value-for-parameter
     main()
