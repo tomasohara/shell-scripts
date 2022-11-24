@@ -35,6 +35,9 @@
 # Jupyter
 .ipynb_checkpoints
 
+# (maldito) Mac
+.DS_Store
+
 #...............................................................................
 # Idiosyncratic stuff for Tom
 
@@ -47,6 +50,7 @@
 **/*.[0-9][0-9][A-Za-z]*[0-9][0-9]
 # ex: usage.list.08Jan22.2
 **/*.[0-9][0-9][A-Za-z]*[0-9][0-9].*
+versioned-files
 
 # Emacs
 TAGS
@@ -54,3 +58,6 @@ TAGS
 # OS-specific directories
 linux
 win32
+mac-os
+# note: darwin21.1.0 => mac-os
+darwin21.1.0
