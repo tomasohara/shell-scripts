@@ -1051,8 +1051,11 @@ alias em-dir=em-file
 alias em-this-dir='em .'
 alias em-devel='em --devel'
 #
-function em-debug () { em --debug-init "$@"; }
-function em-quick () { em --quick "$@"; }
+## OLD:
+## function em-debug () { em --debug-init "$@"; }
+## function em-quick () { em --quick "$@"; }
+function em-debug () { em -- --debug-init "$@"; }
+function em-quick () { em -- --quick "$@"; }
 
 #--------------------------------------------------------------------------------
 # Simple TODO-list maintenance commands
