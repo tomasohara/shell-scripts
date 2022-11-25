@@ -537,9 +537,12 @@ export CDPATH=.
 ## OLD: reset-prompt
 ##
 
-# If interactive session, change prompt to $PS1 (via $PS_symbol).
-# Note: directory is instead put in xterm title (via set_xterm_title.bash)
-if [[ $- =~ i ]]; then reset-prompt; fi
+## OLD:
+## NOTE: This was causing problems with the Jupyter bash kernel
+## as it modifies prompt for parsing purposes.
+## # If interactive session, change prompt to $PS1 (via $PS_symbol).
+## # Note: directory is instead put in xterm title (via set_xterm_title.bash)
+## if [[ $- =~ i ]]; then reset-prompt; fi
 
 # flag for turning off GNOME, which can be flakey at times
 # See xterm.sh (e.g., gnome-terminal).
