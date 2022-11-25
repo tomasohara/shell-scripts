@@ -1,0 +1,9 @@
+# Tests for SSH wrappers
+
+# TODO: track down intermittent problem with followin
+#
+# $ serv-login
+# ssh_exchange_identification: read: Connection reset by peer
+# See ~/config/_serv-login-error-24nov22.log.
+#
+
