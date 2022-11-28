@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 #
 # sync-sync-loop.sh: repeatedly invoke 'sync' in background loop in order
 # to work around problem with battery-based power glitches (i.e., abrupt

@@ -17,6 +17,10 @@
 ## set -o xtrace
 ## set -o verbose
 
+# Support for MacOS-special casing
+under_mac=0
+if [ "$(uname)" = "Darwin" ]; then under_mac=1; fi
+
 # Parse command-line options
 # TODO: #
 more_options=0; case "$1" in -*) more_options=1 ;; esac
@@ -34,6 +38,8 @@ while [ "$more_options" = "1" ]; do
 	for_editting=1;
     elif [ "$1" = "--open" ]; then
 	for_editting=1;
+    elif [ "$1" = "--not-mac" ]; then
+	under_mac=0;
     elif [ "$1" = "--verbose" ]; then
 	verbose=1;
     elif [ "$1" = "--" ]; then
@@ -54,9 +60,10 @@ arg2="$2"
 # Note: uses $arg2 to check for extraneous args
 #
 if [[ ($show_usage = 1) || ("$file" = "") || ("$arg2" != "") ]]; then
-    script=$(basename $0)
+    script=$(basename "$0")
     echo ""
-    echo "Usage: $script [--view|[--edit|--open]] [--verbose] [--trace] [--help] file"
+    echo "Usage: $script [--view|[--edit|--open]] [--verbose] [--trace] [misc-options] file"
+    echo "    misc-options: [--help] [--not-mac]"
     echo ""
     echo "Examples:"
     echo ""
@@ -84,13 +91,27 @@ fi
 function invoke () {
     local program="$1"
     local file="$2"
-    local today=$(date '+%d%b%y')
+    local today
+    today=$(date '+%d%b%y')
     local log_dir="$TEMP/$USER/invocations"
     if [ ! -e "log_dir" ]; then mkdir -p "$log_dir"; fi
-    local log_file="$log_dir/$(basename "$program")-$(basename "$file")-$today.log"
+    local log_file
+    log_file="$log_dir/$(basename "$program")-$(basename "$file")-$today.log"
+    local program_arg=""
     if [ ! -e "$log_file" ]; then touch "$log_file"; fi
     if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" \"$file\" >> \"$log_file\" 2>&1"; fi
-    "$program" "$file" >> "$log_file" 2>&1
+    if [[ (! -e "$program") && ("$program" != "open") ]]; then
+	if [ "$under_mac" = "1" ]; then
+	    ## OLD: program="open -a '$program'"
+	    ## TODO: program_arg="-a '$program'"
+	    program_arg="-a $program"
+	    program="open"
+	fi
+    fi
+    ## OLD: "$program" "$file" >> "$log_file" 2>&1
+    # disable shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
+    # shellcheck disable=SC2086
+    "$program" $program_arg "$file" >> "$log_file" 2>&1
     }
 
 #...............................................................................
@@ -107,19 +128,29 @@ function invoke () {
 
 # If a directory, open using file explorer (e.g., nautilus)
 if [ -d "$file" ]; then
-    nautilus "$file" &
+    ## OLD: nautilus "$file" &
+    file_manager=nautilus
+    ## OLD: if [ "$under_mac" = "1" ]; then file_manager="/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder"; fi
+    if [ "$under_mac" = "1" ]; then file_manager="open"; fi
+    "$file_manager" "$file" &
     exit
 fi
 # Otherwise, use program based on file extension
 lower_file=$(echo "$file" | perl -pe 's/(.*)/\L$1/;')
 
 # Change invoked program if different for editing than for viewing
+office_program="libreoffice"
 pdf_program="evince"
 image_program="eog"
 # TODO: doc_program="libreoffice"
 if [ "$for_editting" = "1" ]; then
     pdf_program="okular"
     image_program="pinta"
+fi
+if [ "$under_mac" = "1" ]; then
+    pdf_program="open"
+    image_program="open"
+    office_program="open"
 fi
 if [[ $lower_file =~ ^.*\.xcf$ ]]; then
     image_program="gimp"
@@ -141,7 +172,7 @@ case "$lower_file" in
     *.mp3 | *.wav) invoke vlc "$@" & ;;
     
     # MS Office and LibreOffice files: word processor files, spreadsheets, etc.
-    *.doc | *.docx | *.pptx | *.odp | *.odt | *.odg | *.xls | *.xlsx | *.csv) invoke libreoffice "$@" & ;;
+    *.doc | *.docx | *.pptx | *.odp | *.odt | *.odg | *.xls | *.xlsx | *.csv) invoke "$office_program" "$@" & ;;
 
     # HTML files and XML files
     # TODO: convert filename arguments to use file:// prefix (to distinguish from URL's)

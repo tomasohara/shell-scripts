@@ -1,0 +1,21 @@
+# Tests for variables used for command
+
+# Make sure $TIME_CMD maps to an executable normally in /usr/bin/time not a shell built in
+#
+# $ /usr/bin/time true
+# 0.00user 0.00system 0:00.00elapsed 100%CPU (0avgtext+0avgdata 1252maxresident)k
+# 0inputs+0outputs (0major+59minor)pagefaults 0swaps
+
+$ $TIME_CMD true | grep -c user.*system.*elapsed
+
+# Make sure that $TIME_CMD maps to an executable so that can be
+# used with nice ...
+#
+# Note: Test added to catch following tupe of error
+# $ $NICE $TIME_CMD true
+# nice: ‘command’: No such file or directory
+# $ echo $TIME_CMD
+# command time
+#
+$ $NICE $TIME_CMD true 2> /dev/null | wc -l
+2

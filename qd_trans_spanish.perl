@@ -40,15 +40,20 @@ BEGIN {
     require 'common.perl';
 }
 require 'spanish.perl';
-use vars qw/$sp_options $sp_word_pattern $first_sense $subsenses $redirect $sp_remove_diacritics $verbose/;
+use vars qw/$sp_options $sp_word_pattern $first_sense $subsenses $redirect $sp_remove_diacritics $verbose $trans_line/;
 use vars qw/$utf8 $prompt/;
 
 my($misc_usage_notes) = <<END_MISC_NOTES;
 Notes:
-- Use + prefix before token for longer lines.
-- Use @ prefix before token for prettyprinting (e.g., verb conjugations).
-- Use & prefix before token for multi-line output (assumes @).
-- Use * prefix for all of the above.
+- Use special indicators before tokens to modify output
+  + for longer lines
+  @ for prettyprinting (e.g., verb conjugations)
+  & for multi-line output (assumes @)
+  * for all of the above
+- Other special indicators:
+  < entire line translation
+  > english translation
+  ! run shell command (with aliases enabled)
 END_MISC_NOTES
 
 sub usage {
@@ -60,7 +65,7 @@ sub usage {
 
 Usage: $program_name [options] spanish_file ...
 
-options = $sp_options [-sp_make_dict=0|1] [-pretty] [-brief] [-maxlen=N] [-full] [-multi] [-prompt=text]
+options = $sp_options [-sp_make_dict=0|1] [-pretty] [-brief] [-maxlen=N] [-full] [-multi] [-trans_line] [-prompt=text]
 
 Quick and dirty (word-level) translation for the Spanish text.
 
@@ -88,6 +93,7 @@ if ($#ARGV < 0) {
 ## OLD: &init_var(*maxlen, 512);	# maximum line length for translation output
 &init_var(*full, &FALSE);       # show full line (i.e., no truncation at $maxlen)
 &init_var(*multi, &FALSE);      # show output on multiple lines
+&init_var(*trans_line, &FALSE); # translate entire line
 &init_var(*pretty, $multi);	# pretty print the entry
 &init_var(*maxlen, ($multi ? 1024 : 512));  # maximum length for translation output
 # Note: Special processing for prompt to support usage under Emacs shell
@@ -98,6 +104,15 @@ if ($#ARGV < 0) {
 ## &init_var(*prompt, $prompt_default);       # prompt for input
 ## TODO: disable buffering
 &init_var(*prompt, "");          # prompt for input
+&init_var(*debug_level, &DEBUG_LEVEL);  # workaround for quirk under Emacs
+
+# Temp workround
+&debug_on(3);
+if ($debug_level != &DEBUG_LEVEL) {
+    &debug_on($debug_level);
+}
+use vars qw/$preserve_temp/;
+&debug_print(3, "preserve_temp=$preserve_temp\n");
 
 # Set stdout unbuffered if prompt used
 if ($prompt ne "") {
@@ -149,6 +164,7 @@ if ($verbose) {
 # its translation on a separate line.
 #
 print($prompt);
+outer:
 while (<>) {
     chomp;	s/\r//;		# TODO: define my_chomp
     &dump_line();
@@ -157,36 +173,74 @@ while (<>) {
     my($full_line) = $full;
     my($pretty_print) = $pretty;
     my($multi_line) = $multi;
-    while ($_ =~ /^[\+@&\*]/) {
+    my($translate_line) = $trans_line;
+    my($translate_english) = &FALSE;
+    my($log) = (&TEMP_DIR . "_qd_trans_spanish.$$.log");
+  inner:
+    while ($_ =~ /^[\+@&\*\<\>\!]/) {
 	if ($_ =~ /^\+/) {      # mnemonic: longer length
-	    $_ = $';		# ' (stupid emacs)
+	    $_ = $';		# ' (maldito emacs)
 	    $full_line = &TRUE;
 	}
 	if ($_ =~ /^@/) {       # mnemonic ???: perl @ for "@all" prettyprint?
-	    $_ = $';		# ' (stupid emacs)
+	    $_ = $';		# ' (maldito emacs)
 	    $pretty_print = &TRUE;
 	}
 	if ($_ =~ /^&/) {       # mnemonic: line AND'ed together w/ newline (not tab)
-	    $_ = $';		# ' (stupid emacs)
+	    $_ = $';		# ' (maldito emacs)
 	    $pretty_print = &TRUE;
 	    $multi_line = &TRUE;
 	    ## OLD: $full_line = &TRUE;
 	}
 	if ($_ =~ /^\*/) {       # mnemonic: * wildcard ('.' conflict w/ period)
-	    $_ = $';		# ' (stupid emacs)
+	    $_ = $';		# ' (maldito emacs)
 	    $full_line = &TRUE;
 	    $pretty_print = &TRUE;
 	    $multi_line = &TRUE;
 	}
+	if ($_ =~ /^\</) {
+	    $_ = $';		# ' (maldito emacs)
+	    $translate_line = &TRUE;
+	}
+	if ($_ =~ /^\>/) {
+	    $_ = $';		        # ' (maldito emacs)
+	    $translate_line = &TRUE;
+	    $translate_english = &TRUE;
+	}
+
+	# With ! indicator, run remainder as shell command and resume
+	# note: useful for sp-, etc. aliases
+	if ($_ =~ /^!/) {               # ' (maldito emacs)
+	    my($command) = $';
+	    print(&run_command("bash -i -c '$command' 2>| $log"));
+	    print("\n");
+	    debug_out(6, "log: {\n%s}\n", &read_file($log));
+	    next outer;
+ 	}
     }
 
+    # Translate entire line
+    # note: doesn't proceed with word lookup (TODO: allow for this along with pruning common terms)
+    $text = "$_";
+    if ($translate_line) {
+	my($from) = ($translate_english ? "en" : "es");
+	my($to) = ($translate_english ? "es" : "en");
+	&debug_print(4, "running translation: f='$from' t='$to' t='$text'\n");
+	my($env_spec) = "FROM=$from TO=$to";
+	print(&run_command_over("$env_spec machine_translation.py 2>| $log", 
+				"$text\n", 3));
+	print("\n");
+	debug_out(6, "log: {\n%s}\n", &read_file($log));
+	next;
+    }
+    
     # Tokenize the line
-    $text = "$_\n";
+    $text .= "\n";
     while ($text =~ /$sp_word_pattern/i) {
 	$pre_delim = $`;
 	$word = $1;
 	$post_delim = $2;
-	$rest = $';		# ' (stupid emacs)
+	$rest = $';		# ' (maldito emacs)
 
 	if ($pre_delim !~ /^[\t\n ]*$/) {
 	    &debug_out(5, "pre: %s (%X)", $pre_delim, $pre_delim);

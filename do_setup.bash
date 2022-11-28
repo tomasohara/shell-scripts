@@ -850,9 +850,9 @@ alias em-devel='em --devel'
 ## OLD
 ## function em-debug () { em -debug-init "$@"; }
 ## function em-quick () { em -q "$@"; }
-function em-small () { em -fn "-adobe-courier-bold-r-normal--12-120-75-75-m-70-iso8859-1" "$@"; }
-function em-large () { em -fn "-adobe-courier-bold-r-normal--18-180-75-75-m-110-iso8859-1" -geometry 70x30 "$@"; }
-function em-very-large () { em -fn "-adobe-courier-bold-r-normal--24-240-75-75-m-150-iso8859-1" -geometry 60x20 "$@"; }
+## function em-small () { em -fn "-adobe-courier-bold-r-normal--12-120-75-75-m-70-iso8859-1" "$@"; }
+## function em-large () { em -fn "-adobe-courier-bold-r-normal--18-180-75-75-m-110-iso8859-1" -geometry 70x30 "$@"; }
+## function em-very-large () { em -fn "-adobe-courier-bold-r-normal--24-240-75-75-m-150-iso8859-1" -geometry 60x20 "$@"; }
 
 # Simple TODO-list maintenance commands
 #
@@ -1427,10 +1427,11 @@ function clisp-apropos() { $GREP -i "$@" $HOME/info/online-reference-works/clisp
 #------------------------------------------------------------------------
 # Bilingual dictionary access
 trace bilingual dict support
-multiling_dir=$HOME/multilingual
+## OLD: multiling_dir=$HOME/multilingual
+multiling_dir=${MULTILINGUAL_DIR:-"$HOME/multilingual"}
 cond-setenv SPANISH_DICT $multiling_dir/spanish/spanish_english.dict
-cond-setenv SPANISH_IRREG_DICT $multiling_dir/spanish/spanish_irregular.dict;
-cond-setenv ENGLISH_DICT $multiling_dir/spanish/english_spanish.dict;
+cond-setenv SPANISH_IRREG_DICT $multiling_dir/spanish/spanish_irregular.dict
+cond-setenv ENGLISH_DICT $multiling_dir/spanish/english_spanish.dict
 # NOTE: grep flags file UTF-8 indicator at top as binary
 dict_grep="zegrep --ignore-case --text"
 dict_word_grep="$dict_grep --word-regexp"
@@ -1451,6 +1452,7 @@ alias eng-='english-'
 function add-multilingual-dicts() {
     ## OLD: cond-setenv SPANISH_IRREG_DICT $multiling_dir/spanish/spanish_irregular.dict;
     ## OLD: cond-setenv ENGLISH_DICT $multiling_dir/spanish/english_spanish.dict;
+    ## TODO: reword lang-lookup- to lang-lookup-loose
     cond-setenv _FRENCH_DICT $multiling_dir/French/french_english.dict;
     cond-setenv GERMAN_DICT $multiling_dir/German/german_english.dict;
     cond-setenv ITALIAN_DICT $multiling_dir/Italian/italian_english.dict;
@@ -1488,9 +1490,12 @@ fi
 alias spanish-='spanish-lookup-'
 alias spanish='spanish-lookup'
 alias sp=spanish
+## TODO: reword sp- to sp-loose
 alias sp-=spanish-
 alias pp-spanish='pp_spanish_entry.perl'
+## TODO: reword sp-pp- to sp-pp-aux
 function sp-pp- () { sp $@ | pp-spanish; }
+function sp-pp-loose () { sp- $@ | pp-spanish; }
 function sp-pp () { sp-pp- $1 >| $1.pp; $PAGER $1.pp; }
 
 function spanish-trans-phrase () { phrase=$1; shift; echo "$phrase" | $multiling_dir/Spanish/qd_trans_spanish.perl "$@" -; }

@@ -1,0 +1,20 @@
+# Tests for aliases that affect prompt
+#
+
+$ reset-prompt @
+@
+
+$ export PS_Symbol='#'
+$ reset-prompt
+#
+
+
+## BUG:
+## TODO: reproduce with dummy account and dummy password
+## ¢ sudo-admin 
+## Script started, file is _config-29jul22.log2
+##
+## ¢ reset-prompt $:$
+## $:$
+## ^^^ expected
+##

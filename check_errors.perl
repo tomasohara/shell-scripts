@@ -42,10 +42,10 @@ if (!defined($ARGV[0])) {
     $options .= " [-relaxed | -strict] [-verbose] [-quiet]";
     my $example = "ex: $script_name whatever\n";
     my $note = "Notes:\n";
-    $note .= "- The default context is 1\n";
-    $note .= "- Warnings are skipped by default\n";
-    $note .= "- Use -no_astericks if input uses ***'s outside of error contexts\n";
-    $note .= "Use -relaxed to exclude special cases (e.g., xyz='error')\n";
+    $note .= "- The default context is 1.\n";
+    $note .= "- Warnings are skipped by default.\n";
+    $note .= "- Use -no_astericks if input uses ***'s outside of error contexts.\n";
+    $note .= "- Use -relaxed to include special cases (e.g., xyz='error').\n";
 
     die "\nusage: $script_name [options]\n\n$options\n\n$example\n\n$note\n";
 }
@@ -81,6 +81,7 @@ while (<>) {
 	# Null chars usually indicate file corruption (eg, multiple writers)
 	$has_error = &TRUE;
 	s/$NULL/^@/g;		# change null char '^@' to "^@" ('^' & '@')
+	&debug_print(&TL_VERY_VERBOSE, "1. has_error=$has_error\n");
     }
 
     # Check for known errors
@@ -170,12 +171,15 @@ while (<>) {
 	   || /wn: invalid search/
 	   ) {
 	$has_error = &TRUE;
+	&debug_print(&TL_VERY_VERBOSE, "2. has_error=$has_error\n");
     }
 
     # Check for warnings and starred messages
     # TODO: Have option for restricting ***'s to start of line.
-    # NOTE: $strict includes "error" or "warning" occurring anywhere;
-    # added to excluded keywords usage as in "conflict_handler='error'".
+    # NOTE: $strict includes "error" or "warning" occurring anywhere, etc.;
+    # It was added to excluded keyword usage as in "conflict_handler='error'".
+    # TODO: Put strict in separate section, such as having 4 sections overall :
+    #    {error, warning} x {non-strict, strict}
     elsif ($show_warnings &&
 	   ((/\b(warning)\b/i           # warning token occuring 
 	     && ((! /='warning'/i) || $strict)) # ... includes quotes if strict
@@ -185,17 +189,22 @@ while (<>) {
 	    || /: warning\b/		# Ruby warnings
 	    || /^bash: /                # ex: "bash: [: : unary operator expected"
 	    || /Traceback|\S+Error/     # Python exceptions (caught)
+	    || (/exception|failed/      # logger messages (e.g., "Training job failed")
+		&& $strict)
 	    || ($asterisks && /\*\*\*/))) {
 	$has_error = &TRUE;
+	&debug_print(&TL_VERY_VERBOSE, "3. has_error=$has_error\n");
     }
 
     # Filter certain case
     if ($has_error && $skip_ruby_lib && /\/usr\/lib\/ruby/) {
 	&debug_print(&TL_DETAILED, "Skipping ruby library error at line $. ($_)\n");
-	$has_error = &FALSE
+	$has_error = &FALSE;
+	&debug_print(&TL_VERY_VERBOSE, "4. has_error=$has_error\n");
     }
 
     # If an error, then display line preceded by pre-context
+    &debug_print(&TL_VERY_VERBOSE, "final has_error=$has_error\n");
     if ($has_error) {
 	# Show up the N preceding context lines, unless there is an overlap
 	# with previous error context in which no pre-context is shown.

@@ -27,7 +27,10 @@
 #
 #     *** Warning: This is not secure, and should be avoided in multi-user environments. ***
 #
-# - Alternatively, git caching is used via
+# - [New] To use platform-native data stores to control sensitive information:
+#   https://github.com/GitCredentialManager/git-credential-manager
+#
+# - [Old] Alternatively, git caching is used via
 #     ~/.git-credentials
 #   See https://git-scm.com/book/en/v2/Git-Tools-Credential-Storage.
 #
@@ -58,6 +61,7 @@
 #
 #................................................................................
 # Examples:
+# TODO2: show the corresponding alias; also move git-mv example later to this section)
 # - Update
 #     git stash;  git pull --all;  git stash pop
 # - Commit changes
@@ -77,19 +81,20 @@
 #...............................................................................
 # based on https://stackoverflow.com/questions/2641146/handling-file-renames-in-git:
 #
-# 1: rename the file from oldfile to newfile
+# 1: rename the file from old-file to new-file
 #     git mv old-file new-file
 # 1.5 mark old file as changed
 #     git add old-file
 # 2: commit and add comments
 #     git commit -m "renamed old-file to new-file"
-# 3: push this change to the remote sever
+# 3: push this change to the remote server
 #     git push
 #
 #................................................................................
 # Aliases from tomohara-aliaes.bash:
 #-------------------------------------------------------------------------------
 # TODO:
+# - ** TODO: diagnose problem with git checkin for simple_batspp.py [Fri 15 Jul 22].
 # - * Get a git guru to critique (e.g., how to make more standard)!
 # - Add an option for verbose tracing (and for quiet mode).
 #
@@ -339,6 +344,7 @@ function invoke-git-command {
     less "$log"
     # TODO: git-alias-review-log "$log"
 }
+# TODO: git-command => git-command-alias
 alias git-command='invoke-git-command'
 
 ## OLD
@@ -375,18 +381,19 @@ function git-add-plus {
 
 # git-reset-file(file, ...): move FILE(s) out of way and "revert" to version in repo (i.e., reset)
 # NOTE: via https://www.atlassian.com/git/tutorials/undoing-changes/git-reset
-#     If git revert is a “safe” way to undo changes, you can think of git reset as the dangerous method. 
+#     If git revert is a “safe” way to undo changes, you can think of git reset as the dangerous method.
+# TODO: clarify whether git add needed as well (due to maldito git)
 function git-reset-file {
     local log;
     log=$(get-temp-log-name "revert");
 
     # Isolate old versions
     mkdir -p _git-trash >| "$log";
-    echo "issuing: mv -iv $* _git-trash";
-    mv -iv "$@" _git-trash >> "$log";
+    echo "issuing: cp -vp $* _git-trash";
+    cp -vp "$@" _git-trash >> "$log";
 
     # Forget state
-    echo "git reset HEAD $*";
+    echo "issuing: git reset HEAD $*";
     git reset HEAD "$@" >> "$log";
     
     # Re-checkout
@@ -418,7 +425,8 @@ function git-diff-plus {
 #       trustExitCode = false
 #
 function git-difftool-plus {
-    ## TODO: echo "issuing: git difftool --no-prompt"
+    ## TODO: add trace-command function
+    ## TODO: echo "issuing: git difftool --no-prompt ..." 1>&2
     git difftool --no-prompt "$@";
 }
 #
@@ -494,7 +502,8 @@ function alt-invoke-next-single-checkin {
 	    echo ""
 	    local divider=$(perl -e 'print("." x 80);')
 	    echo "$divider"
-	    git-status | head
+	    ## OLD: git-status | head
+	    git-status
 	    echo "..."
             return;
         fi
@@ -555,6 +564,18 @@ alias git-invoke-next-single-checkin=invoke-next-single-checkin
 alias git-alias-refresh="source ${BASH_SOURCE[0]}"      # bash idiom for current script filename
 alias git-refresh-aliases=git-alias-refresh
 alias git-next-checkin='invoke-alt-checkin'
+## TEST: hide tracing output alias git-next-checkin='invoke-alt-checkin 2> /dev/null'
+# TODO:
+# NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
+## OLD: alias git-checkout-branch='git-command checkout'
+function git-checkout-branch {
+    git branch | grep -c "$1";
+    if [ $? ]; then
+	git-command checkout "$1";
+    else
+	echo "Error: unknown branch"
+    fi;
+}
 
 #-------------------------------------------------------------------------------
 
@@ -580,6 +601,9 @@ function git-alias-usage () {
     echo "To check in specified changes:"
     echo "    GIT_MESSAGE='...' git-update-commit-push file..."
     echo ""
+    echo "To switch to another branch (n.b., to list, use 'git branch --list --all'):"
+    echo "    git-checkout-branch"
+    echo ""
     echo "Miscellaneous alias template (e.g., for deletions):"
     echo "    git-template-misc"
     echo ""
@@ -591,6 +615,9 @@ function git-alias-usage () {
     echo ''
     echo 'Usual check-in process:'
     echo '    git-cd-root-alias; git-update-plus'
+    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-plus'
+    echo '    # alt: grep "^<<<<< " $(git-diff-list) /dev/null'
+    # TODO: xargs -I{} 'grep "^<<<<< {} | head -5' $(git-list-text-files)
     echo '    git-next-checkin                      # repeat, as needed'
 
     ## TODO: echo '* invoke git-cd-root-alias automatically!'
@@ -605,20 +632,30 @@ function git-alias-usage () {
 #
 # shellcheck disable=SC2016
 function git-misc-alias-usage() {
-    echo "Warning: "
+    # Refresh
+    git-alias-refresh
+
+    # Show usage
+    echo "Warning: Some of these can be dangerous!"
+    echo "   Incorrect usage might be undoable (e.g., disconnected histories with mv)."
     echo "   *** It is safer to git github web inteface!"
-    echo "   The following can lead to information loss (e.g., disconnected histories)."
     echo ""
-    echo "To override file additions:"
+    echo "To revert modified file (n.b., during merge fix, dummy change might be needed):"
+    echo "    git-revert-file-alias file"
+    echo ""
+    echo "To override file additions (e.g., blocked by .gitignore):"
     echo "    git add --force file..."""
     echo "    GIT_MESSAGE='initial version' git-update-commit-push file..."
+    echo ""
+    echo "To use git manual merge resolution (n.b., trial and error required):"
+    echo "    git mergetool"
     echo ""
     echo "To add regular files via git-add (n.b., ignored if matches .gitignore):"
     echo "    GIT_MESSAGE='initial version' git-update-commit-push file..."
     echo ""
     echo "To move or rename (cuidado):"
     echo "   git mv --verbose old-file new-file"
-    echo "   GIT_MESSAGE='renamed' git-update-commit-push old-file"
+    echo "   GIT_MESSAGE='renamed' git-update-commit-push new-file"
     echo ""
     echo "To delete files (mucho cuidado):"
     echo "   git rm old-file"
