@@ -26,8 +26,8 @@
 #
 # TODO:
 # - Flag constructs not yet implemented:
-#   -- C-style for loops
-#   -- Bash arrays and hashes
+#   -- C-style for loops (maybe use cursed-for module)
+#   -- Bash arrays and hashes #Tana-note: Working on this in a separate file
 # - Add more sanity checks (e.g., via debug.assertion).
 #
 
@@ -38,7 +38,7 @@
 from collections import defaultdict
 import os
 import re
-
+import click
 # Local modules
 import mezcla
 from mezcla import debug
@@ -46,7 +46,7 @@ from mezcla import glue_helpers as gh
 from mezcla.main import Main
 from mezcla.my_regex import my_re
 from mezcla import system
-from mezcla.text_utils import version_to_number 
+from mezcla.text_utils import version_to_number
 
 # Version check
 debug.assertion(version_to_number("1.3.4") <= version_to_number(mezcla.__version__))
@@ -59,11 +59,9 @@ USE_MEZCLA = system.getenv_bool("USE_MEZCLA", (USER == "tomohara"),
 INIT_FILE = system.getenv_value("INIT_FILE", None,
                                 "File to source before running Bash command")
 
-
 # Global settings
 if USE_MEZCLA:
     re = my_re
-
 
 ## TEMP:
 ## NOTE: Eventually most pylint issues should be resolved (excepting nitpicking ones)
@@ -85,6 +83,7 @@ def run(command, skip_print=False):
     return result
 """
 
+
 def get_bash_var_hash():
     """Return a lookup hash for checking whether Bash variable is defined
     Note: this includes environment variables as well as regular ones"""
@@ -92,8 +91,8 @@ def get_bash_var_hash():
     #   ANACONDA_HOME=/
     #   BASH=/bin/bash
     #   ...
-    #   zless () 
-    #   { 
+    #   zless ()
+    #   {
     #       zcat "$@" | $PAGER
     #   }
 
@@ -118,17 +117,15 @@ def get_bash_var_hash():
 
 
 class Bash2Python:
-    """Class for converting Bash statements into Python"""       # TODO: refine docstring
+    """Returns a Python-like file based on Bash input"""
     KEYWORD_MAP = {"function": "def"}
     LOOP_CONTROL = ["break", "continue"]
-    
-    def __init__(self, bash, executer):
-        ## TODO: clarify arguments (e.g., executer); make sure string input accepted as well as file
-        self.cmd = bash  # bash script
-        self.exec = executer
+
+    def __init__(self, bash, shell):
+        self.cmd = bash
+        self.exec = shell
         self.bash_var_hash = get_bash_var_hash()
         self.variables = []
-        ##TODO: self.run(f'bash -n {bash}') # checks if the bash script is valid
 
     def map_keyword(self, line):
         """Perform conversion for single keyword statement"""
@@ -140,45 +137,9 @@ class Bash2Python:
             line = indent + self.KEYWORD_MAP.get(keyword, keyword) + remainder
         debug.trace(5, f"map_keyword({in_line!r}) => {line!r}")
         return line
-        
-    ## Note: This is not needed: the run function gets defined in the output code.
-    ## TODO: drop
-    def run(self, cmd):
-        """Runs the python script"""
-        # TODO: make it work
-
-    ## Note: This is not needed: environment variables are resolved by Bash during run()
-    ## TODO: drop
-    def envs(self, line):
-        """Handles environment variables"""
-        # TODO: Almost all. This is just incomplete
-        line = line.replace("export", "os.environ")
-        line = line.replace("=", " = ")
-        line = line.replace("{", "['").replace("}", "']")
-        return line
-
-    def boolean(self, line):
-        """Handles booleans"""
-        # TODO: Make this function more generic
-        in_line = line
-        ## TODO: handle do-removal below (e.g., in loop parsing code)
-        line = line.replace("; do", ": ")
-        if "[ 1 ]" in line:  # if the line is a "true" bash statement
-            line = line.replace("[ 1 ]", "True")  # replace with python "true" statement
-        elif "[ 0 ]" in line:  # if the line is a "false" bash statement
-            line = line.replace("[ 0 ]", "False")  # replace with python "false" statement
-        ## Tom-note: changed followng form elif to if as more than one possible
-        if "||" in line:
-            line = line.replace("||", " or ")
-        if "&&" in line:
-            line = line.replace("&&", " and ")
-        if my_re.search(r"(^.*\S+) = (\S+.*$)", line):
-            debug.trace(4, "Equality test fixup")
-            line = my_re.group(1) + " == " + my_re.group(2)
-        debug.trace(5, f"boolean({in_line!r}) => {line!r}")
-        return line
 
     def var_replace(self, line, other_vars=None, indent=None, is_condition=False):
+        # Tana-note: I'm not convinced this is the best way to do this but it works for now
         """Replaces bash variables with python variables and also derive run call for LINE
         Notes:
         - Optional converts OTHER_VARS in line.
@@ -193,19 +154,20 @@ class Bash2Python:
             if not indent:
                 indent = my_re.group(1)
             line = my_re.group(2)
-
         # Check variable references and $(...) constructs
         variable = ""
         bash_commands = re.findall(r'\$\(.*\)', line)  # finds all bash commands
-        bash_vars = re.findall(r'\$\w+', line)         # finds all bash variables
+        bash_vars = re.findall(r'\$\w+', line)  # finds all bash variables
         if other_vars:
             bash_vars += other_vars
-        # TODO: Use regex (e.g., re.search(r"^\s*[a-z0-9_]+\s+=", line))
-        if ("=" in line) and (not is_condition):       # if the line is a variable declaration
-            line = line.split("=")
-            variable = line[0]                         # isolates variable name
-            line = line[1]                             # isolates the rest of the line
-            self.variables.append("$" + variable)
+
+        if my_re.search(r"(\S)* = (\S)*", line) and (not is_condition):  # if the line is a variable declaration
+            for var in my_re.group(1).split():  # for each variable in the declaration
+                if "$" in var:
+                    variable = var
+                else:
+                    line = var
+                self.variables.append(variable)
 
         # Replace $var references with Python {var}, excluding Bash and environment variables
         has_bash_var = False
@@ -217,13 +179,13 @@ class Bash2Python:
                 has_bash_var = True
 
         # Early exit for conditions
-        # TODO: re-factor code
         if is_condition:
             # note: change quoted string with {var} to f-string
             line = re.sub(r"(([\'\"]).*\{\S+\}.*\2)", r"f\1", line)
-            debug.trace(5, f"var_replace({in_line!r}, othvar={other_vars} ind={indent} cond={is_condition}) => {line!r}")
+            debug.trace(5,
+                        f"var_replace({in_line!r}, othvar={other_vars} ind={indent} cond={is_condition}) => {line!r}")
             return line
-                
+
         # Make sure line has outer single quotes, with any internal ones quoted
         if "'" in line:
             # note: Bash $'...' strings allows for escaped single quotes unlike '...'
@@ -232,7 +194,6 @@ class Bash2Python:
         else:
             line = f"'{line}'"
         debug.assertion(re.search("^'.*'$", line))
-
         # Use f-strings if local Python variable to be resolved
         if has_bash_var:
             line = "f" + line
@@ -261,6 +222,37 @@ class Bash2Python:
         debug.trace(5, f"var_replace({in_line!r}, othvar={other_vars} ind={indent} cond={is_condition}) => {line!r}")
         return line
 
+    def operators(self, line):
+        """Returns line with operators converted to Python equivalents"""
+        # Dictionary with Bash operators and their Python equivalents
+        operators = {"=": " == ",
+                     "!=": " != ",
+                     "-eq": " == ",
+                     "-ne": " != ",
+                     "-gt": " > ",
+                     "-ge": " >= ",
+                     "-lt": " < ",
+                     "-le": " <= ",
+                     "-z": " '' == ",
+                     "-n": " '' != ",
+                     "&&": " and ",
+                     "\|\|": " or ",  # NOTE: need to escape | for Python
+                     }
+
+        in_line = line
+        ## Tom-note: changed followng form elif to if as more than one possible
+        # Iterate over operators and replace them with Python equivalents
+        for operator in operators:
+            if my_re.search(fr"(^.*\S+) {operator} (\S+.*$)", line) or my_re.search(r"(^.*\S+) -eq (\S+.*$)", line):
+                debug.trace(4, f"Operator {operator} test fixup")
+                line = my_re.group(1) + operators[operator] + my_re.group(2)
+        if "[ 1 ]" in line:  # if the line is a "true" bash statement
+            line = line.replace("[ 1 ]", "True")  # replace with python "true" statement
+        elif "[ 0 ]" in line:  # if the line is a "false" bash statement
+            line = line.replace("[ 0 ]", "False")  # replace with python "false" statement
+        debug.trace(5, f"operators({in_line!r}) => {line!r}")
+        return line
+
     def process_simple(self, line):
         """Process simple statement conversion for LINE"""
         debug.trace(6, f"in process_simple({line!r})")
@@ -268,204 +260,95 @@ class Bash2Python:
         converted = False
         # Convert miscellenous commands
         # - break
-        # TODO: {let, continue}
+        # TODO: continue (dont think this is needed)
         debug.trace(6, "checking miscellenous")
         if (line.strip() == "break"):
             debug.trace(4, "processing break")
             converted = True
         # - arithmetic expression
-        #   (( expr )) 
+        #   (( expr ))
         if my_re.search(r"^(\s*)\(\( (.*) \)\)\s*$", line):
             debug.trace(4, "processing arithmetic expression")
             indent = my_re.group(1)
             expression = my_re.group(2)
             line = (indent + expression)
             converted = True
+        if re.search(r"let \"(\S*)\"", line):
+            debug.trace(4, "processing let")
+            line = re.sub(r"let \"(\S*)\"", r"\1", line)
+            converted = True
         debug.trace(7, f"process_simple({in_line!r}) => ({converted}, {line!r})")
         return (converted, line)
 
-
     def process_compound(self, line, cmd_iter):
-        """Process compound statement conversion for LINE using COMMAND_ITERATOR"""
-        debug.trace(6, f"in process_compound({line!r})")
-        in_line = line
-        converted = False
-
-        # Convert simple while loop:
-        #    while [ condition ]; do ... done
-        # TODO: Change the if statements to a dictionary or a list
-        # TODO: ¿Change this to a function?
-        bucle = ""
-        # TODO: if re.search(r"^\s*while \S+ ", line):
-        if "while" in line:  # if the line is a while loop
-            debug.trace(4, "processing while loop")
-            body = ""
-            while not "done" in body:  # while the loop is not finished
-                # Adds the next line to the body unless empty
-                loop_line = next(cmd_iter, None)
-                debug.trace_expr(5, loop_line)
-                # Stop when done statement reached (or EOF)
-                if (loop_line is None) or (loop_line.strip() == "done"):
-                    break
-                loop_line = loop_line.strip("\n").strip(";")
-                if loop_line.strip() in self.LOOP_CONTROL:
-                    body += self.map_keyword(loop_line) + "\n"
-                elif loop_line.strip():
-                    (converted, loop_line) = self.process_simple(loop_line)
-                    if converted:
-                        body += loop_line + "\n"
-                    else:
-                        body += self.var_replace(loop_line.strip("\n"),
-                                                 indent="    ") + "\n"
-            # Note; 'bucle' is Spanish for loop
-            bucle = self.boolean(line)  # calls bucle function
-            # TODO: warn that parenthesis stripped;
-            # Also, use regex replacement (e.g., re.sub("^(\s+)\(\s*while", r"\1while", bucle))
-            bucle = bucle.replace("(while", "while")
-            line = body.replace("done)", "")
-            line = line.replace("done", "")
-            line = bucle + "\n" + line
-            converted = True
-
-        # Convert simple for-in loop
-        #   for var in value ...; do statement; ... done
-        if my_re.search(r"^\s*for (\w+) in ([^;]+); do\s*$", line):
-            loop_var = my_re.group(1)
-            values = my_re.group(2).split()
-            debug.trace(4, "processing for-in loop")
-
-            # Convert body to run() calls with loop variable expansion
-            #    for var in ["v1", ... "vn"]: <newline><indent> statement ...
-            values = ('["' + '", "'.join(values) + '"]')
-            body = f"for {loop_var} in {values}:\n"
-            while True:
-                loop_line = next(cmd_iter, None)
-                debug.trace_expr(5, loop_line)
-                # Stop early if EOF reached
-                if loop_line is None:
-                    break
-                loop_line = loop_line.strip("\n").strip(";")
-                # Stop when done statement found
-                if (loop_line.strip() == "done"):
-                    break
-                if loop_line.strip() in self.LOOP_CONTROL:
-                    body += self.map_keyword(loop_line) + "\n"
-                elif loop_line.strip():
-                    (converted, loop_line) = self.process_simple(loop_line)
-                    if converted:
-                        body += loop_line + "\n"
-                    else:
-                        body += self.var_replace(loop_line.strip("\n"),
-                                                 indent="    ") + "\n"
-            line = body
-            converted = True
-
-        # Convert simple for-in loop
-        #   for var in value ...; do statement; ... done
-        if my_re.search(r"^\s*for (\w+) in ([^;]+); do\s*$", line):
-            loop_var = my_re.group(1)
-            values = my_re.group(2).split()
-            debug.trace(4, "processing for-in loop")
-
-            # Convert body to run() calls with loop variable expansion
-            values = ('["' + '", "'.join(values) + '"]')
-            body = f"for {loop_var} in {values}:\n"
-            while True:
-                loop_line = next(cmd_iter, None)
-                debug.trace_expr(5, loop_line)
-                # Stop early if EOF reached
-                if loop_line is None:
-                    break
-                loop_line = loop_line.strip("\n").strip(";")
-                # Stop when done statement found
-                if (loop_line.strip() == "done"):
-                    break
-                if loop_line.strip() in self.LOOP_CONTROL:
-                    body += self.map_keyword(loop_line) + "\n"
-                elif loop_line.strip():
-                    (converted, loop_line) = self.process_simple(loop_line)
-                    if converted:
-                        body += loop_line + "\n"
-                    else:
-                        body += self.var_replace(loop_line.strip("\n"),
-                                                 other_vars=["$" + loop_var], 
-                                                 indent="    ") + "\n"
-            line = body
-            converted = True
-
-        # Convert simple-if to python
-        #   if [ condition ]; then ... fi
-        # TODO: elif's
-        # TODO: my_re.search(r"^ if \[ ([^\[\]]+) \]; then (.*)$", line, flags=re.VERBOSE):
-        debug.trace(6, "checking if-then")
-        if (my_re.search(r"^\s*if\s+\[\s*([^\[\]]+)\s+\];\s+then\s*$", line)
-            or my_re.search(r"if.*\[(.*)\];.*then", line)):
-            condition = my_re.group(1)
-            debug.trace(4, "processing if-then statement")
-
-            # Convert condition to Python syntax
-            condition = self.var_replace(self.boolean(condition),
-                                         is_condition=True)
-            body = f"if {condition}:\n"
-
-            # Add in each block statement to body
-            while True:
-                block_line = next(cmd_iter, None)
-                debug.trace_expr(5, block_line)
-                # Stop early if EOF reached
-                if block_line is None:
-                    break
-                block_line = block_line.strip("\n").strip(";")
-                # Stop when fi statement found
-                if (block_line.strip() == "fi"):
-                    break
-                if (block_line.strip() == "else"):
-                    body += "else:\n"
-                elif block_line.strip():
-                    (converted, block_line) = self.process_simple(block_line)
-                    if converted:
-                        body += block_line + "\n"
-                    else:
-                        body += self.var_replace(block_line.strip("\n"),
-                                                 indent="    ") + "\n"
-                    
-            line = body
-            converted = True
-
-        debug.trace(7, f"process_compound({in_line!r}) => ({converted}, {line!r})")
+        # Declare loop and statements as a tuple
+        for_loop = ("for", "do", "done")
+        while_loop = ("while", "do", "done")
+        if_statement = ("if", "then", "fi")
+        elif_statement = ("elif", "then", "fi")
+        else_statement = ("else", "None", "fi")  # Else statements do not have a keyword so None
+        loops = (for_loop, while_loop, if_statement)
+        statements = (elif_statement, else_statement)
+        stdout = ""
+        body = line
+        for loop in loops:
+            if my_re.search(fr"\s*{loop[0]} (\w+[^;]+); {loop[1]}", line) or my_re.search(
+                    fr"\s*{loop[0]} ([^;]+); {loop[1]}", line):
+                debug.trace(4, f"Processing {loop[0]} loop")
+                var = my_re.group(1)
+                body = f"{loop[0]} {var}:\n"
+                while True:
+                    loop_line = next(cmd_iter, None)
+                    debug.trace_expr(5, loop_line)
+                    # Redirects to file or var if found
+                    if ">>" in loop_line:
+                        stdout = f"with open({loop_line.split('>>')[1].strip()}, 'w') as sys.stdout: \n    "
+                    if loop_line.strip() == loop[1] or loop_line is None:
+                        break
+                    if my_re.search(fr"\s*{loop[2]}\)?", loop_line):
+                        break
+                    loop_line = loop_line.strip("\n").strip(";")
+                    # If next line contents elif or else, add to body
+                    for statement in statements:
+                        if my_re.search(fr"\s*{statement[0]} (\w+[^;]+);; {statement[1]}", line) or my_re.search(
+                                fr"\s*{statement[0]} ([^;]+); {statement[1]}", loop_line):
+                            var = my_re.group(1)
+                            body += f"{statement[0]} {var}:\n"
+                            loop_line = ""
+                    if loop_line.strip() in self.LOOP_CONTROL:
+                        body += self.map_keyword(loop_line) + "\n"
+                    elif loop_line.strip():
+                        (converted, loop_line) = self.process_simple(loop_line)
+                        if converted:
+                            body += loop_line + "\n"
+                        else:
+                            body += self.var_replace(loop_line.strip("\n"),
+                                                     indent="        ") + "\n"  # Double indent for handle stdout
+        line = stdout + body
+        converted = True
+        # debug.trace(7, f"process_compound({line!r}) => ({converted}, {line!r})")
         return (converted, line)
-            
-    
+
     def format(self):
-        """Convert self.cmd into python, returning text"""    # TODO: refine
+        """Convert self.cmd into python, returning text"""  # TODO: refine
         # Tom-Note: This will need to be restructured. I preserved original for sake of diff.
         python_commands = []
         cmd_iter = (system.open_file(self.cmd) if system.file_exists(self.cmd)
-               else iter(self.cmd.splitlines(keepends=True)))
+                    else iter(self.cmd.splitlines(keepends=True)))
         if cmd_iter:
             for line in cmd_iter:  # for each line in the script
                 debug.trace_expr(5, line)
                 if (not line.strip()) or re.search(r"^\s*#", line):
                     python_commands.append(line.strip("\n"))
                     continue
-                # TODO: preserve whitespace (e.g., to allow for embedded loops)
                 line = line.strip("\n")
                 line = line[:-1] if ";" == line[-1] else line  # remove the ";" last character
+                line = self.var_replace(line)
+                line = self.operators(line)  # calls operators function
                 (converted, line) = self.process_compound(line, cmd_iter)
                 if not converted:
                     (converted, line) = self.process_simple(line)
-                
                 # Adhoc fixups
-                if " & " in line:  # if the line is a background process
-                    # TODO: make this optional
-                    line = line.replace(" & ", "")
-                if not converted:
-                    line = self.var_replace(line)
-                if line[0] == "(" and line[-2] == ")":
-                    line = line[1:-2]       # removes the parenthesis
-                if line[-2] == "&":
-                    # TODO: make this optional
-                    line = line[:-2]
                 python_commands.append(line)
         return "\n".join(python_commands)
 
@@ -473,13 +356,18 @@ class Bash2Python:
         """Returns Python header to use for converted snippet code"""
         return PYTHON_HEADER
 
-#-------------------------------------------------------------------------------
 
-def main():
+# -------------------------------------------------------------------------------
+@click.command()
+@click.option("--script", "-s", help="Script or snippet to convert")
+@click.option("--output", "-o", help="Output file")
+def main(script, output):
     """Entry point"""
     debug.trace(3, f"main(): script={system.real_path(__file__)}")
-    bash_snippet = "TODO"
-
+    bash_snippet = script
+    if not bash_snippet:
+        print("No script or snippet specified. Use --help for usage or --script to specify a script or snippet")
+        return
     # Show simple usage if --help given
     if USE_MEZCLA:
         dummy_main_app = Main(description=__doc__, skip_input=False, manual_input=False)
@@ -488,11 +376,15 @@ def main():
 
     # Convert and print snippet
     b2p = Bash2Python(bash_snippet, "bash -c")
-    print(b2p.header())
-    print(b2p.format())
-    return
+    if output:
+        with open(output, "w") as out_file:
+            out_file.write(b2p.header())
+            out_file.write(b2p.format())
+    else:
+        print(b2p.header())
+        print(b2p.format())
 
-#-------------------------------------------------------------------------------
 
+# -------------------------------------------------------------------------------
 if __name__ == '__main__':
     main()
