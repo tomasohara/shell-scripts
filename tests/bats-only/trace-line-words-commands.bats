@@ -19,18 +19,34 @@ shopt -s expand_aliases
 	test_folder=$(echo /tmp/test1-$$)
 	mkdir $test_folder && cd $test_folder
 
+	unalias -a
+	alias | wc -l
+	for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+	actual=$(test1-assert4-actual)
+	expected=$(test1-assert4-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test1-assert4-actual () {
+	typeset -f | egrep '^\w+' | wc -l
+}
+function test1-assert4-expected () {
+	echo -e '00'
+}
 
 @test "test2" {
 	test_folder=$(echo /tmp/test2-$$)
 	mkdir $test_folder && cd $test_folder
 
-	unalias -a
-	alias | wc -l
-	for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
-	actual=$(test2-assert4-actual)
-	expected=$(test2-assert4-expected)
+	BIN_DIR=$PWD/..
+	actual=$(test2-assert2-actual)
+	expected=$(test2-assert2-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -40,38 +56,15 @@ shopt -s expand_aliases
 
 }
 
-function test2-assert4-actual () {
-	typeset -f | egrep '^\w+' | wc -l
+function test2-assert2-actual () {
+	alias | wc -l
 }
-function test2-assert4-expected () {
-	echo -e '00'
+function test2-assert2-expected () {
+	echo -e '0'
 }
 
 @test "test3" {
 	test_folder=$(echo /tmp/test3-$$)
-	mkdir $test_folder && cd $test_folder
-
-	BIN_DIR=$PWD/..
-	actual=$(test3-assert2-actual)
-	expected=$(test3-assert2-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test3-assert2-actual () {
-	alias | wc -l
-}
-function test3-assert2-expected () {
-	echo -e '0'
-}
-
-@test "test4" {
-	test_folder=$(echo /tmp/test4-$$)
 	mkdir $test_folder && cd $test_folder
 
 	temp_dir=$TMP/test-6439
@@ -79,12 +72,12 @@ function test3-assert2-expected () {
 }
 
 
-@test "test5" {
-	test_folder=$(echo /tmp/test5-$$)
+@test "test4" {
+	test_folder=$(echo /tmp/test4-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test5-assert1-actual)
-	expected=$(test5-assert1-expected)
+	actual=$(test4-assert1-actual)
+	expected=$(test4-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -94,23 +87,27 @@ function test3-assert2-expected () {
 
 }
 
-function test5-assert1-actual () {
+function test4-assert1-actual () {
 	typeset -f | egrep '^\w+' | wc -l
 }
-function test5-assert1-expected () {
+function test4-assert1-expected () {
 	echo -e '10'
 }
+
+@test "test5" {
+	test_folder=$(echo /tmp/test5-$$)
+	mkdir $test_folder && cd $test_folder
+
+	alias testnum="sed -r "s/[0-9]/X/g"" 
+	alias testuser="sed -r "s/"$USER"+/user/g"" 
+}
+
 
 @test "test6" {
 	test_folder=$(echo /tmp/test6-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function line-wc () { perl -n -e '@_ = split; printf("%d\t%s", 1 + $#_, $_);' "$@"; }
-	function line-len () { perl -ne 'printf("%d\t%s", length($_) - 1, $_);' "$@"; }
-	function para-len () { perl -00 -ne 'printf("%d\t%s", length($_) - 1, $_);' "$@"; }
-	alias ls-line-len='ls | line-len | sort -rn | less'  #'$LS | line-len | sort -rn | less'
-	function check-class-dist () { count-it "^(\S+)\t" "$1" | perl- calc_entropy.perl -; }
-	alias 2bib='bibitem2bib'
+	source $BIN_DIR/tomohara-aliases.bash
 }
 
 
@@ -118,9 +115,27 @@ function test5-assert1-expected () {
 	test_folder=$(echo /tmp/test7-$$)
 	mkdir $test_folder && cd $test_folder
 
-	printf "Hi Mom,\nThis is the use of printf\nI can use a backslash n to start a new line\n1\n2\n3"> abc-test.txt
+	rm -rf ./*
+	printf "Hi Mom,\nThis is the use of printf\nI can use a backslash n to start a new line\n1\n2\n3" >> abc-test.txt
+	printf "This is another-test file" >> test2.txt
+	printf "This is test-file 3" >> test3.txt
+	actual=$(test7-assert5-actual)
+	expected=$(test7-assert5-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test7-assert5-actual () {
+	printf "This is a test-file 4" >> test4.txt
+}
+function test7-assert5-expected () {
+	echo -e "removed './abc-test.txt'removed './test2.txt'removed './test3.txt'removed './test4.txt'"
+}
 
 @test "test8" {
 	test_folder=$(echo /tmp/test8-$$)
@@ -138,10 +153,10 @@ function test5-assert1-expected () {
 }
 
 function test8-assert1-actual () {
-	cat abc-test.txt | line-wc
+	ls | count-it '\.([^\.]+)$'
 }
 function test8-assert1-expected () {
-	echo -e '2\tHi Mom,6\tThis is the use of printf11\tI can use a backslash n to start a new line1\t11\t21\t3'
+	echo -e 'txt\t4'
 }
 
 @test "test9" {
@@ -160,10 +175,10 @@ function test8-assert1-expected () {
 }
 
 function test9-assert1-actual () {
-	cat abc-test.txt | line-len
+	cat abc-test.txt | line-wc
 }
 function test9-assert1-expected () {
-	echo -e '7\tHi Mom,25\tThis is the use of printf43\tI can use a backslash n to start a new line1\t11\t20\t3'
+	echo -e '2\tHi Mom,6\tThis is the use of printf11\tI can use a backslash n to start a new line1\t11\t21\t3'
 }
 
 @test "test10" {
@@ -182,10 +197,10 @@ function test9-assert1-expected () {
 }
 
 function test10-assert1-actual () {
-	cat abc-test.txt | para-len
+	cat abc-test.txt | line-len
 }
 function test10-assert1-expected () {
-	echo -e '82\tHi Mom,This is the use of printfI can use a backslash n to start a new line123'
+	echo -e '7\tHi Mom,25\tThis is the use of printf43\tI can use a backslash n to start a new line1\t11\t20\t3'
 }
 
 @test "test11" {
@@ -204,8 +219,44 @@ function test10-assert1-expected () {
 }
 
 function test11-assert1-actual () {
-	cat abc-test.txt | line-word-len
+	cat abc-test.txt | para-len
 }
 function test11-assert1-expected () {
+	echo -e '82\tHi Mom,This is the use of printfI can use a backslash n to start a new line123'
+}
+
+@test "test12" {
+	test_folder=$(echo /tmp/test12-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test12-assert1-actual)
+	expected=$(test12-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test12-assert1-actual () {
+	cat abc-test.txt | line-word-len
+}
+function test12-assert1-expected () {
 	echo -e '2\tHi Mom,6\tThis is the use of printf11\tI can use a backslash n to start a new line1\t11\t21\t3'
+}
+
+@test "test13" {
+	test_folder=$(echo /tmp/test13-$$)
+	mkdir $test_folder && cd $test_folder
+
+}
+
+
+@test "test14" {
+	test_folder=$(echo /tmp/test14-$$)
+	mkdir $test_folder && cd $test_folder
+
+	rm -rf ./* > /dev/null
 }

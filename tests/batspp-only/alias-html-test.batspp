@@ -1,0 +1,72 @@
+## THIS TEST REQUIRES ROOT PERMISSION FOR JUPYTER
+# $ jupyter notebook --allow-root
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+# $ echo 'Hi'
+# | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+$ alias testuser="sed -r "s/"$USER"+/user/g""
+$ alias testnum="sed -r "s/[0-9]/X/g"" 
+
+# Setting a temp directory for tests
+$ TMP=/tmp/test-admin-commands
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+$ alias | wc -l
+2
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 3245)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-5400
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-admin-commands/test-5400
+
+# Count aliases proper
+$ alias | wc -l
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+3
+0
+
+# Alias are defined as some of them require sudo
+$ source $BIN_DIR/tomohara-aliases.bash
+
+# Testing HTML
+$ rm -rf ./* > /dev/null
+$ printf "<html><h1>THIS IS A HEADER OF SIZE 1</h1><br><i>THIS IS IN ITALICS</i></html>" >> template1.html
+removed './template1.html'
+removed './template2.js'
+
+# Output not provided (need help)
+$ check-html template1.html
+
+# Testing JS 
+$ printf '<!DOCTYPE html><html><body><h1>JavaScript Operators</h1><p>The + operator concatenates (adds) strings.</p><p id="demo"></p><script>var txt1 = "What a very";var txt2 = "nice day";document.getElementById("demo").innerHTML = txt1 + txt2;</script></body></html>' >> template2.js
+
+# # Couldn't file jsl (need help)
+# $ check-html-java-script template2.js
+# | bash: jsl: command not found

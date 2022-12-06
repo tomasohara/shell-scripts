@@ -1,52 +1,47 @@
 # Setup
 $ bind 'set enable-bracketed-paste off'
 
+$ alias testuser="sed -r "s/"$USER"+/user/g""
+$ alias testnum="sed -r "s/[0-9]/X/g"" 
+
 $ echo "Hi Mom!"
 Hi Mom!
 
 $ echo 'Hello world' | wc -l
 1
 
-$ pwd
-/home/test3513/tom-project/shell-scripts/tests
+$ pwd | testuser
+/home/user/tom-project/shell-scripts/tests
 
 # THIS IS A COMMENT
 
 $ which systemd
 /usr/bin/systemd
 
-$ ls
-adhoc-tests.test                  os
-alias-calculator-commands.ipynb   random
-alias-cd-commands.ipynb           re
-alias-grep-commands.ipynb         README.txt
-[0m[01;32malias-trace-misc-commands.ipynb[0m   [01;32msimple_batspp.py[0m
-[01;32mauto_batspp_mezcla.py[0m             [01;32msimple_batspp.py.old[0m
-[01;32mauto_batspp.py[0m                    [01;34mstorage-temp-testfiles[0m
-[01;34mbats-only[0m                         [01;34mtemp[0m
-[01;34mbatspp-only[0m                       testbook-test-dir-aliases.ipynb
-batspp_report_kcov.py             test-check-errors.ipynb
-batspp-report-output.txt          [01;32mtest_check_errors.py[0m
-[01;32mbatspp_report.py[0m                  test-cond-env-setting.ipynb
-calc_entropy.input                test-dir-alias.ipynb
-calc_entropy.input2               [01;32mtest_extract_matches.py[0m
-calc_entropy.simple.input         [01;32mtest_tomohara_aliases.bats[0m
-calc_entropy.simple.input2        [01;32mtest_tpo_count_it.py[0m
-calc-entropy-tests.ipynb          tomasohara-aliases-test.ipynb
-command-override-cp-mv.ipynb      [01;32mtom_auto_batspp_mezcla.py[0m
-[01;32m_dir-aliases.bash[0m                 trace-extensionless-shortcut-unicode.ipynb
-dir-aliases-test-revised.ipynb    trace-extensionless-shortcut-V2.ipynb
-docshtest.rst                     trace-file-manipulation.ipynb
-hello-world-basic.ipynb           trace-line-words-commands.ipynb
-hello-world-revised.ipynb         trace-linux-admin-alias.ipynb
-[01;34mimmediate-reports[0m                 trace-python-commands.ipynb
-json-related-alias.ipynb          trace-setup-sorting-wrappers.ipynb
-[01;32mjupyter_to_batspp.py[0m              trace-unix-alias.ipynb
-[01;34mkcov-output[0m                       trace-unix-general.ipynb
-[01;32mkcov_result.py[0m                    [01;34mtxt-reports[0m
-more-tomohara-aliases-test.ipynb
+$ man date | head -n 10 | testnum
+DATE(X)                          User Commands                         DATE(X)
 
-$ ps -l
-F S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
-0 S  1002   21933   21920  1  80   0 -  4386 do_wai pts/5    00:00:00 bash
-0 R  1002   21952   21933  0  80   0 -  4648 -      pts/5    00:00:00 ps
+NAME
+       date - print or set the system date and time
+
+SYNOPSIS
+       date [OPTION]... [+FORMAT]
+       date [-u|--utc|--universal] [MMDDhhmm[[CC]YY][.ss]]
+
+DESCRIPTION
+
+# awk will be used to remove any factors that may cause an error
+$ ps -l | awk '!($3=$4=$5=$10=$13="")' | testnum
+F S    C PRI NI ADDR  WCHAN TTY  CMD
+X S    X XX X -  do_wai pts/XX  bash
+X R    X XX X -  - pts/XX  ps
+X S    X XX X -  pipe_r pts/XX  awk
+X S    X XX X -  pipe_r pts/XX  sed
+
+$ ps | head -n 10 | testuser | testnum
+    PID TTY          TIME CMD
+  XXXXX pts/XX   XX:XX:XX bash
+  XXXXX pts/XX   XX:XX:XX ps
+  XXXXX pts/XX   XX:XX:XX head
+  XXXXX pts/XX   XX:XX:XX sed
+  XXXXX pts/XX   XX:XX:XX sed

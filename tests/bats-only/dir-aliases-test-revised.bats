@@ -12,7 +12,6 @@ shopt -s expand_aliases
 	test_folder=$(echo /tmp/test0-$$)
 	mkdir $test_folder && cd $test_folder
 
-	bind 'set enable-bracketed-paste off'
 }
 
 
@@ -20,18 +19,11 @@ shopt -s expand_aliases
 	test_folder=$(echo /tmp/test1-$$)
 	mkdir $test_folder && cd $test_folder
 
-}
-
-
-@test "test2" {
-	test_folder=$(echo /tmp/test2-$$)
-	mkdir $test_folder && cd $test_folder
-
 	unalias -a
 	alias | wc -l
 	for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
-	actual=$(test2-assert4-actual)
-	expected=$(test2-assert4-expected)
+	actual=$(test1-assert4-actual)
+	expected=$(test1-assert4-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -41,12 +33,21 @@ shopt -s expand_aliases
 
 }
 
-function test2-assert4-actual () {
+function test1-assert4-actual () {
 	typeset -f | egrep '^\w+' | wc -l
 }
-function test2-assert4-expected () {
+function test1-assert4-expected () {
 	echo -e '00'
 }
+
+@test "test2" {
+	test_folder=$(echo /tmp/test2-$$)
+	mkdir $test_folder && cd $test_folder
+
+	alias testnum="sed -r "s/[0-9]/X/g"" 
+	alias testuser="sed -r "s/"$USER"+/user/g""
+}
+
 
 @test "test3" {
 	test_folder=$(echo /tmp/test3-$$)
@@ -60,7 +61,7 @@ function test2-assert4-expected () {
 	test_folder=$(echo /tmp/test4-$$)
 	mkdir $test_folder && cd $test_folder
 
-	source _dir-aliases.bash
+	alias | wc -l
 	actual=$(test4-assert2-actual)
 	expected=$(test4-assert2-expected)
 	echo "========== actual =========="
@@ -73,10 +74,10 @@ function test2-assert4-expected () {
 }
 
 function test4-assert2-actual () {
-	alias | wc -l
+	source _dir-aliases.bash
 }
 function test4-assert2-expected () {
-	echo -e '8'
+	echo -e '2'
 }
 
 @test "test5" {
@@ -98,7 +99,7 @@ function test5-assert1-actual () {
 	alias | wc -l
 }
 function test5-assert1-expected () {
-	echo -e '8'
+	echo -e '10'
 }
 
 @test "test6" {

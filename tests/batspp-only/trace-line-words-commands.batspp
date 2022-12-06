@@ -1,9 +1,9 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
 ## Bracketed Paste is disabled to prevent characters after output
 ## Example: 
-# $ echo 'Hi'
-# | Hi?2004l
-$ bind 'set enable-bracketed-paste off'
-[?2004h[?2004l[?2004l[?2004l[?2004l[?2004l
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -48,21 +48,24 @@ $ typeset -f | egrep '^\w+' | wc -l
 1
 0
 
-## TEST 1 - TRACE LINE/WORD COUNT COMMANDS
-$ alias count-it="count_it.perl"
-# line-wc; alias for counting words on individual lines thoughout a file
-# (Gotta hate csh)
-$ function line-wc () { perl -n -e '@_ = split; printf("%d\t%s", 1 + $#_, $_);' "$@"; }
-$ alias line-word-len='line-wc'
-# 
-$ function line-len () { perl -ne 'printf("%d\t%s", length($_) - 1, $_);' "$@"; }
-$ function para-len () { perl -00 -ne 'printf("%d\t%s", length($_) - 1, $_);' "$@"; }
-$ alias ls-line-len='ls | line-len | sort -rn | less'  #'$LS | line-len | sort -rn | less'
-$ function check-class-dist () { count-it "^(\S+)\t" "$1" | perl- calc_entropy.perl -; }
-$ alias 2bib='bibitem2bib'
+$ alias testnum="sed -r "s/[0-9]/X/g"" 
+$ alias testuser="sed -r "s/"$USER"+/user/g"" 
+
+$ source $BIN_DIR/tomohara-aliases.bash
 
 # GENERATES A PARAGRAPH WITH MULTIPLE LINES
-$ printf "Hi Mom,\nThis is the use of printf\nI can use a backslash n to start a new line\n1\n2\n3"> abc-test.txt
+$ rm -rf ./*
+$ printf "Hi Mom,\nThis is the use of printf\nI can use a backslash n to start a new line\n1\n2\n3" >> abc-test.txt
+$ printf "This is another-test file" >> test2.txt
+$ printf "This is test-file 3" >> test3.txt
+$ printf "This is a test-file 4" >> test4.txt
+removed './abc-test.txt'
+removed './test2.txt'
+removed './test3.txt'
+removed './test4.txt'
+
+$ ls | count-it '\.([^\.]+)$'
+txt	4
 
 # line-wc | COUNTS WORD FOR EACH LINE
 $ cat abc-test.txt | line-wc
@@ -104,11 +107,62 @@ $ cat abc-test.txt | line-word-len
 ## EXAMPLE: 
 ## $ls-line-len
 ## |12      abc-test.txt1h=
-# ls-line-len
+$ ls-line-len
+[?1h=
 
-## ERROR-GENERATED : check-class-dist
-## $ cat abc-test.txt | check-class-dist
-## | bash: perl-: command not found
-## |Can't open : No such file or directory at /home/aveey/bin/count_it.perl line 171.
 
-# cat abc-test.txt | 2bib
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[H[2J[H[H[2J[H12      abc-test.txt
+9       test4.txt
+9       test3.txt
+9       test2.txt
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[K[?1l>
+
+# ## ERROR-GENERATED : check-class-dist
+# $ cat abc-test.txt | check-class-dist
+# | Can't open : No such file or directory at /home/aveey/bin/count_it.perl line 171.
+# | WARNING: unexpected distribution for FREQ (all 0)
+
+# $ cat abc-test.txt | 2bib
+# | bash: bibitem2bib: command not found
+# | cat: write error: Broken pipe
+
+$ rm -rf ./* > /dev/null

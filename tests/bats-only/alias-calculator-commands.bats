@@ -119,16 +119,8 @@ function test5-assert1-expected () {
 	test_folder=$(echo /tmp/test6-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function perl-calc-init () { initexpr="$1"; shift; echo "$@" | perl perlcalc.perl -init="$initexpr" -; }
-	alias calc='perl-calc'
-	alias calc-prec6='perl-calc -precision=6'
-	alias calc-init='perl-calc-init'
-	function old-perl-calc () { perl -e "print $*;"; }
-	function hex2dec { perl -e "printf '%d', 0x$1;" -e 'print "\n";'; }
-	function dec2hex { perl -e "printf '%x', $1;" -e 'print "\n";'; }
-	function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
-	function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
-	alias hv='$BIN_DIR/hexview.perl'
+	alias testnumhex="sed -r "s/[0-9,A-F,a-f]/X/g"" 
+	alias testuser="sed -r "s/"$USER"+/user/g"" 
 }
 
 
@@ -136,10 +128,7 @@ function test5-assert1-expected () {
 	test_folder=$(echo /tmp/test7-$$)
 	mkdir $test_folder && cd $test_folder
 
-	old-calc "24 / 4.0 - (35 / 7.0) * 5" # returns -19 as float
-	linebr
-	old-calc "(2^3)*(2^2)" # returns 32
-	linebr
+	source $BIN_DIR/tomohara-aliases.bash
 }
 
 
@@ -147,43 +136,22 @@ function test5-assert1-expected () {
 	test_folder=$(echo /tmp/test8-$$)
 	mkdir $test_folder && cd $test_folder
 
-	old-perl-calc "70 + 69 + 68"
-	printf "\n"
-	linebr
-	old-perl-calc "8/8/8/8/8"
-	printf "\n"
-	actual=$(test8-assert6-actual)
-	expected=$(test8-assert6-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test8-assert6-actual () {
+	old-calc "24 / 4.0 - (35 / 7.0) * 5" 
 	linebr
 }
-function test8-assert6-expected () {
-	echo -e '207--------------------------------------------------------------------------------0.001953125--------------------------------------------------------------------------------'
-}
+
 
 @test "test9" {
 	test_folder=$(echo /tmp/test9-$$)
 	mkdir $test_folder && cd $test_folder
 
+	old-perl-calc "70 + 69 + 68"
+	printf "\n"
 	linebr
-}
-
-
-@test "test10" {
-	test_folder=$(echo /tmp/test10-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test10-assert1-actual)
-	expected=$(test10-assert1-expected)
+	old-perl-calc "8/8/8/8/8"
+	printf "\n"
+	actual=$(test9-assert6-actual)
+	expected=$(test9-assert6-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -193,20 +161,42 @@ function test8-assert6-expected () {
 
 }
 
-function test10-assert1-actual () {
-	dec2hex "A12" 
+function test9-assert6-actual () {
+	linebr
 }
-function test10-assert1-expected () {
-	echo -e '800'
+function test9-assert6-expected () {
+	echo -e '207--------------------------------------------------------------------------------0.001953125--------------------------------------------------------------------------------'
+}
+
+@test "test10" {
+	test_folder=$(echo /tmp/test10-$$)
+	mkdir $test_folder && cd $test_folder
+
+	linebr
+	actual=$(test10-assert2-actual)
+	expected=$(test10-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test10-assert2-actual () {
+	hex2dec "F"
+}
+function test10-assert2-expected () {
+	echo -e '17950953796--------------------------------------------------------------------------------15'
 }
 
 @test "test11" {
 	test_folder=$(echo /tmp/test11-$$)
 	mkdir $test_folder && cd $test_folder
 
-	bin2dec "11110011"
-	actual=$(test11-assert2-actual)
-	expected=$(test11-assert2-expected)
+	actual=$(test11-assert1-actual)
+	expected=$(test11-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -216,19 +206,20 @@ function test10-assert1-expected () {
 
 }
 
-function test11-assert2-actual () {
-	bin2dec "0110" 
+function test11-assert1-actual () {
+	dec2hex "A12" 
 }
-function test11-assert2-expected () {
-	echo -e '243--------------------------------------------------------------------------------6'
+function test11-assert1-expected () {
+	echo -e '800'
 }
 
 @test "test12" {
 	test_folder=$(echo /tmp/test12-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test12-assert1-actual)
-	expected=$(test12-assert1-expected)
+	bin2dec "11110011"
+	actual=$(test12-assert2-actual)
+	expected=$(test12-assert2-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -238,17 +229,68 @@ function test11-assert2-expected () {
 
 }
 
-function test12-assert1-actual () {
-	dec2bin "10"
+function test12-assert2-actual () {
+	bin2dec "0110" 
 }
-function test12-assert1-expected () {
-	echo -e '100010011000100111010'
+function test12-assert2-expected () {
+	echo -e '243--------------------------------------------------------------------------------6'
 }
 
 @test "test13" {
 	test_folder=$(echo /tmp/test13-$$)
 	mkdir $test_folder && cd $test_folder
 
+	actual=$(test13-assert1-actual)
+	expected=$(test13-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test13-assert1-actual () {
+	dec2bin "10"
+}
+function test13-assert1-expected () {
+	echo -e '100010011000100111010'
+}
+
+@test "test14" {
+	test_folder=$(echo /tmp/test14-$$)
+	mkdir $test_folder && cd $test_folder
+
 	pwd
+	rm -rf ./*
 	ps -l > testforhv.txt
+}
+
+
+@test "test15" {
+	test_folder=$(echo /tmp/test15-$$)
+	mkdir $test_folder && cd $test_folder
+
+	calc "100/(24*5)"
+	linebr
+	calc-prec6 "49/3"
+	calc-init "+" "100/3"
+	linebr
+	actual=$(test15-assert6-actual)
+	expected=$(test15-assert6-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test15-assert6-actual () {
+	calc-int "100/23"
+}
+function test15-assert6-expected () {
+	echo -e '0.833--------------------------------------------------------------------------------16.333333--------------------------------------------------------------------------------33.333--------------------------------------------------------------------------------4'
 }

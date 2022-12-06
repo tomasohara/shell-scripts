@@ -1,7 +1,13 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
 ## TODO: PS1="> "
-$ bind 'set enable-bracketed-paste off'
 ## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
 $ echo $PS1
 [PEXP\[\]ECT_PROMPT>
@@ -16,9 +22,9 @@ $ typeset -f | egrep '^\w+' | wc -l
 0
 
 ## NOTE: All directory references should be standard directories
-## (e.g., /home/aveey/bin => /tmp/test-alias/bin). 
+## (e.g., /home/xaea12/bin => /tmp/test-alias/bin). 
 ## In addition, avoid using personal directories to help weed out local usages
-## OLD: AVEE_BIN=/home/aveey/bin
+## OLD: AVEE_BIN=/home/xaea12/bin
 # SPECIFYING AN IDENTIFIER FOR TMP
 ## OLD: TMP=temp/tmp
 $ TMP=/tmp/test-dir-aliases

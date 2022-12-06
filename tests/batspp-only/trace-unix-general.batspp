@@ -1,12 +1,11 @@
-# Setup
-$ bind 'set enable-bracketed-paste off'
-$ echo "BIND ON!"
-
-## TESTS START FROM LINE 2066 (tomohara-aliases.bash)
+## SETUP (OPTIONAL - USE IF REQUIRED)
 ## Bracketed Paste is disabled to prevent characters after output
 ## Example: 
-# $ echo 'Hi'
-# | Hi?2004l
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TESTS START FROM LINE 2066 (tomohara-aliases.bash)
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -51,294 +50,106 @@ $ typeset -f | egrep '^\w+' | wc -l
 1
 0
 
-# ps-all(pattern): show processes from all users matching PATTERN (or . in which case piped to less)
-# TODO: have option to restrict to current user
-$ function ps-all () { 
-$     local pattern="$1";
-$     local pager=cat;
-$     if [ "$pattern" = "" ]; then 
-$         pattern="."; 
-$         pager=$PAGER
-$     fi;
-$     ps_mine.sh --all | $EGREP -i "((^USER)|($pattern))" | $pager;
-$     }
-$ alias ps-script='ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
-$ function ps-sort-once { ps_sort.perl -num_times=1 -by=time "$@" -; }
-$ alias ps-sort-time='ps-sort-once -by=time'
-$ alias ps-time=ps-sort-time
-$ alias ps-sort-mem='ps-sort-once -by=mem '
-$ alias ps-mem=ps-sort-mem
+$ alias testnum="sed -r "s/[0-9]/X/g"" 
+$ alias testuser="sed -r "s/"$USER"+/user/g""
 
-$ alias ps-script='ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
-$ function ps-sort-once { ps_sort.perl -num_times=1 -by=time "$@" -; }
-$ alias ps-sort-time='ps-sort-once -by=time'
-$ alias ps-time=ps-sort-time
-$ alias ps-sort-mem='ps-sort-once -by=mem '
-$ alias ps-mem=ps-sort-mem
+# SOURCING
+$ source $BIN_DIR/tomohara-aliases.bash
+
+$ ps-all | wc -l | testnum
+XXX
 
 # SORTS ALL PROCESS BY TIME
-$ ps-sort-time
-Error: bad sort field (time): using cpu
-USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
-aveey       1940 16.5 11.8 3559492 437112 ?      Ssl  18:45   2:21 /snap/firef
-aveey       4358 10.7  1.4 672904 51964 ?        Ssl  18:59   0:00 /usr/bin/py
-aveey       3552  6.2  5.2 2544272 195016 ?      Sl   18:46   0:51 /snap/firef
-aveey       1347  2.7  6.6 25834536 246060 ?     Sl   18:35   0:39 /opt/Upwork
-root         866  1.9  2.8 683152 104852 tty1    Ssl+ 18:33   0:31 /usr/lib/xo
-aveey       4112  1.9  4.7 2536612 176300 ?      Sl   18:54   0:06 /snap/firef
-aveey       4368  1.0  0.1  11480  5544 pts/1    Ss   18:59   0:00 /usr/bin/ba
-aveey       3526  0.8  5.0 19460268 186388 ?     Sl   18:46   0:07 /snap/firef
-aveey       1247  0.7  4.5 4788200 168432 ?      Sl   18:35   0:11 /opt/Upwork
-aveey       1549  0.7  2.0 241692 74828 pts/0    Sl+  18:45   0:06 /usr/bin/py
-aveey       1326  0.2  1.9 286020 71776 ?        Sl   18:35   0:03 /opt/Upwork
-root           1  0.1  0.3 166312 11708 ?        Ss   18:32   0:01 /sbin/init 
-root         694  0.1  1.0 1096492 37308 ?       Ssl  18:32   0:02 /usr/lib/sn
-aveey       1072  0.1  2.8 1206800 105556 ?      Sl   18:33   0:02 /usr/bin/lx
-aveey       2437  0.1  3.6 2856908 133092 ?      Sl   18:45   0:01 /snap/firef
-aveey       3062  0.1  2.9 2449764 107740 ?      Sl   18:46   0:01 /snap/firef
-root           2  0.0  0.0      0     0 ?        S    18:32   0:00 [kthreadd]
-root           3  0.0  0.0      0     0 ?        I<   18:32   0:00 [rcu_gp]
-root           4  0.0  0.0      0     0 ?        I<   18:32   0:00 [rcu_par_gp
-root           5  0.0  0.0      0     0 ?        I<   18:32   0:00 [netns]
-root           6  0.0  0.0      0     0 ?        I    18:32   0:00 [kworker/0:
-root           7  0.0  0.0      0     0 ?        I<   18:32   0:00 [kworker/0:
-root           9  0.0  0.0      0     0 ?        I<   18:32   0:00 [kworker/0:
-root          10  0.0  0.0      0     0 ?        I<   18:32   0:00 [mm_percpu_
-root          11  0.0  0.0      0     0 ?        S    18:32   0:00 [rcu_tasks_
-root          12  0.0  0.0      0     0 ?        S    18:32   0:00 [rcu_tasks_
-root          13  0.0  0.0      0     0 ?        S    18:32   0:00 [ksoftirqd/
-root          14  0.0  0.0      0     0 ?        I    18:32   0:00 [rcu_sched]
-root          15  0.0  0.0      0     0 ?        S    18:32   0:00 [migration/
-root          16  0.0  0.0      0     0 ?        S    18:32   0:00 [idle_injec
-root          18  0.0  0.0      0     0 ?        S    18:32   0:00 [cpuhp/0]
-root          19  0.0  0.0      0     0 ?        S    18:32   0:00 [cpuhp/1]
-root          20  0.0  0.0      0     0 ?        S    18:32   0:00 [idle_injec
-root          21  0.0  0.0      0     0 ?        S    18:32   0:00 [migration/
-root          22  0.0  0.0      0     0 ?        S    18:32   0:00 [ksoftirqd/
-root          24  0.0  0.0      0     0 ?        I<   18:32   0:00 [kworker/1:
-root          25  0.0  0.0      0     0 ?        S    18:32   0:00 [cpuhp/2]
-root          26  0.0  0.0      0     0 ?        S    18:32   0:00 [idle_injec
+# Hidden: USER, TTY, STAT, COMMAND
+$ ps-sort-time | head -n 10 | testnum | awk '!($1=$7=$8=$11="")'
+ PID %CPU %MEM VSZ RSS   START TIME 
+ XXXX XX.X XX.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX XX.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXX XXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXXX XXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXX XXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXX XXXXX   XX:XX X:XX 
 
 # ACTS THE SAME AS ps-sort-time
-$ ps-time
-Error: bad sort field (time): using cpu
-USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
-aveey       1940 16.5 11.8 3559492 438160 ?      Ssl  18:45   2:21 /snap/firef
-aveey       4358 11.0  1.4 672904 52020 ?        Ssl  18:59   0:00 /usr/bin/py
-aveey       3552  6.2  5.3 2545296 195620 ?      Sl   18:46   0:52 /snap/firef
-aveey       1347  2.7  6.6 25834536 246060 ?     Sl   18:35   0:39 /opt/Upwork
-root         866  1.9  2.8 683152 104852 tty1    Ssl+ 18:33   0:31 /usr/lib/xo
-aveey       4112  1.9  4.7 2536612 176300 ?      Sl   18:54   0:06 /snap/firef
-aveey       4368  1.0  0.1  11480  5544 pts/1    Ss   18:59   0:00 /usr/bin/ba
-aveey       3526  0.8  5.0 19460268 186388 ?     Sl   18:46   0:07 /snap/firef
-aveey       1247  0.7  4.5 4788200 168432 ?      Sl   18:35   0:11 /opt/Upwork
-aveey       1549  0.7  2.0 241692 74828 pts/0    Sl+  18:45   0:06 /usr/bin/py
-aveey       1326  0.2  1.9 286020 71776 ?        Sl   18:35   0:03 /opt/Upwork
-root           1  0.1  0.3 166312 11708 ?        Ss   18:32   0:01 /sbin/init 
-root         694  0.1  1.0 1096492 37308 ?       Ssl  18:32   0:02 /usr/lib/sn
-aveey       1072  0.1  2.8 1206800 105556 ?      Sl   18:33   0:02 /usr/bin/lx
-aveey       2437  0.1  3.6 2856908 133092 ?      Sl   18:45   0:01 /snap/firef
-aveey       3062  0.1  2.9 2449764 107740 ?      Sl   18:46   0:01 /snap/firef
-root           2  0.0  0.0      0     0 ?        S    18:32   0:00 [kthreadd]
-root           3  0.0  0.0      0     0 ?        I<   18:32   0:00 [rcu_gp]
-root           4  0.0  0.0      0     0 ?        I<   18:32   0:00 [rcu_par_gp
-root           5  0.0  0.0      0     0 ?        I<   18:32   0:00 [netns]
-root           6  0.0  0.0      0     0 ?        I    18:32   0:00 [kworker/0:
-root           7  0.0  0.0      0     0 ?        I<   18:32   0:00 [kworker/0:
-root           9  0.0  0.0      0     0 ?        I<   18:32   0:00 [kworker/0:
-root          10  0.0  0.0      0     0 ?        I<   18:32   0:00 [mm_percpu_
-root          11  0.0  0.0      0     0 ?        S    18:32   0:00 [rcu_tasks_
-root          12  0.0  0.0      0     0 ?        S    18:32   0:00 [rcu_tasks_
-root          13  0.0  0.0      0     0 ?        S    18:32   0:00 [ksoftirqd/
-root          14  0.0  0.0      0     0 ?        I    18:32   0:00 [rcu_sched]
-root          15  0.0  0.0      0     0 ?        S    18:32   0:00 [migration/
-root          16  0.0  0.0      0     0 ?        S    18:32   0:00 [idle_injec
-root          18  0.0  0.0      0     0 ?        S    18:32   0:00 [cpuhp/0]
-root          19  0.0  0.0      0     0 ?        S    18:32   0:00 [cpuhp/1]
-root          20  0.0  0.0      0     0 ?        S    18:32   0:00 [idle_injec
-root          21  0.0  0.0      0     0 ?        S    18:32   0:00 [migration/
-root          22  0.0  0.0      0     0 ?        S    18:32   0:00 [ksoftirqd/
-root          24  0.0  0.0      0     0 ?        I<   18:32   0:00 [kworker/1:
-root          25  0.0  0.0      0     0 ?        S    18:32   0:00 [cpuhp/2]
-root          26  0.0  0.0      0     0 ?        S    18:32   0:00 [idle_injec
+$ ps-time | head -n 10  | testnum | awk '!($1=$7=$8=$11="")'
+ PID %CPU %MEM VSZ RSS   START TIME 
+ XXXX XX.X XX.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX XX.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXX XXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXXX XXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXX XXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXX XXXXX   XX:XX X:XX 
 
 # SORTS ALL PROCESS BY MEMORY
-$ ps-sort-mem
-USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
-aveey       1940 16.5 11.9 3559492 438964 ?      Ssl  18:45   2:21 /snap/firef
-aveey       1347  2.7  6.6 25834536 246060 ?     Sl   18:35   0:39 /opt/Upwork
-aveey       3552  6.2  5.3 2546320 197116 ?      Sl   18:46   0:52 /snap/firef
-aveey       3526  0.8  5.0 19460268 186388 ?     Sl   18:46   0:07 /snap/firef
-aveey       4112  1.9  4.7 2536612 176300 ?      Sl   18:54   0:06 /snap/firef
-aveey       1247  0.7  4.5 4788200 168432 ?      Sl   18:35   0:11 /opt/Upwork
-aveey       2437  0.1  3.6 2856908 133092 ?      Sl   18:45   0:01 /snap/firef
-aveey       3062  0.1  2.9 2449764 107740 ?      Sl   18:46   0:01 /snap/firef
-root         866  1.9  2.8 683152 104852 tty1    Ssl+ 18:33   0:31 /usr/lib/xo
-aveey       1072  0.1  2.8 1206800 105556 ?      Sl   18:33   0:02 /usr/bin/lx
-aveey       1068  0.0  2.7 861112 101196 ?       Sl   18:33   0:00 /usr/bin/pc
-aveey       1251  0.0  2.4 755944 90968 ?        Sl   18:35   0:01 xfce4-termi
-aveey       3014  0.0  2.4 2425852 90816 ?       Sl   18:46   0:00 /snap/firef
-aveey       1549  0.7  2.0 241692 74828 pts/0    Sl+  18:45   0:06 /usr/bin/py
-aveey       1326  0.2  1.9 286020 71776 ?        Sl   18:35   0:03 /opt/Upwork
-aveey       1382  0.0  1.8 4504348 68472 ?       Sl   18:36   0:00 /opt/Upwork
-aveey       1402  0.0  1.8 4502300 68556 ?       Sl   18:36   0:00 /opt/Upwork
-aveey       1436  0.0  1.8 4502300 67268 ?       Sl   18:36   0:00 /opt/Upwork
-aveey       4192  0.0  1.7 2407188 65208 ?       Sl   18:55   0:00 /snap/firef
-aveey       4152  0.0  1.6 2407168 62396 ?       Sl   18:54   0:00 /snap/firef
-aveey       4228  0.0  1.6 2407188 62356 ?       Sl   18:56   0:00 /snap/firef
-aveey       1313  0.0  1.5 273840 58480 ?        Sl   18:35   0:01 /opt/Upwork
-aveey       1074  0.0  1.4 576624 51908 ?        Sl   18:33   0:00 /usr/bin/lx
-aveey       1424  0.0  1.4 522836 54084 ?        Sl   18:36   0:00 /opt/Upwork
-aveey       4358 11.5  1.4 672904 52020 ?        Ssl  18:59   0:00 /usr/bin/py
-aveey       1222  0.0  1.3 504148 47980 ?        Sl   18:34   0:00 /usr/bin/lx
-aveey       1249  0.0  1.2 207348 46536 ?        S    18:35   0:00 /opt/Upwork
-aveey       1250  0.0  1.2 207348 46756 ?        S    18:35   0:00 /opt/Upwork
-aveey       1000  0.0  1.1 336628 41616 ?        Sl   18:33   0:00 lxqt-sessio
-aveey       1071  0.0  1.1 275848 43160 ?        Sl   18:33   0:00 /usr/bin/lx
-aveey       1073  0.0  1.1 410024 41912 ?        Sl   18:33   0:00 /usr/bin/lx
-aveey       1224  0.0  1.1 271432 41880 ?        Sl   18:34   0:00 /usr/bin/ql
-aveey       1226  0.0  1.1 272668 42228 ?        Sl   18:34   0:00 /usr/bin/nm
-root         694  0.1  1.0 1096492 37308 ?       Ssl  18:32   0:02 /usr/lib/sn
-aveey       1069  0.0  1.0 336148 39240 ?        Sl   18:33   0:00 /usr/bin/lx
-aveey       2948  0.0  1.0 268112 40356 ?        Ssl  18:46   0:00 /usr/lib/x8
-aveey       2993  0.0  0.9 218728 36768 ?        Sl   18:46   0:00 /snap/firef
-aveey       3160  0.0  0.9 218712 34876 ?        Sl   18:46   0:00 /snap/firef
+$ ps-sort-mem | head -n 10  | testnum | awk '!($1=$7=$8=$11="")' 
+ PID %CPU %MEM VSZ RSS   START TIME 
+ XXXX XX.X XX.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX XX.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX 
 
 # ps-mem IS AN ALTERNATIVE OF ps-sort-mem
-$ ps-mem
-USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
-aveey       1940 16.5 11.8 3559492 437464 ?      Ssl  18:45   2:21 /snap/firef
-aveey       1347  2.7  7.1 25852196 263732 ?     Sl   18:35   0:39 /opt/Upwork
-aveey       3552  6.2  5.3 2547344 198488 ?      Sl   18:46   0:52 /snap/firef
-aveey       3526  0.8  5.0 19460268 186388 ?     Sl   18:46   0:07 /snap/firef
-aveey       4112  1.9  4.7 2536612 176300 ?      Sl   18:54   0:06 /snap/firef
-aveey       1247  0.7  4.5 4788200 168432 ?      Sl   18:35   0:11 /opt/Upwork
-aveey       2437  0.1  3.6 2856908 133092 ?      Sl   18:45   0:01 /snap/firef
-aveey       3062  0.1  2.9 2449764 107740 ?      Sl   18:46   0:01 /snap/firef
-root         866  1.9  2.8 683152 104852 tty1    Ssl+ 18:33   0:31 /usr/lib/xo
-aveey       1072  0.1  2.8 1206800 105556 ?      Sl   18:33   0:02 /usr/bin/lx
-aveey       1068  0.0  2.7 861112 101196 ?       Sl   18:33   0:00 /usr/bin/pc
-aveey       1251  0.0  2.4 755944 90968 ?        Sl   18:35   0:01 xfce4-termi
-aveey       3014  0.0  2.4 2425852 90816 ?       Sl   18:46   0:00 /snap/firef
-aveey       1549  0.7  2.0 241692 74828 pts/0    Sl+  18:45   0:06 /usr/bin/py
-aveey       1326  0.2  1.9 286020 71776 ?        Sl   18:35   0:03 /opt/Upwork
-aveey       1382  0.0  1.8 4504348 68472 ?       Sl   18:36   0:00 /opt/Upwork
-aveey       1402  0.0  1.8 4502300 68556 ?       Sl   18:36   0:00 /opt/Upwork
-aveey       1436  0.0  1.8 4502300 67268 ?       Sl   18:36   0:00 /opt/Upwork
-aveey       4192  0.0  1.7 2407188 65208 ?       Sl   18:55   0:00 /snap/firef
-aveey       4152  0.0  1.6 2407168 62396 ?       Sl   18:54   0:00 /snap/firef
-aveey       4228  0.0  1.6 2407188 62356 ?       Sl   18:56   0:00 /snap/firef
-aveey       1313  0.0  1.5 273840 58480 ?        Sl   18:35   0:01 /opt/Upwork
-aveey       1074  0.0  1.4 576624 51908 ?        Sl   18:33   0:00 /usr/bin/lx
-aveey       1424  0.0  1.4 522836 54084 ?        Sl   18:36   0:00 /opt/Upwork
-aveey       4358 11.8  1.4 672904 52020 ?        Ssl  18:59   0:00 /usr/bin/py
-aveey       1222  0.0  1.3 504148 47980 ?        Sl   18:34   0:00 /usr/bin/lx
-aveey       1249  0.0  1.2 207348 46536 ?        S    18:35   0:00 /opt/Upwork
-aveey       1250  0.0  1.2 207348 46756 ?        S    18:35   0:00 /opt/Upwork
-aveey       1000  0.0  1.1 336628 41616 ?        Sl   18:33   0:00 lxqt-sessio
-aveey       1071  0.0  1.1 275848 43160 ?        Sl   18:33   0:00 /usr/bin/lx
-aveey       1073  0.0  1.1 410024 41912 ?        Sl   18:33   0:00 /usr/bin/lx
-aveey       1224  0.0  1.1 271432 41880 ?        Sl   18:34   0:00 /usr/bin/ql
-aveey       1226  0.0  1.1 272668 42228 ?        Sl   18:34   0:00 /usr/bin/nm
-root         694  0.1  1.0 1096492 37308 ?       Ssl  18:32   0:02 /usr/lib/sn
-aveey       1069  0.0  1.0 336148 39240 ?        Sl   18:33   0:00 /usr/bin/lx
-aveey       2948  0.0  1.0 268112 40356 ?        Ssl  18:46   0:00 /usr/lib/x8
-aveey       2993  0.0  0.9 218728 36768 ?        Sl   18:46   0:00 /snap/firef
-aveey       3160  0.0  0.9 218712 34876 ?        Sl   18:46   0:00 /snap/firef
+$ ps-mem | head -n 10  | testnum | awk '!($1=$7=$8=$11="")'
+ PID %CPU %MEM VSZ RSS   START TIME 
+ XXXX XX.X XX.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX XX.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX 
+ XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX 
 
-# ERROR GENERATED FOR ps-script
+# ERROR GENERATED FOR ps-script [OLD]
 # $ ps-script
 # | bash: -v: command not found
 # | bash: -i: command not found
 # | OSTYPE: Undefined variable.
+$ ps-script
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
 
-# ERROR GENERATED FOR ps-all
-# $ ps-all
-# | bash: -i: command not found
-# | OSTYPE: Undefined variable.
-
-$ function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$; fi; ps al | perl -Ssw extract_matches.perl "^\d+\s+\d+\s+$pid\s+(\d+)"; }
-
-$ ps al | egrep "(PID|$$)"
+$ ps al | egrep "(PID|$$)" | head -n 10 | testnum | awk '!($1="")'
 $ linebr
 # get-process-parent : return parent process-id for PID
-$ get-process-parent
-F   UID     PID    PPID PRI  NI    VSZ   RSS WCHAN  STAT TTY        TIME COMMAND
-0  1000    4368    4358  20   0  11480  5544 do_wai Ss   pts/1      0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh
-4  1000    4424    4368  20   0  12668  1656 -      R+   pts/1      0:00 ps al
-0  1000    4425    4368  20   0   9076  2356 pipe_r S+   pts/1      0:00 grep -E (PID|4368)
+$ get-process-parent | testnum
+ UID PID PPID PRI NI VSZ RSS WCHAN STAT TTY TIME COMMAND
+ XXXX XXXX XXXX XX X XXXXX XXXX do_wai Ss pts/X X:XX /usr/bi
+ XXXX XXXX XXXX XX X XXXXX XXXX - R+ pts/X X:XX ps al
+ XXXX XXXX XXXX XX X XXXXX XXXX pipe_r S+ pts/X X:XX grep -E
+ XXXX XXXX XXXX XX X XXXXX XXXX pipe_r S+ pts/X X:XX head -n
+ XXXX XXXX XXXX XX X XXXXX XXXX pipe_r S+ pts/X X:XX sed -r
+ XXXX XXXX XXXX XX X XXXXX XXXX pipe_r S+ pts/X X:XX awk !($
 --------------------------------------------------------------------------------
-4358
+XXXX
 
-# Make sure script appends rather than overwrites.
-# In addition, set SCRIPT_PID, so that set_xterm_title.bash can indicate within script.
-# Also, appends $ to prompt symbol so that typescript prompt searchable with strings command
-## HACK: set envionment for sake of set_xterm_title.bash (TODO check PPID for this)
-## TODO: use stack for old_PS_symbol maintenance??? (also allows for recursive invocation, such as with '$ $ $')
-## TODO: rename as my-script to avoid confusion
-$ function script {
-$     ## THIS FUNCTION IS BUGGY
-$     ## Note: set_xterm_title.bash keeps track of titles for each process, so save copies of current ones
-$     local save_full=$(set-xterm-title --print-full)
-$     local save_icon=$(set-xterm-title --print-icon)
-$     ## DEBUG: echo "save_full='$save_full'; save_icon='$save_icon'"
-$     # Change prompt
-$     local old_PS_symbol="$PS_symbol"
-$     export SCRIPT_PID=$$
-$     # Note: the prompt change is flakey
-$     reset-prompt "$PS_symbol\$"
-$     ## DEBUG: echo "script: 1. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
-$     # Change xterm title to match
-$     set-title-to-current-dir
-$     ## DEBUG: echo "script: 2. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
-$     # Run command
-$     command script --append "$@"
-$     # Restore prompt
-$     unset SCRIPT_PID
-$     reset-prompt "$old_PS_symbol"
-$     ## DEBUG: echo "script: 3. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
-$     # Get rid of lingering 'script' in xterm title
-$     ## DEBUG: echo "Restoring xterm title: full=$save_full save=$save_icon"
-$     set-xterm-title "$save_full" "$save_icon"
-$ }
-$ alias script-update='script _update-$(T).log'
-
-## ERROR - NEED TO SOURCE tomohara-aliases.bash FILE
+# # ERROR (To be identified)
 # $ script-update
-# | bash: T: command not found
-#   bash: set-xterm-title: command not found
-#   bash: set-xterm-title: command not found
-#   bash: reset-prompt: command not found
-#   bash: set-title-to-current-dir: command not found
-#   Script started, output log file is '_update-.log'.
+# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.full.list: No such file or directory
+# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.icon.list: No such file or directory
+# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.full.list: No such file or directory
+# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.icon.list: No such file or directory
+# | ]1;script:5848 test-3245 [/tmp/test-unix/test-3245]]2;script:5848 test-3245 [/tmp/test-unix/test-3245]]1;script:5848 test-3245 [/tmp/test-unix/test-3245]]2;script:5848 test-3245 [/tmp/test-unix/test-3245]Script started, output log file is '_update-06dec22.log'.
 
-# ansi-filter(filename]: wrapper around ansifilter with stdio and stdout instead of files
-# TODO: issue request for proper Unix stdin support (n.b., this function is much ado about nothing)
-$ function ansi-filter {
-$     local input_file="$1"
-$     if [ "$input_file" = "" ]; then
-$         input_file="$TMP/ansi-filter-in-$$.list"
-$         cat > "$input_file"
-$     fi
-$     local output_file="$TMP/ansi-filter-out-$$.list";
-$     ansifilter --input="$input_file" --output="$output_file"
-$     cat "$output_file"
-$ }
+## EXAMPLE FOR ansi-filter (a brief example required)
+$ rm -rf ./* > /dev/null
+$ echo "How to use the ansi-filter? " > ansi-filter-test.txt
+$ ansi-filter *.txt
+How to use the ansi-filter? 
 
-## EXAMPLE FOR ansi-filter
-$ echo "How to use the ansi-filter?" > ansi-filter-test.txt
-$ ansi-filter ansi-filter-test.txt
-How to use the ansi-filter?
-
-# pause-for-enter: EXITS AFTER PRESSING ENTER, WITH A MESSAGE
-$ function pause-for-enter () {
-$     local message="$1"
-$     if [ "$message" = "" ]; then message="Press enter to continue"; fi
-$     read -p "$message "
-$ }
-
+## pause-for-enter: EXITS AFTER PRESSING ENTER, WITH A MESSAGE
 ## DOESN'T WORK FOR JUPYTER, WORKS FOR TERMINAL
 # $ pause-for-enter
 # | Press enter to continue 
 ## (program terminates after pressing Enter Key)
-Press enter to continue 

@@ -1,3 +1,10 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
 $ echo $PS1
 [PEXP\[\]ECT_PROMPT>
 
@@ -16,6 +23,8 @@ $ BIN_DIR=$PWD/..
 $ alias | wc -l
 0
 
+$ alias testuser="sed -r "s/"$USER"+/user/g""
+
 $ temp_dir=$TMP/test-3570
 $ mkdir -p "$temp_dir"
 $ cd "$temp_dir"
@@ -28,80 +37,46 @@ $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
 $ alias | wc -l
 # Count functions
 $ typeset -f | egrep '^\w+' | wc -l
-1
+2
 0
 
-## TESTS 1 - EXTENSIONLESS SHORTCUTS PT. 1
-$ alias perl-=""
-$ GREP='grep'
-$ alias move='mv'
-$ alias convert-termstrings='perl- convert_termstrings.perl'
-$ alias do-rcsdiff='do_rcsdiff.sh'
-$ alias dobackup='dobackup.sh'
-$ alias kill-em='kill_em.sh'
-$ alias kill-it='kill-em --pattern'
+$ alias testnum="sed -r "s/[0-9]/X/g"" 
+$ alias testuser="sed -r "s/"$USER"+/user/g""
+
+$ source $BIN_DIR/tomohara-aliases.bash
 
 # # 1.1) NO EXAMPLES RN FOR kill-em and kill-it
-# kill-em
-# linebr
-# kill-it
-# # 1.2) TEST STOPS
-# $ kill-em --pattern kcalc
-# | pattern=/kcalc/
-# | filter=/($)(^)/
-# | OSTYPE: Undefined variable.
+# kill-em () | kill-em and kill-it returns same value
+$ kill-em --test firefox | wc -l
+21
+
+# kill-it ()
+$ kill-it --test firefox | wc -l
+21
 
 ## 1.2) ERROR GENERATED - SCRIPT MISSING
 # $ convert-termstrings
 # | Can't open perl script "convert_termstrings.perl": No such file or directory
 
-$ rm -rf ./*
+$ rm -rf ./* > /dev/null
 $ printf "TOP\nTHIS IS A TEST\nBOTTOM" > test.txt
+$ printf "THIS IS A FILE TO MOVE" > tomove.txt
+$ mkdir newdir1
+$ move tomove.txt ./newdir1/
 $ ls
 $ dobackup test.txt
 $ linebr
 $ ls
-test.txt
+renamed 'tomove.txt' -> './newdir1/tomove.txt'
+newdir1  test.txt
 Backing up 'test.txt' to './backup/test.txt'
 --------------------------------------------------------------------------------
-backup	test.txt
+backup	newdir1  test.txt
 
-$ function ps-mine- { ps-mine "$@" | filter-dirnames; }
-$ alias ps_mine='ps-mine'
-$ alias ps-mine-all='ps-mine --all'
-
-## ERROR - ps-mine COMMAND NOT FOUND
-# ps_mine
-
-$ alias rename-files='perl- rename_files.perl'
-$ alias rename_files='rename-files'
-$ alias testwn='perl- testwn.perl'
-$ alias perlgrep='perl- perlgrep.perl'
-$ alias foreach='perl- foreach.perl'
-$ alias rename-spaces='rename-files -q -global " " "_"'
-$ alias rename-special-punct='rename-files -q -global -regex "[&\!\*?\(\)]" ""'
-$ alias rename-quotes='rename-files -q -global "'"'"'" ""' 
-
-$ rename-files
-
-Usage: rename_files.perl [options] old-pattern new-pattern [file] ...\n
-main options = [-q | -quick] [-f | -force] [-i | -ignore] [-global] [-regex]
-other options = [-evalre] [-t | -test] [-para]
-common options = [-verbose] [-help]
-
-Example(s):
-
-rename_files.perl rename_files ' - Shortcut' '' *Shortcut*
-
-/home/aveey/bin/rename_files.perl rename-files -q -- '--' '-'
-
-
-Notes:
-
--- Use -- for first argument if dashes occur in old-pattern.
--- By default only a single occurrence of the pattern is replaced.
-
-- The -ignore option is with respect to old vs. new comparison).
+# Large List of process with full process paths
+# Number of process is random
+$ ps-mine-all | wc -l | testnum 
+XXX
 
 # HELP REQUIRED FOR RCS FILES (TBC)
 $ do-rcsdiff
@@ -128,36 +103,37 @@ $ uname -v > versionV.txt
 $ uname -i > versionI.txt
 $ uname > "version none.txt"
 $ uname -ra > "version?.txt"
-$ ps -aux > processlist.txt
+$ man grep > grep_manual.txt
 $ cp ./versionR.txt ./versionR-1.txt
 $ ls
- backup		   versionA.txta       versionR-1.txt   versionV.txt
- processlist.txt   versionI.txt        versionR.txt
- test.txt	  'version none.txt'  'version?.txt'
+'./versionR.txt' -> './versionR-1.txt'
+ backup		   test.txt	  'version none.txt'  'version?.txt'
+ grep_manual.txt   versionA.txta   versionR-1.txt      versionV.txt
+ newdir1	   versionI.txt    versionR.txt
 
 $ rename-files -q test.txt harry.txt
 renaming "test.txt" to "harry.txt"
 
 # # NEED HELP (TBC)
 # $ testwn
-# | Undefined subroutine &main::NO_OP called at /home/aveey/bin/common.perl line 2172.
+# | Undefined subroutine &main::NO_OP called at /home/xaea12/bin/common.perl line 2172.
 
-$ perlgrep "bash" ./processlist.txt
-aveey       2415  0.0  0.0  17612  2020 pts/0    Ss   17:40   0:00 bash
-aveey       2440  0.0  0.1  17612  4936 pts/1    Ss+  17:40   0:00 bash
-aveey       4508  0.0  1.6 691220 57836 ?        Ssl  17:50   0:03 /usr/bin/python3 -m bash_kernel -f /home/aveey/.local/share/jupyter/runtime/kernel-c9deb3b8-c656-45df-a2c2-d9f85ff318ab.json
-aveey       4519  0.0  0.1  17480  4904 pts/3    Ss+  17:50   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh
-aveey       5078  0.0  0.1  17668  5048 pts/4    Ss   17:54   0:00 bash
-aveey       8448  0.0  0.1  17668  5376 pts/5    Ss+  18:21   0:00 bash
-aveey      11222  0.0  1.7 691220 60556 ?        Ssl  21:10   0:01 /usr/bin/python3 -m bash_kernel -f /home/aveey/.local/share/jupyter/runtime/kernel-2576ed23-01a7-4571-b5e4-0db404e9a80a.json
-aveey      11233  0.0  0.1  17540  5236 pts/6    Ss+  21:10   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh
-aveey      13076  0.0  1.7 691220 60580 ?        Ssl  21:16   0:01 /usr/bin/python3 -m bash_kernel -f /home/aveey/.local/share/jupyter/runtime/kernel-438a7192-237e-490e-8ab2-2658035cc4dd.json
-aveey      13087  0.0  0.1  17540  5408 pts/7    Ss+  21:16   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh
-aveey      13405  0.0  0.1  17668  5808 pts/8    Ss   21:20   0:00 bash
-aveey      22993  0.0  0.1  17664  5916 pts/9    Ss   21:55   0:00 bash
-aveey      25810 22.0  1.7 691228 60764 ?        Ssl  22:02   0:01 /usr/bin/python3 -m bash_kernel -f /home/aveey/.local/share/jupyter/runtime/kernel-7d6eccc1-4db7-4f69-b592-329e0b2bcb25.json
-aveey      25821  2.2  0.1  17540  5452 pts/2    Ss   22:03   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh
+$ perlgrep "print" ./grep_manual.txt
+       grep, egrep, fgrep, rgrep - print lines that match patterns
+       patterns separated by newline characters, and  grep  prints  each  line
+              Suppress  normal output; instead print a count of matching lines
+              Suppress normal output; instead print the  name  of  each  input
+              file from which no output would normally have been printed.
+              Suppress  normal  output;  instead  print the name of each input
+              file  from  which  output  would  normally  have  been  printed.
+              line of output.  If -o (--only-matching) is specified, print the
+              be printed in a minimum size field width.
+              -print0,  perl  -0,  sort  -z, and xargs -0 to process arbitrary
+              When  -A,  -B, or -C are in use, print SEP instead of -- between
+              When -A, -B, or -C are in use, do not print a separator  between
+       [:graph:], [:lower:], [:print:], [:punct:], [:space:],  [:upper:],  and
 
+# Need Help with example
 $ foreach "echo $f" *.txt
 
 $ rename-spaces
@@ -166,48 +142,33 @@ renaming "version none.txt" to "version_none.txt"
 $ rename-special-punct
 renaming "version?.txt" to "version.txt"
 
-$ ps -l > "process(L).md"
-$ ps -u > "process(U).md"
-$ ps -x > "process(X).md"
-$ ps -al > 'process'all'.md'
+$ ps -l >> "process(L).md"
+$ ps -u >> "process(U).md"
+$ ps -x >> "process(X).md"
+$ ps -al >> "process'all'.md"
+$ ps -aux >> 'psaux(1).txt'
+$ ps -aux >> 'psaux(2).txt'
+$ ps -aux >> 'psaux(3).txt'
 
-$ alias move-duplicates='mkdir -p duplicates; move *\([0-9]\).* duplicates 2>&1 | $GREP -iv cannot.stat.*..No.such'
-$ alias rename-parens='rename-files -global -regex "[\(\)]" "" *[\(\)]*'
-$ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-duplicates'
-
-# # NO OUTPUT - NEED FURTHER ATTENTION
-# $ move-duplicates
+$ move-duplicates
+renamed 'psaux(1).txt' -> 'duplicates/psaux(1).txt'
+renamed 'psaux(2).txt' -> 'duplicates/psaux(2).txt'
+renamed 'psaux(3).txt' -> 'duplicates/psaux(3).txt'
 
 $ rename-parens -v
 renaming "process(L).md" to "processL.md"
 renaming "process(U).md" to "processU.md"
 renaming "process(X).md" to "processX.md"
 
+# Need Help 
 $ rename-quotes -v
 WARNING: Ignoring -quick mode as files specified
 
 $ ls
-backup	       processlist.txt	processX.md    version_none.txt  version.txt
-harry.txt      processL.md	versionA.txta  versionR-1.txt	 versionV.txt
-processall.md  processU.md	versionI.txt   versionR.txt
-
-$ function move-versioned-files {
-$     alias perl-grep='perl $BIN_DIR/perlgrep.perl'
-$     alias dir-rw='dir -rw'
-$     alias move='mv'
-$     local ext_pattern='$1'
-$     if [ '$ext_pattern' = '' ]; then ext_pattern='{list,log,txt}'; fi
-$     local dir='$2'
-$     if [ '$dir' = '' ]; then dir='versioned-files'; fi
-$     mkdir -p '$dir';
-$     local D='[-.]'
-$     local file_list='$TEMP/_move-versioned-files-$$.list'
-$     eval_middle='$(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v "No such file" | perl -pe "s/(\S+\s+){6}\S+//;" | sort -u)'
-$     move '$eval_middle' '$dir'
-$ }
-$ alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
-$ alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
-$ alias move-adhoc-files='move-log-files; move-output-files'
+ backup		   newdir1	      processX.md	 versionR-1.txt
+ duplicates	  "process'all'.md"   versionA.txta	 versionR.txt
+ grep_manual.txt   processL.md	      versionI.txt	 version.txt
+ harry.txt	   processU.md	      version_none.txt	 versionV.txt
 
 $ man sudo > sudo_manual.out
 $ man ansifilter > fakelog.log
@@ -215,93 +176,547 @@ $ ps -aux > process_all.html
 
 # # HELP REQUIRED - TBF
 # $ move-log-files
-# | mv: cannot stat '$eval_middle': No such file or directory
+# | /bin/mv: missing destination file operand after 'log-files'
+# | Try '/bin/mv --help' for more information.
 
 # # HELP REQUIRED - TBF
 # $ move-output-files
 # | mv: cannot stat '$eval_middle': No such file or directory
 
-$ function get-free-filename() {
-$     local base="$1"
-$     local sep="$2"
-$     local L=1
-$     local filename="$base"
-$     while [ -e "$filename" ]; do
-$         let L++
-$         filename="$base$sep$L"
-$     done;
-$     echo "$filename"
-$ }
-$ function rename-with-file-date() {
-$     local f new_f
-$     local move_command="move"
-$     if [ "$1" = "--copy" ]; then
-$         move_command='command cp --interactive --verbose --preserve'
-$         shift
-$     fi
-$     for f in "$@"; do
-$         if [ -e "$f" ]; then
-$            new_f=$(get-free-filename "$f".$(date --reference="$f" '+%d%b%y') ".")
-$            eval "$move_command" "$f" "$new_f";
-$         fi
-$     done;
-$ }
-$ function copy-with-file-date { rename-with-file-date --copy "$@"; }
+$ copy-with-file-date *.md | wc -l
+cp: cannot stat 'processall.md': No such file or directory
+3
 
-$ copy-with-file-date *.md
-'processall.md' -> 'processall.md.09Oct22'
-'processL.md' -> 'processL.md.09Oct22'
-'processU.md' -> 'processU.md.09Oct22'
-'processX.md' -> 'processX.md.09Oct22'
+$ man cat > man_cat.txt
 
-# Statistical helpers
-$ alias bigrams='perl -sw $BIN_DIR/count_bigrams.perl -N=2'
-$ alias unigrams='perl -sw $BIN_DIR/count_bigrams.perl -N=1'
-$ alias word-count=unigrams
+$ unigrams ./man_cat.txt | testuser | testnum
+to	X
+and	X
+standard	X
+output	X
+cat	X
+gnu	X
+display	X
+free	X
+or	X
+is	X
+equivalent	X
+output.	X
+lines	X
+then	X
+this	X
+concatenate	X
+-	X
+by	X
+bugs	X
+tab	X
+number	X
+cat(X)	X
+no	X
+version	X
+coreutils	X
+copyright	X
+exit	X
+the	X
+repeated	X
+-,	X
+'(coreutils)	X
+change	X
+g	X
+f	X
+information	X
+--number	X
+february	X
+reporting	X
+[option]...	X
+any	X
+also	X
+end	X
+full	X
+on	X
+there	X
+of	X
+--squeeze-blank	X
+©	X
+-b,	X
+<https://translationproject.org/team/>	X
+-t,	X
+info	X
+file(s)	X
+synopsis	X
+are	X
+--show-nonprinting	X
+as	X
+[file]...	X
+XXXX	X
+^	X
+you	X
+description	X
+except	X
+lfd	X
+-t	X
+print	X
+when	X
+torbjorn	X
+input.	X
+XXXX	X
+(ignored)	X
+--version	X
+help	X
+--show-all	X
+at	X
+input,	X
+file	X
+available	X
+permitted	X
+-a,	X
+tac(X)	X
+contents,	X
+foundation,	X
+warranty,	X
+-s,	X
+read	X
+contents.	X
+notation,	X
+-v,	X
+-u	X
+help:	X
+gplvX+:	X
+user	X
+^i	X
+-vet	X
+$	X
+-ve	X
+author	X
+X.XX	X
+X	X
+all	X
+translation	X
+n/a	X
+--help	X
+--number-nonblank	X
+use	X
+law.	X
+file,	X
+license	X
+extent	X
+m.	X
+gpl	X
+nonempty	X
+m-	X
+online	X
+input	X
+locally	X
+g's	X
+f's	X
+it.	X
+files	X
+-e,	X
+overrides	X
+see	X
+-n	X
+with	X
+name	X
+examples	X
+<https://gnu.org/licenses/gpl.html>.	X
+later	X
+redistribute	X
+documentation	X
+empty	X
+-e	X
+software	X
+each	X
+granlund	X
+characters	X
+-n,	X
+software:	X
+copy	X
+suppress	X
+commands	X
+--show-ends	X
+invocation'	X
+<https://www.gnu.org/software/coreutils/cat>	X
+richard	X
+lines,	X
+for	X
+<https://www.gnu.org/software/coreutils/>	X
+-vt	X
+stallman.	X
+line	X
+inc.	X
+--show-tabs	X
+via:	X
+report	X
+written	X
 
-$ word-count ./versionV.txt
-utc	1
-n/a	1
-26	1
-aug	1
-13:26:29	1
-fri	1
-#54-ubuntu	1
-smp	1
+$ word-count ./man_cat.txt | testuser | testnum
+to	X
+and	X
+standard	X
+output	X
+cat	X
+or	X
+free	X
+is	X
+display	X
+equivalent	X
+gnu	X
+number	X
+version	X
+copyright	X
+output.	X
+bugs	X
+then	X
+lines	X
+exit	X
+by	X
+no	X
+this	X
+tab	X
+concatenate	X
+the	X
+cat(X)	X
+-	X
+coreutils	X
+lfd	X
+see	X
+contents,	X
+^	X
+XXXX	X
+<https://translationproject.org/team/>	X
+-ve	X
+for	X
+each	X
+'(coreutils)	X
+written	X
+info	X
+suppress	X
+commands	X
+m.	X
+granlund	X
+at	X
+line	X
+[option]...	X
+via:	X
+name	X
+-n	X
+copy	X
+-v,	X
+help	X
+it.	X
+<https://www.gnu.org/software/coreutils/cat>	X
+characters	X
+-t	X
+stallman.	X
+all	X
+description	X
+on	X
+nonempty	X
+-b,	X
+locally	X
+there	X
+-e,	X
+-vet	X
+--help	X
+^i	X
+-vt	X
+february	X
+notation,	X
+input.	X
+warranty,	X
+user	X
+file(s)	X
+full	X
+--version	X
+law.	X
+author	X
+-u	X
+as	X
+report	X
+f	X
+permitted	X
+contents.	X
+help:	X
+foundation,	X
+lines,	X
+g	X
+empty	X
+m-	X
+--show-ends	X
+when	X
+--show-tabs	X
+information	X
+f's	X
+n/a	X
+software	X
+input,	X
+invocation'	X
+-t,	X
+end	X
+repeated	X
+<https://www.gnu.org/software/coreutils/>	X
+-a,	X
+[file]...	X
+-,	X
+<https://gnu.org/licenses/gpl.html>.	X
+use	X
+g's	X
+--show-all	X
+--number	X
+-n,	X
+of	X
+reporting	X
+file,	X
+torbjorn	X
+except	X
+software:	X
+overrides	X
+--number-nonblank	X
+redistribute	X
+--show-nonprinting	X
+translation	X
+gplvX+:	X
+also	X
+--squeeze-blank	X
+X.XX	X
+©	X
+-s,	X
+file	X
+change	X
+documentation	X
+$	X
+X	X
+any	X
+examples	X
+inc.	X
+with	X
+extent	X
+XXXX	X
+(ignored)	X
+online	X
+later	X
+license	X
+gpl	X
+read	X
+input	X
+-e	X
+available	X
+you	X
+tac(X)	X
+richard	X
+print	X
+files	X
+are	X
+synopsis	X
 
-$ bigrams ./version.txt
-x86_64:x86_64	2
-utc:2022	1
-n/a:n/a	1
-n/a:linux	1
-fri:aug	1
-#54-ubuntu:smp	1
-26:13:26:29	1
-smp:fri	1
-13:26:29:utc	1
-aug:26	1
-linux:ins-15-3573-umate	1
-2022:x86_64	1
-5.15.0-48-generic:#54-ubuntu	1
-ins-15-3573-umate:5.15.0-48-generic	1
-
-$ lynx-dump-stdout () { lynx -width=512 -dump "$@"; }
-$ lynx-dump () { 
-$     local in_file="$1"
-$     shift 1
-$     local base=$(basename "$file" .html)
-$     if [[ ("$out_file" = "" ) && (! "$1" =~ -*) ]]; then
-$         local out_file="$1"
-$     fi
-$     if [ "$out_file" = "" ]; then out_file="$base.txt"; fi
-$     lynx-dump-stdout "$@" "$file" > "$out_file" 2> "$out_file.log"
-$     if [ -s "$out_file.log" ]; then
-$         cat "$out_file.log"
-$         delete-force "$out_file.log"
-$     fi
-$ }
-$ if [ "$BAREBONES_HOST" = "1" ]; then export lynx_width=0; fi
-$ alias lynx-html='lynx -force_html'
+$ bigrams ./man_cat.txt | testuser | testnum
+equivalent:to	X
+output:lines	X
+to:standard	X
+standard:output.	X
+and:exit	X
+gnu:coreutils	X
+notation,:except	X
+--number:number	X
+f:-	X
+X.XX:february	X
+read:standard	X
+contents.:cat	X
+<https://translationproject.org/team/>:copyright	X
+--show-ends:display	X
+stallman.:reporting	X
+line:-n,	X
+coreutils:X.XX	X
+reporting:bugs	X
+-e:equivalent	X
+output:version	X
+-s,:--squeeze-blank	X
+file(s):to	X
+display:tab	X
+as:^i	X
+locally:via:	X
+commands:cat(X)	X
+print:on	X
+lfd:and	X
+g:output	X
+or:later	X
+output:synopsis	X
+n/a:n/a	X
+display:$	X
+available:locally	X
+each:line	X
+help::<https://www.gnu.org/software/coreutils/>	X
+you:are	X
+input,:then	X
+number:all	X
+--number-nonblank:number	X
+software::you	X
+are:free	X
+--help:display	X
+output:lines,	X
+-vt:-t,	X
+is:no	X
+information:and	X
+any:translation	X
+gpl:version	X
+the:extent	X
+see:also	X
+and:redistribute	X
+m.:stallman.	X
+output:f's	X
+by:law.	X
+exit:examples	X
+f's:contents,	X
+file:is	X
+cat:copy	X
+-:concatenate	X
+foundation,:inc.	X
+to:-vt	X
+later:<https://gnu.org/licenses/gpl.html>.	X
+on:the	X
+'(coreutils):cat	X
+examples:cat	X
+X:or	X
+standard:input	X
+-b,:--number-nonblank	X
+all:output	X
+no:warranty,	X
+tab:characters	X
+<https://gnu.org/licenses/gpl.html>.:this	X
+gnu:gpl	X
+redistribute:it.	X
+cat(X):user	X
+with:no	X
+free:to	X
+exit:--version	X
+cat:invocation'	X
+(ignored):-v,	X
+is:free	X
+there:is	X
+to:change	X
+permitted:by	X
+invocation':gnu	X
+also:tac(X)	X
+and:print	X
+n/a:cat(X)	X
+-,:read	X
+-u:(ignored)	X
+input:to	X
+to:the	X
+license:gplvX+:	X
+files:and	X
+copyright:©	X
+XXXX:free	X
+free:software	X
+file,:or	X
+of:each	X
+inc.:license	X
+written:by	X
+output.:author	X
+at:end	X
+and:m-	X
+©:XXXX	X
+lines:-s,	X
+end:of	X
+then:g's	X
+-v,:--show-nonprinting	X
+--squeeze-blank:suppress	X
+law.:see	X
+--show-all:equivalent	X
+february:XXXX	X
+output.:with	X
+concatenate:files	X
+-:g	X
+[file]...:description	X
+g's:contents.	X
+$:at	X
+m-:notation,	X
+free:software:	X
+-t,:--show-tabs	X
+software:foundation,	X
+full:documentation	X
+to:<https://translationproject.org/team/>	X
+<https://www.gnu.org/software/coreutils/cat>:or	X
+or:when	X
+help:and	X
+suppress:repeated	X
+-ve:-e,	X
+lines:-t	X
+name:cat	X
+repeated:empty	X
+-e,:--show-ends	X
+this:is	X
+-n:-e	X
+tac(X):full	X
+info:'(coreutils)	X
+by:torbjorn	X
+user:commands	X
+-n,:--number	X
+use:^	X
+cat:f	X
+for:lfd	X
+no:file,	X
+number:nonempty	X
+author:written	X
+concatenate:file(s)	X
+change:and	X
+when:file	X
+input.:-a,	X
+documentation:<https://www.gnu.org/software/coreutils/cat>	X
+bugs:to	X
+standard:output	X
+version:information	X
+gplvX+::gnu	X
+torbjorn:granlund	X
+extent:permitted	X
+granlund:and	X
+characters:as	X
+empty:output	X
+to:-vet	X
+to:-ve	X
+synopsis:cat	X
+except:for	X
+overrides:-n	X
+-a,:--show-all	X
+coreutils:online	X
+copy:standard	X
+this:help	X
+or:available	X
+-vet:-b,	X
+--show-tabs:display	X
+version:X	X
+copyright:copyright	X
+via::info	X
+and:tab	X
+contents,:then	X
+warranty,:to	X
+[option]...:[file]...	X
+is:-,	X
+standard:input.	X
+^i:-u	X
+description:concatenate	X
+--show-nonprinting:use	X
+cat:[option]...	X
+lines,:overrides	X
+display:this	X
+bugs:gnu	X
+nonempty:output	X
+^:and	X
+the:standard	X
+and:richard	X
+it.:there	X
+--version:output	X
+report:any	X
+tab:--help	X
+<https://www.gnu.org/software/coreutils/>:report	X
+-t:equivalent	X
+standard:input,	X
+online:help:	X
+cat:-	X
+cat(X):name	X
+then:standard	X
+translation:bugs	X
+richard:m.	X
 
 # # WORKS FINE - HALTS PROCESS
 # $ lynx-html
@@ -318,16 +733,13 @@ About Lynx
 Credits and Copyright
 
 
-# # NEED HELP - N/A 
-# $ lynx-dump lynx_text.txt
+# (Need Help)
+# $ lynx-dump
+# | bash: .txt: cannot overwrite existing file
 
-$ function setenv () { export $1="$2"; }
-$ alias unsetenv='unset'
-$ alias unexport='unset'
-
-$ setenv MY_USERNAME aveey-temp
+$ setenv MY_USERNAME xaea12-temp
 $ echo $MY_USERNAME
-aveey-temp
+xaea12-temp
 
 $ unexport MY_USERNAME
 $ echo $MY_USERNAME

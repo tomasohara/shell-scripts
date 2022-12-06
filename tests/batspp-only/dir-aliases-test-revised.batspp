@@ -1,5 +1,9 @@
-# Setup
-$ bind 'set enable-bracketed-paste off'
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -17,6 +21,9 @@ $ typeset -f | egrep '^\w+' | wc -l
 0
 0
 
+$ alias testnum="sed -r "s/[0-9]/X/g"" 
+$ alias testuser="sed -r "s/"$USER"+/user/g""
+
 $ mkdir -p tmp/test-dir-aliases
 
 # Setting a temp directory for tests
@@ -25,13 +32,13 @@ $ TMP=/tmp/test-dir-aliases
 $ BIN_DIR=$PWD/..
 ## You will need to run jupyter from that directory.
 ## source $TEMP_BIN/_dir-aliases.bash
-$ source _dir-aliases.bash
 $ alias | wc -l
-8
+$ source _dir-aliases.bash
+2
 
 # Count aliases proper
 $ alias | wc -l
-8
+10
 
 # Count functions
 $ typeset -f | egrep '^\w+' | wc -l

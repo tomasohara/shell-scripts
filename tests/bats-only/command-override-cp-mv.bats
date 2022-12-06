@@ -44,31 +44,19 @@ function test1-assert4-expected () {
 	test_folder=$(echo /tmp/test2-$$)
 	mkdir $test_folder && cd $test_folder
 
-	source _dir-aliases.bash
-	actual=$(test2-assert2-actual)
-	expected=$(test2-assert2-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
+	alias testuser="sed -r "s/"$USER"+/user/g""
+	alias testnum="sed -r "s/[0-9]/X/g""
 }
 
-function test2-assert2-actual () {
-	alias | wc -l
-}
-function test2-assert2-expected () {
-	echo -e '8'
-}
 
 @test "test3" {
 	test_folder=$(echo /tmp/test3-$$)
 	mkdir $test_folder && cd $test_folder
 
+	TMP=./tmp/test-cp-mv
 	temp_dir=$TMP/test-1210
 	cd "$temp_dir"
+	pwd | testuser
 }
 
 
@@ -91,7 +79,7 @@ function test4-assert1-actual () {
 	alias | wc -l
 }
 function test4-assert1-expected () {
-	echo -e '9'
+	echo -e '3'
 }
 
 @test "test5" {
@@ -113,14 +101,14 @@ function test5-assert1-actual () {
 	typeset -f | egrep '^\w+' | wc -l
 }
 function test5-assert1-expected () {
-	echo -e '2'
+	echo -e '0'
 }
 
 @test "test6" {
 	test_folder=$(echo /tmp/test6-$$)
 	mkdir $test_folder && cd $test_folder
 
-	other_file_args="-v"
+	source $BIN_DIR/tomohara-aliases.bash
 }
 
 
@@ -128,25 +116,8 @@ function test5-assert1-expected () {
 	test_folder=$(echo /tmp/test7-$$)
 	mkdir $test_folder && cd $test_folder
 
-	if [ "$OSTYPE" = "solaris" ]; then other_file_args=""; fi
-}
-
-
-@test "test8" {
-	test_folder=$(echo /tmp/test8-$$)
-	mkdir $test_folder && cd $test_folder
-
-	alias clear="echo 'use cls instead (or /bin/clear)'"
-	alias cls="command clear -x"
-}
-
-
-@test "test9" {
-	test_folder=$(echo /tmp/test9-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test9-assert1-actual)
-	expected=$(test9-assert1-expected)
+	actual=$(test7-assert1-actual)
+	expected=$(test7-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -156,148 +127,15 @@ function test5-assert1-expected () {
 
 }
 
-function test9-assert1-actual () {
+function test7-assert1-actual () {
 	clear
 }
-function test9-assert1-expected () {
+function test7-assert1-expected () {
 	echo -e 'use cls instead (or /bin/clear)'
 }
 
-@test "test10" {
-	test_folder=$(echo /tmp/test10-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test10-assert1-actual)
-	expected=$(test10-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test10-assert1-actual () {
-	alias | grep cls
-}
-function test10-assert1-expected () {
-	echo -e "alias clear='echo '\\''use cls instead (or /bin/clear)'\\'''alias cls='command clear -x'"
-}
-
-@test "test11" {
-	test_folder=$(echo /tmp/test11-$$)
-	mkdir $test_folder && cd $test_folder
-
-	MV="/bin/mv -i $other_file_args"
-}
-
-
-@test "test12" {
-	test_folder=$(echo /tmp/test12-$$)
-	mkdir $test_folder && cd $test_folder
-
-	alias mv='$MV'
-	alias move='mv'
-	alias move-force='move -f'
-}
-
-
-@test "test13" {
-	test_folder=$(echo /tmp/test13-$$)
-	mkdir $test_folder && cd $test_folder
-
-}
-
-
-@test "test14" {
-	test_folder=$(echo /tmp/test14-$$)
-	mkdir $test_folder && cd $test_folder
-
-	alias copy='$CP'
-	alias copy-force='/bin/cp -fp $other_file_args'
-	alias cp='/bin/cp -i $other_file_args'
-}
-
-
-@test "test15" {
-	test_folder=$(echo /tmp/test15-$$)
-	mkdir $test_folder && cd $test_folder
-
-	alias rm='/bin/rm -i $other_file_args'
-	alias delete='/bin/rm -i $other_file_args'
-	alias del="delete"
-	alias delete-force='/bin/rm -f $other_file_args'
-	alias remove-force='delete-force'
-}
-
-
-@test "test16" {
-	test_folder=$(echo /tmp/test16-$$)
-	mkdir $test_folder && cd $test_folder
-
-	alias remove-dir='/bin/rm -rv'
-	alias delete-dir='remove-dir'
-	alias remove-dir-force='/bin/rm -rfv'
-	alias delete-dir-force='remove-dir-force'
-}
-
-
-@test "test17" {
-	test_folder=$(echo /tmp/test17-$$)
-	mkdir $test_folder && cd $test_folder
-
-	alias copy-readonly='copy-readonly.sh'
-	function copy-readonly-spec () {
-	local spec="$1"
-	local dir="$2"
-	if [[ ("$3" != "") || ($dir = "") || ($spec == "") ]]; then
-	echo "Usage: copy-readonly-spec pattern dir";
-	return
-	fi
-	for f in $($LS $spec); do copy-readonly "$f" "$dir"; done
-	}
-	function copy-readonly-to-dir () {
-	local dir="$1"
-	shift
-	for f in "$@"; do copy-readonly "$f" "$dir"; done
-	}
-}
-
-
-@test "test18" {
-	test_folder=$(echo /tmp/test18-$$)
-	mkdir $test_folder && cd $test_folder
-
-	export NICE="nice -19"
-	export TIME_CMD="/usr/bin/time"
-}
-
-
-@test "test19" {
-	test_folder=$(echo /tmp/test19-$$)
-	mkdir $test_folder && cd $test_folder
-
-	alias fix-dir-permissions="find . -type d -exec chmod go+xs {} \;"
-}
-
-
-@test "test20" {
-	test_folder=$(echo /tmp/test20-$$)
-	mkdir $test_folder && cd $test_folder
-
-}
-
-
-@test "test21" {
-	test_folder=$(echo /tmp/test21-$$)
-	mkdir $test_folder && cd $test_folder
-
-}
-
-
-@test "test22" {
-	test_folder=$(echo /tmp/test22-$$)
+@test "test8" {
+	test_folder=$(echo /tmp/test8-$$)
 	mkdir $test_folder && cd $test_folder
 
 	rm -rf ./*
@@ -305,11 +143,11 @@ function test10-assert1-expected () {
 	mv abc ./mvtest_dir1
 	move def ./mvtest_dir1
 	move-force ghi ./mvtest_dir1
-	ls -l
+	ls -l | awk '!($6="")' | testuser | testnum
 	linebr
-	ls -l ./mvtest_dir1
-	actual=$(test22-assert9-actual)
-	expected=$(test22-assert9-expected)
+	ls -l ./mvtest_dir1 | awk '!($6="")' | testuser | testnum
+	actual=$(test8-assert9-actual)
+	expected=$(test8-assert9-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -319,15 +157,15 @@ function test10-assert1-expected () {
 
 }
 
-function test22-assert9-actual () {
+function test8-assert9-actual () {
 	linebr
 }
-function test22-assert9-expected () {
-	echo -e "removed './testdir1/.bashrc'removed directory './testdir1'--------------------------------------------------------------------------------renamed 'abc' -> './mvtest_dir1/abc'renamed 'def' -> './mvtest_dir1/def'renamed 'ghi' -> './mvtest_dir1/ghi'--------------------------------------------------------------------------------total 4drwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 mvtest_dir1--------------------------------------------------------------------------------total 0-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 abc-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 def-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 ghi--------------------------------------------------------------------------------"
+function test8-assert9-expected () {
+	echo -e "removed './testdir1/.bashrc'removed directory './testdir1'--------------------------------------------------------------------------------renamed 'abc' -> './mvtest_dir1/abc'renamed 'def' -> './mvtest_dir1/def'renamed 'ghi' -> './mvtest_dir1/ghi'--------------------------------------------------------------------------------total X    drwxrwsr-x X user user XXXX  XX XX:XX mvtest_dirX--------------------------------------------------------------------------------total X    -rw-rw-r-- X user user X  XX XX:XX abc-rw-rw-r-- X user user X  XX XX:XX def-rw-rw-r-- X user user X  XX XX:XX ghi--------------------------------------------------------------------------------"
 }
 
-@test "test23" {
-	test_folder=$(echo /tmp/test23-$$)
+@test "test9" {
+	test_folder=$(echo /tmp/test9-$$)
 	mkdir $test_folder && cd $test_folder
 
 	rm -rf ./*
@@ -335,11 +173,11 @@ function test22-assert9-expected () {
 	cp abc ./cptest_dir1
 	copy def ./cptest_dir1
 	copy-force ghi ./cptest_dir1
-	ls -l
+	ls -l | awk '!($6="")' | testuser | testnum
 	linebr
-	ls -l ./cptest_dir1
-	actual=$(test23-assert9-actual)
-	expected=$(test23-assert9-expected)
+	ls -l ./cptest_dir1 | awk '!($6="")' | testuser | testnum
+	actual=$(test9-assert9-actual)
+	expected=$(test9-assert9-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -349,28 +187,28 @@ function test22-assert9-expected () {
 
 }
 
-function test23-assert9-actual () {
+function test9-assert9-actual () {
 	linebr
 }
-function test23-assert9-expected () {
-	echo -e "removed './mvtest_dir1/abc'removed './mvtest_dir1/ghi'removed './mvtest_dir1/def'removed directory './mvtest_dir1'--------------------------------------------------------------------------------'abc' -> './cptest_dir1/abc''def' -> './cptest_dir1/def''ghi' -> './cptest_dir1/ghi'--------------------------------------------------------------------------------total 4-rw-rw-r-- 1 aveey aveey    0 Oct  6 22:46 abcdrwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 cptest_dir1-rw-rw-r-- 1 aveey aveey    0 Oct  6 22:46 def-rw-rw-r-- 1 aveey aveey    0 Oct  6 22:46 ghi--------------------------------------------------------------------------------total 0-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 abc-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 def-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 ghi--------------------------------------------------------------------------------"
+function test9-assert9-expected () {
+	echo -e "removed './mvtest_dir1/abc'removed './mvtest_dir1/ghi'removed './mvtest_dir1/def'removed directory './mvtest_dir1'--------------------------------------------------------------------------------'abc' -> './cptest_dir1/abc''def' -> './cptest_dir1/def''ghi' -> './cptest_dir1/ghi'--------------------------------------------------------------------------------total X    -rw-rw-r-- X user user X  XX XX:XX abcdrwxrwsr-x X user user XXXX  XX XX:XX cptest_dirX-rw-rw-r-- X user user X  XX XX:XX def-rw-rw-r-- X user user X  XX XX:XX ghi--------------------------------------------------------------------------------total X    -rw-rw-r-- X user user X  XX XX:XX abc-rw-rw-r-- X user user X  XX XX:XX def-rw-rw-r-- X user user X  XX XX:XX ghi--------------------------------------------------------------------------------"
 }
 
-@test "test24" {
-	test_folder=$(echo /tmp/test24-$$)
+@test "test10" {
+	test_folder=$(echo /tmp/test10-$$)
 	mkdir $test_folder && cd $test_folder
 
 	rm -rf ./*
 	touch abc def ghi
 	mkdir TDIR1 TDIR2 TDIR3 TDIR4
-	ls -l
+	ls -l | awk '!($6="")' | testuser | testnum
 	remove-dir "TDIR1"
 	delete-dir "TDIR2"
 	remove-dir-force TDIR3
 	delete-dir-force TDIR4
-	ls -l
-	actual=$(test24-assert10-actual)
-	expected=$(test24-assert10-expected)
+	ls -l | awk '!($6="")' | testuser | testnum
+	actual=$(test10-assert10-actual)
+	expected=$(test10-assert10-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -380,65 +218,32 @@ function test23-assert9-expected () {
 
 }
 
-function test24-assert10-actual () {
+function test10-assert10-actual () {
 	linebr
 }
-function test24-assert10-expected () {
-	echo -e "removed './abc'removed './cptest_dir1/abc'removed './cptest_dir1/ghi'removed './cptest_dir1/def'removed directory './cptest_dir1'removed './def'removed './ghi'--------------------------------------------------------------------------------total 16-rw-rw-r-- 1 aveey aveey    0 Oct  6 22:46 abc-rw-rw-r-- 1 aveey aveey    0 Oct  6 22:46 def-rw-rw-r-- 1 aveey aveey    0 Oct  6 22:46 ghidrwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 TDIR1drwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 TDIR2drwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 TDIR3drwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 TDIR4--------------------------------------------------------------------------------removed directory 'TDIR1'removed directory 'TDIR2'removed directory 'TDIR3'removed directory 'TDIR4'--------------------------------------------------------------------------------total 0-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 abc-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 def-rw-rw-r-- 1 aveey aveey 0 Oct  6 22:46 ghi--------------------------------------------------------------------------------"
+function test10-assert10-expected () {
+	echo -e "removed './abc'removed './cptest_dir1/abc'removed './cptest_dir1/ghi'removed './cptest_dir1/def'removed directory './cptest_dir1'removed './def'removed './ghi'--------------------------------------------------------------------------------total XX    -rw-rw-r-- X user user X  XX XX:XX abc-rw-rw-r-- X user user X  XX XX:XX def-rw-rw-r-- X user user X  XX XX:XX ghidrwxrwsr-x X user user XXXX  XX XX:XX TDIRXdrwxrwsr-x X user user XXXX  XX XX:XX TDIRXdrwxrwsr-x X user user XXXX  XX XX:XX TDIRXdrwxrwsr-x X user user XXXX  XX XX:XX TDIRX--------------------------------------------------------------------------------removed directory 'TDIR1'removed directory 'TDIR2'removed directory 'TDIR3'removed directory 'TDIR4'--------------------------------------------------------------------------------total X    -rw-rw-r-- X user user X  XX XX:XX abc-rw-rw-r-- X user user X  XX XX:XX def-rw-rw-r-- X user user X  XX XX:XX ghi--------------------------------------------------------------------------------"
 }
 
-@test "test25" {
-	test_folder=$(echo /tmp/test25-$$)
+@test "test11" {
+	test_folder=$(echo /tmp/test11-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias copy-readonly='copy-readonly.sh'
-	function copy-readonly-spec () {
-	local spec="$1"
-	local dir="$2"
-	if [[ ("$3" != "") || ($dir = "") || ($spec == "") ]]; then
-	echo "Usage: copy-readonly-spec pattern dir";
-	return
-	fi
-	for f in $($LS $spec); do copy-readonly "$f" "$dir"; done
-	}
-	function copy-readonly-to-dir () {
-	local dir="$1"
-	shift
-	for f in "$@"; do copy-readonly "$f" "$dir"; done
-	}
-}
-
-
-@test "test26" {
-	test_folder=$(echo /tmp/test26-$$)
-	mkdir $test_folder && cd $test_folder
-
-	copy-readonly
+	copy-readonly | testuser
 	rm -rf ./*
 	mkdir testdir1
-	copy-readonly ~/.bashrc ./testdir1
-	ls -l 
 	linebr
-	cat ./testdir1/.bashrc | head
+	copy-readonly ~/.bashrc ./testdir1/ | awk '!($6="")' | testuser | testnum
+	cat ./testdir1/.bashrc | head 
 }
 
 
-@test "test27" {
-	test_folder=$(echo /tmp/test27-$$)
+@test "test12" {
+	test_folder=$(echo /tmp/test12-$$)
 	mkdir $test_folder && cd $test_folder
 
-	export NICE="nice -19"
-	export TIME_CMD="/usr/bin/time"
-	alias fix-dir-permissions='find . -type d -exec chmod go+xs {} \;'
-}
-
-
-@test "test28" {
-	test_folder=$(echo /tmp/test28-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test28-assert1-actual)
-	expected=$(test28-assert1-expected)
+	actual=$(test12-assert1-actual)
+	expected=$(test12-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -448,9 +253,9 @@ function test24-assert10-expected () {
 
 }
 
-function test28-assert1-actual () {
-	ls -l 
+function test12-assert1-actual () {
+	ls -l | awk '!($6="")' | testuser | testnum
 }
-function test28-assert1-expected () {
-	echo -e 'total 4drwxrwsr-x 2 aveey aveey 4096 Oct  6 22:46 testdir1'
+function test12-assert1-expected () {
+	echo -e 'total X    drwxrwsr-x X user user XXXX  XX XX:XX testdirX'
 }

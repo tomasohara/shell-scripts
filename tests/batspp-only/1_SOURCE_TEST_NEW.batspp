@@ -1,0 +1,19 @@
+$ function count-aliases { alias | wc -l; }
+$ function clear-aliases { unalias -a; }
+
+$ clear-aliases
+$ count-aliases
+0
+
+$ function count-aliases { alias | wc -l; }
+$ function list-functions { typeset -f | egrep '^[A-ZZa-z_-]'; }
+$ function count-functions { list-functions | wc -l; }
+
+# Get alias definitions
+# Note: assumes Jupyter run from ./tests directory
+## DEBUG: set -o xtrace
+$ BIN_DIR=$PWD/..
+$ source $BIN_DIR/tomohara-aliases.bash
+
+$ clear
+use cls instead (or /bin/clear)

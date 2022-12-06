@@ -77,8 +77,17 @@ function test2-assert1-expected () {
 	test_folder=$(echo /tmp/test4-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test4-assert1-actual)
-	expected=$(test4-assert1-expected)
+	alias testnum="sed -r "s/[0-9,A-F,a-f]/X/g"" 
+	alias testuser="sed -r "s/"$USER"+/user/g""
+}
+
+
+@test "test5" {
+	test_folder=$(echo /tmp/test5-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test5-assert1-actual)
+	expected=$(test5-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -88,15 +97,15 @@ function test2-assert1-expected () {
 
 }
 
-function test4-assert1-actual () {
+function test5-assert1-actual () {
 	typeset -f | egrep '^\w+' | wc -l
 }
-function test4-assert1-expected () {
-	echo -e '10'
+function test5-assert1-expected () {
+	echo -e '30'
 }
 
-@test "test5" {
-	test_folder=$(echo /tmp/test5-$$)
+@test "test6" {
+	test_folder=$(echo /tmp/test6-$$)
 	mkdir $test_folder && cd $test_folder
 
 	pwd
@@ -104,39 +113,13 @@ function test4-assert1-expected () {
 }
 
 
-@test "test6" {
-	test_folder=$(echo /tmp/test6-$$)
-	mkdir $test_folder && cd $test_folder
-
-	function show-unicode-code-info-aux() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < "$1"; }
-	function show-unicode-code-info { show-unicode-code-info-aux "$@"; }
-	function show-unicode-code-info-stdin() { in_file="$TEMP/show-unicode-code-info.$$"; cat >| $in_file;  show-unicode-code-info-aux $in_file; }
-	function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
-	function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
-}
-
-
 @test "test7" {
 	test_folder=$(echo /tmp/test7-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test7-assert1-actual)
-	expected=$(test7-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
+	source $BIN_DIR/tomohara-aliases.bash
 }
 
-function test7-assert1-actual () {
-	show-unicode-code-info-aux ./version1.txt
-}
-function test7-assert1-expected () {
-	echo -e 'char\tord\toffset\tencoding5.15.0-48-generic: 175\t0035\t0\t35.\t002E\t1\t2e1\t0031\t2\t315\t0035\t3\t35.\t002E\t4\t2e0\t0030\t5\t30-\t002D\t6\t2d4\t0034\t7\t348\t0038\t8\t38-\t002D\t9\t2dg\t0067\t10\t67e\t0065\t11\t65n\t006E\t12\t6ee\t0065\t13\t65r\t0072\t14\t72i\t0069\t15\t69c\t0063\t16\t63'
-}
 
 @test "test8" {
 	test_folder=$(echo /tmp/test8-$$)
@@ -154,18 +137,33 @@ function test7-assert1-expected () {
 }
 
 function test8-assert1-actual () {
-	show-unicode-code-info ./version1.txt
+	show-unicode-code-info-aux ./version1.txt | testnum 
 }
 function test8-assert1-expected () {
-	echo -e 'char\tord\toffset\tencoding5.15.0-48-generic: 175\t0035\t0\t35.\t002E\t1\t2e1\t0031\t2\t315\t0035\t3\t35.\t002E\t4\t2e0\t0030\t5\t30-\t002D\t6\t2d4\t0034\t7\t348\t0038\t8\t38-\t002D\t9\t2dg\t0067\t10\t67e\t0065\t11\t65n\t006E\t12\t6ee\t0065\t13\t65r\t0072\t14\t72i\t0069\t15\t69c\t0063\t16\t63'
+	echo -e 'XhXr\torX\toXXsXt\tXnXoXingX.XX.X-XX-gXnXriX: XXX\tXXXX\tX\tXX.\tXXXX\tX\tXXX\tXXXX\tX\tXXX\tXXXX\tX\tXX.\tXXXX\tX\tXXX\tXXXX\tX\tXX-\tXXXX\tX\tXXX\tXXXX\tX\tXXX\tXXXX\tX\tXX-\tXXXX\tX\tXXg\tXXXX\tXX\tXXX\tXXXX\tXX\tXXn\tXXXX\tXX\tXXX\tXXXX\tXX\tXXr\tXXXX\tXX\tXXi\tXXXX\tXX\tXXX\tXXXX\tXX\tXX'
 }
 
 @test "test9" {
 	test_folder=$(echo /tmp/test9-$$)
 	mkdir $test_folder && cd $test_folder
 
+	actual=$(test9-assert1-actual)
+	expected=$(test9-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test9-assert1-actual () {
+	show-unicode-code-info ./version1.txt | testnum
+}
+function test9-assert1-expected () {
+	echo -e 'XhXr\torX\toXXsXt\tXnXoXingX.XX.X-XX-gXnXriX: XXX\tXXXX\tX\tXX.\tXXXX\tX\tXXX\tXXXX\tX\tXXX\tXXXX\tX\tXX.\tXXXX\tX\tXXX\tXXXX\tX\tXX-\tXXXX\tX\tXXX\tXXXX\tX\tXXX\tXXXX\tX\tXX-\tXXXX\tX\tXXg\tXXXX\tXX\tXXX\tXXXX\tXX\tXXn\tXXXX\tXX\tXXX\tXXXX\tXX\tXXr\tXXXX\tXX\tXXi\tXXXX\tXX\tXXX\tXXXX\tXX\tXX'
+}
 
 @test "test10" {
 	test_folder=$(echo /tmp/test10-$$)

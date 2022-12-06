@@ -6,10 +6,11 @@ $ bind 'set enable-bracketed-paste off'
 $ unalias -a
 $ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
 
-$ AVEE_BIN=/home/aveey/bin
+## OLD: TEST_BIN=/home/test3513/bin
 # SPECIFYING AN IDENTIFIER FOR TMP
-$ TMP=temp/tmp
-$ source $AVEE_BIN/_dir-aliases.bash
+$ TEST_BIN=/home/$USER/tom-project/shell-scripts/tests
+$ TMP=/tmp/test-dir-aliases
+$ source $TEST_BIN/_dir-aliases.bash
 $ alias | wc -l
 8
 
@@ -27,7 +28,13 @@ $ mkdir -p "$temp_dir"
 # TODO: /bin/rm -rvf "$temp_dir"
 $ cd "$temp_dir"
 $ pwd
-/home/aveey/tom-project/shell-scripts/tests/temp/tmp/test-16840
+/tmp/test-dir-aliases/test-11858
+
+$ alias testnum="sed -r "s/[0-9]/X/g"" 
+$ alias testuser="sed -r "s/"$USER"+/user/g""
+
+$ echo $USER | testuser
+user
 
 # The first case succeed
 $ touch file1
@@ -45,32 +52,35 @@ ln: failed to create symbolic link 'link1': File exists
 
 ## FYI: the current aliases and functions
 ## ERROR PRONE COMMAND (BATSPP) - WORKS WELL
-# $ cat $AVEE_BIN/_dir-aliases.bash
+# $ cat $TEST_BIN/_dir-aliases.bash
 
-$ bash $AVEE_BIN/_dir-aliases.bash
+$ ls
+file1  link1
 
-$ ls -l
-total 0
--rw-rw-r-- 1 aveey aveey 0 Sep 19 21:59 file1
-lrwxrwxrwx 1 aveey aveey 5 Sep 19 21:59 link1 -> file1
+$ ls -l | testuser | testnum | awk '!($6="")'
+total X    
+-rw-rw-r-- X user user X  XX XX:XX fileX
+lrwxrwxrwx X user user X  XX XX:XX linkX -> fileX
+
+$ bash $TEST_BIN/_dir-aliases.bash
 
 $ ln-symbolic /tmp temp-link
 'temp-link' -> '/tmp'
 
-$ ls -l
-total 0
--rw-rw-r-- 1 aveey aveey 0 Sep 19 21:59 file1
-lrwxrwxrwx 1 aveey aveey 5 Sep 19 21:59 link1 -> file1
-lrwxrwxrwx 1 aveey aveey 4 Sep 19 21:59 temp-link -> /tmp
+$ ls -l | testuser | testnum | awk '!($6="")'
+total X    
+-rw-rw-r-- X user user X  XX XX:XX fileX
+lrwxrwxrwx X user user X  XX XX:XX linkX -> fileX
+lrwxrwxrwx X user user X  XX XX:XX temp-link -> /tmp
 
-$ link-symbolic-safe --force ~/temp temp-link
-'temp-link' -> '/home/aveey/temp'
+$ link-symbolic-safe --force ~/temp temp-link | testuser
+'temp-link' -> '/home/user/temp'
 
-$ ls -l
-total 0
--rw-rw-r-- 1 aveey aveey  0 Sep 19 21:59 file1
-lrwxrwxrwx 1 aveey aveey  5 Sep 19 21:59 link1 -> file1
-lrwxrwxrwx 1 aveey aveey 16 Sep 19 21:59 temp-link -> /home/aveey/temp
+$ ls -l | testuser | testnum | awk '!($6="")'
+total X    
+-rw-rw-r-- X user user X  XX XX:XX fileX
+lrwxrwxrwx X user user X  XX XX:XX linkX -> fileX
+lrwxrwxrwx X user user XX  XX XX:XX temp-link -> /home/user/temp
 
 $ alias ln-symbolic-force='ln-symbolic --force'
 
@@ -83,13 +93,13 @@ $ alias ln-symbolic-force='ln-symbolic --force'
 # | ln: temp-link/tmp: cannot overwrite directory
 
 $ ln-symbolic-force /tmp1 temp-link
-'temp-link' -> '/tmp1'
+'temp-link/tmp1' -> '/tmp1'
 
-$ link-symbolic-safe --force ~/temp temp-link
-'temp-link' -> '/home/aveey/temp'
+$ link-symbolic-safe --force ~/temp temp-link | testuser | testnum
+'temp-link' -> '/home/user/temp'
 
-$ ls -l
-total 0
--rw-rw-r-- 1 aveey aveey  0 Sep 19 21:59 file1
-lrwxrwxrwx 1 aveey aveey  5 Sep 19 21:59 link1 -> file1
-lrwxrwxrwx 1 aveey aveey 16 Sep 19 21:59 temp-link -> /home/aveey/temp
+$ ls -l | testuser | testnum | awk '!($6="")'
+total X    
+-rw-rw-r-- X user user X  XX XX:XX fileX
+lrwxrwxrwx X user user X  XX XX:XX linkX -> fileX
+lrwxrwxrwx X user user XX  XX XX:XX temp-link -> /home/user/temp

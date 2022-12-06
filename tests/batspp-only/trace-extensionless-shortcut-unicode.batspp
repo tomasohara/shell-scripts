@@ -24,11 +24,15 @@ $ pwd
 $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
 /tmp/test-extensionless/test-3570
 
+# Modified testnum to include Hex
+$ alias testnum="sed -r "s/[0-9,A-F,a-f]/X/g"" 
+$ alias testuser="sed -r "s/"$USER"+/user/g""
+
 # Count aliases proper
 $ alias | wc -l
 # Count functions
 $ typeset -f | egrep '^\w+' | wc -l
-1
+3
 0
 
 $ pwd
@@ -36,67 +40,71 @@ $ rm -rf ./*
 $ uname -r > version1.txt
 /tmp/test-extensionless/test-3570
 
-$ function show-unicode-code-info-aux() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < "$1"; }
-$ function show-unicode-code-info { show-unicode-code-info-aux "$@"; }
-$ function show-unicode-code-info-stdin() { in_file="$TEMP/show-unicode-code-info.$$"; cat >| $in_file;  show-unicode-code-info-aux $in_file; }
-$ function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
-$ function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
+$ source $BIN_DIR/tomohara-aliases.bash
 
-$ show-unicode-code-info-aux ./version1.txt
-char	ord	offset	encoding
-5.15.0-48-generic: 17
-5	0035	0	35
-.	002E	1	2e
-1	0031	2	31
-5	0035	3	35
-.	002E	4	2e
-0	0030	5	30
--	002D	6	2d
-4	0034	7	34
-8	0038	8	38
--	002D	9	2d
-g	0067	10	67
-e	0065	11	65
-n	006E	12	6e
-e	0065	13	65
-r	0072	14	72
-i	0069	15	69
-c	0063	16	63
+# function show-unicode-code-info-aux() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < "$1"; }
+# function show-unicode-code-info { show-unicode-code-info-aux "$@"; }
+# function show-unicode-code-info-stdin() { in_file="$TEMP/show-unicode-code-info.$$"; cat >| $in_file;  show-unicode-code-info-aux $in_file; }
+# function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
+# function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
 
-
-$ show-unicode-code-info ./version1.txt
-char	ord	offset	encoding
-5.15.0-48-generic: 17
-5	0035	0	35
-.	002E	1	2e
-1	0031	2	31
-5	0035	3	35
-.	002E	4	2e
-0	0030	5	30
--	002D	6	2d
-4	0034	7	34
-8	0038	8	38
--	002D	9	2d
-g	0067	10	67
-e	0065	11	65
-n	006E	12	6e
-e	0065	13	65
-r	0072	14	72
-i	0069	15	69
-c	0063	16	63
+$ show-unicode-code-info-aux ./version1.txt | testnum 
+XhXr	orX	oXXsXt	XnXoXing
+X.XX.X-XX-gXnXriX: XX
+X	XXXX	X	XX
+.	XXXX	X	XX
+X	XXXX	X	XX
+X	XXXX	X	XX
+.	XXXX	X	XX
+X	XXXX	X	XX
+-	XXXX	X	XX
+X	XXXX	X	XX
+X	XXXX	X	XX
+-	XXXX	X	XX
+g	XXXX	XX	XX
+X	XXXX	XX	XX
+n	XXXX	XX	XX
+X	XXXX	XX	XX
+r	XXXX	XX	XX
+i	XXXX	XX	XX
+X	XXXX	XX	XX
 
 
-# # ERROR GENERATED (shown below)
+$ show-unicode-code-info ./version1.txt | testnum
+XhXr	orX	oXXsXt	XnXoXing
+X.XX.X-XX-gXnXriX: XX
+X	XXXX	X	XX
+.	XXXX	X	XX
+X	XXXX	X	XX
+X	XXXX	X	XX
+.	XXXX	X	XX
+X	XXXX	X	XX
+-	XXXX	X	XX
+X	XXXX	X	XX
+X	XXXX	X	XX
+-	XXXX	X	XX
+g	XXXX	XX	XX
+X	XXXX	XX	XX
+n	XXXX	XX	XX
+X	XXXX	XX	XX
+r	XXXX	XX	XX
+i	XXXX	XX	XX
+X	XXXX	XX	XX
+
+
+## Need Help
+# show-unicode-code-info-stdin ./version1.txt
+
+## Need Help (output-BOM shows no output)
+# output-BOM
+
+## Issue (non ending process) 
+# show-unicode-control-chars version1.txt 
+
+# # ERROR GENERATED (shown below) [0LD]
 # $ show-unicode-code-info-stdin ./catmanual.txt
 # | bash: /show-unicode-code-info.5292: Permission denied
 # | bash: /show-unicode-code-info.5292: No such file or directory
-
-# ERROR GENERATED (non-ending process; need help)
-# $ show-unicode-control-chars ./catmanual.txt
-
-## NO OUTPUT GENERATED
-$ output-BOM ./version1.txt
-﻿
 
 $ echo "END"
 END

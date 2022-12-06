@@ -1,10 +1,5 @@
-# Setup
-$ bind 'set enable-bracketed-paste off'
-
-## Bracketed Paste is disabled to prevent characters after output
-## Example: 
-# $ echo 'Hii'
-# | Hi?2004l
+# Setup (OPTIONAL - USED IF NEEDED)
+## bind 'set enable-bracketed-paste off'
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -26,11 +21,8 @@ $ typeset -f | egrep '^\w+' | wc -l
 $ TMP=/tmp/test-cp-mv
 ## NOTE: Source it directly from the ./tests directory.
 $ BIN_DIR=$PWD/..
-## You will need to run jupyter from that directory.
-## source $TEMP_BIN/_dir-aliases.bash
-$ source _dir-aliases.bash
 $ alias | wc -l
-8
+0
 
 ## NOTE: For reproducability, the directory name needs to be fixed
 ## In place of $$, use a psuedo random number (e,g., 6869)
@@ -47,46 +39,13 @@ $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
 
 # Count aliases proper
 $ alias | wc -l
-9
+1
 
 # Count functions
 $ typeset -f | egrep '^\w+' | wc -l
-2
+0
 
-# # Command overrides for cd, etc. that set the xterm title to the current directory
-# # TODO: use alias's instead so that the same name can be used as the command
-# # NOTES: 
-# #
-# # - (from bash manual)  There is no mechanism for using arguments in
-# # the replacement text, as in csh. If arguments are needed, a shell
-# # function should be used.
-# #
-# # This is conditioned upon not running under emacs, so that the escape
-# # sequence doesn't end up in the buffer.
-# #
-# if [ "$UNDER_EMACS" != "1" ]; then
-#     function cd () { builtin cd "$@"; set-title-to-current-dir; }
-#     function pushd () { builtin pushd "$@"; set-title-to-current-dir; }
-#     function popd () { builtin popd; set-title-to-current-dir; }
-# fi
-
-$ alias chdir='cd'
-# cd-realdir(dir): change into the real path for DIR
-# cd-this-realdir: ditto for current directory
-## OLD: function cd-realdir { local dir="$1";  if [ "$dir" = "" ]; then dir=.; fi;  cd $(realpath "$dir"); }
-$ function cd-realdir {
-$     local dir="$1";
-$     if [ "$dir" = "" ]; then dir=.; fi;
-$     cd "$(realpath "$dir")";
-$     pwd;
-$ }
-$ alias cd-this-realdir='cd-realdir .'
-
-# pushd-q, popd-q: quiet versions of pushd and popd
-#
-$ function pushd-q () { builtin pushd "$@" >| /dev/null; }
-$ function popd-q () { builtin popd >| /dev/null; }
-#
+$ source $BIN_DIR/tomohara-aliases.bash
 
 # SHOWS CURRENT WORKING DIRECTORY
 $ pwd
@@ -97,14 +56,29 @@ $ chdir ..
 $ pwd
 $ chdir test-6869/
 $ pwd
-$ linebr
+]1;test-cp-mv [/tmp/test-cp-mv]]2;test-cp-mv [/tmp/test-cp-mv]/tmp/test-cp-mv
+/tmp/test-cp-mv/test-6869
+]1;test-6869 [/tmp/test-cp-mv/test-6869]]2;test-6869 [/tmp/test-cp-mv/test-6869]/tmp/test-cp-mv/test-6869
+
 ## cd-this-realdir works as cd as well
 $ chdir ..
 $ pwd
 $ chdir test-6869/
 $ pwd
-/tmp/test-cp-mv
+]1;test-cp-mv [/tmp/test-cp-mv]]2;test-cp-mv [/tmp/test-cp-mv]/tmp/test-cp-mv
 /tmp/test-cp-mv/test-6869
+]1;test-6869 [/tmp/test-cp-mv/test-6869]]2;test-6869 [/tmp/test-cp-mv/test-6869]/tmp/test-cp-mv/test-6869
+
+$ rm -rf ./*
+$ mkdir testdir89 testdir90
+$ echo "Testfile1" > testdir89/f11.txt
+$ echo "Testfile2" > testdir89/f12.txt
+
+$ pushd-q testdir89
+$ ls
+$ linebr
+$ popd-q 
+$ ls
+f11.txt  f12.txt
 --------------------------------------------------------------------------------
-/tmp/test-cp-mv
-/tmp/test-cp-mv/test-6869
+testdir89  testdir90

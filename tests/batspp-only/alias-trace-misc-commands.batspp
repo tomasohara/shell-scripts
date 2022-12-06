@@ -42,6 +42,12 @@ $ typeset -f | egrep '^\w+' | wc -l
 1
 0
 
+$ alias testuser="sed -r "s/"$USER"+/user/g""
+$ alias testnum="sed -r "s/[0-9]/X/g"" 
+$ alias testnumhex="sed -r "s/[0-9,a-f,A-F]/X/g"" 
+
+$ source $BIN_DIR/tomohara-aliases.bash
+
 ##1 SHOWS HISTORY OF BASH COMMANDS
 $ alias hist='history $LINES'
 ##2 SHOWS HISTORY WITHOUT TIMESTAMPS
@@ -57,51 +63,50 @@ DDD MMM  N NN:NN:NN NNNN
 
 ##4 FILTER DIRECTORY NAMES
 $ function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
-$ ps | filter-dirnames
+# awk is used for removing PID column (1st col)
+$ ps | filter-dirnames | testnum
     PID TTY          TIME CMD
-  21393 pts/9    00:00:00 bash
-  21440 pts/9    00:00:00 ps
-  21441 pts/9    00:00:00 bash
-  21442 pts/9    00:00:00 perl
+   XXXX pts/X    XX:XX:XX bash
+   XXXX pts/X    XX:XX:XX ps
+   XXXX pts/X    XX:XX:XX bash
+   XXXX pts/X    XX:XX:XX sed
+   XXXX pts/X    XX:XX:XX perl
 
 ##5 COMMAIZE NUMBERS
-$ function comma-ize-number () { perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\d])/\1,\2\3/g; } '; }
 $ echo '99012342305324254' | comma-ize-number
 99,012,342,305,324,254
 
 ##6 APPLYING NUMERIC SUFFIXES
-$ function apply-numeric-suffixes () {
-$     local just_once="$1"
-$     local g="g";
-$     if [ "$just_once" = "1" ]; then g=""; fi
-$     perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = int(log($1)/log(1024));  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
-$ }
 $ echo "8000000000" | apply-numeric-suffixes
 7.45G
 
 ##6.1 APPLYING USAGE NUMERIC SUFFIXES
-$ function apply-usage-numeric-suffixes() {
-$     perl -pe 's@^(\d+)(?=\s)@$1 * 1024@e;' | apply-numeric-suffixes 1
-$ }
 $ echo "8000000000" | apply-usage-numeric-suffixes
 $ echo "8000000" | apply-usage-numeric-suffixes 
 7.45T
 7.63G
 
-#7 usage-pp
-## BATSPP 2.1.X EXCEPTION ERROR AT LINE 8
-$ function usage {
-$     output_file=$(default_assignment "$1" "usage.list")
-$     rename-with-file-date "$output_file";
-$     $NICE du --block-size=1K --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1;
-$     $PAGER $output_file;
-$ }
-$ function usage-alt {
-$     local output_file=$TEMP/$(basename $PWD)"-usage.list";
-$     usage "$output_file"
-$ }
-$ function byte-usage () { output_file="usage.bytes.list"; backup-file $output_file; $NICE du --bytes --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1; $PAGER $output_file; }
-$ alias usage-pp='usage | apply-usage-numeric-suffixes | $PAGER'
+# #7 usage-pp
+# ## BATSPP 2.1.X EXCEPTION ERROR AT LINE 8
+# function usage {
+#     output_file=$(default_assignment "$1" "usage.list")
+#     rename-with-file-date "$output_file";
+#     $NICE du --block-size=1K --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1;
+#     $PAGER $output_file;
+# }
+# function usage-alt {
+#     local output_file=$TEMP/$(basename $PWD)"-usage.list";
+#     usage "$output_file"
+# }
+# function byte-usage () { output_file="usage.bytes.list"; backup-file $output_file; $NICE du --bytes --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1; $PAGER $output_file; }
+# alias usage-pp='usage | apply-usage-numeric-suffixes | $PAGER'
+$ byte-usage | testnum
+$ usage-pp | testnum
+Backing up 'usage.bytes.list' to './backup/usage.bytes.list'
+XX.XM	.
+X.XXM	./backup
+XXK	.
+XXK	./backup
 
 # ERROR GENERATED - MULTIPLE
 # $ ups a > psa.txt
@@ -112,13 +117,58 @@ $ alias usage-pp='usage | apply-usage-numeric-suffixes | $PAGER'
 # | bash: $output_file: ambiguous redirect
 # | sort: fflush failed: 'standard output': Broken pipe
 # | sort: write error
+$ usage 
+renamed 'usage.list' -> 'usage.list.26Nov22'
+[?1h=
 
-#8 number-columns(file): number each column in first line of tabular file
-$ function number-columns () { head -1 "$1" | perl -0777 -pe '$c = 1; s/^/1: /; s/\t/"\t" . ++$c . ": "/eg;'; };
-$ function number-columns-comma () { head -1 "$1" | perl -pe 's/,/\t/g;' | number-columns -; }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[H[2J[H[H[2J[H76K     .
+16K     ./backup
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[K[?1l>
 
 #8.1) 
-$ rm -rf ./*
+$ rm -rf ./* > /dev/null
 $ mkdir backup
 $ printf "THIS IS THE START\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS THE END\n" > thisisatest.txt
 $ ps -aux > process.txt
@@ -148,38 +198,15 @@ THIS IS A TEST
 THIS IS A TEST
 THIS IS THE START
 
-#10) backup-file
-$ function backup-file () { local file="$1"; if [ -e "$file" ]; then dobackup.sh "$file"; fi; }
-
 ## BATSPP 2.1.X EXCEPTION ERROR AT LINE 4 (OUTPUT)
 $ backup-file thisisatest.txt
 Backing up 'thisisatest.txt' to './backup/thisisatest.txt'
 
-$ function byte-usage () { output_file="usage.bytes.list"; backup-file $output_file; $NICE du --bytes --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1; $PAGER $output_file; }
-
 ## BATSPP 2.1.X EXCEPTION ERROR AT LINE 5 (OUTPUT)
-$ byte-usage process.txt
+$ byte-usage process.txt | testnum
 # (Same output for 'byte-usage "Hi Mom"' and 'byte-usage thisisatest.txt')
-38.4M	.
-4.11M	./backup
-
-$ function check-errors () { (DEBUG_LEVEL=1 check_errors.perl -context=5 "$@") 2>&1 | $PAGER; }
-$ function check-all-errors () { (DEBUG_LEVEL=1 check_errors.perl -warnings -relaxed -context=5 "$@") 2>&1 | $PAGER; }
-$ alias check-warnings='echo "*** Error: use check-all-errors instead ***"; echo "    check-all-errors"'
-$ alias check-all-warnings='check-all-errors -strict'
-$ function check-errors-excerpt () {
-$     local base="$TMP/check-errors-excerpt-$$"
-$     local head="$base.head"
-$     local tail="$base.tail"
-$     check-errors "$@" | head >| $head;
-$     cat "$head"
-$     check-errors "$@" | tail >| $tail;
-$     diff "$head" "$tail" >| /dev/null
-$     if [ $? != 0 ]; then
-$         echo "\$?=$?"
-$         cat "$tail";
-$     fi
-$ }
+XX.XM	.
+X.XXM	./backup
 
 #11 - LOG FILES ARE REQUIRED FOR check-errors
 ## BATSPP 2.1.X EXCEPTION ERROR AT LINE 10 (OUTPUT)
@@ -192,14 +219,127 @@ $ linebr
 $ check-all-warnings
 $ linebr
 $ check-errors-excerpt process.txt
-process.txt
---------------------------------------------------------------------------------
-process.txt
---------------------------------------------------------------------------------
+[?1h=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[H[2J[H[H[2J[Hprocess.txt
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[K[?1l>--------------------------------------------------------------------------------
+[?1h=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[H[2J[H[H[2J[Hprocess.txt
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[K[?1l>--------------------------------------------------------------------------------
 *** Error: use check-all-errors instead ***
     check-all-errors
 --------------------------------------------------------------------------------
+[?1h=
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[H[2J[H[H[2J[H
 usage: check_errors.perl [options]
 
 options = [-warnings] [-context=N] [-no_astericks] [-skip_ruby_lib] [-relaxed | -strict]
@@ -213,60 +353,38 @@ Notes:
 - Use -no_astericks if input uses ***'s outside of error contexts
 Use -relaxed to exclude special cases (e.g., xyz='error')
 
---------------------------------------------------------------------------------
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[K[?1l>--------------------------------------------------------------------------------
 process.txt
 
-$ function tkdiff () { wish -f $BIN_DIR/tkdiff.tcl "$@" & }
-$ alias rdiff='rev_vdiff.sh'
-$ alias tkdiff-='tkdiff -noopt'
-$ function kdiff () { kdiff.sh "$@" & }
-$ alias vdiff='kdiff'
+## Issue (Doesn't halt tests, command not found error)
+# $ rdiff process1.txt psa.txt | testnum
+# | Echo: Command not found.
+# | ???
+# | cvs: Command not found.
+# |
+# | echo: No match.
+# | echo: No match.
+# | issuing: tkdiff.tcl -r.-X processX.txt
+# | [X] XXXX
+# | tkdiff.tcl: Command not found.
 
-# # 12) rdiff, tkdiff, vdiff - ERROR IN COMMANDS (as shown)
-# $ rdiff process.txt psa.txt
-# $ linebr
+## Issue (testnum not working)
 # $ tkdiff- process.txt psa.txt
-# $ linebr
-# $ vdiff process.txt 
-# | Echo: Command not found.
-# | ???
-# | cvs: Command not found.
-# | 
-# | echo: No match.
-# | echo: No match.
-# | issuing: tkdiff.tcl -r.-1 process.txt
-# | [1] 5609
-# | tkdiff.tcl: Command not found.
-# | --------------------------------------------------------------------------------
-# | bash: tkdiff: command not found
-# | --------------------------------------------------------------------------------
-# | [1] 5615
+# | [1] 5244
 
-# ERRORS UPDATED 
-# $ tkdiff process.txt psa.txt
-#   linebr
-#   vdiff process.txt psa.txt
-#   linebr
-#   rdiff process.txt 
-#   linebr
-# | [1] 6322
-# | --------------------------------------------------------------------------------
-# | Error in startup script: couldn't read file "/home/aveey/tom-project/shell-scripts/tests/../tkdiff.tcl": no such file or directory
-# | [2] 6325
-# | [1]   Exit 1                  wish -f $BIN_DIR/tkdiff.tcl "$@"
-# | /home/aveey/bin/kdiff.sh: line 56: /kdiff-6325.log: Permission denied
-# | --------------------------------------------------------------------------------
-# | [2]+  Done                    kdiff.sh "$@"
-# | Echo: Command not found.
-# | ???
-# | cvs: Command not found.
-# | 
-# | echo: No match.
-# | echo: No match.
-# | issuing: tkdiff.tcl -r.-1 process.txt
-# | [1] 6364
-# | tkdiff.tcl: Command not found.
-# | --------------------------------------------------------------------------------
+## Issue (testnum not working)
+# $ vdiff process.txt psa.txt
+# | Error in startup script: couldn't read file "/home/xaea12/bin/tkdiff.tcl": no such file or directory
+# | [2] 5251
+# | [1]   Exit 1                  wish -f $TOM_BIN/tkdiff.tcl "$@"
 
 # diff
 $ diff_options="--ignore-space-change --ignore-blank-lines"
@@ -297,79 +415,102 @@ $ ps -u > process2.txt
 
 # #1) diff - HALTS PROCESS (WORKS FINE)
 # $ diff process1.txt process2.txt #(DIFFERENTIATING PROCESSES FOR DIFFERENT INSTANCES)
+$ diff process1.txt process2.txt | testuser | testnumhex
+XXXXXXX
+< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
+< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+---
+> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
+> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
 
 # #2) diff-default - HALTED (WORKS FINE)
 # $ diff-default process1.txt process2.txt
+$ diff-default process1.txt process2.txt | testuser | testnumhex
+XXXXXXX
+< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
+< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+---
+> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
+> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
 
 # #3) diff-ignore-spacing -HALTED (WORKS FINE)
-# $ diff-ignore-spacing process1.txt process2.txt
+$ diff-ignore-spacing process1.txt process2.txt | testuser | testnumhex
+XXXXXXX
+< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
+< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+---
+> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
+> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
 
 # #4) do-diff - HALTED (WORKS FINE)
-# $ do-diff process1.txt process2.txt
+$ do-diff process1.txt process2.txt | testuser | testnumhex
+proXXssX.txt vs. proXXssX.txt
+XiXXXrXnXXs: proXXssX.txt proXXssX.txt
+-rw-rw-r-- X usXr usXr XXX Nov XX XX:XX proXXssX.txt
+-rw-rw-r-- X usXr usXr XXX Nov XX XX:XX proXXssX.txt
+XXXXXXX
+< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
+< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+---
+> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
+> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+------------------------------------------------------------------------
+
 
 # #5) kdiff-rev & vdiff-rev PERFORM THE SAME TASK - HALTS (WORKS FINE)
 # $ kdiff-rev process1.txt process2.txt
-# linebr
+# $ linebr
 # $ vdiff-rev process1.txt process2.txt
+# | [1] 7234
+# | --------------------------------------------------------------------------------
+# | [1]+  Done                    kdiff.sh "$@"
+# | [1] 7238
 
 # 6) diff-log-output
-# $ ls
-# $ linebr
-# $ diff-log-output logger1.log logger2.log
-# ERROR GENERATED TO BE FIXED
-# bash: completion: function `_completion_loader' not found (COMPLETE COMMENT FILE RETURNS THIS)
+# A. CREATING log files for tests
+$ printf "TESTFILE1\nNEXT LINE" > testtxt1.txt
+$ printf "TESTFILE2\nNEXT LINE2" > testtxt2.txt
+$ prepare-find-files-here | testuser | testnum | awk '!($6="")'
+-rw-rw-r-- X user user XXX  XX XX:XX ls-alR.list
+-rw-rw-r-- X user user X  XX XX:XX ls-alR.list.log
+-rw-rw-r-- X user user XXX  XX XX:XX ls-R.list
+-rw-rw-r-- X user user X  XX XX:XX ls-R.list.log
 
+# Need help (no output)
+$ diff-log-output ls-alR.list.log ls-R.list.log
+
+$ rm -rf $HOME/info > /dev/null
+$ mkdir -p $HOME/info
 $ echo "THIS IS A NOICE SIGNATURE" > $HOME/info/.noice-signature
 
-## TODO: echo filename and then cat??
-## BATSPP 2.1.X EXCEPTION ERROR AT LINE 6
-$ function signature () {
-$     if [ "$1" = "" ]; then
-$         $LS "$HOME/info/.$1-signature"
-$         echo "Usage: signature dotfile-prefix"
-$         echo "ex: signature scrappycito"
-$         return;
-$     fi
-$     local filename="$HOME/info/.$1-signature"
-$     echo "$filename:"
-$     cat "$filename"
-$     }
-$ alias cell-signature='signature cell'
-$ alias home-signature='signature home'
-$ alias po-signature='signature po'
-$ alias tpo-signature='signature tpo'
-$ alias tpo-scrappycito-signature='signature tpo-scrappycito'
-$ alias scrappycito-signature='signature scrappycito'
-$ alias farm-signature='signature farm'
-$ alias circulo-signature='signature circulo'
-# TODO: automatically derive aliases for ~/info/*.signature*
-$ signature noice
-/home/aveey/info/.noice-signature:
+$ signature noice | testuser
+/home/user/info/.noice-signature:
 THIS IS A NOICE SIGNATURE
 
 # most-recent-backup(file): returns most recent backup for FILE in ./backup, accounting for revisions (e.g., extract_matches.perl.~4~)
 ## BATSPP 2.1.X EXCEPTION ERROR AT LINE 13
-$ function most-recent-backup() {
-$     if [ '$1' = '' ]; then
-$         echo 'usage: most-recent-backup filename'
-$         echo 'use BACKUP_DIR=dir ... to override use of ./backup'
-$         return
-$     fi
-$     local file='$1';
-$         local dir='$BACKUP_DIR'; if [ '$dir' = '' ]; then dir=./backup; fi
-$     $LS -t $dir/* | /bin/egrep '/$file(~|.~*)?' | head -1;
-$ }
-$ function diff-backup-helper {
-$     local diff='$1'; local file='$2'; 
-$     '$diff' $(most-recent-backup "$file") '$file';
-$ }
-$ alias diff-backup='diff-backup-helper diff'
-$ alias kdiff-backup='diff-backup-helper kdiff'
-$ dobackup.sh process1.txt
+# function most-recent-backup() {
+#     if [ '$1' = '' ]; then
+#         echo 'usage: most-recent-backup filename'
+#         echo 'use BACKUP_DIR=dir ... to override use of ./backup'
+#         return
+#     fi
+#     local file='$1';
+#         local dir='$BACKUP_DIR'; if [ '$dir' = '' ]; then dir=./backup; fi
+#     $LS -t $dir/* | /bin/egrep '/$file(~|.~*)?' | head -1;
+# }
+# function diff-backup-helper {
+#     local diff='$1'; local file='$2'; 
+#     '$diff' $(most-recent-backup "$file") '$file';
+# }
+# alias diff-backup='diff-backup-helper diff'
+# alias kdiff-backup='diff-backup-helper kdiff'
+
+$ dobackup process1.txt
 Backing up 'process1.txt' to './backup/process1.txt'
 
-## WORKS FINE - HALTS THE NOTEBOOK TESTS
+## WORKS FINE - HALTS THE NOTEBOOK TESTS (Need Help)
 # $ diff-backup process1.txt
 
-## WORKS FINE - HALTS THE NOTEBOOK TESTS
+## WORKS FINE - HALTS THE NOTEBOOK TESTS (Need Help)
 # $ kdiff-backup process1.txt

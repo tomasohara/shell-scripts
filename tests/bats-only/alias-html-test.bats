@@ -45,6 +45,7 @@ function test1-assert4-expected () {
 	mkdir $test_folder && cd $test_folder
 
 	alias testuser="sed -r "s/"$USER"+/user/g""
+	alias testnum="sed -r "s/[0-9]/X/g"" 
 }
 
 
@@ -52,7 +53,7 @@ function test1-assert4-expected () {
 	test_folder=$(echo /tmp/test3-$$)
 	mkdir $test_folder && cd $test_folder
 
-	source _dir-aliases.bash
+	BIN_DIR=$PWD/..
 	actual=$(test3-assert2-actual)
 	expected=$(test3-assert2-expected)
 	echo "========== actual =========="
@@ -68,14 +69,14 @@ function test3-assert2-actual () {
 	alias | wc -l
 }
 function test3-assert2-expected () {
-	echo -e '9'
+	echo -e '2'
 }
 
 @test "test4" {
 	test_folder=$(echo /tmp/test4-$$)
 	mkdir $test_folder && cd $test_folder
 
-	temp_dir=$TMP/test-1710
+	temp_dir=$TMP/test-5400
 	cd "$temp_dir"
 }
 
@@ -96,18 +97,27 @@ function test3-assert2-expected () {
 }
 
 function test5-assert1-actual () {
-	alias | wc -l
+	typeset -f | egrep '^\w+' | wc -l
 }
 function test5-assert1-expected () {
-	echo -e '10'
+	echo -e '30'
 }
 
 @test "test6" {
 	test_folder=$(echo /tmp/test6-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test6-assert1-actual)
-	expected=$(test6-assert1-expected)
+	source $BIN_DIR/tomohara-aliases.bash
+}
+
+
+@test "test7" {
+	test_folder=$(echo /tmp/test7-$$)
+	mkdir $test_folder && cd $test_folder
+
+	rm -rf ./* > /dev/null
+	actual=$(test7-assert2-actual)
+	expected=$(test7-assert2-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -117,26 +127,18 @@ function test5-assert1-expected () {
 
 }
 
-function test6-assert1-actual () {
-	typeset -f | egrep '^\w+' | wc -l
+function test7-assert2-actual () {
+	printf "<html><h1>THIS IS A HEADER OF SIZE 1</h1><br><i>THIS IS IN ITALICS</i></html>" >> template1.html
 }
-function test6-assert1-expected () {
-	echo -e '2'
+function test7-assert2-expected () {
+	echo -e "removed './template1.html'removed './template2.js'"
 }
-
-@test "test7" {
-	test_folder=$(echo /tmp/test7-$$)
-	mkdir $test_folder && cd $test_folder
-
-	source $BIN_DIR/tomohara-aliases.bash
-}
-
 
 @test "test8" {
 	test_folder=$(echo /tmp/test8-$$)
 	mkdir $test_folder && cd $test_folder
 
-	cond-setenv COND_ENV_TEST_TEMP tmp/cond-env-test-temp
+	check-html template1.html
 }
 
 
@@ -144,80 +146,5 @@ function test6-assert1-expected () {
 	test_folder=$(echo /tmp/test9-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test9-assert1-actual)
-	expected=$(test9-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test9-assert1-actual () {
-	echo $COND_ENV_TEST_TEMP
-}
-function test9-assert1-expected () {
-	echo -e 'tmp/cond-env-test-temp'
-}
-
-@test "test10" {
-	test_folder=$(echo /tmp/test10-$$)
-	mkdir $test_folder && cd $test_folder
-
-	mkdir -p $COND_ENV_TEST_TEMP
-	actual=$(test10-assert2-actual)
-	expected=$(test10-assert2-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test10-assert2-actual () {
-	ls -l | awk '!($6=$7=$8="")' | testuser
-}
-function test10-assert2-expected () {
-	echo -e 'total 4      drwxrwxr-x 3 user user 4096    tmp'
-}
-
-@test "test11" {
-	test_folder=$(echo /tmp/test11-$$)
-	mkdir $test_folder && cd $test_folder
-
-	pwd
-}
-
-
-@test "test12" {
-	test_folder=$(echo /tmp/test12-$$)
-	mkdir $test_folder && cd $test_folder
-
-}
-
-
-@test "test13" {
-	test_folder=$(echo /tmp/test13-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test13-assert1-actual)
-	expected=$(test13-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test13-assert1-actual () {
-	cat temp-env-1 | grep BASH | head -n 1
-}
-function test13-assert1-expected () {
-	echo -e 'BASH=/usr/bin/bash'
+	printf '<!DOCTYPE html><html><body><h1>JavaScript Operators</h1><p>The + operator concatenates (adds) strings.</p><p id="demo"></p><script>var txt1 = "What a very";var txt2 = "nice day";document.getElementById("demo").innerHTML = txt1 + txt2;</script></body></html>' >> template2.js
 }

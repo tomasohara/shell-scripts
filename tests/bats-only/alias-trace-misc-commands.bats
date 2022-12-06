@@ -97,6 +97,9 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test5-$$)
 	mkdir $test_folder && cd $test_folder
 
+	alias testuser="sed -r "s/"$USER"+/user/g""
+	alias testnum="sed -r "s/[0-9]/X/g"" 
+	alias testnumhex="sed -r "s/[0-9,a-f,A-F]/X/g"" 
 }
 
 
@@ -104,53 +107,22 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test6-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function asctime() { perl -e 'print (scalar localtime($1));'; echo ''; }
-	actual=$(test6-assert2-actual)
-	expected=$(test6-assert2-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
+	source $BIN_DIR/tomohara-aliases.bash
 }
 
-function test6-assert2-actual () {
-	asctime | perl -pe 's/\d/N/g; s/\w+ \w+/DDD MMM/;'
-}
-function test6-assert2-expected () {
-	echo -e 'DDD MMM  N NN:NN:NN NNNN'
-}
 
 @test "test7" {
 	test_folder=$(echo /tmp/test7-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
-	actual=$(test7-assert2-actual)
-	expected=$(test7-assert2-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
 }
 
-function test7-assert2-actual () {
-	ps | filter-dirnames
-}
-function test7-assert2-expected () {
-	echo -e 'PID TTY          TIME CMD21393 pts/9    00:00:00 bash21440 pts/9    00:00:00 ps21441 pts/9    00:00:00 bash21442 pts/9    00:00:00 perl'
-}
 
 @test "test8" {
 	test_folder=$(echo /tmp/test8-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function comma-ize-number () { perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\d])/\1,\2\3/g; } '; }
+	function asctime() { perl -e 'print (scalar localtime($1));'; echo ''; }
 	actual=$(test8-assert2-actual)
 	expected=$(test8-assert2-expected)
 	echo "========== actual =========="
@@ -163,24 +135,18 @@ function test7-assert2-expected () {
 }
 
 function test8-assert2-actual () {
-	echo '99012342305324254' | comma-ize-number
+	asctime | perl -pe 's/\d/N/g; s/\w+ \w+/DDD MMM/;'
 }
 function test8-assert2-expected () {
-	echo -e '99,012,342,305,324,254'
+	echo -e 'DDD MMM  N NN:NN:NN NNNN'
 }
 
 @test "test9" {
 	test_folder=$(echo /tmp/test9-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function apply-numeric-suffixes () {
-	local just_once="$1"
-	local g="g";
-	if [ "$just_once" = "1" ]; then g=""; fi
-	perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = int(log($1)/log(1024));  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
-	}
-	actual=$(test9-assert7-actual)
-	expected=$(test9-assert7-expected)
+	actual=$(test9-assert1-actual)
+	expected=$(test9-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -190,23 +156,19 @@ function test8-assert2-expected () {
 
 }
 
-function test9-assert7-actual () {
-	echo "8000000000" | apply-numeric-suffixes
+function test9-assert1-actual () {
+	ps | filter-dirnames | testnum
 }
-function test9-assert7-expected () {
-	echo -e '7.45G'
+function test9-assert1-expected () {
+	echo -e 'PID TTY          TIME CMDXXXX pts/X    XX:XX:XX bashXXXX pts/X    XX:XX:XX psXXXX pts/X    XX:XX:XX bashXXXX pts/X    XX:XX:XX sedXXXX pts/X    XX:XX:XX perl'
 }
 
 @test "test10" {
 	test_folder=$(echo /tmp/test10-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function apply-usage-numeric-suffixes() {
-	perl -pe 's@^(\d+)(?=\s)@$1 * 1024@e;' | apply-numeric-suffixes 1
-	}
-	echo "8000000000" | apply-usage-numeric-suffixes
-	actual=$(test10-assert5-actual)
-	expected=$(test10-assert5-expected)
+	actual=$(test10-assert1-actual)
+	expected=$(test10-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -216,52 +178,19 @@ function test9-assert7-expected () {
 
 }
 
-function test10-assert5-actual () {
-	echo "8000000" | apply-usage-numeric-suffixes 
+function test10-assert1-actual () {
+	echo '99012342305324254' | comma-ize-number
 }
-function test10-assert5-expected () {
-	echo -e '7.45T7.63G'
+function test10-assert1-expected () {
+	echo -e '99,012,342,305,324,254'
 }
 
 @test "test11" {
 	test_folder=$(echo /tmp/test11-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function usage {
-	output_file=$(default_assignment "$1" "usage.list")
-	rename-with-file-date "$output_file";
-	$NICE du --block-size=1K --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1;
-	$PAGER $output_file;
-	}
-	function usage-alt {
-	local output_file=$TEMP/$(basename $PWD)"-usage.list";
-	usage "$output_file"
-	}
-	function byte-usage () { output_file="usage.bytes.list"; backup-file $output_file; $NICE du --bytes --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1; $PAGER $output_file; }
-	alias usage-pp='usage | apply-usage-numeric-suffixes | $PAGER'
-}
-
-
-@test "test12" {
-	test_folder=$(echo /tmp/test12-$$)
-	mkdir $test_folder && cd $test_folder
-
-	function number-columns () { head -1 "$1" | perl -0777 -pe '$c = 1; s/^/1: /; s/\t/"\t" . ++$c . ": "/eg;'; };
-	function number-columns-comma () { head -1 "$1" | perl -pe 's/,/\t/g;' | number-columns -; }
-}
-
-
-@test "test13" {
-	test_folder=$(echo /tmp/test13-$$)
-	mkdir $test_folder && cd $test_folder
-
-	rm -rf ./*
-	mkdir backup
-	printf "THIS IS THE START\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS THE END\n" > thisisatest.txt
-	ps -aux > process.txt
-	number-columns thisisatest.txt
-	actual=$(test13-assert6-actual)
-	expected=$(test13-assert6-expected)
+	actual=$(test11-assert1-actual)
+	expected=$(test11-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -271,22 +200,65 @@ function test10-assert5-expected () {
 
 }
 
-function test13-assert6-actual () {
-	number-columns-comma process.txt
+function test11-assert1-actual () {
+	echo "8000000000" | apply-numeric-suffixes
 }
-function test13-assert6-expected () {
-	echo -e '1: THIS IS THE START1: USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND'
+function test11-assert1-expected () {
+	echo -e '7.45G'
+}
+
+@test "test12" {
+	test_folder=$(echo /tmp/test12-$$)
+	mkdir $test_folder && cd $test_folder
+
+	echo "8000000000" | apply-usage-numeric-suffixes
+	actual=$(test12-assert2-actual)
+	expected=$(test12-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test12-assert2-actual () {
+	echo "8000000" | apply-usage-numeric-suffixes 
+}
+function test12-assert2-expected () {
+	echo -e '7.45T7.63G'
+}
+
+@test "test13" {
+	test_folder=$(echo /tmp/test13-$$)
+	mkdir $test_folder && cd $test_folder
+
+	byte-usage | testnum
+	actual=$(test13-assert2-actual)
+	expected=$(test13-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test13-assert2-actual () {
+	usage-pp | testnum
+}
+function test13-assert2-expected () {
+	echo -e "Backing up 'usage.bytes.list' to './backup/usage.bytes.list'XX.XM\t.X.XXM\t./backupXXK\t.XXK\t./backup"
 }
 
 @test "test14" {
 	test_folder=$(echo /tmp/test14-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias reverse='tac'
-	cat thisisatest.txt
-	linebr
-	actual=$(test14-assert4-actual)
-	expected=$(test14-assert4-expected)
+	actual=$(test14-assert1-actual)
+	expected=$(test14-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -296,27 +268,24 @@ function test13-assert6-expected () {
 
 }
 
-function test14-assert4-actual () {
-	reverse thisisatest.txt
+function test14-assert1-actual () {
+	usage 
 }
-function test14-assert4-expected () {
-	echo -e 'THIS IS THE STARTTHIS IS A TESTTHIS IS A TESTTHIS IS A TESTTHIS IS A TESTTHIS IS A TESTTHIS IS THE END--------------------------------------------------------------------------------THIS IS THE ENDTHIS IS A TESTTHIS IS A TESTTHIS IS A TESTTHIS IS A TESTTHIS IS A TESTTHIS IS THE START'
+function test14-assert1-expected () {
+	echo -e "renamed 'usage.list' -> 'usage.list.26Nov22'\x1b[?1h\x1b="
 }
 
 @test "test15" {
 	test_folder=$(echo /tmp/test15-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function backup-file () { local file="$1"; if [ -e "$file" ]; then dobackup.sh "$file"; fi; }
-}
-
-
-@test "test16" {
-	test_folder=$(echo /tmp/test16-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test16-assert1-actual)
-	expected=$(test16-assert1-expected)
+	rm -rf ./* > /dev/null
+	mkdir backup
+	printf "THIS IS THE START\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS THE END\n" > thisisatest.txt
+	ps -aux > process.txt
+	number-columns thisisatest.txt
+	actual=$(test15-assert6-actual)
+	expected=$(test15-assert6-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -326,20 +295,59 @@ function test14-assert4-expected () {
 
 }
 
-function test16-assert1-actual () {
-	backup-file thisisatest.txt
+function test15-assert6-actual () {
+	number-columns-comma process.txt
 }
-function test16-assert1-expected () {
-	echo -e "Backing up 'thisisatest.txt' to './backup/thisisatest.txt'"
+function test15-assert6-expected () {
+	echo -e '1: THIS IS THE START1: USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND'
+}
+
+@test "test16" {
+	test_folder=$(echo /tmp/test16-$$)
+	mkdir $test_folder && cd $test_folder
+
+	alias reverse='tac'
+	cat thisisatest.txt
+	linebr
+	actual=$(test16-assert4-actual)
+	expected=$(test16-assert4-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test16-assert4-actual () {
+	reverse thisisatest.txt
+}
+function test16-assert4-expected () {
+	echo -e 'THIS IS THE STARTTHIS IS A TESTTHIS IS A TESTTHIS IS A TESTTHIS IS A TESTTHIS IS A TESTTHIS IS THE END--------------------------------------------------------------------------------THIS IS THE ENDTHIS IS A TESTTHIS IS A TESTTHIS IS A TESTTHIS IS A TESTTHIS IS A TESTTHIS IS THE START'
 }
 
 @test "test17" {
 	test_folder=$(echo /tmp/test17-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function byte-usage () { output_file="usage.bytes.list"; backup-file $output_file; $NICE du --bytes --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1; $PAGER $output_file; }
+	actual=$(test17-assert1-actual)
+	expected=$(test17-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test17-assert1-actual () {
+	backup-file thisisatest.txt
+}
+function test17-assert1-expected () {
+	echo -e "Backing up 'thisisatest.txt' to './backup/thisisatest.txt'"
+}
 
 @test "test18" {
 	test_folder=$(echo /tmp/test18-$$)
@@ -352,30 +360,6 @@ function test16-assert1-expected () {
 	test_folder=$(echo /tmp/test19-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function check-errors () { (DEBUG_LEVEL=1 check_errors.perl -context=5 "$@") 2>&1 | $PAGER; }
-	function check-all-errors () { (DEBUG_LEVEL=1 check_errors.perl -warnings -relaxed -context=5 "$@") 2>&1 | $PAGER; }
-	alias check-warnings='echo "*** Error: use check-all-errors instead ***"; echo "    check-all-errors"'
-	alias check-all-warnings='check-all-errors -strict'
-	function check-errors-excerpt () {
-	local base="$TMP/check-errors-excerpt-$$"
-	local head="$base.head"
-	local tail="$base.tail"
-	check-errors "$@" | head >| $head;
-	cat "$head"
-	check-errors "$@" | tail >| $tail;
-	diff "$head" "$tail" >| /dev/null
-	if [ $? != 0 ]; then
-	echo "\$?=$?"
-	cat "$tail";
-	fi
-	}
-}
-
-
-@test "test20" {
-	test_folder=$(echo /tmp/test20-$$)
-	mkdir $test_folder && cd $test_folder
-
 	check-errors process.txt
 	linebr
 	check-all-errors process.txt
@@ -384,38 +368,11 @@ function test16-assert1-expected () {
 	linebr
 	check-all-warnings
 	linebr
-	actual=$(test20-assert9-actual)
-	expected=$(test20-assert9-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test20-assert9-actual () {
-	check-errors-excerpt process.txt
-}
-function test20-assert9-expected () {
-	echo -e 'process.txt--------------------------------------------------------------------------------process.txt--------------------------------------------------------------------------------*** Error: use check-all-errors instead ***check-all-errors--------------------------------------------------------------------------------'
-}
-
-@test "test21" {
-	test_folder=$(echo /tmp/test21-$$)
-	mkdir $test_folder && cd $test_folder
-
-	function tkdiff () { wish -f $BIN_DIR/tkdiff.tcl "$@" & }
-	alias rdiff='rev_vdiff.sh'
-	alias tkdiff-='tkdiff -noopt'
-	function kdiff () { kdiff.sh "$@" & }
-	alias vdiff='kdiff'
 }
 
 
-@test "test22" {
-	test_folder=$(echo /tmp/test22-$$)
+@test "test20" {
+	test_folder=$(echo /tmp/test20-$$)
 	mkdir $test_folder && cd $test_folder
 
 	diff_options="--ignore-space-change --ignore-blank-lines"
@@ -440,8 +397,8 @@ function test20-assert9-expected () {
 }
 
 
-@test "test23" {
-	test_folder=$(echo /tmp/test23-$$)
+@test "test21" {
+	test_folder=$(echo /tmp/test21-$$)
 	mkdir $test_folder && cd $test_folder
 
 	ps -u > process1.txt
@@ -449,61 +406,12 @@ function test20-assert9-expected () {
 }
 
 
-@test "test24" {
-	test_folder=$(echo /tmp/test24-$$)
+@test "test22" {
+	test_folder=$(echo /tmp/test22-$$)
 	mkdir $test_folder && cd $test_folder
 
-	echo "THIS IS A NOICE SIGNATURE" > $HOME/info/.noice-signature
-}
-
-
-@test "test25" {
-	test_folder=$(echo /tmp/test25-$$)
-	mkdir $test_folder && cd $test_folder
-
-	function signature () {
-	if [ "$1" = "" ]; then
-	$LS "$HOME/info/.$1-signature"
-	echo "Usage: signature dotfile-prefix"
-	echo "ex: signature scrappycito"
-	return;
-	fi
-	local filename="$HOME/info/.$1-signature"
-	echo "$filename:"
-	cat "$filename"
-	}
-	alias cell-signature='signature cell'
-	alias home-signature='signature home'
-	alias po-signature='signature po'
-	alias tpo-signature='signature tpo'
-	alias tpo-scrappycito-signature='signature tpo-scrappycito'
-	alias scrappycito-signature='signature scrappycito'
-	alias farm-signature='signature farm'
-}
-
-
-@test "test26" {
-	test_folder=$(echo /tmp/test26-$$)
-	mkdir $test_folder && cd $test_folder
-
-	function most-recent-backup() {
-	if [ '$1' = '' ]; then
-	echo 'usage: most-recent-backup filename'
-	echo 'use BACKUP_DIR=dir ... to override use of ./backup'
-	return
-	fi
-	local file='$1';
-	local dir='$BACKUP_DIR'; if [ '$dir' = '' ]; then dir=./backup; fi
-	$LS -t $dir/* | /bin/egrep '/$file(~|.~*)?' | head -1;
-	}
-	function diff-backup-helper {
-	local diff='$1'; local file='$2'; 
-	'$diff' $(most-recent-backup "$file") '$file';
-	}
-	alias diff-backup='diff-backup-helper diff'
-	alias kdiff-backup='diff-backup-helper kdiff'
-	actual=$(test26-assert17-actual)
-	expected=$(test26-assert17-expected)
+	actual=$(test22-assert1-actual)
+	expected=$(test22-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -513,9 +421,131 @@ function test20-assert9-expected () {
 
 }
 
-function test26-assert17-actual () {
-	dobackup.sh process1.txt
+function test22-assert1-actual () {
+	diff process1.txt process2.txt | testuser | testnumhex
 }
-function test26-assert17-expected () {
+function test22-assert1-expected () {
+	echo -e 'XXXXXXX< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u---> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u'
+}
+
+@test "test23" {
+	test_folder=$(echo /tmp/test23-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test23-assert1-actual)
+	expected=$(test23-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test23-assert1-actual () {
+	diff-default process1.txt process2.txt | testuser | testnumhex
+}
+function test23-assert1-expected () {
+	echo -e 'XXXXXXX< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u---> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u'
+}
+
+@test "test24" {
+	test_folder=$(echo /tmp/test24-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test24-assert1-actual)
+	expected=$(test24-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test24-assert1-actual () {
+	diff-ignore-spacing process1.txt process2.txt | testuser | testnumhex
+}
+function test24-assert1-expected () {
+	echo -e 'XXXXXXX< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u---> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u'
+}
+
+@test "test25" {
+	test_folder=$(echo /tmp/test25-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test25-assert1-actual)
+	expected=$(test25-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test25-assert1-actual () {
+	do-diff process1.txt process2.txt | testuser | testnumhex
+}
+function test25-assert1-expected () {
+	echo -e 'proXXssX.txt vs. proXXssX.txtXiXXXrXnXXs: proXXssX.txt proXXssX.txt-rw-rw-r-- X usXr usXr XXX Nov XX XX:XX proXXssX.txt-rw-rw-r-- X usXr usXr XXX Nov XX XX:XX proXXssX.txtXXXXXXX< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u---> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u------------------------------------------------------------------------'
+}
+
+@test "test26" {
+	test_folder=$(echo /tmp/test26-$$)
+	mkdir $test_folder && cd $test_folder
+
+	printf "TESTFILE1\nNEXT LINE" > testtxt1.txt
+	printf "TESTFILE2\nNEXT LINE2" > testtxt2.txt
+}
+
+
+@test "test27" {
+	test_folder=$(echo /tmp/test27-$$)
+	mkdir $test_folder && cd $test_folder
+
+	diff-log-output ls-alR.list.log ls-R.list.log
+}
+
+
+@test "test28" {
+	test_folder=$(echo /tmp/test28-$$)
+	mkdir $test_folder && cd $test_folder
+
+	rm -rf $HOME/info > /dev/null
+	mkdir -p $HOME/info
+	echo "THIS IS A NOICE SIGNATURE" > $HOME/info/.noice-signature
+}
+
+
+@test "test29" {
+	test_folder=$(echo /tmp/test29-$$)
+	mkdir $test_folder && cd $test_folder
+
+}
+
+
+@test "test30" {
+	test_folder=$(echo /tmp/test30-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test30-assert1-actual)
+	expected=$(test30-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test30-assert1-actual () {
+	dobackup process1.txt
+}
+function test30-assert1-expected () {
 	echo -e "Backing up 'process1.txt' to './backup/process1.txt'"
 }

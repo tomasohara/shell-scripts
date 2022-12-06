@@ -98,10 +98,8 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test5-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias tab-sort="sort -t $'\t'"
-	alias colon-sort="sort $SORT_COL2 -t ':'"
-	alias colon-sort-rev-num='colon-sort -rn'
-	function echoize { perl -00 -pe 's/\n(.)/ $1/g;'; }
+	alias testnum="sed -r "s/[0-9]/X/g"" 
+	alias testuser="sed -r "s/"$USER"+/user/g"" 
 }
 
 
@@ -109,6 +107,7 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test6-$$)
 	mkdir $test_folder && cd $test_folder
 
+	source $BIN_DIR/tomohara-aliases.bash
 }
 
 
@@ -116,9 +115,6 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test7-$$)
 	mkdir $test_folder && cd $test_folder
 
-	rm -rf ./*
-	man printf > pf_manual.txt
-	cat pf_manual.txt | tab-sort
 }
 
 
@@ -126,6 +122,9 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test8-$$)
 	mkdir $test_folder && cd $test_folder
 
+	rm -rf ./* > /dev/null
+	man printf > pf_manual.txt
+	cat pf_manual.txt | tab-sort | testnum | testuser
 }
 
 
@@ -133,7 +132,6 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test9-$$)
 	mkdir $test_folder && cd $test_folder
 
-	cat pf_manual.txt | colon-sort
 }
 
 
@@ -141,6 +139,7 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test10-$$)
 	mkdir $test_folder && cd $test_folder
 
+	cat pf_manual.txt | colon-sort | testnum | testuser
 }
 
 
@@ -148,7 +147,6 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test11-$$)
 	mkdir $test_folder && cd $test_folder
 
-	'' syntax.
 }
 
 
@@ -164,7 +162,7 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test13-$$)
 	mkdir $test_folder && cd $test_folder
 
-	uname -a > linux-info.txt
+	'' syntax.
 }
 
 
@@ -172,6 +170,7 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test14-$$)
 	mkdir $test_folder && cd $test_folder
 
+	uname -r > linux-info.txt
 }
 
 
@@ -179,5 +178,35 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test15-$$)
 	mkdir $test_folder && cd $test_folder
 
+}
+
+
+@test "test16" {
+	test_folder=$(echo /tmp/test16-$$)
+	mkdir $test_folder && cd $test_folder
+
 	'' syntax.
+}
+
+
+@test "test17" {
+	test_folder=$(echo /tmp/test17-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test17-assert1-actual)
+	expected=$(test17-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test17-assert1-actual () {
+	cat pf_manual.txt | echoize | head -n 5 | testuser | testnum
+}
+function test17-assert1-expected () {
+	echo -e 'PRINTF(X)                        User Commands                       PRINTF(X)'
 }
