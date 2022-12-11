@@ -47,6 +47,7 @@ from mezcla.main import Main
 from mezcla.my_regex import my_re
 from mezcla import system
 from mezcla.text_utils import version_to_number
+from mezcla.glue_helpers import run_via_bash as run
 
 # Version check
 debug.assertion(version_to_number("1.3.4") <= version_to_number(mezcla.__version__))
@@ -410,8 +411,23 @@ class Bash2Python:
 @click.command()
 @click.option("--script", "-s", help="Script or snippet to convert")
 @click.option("--output", "-o", help="Output file")
-def main(script, output):
+@click.option("--overview", help="List of what is working for now")
+@click.option("--execute", is_flag=True, help="Try to run the code directly (probably brokes somewhere)")
+def main(script, output, overview, execute):
     """Entry point"""
+    if overview:
+    	print("""Working: 
+            -If, elif, else, and while.
+            -Variable Assignments, all of them. 
+            -Piping to file. (Uses bash for it)
+            -All kind of calls to system. 
+            -Printing (still using run(echo) for it)
+Not working yet: 
+            -For loops (there is an untested function)")
+            -Writing on / reading files
+            -Bash functions
+            -Any kind of subprocess
+            -C-style loops """)
     debug.trace(3, f"main(): script={system.real_path(__file__)}")
     bash_snippet = script
     if not bash_snippet:
@@ -429,6 +445,10 @@ def main(script, output):
         with open(output, "w") as out_file:
             out_file.write(b2p.header())
             out_file.write(b2p.format())
+    if execute:
+        cmd = b2p.format()
+        print(f"# {cmd}")
+        print(eval(str(cmd)))
     else:
         print(b2p.header())
         print(b2p.format())
