@@ -138,8 +138,21 @@ class Bash2Python:
         debug.trace(5, f"map_keyword({in_line!r}) => {line!r}")
         return line
 
-    def var_replace(self, line, other_vars=None, indent=None, is_condition=False):
+    def for_in(self, line):
+        if my_re.search(r"for .* in (.* )", line):
+            value = my_re.group(1)
+            values = value.replace(" ", ", ")
+            values = f"[{values}]"
+            line = line.replace(value, values)
+        if my_re.search(r"\{([0-9]*)\.\.([0-9]*)\}", line):
+            values = my_re.group(0)
+            numberone, numbertwo = my_re.group(1, 2)
+            line = line.replace(values, f"range({numberone}, {numbertwo})")
+        return line
+
+    def var_replace(self, line, other_vars=None, indent=None, is_condition=False, is_loop=False):
         # Tana-note: I'm not convinced this is the best way to do this but it works for now
+        ## TODO?: Clean up this mess
         """Replaces bash variables with python variables and also derive run call for LINE
         Notes:
         - Optional converts OTHER_VARS in line.
@@ -148,14 +161,30 @@ class Bash2Python:
         in_line = line
         if indent is None:
             indent = ""
-
+        var_pos = ""
+        variable = ""
+        if "=" in line:
+            line = line.replace("[", "").replace("]", "").split("=")
+            if "$" in line[0] and "$" in line[1]:
+                line = " = ".join(line)
+            if "$" in line[0]:
+                variable = line[0]
+                static = " = " + line[1]
+                var_pos = 0
+            if "$" in line[1]:
+                variable = line[1]
+                static = line[0] + " = "
+                var_pos = 1
+            if not "$" in line[0] and not "$" in line[1]:
+                return " = ".join(line)
+            if variable != "":
+                line = variable
         # Derive indentation
         if my_re.search(r"^(\s+)(.*)", line):
             if not indent:
                 indent = my_re.group(1)
             line = my_re.group(2)
         # Check variable references and $(...) constructs
-        variable = ""
         bash_commands = re.findall(r'\$\(.*\)', line)  # finds all bash commands
         bash_vars = re.findall(r'\$\w+', line)  # finds all bash variables
         if other_vars:
@@ -181,9 +210,16 @@ class Bash2Python:
         # Early exit for conditions
         if is_condition:
             # note: change quoted string with {var} to f-string
-            line = re.sub(r"(([\'\"]).*\{\S+\}.*\2)", r"f\1", line)
+            line = re.sub(r"(([\'\"]).*\{\S+}.*\2)", r"f\1", line)
             debug.trace(5,
                         f"var_replace({in_line!r}, othvar={other_vars} ind={indent} cond={is_condition}) => {line!r}")
+            return line
+        ## Early exit for loops
+        if is_loop:
+            if var_pos == 1:
+                line = f"{static}f{line}"
+            if var_pos == 0:
+                line = f"f{line}{static}"
             return line
 
         # Make sure line has outer single quotes, with any internal ones quoted
@@ -214,10 +250,16 @@ class Bash2Python:
         debug.assertion(not is_condition)
 
         # Add variable assignment and indentation
-        if has_assignment:
-            line = variable + " = " + line
+        try:
+            if var_pos == 1:
+                line = f"{static}{line}"
+            if var_pos == 0:
+                line = f"{line}{static}"
+        except:
+            pass
         if indent:
             line = indent + line
+
 
         debug.trace(5, f"var_replace({in_line!r}, othvar={other_vars} ind={indent} cond={is_condition}) => {line!r}")
         return line
@@ -240,10 +282,9 @@ class Bash2Python:
                      }
 
         in_line = line
-        ## Tom-note: changed followng form elif to if as more than one possible
         # Iterate over operators and replace them with Python equivalents
         for operator in operators:
-            if my_re.search(fr"(^.*\S+) {operator} (\S+.*$)", line) or my_re.search(r"(^.*\S+) -eq (\S+.*$)", line):
+            if my_re.search(fr"(^.*\S+) *{operator} *(\S+.*$)", line) or my_re.search(r"(^.*\S+) -eq (\S+.*$)", line):
                 debug.trace(4, f"Operator {operator} test fixup")
                 line = my_re.group(1) + operators[operator] + my_re.group(2)
         if "[ 1 ]" in line:  # if the line is a "true" bash statement
@@ -286,35 +327,41 @@ class Bash2Python:
         while_loop = ("while", "do", "done")
         if_statement = ("if", "then", "fi")
         elif_statement = ("elif", "then", "fi")
-        else_statement = ("else", "None", "fi")  # Else statements do not have a keyword so None
+        else_statement = ("else", "", "fi")  # Else statements do not have a keyword so None
         loops = (for_loop, while_loop, if_statement)
         statements = (elif_statement, else_statement)
         stdout = ""
         body = line
+        converted = False
         for loop in loops:
-            if my_re.search(fr"\s*{loop[0]} (\w+[^;]+); {loop[1]}", line) or my_re.search(
-                    fr"\s*{loop[0]} ([^;]+); {loop[1]}", line):
+            if my_re.search(fr"\s*\[?\s*{loop[0]} *(\S.*)\s*\]?; *{loop[1]}", line):
                 debug.trace(4, f"Processing {loop[0]} loop")
-                var = my_re.group(1)
+
+                var = self.var_replace(my_re.group(1), is_loop=True)
+                var = self.operators(var)
                 body = f"{loop[0]} {var}:\n"
                 while True:
                     loop_line = next(cmd_iter, None)
                     debug.trace_expr(5, loop_line)
-                    # Redirects to file or var if found
-                    if ">>" in loop_line:
-                        stdout = f"with open({loop_line.split('>>')[1].strip()}, 'w') as sys.stdout: \n    "
-                    if loop_line.strip() == loop[1] or loop_line is None:
+                    if loop_line is None or loop_line == "\n" or loop_line.strip() == loop[1]:
+                        loop_line = ""
                         break
+                    if loop_line.startswith("#"):
+                        body += loop_line
+                        continue
                     if my_re.search(fr"\s*{loop[2]}\)?", loop_line):
                         break
                     loop_line = loop_line.strip("\n").strip(";")
                     # If next line contents elif or else, add to body
-                    for statement in statements:
-                        if my_re.search(fr"\s*{statement[0]} (\w+[^;]+);; {statement[1]}", line) or my_re.search(
-                                fr"\s*{statement[0]} ([^;]+); {statement[1]}", loop_line):
-                            var = my_re.group(1)
-                            body += f"{statement[0]} {var}:\n"
-                            loop_line = ""
+                    if loop[0] == "if":
+                        for statement in statements:
+                            if my_re.search(fr"\s*{statement[0]} *(\S.*); *{statement[1]}", line):
+                                var = my_re.group(1).replace("[", "").replace("]", "")
+                                body += f"{statement[0]} {var}:\n"
+                                loop_line = ""
+                            elif loop_line.strip() == statement[0]:
+                                body += f"{statement[0]}:\n"
+                                loop_line = ""
                     if loop_line.strip() in self.LOOP_CONTROL:
                         body += self.map_keyword(loop_line) + "\n"
                     elif loop_line.strip():
@@ -323,9 +370,10 @@ class Bash2Python:
                             body += loop_line + "\n"
                         else:
                             body += self.var_replace(loop_line.strip("\n"),
-                                                     indent="        ") + "\n"  # Double indent for handle stdout
+                                                     indent="    ") + "\n"
+                    converted = True
+
         line = stdout + body
-        converted = True
         # debug.trace(7, f"process_compound({line!r}) => ({converted}, {line!r})")
         return (converted, line)
 
@@ -342,11 +390,12 @@ class Bash2Python:
                     python_commands.append(line.strip("\n"))
                     continue
                 line = line.strip("\n")
+                if line.startswith("#"):
+                    return "\n".join(python_commands)
                 line = line[:-1] if ";" == line[-1] else line  # remove the ";" last character
-                line = self.var_replace(line)
-                line = self.operators(line)  # calls operators function
                 (converted, line) = self.process_compound(line, cmd_iter)
                 if not converted:
+                    line = self.var_replace(line)
                     (converted, line) = self.process_simple(line)
                 # Adhoc fixups
                 python_commands.append(line)
