@@ -1672,6 +1672,8 @@ function show-all-macros () {
 
 # show-macros(pattern): like show-all-macros, exlcuding leading _ in name
 function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
+# maldito shellcheck: SC2016 (info): Expressions don't expand in single quotes
+# shellcheck disable=SC2016
 alias-fn show-macros-proper 'show-macros | $GREP "^\w"'
 # show-variables(): show defined variables
 # TODO: figure out how to exclude env. vars from show-variables output
@@ -1803,9 +1805,13 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 # move-output-files: likewise for output files with version numbers to ./output
 # note: versioned files are those ending in numerics or with numeric affix
 ## TODO: use perl-style regex for more precise matching (maldito over-arching glob's)
+# maldito shellcheck: SC2120 (warning): ... references arguments, but none are ever passed.
+# shellcheck disable=SC2120
 function move-versioned-files {
     if [ "$1" = "" ]; then
-	echo "usage: move-versioned-files 'brace_pattern' dir"
+	echo "usage: [ENV] move-versioned-files 'brace_pattern' dir"
+	echo "    where ENV = [READONLY=1]"
+	## TODO: echo "    where ENV = [MOVE=command] ...        use 'mv -v' to move read
 	return
     fi
     local ext_pattern="$1"
@@ -1814,24 +1820,27 @@ function move-versioned-files {
     if [ "$dir" = "" ]; then dir="versioned-files"; fi
     mkdir -p "$dir";
     local D="[-.]"
+    local perm="-"
+    if [ "$READONLY" = "1" ]; then perm="w"; fi
     # TODO: fix problem leading to hangup (verification piped to 2>&1)
     # Notes: eval needed for $ext_pattern resolution
-    # - excludes read-only files (e.g., ls -l => "-r--r--r--   1 tomohara   11K Nov  2 16:30 _master-note-info.list.log")
-    # EXs:              fu.log2                fu.2.log                  fu.log.14aug21    fu.14aug21.log
-    ## TODO:
-    ## local file_list="$TEMP/_move-versioned-files-$$.list"
-    ## dir-rw $(eval echo *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*  *$D*[0-9][0-9]*$D$ext_pattern) 2>| "$file_list.log" | perl -pe 's/(\S+\s+){6}\S+//;' >| "$file_list"
-    ## xargs -I "{}" $MV "{}" "$dir" < "$file_list"
-    ## OLD: move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;') "$dir"
+    # - excludes read-only files (e.g., ls -l => "-r--r--r--   1 tomohara tomohara   11K Nov  2 16:30 _master-note-info.list.log")
+    #                            regex groups:   1( ^ [no w])  2 3        4          5   6    7 8
     # maldito shellcheck: SC2035 [Use ./*glob* or -- *glob* so names with dashes won't become options]; SC2046 [Quote this to prevent word splitting], and SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2035,SC2046,SC2086
-    ## OLD: move  $(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;' | sort -u) "$dir"
-    move  $(eval dir-rw *$D${ext_pattern}[0-9]*  *$D*[0-9]*$D${ext_pattern}  *$D${ext_pattern}$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D${ext_pattern}  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;' | sort -u) "$dir"
+    ## OLD: move  $(eval dir-rw *$D${ext_pattern}[0-9]*  *$D*[0-9]*$D${ext_pattern}  *$D${ext_pattern}$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D${ext_pattern}  2>&1 | perl-grep -v 'No such file' | perl -pe 's/(\S+\s+){6}\S+//;' | sort -u) "$dir"
+    ## OLD: move  $(ls -l *$D${ext_pattern}[0-9]*  *$D*[0-9]*$D${ext_pattern}  *$D${ext_pattern}$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D${ext_pattern}  2>&1 | perl-grep -v "(No such file)|(^..$perm)" | perl -pe 's/(\S+\s+){7}\S+//;' | sort -u) "$dir"
+    move  $(eval ls -l *$D${ext_pattern}[0-9]*  *$D*[0-9]*$D${ext_pattern}  *$D${ext_pattern}$D*[0-9][0-9]*   *[0-9][0-9]*$D${ext_pattern}  2>&1 | perl-grep -v "(No such file)|(^..$perm)" | perl -pe 's/(\S+\s+){7}\S+//;' | sort -u) "$dir"
+    #     EXs:     fu.log2                 fu.2.log                    fu.log.14aug21                    fu-14aug21.log
+    # maldito shellcheck: SC2119 [Use ... "$@" if function's $1 should mean script'1 $1]
+    # shellcheck disable=SC2119
+    if [ $? != 0 ]; then move-versioned-files; fi
 }
 alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
 # note: * the version regex should be kept quite specific to avoid useful files being moved into ./output
 alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
 alias move-adhoc-files='move-log-files; move-output-files'
+alias move-old-files='move-versioned-files "*" old'
 
 #--------------------------------------------------------------------------------
 
@@ -2268,7 +2277,7 @@ function scp-host-up() { local host="$1"; shift; scp -P $SSH_PORT -i "$TPO_SSH_K
 ## TOM-IDIOSYNCRATIC
 # scp-aws-up(host, file, ...): updload FILES to HOST, after making sure ~/xfer directory files writable
 function scp-aws-up() { local host="$1"; shift;
-                        ssh -p $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host" chmod u+w ~/xfer/'*';
+                        ssh -p $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host" chmod u+w \~/xfer/'*';
                         scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@"  "$TPO_SSH_USER@$host":xfer; }
 function scp-aws-down() { local host="$1"; shift; for _file in "$@"; do scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host":xfer/$_file .; done; }
 #
@@ -2762,7 +2771,7 @@ alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'
 # extract-text(document-file): extracts text from structured document file (e.g., Word or PDF)
 # note: to avoid hardcoded 'python -m mezcla.extract_document_text' invovation uses awkward which-based approach
 ## TODO: figure out way for python to pull script from path (as with perl -S)
-function extract-text() { python $(which extract_document_text.py) "$@"; }
+function extract-text() { python "$(which extract_document_text.py)" "$@"; }
 alias xtract-text='extract-text'
 
 # test-script(script): run unit test for script (i.e., tests/test_script)
