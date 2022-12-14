@@ -332,6 +332,7 @@ sub init_common {
     if ($utf8) {
 	## OLD:
 	## eval "use Encode;";
+	eval "use Encode 'decode_utf8'";
 	## binmode(STDIN, ":utf8");
 	## binmode(STDOUT, ":utf8");
 	## binmode(STDERR, ":utf8");
@@ -589,14 +590,14 @@ my($run_num) = 0;
 #
 sub run_command_over {
     my($command, $input, $trace_level) = @_;
-    $trace_level = &TL_VERBOSE+1 unless (defined($trace_level));
+    $trace_level = &TL_VERY_DETAILED unless (defined($trace_level));
 
     # Output input to temp file and then run command using the file as input
     my($temp_file) = sprintf("%s%s-%d-%d.data", &TEMP_DIR, "temp-run-command", $$, $run_num++);
     &write_file($temp_file, $input);
     my($result) = &run_command(sprintf("%s %s", $command, $temp_file), $trace_level);
     ## TODO: add $preserve_temp_files option
-    unlink $temp_file unless (&DEBUG_LEVEL > &TL_VERY_DETAILED);
+    unlink $temp_file unless (&DEBUG_LEVEL >= $trace_level);
 
     return ($result);
 }
@@ -684,7 +685,8 @@ sub shell {
 # debug_on([new-trace-level=TL_DETAILED]): turn on detailed debugging
 #
 sub debug_on {
-    my($level) = $_;
+    ## BAD: my($level) = $_;
+    my($level) = @_;
     $level = &TL_DETAILED if (!defined($level));
 
     $debug_level = $level;
