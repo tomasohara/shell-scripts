@@ -49,7 +49,7 @@ BEGIN {
 use strict;
 no strict "refs";		# to allow for old-style references to arrays (TODO: use #xyz_ref = \@array)
 use vars qw/$by $xyz $ps_options $cut_options $num_times $LINES $COLUMNS $max_count $delay $line_len $testing $justuser $USER $username/;
-use vars qw/$batch $full $once $lines $columns $alpha/;
+use vars qw/$batch $full $once $lines $columns $alpha $time2num/;
 
 # Check the command-line options
 # note: OSTYPE needs to be in environment for this to work (see tomohara-aliases.bash)
@@ -93,6 +93,7 @@ $columns = ($full ? &MAXINT : $COLUMNS) if ! defined($columns);
 	  ($justuser ? $USER : ""));
 &init_var(*batch, &FALSE);      # batch mode (don't poll console for early quit)
 &init_var(*alpha, &FALSE);      # sort alphabetically (i.e., lexicographic)
+&init_var(*time2num, &FALSE);   # convert time to a number for sorting purposes
 
 use vars qw/@uid @xyz @line @line_index @user @pid @cpu @mem @sz @rss @tt @stat @f @s @ppid @pri @ni @stime @time @cmd/;
 use vars qw/@vsz @command @tty @start/;
@@ -114,7 +115,7 @@ local(*uid) = *user;
 if (!defined($ARGV[0])) {
     my($options) = "main options = [-by=FIELD] [-username=user] [-num_times=N] [-max_count=N] [-delay=N] [-justuser]";
     # TODO: show defaults
-    $options .= " [-batch] [-once] [-full] [-alpha]";
+    $options .= " [-batch] [-once] [-full] [-alpha] [-time2num]";
     if ($is_solaris) {
 	$options .= "\nfield = [f|s|uid|pid|ppid|c|pri|ni|addr|sz|wchan|stime|tty|time|cmd]";
     }
@@ -137,6 +138,7 @@ if (!defined($ARGV[0])) {
     $note .= "- Use -num_times for number of iterations.\n";
     $note .= "- Use -max_count for number of process listing entries.\n";
     $note .= "- Use -once and -full for stdout: uses -num_times=1 and no row/col truncation).\n";
+    $note .= "- Use -time2num for converting time field to seconds when sorting\n";
     $note .= "- env-var LINES determines number of entries.\n";
     $note .= "- env-var COLUMNS determines width.\n";
 
@@ -196,11 +198,28 @@ for ($t = 1; $t <= $num_times; $t++) {
 	    ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $vsz[$i], $rss[$i], 
 	     $tty[$i], $stat[$i], $start[$i], $time[$i], $command[$i]) = split;
 
-	    # Make sure hour is two digits for proper sorting
+	    # Make sure hour is two digits (internally) for proper sorting
 	    # Note: it is still printed as is
 	    if (($by eq "time") && ($time[$i] =~ /^\d:/)) {
 		$time[$i] = ("0" . $time[$i]);
-		&debug_print(7, "Make hour two digit: $time[$i]\n");
+		&debug_print(7, "Made hour two digit: $time[$i]\n");
+	    }
+	    # Convert time (internally) to numeric seconds for sorting purposes
+	    # note: fraction optionally included as is (*e.g., under macos)
+	    if ($time2num) {
+		# examples:    306:25.88    0:04.36
+		if ($time[$i] =~ /^((\d+):)?((\d+):)?(\d+)(\.\d+)?/) {
+		    # groups:      1  2     3  4     5      6
+		    my($hour) = defined($2) ? $2 : 0;
+		    my($min) = defined($4) ? $4 : 0;
+		    my($sec) = $5;
+		    my($fract) = defined($6) ? $6 : "";
+		    $time[$i] = ($hour * 3600 + $min * 60 + $sec + $fract);
+		    &debug_print(5, "Converted time to seconds $time[$i]\n");
+		}
+		else {
+		    &debug_print(5, "Warning: unable to parse time field: $time[$i]\n");
+		}
 	    }
 	}
 	else {
