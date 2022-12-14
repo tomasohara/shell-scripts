@@ -950,7 +950,7 @@ alias fgr-py='fgr-ext py'
 # tree, in support of find-files-here; this contains full ls entry (as with -l).
 # (The subdirectory listings produced by 'ls -alR' are preceded by blank lines,
 # which is required for find-files-here as explained below.)
-# Notes: Also puts listing proper in ls-R.list (i.e., just list of files).
+# Notes: Also puts listing proper in ls-aR.list (i.e., just list of files).
 # TODO: create external script and have alias call the script
 # Ignores SC2068: Double quote array expansions
 function prepare-find-files-here () {
@@ -964,7 +964,8 @@ function prepare-find-files-here () {
         echo "Error: No arguments accepted; did you mean find-files-here?"
         return
     fi
-    local brief_opts="R"
+    # Note:: uses -a to include dot files
+    local brief_opts="aR"
     local full_opts="alR"
     local brief_file="$dir/ls-$brief_opts.list"
     local full_file="$dir/ls-$full_opts.list"
