@@ -19,3 +19,7 @@ alias nvidia-top='nvtop'
 
 # Python stuff
 alias plint=python-lint
+
+# Misc. stuff
+alias script-config='script ~/config/_config-$(T).log'
+alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
