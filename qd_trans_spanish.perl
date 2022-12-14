@@ -107,7 +107,7 @@ if ($#ARGV < 0) {
 &init_var(*debug_level, &DEBUG_LEVEL);  # workaround for quirk under Emacs
 
 # Temp workround
-&debug_on(3);
+## TODO: &debug_on(3);
 if ($debug_level != &DEBUG_LEVEL) {
     &debug_on($debug_level);
 }
@@ -225,12 +225,15 @@ while (<>) {
     if ($translate_line) {
 	my($from) = ($translate_english ? "en" : "es");
 	my($to) = ($translate_english ? "es" : "en");
-	&debug_print(4, "running translation: f='$from' t='$to' t='$text'\n");
+	&debug_print(5, "running translation: f='$from' t='$to' txt='$text'\n");
 	my($env_spec) = "FROM=$from TO=$to";
-	print(&run_command_over("$env_spec machine_translation.py 2>| $log", 
-				"$text\n", 3));
+	my($save_trace_level) = &DEBUG_LEVEL;
+	&debug_on(3);
+        print(&run_command_over("$env_spec machine_translation.py 2>| $log", 
+                                "$text\n", 3));
 	print("\n");
 	debug_out(6, "log: {\n%s}\n", &read_file($log));
+	&debug_on($save_trace_level);
 	next;
     }
     
