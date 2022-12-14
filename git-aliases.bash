@@ -571,7 +571,9 @@ alias git-next-checkin='invoke-alt-checkin'
 function git-checkout-branch {
     git branch | grep -c "$1";
     if [ $? ]; then
-	git-command checkout "$1";
+	## OLD: git-command checkout "$1";
+	# note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
+	git-command checkout "$1" --;
     else
 	echo "Error: unknown branch"
     fi;
