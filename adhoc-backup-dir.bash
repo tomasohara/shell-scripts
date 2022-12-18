@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 #
-# adhoc-backup-dir.bash: performs backup of current directory
+# adhoc-backup-dir.bash: performs backup of current directory, limited to files changed
+# in given period or smaller than a certain size.
 #
 
 # Uncomment following line(s) for tracing:
@@ -27,12 +28,13 @@ if [ "$1" = "" ]; then
     echo "Examples:"
     echo ""
     ## TODO: example 1
-    echo "$0 example 1"
+    echo "$0 --"
     echo ""
     ## TODO: example 2
-    echo "$script example 2"
+    echo "MAX_DAYS_OLD=365 MAX_SIZE_CHARS=10000000 $script --"
     echo ""
     echo "Notes:"
+    echo "- By default, included files mopdified within 30 days and no larger than 1mb."
     echo "- The -- option is to use default options and to avoid usage statement."
     ## TODO: add more notes
     ## echo ""
