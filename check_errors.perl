@@ -124,6 +124,7 @@ while (<>) {
            || /\[Errno \d+\]/
 	   || /Operation not permitted/
 	   || /Command exited with non-zero status/
+	   || /ommand terminated by signal/
 
 	   # Perl interpretation errors
 	   # TODO: Add more examples like not-a-number, which might not be apparent.
