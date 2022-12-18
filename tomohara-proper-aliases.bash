@@ -2,6 +2,10 @@
 #
 # tomohara-proper-aliases.bash: aliases not intended for general consumption
 #
+# note:
+# - Maldito shellcheck (i.e., lack of menomic codes):
+#   SC2016 (info): Expressions don't expand in single quotes
+#
 
 # Change git-xyz-plus to git-xyz- for sake of tab completion
 # TODO: automate following
@@ -19,7 +23,20 @@ alias nvidia-top='nvtop'
 
 # Python stuff
 alias plint=python-lint
+alias-fn plint-torch 'plint "$@" | grep -v torch.*no-member'
+#
+# clone-repo(url): clone github repo at URL into current dir with logging
+function clone-repo () {
+    local url, repo, log
+    url="$1"
+    repo=$(basename "$url")
+    log="_clone-$repo-$(T).log"
+    command script "$log" git clone "$url"
+    ls -R "$repo" >> "$log"
+}
 
 # Misc. stuff
 alias script-config='script ~/config/_config-$(T).log'
+# 
+# shellcheck disable=SC2016
 alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
