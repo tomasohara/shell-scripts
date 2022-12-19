@@ -389,8 +389,8 @@ function git-reset-file {
 
     # Isolate old versions
     mkdir -p _git-trash >| "$log";
-    echo "issuing: cp -vp $* _git-trash";
-    cp -vp "$@" _git-trash >> "$log";
+    echo "issuing: cp -vpf $* _git-trash";
+    cp -vpf "$@" _git-trash >> "$log";
 
     # Forget state
     echo "issuing: git reset HEAD $*";
@@ -405,6 +405,27 @@ function git-reset-file {
 }
 #
 alias git-revert-file-alias='git-reset-file'
+
+
+# git-restore-file-alias(file, ...): move FILE(s) out of way and "revert" to version in repo (i.e., reset)
+# NOTE: via https://stackoverflow.com/questions/7751555/how-to-resolve-git-stash-conflict-without-commit:
+#     Use 'git restore --staged' to mark conflict as resolved and unstage
+function git-restore-file-alias {
+    local log;
+    log=$(get-temp-log-name "restore");
+
+    # Isolate old versions
+    mkdir -p _git-trash >| "$log";
+    echo "issuing: cp -vpf $* _git-trash";
+    cp -vpf "$@" _git-trash >> "$log";
+
+    # Restore working tree files
+    echo "issuing: git restore --staged $*";
+    git restore --staged "$@" >> "$log";
+    
+    # Sanity check
+    git-alias-review-log "$log"
+}
 
 # git-revert-commit(commit): effectively undoes COMMIT(s) by issuing new commits
 alias git-revert-commit-alias='git-command revert'
@@ -646,6 +667,8 @@ function git-misc-alias-usage() {
     echo ""
     echo "To revert modified file (n.b., during merge fix, dummy change might be needed):"
     echo "    git-revert-file-alias file"
+    echo "You also might need the foillowing:"
+    echo "    git-restore-file-alias file"
     echo ""
     echo "To override file additions (e.g., blocked by .gitignore):"
     echo "    git add --force file..."""
