@@ -141,7 +141,8 @@ function get-temp-log-name {
 function git-alias-review-log {
     local status=0
     local log="$1"
-    local errors=$(get-log-errors "$log")
+    local errors
+    errors=$(get-log-errors "$log")
     if [ "$errors" != "" ]; then
         echo "*** Error(s):"
         echo "$errors"
@@ -163,7 +164,7 @@ function git-update-plus {
     fi
     #
     local log
-    log=$(get-temp-log-name "update")
+    log=$(realpath "$(get-temp-log-name 'update')")
 
     # Optionally preserve timestamps for changed files
     # NOTES:
@@ -171,11 +172,23 @@ function git-update-plus {
     # - backups and restore the modified files via zip (for subdirs and symbolic links).
     local changed_files
     changed_files="$(git-diff-list)"
+    local restore_dir=""
     if [ "$changed_files" != "" ]; then
         if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
+	    # Make sure root active for relative path names in zip file
+	    local root_dir
+	    root_dir="$(git-root-alias)"
+	    if [ "$PWD" != "$root_dir" ]; then
+		echo "Temporarily changing working directory to root: $root_dir"
+		restore_dir="$PWD"
+		cd "$(git-root-alias)"
+	    fi
+
+	    # Create zip (-v for verbose & -y for symlinks)
+	    command rm -f _stash.zip
             echo "issuing: zip over changed files (for later restore)"
-            echo "zip -v -y _stash.zip $(git-diff-list)" >> "$log"
-            zip -v -y _stash.zip "$(git-diff-list)" >> "$log"
+            echo "git-diff-list | zip -v -y -@ _stash.zip" >> "$log"
+            git-diff-list | zip -v -y -@ _stash.zip >> "$log"
         else
             # note: zip options: -y retain links; -v verbose
             echo "Not zipping changes because PRESERVE_GIT_STASH not 1"
@@ -194,7 +207,12 @@ function git-update-plus {
 
     # Optionally restore timestamps for changed files
     if [ "$changed_files" != "" ]; then
-        if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then 
+        if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
+	    # Restore working directory
+	    if [ "$restore_dir" != "" ]; then
+		echo "Restoring working directory: $restore_dir"
+		cd "$restore_dir"
+	    fi
             echo "issuing: unzip over _stash.zip (to restore timestamps)"
             # note: unzip options: -o overwrite; -v verbose:
             echo "unzip -v -o _stash.zip" >> "$log"
@@ -523,7 +541,8 @@ function alt-invoke-next-single-checkin {
             echo "Warning: unable to infer modified file. Perhaps,"
             echo "    Tha-tha-that's all folks"'!'
 	    echo ""
-	    local divider=$(perl -e 'print("." x 80);')
+	    local divider
+	    divider=$(perl -e 'print("." x 80);')
 	    echo "$divider"
 	    ## OLD: git-status | head
 	    git-status
@@ -605,6 +624,8 @@ function git-checkout-branch {
 #-------------------------------------------------------------------------------
 
 # git-alias-usage (): tips on interactive usage (n.b., aka git-template)
+# maldito shellcheck: SC2016 [Expressions don't expand in single, use double].
+# shellcheck disable=SC2016
 function git-alias-usage () {
     # Refresh
     git-alias-refresh
