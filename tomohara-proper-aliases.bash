@@ -27,7 +27,7 @@ alias-fn plint-torch 'plint "$@" | grep -v torch.*no-member'
 #
 # clone-repo(url): clone github repo at URL into current dir with logging
 function clone-repo () {
-    local url, repo, log
+    local url repo log
     url="$1"
     repo=$(basename "$url")
     log="_clone-$repo-$(T).log"
