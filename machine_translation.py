@@ -13,7 +13,7 @@
 # TODO: import re
 
 # Intalled module
-import gradio as gr
+## OLD: import gradio as gr
 ## TODO: import transformers
 ## OLD: from transformers import pipeline
 
@@ -21,6 +21,7 @@ import gradio as gr
 from mezcla import debug
 from mezcla.main import Main
 from mezcla import system
+from mezcla import glue_helpers as gh
 
 # Constants
 TL = debug.TL
@@ -53,6 +54,12 @@ TEXT_FILE = system.getenv_text("TEXT_FILE", "-",
                                "Text file to translate")
 USE_INTERFACE = system.getenv_bool("USE_INTERFACE", False,
                                    "Use web-based interface via gradio")
+
+# Optionally load UI support
+gr = None
+if USE_INTERFACE:
+    import gradio as gr                 # pylint: disable=import-error
+
 
 def main():
     """Entry point"""
@@ -90,6 +97,7 @@ def main():
             print(translation[0].get(TRANSLATION_TEXT) or "")
         except:
             system.print_exception_info("translation")
+    debug.code(4, lambda: debug.trace(1, gh.run("nvidia-smi")))
 
     return
 
