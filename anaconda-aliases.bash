@@ -18,7 +18,9 @@
 
 # Find directory for conda
 # TODO: Use a more standard fallback location
-export ANACONDA_HOME=$(realpath $(dirname $(which conda) 2> /dev/null)/../)
+## OLD: export ANACONDA_HOME=$(realpath $(dirname $(which conda) 2> /dev/null)/../)
+export ANACONDA_HOME
+ANACONDA_HOME=$(realpath "$(dirname "$(which conda)" 2> /dev/null)"/../)
 if [ "$ANACONDA_HOME" = "" ]; then
     export ANACONDA_HOME=/usr/local/misc/programs/anaconda3
 fi
@@ -28,7 +30,8 @@ fi
 # note: also resets prompt to '$ ' (following change by conda scripts)
 function add-conda-env-to-xterm-title {
     ## DEBUG: echo "in add-conda-env-to-xterm-title"
-    export XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d.\d)'):$CONDA_PROMPT_MODIFIER"
+    export XTERM_TITLE_SUFFIX
+    XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d.\d)'):$CONDA_PROMPT_MODIFIER"
 
     reset-prompt
     set-title-to-current-dir
@@ -48,7 +51,8 @@ function init-condaN() {
     # Note: assignment separates so that $? preserved
     #     https://unix.stackexchange.com/questions/506352/bash-what-does-masking-return-values-mean
     local conda_setup
-    conda_setup="$($anaconda_dir'/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+    ## OLD: conda_setup="$($anaconda_dir'/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+    conda_setup="$("$anaconda_dir"'/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
     if [ $? -eq 0 ]; then
         eval "$conda_setup"
     else
@@ -90,7 +94,7 @@ function activation-helper () {
     fi
     ## DEBUG:
     ## echo "Issuing: $conda_command" "$command" "$env"
-    $conda_command "$command" $env
+    $conda_command "$command" "$env"
     ## DEBUG: echo "out activation-helper($@)"
 }
 alias conda-activate='activation-helper activate'
@@ -107,7 +111,9 @@ alias conda-list-env='conda list env'
 #
 ## OLD: alias conda-list-env-hack='ls ~/.conda/envs'
 # conda-list-env-hack(): show environent names from typical directories
-function conda-list-env-hack-aux { ls ~/.conda/envs ${ANACONDA_HOME}/envs 2> /dev/null | grep -v ':$' | sort; }
+# maldito shellcheck [SC2010]: Don't use ls | grep. Use a glob or a for loop ...
+# shellcheck disable=SC2010
+function conda-list-env-hack-aux { ls ~/.conda/envs "${ANACONDA_HOME}"/envs 2> /dev/null | grep -v ':$' | sort; }
 function conda-list-env-hack { conda-list-env-hack-aux | echoize; }
 #
 alias conda-env-list='conda env list'
@@ -142,6 +148,19 @@ function conda-activate-env {
 }
 ## OLD: alias conda-deactivate-env='source deactivate'
 function conda-activate-env-hack { conda-activate-env "$1" "1"; }
+#
+# conda-activate-env-like(env): switch from current anaconda environment to ENV
+# note: this currently just modifies the path and is only intended for quick switching
+# ex: /home/tomohara/anaconda3/envs/nlp-py-3-10 => /home/tomohara/anaconda3/envs/test-nlp-py-3-10
+function conda-activate-env-like {
+    local env_name="$1"
+    # note: regex groups                        1 222       3333333333  
+    #                                            /.../_ENV_/bin/python
+    local bin_dir
+    bin_dir=$(which python | perl -pe "s@^((.*)/[^/]+/bin/python$)@\2/$env_name/bin@;")
+    echo "Warning: only prepending PATH w/ $bin_dir (e.g., no CONDA_ env updates)"
+    export PATH="$bin_dir:$PATH";
+}
 #
 ## OLD: function conda-deactivate-env { source deactivate "$1"; add-conda-env-to-xterm-title; }
 ## OLD: function conda-deactivate-env { conda deactivate "$1"; add-conda-env-to-xterm-title; }
@@ -207,7 +226,7 @@ function conda-init-env {
     local env_name="$1"
     ensure-conda-loaded
     ## OLD: source activate $env_name
-    conda-activate $env_name
+    conda-activate "$env_name"
     ## OLD: reset-prompt
     add-conda-env-to-xterm-title
 }
