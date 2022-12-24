@@ -22,6 +22,7 @@ import click
 
 # Local modules
 from mezcla import debug
+from mezcla import glue_helpers as gh
 from mezcla import system
 
 # Environment constants
@@ -29,13 +30,15 @@ HOME_DIR = system.getenv_text("HOME", "~",
                               "User home directory")
 BACKUP_DIR = system.getenv_text("BACKUP_DIR", HOME_DIR,
                                 "Base directory for backups")
-
+LOG_DIR = system.getenv_text("LOG_DIR", ".",
+                             "Directory for log files")
 
 def create_backup_folder(source):
     """Try to create the backup folder if it doesn't exist"""
     ## OLD: backup_dir = os.path.join(os.environ["HOME"], socket.gethostname())
     backup_dir = os.path.join(BACKUP_DIR, socket.gethostname())
-    base_dir = source.split("/")[-2]
+    ## OLD: base_dir = source.split("/")[-2]
+    base_dir = gh.basename(source)
     try:
         os.makedirs(backup_dir, exist_ok=True)
     except OSError as err:
@@ -48,8 +51,9 @@ def create_backup_folder(source):
     )
     logging.basicConfig(
         ## OLD: filename=f"{backup_dir}/_make-{base_dir}-incremental-backup-"
-        filename=f"_make-{base_dir}-incremental-backup-"
-        f'{date.today().strftime("%Y%m%d")}.log',
+        ## filename=f"_make-{base_dir}-incremental-backup-"
+        filename=os.path.join(LOG_DIR, (f"_make-{base_dir}-incremental-backup-" +
+                                        f'{date.today().strftime("%Y%m%d")}.log')),
         filemode="w",
         encoding="utf-8",
         level=logging.DEBUG,
@@ -66,7 +70,8 @@ def backup_derive(source, max_days_old, max_size_chars):
     backup_dir = os.path.join(BACKUP_DIR, socket.gethostname())
 
     hostname = socket.gethostname()  ##Get's hostname
-    base_dir = source.split("/")[-2]  ##Backup folder name
+    ## OLD: base_dir = source.split("/")[-2]  ##Backup folder name
+    base_dir = gh.basename(source)
     ## OLD: max_days_old=31
     ## -or-: max_days_old=92;   -or-: max_days_old=366;
     ## -or-: max_days_old=$(calc-int "5 * 365.25");
@@ -79,13 +84,13 @@ def backup_derive(source, max_days_old, max_size_chars):
     # max_days_old = 5 * 365.25
     # max_size_chars = 10 ** 9
     if (
-        max_days_old > 36525 and max_size_chars > 1048576
+        max_days_old >= 36525 and max_size_chars >= 1048576
     ):  ##If 100 years and 1TB--effectively no limit
         basename = f"{backup_dir}/full-{hostname}-{base_dir}-"
-    elif max_days_old > 365.25 * 5 and max_size_chars > 1024:  ##If 5 years and 1GB
+    elif max_days_old >= 365.25 * 5 and max_size_chars >= 1024:  ##If 5 years and 1GB
         basename = f"{backup_dir}/fullish-{hostname}-{base_dir}-"
     else:
-        basename = f"{backup_dir}/incr-{hostname}-{base_dir}-"
+        basename = f"{backup_dir}/incr-{hostname}-{base_dir}-{max_days_old}d-{max_size_chars}mb-"
     basename = basename + date.today().strftime(
         "%Y%m%d"
     )  ##Adds date in YY-MM-DD format
@@ -121,6 +126,7 @@ def sort_files(walkdir, size, days):
 
 def create_tar(basename, lista):
     """Creates a simple 7z file and writes files on it"""
+    debug.trace(4, f"create_tar({basename}, {lista}")
     logging.info("Starts creating tar.gz file")
     with tarfile.open(basename + ".tar.gz", "w:gz") as archive:
         for file in lista:
@@ -137,6 +143,7 @@ def create_tar(basename, lista):
 
 def create_encrypted_7z(password, basename, lista):
     """Creates a encrypted 7z file and writes files on it"""
+    debug.trace(4, f"create_encrypted_7z(********, {basename}, {lista}")
     logging.info("Starts creating encrypted 7z file")
     with py7zr.SevenZipFile(basename + ".7z", "w", password=password) as archive:
         for file in lista:
@@ -163,15 +170,28 @@ def create_encrypted_7z(password, basename, lista):
 )
 @click.option("-S", "--source", default=os.getcwd, help="Alternative source")
 @click.option("-f", "--full", is_flag=True, help="Full backup. Overrides size and days")
-@click.option("-d", "--days", required=True, type=int, help="Max days since modification")
-@click.option("-s", "--size", required=True, type=int, help="Max size in MB")
+## OLD
+## @click.option("-d", "--days", required=True, type=int, help="Max days since modification")
+## @click.option("-s", "--size", required=True, type=int, help="Max size in MB")
+@click.option("-d", "--days", type=int, help="Max days since modification")
+@click.option("-s", "--size", type=int, help="Max size in MB")
 def main(password, source, full, days, size):
     """Main function"""
+    debug.trace_fmt(3, "main{args}",
+                    args=tuple([password, source, full, days, size]))
     create_backup_folder(source)
     logging.info("Checking --full flag")
     if full:
         logging.info("Changing days and size to infinite (--full)")
+        debug.assertion(not (days or size))
         days = size = float("inf")
+    if not days:
+        days = 30
+        system.print_stderr(f"FYI: Using {days} days")
+    if not size:
+        size = 10
+        system.print_stderr(f"FYI: Using {size} size [mb]")
+        
     basename = backup_derive(source, days, size)
     lista = sort_files(source, days, size)
     logging.info("Testing password")
