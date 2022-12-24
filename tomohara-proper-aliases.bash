@@ -38,6 +38,15 @@ function clone-repo () {
 
 # Misc. stuff
 alias script-config='script ~/config/_config-$(T).log'
-# 
+
+# Bash stuff
+# shell-check-last-snippet(notes-file): extract last Bash snippet from notes
+# file and run through shellcheck
+# The snippet should be bracketted by lines with "$: {" and "}"
+function shell-check-last-snippet {
+  cat "$1" | perl -0777 -pe 's/^.*\$:\s*\{(.*)\}\s[^\{]+$/$1/s;' | shell-check --shell=bash -;
+}
+
+# Linux stuff
 # shellcheck disable=SC2016
 alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
