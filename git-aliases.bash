@@ -660,8 +660,8 @@ function git-alias-usage () {
     echo '    invoke-alt-checkin "'${next_mod_file}'"'
     echo ''
     echo 'Usual check-in process:'
-    echo '    git-cd-root-alias; git-update-plus'
-    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-plus'
+    echo '    git-cd-root-alias; git-update-plus; git-next-checkin'
+    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-plus; git-next-checkin'
     echo '    # alt: grep "^<<<<< " $(git-diff-list) /dev/null'
     # TODO: xargs -I{} 'grep "^<<<<< {} | head -5' $(git-list-text-files)
     echo '    git-next-checkin                      # repeat, as needed'
