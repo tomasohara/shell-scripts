@@ -37,7 +37,11 @@ function clone-repo () {
 }
 
 # Misc. stuff
-alias script-config='script ~/config/_config-$(T).log'
+## OLD: alias script-config='script ~/config/_config-$(T).log'
+function script-config {
+    mkdir -p ~/config
+    script ~/config/_config-$(T).log
+}
 
 # Bash stuff
 # shell-check-last-snippet(notes-file): extract last Bash snippet from notes
@@ -46,6 +50,25 @@ alias script-config='script ~/config/_config-$(T).log'
 function shell-check-last-snippet {
   cat "$1" | perl -0777 -pe 's/^.*\$:\s*\{(.*)\}\s[^\{]+$/$1/s;' | shell-check --shell=bash -;
 }
+# tabify(text): convert spaces in TEXT to tabs
+# TODO: account for quotes
+function tabify {
+    perl -pe 's/ /\t/;'
+}
+# trace_vars(var, ...): trace each VAR in command line
+# note: output format: VAR1=VAL1; ... VARn=VALn;
+function trace-vars {
+    local var
+    for var in "$@"; do
+	echo -n "$var="$(eval echo "\$$var")"; "
+    done
+    echo
+    ##
+    ## TAKE 1
+    ## local var_spec="$*"
+    ## echo "$var_spec" | tabify
+    ##  echo $(eval echo $var_spec | tabify)
+    }
 
 # Linux stuff
 # shellcheck disable=SC2016
