@@ -359,7 +359,9 @@ function invoke-git-command {
     log=$(get-temp-log-name "$command")
     echo "issuing: git $command $*"
     git "$command" "$@" >| "$log" 2>&1
-    less "$log"
+    ## OLD: less 
+    ## TODO: less --quit-if-one-screen "$log"
+    cat "$log"
     # TODO: git-alias-review-log "$log"
 }
 # TODO: git-command => git-command-alias
@@ -454,6 +456,7 @@ function git-diff-plus {
     log=$(get-temp-log-name "diff");
     git diff "$@" >| "$log";
     less -p '^diff' "$log";
+    ## TODO: less --quit-if-one-screen --pattern='^diff' "$log";
 }
 
 # git-difftool-plus: visual repo diff
