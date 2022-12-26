@@ -6,6 +6,7 @@
 # TODO:
 # - integrate misc features added later there (e.g., modification time)
 # - add features from other backup scripts/aliases (e.g., max size)
+# - * put archive log in separate file (e.g., xyz.tar.log)!
 #
 # Usage example:
 #   source ~/bin/new-backup-aliases.sh
