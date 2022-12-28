@@ -593,6 +593,8 @@ function alt-invoke-next-single-checkin {
     ## echo "Running (n,b, *** be careful nothing lost ***):"
     ## echo "   $command"
     eval "$command"
+    ## TEMP: add tip for next checkin
+    echo "git-next-checkin"
 }
 #
 # invoke-alt-checkin(filename): run alternative template-bsed checkin for filename
