@@ -1,6 +1,8 @@
 # more-tomohara-aliases.bash: Additional aliases (& functions) that arern't
 # used on a regular basis. This supplements tomohara-aliases.bash.
 #
+# Not: OBSOLETE
+#
 
 function derive-ngram-frequency() {
     file="$1"
