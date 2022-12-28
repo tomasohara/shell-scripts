@@ -594,7 +594,7 @@ function alt-invoke-next-single-checkin {
     ## echo "   $command"
     eval "$command"
     ## TEMP: add tip for next checkin
-    echo "git-next-checkin"
+    echo "TODO: git-next-checkin"
 }
 #
 # invoke-alt-checkin(filename): run alternative template-bsed checkin for filename
