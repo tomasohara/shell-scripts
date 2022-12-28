@@ -48,7 +48,7 @@ function script-config {
 # file and run through shellcheck
 # The snippet should be bracketted by lines with "$: {" and "}"
 function shell-check-last-snippet {
-  cat "$1" | perl -0777 -pe 's/^.*\$:\s*\{(.*)\}\s[^\{]+$/$1/s;' | shell-check --shell=bash -;
+  cat "$1" | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
 }
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
