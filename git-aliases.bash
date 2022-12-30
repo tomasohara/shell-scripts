@@ -141,7 +141,8 @@ function get-temp-log-name {
 function git-alias-review-log {
     local status=0
     local log="$1"
-    local errors=$(get-log-errors "$log")
+    local errors
+    errors=$(get-log-errors "$log")
     if [ "$errors" != "" ]; then
         echo "*** Error(s):"
         echo "$errors"
@@ -163,7 +164,7 @@ function git-update-plus {
     fi
     #
     local log
-    log=$(get-temp-log-name "update")
+    log=$(realpath "$(get-temp-log-name 'update')")
 
     # Optionally preserve timestamps for changed files
     # NOTES:
@@ -171,11 +172,23 @@ function git-update-plus {
     # - backups and restore the modified files via zip (for subdirs and symbolic links).
     local changed_files
     changed_files="$(git-diff-list)"
+    local restore_dir=""
     if [ "$changed_files" != "" ]; then
         if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
+	    # Make sure root active for relative path names in zip file
+	    local root_dir
+	    root_dir="$(git-root-alias)"
+	    if [ "$PWD" != "$root_dir" ]; then
+		echo "Temporarily changing working directory to root: $root_dir"
+		restore_dir="$PWD"
+		cd "$(git-root-alias)"
+	    fi
+
+	    # Create zip (-v for verbose & -y for symlinks)
+	    command rm -f _stash.zip
             echo "issuing: zip over changed files (for later restore)"
-            echo "zip -v -y _stash.zip $(git-diff-list)" >> "$log"
-            zip -v -y _stash.zip "$(git-diff-list)" >> "$log"
+            echo "git-diff-list | zip -v -y -@ _stash.zip" >> "$log"
+            git-diff-list | zip -v -y -@ _stash.zip >> "$log"
         else
             # note: zip options: -y retain links; -v verbose
             echo "Not zipping changes because PRESERVE_GIT_STASH not 1"
@@ -194,7 +207,12 @@ function git-update-plus {
 
     # Optionally restore timestamps for changed files
     if [ "$changed_files" != "" ]; then
-        if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then 
+        if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
+	    # Restore working directory
+	    if [ "$restore_dir" != "" ]; then
+		echo "Restoring working directory: $restore_dir"
+		cd "$restore_dir"
+	    fi
             echo "issuing: unzip over _stash.zip (to restore timestamps)"
             # note: unzip options: -o overwrite; -v verbose:
             echo "unzip -v -o _stash.zip" >> "$log"
@@ -341,7 +359,9 @@ function invoke-git-command {
     log=$(get-temp-log-name "$command")
     echo "issuing: git $command $*"
     git "$command" "$@" >| "$log" 2>&1
-    less "$log"
+    ## OLD: less 
+    ## TODO: less --quit-if-one-screen "$log"
+    cat "$log"
     # TODO: git-alias-review-log "$log"
 }
 # TODO: git-command => git-command-alias
@@ -389,8 +409,8 @@ function git-reset-file {
 
     # Isolate old versions
     mkdir -p _git-trash >| "$log";
-    echo "issuing: cp -vp $* _git-trash";
-    cp -vp "$@" _git-trash >> "$log";
+    echo "issuing: cp -vpf $* _git-trash";
+    cp -vpf "$@" _git-trash >> "$log";
 
     # Forget state
     echo "issuing: git reset HEAD $*";
@@ -406,6 +426,27 @@ function git-reset-file {
 #
 alias git-revert-file-alias='git-reset-file'
 
+
+# git-restore-file-alias(file, ...): move FILE(s) out of way and "revert" to version in repo (i.e., reset)
+# NOTE: via https://stackoverflow.com/questions/7751555/how-to-resolve-git-stash-conflict-without-commit:
+#     Use 'git restore --staged' to mark conflict as resolved and unstage
+function git-restore-file-alias {
+    local log;
+    log=$(get-temp-log-name "restore");
+
+    # Isolate old versions
+    mkdir -p _git-trash >| "$log";
+    echo "issuing: cp -vpf $* _git-trash";
+    cp -vpf "$@" _git-trash >> "$log";
+
+    # Restore working tree files
+    echo "issuing: git restore --staged $*";
+    git restore --staged "$@" >> "$log";
+    
+    # Sanity check
+    git-alias-review-log "$log"
+}
+
 # git-revert-commit(commit): effectively undoes COMMIT(s) by issuing new commits
 alias git-revert-commit-alias='git-command revert'
 
@@ -415,6 +456,7 @@ function git-diff-plus {
     log=$(get-temp-log-name "diff");
     git diff "$@" >| "$log";
     less -p '^diff' "$log";
+    ## TODO: less --quit-if-one-screen --pattern='^diff' "$log";
 }
 
 # git-difftool-plus: visual repo diff
@@ -445,6 +487,8 @@ function git-vdiff-alias {
 function git-diff-list-template {
     # TODO: use unique tempfile (e.g., mktemp)
     echo "diff_list_file=\$TMP/_git-diff.\$\$.list"
+    # ex: "diff --git a/tomohara-aliases.bash b/tomohara-aliases.bash" => "tomohara-aliases.bash:
+    # TODO: ex: "diff --cc mezcla/data_utils.py" => "mezcla/data_utils.py"
     echo "git diff 2>&1 | extract_matches.perl '^diff.*b/(.*)' >| \$diff_list_file"
 }
 function git-diff-list {
@@ -500,7 +544,8 @@ function alt-invoke-next-single-checkin {
             echo "Warning: unable to infer modified file. Perhaps,"
             echo "    Tha-tha-that's all folks"'!'
 	    echo ""
-	    local divider=$(perl -e 'print("." x 80);')
+	    local divider
+	    divider=$(perl -e 'print("." x 80);')
 	    echo "$divider"
 	    ## OLD: git-status | head
 	    git-status
@@ -548,6 +593,8 @@ function alt-invoke-next-single-checkin {
     ## echo "Running (n,b, *** be careful nothing lost ***):"
     ## echo "   $command"
     eval "$command"
+    ## TEMP: add tip for next checkin
+    echo "TODO: git-next-checkin"
 }
 #
 # invoke-alt-checkin(filename): run alternative template-bsed checkin for filename
@@ -571,7 +618,9 @@ alias git-next-checkin='invoke-alt-checkin'
 function git-checkout-branch {
     git branch | grep -c "$1";
     if [ $? ]; then
-	git-command checkout "$1";
+	## OLD: git-command checkout "$1";
+	# note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
+	git-command checkout "$1" --;
     else
 	echo "Error: unknown branch"
     fi;
@@ -580,6 +629,8 @@ function git-checkout-branch {
 #-------------------------------------------------------------------------------
 
 # git-alias-usage (): tips on interactive usage (n.b., aka git-template)
+# maldito shellcheck: SC2016 [Expressions don't expand in single, use double].
+# shellcheck disable=SC2016
 function git-alias-usage () {
     # Refresh
     git-alias-refresh
@@ -614,8 +665,8 @@ function git-alias-usage () {
     echo '    invoke-alt-checkin "'${next_mod_file}'"'
     echo ''
     echo 'Usual check-in process:'
-    echo '    git-cd-root-alias; git-update-plus'
-    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-plus'
+    echo '    git-cd-root-alias; git-update-plus; git-next-checkin'
+    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-plus; git-next-checkin'
     echo '    # alt: grep "^<<<<< " $(git-diff-list) /dev/null'
     # TODO: xargs -I{} 'grep "^<<<<< {} | head -5' $(git-list-text-files)
     echo '    git-next-checkin                      # repeat, as needed'
@@ -642,6 +693,8 @@ function git-misc-alias-usage() {
     echo ""
     echo "To revert modified file (n.b., during merge fix, dummy change might be needed):"
     echo "    git-revert-file-alias file"
+    echo "You also might need the foillowing:"
+    echo "    git-restore-file-alias file"
     echo ""
     echo "To override file additions (e.g., blocked by .gitignore):"
     echo "    git add --force file..."""

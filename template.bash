@@ -105,7 +105,7 @@ while [ "$moreoptions" = "1" ]; do
 	set -o xtrace
     elif [ "$1" = "--fubar" ]; then
 	echo "fubar"
-    elif [ "$1" = "--" ]; then
+    elif [[ ("$1" = "--") || ("$1" = "-") ]]; then
 	break
     else
 	echo "ERROR: Unknown option: $1";

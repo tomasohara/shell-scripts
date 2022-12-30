@@ -92,8 +92,10 @@ while (<>) {
     # NOTE: It can be easier to add special-case rules rather than devise a general regex;
     # ex: 'error' occuring within a line even at word boundaries can be too broad.
     elsif (## &debug_print(7, "here\n", 7) &&
-	   /^(ERROR|Error)\b/
-	   || /command not found/i
+	   /^(ERROR|Error)\b/	   
+	   ## OLD: || /command not found/i
+	   ## NOTE: maldito modules package polutes environment and man page not clear about disabling
+	   || (/command not found/i && (! /Cannot switch to Modules/))
 	   || /No space/
 	   || /Segmentation fault/
 	   || /Assertion failed/
@@ -119,11 +121,12 @@ while (<>) {
 	   || /Variable name must contain/
 	   || /unexpected EOF/
 	   || /unexpected end of file/
-	   || /command not found/
+	   ## OLD: || /command not found/
 	   || /^sh: /
            || /\[Errno \d+\]/
 	   || /Operation not permitted/
 	   || /Command exited with non-zero status/
+	   || /ommand terminated by signal/
 
 	   # Perl interpretation errors
 	   # TODO: Add more examples like not-a-number, which might not be apparent.

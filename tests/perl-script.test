@@ -53,3 +53,10 @@ PQR	-	-	R2C3	r2c3
 
 $ echo "\t" | cut.perl -f=2 -missing=FU -
 FU
+
+#................................................................................
+# extract_matches.perl
+# TODO: add mucho mas!
+
+$ extract_matches.perl -i -utf8 'tom\S+s' ~/organizer/tomas.txt | head -1
+Tomás

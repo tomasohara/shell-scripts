@@ -2,6 +2,8 @@
 # for easier restores and for easier re-start if backup script fails
 # (e.g., due to lack of temporary space).
 #
+# OBSOLETE: see new-backup-aliases.sh
+#
 # usage example:
 #   source ~/bin/backup-aliases.sh
 #   backup_dir="f:/backup/tpo-torre/d"

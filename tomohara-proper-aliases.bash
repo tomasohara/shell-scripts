@@ -2,6 +2,10 @@
 #
 # tomohara-proper-aliases.bash: aliases not intended for general consumption
 #
+# note:
+# - Maldito shellcheck (i.e., lack of menomic codes):
+#   SC2016 (info): Expressions don't expand in single quotes
+#
 
 # Change git-xyz-plus to git-xyz- for sake of tab completion
 # TODO: automate following
@@ -16,6 +20,56 @@ alias git-vdiff='git-vdiff-alias '
 # Other misc. stuff
 alias nvidia-batched='batch-nvidia-smi.sh'
 alias nvidia-top='nvtop'
+alias nvsmi=nvidia-smi
 
 # Python stuff
 alias plint=python-lint
+alias-fn plint-torch 'plint "$@" | grep -v torch.*no-member'
+#
+# clone-repo(url): clone github repo at URL into current dir with logging
+function clone-repo () {
+    local url repo log
+    url="$1"
+    repo=$(basename "$url")
+    log="_clone-$repo-$(T).log"
+    command script "$log" git clone "$url"
+    ls -R "$repo" >> "$log"
+}
+
+# Misc. stuff
+## OLD: alias script-config='script ~/config/_config-$(T).log'
+function script-config {
+    mkdir -p ~/config
+    script ~/config/_config-$(T).log
+}
+
+# Bash stuff
+# shell-check-last-snippet(notes-file): extract last Bash snippet from notes
+# file and run through shellcheck
+# The snippet should be bracketted by lines with "$: {" and "}"
+function shell-check-last-snippet {
+  cat "$1" | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
+}
+# tabify(text): convert spaces in TEXT to tabs
+# TODO: account for quotes
+function tabify {
+    perl -pe 's/ /\t/;'
+}
+# trace_vars(var, ...): trace each VAR in command line
+# note: output format: VAR1=VAL1; ... VARn=VALn;
+function trace-vars {
+    local var
+    for var in "$@"; do
+	echo -n "$var="$(eval echo "\$$var")"; "
+    done
+    echo
+    ##
+    ## TAKE 1
+    ## local var_spec="$*"
+    ## echo "$var_spec" | tabify
+    ##  echo $(eval echo $var_spec | tabify)
+    }
+
+# Linux stuff
+# shellcheck disable=SC2016
+alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
