@@ -2165,20 +2165,27 @@ alias blank-screen='xset dpms force off'
 alias stop-service='systemctl stop'
 alias restart-service='sudo systemctl restart'
 
-# get-free-filename(base, [sep=""]): get filename starting with BASE that is not used.
+# get-free-filename(base, [sep=""], [ext=""]): get filename starting with BASE that is not used.
 # Notes: 1. If <base> exists <base><sep><N> checked until the filename not used (for N in 2, 3, ... ).
 # 2. See sudo-admin for sample usage; also see rename-with-file-date.
+# 3. If Ext specified, it is added after the numeric part (n.b., including sep). It is used
+# to ensure that the filename ends with a specific extension instead of a number.
+# EX: get-free-filename("really-unique-filename", ".") => "really-unique-filename"
+# EX: get-free-filename("/boot/initrd", ".", "img") => "/boot/initrd.1.img"
+# TODO: start counting L at 0 so that first affix using 1 not 2
 #
 function get-free-filename() {
     local base="$1"
     local sep="$2"
+    local ext="$3"
     local L=1
     local filename="$base"
+    if [ "$ext" != "" ]; then filename="$filename$sep$ext"; fi
     ## DEBUG: local -p
     while [ -e "$filename" ]; do
-        ## OLD: let L++
         (( L++ ))
         filename="$base$sep$L"
+	if [ "$ext" != "" ]; then filename="$filename$sep$ext"; fi
     done;
     ## DEBUG: local -p
     echo "$filename"
