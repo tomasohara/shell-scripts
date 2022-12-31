@@ -5,8 +5,17 @@
 # Note:
 # - This is intended for shutting down pricey AWS EC2 instances to keep costs down.
 #
-# Usage:
-#   sudo stop-inactive-server.bash
+# Usage examples:
+# 1. Interactive for testing (n.b., sudo required for actual shutdown):
+#    stop-inactive-server.bash
+#
+# 2. Add to cron as root:
+#    sudo crontab -e
+#
+#       # check for inactive server every hour (on the hour) and shutdown if so
+#       0 * * * * /usr/local/bin/stop-inactive-server.bash
+#
+# Script by Tana Alvarez and Tom O'Hara.
 #
 
 # Initialize
