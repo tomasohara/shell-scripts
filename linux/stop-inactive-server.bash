@@ -4,6 +4,9 @@
 #
 # Note:
 # - This is intended for shutting down pricey AWS EC2 instances to keep costs down.
+# - Indicator functions like low_network_load output "True" if the condition holds.
+# - Any debug tracing in such functions should go to stderr. This can be done as follows:
+#    echo "fu=$fu" 1>&2
 #
 # Usage examples:
 # 1. Interactive for testing (n.b., sudo required for actual shutdown):
@@ -22,12 +25,14 @@
 TMP="${TMP:-/tmp}"
 VERBOSE="${VERBOSE:-0}"
 TRACE="${TRACE:-0}"
+LOG="${LOG:-/home/ubuntu/stop-inactive-server.log}"
+TIME=$(date)
 
 # Enable debug trace
 if [ "$TRACE" = "1" ]; then
     set -o xtrace;
     if [ "$VERBOSE" = "1" ]; then
-	set -o verbose
+        set -o verbose
     fi
 fi
 
@@ -45,15 +50,16 @@ low_network_load () {
     
     # Determine status
     if [ -e "$last_output_file" ]; then
-	local current last difference
-	current=$(cat "$current_output_file")
-	last=$(cat "$last_output_file")
-	difference=$(echo "(($current - $last) / $last)" | bc)
-	if [ "$VERBOSE" = "1" ]; then echo "$type: current=$current last=$last diff=$difference" 1>&2; fi
-	if [[ difference -le max_network_load ]]; then
-	    echo "Low network $type: ($difference < $max_network_load)" 1>&2
-	    result="True"
-	fi
+        local current last difference
+        current=$(cat "$current_output_file")
+        last=$(cat "$last_output_file")
+        difference=$(echo "(($current - $last) * 100 / $last)" | bc)
+        if [ "$VERBOSE" = "1" ]; then echo "$type: current=$current last=$last diff=$difference" 1>&2; fi
+        echo "[$TIME] $type: current=$current last=$last diff=$difference" >> $LOG
+        if [[ difference -le max_network_load ]]; then
+            echo "Low network $type: ($difference < $max_network_load)" 1>&2
+            result="True"
+        fi
     fi
 
     # Update last output
@@ -81,11 +87,12 @@ low_cpu_load () {
     # This takes the actual real % load
     actual_cpu_load=$(echo "($avg_cpu * 100 / $cpu_cores)" | bc)
     if [ "$VERBOSE" = "1" ]; then echo "load: avg=$avg_cpu cores=$cpu_cores scaled=$actual_cpu_load" 1>&2; fi
+    echo "[$TIME] load: avg=$avg_cpu cores=$cpu_cores scaled=$actual_cpu_load" >> $LOG
 
     # Determine status
     if [[ actual_cpu_load -le max_cpu_load ]]; then
-	echo "Low cpu usage: ($actual_cpu_load < $max_cpu_load)" 1>&2
-	result="True"
+        echo "Low cpu usage: ($actual_cpu_load < $max_cpu_load)" 1>&2
+        result="True"
     fi
     echo "$result"
 }
