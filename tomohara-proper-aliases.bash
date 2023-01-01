@@ -48,7 +48,7 @@ function script-config {
 # file and run through shellcheck
 # The snippet should be bracketted by lines with "$: {" and "}"
 function shell-check-last-snippet {
-  cat "$1" | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
+    cat "$1" | perl-grep -v '^\s*#' | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
 }
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
@@ -68,8 +68,11 @@ function trace-vars {
     ## local var_spec="$*"
     ## echo "$var_spec" | tabify
     ##  echo $(eval echo $var_spec | tabify)
-    }
+}
 
 # Linux stuff
 # shellcheck disable=SC2016
 alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
+
+# Idiosyncratic stuff
+alias all-tomohara-settings='tomohara-aliases; tomohara-settings; more-tomohara-aliases'
