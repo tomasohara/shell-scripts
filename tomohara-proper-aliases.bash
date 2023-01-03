@@ -72,6 +72,8 @@ function trace-vars {
 
 # Linux stuff
 # shellcheck disable=SC2016
+## TEMP:
+quiet-unalias ps-time
 alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
 
 # Idiosyncratic stuff
