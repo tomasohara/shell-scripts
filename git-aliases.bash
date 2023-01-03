@@ -437,6 +437,7 @@ alias git-revert-file-alias='git-reset-file'
 function git-restore-file-helper {
     local log;
     local option="$1"
+    shift
     log=$(get-temp-log-name "restore");
     if [ "$option" = "--both" ]; then
 	option="--worktree --staged"
