@@ -59,6 +59,10 @@
 #   -- internal
 #      GIT_MESSAGE               message for update (TODO: rework to use optional arg)
 #
+# - maldito shellcheck:
+#   SC2086 (info): Double quote to prevent globbing and word splitting
+#
+#
 #................................................................................
 # Examples:
 # TODO2: show the corresponding alias; also move git-mv example later to this section)
@@ -430,9 +434,13 @@ alias git-revert-file-alias='git-reset-file'
 # git-restore-file-alias(file, ...): move FILE(s) out of way and "revert" to version in repo (i.e., reset)
 # NOTE: via https://stackoverflow.com/questions/7751555/how-to-resolve-git-stash-conflict-without-commit:
 #     Use 'git restore --staged' to mark conflict as resolved and unstage
-function git-restore-file-alias {
+function git-restore-file-helper {
     local log;
+    local option="$1"
     log=$(get-temp-log-name "restore");
+    if [ "$option" = "--both" ]; then
+	option="--worktree --staged"
+    fi
 
     # Isolate old versions
     mkdir -p _git-trash >| "$log";
@@ -440,12 +448,16 @@ function git-restore-file-alias {
     cp -vpf "$@" _git-trash >> "$log";
 
     # Restore working tree files
-    echo "issuing: git restore --staged $*";
-    git restore --staged "$@" >> "$log";
+    echo "issuing: git restore $option $*";
+    # shellcheck disable=SC2086
+    git restore $option "$@" >> "$log";
     
     # Sanity check
     git-alias-review-log "$log"
 }
+alias git-restore-worktree-alias="git-restore-file-helper --worktree"
+alias git-restore-staged-alias="git-restore-file-helper --staged"
+alias git-restore-both-alias="git-restore-file-helper --both"
 
 # git-revert-commit(commit): effectively undoes COMMIT(s) by issuing new commits
 alias git-revert-commit-alias='git-command revert'
@@ -693,8 +705,8 @@ function git-misc-alias-usage() {
     echo ""
     echo "To revert modified file (n.b., during merge fix, dummy change might be needed):"
     echo "    git-revert-file-alias file"
-    echo "You also might need the foillowing:"
-    echo "    git-restore-file-alias file"
+    echo "You also might need the following (or git-restore-{worktree|both}-alias:"
+    echo "    git-restore-staged-alias file"
     echo ""
     echo "To override file additions (e.g., blocked by .gitignore):"
     echo "    git add --force file..."""
