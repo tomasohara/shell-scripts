@@ -357,6 +357,12 @@ function under-macos {
     ## TODO: return $under_mac
     echo "$under_mac"
 }
+function under-linux {
+    local under_linux=0
+    if [[ "$OSTYPE" =~ linux.* ]]; then under_linux=1; fi
+    ## TODO: return $under_linux
+    echo "$under_linux"
+}
 
 # Settings for less command 
 # LESS="-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"
