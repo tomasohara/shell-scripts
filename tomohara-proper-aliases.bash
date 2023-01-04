@@ -3,8 +3,10 @@
 # tomohara-proper-aliases.bash: aliases not intended for general consumption
 #
 # note:
-# - Maldito shellcheck (i.e., lack of menomic codes):
+# - Maldito shellcheck (i.e., lack of menomic codes on top of nitpicking):
+#   SC2002 (style): Useless cat. Consider 'cmd < file | ..' or 'cmd file | ..' instead.
 #   SC2016 (info): Expressions don't expand in single quotes
+#   SC2027 (warning): The surrounding quotes actually unquote this.
 #   SC2086: Double quote to prevent globbing)
 #
 
@@ -49,7 +51,7 @@ function clone-repo () {
 ## OLD: alias script-config='script ~/config/_config-$(T).log'
 function script-config {
     mkdir -p ~/config
-    script ~/config/_config-$(T).log
+    script ~/config/"_config-$(T).log"
 }
 
 # Bash stuff
@@ -57,6 +59,7 @@ function script-config {
 # file and run through shellcheck
 # The snippet should be bracketted by lines with "$: {" and "}"
 function shell-check-last-snippet {
+    # shellcheck disable=SC2002
     cat "$1" | perl-grep -v '^\s*#' | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
 }
 # tabify(text): convert spaces in TEXT to tabs
@@ -69,6 +72,7 @@ function tabify {
 function trace-vars {
     local var
     for var in "$@"; do
+	# shellcheck disable=SC2027
 	echo -n "$var="$(eval echo "\$$var")"; "
     done
     echo
