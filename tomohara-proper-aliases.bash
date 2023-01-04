@@ -5,6 +5,7 @@
 # note:
 # - Maldito shellcheck (i.e., lack of menomic codes):
 #   SC2016 (info): Expressions don't expand in single quotes
+#   SC2086: Double quote to prevent globbing)
 #
 
 # Change git-xyz-plus to git-xyz- for sake of tab completion
@@ -32,7 +33,15 @@ function clone-repo () {
     url="$1"
     repo=$(basename "$url")
     log="_clone-$repo-$(T).log"
-    command script "$log" git clone "$url"
+    ## OLD: command script "$log" git clone "$url"
+    # maldito linux: -c option required for command for
+    local command_indicator=""
+    if [ "$(under-linux)" = "1" ]; then
+	command_indicator="-c"
+    fi
+    #
+    # shellcheck disable=SC2086
+    command script "$log" $command_indicator git clone "$url"
     ls -R "$repo" >> "$log"
 }
 
