@@ -177,9 +177,15 @@ function alias-fn {
     eval "function $alias { $body; }"
     }
 
+#................................................................................
+# General environment settings
+## TOM-IDIOSYNCRATIC
+cond-export DEBUG_LEVEL 4
+
 #...............................................................................
 # Directory for Tom O'Hara's scripts, defaulting to /home/tomohara if available
 # otherwise $HOME/bin
+## TOM-IDIOSYNCRATIC
 ## DEBUG: 
 ## OLD: cond-export TOM_DIR "/home/tomohara"
 cond-export TOM_DIR ~/tomohara
@@ -555,7 +561,7 @@ export CDPATH=.
 export USE_GNOME=1
 
 # General Settings for my scripts
-export DEBUG_LEVEL=2
+## OLD: export DEBUG_LEVEL=2
 export PRECISION=3
 alias debug-on='export DEBUG_LEVEL=3'
 if [ "$PERLLIB" = "" ]; then PERLLIB="."; else PERLLIB="$PERLLIB:."; fi
