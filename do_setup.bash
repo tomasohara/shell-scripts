@@ -502,8 +502,9 @@ if [ "$PS1" = "" ]; then export PS1="$ "; fi
 export USE_GNOME=1
 
 # General Settings for my perl scripts
-export DEBUG_LEVEL=2
-alias debug-on='export DEBUG_LEVEL=3'
+## OLD
+## export DEBUG_LEVEL=2
+## alias debug-on='export DEBUG_LEVEL=3'
 ## OLD: export ORIGINAL_PERLLIB=$PERLLIB
 if [ "$PERLLIB" = "" ]; then PERLLIB="."; else PERLLIB="$PERLLIB:."; fi
 ## export PERLLIB="$BIN:$PERLLIB:$HOME/perl/lib/perl5/site_perl/5.8.0:$HOME/perl/lib/perl5/site_perl/5.8.0/i386-linux-thread-multi/:$HOME/lib/perl5/5.00503/i386-linux:$BIN/MODULES"
