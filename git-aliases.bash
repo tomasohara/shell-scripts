@@ -606,8 +606,9 @@ function alt-invoke-next-single-checkin {
     ## echo "Running (n,b, *** be careful nothing lost ***):"
     ## echo "   $command"
     eval "$command"
-    ## TEMP: add tip for next checkin
-    echo "TODO: git-next-checkin"
+
+    # Start next checkin or show if no more updates to do
+    git-next-checkin
 }
 #
 # invoke-alt-checkin(filename): run alternative template-bsed checkin for filename
@@ -675,7 +676,7 @@ function git-alias-usage () {
     local next_mod_file
     next_mod_file=$(git-diff-list | head -1)
     if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
-    echo '    invoke-alt-checkin "'${next_mod_file}'"'
+    echo '    git-next-checkin "'${next_mod_file}'"'
     echo ''
     echo 'Usual check-in process:'
     echo '    git-cd-root-alias; git-update-plus; git-next-checkin'
@@ -702,7 +703,7 @@ function git-misc-alias-usage() {
     # Show usage
     echo "Warning: Some of these can be dangerous!"
     echo "   Incorrect usage might be undoable (e.g., disconnected histories with mv)."
-    echo "   *** It is safer to git github web inteface!"
+    echo "   *** It is safer to use github web inteface instead!"
     echo ""
     echo "To revert modified file (n.b., during merge fix, dummy change might be needed):"
     echo "    git-revert-file-alias file"
