@@ -23,6 +23,8 @@
 #
 # TODO:
 # - Add checks for missing special files with performance data (e.g., /proc/loadavg):
+# - Rework to maintain stats separately so that usable just invoking every few hours,
+#   such as by adding mean and stdev checks over specified period.
 #
 
 # Initialize
