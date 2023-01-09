@@ -655,10 +655,12 @@ alias chdir='cd'
 function cd-realdir {
     local dir="$1";
     if [ "$dir" = "" ]; then dir=.; fi;
+    # note: cd/pwd used so that xterm updated
     cd "$(realpath "$dir")";
     pwd;
 }
 alias cd-this-realdir='cd-realdir .'
+alias-fn pushd-this-realdir 'pushd "$(realpath ".")"'
 
 # pushd-q, popd-q: quiet versions of pushd and popd
 #
