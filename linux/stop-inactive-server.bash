@@ -7,6 +7,7 @@
 # - Indicator functions like low_network_load output "True" if the condition holds.
 # - Any debug tracing in such functions should go to stderr. This can be done as follows:
 #    echo "fu=$fu" 1>&2
+# - For shellcheck [SC2086: Double quote to prevent globbing and word splitting].
 #
 # Usage examples:
 # 1. Interactive for testing (n.b., sudo required for actual shutdown):
@@ -19,6 +20,9 @@
 #       0 * * * * /usr/local/bin/stop-inactive-server.bash
 #
 # Script by Tana Alvarez and Tom O'Hara.
+#
+# TODO:
+# - Add checks for missing special files with performance data (e.g., /proc/loadavg):
 #
 
 # Initialize
@@ -55,7 +59,7 @@ low_network_load () {
         last=$(cat "$last_output_file")
         difference=$(echo "(($current - $last) * 100 / $last)" | bc)
         if [ "$VERBOSE" = "1" ]; then echo "$type: current=$current last=$last diff=$difference" 1>&2; fi
-        echo "[$TIME] $type: current=$current last=$last diff=$difference" >> $LOG
+        echo "[$TIME] $type: current=$current last=$last diff=$difference" >> "$LOG"
         if [[ difference -le max_network_load ]]; then
             echo "Low network $type: ($difference < $max_network_load)" 1>&2
             result="True"
@@ -87,7 +91,7 @@ low_cpu_load () {
     # This takes the actual real % load
     actual_cpu_load=$(echo "($avg_cpu * 100 / $cpu_cores)" | bc)
     if [ "$VERBOSE" = "1" ]; then echo "load: avg=$avg_cpu cores=$cpu_cores scaled=$actual_cpu_load" 1>&2; fi
-    echo "[$TIME] load: avg=$avg_cpu cores=$cpu_cores scaled=$actual_cpu_load" >> $LOG
+    echo "[$TIME] load: avg=$avg_cpu cores=$cpu_cores scaled=$actual_cpu_load" >> "$LOG"
 
     # Determine status
     if [[ actual_cpu_load -le max_cpu_load ]]; then
@@ -103,6 +107,11 @@ cpu=$(low_cpu_load)
 net_tx=$(low_network_load tx)
 net_rx=$(low_network_load rx)
 if [ "$cpu" = "True" ] && [ "$net_tx" = "True" ] && [ "$net_rx" = "True" ]; then
-    echo "issuing: shutdown"
-    shutdown
+    shutdown_command="shutdown"
+    if [ "${DRY_RUN:-0}" = "1" ]; then
+        shutdown_command="echo $shutdown_command"
+    fi
+    echo "issuing: $shutdown_command"
+    ## TODO???: shellcheck disable=SC2086
+    $shutdown_command
 fi
