@@ -104,7 +104,8 @@ low_cpu_load () {
 }
 
 # Shutdown the server if low CPU and network usage (sending and receiving)
-## DBEUG: echo "checking load averages" 1>&2
+# Note: if DRY_RUN env. is 1, then just echo's shutdown commmand (for testing purposes)
+## DEBUG: echo "checking load averages" 1>&2
 cpu=$(low_cpu_load)
 net_tx=$(low_network_load tx)
 net_rx=$(low_network_load rx)
