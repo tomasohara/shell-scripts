@@ -10,6 +10,9 @@
 #   matches the glob pattern in any subdirectory.
 # - See 'man gitignore' for details.
 #
+# TODO:
+# - Re-enable linux subdir ignore spec.
+#
 
 # Log files and listings
 # TODO: figure out how to apply to subdirs
@@ -56,7 +59,8 @@ versioned-files
 TAGS
 
 # OS-specific directories
-linux
+## TODO: re-enable
+## linux
 win32
 mac-os
 # note: darwin21.1.0 => mac-os

@@ -4,21 +4,41 @@
 #
 # Note:
 # - This is intended for shutting down pricey AWS EC2 instances to keep costs down.
+# - Indicator functions like low_network_load output "True" if the condition holds.
+# - Any debug tracing in such functions should go to stderr. This can be done as follows:
+#    echo "fu=$fu" 1>&2
+# - For shellcheck [SC2086: Double quote to prevent globbing and word splitting].
 #
-# Usage:
-#   sudo stop-inactive-server.bash
+# Usage examples:
+# 1. Interactive for testing (n.b., sudo required for actual shutdown):
+#    stop-inactive-server.bash
+#
+# 2. Add to cron as root:
+#    sudo crontab -e
+#
+#       # check for inactive server every hour (on the hour) and shutdown if so
+#       0 * * * * /usr/local/bin/stop-inactive-server.bash
+#
+# Script by Tana Alvarez and Tom O'Hara.
+#
+# TODO:
+# - Add checks for missing special files with performance data (e.g., /proc/loadavg):
+# - Rework to maintain stats separately so that usable just invoking every few hours,
+#   such as by adding mean and stdev checks over specified period.
 #
 
 # Initialize
 TMP="${TMP:-/tmp}"
 VERBOSE="${VERBOSE:-0}"
 TRACE="${TRACE:-0}"
+LOG="${LOG:-/home/ubuntu/stop-inactive-server.log}"
+TIME=$(date)
 
 # Enable debug trace
 if [ "$TRACE" = "1" ]; then
     set -o xtrace;
     if [ "$VERBOSE" = "1" ]; then
-	set -o verbose
+        set -o verbose
     fi
 fi
 
@@ -36,15 +56,16 @@ low_network_load () {
     
     # Determine status
     if [ -e "$last_output_file" ]; then
-	local current last difference
-	current=$(cat "$current_output_file")
-	last=$(cat "$last_output_file")
-	difference=$(echo "(($current - $last) / $last)" | bc)
-	if [ "$VERBOSE" = "1" ]; then echo "$type: current=$current last=$last diff=$difference" 1>&2; fi
-	if [[ difference -le max_network_load ]]; then
-	    echo "Low network $type: ($difference < $max_network_load)" 1>&2
-	    result="True"
-	fi
+        local current last difference
+        current=$(cat "$current_output_file")
+        last=$(cat "$last_output_file")
+        difference=$(echo "(($current - $last) * 100 / $last)" | bc)
+        if [ "$VERBOSE" = "1" ]; then echo "$type: current=$current last=$last diff=$difference" 1>&2; fi
+        echo "[$TIME] $type: current=$current last=$last diff=$difference" >> "$LOG"
+        if [[ difference -le max_network_load ]]; then
+            echo "Low network $type: ($difference < $max_network_load)" 1>&2
+            result="True"
+        fi
     fi
 
     # Update last output
@@ -72,21 +93,28 @@ low_cpu_load () {
     # This takes the actual real % load
     actual_cpu_load=$(echo "($avg_cpu * 100 / $cpu_cores)" | bc)
     if [ "$VERBOSE" = "1" ]; then echo "load: avg=$avg_cpu cores=$cpu_cores scaled=$actual_cpu_load" 1>&2; fi
+    echo "[$TIME] load: avg=$avg_cpu cores=$cpu_cores scaled=$actual_cpu_load" >> "$LOG"
 
     # Determine status
     if [[ actual_cpu_load -le max_cpu_load ]]; then
-	echo "Low cpu usage: ($actual_cpu_load < $max_cpu_load)" 1>&2
-	result="True"
+        echo "Low cpu usage: ($actual_cpu_load < $max_cpu_load)" 1>&2
+        result="True"
     fi
     echo "$result"
 }
 
 # Shutdown the server if low CPU and network usage (sending and receiving)
-## DBEUG: echo "checking load averages" 1>&2
+# Note: if DRY_RUN env. is 1, then just echo's shutdown commmand (for testing purposes)
+## DEBUG: echo "checking load averages" 1>&2
 cpu=$(low_cpu_load)
 net_tx=$(low_network_load tx)
 net_rx=$(low_network_load rx)
 if [ "$cpu" = "True" ] && [ "$net_tx" = "True" ] && [ "$net_rx" = "True" ]; then
-    echo "issuing: shutdown"
-    shutdown
+    shutdown_command="shutdown"
+    if [ "${DRY_RUN:-0}" = "1" ]; then
+        shutdown_command="echo $shutdown_command"
+    fi
+    echo "issuing: $shutdown_command"
+    ## TODO???: shellcheck disable=SC2086
+    $shutdown_command
 fi

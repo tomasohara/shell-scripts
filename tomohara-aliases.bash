@@ -177,9 +177,15 @@ function alias-fn {
     eval "function $alias { $body; }"
     }
 
+#................................................................................
+# General environment settings
+## TOM-IDIOSYNCRATIC
+cond-export DEBUG_LEVEL 4
+
 #...............................................................................
 # Directory for Tom O'Hara's scripts, defaulting to /home/tomohara if available
 # otherwise $HOME/bin
+## TOM-IDIOSYNCRATIC
 ## DEBUG: 
 ## OLD: cond-export TOM_DIR "/home/tomohara"
 cond-export TOM_DIR ~/tomohara
@@ -356,6 +362,12 @@ function under-macos {
     if [[ "$OSTYPE" =~ darwin.* ]]; then under_mac=1; fi
     ## TODO: return $under_mac
     echo "$under_mac"
+}
+function under-linux {
+    local under_linux=0
+    if [[ "$OSTYPE" =~ linux.* ]]; then under_linux=1; fi
+    ## TODO: return $under_linux
+    echo "$under_linux"
 }
 
 # Settings for less command 
@@ -549,7 +561,7 @@ export CDPATH=.
 export USE_GNOME=1
 
 # General Settings for my scripts
-export DEBUG_LEVEL=2
+## OLD: export DEBUG_LEVEL=2
 export PRECISION=3
 alias debug-on='export DEBUG_LEVEL=3'
 if [ "$PERLLIB" = "" ]; then PERLLIB="."; else PERLLIB="$PERLLIB:."; fi
@@ -643,10 +655,12 @@ alias chdir='cd'
 function cd-realdir {
     local dir="$1";
     if [ "$dir" = "" ]; then dir=.; fi;
+    # note: cd/pwd used so that xterm updated
     cd "$(realpath "$dir")";
     pwd;
 }
 alias cd-this-realdir='cd-realdir .'
+alias-fn pushd-this-realdir 'pushd "$(realpath ".")"'
 
 # pushd-q, popd-q: quiet versions of pushd and popd
 #
@@ -1462,6 +1476,7 @@ function tar-just-dir () { tar-dir "$1" 1; }
 # ex: TEMP=/mnt/my-external-drive/tmp tar-this-dir
 function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")"; popd-q; }
 # test of resolving problem with tar-this-dir if dir a symbolic link from apparent parent
+# TODO: fixme
 function new-tar-this-dir () {
     # example dir change: /home/tomohara/tpo-magro-p3 [=> /media/tomohara/ff3410d4-5ffc-4c01-a2ca-75244b882aa2]
     local dir
@@ -1473,7 +1488,7 @@ function new-tar-this-dir () {
     if [ -L "$base" ]; then
         real_base=$($LS -ld "$base" | perl -pe 's@^.* -> (.*/)?([^/]+)@$2@;');
         # Go to real parent                   /media/tomohara
-        cd $(realpath $dir/..)
+        cd "$(realpath "$dir"/..)"
     fi
     # Create tar of real subdir
     # TODO: pass along actual basename so that tar file can be renamed
@@ -1776,8 +1791,8 @@ alias foreach='perl- foreach.perl'
 alias rename-spaces='rename-files -q -global " " "_"'
 alias rename-quotes='rename-files -q -global "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
 # rename-special-punct: replace runs of any troublesome punctuation in filename w/ _
-## OLD: alias rename-special-punct='rename-files -q -global -regex "[&\!\*?\(\)]" ""'
-alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_"'
+## OLD: alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_"'
+alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_"; rename-files -q -global -regex "–" "-"'
 # TODO: test
 #     $ touch '_what-the-hell?!'; rename-special-punct; ls _what* => _what-the-hell_
 ## TODO:
@@ -2165,20 +2180,27 @@ alias blank-screen='xset dpms force off'
 alias stop-service='systemctl stop'
 alias restart-service='sudo systemctl restart'
 
-# get-free-filename(base, [sep=""]): get filename starting with BASE that is not used.
+# get-free-filename(base, [sep=""], [ext=""]): get filename starting with BASE that is not used.
 # Notes: 1. If <base> exists <base><sep><N> checked until the filename not used (for N in 2, 3, ... ).
 # 2. See sudo-admin for sample usage; also see rename-with-file-date.
+# 3. If Ext specified, it is added after the numeric part (n.b., including sep). It is used
+# to ensure that the filename ends with a specific extension instead of a number.
+# EX: get-free-filename("really-unique-filename", ".") => "really-unique-filename"
+# EX: get-free-filename("/boot/initrd", ".", "img") => "/boot/initrd.1.img"
+# TODO: start counting L at 0 so that first affix using 1 not 2
 #
 function get-free-filename() {
     local base="$1"
     local sep="$2"
+    local ext="$3"
     local L=1
     local filename="$base"
+    if [ "$ext" != "" ]; then filename="$filename$sep$ext"; fi
     ## DEBUG: local -p
     while [ -e "$filename" ]; do
-        ## OLD: let L++
         (( L++ ))
         filename="$base$sep$L"
+	if [ "$ext" != "" ]; then filename="$filename$sep$ext"; fi
     done;
     ## DEBUG: local -p
     echo "$filename"
@@ -2987,9 +3009,12 @@ function shell-check {
     # - SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects.
     # - SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
     # - SC2181 (style): Check exit code directly with e.g. 'if mycmd;' ...
+    # - SC2196 (info): egrep is non-standard
     # - SC2219 (style): Instead of 'let expr', prefer (( expr )) .
+    # - SC2230: which is non-standard
     # - TODO2: -e 'SC1090,SC1091,SC2009,SC2012,SC2129,SC2164,SC2181'
-    shell-check-full "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;' | perl-grep -para -v '(SC1090|SC1091|SC2009|SC2012|SC2129|SC2164|SC2181|SC2219)';
+    ## OLD: shell-check-full "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;' | perl-grep -para -v '(SC1090|SC1091|SC2009|SC2012|SC2129|SC2164|SC2181|SC2219|SC2230)';
+    shell-check-full --exclude="SC1090,SC1091,SC2009,SC2012,SC2129,SC2164,SC2181,SC2196,SC2219,SC2230" "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;';
 }
 
 #-------------------------------------------------------------------------------

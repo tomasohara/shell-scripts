@@ -20,6 +20,8 @@
 #     ${var:-default}              use $var or "default"
 #     true                         no-op
 #     $#                           number of positional arguments
+#     $*                           all positional arguments
+#     "$@"                         likewise all args but with individually quoting
 # TODO:
 #  - variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
 #     note: EXPR is C style;
@@ -30,6 +32,7 @@
 #         list=(v1 value2 ... vN)   initialize
 #         ${list[1]}                second element
 #         ${list[*]}                all elements
+#         "${list[@]}"              likewise all but individually quoted (a la "$@")
 #         list+=value               append value
 #   - conditional expression
 #   - echo to stderr (or print)

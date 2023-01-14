@@ -59,6 +59,10 @@
 #   -- internal
 #      GIT_MESSAGE               message for update (TODO: rework to use optional arg)
 #
+# - maldito shellcheck:
+#   SC2086 (info): Double quote to prevent globbing and word splitting
+#
+#
 #................................................................................
 # Examples:
 # TODO2: show the corresponding alias; also move git-mv example later to this section)
@@ -430,9 +434,14 @@ alias git-revert-file-alias='git-reset-file'
 # git-restore-file-alias(file, ...): move FILE(s) out of way and "revert" to version in repo (i.e., reset)
 # NOTE: via https://stackoverflow.com/questions/7751555/how-to-resolve-git-stash-conflict-without-commit:
 #     Use 'git restore --staged' to mark conflict as resolved and unstage
-function git-restore-file-alias {
+function git-restore-file-helper {
     local log;
+    local option="$1"
+    shift
     log=$(get-temp-log-name "restore");
+    if [ "$option" = "--both" ]; then
+	option="--worktree --staged"
+    fi
 
     # Isolate old versions
     mkdir -p _git-trash >| "$log";
@@ -440,12 +449,16 @@ function git-restore-file-alias {
     cp -vpf "$@" _git-trash >> "$log";
 
     # Restore working tree files
-    echo "issuing: git restore --staged $*";
-    git restore --staged "$@" >> "$log";
+    echo "issuing: git restore $option $*";
+    # shellcheck disable=SC2086
+    git restore $option "$@" >> "$log";
     
     # Sanity check
     git-alias-review-log "$log"
 }
+alias git-restore-worktree-alias="git-restore-file-helper --worktree"
+alias git-restore-staged-alias="git-restore-file-helper --staged"
+alias git-restore-both-alias="git-restore-file-helper --both"
 
 # git-revert-commit(commit): effectively undoes COMMIT(s) by issuing new commits
 alias git-revert-commit-alias='git-command revert'
@@ -593,8 +606,9 @@ function alt-invoke-next-single-checkin {
     ## echo "Running (n,b, *** be careful nothing lost ***):"
     ## echo "   $command"
     eval "$command"
-    ## TEMP: add tip for next checkin
-    echo "TODO: git-next-checkin"
+
+    # Start next checkin or show if no more updates to do
+    git-next-checkin
 }
 #
 # invoke-alt-checkin(filename): run alternative template-bsed checkin for filename
@@ -662,7 +676,7 @@ function git-alias-usage () {
     local next_mod_file
     next_mod_file=$(git-diff-list | head -1)
     if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
-    echo '    invoke-alt-checkin "'${next_mod_file}'"'
+    echo '    git-next-checkin "'${next_mod_file}'"'
     echo ''
     echo 'Usual check-in process:'
     echo '    git-cd-root-alias; git-update-plus; git-next-checkin'
@@ -689,12 +703,12 @@ function git-misc-alias-usage() {
     # Show usage
     echo "Warning: Some of these can be dangerous!"
     echo "   Incorrect usage might be undoable (e.g., disconnected histories with mv)."
-    echo "   *** It is safer to git github web inteface!"
+    echo "   *** It is safer to use github web inteface instead!"
     echo ""
     echo "To revert modified file (n.b., during merge fix, dummy change might be needed):"
     echo "    git-revert-file-alias file"
-    echo "You also might need the foillowing:"
-    echo "    git-restore-file-alias file"
+    echo "You also might need the following (or git-restore-{worktree|both}-alias:"
+    echo "    git-restore-staged-alias file"
     echo ""
     echo "To override file additions (e.g., blocked by .gitignore):"
     echo "    git add --force file..."""
