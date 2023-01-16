@@ -180,7 +180,8 @@ function alias-fn {
 #................................................................................
 # General environment settings
 ## TOM-IDIOSYNCRATIC
-cond-export DEBUG_LEVEL 4
+## OLD: cond-export DEBUG_LEVEL 4
+cond-export DEBUG_LEVEL 3
 
 #...............................................................................
 # Directory for Tom O'Hara's scripts, defaulting to /home/tomohara if available
