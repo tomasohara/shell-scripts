@@ -179,17 +179,17 @@ function git-update-plus {
     local restore_dir=""
     if [ "$changed_files" != "" ]; then
         if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
-	    # Make sure root active for relative path names in zip file
-	    local root_dir
-	    root_dir="$(git-root-alias)"
-	    if [ "$PWD" != "$root_dir" ]; then
-		echo "Temporarily changing working directory to root: $root_dir"
-		restore_dir="$PWD"
-		cd "$(git-root-alias)"
-	    fi
+            # Make sure root active for relative path names in zip file
+            local root_dir
+            root_dir="$(git-root-alias)"
+            if [ "$PWD" != "$root_dir" ]; then
+                echo "Temporarily changing working directory to root: $root_dir"
+                restore_dir="$PWD"
+                cd "$(git-root-alias)"
+            fi
 
-	    # Create zip (-v for verbose & -y for symlinks)
-	    command rm -f _stash.zip
+            # Create zip (-v for verbose & -y for symlinks)
+            command rm -f _stash.zip
             echo "issuing: zip over changed files (for later restore)"
             echo "git-diff-list | zip -v -y -@ _stash.zip" >> "$log"
             git-diff-list | zip -v -y -@ _stash.zip >> "$log"
@@ -212,11 +212,11 @@ function git-update-plus {
     # Optionally restore timestamps for changed files
     if [ "$changed_files" != "" ]; then
         if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
-	    # Restore working directory
-	    if [ "$restore_dir" != "" ]; then
-		echo "Restoring working directory: $restore_dir"
-		cd "$restore_dir"
-	    fi
+            # Restore working directory
+            if [ "$restore_dir" != "" ]; then
+                echo "Restoring working directory: $restore_dir"
+                cd "$restore_dir"
+            fi
             echo "issuing: unzip over _stash.zip (to restore timestamps)"
             # note: unzip options: -o overwrite; -v verbose:
             echo "unzip -v -o _stash.zip" >> "$log"
@@ -262,6 +262,17 @@ function git-commit-and-push {
     local log
     log=$(get-temp-log-name "commit")
     #
+    # TODO: rework so that message passed as argument (to avoid stale messages from environment)
+    local message="$GIT_MESSAGE";
+    if [ "$message" = "..." ]; then
+        echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
+        return 1
+    fi
+    if [ "$message" = "" ]; then
+        echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE-typo error)"
+        return 1
+    fi
+    #
     local git_user="n/a"
     local git_token="n/a"
     if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
@@ -276,16 +287,18 @@ function git-commit-and-push {
         echo "issuing: git add \"$*\""
         git-add-plus "$@" >> "$log"
     fi
-    # TODO: rework so that message passed as argument (to avoid stale messages from environment)
-    local message="$GIT_MESSAGE";
-    if [ "$message" = "..." ]; then
-        echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
-        return 1
-    fi
-    if [ "$message" = "" ]; then
-        echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE error)"
-        return 1
-    fi
+    ##
+    ## OLD:
+    ## # TODO: rework so that message passed as argument (to avoid stale messages from environment)
+    ## local message="$GIT_MESSAGE";
+    ## if [ "$message" = "..." ]; then
+    ##     echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
+    ##     return 1
+    ## fi
+    ## if [ "$message" = "" ]; then
+    ##     echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE error)"
+    ##     return 1
+    ## fi
 
     # Push the changes after showing synopsis and getting user confirmation
     echo ""
@@ -440,7 +453,7 @@ function git-restore-file-helper {
     shift
     log=$(get-temp-log-name "restore");
     if [ "$option" = "--both" ]; then
-	option="--worktree --staged"
+        option="--worktree --staged"
     fi
 
     # Isolate old versions
@@ -556,13 +569,13 @@ function alt-invoke-next-single-checkin {
         if [ "$mod_file" = "" ]; then
             echo "Warning: unable to infer modified file. Perhaps,"
             echo "    Tha-tha-that's all folks"'!'
-	    echo ""
-	    local divider
-	    divider=$(perl -e 'print("." x 80);')
-	    echo "$divider"
-	    ## OLD: git-status | head
-	    git-status
-	    echo "..."
+            echo ""
+            local divider
+            divider=$(perl -e 'print("." x 80);')
+            echo "$divider"
+            ## OLD: git-status | head
+            git-status
+            echo "..."
             return;
         fi
     fi
@@ -632,11 +645,11 @@ alias git-next-checkin='invoke-alt-checkin'
 function git-checkout-branch {
     git branch | grep -c "$1";
     if [ $? ]; then
-	## OLD: git-command checkout "$1";
-	# note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
-	git-command checkout "$1" --;
+        ## OLD: git-command checkout "$1";
+        # note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
+        git-command checkout "$1" --;
     else
-	echo "Error: unknown branch"
+        echo "Error: unknown branch"
     fi;
 }
 
