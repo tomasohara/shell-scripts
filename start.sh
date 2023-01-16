@@ -172,7 +172,9 @@ case "$lower_file" in
     *.mp3 | *.wav) invoke vlc "$@" & ;;
     
     # MS Office and LibreOffice files: word processor files, spreadsheets, etc.
-    *.doc | *.docx | *.pptx | *.odp | *.odt | *.odg | *.xls | *.xlsx | *.csv) invoke "$office_program" "$@" & ;;
+    # warning: this only works well for MS-specific extension (.
+    # if other applications are associated (e.g,. TextEdit for .rtf), then need to invoke via specific office program [maldito mac/microsoft].
+    *.doc | *.docx | *.pptx | *.odp | *.odt | *.odg | *.rtf | *.xls | *.xlsx | *.csv) invoke "$office_program" "$@" & ;;
 
     # HTML files and XML files
     # TODO: convert filename arguments to use file:// prefix (to distinguish from URL's)
