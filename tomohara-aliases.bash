@@ -578,7 +578,7 @@ append-path "$HOME/perl/bin"
 # used at Convera).
 ## OLD: export TIME_CMD=/usr/bin/time
 ## BAD: export TIME_CMD="command time"
-# note: command is a binary under MacOs built just a shell builtin under Linux
+# note: command is a binary under MacOs but just a shell builtin under Linux
 export TIME_CMD="command time"
 if [ "$(which "command" 2> /dev/null)" == "" ]; then
     export TIME_CMD=/usr/bin/time
