@@ -67,3 +67,8 @@ conditional-source "$TOM_BIN/tomohara-proper-aliases.bash"
 
 # User-specific mount directory
 cond-export MNT /media/"$USER"
+
+# Linux stuff
+if [ "$(under-linux)" = "1" ]; then
+    cond-export WNSEARCHDIR /usr/share/wordnet
+fi
