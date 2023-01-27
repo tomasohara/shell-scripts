@@ -31,7 +31,7 @@ if [ "$1" = "" ]; then
     echo "$0 --"
     echo ""
     ## TODO: example 2
-    echo "ROOT_BACKUP_DIR=~/usb/exfat-adhoc MAX_DAYS_OLD=365 MAX_SIZE_CHARS=10000000 $script --"
+    echo "ROOT_BACKUP_DIR=~/usb/sd512 MAX_DAYS_OLD=\$((3*365/12)) MAX_SIZE_CHARS=\$((5 * 1024**2)) $script --"
     echo ""
     echo "Notes:"
     echo "- By default, included files mopdified within 30 days and no larger than 1mb."
@@ -96,7 +96,11 @@ fi
    export SOURCE_DIR="$PWD"
    ## TODO: pre-select based on existence (i.e., prioritized check)
    ## OLD: export BACKUP_DIR=~tohara/"usb/sd512/backup/$HOSTNAME"
-   root_backup_dir=${ROOT_BACKUP_DIR:-~tohara/usb/sd512}
+   ROOT_BACKUP_DIR=${ROOT_BACKUP_DIR:-~tohara/usb/sd512}
+   if [ ! -e "$ROOT_BACKUP_DIR" ]; then
+       echo "Error: ROOT_BACKUP_DIR directory must exit ($ROOT_BACKUP_DIR)."
+       exit
+   fi
    export BACKUP_DIR="$root_backup_dir/backup/$HOSTNAME"
    ## -or-: export BACKUP_DIR=~tohara/"usb/pando-xfer/backup/$HOSTNAME"
    ## -or-: export BACKUP_DIR=~tohara/"usb/exfat-adhoc/backup/$HOSTNAME"
