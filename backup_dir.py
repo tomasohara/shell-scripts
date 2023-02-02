@@ -33,23 +33,25 @@ BACKUP_DIR = system.getenv_text("BACKUP_DIR", HOME_DIR,
                                 "Base directory for backups")
 LOG_DIR = system.getenv_text("LOG_DIR", ".",
                              "Directory for log files")
-
-def create_backup_folder(source,dry_run=False):
+DRY_RUN = system.getenv_bool("DRY_RUN", False, "Dry run mode")
+def create_backup_folder(source):
     """Try to create the backup folder if it doesn't exist"""
     ## OLD: backup_dir = os.path.join(os.environ["HOME"], socket.gethostname())
     backup_dir = os.path.join(BACKUP_DIR, socket.gethostname())
     ## OLD: base_dir = source.split("/")[-2]
     base_dir = gh.basename(source)
-    if dry_run:
+    if DRY_RUN:
         system.print_stderr(f"mkdir -p {backup_dir}")
     else:
         try:
             os.makedirs(backup_dir, exist_ok=True)
         except OSError as err:
-            print(err)
+            print(f"Error creating backup directory: {err}")
+            logging.error("Error creating backup directory: %err")
     total, used, free = tuple(
         number / 1073741824 for number in shutil.disk_usage(backup_dir)
     )
+    #OLD:if free < total * 0.05: print("Error: Not enough space to make backup")
     print(f"{backup_dir}: Total={total:1f} Used={used:.1f} Free={free:.1f} "
         f"{free/total*100:.1f}% of the total space)"
     )
@@ -102,19 +104,21 @@ def backup_derive(source, max_days_old, max_size_chars):
     return basename
 
 
-def sort_files(walkdir, days, size, dry_run=False):
+def sort_files(walkdir, days, size):
     """Walks inside selected path and sift files based on given parameters"""
     logging.info("Starts walking inside path, some errors are expected")
     max_days_old = days * 86400  # Time in days converted to seconds
     max_size_chars = size * 1048576  # max_size_chars in megabytes converted to bytes
     lista = []  # Initializes a new empty list
     # Walks inside every source and file in walkdir
-    if dry_run:
+    if DRY_RUN:
         system.print_stderr("Dry run: Creating list of files to backup")
-    expr = os.walk(walkdir) if not dry_run else tqdm(os.walk(walkdir), desc='Creating list')
+    expr = os.walk(walkdir) if not DRY_RUN else tqdm(os.walk(walkdir), desc='Creating list')
+    #OLD:for root, _, files in os.walk(walkdir):
     for root, _, files in expr:
         for file in files:
             try:
+                #OLD:if os.path.getsize(filepath) < max_size_chars and time.time() - os.path.getmtime(filepath) < max_days_old
                 if (
                     os.stat(os.path.join(root, file)).st_size < max_size_chars
                     and time.time() - os.path.getmtime(os.path.join(root, file))
@@ -129,11 +133,11 @@ def sort_files(walkdir, days, size, dry_run=False):
     return lista
 
 
-def create_tar(basename, lista, dry_run=False):
+def create_tar(basename, lista):
     """Creates a simple 7z file and writes files on it"""
     debug.trace(4, f"create_tar({basename}, {lista}")
     logging.info("Starts creating tar.gz file")
-    if dry_run:
+    if DRY_RUN:
         system.print_stderr("Dry run, no archive will be created")
         system.print_stderr(f"Creating archive {basename}.tar.gz")
         for _ in tqdm(lista, desc="Creating archive"):
@@ -180,15 +184,16 @@ def create_encrypted_7z(password, basename, lista):
     logging.info("Finish creating encrypted 7z file")
 
 
-def deactivate_password_prompt(ctx, _, value):
-    """Deactivates password prompt if --dry-run is on"""
-    if value:
-        for parameter in ctx.command.params:
-            parameter.prompt = None
+def deactivate_prompts(ctx, _, value):
+    """Deactivates prompt except if -e is on"""
+    if not value:
+        for param in ctx.command.params:
+            param.prompt = None
     return value
 
 
 @click.command()
+@click.option("-f", "--full", is_flag=True, help="Full backup. Overrides size and days", callback=deactivate_prompts)
 @click.option(
     "--password",
     prompt=True,
@@ -198,7 +203,6 @@ def deactivate_password_prompt(ctx, _, value):
     help="Blank for no encryptation",
 )
 @click.option("-S", "--source", default=os.getcwd, help="Alternative source")
-@click.option("-f", "--full", is_flag=True, help="Full backup. Overrides size and days")
 ## OLD
 ## @click.option("-d", "--days", required=True, type=int, help="Max days since modification")
 ## @click.option("-s", "--size", required=True, type=int, help="Max size in MB")
@@ -210,16 +214,16 @@ def deactivate_password_prompt(ctx, _, value):
     is_flag=True,
     help="Alternative encrypt using gpg. Faster but requires a Linux system",
 )
-@click.option('--dry_run', is_flag=True, callback=deactivate_password_prompt)
+@click.option('--DRY_RUN', is_flag=True)
 
-def main(password, source, full, days, size, gpg, dry_run):
+def main(password, source, full, days, size, gpg): # pylint: disable=too-many-arguments
     """Main function"""
     debug.trace_fmt(3, "main{args}",
-                    args=tuple([password, source, full, days, size, gpg, dry_run]))
-    if dry_run:
+                    args=tuple([password, source, full, days, size, gpg, DRY_RUN]))
+    if DRY_RUN:
         logging.info("Dry run")
         system.print_stderr("Dry run")
-    create_backup_folder(source, dry_run)
+    create_backup_folder(source)
     logging.info("Checking --full flag")
     if full:
         logging.info("Changing days and size to infinite (--full)")
@@ -232,9 +236,8 @@ def main(password, source, full, days, size, gpg, dry_run):
         size = 10
         system.print_stderr(f"FYI: Using {size} size [mb]")
 
-
     basename = backup_derive(source, days, size)
-    lista = sort_files(source, days, size, dry_run)
+    lista = sort_files(source, days, size)
     logging.info("Testing password")
     if password:
         if gpg:
@@ -245,7 +248,7 @@ def main(password, source, full, days, size, gpg, dry_run):
             create_encrypted_7z(password, basename, lista)
     else:
         logging.info("Password not given")
-        create_tar(basename, lista, dry_run)
+        create_tar(basename, lista)
 
 
 if __name__ == "__main__":
