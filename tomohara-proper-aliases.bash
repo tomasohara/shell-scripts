@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 #
 # tomohara-proper-aliases.bash: aliases not intended for general consumption
+# (e.g., new location for idiosyncratic stuff in tomoohara-aliases.bash)
 #
 # note:
 # - Maldito shellcheck (i.e., lack of menomic codes on top of nitpicking):
@@ -105,5 +106,6 @@ quiet-unalias ps-time
 alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
 
 #................................................................................
-# Idiosyncratic stuff
+# Idiosyncratic stuff (n.b., doubly so given "tomohara-proper" part of filename)
 alias all-tomohara-settings='tomohara-aliases; tomohara-settings; more-tomohara-aliases'
+alias kill-kdiff3='kill-em kdiff3'
