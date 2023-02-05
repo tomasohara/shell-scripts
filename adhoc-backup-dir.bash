@@ -101,7 +101,7 @@ fi
        echo "Error: ROOT_BACKUP_DIR directory must exit ($ROOT_BACKUP_DIR)."
        exit
    fi
-   export BACKUP_DIR="$root_backup_dir/backup/$HOSTNAME"
+   export BACKUP_DIR="$ROOT_BACKUP_DIR/backup/$HOSTNAME"
    ## -or-: export BACKUP_DIR=~tohara/"usb/pando-xfer/backup/$HOSTNAME"
    ## -or-: export BACKUP_DIR=~tohara/"usb/exfat-adhoc/backup/$HOSTNAME"
    mkdir -p "$BACKUP_DIR"
