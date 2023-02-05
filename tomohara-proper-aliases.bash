@@ -72,7 +72,7 @@ function tabify {
 function trace-vars {
     local var
     for var in "$@"; do
-	# shellcheck disable=SC2027
+	# shellcheck disable=SC2027,SC2046
 	echo -n "$var="$(eval echo "\$$var")"; "
     done
     echo
@@ -83,11 +83,27 @@ function trace-vars {
     ##  echo $(eval echo $var_spec | tabify)
 }
 
+#................................................................................
+# Snapshot related
+
+# rename-last-snapshot(new-name): rename most recent snapshot to NEW-NAME (excluding renamed files)
+# example:
+#    $ rename-last-snapshot "sagemaker-users.pnmg"
+#    "Screen Shot 2023-02-01 at 12.21.06 PM.png" -> "sagemaker-users.pnmg"
+function rename-last-snapshot {
+    local new_name="$1"
+    local last_file
+    last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
+    move "$last_file" "$new_name"		
+}
+
+#................................................................................
 # Linux stuff
-# shellcheck disable=SC2016
 ## TEMP:
 quiet-unalias ps-time
+# shellcheck disable=SC2016
 alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
 
+#................................................................................
 # Idiosyncratic stuff
 alias all-tomohara-settings='tomohara-aliases; tomohara-settings; more-tomohara-aliases'
