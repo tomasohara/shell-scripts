@@ -2,6 +2,8 @@
 #
 # note:
 # - New place for settings previously put in tomohara-aliases.bash.
+# - This mainly is for enironment variables, Bash variables and other settings
+#   not directly related to aliases or functions.
 # TODO:
 # - ** Move misc. settings from .bashrc and tomohara-aliases.bash here.
 # - Flesh out.
@@ -40,7 +42,10 @@ export PATH="$PATH:."
 ## OLD: export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib:$HOME/lib/linux
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib:$HOME/lib/$OSTYPE_BRIEF"
 
-
+# Define HOST_NICKNAME from ~/.host-nickname if unset or the default
+if [[ ("$HOST_NICKNAME" = "") || ("$HOST_NICKNAME" = "tpo-host") ]]; then
+    export HOST_NICKNAME="$(cat ~/.host-nickname 2> /dev/null | grep -v '^#')";
+fi
 
 ## OLD: prepend-path "$HOME/python/Mezcla/mezcla"
 add-python-path "$HOME/python/Mezcla/mezcla"
