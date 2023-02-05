@@ -172,6 +172,7 @@ while (<>) {
 
 	   # Miscellaneous errors
 	   || /wn: invalid search/
+	   || /socket has failed to (bind|listen)/
 	   ) {
 	$has_error = &TRUE;
 	&debug_print(&TL_VERY_VERBOSE, "2. has_error=$has_error\n");
