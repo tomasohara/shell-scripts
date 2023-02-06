@@ -39,6 +39,7 @@ from collections import defaultdict
 import os
 import re
 import click
+import openai
 # Local modules
 import mezcla
 from mezcla import debug
@@ -151,6 +152,37 @@ class Bash2Python:
             line = line.replace(values, f"range({numberone}, {numbertwo})")
         return line
 
+    def codex(self, line):
+        """Uses OpenAI Codex to translate Bash to Python"""
+        # Apply for an API Key at https://beta.openai.com
+        openai.api_key = "YOUR_API_KEY"
+        # Define the code generation prompt
+        prompt = f"Convert this Bash snippet to a one-liner Python snippet: {line}"
+        # Call the Codex API
+        response = openai.Completion.create(
+            engine="text-davinci-002",
+            prompt=prompt,
+            max_tokens=3*len(line),
+            n=1,
+            stop=None,
+            temperature=0.6, # more of this makes response more inestable
+        )
+
+        # Get the generated code
+        i = 0
+        while i < len(response["choices"]):
+            # Check if the text of the choice matches the input
+            code = response["choices"][i]["text"].strip().replace("\n", "")
+            if code in line:
+                # If a match is found, access the next choice
+                if i + 1 < len(response["choices"]):
+                    code = response["choices"][i + 1]["text"].strip().replace("\n", "")
+                    break
+            # Increment the index
+            i += 1
+        comment = "#" + code
+        return comment
+
     def var_replace(self, line, other_vars=None, indent=None, is_condition=False, is_loop=False):
         # Tana-note: I'm not convinced this is the best way to do this but it works for now
         ## TODO?: Clean up this mess
@@ -187,7 +219,8 @@ class Bash2Python:
             line = my_re.group(2)
         # Check variable references and $(...) constructs
         bash_commands = re.findall(r'\$\(.*\)', line)  # finds all bash commands
-        bash_vars = re.findall(r'\$\w+', line)  # finds all bash variables
+        bash_vars_with_defaults = re.findall(r'\$\{\w+:-[^\}]+\}', line)  # finds all bash variables with default values
+        bash_vars = re.findall(r'\$\w+', line)  # finds the rest of bash variables
         if other_vars:
             bash_vars += other_vars
 
@@ -201,8 +234,15 @@ class Bash2Python:
 
         # Replace $var references with Python {var}, excluding Bash and environment variables
         has_bash_var = False
-        for var in bash_vars:
-            if (var[1:] in self.bash_var_hash) and (var not in self.variables):
+        has_default = False
+        for var in bash_vars + bash_vars_with_defaults:
+            if var in bash_vars_with_defaults:
+                var_name = re.search(r'\$\{(\w+):-[^\}]+\}', var).group(1)
+                var_default = re.search(r'\$\{\w+:-(.*)\}', var).group(1)
+                line = line.replace(var, f"{{{var_name} if {var_name} is not None else '{var_default}'}}")
+                has_bash_var = True
+                has_default = True
+            elif (var[1:] in self.bash_var_hash) and (var not in self.variables):
                 debug.trace(4, "Excluding Bash-defined variable {var}")
             else:
                 line = line.replace(var, "{" + var[1:] + "}")
@@ -227,7 +267,7 @@ class Bash2Python:
         if "'" in line:
             # note: Bash $'...' strings allows for escaped single quotes unlike '...'
             line = re.sub(r"[^\\]'", r"\\\\'", line)
-            line = f"$'{line}'"
+            line = f'"{line}"'
         else:
             line = f"'{line}'"
         debug.assertion(re.search("^'.*'$", line))
@@ -245,9 +285,13 @@ class Bash2Python:
             # Note: uses echo command with $(...) unless line already uses one
             if (not re.search(r"^f?'echo ", line)):
                 line = re.sub("'", "'echo ", line, count=1)
-            line = f"run({line}, skip_print={has_assignment})"
+            comment = self.codex(line)
+            line = f"run({line}, skip_print={has_assignment}) {comment}"
+        elif has_default:
+            line = line
         else:
-            line = f"run({line})"
+            comment = self.codex(line)
+            line = f"run({line}) {comment}"
         debug.assertion(not is_condition)
 
         # Add variable assignment and indentation
@@ -284,14 +328,12 @@ class Bash2Python:
 
         in_line = line
         # Iterate over operators and replace them with Python equivalents
-        for operator in operators:
-            if my_re.search(fr"(^.*\S+) *{operator} *(\S+.*$)", line) or my_re.search(r"(^.*\S+) -eq (\S+.*$)", line):
-                debug.trace(4, f"Operator {operator} test fixup")
-                line = my_re.group(1) + operators[operator] + my_re.group(2)
-        if "[ 1 ]" in line:  # if the line is a "true" bash statement
-            line = line.replace("[ 1 ]", "True")  # replace with python "true" statement
-        elif "[ 0 ]" in line:  # if the line is a "false" bash statement
-            line = line.replace("[ 0 ]", "False")  # replace with python "false" statement
+        for bash_operator, python_equivalent in operators.items():
+            line = re.sub(rf"(\S+) *{bash_operator} *(\S+)", fr"\1{python_equivalent}\2", line)
+
+        # Replace Bash true/false statements with Python equivalent
+        line = re.sub("\[ 1 \]", "True", line)
+        line = re.sub("\[ 0 \]", "False", line)
         debug.trace(5, f"operators({in_line!r}) => {line!r}")
         return line
 
@@ -337,7 +379,6 @@ class Bash2Python:
         for loop in loops:
             if my_re.search(fr"\s*\[?\s*{loop[0]} *(\S.*)\s*\]?; *{loop[1]}", line):
                 debug.trace(4, f"Processing {loop[0]} loop")
-
                 var = self.var_replace(my_re.group(1), is_loop=True)
                 var = self.operators(var)
                 body = f"{loop[0]} {var}:\n"
@@ -364,6 +405,7 @@ class Bash2Python:
                                 body += f"{statement[0]}:\n"
                                 loop_line = ""
                     if loop_line.strip() in self.LOOP_CONTROL:
+                        body += loop_line + "\n"
                         body += self.map_keyword(loop_line) + "\n"
                     elif loop_line.strip():
                         (converted, loop_line) = self.process_simple(loop_line)
@@ -398,6 +440,7 @@ class Bash2Python:
                 if not converted:
                     line = self.var_replace(line)
                     (converted, line) = self.process_simple(line)
+
                 # Adhoc fixups
                 python_commands.append(line)
         return "\n".join(python_commands)
@@ -422,6 +465,8 @@ def main(script, output, overview, execute):
             -Piping to file. (Uses bash for it)
             -All kind of calls to system. 
             -Printing (still using run(echo) for it)
+            -AI sugestions using OpenAI GPT-3 Codex (requires API key)
+            -Bash defaults
 Not working yet: 
             -For loops (there is an untested function)")
             -Writing on / reading files
