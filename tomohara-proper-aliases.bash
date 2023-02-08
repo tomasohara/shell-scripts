@@ -107,5 +107,5 @@ alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by
 
 #................................................................................
 # Idiosyncratic stuff (n.b., doubly so given "tomohara-proper" part of filename)
-alias all-tomohara-settings='tomohara-aliases; tomohara-settings; more-tomohara-aliases'
+alias all-tomohara-settings='tomohara-aliases; tomohara-settings; more-tomohara-aliases; tomohara-proper-aliases'
 alias kill-kdiff3='kill-it kdiff3'
