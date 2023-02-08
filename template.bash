@@ -34,7 +34,7 @@
 #         ${list[1]}                second element
 #         ${list[*]}                all elements
 #         "${list[@]}"              likewise all but individually quoted (a la "$@")
-#         list+=value               append value
+#         list+=(value)             append value
 #   - conditional expression
 #   - echo to stderr (or print)
 #   - expression evaluation
