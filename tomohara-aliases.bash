@@ -3055,6 +3055,7 @@ alias sleepy='sleepyhead'
 alias tomohara-aliases='source "$TOM_BIN/tomohara-aliases.bash"'
 alias tomohara-settings='source "$TOM_BIN/tomohara-settings.bash"'
 alias more-tomohara-aliases='source "$TOM_BIN/more-tomohara-aliases.bash"'
+alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 
 # Optional end tracing
 startup-trace 'out tomohara-aliases.bash'
