@@ -68,7 +68,7 @@ function shell-check-last-snippet {
 function tabify {
     perl -pe 's/ /\t/;'
 }
-# trace_vars(var, ...): trace each VAR in command line
+# trace-vars(var, ...): trace each VAR in command line
 # note: output format: VAR1=VAL1; ... VARn=VALn;
 function trace-vars {
     local var
@@ -82,6 +82,16 @@ function trace-vars {
     ## local var_spec="$*"
     ## echo "$var_spec" | tabify
     ##  echo $(eval echo $var_spec | tabify)
+}
+# trace-array-vars(var, ...): trace each ARRAY in command line
+# note: output format: VAR1=VAL1; ... VARn=VALn;
+function trace-array-vars {
+    local var
+    for var in "$@"; do
+	# shellcheck disable=SC2027,SC2046
+	echo -n "$var="$(eval echo "\${$var[@]}")"; "
+    done
+    echo
 }
 
 #................................................................................
