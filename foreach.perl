@@ -76,9 +76,10 @@ foreach my $var (&tokenize($init_vars)) {
 # pylos, helion, etc).
 # also restrict hosts used by late-evening users: ilios, orchomenos, etc
 # also hosts tied up by netscape, etc.: tenedos, kimmerion, corinth
-my($domain_name_command) = (&WIN32 ? "ipconfig | perl -ne 'print \$1 if /DNS Suffix.*:\\s*(\\S+)/;'" 
-			    : "domainname");
-## &init_var(*DOMAINNAME, &run_command($domain_name_command));
+## OLD:
+## my($domain_name_command) = (&WIN32 ? "ipconfig | perl -ne 'print \$1 if /DNS Suffix.*:\\s*(\\S+)/;'" 
+##                             : "domainname");
+my($domain_name_command) = "domainname.sh";
 &init_var(*DOMAINNAME, "");
 $DOMAINNAME = &run_command($domain_name_command) unless ($DOMAINNAME ne "");
 &init_var(*ssh, &FALSE);	# use ssh rather than rsh
