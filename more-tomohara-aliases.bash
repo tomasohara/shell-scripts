@@ -1,7 +1,7 @@
 # more-tomohara-aliases.bash: Additional aliases (& functions) that arern't
 # used on a regular basis. This supplements tomohara-aliases.bash.
 #
-# Not: OBSOLETE
+# Note: OBSOLETE and besides TOM-IDIOSYNCRATIC
 #
 
 function derive-ngram-frequency() {
