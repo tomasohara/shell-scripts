@@ -36,6 +36,7 @@ fi
 append-path "$PERLLIB"
 ## OLD (see below): prepend-path "$HOME/python/Mezcla/mezcla"
 append-path "$HOME/python"
+append-path "$TOM_BIN/adhoc"
 # Put current directoy at end of path; can be overwritting with ./ prefix
 export PATH="$PATH:."
 # Note: ~/lib only used to augment existing library, not pre-empt
