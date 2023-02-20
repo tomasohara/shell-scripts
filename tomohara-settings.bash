@@ -48,12 +48,17 @@ if [[ ("$HOST_NICKNAME" = "") || ("$HOST_NICKNAME" = "tpo-host") ]]; then
     export HOST_NICKNAME="$(cat ~/.host-nickname 2> /dev/null | grep -v '^#')";
 fi
 
+# Python stuff
 ## OLD: prepend-path "$HOME/python/Mezcla/mezcla"
 add-python-path "$HOME/python/Mezcla/mezcla"
 append-path "$HOME/mezcla-tom/examples:$HOME/python/examples:$TOM_BIN/bruno"
-
+#
 # HACK: make sure ~/mezcla-tom used if available
 if [ -e "$HOME/mezcla-tom" ]; then add-python-path "$HOME/mezcla-tom"; fi
+#
+# Make sure gradio apps accessible in local net
+# See https://superuser.com/questions/949428/whats-the-difference-between-127-0-0-1-and-0-0-0-0.
+export GRADIO_SERVER_NAME=0.0.0.0
 
 # Enable timestamp preservation during git-update alias operations (n.b., stash pop quirk)
 export PRESERVE_GIT_STASH=1
