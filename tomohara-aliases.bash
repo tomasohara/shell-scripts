@@ -1864,6 +1864,8 @@ alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
 alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
 alias move-adhoc-files='move-log-files; move-output-files'
 alias move-old-files='move-versioned-files "*" old'
+# move-versioned-files-alt: alternative version for moving all files with DDMMMDD-style timestamp into ./old
+alias move-versioned-files-alt='mkdir -p old; move *[0-9][0-9][a-z][a-z][a-z]*[0-9][0-9]* old'
 
 #--------------------------------------------------------------------------------
 
@@ -2180,6 +2182,8 @@ alias restart-system='shutdown-system --reboot'
 alias blank-screen='xset dpms force off'
 alias stop-service='systemctl stop'
 alias restart-service='sudo systemctl restart'
+# TODO: rename as map-internet-ports???
+alias map-ports='nmap'
 
 # get-free-filename(base, [sep=""], [ext=""]): get filename starting with BASE that is not used.
 # Notes: 1. If <base> exists <base><sep><N> checked until the filename not used (for N in 2, 3, ... ).
