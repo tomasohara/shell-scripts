@@ -212,15 +212,23 @@ function git-update-plus {
     # Optionally restore timestamps for changed files
     if [ "$changed_files" != "" ]; then
         if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
+	    ## OLD:
+            ## # Restore working directory
+            ## if [ "$restore_dir" != "" ]; then
+            ##     echo "Restoring working directory: $restore_dir"
+            ##     cd "$restore_dir"
+            ## fi
+
+            echo "issuing: unzip over _stash.zip (to restore timestamps)"
+            # note: unzip options: -o overwrite; -v verbose:
+            echo "unzip -v -o _stash.zip" >> "$log"
+            unzip -v -o _stash.zip >> "$log"
+	    
             # Restore working directory
             if [ "$restore_dir" != "" ]; then
                 echo "Restoring working directory: $restore_dir"
                 cd "$restore_dir"
             fi
-            echo "issuing: unzip over _stash.zip (to restore timestamps)"
-            # note: unzip options: -o overwrite; -v verbose:
-            echo "unzip -v -o _stash.zip" >> "$log"
-            unzip -v -o _stash.zip >> "$log"
         else
             echo "Not unzipping changes (because PRESERVE_GIT_STASH not 1)"
         fi
