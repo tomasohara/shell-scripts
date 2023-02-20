@@ -109,6 +109,12 @@ function rename-last-snapshot {
 }
 
 #................................................................................
+# Media related
+#
+# fix-transcript-timestamp(): put text on same line in YouTube transcripts
+alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
+
+#................................................................................
 # Linux stuff
 ## TEMP:
 quiet-unalias ps-time
