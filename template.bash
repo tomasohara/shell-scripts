@@ -43,6 +43,8 @@
 #   - early return
 #      return                       just inside functions
 #      exit                         early script termination; avoid in functions or if script sourced
+#   - history mechanism
+#     !?string[?]                   find last command with string
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
