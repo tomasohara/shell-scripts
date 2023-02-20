@@ -12,18 +12,18 @@
 #       # format: m h dom mon dow command
 #
 
-echo "0. $@"
+## DEBUG: echo "0. $@"
 
 # Enable Bash aliases, etc.
 ## maldito shellcheck: [SC1090: Can't follow non-constant source]
 # shellcheck disable=SC1090
 {
     shopt -s expand_aliases
-echo "1. $@"
+    ## DEBUG: echo "1. $@"
     source ~/bin/tomohara-aliases.bash
-echo "2. $@"
+    ## DEBUG: echo "2. $@"
     source ~/bin/tomohara-proper-aliases.bash
-echo "3. $@"
+    ## DEBUG: echo "3. $@"
     source ~/bin/tomohara-settings.bash
 }
 
@@ -31,7 +31,7 @@ echo "3. $@"
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #  
-echo "$@"
+## echo "$@"
 ## set -o xtrace
 ## DEBUG: set -o verbose
 
