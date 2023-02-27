@@ -38,6 +38,7 @@
 from collections import defaultdict
 import os
 import re
+import time
 import click
 import openai
 # Local modules
@@ -152,7 +153,7 @@ class Bash2Python:
             line = line.replace(values, f"range({numberone}, {numbertwo})")
         return line
 
-    def codex(self, line):
+    def codex_convert(self, line):
         """Uses OpenAI Codex to translate Bash to Python"""
         # Apply for an API Key at https://beta.openai.com
         openai.api_key = "YOUR_API_KEY"
@@ -174,6 +175,7 @@ class Bash2Python:
             # Check if the text of the choice matches the input
             code = response["choices"][i]["text"].strip().replace("\n", "")
             if code in line:
+                time.sleep(2)
                 # If a match is found, access the next choice
                 if i + 1 < len(response["choices"]):
                     code = response["choices"][i + 1]["text"].strip().replace("\n", "")
@@ -182,6 +184,7 @@ class Bash2Python:
             i += 1
         comment = "#" + code
         return comment
+
 
     def var_replace(self, line, other_vars=None, indent=None, is_condition=False, is_loop=False):
         # Tana-note: I'm not convinced this is the best way to do this but it works for now
@@ -285,13 +288,13 @@ class Bash2Python:
             # Note: uses echo command with $(...) unless line already uses one
             if (not re.search(r"^f?'echo ", line)):
                 line = re.sub("'", "'echo ", line, count=1)
-            comment = self.codex(line)
-            line = f"run({line}, skip_print={has_assignment}) {comment}"
+            comment = self.codex_convert(line)
+            line = f"run({line}, skip_print={has_assignment})"
         elif has_default:
             line = line
         else:
-            comment = self.codex(line)
-            line = f"run({line}) {comment}"
+            comment = self.codex_convert(line)
+            line = f"run({line})"
         debug.assertion(not is_condition)
 
         # Add variable assignment and indentation
@@ -314,7 +317,9 @@ class Bash2Python:
         # Dictionary with Bash operators and their Python equivalents
         operators = {"=": " == ",
                      "!=": " != ",
+                     "!": "not ",
                      "-eq": " == ",
+                     "-e": " os.path.exists ",
                      "-ne": " != ",
                      "-gt": " > ",
                      "-ge": " >= ",
@@ -329,8 +334,7 @@ class Bash2Python:
         in_line = line
         # Iterate over operators and replace them with Python equivalents
         for bash_operator, python_equivalent in operators.items():
-            line = re.sub(rf"(\S+) *{bash_operator} *(\S+)", fr"\1{python_equivalent}\2", line)
-
+            line = re.sub(rf"(\S*) *{bash_operator} *(\S*)", fr"\1{python_equivalent}\2", line).replace("[", "").replace("]", "")
         # Replace Bash true/false statements with Python equivalent
         line = re.sub("\[ 1 \]", "True", line)
         line = re.sub("\[ 0 \]", "False", line)
@@ -364,7 +368,9 @@ class Bash2Python:
         debug.trace(7, f"process_simple({in_line!r}) => ({converted}, {line!r})")
         return (converted, line)
 
+
     def process_compound(self, line, cmd_iter):
+        """Process compound statement conversion for LINE"""
         # Declare loop and statements as a tuple
         for_loop = ("for", "do", "done")
         while_loop = ("while", "do", "done")
@@ -410,17 +416,17 @@ class Bash2Python:
                     elif loop_line.strip():
                         (converted, loop_line) = self.process_simple(loop_line)
                         if converted:
-                            body += loop_line + "\n"
+                            body += "    " + loop_line + "\n"
                         else:
                             body += self.var_replace(loop_line.strip("\n"),
                                                      indent="    ") + "\n"
                     converted = True
-
+        print(body)
         line = stdout + body
         # debug.trace(7, f"process_compound({line!r}) => ({converted}, {line!r})")
         return (converted, line)
 
-    def format(self):
+    def format(self, codex):
         """Convert self.cmd into python, returning text"""  # TODO: refine
         # Tom-Note: This will need to be restructured. I preserved original for sake of diff.
         python_commands = []
@@ -429,19 +435,26 @@ class Bash2Python:
         if cmd_iter:
             for line in cmd_iter:  # for each line in the script
                 debug.trace_expr(5, line)
-                if (not line.strip()) or re.search(r"^\s*#", line):
+                if (not line.strip()) or re.search(r"^\s*#", line) or line.startswith("{") or line.startswith("}"):
                     python_commands.append(line.strip("\n"))
                     continue
                 line = line.strip("\n")
-                if line.startswith("#"):
-                    return "\n".join(python_commands)
+                # if comment line, skip
+                comment = ""
+                if "#" in line:
+                    line, comment = line.split("#", 1)
+                if codex:
+                    line = self.codex_convert(line)
+                    python_commands.append(line)
+                    continue
                 line = line[:-1] if ";" == line[-1] else line  # remove the ";" last character
                 (converted, line) = self.process_compound(line, cmd_iter)
                 if not converted:
                     line = self.var_replace(line)
                     (converted, line) = self.process_simple(line)
-
                 # Adhoc fixups
+                if comment:
+                    line += f" # {comment}"
                 python_commands.append(line)
         return "\n".join(python_commands)
 
@@ -456,10 +469,12 @@ class Bash2Python:
 @click.option("--output", "-o", help="Output file")
 @click.option("--overview", help="List of what is working for now")
 @click.option("--execute", is_flag=True, help="Try to run the code directly (probably brokes somewhere)")
-def main(script, output, overview, execute):
+@click.option("--line-numbers", is_flag=True, help="Add line numbers to the output")
+@click.option("--codex", is_flag=True, help="Use OpenAI Codex to port all the code. It's SLOW")
+def main(script, output, overview, execute, line_numbers, codex):
     """Entry point"""
     if overview:
-    	print("""Working: 
+        print("""Working: 
             -If, elif, else, and while.
             -Variable Assignments, all of them. 
             -Piping to file. (Uses bash for it)
@@ -476,8 +491,22 @@ Not working yet:
     debug.trace(3, f"main(): script={system.real_path(__file__)}")
     bash_snippet = script
     if not bash_snippet:
-        print("No script or snippet specified. Use --help for usage or --script to specify a script or snippet")
+        print("No script or snippet specified. Use --help for usage or --script to specify a script")
         return
+
+    if line_numbers:
+        with open(script, 'r') as infile, open(script + ".b2py", 'w') as outfile:
+            # Loop through each line in the input file
+            for i, line in enumerate(infile):
+                # Write the modified line to the output file
+                if line.startswith("#"):
+                    outfile.write(line)
+                elif line == "\n":
+                    outfile.write(line)
+                else:
+                    outfile.write(f"{line}#b2py #Line {i}" + "\n")
+        bash_snippet = script + ".b2py"
+
     # Show simple usage if --help given
     if USE_MEZCLA:
         dummy_main_app = Main(description=__doc__, skip_input=False, manual_input=False)
@@ -487,16 +516,16 @@ Not working yet:
     # Convert and print snippet
     b2p = Bash2Python(bash_snippet, "bash -c")
     if output:
-        with open(output, "w") as out_file:
+        with open(output, "rw") as out_file:
             out_file.write(b2p.header())
-            out_file.write(b2p.format())
+            out_file.write(b2p.format(codex))
     if execute:
         cmd = b2p.format()
         print(f"# {cmd}")
         print(eval(str(cmd)))
     else:
         print(b2p.header())
-        print(b2p.format())
+        print(b2p.format(codex))
 
 
 # -------------------------------------------------------------------------------
