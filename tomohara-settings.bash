@@ -67,6 +67,11 @@ export PRESERVE_GIT_STASH=1
 # make file globs cases insensitve
 # note: also include 'set completion-ignore-case on' in ~/.inputrc (see http://www.cygwin.com/cygwin-ug-net/setup-files.html)
 shopt -s nocaseglob
+#
+# Have less handle unicode (avoids reverse video display of hex, such as for non-breaking space U+FEFF)
+export LESSCHARSET=utf-8
+# Also have it display binary characters  as underline instead of reverse video (i.e., standout)
+export LESSBINFMT="*u<%02X>"
 
 # Don't enable default .bashrc settings
 cond-export SKIP_DEFAULT_BASHRC 1
