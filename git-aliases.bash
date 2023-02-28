@@ -449,6 +449,7 @@ function git-reset-file {
 
     # Forget state
     echo "issuing: git reset HEAD $*";
+    git reset HEAD "$@" >> "$log";
     ## TODO: git reset HEAD $reset_options "$@" >> "$log";
     ## NOTE: leads to "Cannot do hard reset with paths" error
     
