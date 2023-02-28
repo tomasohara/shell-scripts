@@ -427,10 +427,20 @@ function git-add-plus {
 # git-reset-file(file, ...): move FILE(s) out of way and "revert" to version in repo (i.e., reset)
 # NOTE: via https://www.atlassian.com/git/tutorials/undoing-changes/git-reset
 #     If git revert is a “safe” way to undo changes, you can think of git reset as the dangerous method.
+# Also see
+#     https://stackoverflow.com/questions/1125968/how-do-i-force-git-pull-to-overwrite-local-files
+#     https://stackoverflow.com/questions/11200839/why-git-cant-do-hard-soft-resets-by-path
 # TODO: clarify whether git add needed as well (due to maldito git)
 function git-reset-file {
     local log;
     log=$(get-temp-log-name "revert");
+    ## TODO:
+    ## local reset_options=""
+    ## if [ "$1" = "--hard" ]; then
+    ##     reset_options="$1";
+    ##     shift
+    ##     pause-for-enter $'Warning: reset --hard changes the both index and working tree!\nPress enter to proceed'
+    ## fi
 
     # Isolate old versions
     mkdir -p _git-trash >| "$log";
@@ -439,18 +449,30 @@ function git-reset-file {
 
     # Forget state
     echo "issuing: git reset HEAD $*";
-    git reset HEAD "$@" >> "$log";
+    ## TODO: git reset HEAD $reset_options "$@" >> "$log";
+    ## NOTE: leads to "Cannot do hard reset with paths" error
     
     # Re-checkout
+    # TODO: add option for 'git checkout HEAD -- ...'???
     echo "issuing: git checkout -- $*";
     git checkout -- "$@" >> "$log";
+
+    # Issue warning if stash non-empty
+    echo "issuing: git stash list"
+    local stash
+    stash=$(git stash list)
+    if [ "$stash" != "" ]; then
+	echo "Warning: non-empty stash:"
+        echo "$stash" | perl -pe 's/^/    /;'
+        echo "Consider issuing following: git stash drop"
+    fi
 
     # Sanity check
     git-alias-review-log "$log"
 }
 #
 alias git-revert-file-alias='git-reset-file'
-
+## TODO: alias git-reset-hard-alias='git-reset-file --hard'
 
 # git-restore-file-alias(file, ...): move FILE(s) out of way and "revert" to version in repo (i.e., reset)
 # NOTE: via https://stackoverflow.com/questions/7751555/how-to-resolve-git-stash-conflict-without-commit:
