@@ -816,7 +816,10 @@ alias symlinks='sublinks'
 # symlinks-proper: just show file name info for symbolic links, which starts at column 43
 alias symlinks-proper='symlinks | cut --characters=43-'
 #
-function sublinks-proper { sublinks "$@" | cut --characters=42-  | $PAGER; }
+## OLD: function sublinks-proper { sublinks "$@" | cut --characters=42-  | $PAGER; }
+ls_filename_col=40
+if [ "$(under-macos)" = "1" ]; then ls_filename_col=42; fi
+function sublinks-proper { sublinks "$@" | cut --characters=${ls_filename_col}-  | $PAGER; }
 alias symlinks-proper=sublinks-proper
 #
 alias glob-links='find . -maxdepth 1 -type l | sed -e "s/.\///g"'
@@ -2039,7 +2042,9 @@ alias tokenize='split-tokens'
 # NOTE: Usually Bash $'string' special tokens can be used instead
 #       (e.g., perl-echo "A\tB" => echo $'A\tB').
 # TODO: try to minimize use of quotes in perl-echo (e.g., need to mix single with double) due to bash quirks
-function perl-echo () { perl -e 'print "'"$1"'\n";'; }
+## OLD: function perl-echo () { perl -e 'print "'"$1"'\n";'; }
+function perl-echo () { perl -e 'print "'"$*"'\n";'; }
+## TODO: function perl-echo () { perl -e 'print "'"($*)"'\n";'; }
 ## MISC
 function perl-echo-sans-newline () { perl -e 'print "'"$1"'";'; }
 #
