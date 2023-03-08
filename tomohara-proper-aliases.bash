@@ -94,7 +94,8 @@ function trace-vars {
 function trace-array-vars {
     local var
     for var in "$@"; do
-	# shellcheck disable=SC2027,SC2046
+	# note: ignores SC1087 (error): Use braces when expanding arrays
+	# shellcheck disable=SC2027,SC2046,SC1087
 	echo -n "$var="$(eval echo "\${$var[@]}")"; "
     done
     echo
