@@ -23,6 +23,8 @@
 #     $#                           number of positional arguments
 #     $*                           all positional arguments
 #     "$@"                         likewise all args but with individually quoting
+# - tools like OpenAI Codex and GitHub Copliot can be used to translate Bash constructs
+#     https://github.com/features/copilot
 # TODO:
 #  - variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
 #     note: EXPR is C style;
