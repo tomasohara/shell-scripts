@@ -48,6 +48,12 @@ function clone-repo () {
     ls -R "$repo" >> "$log"
 }
 
+# JSON stuff
+function json-validate () {
+    local file="$1"
+    python -c "import json; from mezcla import system; print(json.loads(system.read_file('$file')))" | head -5 | truncate-width
+}
+
 # Misc. stuff
 ## OLD: alias script-config='script ~/config/_config-$(T).log'
 function script-config {
@@ -98,11 +104,16 @@ function trace-array-vars {
 # Snapshot related
 
 # rename-last-snapshot(new-name): rename most recent snapshot to NEW-NAME (excluding renamed files)
+# Note: includes dated suffix unless date-like one used
 # example:
 #    $ rename-last-snapshot "sagemaker-users.pnmg"
 #    "Screen Shot 2023-02-01 at 12.21.06 PM.png" -> "sagemaker-users.pnmg"
 function rename-last-snapshot {
     local new_name="$1"
+    # Append dated image suffix unless date-like suffix w/ extension used
+    if [[ ! "$new_name" =~ [0-9][0-9]*.png ]]; then
+	new_name="$new_name-$(T).png"
+    fi
     local last_file
     last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
     move "$last_file" "$new_name"		
