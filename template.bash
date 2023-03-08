@@ -112,8 +112,9 @@ while [ "$moreoptions" = "1" ]; do
     # TODO : add real options
     if [ "$1" = "--trace" ]; then
 	set -o xtrace
-    elif [ "$1" = "--fubar" ]; then
-	echo "fubar"
+    elif [ "$1" = "--TODO-fubar" ]; then
+	## TODO: implement
+	echo "TODO-fubar"
     elif [[ ("$1" = "--") || ("$1" = "-") ]]; then
 	break
     else
