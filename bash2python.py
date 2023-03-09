@@ -39,8 +39,11 @@ from collections import defaultdict
 import os
 import re
 import time
+
+# Installed modules
 import click
 import openai
+
 # Local modules
 import mezcla
 from mezcla import debug
@@ -49,7 +52,8 @@ from mezcla.main import Main
 from mezcla.my_regex import my_re
 from mezcla import system
 from mezcla.text_utils import version_to_number
-from mezcla.glue_helpers import run_via_bash as run
+
+## OLD: from mezcla.glue_helpers import run_via_bash as run
 
 # Version check
 debug.assertion(version_to_number("1.3.4") <= version_to_number(mezcla.__version__))
@@ -61,6 +65,12 @@ USE_MEZCLA = system.getenv_bool("USE_MEZCLA", (USER == "tomohara"),
                                 "Whether to use mezcla support")
 INIT_FILE = system.getenv_value("INIT_FILE", None,
                                 "File to source before running Bash command")
+OPENAI_API_KEY = system.getenv_value("OPENAI_API_KEY", None,
+                                     "API key for OpenAI")
+JUST_CODEX = system.getenv_bool("JUST_CODEX", False,
+                                "Only do conversion via Codex")
+USE_CODEX = system.getenv_bool("USE_CODEX", (OPENAI_API_KEY or JUST_CODEX),
+                               "Whether to use codex support")
 
 # Global settings
 if USE_MEZCLA:
@@ -124,6 +134,8 @@ class Bash2Python:
     KEYWORD_MAP = {"function": "def"}
     LOOP_CONTROL = ["break", "continue"]
 
+    ## TODO: simplify initializer (e.g., make bash command and shell option optional)
+    ##
     def __init__(self, bash, shell):
         self.cmd = bash
         self.exec = shell
@@ -142,6 +154,8 @@ class Bash2Python:
         return line
 
     def for_in(self, line):
+        """TODO: handle FOR var IN list loop"""
+        ## NOTE: This regex needs to be tightened up (e.g., the .* parts).
         if my_re.search(r"for .* in (.* )", line):
             value = my_re.group(1)
             values = value.replace(" ", ", ")
@@ -155,21 +169,32 @@ class Bash2Python:
 
     def codex_convert(self, line):
         """Uses OpenAI Codex to translate Bash to Python"""
+        debug.assertion(USE_CODEX)
+        if not USE_CODEX:
+            return "# internal error"
+
         # Apply for an API Key at https://beta.openai.com
-        openai.api_key = "YOUR_API_KEY"
+        ## OLD: openai.api_key = "YOUR_API_KEY"
+        openai.api_key = OPENAI_API_KEY
         # Define the code generation prompt
-        prompt = f"Convert this Bash snippet to a one-liner Python snippet: {line}"
+        ## OLD: prompt = f"Convert this Bash snippet to a one-liner Python snippet: {line}"
+        TARGET_LANG = system.getenv_text("TARGET_LANG", "Python",
+                                         "Target language for Codex")
+        prompt = f"Convert this Bash snippet to a one-liner {TARGET_LANG} snippet: {line}"
         # Call the Codex API
         response = openai.Completion.create(
             engine="text-davinci-002",
             prompt=prompt,
-            max_tokens=3*len(line),
+            max_tokens=3 * len(line),
             n=1,
             stop=None,
-            temperature=0.6, # more of this makes response more inestable
+            temperature=0.6,  # more of this makes response more inestable
         )
+        debug.trace_expr(5, response, max_len=4096)
 
         # Get the generated code
+        # TODO: What the Hades is going on here?!
+        # NOTE: It should just get the first result (and perhaps warn if more given).
         i = 0
         while i < len(response["choices"]):
             # Check if the text of the choice matches the input
@@ -184,7 +209,6 @@ class Bash2Python:
             i += 1
         comment = "#" + code
         return comment
-
 
     def var_replace(self, line, other_vars=None, indent=None, is_condition=False, is_loop=False):
         # Tana-note: I'm not convinced this is the best way to do this but it works for now
@@ -281,6 +305,7 @@ class Bash2Python:
 
         # Derive run invocation, with output omitted for variable assignments
         has_assignment = (variable != "")
+        comment = ""
         if (has_assignment and ("$" not in line)):
             # Remove outer quotes (e.g., '"my dog"' => "my dog" and '123' => 123)
             line = re.sub(r"^'(.*)'$", r"\1", line)
@@ -291,11 +316,13 @@ class Bash2Python:
             comment = self.codex_convert(line)
             line = f"run({line}, skip_print={has_assignment})"
         elif has_default:
-            line = line
+            ## OLD: line = line
+            pass
         else:
             comment = self.codex_convert(line)
             line = f"run({line})"
         debug.assertion(not is_condition)
+        debug.trace_expr(3, line, comment)
 
         # Add variable assignment and indentation
         try:
@@ -307,7 +334,6 @@ class Bash2Python:
             pass
         if indent:
             line = indent + line
-
 
         debug.trace(5, f"var_replace({in_line!r}, othvar={other_vars} ind={indent} cond={is_condition}) => {line!r}")
         return line
@@ -328,16 +354,18 @@ class Bash2Python:
                      "-z": " '' == ",
                      "-n": " '' != ",
                      "&&": " and ",
-                     "\|\|": " or ",  # NOTE: need to escape | for Python
+                     r"\|\|": " or ",  # NOTE: need to escape | for Python
                      }
 
         in_line = line
         # Iterate over operators and replace them with Python equivalents
         for bash_operator, python_equivalent in operators.items():
-            line = re.sub(rf"(\S*) *{bash_operator} *(\S*)", fr"\1{python_equivalent}\2", line).replace("[", "").replace("]", "")
+            line = re.sub(rf"(\S*) *{bash_operator} *(\S*)", fr"\1{python_equivalent}\2", line).replace("[",
+                                                                                                        "").replace("]",
+                                                                                                                    "")
         # Replace Bash true/false statements with Python equivalent
-        line = re.sub("\[ 1 \]", "True", line)
-        line = re.sub("\[ 0 \]", "False", line)
+        line = re.sub(r"\[ 1 \]", "True", line)
+        line = re.sub(r"\[ 0 \]", "False", line)
         debug.trace(5, f"operators({in_line!r}) => {line!r}")
         return line
 
@@ -369,69 +397,80 @@ class Bash2Python:
         return (converted, line)
 
 
+
     def process_compound(self, line, cmd_iter):
         """Process compound statement conversion for LINE"""
         # Declare loop and statements as a tuple
-        for_loop = ("for", "do", "done")
-        while_loop = ("while", "do", "done")
-        if_statement = ("if", "then", "fi")
-        elif_statement = ("elif", "then", "fi")
-        else_statement = ("else", "", "fi")  # Else statements do not have a keyword so None
-        loops = (for_loop, while_loop, if_statement)
-        statements = (elif_statement, else_statement)
-        stdout = ""
-        body = line
+        for_loop = ("for", " do ", "done")
+        while_loop = ("while", " do ", "done")
+        if_loop = ("if", "then", "fi")
+        elif_loop = ("elif", "then", "fi")
+        else_loop = ("else", "", "fi")  # Else statements do not have a keyword so None
+        loops = (elif_loop, for_loop, while_loop, if_loop, else_loop)
+        body = ""
+        loop_count = 0
+        loopy = []
+        actual_loop = ()
         converted = False
-        for loop in loops:
-            if my_re.search(fr"\s*\[?\s*{loop[0]} *(\S.*)\s*\]?; *{loop[1]}", line):
-                debug.trace(4, f"Processing {loop[0]} loop")
-                var = self.var_replace(my_re.group(1), is_loop=True)
+        loop_line = line
+        indent = ""
+        #Emulates a do while loop in python
+        do_while = True
+        while loop_count > 0 or do_while:
+            loop_line = loop_line.strip()
+            do_while = False
+            if not loop_line or loop_line == "\n":
+                break
+            elif "#" in loop_line:
+                body += indent + "    " + loop_line + "\n"
+            elif my_re.search(fr"^(?!\*)\s*({loops[0][0]}|{loops[1][0]}|{loops[2][0]}|{loops[3][0]}) *(\S.*)\s*\]?", loop_line):
+                if my_re.group(1) != "elif":
+                    loop_count += 1
+                    indent = "    " * (loop_count - 1)
+                    loopy.append(my_re.group(1) + "_loop")
+                else:
+                    loopy.append("elif_loop")
+                var = self.var_replace(my_re.group(2), is_loop=True)
                 var = self.operators(var)
-                body = f"{loop[0]} {var}:\n"
-                while True:
-                    loop_line = next(cmd_iter, None)
-                    debug.trace_expr(5, loop_line)
-                    if loop_line is None or loop_line == "\n" or loop_line.strip() == loop[1]:
-                        loop_line = ""
-                        break
-                    if loop_line.startswith("#"):
-                        body += loop_line
-                        continue
-                    if my_re.search(fr"\s*{loop[2]}\)?", loop_line):
-                        break
-                    loop_line = loop_line.strip("\n").strip(";")
-                    # If next line contents elif or else, add to body
-                    if loop[0] == "if":
-                        for statement in statements:
-                            if my_re.search(fr"\s*{statement[0]} *(\S.*); *{statement[1]}", line):
-                                var = my_re.group(1).replace("[", "").replace("]", "")
-                                body += f"{statement[0]} {var}:\n"
-                                loop_line = ""
-                            elif loop_line.strip() == statement[0]:
-                                body += f"{statement[0]}:\n"
-                                loop_line = ""
-                    if loop_line.strip() in self.LOOP_CONTROL:
-                        body += loop_line + "\n"
-                        body += self.map_keyword(loop_line) + "\n"
-                    elif loop_line.strip():
-                        (converted, loop_line) = self.process_simple(loop_line)
-                        if converted:
-                            body += "    " + loop_line + "\n"
-                        else:
-                            body += self.var_replace(loop_line.strip("\n"),
-                                                     indent="    ") + "\n"
-                    converted = True
-        print(body)
-        line = stdout + body
-        # debug.trace(7, f"process_compound({line!r}) => ({converted}, {line!r})")
-        return (converted, line)
+                actual_loop = eval(loopy[-1])
+                body += f"{indent}{actual_loop[0]} {var}:\n"
+                debug.trace_expr(5, loop_line)
+                debug.trace(4, f"Processing {loopy[0][0]} loop")
+            elif loop_line == "else":
+                body += indent + loop_line + ":\n"
+                loop_count += 1
+            else:
+                if not actual_loop:
+                    return (False, line)
+                    break
+                elif actual_loop[2] in loop_line:
+                    loop_count = loop_count - 1
+                    loopy.pop()
+                    try:
+                        actual_loop = eval(loopy[-1])
+                    except IndexError:
+                        actual_loop = ()
+                elif loop_line.strip() in self.LOOP_CONTROL:
+                    body += loop_line + "\n"
+                    body += self.map_keyword(loop_line) + "\n"
+                elif loop_line.strip():
+                    (converted, loop_line) = self.process_simple(loop_line)
+                    if converted:
+                        body += indent + "    " + loop_line + "\n"
+                    else:
+                        body += self.var_replace(loop_line.strip("\n"),
+                                                 indent="    " * loop_count) + "\n"
+                converted = True
+                print(f"loop_count: {loop_count}", f"loopy: {loopy}", f"actual_loop: {actual_loop}")
+            loop_line = next(cmd_iter, None)
+        return (converted, body)
 
     def format(self, codex):
         """Convert self.cmd into python, returning text"""  # TODO: refine
         # Tom-Note: This will need to be restructured. I preserved original for sake of diff.
         python_commands = []
         cmd_iter = (system.open_file(self.cmd) if system.file_exists(self.cmd)
-                    else iter(self.cmd.splitlines(keepends=True)))
+                    else iter(self.cmd.replace(";", "\n").splitlines(keepends=True)))
         if cmd_iter:
             for line in cmd_iter:  # for each line in the script
                 debug.trace_expr(5, line)
@@ -447,7 +486,7 @@ class Bash2Python:
                     line = self.codex_convert(line)
                     python_commands.append(line)
                     continue
-                line = line[:-1] if ";" == line[-1] else line  # remove the ";" last character
+
                 (converted, line) = self.process_compound(line, cmd_iter)
                 if not converted:
                     line = self.var_replace(line)
@@ -471,7 +510,8 @@ class Bash2Python:
 @click.option("--execute", is_flag=True, help="Try to run the code directly (probably brokes somewhere)")
 @click.option("--line-numbers", is_flag=True, help="Add line numbers to the output")
 @click.option("--codex", is_flag=True, help="Use OpenAI Codex to port all the code. It's SLOW")
-def main(script, output, overview, execute, line_numbers, codex):
+@click.option("--stdin", "-i", is_flag=True, help="Get input from stdin")
+def main(script, output, overview, execute, line_numbers, codex, stdin):
     """Entry point"""
     if overview:
         print("""Working: 
@@ -488,14 +528,35 @@ Not working yet:
             -Bash functions
             -Any kind of subprocess
             -C-style loops """)
-    debug.trace(3, f"main(): script={system.real_path(__file__)}")
+    debug.trace(3,
+                f"main{(script, output, overview, execute, line_numbers, codex, stdin)}: script={system.real_path(__file__)}")
     bash_snippet = script
+
+    # Optionally get script from standard input (stdin)
+    if stdin:
+        debug.assertion(not bash_snippet)
+        dummy_main_app = Main([], description=__doc__, skip_input=False, manual_input=True)
+        debug.assertion(dummy_main_app.parsed_args)
+        bash_snippet = dummy_main_app.read_entire_input()
+
+    # If just converting via Codex, show the result and stop.
+    if JUST_CODEX:
+        b2p = Bash2Python(None, None)
+        print(b2p.codex_convert(bash_snippet))
+        return
+
     if not bash_snippet:
         print("No script or snippet specified. Use --help for usage or --script to specify a script")
         return
 
+    # HACK: override global flag
+    global USE_CODEX
+    if codex and not USE_CODEX:
+        USE_CODEX = codex
+
     if line_numbers:
-        with open(script, 'r') as infile, open(script + ".b2py", 'w') as outfile:
+        with open(script, encoding='UTF-8', mode='r') as infile, \
+                open(script + ".b2py", encoding='UTF-8', mode='w') as outfile:
             # Loop through each line in the input file
             for i, line in enumerate(infile):
                 # Write the modified line to the output file
@@ -507,27 +568,31 @@ Not working yet:
                     outfile.write(f"{line}#b2py #Line {i}" + "\n")
         bash_snippet = script + ".b2py"
 
-    # Show simple usage if --help given
-    if USE_MEZCLA:
-        dummy_main_app = Main(description=__doc__, skip_input=False, manual_input=False)
-        debug.assertion(dummy_main_app.parsed_args)
-        bash_snippet = dummy_main_app.read_entire_input()
+    ## OLD:
+    ## # Show simple usage if --help given
+    ## if USE_MEZCLA:
+    ##     dummy_main_app = Main(description=__doc__, skip_input=False, manual_input=False)
+    ##     debug.assertion(dummy_main_app.parsed_args)
+    ##     bash_snippet = dummy_main_app.read_entire_input()
 
     # Convert and print snippet
     b2p = Bash2Python(bash_snippet, "bash -c")
     if output:
-        with open(output, "rw") as out_file:
+        ## BAD: with open(output, "rw") as out_file:
+        ## NOTE: easier to use helper like system.write_file (or system.write_lines)
+        with open(output, encoding="UTF-8", mode="w") as out_file:
             out_file.write(b2p.header())
             out_file.write(b2p.format(codex))
     if execute:
-        cmd = b2p.format()
+        cmd = b2p.format(codex)
         print(f"# {cmd}")
-        print(eval(str(cmd)))
+        print(eval(str(cmd)))  # pylint: disable=eval-used
     else:
-        print(b2p.header())
+        #print(b2p.header())
         print(b2p.format(codex))
 
 
 # -------------------------------------------------------------------------------
 if __name__ == '__main__':
+    # pylint: disable=no-value-for-parameter
     main()
