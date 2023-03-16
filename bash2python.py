@@ -38,8 +38,7 @@
 from collections import defaultdict
 import os
 import re
-import time
-
+import subprocess
 # Installed modules
 import click
 import openai
@@ -142,6 +141,15 @@ class Bash2Python:
         self.bash_var_hash = get_bash_var_hash()
         self.variables = []
 
+    def perlregex(self, bash_snippet):
+        """Simple method to get perl regex detection of embedded for loops"""
+        file = (system.open_file(bash_snippet).read() if system.file_exists(bash_snippet)
+                    else bash_snippet)
+        command = f"echo '{file}'| perl -0777 -ne 's/.*/\L$&/; s/done/D/g; print(\"embedded for: $&\n\") if (/for[^D]*for/m);'"
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+        output, _ = process.communicate()
+        return output.decode()
+
     def map_keyword(self, line):
         """Perform conversion for single keyword statement"""
         in_line = line
@@ -191,23 +199,7 @@ class Bash2Python:
             temperature=0.6,  # more of this makes response more inestable
         )
         debug.trace_expr(5, response, max_len=4096)
-
-        # Get the generated code
-        # TODO: What the Hades is going on here?!
-        # NOTE: It should just get the first result (and perhaps warn if more given).
-        i = 0
-        while i < len(response["choices"]):
-            # Check if the text of the choice matches the input
-            code = response["choices"][i]["text"].strip().replace("\n", "")
-            if code in line:
-                time.sleep(2)
-                # If a match is found, access the next choice
-                if i + 1 < len(response["choices"]):
-                    code = response["choices"][i + 1]["text"].strip().replace("\n", "")
-                    break
-            # Increment the index
-            i += 1
-        comment = "#" + code
+        comment = "#" + response
         return comment
 
     def var_replace(self, line, other_vars=None, indent=None, is_condition=False, is_loop=False):
@@ -218,24 +210,30 @@ class Bash2Python:
         - Optional converts OTHER_VARS in line.
         - Use INDENT to overide the line space indentation.
         """
+
         in_line = line
         if indent is None:
             indent = ""
         var_pos = ""
         variable = ""
+
         if "=" in line:
-            line = line.replace("[", "").replace("]", "").split("=")
+            line = line.replace("[", "").replace("]", "")
+            if " = " in line:
+                line = line.split(" = ")
+            else:
+                line = line.split("=")
             if "$" in line[0] and "$" in line[1]:
                 line = " = ".join(line)
-            if "$" in line[0]:
+            elif "$" in line[0]:
                 variable = line[0]
                 static = " = " + line[1]
                 var_pos = 0
-            if "$" in line[1]:
+            elif "$" in line[1]:
                 variable = line[1]
                 static = line[0] + " = "
                 var_pos = 1
-            if not "$" in line[0] and not "$" in line[1]:
+            elif not "$" in line[0] and not "$" in line[1]:
                 return " = ".join(line)
             if variable != "":
                 line = variable
@@ -244,21 +242,13 @@ class Bash2Python:
             if not indent:
                 indent = my_re.group(1)
             line = my_re.group(2)
+
         # Check variable references and $(...) constructs
         bash_commands = re.findall(r'\$\(.*\)', line)  # finds all bash commands
         bash_vars_with_defaults = re.findall(r'\$\{\w+:-[^\}]+\}', line)  # finds all bash variables with default values
         bash_vars = re.findall(r'\$\w+', line)  # finds the rest of bash variables
         if other_vars:
             bash_vars += other_vars
-
-        if my_re.search(r"(\S)* = (\S)*", line) and (not is_condition):  # if the line is a variable declaration
-            for var in my_re.group(1).split():  # for each variable in the declaration
-                if "$" in var:
-                    variable = var
-                else:
-                    line = var
-                self.variables.append(variable)
-
         # Replace $var references with Python {var}, excluding Bash and environment variables
         has_bash_var = False
         has_default = False
@@ -274,8 +264,8 @@ class Bash2Python:
             else:
                 line = line.replace(var, "{" + var[1:] + "}")
                 has_bash_var = True
-
         # Early exit for conditions
+
         if is_condition:
             # note: change quoted string with {var} to f-string
             line = re.sub(r"(([\'\"]).*\{\S+}.*\2)", r"f\1", line)
@@ -341,10 +331,10 @@ class Bash2Python:
     def operators(self, line):
         """Returns line with operators converted to Python equivalents"""
         # Dictionary with Bash operators and their Python equivalents
-        operators = {"=": " == ",
-                     "!=": " != ",
-                     "!": "not ",
-                     "-eq": " == ",
+        operators = {" = ": " == ",
+                     " != ": " != ",
+                     " ! ": "not ",
+                     "- eq ": " == ",
                      "-e": " os.path.exists ",
                      "-ne": " != ",
                      "-gt": " > ",
@@ -396,8 +386,6 @@ class Bash2Python:
         debug.trace(7, f"process_simple({in_line!r}) => ({converted}, {line!r})")
         return (converted, line)
 
-
-
     def process_compound(self, line, cmd_iter):
         """Process compound statement conversion for LINE"""
         # Declare loop and statements as a tuple
@@ -414,16 +402,21 @@ class Bash2Python:
         converted = False
         loop_line = line
         indent = ""
-        #Emulates a do while loop in python
+        comment = ""
+        # Emulates a do while loop in python
         do_while = True
         while loop_count > 0 or do_while:
             loop_line = loop_line.strip()
             do_while = False
+            if loop_count > 1:
+                comment = f"#b2py: Loop founded order {loop_count}. Please be careful\n"
             if not loop_line or loop_line == "\n":
                 break
             elif "#" in loop_line:
                 body += indent + "    " + loop_line + "\n"
-            elif my_re.search(fr"^(?!\*)\s*({loops[0][0]}|{loops[1][0]}|{loops[2][0]}|{loops[3][0]}) *(\S.*)\s*\]?", loop_line):
+            elif my_re.search(
+                fr"^(?!\*)\s*({loops[0][0]}|{loops[1][0]}|{loops[2][0]}|{loops[3][0]})\s+(\S.*)((?=;))",
+                    loop_line + "\n"):
                 if my_re.group(1) != "elif":
                     loop_count += 1
                     indent = "    " * (loop_count - 1)
@@ -433,24 +426,29 @@ class Bash2Python:
                 var = self.var_replace(my_re.group(2), is_loop=True)
                 var = self.operators(var)
                 actual_loop = eval(loopy[-1])
+                var = var.replace(";" + actual_loop[1], "")
                 body += f"{indent}{actual_loop[0]} {var}:\n"
                 debug.trace_expr(5, loop_line)
                 debug.trace(4, f"Processing {loopy[0][0]} loop")
             elif loop_line == "else":
                 body += indent + loop_line + ":\n"
                 loop_count += 1
+
             else:
                 if not actual_loop:
-                    return (False, line)
+                    return False, line
                     break
-                elif actual_loop[2] in loop_line:
-                    loop_count = loop_count - 1
+                if actual_loop[1] == loop_line:
+                    loop_line = ""
+                elif actual_loop[2] == loop_line:
+                    loop_line = ""
+                    loop_count -= 1
                     loopy.pop()
                     try:
                         actual_loop = eval(loopy[-1])
                     except IndexError:
-                        actual_loop = ()
-                elif loop_line.strip() in self.LOOP_CONTROL:
+                        break
+                if loop_line.strip() in self.LOOP_CONTROL:
                     body += loop_line + "\n"
                     body += self.map_keyword(loop_line) + "\n"
                 elif loop_line.strip():
@@ -458,12 +456,12 @@ class Bash2Python:
                     if converted:
                         body += indent + "    " + loop_line + "\n"
                     else:
-                        body += self.var_replace(loop_line.strip("\n"),
-                                                 indent="    " * loop_count) + "\n"
+                        body += "" + self.var_replace(loop_line.strip("\n"),
+                                                indent="    " * loop_count) + "\n"
                 converted = True
-                print(f"loop_count: {loop_count}", f"loopy: {loopy}", f"actual_loop: {actual_loop}")
             loop_line = next(cmd_iter, None)
-        return (converted, body)
+        body = comment + body
+        return converted, body
 
     def format(self, codex):
         """Convert self.cmd into python, returning text"""  # TODO: refine
@@ -511,6 +509,7 @@ class Bash2Python:
 @click.option("--line-numbers", is_flag=True, help="Add line numbers to the output")
 @click.option("--codex", is_flag=True, help="Use OpenAI Codex to port all the code. It's SLOW")
 @click.option("--stdin", "-i", is_flag=True, help="Get input from stdin")
+
 def main(script, output, overview, execute, line_numbers, codex, stdin):
     """Entry point"""
     if overview:
@@ -575,6 +574,7 @@ Not working yet:
     ##     debug.assertion(dummy_main_app.parsed_args)
     ##     bash_snippet = dummy_main_app.read_entire_input()
 
+
     # Convert and print snippet
     b2p = Bash2Python(bash_snippet, "bash -c")
     if output:
@@ -589,6 +589,7 @@ Not working yet:
         print(eval(str(cmd)))  # pylint: disable=eval-used
     else:
         #print(b2p.header())
+        print(b2p.perlregex(bash_snippet))
         print(b2p.format(codex))
 
 
