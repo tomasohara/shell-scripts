@@ -77,7 +77,7 @@ if USE_MEZCLA:
 
 ## TEMP:
 ## NOTE: Eventually most pylint issues should be resolved (excepting nitpicking ones)
-## pylint: disable=no-self-use,unneeded-not
+## pylint: disable=unneeded-not, line-too-long, fixme
 
 PYTHON_HEADER = """# Output from bash2python.py
 '''Python code from Bash snippet'''
@@ -162,8 +162,7 @@ class Bash2Python:
         return line
 
     def for_in(self, line):
-        """TODO: handle FOR var IN list loop"""
-        ## NOTE: This regex needs to be tightened up (e.g., the .* parts).
+        """TODO: Deprecated? Check if necessary or delete"""
         if my_re.search(r"for .* in (.* )", line):
             value = my_re.group(1)
             values = value.replace(" ", ", ")
@@ -412,7 +411,7 @@ class Bash2Python:
                 comment = f"#b2py: Loop founded order {loop_count}. Please be careful\n"
             if not loop_line or loop_line == "\n":
                 break
-            elif "#" in loop_line:
+            if "#" in loop_line:
                 body += indent + "    " + loop_line + "\n"
             elif my_re.search(
                 fr"^(?!\*)\s*({loops[0][0]}|{loops[1][0]}|{loops[2][0]}|{loops[3][0]})\s+(\S.*)((?=;))",
@@ -440,7 +439,7 @@ class Bash2Python:
                     break
                 if actual_loop[1] == loop_line:
                     loop_line = ""
-                elif actual_loop[2] == loop_line:
+                elif actual_loop[2] == loop_line.strip():
                     loop_line = ""
                     loop_count -= 1
                     loopy.pop()
@@ -513,7 +512,7 @@ class Bash2Python:
 def main(script, output, overview, execute, line_numbers, codex, stdin):
     """Entry point"""
     if overview:
-        print("""Working: 
+        print("""Working:
             -If, elif, else, and while.
             -Variable Assignments, all of them. 
             -Piping to file. (Uses bash for it)
@@ -522,7 +521,7 @@ def main(script, output, overview, execute, line_numbers, codex, stdin):
             -AI sugestions using OpenAI GPT-3 Codex (requires API key)
             -Bash defaults
 Not working yet: 
-            -For loops (there is an untested function)")
+            -For loops")
             -Writing on / reading files
             -Bash functions
             -Any kind of subprocess
