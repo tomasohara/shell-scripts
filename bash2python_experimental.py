@@ -310,10 +310,10 @@ class Bash2Python:
                 line[i], has_command = command(line[i])
                 line[i] = variable(line[i])
                 if has_command:
-                    line[i] = "run(" + line[i] + ")"
+                    line[i] = "run('" + line[i] + "')"
             has_nothing = (check_line == line[i])
             if has_nothing and not assignment:
-                line[i] = "run(" + line[i] + ")"
+                line[i] = "run('" + line[i] + "')"
         # Reunify line if assignment
         if assignment:
             line = ' = '.join(line)
