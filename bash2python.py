@@ -23,6 +23,9 @@
 #         =>
 #     # not supported:  for (( i=0; i<10; i++ )); do  echo $i; done
 #     raise NotImplementedError()
+# - stuff for code linters
+#   # pylint: disable=eval-used
+#
 #
 # TODO:
 # - Flag constructs not yet implemented:
@@ -51,8 +54,6 @@ from mezcla.main import Main
 from mezcla.my_regex import my_re
 from mezcla import system
 from mezcla.text_utils import version_to_number
-
-## OLD: from mezcla.glue_helpers import run_via_bash as run
 
 # Version check
 debug.assertion(version_to_number("1.3.4") <= version_to_number(mezcla.__version__))
@@ -145,7 +146,8 @@ class Bash2Python:
         """Simple method to get perl regex detection of embedded for loops"""
         file = (system.open_file(bash_snippet).read() if system.file_exists(bash_snippet)
                     else bash_snippet)
-        command = f"echo '{file}'| perl -0777 -ne 's/.*/\L$&/; s/done/D/g; print(\"embedded for: $&\n\") if (/for[^D]*for/m);'"
+        ## OLD: command = f"echo '{file}'| perl -0777 -ne 's/.*/\L$&/; s/done/D/g; print(\"embedded for: $&\n\") if (/for[^D]*for/m);'"
+        command = f"echo '{file}'| perl -0777 -ne 's/.*/\\L$&/; s/done/D/g; print(\"embedded for: $&\n\") if (/for[^D]*for/m);'"
         process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
         output, _ = process.communicate()
         return output.decode()
@@ -181,24 +183,32 @@ class Bash2Python:
             return "# internal error"
 
         # Apply for an API Key at https://beta.openai.com
-        ## OLD: openai.api_key = "YOUR_API_KEY"
+        debug.assertion(OPENAI_API_KEY)
         openai.api_key = OPENAI_API_KEY
         # Define the code generation prompt
-        ## OLD: prompt = f"Convert this Bash snippet to a one-liner Python snippet: {line}"
         TARGET_LANG = system.getenv_text("TARGET_LANG", "Python",
                                          "Target language for Codex")
         prompt = f"Convert this Bash snippet to a one-liner {TARGET_LANG} snippet: {line}"
+        
         # Call the Codex API
-        response = openai.Completion.create(
-            engine="text-davinci-002",
-            prompt=prompt,
-            max_tokens=3 * len(line),
-            n=1,
-            stop=None,
-            temperature=0.6,  # more of this makes response more inestable
-        )
-        debug.trace_expr(5, response, max_len=4096)
-        comment = "#" + response
+        comment = ""
+        try:
+            # Submit request
+            response = openai.Completion.create(
+                engine="text-davinci-002",
+                prompt=prompt,
+                max_tokens=3 * len(line),
+                n=1,
+                stop=None,
+                temperature=0.6,  # more of this makes response more inestable
+            )
+            debug.trace_expr(5, response, max_len=4096)
+
+            # Extract text for first choice and convert into single-line comment
+            ## BAD: comment = "#" + response
+            comment = "#" + response["choices"][0]["text"].replace("\n", " ").strip()
+        except:
+            system.print_exception_info("codex_convert")
         return comment
 
     def var_replace(self, line, other_vars=None, indent=None, is_condition=False, is_loop=False):
@@ -436,7 +446,7 @@ class Bash2Python:
             else:
                 if not actual_loop:
                     return False, line
-                    break
+                    ## OLD: break
                 if actual_loop[1] == loop_line:
                     loop_line = ""
                 elif actual_loop[2] == loop_line.strip():
@@ -566,14 +576,6 @@ Not working yet:
                     outfile.write(f"{line}#b2py #Line {i}" + "\n")
         bash_snippet = script + ".b2py"
 
-    ## OLD:
-    ## # Show simple usage if --help given
-    ## if USE_MEZCLA:
-    ##     dummy_main_app = Main(description=__doc__, skip_input=False, manual_input=False)
-    ##     debug.assertion(dummy_main_app.parsed_args)
-    ##     bash_snippet = dummy_main_app.read_entire_input()
-
-
     # Convert and print snippet
     b2p = Bash2Python(bash_snippet, "bash -c")
     if output:
@@ -585,9 +587,9 @@ Not working yet:
     if execute:
         cmd = b2p.format(codex)
         print(f"# {cmd}")
-        print(eval(str(cmd)))  # pylint: disable=eval-used
+        print(eval(str(cmd)))
     else:
-        #print(b2p.header())
+        ## OLD: #print(b2p.header())
         print(b2p.perlregex(bash_snippet))
         print(b2p.format(codex))
 
