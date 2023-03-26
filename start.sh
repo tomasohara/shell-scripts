@@ -148,6 +148,8 @@ if [ "$for_editting" = "1" ]; then
     image_program="pinta"
 fi
 if [ "$under_mac" = "1" ]; then
+    # HACK: use 'command open'
+    # NOTE: unfortunately there is no dispatcher for office programs as under Windows
     pdf_program="open"
     image_program="open"
     office_program="open"
@@ -162,7 +164,7 @@ case "$lower_file" in
     *.pdf | *.ps) invoke "$pdf_program" "$@" & ;;
 
     # Image files
-    # note: uses viewer that Files invokes (eog, the "eye of GNOME")
+    # note: uses viewer that Files invokes, such as eog [the "eye of GNOME"] for images
     *.gif | *.ico | *.jpeg | *.jpg | *.png | .svg | *.xcf) invoke "$image_program"  "$@" & ;;
 
     # Video files
@@ -174,6 +176,8 @@ case "$lower_file" in
     # MS Office and LibreOffice files: word processor files, spreadsheets, etc.
     # warning: this only works well for MS-specific extension (.
     # if other applications are associated (e.g,. TextEdit for .rtf), then need to invoke via specific office program [maldito mac/microsoft].
+    # note: MacOs has awkware sequence via [Finder > GetInfo > OpenWith/ChangeAll] to change the default. See
+    #    https://www.macworld.com/article/672511/how-to-change-default-apps-on-mac.html
     *.doc | *.docx | *.pptx | *.odp | *.odt | *.odg | *.rtf | *.xls | *.xlsx | *.csv) invoke "$office_program" "$@" & ;;
 
     # HTML files and XML files
