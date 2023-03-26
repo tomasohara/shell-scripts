@@ -407,6 +407,7 @@ alias git-push-plus='invoke-git-command push'
 alias git-status='invoke-git-command status'
 alias git-log-plus='invoke-git-command log --name-status'
 alias git-log-diff-plus='invoke-git-command log --patch'
+alias git-blame-alias='invoke-git-command blame'
 
 # git-add-plus: add filename(s) to repository
 function git-add-plus {
