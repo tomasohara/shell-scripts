@@ -46,6 +46,9 @@ function clone-repo () {
     # shellcheck disable=SC2086
     command script "$log" $command_indicator git clone "$url"
     ls -R "$repo" >> "$log"
+    ## Note: output warning that script now done (to avoid user closing the window assuming script active)
+    ## TODO: add trace-stderr
+    echo "FYI: script-based clone done (see $log)" 1>&1
 }
 
 # JSON stuff
@@ -60,6 +63,10 @@ function script-config {
     mkdir -p ~/config
     script ~/config/"_config-$(T).log"
 }
+
+# para-len-alt(file, ...): show length of each paragraph with embedded newlines replaced with CR's to allow chaining
+# note: strips the 0-len paragraph indicator
+function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -pe 's/^0\t//;'; }
 
 # Bash stuff
 # shell-check-last-snippet(notes-file): extract last Bash snippet from notes
