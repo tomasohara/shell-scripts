@@ -1791,6 +1791,11 @@ alias rename_files='rename-files'
 alias testwn='perl- testwn.perl'
 alias perlgrep='perl- perlgrep.perl'
 alias foreach='perl- foreach.perl'
+
+#--------------------------------------------------------------------------------
+# Adhoc aliases for renaming aliases
+## TOM-IDIOSYNCRATIC#
+
 # rename-spaces: replace spaces in filenames of current dir with underscores
 alias rename-spaces='rename-files -q -global " " "_"'
 alias rename-quotes='rename-files -q -global "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
@@ -1812,6 +1817,10 @@ alias rename-parens='rename-files -global -regex "[\(\)]" "" *[\(\)]*'
 alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-duplicates'
 ## TODO: alias rename-parens='rename-files -rename_old -global -regex "[\(\)]" "" *[\(\)]*'
 #
+# rename-utf8-encoded: replace runs of non-ascii UTF8 encodings with _
+# note: '👇🏻' gets encoded as ; see show-unicode-code-info alias to way to illustrate encodings
+# TODO: make this less of a sledgehammer
+alias rename-utf8-encoded='rename-files -global -regex "[0x80-0xFF]\{3,\}" "_"'
 
 #-------------------------------------------------------------------------------
 ## TOM-IDIOSYNCRATIC
@@ -2655,7 +2664,9 @@ function python-lint-full() {
 # - the following has two regex: *modify the first* to add more conditions to ignore; the second is just for the extraneous pylint output
 function python-lint-work() { python-lint-full "$@" 2>&1 | $EGREP -v '\((bad-continuation|bad-option-value|fixme|invalid-name|locally-disabled|too-few-public-methods|too-many-\S+|trailing-whitespace|star-args|unnecessary-pass)\)' | $EGREP -v '^(([A-Z]:[0-9]+)|(Your code has been rated)|(No config file found)|(PYLINTHOME is now)|(\-\-\-\-\-))' | $PAGER; }
 # TODO: rename as python-lint-tpo for clarity (and make python-lint as alias for it)
-function python-lint() { python-lint-work "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-f-string|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|missing-final-newline|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
+# note: R0801 is for duplicate lines across source files (no mnemonic)
+function python-lint() { python-lint-work "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-f-string|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|missing-final-newline|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position|R0801)\)' | $PAGER; }
+# TODO: fix R0801 support
 
 # run-python-lint-batched([file_spec="*.py"]: Run python-lint in batch mode over
 # files in FILE_SPEC, placing results in pylint/<today>.
