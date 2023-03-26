@@ -25,6 +25,7 @@
 #     "$@"                         likewise all args but with individually quoting
 # - tools like OpenAI Codex and GitHub Copliot can be used to translate Bash constructs
 #     https://github.com/features/copilot
+# - For sake of simplicity, not all of the syntax is covered. (Likewise below.)
 # TODO:
 #  - variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
 #     note: EXPR is C style;
@@ -47,6 +48,8 @@
 #      exit                         early script termination; avoid in functions or if script sourced
 #   - history mechanism
 #     !?string[?]                   find last command with string
+#  - local variable declaration     note: space-separated not comma; simplified
+#      local var1[=val1] [var2[=val2] ...]
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
