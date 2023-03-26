@@ -6,6 +6,7 @@
 # note:
 # - Maldito shellcheck (i.e., lack of menomic codes on top of nitpicking):
 #   SC2002 (style): Useless cat. Consider 'cmd < file | ..' or 'cmd file | ..' instead.
+#   SC2010 (warning): Don't use ls | grep. Use a glob or a for loop with a condition to allow non-alphanumeric filenames.
 #   SC2016 (info): Expressions don't expand in single quotes
 #   SC2027 (warning): The surrounding quotes actually unquote this.
 #   SC2086: Double quote to prevent globbing)
@@ -28,7 +29,7 @@ alias nvsmi=nvidia-smi
 
 # Python stuff
 alias plint=python-lint
-alias-fn plint-torch 'plint "$@" | grep -v torch.*no-member'
+alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
 #
 # clone-repo(url): clone github repo at URL into current dir with logging
 function clone-repo () {
@@ -123,6 +124,7 @@ function rename-last-snapshot {
 	new_name="$new_name-$(T).png"
     fi
     local last_file
+    # shellcheck disable=SC2010
     last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
     move "$last_file" "$new_name"		
 }
