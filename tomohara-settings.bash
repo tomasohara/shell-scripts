@@ -4,6 +4,9 @@
 # - New place for settings previously put in tomohara-aliases.bash.
 # - This mainly is for enironment variables, Bash variables and other settings
 #   not directly related to aliases or functions.
+# - Selectively ignore following shellcheck warnings
+#    -- SC2155: Declare and assign separately to avoid masking return values
+#    -- SCnnnn: ...
 # TODO:
 # - ** Move misc. settings from .bashrc and tomohara-aliases.bash here.
 # - Flesh out.
@@ -45,7 +48,9 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib:$HOME/lib/$OSTYPE_BRIEF"
 
 # Define HOST_NICKNAME from ~/.host-nickname if unset or the default
 if [[ ("$HOST_NICKNAME" = "") || ("$HOST_NICKNAME" = "tpo-host") ]]; then
-    export HOST_NICKNAME="$(cat ~/.host-nickname 2> /dev/null | grep -v '^#')";
+    ## OLD: export HOST_NICKNAME="$(cat ~/.host-nickname 2> /dev/null | grep -v '^#')";
+    # shellcheck disable=SC2155
+    export HOST_NICKNAME="$(grep -v '^#' ~/.host-nickname 2> /dev/null)";
 fi
 
 # Python stuff
