@@ -78,6 +78,7 @@
 # - Likewise commonly used Unix features which might not be familiar:
 #    -- 'realpath file' returns full path for file with relative path.
 # - Selectively ignore following shellcheck warnings
+#    -- SC2016: (info): Expressions don't expand in single quotes
 #    -- SC2155: Declare and assign separately to avoid masking return values
 #    -- SC2139: This expands when defined, not when used. Consider escaping.
 #
@@ -661,6 +662,7 @@ function cd-realdir {
     pwd;
 }
 alias cd-this-realdir='cd-realdir .'
+# shellcheck disable=SC2016
 alias-fn pushd-this-realdir 'pushd "$(realpath ".")"'
 
 # pushd-q, popd-q: quiet versions of pushd and popd
@@ -1692,7 +1694,6 @@ function show-all-macros () {
 
 # show-macros(pattern): like show-all-macros, exlcuding leading _ in name
 function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
-# maldito shellcheck: SC2016 (info): Expressions don't expand in single quotes
 # shellcheck disable=SC2016
 alias-fn show-macros-proper 'show-macros | $GREP "^\w"'
 # show-variables(): show defined variables
