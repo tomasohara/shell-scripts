@@ -75,14 +75,17 @@ function remove-extension { echo "$1" | perl -pe 'chomp; s/\.[^\.]+$/$1\n/;'; }
 # Source control
 
 # git-blame-plus(filename): show revision info for file
-# note: provides info suitable for blaming another programmer ;)
+# Notes:
+# - provides info suitable for blaming another programmer ;)
+# - Uses pager with formatted temp filename (unlike git-blame-alias).
 #
 # sample line annotations:
 # 257087c2 (Tom O'Hara        2022-11-27 18:31:19 -0600 363)         debug.trace(6, f"in process_simple({line!r})")
 #
 function git-blame-plus { 
     local file="$1"
-    local log=""$TMP/$base.$(T).blame.list"
+    local log
+    log="$TMP/$base.$(T).blame.list"
     base="$(remove-extension "$file")"
     git blame "$file" > "$log"
     $PAGER "$log"
