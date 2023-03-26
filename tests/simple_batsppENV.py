@@ -7,6 +7,10 @@
 # NOTE: It is only necessary to have installed bats-core
 #       no need for bats-assertions library.
 #
+# FYI: This version is a simplified version of the original BatsPP facility. It uses some shameless
+# hacks enabled via environment variables to work around quirks in the example parsing. For example,
+#   TEST_FILE=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 python ./simple_batspp.py tests/adhoc-tests.test
+#
 ## TODO:
 ## - extend usage guide or docstring.
 ## - Add some directives in the test or script comments:
@@ -29,20 +33,15 @@
 
 """
 BATSPP
-
 This process and run custom tests using bats-core.
-
 You can run tests for aliases and more using the
 command line with '$ [command]' followed by the
 expected output:
-
  $ echo -e "hello\nworld"
  hello
  world
-
  $ echo "this is a test" | wc -c
  15
-
 Also you can test bash functions:
  [functions + args] => [expected]:
  fibonacci 9 => "0 1 1 2 3 5 8 13 21 34"
@@ -54,7 +53,6 @@ from collections import namedtuple
 import os
 import re
 import random
-
 
 # Local packages
 from mezcla.main import Main
@@ -101,6 +99,8 @@ OMIT_TRACE = system.getenv_bool("OMIT_TRACE", False,
                                 "Omit actual/expected trace from bats file")
 OMIT_MISC = system.getenv_bool("OMIT_MISC", False,
                                "Omit miscellaenous/obsolete bats stuff")
+TEST_FILE = system.getenv_bool("TEST_FILE", False,
+                               "Treat input as example-base test file, not a bash script")
 #
 # Shameless hacks
 ## TEST: GLOBAL_SETUP = system.getenv_text("GLOBAL_SETUP", " ",
@@ -137,7 +137,6 @@ T9 = (T8 + 1)
 def merge_continuation(actual, expected):
     """Merge EXPECTED into ACTUAL if line continuation (e.g., function definition)
     Note: returns tuple with new actual and expected
-
     >>> merge_continuation(
     ...      '''
     ...          function f {
@@ -265,7 +264,8 @@ class Batspp(Main):
         self.testfile     = self.get_parsed_argument(TESTFILE, "")
         self.output       = self.get_parsed_argument(OUTPUT, "")
         self.source       = self.get_parsed_argument(SOURCE, "")
-        self.verbose      = self.has_parsed_option(VERBOSE)
+        ## OLD: self.verbose      = self.has_parsed_option(VERBOSE)
+        self.verbose      = (self.has_parsed_option(VERBOSE) or system.getenv("VERBOSE"))
 
         debug.trace(T7, (f'batspp - testfile: {self.testfile}, '
                          f'output: {self.output}, '
@@ -277,7 +277,7 @@ class Batspp(Main):
         """Process main script"""
 
         # Check if is test of shell script file
-        self.is_test_file = self.testfile.endswith(BATSPP_EXTENSION)
+        self.is_test_file = (TEST_FILE or self.testfile.endswith(BATSPP_EXTENSION))
         debug.trace(T7, f'batspp - {self.testfile} is a test file (not shell script): {self.is_test_file}')
 
 
@@ -307,6 +307,7 @@ class Batspp(Main):
             batsfile = self.output
             if batsfile.endswith('/'):
                 ## BAD: name = re.search(r"\/(\w+)\.", self.test_file).group(0)
+                ## TODO: fixme (e.g., filename '##.batspp')-- ex via glue_helpers.remove_extension
                 name = re.search(r"\/(\w+)\.", batsfile).group(0)
                 batsfile += f'{name}.bats'
         else:
@@ -482,7 +483,7 @@ class CustomTestsToBats:
         ## TODO?: if USE_INDENT_PATTERN and not Batspp.is_test_file:
         ## OLD:
         if not Batspp.is_test_file:
-            field = my_re.sub(fr'^{self._indent_used}', '', field, flags=re.MULTILINE)
+            field = my_re.sub(fr'^{self._indent_used}', '', field, flags=my_re.MULTILINE)
 
         return field
 
@@ -493,6 +494,7 @@ class CustomTestsToBats:
 
     def _preprocess_output(self, field):
         """Preprocess output FIELD"""
+        in_field = field
         field = self._preprocess_field(field)
         
         # Strip whitespaces
@@ -501,7 +503,7 @@ class CustomTestsToBats:
 
         # Remove initial and trailing quotes
         field = my_re.sub(f'^(\"|\')(.*)(\"|\')$', r'\2', field)
-
+        debug.trace(T8, f"_preprocess_output({in_field!r}) ==  {field!r}")
         return field
 
     def _common_process(self, test):
@@ -591,7 +593,7 @@ class CustomTestsToBats:
         ##        debug.assertion("\n" not in command)
         ##        command     = my_re.sub(r'^\$\s+', '', command, re.MULTILINE)
         ##        setup_text += f'\t{command}\n'
-        setup_sans_prompt = my_re.sub(r'^\s*\$', '\t', setup, flags=re.MULTILINE)
+        setup_sans_prompt = my_re.sub(r'^\s*\$', '\t', setup, flags=my_re.MULTILINE)
         ## OLD
         ## HACK: fixup lingering $
         ## setup_sans_prompt = setup_sans_prompt.replace("\n$", "\n")

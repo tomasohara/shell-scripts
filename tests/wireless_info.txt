@@ -1,0 +1,9 @@
+wlp4s0    IEEE 802.11  ESSID:"Sudhir_DHFibernet"  
+          Mode:Managed  Frequency:2.432 GHz  Access Point: 6C:14:6E:5A:B7:58   
+          Bit Rate=130 Mb/s   Tx-Power=3 dBm   
+          Retry short limit:7   RTS thr:off   Fragment thr:off
+          Power Management:on
+          Link Quality=49/70  Signal level=-61 dBm  
+          Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+          Tx excessive retries:1  Invalid misc:1   Missed beacon:0
+
