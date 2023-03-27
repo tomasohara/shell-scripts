@@ -141,6 +141,9 @@ alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
 quiet-unalias ps-time
 # shellcheck disable=SC2016
 alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
+#
+# options: -d -RR: reattach a session and if necessary detach or create it
+alias-fn screen-reattach 'screen -d -RR'
 
 #................................................................................
 # Idiosyncratic stuff (n.b., doubly so given "tomohara-proper" part of filename)
