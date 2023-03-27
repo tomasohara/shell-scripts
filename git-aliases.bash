@@ -410,10 +410,14 @@ alias git-log-diff-plus='invoke-git-command log --patch'
 alias git-blame-alias='invoke-git-command blame'
 
 # git-add-plus: add filename(s) to repository
+# note: if GIT_FORCE is 1 then --force added (e.g., to override .gitignore)
 function git-add-plus {
     local log;
     log=$(get-temp-log-name "add");
-    git add "$@" >| "$log" 2>&1;
+    local options=""
+    if [ "$GIT_FORCE" = "1" ]; then options="--force"; fi
+    ## OLD: git add "$@" >| "$log" 2>&1;
+    git add $options "$@" >| "$log" 2>&1;
     ## TEMP:
     ## check-errors "$log" | cat;
     ## if [ "$(extract-matches '^fatal:' "$log")" != "" ]; then
@@ -757,6 +761,7 @@ function git-misc-alias-usage() {
     echo ""
     echo "To override file additions (e.g., blocked by .gitignore):"
     echo "    git add --force file..."""
+    echo "    # TODO: GIT_FORCE=1 GIT_MESSAGE='initial version' git-update-commit-push file..."
     echo "    GIT_MESSAGE='initial version' git-update-commit-push file..."
     echo ""
     echo "To use git manual merge resolution (n.b., trial and error required):"
