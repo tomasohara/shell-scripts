@@ -25,9 +25,9 @@ import sys
 import click
 
 # Local modules
-import bash2python
 from mezcla import debug
 from mezcla import system
+import bash2python
 
 # Constants
 TL = debug.TL
@@ -61,7 +61,7 @@ def format_bash_to_python(output):
     """Formats file with bash2python"""
     b2p = bash2python.Bash2Python(output, None)
     formatted_outputs = []
-    # Uses [TODO: what???] and no codex to get both versions
+
     for codex in [True, False]:
         formatted_output = b2p.format(codex)
         formatted_outputs.append(formatted_output.splitlines())
@@ -69,17 +69,20 @@ def format_bash_to_python(output):
 
 
 def print_diff(formatted_outputs):
-    """Creates and gives format to a diff"""
-    diff = list(
-        difflib.unified_diff(
-            formatted_outputs[0],
-            formatted_outputs[1],
-            fromfile="codex",
-            tofile="b2py",
-        )
-    )
+    """Creates and gives format to a side-by-side diff"""
+    diff = list(difflib.ndiff(formatted_outputs[0], formatted_outputs[1]))
+
     for line in diff:
-        sys.stdout.write(line + "\n")
+        symbol = line[0]
+        content = line[2:]
+
+        if content.strip():  # Check if the content is not an empty string
+            if symbol == '+':
+                print(f"{content:<70} | {'':<70}")
+            elif symbol == '-':
+                print(f"{'':<70}   {content:<70}")
+            else:
+                print(f"{content:<70} | {content:<70}")
 
 
 @click.command()
@@ -91,30 +94,22 @@ def main(perl, diff):
     if perl:
         for line in sys.stdin:
             file += line + "\n"
-        #TODO: There is a problem with this command and generates extra segments. Correct it if useful
         ## OLD: command = 'BEGIN { $seg_num = 1; print "#segment $seg_num\n" } if (/^\s*$/) { $seg_num++; print "#segment $seg_num\n"; } else { print; }'
         ##
-        ## TOM: Note that perl uses -00 option for its paragraph mode (see above) 
+        ## TOM: Note that perl uses -00 option for its paragraph mode (see above)
         ##
         command = ""
         if STRICT_MODE:
             command += "use strict;\n"
         command += r"""
-            BEGIN {
-                $seg_num = 1;
-                print "#segment $seg_num\n"
-            }
-            if (/^\s*$/) {
-                $seg_num++;
-                print "#segment $seg_num\n";
-            }
-            else {
-                print;
-            }
+                BEGIN{$i=1}
+                print "#Segment ", $i++,
+                "\n";
+                print $_
         """
 
         ## OLD: output_bytes = subprocess.Popen(['perl', '-ne', command], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate(input=file.encode())[0]
-        options = "-ne"
+        options = "-00 -ne"
         if PERL_WARNINGS:
             options += " -w"
         output_bytes = subprocess.Popen(['perl', options, command],
