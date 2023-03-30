@@ -14,8 +14,7 @@
 
 import subprocess
 import pytest
-import bash2python
-
+from bash2python import Bash2Python as bp
 
 def run_bash(bash, python):
     """Helper for call to bash2python"""
@@ -28,9 +27,16 @@ def run_bash(bash, python):
 
 def bash2py(bash, python):
     """Helper for call bash2python as a module"""
-    b2p = bash2python.Bash2Python(bash, None)
+    b2p = bp(bash, None)
     output = b2p.format(False)
     assert output == python
+
+def test_codex():
+    """Simple test for codex using an very standard input"""
+    bash = "echo Hello World"
+    python = bp.codex_convert(None, bash)
+    output = '#\n\nprint("Hello World")'
+    assert python == output
 
 def test_variable_substitution():
     """Test to check if a simple echo $foo variable is ported"""
