@@ -23,7 +23,7 @@ if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--TODO] [--trace] [--help] [--]"
+    echo "Usage: $0 [--TODO] [--trace] [--help] [-- | -]"
     echo ""
     echo "Examples:"
     echo ""
@@ -54,7 +54,7 @@ while [ "$moreoptions" = "1" ]; do
 	trace=1
     elif [ "$1" = "--verbose" ]; then
 	verbose=1
-    elif [ "$1" = "--" ]; then
+    elif [[ ("$1" = "--") || ("$1" = "-") ]]; then
 	break
     else
 	echo "ERROR: Unknown option: $1";
