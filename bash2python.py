@@ -213,7 +213,6 @@ class Bash2Python:
 
     def var_replace(self, line, other_vars=None, indent=None, is_condition=False, is_loop=False):
         # Tana-note: I'm not convinced this is the best way to do this but it works for now
-        ## TODO?: Clean up this mess
         """Replaces bash variables with python variables and also derive run call for LINE
         Notes:
         - Optional converts OTHER_VARS in line.
@@ -246,6 +245,7 @@ class Bash2Python:
                 return " = ".join(line)
             if variable != "":
                 line = variable
+
         # Derive indentation
         if my_re.search(r"^(\s+)(.*)", line):
             if not indent:
@@ -268,13 +268,12 @@ class Bash2Python:
                 line = line.replace(var, f"{{{var_name} if {var_name} is not None else '{var_default}'}}")
                 has_bash_var = True
                 has_default = True
-            elif (var[1:] in self.bash_var_hash) and (var not in self.variables):
+            elif var[1:] in self.bash_var_hash or var[1:] in self.variables:
                 debug.trace(4, "Excluding Bash-defined variable {var}")
             else:
                 line = line.replace(var, "{" + var[1:] + "}")
                 has_bash_var = True
         # Early exit for conditions
-
         if is_condition:
             # note: change quoted string with {var} to f-string
             line = re.sub(r"(([\'\"]).*\{\S+}.*\2)", r"f\1", line)
@@ -292,7 +291,8 @@ class Bash2Python:
         # Make sure line has outer single quotes, with any internal ones quoted
         if "'" in line:
             # note: Bash $'...' strings allows for escaped single quotes unlike '...'
-            line = re.sub(r"[^\\]'", r"\\\\'", line)
+            # OLD: line = re.sub(r"[^\\]'", r"\\\\'", line)
+            line = re.sub(r"(?<!\\)(')", r"\\\\\1", line)
             line = f'"{line}"'
         else:
             line = f"'{line}'"
@@ -388,9 +388,9 @@ class Bash2Python:
             expression = my_re.group(2)
             line = (indent + expression)
             converted = True
-        if re.search(r"let \"(\S*)\"", line):
+        if re.search(r"let(\S*)", line):
             debug.trace(4, "processing let")
-            line = re.sub(r"let \"(\S*)\"", r"\1", line)
+            line = re.sub(r"let(\S*)", r"\1", line)
             converted = True
         debug.trace(7, f"process_simple({in_line!r}) => ({converted}, {line!r})")
         return (converted, line)
@@ -411,20 +411,21 @@ class Bash2Python:
         converted = False
         loop_line = line
         indent = ""
-        comment = ""
+        comment = 0
         # Emulates a do while loop in python
         do_while = True
         while loop_count > 0 or do_while:
-            loop_line = loop_line.strip()
-            do_while = False
-            if loop_count > 1:
-                comment = f"#b2py: Loop founded order {loop_count}. Please be careful\n"
             if not loop_line or loop_line == "\n":
                 break
+            loop_line = loop_line.strip()
+            do_while = False
+            if loop_count > comment:
+                comment = loop_count
             if "#" in loop_line:
                 body += indent + "    " + loop_line + "\n"
             elif my_re.search(
-                fr"^(?!\*)\s*({loops[0][0]}|{loops[1][0]}|{loops[2][0]}|{loops[3][0]})\s+(\S.*)((?=;))",
+                ## OLD: fr"^(?!\*)\s*({loops[0][0]}|{loops[1][0]}|{loops[2][0]}|{loops[3][0]})\s+(\S.*)((?=;))",
+                fr"^(?!\*)\s*({loops[0][0]}|{loops[1][0]}|{loops[2][0]}|{loops[3][0]})\s+(\S.*)((?=\n))",
                     loop_line + "\n"):
                 if my_re.group(1) != "elif":
                     loop_count += 1
@@ -442,12 +443,13 @@ class Bash2Python:
             elif loop_line == "else":
                 body += indent + loop_line + ":\n"
                 loop_count += 1
-
             else:
                 if not actual_loop:
                     return False, line
                     ## OLD: break
-                if actual_loop[1] == loop_line:
+                if loop_line.strip().startswith(actual_loop[1].lstrip()):
+                    loop_line = loop_line.replace(actual_loop[1].lstrip(), "")
+                if loop_line == actual_loop[1].strip():
                     loop_line = ""
                 elif actual_loop[2] == loop_line.strip():
                     loop_line = ""
@@ -469,6 +471,7 @@ class Bash2Python:
                                                 indent="    " * loop_count) + "\n"
                 converted = True
             loop_line = next(cmd_iter, None)
+        comment = f"#b2py: Founded loop of order {comment}. Please be careful\n"
         body = comment + body
         return converted, body
 
@@ -493,11 +496,10 @@ class Bash2Python:
                     line = self.codex_convert(line)
                     python_commands.append(line)
                     continue
-
                 (converted, line) = self.process_compound(line, cmd_iter)
                 if not converted:
-                    line = self.var_replace(line)
                     (converted, line) = self.process_simple(line)
+                    line = self.var_replace(line)
                 # Adhoc fixups
                 if comment:
                     line += f" # {comment}"
