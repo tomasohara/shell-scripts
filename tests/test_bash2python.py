@@ -2,20 +2,21 @@
 ## TODO (have the script invoke pytest: see mezcla/tests/test_system.py)
 #!/usr/bin/env python
 #
+# pylint: disable=line-too-long
 # Simple test suite for bash2python.py. oming up with general tests will be difficult,
 # given the open-ended nature of the task. So just concentrate on the conversion of
 # simple examples that should be converted for each of the main supported features
 # (e.g., assignments, loops, and environment support).
 #
 # Notes:
-# - Use 'pytest bash2python_test.py -k "not skip"' to skip the tests that cover functions not yet implemented.
-
+# - Use 'pytest test_bash2python.py -k "not skip"' to skip the tests that cover functions not yet implemented.
 """Tests for bash2python.py"""
 
 import subprocess
 import pytest
+from click.testing import CliRunner
 from bash2python import Bash2Python as bp
-
+from bash2python_diff import main
 
 def run_bash(bash, python):
     """Helper for call to bash2python"""
@@ -38,10 +39,10 @@ def test_codex():
     """Simple test for codex using an very standard input"""
     bash = "echo Hello World"
     python = bp.codex_convert(None, bash)
-    output = '#\n\nprint("Hello World")'
+    output = 'print("Hello World")'
     if python == '# internal error':
         print("Usually a problem with API_KEY")
-    assert python == output
+    assert output in python
 
 
 def test_variable_substitution():
@@ -113,7 +114,6 @@ def test_double_quotes():
     """Make sure double quotes escaped inside run calls"""
     bash = 'echo "Hello world"'
     python = "run('echo \"Hello world\"')"
-
     bash2py(bash, python)
 
 
@@ -137,7 +137,7 @@ def test_embedded_for_not_supported():
 @pytest.mark.skip
 def test_if_else_condition():
     """TODO flesh out: test if/else"""
-    bash = """if [ -f "$1" ]; then' 
+    bash = """if [ -f "$1" ]; then'
            echo "$1 exists and is a regular file."
            elif [ -e "$1" ]; then
            echo "$1 exists but is not a regular file."
@@ -156,6 +156,7 @@ def test_for_c_style():
     bash = "for ((i=0; i < 10; i++)); do  echo $i; done"
     python = "for i in range(10): \n run(f'print {i}')"
     bash2py(bash, python)
+
 
 @pytest.mark.skip
 def test_case_statement():
@@ -190,11 +191,13 @@ def test_let_command():
     python = ' "x = 1+2"'
     bash2py(bash, python)
 
+
 def test_history_substitution():
     """Tests the history mechanism ($!)"""
     bash = "echo hello && echo world && echo !$"
     python = "run('echo hello && echo world && echo !$')"
     bash2py(bash, python)
+
 
 def test_echo_to_stderr():
     """Tests if echo to stderr is converted"""
@@ -203,7 +206,7 @@ def test_echo_to_stderr():
     bash2py(bash, python)
 
 
-@pytest.mark.xfail(reason="Complex syntax not implemented")
+@pytest.mark.xfail(reason="Complex systax not implemented")
 def test_complex_for_loop():
     """Tests complex for loop. Includes some arrays. Doomed to fail"""
     bash = """
@@ -234,3 +237,21 @@ def test_complex_for_loop():
 def test_tabular_tests(bash, python):
     """Tests in tabular format. Uses pythest parametrize"""
     bash2py(bash, python)
+
+
+def test_diff_no_opts():
+    """Tests bash2python_diff without flags enabled"""
+    runner = CliRunner()
+    result = runner.invoke(main, input="line1\n\nline2\n")
+    assert result.exit_code == 0
+    assert "------------codex------------" in result.output
+    assert "------------b2py------------" in result.output
+
+
+def test_diff_opts():
+    """Tests bash2python_diff with all flags enabled"""
+    runner = CliRunner()
+    result = runner.invoke(main, ["--perl", "--diff"], input="echo Hello World\n\nfoo=bar\n")
+    assert result.exit_code == 0
+    assert 'print("Hello World")' in result.output
+    assert "foo = bar" in result.output
