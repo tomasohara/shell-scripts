@@ -268,7 +268,7 @@ class Bash2Python:
                 line = line.replace(var, f"{{{var_name} if {var_name} is not None else '{var_default}'}}")
                 has_bash_var = True
                 has_default = True
-            elif var[1:] in self.bash_var_hash or var[1:] in self.variables:
+            elif (var[1:] in self.bash_var_hash) and (var not in self.variables):
                 debug.trace(4, "Excluding Bash-defined variable {var}")
             else:
                 line = line.replace(var, "{" + var[1:] + "}")
