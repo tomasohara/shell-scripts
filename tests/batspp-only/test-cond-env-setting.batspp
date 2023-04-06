@@ -21,7 +21,7 @@ $ typeset -f | egrep '^\w+' | wc -l
 0
 0
 
-$ alias testuser="sed -r "s/"$USER"+/user/g""
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
 
 # Setting a temp directory for tests
 $ TMP=/tmp/test-cond-env
@@ -64,22 +64,19 @@ $ echo $COND_ENV_TEST_TEMP
 tmp/cond-env-test-temp
 
 # USE OF ENV VARIABLE TO CREATE A SUB-DIRECTORY
+$ rm -rf ./* > /dev/null
 $ mkdir -p $COND_ENV_TEST_TEMP
 $ ls -l | awk '!($6=$7=$8="")' | testuser
 total 4      
-drwxrwxr-x 3 user user 4096    tmp
+drwxrwxr-x 3 userxf333 userxf333 4096    tmp
 
-# THE OUTPUT OF printenv.sh IS STORED IN temp_env1.tmp CREATED IN THE DIRECTORY SPECIFIED BY $COND_ENV_TEST_TEMP
+# THE OUTPUT OF printenv IS STORED IN temp-env-1.tmp CREATED IN THE DIRECTORY SPECIFIED BY $COND_ENV_TEST_TEMP
 $ pwd
-$ printenv >> $COND_ENV_TEST_TEMP/temp-env-1
+$ printenv >> $COND_ENV_TEST_TEMP/temp-env-1.tmp
 /tmp/test-cond-env/test-1710
 
-# MOVING TO THE DIRECTORY & VIEWING THE OUTPUT LOG
-$ cd $COND_ENV_TEST_TEMP
-# ERROR PRONE COMMAND (BATSPP)
-# cat temp-env-1
-/tmp/test-cond-env/test-1710/tmp/cond-env-test-temp
-]1;cond-env-test-temp [/tmp/test-cond-env/test-1710/tmp/cond-env-test-temp]]2;cond-env-test-temp [/tmp/test-cond-env/test-1710/tmp/cond-env-test-temp]
+$ cat $COND_ENV_TEST_TEMP/temp-env-1.tmp | grep TOM_BIN | testuser
+TOM_BIN=/home/userxf333/bin
 
-$ cat temp-env-1 | grep BASH | head -n 1
-BASH=/usr/bin/bash
+$ echo "Done!"
+Done!

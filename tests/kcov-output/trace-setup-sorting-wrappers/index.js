@@ -1,5 +1,5 @@
 var data = {files:[
-{"link":"bats.e38fe61c8733e2cd/index.html","title":"bats","summary_name":"bats","covered_class":"linePartCov","covered":"44.7","covered_lines":"654","uncovered_lines":"809","total_lines" : "1463"},
+{"link":"bats.e38fe61c8733e2cd/index.html","title":"bats","summary_name":"bats","covered_class":"linePartCov","covered":"29.5","covered_lines":"688","uncovered_lines":"1642","total_lines" : "2330"},
 ], merged_files:[]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-25 17:15:43", "instrumented" : 1463, "covered" : 654,};
+var header = { "command" : "bats", "date" : "2023-04-06 21:10:25", "instrumented" : 2330, "covered" : 688,};

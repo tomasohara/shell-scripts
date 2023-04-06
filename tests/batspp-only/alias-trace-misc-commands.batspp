@@ -42,9 +42,9 @@ $ typeset -f | egrep '^\w+' | wc -l
 1
 0
 
-$ alias testuser="sed -r "s/"$USER"+/user/g""
-$ alias testnum="sed -r "s/[0-9]/X/g"" 
-$ alias testnumhex="sed -r "s/[0-9,a-f,A-F]/X/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+$ alias testnumhex="sed -r "s/[0-9,a-f,A-F]/h/g"" 
 
 $ source $BIN_DIR/tomohara-aliases.bash
 
@@ -66,11 +66,11 @@ $ function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
 # awk is used for removing PID column (1st col)
 $ ps | filter-dirnames | testnum
     PID TTY          TIME CMD
-   XXXX pts/X    XX:XX:XX bash
-   XXXX pts/X    XX:XX:XX ps
-   XXXX pts/X    XX:XX:XX bash
-   XXXX pts/X    XX:XX:XX sed
-   XXXX pts/X    XX:XX:XX perl
+  NNNNN pts/N    NN:NN:NN bash
+  NNNNN pts/N    NN:NN:NN ps
+  NNNNN pts/N    NN:NN:NN bash
+  NNNNN pts/N    NN:NN:NN sed
+  NNNNN pts/N    NN:NN:NN perl
 
 ##5 COMMAIZE NUMBERS
 $ echo '99012342305324254' | comma-ize-number
@@ -103,10 +103,10 @@ $ echo "8000000" | apply-usage-numeric-suffixes
 $ byte-usage | testnum
 $ usage-pp | testnum
 Backing up 'usage.bytes.list' to './backup/usage.bytes.list'
-XX.XM	.
-X.XXM	./backup
-XXK	.
-XXK	./backup
+NN.NM	.
+N.NNM	./backup
+NNK	.
+NNK	./backup
 
 # ERROR GENERATED - MULTIPLE
 # $ ups a > psa.txt
@@ -118,7 +118,7 @@ XXK	./backup
 # | sort: fflush failed: 'standard output': Broken pipe
 # | sort: write error
 $ usage 
-renamed 'usage.list' -> 'usage.list.26Nov22'
+renamed 'usage.list' -> 'usage.list.06Dec22'
 [?1h=
 
 
@@ -205,8 +205,8 @@ Backing up 'thisisatest.txt' to './backup/thisisatest.txt'
 ## BATSPP 2.1.X EXCEPTION ERROR AT LINE 5 (OUTPUT)
 $ byte-usage process.txt | testnum
 # (Same output for 'byte-usage "Hi Mom"' and 'byte-usage thisisatest.txt')
-XX.XM	.
-X.XXM	./backup
+NN.NM	.
+N.NNM	./backup
 
 #11 - LOG FILES ARE REQUIRED FOR check-errors
 ## BATSPP 2.1.X EXCEPTION ERROR AT LINE 10 (OUTPUT)
@@ -416,44 +416,44 @@ $ ps -u > process2.txt
 # #1) diff - HALTS PROCESS (WORKS FINE)
 # $ diff process1.txt process2.txt #(DIFFERENTIATING PROCESSES FOR DIFFERENT INSTANCES)
 $ diff process1.txt process2.txt | testuser | testnumhex
-XXXXXXX
-< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
-< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+hhhhhhhhhhh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
 ---
-> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
-> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
 
 # #2) diff-default - HALTED (WORKS FINE)
 # $ diff-default process1.txt process2.txt
 $ diff-default process1.txt process2.txt | testuser | testnumhex
-XXXXXXX
-< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
-< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+hhhhhhhhhhh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
 ---
-> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
-> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
 
 # #3) diff-ignore-spacing -HALTED (WORKS FINE)
 $ diff-ignore-spacing process1.txt process2.txt | testuser | testnumhex
-XXXXXXX
-< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
-< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+hhhhhhhhhhh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
 ---
-> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
-> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
 
 # #4) do-diff - HALTED (WORKS FINE)
 $ do-diff process1.txt process2.txt | testuser | testnumhex
-proXXssX.txt vs. proXXssX.txt
-XiXXXrXnXXs: proXXssX.txt proXXssX.txt
--rw-rw-r-- X usXr usXr XXX Nov XX XX:XX proXXssX.txt
--rw-rw-r-- X usXr usXr XXX Nov XX XX:XX proXXssX.txt
-XXXXXXX
-< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
-< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+prohhssh.txt vs. prohhssh.txt
+hihhhrhnhhs: prohhssh.txt prohhssh.txt
+-rw-rw-r-- h ushrxhhhh ushrxhhhh hhhh hhh  h hh:hh prohhssh.txt
+-rw-rw-r-- h ushrxhhhh ushrxhhhh hhhh hhh  h hh:hh prohhssh.txt
+hhhhhhhhhhh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
 ---
-> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh
-> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
 ------------------------------------------------------------------------
 
 
@@ -471,12 +471,12 @@ XXXXXXX
 $ printf "TESTFILE1\nNEXT LINE" > testtxt1.txt
 $ printf "TESTFILE2\nNEXT LINE2" > testtxt2.txt
 $ prepare-find-files-here | testuser | testnum | awk '!($6="")'
--rw-rw-r-- X user user XXX  XX XX:XX ls-alR.list
--rw-rw-r-- X user user X  XX XX:XX ls-alR.list.log
--rw-rw-r-- X user user XXX  XX XX:XX ls-R.list
--rw-rw-r-- X user user X  XX XX:XX ls-R.list.log
+-rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-alR.list
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list.log
+-rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-R.list
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-R.list.log
 
-# Need help (no output)
+# Opens kdiff (doesn't halt process)
 $ diff-log-output ls-alR.list.log ls-R.list.log
 
 $ rm -rf $HOME/info > /dev/null
@@ -484,7 +484,7 @@ $ mkdir -p $HOME/info
 $ echo "THIS IS A NOICE SIGNATURE" > $HOME/info/.noice-signature
 
 $ signature noice | testuser
-/home/user/info/.noice-signature:
+/home/userxf333/info/.noice-signature:
 THIS IS A NOICE SIGNATURE
 
 # most-recent-backup(file): returns most recent backup for FILE in ./backup, accounting for revisions (e.g., extract_matches.perl.~4~)
@@ -509,8 +509,14 @@ THIS IS A NOICE SIGNATURE
 $ dobackup process1.txt
 Backing up 'process1.txt' to './backup/process1.txt'
 
-## WORKS FINE - HALTS THE NOTEBOOK TESTS (Need Help)
+## WORKS FINE - MAY HALT THE NOTEBOOK TESTS (Opens kdiff)
 # $ diff-backup process1.txt
+$ diff-backup process1.txt
 
-## WORKS FINE - HALTS THE NOTEBOOK TESTS (Need Help)
-# $ kdiff-backup process1.txt
+## WORKS FINE - MAY HALT THE NOTEBOOK TESTS (Opens kdiff)
+$ kdiff-backup process1.txt
+[1] 24771
+[1]+  Done                    kdiff.sh "$@"
+
+$ echo "Done"
+Done

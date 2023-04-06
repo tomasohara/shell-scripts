@@ -1,0 +1,1 @@
+{'report_name': 'command-override-cp-mv', 'instrumented_line': 152, 'covered_line': 95, 'ratio': 0.625}

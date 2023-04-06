@@ -197,7 +197,7 @@ function test12-assert3-actual () {
 	intersection ntest1.txt ntest2.txt | testnum
 }
 function test12-assert3-expected () {
-	echo -e 'PIDTTYTIMEbashbashXXXXpts/Xpts/Xps'
+	echo -e 'PIDTTYTIMEbashbashbashXXXXpts/Xpts/Xps'
 }
 
 @test "test13" {
@@ -252,7 +252,7 @@ function test15-assert3-actual () {
 	line-difference free2.txt free1.txt | testnum
 }
 function test15-assert3-expected () {
-	echo -e 'Mem:            XXXX        XXXX         XXX         XXX        XXXX         XXXSwap:           XXXX         XXX        XXXX--------------------------------------------------------------------------------Mem:         XXXXXXX     XXXXXXX      XXXXXX      XXXXXX     XXXXXXX      XXXXXXSwap:        XXXXXXX      XXXXXX     XXXXXXX'
+	echo -e 'Mem:            XXXX        XXXX         XXX         XXX         XXX         XXXSwap:           XXXX         XXX        XXXX--------------------------------------------------------------------------------Mem:         XXXXXXX     XXXXXXX      XXXXXX      XXXXXX     XXXXXXX      XXXXXXSwap:        XXXXXXX      XXXXXX     XXXXXXX'
 }
 
 @test "test16" {
@@ -276,7 +276,7 @@ function test16-assert3-actual () {
 	show-line 3 ntest1.txt | testuser | testnum
 }
 function test16-assert3-expected () {
-	echo -e 'USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMANDuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX bashuser       XXXX  X.X  X.X XXXXXX XXXXXX pts/X   Sl+  XX:XX   X:XX /usr/bin/pythuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u--------------------------------------------------------------------------------user       XXXX  X.X  X.X XXXXXX XXXXXX pts/X   Sl+  XX:XX   X:XX /usr/bin/pyth'
+	echo -e 'USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMANDuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX bashuser       XXXX  X.X  X.X XXXXXX XXXXXX pts/X   Sl+  XX:XX   X:XX /usr/bin/pythuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX bashuser       XXXX  X.X  X.X XXXXXX XXXXX pts/X    Sl+  XX:XX   X:XX vi tomohara-auser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u--------------------------------------------------------------------------------user       XXXX  X.X  X.X XXXXXX XXXXXX pts/X   Sl+  XX:XX   X:XX /usr/bin/pyth'
 }
 
 @test "test17" {
@@ -300,7 +300,7 @@ function test17-assert3-actual () {
 	last-n-with-header 2 ntest2.txt | testuser | testnum
 }
 function test17-assert3-expected () {
-	echo -e 'USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMANDuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u--------------------------------------------------------------------------------F S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMDX S  XXXX    XXXX    XXXX  X  XX   X -  XXXX do_wai pts/X    XX:XX:XX bashX R  XXXX    XXXX    XXXX  X  XX   X -  XXXX -      pts/X    XX:XX:XX ps'
+	echo -e 'USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMANDuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/bin/bashuser       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u--------------------------------------------------------------------------------F S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMDX S  XXXX    XXXX    XXXX  X  XX   X -  XXXX do_wai pts/X    XX:XX:XX bashX R  XXXX    XXXX    XXXX  X  XX   X -  XXXX -      pts/X    XX:XX:XX ps'
 }
 
 @test "test18" {

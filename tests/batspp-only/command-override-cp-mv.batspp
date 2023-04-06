@@ -21,8 +21,8 @@ $ typeset -f | egrep '^\w+' | wc -l
 0
 0
 
-$ alias testuser="sed -r "s/"$USER"+/user/g""
-$ alias testnum="sed -r "s/[0-9]/X/g""
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9]/N/g""
 
 ## NOTE: For reproducability, the directory name needs to be fixed
 ## In place of $$, use a psuedo random number (e,g., 1210)
@@ -38,7 +38,7 @@ $ pwd | testuser
 $ alias | wc -l
 #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
 $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
-/home/user/tom-project/shell-scripts/tests/tmp/test-cp-mv/test-1210
+/home/userxf333/tom-project/shell-scripts/tests/tmp/test-cp-mv/test-1210
 2
 
 # Count aliases proper
@@ -55,33 +55,6 @@ $ source $BIN_DIR/tomohara-aliases.bash
 $ clear
 use cls instead (or /bin/clear)
 
-# #All move aliases
-# alias mv='$MV'
-# alias move='mv'
-# alias move-force='move -f'
-
-# # TODO: make sure symbolic links are copied as-is (ie, not dereferenced)
-# CP="/bin/cp -ip $other_file_args"
-# ##reference-variable "$CP"
-
-# #All Copy Aliases
-# alias copy='$CP'
-# alias copy-force='/bin/cp -fp $other_file_args'
-# alias cp='/bin/cp -i $other_file_args'
-
-# #All Remove Aliases
-# alias rm='/bin/rm -i $other_file_args'
-# alias delete='/bin/rm -i $other_file_args'
-# alias del="delete"
-# alias delete-force='/bin/rm -f $other_file_args'
-# alias remove-force='delete-force'
-
-# #All remove-dir aliases
-# alias remove-dir='/bin/rm -rv'
-# alias delete-dir='remove-dir'
-# alias remove-dir-force='/bin/rm -rfv'
-# alias delete-dir-force='remove-dir-force'
-
 # TEST 1 - MOVE ALIASES
 ## CLEARS TEST FOLDER
 $ rm -rf ./*
@@ -95,9 +68,9 @@ $ move def ./mvtest_dir1
 $ move-force ghi ./mvtest_dir1
 $ linebr
 ## VIEWING THE CHANGES MADE
-$ ls -l | awk '!($6="")' | testuser | testnum
+$ ls -l | awk '!($6="")' | testnum | testuser
 $ linebr
-$ ls -l ./mvtest_dir1 | awk '!($6="")' | testuser | testnum
+$ ls -l ./mvtest_dir1 | awk '!($6="")' | testnum | testuser
 $ linebr
 removed './testdir1/.bashrc'
 removed directory './testdir1'
@@ -106,13 +79,13 @@ renamed 'abc' -> './mvtest_dir1/abc'
 renamed 'def' -> './mvtest_dir1/def'
 renamed 'ghi' -> './mvtest_dir1/ghi'
 --------------------------------------------------------------------------------
-total X    
-drwxrwsr-x X user user XXXX  XX XX:XX mvtest_dirX
+total N    
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN mvtest_dirN
 --------------------------------------------------------------------------------
-total X    
--rw-rw-r-- X user user X  XX XX:XX abc
--rw-rw-r-- X user user X  XX XX:XX def
--rw-rw-r-- X user user X  XX XX:XX ghi
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
 --------------------------------------------------------------------------------
 
 # TEST 2 - COPY ALIASES
@@ -128,9 +101,9 @@ $ copy def ./cptest_dir1
 $ copy-force ghi ./cptest_dir1
 $ linebr
 ## VIEWING THE CHANGES MADE
-$ ls -l | awk '!($6="")' | testuser | testnum
+$ ls -l | awk '!($6="")' | testnum | testuser
 $ linebr
-$ ls -l ./cptest_dir1 | awk '!($6="")' | testuser | testnum
+$ ls -l ./cptest_dir1 | awk '!($6="")' | testnum | testuser
 $ linebr
 removed './mvtest_dir1/abc'
 removed './mvtest_dir1/ghi'
@@ -141,16 +114,16 @@ removed directory './mvtest_dir1'
 'def' -> './cptest_dir1/def'
 'ghi' -> './cptest_dir1/ghi'
 --------------------------------------------------------------------------------
-total X    
--rw-rw-r-- X user user X  XX XX:XX abc
-drwxrwsr-x X user user XXXX  XX XX:XX cptest_dirX
--rw-rw-r-- X user user X  XX XX:XX def
--rw-rw-r-- X user user X  XX XX:XX ghi
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN cptest_dirN
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
 --------------------------------------------------------------------------------
-total X    
--rw-rw-r-- X user user X  XX XX:XX abc
--rw-rw-r-- X user user X  XX XX:XX def
--rw-rw-r-- X user user X  XX XX:XX ghi
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
 --------------------------------------------------------------------------------
 
 # #=================(TEST ERROR: "/bin/rm: remove regular empty file 'f1'?")=========================#
@@ -171,12 +144,12 @@ total X
 
 # TEST 4 - REMOVE DIRECTORY ALIASES
 ## CLEARS TEST FOLDER
-$ rm -rf ./*
+$ rm -rf ./* > /dev/null
 $ linebr
 ## CREATES TEST SUBJECTS
 $ touch abc def ghi
 $ mkdir TDIR1 TDIR2 TDIR3 TDIR4
-$ ls -l | awk '!($6="")' | testuser | testnum
+$ ls -l | awk '!($6="")' | testnum | testuser
 $ linebr
 ## WORK OF ALIASES
 $ remove-dir "TDIR1"
@@ -185,62 +158,52 @@ $ remove-dir-force TDIR3
 $ delete-dir-force TDIR4
 $ linebr
 ## VIEWING THE CHANGES MADE
-$ ls -l | awk '!($6="")' | testuser | testnum
+$ ls -l | awk '!($6="")' | testnum | testuser
 $ linebr
-removed './abc'
-removed './cptest_dir1/abc'
-removed './cptest_dir1/ghi'
-removed './cptest_dir1/def'
-removed directory './cptest_dir1'
-removed './def'
-removed './ghi'
 --------------------------------------------------------------------------------
-total XX    
--rw-rw-r-- X user user X  XX XX:XX abc
--rw-rw-r-- X user user X  XX XX:XX def
--rw-rw-r-- X user user X  XX XX:XX ghi
-drwxrwsr-x X user user XXXX  XX XX:XX TDIRX
-drwxrwsr-x X user user XXXX  XX XX:XX TDIRX
-drwxrwsr-x X user user XXXX  XX XX:XX TDIRX
-drwxrwsr-x X user user XXXX  XX XX:XX TDIRX
+total NN    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
 --------------------------------------------------------------------------------
 removed directory 'TDIR1'
 removed directory 'TDIR2'
 removed directory 'TDIR3'
 removed directory 'TDIR4'
 --------------------------------------------------------------------------------
-total X    
--rw-rw-r-- X user user X  XX XX:XX abc
--rw-rw-r-- X user user X  XX XX:XX def
--rw-rw-r-- X user user X  XX XX:XX ghi
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
 --------------------------------------------------------------------------------
 
 # RUNNING FOR DETAILS
 $ copy-readonly | testuser
 $ linebr
 # COPYING .bashrc TO TEST DIRECTORY
-$ rm -rf ./*
+$ rm -rf ./* > /dev/null
 $ mkdir testdir1
 $ linebr
-$ copy-readonly ~/.bashrc ./testdir1/ | awk '!($6="")' | testuser | testnum
+$ copy-readonly ~/.bashrc ./testdir1/ | awk '!($6="")' | testnum | testuser
 $ linebr
 # VIEWING THE COPIED FILE (IN DIR AND CAT)
 $ cat ./testdir1/.bashrc | head 
 
-Usage: /home/user/bin/copy-readonly.sh source-file [--force] [--verbose] [file | directory]
+Usage: /home/userxf333/bin/copy-readonly.sh source-file [--force] [--verbose] [file | directory]
 
 Examples (under Bash):
 
-  /home/user/bin/copy-readonly.sh ~/.bashrc ~/dot-file-archive
+  /home/userxf333/bin/copy-readonly.sh ~/.bashrc ~/dot-file-archive
 
   for f in copyright.py search_page.mako index.mako visual_diff_server.py; do copy-readonly $f ~/visual-diff; done
 
 --------------------------------------------------------------------------------
-removed './abc'
-removed './def'
-removed './ghi'
 --------------------------------------------------------------------------------
--r--r--r-- X user user XXXX  X XX:XX ./testdirX//.bashrc
+-r--r--r-- N userxf333 userxf333 NNNN  N NN:NN ./testdirN//.bashrc
 --------------------------------------------------------------------------------
 # ~/.bashrc: executed by bash(1) for non-login shells.
 # see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
@@ -259,6 +222,6 @@ esac
 # | drwxrwxr-x 2 xaea12 xaea12 4096 Jul  4 21:41 testdir1
 $ fix-dir-permissions
 # # AFTER fix-dir-permissions
-$ ls -l | awk '!($6="")' | testuser | testnum
-total X    
-drwxrwsr-x X user user XXXX  XX XX:XX testdirX
+$ ls -l | awk '!($6="")' | testnum | testuser
+total N    
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN testdirN

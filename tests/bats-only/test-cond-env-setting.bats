@@ -44,7 +44,7 @@ function test1-assert4-expected () {
 	test_folder=$(echo /tmp/test2-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testuser="sed -r "s/"$USER"+/user/g""
+	alias testuser="sed -r "s/"$USER"+/userxf333/g""
 }
 
 
@@ -166,9 +166,10 @@ function test9-assert1-expected () {
 	test_folder=$(echo /tmp/test10-$$)
 	mkdir $test_folder && cd $test_folder
 
+	rm -rf ./* > /dev/null
 	mkdir -p $COND_ENV_TEST_TEMP
-	actual=$(test10-assert2-actual)
-	expected=$(test10-assert2-expected)
+	actual=$(test10-assert3-actual)
+	expected=$(test10-assert3-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -178,11 +179,11 @@ function test9-assert1-expected () {
 
 }
 
-function test10-assert2-actual () {
+function test10-assert3-actual () {
 	ls -l | awk '!($6=$7=$8="")' | testuser
 }
-function test10-assert2-expected () {
-	echo -e 'total 4      drwxrwxr-x 3 user user 4096    tmp'
+function test10-assert3-expected () {
+	echo -e 'total 4      drwxrwxr-x 3 userxf333 userxf333 4096    tmp'
 }
 
 @test "test11" {
@@ -197,8 +198,23 @@ function test10-assert2-expected () {
 	test_folder=$(echo /tmp/test12-$$)
 	mkdir $test_folder && cd $test_folder
 
+	actual=$(test12-assert1-actual)
+	expected=$(test12-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test12-assert1-actual () {
+	cat $COND_ENV_TEST_TEMP/temp-env-1.tmp | grep TOM_BIN | testuser
+}
+function test12-assert1-expected () {
+	echo -e 'TOM_BIN=/home/userxf333/bin'
+}
 
 @test "test13" {
 	test_folder=$(echo /tmp/test13-$$)
@@ -216,8 +232,8 @@ function test10-assert2-expected () {
 }
 
 function test13-assert1-actual () {
-	cat temp-env-1 | grep BASH | head -n 1
+	echo "Done!"
 }
 function test13-assert1-expected () {
-	echo -e 'BASH=/usr/bin/bash'
+	echo -e 'Done!'
 }

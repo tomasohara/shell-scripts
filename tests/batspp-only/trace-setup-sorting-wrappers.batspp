@@ -41,8 +41,8 @@ $ typeset -f | egrep '^\w+' | wc -l
 1
 0
 
-$ alias testnum="sed -r "s/[0-9]/X/g"" 
-$ alias testuser="sed -r "s/"$USER"+/user/g"" 
+$ alias testnum="sed -r "s/[0-9]/H/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g"" 
 
 $ source $BIN_DIR/tomohara-aliases.bash
 
@@ -103,7 +103,7 @@ AUTHOR
        %b     ARGUMENT  as  a string with '\' escapes interpreted, except that
        \b     backspace
 COPYRIGHT
-       Copyright  ©  XXXX  Free Software Foundation, Inc.  License GPLvX+: GNU
+       Copyright  ©  HHHH  Free Software Foundation, Inc.  License GPLvH+: GNU
        \c     produce no further output
 DESCRIPTION
        \"     double quote
@@ -111,21 +111,21 @@ DESCRIPTION
        \f     form feed
        FORMAT controls the output as in C printf.  Interpreted sequences are:
        Full documentation <https://www.gnu.org/software/coreutils/printf>
-GNU coreutils X.XX               February XXXX                       PRINTF(X)
+GNU coreutils H.HH               February HHHH                       PRINTF(H)
        GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
-       GPL version X or later <https://gnu.org/licenses/gpl.html>.
+       GPL version H or later <https://gnu.org/licenses/gpl.html>.
        --help display this help and exit
 NAME
        \n     new line
-       \NNN   byte with octal value NNN (X to X digits)
+       \NNN   byte with octal value NNN (H to H digits)
        NOTE:  your shell may have its own version of printf, which usually su‐
-              octal escapes are of the form \X or \XNNN
+              octal escapes are of the form \H or \HNNN
        or available locally via: info '(coreutils) printf invocation'
               output version information and exit
        persedes the version described here.  Please refer to your shell's doc‐
        Print ARGUMENT(s) according to FORMAT, or execute according to OPTION:
-PRINTF(X)                        User Commands                       PRINTF(X)
-       printf(X)
+PRINTF(H)                        User Commands                       PRINTF(H)
+       printf(H)
        printf - format and print data
        printf FORMAT [ARGUMENT]...
        printf OPTION
@@ -140,13 +140,13 @@ SYNOPSIS
        This is free software: you are free  to  change  and  redistribute  it.
        \t     horizontal tab
        \UHHHHHHHH
-       \uHHHH Unicode (ISO/IEC XXXXX) character with hex value HHHH (X digits)
+       \uHHHH Unicode (ISO/IEC HHHHH) character with hex value HHHH (H digits)
        umentation for details about the options it supports.
-              Unicode character with hex value HHHHHHHH (X digits)
+              Unicode character with hex value HHHHHHHH (H digits)
        --version
        \v     vertical tab
        Written by David MacKenzie.
-       \xHH   byte with hexadecimal value HH (X to X digits)
+       \xHH   byte with hexadecimal value HH (H to H digits)
 
 $ cat pf_manual.txt | colon-sort | testnum | testuser
 
@@ -197,17 +197,17 @@ DESCRIPTION
        \e     escape
        \f     form feed
        FORMAT controls the output as in C printf.  Interpreted sequences are:
-GNU coreutils X.XX               February XXXX                       PRINTF(X)
+GNU coreutils H.HH               February HHHH                       PRINTF(H)
        --help display this help and exit
 NAME
        \n     new line
-       \NNN   byte with octal value NNN (X to X digits)
-              octal escapes are of the form \X or \XNNN
+       \NNN   byte with octal value NNN (H to H digits)
+              octal escapes are of the form \H or \HNNN
               output version information and exit
        persedes the version described here.  Please refer to your shell's doc‐
        Print ARGUMENT(s) according to FORMAT, or execute according to OPTION:
-PRINTF(X)                        User Commands                       PRINTF(X)
-       printf(X)
+PRINTF(H)                        User Commands                       PRINTF(H)
+       printf(H)
        printf - format and print data
        printf FORMAT [ARGUMENT]...
        printf OPTION
@@ -220,15 +220,15 @@ SYNOPSIS
        There is NO WARRANTY, to the extent permitted by law.
        \t     horizontal tab
        \UHHHHHHHH
-       \uHHHH Unicode (ISO/IEC XXXXX) character with hex value HHHH (X digits)
+       \uHHHH Unicode (ISO/IEC HHHHH) character with hex value HHHH (H digits)
        umentation for details about the options it supports.
-              Unicode character with hex value HHHHHHHH (X digits)
+              Unicode character with hex value HHHHHHHH (H digits)
        --version
        \v     vertical tab
        Written by David MacKenzie.
-       \xHH   byte with hexadecimal value HH (X to X digits)
-       Copyright  ©  XXXX  Free Software Foundation, Inc.  License GPLvX+: GNU
-       GPL version X or later <https://gnu.org/licenses/gpl.html>.
+       \xHH   byte with hexadecimal value HH (H to H digits)
+       Copyright  ©  HHHH  Free Software Foundation, Inc.  License GPLvH+: GNU
+       GPL version H or later <https://gnu.org/licenses/gpl.html>.
        GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
        or available locally via: info '(coreutils) printf invocation'
        Report any translation bugs to <https://translationproject.org/team/>
@@ -237,13 +237,13 @@ SYNOPSIS
        NOTE:  your shell may have its own version of printf, which usually su‐
 
 $ cat pf_manual.txt | colon-sort-rev-num | testnum | testuser
-       \xHH   byte with hexadecimal value HH (X to X digits)
+       \xHH   byte with hexadecimal value HH (H to H digits)
        Written by David MacKenzie.
        \v     vertical tab
        --version
-              Unicode character with hex value HHHHHHHH (X digits)
+              Unicode character with hex value HHHHHHHH (H digits)
        umentation for details about the options it supports.
-       \uHHHH Unicode (ISO/IEC XXXXX) character with hex value HHHH (X digits)
+       \uHHHH Unicode (ISO/IEC HHHHH) character with hex value HHHH (H digits)
        \UHHHHHHHH
        \t     horizontal tab
        This is free software: you are free  to  change  and  redistribute  it.
@@ -258,21 +258,21 @@ REPORTING BUGS
        printf OPTION
        printf FORMAT [ARGUMENT]...
        printf - format and print data
-       printf(X)
-PRINTF(X)                        User Commands                       PRINTF(X)
+       printf(H)
+PRINTF(H)                        User Commands                       PRINTF(H)
        Print ARGUMENT(s) according to FORMAT, or execute according to OPTION:
        persedes the version described here.  Please refer to your shell's doc‐
               output version information and exit
        or available locally via: info '(coreutils) printf invocation'
-              octal escapes are of the form \X or \XNNN
+              octal escapes are of the form \H or \HNNN
        NOTE:  your shell may have its own version of printf, which usually su‐
-       \NNN   byte with octal value NNN (X to X digits)
+       \NNN   byte with octal value NNN (H to H digits)
        \n     new line
 NAME
        --help display this help and exit
-       GPL version X or later <https://gnu.org/licenses/gpl.html>.
+       GPL version H or later <https://gnu.org/licenses/gpl.html>.
        GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
-GNU coreutils X.XX               February XXXX                       PRINTF(X)
+GNU coreutils H.HH               February HHHH                       PRINTF(H)
        Full documentation <https://www.gnu.org/software/coreutils/printf>
        FORMAT controls the output as in C printf.  Interpreted sequences are:
        \f     form feed
@@ -280,7 +280,7 @@ GNU coreutils X.XX               February XXXX                       PRINTF(X)
        \"     double quote
 DESCRIPTION
        \c     produce no further output
-       Copyright  ©  XXXX  Free Software Foundation, Inc.  License GPLvX+: GNU
+       Copyright  ©  HHHH  Free Software Foundation, Inc.  License GPLvH+: GNU
 COPYRIGHT
        \b     backspace
        %b     ARGUMENT  as  a string with '\' escapes interpreted, except that
@@ -325,13 +325,13 @@ AUTHOR
 
 
 $ cat pf_manual.txt | freq-sort | testnum | testuser
-       \xHH   byte with hexadecimal value HH (X to X digits)
+       \xHH   byte with hexadecimal value HH (H to H digits)
        Written by David MacKenzie.
        \v     vertical tab
        --version
-              Unicode character with hex value HHHHHHHH (X digits)
+              Unicode character with hex value HHHHHHHH (H digits)
        umentation for details about the options it supports.
-       \uHHHH Unicode (ISO/IEC XXXXX) character with hex value HHHH (X digits)
+       \uHHHH Unicode (ISO/IEC HHHHH) character with hex value HHHH (H digits)
        \UHHHHHHHH
        \t     horizontal tab
        This is free software: you are free  to  change  and  redistribute  it.
@@ -346,21 +346,21 @@ REPORTING BUGS
        printf OPTION
        printf FORMAT [ARGUMENT]...
        printf - format and print data
-       printf(X)
-PRINTF(X)                        User Commands                       PRINTF(X)
+       printf(H)
+PRINTF(H)                        User Commands                       PRINTF(H)
        Print ARGUMENT(s) according to FORMAT, or execute according to OPTION:
        persedes the version described here.  Please refer to your shell's doc‐
               output version information and exit
        or available locally via: info '(coreutils) printf invocation'
-              octal escapes are of the form \X or \XNNN
+              octal escapes are of the form \H or \HNNN
        NOTE:  your shell may have its own version of printf, which usually su‐
-       \NNN   byte with octal value NNN (X to X digits)
+       \NNN   byte with octal value NNN (H to H digits)
        \n     new line
 NAME
        --help display this help and exit
-       GPL version X or later <https://gnu.org/licenses/gpl.html>.
+       GPL version H or later <https://gnu.org/licenses/gpl.html>.
        GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
-GNU coreutils X.XX               February XXXX                       PRINTF(X)
+GNU coreutils H.HH               February HHHH                       PRINTF(H)
        Full documentation <https://www.gnu.org/software/coreutils/printf>
        FORMAT controls the output as in C printf.  Interpreted sequences are:
        \f     form feed
@@ -368,7 +368,7 @@ GNU coreutils X.XX               February XXXX                       PRINTF(X)
        \"     double quote
 DESCRIPTION
        \c     produce no further output
-       Copyright  ©  XXXX  Free Software Foundation, Inc.  License GPLvX+: GNU
+       Copyright  ©  HHHH  Free Software Foundation, Inc.  License GPLvH+: GNU
 COPYRIGHT
        \b     backspace
        %b     ARGUMENT  as  a string with '\' escapes interpreted, except that
@@ -416,7 +416,7 @@ AUTHOR
 $ uname -r > linux-info.txt
 $ cat linux-info.txt | echoize | testnum | testuser
 # $ cat ~/.bashrc | echoize
-X.XX.X-XX-generic
+H.HH.H-HH-generic
 
 # SORTS BY PARAGRAPH
 $ cat pf_manual.txt | para-sort | testnum | testuser
@@ -424,7 +424,7 @@ $ cat pf_manual.txt | para-sort | testnum | testuser
 
 
        %b     ARGUMENT  as  a string with '\' escapes interpreted, except that
-              octal escapes are of the form \X or \XNNN
+              octal escapes are of the form \H or \HNNN
 
 
        %q     ARGUMENT is printed in a format that can be reused as shell  in‐
@@ -454,11 +454,11 @@ $ cat pf_manual.txt | para-sort | testnum | testuser
        \"     double quote
 
 
-       \NNN   byte with octal value NNN (X to X digits)
+       \NNN   byte with octal value NNN (H to H digits)
 
 
        \UHHHHHHHH
-              Unicode character with hex value HHHHHHHH (X digits)
+              Unicode character with hex value HHHHHHHH (H digits)
 
 
        \\     backslash
@@ -488,13 +488,13 @@ $ cat pf_manual.txt | para-sort | testnum | testuser
        \t     horizontal tab
 
 
-       \uHHHH Unicode (ISO/IEC XXXXX) character with hex value HHHH (X digits)
+       \uHHHH Unicode (ISO/IEC HHHHH) character with hex value HHHH (H digits)
 
 
        \v     vertical tab
 
 
-       \xHH   byte with hexadecimal value HH (X to X digits)
+       \xHH   byte with hexadecimal value HH (H to H digits)
 
 
        and all C format specifications ending with one of diouxXfeEgGcs,  with
@@ -506,8 +506,8 @@ AUTHOR
 
 
 COPYRIGHT
-       Copyright  ©  XXXX  Free Software Foundation, Inc.  License GPLvX+: GNU
-       GPL version X or later <https://gnu.org/licenses/gpl.html>.
+       Copyright  ©  HHHH  Free Software Foundation, Inc.  License GPLvH+: GNU
+       GPL version H or later <https://gnu.org/licenses/gpl.html>.
        This is free software: you are free  to  change  and  redistribute  it.
        There is NO WARRANTY, to the extent permitted by law.
 
@@ -516,13 +516,13 @@ DESCRIPTION
        Print ARGUMENT(s) according to FORMAT, or execute according to OPTION:
 
 
-GNU coreutils X.XX               February XXXX                       PRINTF(X)
+GNU coreutils H.HH               February HHHH                       PRINTF(H)
 
 NAME
        printf - format and print data
 
 
-PRINTF(X)                        User Commands                       PRINTF(X)
+PRINTF(H)                        User Commands                       PRINTF(H)
 
 
 REPORTING BUGS
@@ -531,7 +531,7 @@ REPORTING BUGS
 
 
 SEE ALSO
-       printf(X)
+       printf(H)
 
 
 SYNOPSIS
@@ -540,7 +540,7 @@ SYNOPSIS
 
 
 $ cat pf_manual.txt | echoize | head -n 5 | testuser | testnum
-PRINTF(X)                        User Commands                       PRINTF(X)
+PRINTF(H)                        User Commands                       PRINTF(H)
 
 NAME        printf - format and print data
 

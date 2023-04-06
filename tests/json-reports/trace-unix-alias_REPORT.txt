@@ -1,0 +1,1 @@
+{'report_name': 'trace-unix-alias', 'instrumented_line': 250, 'covered_line': 144, 'ratio': 0.576}

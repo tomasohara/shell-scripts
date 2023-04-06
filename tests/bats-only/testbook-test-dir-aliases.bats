@@ -107,8 +107,8 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test6-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testnum="sed -r "s/[0-9]/X/g"" 
-	alias testuser="sed -r "s/"$USER"+/user/g""
+	alias testnum="sed -r "s/[0-9]/N/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g""
 }
 
 
@@ -131,7 +131,7 @@ function test7-assert1-actual () {
 	echo $USER | testuser
 }
 function test7-assert1-expected () {
-	echo -e 'user'
+	echo -e 'userxf333'
 }
 
 @test "test8" {
@@ -180,10 +180,10 @@ function test9-assert1-expected () {
 }
 
 function test10-assert1-actual () {
-	ls -l | testuser | testnum | awk '!($6="")'
+	ls -l | testnum | testuser | awk '!($6="")'
 }
 function test10-assert1-expected () {
-	echo -e 'total X    -rw-rw-r-- X user user X  XX XX:XX fileXlrwxrwxrwx X user user X  XX XX:XX linkX -> fileX'
+	echo -e 'total N    -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileNlrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN'
 }
 
 @test "test11" {
@@ -217,10 +217,10 @@ function test10-assert1-expected () {
 }
 
 function test13-assert1-actual () {
-	ls -l | testuser | testnum | awk '!($6="")'
+	ls -l | testnum | testuser | awk '!($6="")'
 }
 function test13-assert1-expected () {
-	echo -e 'total X    -rw-rw-r-- X user user X  XX XX:XX fileXlrwxrwxrwx X user user X  XX XX:XX linkX -> fileXlrwxrwxrwx X user user X  XX XX:XX temp-link -> /tmp'
+	echo -e 'total N    -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileNlrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileNlrwxrwxrwx N userxf333 userxf333 N  N NN:NN temp-link -> /tmp'
 }
 
 @test "test14" {
@@ -246,10 +246,10 @@ function test13-assert1-expected () {
 }
 
 function test15-assert1-actual () {
-	ls -l | testuser | testnum | awk '!($6="")'
+	ls -l | testnum | testuser | awk '!($6="")'
 }
 function test15-assert1-expected () {
-	echo -e 'total X    -rw-rw-r-- X user user X  XX XX:XX fileXlrwxrwxrwx X user user X  XX XX:XX linkX -> fileXlrwxrwxrwx X user user XX  XX XX:XX temp-link -> /home/user/temp'
+	echo -e 'total N    -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileNlrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileNlrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp'
 }
 
 @test "test16" {
@@ -290,8 +290,8 @@ function test15-assert1-expected () {
 }
 
 function test19-assert1-actual () {
-	ls -l | testuser | testnum | awk '!($6="")'
+	ls -l | testnum | testuser | awk '!($6="")'
 }
 function test19-assert1-expected () {
-	echo -e 'total X    -rw-rw-r-- X user user X  XX XX:XX fileXlrwxrwxrwx X user user X  XX XX:XX linkX -> fileXlrwxrwxrwx X user user XX  XX XX:XX temp-link -> /home/user/temp'
+	echo -e 'total N    -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileNlrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileNlrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp'
 }

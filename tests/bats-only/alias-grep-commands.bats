@@ -66,8 +66,8 @@ function test2-assert1-expected () {
 	test_folder=$(echo /tmp/test3-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testnum="sed -r "s/[0-9]/X/g"" 
-	alias testuser="sed -r "s/"$USER"+/user/g""
+	alias testnum="sed -r "s/[0-9]/N/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g""
 }
 
 
@@ -151,7 +151,7 @@ function test8-assert1-actual () {
 	grep -V | testnum
 }
 function test8-assert1-expected () {
-	echo -e 'grep (GNU grep) X.XCopyright (C) XXXX Free Software Foundation, Inc.License GPLvX+: GNU GPL version X or later <https://gnu.org/licenses/gpl.html>.This is free software: you are free to change and redistribute it.There is NO WARRANTY, to the extent permitted by law.'
+	echo -e 'grep (GNU grep) N.NCopyright (C) NNNN Free Software Foundation, Inc.License GPLvN+: GNU GPL version N or later <https://gnu.org/licenses/gpl.html>.This is free software: you are free to change and redistribute it.There is NO WARRANTY, to the extent permitted by law.'
 }
 
 @test "test9" {

@@ -97,9 +97,9 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test5-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testuser="sed -r "s/"$USER"+/user/g""
-	alias testnum="sed -r "s/[0-9]/X/g"" 
-	alias testnumhex="sed -r "s/[0-9,a-f,A-F]/X/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g""
+	alias testnum="sed -r "s/[0-9]/N/g"" 
+	alias testnumhex="sed -r "s/[0-9,a-f,A-F]/h/g"" 
 }
 
 
@@ -160,7 +160,7 @@ function test9-assert1-actual () {
 	ps | filter-dirnames | testnum
 }
 function test9-assert1-expected () {
-	echo -e 'PID TTY          TIME CMDXXXX pts/X    XX:XX:XX bashXXXX pts/X    XX:XX:XX psXXXX pts/X    XX:XX:XX bashXXXX pts/X    XX:XX:XX sedXXXX pts/X    XX:XX:XX perl'
+	echo -e 'PID TTY          TIME CMDNNNNN pts/N    NN:NN:NN bashNNNNN pts/N    NN:NN:NN psNNNNN pts/N    NN:NN:NN bashNNNNN pts/N    NN:NN:NN sedNNNNN pts/N    NN:NN:NN perl'
 }
 
 @test "test10" {
@@ -250,7 +250,7 @@ function test13-assert2-actual () {
 	usage-pp | testnum
 }
 function test13-assert2-expected () {
-	echo -e "Backing up 'usage.bytes.list' to './backup/usage.bytes.list'XX.XM\t.X.XXM\t./backupXXK\t.XXK\t./backup"
+	echo -e "Backing up 'usage.bytes.list' to './backup/usage.bytes.list'NN.NM\t.N.NNM\t./backupNNK\t.NNK\t./backup"
 }
 
 @test "test14" {
@@ -272,7 +272,7 @@ function test14-assert1-actual () {
 	usage 
 }
 function test14-assert1-expected () {
-	echo -e "renamed 'usage.list' -> 'usage.list.26Nov22'\x1b[?1h\x1b="
+	echo -e "renamed 'usage.list' -> 'usage.list.06Dec22'\x1b[?1h\x1b="
 }
 
 @test "test15" {
@@ -425,7 +425,7 @@ function test22-assert1-actual () {
 	diff process1.txt process2.txt | testuser | testnumhex
 }
 function test22-assert1-expected () {
-	echo -e 'XXXXXXX< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u---> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u'
+	echo -e 'hhhhhhhhhhh< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u---> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u'
 }
 
 @test "test23" {
@@ -447,7 +447,7 @@ function test23-assert1-actual () {
 	diff-default process1.txt process2.txt | testuser | testnumhex
 }
 function test23-assert1-expected () {
-	echo -e 'XXXXXXX< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u---> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u'
+	echo -e 'hhhhhhhhhhh< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u---> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u'
 }
 
 @test "test24" {
@@ -469,7 +469,7 @@ function test24-assert1-actual () {
 	diff-ignore-spacing process1.txt process2.txt | testuser | testnumhex
 }
 function test24-assert1-expected () {
-	echo -e 'XXXXXXX< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u---> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u'
+	echo -e 'hhhhhhhhhhh< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u---> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u'
 }
 
 @test "test25" {
@@ -491,7 +491,7 @@ function test25-assert1-actual () {
 	do-diff process1.txt process2.txt | testuser | testnumhex
 }
 function test25-assert1-expected () {
-	echo -e 'proXXssX.txt vs. proXXssX.txtXiXXXrXnXXs: proXXssX.txt proXXssX.txt-rw-rw-r-- X usXr usXr XXX Nov XX XX:XX proXXssX.txt-rw-rw-r-- X usXr usXr XXX Nov XX XX:XX proXXssX.txtXXXXXXX< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh< usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u---> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/Xin/XXsh> usXr       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u------------------------------------------------------------------------'
+	echo -e 'prohhssh.txt vs. prohhssh.txthihhhrhnhhs: prohhssh.txt prohhssh.txt-rw-rw-r-- h ushrxhhhh ushrxhhhh hhhh hhh  h hh:hh prohhssh.txt-rw-rw-r-- h ushrxhhhh ushrxhhhh hhhh hhh  h hh:hh prohhssh.txthhhhhhhhhhh< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u---> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u------------------------------------------------------------------------'
 }
 
 @test "test26" {
@@ -548,4 +548,41 @@ function test30-assert1-actual () {
 }
 function test30-assert1-expected () {
 	echo -e "Backing up 'process1.txt' to './backup/process1.txt'"
+}
+
+@test "test31" {
+	test_folder=$(echo /tmp/test31-$$)
+	mkdir $test_folder && cd $test_folder
+
+	diff-backup process1.txt
+}
+
+
+@test "test32" {
+	test_folder=$(echo /tmp/test32-$$)
+	mkdir $test_folder && cd $test_folder
+
+}
+
+
+@test "test33" {
+	test_folder=$(echo /tmp/test33-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test33-assert1-actual)
+	expected=$(test33-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test33-assert1-actual () {
+	echo "Done"
+}
+function test33-assert1-expected () {
+	echo -e 'Done'
 }

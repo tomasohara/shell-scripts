@@ -53,23 +53,17 @@ $ pwd
 
 ## chdir works as cd
 $ chdir ..
-$ pwd
 $ chdir test-6869/
-$ pwd
-]1;test-cp-mv [/tmp/test-cp-mv]]2;test-cp-mv [/tmp/test-cp-mv]/tmp/test-cp-mv
-/tmp/test-cp-mv/test-6869
-]1;test-6869 [/tmp/test-cp-mv/test-6869]]2;test-6869 [/tmp/test-cp-mv/test-6869]/tmp/test-cp-mv/test-6869
+]1;test-cp-mv [/tmp/test-cp-mv]]2;test-cp-mv [/tmp/test-cp-mv]/tmp/test-cp-mv/test-6869
+]1;test-6869 [/tmp/test-cp-mv/test-6869]]2;test-6869 [/tmp/test-cp-mv/test-6869]
 
 ## cd-this-realdir works as cd as well
 $ chdir ..
-$ pwd
 $ chdir test-6869/
-$ pwd
-]1;test-cp-mv [/tmp/test-cp-mv]]2;test-cp-mv [/tmp/test-cp-mv]/tmp/test-cp-mv
-/tmp/test-cp-mv/test-6869
-]1;test-6869 [/tmp/test-cp-mv/test-6869]]2;test-6869 [/tmp/test-cp-mv/test-6869]/tmp/test-cp-mv/test-6869
+]1;test-cp-mv [/tmp/test-cp-mv]]2;test-cp-mv [/tmp/test-cp-mv]/tmp/test-cp-mv/test-6869
+]1;test-6869 [/tmp/test-cp-mv/test-6869]]2;test-6869 [/tmp/test-cp-mv/test-6869]
 
-$ rm -rf ./*
+$ rm -rf ./* > /dev/null
 $ mkdir testdir89 testdir90
 $ echo "Testfile1" > testdir89/f11.txt
 $ echo "Testfile2" > testdir89/f12.txt

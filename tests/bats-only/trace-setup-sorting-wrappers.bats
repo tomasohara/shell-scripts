@@ -98,8 +98,8 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test5-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testnum="sed -r "s/[0-9]/X/g"" 
-	alias testuser="sed -r "s/"$USER"+/user/g"" 
+	alias testnum="sed -r "s/[0-9]/H/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g"" 
 }
 
 
@@ -208,5 +208,5 @@ function test17-assert1-actual () {
 	cat pf_manual.txt | echoize | head -n 5 | testuser | testnum
 }
 function test17-assert1-expected () {
-	echo -e 'PRINTF(X)                        User Commands                       PRINTF(X)'
+	echo -e 'PRINTF(H)                        User Commands                       PRINTF(H)'
 }

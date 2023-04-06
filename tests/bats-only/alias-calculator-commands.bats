@@ -119,8 +119,8 @@ function test5-assert1-expected () {
 	test_folder=$(echo /tmp/test6-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testnumhex="sed -r "s/[0-9,A-F,a-f]/X/g"" 
-	alias testuser="sed -r "s/"$USER"+/user/g"" 
+	alias testnumhex="sed -r "s/[0-9,A-F,a-f]/N/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g"" 
 }
 
 
@@ -263,7 +263,7 @@ function test13-assert1-expected () {
 	mkdir $test_folder && cd $test_folder
 
 	pwd
-	rm -rf ./*
+	rm -rf ./* > /dev/null
 	ps -l > testforhv.txt
 }
 

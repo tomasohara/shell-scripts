@@ -1,0 +1,1 @@
+{'report_name': 'alias-cd-commands', 'instrumented_line': 105, 'covered_line': 82, 'ratio': 0.781}

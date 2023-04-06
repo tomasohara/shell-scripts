@@ -48,8 +48,8 @@ $ typeset -f | egrep '^\w+' | wc -l
 1
 0
 
-$ alias testnum="sed -r "s/[0-9]/X/g"" 
-$ alias testuser="sed -r "s/"$USER"+/user/g"" 
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g"" 
 
 $ source $BIN_DIR/tomohara-aliases.bash
 
@@ -59,10 +59,6 @@ $ printf "Hi Mom,\nThis is the use of printf\nI can use a backslash n to start a
 $ printf "This is another-test file" >> test2.txt
 $ printf "This is test-file 3" >> test3.txt
 $ printf "This is a test-file 4" >> test4.txt
-removed './abc-test.txt'
-removed './test2.txt'
-removed './test3.txt'
-removed './test4.txt'
 
 $ ls | count-it '\.([^\.]+)$'
 txt	4
@@ -158,7 +154,7 @@ $ ls-line-len
 
 # ## ERROR-GENERATED : check-class-dist
 # $ cat abc-test.txt | check-class-dist
-# | Can't open : No such file or directory at /home/aveey/bin/count_it.perl line 171.
+# | Can't open : No such file or directory at /home/xaea12/bin/count_it.perl line 171.
 # | WARNING: unexpected distribution for FREQ (all 0)
 
 # $ cat abc-test.txt | 2bib
@@ -166,3 +162,5 @@ $ ls-line-len
 # | cat: write error: Broken pipe
 
 $ rm -rf ./* > /dev/null
+$ echo "Done"
+Done

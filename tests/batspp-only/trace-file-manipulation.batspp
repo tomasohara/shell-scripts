@@ -68,10 +68,10 @@ Backing up 'freemem_mb.txt' to './backup/freemem_mb.txt'
 bash: BACKUP/freemem_mb.txt: No such file or directory
 --------------------------------------------------------------------------------
 total X    
--r--r--r-- X user user XXX  XX XX:XX freemem_mb.txt
+-r--r--r-- X user user XXX  X XX:XX freemem_mb.txt
 --------------------------------------------------------------------------------
                total        used        free      shared  buff/cache   available
-Mem:            XXXX        XXXX         XXX         XXX        XXXX         XXX
+Mem:            XXXX        XXXX         XXX         XXX         XXX         XXX
 Swap:           XXXX         XXX        XXXX
 
 # perl-slurp IS AN ALIAS FOR 'perl -0777'
@@ -124,6 +124,7 @@ TTY
 TIME
 bash
 bash
+bash
 XXXX
 pts/X
 pts/X
@@ -141,6 +142,9 @@ X.X
 X.X
 X:XX
 X:XX
+X:XX
+X.X
+XXXXXX
 XXXXXX
 XXXXX
 XXXXX
@@ -151,18 +155,30 @@ XXXXX
 XX:XX
 XX:XX
 XX:XX
+XX:XX
+X.X
 X.X
 XX:XX
 XX:XX
 XX:XX
 XX:XX
 XX:XX
-XXXX
-XXXX
-X.X
-XXXX
-XXXX
+XX:XX
 XXXXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
 XXXX
 XXXX
 XXXX
@@ -189,6 +205,12 @@ pts/X
 pts/X
 pts/X
 pts/X
+pts/X
+pts/X
+pts/X
+pts/X
+tomohara-a
+vi
 
 # line-intersection = intersection -line
 $ free -m > free1.txt
@@ -200,7 +222,7 @@ $ line-intersection free1.txt free2.txt
 $ line-difference free1.txt free2.txt | testnum
 $ linebr
 $ line-difference free2.txt free1.txt | testnum
-Mem:            XXXX        XXXX         XXX         XXX        XXXX         XXX
+Mem:            XXXX        XXXX         XXX         XXX         XXX         XXX
 Swap:           XXXX         XXX        XXXX
 --------------------------------------------------------------------------------
 Mem:         XXXXXXX     XXXXXXX      XXXXXX      XXXXXX     XXXXXXX      XXXXXX
@@ -215,8 +237,13 @@ USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
 user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX bash
 user       XXXX  X.X  X.X XXXXXX XXXXXX pts/X   Sl+  XX:XX   X:XX /usr/bin/pyth
 user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
-user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
 user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX bash
+user       XXXX  X.X  X.X XXXXXX XXXXX pts/X    Sl+  XX:XX   X:XX vi tomohara-a
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
 user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
 user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/bin/bash
 user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
@@ -228,7 +255,7 @@ $ last-n-with-header 4 ntest1.txt | testuser | testnum
 $ linebr
 $ last-n-with-header 2 ntest2.txt | testuser | testnum
 USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
-user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
 user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
 user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/bin/bash
 user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u

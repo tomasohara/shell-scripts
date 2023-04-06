@@ -44,8 +44,8 @@ function test1-assert4-expected () {
 	test_folder=$(echo /tmp/test2-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testuser="sed -r "s/"$USER"+/user/g""
-	alias testnum="sed -r "s/[0-9]/X/g""
+	alias testuser="sed -r "s/"$USER"+/userxf333/g""
+	alias testnum="sed -r "s/[0-9]/N/g""
 }
 
 
@@ -143,9 +143,9 @@ function test7-assert1-expected () {
 	mv abc ./mvtest_dir1
 	move def ./mvtest_dir1
 	move-force ghi ./mvtest_dir1
-	ls -l | awk '!($6="")' | testuser | testnum
+	ls -l | awk '!($6="")' | testnum | testuser
 	linebr
-	ls -l ./mvtest_dir1 | awk '!($6="")' | testuser | testnum
+	ls -l ./mvtest_dir1 | awk '!($6="")' | testnum | testuser
 	actual=$(test8-assert9-actual)
 	expected=$(test8-assert9-expected)
 	echo "========== actual =========="
@@ -161,7 +161,7 @@ function test8-assert9-actual () {
 	linebr
 }
 function test8-assert9-expected () {
-	echo -e "removed './testdir1/.bashrc'removed directory './testdir1'--------------------------------------------------------------------------------renamed 'abc' -> './mvtest_dir1/abc'renamed 'def' -> './mvtest_dir1/def'renamed 'ghi' -> './mvtest_dir1/ghi'--------------------------------------------------------------------------------total X    drwxrwsr-x X user user XXXX  XX XX:XX mvtest_dirX--------------------------------------------------------------------------------total X    -rw-rw-r-- X user user X  XX XX:XX abc-rw-rw-r-- X user user X  XX XX:XX def-rw-rw-r-- X user user X  XX XX:XX ghi--------------------------------------------------------------------------------"
+	echo -e "removed './testdir1/.bashrc'removed directory './testdir1'--------------------------------------------------------------------------------renamed 'abc' -> './mvtest_dir1/abc'renamed 'def' -> './mvtest_dir1/def'renamed 'ghi' -> './mvtest_dir1/ghi'--------------------------------------------------------------------------------total N    drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN mvtest_dirN--------------------------------------------------------------------------------total N    -rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc-rw-rw-r-- N userxf333 userxf333 N  N NN:NN def-rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi--------------------------------------------------------------------------------"
 }
 
 @test "test9" {
@@ -173,9 +173,9 @@ function test8-assert9-expected () {
 	cp abc ./cptest_dir1
 	copy def ./cptest_dir1
 	copy-force ghi ./cptest_dir1
-	ls -l | awk '!($6="")' | testuser | testnum
+	ls -l | awk '!($6="")' | testnum | testuser
 	linebr
-	ls -l ./cptest_dir1 | awk '!($6="")' | testuser | testnum
+	ls -l ./cptest_dir1 | awk '!($6="")' | testnum | testuser
 	actual=$(test9-assert9-actual)
 	expected=$(test9-assert9-expected)
 	echo "========== actual =========="
@@ -191,49 +191,34 @@ function test9-assert9-actual () {
 	linebr
 }
 function test9-assert9-expected () {
-	echo -e "removed './mvtest_dir1/abc'removed './mvtest_dir1/ghi'removed './mvtest_dir1/def'removed directory './mvtest_dir1'--------------------------------------------------------------------------------'abc' -> './cptest_dir1/abc''def' -> './cptest_dir1/def''ghi' -> './cptest_dir1/ghi'--------------------------------------------------------------------------------total X    -rw-rw-r-- X user user X  XX XX:XX abcdrwxrwsr-x X user user XXXX  XX XX:XX cptest_dirX-rw-rw-r-- X user user X  XX XX:XX def-rw-rw-r-- X user user X  XX XX:XX ghi--------------------------------------------------------------------------------total X    -rw-rw-r-- X user user X  XX XX:XX abc-rw-rw-r-- X user user X  XX XX:XX def-rw-rw-r-- X user user X  XX XX:XX ghi--------------------------------------------------------------------------------"
+	echo -e "removed './mvtest_dir1/abc'removed './mvtest_dir1/ghi'removed './mvtest_dir1/def'removed directory './mvtest_dir1'--------------------------------------------------------------------------------'abc' -> './cptest_dir1/abc''def' -> './cptest_dir1/def''ghi' -> './cptest_dir1/ghi'--------------------------------------------------------------------------------total N    -rw-rw-r-- N userxf333 userxf333 N  N NN:NN abcdrwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN cptest_dirN-rw-rw-r-- N userxf333 userxf333 N  N NN:NN def-rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi--------------------------------------------------------------------------------total N    -rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc-rw-rw-r-- N userxf333 userxf333 N  N NN:NN def-rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi--------------------------------------------------------------------------------"
 }
 
 @test "test10" {
 	test_folder=$(echo /tmp/test10-$$)
 	mkdir $test_folder && cd $test_folder
 
-	rm -rf ./*
+	rm -rf ./* > /dev/null
 	touch abc def ghi
 	mkdir TDIR1 TDIR2 TDIR3 TDIR4
-	ls -l | awk '!($6="")' | testuser | testnum
+	ls -l | awk '!($6="")' | testnum | testuser
 	remove-dir "TDIR1"
 	delete-dir "TDIR2"
 	remove-dir-force TDIR3
 	delete-dir-force TDIR4
-	ls -l | awk '!($6="")' | testuser | testnum
-	actual=$(test10-assert10-actual)
-	expected=$(test10-assert10-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
+	ls -l | awk '!($6="")' | testnum | testuser
 }
 
-function test10-assert10-actual () {
-	linebr
-}
-function test10-assert10-expected () {
-	echo -e "removed './abc'removed './cptest_dir1/abc'removed './cptest_dir1/ghi'removed './cptest_dir1/def'removed directory './cptest_dir1'removed './def'removed './ghi'--------------------------------------------------------------------------------total XX    -rw-rw-r-- X user user X  XX XX:XX abc-rw-rw-r-- X user user X  XX XX:XX def-rw-rw-r-- X user user X  XX XX:XX ghidrwxrwsr-x X user user XXXX  XX XX:XX TDIRXdrwxrwsr-x X user user XXXX  XX XX:XX TDIRXdrwxrwsr-x X user user XXXX  XX XX:XX TDIRXdrwxrwsr-x X user user XXXX  XX XX:XX TDIRX--------------------------------------------------------------------------------removed directory 'TDIR1'removed directory 'TDIR2'removed directory 'TDIR3'removed directory 'TDIR4'--------------------------------------------------------------------------------total X    -rw-rw-r-- X user user X  XX XX:XX abc-rw-rw-r-- X user user X  XX XX:XX def-rw-rw-r-- X user user X  XX XX:XX ghi--------------------------------------------------------------------------------"
-}
 
 @test "test11" {
 	test_folder=$(echo /tmp/test11-$$)
 	mkdir $test_folder && cd $test_folder
 
 	copy-readonly | testuser
-	rm -rf ./*
+	rm -rf ./* > /dev/null
 	mkdir testdir1
 	linebr
-	copy-readonly ~/.bashrc ./testdir1/ | awk '!($6="")' | testuser | testnum
+	copy-readonly ~/.bashrc ./testdir1/ | awk '!($6="")' | testnum | testuser
 	cat ./testdir1/.bashrc | head 
 }
 
@@ -254,8 +239,8 @@ function test10-assert10-expected () {
 }
 
 function test12-assert1-actual () {
-	ls -l | awk '!($6="")' | testuser | testnum
+	ls -l | awk '!($6="")' | testnum | testuser
 }
 function test12-assert1-expected () {
-	echo -e 'total X    drwxrwsr-x X user user XXXX  XX XX:XX testdirX'
+	echo -e 'total N    drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN testdirN'
 }

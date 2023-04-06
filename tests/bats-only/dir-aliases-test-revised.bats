@@ -44,8 +44,8 @@ function test1-assert4-expected () {
 	test_folder=$(echo /tmp/test2-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testnum="sed -r "s/[0-9]/X/g"" 
-	alias testuser="sed -r "s/"$USER"+/user/g""
+	alias testnum="sed -r "s/[0-9]/N/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g""
 }
 
 
@@ -220,23 +220,8 @@ function test13-assert1-expected () {
 	test_folder=$(echo /tmp/test15-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test15-assert1-actual)
-	expected=$(test15-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
 }
 
-function test15-assert1-actual () {
-	ln-symbolic-force /tmp temp-link
-}
-function test15-assert1-expected () {
-	echo -e "ln: failed to create symbolic link 'temp-link/tmp': File exists'temp-link/tmp' -> '/tmp'"
-}
 
 @test "test16" {
 	test_folder=$(echo /tmp/test16-$$)

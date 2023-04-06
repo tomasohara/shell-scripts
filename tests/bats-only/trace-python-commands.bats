@@ -76,7 +76,7 @@ function test2-assert2-expected () {
 	test_folder=$(echo /tmp/test4-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testuser="sed -r "s/"$USER"+/user/g""
+	alias testuser="sed -r "s/"$USER"+/userxf333/g""
 }
 
 
@@ -121,7 +121,7 @@ function test8-assert1-actual () {
 	show-python-path | testuser
 }
 function test8-assert1-expected () {
-	echo -e 'PYTHONPATH:/home/user/python'
+	echo -e 'PYTHONPATH:/home/userxf333/python'
 }
 
 @test "test9" {
@@ -149,34 +149,18 @@ function test8-assert1-expected () {
 	test_folder=$(echo /tmp/test12-$$)
 	mkdir $test_folder && cd $test_folder
 
-	python-import-path 'mezcla' | testnum
-	linebr
-	python-import-path-full 'mezcla' | testnum
-	actual=$(test12-assert4-actual)
-	expected=$(test12-assert4-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
 }
 
-function test12-assert4-actual () {
-	python-import-path-all 'mezcla' | grep mezcla | head -n 5 | testnum
-}
-function test12-assert4-expected () {
-	echo -e "matches /usr/local/lib/pythonX.XX/dist-packages/mezcla/__init__.py--------------------------------------------------------------------------------matches /usr/local/lib/pythonX.XX/dist-packages/mezcla/__init__.pymatches /usr/local/lib/pythonX.XX/dist-packages/mezcla/debug.pymatches /usr/local/lib/pythonX.XX/dist-packages/mezcla/sys_version_info_hack.pymatches /usr/local/lib/pythonX.XX/dist-packages/mezcla/glue_helpers.pymatches /usr/local/lib/pythonX.XX/dist-packages/mezcla/system.pymatches /usr/local/lib/pythonX.XX/dist-packages/mezcla/tpo_common.py--------------------------------------------------------------------------------# /usr/local/lib/pythonX.XX/dist-packages/mezcla/__pycache__/__init__.cpython-XXX.pyc matches /usr/local/lib/pythonX.XX/dist-packages/mezcla/__init__.py# code object from '/usr/local/lib/pythonX.XX/dist-packages/mezcla/__pycache__/__init__.cpython-XXX.pyc'# /usr/local/lib/pythonX.XX/dist-packages/mezcla/__pycache__/debug.cpython-XXX.pyc matches /usr/local/lib/pythonX.XX/dist-packages/mezcla/debug.py# code object from '/usr/local/lib/pythonX.XX/dist-packages/mezcla/__pycache__/debug.cpython-XXX.pyc'# /usr/local/lib/pythonX.XX/dist-packages/mezcla/__pycache__/sys_version_info_hack.cpython-XXX.pyc matches /usr/local/lib/pythonX.XX/dist-packages/mezcla/sys_version_info_hack.py"
-}
 
 @test "test13" {
 	test_folder=$(echo /tmp/test13-$$)
 	mkdir $test_folder && cd $test_folder
 
-	rm -rf ./* > /dev/null
-	actual=$(test13-assert2-actual)
-	expected=$(test13-assert2-expected)
+	python-import-path 'mezcla' | testnum
+	linebr
+	python-import-path-full 'mezcla' | testnum
+	actual=$(test13-assert4-actual)
+	expected=$(test13-assert4-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -186,15 +170,38 @@ function test12-assert4-expected () {
 
 }
 
-function test13-assert2-actual () {
-	pip3 freeze | grep ipython | wc -l
+function test13-assert4-actual () {
+	python-import-path-all 'mezcla' | grep mezcla | head -n 5 | testnum
 }
-function test13-assert2-expected () {
-	echo -e '2'
+function test13-assert4-expected () {
+	echo -e "matches /usr/local/lib/pythonN.NN/dist-packages/mezcla/__init__.py--------------------------------------------------------------------------------matches /usr/local/lib/pythonN.NN/dist-packages/mezcla/__init__.pymatches /usr/local/lib/pythonN.NN/dist-packages/mezcla/debug.pymatches /usr/local/lib/pythonN.NN/dist-packages/mezcla/sys_version_info_hack.pymatches /usr/local/lib/pythonN.NN/dist-packages/mezcla/glue_helpers.pymatches /usr/local/lib/pythonN.NN/dist-packages/mezcla/system.pymatches /usr/local/lib/pythonN.NN/dist-packages/mezcla/tpo_common.py--------------------------------------------------------------------------------# /usr/local/lib/pythonN.NN/dist-packages/mezcla/__pycache__/__init__.cpython-NNN.pyc matches /usr/local/lib/pythonN.NN/dist-packages/mezcla/__init__.py# code object from '/usr/local/lib/pythonN.NN/dist-packages/mezcla/__pycache__/__init__.cpython-NNN.pyc'# /usr/local/lib/pythonN.NN/dist-packages/mezcla/__pycache__/debug.cpython-NNN.pyc matches /usr/local/lib/pythonN.NN/dist-packages/mezcla/debug.py# code object from '/usr/local/lib/pythonN.NN/dist-packages/mezcla/__pycache__/debug.cpython-NNN.pyc'# /usr/local/lib/pythonN.NN/dist-packages/mezcla/__pycache__/sys_version_info_hack.cpython-NNN.pyc matches /usr/local/lib/pythonN.NN/dist-packages/mezcla/sys_version_info_hack.py"
 }
 
 @test "test14" {
 	test_folder=$(echo /tmp/test14-$$)
+	mkdir $test_folder && cd $test_folder
+
+	rm -rf ./* > /dev/null
+	actual=$(test14-assert2-actual)
+	expected=$(test14-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test14-assert2-actual () {
+	pip3 freeze | grep ipython | wc -l
+}
+function test14-assert2-expected () {
+	echo -e '2'
+}
+
+@test "test15" {
+	test_folder=$(echo /tmp/test15-$$)
 	mkdir $test_folder && cd $test_folder
 
 	python-module-version-full mezcla | testnum
@@ -202,8 +209,8 @@ function test13-assert2-expected () {
 	python-module-version mezcla | testnum
 	linebr
 	python-package-members mezcla | testnum
-	actual=$(test14-assert6-actual)
-	expected=$(test14-assert6-expected)
+	actual=$(test15-assert6-actual)
+	expected=$(test15-assert6-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -213,42 +220,20 @@ function test13-assert2-expected () {
 
 }
 
-function test14-assert6-actual () {
+function test15-assert6-actual () {
 	linebr
 }
-function test14-assert6-expected () {
-	echo -e "X.X.X--------------------------------------------------------------------------------X.X.X--------------------------------------------------------------------------------['PYTHONX_PLUS', 'TL', '__VERSION__', '__all__', '__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__path__', '__spec__', '__version__', 'debug', 'gh', 'glue_helpers', 'mezcla', 'sys', 'sys_version_info_hack', 'system', 'tpo_common']--------------------------------------------------------------------------------"
+function test15-assert6-expected () {
+	echo -e "N.N.N--------------------------------------------------------------------------------N.N.N--------------------------------------------------------------------------------['PYTHONN_PLUS', 'TL', '__VERSION__', '__all__', '__builtins__', '__cached__', '__doc__', '__file__', '__loader__', '__name__', '__package__', '__path__', '__spec__', '__version__', 'debug', 'gh', 'glue_helpers', 'mezcla', 'sys', 'sys_version_info_hack', 'system', 'tpo_common']--------------------------------------------------------------------------------"
 }
-
-@test "test15" {
-	test_folder=$(echo /tmp/test15-$$)
-	mkdir $test_folder && cd $test_folder
-
-	pwd 
-}
-
 
 @test "test16" {
 	test_folder=$(echo /tmp/test16-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test16-assert1-actual)
-	expected=$(test16-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
+	pwd 
 }
 
-function test16-assert1-actual () {
-	ltc testless.txt | testnum
-}
-function test16-assert1-expected () {
-	echo -e 'THIS IS THE HEADXXXXXXXTHIS IS THE TAIL.'
-}
 
 @test "test17" {
 	test_folder=$(echo /tmp/test17-$$)
@@ -266,10 +251,10 @@ function test16-assert1-expected () {
 }
 
 function test17-assert1-actual () {
-	less-tail testless.txt | testnum
+	ltc testless.txt | testnum
 }
 function test17-assert1-expected () {
-	echo -e 'THIS IS THE HEADXXXXXXXTHIS IS THE TAIL.'
+	echo -e 'THIS IS THE HEADNNNNNNNTHIS IS THE TAIL.'
 }
 
 @test "test18" {
@@ -288,10 +273,10 @@ function test17-assert1-expected () {
 }
 
 function test18-assert1-actual () {
-	less-tail-clipped testless.txt | testnum
+	less-tail testless.txt | testnum
 }
 function test18-assert1-expected () {
-	echo -e 'THIS IS THE HEADXXXXXXXTHIS IS THE TAIL.'
+	echo -e 'THIS IS THE HEADNNNNNNNTHIS IS THE TAIL.'
 }
 
 @test "test19" {
@@ -310,10 +295,10 @@ function test18-assert1-expected () {
 }
 
 function test19-assert1-actual () {
-	less-clipped testless.txt | testnum
+	less-tail-clipped testless.txt | testnum
 }
 function test19-assert1-expected () {
-	echo -e 'THIS IS THE HEADXXXXXXXTHIS IS THE TAIL.'
+	echo -e 'THIS IS THE HEADNNNNNNNTHIS IS THE TAIL.'
 }
 
 @test "test20" {
@@ -332,37 +317,18 @@ function test19-assert1-expected () {
 }
 
 function test20-assert1-actual () {
-	less- testless.txt | testnum
+	less-clipped testless.txt | testnum
 }
 function test20-assert1-expected () {
-	echo -e 'THIS IS THE HEADXXXXXXXTHIS IS THE TAIL.'
+	echo -e 'THIS IS THE HEADNNNNNNNTHIS IS THE TAIL.'
 }
 
 @test "test21" {
 	test_folder=$(echo /tmp/test21-$$)
 	mkdir $test_folder && cd $test_folder
 
-	ipython --version | testuser | testnum
-}
-
-
-@test "test22" {
-	test_folder=$(echo /tmp/test22-$$)
-	mkdir $test_folder && cd $test_folder
-
-	alias which-py3='which python3' 
-}
-
-
-@test "test23" {
-	test_folder=$(echo /tmp/test23-$$)
-	mkdir $test_folder && cd $test_folder
-
-	rm -rf ./* > /dev/null
-	printf "print('THIS IS A TEST')" > atest.py
-	printf "print('THIS IS A TEST')" > xyz.py
-	actual=$(test23-assert4-actual)
-	expected=$(test23-assert4-expected)
+	actual=$(test21-assert1-actual)
+	expected=$(test21-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -372,36 +338,53 @@ function test20-assert1-expected () {
 
 }
 
-function test23-assert4-actual () {
-	py-diff atest.py xyz.py | testuser | testnum | awk '!($6="")'
+function test21-assert1-actual () {
+	less- testless.txt | testnum
 }
-function test23-assert4-expected () {
-	echo -e "Assuming implicit --no-glob, as otherwise  would be in extensionabcX.py vs. atest.py   Differences: abcX.py atest.py   -rw-rw-r-- X user user XX  X XX:XX abcX.py-rw-rw-r-- X user user XX  X XX:XX atest.pyXcX     < print('THIS IS A TESTXX') \\ No newline at end  file---     > print('THIS IS A TEST') \\ No newline at end  file------------------------------------------------------------------------     "
+function test21-assert1-expected () {
+	echo -e 'THIS IS THE HEADNNNNNNNTHIS IS THE TAIL.'
 }
+
+@test "test22" {
+	test_folder=$(echo /tmp/test22-$$)
+	mkdir $test_folder && cd $test_folder
+
+	ipython --version | testuser | testnum
+}
+
+
+@test "test23" {
+	test_folder=$(echo /tmp/test23-$$)
+	mkdir $test_folder && cd $test_folder
+
+	alias which-py3='which python3' 
+}
+
 
 @test "test24" {
 	test_folder=$(echo /tmp/test24-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias TODAY='date'
-	alias extract-matches='extract_matches.perl'
-	function run-jupyter-notebook () {
-	local port="$1"; if [ "$port" = "" ]; then port=8888; fi
-	local ip="$2"; if [ "$ip" = "" ]; then ip="127.0.0.1"; fi
-	local log="$TEMP/jupyter-$(TODAY).log"
-	jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
-	echo "$log"
-	local delay=5
-	echo "sleeping $delay seconds for log to stabalize (effing jupyter)"
-	sleep $delay
-	tail "$log"
-	echo -n "URL: "
-	extract-matches 'http:\S+' "$log" | sort -u
-	}
-	alias jupyter-notebook-redir=run-jupyter-notebook
-	alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'
+	rm -rf ./* > /dev/null
+	printf "print('THIS IS A TEST')" > atest.py
+	printf "print('THIS IS A TEST')" > xyz.py
+	actual=$(test24-assert4-actual)
+	expected=$(test24-assert4-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test24-assert4-actual () {
+	py-diff atest.py xyz.py | testuser | testnum | awk '!($6="")'
+}
+function test24-assert4-expected () {
+	echo -e "Assuming implicit --no-glob, as otherwise  would be in extensionabcN.py vs. atest.py   Differences: abcN.py atest.py   -rw-rw-r-- N userxfNNN userxfNNN NN  N NN:NN abcN.py-rw-rw-r-- N userxfNNN userxfNNN NN  N NN:NN atest.pyNcN     < print('THIS IS A TESTNN') \\ No newline at end  file---     > print('THIS IS A TEST') \\ No newline at end  file------------------------------------------------------------------------     "
+}
 
 @test "test25" {
 	test_folder=$(echo /tmp/test25-$$)
@@ -457,7 +440,7 @@ function test27-assert1-expected () {
 
 	curl-dump https://www.example.com/
 	linebr
-	ls -l | testuser | testnum | awk '!($6="")'
+	ls -l | testnum | testuser | awk '!($6="")'
 	linebr
 }
 

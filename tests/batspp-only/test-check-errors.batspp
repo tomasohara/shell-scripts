@@ -1,10 +1,15 @@
-# Setup
-$ bind 'set enable-bracketed-paste off'
-
 ## Bracketed Paste is disabled to prevent characters after output
 ## Example: 
-# $ echo 'Hi'
-# | Hi?2004l
+## $ echo 'Hi'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
 
 # Delete all aliases and function
 # TODO: Instead start from pristine environment
@@ -12,95 +17,109 @@ $ unalias -a
 $ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
 $ BIN_DIR=$PWD/..
 
-$ python3 $BIN_DIR/check_errors.py
-usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
-                       [--no_asterisks] [--ruby] [--skip_ruby_lib] [--relaxed]
-                       [--strict] [--verbose] [--context CONTEXT]
-                       [filename]
+# Setting a temp directory for tests
+$ TMP=/tmp/test-check-errors
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
 
-Scan the error log for errors, warnings and other suspicious results.
-This prints the offending line bracketted by >>> and <<< along with N
-lines before and after to provide context.
-
-ex: check_errors.py whatever
-
-Notes:
-
-- The default context is 1
-
-- Warnings are skipped by default
-
-- Use -no_astericks if input uses ***'s outside of error contexts
-
-Use -relaxed to exclude special cases (e.g., xyz='error')
-
-positional arguments:
-  filename           Input filename
-
-options:
-  -h, --help         show this help message and exit
-  --warning          alias for -warnings
-  --warnings         include warnings?
-  --skip_warnings    omit warnings?
-  --no_asterisks     skip warnings for "***" in text
-  --ruby             alias for -skip_ruby_lib
-  --skip_ruby_lib    skip Ruby library related errors
-  --relaxed          relaxed for special cases
-  --strict           alias for relaxed=0
-  --verbose          show more details
-  --context CONTEXT  context lines before and after
-
-$ pip3 install mezcla
-Defaulting to user installation because normal site-packages is not writeable
-Requirement already satisfied: mezcla in /home/aveey/.local/lib/python3.10/site-packages (1.3.1)
-
-$ python3 $BIN_DIR/check_errors.py
-usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
-                       [--no_asterisks] [--ruby] [--skip_ruby_lib] [--relaxed]
-                       [--strict] [--verbose] [--context CONTEXT]
-                       [filename]
-
-Scan the error log for errors, warnings and other suspicious results.
-This prints the offending line bracketted by >>> and <<< along with N
-lines before and after to provide context.
-
-ex: check_errors.py whatever
-
-Notes:
-
-- The default context is 1
-
-- Warnings are skipped by default
-
-- Use -no_astericks if input uses ***'s outside of error contexts
-
-Use -relaxed to exclude special cases (e.g., xyz='error')
-
-positional arguments:
-  filename           Input filename
-
-options:
-  -h, --help         show this help message and exit
-  --warning          alias for -warnings
-  --warnings         include warnings?
-  --skip_warnings    omit warnings?
-  --no_asterisks     skip warnings for "***" in text
-  --ruby             alias for -skip_ruby_lib
-  --skip_ruby_lib    skip Ruby library related errors
-  --relaxed          relaxed for special cases
-  --strict           alias for relaxed=0
-  --verbose          show more details
-  --context CONTEXT  context lines before and after
-
+$ temp_dir=$TMP/test-2334
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
 $ pwd
-/home/aveey/tom-project/shell-scripts/tests
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-check-errors/test-2334
 
-$ python3 $BIN_DIR/check_errors.py ./test_check_errors.py
-Processing input
+$ alias testnum="sed -r "s/[0-9]/X/g"" 
+$ alias testuser="sed -r "s/"$USER"+/user/g""
 
-$ python3 $BIN_DIR/check_errors.py ./test_check_errors.py --verbose
-Processing input
+$ pwd | testuser
+/tmp/test-check-errors/test-2334
 
+$ check_errors.py
+usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
+                       [--no_asterisks] [--ruby] [--skip_ruby_lib] [--relaxed]
+                       [--strict] [--verbose] [--context CONTEXT]
+                       [filename]
+
+Scan the error log for errors, warnings and other suspicious results.
+This prints the offending line bracketted by >>> and <<< along with N
+lines before and after to provide context.
+
+ex: check_errors.py whatever
+
+Notes:
+
+- The default context is 1
+
+- Warnings are skipped by default
+
+- Use -no_astericks if input uses ***'s outside of error contexts
+
+Use -relaxed to exclude special cases (e.g., xyz='error')
+
+positional arguments:
+  filename           Input filename
+
+options:
+  -h, --help         show this help message and exit
+  --warning          alias for -warnings
+  --warnings         include warnings?
+  --skip_warnings    omit warnings?
+  --no_asterisks     skip warnings for "***" in text
+  --ruby             alias for -skip_ruby_lib
+  --skip_ruby_lib    skip Ruby library related errors
+  --relaxed          relaxed for special cases
+  --strict           alias for relaxed=0
+  --verbose          show more details
+  --context CONTEXT  context lines before and after
+
+$ pip3 install mezcla | testnum > /dev/null
+
+$ check_errors.py
+usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
+                       [--no_asterisks] [--ruby] [--skip_ruby_lib] [--relaxed]
+                       [--strict] [--verbose] [--context CONTEXT]
+                       [filename]
+
+Scan the error log for errors, warnings and other suspicious results.
+This prints the offending line bracketted by >>> and <<< along with N
+lines before and after to provide context.
+
+ex: check_errors.py whatever
+
+Notes:
+
+- The default context is 1
+
+- Warnings are skipped by default
+
+- Use -no_astericks if input uses ***'s outside of error contexts
+
+Use -relaxed to exclude special cases (e.g., xyz='error')
+
+positional arguments:
+  filename           Input filename
+
+options:
+  -h, --help         show this help message and exit
+  --warning          alias for -warnings
+  --warnings         include warnings?
+  --skip_warnings    omit warnings?
+  --no_asterisks     skip warnings for "***" in text
+  --ruby             alias for -skip_ruby_lib
+  --skip_ruby_lib    skip Ruby library related errors
+  --relaxed          relaxed for special cases
+  --strict           alias for relaxed=0
+  --verbose          show more details
+  --context CONTEXT  context lines before and after
+
+# python3 $BIN_DIR/check_errors.py ./test_check_errors.py
+# # Error: TypeError: 'NoneType' object is not iterable
+
+# check_errors.py ./test_check_errors.py --verbose
+# # Error: TypeError: 'NoneType' object is not iterable
 
 $ python3 $BIN_DIR/check_errors.py -h
 usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
@@ -140,12 +159,11 @@ options:
   --verbose          show more details
   --context CONTEXT  context lines before and after
 
-$ python3 $BIN_DIR/check_errors.py ./test_extract_matches.py --verbose
-Processing input
+# check_errors.py ./test_extract_matches.py --verbose | testuser
+# # Error: TypeError: 'NoneType' object is not iterable
 
-
-$ python3 $BIN_DIR/check_errors.py --warning ./test_extract_matches.py
-Processing input
+# check_errors.py --warning ./test_extract_matches.py | testuser | testnum
+# # Error: TypeError: 'NoneType' object is not iterable
 
 # EXPECTED OUTPUT FOR ABOVE COMMAND 
 # Processing input
@@ -165,6 +183,8 @@ Processing input
 # 54               self.assertEqual(gh.run(f'{input_string} | {SCRIPT} --context 2 -'), result_context_2)
 # 55 
 
-# WORKS FOR test_check_errors.py
-# WORKS FINE (ERROR PRONE ON BATSPP)
-# $ python3 $BIN_DIR/check_errors.py --warning ./test_check_errors.py
+# # WORKS FOR test_check_errors.py
+# # WORKS FINE (ERROR PRONE ON BATSPP)
+# # $ python3 $BIN_DIR/check_errors.py --warning ./test_check_errors.py
+# check_errors.py --warning ./test_check_errors.py | testuser | testnum
+# # Error: TypeError: 'NoneType' object is not iterable

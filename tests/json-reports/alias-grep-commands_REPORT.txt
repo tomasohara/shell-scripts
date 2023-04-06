@@ -1,0 +1,1 @@
+{'report_name': 'alias-grep-commands', 'instrumented_line': 139, 'covered_line': 110, 'ratio': 0.7914}

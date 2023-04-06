@@ -1,0 +1,1 @@
+{'report_name': 'trace-extensionless-shortcut-unicode', 'instrumented_line': 107, 'covered_line': 79, 'ratio': 0.7383}

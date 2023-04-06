@@ -98,8 +98,8 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test5-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testnum="sed -r "s/[0-9]/X/g"" 
-	alias testuser="sed -r "s/"$USER"+/user/g"" 
+	alias testnum="sed -r "s/[0-9]/N/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g"" 
 }
 
 
@@ -119,23 +119,9 @@ function test4-assert1-expected () {
 	printf "Hi Mom,\nThis is the use of printf\nI can use a backslash n to start a new line\n1\n2\n3" >> abc-test.txt
 	printf "This is another-test file" >> test2.txt
 	printf "This is test-file 3" >> test3.txt
-	actual=$(test7-assert5-actual)
-	expected=$(test7-assert5-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test7-assert5-actual () {
 	printf "This is a test-file 4" >> test4.txt
 }
-function test7-assert5-expected () {
-	echo -e "removed './abc-test.txt'removed './test2.txt'removed './test3.txt'removed './test4.txt'"
-}
+
 
 @test "test8" {
 	test_folder=$(echo /tmp/test8-$$)
@@ -259,4 +245,20 @@ function test12-assert1-expected () {
 	mkdir $test_folder && cd $test_folder
 
 	rm -rf ./* > /dev/null
+	actual=$(test14-assert2-actual)
+	expected=$(test14-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test14-assert2-actual () {
+	echo "Done"
+}
+function test14-assert2-expected () {
+	echo -e 'Done'
 }

@@ -22,8 +22,8 @@ $ typeset -f | egrep '^\w+' | wc -l
 0
 0
 
-$ alias testuser="sed -r "s/"$USER"+/user/g""
-$ alias testnum="sed -r "s/[0-9]/X/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
 
 # Setting a temp directory for tests
 $ TMP=/tmp/test-admin-commands
@@ -69,14 +69,21 @@ $ apt-installed *python3* | grep ipython | cut -d \/ -f 1 | testnum
 
 WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
 
-ipythonX
-pythonX-ipython-genutils
-pythonX-ipython
+ipythonN
+pythonN-ipython-genutils
+pythonN-ipython
 
 ## 1B) apt-search : SEARCHES DESIRED PACKAGES IN THE apt REPO
 # Example: Searching for rolldice, a simple apt package
 $ apt-search rolldice
 rolldice - virtual dice roller
+
+# 1C) apt-installed: Lists all installed apt packages
+$ apt-installed | grep acpi | wc -l
+
+WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+
+2
 
 ## 1C) apt-install : INSTALLS THE PACKAGE IF PRESENT IN THE REPO
 ## NOTE: Installing packages requires sudo
@@ -137,24 +144,6 @@ $ service-status unattended-upgrades | grep Active | cut -d \s -f 1
 # requires password but tests completes after (check need for batspp)
      Active: active (running) 
 
-# get-free-filename(base, [sep=""]): get filename starting with BASE that is not used.
-# Notes: 1. If <base> exists <base><sep><N> checked until the filename not used (for N in 2, 3, ... ).
-# 2. See sudo-admin for sample usage; also see rename-with-file-date.
-#
-$ function get-free-filename() {
-$     local base="$1"
-$     local sep="$2"
-$     local L=1
-$     local filename="$base"
-$     ## DEBUG: local -p
-$     while [ -e "$filename" ]; do
-$         let L++
-$         filename="$base$sep$L"
-$     done;
-$     ## DEBUG: local -p
-$     echo "$filename"
-$ }
-
 $ pwd
 /tmp/test-admin-commands/test-3245
 
@@ -162,15 +151,20 @@ $ pwd
 $ printf "HELLO THERE,\nI AM EXTREMELY PLEASED TO USE UBUNTU." >> abc.txt
 $ get-free-filename "abc.txt" 2      #DOUBT(?)
 $ linebr
-$ ls -l | awk '!($6="")' | testuser | testnum
+$ ls -l | awk '!($6="")' | testnum | testuser
 $ linebr
 $ cat "abc.txt"
 abc.txt22
 --------------------------------------------------------------------------------
-total X    
--rw-rw-r-- X user user XX  X XX:XX abc.txt
+total N    
+-rw-rw-r-- N userxf333 userxf333 NNN  N NN:NN abc.txt
 --------------------------------------------------------------------------------
 HELLO THERE,
+I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
 I AM EXTREMELY PLEASED TO USE UBUNTU.
 
 # ## TEST 4 - SUDO ADMIN (Doesn't work on Jupyter | requires sudo | Halts process)
@@ -188,7 +182,7 @@ I AM EXTREMELY PLEASED TO USE UBUNTU.
 
 # sudo-admin
 
-## Should be done from a sysadmin account
+## Should be done from a sysadmin account (Need help)
 $ sync2
 
 ## fix-sudoer-home-permission gives a warning if no sudo user present

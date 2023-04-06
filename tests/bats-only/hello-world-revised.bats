@@ -12,7 +12,7 @@ shopt -s expand_aliases
 	test_folder=$(echo /tmp/test0-$$)
 	mkdir $test_folder && cd $test_folder
 
-	bind 'set enable-bracketed-paste off'
+	shopt -s expand_aliases
 }
 
 
@@ -20,8 +20,8 @@ shopt -s expand_aliases
 	test_folder=$(echo /tmp/test1-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testuser="sed -r "s/"$USER"+/user/g""
-	alias testnum="sed -r "s/[0-9]/X/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g""
+	alias testnum="sed -r "s/[0-9]/N/g"" 
 }
 
 
@@ -102,7 +102,7 @@ function test6-assert1-actual () {
 	man date | head -n 10 | testnum
 }
 function test6-assert1-expected () {
-	echo -e 'DATE(X)                          User Commands                         DATE(X)'
+	echo -e 'DATE(N)                          User Commands                         DATE(N)'
 }
 
 @test "test7" {
@@ -124,7 +124,7 @@ function test7-assert1-actual () {
 	ps -l | awk '!($3=$4=$5=$10=$13="")' | testnum
 }
 function test7-assert1-expected () {
-	echo -e 'F S    C PRI NI ADDR  WCHAN TTY  CMDX S    X XX X -  do_wai pts/XX  bashX R    X XX X -  - pts/XX  psX S    X XX X -  pipe_r pts/XX  awkX S    X XX X -  pipe_r pts/XX  sed'
+	echo -e 'F S    C PRI NI ADDR  WCHAN TTY  CMDN S    N NN N -  do_wai pts/N  bashN R    N NN N -  - pts/N  psN S    N NN N -  pipe_r pts/N  awkN S    N NN N -  pipe_r pts/N  sed'
 }
 
 @test "test8" {
@@ -146,5 +146,5 @@ function test8-assert1-actual () {
 	ps | head -n 10 | testuser | testnum
 }
 function test8-assert1-expected () {
-	echo -e 'PID TTY          TIME CMDXXXXX pts/XX   XX:XX:XX bashXXXXX pts/XX   XX:XX:XX psXXXXX pts/XX   XX:XX:XX headXXXXX pts/XX   XX:XX:XX sedXXXXX pts/XX   XX:XX:XX sed'
+	echo -e 'PID TTY          TIME CMDNNNNN pts/N    NN:NN:NN bashNNNNN pts/N    NN:NN:NN psNNNNN pts/N    NN:NN:NN headNNNNN pts/N    NN:NN:NN sedNNNNN pts/N    NN:NN:NN sed'
 }

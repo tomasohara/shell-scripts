@@ -1,0 +1,15 @@
+# uname -r | sudo tee $TEMP
+
+$ TEMP_PATH="./temp/kernelinfo.txt"
+
+$ sudo -S apt search caffeine < ./temp/pass.txt
+Sorting... 0%rd for aveey: Sorting... 0%Sorting... 0%Sorting... Done
+Full Text Search... 50%Full Text Search... 50%Full Text Search... Done
+[32mcaffeine[0m/jammy,jammy,now 2.9.8-2 all [residual-config]
+  prevent the desktop becoming idle in full-screen mode
+
+[32mfonts-aenigma[0m/jammy,jammy 0.0.20080511+dfsg-4 all
+  465 free TrueType fonts by Brian Kent
+
+[32mlibcaffeine-java[0m/jammy,jammy 2.6.2-1.1 all
+  High performance caching library

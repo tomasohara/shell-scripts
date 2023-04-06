@@ -107,8 +107,8 @@ function test5-assert1-expected () {
 	test_folder=$(echo /tmp/test6-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testnum="sed -r "s/[0-9]/X/g"" 
-	alias testuser="sed -r "s/"$USER"+/user/g""
+	alias testnum="sed -r "s/[0-9]/N/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g""
 }
 
 
@@ -139,7 +139,7 @@ function test8-assert1-actual () {
 	kill-em --test firefox | wc -l
 }
 function test8-assert1-expected () {
-	echo -e '21'
+	echo -e '20'
 }
 
 @test "test9" {
@@ -161,7 +161,7 @@ function test9-assert1-actual () {
 	kill-it --test firefox | wc -l
 }
 function test9-assert1-expected () {
-	echo -e '21'
+	echo -e '20'
 }
 
 @test "test10" {
@@ -213,7 +213,7 @@ function test11-assert1-actual () {
 	ps-mine-all | wc -l | testnum 
 }
 function test11-assert1-expected () {
-	echo -e 'XXX'
+	echo -e 'NNN'
 }
 
 @test "test12" {
@@ -490,13 +490,28 @@ function test25-assert1-expected () {
 	echo "============================"
 	[ "$actual" == "$expected" ]
 
+	actual=$(test27-assert2-actual)
+	expected=$(test27-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
 function test27-assert1-actual () {
 	unigrams ./man_cat.txt | testuser | testnum
 }
 function test27-assert1-expected () {
-	echo -e "to\tXand\tXstandard\tXoutput\tXcat\tXgnu\tXdisplay\tXfree\tXor\tXis\tXequivalent\tXoutput.\tXlines\tXthen\tXthis\tXconcatenate\tX-\tXby\tXbugs\tXtab\tXnumber\tXcat(X)\tXno\tXversion\tXcoreutils\tXcopyright\tXexit\tXthe\tXrepeated\tX-,\tX'(coreutils)\tXchange\tXg\tXf\tXinformation\tX--number\tXfebruary\tXreporting\tX[option]...\tXany\tXalso\tXend\tXfull\tXon\tXthere\tXof\tX--squeeze-blank\tX©\tX-b,\tX<https://translationproject.org/team/>\tX-t,\tXinfo\tXfile(s)\tXsynopsis\tXare\tX--show-nonprinting\tXas\tX[file]...\tXXXXX\tX^\tXyou\tXdescription\tXexcept\tXlfd\tX-t\tXprint\tXwhen\tXtorbjorn\tXinput.\tXXXXX\tX(ignored)\tX--version\tXhelp\tX--show-all\tXat\tXinput,\tXfile\tXavailable\tXpermitted\tX-a,\tXtac(X)\tXcontents,\tXfoundation,\tXwarranty,\tX-s,\tXread\tXcontents.\tXnotation,\tX-v,\tX-u\tXhelp:\tXgplvX+:\tXuser\tX^i\tX-vet\tX$\tX-ve\tXauthor\tXX.XX\tXX\tXall\tXtranslation\tXn/a\tX--help\tX--number-nonblank\tXuse\tXlaw.\tXfile,\tXlicense\tXextent\tXm.\tXgpl\tXnonempty\tXm-\tXonline\tXinput\tXlocally\tXg's\tXf's\tXit.\tXfiles\tX-e,\tXoverrides\tXsee\tX-n\tXwith\tXname\tXexamples\tX<https://gnu.org/licenses/gpl.html>.\tXlater\tXredistribute\tXdocumentation\tXempty\tX-e\tXsoftware\tXeach\tXgranlund\tXcharacters\tX-n,\tXsoftware:\tXcopy\tXsuppress\tXcommands\tX--show-ends\tXinvocation'\tX<https://www.gnu.org/software/coreutils/cat>\tXrichard\tXlines,\tXfor\tX<https://www.gnu.org/software/coreutils/>\tX-vt\tXstallman.\tXline\tXinc.\tX--show-tabs\tXvia:\tXreport\tXwritten\tX"
+	echo -e "to\tNand\tNstandard\tNoutput\tNcat\tNequivalent\tNfree\tNgnu\tNdisplay\tNis\tNor\tNcoreutils\tNthen\tN-\tNtab\tNcat(N)\tNbugs\tNnumber\tNno\tNoutput.\tNby\tNthe\tNthis\tNlines\tNconcatenate\tNexit\tNversion\tNcopyright\tNinput,\tNhelp\tN-b,\tNgpl\tN-vt\tN^i\tN-,\tNreporting\tN-n,\tNfor\tNgranlund\tNname\tNfile,\tNm-\tNfile(s)\tNdocumentation\tNdescription\tNwhen\tNfoundation,\tN--version\tNfebruary\tN--help\tNfiles\tNit.\tN--number\tNinput.\tN<https://translationproject.org/team/>\tNN\tNm.\tNinvocation'\tN-a,\tN--show-nonprinting\tNchange\tNnotation,\tNuse\tNN.NN\tNfull\tNgplvN+:\tN-u\tNnonempty\tN'(coreutils)\tNend\tNfile\tNextent\tNtac(N)\tNrepeated\tN<https://www.gnu.org/software/coreutils/cat>\tNtranslation\tN--number-nonblank\tNsuppress\tN-s,\tNhelp:\tNstallman.\tNsoftware\tNtorbjorn\tNvia:\tNpermitted\tNlater\tN^\tNrichard\tNinc.\tNsee\tNalso\tNwritten\tN-e\tNoverrides\tN-t,\tNlfd\tNsynopsis\tNlocally\tNinput\tNreport\tN<https://gnu.org/licenses/gpl.html>.\tNon\tNf's\tNcharacters\tNcommands\tN-n\tN-v,\tNwarranty,\tNsoftware:\tNread\tNcontents,\tNat\tNany\tN-vet\tNg\tNof\tNempty\tNexamples\tNline\tNprint\tNas\tN(ignored)\tNwith\tNlines,\tNcontents.\tN--show-ends\tNauthor\tNthere\tNonline\tN-ve\tN<https://www.gnu.org/software/coreutils/>\tNlicense\tN--show-all\tN[file]...\tNcopy\tNn/a\tNinformation\tN[option]...\tNredistribute\tNinfo\tNg's\tNlaw.\tN-e,\tNuser\tNexcept\tN-t\tNeach\tN©\tNall\tNNNNN\tN--show-tabs\tNavailable\tN--squeeze-blank\tN"
+}
+function test27-assert2-actual () {
+		N
+}
+function test27-assert2-expected () {
+	echo -e 'you\tNf\tNNNNN\tNare\tN'
 }
 
 @test "test28" {
@@ -527,13 +542,13 @@ function test28-assert1-actual () {
 	word-count ./man_cat.txt | testuser | testnum
 }
 function test28-assert1-expected () {
-	echo -e "to\tXand\tXstandard\tXoutput\tXcat\tXor\tXfree\tXis\tXdisplay\tXequivalent\tXgnu\tXnumber\tXversion\tXcopyright\tXoutput.\tXbugs\tXthen\tXlines\tXexit\tXby\tXno\tXthis\tXtab\tXconcatenate\tXthe\tXcat(X)\tX-\tXcoreutils\tXlfd\tXsee\tXcontents,\tX^\tXXXXX\tX<https://translationproject.org/team/>\tX-ve\tXfor\tXeach\tX'(coreutils)\tXwritten\tXinfo\tXsuppress\tXcommands\tXm.\tXgranlund\tXat\tXline\tX[option]...\tXvia:\tXname\tX-n\tXcopy\tX-v,\tXhelp\tXit.\tX<https://www.gnu.org/software/coreutils/cat>\tXcharacters\tX-t\tXstallman.\tXall\tXdescription\tXon\tXnonempty\tX-b,\tXlocally\tXthere\tX-e,\tX-vet\tX--help\tX^i\tX-vt\tXfebruary\tXnotation,\tXinput.\tXwarranty,\tXuser\tXfile(s)\tXfull\tX--version\tXlaw.\tXauthor\tX-u\tXas\tXreport\tXf\tXpermitted\tXcontents.\tXhelp:\tXfoundation,\tXlines,\tXg\tXempty\tXm-\tX--show-ends\tXwhen\tX--show-tabs\tXinformation\tXf's\tXn/a\tXsoftware\tXinput,\tXinvocation'\tX-t,\tXend\tXrepeated\tX<https://www.gnu.org/software/coreutils/>\tX-a,\tX[file]...\tX-,\tX<https://gnu.org/licenses/gpl.html>.\tXuse\tXg's\tX--show-all\tX--number\tX-n,\tXof\tXreporting\tXfile,\tXtorbjorn\tXexcept\tXsoftware:\tXoverrides\tX--number-nonblank\tXredistribute\tX--show-nonprinting\tXtranslation\tXgplvX+:\tXalso\tX--squeeze-blank\tXX.XX\tX©\tX-s,\tXfile\tXchange\tXdocumentation\tX"
+	echo -e "to\tNand\tNstandard\tNoutput\tNcat\tNor\tNis\tNequivalent\tNfree\tNgnu\tNdisplay\tNcat(N)\tNcopyright\tNtab\tNlines\tNexit\tNoutput.\tNthis\tN-\tNnumber\tNthen\tNbugs\tNversion\tNcoreutils\tNconcatenate\tNno\tNthe\tNby\tNN.NN\tNgplvN+:\tNN\tN-,\tN<https://www.gnu.org/software/coreutils/cat>\tN--show-tabs\tNsynopsis\tN'(coreutils)\tNuse\tN^\tNgranlund\tNof\tNg\tNfile(s)\tNtac(N)\tNfull\tNcopy\tNnotation,\tN-b,\tNhelp\tNg's\tNthere\tNexcept\tNcontents,\tNpermitted\tNlicense\tN--show-ends\tNnonempty\tNfiles\tN©\tNfebruary\tN[file]...\tNat\tNend\tN--show-nonprinting\tNgpl\tNf's\tN-n\tNinput,\tNhelp:\tNcontents.\tNread\tNsee\tN--show-all\tN-e,\tNdescription\tNauthor\tN<https://gnu.org/licenses/gpl.html>.\tN--squeeze-blank\tNalso\tN-a,\tNon\tNname\tN-v,\tNreport\tNf\tNprint\tNlocally\tNredistribute\tNoverrides\tNsoftware\tNfor\tN-t,\tNwarranty,\tN--version\tNwritten\tN-vet\tNvia:\tN[option]...\tN-e\tNas\tN--number\tNonline\tNsuppress\tNinvocation'\tNall\tN-t\tNsoftware:\tN-vt\tNchange\tNNNNN\tN"
 }
 function test28-assert2-actual () {
-		X
+		N
 }
 function test28-assert2-expected () {
-	echo -e 'X\tXany\tXexamples\tXinc.\tXwith\tXextent\tXXXXX\tX(ignored)\tXonline\tXlater\tXlicense\tXgpl\tXread\tXinput\tX-e\tXavailable\tXyou\tXtac(X)\tXrichard\tXprint\tXfiles\tXare\tXsynopsis\tX'
+	echo -e 'richard\tNinfo\tN<https://www.gnu.org/software/coreutils/>\tNlines,\tNinput\tNyou\tNm.\tNinput.\tN-n,\tN(ignored)\tNdocumentation\tNlaw.\tNinc.\tN^i\tNwith\tNNNNN\tNn/a\tN--help\tNm-\tNfile\tNtranslation\tNare\tNit.\tN-s,\tNreporting\tNcommands\tNempty\tN-ve\tNextent\tNcharacters\tNany\tN<https://translationproject.org/team/>\tNtorbjorn\tNlater\tNrepeated\tN--number-nonblank\tNfoundation,\tNstallman.\tNfile,\tNeach\tN-u\tNuser\tNinformation\tNavailable\tNlfd\tNline\tNwhen\tNexamples\tN'
 }
 
 @test "test29" {
@@ -564,13 +579,13 @@ function test29-assert1-actual () {
 	bigrams ./man_cat.txt | testuser | testnum
 }
 function test29-assert1-expected () {
-	echo -e "equivalent:to\tXoutput:lines\tXto:standard\tXstandard:output.\tXand:exit\tXgnu:coreutils\tXnotation,:except\tX--number:number\tXf:-\tXX.XX:february\tXread:standard\tXcontents.:cat\tX<https://translationproject.org/team/>:copyright\tX--show-ends:display\tXstallman.:reporting\tXline:-n,\tXcoreutils:X.XX\tXreporting:bugs\tX-e:equivalent\tXoutput:version\tX-s,:--squeeze-blank\tXfile(s):to\tXdisplay:tab\tXas:^i\tXlocally:via:\tXcommands:cat(X)\tXprint:on\tXlfd:and\tXg:output\tXor:later\tXoutput:synopsis\tXn/a:n/a\tXdisplay:$\tXavailable:locally\tXeach:line\tXhelp::<https://www.gnu.org/software/coreutils/>\tXyou:are\tXinput,:then\tXnumber:all\tX--number-nonblank:number\tXsoftware::you\tXare:free\tX--help:display\tXoutput:lines,\tX-vt:-t,\tXis:no\tXinformation:and\tXany:translation\tXgpl:version\tXthe:extent\tXsee:also\tXand:redistribute\tXm.:stallman.\tXoutput:f's\tXby:law.\tXexit:examples\tXf's:contents,\tXfile:is\tXcat:copy\tX-:concatenate\tXfoundation,:inc.\tXto:-vt\tXlater:<https://gnu.org/licenses/gpl.html>.\tXon:the\tX'(coreutils):cat\tXexamples:cat\tXX:or\tXstandard:input\tX-b,:--number-nonblank\tXall:output\tXno:warranty,\tXtab:characters\tX<https://gnu.org/licenses/gpl.html>.:this\tXgnu:gpl\tXredistribute:it.\tXcat(X):user\tXwith:no\tXfree:to\tXexit:--version\tXcat:invocation'\tX(ignored):-v,\tXis:free\tXthere:is\tXto:change\tXpermitted:by\tXinvocation':gnu\tXalso:tac(X)\tXand:print\tXn/a:cat(X)\tX-,:read\tX-u:(ignored)\tXinput:to\tXto:the\tXlicense:gplvX+:\tXfiles:and\tXcopyright:©\tXXXXX:free\tXfree:software\tXfile,:or\tXof:each\tXinc.:license\tXwritten:by\tXoutput.:author\tXat:end\tXand:m-\tX©:XXXX\tXlines:-s,\tXend:of\tXthen:g's\tX-v,:--show-nonprinting\tX--squeeze-blank:suppress\tXlaw.:see\tX--show-all:equivalent\tXfebruary:XXXX\tXoutput.:with\tXconcatenate:files\tX-:g\tX[file]...:description\tXg's:contents.\tX"
+	echo -e "equivalent:to\tNoutput:lines\tNto:standard\tNgnu:coreutils\tNand:exit\tNstandard:output.\tNor:later\tNNNNN:free\tN-n,:--number\tN--show-nonprinting:use\tN-:g\tN-v,:--show-nonprinting\tNpermitted:by\tNcopyright:copyright\tNcat:invocation'\tNand:m-\tNcopyright:©\tNoutput:lines,\tNoutput:synopsis\tNnumber:all\tNcoreutils:online\tNany:translation\tNf:-\tNgpl:version\tNm-:notation,\tNwith:no\tNtranslation:bugs\tN-t:equivalent\tNand:tab\tNreport:any\tNyou:are\tNsoftware::you\tN--version:output\tNname:cat\tN-e,:--show-ends\tNand:redistribute\tNstandard:input.\tNdisplay:$\tNfree:to\tNoutput.:with\tNgnu:gpl\tNeach:line\tN--show-tabs:display\tNversion:N\tN^:and\tNcat:[option]...\tN-,:read\tNthis:is\tNn/a:cat(N)\tNthe:standard\tNempty:output\tN-ve:-e,\tNlines,:overrides\tNcat:f\tN--squeeze-blank:suppress\tNfor:lfd\tNfoundation,:inc.\tNcontents.:cat\tNinput:to\tNthen:g's\tN[option]...:[file]...\tN-vet:-b,\tNis:free\tNtab:characters\tNno:warranty,\tNlocally:via:\tNtac(N):full\tNoutput:version\tN<https://translationproject.org/team/>:copyright\tNcat(N):name\tNor:when\tNno:file,\tNcopy:standard\tNfree:software:\tNis:no\tNprint:on\tN(ignored):-v,\tNthere:is\tNlfd:and\tNinformation:and\tNsoftware:foundation,\tNlicense:gplvN+:\tNexit:--version\tNavailable:locally\tNuse:^\tNlater:<https://gnu.org/licenses/gpl.html>.\tNstandard:input,\tNas:^i\tNcharacters:as\tN^i:-u\tNexamples:cat\tNlaw.:see\tNbugs:to\tNn/a:n/a\tNg:output\tNoutput:f's\tNat:end\tNline:-n,\tNlines:-s,\tNcoreutils:N.NN\tNbugs:gnu\tNcat:-\tNstandard:output\tNto:-ve\tN--number-nonblank:number\tNto:-vet\tNconcatenate:file(s)\tNare:free\tN<https://www.gnu.org/software/coreutils/cat>:or\tNoutput.:author\tNsuppress:repeated\tNcat(N):user\tN-a,:--show-all\tN-vt:-t,\tNcommands:cat(N)\tN-n:-e\tNsee:also\tNinvocation':gnu\tNredistribute:it.\tN'(coreutils):cat\tNstallman.:reporting\tNonline:help:\tNof:each\tNm.:stallman.\tNsynopsis:cat\tNfebruary:NNNN\tNthe:extent\tN"
 }
 function test29-assert2-actual () {
-	:at	X
+	:at	N
 }
 function test29-assert2-expected () {
-	echo -e "m-:notation,\tXfree:software:\tX-t,:--show-tabs\tXsoftware:foundation,\tXfull:documentation\tXto:<https://translationproject.org/team/>\tX<https://www.gnu.org/software/coreutils/cat>:or\tXor:when\tXhelp:and\tXsuppress:repeated\tX-ve:-e,\tXlines:-t\tXname:cat\tXrepeated:empty\tX-e,:--show-ends\tXthis:is\tX-n:-e\tXtac(X):full\tXinfo:'(coreutils)\tXby:torbjorn\tXuser:commands\tX-n,:--number\tXuse:^\tXcat:f\tXfor:lfd\tXno:file,\tXnumber:nonempty\tXauthor:written\tXconcatenate:file(s)\tXchange:and\tXwhen:file\tXinput.:-a,\tXdocumentation:<https://www.gnu.org/software/coreutils/cat>\tXbugs:to\tXstandard:output\tXversion:information\tXgplvX+::gnu\tXtorbjorn:granlund\tXextent:permitted\tXgranlund:and\tXcharacters:as\tXempty:output\tXto:-vet\tXto:-ve\tXsynopsis:cat\tXexcept:for\tXoverrides:-n\tX-a,:--show-all\tXcoreutils:online\tXcopy:standard\tXthis:help\tXor:available\tX-vet:-b,\tX--show-tabs:display\tXversion:X\tXcopyright:copyright\tXvia::info\tXand:tab\tXcontents,:then\tXwarranty,:to\tX[option]...:[file]...\tXis:-,\tXstandard:input.\tX^i:-u\tXdescription:concatenate\tX--show-nonprinting:use\tXcat:[option]...\tXlines,:overrides\tXdisplay:this\tXbugs:gnu\tXnonempty:output\tX^:and\tXthe:standard\tXand:richard\tXit.:there\tX--version:output\tXreport:any\tXtab:--help\tX<https://www.gnu.org/software/coreutils/>:report\tX-t:equivalent\tXstandard:input,\tXonline:help:\tXcat:-\tXcat(X):name\tXthen:standard\tXtranslation:bugs\tXrichard:m.\tX"
+	echo -e "user:commands\tNto:-vt\tN[file]...:description\tNreporting:bugs\tNread:standard\tN-b,:--number-nonblank\tN<https://www.gnu.org/software/coreutils/>:report\tN--show-all:equivalent\tN--number:number\tNg's:contents.\tNinput,:then\tNto:<https://translationproject.org/team/>\tN--show-ends:display\tNgranlund:and\tNby:law.\tNfree:software\tNor:available\tNthis:help\tNdisplay:this\tNend:of\tNhelp::<https://www.gnu.org/software/coreutils/>\tNconcatenate:files\tNcat:copy\tNnonempty:output\tN-t,:--show-tabs\tN--help:display\tN-:concatenate\tNis:-,\tNon:the\tNtab:--help\tNdisplay:tab\tN-e:equivalent\tNfile(s):to\tNhelp:and\tNto:change\tNdescription:concatenate\tNit.:there\tNvia::info\tNby:torbjorn\tNalso:tac(N)\tNlines:-t\tNrepeated:empty\tNwarranty,:to\tN-u:(ignored)\tN<https://gnu.org/licenses/gpl.html>.:this\tNnotation,:except\tN-s,:--squeeze-blank\tNall:output\tNextent:permitted\tNrichard:m.\tNand:richard\tNN:or\tNand:print\tNfile:is\tNexcept:for\tNchange:and\tNfile,:or\tNversion:information\tNinput.:-a,\tNthen:standard\tNto:the\tNinfo:'(coreutils)\tNfiles:and\tNnumber:nonempty\tNN.NN:february\tNinc.:license\tN©:NNNN\tNcontents,:then\tNauthor:written\tNoverrides:-n\tNf's:contents,\tNdocumentation:<https://www.gnu.org/software/coreutils/cat>\tNwhen:file\tNgplvN+::gnu\tNwritten:by\tNfull:documentation\tNtorbjorn:granlund\tNstandard:input\tNexit:examples\tN"
 }
 
 @test "test30" {

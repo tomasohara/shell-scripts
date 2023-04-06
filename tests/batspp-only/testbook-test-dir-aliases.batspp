@@ -28,13 +28,13 @@ $ mkdir -p "$temp_dir"
 # TODO: /bin/rm -rvf "$temp_dir"
 $ cd "$temp_dir"
 $ pwd
-/tmp/test-dir-aliases/test-11858
+/tmp/test-dir-aliases/test-4781
 
-$ alias testnum="sed -r "s/[0-9]/X/g"" 
-$ alias testuser="sed -r "s/"$USER"+/user/g""
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
 
 $ echo $USER | testuser
-user
+userxf333
 
 # The first case succeed
 $ touch file1
@@ -57,30 +57,30 @@ ln: failed to create symbolic link 'link1': File exists
 $ ls
 file1  link1
 
-$ ls -l | testuser | testnum | awk '!($6="")'
-total X    
--rw-rw-r-- X user user X  XX XX:XX fileX
-lrwxrwxrwx X user user X  XX XX:XX linkX -> fileX
+$ ls -l | testnum | testuser | awk '!($6="")'
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
 
 $ bash $TEST_BIN/_dir-aliases.bash
 
 $ ln-symbolic /tmp temp-link
 'temp-link' -> '/tmp'
 
-$ ls -l | testuser | testnum | awk '!($6="")'
-total X    
--rw-rw-r-- X user user X  XX XX:XX fileX
-lrwxrwxrwx X user user X  XX XX:XX linkX -> fileX
-lrwxrwxrwx X user user X  XX XX:XX temp-link -> /tmp
+$ ls -l | testnum | testuser | awk '!($6="")'
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+lrwxrwxrwx N userxf333 userxf333 N  N NN:NN temp-link -> /tmp
 
 $ link-symbolic-safe --force ~/temp temp-link | testuser
-'temp-link' -> '/home/user/temp'
+'temp-link' -> '/home/userxf333/temp'
 
-$ ls -l | testuser | testnum | awk '!($6="")'
-total X    
--rw-rw-r-- X user user X  XX XX:XX fileX
-lrwxrwxrwx X user user X  XX XX:XX linkX -> fileX
-lrwxrwxrwx X user user XX  XX XX:XX temp-link -> /home/user/temp
+$ ls -l | testnum | testuser | awk '!($6="")'
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+lrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp
 
 $ alias ln-symbolic-force='ln-symbolic --force'
 
@@ -96,10 +96,10 @@ $ ln-symbolic-force /tmp1 temp-link
 'temp-link/tmp1' -> '/tmp1'
 
 $ link-symbolic-safe --force ~/temp temp-link | testuser | testnum
-'temp-link' -> '/home/user/temp'
+'temp-link' -> '/home/userxfNNN/temp'
 
-$ ls -l | testuser | testnum | awk '!($6="")'
-total X    
--rw-rw-r-- X user user X  XX XX:XX fileX
-lrwxrwxrwx X user user X  XX XX:XX linkX -> fileX
-lrwxrwxrwx X user user XX  XX XX:XX temp-link -> /home/user/temp
+$ ls -l | testnum | testuser | awk '!($6="")'
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+lrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp

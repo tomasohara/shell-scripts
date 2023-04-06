@@ -102,7 +102,7 @@ OMIT_MISC = system.getenv_bool("OMIT_MISC", False,
                                "Omit miscellaenous/obsolete bats stuff")
 TEST_FILE = system.getenv_bool("TEST_FILE", False,
                                "Treat input as example-base test file, not a bash script")
-ALLOW_SUDO = system.getenv_bool("ALLOW_SUDO", False, 
+ALLOW_SUDO = system.getenv_bool("ALLOW_SUDO", True, 
                                 "Allows sudo commands")
 #
 # Shameless hacks
@@ -414,18 +414,18 @@ class Batspp(Main):
             ## BAD: file_content = my_re.sub(r"^[^#][^\n]*\n", "\n", file_content, flags=re.MULTILINE)
             file_content = ""
             for line in self.file_content.splitlines():
-                if not my_re.search("^[^#].*$", line):
+                if not my_re.search(r"^[^#].*$", line):
                     file_content += line + "\n"
             debug.trace(T8, f"content after non-comment stripping:\n\t{file_content!r}")
             system.write_file(gh.form_path(TMP, "file_content.list"), file_content)
 
         # Currently removes all the lines with sudo references
+        # [TODO]: Don't allow sudo removal in comments (or create a different approach)
         if not ALLOW_SUDO:
             file_content = ""
             for line in self.file_content.splitlines():
-                if not my_re.search(r"\bsudo\b", line):
-                    #if not my_re.search("^[^#].*$", line):
-                        file_content += line + "\n"
+                if (not my_re.search(r"\bsudo\b", line)) and (not my_re.search(r"^\# #.*", line)):
+                    file_content += line + "\n"
             debug.trace(T8, f"content after denying sudo permissions:\n\t{file_content!r}")
             system.write_file(gh.form_path(TMP, "file_content.list"), file_content)
 

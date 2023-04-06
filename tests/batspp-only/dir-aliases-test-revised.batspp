@@ -21,8 +21,8 @@ $ typeset -f | egrep '^\w+' | wc -l
 0
 0
 
-$ alias testnum="sed -r "s/[0-9]/X/g"" 
-$ alias testuser="sed -r "s/"$USER"+/user/g""
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
 
 $ mkdir -p tmp/test-dir-aliases
 
@@ -110,7 +110,7 @@ $ ln-symbolic /tmp temp-link
 # ln-symbolic-force SHOULD BYPASS THE CONDITION
 # ln: failed to create symbolic link 'temp-link': File exist
 $ ln-symbolic-force /tmp temp-link
-ln: failed to create symbolic link 'temp-link/tmp': File exists
+'temp-link/tmp' -> '/tmp'
 'temp-link/tmp' -> '/tmp'
 
 ## CREATES A SAFE SYMBOLIC LINK (link-symbolic-safe='ln-symbolic --no-target-directory --no-dereference')

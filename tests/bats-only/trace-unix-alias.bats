@@ -94,8 +94,8 @@ function test3-assert1-expected () {
 	test_folder=$(echo /tmp/test4-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testnum="sed -r "s/[0-9]/X/g"" 
-	alias testuser="sed -r "s/"$USER"+/user/g"" 
+	alias testnum="sed -r "s/[0-9]/N/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g"" 
 }
 
 
@@ -157,15 +157,8 @@ function test7-assert3-expected () {
 	test_folder=$(echo /tmp/test9-$$)
 	mkdir $test_folder && cd $test_folder
 
-}
-
-
-@test "test10" {
-	test_folder=$(echo /tmp/test10-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test10-assert1-actual)
-	expected=$(test10-assert1-expected)
+	actual=$(test9-assert1-actual)
+	expected=$(test9-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -175,12 +168,19 @@ function test7-assert3-expected () {
 
 }
 
-function test10-assert1-actual () {
-	system-status | testuser | testnum | tail -n +2 | awk '!($8="")'
+function test9-assert1-actual () {
+	gtime -V | testnum
 }
-function test10-assert1-expected () {
-	echo -e 'total used free shared buff/cache available  Mem: XXXXXXX XXXXXXX XXXXXX XXXXXX XXXXXXX XXXXXX Swap: XXXXXXX XXXXXX XXXXXXX    XX:XX:XX up XX min, X user, load  X.XX, X.XX, X.XXUSER TTY FROM LOGIN@ IDLE JCPU PCPU user ttyX :X XX:XX XX:XX X:XX X.XXs '
+function test9-assert1-expected () {
+	echo -e 'time (GNU Time) UNKNOWNCopyright (C) NNNN Free Software Foundation, Inc.License GPLvN+: GNU GPL version N or later <https://gnu.org/licenses/gpl.html>.This is free software: you are free to change and redistribute it.There is NO WARRANTY, to the extent permitted by law.'
 }
+
+@test "test10" {
+	test_folder=$(echo /tmp/test10-$$)
+	mkdir $test_folder && cd $test_folder
+
+}
+
 
 @test "test11" {
 	test_folder=$(echo /tmp/test11-$$)
@@ -198,20 +198,18 @@ function test10-assert1-expected () {
 }
 
 function test11-assert1-actual () {
-	apropos-command time | grep asctime | wc -l | testnum
+	system-status | testnum | testuser | tail -n +2 | awk '!($8="")'
 }
 function test11-assert1-expected () {
-	echo -e 'X'
+	echo -e 'total used free shared buff/cache available  Mem: NNNNNNN NNNNNNN NNNNNN NNNNNN NNNNNN NNNNNN Swap: NNNNNNN NNNNNNN NNNNNNN    NN:NN:NN up N:NN, N user, load average:  N.NN, N.NNUSER TTY FROM LOGIN@ IDLE JCPU PCPU userxf333 ttyN :N NN:NN N:NNm NN:NN N.NNs '
 }
 
 @test "test12" {
 	test_folder=$(echo /tmp/test12-$$)
 	mkdir $test_folder && cd $test_folder
 
-	cat hidad.txt
-	linebr
-	actual=$(test12-assert3-actual)
-	expected=$(test12-assert3-expected)
+	actual=$(test12-assert1-actual)
+	expected=$(test12-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -221,19 +219,21 @@ function test11-assert1-expected () {
 
 }
 
-function test12-assert3-actual () {
-	split-tokens hidad.txt
+function test12-assert1-actual () {
+	apropos-command time | grep asctime | wc -l | testnum
 }
-function test12-assert3-expected () {
-	echo -e 'Hi Dad!--------------------------------------------------------------------------------HiDad!'
+function test12-assert1-expected () {
+	echo -e 'N'
 }
 
 @test "test13" {
 	test_folder=$(echo /tmp/test13-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test13-assert1-actual)
-	expected=$(test13-assert1-expected)
+	cat hidad.txt
+	linebr
+	actual=$(test13-assert3-actual)
+	expected=$(test13-assert3-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -243,21 +243,19 @@ function test12-assert3-expected () {
 
 }
 
-function test13-assert1-actual () {
-	tokenize _old_make.log
+function test13-assert3-actual () {
+	split-tokens hidad.txt
 }
-function test13-assert1-expected () {
-	echo -e "make:Nothingtobedonefor'himom.txt'."
+function test13-assert3-expected () {
+	echo -e 'Hi Dad!--------------------------------------------------------------------------------HiDad!'
 }
 
 @test "test14" {
 	test_folder=$(echo /tmp/test14-$$)
 	mkdir $test_folder && cd $test_folder
 
-	PERL_PRINT='This is Ubuntu!'
-	perl-echo $PERL_PRINT
-	actual=$(test14-assert3-actual)
-	expected=$(test14-assert3-expected)
+	actual=$(test14-assert1-actual)
+	expected=$(test14-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -267,22 +265,21 @@ function test13-assert1-expected () {
 
 }
 
-function test14-assert3-actual () {
-	perl-echo-sans-newline $PERL_PRINT
+function test14-assert1-actual () {
+	tokenize _old_make.log
 }
-function test14-assert3-expected () {
-	echo -e 'ThisThis'
+function test14-assert1-expected () {
+	echo -e "make:Nothingtobedonefor'himom.txt'."
 }
 
 @test "test15" {
 	test_folder=$(echo /tmp/test15-$$)
 	mkdir $test_folder && cd $test_folder
 
-	perl-printf 'ONE KISS IS ALL IT TAKES\n'
-	perl-print '2\n3\n5\n7\n11'
-	perl-print-n 'A B C D E F G\n'
-	actual=$(test15-assert4-actual)
-	expected=$(test15-assert4-expected)
+	PERL_PRINT='This is Ubuntu!'
+	perl-echo $PERL_PRINT
+	actual=$(test15-assert3-actual)
+	expected=$(test15-assert3-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -292,20 +289,22 @@ function test14-assert3-expected () {
 
 }
 
-function test15-assert4-actual () {
-	quote-tokens 'HELP ME!'
+function test15-assert3-actual () {
+	perl-echo-sans-newline $PERL_PRINT
 }
-function test15-assert4-expected () {
-	echo -e 'ONE KISS IS ALL IT TAKES235711A B C D E F G"HELP" "ME!"'
+function test15-assert3-expected () {
+	echo -e 'ThisThis'
 }
 
 @test "test16" {
 	test_folder=$(echo /tmp/test16-$$)
 	mkdir $test_folder && cd $test_folder
 
-	set-display-local
-	actual=$(test16-assert2-actual)
-	expected=$(test16-assert2-expected)
+	perl-printf 'ONE KISS IS ALL IT TAKES\n'
+	perl-print '2\n3\n5\n7\n11'
+	perl-print-n 'A B C D E F G\n'
+	actual=$(test16-assert4-actual)
+	expected=$(test16-assert4-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -315,15 +314,38 @@ function test15-assert4-expected () {
 
 }
 
-function test16-assert2-actual () {
-	echo $DISPLAY | testnum
+function test16-assert4-actual () {
+	quote-tokens 'HELP ME!'
 }
-function test16-assert2-expected () {
-	echo -e 'localhost:X.X'
+function test16-assert4-expected () {
+	echo -e 'ONE KISS IS ALL IT TAKES235711A B C D E F G"HELP" "ME!"'
 }
 
 @test "test17" {
 	test_folder=$(echo /tmp/test17-$$)
+	mkdir $test_folder && cd $test_folder
+
+	set-display-local
+	actual=$(test17-assert2-actual)
+	expected=$(test17-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test17-assert2-actual () {
+	echo $DISPLAY | testnum
+}
+function test17-assert2-expected () {
+	echo -e 'localhost:N.N'
+}
+
+@test "test18" {
+	test_folder=$(echo /tmp/test18-$$)
 	mkdir $test_folder && cd $test_folder
 
 	bash-trace-on | testuser | testnum
@@ -332,8 +354,8 @@ function test16-assert2-expected () {
 }
 
 
-@test "test18" {
-	test_folder=$(echo /tmp/test18-$$)
+@test "test19" {
+	test_folder=$(echo /tmp/test19-$$)
 	mkdir $test_folder && cd $test_folder
 
 	ls
@@ -343,8 +365,8 @@ function test16-assert2-expected () {
 	linebr
 	ls
 	linebr
-	actual=$(test18-assert8-actual)
-	expected=$(test18-assert8-expected)
+	actual=$(test19-assert8-actual)
+	expected=$(test19-assert8-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -354,15 +376,15 @@ function test16-assert2-expected () {
 
 }
 
-function test18-assert8-actual () {
+function test19-assert8-actual () {
 	ununcompress-this-dir ./testfolder | testnum
 }
-function test18-assert8-expected () {
-	echo -e "hidad.txt  _make.log\t  testfolder  tf2.txthimom.txt  _old_make.log  tf1.txt     tf3.txt'tf2.txt' -> 'testfolder/tf2.txt'--------------------------------------------------------------------------------gzip: /tmp/test-unix-alias/test-XXXX is a directory -- ignored/tmp/test-unix-alias/test-XXXX/hidad.txt:\t-XX.X% -- replaced with /tmp/test-unix-alias/test-XXXX/hidad.txt.gz/tmp/test-unix-alias/test-XXXX/himom.txt:\t-XX.X% -- replaced with /tmp/test-unix-alias/test-XXXX/himom.txt.gz/tmp/test-unix-alias/test-XXXX/tfX.txt:\t  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/tfX.txt.gz/tmp/test-unix-alias/test-XXXX/tfX.txt:\t  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/tfX.txt.gzgzip: /tmp/test-unix-alias/test-XXXX/testfolder is a directory -- ignored/tmp/test-unix-alias/test-XXXX/testfolder/tfX.txt:\t  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/testfolder/tfX.txt.gz/tmp/test-unix-alias/test-XXXX/_old_make.log:\t -X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/_old_make.log.gz/tmp/test-unix-alias/test-XXXX/tfX.txt:\t  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/tfX.txt.gz/tmp/test-unix-alias/test-XXXX/_make.log:\t -X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/_make.log.gz--------------------------------------------------------------------------------hidad.txt.gz  _make.log.gz\ttestfolder  tf2.txt.gzhimom.txt.gz  _old_make.log.gz\ttf1.txt.gz  tf3.txt.gz--------------------------------------------------------------------------------gzip: /tmp/test-unix-alias/test-XXXX is a directory -- ignored/tmp/test-unix-alias/test-XXXX/_make.log.gz:\t -X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/_make.log/tmp/test-unix-alias/test-XXXX/tfX.txt.gz:\t  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/tfX.txt/tmp/test-unix-alias/test-XXXX/tfX.txt.gz:\t  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/tfX.txt/tmp/test-unix-alias/test-XXXX/_old_make.log.gz:\t -X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/_old_make.log/tmp/test-unix-alias/test-XXXX/himom.txt.gz:\t-XX.X% -- replaced with /tmp/test-unix-alias/test-XXXX/himom.txt/tmp/test-unix-alias/test-XXXX/hidad.txt.gz:\t-XX.X% -- replaced with /tmp/test-unix-alias/test-XXXX/hidad.txtgzip: /tmp/test-unix-alias/test-XXXX/testfolder is a directory -- ignored/tmp/test-unix-alias/test-XXXX/testfolder/tfX.txt.gz:\t  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/testfolder/tfX.txt/tmp/test-unix-alias/test-XXXX/tfX.txt.gz:\t  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/tfX.txt"
+function test19-assert8-expected () {
+	echo -e "hidad.txt  _make.log\t  testfolder  tf2.txthimom.txt  _old_make.log  tf1.txt     tf3.txt'tf2.txt' -> 'testfolder/tf2.txt'--------------------------------------------------------------------------------gzip: /tmp/test-unix-alias/test-NNNN is a directory -- ignored/tmp/test-unix-alias/test-NNNN/hidad.txt:\t-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/hidad.txt.gz/tmp/test-unix-alias/test-NNNN/himom.txt:\t-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/himom.txt.gz/tmp/test-unix-alias/test-NNNN/tfN.txt:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt.gz/tmp/test-unix-alias/test-NNNN/tfN.txt:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt.gzgzip: /tmp/test-unix-alias/test-NNNN/testfolder is a directory -- ignored/tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt.gz/tmp/test-unix-alias/test-NNNN/_old_make.log:\t -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_old_make.log.gz/tmp/test-unix-alias/test-NNNN/tfN.txt:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt.gz/tmp/test-unix-alias/test-NNNN/_make.log:\t -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_make.log.gz--------------------------------------------------------------------------------hidad.txt.gz  _make.log.gz\ttestfolder  tf2.txt.gzhimom.txt.gz  _old_make.log.gz\ttf1.txt.gz  tf3.txt.gz--------------------------------------------------------------------------------gzip: /tmp/test-unix-alias/test-NNNN is a directory -- ignored/tmp/test-unix-alias/test-NNNN/_make.log.gz:\t -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_make.log/tmp/test-unix-alias/test-NNNN/tfN.txt.gz:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt/tmp/test-unix-alias/test-NNNN/tfN.txt.gz:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt/tmp/test-unix-alias/test-NNNN/_old_make.log.gz:\t -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_old_make.log/tmp/test-unix-alias/test-NNNN/himom.txt.gz:\t-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/himom.txt/tmp/test-unix-alias/test-NNNN/hidad.txt.gz:\t-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/hidad.txtgzip: /tmp/test-unix-alias/test-NNNN/testfolder is a directory -- ignored/tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt.gz:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt/tmp/test-unix-alias/test-NNNN/tfN.txt.gz:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt"
 }
 
-@test "test19" {
-	test_folder=$(echo /tmp/test19-$$)
+@test "test20" {
+	test_folder=$(echo /tmp/test20-$$)
 	mkdir $test_folder && cd $test_folder
 
 	old-count-exts | testnum
@@ -370,12 +392,12 @@ function test18-assert8-expected () {
 }
 
 
-@test "test20" {
-	test_folder=$(echo /tmp/test20-$$)
+@test "test21" {
+	test_folder=$(echo /tmp/test21-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test20-assert1-actual)
-	expected=$(test20-assert1-expected)
+	actual=$(test21-assert1-actual)
+	expected=$(test21-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -385,9 +407,9 @@ function test18-assert8-expected () {
 
 }
 
-function test20-assert1-actual () {
+function test21-assert1-actual () {
 	echo "Done!"
 }
-function test20-assert1-expected () {
+function test21-assert1-expected () {
 	echo -e 'Done!'
 }

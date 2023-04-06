@@ -1,0 +1,1 @@
+{'report_name': 'more-tomohara-aliases-test', 'instrumented_line': 47, 'covered_line': 47, 'ratio': 1.0}

@@ -1,0 +1,1 @@
+{'report_name': 'testbook-test-dir-aliases', 'instrumented_line': 165, 'covered_line': 157, 'ratio': 0.9515}

@@ -98,8 +98,8 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test5-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testnum="sed -r "s/[0-9]/X/g"" 
-	alias testuser="sed -r "s/"$USER"+/user/g""
+	alias testnum="sed -r "s/[0-9]/N/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g""
 }
 
 
@@ -130,7 +130,7 @@ function test7-assert1-actual () {
 	ps-all | wc -l | testnum
 }
 function test7-assert1-expected () {
-	echo -e 'XXX'
+	echo -e 'NNN'
 }
 
 @test "test8" {
@@ -152,7 +152,7 @@ function test8-assert1-actual () {
 	ps-sort-time | head -n 10 | testnum | awk '!($1=$7=$8=$11="")'
 }
 function test8-assert1-expected () {
-	echo -e 'PID %CPU %MEM VSZ RSS   START TIME XXXX XX.X XX.X XXXXXXX XXXXXX   XX:XX X:XX XXXX XX.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXX XXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXXX XXXXX   XX:XX X:XX XXXX X.X X.X XXXXXX XXXXX   XX:XX X:XX XXXX X.X X.X XXXXXX XXXXX   XX:XX X:XX '
+	echo -e 'PID %CPU %MEM VSZ RSS   START TIME NNNN N.N N.N NNNNNNN NNNNN   NN:NN NN:NN NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNNN NNNNN   NN:NN N:NN '
 }
 
 @test "test9" {
@@ -174,7 +174,7 @@ function test9-assert1-actual () {
 	ps-time | head -n 10  | testnum | awk '!($1=$7=$8=$11="")'
 }
 function test9-assert1-expected () {
-	echo -e 'PID %CPU %MEM VSZ RSS   START TIME XXXX XX.X XX.X XXXXXXX XXXXXX   XX:XX X:XX XXXX XX.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXX XXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXXX XXXXX   XX:XX X:XX XXXX X.X X.X XXXXXX XXXXX   XX:XX X:XX XXXX X.X X.X XXXXXX XXXXX   XX:XX X:XX '
+	echo -e 'PID %CPU %MEM VSZ RSS   START TIME NNNN N.N N.N NNNNNNN NNNNN   NN:NN NN:NN NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNNN NNNNN   NN:NN N:NN '
 }
 
 @test "test10" {
@@ -196,7 +196,7 @@ function test10-assert1-actual () {
 	ps-sort-mem | head -n 10  | testnum | awk '!($1=$7=$8=$11="")' 
 }
 function test10-assert1-expected () {
-	echo -e 'PID %CPU %MEM VSZ RSS   START TIME XXXX XX.X XX.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX XXXX XX.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX '
+	echo -e 'PID %CPU %MEM VSZ RSS   START TIME NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN NNNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN NNNNN N.N N.N NNNNNNN NNNNN   NN:NN N:NN '
 }
 
 @test "test11" {
@@ -218,7 +218,7 @@ function test11-assert1-actual () {
 	ps-mem | head -n 10  | testnum | awk '!($1=$7=$8=$11="")'
 }
 function test11-assert1-expected () {
-	echo -e 'PID %CPU %MEM VSZ RSS   START TIME XXXX XX.X XX.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX XXXX XX.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX XXXX X.X X.X XXXXXXXX XXXXXX   XX:XX X:XX '
+	echo -e 'PID %CPU %MEM VSZ RSS   START TIME NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN NNNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN NNNNN N.N N.N NNNNNNN NNNNN   NN:NN N:NN '
 }
 
 @test "test12" {
@@ -263,7 +263,7 @@ function test13-assert2-actual () {
 	get-process-parent | testnum
 }
 function test13-assert2-expected () {
-	echo -e 'UID PID PPID PRI NI VSZ RSS WCHAN STAT TTY TIME COMMANDXXXX XXXX XXXX XX X XXXXX XXXX do_wai Ss pts/X X:XX /usr/biXXXX XXXX XXXX XX X XXXXX XXXX - R+ pts/X X:XX ps alXXXX XXXX XXXX XX X XXXXX XXXX pipe_r S+ pts/X X:XX grep -EXXXX XXXX XXXX XX X XXXXX XXXX pipe_r S+ pts/X X:XX head -nXXXX XXXX XXXX XX X XXXXX XXXX pipe_r S+ pts/X X:XX sed -rXXXX XXXX XXXX XX X XXXXX XXXX pipe_r S+ pts/X X:XX awk !($--------------------------------------------------------------------------------XXXX'
+	echo -e 'UID PID PPID PRI NI VSZ RSS WCHAN STAT TTY TIME COMMANDNNNN NNNNN NNNNN NN N NNNNN NNNN do_wai Ss pts/NN N:NN /usr/biNNNN NNNNN NNNNN NN N NNNNN NNNN - R+ pts/NN N:NN ps alNNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN grep -ENNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN head -nNNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN sed -rNNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN awk !($--------------------------------------------------------------------------------NNNNN'
 }
 
 @test "test14" {
@@ -288,4 +288,26 @@ function test14-assert3-actual () {
 }
 function test14-assert3-expected () {
 	echo -e 'How to use the ansi-filter? '
+}
+
+@test "test15" {
+	test_folder=$(echo /tmp/test15-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test15-assert1-actual)
+	expected=$(test15-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test15-assert1-actual () {
+	echo "Done"
+}
+function test15-assert1-expected () {
+	echo -e 'Done'
 }

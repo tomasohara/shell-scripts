@@ -67,9 +67,7 @@ function test2-assert1-expected () {
 	test_folder=$(echo /tmp/test3-$$)
 	mkdir $test_folder && cd $test_folder
 
-	temp_dir=$TMP/test-3570
-	mkdir -p "$temp_dir"
-	cd "$temp_dir"
+	alias testuser="sed -r "s/"$USER"+/user/g""
 }
 
 
@@ -77,50 +75,18 @@ function test2-assert1-expected () {
 	test_folder=$(echo /tmp/test4-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test4-assert1-actual)
-	expected=$(test4-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
+	temp_dir=$TMP/test-3570
+	mkdir -p "$temp_dir"
+	cd "$temp_dir"
 }
 
-function test4-assert1-actual () {
-	typeset -f | egrep '^\w+' | wc -l
-}
-function test4-assert1-expected () {
-	echo -e '10'
-}
 
 @test "test5" {
 	test_folder=$(echo /tmp/test5-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias perl-=""
-	GREP='grep'
-	alias move='mv'
-	alias convert-termstrings='perl- convert_termstrings.perl'
-	alias do-rcsdiff='do_rcsdiff.sh'
-	alias dobackup='dobackup.sh'
-	alias kill-em='kill_em.sh'
-	alias kill-it='kill-em --pattern'
-}
-
-
-@test "test6" {
-	test_folder=$(echo /tmp/test6-$$)
-	mkdir $test_folder && cd $test_folder
-
-	rm -rf ./*
-	printf "TOP\nTHIS IS A TEST\nBOTTOM" > test.txt
-	ls
-	dobackup test.txt
-	linebr
-	actual=$(test6-assert6-actual)
-	expected=$(test6-assert6-expected)
+	actual=$(test5-assert1-actual)
+	expected=$(test5-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -130,20 +96,27 @@ function test4-assert1-expected () {
 
 }
 
-function test6-assert6-actual () {
-	ls
+function test5-assert1-actual () {
+	typeset -f | egrep '^\w+' | wc -l
 }
-function test6-assert6-expected () {
-	echo -e "test.txtBacking up 'test.txt' to './backup/test.txt'--------------------------------------------------------------------------------backup\ttest.txt"
+function test5-assert1-expected () {
+	echo -e '20'
 }
+
+@test "test6" {
+	test_folder=$(echo /tmp/test6-$$)
+	mkdir $test_folder && cd $test_folder
+
+	alias testnum="sed -r "s/[0-9]/N/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g""
+}
+
 
 @test "test7" {
 	test_folder=$(echo /tmp/test7-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function ps-mine- { ps-mine "$@" | filter-dirnames; }
-	alias ps_mine='ps-mine'
-	alias ps-mine-all='ps-mine --all'
+	source $BIN_DIR/tomohara-aliases.bash
 }
 
 
@@ -151,35 +124,108 @@ function test6-assert6-expected () {
 	test_folder=$(echo /tmp/test8-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias rename-files='perl- rename_files.perl'
-	alias rename_files='rename-files'
-	alias testwn='perl- testwn.perl'
-	alias perlgrep='perl- perlgrep.perl'
-	alias foreach='perl- foreach.perl'
-	alias rename-spaces='rename-files -q -global " " "_"'
-	alias rename-special-punct='rename-files -q -global -regex "[&\!\*?\(\)]" ""'
-	alias rename-quotes='rename-files -q -global "'"'"'" ""' 
+	actual=$(test8-assert1-actual)
+	expected=$(test8-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test8-assert1-actual () {
+	kill-em --test firefox | wc -l
+}
+function test8-assert1-expected () {
+	echo -e '20'
+}
 
 @test "test9" {
 	test_folder=$(echo /tmp/test9-$$)
 	mkdir $test_folder && cd $test_folder
 
-	rename-files
+	actual=$(test9-assert1-actual)
+	expected=$(test9-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test9-assert1-actual () {
+	kill-it --test firefox | wc -l
+}
+function test9-assert1-expected () {
+	echo -e '20'
+}
 
 @test "test10" {
 	test_folder=$(echo /tmp/test10-$$)
+	mkdir $test_folder && cd $test_folder
+
+	rm -rf ./* > /dev/null
+	printf "TOP\nTHIS IS A TEST\nBOTTOM" > test.txt
+	printf "THIS IS A FILE TO MOVE" > tomove.txt
+	mkdir newdir1
+	move tomove.txt ./newdir1/
+	ls
+	dobackup test.txt
+	linebr
+	actual=$(test10-assert9-actual)
+	expected=$(test10-assert9-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test10-assert9-actual () {
+	ls
+}
+function test10-assert9-expected () {
+	echo -e "renamed 'tomove.txt' -> './newdir1/tomove.txt'newdir1  test.txtBacking up 'test.txt' to './backup/test.txt'--------------------------------------------------------------------------------backup\tnewdir1  test.txt"
+}
+
+@test "test11" {
+	test_folder=$(echo /tmp/test11-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test11-assert1-actual)
+	expected=$(test11-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test11-assert1-actual () {
+	ps-mine-all | wc -l | testnum 
+}
+function test11-assert1-expected () {
+	echo -e 'NNN'
+}
+
+@test "test12" {
+	test_folder=$(echo /tmp/test12-$$)
 	mkdir $test_folder && cd $test_folder
 
 	do-rcsdiff
 }
 
 
-@test "test11" {
-	test_folder=$(echo /tmp/test11-$$)
+@test "test13" {
+	test_folder=$(echo /tmp/test13-$$)
 	mkdir $test_folder && cd $test_folder
 
 	uname -r > versionR.txt
@@ -188,77 +234,32 @@ function test6-assert6-expected () {
 	uname -i > versionI.txt
 	uname > "version none.txt"
 	uname -ra > "version?.txt"
-	ps -aux > processlist.txt
+	man grep > grep_manual.txt
 	cp ./versionR.txt ./versionR-1.txt
-	actual=$(test11-assert9-actual)
-	expected=$(test11-assert9-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
 }
 
-function test11-assert9-actual () {
-	ls
-}
-function test11-assert9-expected () {
-	echo -e "backup\t\t   versionA.txta       versionR-1.txt   versionV.txtprocesslist.txt   versionI.txt        versionR.txttest.txt\t  'version none.txt'  'version?.txt'"
-}
-
-@test "test12" {
-	test_folder=$(echo /tmp/test12-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test12-assert1-actual)
-	expected=$(test12-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test12-assert1-actual () {
-	rename-files -q test.txt harry.txt
-}
-function test12-assert1-expected () {
-	echo -e 'renaming "test.txt" to "harry.txt"'
-}
-
-@test "test13" {
-	test_folder=$(echo /tmp/test13-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test13-assert1-actual)
-	expected=$(test13-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
-}
-
-function test13-assert1-actual () {
-	perlgrep "bash" ./processlist.txt
-}
-function test13-assert1-expected () {
-	echo -e 'aveey       2415  0.0  0.0  17612  2020 pts/0    Ss   17:40   0:00 bashaveey       2440  0.0  0.1  17612  4936 pts/1    Ss+  17:40   0:00 bashaveey       4508  0.0  1.6 691220 57836 ?        Ssl  17:50   0:03 /usr/bin/python3 -m bash_kernel -f /home/aveey/.local/share/jupyter/runtime/kernel-c9deb3b8-c656-45df-a2c2-d9f85ff318ab.jsonaveey       4519  0.0  0.1  17480  4904 pts/3    Ss+  17:50   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.shaveey       5078  0.0  0.1  17668  5048 pts/4    Ss   17:54   0:00 bashaveey       8448  0.0  0.1  17668  5376 pts/5    Ss+  18:21   0:00 bashaveey      11222  0.0  1.7 691220 60556 ?        Ssl  21:10   0:01 /usr/bin/python3 -m bash_kernel -f /home/aveey/.local/share/jupyter/runtime/kernel-2576ed23-01a7-4571-b5e4-0db404e9a80a.jsonaveey      11233  0.0  0.1  17540  5236 pts/6    Ss+  21:10   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.shaveey      13076  0.0  1.7 691220 60580 ?        Ssl  21:16   0:01 /usr/bin/python3 -m bash_kernel -f /home/aveey/.local/share/jupyter/runtime/kernel-438a7192-237e-490e-8ab2-2658035cc4dd.jsonaveey      13087  0.0  0.1  17540  5408 pts/7    Ss+  21:16   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.shaveey      13405  0.0  0.1  17668  5808 pts/8    Ss   21:20   0:00 bashaveey      22993  0.0  0.1  17664  5916 pts/9    Ss   21:55   0:00 bashaveey      25810 22.0  1.7 691228 60764 ?        Ssl  22:02   0:01 /usr/bin/python3 -m bash_kernel -f /home/aveey/.local/share/jupyter/runtime/kernel-7d6eccc1-4db7-4f69-b592-329e0b2bcb25.jsonaveey      25821  2.2  0.1  17540  5452 pts/2    Ss   22:03   0:00 /usr/bin/bash --rcfile /usr/lib/python3/dist-packages/pexpect/bashrc.sh'
-}
 
 @test "test14" {
 	test_folder=$(echo /tmp/test14-$$)
 	mkdir $test_folder && cd $test_folder
 
-	foreach "echo $f" *.txt
+	actual=$(test14-assert1-actual)
+	expected=$(test14-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test14-assert1-actual () {
+	rename-files -q test.txt harry.txt
+}
+function test14-assert1-expected () {
+	echo -e 'renaming "test.txt" to "harry.txt"'
+}
 
 @test "test15" {
 	test_folder=$(echo /tmp/test15-$$)
@@ -276,61 +277,26 @@ function test13-assert1-expected () {
 }
 
 function test15-assert1-actual () {
-	rename-spaces
+	perlgrep "print" ./grep_manual.txt
 }
 function test15-assert1-expected () {
-	echo -e 'renaming "version none.txt" to "version_none.txt"'
+	echo -e 'grep, egrep, fgrep, rgrep - print lines that match patternspatterns separated by newline characters, and  grep  prints  each  lineSuppress  normal output; instead print a count of matching linesSuppress normal output; instead print the  name  of  each  inputfile from which no output would normally have been printed.Suppress  normal  output;  instead  print the name of each inputfile  from  which  output  would  normally  have  been  printed.line of output.  If -o (--only-matching) is specified, print thebe printed in a minimum size field width.-print0,  perl  -0,  sort  -z, and xargs -0 to process arbitraryWhen  -A,  -B, or -C are in use, print SEP instead of -- betweenWhen -A, -B, or -C are in use, do not print a separator  between[:graph:], [:lower:], [:print:], [:punct:], [:space:],  [:upper:],  and'
 }
 
 @test "test16" {
 	test_folder=$(echo /tmp/test16-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test16-assert1-actual)
-	expected=$(test16-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
+	foreach "echo $f" *.txt
 }
 
-function test16-assert1-actual () {
-	rename-special-punct
-}
-function test16-assert1-expected () {
-	echo -e 'renaming "version?.txt" to "version.txt"'
-}
 
 @test "test17" {
 	test_folder=$(echo /tmp/test17-$$)
 	mkdir $test_folder && cd $test_folder
 
-	ps -l > "process(L).md"
-	ps -u > "process(U).md"
-	ps -x > "process(X).md"
-	ps -al > 'process'all'.md'
-}
-
-
-@test "test18" {
-	test_folder=$(echo /tmp/test18-$$)
-	mkdir $test_folder && cd $test_folder
-
-	alias move-duplicates='mkdir -p duplicates; move *\([0-9]\).* duplicates 2>&1 | $GREP -iv cannot.stat.*..No.such'
-	alias rename-parens='rename-files -global -regex "[\(\)]" "" *[\(\)]*'
-	alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-duplicates'
-}
-
-
-@test "test19" {
-	test_folder=$(echo /tmp/test19-$$)
-	mkdir $test_folder && cd $test_folder
-
-	actual=$(test19-assert1-actual)
-	expected=$(test19-assert1-expected)
+	actual=$(test17-assert1-actual)
+	expected=$(test17-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -340,12 +306,48 @@ function test16-assert1-expected () {
 
 }
 
-function test19-assert1-actual () {
-	rename-parens -v
+function test17-assert1-actual () {
+	rename-spaces
 }
-function test19-assert1-expected () {
-	echo -e 'renaming "process(L).md" to "processL.md"renaming "process(U).md" to "processU.md"renaming "process(X).md" to "processX.md"'
+function test17-assert1-expected () {
+	echo -e 'renaming "version none.txt" to "version_none.txt"'
 }
+
+@test "test18" {
+	test_folder=$(echo /tmp/test18-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test18-assert1-actual)
+	expected=$(test18-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test18-assert1-actual () {
+	rename-special-punct
+}
+function test18-assert1-expected () {
+	echo -e 'renaming "version?.txt" to "version.txt"'
+}
+
+@test "test19" {
+	test_folder=$(echo /tmp/test19-$$)
+	mkdir $test_folder && cd $test_folder
+
+	ps -l >> "process(L).md"
+	ps -u >> "process(U).md"
+	ps -x >> "process(X).md"
+	ps -al >> "process'all'.md"
+	ps -aux >> 'psaux(1).txt'
+	ps -aux >> 'psaux(2).txt'
+	ps -aux >> 'psaux(3).txt'
+}
+
 
 @test "test20" {
 	test_folder=$(echo /tmp/test20-$$)
@@ -363,10 +365,10 @@ function test19-assert1-expected () {
 }
 
 function test20-assert1-actual () {
-	rename-quotes -v
+	move-duplicates
 }
 function test20-assert1-expected () {
-	echo -e 'WARNING: Ignoring -quick mode as files specified'
+	echo -e "renamed 'psaux(1).txt' -> 'duplicates/psaux(1).txt'renamed 'psaux(2).txt' -> 'duplicates/psaux(2).txt'renamed 'psaux(3).txt' -> 'duplicates/psaux(3).txt'"
 }
 
 @test "test21" {
@@ -385,38 +387,58 @@ function test20-assert1-expected () {
 }
 
 function test21-assert1-actual () {
-	ls
+	rename-parens -v
 }
 function test21-assert1-expected () {
-	echo -e 'backup\t       processlist.txt\tprocessX.md    version_none.txt  version.txtharry.txt      processL.md\tversionA.txta  versionR-1.txt\t versionV.txtprocessall.md  processU.md\tversionI.txt   versionR.txt'
+	echo -e 'renaming "process(L).md" to "processL.md"renaming "process(U).md" to "processU.md"renaming "process(X).md" to "processX.md"'
 }
 
 @test "test22" {
 	test_folder=$(echo /tmp/test22-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function move-versioned-files {
-	alias perl-grep='perl $BIN_DIR/perlgrep.perl'
-	alias dir-rw='dir -rw'
-	alias move='mv'
-	local ext_pattern='$1'
-	if [ '$ext_pattern' = '' ]; then ext_pattern='{list,log,txt}'; fi
-	local dir='$2'
-	if [ '$dir' = '' ]; then dir='versioned-files'; fi
-	mkdir -p '$dir';
-	local D='[-.]'
-	local file_list='$TEMP/_move-versioned-files-$$.list'
-	eval_middle='$(eval dir-rw *$D$ext_pattern[0-9]*  *$D*[0-9]*$D$ext_pattern  *$D$ext_pattern$D*[0-9][0-9]*   *$D*[0-9][0-9]*$D$ext_pattern  2>&1 | perl-grep -v "No such file" | perl -pe "s/(\S+\s+){6}\S+//;" | sort -u)'
-	move '$eval_middle' '$dir'
-	}
-	alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
-	alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
-	alias move-adhoc-files='move-log-files; move-output-files'
+	actual=$(test22-assert1-actual)
+	expected=$(test22-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test22-assert1-actual () {
+	rename-quotes -v
+}
+function test22-assert1-expected () {
+	echo -e 'WARNING: Ignoring -quick mode as files specified'
+}
 
 @test "test23" {
 	test_folder=$(echo /tmp/test23-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test23-assert1-actual)
+	expected=$(test23-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test23-assert1-actual () {
+	ls
+}
+function test23-assert1-expected () {
+	echo -e 'backup\t\t   newdir1\t      processX.md\t versionR-1.txtduplicates\t  "process\'all\'.md"   versionA.txta\t versionR.txtgrep_manual.txt   processL.md\t      versionI.txt\t version.txtharry.txt\t   processU.md\t      version_none.txt\t versionV.txt'
+}
+
+@test "test24" {
+	test_folder=$(echo /tmp/test24-$$)
 	mkdir $test_folder && cd $test_folder
 
 	man sudo > sudo_manual.out
@@ -425,53 +447,33 @@ function test21-assert1-expected () {
 }
 
 
-@test "test24" {
-	test_folder=$(echo /tmp/test24-$$)
-	mkdir $test_folder && cd $test_folder
-
-	function get-free-filename() {
-	local base="$1"
-	local sep="$2"
-	local L=1
-	local filename="$base"
-	while [ -e "$filename" ]; do
-	let L++
-	filename="$base$sep$L"
-	done;
-	echo "$filename"
-	}
-	function rename-with-file-date() {
-	local f new_f
-	local move_command="move"
-	if [ "$1" = "--copy" ]; then
-	move_command='command cp --interactive --verbose --preserve'
-	shift
-	fi
-	for f in "$@"; do
-	if [ -e "$f" ]; then
-	new_f=$(get-free-filename "$f".$(date --reference="$f" '+%d%b%y') ".")
-	eval "$move_command" "$f" "$new_f";
-	fi
-	done;
-	}
-	function copy-with-file-date { rename-with-file-date --copy "$@"; }
-}
-
-
 @test "test25" {
 	test_folder=$(echo /tmp/test25-$$)
 	mkdir $test_folder && cd $test_folder
 
+	actual=$(test25-assert1-actual)
+	expected=$(test25-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test25-assert1-actual () {
+	copy-with-file-date *.md | wc -l
+}
+function test25-assert1-expected () {
+	echo -e "cp: cannot stat 'processall.md': No such file or directory3"
+}
 
 @test "test26" {
 	test_folder=$(echo /tmp/test26-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias bigrams='perl -sw $BIN_DIR/count_bigrams.perl -N=2'
-	alias unigrams='perl -sw $BIN_DIR/count_bigrams.perl -N=1'
-	alias word-count=unigrams
+	man cat > man_cat.txt
 }
 
 
@@ -488,13 +490,28 @@ function test21-assert1-expected () {
 	echo "============================"
 	[ "$actual" == "$expected" ]
 
+	actual=$(test27-assert2-actual)
+	expected=$(test27-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
 function test27-assert1-actual () {
-	word-count ./versionV.txt
+	unigrams ./man_cat.txt | testuser | testnum
 }
 function test27-assert1-expected () {
-	echo -e 'utc\t1n/a\t126\t1aug\t113:26:29\t1fri\t1#54-ubuntu\t1smp\t1'
+	echo -e "to\tNand\tNstandard\tNoutput\tNcat\tNequivalent\tNfree\tNgnu\tNdisplay\tNis\tNor\tNcoreutils\tNthen\tN-\tNtab\tNcat(N)\tNbugs\tNnumber\tNno\tNoutput.\tNby\tNthe\tNthis\tNlines\tNconcatenate\tNexit\tNversion\tNcopyright\tNinput,\tNhelp\tN-b,\tNgpl\tN-vt\tN^i\tN-,\tNreporting\tN-n,\tNfor\tNgranlund\tNname\tNfile,\tNm-\tNfile(s)\tNdocumentation\tNdescription\tNwhen\tNfoundation,\tN--version\tNfebruary\tN--help\tNfiles\tNit.\tN--number\tNinput.\tN<https://translationproject.org/team/>\tNN\tNm.\tNinvocation'\tN-a,\tN--show-nonprinting\tNchange\tNnotation,\tNuse\tNN.NN\tNfull\tNgplvN+:\tN-u\tNnonempty\tN'(coreutils)\tNend\tNfile\tNextent\tNtac(N)\tNrepeated\tN<https://www.gnu.org/software/coreutils/cat>\tNtranslation\tN--number-nonblank\tNsuppress\tN-s,\tNhelp:\tNstallman.\tNsoftware\tNtorbjorn\tNvia:\tNpermitted\tNlater\tN^\tNrichard\tNinc.\tNsee\tNalso\tNwritten\tN-e\tNoverrides\tN-t,\tNlfd\tNsynopsis\tNlocally\tNinput\tNreport\tN<https://gnu.org/licenses/gpl.html>.\tNon\tNf's\tNcharacters\tNcommands\tN-n\tN-v,\tNwarranty,\tNsoftware:\tNread\tNcontents,\tNat\tNany\tN-vet\tNg\tNof\tNempty\tNexamples\tNline\tNprint\tNas\tN(ignored)\tNwith\tNlines,\tNcontents.\tN--show-ends\tNauthor\tNthere\tNonline\tN-ve\tN<https://www.gnu.org/software/coreutils/>\tNlicense\tN--show-all\tN[file]...\tNcopy\tNn/a\tNinformation\tN[option]...\tNredistribute\tNinfo\tNg's\tNlaw.\tN-e,\tNuser\tNexcept\tN-t\tNeach\tN©\tNall\tNNNNN\tN--show-tabs\tNavailable\tN--squeeze-blank\tN"
+}
+function test27-assert2-actual () {
+		N
+}
+function test27-assert2-expected () {
+	echo -e 'you\tNf\tNNNNN\tNare\tN'
 }
 
 @test "test28" {
@@ -510,38 +527,66 @@ function test27-assert1-expected () {
 	echo "============================"
 	[ "$actual" == "$expected" ]
 
+	actual=$(test28-assert2-actual)
+	expected=$(test28-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
 function test28-assert1-actual () {
-	bigrams ./version.txt
+	word-count ./man_cat.txt | testuser | testnum
 }
 function test28-assert1-expected () {
-	echo -e 'x86_64:x86_64\t2utc:2022\t1n/a:n/a\t1n/a:linux\t1fri:aug\t1#54-ubuntu:smp\t126:13:26:29\t1smp:fri\t113:26:29:utc\t1aug:26\t1linux:ins-15-3573-umate\t12022:x86_64\t15.15.0-48-generic:#54-ubuntu\t1ins-15-3573-umate:5.15.0-48-generic\t1'
+	echo -e "to\tNand\tNstandard\tNoutput\tNcat\tNor\tNis\tNequivalent\tNfree\tNgnu\tNdisplay\tNcat(N)\tNcopyright\tNtab\tNlines\tNexit\tNoutput.\tNthis\tN-\tNnumber\tNthen\tNbugs\tNversion\tNcoreutils\tNconcatenate\tNno\tNthe\tNby\tNN.NN\tNgplvN+:\tNN\tN-,\tN<https://www.gnu.org/software/coreutils/cat>\tN--show-tabs\tNsynopsis\tN'(coreutils)\tNuse\tN^\tNgranlund\tNof\tNg\tNfile(s)\tNtac(N)\tNfull\tNcopy\tNnotation,\tN-b,\tNhelp\tNg's\tNthere\tNexcept\tNcontents,\tNpermitted\tNlicense\tN--show-ends\tNnonempty\tNfiles\tN©\tNfebruary\tN[file]...\tNat\tNend\tN--show-nonprinting\tNgpl\tNf's\tN-n\tNinput,\tNhelp:\tNcontents.\tNread\tNsee\tN--show-all\tN-e,\tNdescription\tNauthor\tN<https://gnu.org/licenses/gpl.html>.\tN--squeeze-blank\tNalso\tN-a,\tNon\tNname\tN-v,\tNreport\tNf\tNprint\tNlocally\tNredistribute\tNoverrides\tNsoftware\tNfor\tN-t,\tNwarranty,\tN--version\tNwritten\tN-vet\tNvia:\tN[option]...\tN-e\tNas\tN--number\tNonline\tNsuppress\tNinvocation'\tNall\tN-t\tNsoftware:\tN-vt\tNchange\tNNNNN\tN"
+}
+function test28-assert2-actual () {
+		N
+}
+function test28-assert2-expected () {
+	echo -e 'richard\tNinfo\tN<https://www.gnu.org/software/coreutils/>\tNlines,\tNinput\tNyou\tNm.\tNinput.\tN-n,\tN(ignored)\tNdocumentation\tNlaw.\tNinc.\tN^i\tNwith\tNNNNN\tNn/a\tN--help\tNm-\tNfile\tNtranslation\tNare\tNit.\tN-s,\tNreporting\tNcommands\tNempty\tN-ve\tNextent\tNcharacters\tNany\tN<https://translationproject.org/team/>\tNtorbjorn\tNlater\tNrepeated\tN--number-nonblank\tNfoundation,\tNstallman.\tNfile,\tNeach\tN-u\tNuser\tNinformation\tNavailable\tNlfd\tNline\tNwhen\tNexamples\tN'
 }
 
 @test "test29" {
 	test_folder=$(echo /tmp/test29-$$)
 	mkdir $test_folder && cd $test_folder
 
-	lynx-dump-stdout () { lynx -width=512 -dump "$@"; }
-	lynx-dump () { 
-	local in_file="$1"
-	shift 1
-	local base=$(basename "$file" .html)
-	if [[ ("$out_file" = "" ) && (! "$1" =~ -*) ]]; then
-	local out_file="$1"
-	fi
-	if [ "$out_file" = "" ]; then out_file="$base.txt"; fi
-	lynx-dump-stdout "$@" "$file" > "$out_file" 2> "$out_file.log"
-	if [ -s "$out_file.log" ]; then
-	cat "$out_file.log"
-	delete-force "$out_file.log"
-	fi
-	}
-	if [ "$BAREBONES_HOST" = "1" ]; then export lynx_width=0; fi
-	alias lynx-html='lynx -force_html'
+	actual=$(test29-assert1-actual)
+	expected=$(test29-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+	actual=$(test29-assert2-actual)
+	expected=$(test29-assert2-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test29-assert1-actual () {
+	bigrams ./man_cat.txt | testuser | testnum
+}
+function test29-assert1-expected () {
+	echo -e "equivalent:to\tNoutput:lines\tNto:standard\tNgnu:coreutils\tNand:exit\tNstandard:output.\tNor:later\tNNNNN:free\tN-n,:--number\tN--show-nonprinting:use\tN-:g\tN-v,:--show-nonprinting\tNpermitted:by\tNcopyright:copyright\tNcat:invocation'\tNand:m-\tNcopyright:©\tNoutput:lines,\tNoutput:synopsis\tNnumber:all\tNcoreutils:online\tNany:translation\tNf:-\tNgpl:version\tNm-:notation,\tNwith:no\tNtranslation:bugs\tN-t:equivalent\tNand:tab\tNreport:any\tNyou:are\tNsoftware::you\tN--version:output\tNname:cat\tN-e,:--show-ends\tNand:redistribute\tNstandard:input.\tNdisplay:$\tNfree:to\tNoutput.:with\tNgnu:gpl\tNeach:line\tN--show-tabs:display\tNversion:N\tN^:and\tNcat:[option]...\tN-,:read\tNthis:is\tNn/a:cat(N)\tNthe:standard\tNempty:output\tN-ve:-e,\tNlines,:overrides\tNcat:f\tN--squeeze-blank:suppress\tNfor:lfd\tNfoundation,:inc.\tNcontents.:cat\tNinput:to\tNthen:g's\tN[option]...:[file]...\tN-vet:-b,\tNis:free\tNtab:characters\tNno:warranty,\tNlocally:via:\tNtac(N):full\tNoutput:version\tN<https://translationproject.org/team/>:copyright\tNcat(N):name\tNor:when\tNno:file,\tNcopy:standard\tNfree:software:\tNis:no\tNprint:on\tN(ignored):-v,\tNthere:is\tNlfd:and\tNinformation:and\tNsoftware:foundation,\tNlicense:gplvN+:\tNexit:--version\tNavailable:locally\tNuse:^\tNlater:<https://gnu.org/licenses/gpl.html>.\tNstandard:input,\tNas:^i\tNcharacters:as\tN^i:-u\tNexamples:cat\tNlaw.:see\tNbugs:to\tNn/a:n/a\tNg:output\tNoutput:f's\tNat:end\tNline:-n,\tNlines:-s,\tNcoreutils:N.NN\tNbugs:gnu\tNcat:-\tNstandard:output\tNto:-ve\tN--number-nonblank:number\tNto:-vet\tNconcatenate:file(s)\tNare:free\tN<https://www.gnu.org/software/coreutils/cat>:or\tNoutput.:author\tNsuppress:repeated\tNcat(N):user\tN-a,:--show-all\tN-vt:-t,\tNcommands:cat(N)\tN-n:-e\tNsee:also\tNinvocation':gnu\tNredistribute:it.\tN'(coreutils):cat\tNstallman.:reporting\tNonline:help:\tNof:each\tNm.:stallman.\tNsynopsis:cat\tNfebruary:NNNN\tNthe:extent\tN"
+}
+function test29-assert2-actual () {
+	:at	N
+}
+function test29-assert2-expected () {
+	echo -e "user:commands\tNto:-vt\tN[file]...:description\tNreporting:bugs\tNread:standard\tN-b,:--number-nonblank\tN<https://www.gnu.org/software/coreutils/>:report\tN--show-all:equivalent\tN--number:number\tNg's:contents.\tNinput,:then\tNto:<https://translationproject.org/team/>\tN--show-ends:display\tNgranlund:and\tNby:law.\tNfree:software\tNor:available\tNthis:help\tNdisplay:this\tNend:of\tNhelp::<https://www.gnu.org/software/coreutils/>\tNconcatenate:files\tNcat:copy\tNnonempty:output\tN-t,:--show-tabs\tN--help:display\tN-:concatenate\tNis:-,\tNon:the\tNtab:--help\tNdisplay:tab\tN-e:equivalent\tNfile(s):to\tNhelp:and\tNto:change\tNdescription:concatenate\tNit.:there\tNvia::info\tNby:torbjorn\tNalso:tac(N)\tNlines:-t\tNrepeated:empty\tNwarranty,:to\tN-u:(ignored)\tN<https://gnu.org/licenses/gpl.html>.:this\tNnotation,:except\tN-s,:--squeeze-blank\tNall:output\tNextent:permitted\tNrichard:m.\tNand:richard\tNN:or\tNand:print\tNfile:is\tNexcept:for\tNchange:and\tNfile,:or\tNversion:information\tNinput.:-a,\tNthen:standard\tNto:the\tNinfo:'(coreutils)\tNfiles:and\tNnumber:nonempty\tNN.NN:february\tNinc.:license\tN©:NNNN\tNcontents,:then\tNauthor:written\tNoverrides:-n\tNf's:contents,\tNdocumentation:<https://www.gnu.org/software/coreutils/cat>\tNwhen:file\tNgplvN+::gnu\tNwritten:by\tNfull:documentation\tNtorbjorn:granlund\tNstandard:input\tNexit:examples\tN"
+}
 
 @test "test30" {
 	test_folder=$(echo /tmp/test30-$$)
@@ -554,19 +599,9 @@ function test28-assert1-expected () {
 	test_folder=$(echo /tmp/test31-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function setenv () { export $1="$2"; }
-	alias unsetenv='unset'
-	alias unexport='unset'
-}
-
-
-@test "test32" {
-	test_folder=$(echo /tmp/test32-$$)
-	mkdir $test_folder && cd $test_folder
-
-	setenv MY_USERNAME aveey-temp
-	actual=$(test32-assert2-actual)
-	expected=$(test32-assert2-expected)
+	setenv MY_USERNAME xaea12-temp
+	actual=$(test31-assert2-actual)
+	expected=$(test31-assert2-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -576,15 +611,15 @@ function test28-assert1-expected () {
 
 }
 
-function test32-assert2-actual () {
+function test31-assert2-actual () {
 	echo $MY_USERNAME
 }
-function test32-assert2-expected () {
-	echo -e 'aveey-temp'
+function test31-assert2-expected () {
+	echo -e 'xaea12-temp'
 }
 
-@test "test33" {
-	test_folder=$(echo /tmp/test33-$$)
+@test "test32" {
+	test_folder=$(echo /tmp/test32-$$)
 	mkdir $test_folder && cd $test_folder
 
 	unexport MY_USERNAME
@@ -592,12 +627,12 @@ function test32-assert2-expected () {
 }
 
 
-@test "test34" {
-	test_folder=$(echo /tmp/test34-$$)
+@test "test33" {
+	test_folder=$(echo /tmp/test33-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test34-assert1-actual)
-	expected=$(test34-assert1-expected)
+	actual=$(test33-assert1-actual)
+	expected=$(test33-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -607,9 +642,9 @@ function test32-assert2-expected () {
 
 }
 
-function test34-assert1-actual () {
+function test33-assert1-actual () {
 	echo "END"
 }
-function test34-assert1-expected () {
+function test33-assert1-expected () {
 	echo -e 'END'
 }

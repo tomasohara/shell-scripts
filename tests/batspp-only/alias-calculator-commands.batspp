@@ -50,8 +50,8 @@ $ typeset -f | egrep '^\w+' | wc -l
 0
 
 # Aliases for censoring any number or username
-$ alias testnumhex="sed -r "s/[0-9,A-F,a-f]/X/g"" 
-$ alias testuser="sed -r "s/"$USER"+/user/g"" 
+$ alias testnumhex="sed -r "s/[0-9,A-F,a-f]/N/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g"" 
 
 # Making sure that the tests run from ./tests directory
 $ source $BIN_DIR/tomohara-aliases.bash
@@ -116,25 +116,24 @@ $ dec2bin "10"
 1010
 
 $ pwd
-$ rm -rf ./*
+$ rm -rf ./* > /dev/null
 $ ps -l > testforhv.txt
 $ hv testforhv.txt | testnumhex
 /tmp/test-calc/test-1210
-removed './testforhv.txt'
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX XX XX  X S   UIX     PI
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX XX XX  X    PPIX  X PRI
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX XX XX    NI XXXR SZ WXH
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX XX XX  XN  TTY         
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX XX XX   TIMX XMX.X S  X
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX XX XX  XXX   XXXXX   XX
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX XX XX  XXX  X  XX   X -
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX XX XX    XXXX Xo_wXi pt
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX XX XX  s/X    XX:XX:XX 
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX XX XX  XXsh.X R  XXXX  
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX XX XX   XXXXX   XXXXX  
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX XX XX  X  XX   X -  XXX
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX XX XX  X -      pts/X  
-XXXXXXXX  XX XX XX XX XX XX XX XX - XX XX XX XX XX XX          XX:XX:XX ps.
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  N S   UIN     PI
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  N    PPIN  N PRI
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN    NI NNNR SZ WNH
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  NN  TTY         
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN   TIMN NMN.N S  N
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  NNN   NNNNN   NN
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  NNN  N  NN   N -
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN    NNNN No_wNi pt
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  s/N    NN:NN:NN 
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  NNsh.N R  NNNN  
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN   NNNNN   NNNNN  
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  N  NN   N -  NNN
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  N -      pts/N  
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN          NN:NN:NN ps.
 
 ## TEST 5 - calc AND ITS ALIASES
 $ calc "100/(24*5)"

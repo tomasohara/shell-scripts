@@ -136,7 +136,7 @@ $ alias ln-symbolic-force='ln-symbolic --force'
 # | ln: failed to create symbolic link 'temp-link': File exists
 
 $ ln-symbolic-force /tmp temp-link
-'temp-link/tmp' -> '/tmp'
+'temp-link' -> '/tmp'
 
 $ link-symbolic-safe --force /tmp/tmp temp-link
 'temp-link' -> '/tmp/tmp'

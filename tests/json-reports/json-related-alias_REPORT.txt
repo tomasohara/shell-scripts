@@ -1,0 +1,1 @@
+{'report_name': 'json-related-alias', 'instrumented_line': 124, 'covered_line': 90, 'ratio': 0.7258}

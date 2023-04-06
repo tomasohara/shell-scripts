@@ -136,8 +136,6 @@ function test5-assert1-expected () {
 	mkdir $test_folder && cd $test_folder
 
 	chdir ..
-	pwd
-	chdir test-6869/
 }
 
 
@@ -146,8 +144,6 @@ function test5-assert1-expected () {
 	mkdir $test_folder && cd $test_folder
 
 	chdir ..
-	pwd
-	chdir test-6869/
 }
 
 
@@ -155,7 +151,7 @@ function test5-assert1-expected () {
 	test_folder=$(echo /tmp/test10-$$)
 	mkdir $test_folder && cd $test_folder
 
-	rm -rf ./*
+	rm -rf ./* > /dev/null
 	mkdir testdir89 testdir90
 	echo "Testfile1" > testdir89/f11.txt
 	echo "Testfile2" > testdir89/f12.txt

@@ -27,8 +27,8 @@ var data = {lines:[
 {"lineNum":"   26","line":"    while [ \"$max_symlinks\" -ge 0 ] && max_symlinks=$((max_symlinks - 1)); do","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   27","line":"      if [ ! \"$target\" = \"${target%/*}\" ]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   28","line":"        case $target in","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   29","line":"          /*) cd -P \"${target%/*}/\" 2>/dev/null || break ;;","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"   30","line":"          *) cd -P \"./${target%/*}\" 2>/dev/null || break ;;","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   29","line":"        /*) cd -P \"${target%/*}/\" 2>/dev/null || break ;;","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"   30","line":"        *) cd -P \"./${target%/*}\" 2>/dev/null || break ;;","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   31","line":"        esac"},
 {"lineNum":"   32","line":"        target=${target##*/}","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   33","line":"      fi"},
@@ -60,5 +60,5 @@ var data = {lines:[
 {"lineNum":"   59","line":"exec env BATS_ROOT=\"$BATS_ROOT\" \"$BATS_ROOT/libexec/bats-core/bats\" \"$@\"","class":"lineCov","hits":"1","order":"7","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2022-10-25 17:16:28", "instrumented" : 30, "covered" : 7,};
+var header = { "command" : "bats", "date" : "2023-04-06 21:10:56", "instrumented" : 30, "covered" : 7,};
 var merged_data = [];

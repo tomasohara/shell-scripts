@@ -1,0 +1,1 @@
+{'report_name': 'hello-world-revised', 'instrumented_line': 82, 'covered_line': 58, 'ratio': 0.7073}

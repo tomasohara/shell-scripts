@@ -44,8 +44,8 @@ function test1-assert4-expected () {
 	test_folder=$(echo /tmp/test2-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias testuser="sed -r "s/"$USER"+/user/g""
-	alias testnum="sed -r "s/[0-9]/X/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g""
+	alias testnum="sed -r "s/[0-9]/N/g"" 
 }
 
 
@@ -157,6 +157,14 @@ function test9-assert1-expected () {
 	test_folder=$(echo /tmp/test10-$$)
 	mkdir $test_folder && cd $test_folder
 
+	apt-installed | grep acpi | wc -l
+}
+
+
+@test "test11" {
+	test_folder=$(echo /tmp/test11-$$)
+	mkdir $test_folder && cd $test_folder
+
 	alias start-service='systemctl start'
 	alias list-all-service='systemctl --type=service'
 	alias restart-service-sudoless='systemctl restart'
@@ -165,12 +173,12 @@ function test9-assert1-expected () {
 }
 
 
-@test "test11" {
-	test_folder=$(echo /tmp/test11-$$)
+@test "test12" {
+	test_folder=$(echo /tmp/test12-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test11-assert1-actual)
-	expected=$(test11-assert1-expected)
+	actual=$(test12-assert1-actual)
+	expected=$(test12-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -180,19 +188,12 @@ function test9-assert1-expected () {
 
 }
 
-function test11-assert1-actual () {
+function test12-assert1-actual () {
 	list-all-service | grep ufw
 }
-function test11-assert1-expected () {
+function test12-assert1-expected () {
 	echo -e 'ufw.service                                           loaded active exited  Uncomplicated firewall'
 }
-
-@test "test12" {
-	test_folder=$(echo /tmp/test12-$$)
-	mkdir $test_folder && cd $test_folder
-
-}
-
 
 @test "test13" {
 	test_folder=$(echo /tmp/test13-$$)
@@ -212,19 +213,6 @@ function test11-assert1-expected () {
 	test_folder=$(echo /tmp/test15-$$)
 	mkdir $test_folder && cd $test_folder
 
-	function get-free-filename() {
-	local base="$1"
-	local sep="$2"
-	local L=1
-	local filename="$base"
-	## DEBUG: local -p
-	while [ -e "$filename" ]; do
-	let L++
-	filename="$base$sep$L"
-	done;
-	## DEBUG: local -p
-	echo "$filename"
-	}
 }
 
 
@@ -242,7 +230,7 @@ function test11-assert1-expected () {
 	printf "HELLO THERE,\nI AM EXTREMELY PLEASED TO USE UBUNTU." >> abc.txt
 	get-free-filename "abc.txt" 2      #DOUBT(?)
 	linebr
-	ls -l | awk '!($6="")' | testuser | testnum
+	ls -l | awk '!($6="")' | testnum | testuser
 	linebr
 	actual=$(test17-assert6-actual)
 	expected=$(test17-assert6-expected)
@@ -259,7 +247,7 @@ function test17-assert6-actual () {
 	cat "abc.txt"
 }
 function test17-assert6-expected () {
-	echo -e 'abc.txt22--------------------------------------------------------------------------------total X    -rw-rw-r-- X user user XX  X XX:XX abc.txt--------------------------------------------------------------------------------HELLO THERE,I AM EXTREMELY PLEASED TO USE UBUNTU.'
+	echo -e 'abc.txt22--------------------------------------------------------------------------------total N    -rw-rw-r-- N userxf333 userxf333 NNN  N NN:NN abc.txt--------------------------------------------------------------------------------HELLO THERE,I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,I AM EXTREMELY PLEASED TO USE UBUNTU.'
 }
 
 @test "test18" {

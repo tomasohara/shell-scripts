@@ -1,0 +1,1 @@
+{'report_name': 'hello-world-basic', 'instrumented_line': 33, 'covered_line': 33, 'ratio': 1.0}

@@ -38,8 +38,8 @@ $ typeset -f | egrep '^\w+' | wc -l
 1
 0
 
-$ alias testnum="sed -r "s/[0-9]/X/g"" 
-$ alias testuser="sed -r "s/"$USER"+/user/g"" 
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g"" 
 
 $ source $BIN_DIR/tomohara-aliases.bash
 
@@ -47,7 +47,7 @@ $ source $BIN_DIR/tomohara-aliases.bash
 # $ group-members
 # | ypcat: can't get local yp domain: Local domain name not set
 
-## 1A) do-make
+## 1A) do-make 
 $ rm -rf ./* > /dev/null
 $ mkdir testfolder
 $ echo "Hi Mom!" > himom.txt
@@ -152,12 +152,12 @@ $ ls -l | awk '!($6="")' | testuser | testnum
 [1m~[0m
 [1m~[0m
 [K[?1l>make: Nothing to be done for 'hidad.txt'.
-total XX    
--rw-rw-r-- X user user X  X XX:XX hidad.txt
--rw-rw-r-- X user user X  X XX:XX himom.txt
--rw-rw-r-- X user user XX  X XX:XX _make.log
--rw-rw-r-- X user user XX  X XX:XX _old_make.log
-drwxrwxr-x X user user XXXX  X XX:XX testfolder
+total NN    
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN hidad.txt
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN himom.txt
+-rw-rw-r-- N userxfNNN userxfNNN NN  N NN:NN _make.log
+-rw-rw-r-- N userxfNNN userxfNNN NN  N NN:NN _old_make.log
+drwxrwxr-x N userxfNNN userxfNNN NNNN  N NN:NN testfolder
 
 # 2A) merge REPLACED BY do-merge 
 ## INITIAL FILES TO TEST THE ALIASES
@@ -205,29 +205,37 @@ $ basename-with-dir himom.txt
 ## 4A) dump-url GIVES ERROR FOR BATSPP 2.1.X (can't use testnum) 
 # dump-url https://www.example.com/
 
-## 4B) gtime
+## 4B) gtime (Need help to run commands)
 # ERROR - VI 
 # $ gtime
 # | /usr/bin/time: missing program to run
 # | Try '/usr/bin/time --help' for more information
+$ gtime -V | testnum
+time (GNU Time) UNKNOWN
+Copyright (C) NNNN Free Software Foundation, Inc.
+License GPLvN+: GNU GPL version N or later <https://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by David Keppel, David MacKenzie, and Assaf Gordon.
 
 ## 4C) linux-version GIVES INFO ALL INFO ABOUT THE OS INSTALLED
 $ linux-version | grep VERSION_ID | testnum
 # os-release ALSO WORKS SAME AS linux-version
-VERSION_ID="XX.XX"
+VERSION_ID="NN.NN"
 
 ## 4D) system-status - (awk removes the session-name)
-$ system-status | testuser | testnum | tail -n +2 | awk '!($8="")'
+$ system-status | testnum | testuser | tail -n +2 | awk '!($8="")'
 total used free shared buff/cache available  
-Mem: XXXXXXX XXXXXXX XXXXXX XXXXXX XXXXXXX XXXXXX 
-Swap: XXXXXXX XXXXXX XXXXXXX    
-XX:XX:XX up XX min, X user, load  X.XX, X.XX, X.XX
+Mem: NNNNNNN NNNNNNN NNNNNN NNNNNN NNNNNN NNNNNN 
+Swap: NNNNNNN NNNNNNN NNNNNNN    
+NN:NN:NN up N:NN, N user, load average:  N.NN, N.NN
 USER TTY FROM LOGIN@ IDLE JCPU PCPU 
-user ttyX :X XX:XX XX:XX X:XX X.XXs 
+userxf333 ttyN :N NN:NN N:NNm NN:NN N.NNs 
        
 
 $ apropos-command time | grep asctime | wc -l | testnum
-X
+N
 
 $ cat hidad.txt
 $ linebr
@@ -237,7 +245,7 @@ Hi Dad!
 Hi
 Dad!
 
-# tokenize SPLITS THE CONTENTS IN SEVERAL LINES
+# tokenize SPLITS THE CONTENTS IN SEVERAL LINES ()
 $ tokenize _old_make.log
 make:
 Nothing
@@ -273,7 +281,7 @@ A B C D E F G
 # alias set-display-local='export DISPLAY=localhost:0.0'
 $ set-display-local
 $ echo $DISPLAY | testnum
-localhost:X.X
+localhost:N.N
 
 ## Need a filter to sensor day and month
 ## bash-trace-on ENABLES bash tracing
@@ -286,15 +294,15 @@ $ bash-trace-off | testuser | testnum
 $ linebr
 $ trace-cmd | testuser | testnum
 --------------------------------------------------------------------------------
-start: Tue Dec  X XX:XX:XX PM +XXXX XXXX
+start: Thu Dec  N NN:NN:NN PM +NNNN NNNN
 + eval
 + set - -o xtrace
-end: Tue Dec  X XX:XX:XX PM +XXXX XXXX
+end: Thu Dec  N NN:NN:NN PM +NNNN NNNN
 --------------------------------------------------------------------------------
-start: Tue Dec  X XX:XX:XX PM +XXXX XXXX
+start: Thu Dec  N NN:NN:NN PM +NNNN NNNN
 + eval
 + set - -o xtrace
-end: Tue Dec  X XX:XX:XX PM +XXXX XXXX
+end: Thu Dec  N NN:NN:NN PM +NNNN NNNN
 
 # testing compression and extraction of dirs
 $ ls
@@ -309,30 +317,30 @@ hidad.txt  _make.log	  testfolder  tf2.txt
 himom.txt  _old_make.log  tf1.txt     tf3.txt
 'tf2.txt' -> 'testfolder/tf2.txt'
 --------------------------------------------------------------------------------
-gzip: /tmp/test-unix-alias/test-XXXX is a directory -- ignored
-/tmp/test-unix-alias/test-XXXX/hidad.txt:	-XX.X% -- replaced with /tmp/test-unix-alias/test-XXXX/hidad.txt.gz
-/tmp/test-unix-alias/test-XXXX/himom.txt:	-XX.X% -- replaced with /tmp/test-unix-alias/test-XXXX/himom.txt.gz
-/tmp/test-unix-alias/test-XXXX/tfX.txt:	  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/tfX.txt.gz
-/tmp/test-unix-alias/test-XXXX/tfX.txt:	  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/tfX.txt.gz
-gzip: /tmp/test-unix-alias/test-XXXX/testfolder is a directory -- ignored
-/tmp/test-unix-alias/test-XXXX/testfolder/tfX.txt:	  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/testfolder/tfX.txt.gz
-/tmp/test-unix-alias/test-XXXX/_old_make.log:	 -X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/_old_make.log.gz
-/tmp/test-unix-alias/test-XXXX/tfX.txt:	  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/tfX.txt.gz
-/tmp/test-unix-alias/test-XXXX/_make.log:	 -X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/_make.log.gz
+gzip: /tmp/test-unix-alias/test-NNNN is a directory -- ignored
+/tmp/test-unix-alias/test-NNNN/hidad.txt:	-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/hidad.txt.gz
+/tmp/test-unix-alias/test-NNNN/himom.txt:	-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/himom.txt.gz
+/tmp/test-unix-alias/test-NNNN/tfN.txt:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt.gz
+/tmp/test-unix-alias/test-NNNN/tfN.txt:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt.gz
+gzip: /tmp/test-unix-alias/test-NNNN/testfolder is a directory -- ignored
+/tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt.gz
+/tmp/test-unix-alias/test-NNNN/_old_make.log:	 -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_old_make.log.gz
+/tmp/test-unix-alias/test-NNNN/tfN.txt:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt.gz
+/tmp/test-unix-alias/test-NNNN/_make.log:	 -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_make.log.gz
 --------------------------------------------------------------------------------
 hidad.txt.gz  _make.log.gz	testfolder  tf2.txt.gz
 himom.txt.gz  _old_make.log.gz	tf1.txt.gz  tf3.txt.gz
 --------------------------------------------------------------------------------
-gzip: /tmp/test-unix-alias/test-XXXX is a directory -- ignored
-/tmp/test-unix-alias/test-XXXX/_make.log.gz:	 -X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/_make.log
-/tmp/test-unix-alias/test-XXXX/tfX.txt.gz:	  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/tfX.txt
-/tmp/test-unix-alias/test-XXXX/tfX.txt.gz:	  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/tfX.txt
-/tmp/test-unix-alias/test-XXXX/_old_make.log.gz:	 -X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/_old_make.log
-/tmp/test-unix-alias/test-XXXX/himom.txt.gz:	-XX.X% -- replaced with /tmp/test-unix-alias/test-XXXX/himom.txt
-/tmp/test-unix-alias/test-XXXX/hidad.txt.gz:	-XX.X% -- replaced with /tmp/test-unix-alias/test-XXXX/hidad.txt
-gzip: /tmp/test-unix-alias/test-XXXX/testfolder is a directory -- ignored
-/tmp/test-unix-alias/test-XXXX/testfolder/tfX.txt.gz:	  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/testfolder/tfX.txt
-/tmp/test-unix-alias/test-XXXX/tfX.txt.gz:	  X.X% -- replaced with /tmp/test-unix-alias/test-XXXX/tfX.txt
+gzip: /tmp/test-unix-alias/test-NNNN is a directory -- ignored
+/tmp/test-unix-alias/test-NNNN/_make.log.gz:	 -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_make.log
+/tmp/test-unix-alias/test-NNNN/tfN.txt.gz:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt
+/tmp/test-unix-alias/test-NNNN/tfN.txt.gz:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt
+/tmp/test-unix-alias/test-NNNN/_old_make.log.gz:	 -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_old_make.log
+/tmp/test-unix-alias/test-NNNN/himom.txt.gz:	-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/himom.txt
+/tmp/test-unix-alias/test-NNNN/hidad.txt.gz:	-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/hidad.txt
+gzip: /tmp/test-unix-alias/test-NNNN/testfolder is a directory -- ignored
+/tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt.gz:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt
+/tmp/test-unix-alias/test-NNNN/tfN.txt.gz:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt
 
 ## You need to use iceweasel to kill it.
 ## If iceweasel is not installed, you get this:
@@ -345,11 +353,11 @@ gzip: /tmp/test-unix-alias/test-XXXX/testfolder is a directory -- ignored
 $ old-count-exts | testnum
 $ linebr
 $ count-exts | testnum
-.txt	X
-.log	X
+.txt	N
+.log	N
 --------------------------------------------------------------------------------
-.txt	X
-.log	X
+.txt	N
+.log	N
 
 ## cmd-usage (HELP REQUIRED | HALTS PROCESS)
 

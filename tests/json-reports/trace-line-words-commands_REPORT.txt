@@ -1,0 +1,1 @@
+{'report_name': 'trace-line-words-commands', 'instrumented_line': 152, 'covered_line': 102, 'ratio': 0.6711}

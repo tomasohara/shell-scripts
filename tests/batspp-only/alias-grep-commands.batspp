@@ -30,8 +30,8 @@ $ alias | wc -l
 0
 
 # Aliases for censoring username and/or numbers
-$ alias testnum="sed -r "s/[0-9]/X/g"" 
-$ alias testuser="sed -r "s/"$USER"+/user/g""
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
 
 ## NOTE: For reproducability, the directory name needs to be fixed
 ## In place of $$, use a psuedo random number (e,g., 7071)
@@ -65,9 +65,9 @@ $ source $BIN_DIR/tomohara-aliases.bash
 # Copyright 1988, 1992-1999, 2000 Free Software Foundation, Inc.
 # ...
 $ grep -V | testnum
-grep (GNU grep) X.X
-Copyright (C) XXXX Free Software Foundation, Inc.
-License GPLvX+: GNU GPL version X or later <https://gnu.org/licenses/gpl.html>.
+grep (GNU grep) N.N
+Copyright (C) NNNN Free Software Foundation, Inc.
+License GPLvN+: GNU GPL version N or later <https://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
 There is NO WARRANTY, to the extent permitted by law.
 
@@ -171,10 +171,10 @@ Non ASCII: §
 # Need help for: fs-, findgrep, fgr, fgr-py
 
 $ prepare-find-files-here | testuser | testnum | awk '!($6="")'
--rw-rw-r-- X user user XXX  X XX:XX ls-alR.list
--rw-rw-r-- X user user X  X XX:XX ls-alR.list.log
--rw-rw-r-- X user user XXX  X XX:XX ls-R.list
--rw-rw-r-- X user user X  X XX:XX ls-R.list.log
+-rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-alR.list
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list.log
+-rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-R.list
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-R.list.log
 
 $ mkdir backup/
 $ ls
@@ -183,15 +183,15 @@ ls-alR.list  ls-R.list	      testdir1	     testgrep1	testgrep3  testgrep5
 
 $ find-files "ls*" | testuser | testnum | awk '!($6="")'
 .:     
-total XX    
--rw-rw-r-- X user user X  X XX:XX ls-alR.list
--rw-rw-r-- X user user X  X XX:XX ls-alR.list.log
--rw-rw-r-- X user user XXX  X XX:XX ls-R.list
--rw-rw-r-- X user user X  X XX:XX ls-R.list.log
-./testdirX:     
-total X    
-./testdirX:     
-total X    
+total NN    
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list.log
+-rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-R.list
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-R.list.log
+./testdirN:     
+total N    
+./testdirN:     
+total N    
 
 # # Need Help (Non-ending process)
 # $ find-files- "testgrep4" | wc -l

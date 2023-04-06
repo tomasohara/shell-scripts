@@ -22,8 +22,8 @@ $ typeset -f | egrep '^\w+' | wc -l
 0
 0
 
-$ alias testuser="sed -r "s/"$USER"+/user/g""
-$ alias testnum="sed -r "s/[0-9]/X/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
 
 # Setting a temp directory for tests
 $ TMP=/tmp/test-admin-commands
@@ -58,8 +58,6 @@ $ source $BIN_DIR/tomohara-aliases.bash
 # Testing HTML
 $ rm -rf ./* > /dev/null
 $ printf "<html><h1>THIS IS A HEADER OF SIZE 1</h1><br><i>THIS IS IN ITALICS</i></html>" >> template1.html
-removed './template1.html'
-removed './template2.js'
 
 # Output not provided (need help)
 $ check-html template1.html
