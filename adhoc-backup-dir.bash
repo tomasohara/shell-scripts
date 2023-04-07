@@ -95,15 +95,12 @@ fi
    fi
    export SOURCE_DIR="$PWD"
    ## TODO: pre-select based on existence (i.e., prioritized check)
-   ## OLD: export BACKUP_DIR=~tohara/"usb/sd512/backup/$HOSTNAME"
-   ROOT_BACKUP_DIR=${ROOT_BACKUP_DIR:-~tohara/usb/sd512}
+   ROOT_BACKUP_DIR=${ROOT_BACKUP_DIR:-$HOME/usb/sd512}
    if [ ! -e "$ROOT_BACKUP_DIR" ]; then
-       echo "Error: ROOT_BACKUP_DIR directory must exit ($ROOT_BACKUP_DIR)."
+       echo "Error: ROOT_BACKUP_DIR directory must exist ($ROOT_BACKUP_DIR)."
        exit
    fi
    export BACKUP_DIR="$ROOT_BACKUP_DIR/backup/$HOSTNAME"
-   ## -or-: export BACKUP_DIR=~tohara/"usb/pando-xfer/backup/$HOSTNAME"
-   ## -or-: export BACKUP_DIR=~tohara/"usb/exfat-adhoc/backup/$HOSTNAME"
    mkdir -p "$BACKUP_DIR"
    df -h "$BACKUP_DIR"
    ## OLD:
