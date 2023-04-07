@@ -70,6 +70,7 @@
 # - Mention some useful variables:
 #   (e.g., ${!#} for last argument--see https://stackoverflow.com/questions/1853946/getting-the-last-argument-passed-to-a-shell-script).
 # - Document regex match quirks.
+# - Document file tests (e.g., -e fubar.txt).
 #
 
 # Uncomment following line(s) for tracing:
