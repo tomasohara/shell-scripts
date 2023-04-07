@@ -126,6 +126,14 @@ function downcase-stdin-alias ()
 }
 ## OLD: fi
 
+# quiet-unalias-alias(name): undefines NAME alias w/o error message
+# NOTE: used during transition from an alias proper to a function
+# TODO: add clear-and-redefine-aliases function elsewhere to address this
+function quiet-unalias-alias {
+    unalias "$@" 2> /dev/null || true;
+}
+
+
 # HACK: wrapper around check_errors.perl w/ new QUIET option
 function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 check_errors.perl -context=5 "$@") 2>&1; }
 
@@ -384,7 +392,8 @@ function invoke-git-command {
     log=$(get-temp-log-name "$command")
     echo "issuing: git $command $*"
     git "$command" "$@" >| "$log" 2>&1
-    ## OLD: less 
+    ## OLD: less
+    ## NOTE: unfortunately, less clears the screen
     ## TODO: less --quit-if-one-screen "$log"
     cat "$log"
     # TODO: git-alias-review-log "$log"
@@ -404,8 +413,13 @@ alias git-command='invoke-git-command'
 alias git-push-plus='invoke-git-command push'
 
 # Misc git commands (redirected to log file)
+# NOTE: commands with much output like git-log invoke less
+# TODO: add invoke-git-command-paged wrapper (a la git ... | less)
 alias git-status='invoke-git-command status'
-alias git-log-plus='invoke-git-command log --name-status'
+## OLD: alias git-log-plus='invoke-git-command log --name-status'
+quiet-unalias-alias git-log-plus        ## TEMP
+function git-log-plus { invoke-git-command log --name-status "$@" | less --quit-if-one-screen; }
+# note: git-log-diff-plus shows diff-style log
 alias git-log-diff-plus='invoke-git-command log --patch'
 alias git-blame-alias='invoke-git-command blame'
 
