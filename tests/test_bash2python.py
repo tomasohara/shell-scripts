@@ -12,6 +12,7 @@
 # - Use 'pytest test_bash2python.py -k "not skip"' to skip the tests that cover functions not yet implemented.
 """Tests for bash2python.py"""
 
+import os
 import subprocess
 import pytest
 from click.testing import CliRunner
@@ -34,7 +35,7 @@ def bash2py(bash, python):
     output = b2p.format(False)
     assert output == python
 
-
+@pytest.mark.skipif(not os.getenv('API_KEY'), reason='API_KEY not set')
 def test_codex():
     """Simple test for codex using an very standard input"""
     bash = "echo Hello World"
@@ -247,7 +248,7 @@ def test_diff_no_opts():
     assert "------------codex------------" in result.output
     assert "------------b2py------------" in result.output
 
-
+@pytest.mark.skipif(not os.getenv('API_KEY'), reason='API_KEY not set')
 def test_diff_opts():
     """Tests bash2python_diff with all flags enabled"""
     runner = CliRunner()
