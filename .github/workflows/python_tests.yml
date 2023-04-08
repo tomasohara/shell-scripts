@@ -36,7 +36,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pytest
+        pip install pytest click mezcla
         #npm install -g bats
         
     # Run tests using pytest
