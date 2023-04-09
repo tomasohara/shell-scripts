@@ -1,1 +1,0 @@
-{'report_name': 'trace-linux-admin-alias', 'instrumented_line': 159, 'covered_line': 112, 'ratio': 0.7044}

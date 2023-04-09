@@ -1967,17 +1967,7 @@
 		<lineToCover lineNumber="247" covered="false"/>
 		<lineToCover lineNumber="248" covered="false"/>
 	</file>
-	<file path="/usr/local/lib/bats-core/preprocessing.bash">
-		<lineToCover lineNumber="3" covered="true"/>
-		<lineToCover lineNumber="4" covered="true"/>
-		<lineToCover lineNumber="6" covered="true"/>
-		<lineToCover lineNumber="11" covered="true"/>
-		<lineToCover lineNumber="12" covered="true"/>
-		<lineToCover lineNumber="16" covered="true"/>
-		<lineToCover lineNumber="17" covered="false"/>
-		<lineToCover lineNumber="21" covered="true"/>
-	</file>
-	<file path="/tmp/bats-run-8Mddsd/bats.66926.src">
+	<file path="/tmp/bats-run-arG7wX/bats.37172.src">
 		<lineToCover lineNumber="5" covered="true"/>
 		<lineToCover lineNumber="8" covered="true"/>
 		<lineToCover lineNumber="12" covered="true"/>
@@ -2048,6 +2038,16 @@
 		<lineToCover lineNumber="130" covered="true"/>
 		<lineToCover lineNumber="131" covered="true"/>
 		<lineToCover lineNumber="132" covered="true"/>
+	</file>
+	<file path="/usr/local/lib/bats-core/preprocessing.bash">
+		<lineToCover lineNumber="3" covered="true"/>
+		<lineToCover lineNumber="4" covered="true"/>
+		<lineToCover lineNumber="6" covered="true"/>
+		<lineToCover lineNumber="11" covered="true"/>
+		<lineToCover lineNumber="12" covered="true"/>
+		<lineToCover lineNumber="16" covered="true"/>
+		<lineToCover lineNumber="17" covered="false"/>
+		<lineToCover lineNumber="21" covered="true"/>
 	</file>
 	<file path="/usr/local/lib/bats-core/warnings.bash">
 		<lineToCover lineNumber="4" covered="true"/>

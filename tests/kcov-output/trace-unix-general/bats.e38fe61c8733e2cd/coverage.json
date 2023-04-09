@@ -1,10 +1,10 @@
 {
   "files": [
-    {"file": "/tmp/bats-run-F9BoyZ/bats.78035.src", "percent_covered": "76.92", "covered_lines": "140", "total_lines": "182"},
     {"file": "/usr/local/bin/cpufreqctl-aveey", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "806"},
     {"file": "/usr/local/bin/bats", "percent_covered": "23.33", "covered_lines": "7", "total_lines": "30"},
     {"file": "/usr/local/libexec/bats-core/bats", "percent_covered": "36.84", "covered_lines": "91", "total_lines": "247"},
     {"file": "/usr/local/lib/bats-core/test_functions.bash", "percent_covered": "1.94", "covered_lines": "2", "total_lines": "103"},
+    {"file": "/tmp/bats-run-keitmB/bats.49309.src", "percent_covered": "76.92", "covered_lines": "140", "total_lines": "182"},
     {"file": "/usr/local/lib/bats-core/validator.bash", "percent_covered": "78.57", "covered_lines": "11", "total_lines": "14"},
     {"file": "/usr/local/libexec/bats-core/bats-exec-file", "percent_covered": "52.08", "covered_lines": "100", "total_lines": "192"},
     {"file": "/usr/local/libexec/bats-core/bats-exec-suite", "percent_covered": "36.73", "covered_lines": "90", "total_lines": "245"},
@@ -22,5 +22,5 @@
   "percent_low": 25,
   "percent_high": 75,
   "command": "bats",
-  "date": "2023-04-06 21:10:56"
+  "date": "2023-04-09 21:58:03"
 }

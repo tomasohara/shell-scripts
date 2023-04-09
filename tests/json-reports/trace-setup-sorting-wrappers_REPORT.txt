@@ -1,1 +1,0 @@
-{'report_name': 'trace-setup-sorting-wrappers', 'instrumented_line': 113, 'covered_line': 95, 'ratio': 0.8407}

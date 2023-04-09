@@ -21,7 +21,7 @@
 #   --summary   Generates summary only
 #   --ro        Generates individual reports of testfiles only
 #   --list      Generates lists of testfiles according to the success rate (desc)
-#   --export    Generates and stores text reports at ./json-reports/
+#   --export    Generates and stores text reports at ./coverage-reports/
 
 ## BUGS & ISSUES
 # 1) Issue regarding repetitive outputs in --list option [FIXED]
@@ -58,7 +58,7 @@ EXPORT_REPORT = "export"
 # Function Constants
 JS_PATTERN = f"bats.*/bats.*.src.*.js"
 JSON_REGEX = r'\{[^}]*\}'
-REPORT_EXPORT_PATH = f"./json-reports/"
+REPORT_EXPORT_PATH = f"./coverage-reports/"
 KCOV_FOLDER = "kcov-output"
 LIST_MODE_INS = "instrumented_line"
 LIST_MODE_RATIO = "ratio"
@@ -99,11 +99,13 @@ class KcovTestCoverage:
             self.report_process()
             
             if not self.REPORT_ONLY_OPT:
-                if self.SUMMARY_OPT or not self.LIST_OPT:
-                    self.summary_stats()
                 
                 if self.LIST_OPT:
                     self.list_summary_mode()
+                
+                if self.SUMMARY_OPT or not self.LIST_OPT:
+                    self.summary_stats()
+
             else:
                 print ("\n\t[REPORTS ONLY MODE (--ro) enabled]\t\n")
         else:
@@ -141,10 +143,10 @@ class KcovTestCoverage:
 ------------------------------------
 kcov REPORT [{i}]: {report_name}
 ------------------------------------
->> Date: {report_Date}
->> Instrumented Lines: {report_InsLine}
->> Covered Lines: {report_CovLine}
->> Coverage Ratio: {round(report_RatioLine, 4)}
+Date: {report_Date}
+Instrumented Lines: {report_InsLine}
+Covered Lines: {report_CovLine}
+Coverage Ratio: {round(report_RatioLine, 4)}
 """     
         # facts_JSON is used for determining highest and lowest facts
         facts_JSON = {}
@@ -154,14 +156,18 @@ kcov REPORT [{i}]: {report_name}
         facts_JSON["ratio"] = report_RatioLine
         facts_array.append(facts_JSON)
 
-        if not self.SUMMARY_OPT:
+        if not self.SUMMARY_OPT or not self.LIST_OPT:
             print (REPORT_PATTERN)
         
         if self.EXPORT_OPT:
-            # TODO: Prettify JSON for export
+            # # TODO: Prettify JSON for export
             # facts_JSON_obj = json.load(facts_JSON)
             # pretty_facts_JSON = json.dumps(facts_JSON_obj)
-            gh.write_file(filename=f"{REPORT_EXPORT_PATH}/{report_name}_REPORT.txt", text=str(facts_JSON))
+
+            # [OLD]: JSON output is replaced by simple output
+            # gh.write_file(filename=f"{REPORT_EXPORT_PATH}/{report_name}_REPORT.txt", text=str(facts_JSON))
+            export_summary = f"{report_CovLine} out of {report_InsLine} tests passed overall ({report_RatioLine*100}%)"
+            gh.write_file(filename=f"{REPORT_EXPORT_PATH}/{report_name}_REPORT.txt", text=export_summary)
 
     # 2. report_process() uses extract_report(report); act as a calculating function
     def report_process(self):
@@ -370,7 +376,7 @@ if __name__ == "__main__":
             (SUMMARY_MODE, f"Generates summary only"),
             (REPORT_ONLY_MODE, f"Generates individual reports of testfiles only"),
             (LIST_MODE, f"Generates lists of testfiles according to the success rate (desc)"),
-            (EXPORT_REPORT, f"Generates and stores text reports at ./json-reports/")
+            (EXPORT_REPORT, f"Generates and stores text reports at ./coverage-reports/")
         ],
         
         text_options=[

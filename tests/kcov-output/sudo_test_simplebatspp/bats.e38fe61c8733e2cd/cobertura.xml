@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.286" lines-covered="653" lines-valid="2287" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1680794726">
+<coverage line-rate="0.286" lines-covered="653" lines-valid="2287" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1681056751">
 	<sources>
 		<source>/</source>
 	</sources>
@@ -1994,19 +1994,7 @@
 						<line number="248" hits="0"/>
 					</lines>
 				</class>
-				<class name="preprocessing_bash" filename="usr/local/lib/bats-core/preprocessing.bash" branch-rate="1.0" complexity="1.0" line-rate="0.875">
-					<lines>
-						<line number="3" hits="7"/>
-						<line number="4" hits="7"/>
-						<line number="6" hits="7"/>
-						<line number="11" hits="2"/>
-						<line number="12" hits="2"/>
-						<line number="16" hits="6"/>
-						<line number="17" hits="0"/>
-						<line number="21" hits="6"/>
-					</lines>
-				</class>
-				<class name="bats_66926_src" filename="tmp/bats-run-8Mddsd/bats.66926.src" branch-rate="1.0" complexity="1.0" line-rate="0.886">
+				<class name="bats_37172_src" filename="tmp/bats-run-arG7wX/bats.37172.src" branch-rate="1.0" complexity="1.0" line-rate="0.886">
 					<lines>
 						<line number="5" hits="8"/>
 						<line number="8" hits="8"/>
@@ -2078,6 +2066,18 @@
 						<line number="130" hits="8"/>
 						<line number="131" hits="8"/>
 						<line number="132" hits="8"/>
+					</lines>
+				</class>
+				<class name="preprocessing_bash" filename="usr/local/lib/bats-core/preprocessing.bash" branch-rate="1.0" complexity="1.0" line-rate="0.875">
+					<lines>
+						<line number="3" hits="7"/>
+						<line number="4" hits="7"/>
+						<line number="6" hits="7"/>
+						<line number="11" hits="2"/>
+						<line number="12" hits="2"/>
+						<line number="16" hits="6"/>
+						<line number="17" hits="0"/>
+						<line number="21" hits="6"/>
 					</lines>
 				</class>
 				<class name="warnings_bash" filename="usr/local/lib/bats-core/warnings.bash" branch-rate="1.0" complexity="1.0" line-rate="0.087">

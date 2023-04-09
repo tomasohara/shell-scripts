@@ -1967,17 +1967,7 @@
       "247": 0,
       "248": 0
     },
-    "usr/local/lib/bats-core/preprocessing.bash": {
-      "3": 7,
-      "4": 7,
-      "6": 7,
-      "11": 2,
-      "12": 2,
-      "16": 6,
-      "17": 0,
-      "21": 6
-    },
-    "tmp/bats-run-8Mddsd/bats.66926.src": {
+    "tmp/bats-run-arG7wX/bats.37172.src": {
       "5": 8,
       "8": 8,
       "12": 4,
@@ -2048,6 +2038,16 @@
       "130": 8,
       "131": 8,
       "132": 8
+    },
+    "usr/local/lib/bats-core/preprocessing.bash": {
+      "3": 7,
+      "4": 7,
+      "6": 7,
+      "11": 2,
+      "12": 2,
+      "16": 6,
+      "17": 0,
+      "21": 6
     },
     "usr/local/lib/bats-core/warnings.bash": {
       "4": 7,

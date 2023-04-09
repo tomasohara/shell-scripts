@@ -1,1 +1,0 @@
-{'report_name': 'alias-calculator-commands', 'instrumented_line': 175, 'covered_line': 100, 'ratio': 0.5714}

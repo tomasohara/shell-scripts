@@ -1,1 +1,0 @@
-{'report_name': 'trace-file-manipulation', 'instrumented_line': 183, 'covered_line': 110, 'ratio': 0.6011}

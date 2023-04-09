@@ -1,1 +1,0 @@
-{'report_name': 'test-cond-env-setting', 'instrumented_line': 136, 'covered_line': 108, 'ratio': 0.7941}

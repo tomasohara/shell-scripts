@@ -1,1 +1,0 @@
-{'report_name': 'test-dir-alias', 'instrumented_line': 146, 'covered_line': 136, 'ratio': 0.9315}

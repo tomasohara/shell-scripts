@@ -1,1 +1,0 @@
-{'report_name': 'dir-aliases-test-revised', 'instrumented_line': 160, 'covered_line': 134, 'ratio': 0.8375}

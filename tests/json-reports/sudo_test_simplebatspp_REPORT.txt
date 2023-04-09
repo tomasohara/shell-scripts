@@ -1,1 +1,0 @@
-{'report_name': 'sudo_test_simplebatspp', 'instrumented_line': 70, 'covered_line': 62, 'ratio': 0.8857}

@@ -6,7 +6,6 @@
 # bind 'set enable-bracketed-paste off'
 
 $ echo $PS1
-[PEXP\[\]ECT_PROMPT>
 
 # Delete all aliases and function
 # TODO: Instead start from pristine environment
@@ -17,11 +16,8 @@ $ typeset -f | egrep '^\w+' | wc -l
 # Setting a temp directory for tests
 $ TMP=/tmp/test-extensionless
 $ BIN_DIR=$PWD/..
-0
-0
 
 $ alias | wc -l
-0
 
 $ alias testuser="sed -r "s/"$USER"+/user/g""
 
@@ -31,14 +27,11 @@ $ cd "$temp_dir"
 $ pwd
 #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
 $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
-/tmp/test-extensionless/test-3570
 
 # Count aliases proper
 $ alias | wc -l
 # Count functions
 $ typeset -f | egrep '^\w+' | wc -l
-2
-0
 
 $ alias testnum="sed -r "s/[0-9]/N/g"" 
 $ alias testuser="sed -r "s/"$USER"+/userxf333/g""
@@ -48,11 +41,9 @@ $ source $BIN_DIR/tomohara-aliases.bash
 # # 1.1) NO EXAMPLES RN FOR kill-em and kill-it
 # kill-em () | kill-em and kill-it returns same value
 $ kill-em --test firefox | wc -l
-20
 
 # kill-it ()
 $ kill-it --test firefox | wc -l
-20
 
 ## 1.2) ERROR GENERATED - SCRIPT MISSING
 # $ convert-termstrings
@@ -67,35 +58,13 @@ $ ls
 $ dobackup test.txt
 $ linebr
 $ ls
-renamed 'tomove.txt' -> './newdir1/tomove.txt'
-newdir1  test.txt
-Backing up 'test.txt' to './backup/test.txt'
---------------------------------------------------------------------------------
-backup	newdir1  test.txt
 
 # Large List of process with full process paths
 # Number of process is random
 $ ps-mine-all | wc -l | testnum 
-NNN
 
 # HELP REQUIRED FOR RCS FILES (TBC)
 $ do-rcsdiff
-
-usage: do_rcsdiff.sh [-v] [-c] [--brief] [-p file_pattern] [-f] file ...
-
-examples:
-
-do_rcsdiff.sh Makefile
-
-do_rcsdiff.sh \* >| _rcs.diff 2>&1
-
-do_rcsdiff.sh *.[ch] >| _rcs.diff 2>&1
-
-NOTES:
-- Patterns are relative to the RCS subdirectory
-- The rcsdiff command lists the rcs file before the current one, as in:
-      diff RCS-file file
-
 
 $ uname -r > versionR.txt
 $ uname -a > versionA.txta
@@ -106,41 +75,21 @@ $ uname -ra > "version?.txt"
 $ man grep > grep_manual.txt
 $ cp ./versionR.txt ./versionR-1.txt
 $ ls
-'./versionR.txt' -> './versionR-1.txt'
- backup		   test.txt	  'version none.txt'  'version?.txt'
- grep_manual.txt   versionA.txta   versionR-1.txt      versionV.txt
- newdir1	   versionI.txt    versionR.txt
 
 $ rename-files -q test.txt harry.txt
-renaming "test.txt" to "harry.txt"
 
 # # NEED HELP (TBC)
 # $ testwn
 # | Undefined subroutine &main::NO_OP called at /home/xaea12/bin/common.perl line 2172.
 
 $ perlgrep "print" ./grep_manual.txt
-       grep, egrep, fgrep, rgrep - print lines that match patterns
-       patterns separated by newline characters, and  grep  prints  each  line
-              Suppress  normal output; instead print a count of matching lines
-              Suppress normal output; instead print the  name  of  each  input
-              file from which no output would normally have been printed.
-              Suppress  normal  output;  instead  print the name of each input
-              file  from  which  output  would  normally  have  been  printed.
-              line of output.  If -o (--only-matching) is specified, print the
-              be printed in a minimum size field width.
-              -print0,  perl  -0,  sort  -z, and xargs -0 to process arbitrary
-              When  -A,  -B, or -C are in use, print SEP instead of -- between
-              When -A, -B, or -C are in use, do not print a separator  between
-       [:graph:], [:lower:], [:print:], [:punct:], [:space:],  [:upper:],  and
 
 # Need Help with example
 $ foreach "echo $f" *.txt
 
 $ rename-spaces
-renaming "version none.txt" to "version_none.txt"
 
 $ rename-special-punct
-renaming "version?.txt" to "version.txt"
 
 $ ps -l >> "process(L).md"
 $ ps -u >> "process(U).md"
@@ -151,24 +100,13 @@ $ ps -aux >> 'psaux(2).txt'
 $ ps -aux >> 'psaux(3).txt'
 
 $ move-duplicates
-renamed 'psaux(1).txt' -> 'duplicates/psaux(1).txt'
-renamed 'psaux(2).txt' -> 'duplicates/psaux(2).txt'
-renamed 'psaux(3).txt' -> 'duplicates/psaux(3).txt'
 
 $ rename-parens -v
-renaming "process(L).md" to "processL.md"
-renaming "process(U).md" to "processU.md"
-renaming "process(X).md" to "processX.md"
 
 # Need Help 
 $ rename-quotes -v
-WARNING: Ignoring -quick mode as files specified
 
 $ ls
- backup		   newdir1	      processX.md	 versionR-1.txt
- duplicates	  "process'all'.md"   versionA.txta	 versionR.txt
- grep_manual.txt   processL.md	      versionI.txt	 version.txt
- harry.txt	   processU.md	      version_none.txt	 versionV.txt
 
 $ man sudo > sudo_manual.out
 $ man ansifilter > fakelog.log
@@ -184,554 +122,19 @@ $ ps -aux > process_all.html
 # | mv: cannot stat '$eval_middle': No such file or directory
 
 $ copy-with-file-date *.md | wc -l
-cp: cannot stat 'processall.md': No such file or directory
-3
 
 $ man cat > man_cat.txt
 
 $ unigrams ./man_cat.txt | testuser | testnum
-to	N
-and	N
-standard	N
-output	N
-cat	N
-equivalent	N
-free	N
-gnu	N
-display	N
-is	N
-or	N
-coreutils	N
-then	N
--	N
-tab	N
-cat(N)	N
-bugs	N
-number	N
-no	N
-output.	N
-by	N
-the	N
-this	N
-lines	N
-concatenate	N
-exit	N
-version	N
-copyright	N
-input,	N
-help	N
--b,	N
-gpl	N
--vt	N
-^i	N
--,	N
-reporting	N
--n,	N
-for	N
-granlund	N
-name	N
-file,	N
-m-	N
-file(s)	N
-documentation	N
-description	N
-when	N
-foundation,	N
---version	N
-february	N
---help	N
-files	N
-it.	N
---number	N
-input.	N
-<https://translationproject.org/team/>	N
-N	N
-m.	N
-invocation'	N
--a,	N
---show-nonprinting	N
-change	N
-notation,	N
-use	N
-N.NN	N
-full	N
-gplvN+:	N
--u	N
-nonempty	N
-'(coreutils)	N
-end	N
-file	N
-extent	N
-tac(N)	N
-repeated	N
-<https://www.gnu.org/software/coreutils/cat>	N
-translation	N
---number-nonblank	N
-suppress	N
--s,	N
-help:	N
-stallman.	N
-software	N
-torbjorn	N
-via:	N
-permitted	N
-later	N
-^	N
-richard	N
-inc.	N
-see	N
-also	N
-written	N
--e	N
-overrides	N
--t,	N
-lfd	N
-synopsis	N
-locally	N
-input	N
-report	N
-<https://gnu.org/licenses/gpl.html>.	N
-on	N
-f's	N
-characters	N
-commands	N
--n	N
--v,	N
-warranty,	N
-software:	N
-read	N
-contents,	N
-at	N
-any	N
--vet	N
-g	N
-of	N
-empty	N
-examples	N
-line	N
-print	N
-as	N
-(ignored)	N
-with	N
-lines,	N
-contents.	N
---show-ends	N
-author	N
-there	N
-online	N
--ve	N
-<https://www.gnu.org/software/coreutils/>	N
-license	N
---show-all	N
-[file]...	N
-copy	N
-n/a	N
-information	N
-[option]...	N
-redistribute	N
-info	N
-g's	N
-law.	N
--e,	N
-user	N
-except	N
--t	N
-each	N
-©	N
-all	N
-NNNN	N
---show-tabs	N
-available	N
---squeeze-blank	N
-$	N
-you	N
-f	N
-NNNN	N
-are	N
 
 $ word-count ./man_cat.txt | testuser | testnum
-to	N
-and	N
-standard	N
-output	N
-cat	N
-or	N
-is	N
-equivalent	N
-free	N
-gnu	N
-display	N
-cat(N)	N
-copyright	N
-tab	N
-lines	N
-exit	N
-output.	N
-this	N
--	N
-number	N
-then	N
-bugs	N
-version	N
-coreutils	N
-concatenate	N
-no	N
-the	N
-by	N
-N.NN	N
-gplvN+:	N
-N	N
--,	N
-<https://www.gnu.org/software/coreutils/cat>	N
---show-tabs	N
-synopsis	N
-'(coreutils)	N
-use	N
-^	N
-granlund	N
-of	N
-g	N
-file(s)	N
-tac(N)	N
-full	N
-copy	N
-notation,	N
--b,	N
-help	N
-g's	N
-there	N
-except	N
-contents,	N
-permitted	N
-license	N
---show-ends	N
-nonempty	N
-files	N
-©	N
-february	N
-[file]...	N
-at	N
-end	N
---show-nonprinting	N
-gpl	N
-f's	N
--n	N
-input,	N
-help:	N
-contents.	N
-read	N
-see	N
---show-all	N
--e,	N
-description	N
-author	N
-<https://gnu.org/licenses/gpl.html>.	N
---squeeze-blank	N
-also	N
--a,	N
-on	N
-name	N
--v,	N
-report	N
-f	N
-print	N
-locally	N
-redistribute	N
-overrides	N
-software	N
-for	N
--t,	N
-warranty,	N
---version	N
-written	N
--vet	N
-via:	N
-[option]...	N
--e	N
-as	N
---number	N
-online	N
-suppress	N
-invocation'	N
-all	N
--t	N
-software:	N
--vt	N
-change	N
-NNNN	N
-$	N
-richard	N
-info	N
-<https://www.gnu.org/software/coreutils/>	N
-lines,	N
-input	N
-you	N
-m.	N
-input.	N
--n,	N
-(ignored)	N
-documentation	N
-law.	N
-inc.	N
-^i	N
-with	N
-NNNN	N
-n/a	N
---help	N
-m-	N
-file	N
-translation	N
-are	N
-it.	N
--s,	N
-reporting	N
-commands	N
-empty	N
--ve	N
-extent	N
-characters	N
-any	N
-<https://translationproject.org/team/>	N
-torbjorn	N
-later	N
-repeated	N
---number-nonblank	N
-foundation,	N
-stallman.	N
-file,	N
-each	N
--u	N
-user	N
-information	N
-available	N
-lfd	N
-line	N
-when	N
-examples	N
 
 $ bigrams ./man_cat.txt | testuser | testnum
-equivalent:to	N
-output:lines	N
-to:standard	N
-gnu:coreutils	N
-and:exit	N
-standard:output.	N
-or:later	N
-NNNN:free	N
--n,:--number	N
---show-nonprinting:use	N
--:g	N
--v,:--show-nonprinting	N
-permitted:by	N
-copyright:copyright	N
-cat:invocation'	N
-and:m-	N
-copyright:©	N
-output:lines,	N
-output:synopsis	N
-number:all	N
-coreutils:online	N
-any:translation	N
-f:-	N
-gpl:version	N
-m-:notation,	N
-with:no	N
-translation:bugs	N
--t:equivalent	N
-and:tab	N
-report:any	N
-you:are	N
-software::you	N
---version:output	N
-name:cat	N
--e,:--show-ends	N
-and:redistribute	N
-standard:input.	N
-display:$	N
-free:to	N
-output.:with	N
-gnu:gpl	N
-each:line	N
---show-tabs:display	N
-version:N	N
-^:and	N
-cat:[option]...	N
--,:read	N
-this:is	N
-n/a:cat(N)	N
-the:standard	N
-empty:output	N
--ve:-e,	N
-lines,:overrides	N
-cat:f	N
---squeeze-blank:suppress	N
-for:lfd	N
-foundation,:inc.	N
-contents.:cat	N
-input:to	N
-then:g's	N
-[option]...:[file]...	N
--vet:-b,	N
-is:free	N
-tab:characters	N
-no:warranty,	N
-locally:via:	N
-tac(N):full	N
-output:version	N
-<https://translationproject.org/team/>:copyright	N
-cat(N):name	N
-or:when	N
-no:file,	N
-copy:standard	N
-free:software:	N
-is:no	N
-print:on	N
-(ignored):-v,	N
-there:is	N
-lfd:and	N
-information:and	N
-software:foundation,	N
-license:gplvN+:	N
-exit:--version	N
-available:locally	N
-use:^	N
-later:<https://gnu.org/licenses/gpl.html>.	N
-standard:input,	N
-as:^i	N
-characters:as	N
-^i:-u	N
-examples:cat	N
-law.:see	N
-bugs:to	N
-n/a:n/a	N
-g:output	N
-output:f's	N
-at:end	N
-line:-n,	N
-lines:-s,	N
-coreutils:N.NN	N
-bugs:gnu	N
-cat:-	N
-standard:output	N
-to:-ve	N
---number-nonblank:number	N
-to:-vet	N
-concatenate:file(s)	N
-are:free	N
-<https://www.gnu.org/software/coreutils/cat>:or	N
-output.:author	N
-suppress:repeated	N
-cat(N):user	N
--a,:--show-all	N
--vt:-t,	N
-commands:cat(N)	N
--n:-e	N
-see:also	N
-invocation':gnu	N
-redistribute:it.	N
-'(coreutils):cat	N
-stallman.:reporting	N
-online:help:	N
-of:each	N
-m.:stallman.	N
-synopsis:cat	N
-february:NNNN	N
-the:extent	N
-$:at	N
-user:commands	N
-to:-vt	N
-[file]...:description	N
-reporting:bugs	N
-read:standard	N
--b,:--number-nonblank	N
-<https://www.gnu.org/software/coreutils/>:report	N
---show-all:equivalent	N
---number:number	N
-g's:contents.	N
-input,:then	N
-to:<https://translationproject.org/team/>	N
---show-ends:display	N
-granlund:and	N
-by:law.	N
-free:software	N
-or:available	N
-this:help	N
-display:this	N
-end:of	N
-help::<https://www.gnu.org/software/coreutils/>	N
-concatenate:files	N
-cat:copy	N
-nonempty:output	N
--t,:--show-tabs	N
---help:display	N
--:concatenate	N
-is:-,	N
-on:the	N
-tab:--help	N
-display:tab	N
--e:equivalent	N
-file(s):to	N
-help:and	N
-to:change	N
-description:concatenate	N
-it.:there	N
-via::info	N
-by:torbjorn	N
-also:tac(N)	N
-lines:-t	N
-repeated:empty	N
-warranty,:to	N
--u:(ignored)	N
-<https://gnu.org/licenses/gpl.html>.:this	N
-notation,:except	N
--s,:--squeeze-blank	N
-all:output	N
-extent:permitted	N
-richard:m.	N
-and:richard	N
-N:or	N
-and:print	N
-file:is	N
-except:for	N
-change:and	N
-file,:or	N
-version:information	N
-input.:-a,	N
-then:standard	N
-to:the	N
-info:'(coreutils)	N
-files:and	N
-number:nonempty	N
-N.NN:february	N
-inc.:license	N
-©:NNNN	N
-contents,:then	N
-author:written	N
-overrides:-n	N
-f's:contents,	N
-documentation:<https://www.gnu.org/software/coreutils/cat>	N
-when:file	N
-gplvN+::gnu	N
-written:by	N
-full:documentation	N
-torbjorn:granlund	N
-standard:input	N
-exit:examples	N
 
 # # WORKS FINE - HALTS PROCESS
 # $ lynx-html
 
 $ lynx-dump-stdout | head
-     [ [1]About Lynx-Dev | [2]Lynx-Dev Archives ]
-
-About Lynx
-
-   Lynx is a fully-featured World Wide Web (WWW) browser for users on Unix, VMS, and other platforms running cursor-addressable, character-cell terminals or emulators. That includes vt100 terminals, other character-cell displays, and vt100 emulators such as Kermit or Procomm running on PCs or Macs.
-
-   For information on how to use Lynx see the [3]Lynx User's Guide, or the [4]Lynx help files.
-
-Credits and Copyright
-
 
 # (Need Help)
 # $ lynx-dump
@@ -739,11 +142,8 @@ Credits and Copyright
 
 $ setenv MY_USERNAME xaea12-temp
 $ echo $MY_USERNAME
-xaea12-temp
 
 $ unexport MY_USERNAME
 $ echo $MY_USERNAME
 
-
 $ echo "END"
-END

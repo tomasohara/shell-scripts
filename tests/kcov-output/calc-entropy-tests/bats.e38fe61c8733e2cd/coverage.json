@@ -1,6 +1,6 @@
 {
   "files": [
-    {"file": "/tmp/bats-run-Ybt4MM/bats.69986.src", "percent_covered": "56.58", "covered_lines": "43", "total_lines": "76"},
+    {"file": "/tmp/bats-run-tc7dWP/bats.40251.src", "percent_covered": "56.58", "covered_lines": "43", "total_lines": "76"},
     {"file": "/usr/local/bin/cpufreqctl-aveey", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "806"},
     {"file": "/usr/local/bin/bats", "percent_covered": "23.33", "covered_lines": "7", "total_lines": "30"},
     {"file": "/usr/local/libexec/bats-core/bats", "percent_covered": "36.84", "covered_lines": "91", "total_lines": "247"},
@@ -22,5 +22,5 @@
   "percent_low": 25,
   "percent_high": 75,
   "command": "bats",
-  "date": "2023-04-06 21:10:33"
+  "date": "2023-04-09 21:57:38"
 }

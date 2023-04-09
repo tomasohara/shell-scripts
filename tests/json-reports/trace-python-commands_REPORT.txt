@@ -1,1 +1,0 @@
-{'report_name': 'trace-python-commands', 'instrumented_line': 258, 'covered_line': 160, 'ratio': 0.6202}

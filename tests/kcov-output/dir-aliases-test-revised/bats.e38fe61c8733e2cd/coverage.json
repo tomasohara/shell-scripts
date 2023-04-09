@@ -1,5 +1,6 @@
 {
   "files": [
+    {"file": "/tmp/bats-run-S5kU9T/bats.42944.src", "percent_covered": "83.75", "covered_lines": "134", "total_lines": "160"},
     {"file": "/usr/local/bin/cpufreqctl-aveey", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "806"},
     {"file": "/home/aveey/tom-project/shell-scripts/tests/_dir-aliases.bash", "percent_covered": "63.64", "covered_lines": "14", "total_lines": "22"},
     {"file": "/usr/local/bin/bats", "percent_covered": "23.33", "covered_lines": "7", "total_lines": "30"},
@@ -13,7 +14,6 @@
     {"file": "/usr/local/lib/bats-core/common.bash", "percent_covered": "28.93", "covered_lines": "35", "total_lines": "121"},
     {"file": "/usr/local/lib/bats-core/preprocessing.bash", "percent_covered": "87.50", "covered_lines": "7", "total_lines": "8"},
     {"file": "/usr/local/lib/bats-core/warnings.bash", "percent_covered": "8.70", "covered_lines": "2", "total_lines": "23"},
-    {"file": "/tmp/bats-run-gigfhk/bats.72689.src", "percent_covered": "83.75", "covered_lines": "134", "total_lines": "160"},
     {"file": "/usr/local/libexec/bats-core/bats-preprocess", "percent_covered": "49.30", "covered_lines": "35", "total_lines": "71"},
     {"file": "/usr/local/lib/bats-core/tracing.bash", "percent_covered": "66.07", "covered_lines": "111", "total_lines": "168"}
   ],
@@ -23,5 +23,5 @@
   "percent_low": 25,
   "percent_high": 75,
   "command": "bats",
-  "date": "2023-04-06 21:10:41"
+  "date": "2023-04-09 21:57:46"
 }

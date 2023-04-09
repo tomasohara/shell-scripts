@@ -1,1 +1,0 @@
-{'report_name': 'test-check-errors', 'instrumented_line': 71, 'covered_line': 62, 'ratio': 0.8732}

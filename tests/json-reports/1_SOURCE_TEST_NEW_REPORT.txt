@@ -1,1 +1,0 @@
-{'report_name': '1_SOURCE_TEST_NEW', 'instrumented_line': 73, 'covered_line': 55, 'ratio': 0.7534}

@@ -1,1 +1,0 @@
-{'report_name': 'sudocommentstest', 'instrumented_line': 19, 'covered_line': 11, 'ratio': 0.5789}

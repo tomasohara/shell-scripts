@@ -1,6 +1,6 @@
 {
   "files": [
-    {"file": "/tmp/bats-run-oAF8X1/bats.67336.src", "percent_covered": "79.41", "covered_lines": "108", "total_lines": "136"},
+    {"file": "/tmp/bats-run-pqTCr4/bats.37590.src", "percent_covered": "79.41", "covered_lines": "108", "total_lines": "136"},
     {"file": "/usr/local/bin/cpufreqctl-aveey", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "806"},
     {"file": "/home/aveey/tom-project/shell-scripts/tests/_dir-aliases.bash", "percent_covered": "63.64", "covered_lines": "14", "total_lines": "22"},
     {"file": "/usr/local/bin/bats", "percent_covered": "23.33", "covered_lines": "7", "total_lines": "30"},
@@ -23,5 +23,5 @@
   "percent_low": 25,
   "percent_high": 75,
   "command": "bats",
-  "date": "2023-04-06 21:10:27"
+  "date": "2023-04-09 21:57:32"
 }

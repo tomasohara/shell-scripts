@@ -1,1 +1,0 @@
-{'report_name': 'tomasohara-aliases-test', 'instrumented_line': 28, 'covered_line': 12, 'ratio': 0.4286}

@@ -352,5 +352,5 @@ var data = {lines:[
 {"lineNum":"  351","line":"bats_perform_test","class":"lineCov","hits":"2","order":"408","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-06 21:10:32", "instrumented" : 186, "covered" : 92,};
+var header = { "command" : "bats", "date" : "2023-04-09 21:57:38", "instrumented" : 186, "covered" : 92,};
 var merged_data = [];

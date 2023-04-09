@@ -1,1 +1,0 @@
-{'report_name': 'calc-entropy-tests', 'instrumented_line': 76, 'covered_line': 43, 'ratio': 0.5658}

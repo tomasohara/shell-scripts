@@ -1,1 +1,0 @@
-{'report_name': 'alias-html-test', 'instrumented_line': 75, 'covered_line': 65, 'ratio': 0.8667}
