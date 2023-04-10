@@ -79,6 +79,8 @@
 #    -- 'realpath file' returns full path for file with relative path.
 # - Selectively ignore following shellcheck warnings
 #    -- SC2016: (info): Expressions don't expand in single quotes
+#    -- SC2046: Quote this to prevent word splitting
+#    -- SC2086: Double quote to prevent globbing and word splitting.
 #    -- SC2155: Declare and assign separately to avoid masking return values
 #    -- SC2139: This expands when defined, not when used. Consider escaping.
 #
@@ -142,8 +144,7 @@ function conditional-export () {
         var="$1" value="$2";
         ## DEBUG: echo "value for env. var. $var: $(printenv "$var")"
         if [ "$(printenv "$var")" == "" ]; then
-	    # Note: ignores SC1066 [Don't use $ on the left side of assignments],
-	    # SC2046 [Quote this to prevent word splitting], and SC2086 [Double quote to prevent globbing and word splitting].
+	    # Ignores SC1066: Don't use $ on the left side of assignments
 	    # shellcheck disable=SC1066,SC2046,SC2086
             export $var="$value"
         fi
@@ -1878,7 +1879,21 @@ alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,pn
 alias move-adhoc-files='move-log-files; move-output-files'
 alias move-old-files='move-versioned-files "*" old'
 # move-versioned-files-alt: alternative version for moving all files with DDMMMDD-style timestamp into ./old
-alias move-versioned-files-alt='mkdir -p old; move *[0-9][0-9][a-z][a-z][a-z]*[0-9][0-9]* old'
+## alias move-versioned-files-alt='mkdir -p old; move *[0-9][0-9][a-z][a-z][a-z]*[0-9][0-9]* old'
+# shellcheck disable=SC2010,SC2086
+{
+function move-versioned-files-alt {
+    mkdir -p old;
+    local version_regex="[0-9][0-9][a-z][a-z][a-z]*[0-9][0-9]"
+    move ./*$version_regex* old
+    local false_positives
+    false_positives="$(ls old/*$version_regex* 2>&1 | grep -v 'No such file' | egrep "(adhoc)|(.txt$)")"
+    if [ "$false_positives" != "" ]; then
+	echo "Warning: potential misplaced files"
+	echo "    $false_positives"
+    fi
+    }
+}
 
 #--------------------------------------------------------------------------------
 
