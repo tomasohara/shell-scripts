@@ -17,7 +17,7 @@ from mezcla.unittest_wrapper import TestWrapper
 from mezcla import glue_helpers as gh
 
 #OLD: SCRIPT = './../tpo_count_it.py'
-script_name = 'tpo_count_it.py'
+script_name = '../tpo_count_it.py'
 SCRIPT = gh.resolve_path(script_name)
 
 
