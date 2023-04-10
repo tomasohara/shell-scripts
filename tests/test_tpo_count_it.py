@@ -12,14 +12,13 @@
 # Standart packages
 import unittest
 
-
 # Local packages
 from mezcla.unittest_wrapper import TestWrapper
 from mezcla import glue_helpers as gh
 
-
-## TODO: use gh.resolve_path(SCRIPT) instead of relative path on string
-SCRIPT = './../tpo_count_it.py'
+#OLD: SCRIPT = './../tpo_count_it.py'
+script_name = 'tpo_count_it.py'
+SCRIPT = gh.resolve_path(script_name)
 
 
 class TestIt(TestWrapper):
