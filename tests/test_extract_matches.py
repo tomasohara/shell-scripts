@@ -15,8 +15,9 @@ from mezcla.unittest_wrapper import TestWrapper
 from mezcla import glue_helpers as gh
 
 
-## TODO: use gh.resolve_path(SCRIPT) instead of relative path on string
-SCRIPT = './../extract_matches.py'
+#OLD: SCRIPT = './../extract_matches.py'
+script_name = '../extract_matches.py'
+SCRIPT = gh.resolve_path(script_name)
 
 
 class TestIt(TestWrapper):
