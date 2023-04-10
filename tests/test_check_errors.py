@@ -8,7 +8,7 @@
 
 # Standart packages
 import unittest
-
+import pytest
 
 # Local packages
 from mezcla.unittest_wrapper import TestWrapper
@@ -52,25 +52,25 @@ class TestIt(TestWrapper):
         self.assertEqual(gh.run(f'{input_string} | {SCRIPT} --context 1 -'), result_context_1)
         self.assertEqual(gh.run(f'{input_string} | {SCRIPT} --context 2 -'), result_context_2)
 
-
+@pytest.mark.xfail(reason="Nothing here. Work in progress")
     def test_no_asterisks(self):
         """test no asterisks option"""
         ## WORK-IN-PROGRESS
         assert(False)
 
-
+@pytest.mark.xfail(reason="Nothing here. Work in progress")
     def test_skip_ruby_lib(self):
         """test skip ruby lib and ruby options"""
         ## WORK-IN-PROGRESS
         assert(False)
 
-
+@pytest.mark.xfail(reason="Nothing here. Work in progress")
     def test_relaxed_strict(self):
         """test relaxed and strict options"""
         ## WORK-IN-PROGRESS
         assert(False)
 
-
+@pytest.mark.xfail(reason="Nothing here. Work in progress")
     def test_verbose(self):
         """test verbose option"""
         ## WORK-IN-PROGRESS
