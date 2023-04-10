@@ -460,6 +460,10 @@ function git-reset-file {
     ##     shift
     ##     pause-for-enter $'Warning: reset --hard changes the both index and working tree!\nPress enter to proceed'
     ## fi
+    if [ "$*" = "" ]; then
+	echo "Error: need to specify a file"
+	return 1
+    fi
 
     # Isolate old versions
     mkdir -p _git-trash >| "$log";
@@ -541,6 +545,7 @@ function git-diff-plus {
 #   [difftool "kdiff3"]
 #       path = /usr/bin/kdiff3
 #       trustExitCode = false
+# TODO1: work around quirk with plain diff being invoked in certain situations (e.g., merge conflict)
 #
 function git-difftool-plus {
     ## TODO: add trace-command function
