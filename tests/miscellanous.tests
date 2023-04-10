@@ -1,10 +1,12 @@
 # Tests for miscellaneous scripts (i.e., not readily categorizable)
 
+
 ## TODO
 ## $ consolidate-notes.bash --
 ## ...
 ## 238  >>> FileNotFoundError: [Errno 2] No such file or directory: './config/#_toms-mac-adhoc-notes-apr23.txt#' <<<
 ## 239      [/Users/tohara/mezcla/debug.py] unloaded at 2023-04-06 08:31:32.036632; elapsed=4.613s
+
 
 ## TODO:
 ## resolve silly intermittent problem with aliases in git-aliases.bash
@@ -13,3 +15,23 @@
 ## ...
 ## bash: git-next-checkin: command not found
 ##
+
+
+## TODO:
+## - check for merge_notes.py incorporating results of existing merger.
+##
+##    Tue 28 Mar 23
+##    
+##    note:
+##    - running standalone script version of Jupyter notebook for prompt evaluation
+##    - steps:
+##    
+##    _master-note-info.list:
+##    /Users/tohara/temp/tom-experiment-related-notes-5apr23.txt:﻿
+##    /Users/tohara/temp/tom-experiment-related-notes-5apr23.txt:Wed 27 Jul 22
+##    /Users/tohara/temp/tom-experiment-related-notes-5apr23.txt:
+##
+## - The issue is the grep filename prefix.
+## - Also see ~/bin/adhoc/consolidate-notes.bash, which has some heuristics for finding note files.
+##
+
