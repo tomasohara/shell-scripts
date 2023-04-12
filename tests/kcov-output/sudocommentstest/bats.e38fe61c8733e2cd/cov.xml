@@ -1,35 +1,12 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.269" lines-covered="602" lines-valid="2236" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1681056768">
+<coverage line-rate="0.269" lines-covered="602" lines-valid="2236" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1681305352">
 	<sources>
 		<source>/</source>
 	</sources>
 	<packages>
 		<package name="bats" line-rate="0.269" lines-covered="602" lines-valid="2236" branch-rate="1.0" complexity="1.0">
 			<classes>
-				<class name="bats_44074_src" filename="tmp/bats-run-Zhfcf1/bats.44074.src" branch-rate="1.0" complexity="1.0" line-rate="0.579">
-					<lines>
-						<line number="5" hits="4"/>
-						<line number="8" hits="4"/>
-						<line number="12" hits="4"/>
-						<line number="13" hits="4"/>
-						<line number="15" hits="2"/>
-						<line number="20" hits="4"/>
-						<line number="21" hits="4"/>
-						<line number="23" hits="7"/>
-						<line number="24" hits="0"/>
-						<line number="25" hits="0"/>
-						<line number="26" hits="0"/>
-						<line number="27" hits="0"/>
-						<line number="28" hits="0"/>
-						<line number="29" hits="0"/>
-						<line number="30" hits="0"/>
-						<line number="35" hits="4"/>
-						<line number="38" hits="0"/>
-						<line number="41" hits="4"/>
-						<line number="42" hits="4"/>
-					</lines>
-				</class>
 				<class name="cpufreqctl_aveey" filename="usr/local/bin/cpufreqctl-aveey" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="24" hits="0"/>
@@ -2015,6 +1992,29 @@
 						<line number="246" hits="0"/>
 						<line number="247" hits="0"/>
 						<line number="248" hits="0"/>
+					</lines>
+				</class>
+				<class name="bats_84908_src" filename="tmp/bats-run-1AoI4p/bats.84908.src" branch-rate="1.0" complexity="1.0" line-rate="0.579">
+					<lines>
+						<line number="5" hits="4"/>
+						<line number="8" hits="4"/>
+						<line number="12" hits="4"/>
+						<line number="13" hits="4"/>
+						<line number="15" hits="2"/>
+						<line number="20" hits="4"/>
+						<line number="21" hits="4"/>
+						<line number="23" hits="7"/>
+						<line number="24" hits="0"/>
+						<line number="25" hits="0"/>
+						<line number="26" hits="0"/>
+						<line number="27" hits="0"/>
+						<line number="28" hits="0"/>
+						<line number="29" hits="0"/>
+						<line number="30" hits="0"/>
+						<line number="35" hits="4"/>
+						<line number="38" hits="0"/>
+						<line number="41" hits="4"/>
+						<line number="42" hits="4"/>
 					</lines>
 				</class>
 				<class name="preprocessing_bash" filename="usr/local/lib/bats-core/preprocessing.bash" branch-rate="1.0" complexity="1.0" line-rate="0.875">

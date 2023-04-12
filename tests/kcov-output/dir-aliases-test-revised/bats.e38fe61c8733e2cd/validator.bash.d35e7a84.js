@@ -17,7 +17,7 @@ var data = {lines:[
 {"lineNum":"   16","line":"    while IFS= read -r line; do","class":"lineCov","hits":"164","order":"224","possible_hits":"0",},
 {"lineNum":"   17","line":"      # forward line"},
 {"lineNum":"   18","line":"      printf \"%s\\n\" \"$line\"","class":"lineCov","hits":"81","order":"475","possible_hits":"0",},
-{"lineNum":"   19","line":"      case \"$line\" in","class":"lineCov","hits":"81","order":"477","possible_hits":"0",},
+{"lineNum":"   19","line":"      case \"$line\" in","class":"lineCov","hits":"81","order":"476","possible_hits":"0",},
 {"lineNum":"   20","line":"      \'ok \'*)"},
 {"lineNum":"   21","line":"        ((++actual_number_of_tests))"},
 {"lineNum":"   22","line":"        ;;"},
@@ -38,5 +38,5 @@ var data = {lines:[
 {"lineNum":"   37","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-09 21:57:46", "instrumented" : 14, "covered" : 11,};
+var header = { "command" : "bats", "date" : "2023-04-12 19:00:50", "instrumented" : 14, "covered" : 11,};
 var merged_data = [];

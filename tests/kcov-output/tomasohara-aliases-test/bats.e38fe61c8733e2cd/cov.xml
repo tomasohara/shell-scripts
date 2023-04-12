@@ -1,12 +1,44 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.265" lines-covered="596" lines-valid="2245" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1681056758">
+<coverage line-rate="0.265" lines-covered="596" lines-valid="2245" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1681305342">
 	<sources>
 		<source>/</source>
 	</sources>
 	<packages>
 		<package name="bats" line-rate="0.265" lines-covered="596" lines-valid="2245" branch-rate="1.0" complexity="1.0">
 			<classes>
+				<class name="bats_80834_src" filename="tmp/bats-run-JhlTq6/bats.80834.src" branch-rate="1.0" complexity="1.0" line-rate="0.429">
+					<lines>
+						<line number="5" hits="4"/>
+						<line number="8" hits="4"/>
+						<line number="12" hits="4"/>
+						<line number="13" hits="4"/>
+						<line number="15" hits="7"/>
+						<line number="16" hits="0"/>
+						<line number="17" hits="0"/>
+						<line number="18" hits="0"/>
+						<line number="19" hits="0"/>
+						<line number="20" hits="0"/>
+						<line number="21" hits="0"/>
+						<line number="22" hits="0"/>
+						<line number="27" hits="4"/>
+						<line number="30" hits="0"/>
+						<line number="34" hits="4"/>
+						<line number="35" hits="4"/>
+						<line number="37" hits="7"/>
+						<line number="38" hits="0"/>
+						<line number="39" hits="0"/>
+						<line number="40" hits="0"/>
+						<line number="41" hits="0"/>
+						<line number="42" hits="0"/>
+						<line number="43" hits="0"/>
+						<line number="44" hits="0"/>
+						<line number="49" hits="4"/>
+						<line number="52" hits="0"/>
+						<line number="55" hits="4"/>
+						<line number="56" hits="4"/>
+					</lines>
+				</class>
 				<class name="cpufreqctl_aveey" filename="usr/local/bin/cpufreqctl-aveey" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="24" hits="0"/>
@@ -1421,38 +1453,6 @@
 						<line number="380" hits="2"/>
 						<line number="381" hits="2"/>
 						<line number="383" hits="2"/>
-					</lines>
-				</class>
-				<class name="bats_40022_src" filename="tmp/bats-run-ruY2ab/bats.40022.src" branch-rate="1.0" complexity="1.0" line-rate="0.429">
-					<lines>
-						<line number="5" hits="4"/>
-						<line number="8" hits="4"/>
-						<line number="12" hits="4"/>
-						<line number="13" hits="4"/>
-						<line number="15" hits="7"/>
-						<line number="16" hits="0"/>
-						<line number="17" hits="0"/>
-						<line number="18" hits="0"/>
-						<line number="19" hits="0"/>
-						<line number="20" hits="0"/>
-						<line number="21" hits="0"/>
-						<line number="22" hits="0"/>
-						<line number="27" hits="4"/>
-						<line number="30" hits="0"/>
-						<line number="34" hits="4"/>
-						<line number="35" hits="4"/>
-						<line number="37" hits="7"/>
-						<line number="38" hits="0"/>
-						<line number="39" hits="0"/>
-						<line number="40" hits="0"/>
-						<line number="41" hits="0"/>
-						<line number="42" hits="0"/>
-						<line number="43" hits="0"/>
-						<line number="44" hits="0"/>
-						<line number="49" hits="4"/>
-						<line number="52" hits="0"/>
-						<line number="55" hits="4"/>
-						<line number="56" hits="4"/>
 					</lines>
 				</class>
 				<class name="bats_exec_suite" filename="usr/local/libexec/bats-core/bats-exec-suite" branch-rate="1.0" complexity="1.0" line-rate="0.367">

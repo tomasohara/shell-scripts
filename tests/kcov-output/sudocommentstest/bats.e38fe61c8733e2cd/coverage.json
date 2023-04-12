@@ -1,6 +1,5 @@
 {
   "files": [
-    {"file": "/tmp/bats-run-Zhfcf1/bats.44074.src", "percent_covered": "57.89", "covered_lines": "11", "total_lines": "19"},
     {"file": "/usr/local/bin/cpufreqctl-aveey", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "806"},
     {"file": "/usr/local/bin/bats", "percent_covered": "23.33", "covered_lines": "7", "total_lines": "30"},
     {"file": "/usr/local/libexec/bats-core/bats", "percent_covered": "36.84", "covered_lines": "91", "total_lines": "247"},
@@ -11,6 +10,7 @@
     {"file": "/usr/local/libexec/bats-core/bats-exec-test", "percent_covered": "52.69", "covered_lines": "98", "total_lines": "186"},
     {"file": "/usr/local/libexec/bats-core/bats-format-cat", "percent_covered": "100.00", "covered_lines": "3", "total_lines": "3"},
     {"file": "/usr/local/lib/bats-core/common.bash", "percent_covered": "28.93", "covered_lines": "35", "total_lines": "121"},
+    {"file": "/tmp/bats-run-1AoI4p/bats.84908.src", "percent_covered": "57.89", "covered_lines": "11", "total_lines": "19"},
     {"file": "/usr/local/lib/bats-core/preprocessing.bash", "percent_covered": "87.50", "covered_lines": "7", "total_lines": "8"},
     {"file": "/usr/local/lib/bats-core/warnings.bash", "percent_covered": "8.70", "covered_lines": "2", "total_lines": "23"},
     {"file": "/usr/local/libexec/bats-core/bats-preprocess", "percent_covered": "49.30", "covered_lines": "35", "total_lines": "71"},
@@ -22,5 +22,5 @@
   "percent_low": 25,
   "percent_high": 75,
   "command": "bats",
-  "date": "2023-04-09 21:57:48"
+  "date": "2023-04-12 19:00:52"
 }

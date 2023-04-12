@@ -3,6 +3,7 @@
 #| NOTE: USES batspp 1.X.X (simple_batspp.py), mezcla & kcov || MAY NOT WORK PROPERLY ON FIRST RUN
 ## SCRIPT_NAME : batspp_report.py
 #| BUG: NO EXECUTION ON FIRST TRY
+#| TODO: Avoid tests (e.g. sudo tests) having "NOBATSPP" on the title | --all selects all testfiles 
 
 """ 
     TEST AUTOMATION & REPORT GENERATION FOR IPYNB TEST FILES (FOR BATSPP 1.5.X)
@@ -19,11 +20,13 @@ IPYNB = ".ipynb"
 BATSPP = ".batspp"
 BATS = ".bats"
 TXT = ".txt"
+NOBATSPP = "NOBATSPP"
 
 BATSPP_STORE = "batspp-only"
 BATS_STORE = "bats-only"
 TXT_STORE = "txt-reports"
 KCOV_STORE = "kcov-output"
+
 
 ESSENTIAL_DIRS = [BATSPP_STORE, BATS_STORE, KCOV_STORE, TXT_STORE]
 
@@ -72,32 +75,57 @@ parser.add_option(
     help=f"Textfile based reports generated, stored at ./{TXT_STORE}"
 )
 
+parser.add_option(
+    "-a", "--all",
+    default=0,
+    dest="all_option",
+    action="count", 
+    help=f"Generates report for all available testfiles (NOBATSPP testfiles were ignored by default)"
+)
+
 (options, args) = parser.parse_args()
 
 NO_OPTION = options.no_option
 TXT_OPTION = options.txt_option
 KCOV_OPTION = options.kcov_option
+ALL_OPTION = options.all_option
+
+if not NO_OPTION:
+    gh.run(f"rm -rf ./{BATSPP_STORE}/*")
+    gh.run(f"rm -rf ./{BATS_STORE}/*")
+    
+if KCOV_OPTION:
+    gh.run(f"rm -rf ./{KCOV_STORE}/*")
+
 
 # 1) Identifying .ipynb files
 i = 1
 ipynb_array = []
+avoid_array = []
+avoid_count = 0
+
 print("\n=== BATSPP REPORT GENERATOR (simple_batspp.py / BATSPP 1.5.X) ===\n")
 
 for file in files:
     is_ipynb = file.endswith(IPYNB)
     if is_ipynb:
-        print(f"JUPYTER TESTFILE FOUND [{i}]: {file}")
-        ipynb_array += [file]
+        if not ALL_OPTION and NOBATSPP in file:      
+                print(f"NOBATSPP File Found [{i}]: {file}")
+                avoid_array += [file]
+                avoid_count += 1
+        else: 
+            print(f"JUPYTER Testfile Found [{i}]: {file}")
+            ipynb_array += [file]
         i += 1
 
-print(f"\nTOTAL JUPYTER FILE FOUND: {i-1}")
+print(f"\nIPYNB Files Found (Total - NOBATSPP): {i-1} - {avoid_count} = {i-avoid_count-1}")
 
 # 2) Generating .batspp files from .ipynb files
 
 i = 1
 print(f"\n=== GENERATING BATSPP FILES ===\n")
 
-for testfile in files:
+for testfile in ipynb_array:
     is_ipynb = testfile.endswith(IPYNB)
     if is_ipynb:
         batspp_from_ipynb = testfile.replace(IPYNB, BATSPP)
@@ -117,7 +145,6 @@ if NO_OPTION == 1:
 else:
     for batsppfile in filesys_bpp:
         is_batspp = batsppfile.endswith(BATSPP)
-
         if is_batspp:
             bats_from_batspp = batsppfile.replace(BATSPP, BATS)
             txt_from_batspp = batsppfile.replace(BATSPP, TXT)
@@ -159,13 +186,23 @@ faulty_count = ipynb_count - batspp_count
 
 print(f"\n======================================================")
 print(f"SUMMARY STATISTICS:\n")
-print(f"IPYNB FILES PRESENT: {ipynb_count}")
-print(f"BATSPP FILES GENERATED: {batspp_count if TXT_OPTION or NO_OPTION != 1 else 'NaN'}")
-print(f"NO. OF FAULTY TESTFILES: {faulty_count if TXT_OPTION or NO_OPTION != 1 else 'NaN'}")
+print(f"No. of IPYNB testfiles: {ipynb_count + avoid_count}")
+print(f"No. of BATSPP files (generated): {batspp_count if TXT_OPTION or NO_OPTION != 1 else 'NaN'}")
+print(f"No. of FAULTY testfiles: {faulty_count if TXT_OPTION or NO_OPTION != 1 else 'NaN'}")
+print(f"No. of AVOIDED testfiles: {avoid_count}")
+
 print(f"\nFAULTY TESTFILES:")
 if faulty_count == 0:
     print ("NaN")
 else: 
     for tf in error_testfiles:  
         print(f">> {tf}")
+
+print(f"\nAVOIDED TESTFILES:")
+if avoid_count == 0:
+    print ("NaN")
+else: 
+    for tf in avoid_array:  
+        print(f">> {tf}")
+        
 print(f"======================================================")

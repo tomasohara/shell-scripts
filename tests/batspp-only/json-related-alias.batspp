@@ -76,14 +76,41 @@ $ perl -e'print q|{"foo":"あい","bar":1234567890000000000000000}|' | pp-json-s
 
 ## TEST 2 - TEXT MANIPULATION
 # Text manipulation
-$ alias 'intersection=intersection.perl'
-$ alias 'difference=intersection.perl -diff'
-$ alias 'line-intersection=intersection.perl -line'
-$ alias 'line-difference=intersection.perl -diff -line'
+# alias intersection=intersection.perl
+# alias difference=intersection.perl -diff
+# alias 'line-intersection=intersection.perl -line'
+# alias 'line-difference=intersection.perl -diff -line'
+
+$ pwd
+/tmp/test-json-alias/test-3214
+
+## TEST 2 - TEXT MANIPULATION
+$ rm -rf ./* > /dev/null
+$ printf "This is Line A.\n1 2 3 4 5" > file_a.txt
+$ printf "This is Line B.\n1 3 5 7 9" > file_b.txt
+
+$ intersection ./file_a.txt ./file_b.txt
+This
+is
+Line
+1
+3
+5
+
+$ line-intersection ./file_b.txt ./file_a.txt 
+
+
+$ difference ./file_a.txt ./file_b.txt
+2
+4
+A.
+
+$ line-difference ./file_b.txt ./file_a.txt 
+1 3 5 7 9
+This is Line B.
 
 # THIS IS THE DEFAULT PRINT STATEMENT WITH /r (RETURN)
 $ printf "Hi Mom, \rI am using Ubuntu\n"
-Hi Mom, 
 I am using Ubuntu
 
 # remove-cr REMOVES RETURNS (or /r)
@@ -100,7 +127,7 @@ $ printf "Hi Mom,\r I am using Ubuntu\n" | perl-remove-cr
 Hi Mom, I am using Ubuntu
 
 $ pwd
-$ rm -rf ./*
+$ rm -rf ./* > /dev/null
 $ printf "Hi Mom,\nThs is the use of printf\nI can use a backslash n to start a new line.\n1\n2\n3"> abc-test.txt
 $ last-n-with-header 3 abc-test.txt
 /tmp/test-json-alias/test-3214

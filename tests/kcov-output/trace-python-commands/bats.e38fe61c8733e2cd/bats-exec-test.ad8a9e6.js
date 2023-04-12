@@ -188,21 +188,21 @@ var data = {lines:[
 {"lineNum":"  187","line":"    local state=passed","class":"lineCov","hits":"30","order":"485","possible_hits":"0",},
 {"lineNum":"  188","line":"  fi"},
 {"lineNum":"  189","line":""},
-{"lineNum":"  190","line":"  if [[ -z \"$should_retry\" ]]; then","class":"lineCov","hits":"46","order":"488","possible_hits":"0",},
-{"lineNum":"  191","line":"    printf \"%s %s\\t%s\\n\" \"$state\" \"$BATS_TEST_FILENAME\" \"$BATS_TEST_NAME\" >>\"$BATS_RUNLOG_FILE\"","class":"lineCov","hits":"46","order":"489","possible_hits":"0",},
+{"lineNum":"  190","line":"  if [[ -z \"$should_retry\" ]]; then","class":"lineCov","hits":"46","order":"486","possible_hits":"0",},
+{"lineNum":"  191","line":"    printf \"%s %s\\t%s\\n\" \"$state\" \"$BATS_TEST_FILENAME\" \"$BATS_TEST_NAME\" >>\"$BATS_RUNLOG_FILE\"","class":"lineCov","hits":"46","order":"487","possible_hits":"0",},
 {"lineNum":"  192","line":""},
-{"lineNum":"  193","line":"    if [[ $print_bats_out ]]; then","class":"lineCov","hits":"46","order":"490","possible_hits":"0",},
+{"lineNum":"  193","line":"    if [[ $print_bats_out ]]; then","class":"lineCov","hits":"46","order":"488","possible_hits":"0",},
 {"lineNum":"  194","line":"      bats_prefix_lines_for_tap_output <\"$BATS_OUT\" | bats_replace_filename >&3","class":"lineCov","hits":"32","order":"580","possible_hits":"0",},
 {"lineNum":"  195","line":"    fi"},
 {"lineNum":"  196","line":"  fi"},
-{"lineNum":"  197","line":"  if [[ $BATS_GATHER_TEST_OUTPUTS_IN ]]; then","class":"lineCov","hits":"46","order":"491","possible_hits":"0",},
+{"lineNum":"  197","line":"  if [[ $BATS_GATHER_TEST_OUTPUTS_IN ]]; then","class":"lineCov","hits":"46","order":"489","possible_hits":"0",},
 {"lineNum":"  198","line":"    local try_suffix=","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  199","line":"    if [[ -n \"$should_retry\" ]]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  200","line":"      try_suffix=\"-try$BATS_TEST_TRY_NUMBER\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  201","line":"    fi"},
 {"lineNum":"  202","line":"    cp \"$BATS_OUT\" \"$BATS_GATHER_TEST_OUTPUTS_IN/$BATS_SUITE_TEST_NUMBER$try_suffix-$BATS_TEST_DESCRIPTION.log\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  203","line":"  fi"},
-{"lineNum":"  204","line":"  rm -f \"$BATS_OUT\"","class":"lineCov","hits":"46","order":"492","possible_hits":"0",},
+{"lineNum":"  204","line":"  rm -f \"$BATS_OUT\"","class":"lineCov","hits":"46","order":"490","possible_hits":"0",},
 {"lineNum":"  205","line":"  exit \"$status\"","class":"lineCov","hits":"46","order":"493","possible_hits":"0",},
 {"lineNum":"  206","line":"}"},
 {"lineNum":"  207","line":""},
@@ -352,5 +352,5 @@ var data = {lines:[
 {"lineNum":"  351","line":"bats_perform_test","class":"lineCov","hits":"31","order":"437","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-09 21:57:59", "instrumented" : 186, "covered" : 98,};
+var header = { "command" : "bats", "date" : "2023-04-12 19:01:03", "instrumented" : 186, "covered" : 98,};
 var merged_data = [];

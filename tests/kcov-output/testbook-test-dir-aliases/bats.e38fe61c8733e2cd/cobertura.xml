@@ -1,13 +1,13 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.317" lines-covered="763" lines-valid="2404" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1681056768">
+<coverage line-rate="0.317" lines-covered="763" lines-valid="2404" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1681305352">
 	<sources>
 		<source>/</source>
 	</sources>
 	<packages>
 		<package name="bats" line-rate="0.317" lines-covered="763" lines-valid="2404" branch-rate="1.0" complexity="1.0">
 			<classes>
-				<class name="bats_43669_src" filename="tmp/bats-run-Yv0tKb/bats.43669.src" branch-rate="1.0" complexity="1.0" line-rate="0.952">
+				<class name="bats_84478_src" filename="tmp/bats-run-TAOhH8/bats.84478.src" branch-rate="1.0" complexity="1.0" line-rate="0.952">
 					<lines>
 						<line number="5" hits="22"/>
 						<line number="8" hits="22"/>

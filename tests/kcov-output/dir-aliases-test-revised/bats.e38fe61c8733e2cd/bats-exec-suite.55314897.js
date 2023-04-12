@@ -1,10 +1,10 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
-{"lineNum":"    2","line":"set -e","class":"lineCov","hits":"1","order":"99","possible_hits":"0",},
+{"lineNum":"    2","line":"set -e","class":"lineCov","hits":"1","order":"98","possible_hits":"0",},
 {"lineNum":"    3","line":""},
-{"lineNum":"    4","line":"count_only_flag=\'\'","class":"lineCov","hits":"1","order":"100","possible_hits":"0",},
-{"lineNum":"    5","line":"filter=\'\'","class":"lineCov","hits":"1","order":"101","possible_hits":"0",},
-{"lineNum":"    6","line":"num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}","class":"lineCov","hits":"1","order":"102","possible_hits":"0",},
+{"lineNum":"    4","line":"count_only_flag=\'\'","class":"lineCov","hits":"1","order":"99","possible_hits":"0",},
+{"lineNum":"    5","line":"filter=\'\'","class":"lineCov","hits":"1","order":"100","possible_hits":"0",},
+{"lineNum":"    6","line":"num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}","class":"lineCov","hits":"1","order":"101","possible_hits":"0",},
 {"lineNum":"    7","line":"bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}","class":"lineCov","hits":"1","order":"103","possible_hits":"0",},
 {"lineNum":"    8","line":"bats_no_parallelize_within_files=","class":"lineCov","hits":"1","order":"104","possible_hits":"0",},
 {"lineNum":"    9","line":"filter_status=\'\'","class":"lineCov","hits":"1","order":"105","possible_hits":"0",},
@@ -468,5 +468,5 @@ var data = {lines:[
 {"lineNum":"  467","line":"exit \"$bats_exec_suite_status\" # the actual exit code will be set by the exit trap using bats_exec_suite_status","class":"lineCov","hits":"2","order":"730","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-09 21:57:46", "instrumented" : 245, "covered" : 90,};
+var header = { "command" : "bats", "date" : "2023-04-12 19:00:50", "instrumented" : 245, "covered" : 90,};
 var merged_data = [];

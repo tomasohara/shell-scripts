@@ -112,10 +112,6 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test9-$$)
 	mkdir $test_folder && cd $test_folder
 
-	alias 'intersection=intersection.perl'
-	alias 'difference=intersection.perl -diff'
-	alias 'line-intersection=intersection.perl -line'
-	alias 'line-difference=intersection.perl -diff -line'
 }
 
 
@@ -123,23 +119,11 @@ function test4-assert1-expected () {
 	test_folder=$(echo /tmp/test10-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test10-assert1-actual)
-	expected=$(test10-assert1-expected)
-	echo "========== actual =========="
-	echo "$actual" | hexview.perl
-	echo "========= expected ========="
-	echo "$expected" | hexview.perl
-	echo "============================"
-	[ "$actual" == "$expected" ]
-
+	rm -rf ./* > /dev/null
+	printf "This is Line A.\n1 2 3 4 5" > file_a.txt
+	printf "This is Line B.\n1 3 5 7 9" > file_b.txt
 }
 
-function test10-assert1-actual () {
-	printf "Hi Mom, \rI am using Ubuntu\n"
-}
-function test10-assert1-expected () {
-	echo -e 'Hi Mom, I am using Ubuntu'
-}
 
 @test "test11" {
 	test_folder=$(echo /tmp/test11-$$)
@@ -157,18 +141,26 @@ function test10-assert1-expected () {
 }
 
 function test11-assert1-actual () {
-	printf "Hi Mom,\r I am using Ubuntu\n" | remove-cr
+	intersection ./file_a.txt ./file_b.txt
 }
 function test11-assert1-expected () {
-	echo -e 'Hi Mom, I am using Ubuntu'
+	echo -e 'ThisisLine135'
 }
 
 @test "test12" {
 	test_folder=$(echo /tmp/test12-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test12-assert1-actual)
-	expected=$(test12-assert1-expected)
+	line-intersection ./file_b.txt ./file_a.txt 
+}
+
+
+@test "test13" {
+	test_folder=$(echo /tmp/test13-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test13-assert1-actual)
+	expected=$(test13-assert1-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -178,29 +170,34 @@ function test11-assert1-expected () {
 
 }
 
-function test12-assert1-actual () {
-	printf "Hi Mom,\r I am using Ubuntu\n" | alt-remove-cr
+function test13-assert1-actual () {
+	difference ./file_a.txt ./file_b.txt
 }
-function test12-assert1-expected () {
-	echo -e 'Hi Mom, I am using Ubuntu'
+function test13-assert1-expected () {
+	echo -e '24A.'
 }
-
-@test "test13" {
-	test_folder=$(echo /tmp/test13-$$)
-	mkdir $test_folder && cd $test_folder
-
-}
-
 
 @test "test14" {
 	test_folder=$(echo /tmp/test14-$$)
 	mkdir $test_folder && cd $test_folder
 
-	pwd
-	rm -rf ./*
-	printf "Hi Mom,\nThs is the use of printf\nI can use a backslash n to start a new line.\n1\n2\n3"> abc-test.txt
+	actual=$(test14-assert1-actual)
+	expected=$(test14-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
 }
 
+function test14-assert1-actual () {
+	line-difference ./file_b.txt ./file_a.txt 
+}
+function test14-assert1-expected () {
+	echo -e '1 3 5 7 9This is Line B.'
+}
 
 @test "test15" {
 	test_folder=$(echo /tmp/test15-$$)
@@ -218,8 +215,91 @@ function test12-assert1-expected () {
 }
 
 function test15-assert1-actual () {
-	show-line 3 abc-test.txt
+	printf "Hi Mom, \rI am using Ubuntu\n"
 }
 function test15-assert1-expected () {
+	echo -e 'I am using Ubuntu'
+}
+
+@test "test16" {
+	test_folder=$(echo /tmp/test16-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test16-assert1-actual)
+	expected=$(test16-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test16-assert1-actual () {
+	printf "Hi Mom,\r I am using Ubuntu\n" | remove-cr
+}
+function test16-assert1-expected () {
+	echo -e 'Hi Mom, I am using Ubuntu'
+}
+
+@test "test17" {
+	test_folder=$(echo /tmp/test17-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test17-assert1-actual)
+	expected=$(test17-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test17-assert1-actual () {
+	printf "Hi Mom,\r I am using Ubuntu\n" | alt-remove-cr
+}
+function test17-assert1-expected () {
+	echo -e 'Hi Mom, I am using Ubuntu'
+}
+
+@test "test18" {
+	test_folder=$(echo /tmp/test18-$$)
+	mkdir $test_folder && cd $test_folder
+
+}
+
+
+@test "test19" {
+	test_folder=$(echo /tmp/test19-$$)
+	mkdir $test_folder && cd $test_folder
+
+	pwd
+	rm -rf ./* > /dev/null
+	printf "Hi Mom,\nThs is the use of printf\nI can use a backslash n to start a new line.\n1\n2\n3"> abc-test.txt
+}
+
+
+@test "test20" {
+	test_folder=$(echo /tmp/test20-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test20-assert1-actual)
+	expected=$(test20-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test20-assert1-actual () {
+	show-line 3 abc-test.txt
+}
+function test20-assert1-expected () {
 	echo -e 'I can use a backslash n to start a new line.'
 }
