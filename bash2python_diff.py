@@ -31,6 +31,9 @@ import bash2python
 
 # Constants
 TL = debug.TL
+LABEL_BASH2PYTHON = "b2py"
+LABEL_CODEX = "codex"
+
 
 # Environment options
 # Notes:
@@ -46,14 +49,17 @@ PERL_WARNINGS = system.getenv_bool("PERL_WARNINGS", False,
 
 def read_input_file(file):
     """Reads and segments file"""
-    segment_num = 1
-    output = f"#segment {segment_num} \n"
+    segment_num = 0
+    output = ""
     for line in file:
-        if line.strip() == "":
+        if ((line.strip() == "") or (not segment_num)):
+            # Print divider for subsequent segments
+            if segment_num:
+                output += "\n#----------------------------------------\n"
+            # Print segment indicator
             segment_num += 1
-            output += f"##Segment {segment_num} \n"
-        else:
-            output += line
+            output += f"# Segment {segment_num}\n"
+        output += line
     return output
 
 
@@ -72,18 +78,38 @@ def print_diff(formatted_outputs):
     """Creates and gives format to a side-by-side diff"""
     diff = list(difflib.ndiff(formatted_outputs[0], formatted_outputs[1]))
 
+    ## TODO-by-Tana: code a simple alternative using 'diff --side-by-side'
+    ## NOTE: It is not good to re-invent the wheel.
+    ##   temp1 = f"{TMP}/_b2p_diff.codex.list"
+    ##   temp2 = f"{TMP}/_b2p_diff.regex.list"
+    ##   system.write_file(, formatted_outputs[0])
+    ##   system.write_file(, formatted_outputs[1])
+    ##   print(gh.run(f"diff --side-by-side {temp1} {temp2}")
+    
+    HALF_DIFF_MAX = system.getenv_int("HALF_DIFF_MAX", 70,
+                                      "Maximum length for one half of the diff")
+    ## TEMP: output
+    label_spacer = (" " * (HALF_DIFF_MAX - len(LABEL_BASH2PYTHON) - 1))
+    print(f"{LABEL_BASH2PYTHON}{label_spacer}{LABEL_CODEX}")
+    
     for line in diff:
         symbol = line[0]
         content = line[2:]
+        debug.assertion(line[1] == " ")
 
+        ## TODO-by-Tana: explain what you were trying to do
         if content.strip():  # Check if the content is not an empty string
+            content_clipped = content[:HALF_DIFF_MAX]
+            blanks = (" " * HALF_DIFF_MAX)
             if symbol == '+':
-                print(f"{content:<70} | {'':<70}")
+                ## BAD: print(f"{content:<70} | {'':<70}")
+                print(f"{content_clipped:{HALF_DIFF_MAX}} | {blanks}")
             elif symbol == '-':
-                print(f"{'':<70}   {content:<70}")
+                ## BAD: print(f"{'':<70}   {content:<70}")
+                print(f"{blanks} | {content_clipped}")
             else:
-                print(f"{content:<70} | {content:<70}")
-
+                ## BAD: print(f"{content:<70} | {content:<70}")
+                print(content)
 
 @click.command()
 @click.option("--perl", is_flag=True, help="Uses perl.")
@@ -91,41 +117,52 @@ def print_diff(formatted_outputs):
 def main(perl, diff):
     """Main function"""
     file = ""
+
+    # Read the input, segmenting into units such as by paragraph (e.,g., Perl style)
     if perl:
         for line in sys.stdin:
             file += line + "\n"
+        # Note: See perlgrep.perl for use of $/ (record separator, whihc normally is newline).
+        #
         ## OLD: command = 'BEGIN { $seg_num = 1; print "#segment $seg_num\n" } if (/^\s*$/) { $seg_num++; print "#segment $seg_num\n"; } else { print; }'
         ##
         ## TOM: Note that perl uses -00 option for its paragraph mode (see above)
         ##
+        # The following code gets executed in a loop (via -ne option)
         command = ""
         if STRICT_MODE:
             command += "use strict;\n"
         command += r"""
-                BEGIN{$i=1}
-                print "#Segment ", $i++,
-                "\n";
-                print $_
+            BEGIN { $seg_num = 1; }
+            print("#----------------------------------------\n");
+            print("# Segment ", $seg_num++, "\n");
+            print;
         """
 
         ## OLD: output_bytes = subprocess.Popen(['perl', '-ne', command], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate(input=file.encode())[0]
-        options = "-00 -ne"
+        options = ""
         if PERL_WARNINGS:
             options += " -w"
-        output_bytes = subprocess.Popen(['perl', options, command],
+        options = " -00 -ne "
+        command_spec = ['perl', options, "'", command, "'"]
+        debug.trace_expr(5, command_spec)
+        output_bytes = subprocess.Popen(command_spec,
                                         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
                                         ).communicate(input=file.encode())[0]
         output = output_bytes.decode()
     else:
         file = sys.stdin
         output = read_input_file(file)
+    # note: output is script and formatted_outputs converted version (TODO: rename both)
     formatted_outputs = format_bash_to_python(output)
+    
     #If diff function, creates the diff
+    # note: diff is side-by-side
     if diff:
         print_diff(formatted_outputs)
     else:
         for index, formatted_output in enumerate(formatted_outputs):
-            file_label = "codex" if index == 0 else "b2py"
+            file_label = LABEL_BASH2PYTHON if index == 0 else LABEL_CODEX
             sys.stdout.write(f"------------{file_label}------------\n")
             for line in formatted_output:
                 sys.stdout.write(line + "\n")
