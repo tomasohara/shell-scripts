@@ -13,7 +13,7 @@
 #      [To slurp files whole, use the value 0777.]
 #
 
-# TODO: something like """Wrapper around bash2python.py showing regex vs codex diff"""
+# Tana-TODO2: something like """Wrapper around bash2python.py showing regex vs codex diff"""
 """Segments a script and makes a diff"""
 
 # Standard modules
@@ -33,7 +33,9 @@ import bash2python
 TL = debug.TL
 LABEL_BASH2PYTHON = "b2py"
 LABEL_CODEX = "codex"
-
+DIVIDER_PROPER = "----------------------------------------"
+SMALL_SEGMENT_DIVIDER = f"#{DIVIDER_PROPER[:-10]}\n"
+SEGMENT_DIVIDER = f"#{DIVIDER_PROPER}\n"
 
 # Environment options
 # Notes:
@@ -48,14 +50,18 @@ PERL_WARNINGS = system.getenv_bool("PERL_WARNINGS", False,
                                    description="Show perl warnings")
 
 def read_input_file(file):
-    """Reads and segments file"""
+    """Reads and segments FILE handle"""
     segment_num = 0
     output = ""
+    debug.assertion(SEGMENT_DIVIDER.endswith("\n"))
     for line in file:
         if ((line.strip() == "") or (not segment_num)):
             # Print divider for subsequent segments
             if segment_num:
-                output += "\n#----------------------------------------\n"
+                # note: use two dividiers: one is full length and the other is shortened
+                # so not consumed by split (see format() in main script).
+                output += f"{SMALL_SEGMENT_DIVIDER}"
+                output += f"{SEGMENT_DIVIDER}"
             # Print segment indicator
             segment_num += 1
             output += f"# Segment {segment_num}\n"
@@ -65,10 +71,11 @@ def read_input_file(file):
 
 def format_bash_to_python(output):
     """Formats file with bash2python"""
-    b2p = bash2python.Bash2Python(output, None)
     formatted_outputs = []
 
     for codex in [True, False]:
+        b2p = bash2python.Bash2Python(output, None,
+                                      segment_divider=SEGMENT_DIVIDER)
         formatted_output = b2p.format(codex)
         formatted_outputs.append(formatted_output.splitlines())
     return formatted_outputs
@@ -77,8 +84,9 @@ def format_bash_to_python(output):
 def print_diff(formatted_outputs):
     """Creates and gives format to a side-by-side diff"""
     diff = list(difflib.ndiff(formatted_outputs[0], formatted_outputs[1]))
+    debug.trace_expr(6, diff)
 
-    ## TODO-by-Tana: code a simple alternative using 'diff --side-by-side'
+    ## Tana-TODO2: code a simple alternative using 'diff --side-by-side'
     ## NOTE: It is not good to re-invent the wheel.
     ##   temp1 = f"{TMP}/_b2p_diff.codex.list"
     ##   temp2 = f"{TMP}/_b2p_diff.regex.list"
@@ -90,14 +98,14 @@ def print_diff(formatted_outputs):
                                       "Maximum length for one half of the diff")
     ## TEMP: output
     label_spacer = (" " * (HALF_DIFF_MAX - len(LABEL_BASH2PYTHON) - 1))
-    print(f"{LABEL_BASH2PYTHON}{label_spacer}{LABEL_CODEX}")
+    print(f"# {LABEL_BASH2PYTHON}{label_spacer}| {LABEL_CODEX}")
     
     for line in diff:
         symbol = line[0]
         content = line[2:]
         debug.assertion(line[1] == " ")
 
-        ## TODO-by-Tana: explain what you were trying to do
+        ## Tana-TODO1: explain what you were trying to do
         if content.strip():  # Check if the content is not an empty string
             content_clipped = content[:HALF_DIFF_MAX]
             blanks = (" " * HALF_DIFF_MAX)
@@ -153,7 +161,9 @@ def main(perl, diff):
     else:
         file = sys.stdin
         output = read_input_file(file)
-    # note: output is script and formatted_outputs converted version (TODO: rename both)
+    debug.trace_expr(7, output)
+    
+    # note: output is script and formatted_outputs converted version (Tana-TODO2: rename both--see 'Tips' in main script)
     formatted_outputs = format_bash_to_python(output)
     
     #If diff function, creates the diff
