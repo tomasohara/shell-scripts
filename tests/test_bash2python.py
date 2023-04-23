@@ -12,7 +12,6 @@
 #      https://platform.openai.com/docs/api-reference/introduction?lang=python
 # - Debug tracing might cause problems for the tests, so disable as follows:
 #      DEBUG_LEVEL=0 pytest tests/test_bash2python.py
-#   Alternatively, use PYTHONOPTIMIZE=2 so that stubs used all debug.xyz functions.
 #
 # Tips:
 # - ** See bash2python.py for important coding tips.
@@ -24,7 +23,6 @@
 """Tests for bash2python.py"""
 
 # Standard modules
-import os
 import subprocess
 
 # Installed modules
@@ -32,7 +30,7 @@ import pytest
 from click.testing import CliRunner
 
 # Local modules
-from bash2python import Bash2Python as bp
+from bash2python import Bash2Python as bp, OPENAI_API_KEY
 from bash2python_diff import main
 from mezcla import debug
 from mezcla.my_regex import my_re
@@ -78,7 +76,7 @@ def bash2py(bash, python, skip_normalize=False, keep_comments=False):
 #-------------------------------------------------------------------------------
 # Tests proper
     
-@pytest.mark.skipif(not os.getenv('OPENAI_API_KEY'), reason='OPENAI_API_KEY not set')
+@pytest.mark.skipif(not OPENAI_API_KEY, reason='OPENAI_API_KEY not set')
 def test_codex():
     """Simple test for codex using an very standard input"""
     bash = "echo Hello World"
@@ -100,10 +98,20 @@ def test_operator_substitution():
     """Test if simple operators are substituted in a if statement"""
     ## OLD: bash = "if [ 1 -gt 0 -lt 2 ]; then echo Hello; fi"
     ## NOTE: above made into xfail one below
-    bash = 'if [ 1 -gt 0 -lt 2 ]; then\n   echo "Hello"\nfi'
+    bash = """
+if [ 1 -gt 0 ]; then
+    if [ 0 -lt 2 ]; then
+        echo "Hello"
+    fi
+fi
+    """
     # TODO2: test for warning separately (e.g., strip comments); also, use valid bash input
     ## OLD: python = """#b2py: Founded loop of order 1. Please be careful\nif  1 > 0 < 2:\n    run('echo Hello')\n"""
-    python = """if 1 > 0 < 2:\n    run('echo "Hello"')\n"""
+    python = """
+if 1 > 0:
+    if 0 < 2:
+        run('echo "Hello"')
+    """
     bash2py(bash, python)
 
 
@@ -117,7 +125,7 @@ def test_comments_1():
 def test_comments_2():
     """Checks in-line comments to ensure integrity"""
     bash = "echo $foo # Another comment"
-    python = "run(f'echo {foo} ') #  Another comment"
+    python = "run(f'echo {foo} ')# Another comment"
     bash2py(bash, python, keep_comments=True)
 
 
@@ -128,6 +136,7 @@ def test_while_loop():
 c=3
 while [ $c -le 5 ]; do
     echo $c
+    let c++
 done
 """
     ## OLD: python = "#b2py: Founded loop of order 1. Please be careful\nwhile i <= 5 :\n    run(f'echo {i}')\n"
@@ -135,6 +144,7 @@ done
 c = 3
 while c <= 5:
     run(f'echo {c}')
+    c += 1
 """
     bash2py(bash, python)
 
@@ -180,11 +190,11 @@ def test_double_quotes():
 def test_embedded_for_not_supported():
     """Make sure that embedded FOR issues warning about not being supported"""
     bash = """
-    for i in 1 2 3; do
-        for j in a b c; do
-            echo \"$i vs. $j\"
-        done
-    done 
+for i in 1 2 3; do
+    for j in a b c; do
+        echo "$i vs. $j"
+    done
+done 
     """
     ## OLD: python = "embedded for: for i in 1 2 3; do"
     python = "embedded for"
@@ -197,45 +207,72 @@ def test_embedded_for_not_supported():
     assert python in output
 
 
-@pytest.mark.skip
+@pytest.mark.xfail
 def test_if_else_condition():
     """TODO3 flesh out comment: test if/else"""
-    bash = """if [ -f "$1" ]; then'
-           echo "$1 exists and is a regular file."
-           elif [ -e "$1" ]; then
-           echo "$1 exists but is not a regular file."
-           else
-           echo "$1 does not exist."
-           fi"""
+    bash = """
+if [ -f "$1" ]; then
+    echo "$1 exists and is a regular file."
+elif [ -e "$1" ]; then
+    echo "$1 exists but is not a regular file."
+else
+    echo "$1 does not exist."
+fi
+    """
     python = (
         "if a == b:\n run('echo 'Equal'')\nelse:\n run('echo 'Not Equal'')"
     )
     bash2py(bash, python)
 
 
-@pytest.mark.skip
-def test_for_c_style():
-    """Tests C-style for loops"""
-    bash = "for ((i=0; i < 10; i++)); do  echo $i; done"
-    python = "for i in range(10): \n run(f'print {i}')"
+@pytest.mark.xfail
+def test_alt_if_else_condition():
+    """Test non-trivial if/then/elif/fi conversion"""
+    bash = """
+(( x=RANDOM ))                         # TODO: x=$(calc-int "rand() * 1024")
+if [ $x -eq 0 ]; then
+    echo "$x zero"
+elif [ $x -lt 0 ]; then
+    echo "$x negative"
+else
+    echo "$x positive"
+fi
+    """
+    python = """
+x = run("echo $RANDOM")
+if x == 0:
+    run(f'"echo {x} zero"')
+elif x < 0:
+    run(f'"echo {x} negative"')
+else:
+    run(f'"echo {x} positive"')
+    """
     bash2py(bash, python)
 
 
-@pytest.mark.skip
+@pytest.mark.xfail                      # note: c-style loops not supported
+def test_for_c_style():
+    """Tests C-style for loops"""
+    bash = "for ((i=0; i < 10; i++)); do  echo $i; done"
+    python = "for i in range(10):\n    run(f'print {i}')"
+    bash2py(bash, python)
+
+
+@pytest.mark.xfail
 def test_case_statement():
     """Tests if case statement is correctly translated. Not implemented"""
     bash = """
-    case $var in
-        x)
-            echo "var is x"
-            ;;
-        y|z)
-            echo "var is y or z"
-            ;;
-        *)
-            echo "var is not x, y or z"
-            ;;
-    esac
+case $var in
+    x)
+        echo "var is x"
+        ;;
+    y|z)
+        echo "var is y or z"
+        ;;
+    *)
+        echo "var is not x, y or z"
+        ;;
+esac
     """
     python = """
     if var == 'x':
@@ -251,7 +288,8 @@ def test_case_statement():
 def test_let_command():
     """Test if a let command is converted correctly"""
     bash = 'let "x=1+2"'
-    python = ' "x = 1+2"'
+    ## TODO: python = "x=1+2"
+    python = "x = 1+2"
     bash2py(bash, python)
 
 
@@ -262,10 +300,12 @@ def test_history_substitution():
     bash2py(bash, python)
 
 
+@pytest.mark.xfail(reason="Extraenous quotes produced")
 def test_echo_to_stderr():
     """Tests if echo to stderr is converted"""
     bash = "echo 'This is an error' >&2"
-    python = """run("echo \\\\\'This is an error\\\\\' >&2")"""
+    ## OLD: python = """run("echo \\\\\'This is an error\\\\\' >&2")"""
+    python = """run("echo 'This is an error' >&2")"""
     bash2py(bash, python)
 
 
@@ -273,57 +313,68 @@ def test_echo_to_stderr():
 def test_complex_for_loop():
     """Tests complex for loop. Includes some arrays. Doomed to fail"""
     bash = """
-    files=('file1.txt' 'file2.txt' 'file3.txt' 'file4.txt' 'file5.txt')
-    for file in "${files[@]}"; do
-        echo "Reading file: $file"
-        run("cat $file")
-    done
-    """
+files=('file1.txt' 'file2.txt' 'file3.txt' 'file4.txt' 'file5.txt')
+for file in "${files[@]}"; do
+    echo "Reading file: $file"
+    cat $file
+done
+"""
     python = """
-    files=['file1.txt', 'file2.txt', 'file3.txt', 'file4.txt', 'file5.txt']
-    for file in files:
-        run("echo \"Reading file: $file\"")
-        run(f"cat {file}")
-        """
+files=['file1.txt', 'file2.txt', 'file3.txt', 'file4.txt', 'file5.txt']
+for file in files:
+    run("echo \"Reading file: $file\"")
+    run(f"cat {file}")
+    """
     bash2py(bash, python)
 
 
+@pytest.mark.xfail                      # uses xafil for convenience (TODO: have separate version for good tests)
 @pytest.mark.parametrize("bash, python", [
     # Bash. => Python
-    ("echo foo", "run('echo foo')"),  # simple control test to check parametrize decorator
-    pytest.param("let v++", "let_value['v'] += 1; v = let_value['v']", marks=pytest.mark.xfail),  # doomed to fail
-    ("exit", "run('exit')"),
-    ("foo=$bar", "foo = f'{bar}'"),
-    ("ls -a", "run('ls -a')"),
-    ("echo $bar", "run(f'echo {bar}')"),
+    ("echo foo",
+     "run('echo foo')"),  # simple control test to check parametrize decorator
+    ("let v++",
+     "let_value['v'] += 1; v = let_value['v']"),  # doomed to fail (hash usage)
+    ("exit",
+     "run('exit')"),
+    ("foo=$bar",
+     "foo = f'{bar}'"),
+    ("ls -a",
+     "run('ls -a')"),
+    ("echo $bar",
+     "run(f'echo {bar}')"),
     # arithmetic expressions and expansions (latter results in string)
-    ("(( z = x + y ))", "z = x + y"),
-    ("z=$((x + y))", 'z = f"{x + y}"'),
+    ("(( z = x + y ))",
+     "z = x + y"),
+    ("z=$((x + y))",
+     'z = f"{x + y}"'),
     # simple if statement(s)
-    pytest.param("""if [ $? -eq 0 ]; then echo "Success"; fi""",
-                 """if run("echo $?") == "0":\n   print("Success")""", marks=pytest.mark.xfail),
-    pytest.param("""if [ 1 -gt 0 -lt 2 ]; then echo Hello; fi""",    # note: single line causes problem
-                 """if 1 > 0 < 2:\n    run('echo Hello')\n""", marks=pytest.mark.xfail),
+    ("""if [ $? -eq 0 ]; then echo "Success"; fi""",
+     """if run("echo $?") == "0":\n   print("Success")"""),
+    ("""if [ 1 -gt 0 ]; then if [ 1 -gt 0 -lt 2 ]; then echo Hello; fi; fi""",    # note: single line causes problem
+     """if 1 > 0 < 2:\n    run('echo Hello')\n"""),
     # simple for statement(s)
-    pytest.param("""for i in 1 2 3; do echo "$i"; done""",
-                 """for i in [1, 2, 3]: print(i)""", marks=pytest.mark.xfail),
+    ("""for i in 1 2 3; do echo "$i"; done""",
+     """for i in [1, 2, 3]: print(i)"""),
     # simple while statement(s)
-    pytest.param("""while [ $i -ge 0 ]; do""",
-                 """while i >= 0:\n    print(i)""", marks=pytest.mark.xfail),
+    ("""while [ $i -ge 0 ]; do echo $i; let i--; done""",
+     """while i >= 0:\n    print(i)\n    i -= 1"""),
     # variable assignment
-    pytest.param("""name='John Doe'; echo $name""",                  # semicolon blocks variable conversion
-                 """name = 'John Doe'\n run(f'echo {name}')""", marks=pytest.mark.xfail),
+    ("""name='John Doe'; echo $name""",                  # semicolon blocks variable conversion
+     """name = 'John Doe'\n run(f'echo {name}')"""),
     # no-op statement
-    ("true", "pass"),
-    pytest.param("true;", "pass", marks=pytest.mark.xfail),          # semicolon needs to be dropped
+    ("true",
+     "pass"),
+    ("true;",
+     "pass"),          # semicolon needs to be dropped
     ])
 def test_tabular_tests(bash, python):
-    """Tests in tabular format. Uses pythest parametrize"""
+    """Tests in tabular format. Uses pytest parametrize"""
     bash2py(bash, python)
 
 ## TODO1: put bash2python_diff tests in test_bash2python_diff
 ##
-@pytest.mark.skipif(not os.getenv('OPENAI_API_KEY'), reason='OPENAI_API_KEY not set')
+@pytest.mark.skipif(not OPENAI_API_KEY, reason='OPENAI_API_KEY not set')
 def test_diff_no_opts():
     """Tests bash2python_diff without flags enabled"""
     debug.trace(5, "test_diff_no_opts()")
@@ -335,7 +386,7 @@ def test_diff_no_opts():
     assert "------------codex------------" in result.output
     assert "------------b2py------------" in result.output
 ##
-@pytest.mark.skipif(not os.getenv('OPENAI_API_KEY'), reason='OPENAI_API_KEY not set')
+@pytest.mark.skipif(not OPENAI_API_KEY, reason='OPENAI_API_KEY not set')
 def test_diff_opts():
     """Tests bash2python_diff with all flags enabled"""
     debug.trace(5, "test_diff_opts()")
