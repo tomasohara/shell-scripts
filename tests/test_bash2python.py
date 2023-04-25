@@ -19,6 +19,10 @@
 # TODO2:
 # - * Err on the side of adding more tests!
 #
+# TODO3:
+# - Convert """-based-string input to include indentation that gets stripped prior to test invocation:
+#   so that not flush left in source.
+#
 
 """Tests for bash2python.py"""
 
@@ -80,8 +84,14 @@ def bash2py(bash, python, skip_normalize=False, keep_comments=False):
 def test_codex():
     """Simple test for codex using an very standard input"""
     bash = "echo Hello World"
-    python = bp.codex_convert(None, bash)
+    ## OLD: python = bp.codex_convert(None, bash)
+    b2p = bp(bash, None, skip_comments=True)
+    python = b2p.format(True)
     output = 'print("Hello World")'
+    #
+    output = normalize_whitespace(output)
+    python = normalize_whitespace(python)
+    #
     if python == '# internal error':
         print("Usually a problem with OPENAI_API_KEY")
     assert output in python
@@ -125,7 +135,7 @@ def test_comments_1():
 def test_comments_2():
     """Checks in-line comments to ensure integrity"""
     bash = "echo $foo # Another comment"
-    python = "run(f'echo {foo} ')# Another comment"
+    python = "run(f'echo {foo}')# Another comment"
     bash2py(bash, python, keep_comments=True)
 
 
@@ -328,15 +338,13 @@ for file in files:
     bash2py(bash, python)
 
 
-@pytest.mark.xfail                      # uses xafil for convenience (TODO: have separate version for good tests)
+@pytest.mark.xfail                      # uses xfail for convenience (TODO: have separate version for good tests)
 @pytest.mark.parametrize("bash, python", [
     # Bash. => Python
     ("echo foo",
      "run('echo foo')"),  # simple control test to check parametrize decorator
     ("let v++",
      "let_value['v'] += 1; v = let_value['v']"),  # doomed to fail (hash usage)
-    ("exit",
-     "run('exit')"),
     ("foo=$bar",
      "foo = f'{bar}'"),
     ("ls -a",
@@ -362,11 +370,33 @@ for file in files:
     # variable assignment
     ("""name='John Doe'; echo $name""",                  # semicolon blocks variable conversion
      """name = 'John Doe'\n run(f'echo {name}')"""),
+    # consecutive statement execution
+    ("""ls; pwd;""",
+     """run("ls"); run("pwd")"""),
+    ("""ls\npwd\n""",
+     """run("ls"); run("pwd")"""),                          # newline getting munged into run call
     # no-op statement
     ("true",
      "pass"),
     ("true;",
      "pass"),          # semicolon needs to be dropped
+    # default values (n.b., the support needs to be changed in bash2python.py)
+    ("""if [ ${HOME:-n/a} = "n/a" ]; then echo "no HOME"; fi""",
+     """if os.getenv("HOME", "n/a") == "n/a":\n    print("no HOME")"""),
+    # operators
+    ("""if [[ ($? -gt 0) && ($? -lt 0) ]]; then echo "bad status"; fi""",
+     """if run("$?") > 0 and run("$?") < 0:\n    print("bad status")"""),
+    ("""if [ 1 || 0 ]; then echo "one"; fi""",
+     """if 1 or 0:\n    print('one')"""),
+    ("""if [ ! 1 = 1 ]; then echo "bug"; fi""",
+     """if not 1 == 1:\n    print('bug')"""),
+    ("""if [ -z " " ]; then echo "bug"; fi""",
+     """if '' == " ":\n    print('bug')"""),
+    ("""if [ -n "" ]; then echo "bug"; fi""",
+     """if '' != " ":\n    print('bug')"""),
+     # Exit statement (n.b., keep last as all bash input converted to script)
+    ("exit",
+     "run('exit')")
     ])
 def test_tabular_tests(bash, python):
     """Tests in tabular format. Uses pytest parametrize"""
@@ -378,8 +408,10 @@ def test_tabular_tests(bash, python):
 def test_diff_no_opts():
     """Tests bash2python_diff without flags enabled"""
     debug.trace(5, "test_diff_no_opts()")
-    runner = CliRunner()
-    result = runner.invoke(main, input="line1\n\nline2\n")
+    runner = CliRunner(mix_stderr=False)
+    # NOTE: disable stderr tracing
+    result = runner.invoke(main, env={"DEBUG_LEVEL": "0"},
+                           input="line1\n\nline2\n")
     debug.trace_expr(5, result)
     debug.trace_object(6, result)
     assert result.exit_code == 0
@@ -390,13 +422,32 @@ def test_diff_no_opts():
 def test_diff_opts():
     """Tests bash2python_diff with all flags enabled"""
     debug.trace(5, "test_diff_opts()")
-    runner = CliRunner()
-    result = runner.invoke(main, ["--perl", "--diff"], input="echo Hello World\n\nfoo=bar\n")
-    debug.trace_expr(5, result)
+    runner = CliRunner(mix_stderr=False)
+    # NOTE: disable stderr tracing
+    result = runner.invoke(main, args=["--perl", "--diff"], env={"DEBUG_LEVEL": "0"},
+                           ## TODO2: input="echo Hello World\n\nfoo='bar'\n",
+                           input="echo Hello World;\nfoo='bar';\n",
+                           )
+    debug.trace_expr(5, result.output, max_len=4096)
     debug.trace_object(6, result)
     assert result.exit_code == 0
-    assert 'print("Hello World")' in result.output
-    assert "foo = bar" in result.output
+    ##
+    ## OLD
+    ## assert 'print("Hello World")' in result.output
+    ## assert "foo = 'bar'" in result.output
+    ##
+    # example output (simplified):
+    #   # b2py                           | codex
+    #   run('echo "Hello World"')        |
+    #                                    | print("Hello World")
+    #   fuu='bar'                        |
+    #                                    | foo = 'bar'
+    assert(my_re.search(r"""# b2py\s+\|\s+codex""", result.output))
+    assert(my_re.search(r"""run\(.*echo Hello World.*\).*\|""", result.output))
+    # TODO2: assert(my_re.search(r"""run\('echo Hello World'\).*\|""", result.output))
+    assert(my_re.search(r"""\|.*print\("Hello World"\)""", result.output))
+    assert(my_re.search(r"""foo\s*=\s*['"]bar['"].*\|""", result.output))
+    assert(my_re.search(r"""\|.*foo\s*=\s*['"]bar['"]""", result.output))
 
 #-------------------------------------------------------------------------------
 
