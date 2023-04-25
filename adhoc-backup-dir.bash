@@ -90,6 +90,7 @@ fi
    export BASE_DIR
    BASE_DIR=$(basename "$PWD")
    if [ "$BASE_DIR" = "/" ]; then
+      # note: uses "fs-root" for label if / and retricts to same file system
       export BASE_DIR=fs-root;
       export MISC_FIND_OPTIONS="-xdev"
    fi
