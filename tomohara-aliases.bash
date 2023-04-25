@@ -1827,6 +1827,7 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 # note: '👇🏻' gets encoded as ; see show-unicode-code-info alias to way to illustrate encodings
 # TODO: make this less of a sledgehammer
 alias rename-utf8-encoded='rename-files -global -regex "[0x80-0xFF]\{3,\}" "_"'
+alias rename-bad-dashes="rename-files -quick -global -regex ' \-' '_'; rename-files -quick -global -regex '\-' '_' -*"; 
 
 #-------------------------------------------------------------------------------
 ## TOM-IDIOSYNCRATIC
