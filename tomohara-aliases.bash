@@ -145,6 +145,7 @@ function conditional-export () {
         ## DEBUG: echo "value for env. var. $var: $(printenv "$var")"
         if [ "$(printenv "$var")" == "" ]; then
 	    # Ignores SC1066: Don't use $ on the left side of assignments
+	    # SC2046 [Quote this to prevent word splitting], and SC2086 [Double quote to prevent globbing and word splitting].
 	    # shellcheck disable=SC1066,SC2046,SC2086
             export $var="$value"
         fi
@@ -170,6 +171,9 @@ alias cond-setenv='conditional-export'
 # - Variable intended for run-time evaluation should be passed inside a single quoted string (or escaped with \)
 # - This is so that the alias becomes a "first class" citizen, such as allowing for
 #   environment variables to be set as in 'alias-fn echo-ENV1 'echo "$ENV1"'; ENV1=one echo-ENV1
+# - Use dummy command if a background command is invoked: gotta hate Bash!
+#   ex: alias-fn eyes 'xeyes & true'
+##
 # ex: alias-fn trace-PS1 'echo \$PS1="$PS1" 1>&2'
 # TODO: fix problem with embedded invocations (see em-adhoc-notes below)
 function alias-fn {
@@ -1879,7 +1883,7 @@ alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,pn
 alias move-adhoc-files='move-log-files; move-output-files'
 alias move-old-files='move-versioned-files "*" old'
 # move-versioned-files-alt: alternative version for moving all files with DDMMMDD-style timestamp into ./old
-## alias move-versioned-files-alt='mkdir -p old; move *[0-9][0-9][a-z][a-z][a-z]*[0-9][0-9]* old'
+## OLD: alias move-versioned-files-alt='mkdir -p old; move *[0-9][0-9][a-z][a-z][a-z]*[0-9][0-9]* old'
 # shellcheck disable=SC2010,SC2086
 {
 function move-versioned-files-alt {
