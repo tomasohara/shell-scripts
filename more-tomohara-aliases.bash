@@ -90,3 +90,5 @@ function git-blame-plus {
     git blame "$file" > "$log"
     $PAGER "$log"
 }
+# bluetooth-indicator(): pull up Ubuntu system tray item for bluetooth
+alias-fn bluetooth-indicator '/usr/lib/x86_64-linux-gnu/indicator-bluetooth/indicator-bluetooth-service & true'
