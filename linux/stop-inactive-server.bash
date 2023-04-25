@@ -8,18 +8,24 @@
 # - Any debug tracing in such functions should go to stderr. This can be done as follows:
 #    echo "fu=$fu" 1>&2
 # - For shellcheck [SC2086: Double quote to prevent globbing and word splitting].
+# - If DRY_RUN env. var set, then shutdown command not issued (but everything else is done).
 #
 # Usage examples:
 # 1. Interactive for testing (n.b., sudo required for actual shutdown):
 #    stop-inactive-server.bash
 #
-# 2. Add to cron as root:
+# 2. Add to cron as root to run once a hour on the hour (i.e., hh:00 for all hours):
 #    sudo crontab -e
 #
 #       # check for inactive server every hour (on the hour) and shutdown if so
 #       0 * * * * /usr/local/bin/stop-inactive-server.bash
 #
 # Script by Tana Alvarez and Tom O'Hara.
+#
+# NOTE:
+# - crontab format and example [based on CRONTAB(5), web searching, etc.]:
+#     min  hour  day-of-month  month  day-of-week   command
+#      0    5        *           *       sun        tar -zcf /var/backups/home.tgz /home/
 #
 # TODO:
 # - Add checks for missing special files with performance data (e.g., /proc/loadavg):
@@ -33,6 +39,12 @@ VERBOSE="${VERBOSE:-0}"
 TRACE="${TRACE:-0}"
 LOG="${LOG:-/home/ubuntu/stop-inactive-server.log}"
 TIME=$(date)
+
+# Show env. settings
+if [ "$VERBOSE" = "1" ]; then
+    echo "$0 $*"
+    echo "DRY_RUN=$DRY_RUN LOG=$LOG"
+fi
 
 # Enable debug trace
 if [ "$TRACE" = "1" ]; then
@@ -112,7 +124,7 @@ net_rx=$(low_network_load rx)
 if [ "$cpu" = "True" ] && [ "$net_tx" = "True" ] && [ "$net_rx" = "True" ]; then
     shutdown_command="shutdown"
     if [ "${DRY_RUN:-0}" = "1" ]; then
-        shutdown_command="echo $shutdown_command"
+        shutdown_command="echo $shutdown_command     # dry-run"
     fi
     echo "issuing: $shutdown_command"
     ## TODO???: shellcheck disable=SC2086
