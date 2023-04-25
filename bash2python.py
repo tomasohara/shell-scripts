@@ -125,6 +125,8 @@ MODEL_NAME = system.getenv_text("MODEL_NAME", "text-davinci-002",
                                 description="Name of OpenAI model/engine")
 TEMPERATURE = system.getenv_float("TEMPERATURE", 0.6,
                                   description="Next token probability")
+PARA_SPLIT = system.getenv_bool("PARA_SPLIT", False,
+                                "Split code in Perl-style paragraph mode")
 
 # Global settings
 if USE_MEZCLA:
@@ -165,7 +167,8 @@ def get_bash_var_hash():
 
     # Extract variables from set command output
     var_hash = defaultdict(bool)
-    bash_variable_listing = gh.run_via_bash("set", init_file=INIT_FILE)
+    bash_variable_listing = gh.run_via_bash("set", init_file=INIT_FILE,
+                                            trace_level=7)
     for line in bash_variable_listing.splitlines():
         if my_re.search(r"^([A-Za-z0-9_]+)=", line):
             var_hash[my_re.group(1)] = True
@@ -214,7 +217,7 @@ class Bash2Python:
 
     ## Tana-TODO: simplify initializer (e.g., make bash command and shell option optional)
     ##
-    def __init__(self, bash, shell, skip_comments=None, segment_divider=None):
+    def __init__(self, bash, shell, skip_comments=None, segment_prefix=None, segment_divider=None):
         """Class initializer: using BASH command with SHELL executable
         Note: Optionally SKIP_COMMENTS and changes SEGMENT_DIVIDER for command iteration (or newline)"""
         self.cmd = bash
@@ -225,8 +228,10 @@ class Bash2Python:
             skip_comments = SKIP_COMMENTS
         self.skip_comments = skip_comments
         if segment_divider is None:
-            segment_divider = "\n"
+            # note: PARA_SPLIT emulates input done by bash2python_diff.py
+            segment_divider = ("\n\n" if PARA_SPLIT else "\n")
         self.segment_divider = segment_divider
+        self.segment_prefix = segment_prefix
         self.cache = None
         self.codex_count = 0
         self.line_num = 0
@@ -289,7 +294,31 @@ class Bash2Python:
 
     def codex_convert(self, line):
         """Uses OpenAI Codex to translate Bash to Python"""
-        debug.trace(6, f"codex_convert({line!r})")
+        result = self.codex_convert_aux(line)
+        debug.trace(6, f"codex_convert({line!r}) => {result!r}")
+        return result
+
+    def codex_convert_aux(self, line):
+        """Helper to codex_convert"""
+        debug.trace(6, f"codex_convert_aux({line!r})")
+
+        # Strip segment comments (see bash2python_diff.py)
+        # ex: "#s# Segment 1\nfu=3\n" => "fu=3\n"
+        comment = ""
+        if self.segment_prefix:
+            debug.assertion(self.segment_prefix.startswith("#"))
+            while my_re.search(fr"^({self.segment_prefix}[^\n]*\n)+(.*)", line,
+                               flags=my_re.DOTALL):
+                comment += my_re.group(1)
+                line = my_re.group(2)
+                debug.trace_expr(6, comment, line)
+            if my_re.search(fr"^({self.segment_prefix}[^\n]*\n)", line, flags=my_re.MULTILINE):
+                debug.trace(5, f"FYI: Stripping residual segment comments in line: {my_re.group(1)!r}")
+                line = my_re.sub(fr"^{self.segment_prefix}[^\n]*\n", "", line, flags=my_re.MULTILINE)
+                debug.trace_expr(6, line)
+        # note: normalize for sake of caching
+        line = line.rstrip("\n") + "\n"
+        
         # Tana-TODO1: eliminate the extraneus invocations
         # Note: Non-code uses both prefix and comment indicator (n.b., former stripped in format below)
         if SKIP_CODEX:
@@ -316,13 +345,11 @@ class Bash2Python:
         
         # Call the Codex API
         # TODO: cache the result (e.g., for debugging)
-        comment = ""
         try:
             # Optionally check cache
             params = {
                 "engine": MODEL_NAME,
                 "prompt": prompt,
-                ## BAD: "max_tokens": 3 * len(line),
                 "max_tokens": 3 * len(line.split()),
                 "n": 1,
                 "stop": None,
@@ -339,6 +366,7 @@ class Bash2Python:
                 debug.trace(5, "Submitting Codex request")
                 response = openai.Completion.create(**params)
                 if self.cache is not None:
+                    self.cache.set("tuple_labels", list(params.keys()))
                     self.cache.set(params_tuple, response)
             if EXPORT_RESPONSE:
                 self.codex_count += 1
@@ -348,9 +376,7 @@ class Bash2Python:
             debug.trace_expr(5, response, max_len=4096)
 
             # Extract text for first choice and convert into single-line comment
-            ## BAD: comment = "#" + response
-            ## OLD: comment = "#" + response["choices"][0]["text"].replace("\n", " ").strip()
-            comment = CODEX_PREFIX + response["choices"][0]["text"].replace("\n", "\n" + CODEX_PREFIX).rstrip()
+            comment += CODEX_PREFIX + response["choices"][0]["text"].replace("\n", "\n" + CODEX_PREFIX).rstrip()
         except:
             system.print_exception_info("codex_convert")
         return comment
@@ -446,7 +472,14 @@ class Bash2Python:
             if var in bash_vars_with_defaults:
                 var_name = re.search(r'\$\{(\w+):-[^\}]+\}', var).group(1)
                 var_default = re.search(r'\$\{\w+:-(.*)\}', var).group(1)
-                line = line.replace(var, f"{{{var_name} if {var_name} is not None else '{var_default}'}}")
+                # NOTE: asssumes env var if uppercase
+                ## OLD: line = line.replace(var, f"{{{var_name} if {var_name} is not None else '{var_default}'}}")
+                if my_re.search(r"^[A-Z0-9_]$", var_name):
+                    replacement = f'os.getenv("{var_name}", "{var_default}")'
+                else:
+                    # TODO2: Fix if var not defined
+                    replacement = f"{{{var_name} if {var_name} is not None else '{var_default}'}}"
+                line = my_re.sub(fr"{var}\b", replacement, line)
                 has_bash_var = True
                 has_default = True
             elif (var in bash_commmon_special_vars):
@@ -488,6 +521,7 @@ class Bash2Python:
             line, inline_comment = my_re.groups()
             debug.assertion(not embedded_in_quoted_string("#", line))
             debug.assertion("\n" not in inline_comment)
+            line = line.strip()
         
         # Do special processing for single statement lines
         is_compound_statement = (((";" in line) or ("\n" in line)) and
@@ -722,7 +756,6 @@ class Bash2Python:
         middle_keyword_regex = "(?:" + "|".join([l[1] for l in loops]) + ")"
         end_keyword_regex = "(?:" + "|".join([l[2] for l in loops]) + ")"
         body = ""
-        last_body = None
         loop_count = 0
         compound_stack = []             # OLD: loopy
         actual_loop = ()
@@ -738,18 +771,15 @@ class Bash2Python:
         remainder = ""
         # Emulates a do while loop in python
         do_while = True
-        lookahead = False
         while ((loop_count > 0) or do_while):
             debug.trace_expr(5, loop_line, loop_count, compound_stack, actual_loop, remainder)
             debug.trace_expr(6, body)
             # Stop upon end of compound command iteration (or some internal error)
-            debug.assertion((body != last_body) or lookahead)
             debug.assertion(loop_iterations < MAX_LOOP_ITERATIONS)
             if ((not loop_line) or (loop_iterations == MAX_LOOP_ITERATIONS)):
+                debug.trace(6, f"Premature loop termination (iters={loop_iterations})")
                 break
-            lookahead = False
             loop_iterations += 1
-            last_body = body
             loop_line = loop_line.strip()
             do_while = False
             if loop_count > max_loop_count:
@@ -824,7 +854,19 @@ class Bash2Python:
                 new_body = indent + loop_line.strip() + ":\n"
                 body += new_body
                 loop_line = ""
+                remainder = my_re.group(1)
                 debug.trace(5, f"Processing compound else; new body={new_body!r}")
+            elif (actual_loop and my_re.search(fr"^\s*{actual_loop[2]}\b(.*)$", loop_line, flags=my_re.DOTALL)):
+                debug.trace(5, f"Processing compound close {actual_loop[2]}")
+                loop_line = ""
+                remainder = my_re.group(1)
+                loop_count -= 1
+                compound_stack.pop()
+                try:
+                    actual_loop = (eval(compound_stack[-1]) if compound_stack else dummy_loop)
+                    debug.trace(6, f"actual_loop3:{actual_loop}")
+                except IndexError:
+                    break
             else:
                 debug.trace(7, "Processing compound misc.")
                 if not actual_loop:
@@ -842,25 +884,15 @@ class Bash2Python:
                     loop_line = ""
                     debug.assertion(not saw_middle)
                     saw_middle = True
-                elif my_re.search(fr"^\s*{actual_loop[2]}\b(.*)", loop_line):
-                    debug.trace(5, f"Processing compound close {actual_loop[2]}")
-                    loop_line = my_re.group(1)
-                    loop_count -= 1
-                    compound_stack.pop()
-                    try:
-                        actual_loop = (eval(compound_stack[-1]) if compound_stack else dummy_loop)
-                        debug.trace(6, f"actual_loop3:{actual_loop}")
-                    except IndexError:
-                        break
                 if loop_line.strip() in self.LOOP_CONTROL:
                     debug.trace(5, "Processing compound loop control")
                     body += loop_line + "\n"
                     body += self.map_keyword(loop_line) + "\n"
                 elif loop_line.strip():
                     debug.trace(5, "Processing compound body statement")
-                    if (my_re.search(fr"^(.*?); ({end_keyword_regex}\b.*?)", loop_line, flags=my_re.DOTALL)):
-                        (loop_line, remainder) = my_re.groups()
-                        debug.trace(5, f"Isolated compound end statement: remainder={remainder!r}")
+                    if (my_re.search(fr"^(.*?)(;|\n)\s*({end_keyword_regex}\b.*?)$", loop_line, flags=my_re.DOTALL)):
+                        (loop_line, _sep, remainder) = my_re.groups()
+                        debug.trace(5, f"Isolated compound end statement: remainder={remainder!r} loop_line={loop_line!r}")
                     # First tries to convert simple statements and then falls back to variable reference checks
                     (converted, loop_line, rem_line) = self.process_keyword_statement(loop_line)
                     if not converted:
@@ -882,10 +914,9 @@ class Bash2Python:
             else:
                 # note: line tracing mimics that of format()
                 if loop_count > 0:
-                    lookahead = True
                     alt_bash_line = next(cmd_iter, None)
                     debug.trace_expr(5, alt_bash_line)
-                    if INCLUDE_ORIGINAL:
+                    if INCLUDE_ORIGINAL and (alt_bash_line is not None):
                         self.line_num += 1
                         alt_bash_line_spec = alt_bash_line.replace("\n", "\\n")
                         body += f"{indent}# L{self.line_num}: {alt_bash_line_spec}\n"
@@ -917,7 +948,7 @@ class Bash2Python:
                     ## TEST: else iter(self.cmd.splitlines(keepends=True)))
                     else iter(self.cmd.split(sep=self.segment_divider)))
         if cmd_iter:
-            for _i, bash_line in enumerate(cmd_iter):  # for each line in the script
+            for bash_line in cmd_iter:            # for each line in the script
                 self.line_num += 1
                 debug.trace_expr(5, bash_line)
                 if INCLUDE_ORIGINAL:
@@ -930,6 +961,7 @@ class Bash2Python:
                 while ((remainder != "") or (loop_iterations == 0)):
                     loop_iterations += 1
                     if (loop_iterations == MAX_LOOP_ITERATIONS):
+                        debug.trace(6, f"Premature loop termination (iters={loop_iterations})")
                         break
                     try:
                         remainder = self.convert_bash(remainder, cmd_iter, python_commands, codex)
@@ -945,47 +977,56 @@ class Bash2Python:
         """Convert bash LINE with additional input from CMD_ITER via CODEX
         Modifies PYTHON_COMMANDS in place and returns any unprocessed text
         """
-        debug.trace(5, f"convert_bash({bash_line!r}, ...)")
+        debug.trace(5, f"convert_bash({bash_line!r}, ..., {codex})")
         # Optionally filter non-code lines
         # Note: comments useful for Codex so included by default (i.e., not STRIP_INPUT)
         include = True
         rem_bash_line = ""
+        # Strip comments and blank lines (n.b., doesn't show up in listing at all_
         if STRIP_INPUT:
             if not bash_line.strip():
-                debug.trace(4, "FYI: Ignoring blank line {i + 1}: {bash_line}")
+                debug.trace(4, f"FYI: Ignoring blank line {self.line_num}: {bash_line!r}")
                 include = False
             elif re.search(r"^\s*#", bash_line):
-                debug.trace(4, "FYI: Ignoring comment line {i + 1}: {bash_line}")
+                debug.trace(4, f"FYI: Ignoring comment line {self.line_num}: {bash_line!r}")
                 include = False
             # Tana-TODO: what's with the { and }???
             elif (bash_line.startswith("{") or bash_line.startswith("}")):
-                debug.trace(4, "FYI: Ignoring misc line {i + 1}: {bash_line}")
+                debug.trace(4, f"FYI: Ignoring misc line with braces {self.line_num}: {bash_line!r}")
                 include = False
             else:
                 pass
+        # Add ignored text to return buffer
         if not include:
+            debug.trace(5, f"Ignoring stripped input {bash_line!r}")
             python_commands.append(bash_line.strip("\n"))
+        # Otherwise proceed with more filtering
         else:
-            ## OLD: bash_line = bash_line.strip("\n")
-            # if comment line, skip
+            # Old sledgehammer approach to stripping comments
             comment = ""
             if (STRIP_INPUT and "#" in bash_line):
                 # Tana-TODO: ignore #'s within strings
                 debug.assertion(not embedded_in_quoted_string("#", bash_line))
-                bash_line, comment = bash_line.split("#", 1)
-                debug.trace(4, "FYI: Stripped comments from line {i + 1}: {bash_line}")
+                bash_line, comment = bash_line.split("#", maxsplit=1)
+                debug.trace(4, f"FYI: Stripped comments from line {self.line_num}: {bash_line!r}")
+            # Process with Codex; normally it should see the comments so best w/o STRIP_INPUT)
             if codex:
                 python_line = self.codex_convert(bash_line)
                 # note: removes comment indicator (TODO, rework so not produced when just using codex)
                 python_line = my_re.sub(fr"^{CODEX_PREFIX}", "", python_line, flags=my_re.MULTILINE)
                 python_commands.append(python_line)
-            elif (my_re.search(r"^(\s*#[^\n]+)(\n.*)?$", bash_line, flags=my_re.DOTALL)):
+            # Ignore comment (just up to first newline)
+            elif (my_re.search(r"^(\s*#[^\n]*\n?)(.*)?$", bash_line, flags=my_re.DOTALL)):
                 (comment, rem_bash_line) = my_re.groups()
+                debug.trace(5, f"Ignoring comment {comment!r}")
                 python_commands.append(comment)
-            elif (my_re.search(r"^(\s*)(\n.*)?$", bash_line, flags=my_re.DOTALL)):
+            # Ignore blank line
+            elif (my_re.search(r"^(\s*\n)(.*)?$", bash_line, flags=my_re.DOTALL)):
                 # note: this matches an empty string
                 (blank_line, rem_bash_line) = my_re.groups()
+                debug.trace(5, f"Ignoring blank line {(blank_line or '')!r}")
                 python_commands.append(blank_line or "")
+            # Otherwise parse via regex approach
             else:
                 (converted, python_line, rem_bash_line) = self.process_compound(bash_line, cmd_iter)
                 if not converted:
@@ -1065,8 +1106,8 @@ Not working yet:
 
     # If just converting via Codex, show the result and stop.
     if JUST_CODEX:
-        b2p = Bash2Python(None, None)
-        result = b2p.codex_convert(bash_snippet)
+        b2p = Bash2Python(bash_snippet, None)
+        result = b2p.format(True)
         print(my_re.sub(fr"^{CODEX_PREFIX}", "", result, flags=my_re.MULTILINE))
         return
 
