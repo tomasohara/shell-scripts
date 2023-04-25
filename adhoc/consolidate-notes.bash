@@ -13,7 +13,7 @@
 #
 
 ## DEBUG:
-echo "0. $@"
+echo "0. $*"
 
 # Uncomment following line(s) for tracing:
 # - xtrace shows arg expansion (and often is sufficient)
