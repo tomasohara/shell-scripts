@@ -41,7 +41,7 @@ if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     echo ""
     echo "$0 --"
     echo ""
-    echo "ALL_TEXT=2 TARGET_DIR=~/notes $script --"
+    echo "ALL_TEXT=1 TARGET_DIR=~/notes $script --"
     echo ""
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."
