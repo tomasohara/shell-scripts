@@ -18,7 +18,7 @@
 
 # Standard modules
 import difflib
-import subprocess
+## OLD: import subprocess
 import sys
 
 # Installed modules
@@ -26,6 +26,7 @@ import click
 
 # Local modules
 from mezcla import debug
+from mezcla import glue_helpers as gh
 from mezcla import system
 import bash2python
 
@@ -34,8 +35,9 @@ TL = debug.TL
 LABEL_BASH2PYTHON = "b2py"
 LABEL_CODEX = "codex"
 DIVIDER_PROPER = "----------------------------------------"
-SMALL_SEGMENT_DIVIDER = f"#{DIVIDER_PROPER[:-10]}\n"
-SEGMENT_DIVIDER = f"#{DIVIDER_PROPER}\n"
+SEGMENT_COMMENT = "#s#"
+SMALL_SEGMENT_DIVIDER = f"{SEGMENT_COMMENT}{DIVIDER_PROPER[:-10]}\n"
+SEGMENT_DIVIDER = f"{SEGMENT_COMMENT}{DIVIDER_PROPER}\n"
 
 # Environment options
 # Notes:
@@ -49,12 +51,13 @@ STRICT_MODE = system.getenv_bool("STRICT_MODE", False,
 PERL_WARNINGS = system.getenv_bool("PERL_WARNINGS", False,
                                    description="Show perl warnings")
 
-def read_input_file(file):
-    """Reads and segments FILE handle"""
+def segment_input(file_handle):
+    """Reads and segments FILE_HANDLE"""
+    debug.trace(6, f"segment_input({file_handle}))")
     segment_num = 0
     output = ""
     debug.assertion(SEGMENT_DIVIDER.endswith("\n"))
-    for line in file:
+    for line in file_handle:
         if ((line.strip() == "") or (not segment_num)):
             # Print divider for subsequent segments
             if segment_num:
@@ -64,17 +67,19 @@ def read_input_file(file):
                 output += f"{SEGMENT_DIVIDER}"
             # Print segment indicator
             segment_num += 1
-            output += f"# Segment {segment_num}\n"
+            output += f"{SEGMENT_COMMENT} Segment {segment_num}\n"
         output += line
     return output
 
 
-def format_bash_to_python(output):
-    """Formats file with bash2python"""
+def bash_to_python(output):
+    """Convert BASH with bash2python"""
+    debug.trace(6, f"bash_to_python({output!r}))")
     formatted_outputs = []
 
     for codex in [True, False]:
         b2p = bash2python.Bash2Python(output, None,
+                                      segment_prefix=SEGMENT_COMMENT,
                                       segment_divider=SEGMENT_DIVIDER)
         formatted_output = b2p.format(codex)
         formatted_outputs.append(formatted_output.splitlines())
@@ -83,6 +88,7 @@ def format_bash_to_python(output):
 
 def print_diff(formatted_outputs):
     """Creates and gives format to a side-by-side diff"""
+    debug.trace(6, f"print_diff({formatted_outputs!r}))")
     diff = list(difflib.ndiff(formatted_outputs[0], formatted_outputs[1]))
     debug.trace_expr(6, diff)
 
@@ -106,67 +112,85 @@ def print_diff(formatted_outputs):
         debug.assertion(line[1] == " ")
 
         ## Tana-TODO1: explain what you were trying to do
-        if content.strip():  # Check if the content is not an empty string
+        if content.strip():             # Check if the content is not an empty string
             content_clipped = content[:HALF_DIFF_MAX]
             blanks = (" " * HALF_DIFF_MAX)
             if symbol == '+':
-                ## BAD: print(f"{content:<70} | {'':<70}")
                 print(f"{content_clipped:{HALF_DIFF_MAX}} | {blanks}")
             elif symbol == '-':
-                ## BAD: print(f"{'':<70}   {content:<70}")
                 print(f"{blanks} | {content_clipped}")
             else:
-                ## BAD: print(f"{content:<70} | {content:<70}")
                 print(content)
+    return
+
+
+def perl_segment_input(file_handle):
+    """Segment code from FILE_HANDLE by splitting according to Perl paragraph mode (i.e., separated by blank lines)"""
+    debug.trace(7, f"perl_segment_input({file_handle})")
+    file_text = ""
+    for line in sys.stdin:
+        file_text += line + "\n"
+
+    # Note: See perlgrep.perl for use of $/ (record separator, whihc normally is newline).
+    #
+    ## TOM: Note that perl uses -00 option for its paragraph mode (see above)
+    ##
+    # The following code gets executed in a loop (via -ne option)
+    command = ""
+    if STRICT_MODE:
+        command += "use strict;\n"
+    command += fr"""
+        BEGIN {{ $seg_num = 1; }}
+        print("{SMALL_SEGMENT_DIVIDER}");
+        print("{SEGMENT_DIVIDER}");
+        print("# Segment ", $seg_num++, "\n");
+        print;
+    """
+
+    # Initialize command invocaitn with Perl options for warnings and strict mode
+    options = ""
+    if PERL_WARNINGS:
+        options += " -w"
+    options = " -00 -ne "
+    ## OLD
+    ## command_spec = ['perl', options, "'", command, "'"]
+    ## debug.trace_expr(5, command_spec)
+    ## output_bytes = subprocess.Popen(command_spec,
+    ##                                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    ##                                 ).communicate(input=file_text.encode())[0]
+    ## output = output_bytes.decode()
+    temp_filename = gh.create_temp_file(file_text)
+    log_filename = f"{temp_filename}.err"
+    ## TODO: output = gh.run(f"perl {options} '{command}' < {temp_filename}", namespace={})
+    ## TODO: extend gh.run to optionally capture stderr (similalr to gh.issue)
+    output = gh.run("perl {opts} '{cmd}' < {temp} 2> {log}",
+                    opts=options, cmd=command, temp=temp_filename, log=log_filename)
+    debug.trace(6, f"perl_segment_input({file_handle}): => {output}")
+    debug.code(6, lambda: debug.trace_fmt(1, "stderr: {log}",
+                                          log=system.read_file(log_filename)))
+    return output
+
 
 @click.command()
 @click.option("--perl", is_flag=True, help="Uses perl.")
 @click.option("--diff", is_flag=True, help="Print the diff between both files.")
 def main(perl, diff):
     """Main function"""
-    file = ""
+    debug.trace(6, f"main({perl}, {diff})")
+    file_handle = sys.stdin
 
     # Read the input, segmenting into units such as by paragraph (e.,g., Perl style)
     if perl:
-        for line in sys.stdin:
-            file += line + "\n"
-        # Note: See perlgrep.perl for use of $/ (record separator, whihc normally is newline).
-        #
-        ## OLD: command = 'BEGIN { $seg_num = 1; print "#segment $seg_num\n" } if (/^\s*$/) { $seg_num++; print "#segment $seg_num\n"; } else { print; }'
-        ##
-        ## TOM: Note that perl uses -00 option for its paragraph mode (see above)
-        ##
-        # The following code gets executed in a loop (via -ne option)
-        command = ""
-        if STRICT_MODE:
-            command += "use strict;\n"
-        command += r"""
-            BEGIN { $seg_num = 1; }
-            print("#----------------------------------------\n");
-            print("# Segment ", $seg_num++, "\n");
-            print;
-        """
-
-        ## OLD: output_bytes = subprocess.Popen(['perl', '-ne', command], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate(input=file.encode())[0]
-        options = ""
-        if PERL_WARNINGS:
-            options += " -w"
-        options = " -00 -ne "
-        command_spec = ['perl', options, "'", command, "'"]
-        debug.trace_expr(5, command_spec)
-        output_bytes = subprocess.Popen(command_spec,
-                                        stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-                                        ).communicate(input=file.encode())[0]
-        output = output_bytes.decode()
+        output = perl_segment_input(file_handle)
     else:
-        file = sys.stdin
-        output = read_input_file(file)
+        output = segment_input(file_handle)
+        
     debug.trace_expr(7, output)
     
-    # note: output is script and formatted_outputs converted version (Tana-TODO2: rename both--see 'Tips' in main script)
-    formatted_outputs = format_bash_to_python(output)
+    # note: output is script text and formatted_outputs converted version (Tana-TODO2: rename both--see 'Tips' in main script)
+    formatted_outputs = bash_to_python(output)
     
-    #If diff function, creates the diff
+    # If using diff function, creates the diff
     # note: diff is side-by-side
     if diff:
         print_diff(formatted_outputs)
@@ -176,6 +200,7 @@ def main(perl, diff):
             sys.stdout.write(f"------------{file_label}------------\n")
             for line in formatted_output:
                 sys.stdout.write(line + "\n")
+    return
 
 
 if __name__ == "__main__":
