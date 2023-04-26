@@ -34,6 +34,7 @@
 # - Global specifications for code linter(s):
 #   # pylint: disable=eval-used
 # - OpenAI API reference: https://platform.openai.com/docs/api-reference
+# - Bash manual: https://www.gnu.org/software/bash/manual/bash.html
 # - Devloped by Tana Alvarez and Tom O'Hara.
 #
 # Tips:
@@ -138,6 +139,7 @@ if USE_MEZCLA:
 
 PYTHON_HEADER = """# Output from bash2python.py
 '''Python code from Bash snippet'''
+import os
 from mezcla.glue_helpers import run_via_bash
 from mezcla import system
 
@@ -382,12 +384,13 @@ class Bash2Python:
         return comment
 
     def var_replace(self, line, other_vars=None, indent=None, is_condition=False, is_loop=False, converted_statement=False):
-        # Tana-note: I'm not convinced this is the best way to do this but it works for now
         """Replaces bash variables with python variables and also derive run call for LINE
         Notes:
         - Optional converts OTHER_VARS in line.
         - Use INDENT to overide the line space indentation.
         """
+        # Tana-note: I'm not convinced this is the best way to do this but it works for now
+        # TODO1: return (was-converted, python, remainder), as with process_xyz functions
         # Note: is_condition is no longer used
         in_line = line
         if indent is None:
@@ -403,6 +406,8 @@ class Bash2Python:
         ## BAD: if "=" in line:
         if my_re.search(r"^\s*\w+=", line):
             line = line.replace("[", "").replace("]", "")
+            ## *** Don't mix-n-match variable types with the same name: very confusing! ***
+            # TODO: pre_assign, post_assign = line.split(" = ", maxsplit=1)
             if " = " in line:
                 line = line.split(" = ")
             else:
@@ -422,7 +427,7 @@ class Bash2Python:
                 debug.trace(5, f"[early exit 1] {var_replace_call} => {result!r}")
                 return result
             if variable != "":
-                # Tana-TODO: add constraint to avoid clobbering line
+                # Tana-TODO: add constraint to avoid clobbering entire line
                 line = variable
         # Check for assignment within expression statement; ex: (( z = x + y ))
         if my_re.search(r"^\s+\(\(\s*(\w+)\s*=.*\)\)", line):
@@ -524,11 +529,18 @@ class Bash2Python:
             line = line.strip()
         
         # Do special processing for single statement lines
-        is_compound_statement = (((";" in line) or ("\n" in line)) and
+        # TODO: strip extraneous semicolons (e.g., "ls;" => "ls")
+        is_multiline_statement = ("\n" in line)
+        if is_multiline_statement:
+            system.print_stderr("Warning: unexpected multi-line statement in var_replace")
+            debug.trace(5, f"[early exit 3] {var_replace_call} => {line!r}")
+            return line
+        is_compound_statement = (my_re.search(r"\s*\S+\s*;\s*\S+\s*", line) and
                                  (not re.search(r"""^(['"])[^\1]*;\1$""", line)))
         if is_compound_statement:
             debug.assertion(not embedded_in_quoted_string(";", line))
-        elif not line.strip():
+            inline_comment += " # Warning: review conversion of compound statement"
+        if not line.strip():
             debug.trace(6, f"line4.5={line!r}")
             pass
         ## TEST
@@ -630,21 +642,23 @@ class Bash2Python:
             line = f"run(f{line!r})"
 
         # Restore comment
-        line = (line + inline_comment)
+        if not self.skip_comments:
+            line = (line + inline_comment)
         debug.trace(6, f"line7={line!r}")
 
         debug.trace(5, f"{var_replace_call} => {line!r}")
         return line
 
     def operators(self, line):
-        """Returns line with operators converted to Python equivalents"""
+        """Returns line with operators converted to Python equivalents
+        Note: Assumes the line contains a single test expression (in isolation).
+        """
         # Dictionary with Bash operators and their Python equivalents
         # TODO1: split into binary and unary operators
         operators = {" = ":       " == ",
                      " != ":      " != ",
                      " ! ":       "not ",
                      "-eq ":      " == ",
-                     "-e":        "  os.path.exists ",    # TODO3: fix parentheses below
                      "-ne":       " != ",
                      "-gt":       " > ",
                      "-ge":       " >= ",
@@ -655,6 +669,13 @@ class Bash2Python:
                      "&&":        " and ",
                      r"\|\|":     " or ",  # NOTE: need to escape | for Python
                      }
+        file_operators = {
+            "-d": "os.path.isdir",
+            "-f": "os.path.isfile",
+            "-e": "os.path.exists",
+            "-L": "os.path.islink",
+            # TODO: other common cases from bash manual (r, s, w, x, etc.)
+            }
 
         in_line = line
         
@@ -662,17 +683,31 @@ class Bash2Python:
         # TODO3: use regex replacement and account for token boundaries (e.g., make sure [ or ] not in string)
         for bash_operator, python_equivalent in operators.items():
             line = re.sub(fr"(\S*) *{bash_operator} *(\S*)",
-                          fr"\1{python_equivalent}\2", line).replace("[", "").replace("]", "")
-            
+                          fr"\1{python_equivalent}\2", line)
+
+        # Likewise handle file operators
+        # examples: "[ -f ~/.bashrc ]"  and  "[[(-d /tmp) || (-d /temp)]]"
+        for bash_operator, python_equivalent in file_operators.items():
+            # TODO: handle quoted filenames with spaces and use of paretheses
+            line = re.sub(fr"([\[\(] \s*) {bash_operator} +([^ \]]+) \b",
+                          fr"\1{python_equivalent}(\2)", line, flags=my_re.VERBOSE)
+
         # Replace Bash true/false statements with Python equivalent
         line = re.sub(r"\[ 1 \]", "True", line)
         line = re.sub(r"\[ 0 \]", "False", line)
+
+        # Remove square brackets
+        for bracket in [r"\[", r"\]", r"\[\[", r"\]\]"]:
+            debug.assertion(not embedded_in_quoted_string(bracket, line), f"test bracket '{bracket}' in quoted expression")
+        line = my_re.sub(r"(^\s* \[) | (\] \s*$)", "", line, flags=my_re.VERBOSE)
+        line = my_re.sub(r"(^\s* \[\[) | ( \]\]) \s*$", "", line, flags=my_re.VERBOSE)
+        
         debug.trace(5, f"operators({in_line!r}) => {line!r}")
         return line
 
     def process_keyword_statement(self, line):
         """Process simple built-in keyword statement (e.g., true to pass)
-        Returns was-converted, python, remainder
+        Returns (was-converted, python, remainder): see process_compound)
         """
         debug.trace(6, f"in process_keyword_statement({line!r})")
         in_line = line
@@ -685,7 +720,7 @@ class Bash2Python:
 
     def process_simple(self, line):
         """Process simple statement conversion for LINE
-        Returns was-converted, python, remainder
+        Returns (was-converted, python, remainder): see process_compound)
         """
         debug.trace(6, f"in process_simple({line!r})")
         in_line = line
