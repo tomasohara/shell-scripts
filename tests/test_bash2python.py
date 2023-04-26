@@ -7,7 +7,11 @@
 # (e.g., assignments, loops, and environment support).
 #
 # Notes:
-# - Use 'pytest test_bash2python.py -k "not skip"' to skip the tests that cover functions not yet implemented.
+# - Use 'pytest test_bash2python.py -k "not skip"'
+# - To skip the tests that cover functions not yet implemented., use
+#     pytest -k "not skip" tests/test_bash2python.py
+# - To treat xfail-marked tests as failure, use
+#     pytest --runxfail tests/test_bash2python.py
 # - For OpenAI key specification, see
 #      https://platform.openai.com/docs/api-reference/introduction?lang=python
 # - Debug tracing might cause problems for the tests, so disable as follows:
@@ -34,7 +38,7 @@ import pytest
 from click.testing import CliRunner
 
 # Local modules
-from bash2python import Bash2Python as bp, OPENAI_API_KEY
+from bash2python import Bash2Python as B2P, OPENAI_API_KEY
 from bash2python_diff import main
 from mezcla import debug
 from mezcla.my_regex import my_re
@@ -69,7 +73,9 @@ def bash2py(bash, python, skip_normalize=False, keep_comments=False):
     - Applies whitespace normalization unless SKIP_NORMALIZE
     - Omits conversion comments unless KEEP_COMMENTS (for sake of simpler matching)
     """
-    b2p = bp(bash, None, skip_comments=(not keep_comments))
+    debug.trace(6, f"bash2py{(bash, python, skip_normalize, keep_comments)}")
+    debug.trace_expr(5, bash, python, delim="\n")
+    b2p = B2P(bash, None, skip_comments=(not keep_comments))
     output = b2p.format(False)
     if not skip_normalize:
         output = normalize_whitespace(output)
@@ -84,8 +90,8 @@ def bash2py(bash, python, skip_normalize=False, keep_comments=False):
 def test_codex():
     """Simple test for codex using an very standard input"""
     bash = "echo Hello World"
-    ## OLD: python = bp.codex_convert(None, bash)
-    b2p = bp(bash, None, skip_comments=True)
+    ## OLD: python = b2p.codex_convert(None, bash)
+    b2p = B2P(bash, None, skip_comments=True)
     python = b2p.format(True)
     output = 'print("Hello World")'
     #
@@ -207,7 +213,9 @@ for i in 1 2 3; do
 done 
     """
     ## OLD: python = "embedded for: for i in 1 2 3; do"
+    ## TODO: call directly
     python = "embedded for"
+    debug.trace_expr(5, bash, python, delim="\n") 
     output = (
         subprocess.check_output(["python", "bash2python.py", "--script", bash])
         .decode()
@@ -239,7 +247,7 @@ fi
 def test_alt_if_else_condition():
     """Test non-trivial if/then/elif/fi conversion"""
     bash = """
-(( x=RANDOM ))                         # TODO: x=$(calc-int "rand() * 1024")
+(( x=RANDOM ))                         
 if [ $x -eq 0 ]; then
     echo "$x zero"
 elif [ $x -lt 0 ]; then
@@ -247,7 +255,7 @@ elif [ $x -lt 0 ]; then
 else
     echo "$x positive"
 fi
-    """
+    """                                 # TODO: x=$(calc-int "rand() * 1024")
     python = """
 x = run("echo $RANDOM")
 if x == 0:
@@ -338,6 +346,25 @@ for file in files:
     bash2py(bash, python)
 
 
+@pytest.mark.xfail
+# note: uses xfail for convenience (TODO: have separate version for important tests)
+@pytest.mark.parametrize("bash_line, expected_result", [
+    # input                             result
+    ("""echo $fubar""",                 """run(f'echo {fubar}')"""),      # TODO: print(f"{fubar}")
+    # note: results with multiple run's requires var_replace to be incremental (as with process_compound)
+    ("""ls; pwd""",                     """run('ls; pwd')"""),
+    ("""ls\npwd\n""",                   """run('ls')\nrun('pwd')"""),
+    ("""ls\n\npwd\n""",                 """run('ls')\n\nrun('pwd')"""),
+    ])
+def test_tabular_var_replace(bash_line, expected_result):
+    """Tests in tabular format for var_replace. Uses pytest parametrize"""
+    b2p = B2P(None, None)
+    actual_result = b2p.var_replace(bash_line)
+    norm_actual_result = normalize_whitespace(actual_result)
+    norm_expected_result = normalize_whitespace(expected_result)
+    assert(norm_actual_result == norm_expected_result)
+
+
 @pytest.mark.xfail                      # uses xfail for convenience (TODO: have separate version for good tests)
 @pytest.mark.parametrize("bash, python", [
     # Bash. => Python
@@ -359,7 +386,7 @@ for file in files:
     # simple if statement(s)
     ("""if [ $? -eq 0 ]; then echo "Success"; fi""",
      """if run("echo $?") == "0":\n   print("Success")"""),
-    ("""if [ 1 -gt 0 ]; then if [ 1 -gt 0 -lt 2 ]; then echo Hello; fi; fi""",    # note: single line causes problem
+    ("""if [ 1 -gt 0 ]; then if [ 1 -gt 0 -lt 2 ]; then echo Hello; fi; fi""",   # single line issue
      """if 1 > 0 < 2:\n    run('echo Hello')\n"""),
     # simple for statement(s)
     ("""for i in 1 2 3; do echo "$i"; done""",
@@ -383,7 +410,12 @@ for file in files:
     # default values (n.b., the support needs to be changed in bash2python.py)
     ("""if [ ${HOME:-n/a} = "n/a" ]; then echo "no HOME"; fi""",
      """if os.getenv("HOME", "n/a") == "n/a":\n    print("no HOME")"""),
-    # operators
+    # special test conditions (TOOD: rework in terms of tests for operator function)
+    ("""if [ 1 ]; then true; fi""",
+     """if True:\n    pass"""),
+    ("""if [ 1 ]; then true; fi""",
+     """if True:\n    pass"""),
+    # operators (TODO: isolate from if/then/fi verbiage)
     ("""if [[ ($? -gt 0) && ($? -lt 0) ]]; then echo "bad status"; fi""",
      """if run("$?") > 0 and run("$?") < 0:\n    print("bad status")"""),
     ("""if [ 1 || 0 ]; then echo "one"; fi""",
@@ -394,13 +426,29 @@ for file in files:
      """if '' == " ":\n    print('bug')"""),
     ("""if [ -n "" ]; then echo "bug"; fi""",
      """if '' != " ":\n    print('bug')"""),
-     # Exit statement (n.b., keep last as all bash input converted to script)
+    # file operators (TODO: test for quoting of filenames)
+    ("""if [ -f "$HOME/.bashrc" ]; then true; fi""",
+     """if os.path.isfile("$HOME/.bashrc"): then pass"""),
+    ("""if [ -d "/tmp" ]; then true; fi""",
+     """if os.path.isdir("/tmp"): then pass"""),
+    ("""if [[ (-d "/tmp") || (-d "$HOME/temp") ]]; then true; fi""",
+     """if os.path.isdir("/tmp") or os.path.isdir("$HOME/temp"): then pass"""),
+    # Unimplemented operators
+    ("""if [[ $fu =~ bar ]]; then true; fi""",       # regex matching
+     """if re.search("bar", fu): \n    pass"""),
+    # Unimplemented features
+    ("""
+echo 1 2 \
+3""",                                   # line continuation
+     """run('echo 1 2 3');"""),
+    # Exit statement (n.b., keep last as all bash input converted to script)
     ("exit",
      "run('exit')")
     ])
 def test_tabular_tests(bash, python):
     """Tests in tabular format. Uses pytest parametrize"""
     bash2py(bash, python)
+
 
 ## TODO1: put bash2python_diff tests in test_bash2python_diff
 ##
@@ -410,9 +458,11 @@ def test_diff_no_opts():
     debug.trace(5, "test_diff_no_opts()")
     runner = CliRunner(mix_stderr=False)
     # NOTE: disable stderr tracing
+    bash = "line1\n\nline2\n"
     result = runner.invoke(main, env={"DEBUG_LEVEL": "0"},
-                           input="line1\n\nline2\n")
-    debug.trace_expr(5, result)
+                           input=bash)
+    python = result.output
+    debug.trace_expr(5, bash, python, delim="\n")
     debug.trace_object(6, result)
     assert result.exit_code == 0
     assert "------------codex------------" in result.output
@@ -424,12 +474,14 @@ def test_diff_opts():
     debug.trace(5, "test_diff_opts()")
     runner = CliRunner(mix_stderr=False)
     # NOTE: disable stderr tracing
+    bash = "echo Hello World;\nfoo='bar';\n"
     result = runner.invoke(main, args=["--perl", "--diff"], env={"DEBUG_LEVEL": "0"},
                            ## TODO2: input="echo Hello World\n\nfoo='bar'\n",
-                           input="echo Hello World;\nfoo='bar';\n",
-                           )
-    debug.trace_expr(5, result.output, max_len=4096)
-    debug.trace_object(6, result)
+                           input=bash)
+    python = result.output
+    debug.trace_expr(5, bash, python, delim="\n")
+    debug.trace_expr(6, result.output, max_len=4096)
+    debug.trace_object(7, result)
     assert result.exit_code == 0
     ##
     ## OLD
