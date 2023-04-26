@@ -126,6 +126,14 @@ function downcase-stdin-alias ()
 }
 ## OLD: fi
 
+# quiet-unalias-alias(name): undefines NAME alias w/o error message
+# NOTE: used during transition from an alias proper to a function
+# TODO: add clear-and-redefine-aliases function elsewhere to address this
+function quiet-unalias-alias {
+    unalias "$@" 2> /dev/null || true;
+}
+
+
 # HACK: wrapper around check_errors.perl w/ new QUIET option
 function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 check_errors.perl -context=5 "$@") 2>&1; }
 
@@ -179,17 +187,17 @@ function git-update-plus {
     local restore_dir=""
     if [ "$changed_files" != "" ]; then
         if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
-	    # Make sure root active for relative path names in zip file
-	    local root_dir
-	    root_dir="$(git-root-alias)"
-	    if [ "$PWD" != "$root_dir" ]; then
-		echo "Temporarily changing working directory to root: $root_dir"
-		restore_dir="$PWD"
-		cd "$(git-root-alias)"
-	    fi
+            # Make sure root active for relative path names in zip file
+            local root_dir
+            root_dir="$(git-root-alias)"
+            if [ "$PWD" != "$root_dir" ]; then
+                echo "Temporarily changing working directory to root: $root_dir"
+                restore_dir="$PWD"
+                cd "$(git-root-alias)"
+            fi
 
-	    # Create zip (-v for verbose & -y for symlinks)
-	    command rm -f _stash.zip
+            # Create zip (-v for verbose & -y for symlinks)
+            command rm -f _stash.zip
             echo "issuing: zip over changed files (for later restore)"
             echo "git-diff-list | zip -v -y -@ _stash.zip" >> "$log"
             git-diff-list | zip -v -y -@ _stash.zip >> "$log"
@@ -212,15 +220,23 @@ function git-update-plus {
     # Optionally restore timestamps for changed files
     if [ "$changed_files" != "" ]; then
         if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
-	    # Restore working directory
-	    if [ "$restore_dir" != "" ]; then
-		echo "Restoring working directory: $restore_dir"
-		cd "$restore_dir"
-	    fi
+	    ## OLD:
+            ## # Restore working directory
+            ## if [ "$restore_dir" != "" ]; then
+            ##     echo "Restoring working directory: $restore_dir"
+            ##     cd "$restore_dir"
+            ## fi
+
             echo "issuing: unzip over _stash.zip (to restore timestamps)"
             # note: unzip options: -o overwrite; -v verbose:
             echo "unzip -v -o _stash.zip" >> "$log"
             unzip -v -o _stash.zip >> "$log"
+	    
+            # Restore working directory
+            if [ "$restore_dir" != "" ]; then
+                echo "Restoring working directory: $restore_dir"
+                cd "$restore_dir"
+            fi
         else
             echo "Not unzipping changes (because PRESERVE_GIT_STASH not 1)"
         fi
@@ -262,6 +278,17 @@ function git-commit-and-push {
     local log
     log=$(get-temp-log-name "commit")
     #
+    # TODO: rework so that message passed as argument (to avoid stale messages from environment)
+    local message="$GIT_MESSAGE";
+    if [ "$message" = "..." ]; then
+        echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
+        return 1
+    fi
+    if [ "$message" = "" ]; then
+        echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE-typo error)"
+        return 1
+    fi
+    #
     local git_user="n/a"
     local git_token="n/a"
     if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
@@ -276,16 +303,18 @@ function git-commit-and-push {
         echo "issuing: git add \"$*\""
         git-add-plus "$@" >> "$log"
     fi
-    # TODO: rework so that message passed as argument (to avoid stale messages from environment)
-    local message="$GIT_MESSAGE";
-    if [ "$message" = "..." ]; then
-        echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
-        return 1
-    fi
-    if [ "$message" = "" ]; then
-        echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE error)"
-        return 1
-    fi
+    ##
+    ## OLD:
+    ## # TODO: rework so that message passed as argument (to avoid stale messages from environment)
+    ## local message="$GIT_MESSAGE";
+    ## if [ "$message" = "..." ]; then
+    ##     echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
+    ##     return 1
+    ## fi
+    ## if [ "$message" = "" ]; then
+    ##     echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE error)"
+    ##     return 1
+    ## fi
 
     # Push the changes after showing synopsis and getting user confirmation
     echo ""
@@ -363,7 +392,8 @@ function invoke-git-command {
     log=$(get-temp-log-name "$command")
     echo "issuing: git $command $*"
     git "$command" "$@" >| "$log" 2>&1
-    ## OLD: less 
+    ## OLD: less
+    ## NOTE: unfortunately, less clears the screen
     ## TODO: less --quit-if-one-screen "$log"
     cat "$log"
     # TODO: git-alias-review-log "$log"
@@ -383,15 +413,25 @@ alias git-command='invoke-git-command'
 alias git-push-plus='invoke-git-command push'
 
 # Misc git commands (redirected to log file)
+# NOTE: commands with much output like git-log invoke less
+# TODO: add invoke-git-command-paged wrapper (a la git ... | less)
 alias git-status='invoke-git-command status'
-alias git-log-plus='invoke-git-command log --name-status'
+## OLD: alias git-log-plus='invoke-git-command log --name-status'
+quiet-unalias-alias git-log-plus        ## TEMP
+function git-log-plus { invoke-git-command log --name-status "$@" | less --quit-if-one-screen; }
+# note: git-log-diff-plus shows diff-style log
 alias git-log-diff-plus='invoke-git-command log --patch'
+alias git-blame-alias='invoke-git-command blame'
 
 # git-add-plus: add filename(s) to repository
+# note: if GIT_FORCE is 1 then --force added (e.g., to override .gitignore)
 function git-add-plus {
     local log;
     log=$(get-temp-log-name "add");
-    git add "$@" >| "$log" 2>&1;
+    local options=""
+    if [ "$GIT_FORCE" = "1" ]; then options="--force"; fi
+    ## OLD: git add "$@" >| "$log" 2>&1;
+    git add $options "$@" >| "$log" 2>&1;
     ## TEMP:
     ## check-errors "$log" | cat;
     ## if [ "$(extract-matches '^fatal:' "$log")" != "" ]; then
@@ -406,10 +446,24 @@ function git-add-plus {
 # git-reset-file(file, ...): move FILE(s) out of way and "revert" to version in repo (i.e., reset)
 # NOTE: via https://www.atlassian.com/git/tutorials/undoing-changes/git-reset
 #     If git revert is a “safe” way to undo changes, you can think of git reset as the dangerous method.
+# Also see
+#     https://stackoverflow.com/questions/1125968/how-do-i-force-git-pull-to-overwrite-local-files
+#     https://stackoverflow.com/questions/11200839/why-git-cant-do-hard-soft-resets-by-path
 # TODO: clarify whether git add needed as well (due to maldito git)
 function git-reset-file {
     local log;
     log=$(get-temp-log-name "revert");
+    ## TODO:
+    ## local reset_options=""
+    ## if [ "$1" = "--hard" ]; then
+    ##     reset_options="$1";
+    ##     shift
+    ##     pause-for-enter $'Warning: reset --hard changes the both index and working tree!\nPress enter to proceed'
+    ## fi
+    if [ "$*" = "" ]; then
+	echo "Error: need to specify a file"
+	return 1
+    fi
 
     # Isolate old versions
     mkdir -p _git-trash >| "$log";
@@ -419,17 +473,30 @@ function git-reset-file {
     # Forget state
     echo "issuing: git reset HEAD $*";
     git reset HEAD "$@" >> "$log";
+    ## TODO: git reset HEAD $reset_options "$@" >> "$log";
+    ## NOTE: leads to "Cannot do hard reset with paths" error
     
     # Re-checkout
+    # TODO: add option for 'git checkout HEAD -- ...'???
     echo "issuing: git checkout -- $*";
     git checkout -- "$@" >> "$log";
+
+    # Issue warning if stash non-empty
+    echo "issuing: git stash list"
+    local stash
+    stash=$(git stash list)
+    if [ "$stash" != "" ]; then
+	echo "Warning: non-empty stash:"
+        echo "$stash" | perl -pe 's/^/    /;'
+        echo "Consider issuing following: git stash drop"
+    fi
 
     # Sanity check
     git-alias-review-log "$log"
 }
 #
 alias git-revert-file-alias='git-reset-file'
-
+## TODO: alias git-reset-hard-alias='git-reset-file --hard'
 
 # git-restore-file-alias(file, ...): move FILE(s) out of way and "revert" to version in repo (i.e., reset)
 # NOTE: via https://stackoverflow.com/questions/7751555/how-to-resolve-git-stash-conflict-without-commit:
@@ -440,7 +507,7 @@ function git-restore-file-helper {
     shift
     log=$(get-temp-log-name "restore");
     if [ "$option" = "--both" ]; then
-	option="--worktree --staged"
+        option="--worktree --staged"
     fi
 
     # Isolate old versions
@@ -478,6 +545,7 @@ function git-diff-plus {
 #   [difftool "kdiff3"]
 #       path = /usr/bin/kdiff3
 #       trustExitCode = false
+# TODO1: work around quirk with plain diff being invoked in certain situations (e.g., merge conflict)
 #
 function git-difftool-plus {
     ## TODO: add trace-command function
@@ -556,13 +624,13 @@ function alt-invoke-next-single-checkin {
         if [ "$mod_file" = "" ]; then
             echo "Warning: unable to infer modified file. Perhaps,"
             echo "    Tha-tha-that's all folks"'!'
-	    echo ""
-	    local divider
-	    divider=$(perl -e 'print("." x 80);')
-	    echo "$divider"
-	    ## OLD: git-status | head
-	    git-status
-	    echo "..."
+            echo ""
+            local divider
+            divider=$(perl -e 'print("." x 80);')
+            echo "$divider"
+            ## OLD: git-status | head
+            git-status
+            echo "..."
             return;
         fi
     fi
@@ -632,11 +700,11 @@ alias git-next-checkin='invoke-alt-checkin'
 function git-checkout-branch {
     git branch | grep -c "$1";
     if [ $? ]; then
-	## OLD: git-command checkout "$1";
-	# note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
-	git-command checkout "$1" --;
+        ## OLD: git-command checkout "$1";
+        # note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
+        git-command checkout "$1" --;
     else
-	echo "Error: unknown branch"
+        echo "Error: unknown branch"
     fi;
 }
 
@@ -712,6 +780,7 @@ function git-misc-alias-usage() {
     echo ""
     echo "To override file additions (e.g., blocked by .gitignore):"
     echo "    git add --force file..."""
+    echo "    # TODO: GIT_FORCE=1 GIT_MESSAGE='initial version' git-update-commit-push file..."
     echo "    GIT_MESSAGE='initial version' git-update-commit-push file..."
     echo ""
     echo "To use git manual merge resolution (n.b., trial and error required):"

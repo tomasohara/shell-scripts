@@ -78,6 +78,9 @@
 # - Likewise commonly used Unix features which might not be familiar:
 #    -- 'realpath file' returns full path for file with relative path.
 # - Selectively ignore following shellcheck warnings
+#    -- SC2016: (info): Expressions don't expand in single quotes
+#    -- SC2046: Quote this to prevent word splitting
+#    -- SC2086: Double quote to prevent globbing and word splitting.
 #    -- SC2155: Declare and assign separately to avoid masking return values
 #    -- SC2139: This expands when defined, not when used. Consider escaping.
 #
@@ -141,7 +144,7 @@ function conditional-export () {
         var="$1" value="$2";
         ## DEBUG: echo "value for env. var. $var: $(printenv "$var")"
         if [ "$(printenv "$var")" == "" ]; then
-	    # Note: ignores SC1066 [Don't use $ on the left side of assignments],
+	    # Ignores SC1066: Don't use $ on the left side of assignments
 	    # SC2046 [Quote this to prevent word splitting], and SC2086 [Double quote to prevent globbing and word splitting].
 	    # shellcheck disable=SC1066,SC2046,SC2086
             export $var="$value"
@@ -168,6 +171,9 @@ alias cond-setenv='conditional-export'
 # - Variable intended for run-time evaluation should be passed inside a single quoted string (or escaped with \)
 # - This is so that the alias becomes a "first class" citizen, such as allowing for
 #   environment variables to be set as in 'alias-fn echo-ENV1 'echo "$ENV1"'; ENV1=one echo-ENV1
+# - Use dummy command if a background command is invoked: gotta hate Bash!
+#   ex: alias-fn eyes 'xeyes & true'
+##
 # ex: alias-fn trace-PS1 'echo \$PS1="$PS1" 1>&2'
 # TODO: fix problem with embedded invocations (see em-adhoc-notes below)
 function alias-fn {
@@ -180,7 +186,8 @@ function alias-fn {
 #................................................................................
 # General environment settings
 ## TOM-IDIOSYNCRATIC
-cond-export DEBUG_LEVEL 4
+## OLD: cond-export DEBUG_LEVEL 4
+cond-export DEBUG_LEVEL 3
 
 #...............................................................................
 # Directory for Tom O'Hara's scripts, defaulting to /home/tomohara if available
@@ -577,7 +584,7 @@ append-path "$HOME/perl/bin"
 # used at Convera).
 ## OLD: export TIME_CMD=/usr/bin/time
 ## BAD: export TIME_CMD="command time"
-# note: command is a binary under MacOs built just a shell builtin under Linux
+# note: command is a binary under MacOs but just a shell builtin under Linux
 export TIME_CMD="command time"
 if [ "$(which "command" 2> /dev/null)" == "" ]; then
     export TIME_CMD=/usr/bin/time
@@ -660,6 +667,7 @@ function cd-realdir {
     pwd;
 }
 alias cd-this-realdir='cd-realdir .'
+# shellcheck disable=SC2016
 alias-fn pushd-this-realdir 'pushd "$(realpath ".")"'
 
 # pushd-q, popd-q: quiet versions of pushd and popd
@@ -815,7 +823,10 @@ alias symlinks='sublinks'
 # symlinks-proper: just show file name info for symbolic links, which starts at column 43
 alias symlinks-proper='symlinks | cut --characters=43-'
 #
-function sublinks-proper { sublinks "$@" | cut --characters=42-  | $PAGER; }
+## OLD: function sublinks-proper { sublinks "$@" | cut --characters=42-  | $PAGER; }
+ls_filename_col=40
+if [ "$(under-macos)" = "1" ]; then ls_filename_col=42; fi
+function sublinks-proper { sublinks "$@" | cut --characters=${ls_filename_col}-  | $PAGER; }
 alias symlinks-proper=sublinks-proper
 #
 alias glob-links='find . -maxdepth 1 -type l | sed -e "s/.\///g"'
@@ -1688,7 +1699,6 @@ function show-all-macros () {
 
 # show-macros(pattern): like show-all-macros, exlcuding leading _ in name
 function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
-# maldito shellcheck: SC2016 (info): Expressions don't expand in single quotes
 # shellcheck disable=SC2016
 alias-fn show-macros-proper 'show-macros | $GREP "^\w"'
 # show-variables(): show defined variables
@@ -1787,6 +1797,11 @@ alias rename_files='rename-files'
 alias testwn='perl- testwn.perl'
 alias perlgrep='perl- perlgrep.perl'
 alias foreach='perl- foreach.perl'
+
+#--------------------------------------------------------------------------------
+# Adhoc aliases for renaming aliases
+## TOM-IDIOSYNCRATIC#
+
 # rename-spaces: replace spaces in filenames of current dir with underscores
 alias rename-spaces='rename-files -q -global " " "_"'
 alias rename-quotes='rename-files -q -global "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
@@ -1808,6 +1823,11 @@ alias rename-parens='rename-files -global -regex "[\(\)]" "" *[\(\)]*'
 alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-duplicates'
 ## TODO: alias rename-parens='rename-files -rename_old -global -regex "[\(\)]" "" *[\(\)]*'
 #
+# rename-utf8-encoded: replace runs of non-ascii UTF8 encodings with _
+# note: '👇🏻' gets encoded as ; see show-unicode-code-info alias to way to illustrate encodings
+# TODO: make this less of a sledgehammer
+alias rename-utf8-encoded='rename-files -global -regex "[0x80-0xFF]\{3,\}" "_"'
+alias rename-bad-dashes="rename-files -quick -global -regex ' \-' '_'; rename-files -quick -global -regex '\-' '_' -*"; 
 
 #-------------------------------------------------------------------------------
 ## TOM-IDIOSYNCRATIC
@@ -1863,6 +1883,22 @@ alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
 alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
 alias move-adhoc-files='move-log-files; move-output-files'
 alias move-old-files='move-versioned-files "*" old'
+# move-versioned-files-alt: alternative version for moving all files with DDMMMDD-style timestamp into ./old
+## OLD: alias move-versioned-files-alt='mkdir -p old; move *[0-9][0-9][a-z][a-z][a-z]*[0-9][0-9]* old'
+# shellcheck disable=SC2010,SC2086
+{
+function move-versioned-files-alt {
+    mkdir -p old;
+    local version_regex="[0-9][0-9][a-z][a-z][a-z]*[0-9][0-9]"
+    move ./*$version_regex* old
+    local false_positives
+    false_positives="$(ls old/*$version_regex* 2>&1 | grep -v 'No such file' | egrep "(adhoc)|(.txt$)")"
+    if [ "$false_positives" != "" ]; then
+	echo "Warning: potential misplaced files"
+	echo "    $false_positives"
+    fi
+    }
+}
 
 #--------------------------------------------------------------------------------
 
@@ -2036,7 +2072,9 @@ alias tokenize='split-tokens'
 # NOTE: Usually Bash $'string' special tokens can be used instead
 #       (e.g., perl-echo "A\tB" => echo $'A\tB').
 # TODO: try to minimize use of quotes in perl-echo (e.g., need to mix single with double) due to bash quirks
-function perl-echo () { perl -e 'print "'"$1"'\n";'; }
+## OLD: function perl-echo () { perl -e 'print "'"$1"'\n";'; }
+function perl-echo () { perl -e 'print "'"$*"'\n";'; }
+## TODO: function perl-echo () { perl -e 'print "'"($*)"'\n";'; }
 ## MISC
 function perl-echo-sans-newline () { perl -e 'print "'"$1"'";'; }
 #
@@ -2179,6 +2217,8 @@ alias restart-system='shutdown-system --reboot'
 alias blank-screen='xset dpms force off'
 alias stop-service='systemctl stop'
 alias restart-service='sudo systemctl restart'
+# TODO: rename as map-internet-ports???
+alias map-ports='nmap'
 
 # get-free-filename(base, [sep=""], [ext=""]): get filename starting with BASE that is not used.
 # Notes: 1. If <base> exists <base><sep><N> checked until the filename not used (for N in 2, 3, ... ).
@@ -2645,7 +2685,9 @@ function python-lint-full() {
 # - the following has two regex: *modify the first* to add more conditions to ignore; the second is just for the extraneous pylint output
 function python-lint-work() { python-lint-full "$@" 2>&1 | $EGREP -v '\((bad-continuation|bad-option-value|fixme|invalid-name|locally-disabled|too-few-public-methods|too-many-\S+|trailing-whitespace|star-args|unnecessary-pass)\)' | $EGREP -v '^(([A-Z]:[0-9]+)|(Your code has been rated)|(No config file found)|(PYLINTHOME is now)|(\-\-\-\-\-))' | $PAGER; }
 # TODO: rename as python-lint-tpo for clarity (and make python-lint as alias for it)
-function python-lint() { python-lint-work "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-f-string|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|missing-final-newline|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
+# note: R0801 is for duplicate lines across source files (no mnemonic)
+function python-lint() { python-lint-work "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-f-string|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|missing-final-newline|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position|R0801)\)' | $PAGER; }
+# TODO: fix R0801 support
 
 # run-python-lint-batched([file_spec="*.py"]: Run python-lint in batch mode over
 # files in FILE_SPEC, placing results in pylint/<today>.
@@ -3054,6 +3096,7 @@ alias sleepy='sleepyhead'
 alias tomohara-aliases='source "$TOM_BIN/tomohara-aliases.bash"'
 alias tomohara-settings='source "$TOM_BIN/tomohara-settings.bash"'
 alias more-tomohara-aliases='source "$TOM_BIN/more-tomohara-aliases.bash"'
+alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 
 # Optional end tracing
 startup-trace 'out tomohara-aliases.bash'

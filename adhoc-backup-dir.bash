@@ -17,13 +17,13 @@
 # in $@.
 # NOTE: See sync-loop.sh for an example.
 #
-if [ "$1" = "" ]; then
+if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     script=$(basename "$0")
     ## TODO: if [ $script ~= *\ * ]; then script='"'$script'"; fi
     ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--TODO] [--trace] [--help] [--]"
+    echo "Usage: $0 [--TODO] [--trace] [--help] [-- | -]"
     echo ""
     echo "Examples:"
     echo ""
@@ -31,7 +31,7 @@ if [ "$1" = "" ]; then
     echo "$0 --"
     echo ""
     ## TODO: example 2
-    echo "ROOT_BACKUP_DIR=~/usb/exfat-adhoc MAX_DAYS_OLD=365 MAX_SIZE_CHARS=10000000 $script --"
+    echo "ROOT_BACKUP_DIR=~/usb/sd512 MAX_DAYS_OLD=\$((3*365/12)) MAX_SIZE_CHARS=\$((5 * 1024**2)) $script --"
     echo ""
     echo "Notes:"
     echo "- By default, included files mopdified within 30 days and no larger than 1mb."
@@ -54,7 +54,7 @@ while [ "$moreoptions" = "1" ]; do
 	trace=1
     elif [ "$1" = "--verbose" ]; then
 	verbose=1
-    elif [ "$1" = "--" ]; then
+    elif [[ ("$1" = "--") || ("$1" = "-") ]]; then
 	break
     else
 	echo "ERROR: Unknown option: $1";
@@ -90,16 +90,18 @@ fi
    export BASE_DIR
    BASE_DIR=$(basename "$PWD")
    if [ "$BASE_DIR" = "/" ]; then
+      # note: uses "fs-root" for label if / and retricts to same file system
       export BASE_DIR=fs-root;
       export MISC_FIND_OPTIONS="-xdev"
    fi
    export SOURCE_DIR="$PWD"
    ## TODO: pre-select based on existence (i.e., prioritized check)
-   ## OLD: export BACKUP_DIR=~tohara/"usb/sd512/backup/$HOSTNAME"
-   root_backup_dir=${ROOT_BACKUP_DIR:-~tohara/usb/sd512}
-   export BACKUP_DIR="$root_backup_dir/backup/$HOSTNAME"
-   ## -or-: export BACKUP_DIR=~tohara/"usb/pando-xfer/backup/$HOSTNAME"
-   ## -or-: export BACKUP_DIR=~tohara/"usb/exfat-adhoc/backup/$HOSTNAME"
+   ROOT_BACKUP_DIR=${ROOT_BACKUP_DIR:-$HOME/usb/sd512}
+   if [ ! -e "$ROOT_BACKUP_DIR" ]; then
+       echo "Error: ROOT_BACKUP_DIR directory must exist ($ROOT_BACKUP_DIR)."
+       exit
+   fi
+   export BACKUP_DIR="$ROOT_BACKUP_DIR/backup/$HOSTNAME"
    mkdir -p "$BACKUP_DIR"
    df -h "$BACKUP_DIR"
    ## OLD:

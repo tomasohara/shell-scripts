@@ -11,6 +11,8 @@ eval 'exec perl -Ssw $0 "$@"'
 #	$B	same but also without file extensions
 #	$h	host name
 #       $n	alias for $f (for use with -count option)
+#       $q      single quote
+#       $qq     double quote
 # These can also be referred to a &f, etc.
 # ex: foreach.perl 'echo $f' *.c
 #
@@ -25,6 +27,7 @@ eval 'exec perl -Ssw $0 "$@"'
 # - alternative add eval option to support adhoc needs -eval='($t = scalar)time;'
 # - decompose main loop into subroutines and add EX unit-tests
 # - properly escape double quotes (e.g., to avoid having to use \" within single quotes on command line)
+# - ** straighten out double quote morass!'
 #
 
 # Load in the common module, making sure the script dir is in the Perl lib path
@@ -41,7 +44,7 @@ if (! defined($nostrict)) {
 }
 
 use vars qw/$kill $status $remote $no_files $pause $all $busy_load $trace
-            $quote $noquote $nonfile $from $to $step $count $DOMAINNAME $HOST $hostlist $f $F $h $b $B $d $n/;
+            $quote $noquote $nonfile $from $to $step $count $DOMAINNAME $HOST $hostlist $f $F $h $b $B $d $n $q $qq/;
 
 &init_var(*kill, &FALSE);
 &init_var(*status, &FALSE);
@@ -76,9 +79,10 @@ foreach my $var (&tokenize($init_vars)) {
 # pylos, helion, etc).
 # also restrict hosts used by late-evening users: ilios, orchomenos, etc
 # also hosts tied up by netscape, etc.: tenedos, kimmerion, corinth
-my($domain_name_command) = (&WIN32 ? "ipconfig | perl -ne 'print \$1 if /DNS Suffix.*:\\s*(\\S+)/;'" 
-			    : "domainname");
-## &init_var(*DOMAINNAME, &run_command($domain_name_command));
+## OLD:
+## my($domain_name_command) = (&WIN32 ? "ipconfig | perl -ne 'print \$1 if /DNS Suffix.*:\\s*(\\S+)/;'" 
+##                             : "domainname");
+my($domain_name_command) = "domainname.sh";
 &init_var(*DOMAINNAME, "");
 $DOMAINNAME = &run_command($domain_name_command) unless ($DOMAINNAME ne "");
 &init_var(*ssh, &FALSE);	# use ssh rather than rsh
@@ -221,6 +225,8 @@ foreach $f (@ARGV) {
     $B =~ s/\..*$//;		# $B placeholder for basename sans extension
     $d = &dirname($f);		# $d placeholder for directory
     $h = $host;			# $h placeholder for remote host name
+    $q = "'";                   # $q placeholder for single quote
+    $qq = '"';                  # (likewise $qq for double quote)
     ## $n = $f;			# $n placeholder for count
     &debug_out(6, "f=%s d=%s b=%s B=%s h=%s\n", $f, $d, $b, $B, $host);
 
@@ -336,7 +342,8 @@ sub b { return ($b); }		# file basename
 sub B { return ($B); }		# basename proper (no directory)
 sub f { return ($f); }		# filename
 sub h { return ($h); }		# host for remote execution
-sub n { return ($n); }		# current count
+sub q { return ($q); }		# single quote
+sub qq { return ($qq); }	# double quote
 
 # usage(): Displays usage statement on stdard error
 # TODO: have option for verbose explanation
@@ -379,6 +386,7 @@ Placeholders for use in the command:
     \$B   same but also without file extensions
     \$h   host name (for use with -remote option)
     \$n   position in the list (1-based)
+    \$q   single quote (and likewise \$qq for double)
 These can also be referred using &X rather than \$X (e.g., '&B').
 
 END_USAGE
