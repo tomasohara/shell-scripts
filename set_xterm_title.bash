@@ -178,7 +178,8 @@ fi
 full="$1"
 icon="$2"
 if [ "$icon" = "" ]; then icon=$full; fi
-if [ "$TERM" = "screen" ]; then full="SCREEN: $full"; icon="SCREEN: $icon"; fi
+## OLD: if [ "$TERM" = "screen" ]; then full="SCREEN: $full"; icon="SCREEN: $icon"; fi
+if [[ "$TERM" =~ screen ]]; then full="SCREEN: $full"; icon="SCREEN: $icon"; fi
 ## echo full="$full"
 ## echo icon="$icon"
 
