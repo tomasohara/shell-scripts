@@ -77,10 +77,10 @@ var data = {lines:[
 {"lineNum":"   76","line":"line_number=0","class":"lineCov","hits":"2","order":"140","possible_hits":"0",},
 {"lineNum":"   77","line":"exit_code=0","class":"lineCov","hits":"2","order":"141","possible_hits":"0",},
 {"lineNum":"   78","line":"{"},
-{"lineNum":"   79","line":"  while IFS= read -r line; do","class":"lineCov","hits":"608","order":"142","possible_hits":"0",},
-{"lineNum":"   80","line":"    ((++line_number))","class":"lineCov","hits":"302","order":"143","possible_hits":"0",},
-{"lineNum":"   81","line":"    line=\"${line//$\'\\r\'/}\"","class":"lineCov","hits":"302","order":"144","possible_hits":"0",},
-{"lineNum":"   82","line":"    if [[ \"$line\" =~ $BATS_TEST_PATTERN ]] || [[ \"$line\" =~ $BATS_TEST_PATTERN_COMMENT ]]; then","class":"lineCov","hits":"586","order":"145","possible_hits":"0",},
+{"lineNum":"   79","line":"  while IFS= read -r line; do","class":"lineCov","hits":"332","order":"142","possible_hits":"0",},
+{"lineNum":"   80","line":"    ((++line_number))","class":"lineCov","hits":"164","order":"143","possible_hits":"0",},
+{"lineNum":"   81","line":"    line=\"${line//$\'\\r\'/}\"","class":"lineCov","hits":"164","order":"144","possible_hits":"0",},
+{"lineNum":"   82","line":"    if [[ \"$line\" =~ $BATS_TEST_PATTERN ]] || [[ \"$line\" =~ $BATS_TEST_PATTERN_COMMENT ]]; then","class":"lineCov","hits":"310","order":"145","possible_hits":"0",},
 {"lineNum":"   83","line":"      name=\"${BASH_REMATCH[1]#[\\\'\\\"]}\"","class":"lineCov","hits":"18","order":"150","possible_hits":"0",},
 {"lineNum":"   84","line":"      name=\"${name%[\\\'\\\"]}\"","class":"lineCov","hits":"18","order":"151","possible_hits":"0",},
 {"lineNum":"   85","line":"      body=\"${BASH_REMATCH[2]:-}\"","class":"lineCov","hits":"18","order":"152","possible_hits":"0",},
@@ -97,7 +97,7 @@ var data = {lines:[
 {"lineNum":"   96","line":"      # shellcheck disable=SC2034 # used in `bats_sort tags`/`extract_tags`"},
 {"lineNum":"   97","line":"      test_tags=() # reset test tags for next test"},
 {"lineNum":"   98","line":"    else"},
-{"lineNum":"   99","line":"      if [[ \"$line\" =~ $BATS_COMMENT_COMMAND_PATTERN ]]; then","class":"lineCov","hits":"284","order":"146","possible_hits":"0",},
+{"lineNum":"   99","line":"      if [[ \"$line\" =~ $BATS_COMMENT_COMMAND_PATTERN ]]; then","class":"lineCov","hits":"146","order":"146","possible_hits":"0",},
 {"lineNum":"  100","line":"        command=${BASH_REMATCH[1]}","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  101","line":"        case $command in","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  102","line":"        \'test_tags=\'*)"},
@@ -108,7 +108,7 @@ var data = {lines:[
 {"lineNum":"  107","line":"          ;;"},
 {"lineNum":"  108","line":"        esac"},
 {"lineNum":"  109","line":"      fi"},
-{"lineNum":"  110","line":"      printf \'%s\\n\' \"$line\"","class":"lineCov","hits":"284","order":"147","possible_hits":"0",},
+{"lineNum":"  110","line":"      printf \'%s\\n\' \"$line\"","class":"lineCov","hits":"146","order":"147","possible_hits":"0",},
 {"lineNum":"  111","line":"    fi"},
 {"lineNum":"  112","line":"  done"},
 {"lineNum":"  113","line":"} <<<\"$(<\"$test_file\")\"$\'\\n\'","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -120,5 +120,5 @@ var data = {lines:[
 {"lineNum":"  119","line":"exit $exit_code","class":"lineCov","hits":"2","order":"183","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-12 19:01:04", "instrumented" : 71, "covered" : 35,};
+var header = { "command" : "bats", "date" : "2023-05-04 19:40:25", "instrumented" : 71, "covered" : 35,};
 var merged_data = [];

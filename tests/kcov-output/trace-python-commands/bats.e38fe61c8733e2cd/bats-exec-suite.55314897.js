@@ -1,9 +1,9 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
-{"lineNum":"    2","line":"set -e","class":"lineCov","hits":"1","order":"99","possible_hits":"0",},
+{"lineNum":"    2","line":"set -e","class":"lineCov","hits":"1","order":"98","possible_hits":"0",},
 {"lineNum":"    3","line":""},
-{"lineNum":"    4","line":"count_only_flag=\'\'","class":"lineCov","hits":"1","order":"100","possible_hits":"0",},
-{"lineNum":"    5","line":"filter=\'\'","class":"lineCov","hits":"1","order":"101","possible_hits":"0",},
+{"lineNum":"    4","line":"count_only_flag=\'\'","class":"lineCov","hits":"1","order":"99","possible_hits":"0",},
+{"lineNum":"    5","line":"filter=\'\'","class":"lineCov","hits":"1","order":"100","possible_hits":"0",},
 {"lineNum":"    6","line":"num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}","class":"lineCov","hits":"1","order":"102","possible_hits":"0",},
 {"lineNum":"    7","line":"bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}","class":"lineCov","hits":"1","order":"103","possible_hits":"0",},
 {"lineNum":"    8","line":"bats_no_parallelize_within_files=","class":"lineCov","hits":"1","order":"104","possible_hits":"0",},
@@ -119,7 +119,7 @@ var data = {lines:[
 {"lineNum":"  118","line":""},
 {"lineNum":"  119","line":"    test_names=()"},
 {"lineNum":"  120","line":"    test_dupes=()"},
-{"lineNum":"  121","line":"    while read -r line; do","class":"lineCov","hits":"486","order":"129","possible_hits":"0",},
+{"lineNum":"  121","line":"    while read -r line; do","class":"lineCov","hits":"486","order":"132","possible_hits":"0",},
 {"lineNum":"  122","line":"      if [[ ! \"$line\" =~ ^bats_test_function\\  ]]; then","class":"lineCov","hits":"485","order":"148","possible_hits":"0",},
 {"lineNum":"  123","line":"        continue","class":"lineCov","hits":"454","order":"149","possible_hits":"0",},
 {"lineNum":"  124","line":"      fi"},
@@ -127,13 +127,13 @@ var data = {lines:[
 {"lineNum":"  126","line":"      line=\"${line#* }\"","class":"lineCov","hits":"31","order":"184","possible_hits":"0",},
 {"lineNum":"  127","line":"      TAG_REGEX=\"--tags \'(.*)\' (.*)\"","class":"lineCov","hits":"31","order":"185","possible_hits":"0",},
 {"lineNum":"  128","line":"      if [[ \"$line\" =~ $TAG_REGEX ]]; then","class":"lineCov","hits":"31","order":"186","possible_hits":"0",},
-{"lineNum":"  129","line":"        IFS=, read -ra tags <<<\"${BASH_REMATCH[1]}\" || true","class":"lineCov","hits":"62","order":"188","possible_hits":"0",},
-{"lineNum":"  130","line":"        line=\"${BASH_REMATCH[2]}\"","class":"lineCov","hits":"31","order":"189","possible_hits":"0",},
+{"lineNum":"  129","line":"        IFS=, read -ra tags <<<\"${BASH_REMATCH[1]}\" || true","class":"lineCov","hits":"62","order":"187","possible_hits":"0",},
+{"lineNum":"  130","line":"        line=\"${BASH_REMATCH[2]}\"","class":"lineCov","hits":"31","order":"188","possible_hits":"0",},
 {"lineNum":"  131","line":"      else"},
 {"lineNum":"  132","line":"        tags=()"},
 {"lineNum":"  133","line":"      fi"},
 {"lineNum":"  134","line":"      # is this test focused?"},
-{"lineNum":"  135","line":"      if bats_all_in tags \'bats:focus\'; then","class":"lineCov","hits":"31","order":"190","possible_hits":"0",},
+{"lineNum":"  135","line":"      if bats_all_in tags \'bats:focus\'; then","class":"lineCov","hits":"31","order":"189","possible_hits":"0",},
 {"lineNum":"  136","line":"        if [[ $focus_mode == 1 ]]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  137","line":"          # focused tests in focus mode should just be registered"},
 {"lineNum":"  138","line":"          :","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -468,5 +468,5 @@ var data = {lines:[
 {"lineNum":"  467","line":"exit \"$bats_exec_suite_status\" # the actual exit code will be set by the exit trap using bats_exec_suite_status","class":"lineCov","hits":"2","order":"743","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-12 19:01:03", "instrumented" : 245, "covered" : 90,};
+var header = { "command" : "bats", "date" : "2023-05-04 19:40:24", "instrumented" : 245, "covered" : 90,};
 var merged_data = [];

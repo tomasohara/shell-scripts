@@ -117,8 +117,8 @@ var data = {lines:[
 {"lineNum":"  116","line":"  printf \'bats_test_function %s\\n\' \"$test_name\"","class":"lineCov","hits":"20","order":"182","possible_hits":"0",},
 {"lineNum":"  117","line":"done"},
 {"lineNum":"  118","line":""},
-{"lineNum":"  119","line":"exit $exit_code","class":"lineCov","hits":"2","order":"185","possible_hits":"0",},
+{"lineNum":"  119","line":"exit $exit_code","class":"lineCov","hits":"2","order":"184","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-12 19:00:41", "instrumented" : 71, "covered" : 35,};
+var header = { "command" : "bats", "date" : "2023-05-04 19:40:03", "instrumented" : 71, "covered" : 35,};
 var merged_data = [];

@@ -141,7 +141,7 @@ var data = {lines:[
 {"lineNum":"  140","line":"  local -i haystack_index=0         # initialize only here to continue from last search position","class":"lineCov","hits":"34","order":"194","possible_hits":"0",},
 {"lineNum":"  141","line":"  local search_value haystack_value # just to appease shellcheck","class":"lineCov","hits":"34","order":"195","possible_hits":"0",},
 {"lineNum":"  142","line":"  for ((i = 1; i <= $#; ++i)); do","class":"lineNoCov","hits":"0","possible_hits":"0",},
-{"lineNum":"  143","line":"    eval \"local search_value=${!i}\"","class":"lineCov","hits":"68","order":"198","possible_hits":"0",},
+{"lineNum":"  143","line":"    eval \"local search_value=${!i}\"","class":"lineCov","hits":"68","order":"197","possible_hits":"0",},
 {"lineNum":"  144","line":"    for (( ; haystack_index < haystack_length; ++haystack_index)); do","class":"lineCov","hits":"136","order":"196","possible_hits":"0",},
 {"lineNum":"  145","line":"      eval \"local haystack_value=\\${${haystack_array}[$haystack_index]}\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  146","line":"      if [[ $haystack_value > \"$search_value\" ]]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -250,5 +250,5 @@ var data = {lines:[
 {"lineNum":"  249","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-12 19:00:56", "instrumented" : 121, "covered" : 35,};
+var header = { "command" : "bats", "date" : "2023-05-04 19:40:17", "instrumented" : 121, "covered" : 35,};
 var merged_data = [];

@@ -1,5 +1,5 @@
 var data = {files:[
-{"link":"bats.88482.src.4e36ecbc.html","title":"bats.88482.src","summary_name":"/tmp/bats-run-RZcfSE/bats.88482.src","covered_class":"linePartCov","covered":"62.0","covered_lines":"160","uncovered_lines":"98","total_lines" : "258"},
+{"link":"bats.57830.src.8b5cba4.html","title":"bats.57830.src","summary_name":"/tmp/bats-run-Ionzwq/bats.57830.src","covered_class":"linePartCov","covered":"62.0","covered_lines":"160","uncovered_lines":"98","total_lines" : "258"},
 {"link":"cpufreqctl-aveey.eba110ce.html","title":"cpufreqctl-aveey","summary_name":"/usr/local/bin/cpufreqctl-aveey","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"806","total_lines" : "806"},
 {"link":"bats.51601793.html","title":"bats","summary_name":"/usr/local/bin/bats","covered_class":"lineNoCov","covered":"23.3","covered_lines":"7","uncovered_lines":"23","total_lines" : "30"},
 {"link":"bats.b5ee664b.html","title":"bats","summary_name":"/usr/local/libexec/bats-core/bats","covered_class":"linePartCov","covered":"36.8","covered_lines":"91","uncovered_lines":"156","total_lines" : "247"},
@@ -16,5 +16,5 @@ var data = {files:[
 {"link":"tracing.bash.d47fd49d.html","title":"tracing.bash","summary_name":"/usr/local/lib/bats-core/tracing.bash","covered_class":"linePartCov","covered":"66.7","covered_lines":"112","uncovered_lines":"56","total_lines" : "168"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-12 19:01:03", "instrumented" : 2475, "covered" : 753,};
+var header = { "command" : "bats", "date" : "2023-05-04 19:40:24", "instrumented" : 2475, "covered" : 753,};
 var merged_data = [];

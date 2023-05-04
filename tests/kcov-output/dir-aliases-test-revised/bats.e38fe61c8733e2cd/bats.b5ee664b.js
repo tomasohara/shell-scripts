@@ -501,9 +501,9 @@ var data = {lines:[
 {"lineNum":"  500","line":"else"},
 {"lineNum":"  501","line":"  exec bats-exec-suite \"${flags[@]}\" \"${filenames[@]}\" |","class":"lineCov","hits":"1","order":"93","possible_hits":"0",},
 {"lineNum":"  502","line":"    bats_test_count_validator |","class":"lineCov","hits":"1","order":"94","possible_hits":"0",},
-{"lineNum":"  503","line":"    \"$interpolated_formatter\" \"${formatter_flags[@]}\"","class":"lineCov","hits":"1","order":"102","possible_hits":"0",},
+{"lineNum":"  503","line":"    \"$interpolated_formatter\" \"${formatter_flags[@]}\"","class":"lineCov","hits":"1","order":"110","possible_hits":"0",},
 {"lineNum":"  504","line":"fi"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-12 19:00:50", "instrumented" : 247, "covered" : 91,};
+var header = { "command" : "bats", "date" : "2023-05-04 19:40:11", "instrumented" : 247, "covered" : 91,};
 var merged_data = [];

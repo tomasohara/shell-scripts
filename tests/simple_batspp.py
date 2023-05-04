@@ -234,7 +234,6 @@ class Batspp(Main):
             else:
                 tests.append(test)
 
-
         # Process tests
         # Simplified regex example: https://regex101.com/r/tliu64/1
         re_pattern = fr'{re_indent} *(?:(?:\$ *(?P<setup>[^\n]+) *$\n(?={re_indent} *(?:\$ *[^\n]+)?$\n))|(?:(?P<assert_eq>\$) *(?P<actual>[^\n]+) *$\n(?={re_indent} *\w+))|(?:(?:{RE_TITLE} +(?P<title>.+?)$\n)|[Cc]ontinue|[Cc]ontinuation|[Ss]etup)|(?:(?P<expected>[^\n]+)?$\n))'

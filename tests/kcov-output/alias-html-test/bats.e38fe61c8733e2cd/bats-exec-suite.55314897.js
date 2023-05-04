@@ -124,7 +124,7 @@ var data = {lines:[
 {"lineNum":"  123","line":"        continue","class":"lineCov","hits":"137","order":"149","possible_hits":"0",},
 {"lineNum":"  124","line":"      fi"},
 {"lineNum":"  125","line":"      line=\"${line%$\'\\r\'}\"","class":"lineCov","hits":"10","order":"183","possible_hits":"0",},
-{"lineNum":"  126","line":"      line=\"${line#* }\"","class":"lineCov","hits":"10","order":"184","possible_hits":"0",},
+{"lineNum":"  126","line":"      line=\"${line#* }\"","class":"lineCov","hits":"10","order":"185","possible_hits":"0",},
 {"lineNum":"  127","line":"      TAG_REGEX=\"--tags \'(.*)\' (.*)\"","class":"lineCov","hits":"10","order":"186","possible_hits":"0",},
 {"lineNum":"  128","line":"      if [[ \"$line\" =~ $TAG_REGEX ]]; then","class":"lineCov","hits":"10","order":"187","possible_hits":"0",},
 {"lineNum":"  129","line":"        IFS=, read -ra tags <<<\"${BASH_REMATCH[1]}\" || true","class":"lineCov","hits":"20","order":"188","possible_hits":"0",},
@@ -468,5 +468,5 @@ var data = {lines:[
 {"lineNum":"  467","line":"exit \"$bats_exec_suite_status\" # the actual exit code will be set by the exit trap using bats_exec_suite_status","class":"lineCov","hits":"2","order":"648","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-12 19:00:41", "instrumented" : 245, "covered" : 90,};
+var header = { "command" : "bats", "date" : "2023-05-04 19:40:03", "instrumented" : 245, "covered" : 90,};
 var merged_data = [];

@@ -45,5 +45,5 @@ var data = {lines:[
 {"lineNum":"   44","line":")","class":"lineCov","hits":"22","order":"320","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-12 19:00:50", "instrumented" : 23, "covered" : 2,};
+var header = { "command" : "bats", "date" : "2023-05-04 19:40:11", "instrumented" : 23, "covered" : 2,};
 var merged_data = [];

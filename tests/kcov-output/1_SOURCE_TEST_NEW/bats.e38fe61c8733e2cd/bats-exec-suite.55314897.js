@@ -22,7 +22,7 @@ var data = {lines:[
 {"lineNum":"   21","line":"# shellcheck source=lib/bats-core/common.bash disable=SC2153"},
 {"lineNum":"   22","line":"source \"$BATS_ROOT/lib/bats-core/common.bash\"","class":"lineCov","hits":"1","order":"109","possible_hits":"0",},
 {"lineNum":"   23","line":""},
-{"lineNum":"   24","line":"while [[ \"$#\" -ne 0 ]]; do","class":"lineCov","hits":"2","order":"110","possible_hits":"0",},
+{"lineNum":"   24","line":"while [[ \"$#\" -ne 0 ]]; do","class":"lineCov","hits":"2","order":"111","possible_hits":"0",},
 {"lineNum":"   25","line":"  case \"$1\" in","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   26","line":"  -c)"},
 {"lineNum":"   27","line":"    count_only_flag=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -40,7 +40,7 @@ var data = {lines:[
 {"lineNum":"   39","line":"    flags+=(\'-T\')","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   40","line":"    ;;"},
 {"lineNum":"   41","line":"  -x)"},
-{"lineNum":"   42","line":"    flags+=(\'-x\')","class":"lineCov","hits":"2","order":"111","possible_hits":"0",},
+{"lineNum":"   42","line":"    flags+=(\'-x\')","class":"lineCov","hits":"2","order":"112","possible_hits":"0",},
 {"lineNum":"   43","line":"    ;;"},
 {"lineNum":"   44","line":"  --no-parallelize-across-files)"},
 {"lineNum":"   45","line":"    bats_no_parallelize_across_files=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -91,13 +91,13 @@ var data = {lines:[
 {"lineNum":"   90","line":"    setup_suite_file=\"$1\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   91","line":"    ;;"},
 {"lineNum":"   92","line":"  *)"},
-{"lineNum":"   93","line":"    break","class":"lineCov","hits":"1","order":"113","possible_hits":"0",},
+{"lineNum":"   93","line":"    break","class":"lineCov","hits":"1","order":"114","possible_hits":"0",},
 {"lineNum":"   94","line":"    ;;"},
 {"lineNum":"   95","line":"  esac"},
-{"lineNum":"   96","line":"  shift","class":"lineCov","hits":"1","order":"112","possible_hits":"0",},
+{"lineNum":"   96","line":"  shift","class":"lineCov","hits":"1","order":"113","possible_hits":"0",},
 {"lineNum":"   97","line":"done"},
 {"lineNum":"   98","line":""},
-{"lineNum":"   99","line":"if [[ \"$num_jobs\" != 1 ]]; then","class":"lineCov","hits":"1","order":"114","possible_hits":"0",},
+{"lineNum":"   99","line":"if [[ \"$num_jobs\" != 1 ]]; then","class":"lineCov","hits":"1","order":"115","possible_hits":"0",},
 {"lineNum":"  100","line":"  if ! type -p parallel >/dev/null && parallel --version &>/dev/null && [[ -z \"$bats_no_parallelize_across_files\" ]]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  101","line":"    abort \"Cannot execute \\\"${num_jobs}\\\" jobs without GNU parallel\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  102","line":"  fi"},
@@ -107,8 +107,8 @@ var data = {lines:[
 {"lineNum":"  106","line":"fi"},
 {"lineNum":"  107","line":""},
 {"lineNum":"  108","line":"# create a file that contains all (filtered) tests to run from all files"},
-{"lineNum":"  109","line":"TESTS_LIST_FILE=\"${BATS_RUN_TMPDIR}/test_list_file.txt\"","class":"lineCov","hits":"1","order":"115","possible_hits":"0",},
-{"lineNum":"  110","line":"focus_mode=","class":"lineCov","hits":"1","order":"116","possible_hits":"0",},
+{"lineNum":"  109","line":"TESTS_LIST_FILE=\"${BATS_RUN_TMPDIR}/test_list_file.txt\"","class":"lineCov","hits":"1","order":"116","possible_hits":"0",},
+{"lineNum":"  110","line":"focus_mode=","class":"lineCov","hits":"1","order":"117","possible_hits":"0",},
 {"lineNum":"  111","line":"bats_gather_tests() {"},
 {"lineNum":"  112","line":"  local line test_line tags","class":"lineCov","hits":"1","order":"126","possible_hits":"0",},
 {"lineNum":"  113","line":"  all_tests=()"},
@@ -468,5 +468,5 @@ var data = {lines:[
 {"lineNum":"  467","line":"exit \"$bats_exec_suite_status\" # the actual exit code will be set by the exit trap using bats_exec_suite_status","class":"lineCov","hits":"2","order":"638","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-12 19:00:43", "instrumented" : 245, "covered" : 90,};
+var header = { "command" : "bats", "date" : "2023-05-04 19:40:05", "instrumented" : 245, "covered" : 90,};
 var merged_data = [];

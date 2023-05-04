@@ -1,11 +1,11 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
 {"lineNum":"    2","line":""},
-{"lineNum":"    3","line":"BATS_TEST_DIRNAME=\"${BATS_TEST_FILENAME%/*}\"","class":"lineCov","hits":"17","order":"317","possible_hits":"0",},
+{"lineNum":"    3","line":"BATS_TEST_DIRNAME=\"${BATS_TEST_FILENAME%/*}\"","class":"lineCov","hits":"22","order":"317","possible_hits":"0",},
 {"lineNum":"    4","line":"BATS_TEST_NAMES=()"},
 {"lineNum":"    5","line":""},
 {"lineNum":"    6","line":"# shellcheck source=lib/bats-core/warnings.bash"},
-{"lineNum":"    7","line":"source \"$BATS_ROOT/lib/bats-core/warnings.bash\"","class":"lineCov","hits":"17","order":"318","possible_hits":"0",},
+{"lineNum":"    7","line":"source \"$BATS_ROOT/lib/bats-core/warnings.bash\"","class":"lineCov","hits":"22","order":"318","possible_hits":"0",},
 {"lineNum":"    8","line":""},
 {"lineNum":"    9","line":"# find_in_bats_lib_path echoes the first recognized load path to"},
 {"lineNum":"   10","line":"# a library in BATS_LIB_PATH or relative to BATS_TEST_DIRNAME."},
@@ -372,5 +372,5 @@ var data = {lines:[
 {"lineNum":"  371","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-12 19:01:06", "instrumented" : 103, "covered" : 2,};
+var header = { "command" : "bats", "date" : "2023-05-04 19:40:27", "instrumented" : 103, "covered" : 2,};
 var merged_data = [];

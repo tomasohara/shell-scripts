@@ -54,6 +54,7 @@ import sys
 import os
 import re
 import random
+import pytest
 
 # Local packages
 from mezcla.main import Main

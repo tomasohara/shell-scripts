@@ -1,12 +1,63 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.282" lines-covered="638" lines-valid="2264" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1681305360">
+<coverage line-rate="0.282" lines-covered="638" lines-valid="2264" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1683208521">
 	<sources>
 		<source>/</source>
 	</sources>
 	<packages>
 		<package name="bats" line-rate="0.282" lines-covered="638" lines-valid="2264" branch-rate="1.0" complexity="1.0">
 			<classes>
+				<class name="bats_57171_src" filename="tmp/bats-run-wERpQs/bats.57171.src" branch-rate="1.0" complexity="1.0" line-rate="1.000">
+					<lines>
+						<line number="5" hits="7"/>
+						<line number="8" hits="7"/>
+						<line number="12" hits="4"/>
+						<line number="13" hits="4"/>
+						<line number="15" hits="4"/>
+						<line number="16" hits="4"/>
+						<line number="17" hits="2"/>
+						<line number="18" hits="4"/>
+						<line number="19" hits="2"/>
+						<line number="20" hits="4"/>
+						<line number="21" hits="2"/>
+						<line number="22" hits="4"/>
+						<line number="27" hits="2"/>
+						<line number="30" hits="2"/>
+						<line number="34" hits="4"/>
+						<line number="35" hits="4"/>
+						<line number="37" hits="2"/>
+						<line number="38" hits="2"/>
+						<line number="39" hits="2"/>
+						<line number="40" hits="2"/>
+						<line number="45" hits="4"/>
+						<line number="46" hits="4"/>
+						<line number="52" hits="4"/>
+						<line number="53" hits="4"/>
+						<line number="55" hits="4"/>
+						<line number="56" hits="4"/>
+						<line number="57" hits="4"/>
+						<line number="58" hits="2"/>
+						<line number="59" hits="4"/>
+						<line number="60" hits="2"/>
+						<line number="61" hits="4"/>
+						<line number="62" hits="2"/>
+						<line number="63" hits="4"/>
+						<line number="68" hits="4"/>
+						<line number="71" hits="2"/>
+						<line number="75" hits="4"/>
+						<line number="76" hits="4"/>
+						<line number="78" hits="2"/>
+						<line number="79" hits="2"/>
+						<line number="80" hits="2"/>
+						<line number="81" hits="2"/>
+						<line number="82" hits="4"/>
+						<line number="85" hits="7"/>
+						<line number="86" hits="7"/>
+						<line number="87" hits="7"/>
+						<line number="88" hits="7"/>
+						<line number="89" hits="7"/>
+					</lines>
+				</class>
 				<class name="cpufreqctl_aveey" filename="usr/local/bin/cpufreqctl-aveey" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="24" hits="0"/>
@@ -849,57 +900,6 @@
 						<line number="57" hits="2"/>
 						<line number="58" hits="1"/>
 						<line number="59" hits="1"/>
-					</lines>
-				</class>
-				<class name="bats_87842_src" filename="tmp/bats-run-TiG3ua/bats.87842.src" branch-rate="1.0" complexity="1.0" line-rate="1.000">
-					<lines>
-						<line number="5" hits="7"/>
-						<line number="8" hits="7"/>
-						<line number="12" hits="4"/>
-						<line number="13" hits="4"/>
-						<line number="15" hits="4"/>
-						<line number="16" hits="4"/>
-						<line number="17" hits="2"/>
-						<line number="18" hits="4"/>
-						<line number="19" hits="2"/>
-						<line number="20" hits="4"/>
-						<line number="21" hits="2"/>
-						<line number="22" hits="4"/>
-						<line number="27" hits="2"/>
-						<line number="30" hits="2"/>
-						<line number="34" hits="4"/>
-						<line number="35" hits="4"/>
-						<line number="37" hits="2"/>
-						<line number="38" hits="2"/>
-						<line number="39" hits="2"/>
-						<line number="40" hits="2"/>
-						<line number="45" hits="4"/>
-						<line number="46" hits="4"/>
-						<line number="52" hits="4"/>
-						<line number="53" hits="4"/>
-						<line number="55" hits="4"/>
-						<line number="56" hits="4"/>
-						<line number="57" hits="4"/>
-						<line number="58" hits="2"/>
-						<line number="59" hits="4"/>
-						<line number="60" hits="2"/>
-						<line number="61" hits="4"/>
-						<line number="62" hits="2"/>
-						<line number="63" hits="4"/>
-						<line number="68" hits="4"/>
-						<line number="71" hits="2"/>
-						<line number="75" hits="4"/>
-						<line number="76" hits="4"/>
-						<line number="78" hits="2"/>
-						<line number="79" hits="2"/>
-						<line number="80" hits="2"/>
-						<line number="81" hits="2"/>
-						<line number="82" hits="4"/>
-						<line number="85" hits="7"/>
-						<line number="86" hits="7"/>
-						<line number="87" hits="7"/>
-						<line number="88" hits="7"/>
-						<line number="89" hits="7"/>
 					</lines>
 				</class>
 				<class name="bats" filename="usr/local/libexec/bats-core/bats" branch-rate="1.0" complexity="1.0" line-rate="0.368">

@@ -468,5 +468,5 @@ var data = {lines:[
 {"lineNum":"  467","line":"exit \"$bats_exec_suite_status\" # the actual exit code will be set by the exit trap using bats_exec_suite_status","class":"lineCov","hits":"2","order":"665","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-04-12 19:01:08", "instrumented" : 245, "covered" : 90,};
+var header = { "command" : "bats", "date" : "2023-05-04 19:40:30", "instrumented" : 245, "covered" : 90,};
 var merged_data = [];

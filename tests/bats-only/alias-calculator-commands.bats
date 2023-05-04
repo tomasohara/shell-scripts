@@ -240,8 +240,9 @@ function test12-assert2-expected () {
 	test_folder=$(echo /tmp/test13-$$)
 	mkdir $test_folder && cd $test_folder
 
-	actual=$(test13-assert1-actual)
-	expected=$(test13-assert1-expected)
+	dec2bin "10" 
+	actual=$(test13-assert2-actual)
+	expected=$(test13-assert2-expected)
 	echo "========== actual =========="
 	echo "$actual" | hexview.perl
 	echo "========= expected ========="
@@ -251,11 +252,11 @@ function test12-assert2-expected () {
 
 }
 
-function test13-assert1-actual () {
-	dec2bin "10"
+function test13-assert2-actual () {
+	dec2bin "7" | testnumhex
 }
-function test13-assert1-expected () {
-	echo -e '100010011000100111010'
+function test13-assert2-expected () {
+	echo -e '100010011000100111010NNN'
 }
 
 @test "test14" {
