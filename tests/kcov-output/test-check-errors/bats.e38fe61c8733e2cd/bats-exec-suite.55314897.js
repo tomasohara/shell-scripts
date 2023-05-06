@@ -9,10 +9,10 @@ var data = {lines:[
 {"lineNum":"    8","line":"bats_no_parallelize_within_files=","class":"lineCov","hits":"1","order":"103","possible_hits":"0",},
 {"lineNum":"    9","line":"filter_status=\'\'","class":"lineCov","hits":"1","order":"104","possible_hits":"0",},
 {"lineNum":"   10","line":"filter_tags_list=()"},
-{"lineNum":"   11","line":"flags=(\'--dummy-flag\') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions","class":"lineCov","hits":"1","order":"105","possible_hits":"0",},
-{"lineNum":"   12","line":"setup_suite_file=\'\'","class":"lineCov","hits":"1","order":"106","possible_hits":"0",},
-{"lineNum":"   13","line":"BATS_TRACE_LEVEL=\"${BATS_TRACE_LEVEL:-0}\"","class":"lineCov","hits":"1","order":"107","possible_hits":"0",},
-{"lineNum":"   14","line":"BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=","class":"lineCov","hits":"1","order":"108","possible_hits":"0",},
+{"lineNum":"   11","line":"flags=(\'--dummy-flag\') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions","class":"lineCov","hits":"1","order":"106","possible_hits":"0",},
+{"lineNum":"   12","line":"setup_suite_file=\'\'","class":"lineCov","hits":"1","order":"107","possible_hits":"0",},
+{"lineNum":"   13","line":"BATS_TRACE_LEVEL=\"${BATS_TRACE_LEVEL:-0}\"","class":"lineCov","hits":"1","order":"108","possible_hits":"0",},
+{"lineNum":"   14","line":"BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=","class":"lineCov","hits":"1","order":"109","possible_hits":"0",},
 {"lineNum":"   15","line":""},
 {"lineNum":"   16","line":"abort() {"},
 {"lineNum":"   17","line":"  printf \'Error: %s\\n\' \"$1\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -20,7 +20,7 @@ var data = {lines:[
 {"lineNum":"   19","line":"}"},
 {"lineNum":"   20","line":""},
 {"lineNum":"   21","line":"# shellcheck source=lib/bats-core/common.bash disable=SC2153"},
-{"lineNum":"   22","line":"source \"$BATS_ROOT/lib/bats-core/common.bash\"","class":"lineCov","hits":"1","order":"109","possible_hits":"0",},
+{"lineNum":"   22","line":"source \"$BATS_ROOT/lib/bats-core/common.bash\"","class":"lineCov","hits":"1","order":"110","possible_hits":"0",},
 {"lineNum":"   23","line":""},
 {"lineNum":"   24","line":"while [[ \"$#\" -ne 0 ]]; do","class":"lineCov","hits":"2","order":"111","possible_hits":"0",},
 {"lineNum":"   25","line":"  case \"$1\" in","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -119,12 +119,12 @@ var data = {lines:[
 {"lineNum":"  118","line":""},
 {"lineNum":"  119","line":"    test_names=()"},
 {"lineNum":"  120","line":"    test_dupes=()"},
-{"lineNum":"  121","line":"    while read -r line; do","class":"lineCov","hits":"145","order":"129","possible_hits":"0",},
+{"lineNum":"  121","line":"    while read -r line; do","class":"lineCov","hits":"145","order":"132","possible_hits":"0",},
 {"lineNum":"  122","line":"      if [[ ! \"$line\" =~ ^bats_test_function\\  ]]; then","class":"lineCov","hits":"144","order":"148","possible_hits":"0",},
 {"lineNum":"  123","line":"        continue","class":"lineCov","hits":"134","order":"149","possible_hits":"0",},
 {"lineNum":"  124","line":"      fi"},
 {"lineNum":"  125","line":"      line=\"${line%$\'\\r\'}\"","class":"lineCov","hits":"10","order":"183","possible_hits":"0",},
-{"lineNum":"  126","line":"      line=\"${line#* }\"","class":"lineCov","hits":"10","order":"185","possible_hits":"0",},
+{"lineNum":"  126","line":"      line=\"${line#* }\"","class":"lineCov","hits":"10","order":"184","possible_hits":"0",},
 {"lineNum":"  127","line":"      TAG_REGEX=\"--tags \'(.*)\' (.*)\"","class":"lineCov","hits":"10","order":"186","possible_hits":"0",},
 {"lineNum":"  128","line":"      if [[ \"$line\" =~ $TAG_REGEX ]]; then","class":"lineCov","hits":"10","order":"187","possible_hits":"0",},
 {"lineNum":"  129","line":"        IFS=, read -ra tags <<<\"${BASH_REMATCH[1]}\" || true","class":"lineCov","hits":"20","order":"188","possible_hits":"0",},
@@ -468,5 +468,5 @@ var data = {lines:[
 {"lineNum":"  467","line":"exit \"$bats_exec_suite_status\" # the actual exit code will be set by the exit trap using bats_exec_suite_status","class":"lineCov","hits":"2","order":"644","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-04 19:40:32", "instrumented" : 245, "covered" : 90,};
+var header = { "command" : "bats", "date" : "2023-05-06 21:39:41", "instrumented" : 245, "covered" : 90,};
 var merged_data = [];

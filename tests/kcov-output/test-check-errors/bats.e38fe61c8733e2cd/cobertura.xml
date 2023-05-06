@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.286" lines-covered="654" lines-valid="2288" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1683208532">
+<coverage line-rate="0.286" lines-covered="654" lines-valid="2288" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1683388481">
 	<sources>
 		<source>/</source>
 	</sources>
@@ -1209,6 +1209,81 @@
 						<line number="248" hits="0"/>
 					</lines>
 				</class>
+				<class name="bats_25983_src" filename="tmp/bats-run-ZIMKgs/bats.25983.src" branch-rate="1.0" complexity="1.0" line-rate="0.873">
+					<lines>
+						<line number="5" hits="12"/>
+						<line number="8" hits="12"/>
+						<line number="12" hits="4"/>
+						<line number="13" hits="4"/>
+						<line number="19" hits="4"/>
+						<line number="20" hits="4"/>
+						<line number="22" hits="2"/>
+						<line number="23" hits="66"/>
+						<line number="24" hits="0"/>
+						<line number="29" hits="4"/>
+						<line number="30" hits="4"/>
+						<line number="32" hits="2"/>
+						<line number="37" hits="4"/>
+						<line number="38" hits="4"/>
+						<line number="40" hits="2"/>
+						<line number="41" hits="4"/>
+						<line number="46" hits="4"/>
+						<line number="47" hits="4"/>
+						<line number="49" hits="2"/>
+						<line number="50" hits="2"/>
+						<line number="55" hits="4"/>
+						<line number="56" hits="4"/>
+						<line number="62" hits="4"/>
+						<line number="63" hits="4"/>
+						<line number="65" hits="4"/>
+						<line number="66" hits="4"/>
+						<line number="67" hits="2"/>
+						<line number="68" hits="4"/>
+						<line number="69" hits="2"/>
+						<line number="70" hits="4"/>
+						<line number="71" hits="2"/>
+						<line number="72" hits="4"/>
+						<line number="77" hits="2"/>
+						<line number="80" hits="2"/>
+						<line number="84" hits="4"/>
+						<line number="85" hits="4"/>
+						<line number="87" hits="6"/>
+						<line number="92" hits="4"/>
+						<line number="93" hits="4"/>
+						<line number="95" hits="4"/>
+						<line number="96" hits="4"/>
+						<line number="97" hits="2"/>
+						<line number="98" hits="4"/>
+						<line number="99" hits="2"/>
+						<line number="100" hits="4"/>
+						<line number="101" hits="2"/>
+						<line number="102" hits="4"/>
+						<line number="107" hits="2"/>
+						<line number="110" hits="2"/>
+						<line number="114" hits="4"/>
+						<line number="115" hits="4"/>
+						<line number="117" hits="7"/>
+						<line number="118" hits="0"/>
+						<line number="119" hits="0"/>
+						<line number="120" hits="0"/>
+						<line number="121" hits="0"/>
+						<line number="122" hits="0"/>
+						<line number="123" hits="0"/>
+						<line number="124" hits="0"/>
+						<line number="129" hits="4"/>
+						<line number="132" hits="0"/>
+						<line number="135" hits="12"/>
+						<line number="136" hits="12"/>
+						<line number="137" hits="12"/>
+						<line number="138" hits="12"/>
+						<line number="139" hits="12"/>
+						<line number="140" hits="12"/>
+						<line number="141" hits="12"/>
+						<line number="142" hits="12"/>
+						<line number="143" hits="12"/>
+						<line number="144" hits="12"/>
+					</lines>
+				</class>
 				<class name="validator_bash" filename="usr/local/lib/bats-core/validator.bash" branch-rate="1.0" complexity="1.0" line-rate="0.786">
 					<lines>
 						<line number="4" hits="1"/>
@@ -1992,81 +2067,6 @@
 						<line number="246" hits="0"/>
 						<line number="247" hits="0"/>
 						<line number="248" hits="0"/>
-					</lines>
-				</class>
-				<class name="bats_60727_src" filename="tmp/bats-run-UpJnxN/bats.60727.src" branch-rate="1.0" complexity="1.0" line-rate="0.873">
-					<lines>
-						<line number="5" hits="12"/>
-						<line number="8" hits="12"/>
-						<line number="12" hits="4"/>
-						<line number="13" hits="4"/>
-						<line number="19" hits="4"/>
-						<line number="20" hits="4"/>
-						<line number="22" hits="2"/>
-						<line number="23" hits="66"/>
-						<line number="24" hits="0"/>
-						<line number="29" hits="4"/>
-						<line number="30" hits="4"/>
-						<line number="32" hits="2"/>
-						<line number="37" hits="4"/>
-						<line number="38" hits="4"/>
-						<line number="40" hits="2"/>
-						<line number="41" hits="4"/>
-						<line number="46" hits="4"/>
-						<line number="47" hits="4"/>
-						<line number="49" hits="2"/>
-						<line number="50" hits="2"/>
-						<line number="55" hits="4"/>
-						<line number="56" hits="4"/>
-						<line number="62" hits="4"/>
-						<line number="63" hits="4"/>
-						<line number="65" hits="4"/>
-						<line number="66" hits="4"/>
-						<line number="67" hits="2"/>
-						<line number="68" hits="4"/>
-						<line number="69" hits="2"/>
-						<line number="70" hits="4"/>
-						<line number="71" hits="2"/>
-						<line number="72" hits="4"/>
-						<line number="77" hits="2"/>
-						<line number="80" hits="2"/>
-						<line number="84" hits="4"/>
-						<line number="85" hits="4"/>
-						<line number="87" hits="6"/>
-						<line number="92" hits="4"/>
-						<line number="93" hits="4"/>
-						<line number="95" hits="4"/>
-						<line number="96" hits="4"/>
-						<line number="97" hits="2"/>
-						<line number="98" hits="4"/>
-						<line number="99" hits="2"/>
-						<line number="100" hits="4"/>
-						<line number="101" hits="2"/>
-						<line number="102" hits="4"/>
-						<line number="107" hits="2"/>
-						<line number="110" hits="2"/>
-						<line number="114" hits="4"/>
-						<line number="115" hits="4"/>
-						<line number="117" hits="7"/>
-						<line number="118" hits="0"/>
-						<line number="119" hits="0"/>
-						<line number="120" hits="0"/>
-						<line number="121" hits="0"/>
-						<line number="122" hits="0"/>
-						<line number="123" hits="0"/>
-						<line number="124" hits="0"/>
-						<line number="129" hits="4"/>
-						<line number="132" hits="0"/>
-						<line number="135" hits="12"/>
-						<line number="136" hits="12"/>
-						<line number="137" hits="12"/>
-						<line number="138" hits="12"/>
-						<line number="139" hits="12"/>
-						<line number="140" hits="12"/>
-						<line number="141" hits="12"/>
-						<line number="142" hits="12"/>
-						<line number="143" hits="12"/>
-						<line number="144" hits="12"/>
 					</lines>
 				</class>
 				<class name="preprocessing_bash" filename="usr/local/lib/bats-core/preprocessing.bash" branch-rate="1.0" complexity="1.0" line-rate="0.875">

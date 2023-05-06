@@ -6,7 +6,7 @@ var data = {lines:[
 {"lineNum":"    5","line":"  header_pattern=\'[0-9]+\\.\\.[0-9]+\'","class":"lineCov","hits":"1","order":"96","possible_hits":"0",},
 {"lineNum":"    6","line":"  IFS= read -r header","class":"lineCov","hits":"2","order":"97","possible_hits":"0",},
 {"lineNum":"    7","line":"  # repeat the header"},
-{"lineNum":"    8","line":"  printf \"%s\\n\" \"$header\"","class":"lineCov","hits":"1","order":"220","possible_hits":"0",},
+{"lineNum":"    8","line":"  printf \"%s\\n\" \"$header\"","class":"lineCov","hits":"1","order":"219","possible_hits":"0",},
 {"lineNum":"    9","line":""},
 {"lineNum":"   10","line":"  # if we detect a TAP plan"},
 {"lineNum":"   11","line":"  if [[ \"$header\" =~ $header_pattern ]]; then","class":"lineCov","hits":"1","order":"221","possible_hits":"0",},
@@ -17,7 +17,7 @@ var data = {lines:[
 {"lineNum":"   16","line":"    while IFS= read -r line; do","class":"lineCov","hits":"92","order":"224","possible_hits":"0",},
 {"lineNum":"   17","line":"      # forward line"},
 {"lineNum":"   18","line":"      printf \"%s\\n\" \"$line\"","class":"lineCov","hits":"45","order":"466","possible_hits":"0",},
-{"lineNum":"   19","line":"      case \"$line\" in","class":"lineCov","hits":"45","order":"468","possible_hits":"0",},
+{"lineNum":"   19","line":"      case \"$line\" in","class":"lineCov","hits":"45","order":"467","possible_hits":"0",},
 {"lineNum":"   20","line":"      \'ok \'*)"},
 {"lineNum":"   21","line":"        ((++actual_number_of_tests))"},
 {"lineNum":"   22","line":"        ;;"},
@@ -38,5 +38,5 @@ var data = {lines:[
 {"lineNum":"   37","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-04 19:40:30", "instrumented" : 14, "covered" : 11,};
+var header = { "command" : "bats", "date" : "2023-05-06 21:39:37", "instrumented" : 14, "covered" : 11,};
 var merged_data = [];

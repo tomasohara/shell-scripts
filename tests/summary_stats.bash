@@ -5,4 +5,4 @@
 # 2) ./kcov_result.py --list --export (returns result according to the KCOV outputs) 
 # 3) Output of the process is also stored in ./summary_stats.txt
 
-./batspp_report.py -k && ./kcov_result.py --export > summary_stats.txt
+./batspp_report.py -k && ./kcov_result.py --export | tee summary_stats.txt

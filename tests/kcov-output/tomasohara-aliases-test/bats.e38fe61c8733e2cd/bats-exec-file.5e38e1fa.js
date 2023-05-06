@@ -384,5 +384,5 @@ var data = {lines:[
 {"lineNum":"  383","line":"exit $bats_exec_file_status","class":"lineCov","hits":"2","order":"565","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-04 19:40:03", "instrumented" : 192, "covered" : 99,};
+var header = { "command" : "bats", "date" : "2023-05-06 21:38:39", "instrumented" : 192, "covered" : 99,};
 var merged_data = [];

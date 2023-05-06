@@ -185,7 +185,7 @@ var data = {lines:[
 {"lineNum":"  184","line":"    printf \'ok %d %s%s\\n\' \"$BATS_SUITE_TEST_NUMBER\" \"${BATS_TEST_NAME_PREFIX:-}${BATS_TEST_DESCRIPTION}${BATS_TEST_TIME}\" \\","class":"lineCov","hits":"6","order":"457","possible_hits":"0",},
 {"lineNum":"  185","line":"      \"$exit_metadata\" >&3"},
 {"lineNum":"  186","line":"    status=0","class":"lineCov","hits":"6","order":"458","possible_hits":"0",},
-{"lineNum":"  187","line":"    local state=passed","class":"lineCov","hits":"6","order":"460","possible_hits":"0",},
+{"lineNum":"  187","line":"    local state=passed","class":"lineCov","hits":"6","order":"461","possible_hits":"0",},
 {"lineNum":"  188","line":"  fi"},
 {"lineNum":"  189","line":""},
 {"lineNum":"  190","line":"  if [[ -z \"$should_retry\" ]]; then","class":"lineCov","hits":"6","order":"462","possible_hits":"0",},
@@ -352,5 +352,5 @@ var data = {lines:[
 {"lineNum":"  351","line":"bats_perform_test","class":"lineCov","hits":"3","order":"409","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-04 19:40:30", "instrumented" : 186, "covered" : 85,};
+var header = { "command" : "bats", "date" : "2023-05-06 21:39:38", "instrumented" : 186, "covered" : 85,};
 var merged_data = [];

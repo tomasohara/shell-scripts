@@ -127,7 +127,7 @@ var data = {lines:[
 {"lineNum":"  126","line":"      line=\"${line#* }\"","class":"lineCov","hits":"16","order":"184","possible_hits":"0",},
 {"lineNum":"  127","line":"      TAG_REGEX=\"--tags \'(.*)\' (.*)\"","class":"lineCov","hits":"16","order":"185","possible_hits":"0",},
 {"lineNum":"  128","line":"      if [[ \"$line\" =~ $TAG_REGEX ]]; then","class":"lineCov","hits":"16","order":"186","possible_hits":"0",},
-{"lineNum":"  129","line":"        IFS=, read -ra tags <<<\"${BASH_REMATCH[1]}\" || true","class":"lineCov","hits":"32","order":"188","possible_hits":"0",},
+{"lineNum":"  129","line":"        IFS=, read -ra tags <<<\"${BASH_REMATCH[1]}\" || true","class":"lineCov","hits":"32","order":"187","possible_hits":"0",},
 {"lineNum":"  130","line":"        line=\"${BASH_REMATCH[2]}\"","class":"lineCov","hits":"16","order":"189","possible_hits":"0",},
 {"lineNum":"  131","line":"      else"},
 {"lineNum":"  132","line":"        tags=()"},
@@ -468,5 +468,5 @@ var data = {lines:[
 {"lineNum":"  467","line":"exit \"$bats_exec_suite_status\" # the actual exit code will be set by the exit trap using bats_exec_suite_status","class":"lineCov","hits":"2","order":"723","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-04 19:40:28", "instrumented" : 245, "covered" : 90,};
+var header = { "command" : "bats", "date" : "2023-05-06 21:39:34", "instrumented" : 245, "covered" : 90,};
 var merged_data = [];

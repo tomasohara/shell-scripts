@@ -119,11 +119,11 @@ var data = {lines:[
 {"lineNum":"  118","line":""},
 {"lineNum":"  119","line":"    test_names=()"},
 {"lineNum":"  120","line":"    test_dupes=()"},
-{"lineNum":"  121","line":"    while read -r line; do","class":"lineCov","hits":"149","order":"129","possible_hits":"0",},
+{"lineNum":"  121","line":"    while read -r line; do","class":"lineCov","hits":"149","order":"132","possible_hits":"0",},
 {"lineNum":"  122","line":"      if [[ ! \"$line\" =~ ^bats_test_function\\  ]]; then","class":"lineCov","hits":"148","order":"148","possible_hits":"0",},
 {"lineNum":"  123","line":"        continue","class":"lineCov","hits":"139","order":"149","possible_hits":"0",},
 {"lineNum":"  124","line":"      fi"},
-{"lineNum":"  125","line":"      line=\"${line%$\'\\r\'}\"","class":"lineCov","hits":"9","order":"184","possible_hits":"0",},
+{"lineNum":"  125","line":"      line=\"${line%$\'\\r\'}\"","class":"lineCov","hits":"9","order":"183","possible_hits":"0",},
 {"lineNum":"  126","line":"      line=\"${line#* }\"","class":"lineCov","hits":"9","order":"185","possible_hits":"0",},
 {"lineNum":"  127","line":"      TAG_REGEX=\"--tags \'(.*)\' (.*)\"","class":"lineCov","hits":"9","order":"186","possible_hits":"0",},
 {"lineNum":"  128","line":"      if [[ \"$line\" =~ $TAG_REGEX ]]; then","class":"lineCov","hits":"9","order":"187","possible_hits":"0",},
@@ -468,5 +468,5 @@ var data = {lines:[
 {"lineNum":"  467","line":"exit \"$bats_exec_suite_status\" # the actual exit code will be set by the exit trap using bats_exec_suite_status","class":"lineCov","hits":"2","order":"625","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-04 19:40:04", "instrumented" : 245, "covered" : 90,};
+var header = { "command" : "bats", "date" : "2023-05-06 21:38:40", "instrumented" : 245, "covered" : 90,};
 var merged_data = [];

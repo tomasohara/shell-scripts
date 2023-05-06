@@ -1,18 +1,18 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
-{"lineNum":"    2","line":"set -e","class":"lineCov","hits":"1","order":"99","possible_hits":"0",},
+{"lineNum":"    2","line":"set -e","class":"lineCov","hits":"1","order":"98","possible_hits":"0",},
 {"lineNum":"    3","line":""},
-{"lineNum":"    4","line":"count_only_flag=\'\'","class":"lineCov","hits":"1","order":"100","possible_hits":"0",},
-{"lineNum":"    5","line":"filter=\'\'","class":"lineCov","hits":"1","order":"101","possible_hits":"0",},
-{"lineNum":"    6","line":"num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}","class":"lineCov","hits":"1","order":"102","possible_hits":"0",},
-{"lineNum":"    7","line":"bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}","class":"lineCov","hits":"1","order":"103","possible_hits":"0",},
-{"lineNum":"    8","line":"bats_no_parallelize_within_files=","class":"lineCov","hits":"1","order":"104","possible_hits":"0",},
-{"lineNum":"    9","line":"filter_status=\'\'","class":"lineCov","hits":"1","order":"105","possible_hits":"0",},
+{"lineNum":"    4","line":"count_only_flag=\'\'","class":"lineCov","hits":"1","order":"99","possible_hits":"0",},
+{"lineNum":"    5","line":"filter=\'\'","class":"lineCov","hits":"1","order":"100","possible_hits":"0",},
+{"lineNum":"    6","line":"num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}","class":"lineCov","hits":"1","order":"101","possible_hits":"0",},
+{"lineNum":"    7","line":"bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}","class":"lineCov","hits":"1","order":"102","possible_hits":"0",},
+{"lineNum":"    8","line":"bats_no_parallelize_within_files=","class":"lineCov","hits":"1","order":"103","possible_hits":"0",},
+{"lineNum":"    9","line":"filter_status=\'\'","class":"lineCov","hits":"1","order":"104","possible_hits":"0",},
 {"lineNum":"   10","line":"filter_tags_list=()"},
-{"lineNum":"   11","line":"flags=(\'--dummy-flag\') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions","class":"lineCov","hits":"1","order":"106","possible_hits":"0",},
-{"lineNum":"   12","line":"setup_suite_file=\'\'","class":"lineCov","hits":"1","order":"107","possible_hits":"0",},
-{"lineNum":"   13","line":"BATS_TRACE_LEVEL=\"${BATS_TRACE_LEVEL:-0}\"","class":"lineCov","hits":"1","order":"108","possible_hits":"0",},
-{"lineNum":"   14","line":"BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=","class":"lineCov","hits":"1","order":"109","possible_hits":"0",},
+{"lineNum":"   11","line":"flags=(\'--dummy-flag\') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions","class":"lineCov","hits":"1","order":"105","possible_hits":"0",},
+{"lineNum":"   12","line":"setup_suite_file=\'\'","class":"lineCov","hits":"1","order":"106","possible_hits":"0",},
+{"lineNum":"   13","line":"BATS_TRACE_LEVEL=\"${BATS_TRACE_LEVEL:-0}\"","class":"lineCov","hits":"1","order":"107","possible_hits":"0",},
+{"lineNum":"   14","line":"BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=","class":"lineCov","hits":"1","order":"108","possible_hits":"0",},
 {"lineNum":"   15","line":""},
 {"lineNum":"   16","line":"abort() {"},
 {"lineNum":"   17","line":"  printf \'Error: %s\\n\' \"$1\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -468,5 +468,5 @@ var data = {lines:[
 {"lineNum":"  467","line":"exit \"$bats_exec_suite_status\" # the actual exit code will be set by the exit trap using bats_exec_suite_status","class":"lineCov","hits":"2","order":"678","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-04 19:40:20", "instrumented" : 245, "covered" : 90,};
+var header = { "command" : "bats", "date" : "2023-05-06 21:39:15", "instrumented" : 245, "covered" : 90,};
 var merged_data = [];

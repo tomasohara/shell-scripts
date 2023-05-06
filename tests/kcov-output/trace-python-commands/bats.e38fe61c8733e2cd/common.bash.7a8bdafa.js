@@ -132,11 +132,11 @@ var data = {lines:[
 {"lineNum":"  131","line":"# check if all search values (must be sorted!) are in the (sorted!) array"},
 {"lineNum":"  132","line":"# Intended for short lists/arrays!"},
 {"lineNum":"  133","line":"bats_all_in() { # <sorted-array> <sorted search values...>"},
-{"lineNum":"  134","line":"  local -r haystack_array=$1","class":"lineCov","hits":"31","order":"190","possible_hits":"0",},
-{"lineNum":"  135","line":"  shift","class":"lineCov","hits":"31","order":"191","possible_hits":"0",},
+{"lineNum":"  134","line":"  local -r haystack_array=$1","class":"lineCov","hits":"31","order":"191","possible_hits":"0",},
+{"lineNum":"  135","line":"  shift","class":"lineCov","hits":"31","order":"192","possible_hits":"0",},
 {"lineNum":"  136","line":""},
-{"lineNum":"  137","line":"  local -i haystack_length # just to appease shellcheck","class":"lineCov","hits":"31","order":"192","possible_hits":"0",},
-{"lineNum":"  138","line":"  eval \"local -r haystack_length=\\${#${haystack_array}[@]}\"","class":"lineCov","hits":"62","order":"193","possible_hits":"0",},
+{"lineNum":"  137","line":"  local -i haystack_length # just to appease shellcheck","class":"lineCov","hits":"31","order":"193","possible_hits":"0",},
+{"lineNum":"  138","line":"  eval \"local -r haystack_length=\\${#${haystack_array}[@]}\"","class":"lineCov","hits":"62","order":"194","possible_hits":"0",},
 {"lineNum":"  139","line":""},
 {"lineNum":"  140","line":"  local -i haystack_index=0         # initialize only here to continue from last search position","class":"lineCov","hits":"31","order":"195","possible_hits":"0",},
 {"lineNum":"  141","line":"  local search_value haystack_value # just to appease shellcheck","class":"lineCov","hits":"31","order":"196","possible_hits":"0",},
@@ -250,5 +250,5 @@ var data = {lines:[
 {"lineNum":"  249","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-04 19:40:24", "instrumented" : 121, "covered" : 35,};
+var header = { "command" : "bats", "date" : "2023-05-06 21:39:25", "instrumented" : 121, "covered" : 35,};
 var merged_data = [];
