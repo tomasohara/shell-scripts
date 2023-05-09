@@ -45,11 +45,12 @@ function clone-repo () {
     fi
     #
     # shellcheck disable=SC2086
-    command script "$log" $command_indicator git clone "$url"
+    ## OLD: command script "$log" $command_indicator git clone "$url"
+    command script "$log" $command_indicator "git clone '$url'"
     ls -R "$repo" >> "$log"
     ## Note: output warning that script now done (to avoid user closing the window assuming script active)
     ## TODO: add trace-stderr
-    echo "FYI: script-based clone done (see $log)" 1>&1
+    echo "FYI: script-based clone done (see $log)" 1>&2
 }
 
 # JSON stuff
