@@ -2575,7 +2575,8 @@ function script {
 }
 }
 # TODO: put this in a separate file
-alias script-update='script _update-$(T).log'
+## OLD: alias script-update='script _update-$(T).log'
+alias script-update='script  _update-$(T).log  make-git-update.bash'
 
 # ansi-filter(filename]: wrapper around ansifilter with stdio and stdout instead of files
 # TODO: issue request for proper Unix stdin support (n.b., this function is much ado about nothing)
