@@ -12,7 +12,8 @@
 #   trace-cmd source /tmp/_do_d_backup.sh >| ${backup_dir}/_do_d_backup.log 2>&1
 #
 # NOTE:
-# - Inremental backups are done when MAX_MOD_TIME enironmen variable se.
+# - Inremental backups are done when MAX_MOD_TIME enironment variable set.
+# - Skips compression when SKIP_COMPRESSION set to 1.
 # - 7zip seems to use current directory for temp files.
 # - example default to p: drive (for WD Passport)
 #
@@ -21,8 +22,6 @@
 # - *** Use 64bit version of 7Zip if available (see make-tpo-backup.sh)!
 # - *** Omit gzip if 7zip also being used (i.e., xyz.tar.gz.7z to => xyz.tar.7z)
 # - ** Ensure log output not buffereed (i.e., is flushed)!
-# - Have option to use compressed tar archive to cut down on space requirments.
-# - Make sure current disk not used for temp file (e.g, cygwin.7z.tmp).
 # - Add verification step:
 #   ex: $ (for f in "${backup_dir}"/*7z; do 7z l "$f"; done) >| "${backup_dir}"/_archive-test.log 2>&1
 # - Resolve stuipid problem with 7zip and filenames with spaces (e.g., save with underscores)!.
@@ -61,16 +60,21 @@ function do-backup-dir () {
     ls -lh "$tar_file"
     #
     # Compress archive via 7zip
-    echo "Compresssing tar archive with 7zip"
-    $NICE_TIMED 7z a "$zip_file" "$tar_file";
-    ls -lh "$zip_file"
-    #
-    if [ ! -s "${backup_dir}/$dir.7z" ]; then
-	echo "Error: problem creating backup for $dir";
+    if [ "$SKIP_COMPRESSION" = "1" ]; then
+	echo "FYI: Skipping compression"
+	copy "$TMP/$dir.tar" "${backup_dir}"
+    else
+        echo "Compresssing tar archive with 7zip"
+        $NICE_TIMED 7z a "$zip_file" "$tar_file";
+        ls -lh "$zip_file"
+        #
+        if [ ! -s "${backup_dir}/$dir.7z" ]; then
+            echo "Error: problem creating backup for $dir";
+        fi
     fi
     # Cleanup
     if [ "$RETAIN_TEMP_TAR" != "1" ]; then
-	/bin/rm -fv "$TMP/$dir.tar";
+        /bin/rm -fv "$TMP/$dir.tar";
     fi
     echo "end of do-backup-dir(): " $(date)
     echo "" 
@@ -144,14 +148,21 @@ function restore-dir () {
     if [ "$target_dir" = "" ]; then target_dir="$current_dir"; fi;
     # Unextract 7zip archive first to temp dir
     # note: -y is to force overwrite of existing temp tar archive (e.g., /tmp/Users.tar)
-    echo "Unzippng 7z archive"
-    $NICE_TIMED 7z x -y -o"$TMP" "${backup_dir}/${subdir}.7z"
-    # Unextract tar archive (embedded in above)
-    # note: supports situation where tar archive is gzipped (via older script)
-    cd "$target_dir"
-    if [ ! -e "$TMP/$subdir.tar" ]; then
-	echo "Unzipping tar archive"
-	$NICE_TIMED gzip --decompress "$TMP/$subdir.tar.gz"
+    if [ "$SKIP_COMPRESSION" = "1" ]; then
+	echo "Skipping uncompression"
+	subdir=`basename "$file" .tar`
+	# TODO: rework to eliminate needless copying and deletion (at end)
+	cp "${backup_dir}/${subdir}.tar" "$TMP"
+    else
+        echo "Unzipping 7z archive"
+        $NICE_TIMED 7z x -y -o"$TMP" "${backup_dir}/${subdir}.7z"
+        # Unextract tar archive (embedded in above)
+        # note: supports situation where tar archive is gzipped (via older script)
+        cd "$target_dir"
+        if [ ! -e "$TMP/$subdir.tar" ]; then
+            echo "Unzipping tar archive"
+            $NICE_TIMED gzip --decompress "$TMP/$subdir.tar.gz"
+        fi
     fi
     echo "Extracting tar archive"
     tar xf "$TMP/$subdir.tar"
