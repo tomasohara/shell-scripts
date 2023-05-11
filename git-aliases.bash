@@ -570,7 +570,7 @@ function git-diff-list-template {
     echo "diff_list_file=\$TMP/_git-diff.\$\$.list"
     # ex: "diff --git a/tomohara-aliases.bash b/tomohara-aliases.bash" => "tomohara-aliases.bash:
     # TODO: ex: "diff --cc mezcla/data_utils.py" => "mezcla/data_utils.py"
-    echo "git diff 2>&1 | extract_matches.perl '^diff.*b/(.*)' >| \$diff_list_file"
+    echo "git diff 2>&1 | extract_matches.perl '^diff.* b/(.*)' >| \$diff_list_file"
 }
 function git-diff-list {
     local diff_list_file
