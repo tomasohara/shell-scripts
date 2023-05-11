@@ -35,7 +35,7 @@ BEGIN {
 # for command-line arguments (see init_var's in &init).
 use strict;
 use vars qw/$warning $warnings $skip_warnings $context $no_asterisks $skip_ruby_lib $ruby/;
-use vars qw/$relaxed $strict $quiet/;
+use vars qw/$relaxed $strict $quiet $matching/;
 
 if (!defined($ARGV[0])) {
     my $options = "options = [-warnings] [-context=N] [-no_astericks] [-skip_ruby_lib]";
@@ -62,6 +62,7 @@ my $asterisks = (! $no_asterisks);
 &init_var(*relaxed, &FALSE);            # relaxed for special cases
 &init_var(*strict, ! $relaxed);         # alias for relaxed=0 
 &init_var(*quiet, &FALSE);              # just output errors proper (e.g., no filenames)
+&init_var(*matching, &FALSE);           # show matching text
 
 my $NULL = chr(0);			# null character ('\0')
 my(@before_context);			# prior context
@@ -75,11 +76,13 @@ while (<>) {
     &dump_line();
     chop;
     my($has_error) = &FALSE;		# whether line has error
+    my($match_info) = "";             # text span within line that matched
 
     # Check for error log corruption
     if ($show_warnings && /$NULL/) {
 	# Null chars usually indicate file corruption (eg, multiple writers)
 	$has_error = &TRUE;
+	$match_info = "E1 [$&]";
 	s/$NULL/^@/g;		# change null char '^@' to "^@" ('^' & '@')
 	&debug_print(&TL_VERY_VERBOSE, "1. has_error=$has_error\n");
     }
@@ -175,6 +178,7 @@ while (<>) {
 	   || /socket has failed to (bind|listen)/
 	   ) {
 	$has_error = &TRUE;
+	$match_info = "E2 [$&]";
 	&debug_print(&TL_VERY_VERBOSE, "2. has_error=$has_error\n");
     }
 
@@ -197,6 +201,7 @@ while (<>) {
 		&& $strict)
 	    || ($asterisks && /\*\*\*/))) {
 	$has_error = &TRUE;
+	$match_info = "W1 [$&]";
 	&debug_print(&TL_VERY_VERBOSE, "3. has_error=$has_error\n");
     }
 
@@ -220,6 +225,9 @@ while (<>) {
 
 	# Display the error line and update the after context count
 	printf "%-4d >>> %s <<<\n", $., $_;
+	if ($matching) {
+	    printf "%-4d match: %s\n", $., $match_info;
+	}
 	$after = $context;
     }
 
