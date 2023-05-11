@@ -98,13 +98,13 @@ RANDOM_ID = system.getenv_bool("RANDOM_ID", False,
 OMIT_PATH = system.getenv_bool("OMIT_PATH", False,
                                "Omit PATH spec. for directory of .Batspp file")
 BATS_OPTIONS = system.getenv_text("BATS_OPTIONS", " ",
-                                  "Options for bats command")
+                                  "Options for bats command such as --pretty")
 SKIP_BATS = system.getenv_bool("SKIP_BATS", False,
                                "Do not run the bats test script")
 OMIT_TRACE = system.getenv_bool("OMIT_TRACE", False,
                                 "Omit actual/expected trace from bats file")
 OMIT_MISC = system.getenv_bool("OMIT_MISC", False,
-                               "Omit miscellaenous/obsolete bats stuff")
+                               "Omit miscellaenous/obsolete bats stuff such as diagnostic code in test")
 TEST_FILE = system.getenv_bool("TEST_FILE", False,
                                "Treat input as example-base test file, not a bash script")
 #
@@ -287,7 +287,6 @@ class Batspp(Main):
         self.is_test_file = (TEST_FILE or self.testfile.endswith(BATSPP_EXTENSION))
         debug.trace(T7, f'batspp - {self.testfile} is a test file (not shell script): {self.is_test_file}')
 
-
         # Read file content
         self.file_content = system.read_file(self.testfile)
         if (self.is_test_file and PREPROCESS_BATSPP):
@@ -408,6 +407,9 @@ class Batspp(Main):
 
         command_tests  = CommandTests(verbose_debug=self.verbose)
         function_tests = FunctionTests(verbose_debug=self.verbose)
+        # TODO: add is_test_file to constructor; simplify class inter-dependencies
+        command_tests.is_test_file = self.is_test_file
+        function_tests.is_test_file = self.is_test_file
 
         # Do the test extraction, optionally removing regular content from bash scripts (i.e., extract comments and empty lines)
         file_content = self.file_content
@@ -448,6 +450,7 @@ class CustomTestsToBats:
         ## OLD: self._test_id       = f'id{random.randint(1, 999999)}' # differentiate tests
         self._test_id       = self.next_id()
         self._indent_used   = None
+        self.is_test_file   = False
 
         # Add optional header and trailer patterns
         self._patterns = patterns
@@ -891,13 +894,14 @@ class CommandTests(CustomTestsToBats):
                 r'(.+?)\n',                                         # expected output; non-greedy
                 fr'{INDENT_PATTERN}$']                              # end test
         else:
+            comment = ("" if Batspp.is_test_file else "#")
             patterns = [
                 r'(?#title    )(?:^ *\# *Test +([^\n]*)\n)?',      # optional test title
                 # optional setup code w/ explicit start ('# setup') and end ('# actual') indicators
                 r'(?#setup    )((?:^ *\# *Setup\n)'        \
                               r'(?:^ *\#? *\$ +[^\n]+\n)*' \
                               r'(?:^ *\# *Actual\n))?',
-                r'(?#actual   )(^ *\#? *\$ +[^\n]+\n)',            # command line [actual]
+                fr'(?#actual   )(^ *{comment}? *\$ +[^\n]+\n)',    # command line [actual]
                 r'(?#expected )(.*)',                              # expected output
                 r'(?#end      )^ *\#?\s*\n']                       # end test (blank line)
 
