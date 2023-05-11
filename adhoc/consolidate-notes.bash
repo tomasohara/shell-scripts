@@ -13,7 +13,7 @@
 #
 
 ## DEBUG:
-echo "0. $*"
+echo "$0 $*"
 
 # Uncomment following line(s) for tracing:
 # - xtrace shows arg expansion (and often is sufficient)
@@ -135,7 +135,10 @@ chmod ugo-w $new_base*;
 
 # Rename existing master note files
 # TODO: exclude cases already with timestamps
-rename-with-file-date "$base.files.list" "$base.list" "$base.log" "$base.files.log"
+## OLD: rename-with-file-date "$base.files.list" "$base.list" "$base.log" "$base.files.log"
+rename-with-file-date "$base.files.list" "$base.files.log" "$base.list" "$base.list.log" 
+## TODO: rename-with-file-date "$base"*[a-z]
+
 
 # Rename new file to use target name
 # TODO1: fix following
