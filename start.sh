@@ -142,6 +142,7 @@ lower_file=$(echo "$file" | perl -pe 's/(.*)/\L$1/;')
 office_program="libreoffice"
 pdf_program="evince"
 image_program="eog"
+default_program="emacs"
 # TODO: doc_program="libreoffice"
 if [ "$for_editting" = "1" ]; then
     pdf_program="okular"
@@ -153,6 +154,7 @@ if [ "$under_mac" = "1" ]; then
     pdf_program="open"
     image_program="open"
     office_program="open"
+    default_program="open"
 fi
 if [[ $lower_file =~ ^.*\.xcf$ ]]; then
     image_program="gimp"
@@ -199,6 +201,10 @@ case "$lower_file" in
     # Default processing
     *)
        echo ""
-       echo "*** Warning: Unknown extension in $1; using Emacs"
-       invoke emacs "$@" & ;;
+       ## OLD
+       ## echo "*** Warning: Unknown extension in $1; using Emacs"
+       ## invoke emacs "$@" & ;;
+       echo "*** Warning: Unknown extension in $1; using $default_program"
+       invoke "$default_program" "$@" & ;;
+
 esac
