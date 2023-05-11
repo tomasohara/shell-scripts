@@ -23,7 +23,7 @@ eval 'exec perl -Ssw $0 "$@"'
 BEGIN { 
     my $dir = `dirname $0`; chomp $dir; unshift(@INC, $dir);
     require 'common.perl';
-    use vars qw/$script_name/;
+    use vars qw/$script_name $verbose/;
 }
 
 
@@ -129,6 +129,7 @@ $replacement =~ s/\\(\d+)/\$$1/g;
 &debug_out(&TL_VERY_DETAILED, "pattern='%s'; replacement='%s'; restore='%s'\n", $pattern, $replacement, $restore);
 
 # Scan through the text (checking the pattern line by line)
+my($total_matched) = 0;
 while (<>) {
     if ($utf8) {
 	$_ = decode_utf8($_);
@@ -177,6 +178,7 @@ while (<>) {
 	}
 	&debug_out(&TL_VERY_DETAILED, "resulting text: '%s'\n", $matching_text);
 	print "$matching_text\n";
+	$total_matched++;
 
 	# See if limit for displayed matches reached
 	&debug_print(&TL_VERY_DETAILED, "count=$count max_count=$max_count\n"); 
@@ -188,6 +190,11 @@ while (<>) {
     if ($count == 0) {
 	&debug_print(&TL_VERY_VERBOSE, "line not matched: $_\n");
     }
+}
+
+# Report unmatched pattern in verbose mode
+if ($verbose && ($total_matched == 0)) {
+    print("no matches\n");
 }
 
 &exit();
