@@ -231,7 +231,7 @@ while (<>) {
 	&debug_on(3);
         print(&run_command_over("$env_spec machine_translation.py 2>| $log", 
                                 "$text\n", 3));
-	print("\n");
+	print("\n\n");
 	debug_out(6, "log: {\n%s}\n", &read_file($log));
 	&debug_on($save_trace_level);
 	next;
