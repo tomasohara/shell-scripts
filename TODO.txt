@@ -9,3 +9,4 @@ Things to do
       my($level) = @_;
       ...
       }
+- prune temporary scripts (e.g., it.perl)
