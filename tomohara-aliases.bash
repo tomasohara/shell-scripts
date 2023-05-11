@@ -326,10 +326,10 @@ set histappend
 export HISTSIZE=25000
 export HISTFILESIZE=32767
 #
-# Note: bash setting(s) in ~/.bash+profile
+# Note: bash setting(s) in ~/.bash_profile
 # format: shopt [-s | -u] optionname
-# where -s to sets and -u unsets
-# shopt -s nocaseglob   # ignore case in filename glob patterns
+#   where -s to sets and -u unsets
+#   shopt -s nocaseglob   # ignore case in filename glob patterns
 #
 # Ignore case in pattern matching
 shopt -s nocasematch
@@ -542,6 +542,9 @@ alias reset-prompt-dollar='reset-prompt "\$"'
     alias reset-prompt-default="reset-prompt '$PS_symbol'"
 }
 ## TODO: alias reset-prompt-default='reset-prompt "\$PS_symbol"'
+
+# rehash(): reset locations for programs
+alias rehash='hash -l' 
 
 #-------------------------------------------------------------------------------
 # More misc stuff
@@ -1251,7 +1254,8 @@ function usage-alt {
     local output_file
     local basename
     basename="$(basename "$PWD")"
-    if [ "$basename" = "" ]; then basename="fs-root"; fi
+    ## OLD: if [ "$basename" = "" ]; then basename="fs-root"; fi
+    if [[ ("$basename" = "") || ("$basename" = "/") ]]; then basename="fs-root"; fi
     output_file="$TEMP/$basename-usage.list";
     usage "$output_file"
 }
@@ -1826,7 +1830,10 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 # rename-utf8-encoded: replace runs of non-ascii UTF8 encodings with _
 # note: '👇🏻' gets encoded as ; see show-unicode-code-info alias to way to illustrate encodings
 # TODO: make this less of a sledgehammer
-alias rename-utf8-encoded='rename-files -global -regex "[0x80-0xFF]\{3,\}" "_"'
+## BAD: alias rename-utf8-encoded='rename-files -global -regex "[0x80-0xFF]\{3,\}" "_"'
+## OLD: alias rename-utf8-encoded='rename-files -global -regex "[\x80-\xFF]\{3,\}" "_"'
+alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]+" "_"'
+alias rename-emoji=rename-utf8-encoded
 alias rename-bad-dashes="rename-files -quick -global -regex ' \-' '_'; rename-files -quick -global -regex '\-' '_' -*"; 
 
 #-------------------------------------------------------------------------------
@@ -2218,7 +2225,9 @@ alias blank-screen='xset dpms force off'
 alias stop-service='systemctl stop'
 alias restart-service='sudo systemctl restart'
 # TODO: rename as map-internet-ports???
-alias map-ports='nmap'
+# map-ports: shows TCP ports being listened to on the remote host
+# note: -Pn option skips host discovery (a la no ping)
+alias map-ports='nmap -Pn'
 
 # get-free-filename(base, [sep=""], [ext=""]): get filename starting with BASE that is not used.
 # Notes: 1. If <base> exists <base><sep><N> checked until the filename not used (for N in 2, 3, ... ).
