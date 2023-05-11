@@ -76,7 +76,7 @@ function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -p
 # The snippet should be bracketted by lines with "$: {" and "}"
 function shell-check-last-snippet {
     # shellcheck disable=SC2002
-    cat "$1" | perl-grep -v '^\s*#' | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
+    cat "$1" | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
 }
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
@@ -122,9 +122,11 @@ function rename-last-snapshot {
     local new_name="$1"
     # Append dated image suffix unless date-like suffix w/ extension used
     if [[ ! "$new_name" =~ [0-9][0-9]*.png ]]; then
+	# TODO: derive timestamp via rename-with-file-date (in case last snapshit taken earlier)
 	new_name="$new_name-$(T).png"
     fi
     local last_file
+    # TODO: have options to use latest file (regardless of name) 
     # shellcheck disable=SC2010
     last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
     move "$last_file" "$new_name"		
