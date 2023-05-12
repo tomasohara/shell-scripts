@@ -719,9 +719,12 @@ alias copy='$CP'
 alias del="delete"
 alias copy-force='command cp -fp $other_file_args'
 alias cp='command cp -i $other_file_args'
+# maldito shellcheck bug: SC2032: Use own script or sh -c '..' to run this from find
+# shellcheck disable=SC2032
 alias rm='command rm -i $other_file_args'
 alias delete='command rm -i $other_file_args'
 ## OLD: alias delete-force='/bin/rm -f $other_file_args'
+# shellcheck disable=SC2034
 force_echo=""
 alias disable-forced-deletions='force_echo="echo Warning: run enable-forced-deletions or issue: "'
 alias enable-forced-deletions='force_echo=""'
@@ -914,10 +917,11 @@ function gu- () { $GREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0"; }
 ## OLD: function grep-to-less () { $EGREP $MY_GREP_OPTIONS "$@" | $PAGER_NOEXIT -p"$1"; }
 function grep-to-less () {
     # TODO: fix warning about possible discrepency between grep regex and less, such as when ^ used (e.g., with multiple files in grep output)
-    if [[ ($1 =~ \^) && ($# -gt 2) ]]; then
-	echo "Warning: ^ might be intrepretted differently by less (e.g., due to multiple files)" 1>&2
+    if [[ ($1 =~ ^[^]) && ($# -gt 2) ]]; then
+	echo "Error: ^ will be intrepretted differently by less (e.g., due to multiple files)" 1>&2
+    else
+	$EGREP $MY_GREP_OPTIONS "$@" | $PAGER_NOEXIT -p"$1";
     fi
-    $EGREP $MY_GREP_OPTIONS "$@" | $PAGER_NOEXIT -p"$1";
 }
 alias grepl-='grep-to-less'
 function grepl () { pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
@@ -1916,18 +1920,30 @@ function move-versioned-files-alt {
 function rename-with-file-date() {
     ## DEBUG: set -o xtrace
     local f new_f
+    local verbose=0
     local move_command="move"
     if [ "$1" = "--copy" ]; then
         ## TODO: move_command="copy"
         move_command="command cp --interactive --verbose --preserve"
         shift
     fi
+    if [ "$1" = "--verbose" ]; then
+	verbose=1
+	shift
+    fi
     for f in "$@"; do
         ## DEBUG: echo "f=$f"
-        if [ -e "$f" ]; then
+        ## OLD: if [ -e "$f" ]; then
+	if [[ "$f" =~ \.[0-9]{2}[a-z]{3,4} ]]; then
+	    ## TODO2: [ $verbose = 1 ] && echo "Ignoring file with timestamp: $f"
+	    [ $verbose = 1 ] && echo "Ignoring file with timestamp: $f"
+        elif [ -e "$f" ]; then
            new_f=$(get-free-filename "$f.$(date --reference="$f" '+%d%b%y')" ".")
            ## DEBUG: echo
            eval "$move_command" "$f" "$new_f";
+	else
+	   ## TODO2: [ $verbose ] && echo "FYI: no '$f'"
+	   [ $verbose = 1 ] && echo "FYI: no '$f'"
         fi
     done;
     ## DEBUG: set - -o xtrace
@@ -2487,7 +2503,6 @@ function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$;
 ## HACK: set envionment for sake of set_xterm_title.bash (TODO check PPID for this)
 ## TODO: use stack for old_PS_symbol maintenance??? (also allows for recursive invocation, such as with '$ $ $')
 ## TODO: rename as my-script to avoid confusion
-## Maldito shellcheck [
 #-------------------------------------------------------------------------------
 # Misc. language related
 alias json-pp='json_pp -json_opt utf8,pretty'
@@ -2538,7 +2553,7 @@ function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$;
 ## HACK: set envionment for sake of set_xterm_title.bash (TODO check PPID for this)
 ## TODO: use stack for old_PS_symbol maintenance??? (also allows for recursive invocation, such as with '$ $ $')
 ## TODO: rename as my-script to avoid confusion
-## Maldito shellcheck [SC2032: Use own script or sh -c '..' to run this from sudo.]
+# Maldito shellcheck [SC2032: Use own script or sh -c '..' to run this from sudo.]
 # shellcheck disable=SC2032
 ## TOM-IDIOSYNCRATIC
 {
@@ -2655,6 +2670,8 @@ function delete-compiled-python-files-aux {
     # Maldito shellcheck [SC2086: Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2086
     ## OLD: find . \( -name "*.pyc" -o -name "*.pyo" \) -exec /bin/rm $rm_options {} \;
+    # maldito shellcheck bug: SC2033: Shell functions can't be passed to external commands
+    # shellcheck disable=SC2033
     find . \( -name "*.pyc" -o -name "*.pyo" \) -exec command rm $rm_options {} \;
 }
 alias delete-compiled-python-files=delete-compiled-python-files-aux
