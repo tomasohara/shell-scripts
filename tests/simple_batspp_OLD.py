@@ -64,8 +64,8 @@ ACTUAL    = 'actual'
 EXPECTED  = 'expected'
 TAGS      = [('<blank>', ' '),
              ('<blank-line>', '\n'),
-             ('<tab>', '\t')]
-
+             ('<tab>', '\t'),
+             ('# SKIP', '')]
 
 class Batspp(Main):
     """This process and run custom tests using bats-core"""
@@ -397,7 +397,6 @@ def format_bats_test(data, default_title=""):
     debug.trace(7, f'batspp.format_bats_test(data={data}) => {result}')
     return result
 
-
 def get_bash_function(name, content):
     """Return bash function string"""
 
@@ -408,7 +407,6 @@ def get_bash_function(name, content):
 
     debug.trace(7, f'batspp.get_bash_function(name={name}, content={content}) => {result}')
     return result
-
 
 def replace_tags(tags, text):
     """
@@ -424,7 +422,6 @@ def replace_tags(tags, text):
 
     debug.trace(7, f'batspp.replace_tags(tags={tags}, text={text}) => {result}')
     return result
-
 
 if __name__ == '__main__':
     app = Batspp(description          = __doc__,

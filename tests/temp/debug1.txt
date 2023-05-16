@@ -1,0 +1,41 @@
+1..8
+not ok 1 test-1
+# (in test file /tmp/main-ql917_gx, line 24)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== alias testuser="sed -r "s/"$USER"+/userxf333/g""
+#  ==========
+# ========= $ alias testnum="sed -r "s/[0-9]/N/g"" =========
+# $ alias testnum="sed -r "s/[0-9]/N/g""
+# ============================
+ok 2 test-3
+ok 3 test-4
+not ok 4 test-5
+# (from function `test-5-actual' in file /tmp/main-ql917_gx, line 130,
+#  in test file /tmp/main-ql917_gx, line 117)
+#   `test-5-actual ' failed with status 127
+# ========== pwd | testuser
+#  ==========
+# /tmp/main-ql917_gx: line 130: testuser: command not found
+ok 5 test-6
+not ok 6 test-7
+# (from function `test-7-actual' in file /tmp/main-ql917_gx, line 196,
+#  in test file /tmp/main-ql917_gx, line 183)
+#   `test-7-actual ' failed with status 127
+# ========== man date | head -n 10 | testnum
+#  ==========
+# /tmp/main-ql917_gx: line 196: testnum: command not found
+not ok 7 test-8
+# (from function `test-8-actual' in file /tmp/main-ql917_gx, line 229,
+#  in test file /tmp/main-ql917_gx, line 216)
+#   `test-8-actual ' failed with status 127
+# ========== ps -l | awk '!($3=$4=$5=$10=$13="")' | testnum
+#  ==========
+# /tmp/main-ql917_gx: line 229: testnum: command not found
+not ok 8 test-9
+# (from function `test-9-actual' in file /tmp/main-ql917_gx, line 266,
+#  in test file /tmp/main-ql917_gx, line 253)
+#   `test-9-actual ' failed with status 127
+# ========== ps | head -n 10 | testuser | testnum
+#  ==========
+# /tmp/main-ql917_gx: line 266: testuser: command not found
+# /tmp/main-ql917_gx: line 266: testnum: command not found
