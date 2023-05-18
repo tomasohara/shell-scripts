@@ -293,9 +293,9 @@ reference-variable "$hoy, $T"
 function quiet-unalias {
     ## HACK: do nothing if running under bats-core
     if [ "$BATS_TEST_FILENAME" != "" ]; then
-	if [ "$BATCH_MODE" != "1" ]; then
+        if [ "$BATCH_MODE" != "1" ]; then
             echo "Ignoring unalias over $* for sake of bats"
-	fi
+        fi
         return
     fi
     unalias "$@" 2> /dev/null || true;
@@ -3126,5 +3126,6 @@ alias more-tomohara-aliases='source "$TOM_BIN/more-tomohara-aliases.bash"'
 alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 
 # Optional end tracing
-startup-trace 'out tomohara-aliases.bash'
+## OLD: startup-trace 'out tomohara-aliases.bash'
+trace 'out tomohara-aliases.bash'
 ## DEBUG: echo 'out tomohara-aliases.bash'
