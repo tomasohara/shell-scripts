@@ -11,6 +11,17 @@
 # hacks enabled via environment variables to work around quirks in the example parsing. For example,
 #   TEST_FILE=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 python ./simple_batspp.py tests/adhoc-tests.test
 #
+## TODO1:
+## - Add option to use bash-compiant syntax for tests; via https://bats-core.readthedocs.io/en/stable/gotchas.html
+##     function bash_compliant_function_name_as_test_name { # @test
+##         # your code
+##     }
+## - Issue a warning about tests with '<<END' and other arcane syntax that conflict with
+##   the .bats file generation.
+## TODO2:
+## - Have option to save each test in a separate bats file: a simple syntax error (e.g., wrong closing quote) can cause the entire test to fail.
+## TODO3:
+## - Warn if expecting command and non-comment and non-$ line encounters (e.g., Tom's funky ¢ prompt)
 ## TODO:
 ## - extend usage guide or docstring.
 ## - Add some directives in the test or script comments:
