@@ -1404,6 +1404,134 @@
 		<lineToCover lineNumber="381" covered="true"/>
 		<lineToCover lineNumber="383" covered="true"/>
 	</file>
+	<file path="/tmp/bats-run-sbh2SR/bats.152517.src">
+		<lineToCover lineNumber="5" covered="true"/>
+		<lineToCover lineNumber="8" covered="true"/>
+		<lineToCover lineNumber="13" covered="true"/>
+		<lineToCover lineNumber="14" covered="true"/>
+		<lineToCover lineNumber="15" covered="true"/>
+		<lineToCover lineNumber="17" covered="true"/>
+		<lineToCover lineNumber="18" covered="true"/>
+		<lineToCover lineNumber="19" covered="true"/>
+		<lineToCover lineNumber="20" covered="true"/>
+		<lineToCover lineNumber="21" covered="true"/>
+		<lineToCover lineNumber="24" covered="true"/>
+		<lineToCover lineNumber="29" covered="true"/>
+		<lineToCover lineNumber="37" covered="true"/>
+		<lineToCover lineNumber="39" covered="true"/>
+		<lineToCover lineNumber="46" covered="true"/>
+		<lineToCover lineNumber="47" covered="true"/>
+		<lineToCover lineNumber="48" covered="true"/>
+		<lineToCover lineNumber="50" covered="true"/>
+		<lineToCover lineNumber="51" covered="true"/>
+		<lineToCover lineNumber="52" covered="false"/>
+		<lineToCover lineNumber="53" covered="false"/>
+		<lineToCover lineNumber="54" covered="false"/>
+		<lineToCover lineNumber="57" covered="false"/>
+		<lineToCover lineNumber="62" covered="true"/>
+		<lineToCover lineNumber="64" covered="true"/>
+		<lineToCover lineNumber="70" covered="false"/>
+		<lineToCover lineNumber="72" covered="false"/>
+		<lineToCover lineNumber="80" covered="true"/>
+		<lineToCover lineNumber="81" covered="true"/>
+		<lineToCover lineNumber="82" covered="true"/>
+		<lineToCover lineNumber="84" covered="true"/>
+		<lineToCover lineNumber="85" covered="true"/>
+		<lineToCover lineNumber="86" covered="true"/>
+		<lineToCover lineNumber="87" covered="true"/>
+		<lineToCover lineNumber="88" covered="true"/>
+		<lineToCover lineNumber="91" covered="true"/>
+		<lineToCover lineNumber="96" covered="true"/>
+		<lineToCover lineNumber="104" covered="true"/>
+		<lineToCover lineNumber="106" covered="true"/>
+		<lineToCover lineNumber="114" covered="true"/>
+		<lineToCover lineNumber="115" covered="true"/>
+		<lineToCover lineNumber="116" covered="true"/>
+		<lineToCover lineNumber="118" covered="true"/>
+		<lineToCover lineNumber="119" covered="true"/>
+		<lineToCover lineNumber="120" covered="true"/>
+		<lineToCover lineNumber="121" covered="true"/>
+		<lineToCover lineNumber="122" covered="true"/>
+		<lineToCover lineNumber="125" covered="true"/>
+		<lineToCover lineNumber="130" covered="true"/>
+		<lineToCover lineNumber="132" covered="true"/>
+		<lineToCover lineNumber="138" covered="true"/>
+		<lineToCover lineNumber="140" covered="true"/>
+		<lineToCover lineNumber="149" covered="true"/>
+		<lineToCover lineNumber="150" covered="true"/>
+		<lineToCover lineNumber="151" covered="true"/>
+		<lineToCover lineNumber="153" covered="true"/>
+		<lineToCover lineNumber="154" covered="true"/>
+		<lineToCover lineNumber="155" covered="false"/>
+		<lineToCover lineNumber="156" covered="false"/>
+		<lineToCover lineNumber="157" covered="false"/>
+		<lineToCover lineNumber="160" covered="false"/>
+		<lineToCover lineNumber="165" covered="true"/>
+		<lineToCover lineNumber="167" covered="true"/>
+		<lineToCover lineNumber="173" covered="false"/>
+		<lineToCover lineNumber="175" covered="false"/>
+		<lineToCover lineNumber="182" covered="true"/>
+		<lineToCover lineNumber="183" covered="true"/>
+		<lineToCover lineNumber="184" covered="true"/>
+		<lineToCover lineNumber="186" covered="true"/>
+		<lineToCover lineNumber="187" covered="true"/>
+		<lineToCover lineNumber="188" covered="true"/>
+		<lineToCover lineNumber="189" covered="true"/>
+		<lineToCover lineNumber="190" covered="true"/>
+		<lineToCover lineNumber="193" covered="true"/>
+		<lineToCover lineNumber="198" covered="true"/>
+		<lineToCover lineNumber="200" covered="true"/>
+		<lineToCover lineNumber="206" covered="true"/>
+		<lineToCover lineNumber="208" covered="true"/>
+		<lineToCover lineNumber="215" covered="true"/>
+		<lineToCover lineNumber="216" covered="true"/>
+		<lineToCover lineNumber="217" covered="true"/>
+		<lineToCover lineNumber="219" covered="true"/>
+		<lineToCover lineNumber="220" covered="true"/>
+		<lineToCover lineNumber="221" covered="true"/>
+		<lineToCover lineNumber="222" covered="true"/>
+		<lineToCover lineNumber="223" covered="true"/>
+		<lineToCover lineNumber="226" covered="true"/>
+		<lineToCover lineNumber="231" covered="true"/>
+		<lineToCover lineNumber="233" covered="true"/>
+		<lineToCover lineNumber="239" covered="true"/>
+		<lineToCover lineNumber="241" covered="true"/>
+		<lineToCover lineNumber="252" covered="true"/>
+		<lineToCover lineNumber="253" covered="true"/>
+		<lineToCover lineNumber="254" covered="true"/>
+		<lineToCover lineNumber="256" covered="true"/>
+		<lineToCover lineNumber="257" covered="true"/>
+		<lineToCover lineNumber="258" covered="true"/>
+		<lineToCover lineNumber="259" covered="true"/>
+		<lineToCover lineNumber="260" covered="true"/>
+		<lineToCover lineNumber="263" covered="true"/>
+		<lineToCover lineNumber="268" covered="true"/>
+		<lineToCover lineNumber="270" covered="true"/>
+		<lineToCover lineNumber="276" covered="true"/>
+		<lineToCover lineNumber="278" covered="true"/>
+		<lineToCover lineNumber="285" covered="true"/>
+		<lineToCover lineNumber="286" covered="true"/>
+		<lineToCover lineNumber="287" covered="true"/>
+		<lineToCover lineNumber="289" covered="true"/>
+		<lineToCover lineNumber="290" covered="true"/>
+		<lineToCover lineNumber="291" covered="false"/>
+		<lineToCover lineNumber="292" covered="false"/>
+		<lineToCover lineNumber="293" covered="false"/>
+		<lineToCover lineNumber="296" covered="false"/>
+		<lineToCover lineNumber="301" covered="true"/>
+		<lineToCover lineNumber="303" covered="true"/>
+		<lineToCover lineNumber="309" covered="false"/>
+		<lineToCover lineNumber="311" covered="false"/>
+		<lineToCover lineNumber="317" covered="true"/>
+		<lineToCover lineNumber="318" covered="true"/>
+		<lineToCover lineNumber="319" covered="true"/>
+		<lineToCover lineNumber="320" covered="true"/>
+		<lineToCover lineNumber="321" covered="true"/>
+		<lineToCover lineNumber="322" covered="true"/>
+		<lineToCover lineNumber="323" covered="true"/>
+		<lineToCover lineNumber="324" covered="true"/>
+		<lineToCover lineNumber="325" covered="true"/>
+	</file>
 	<file path="/usr/local/libexec/bats-core/bats-exec-suite">
 		<lineToCover lineNumber="2" covered="true"/>
 		<lineToCover lineNumber="4" covered="true"/>
@@ -1967,81 +2095,6 @@
 		<lineToCover lineNumber="247" covered="false"/>
 		<lineToCover lineNumber="248" covered="false"/>
 	</file>
-	<file path="/tmp/bats-run-OsBCTA/bats.15638.src">
-		<lineToCover lineNumber="5" covered="true"/>
-		<lineToCover lineNumber="8" covered="true"/>
-		<lineToCover lineNumber="12" covered="true"/>
-		<lineToCover lineNumber="13" covered="true"/>
-		<lineToCover lineNumber="21" covered="true"/>
-		<lineToCover lineNumber="22" covered="true"/>
-		<lineToCover lineNumber="24" covered="true"/>
-		<lineToCover lineNumber="25" covered="false"/>
-		<lineToCover lineNumber="26" covered="false"/>
-		<lineToCover lineNumber="27" covered="false"/>
-		<lineToCover lineNumber="28" covered="false"/>
-		<lineToCover lineNumber="29" covered="false"/>
-		<lineToCover lineNumber="30" covered="false"/>
-		<lineToCover lineNumber="31" covered="false"/>
-		<lineToCover lineNumber="32" covered="false"/>
-		<lineToCover lineNumber="37" covered="false"/>
-		<lineToCover lineNumber="40" covered="false"/>
-		<lineToCover lineNumber="44" covered="true"/>
-		<lineToCover lineNumber="45" covered="true"/>
-		<lineToCover lineNumber="54" covered="true"/>
-		<lineToCover lineNumber="55" covered="true"/>
-		<lineToCover lineNumber="57" covered="true"/>
-		<lineToCover lineNumber="62" covered="true"/>
-		<lineToCover lineNumber="63" covered="true"/>
-		<lineToCover lineNumber="65" covered="true"/>
-		<lineToCover lineNumber="70" covered="true"/>
-		<lineToCover lineNumber="71" covered="true"/>
-		<lineToCover lineNumber="73" covered="true"/>
-		<lineToCover lineNumber="74" covered="true"/>
-		<lineToCover lineNumber="75" covered="true"/>
-		<lineToCover lineNumber="76" covered="true"/>
-		<lineToCover lineNumber="77" covered="true"/>
-		<lineToCover lineNumber="78" covered="true"/>
-		<lineToCover lineNumber="79" covered="true"/>
-		<lineToCover lineNumber="80" covered="true"/>
-		<lineToCover lineNumber="85" covered="true"/>
-		<lineToCover lineNumber="88" covered="true"/>
-		<lineToCover lineNumber="92" covered="true"/>
-		<lineToCover lineNumber="93" covered="true"/>
-		<lineToCover lineNumber="95" covered="true"/>
-		<lineToCover lineNumber="96" covered="true"/>
-		<lineToCover lineNumber="97" covered="true"/>
-		<lineToCover lineNumber="98" covered="true"/>
-		<lineToCover lineNumber="99" covered="true"/>
-		<lineToCover lineNumber="100" covered="true"/>
-		<lineToCover lineNumber="101" covered="true"/>
-		<lineToCover lineNumber="102" covered="true"/>
-		<lineToCover lineNumber="107" covered="true"/>
-		<lineToCover lineNumber="110" covered="true"/>
-		<lineToCover lineNumber="114" covered="true"/>
-		<lineToCover lineNumber="115" covered="true"/>
-		<lineToCover lineNumber="117" covered="true"/>
-		<lineToCover lineNumber="122" covered="true"/>
-		<lineToCover lineNumber="123" covered="true"/>
-		<lineToCover lineNumber="125" covered="true"/>
-		<lineToCover lineNumber="126" covered="false"/>
-		<lineToCover lineNumber="127" covered="false"/>
-		<lineToCover lineNumber="128" covered="false"/>
-		<lineToCover lineNumber="129" covered="false"/>
-		<lineToCover lineNumber="130" covered="false"/>
-		<lineToCover lineNumber="131" covered="false"/>
-		<lineToCover lineNumber="132" covered="false"/>
-		<lineToCover lineNumber="137" covered="true"/>
-		<lineToCover lineNumber="140" covered="false"/>
-		<lineToCover lineNumber="143" covered="true"/>
-		<lineToCover lineNumber="144" covered="true"/>
-		<lineToCover lineNumber="145" covered="true"/>
-		<lineToCover lineNumber="146" covered="true"/>
-		<lineToCover lineNumber="147" covered="true"/>
-		<lineToCover lineNumber="148" covered="true"/>
-		<lineToCover lineNumber="149" covered="true"/>
-		<lineToCover lineNumber="150" covered="true"/>
-		<lineToCover lineNumber="151" covered="true"/>
-	</file>
 	<file path="/usr/local/lib/bats-core/preprocessing.bash">
 		<lineToCover lineNumber="3" covered="true"/>
 		<lineToCover lineNumber="4" covered="true"/>
@@ -2180,19 +2233,19 @@
 		<lineToCover lineNumber="58" covered="true"/>
 		<lineToCover lineNumber="59" covered="true"/>
 		<lineToCover lineNumber="60" covered="true"/>
-		<lineToCover lineNumber="62" covered="false"/>
+		<lineToCover lineNumber="62" covered="true"/>
 		<lineToCover lineNumber="65" covered="true"/>
 		<lineToCover lineNumber="66" covered="true"/>
 		<lineToCover lineNumber="67" covered="true"/>
-		<lineToCover lineNumber="70" covered="false"/>
-		<lineToCover lineNumber="71" covered="false"/>
-		<lineToCover lineNumber="72" covered="false"/>
-		<lineToCover lineNumber="73" covered="false"/>
+		<lineToCover lineNumber="70" covered="true"/>
+		<lineToCover lineNumber="71" covered="true"/>
+		<lineToCover lineNumber="72" covered="true"/>
+		<lineToCover lineNumber="73" covered="true"/>
 		<lineToCover lineNumber="76" covered="true"/>
 		<lineToCover lineNumber="77" covered="true"/>
 		<lineToCover lineNumber="78" covered="true"/>
 		<lineToCover lineNumber="79" covered="true"/>
-		<lineToCover lineNumber="81" covered="false"/>
+		<lineToCover lineNumber="81" covered="true"/>
 		<lineToCover lineNumber="89" covered="true"/>
 		<lineToCover lineNumber="90" covered="true"/>
 		<lineToCover lineNumber="91" covered="false"/>

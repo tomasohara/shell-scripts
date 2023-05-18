@@ -1,8 +1,7 @@
 {
   "files": [
-    {"file": "/tmp/bats-run-SWq33l/bats.12578.src", "percent_covered": "79.41", "covered_lines": "108", "total_lines": "136"},
+    {"file": "/tmp/bats-run-0ApAll/bats.148783.src", "percent_covered": "90.91", "covered_lines": "180", "total_lines": "198"},
     {"file": "/usr/local/bin/cpufreqctl-aveey", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "806"},
-    {"file": "/home/aveey/tom-project/shell-scripts/tests/_dir-aliases.bash", "percent_covered": "63.64", "covered_lines": "14", "total_lines": "22"},
     {"file": "/usr/local/bin/bats", "percent_covered": "23.33", "covered_lines": "7", "total_lines": "30"},
     {"file": "/usr/local/libexec/bats-core/bats", "percent_covered": "36.84", "covered_lines": "91", "total_lines": "247"},
     {"file": "/usr/local/lib/bats-core/test_functions.bash", "percent_covered": "1.94", "covered_lines": "2", "total_lines": "103"},
@@ -15,13 +14,13 @@
     {"file": "/usr/local/lib/bats-core/preprocessing.bash", "percent_covered": "87.50", "covered_lines": "7", "total_lines": "8"},
     {"file": "/usr/local/lib/bats-core/warnings.bash", "percent_covered": "8.70", "covered_lines": "2", "total_lines": "23"},
     {"file": "/usr/local/libexec/bats-core/bats-preprocess", "percent_covered": "49.30", "covered_lines": "35", "total_lines": "71"},
-    {"file": "/usr/local/lib/bats-core/tracing.bash", "percent_covered": "66.67", "covered_lines": "112", "total_lines": "168"}
+    {"file": "/usr/local/lib/bats-core/tracing.bash", "percent_covered": "70.24", "covered_lines": "118", "total_lines": "168"}
   ],
-  "percent_covered": "30.11",
-  "covered_lines": 715,
-  "total_lines": 2375,
+  "percent_covered": "32.26",
+  "covered_lines": 779,
+  "total_lines": 2415,
   "percent_low": 25,
   "percent_high": 75,
   "command": "bats",
-  "date": "2023-05-06 21:38:26"
+  "date": "2023-05-18 22:52:27"
 }

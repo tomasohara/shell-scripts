@@ -1,5 +1,6 @@
 {
   "files": [
+    {"file": "/tmp/bats-run-bZr5Ic/bats.157218.src", "percent_covered": "89.35", "covered_lines": "151", "total_lines": "169"},
     {"file": "/usr/local/bin/cpufreqctl-aveey", "percent_covered": "0.00", "covered_lines": "0", "total_lines": "806"},
     {"file": "/usr/local/bin/bats", "percent_covered": "23.33", "covered_lines": "7", "total_lines": "30"},
     {"file": "/usr/local/libexec/bats-core/bats", "percent_covered": "36.84", "covered_lines": "91", "total_lines": "247"},
@@ -9,18 +10,17 @@
     {"file": "/usr/local/libexec/bats-core/bats-exec-suite", "percent_covered": "36.73", "covered_lines": "90", "total_lines": "245"},
     {"file": "/usr/local/libexec/bats-core/bats-exec-test", "percent_covered": "52.69", "covered_lines": "98", "total_lines": "186"},
     {"file": "/usr/local/libexec/bats-core/bats-format-cat", "percent_covered": "100.00", "covered_lines": "3", "total_lines": "3"},
-    {"file": "/tmp/bats-run-0RLvNY/bats.19459.src", "percent_covered": "73.83", "covered_lines": "79", "total_lines": "107"},
     {"file": "/usr/local/lib/bats-core/common.bash", "percent_covered": "28.93", "covered_lines": "35", "total_lines": "121"},
     {"file": "/usr/local/lib/bats-core/preprocessing.bash", "percent_covered": "87.50", "covered_lines": "7", "total_lines": "8"},
     {"file": "/usr/local/lib/bats-core/warnings.bash", "percent_covered": "8.70", "covered_lines": "2", "total_lines": "23"},
     {"file": "/usr/local/libexec/bats-core/bats-preprocess", "percent_covered": "49.30", "covered_lines": "35", "total_lines": "71"},
-    {"file": "/usr/local/lib/bats-core/tracing.bash", "percent_covered": "66.67", "covered_lines": "112", "total_lines": "168"}
+    {"file": "/usr/local/lib/bats-core/tracing.bash", "percent_covered": "70.24", "covered_lines": "118", "total_lines": "168"}
   ],
-  "percent_covered": "28.92",
-  "covered_lines": 672,
-  "total_lines": 2324,
+  "percent_covered": "31.43",
+  "covered_lines": 750,
+  "total_lines": 2386,
   "percent_low": 25,
   "percent_high": 75,
   "command": "bats",
-  "date": "2023-05-06 21:39:03"
+  "date": "2023-05-18 22:52:49"
 }

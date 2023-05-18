@@ -14,10 +14,10 @@ var data = {lines:[
 {"lineNum":"   13","line":"    local expected_number_of_tests=\"${header:3}\"","class":"lineCov","hits":"1","order":"222","possible_hits":"0",},
 {"lineNum":"   14","line":"    # ... count the actual number of [not ] oks..."},
 {"lineNum":"   15","line":"    local actual_number_of_tests=0","class":"lineCov","hits":"1","order":"223","possible_hits":"0",},
-{"lineNum":"   16","line":"    while IFS= read -r line; do","class":"lineCov","hits":"104","order":"224","possible_hits":"0",},
+{"lineNum":"   16","line":"    while IFS= read -r line; do","class":"lineCov","hits":"718","order":"224","possible_hits":"0",},
 {"lineNum":"   17","line":"      # forward line"},
-{"lineNum":"   18","line":"      printf \"%s\\n\" \"$line\"","class":"lineCov","hits":"51","order":"469","possible_hits":"0",},
-{"lineNum":"   19","line":"      case \"$line\" in","class":"lineCov","hits":"51","order":"470","possible_hits":"0",},
+{"lineNum":"   18","line":"      printf \"%s\\n\" \"$line\"","class":"lineCov","hits":"358","order":"492","possible_hits":"0",},
+{"lineNum":"   19","line":"      case \"$line\" in","class":"lineCov","hits":"358","order":"493","possible_hits":"0",},
 {"lineNum":"   20","line":"      \'ok \'*)"},
 {"lineNum":"   21","line":"        ((++actual_number_of_tests))"},
 {"lineNum":"   22","line":"        ;;"},
@@ -27,7 +27,7 @@ var data = {lines:[
 {"lineNum":"   26","line":"      esac"},
 {"lineNum":"   27","line":"    done"},
 {"lineNum":"   28","line":"    # ... and error if they are not the same"},
-{"lineNum":"   29","line":"    if [[ \"${actual_number_of_tests}\" != \"${expected_number_of_tests}\" ]]; then","class":"lineCov","hits":"1","order":"692","possible_hits":"0",},
+{"lineNum":"   29","line":"    if [[ \"${actual_number_of_tests}\" != \"${expected_number_of_tests}\" ]]; then","class":"lineCov","hits":"1","order":"785","possible_hits":"0",},
 {"lineNum":"   30","line":"      printf \'# bats warning: Executed %s instead of expected %s tests\\n\' \"$actual_number_of_tests\" \"$expected_number_of_tests\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   31","line":"      return 1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   32","line":"    fi"},
@@ -38,5 +38,5 @@ var data = {lines:[
 {"lineNum":"   37","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-06 21:38:29", "instrumented" : 14, "covered" : 11,};
+var header = { "command" : "bats", "date" : "2023-05-18 22:52:29", "instrumented" : 14, "covered" : 11,};
 var merged_data = [];

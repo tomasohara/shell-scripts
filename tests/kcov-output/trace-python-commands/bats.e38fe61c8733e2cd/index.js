@@ -1,5 +1,5 @@
 var data = {files:[
-{"link":"bats.22897.src.d8b84312.html","title":"bats.22897.src","summary_name":"/tmp/bats-run-f04qVV/bats.22897.src","covered_class":"linePartCov","covered":"62.0","covered_lines":"160","uncovered_lines":"98","total_lines" : "258"},
+{"link":"bats.161324.src.749796c1.html","title":"bats.161324.src","summary_name":"/tmp/bats-run-oo3b0h/bats.161324.src","covered_class":"linePartCov","covered":"74.7","covered_lines":"354","uncovered_lines":"120","total_lines" : "474"},
 {"link":"cpufreqctl-aveey.eba110ce.html","title":"cpufreqctl-aveey","summary_name":"/usr/local/bin/cpufreqctl-aveey","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"806","total_lines" : "806"},
 {"link":"bats.51601793.html","title":"bats","summary_name":"/usr/local/bin/bats","covered_class":"lineNoCov","covered":"23.3","covered_lines":"7","uncovered_lines":"23","total_lines" : "30"},
 {"link":"bats.b5ee664b.html","title":"bats","summary_name":"/usr/local/libexec/bats-core/bats","covered_class":"linePartCov","covered":"36.8","covered_lines":"91","uncovered_lines":"156","total_lines" : "247"},
@@ -13,8 +13,8 @@ var data = {files:[
 {"link":"preprocessing.bash.6dd62e59.html","title":"preprocessing.bash","summary_name":"/usr/local/lib/bats-core/preprocessing.bash","covered_class":"lineCov","covered":"87.5","covered_lines":"7","uncovered_lines":"1","total_lines" : "8"},
 {"link":"warnings.bash.92955179.html","title":"warnings.bash","summary_name":"/usr/local/lib/bats-core/warnings.bash","covered_class":"lineNoCov","covered":"8.7","covered_lines":"2","uncovered_lines":"21","total_lines" : "23"},
 {"link":"bats-preprocess.c89b1ce6.html","title":"bats-preprocess","summary_name":"/usr/local/libexec/bats-core/bats-preprocess","covered_class":"linePartCov","covered":"49.3","covered_lines":"35","uncovered_lines":"36","total_lines" : "71"},
-{"link":"tracing.bash.d47fd49d.html","title":"tracing.bash","summary_name":"/usr/local/lib/bats-core/tracing.bash","covered_class":"linePartCov","covered":"66.7","covered_lines":"112","uncovered_lines":"56","total_lines" : "168"},
+{"link":"tracing.bash.d47fd49d.html","title":"tracing.bash","summary_name":"/usr/local/lib/bats-core/tracing.bash","covered_class":"linePartCov","covered":"70.2","covered_lines":"118","uncovered_lines":"50","total_lines" : "168"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-06 21:39:25", "instrumented" : 2475, "covered" : 753,};
+var header = { "command" : "bats", "date" : "2023-05-18 22:53:03", "instrumented" : 2691, "covered" : 953,};
 var merged_data = [];
