@@ -95,8 +95,9 @@ if [ ! -e "$HOME/temp" ]; then
    echo "WARNING: creating $HOME/temp for startup script logs"
    mkdir "$HOME/temp"
 fi
-function startup-trace () { if [ "$STARTUP_TRACING" = "1" ]; then echo $* [$HOST `date`] >> $HOME/temp/.startup-$HOST-$$.log; fi; }
-conditional-source $BIN/startup-tracing.bash
+## OLD
+## function startup-trace () { if [ "$STARTUP_TRACING" = "1" ]; then echo $* [$HOST `date`] >> $HOME/temp/.startup-$HOST-$$.log; fi; }
+## conditional-source $BIN/startup-tracing.bash
 #
 
 ## OLD
