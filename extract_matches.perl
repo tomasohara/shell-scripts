@@ -40,7 +40,7 @@ if (! defined($nostrict)) {
 ##
 use vars qw/$replacement $restore $para $file $fields $one_per_line
     $max_count $i $locale $single $preserve $slurp/;
-use vars qw/$multi_per_line/;
+use vars qw/$multi_per_line $multi_line_match/;
 
 # Process the command-line options
 if (!defined($ARGV[0])) {
@@ -76,6 +76,8 @@ if (!defined($ARGV[0])) {
 &init_var(*preserve, &FALSE);		# preserve case (when -i in effect)
 &debug_print(&TL_DETAILED, "Note: -preserve not implemented\n") if ($preserve);
 &init_var(*locale, &FALSE);		# use locale information
+&init_var(*multi_line_match, &FALSE);   # use m qualifier for multi-line matching
+my($single_line_input) = (! ($para || $slurp));
 my($ignore_case) = $i;
 my($auto_pattern) = &FALSE;		# automatically derive pattern (for tab-delimited fields)
 
@@ -139,9 +141,13 @@ while (<>) {
     chomp;
 
     # Print the text instances that matches the pattern, each on a separate line
-    # NOTE: s qualifier treats string as single line (in case -para specified)
+    # NOTE: s qualifier treats string as single line & m multiline matching (in case -para specified); uses awkward special case logic to avoid issues with embedded newline matching (i.e., appraoch with //m as no-op not used for regular input)
+    # TODO2: add option to control application (e.g., -multiline)
+    ## OLD: while (($ignore_case && m/$pattern/is) || (m/$pattern/s)) ...
     my($count) = 0;
-    while (($ignore_case && m/$pattern/is) || (m/$pattern/s)) {
+    while (($multi_line_match &&
+	    (($ignore_case  && (m/$pattern/ims) || (m/$pattern/ms))))
+	   || (($ignore_case && m/$pattern/is) || (m/$pattern/s))) {
 	my($matching_text) = $&;
 	&debug_print(&TL_VERY_DETAILED, "\n");
 	&debug_out(&TL_VERY_DETAILED, "matching text: '%s'\n", $matching_text);
@@ -171,10 +177,20 @@ while (<>) {
 	eval "\$replacement_text = \"$replacement\";";
 	&debug_out(&TL_VERY_DETAILED, "replacement text: '%s'\n", $replacement_text);
 	if ($ignore_case) {
-	    $matching_text =~ s/$pattern/$replacement_text/si;
+	    if ($multi_line_match) {
+		$matching_text =~ s/$pattern/$replacement_text/ims;
+	    }
+	    else {
+		$matching_text =~ s/$pattern/$replacement_text/is;
+	    }
 	}
 	else {
-	    $matching_text =~ s/$pattern/$replacement_text/s;
+	    if ($multi_line_match) {
+		$matching_text =~ s/$pattern/$replacement_text/ms;
+	    }
+	    else {
+		$matching_text =~ s/$pattern/$replacement_text/s;
+	    }
 	}
 	&debug_out(&TL_VERY_DETAILED, "resulting text: '%s'\n", $matching_text);
 	print "$matching_text\n";
@@ -188,7 +204,8 @@ while (<>) {
 
     # Trace out lines not matched
     if ($count == 0) {
-	&debug_print(&TL_VERY_VERBOSE, "line not matched: $_\n");
+	my($line) = ($single_line_input ? $_ : "{ $_ }");
+	&debug_print(&TL_VERY_VERBOSE, "line not matched: $line\n");
     }
 }
 
