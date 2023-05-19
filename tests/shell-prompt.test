@@ -1,12 +1,14 @@
 # Tests for aliases that affect prompt
 #
 
-$ reset-prompt @
-@
+## BAD: $ reset-prompt @ > /dev/null 2>&1;  echo "'$PS1'"
+## NOTE: quotes get stripped so use in output not reliable
 
-$ export PS_Symbol='#'
-$ reset-prompt
-#
+$ reset-prompt @ > /dev/null 2>&1;  echo ">$PS1<"
+>@ <
+
+$ export PS_symbol='#';  reset-prompt > /dev/null 2>&1;  echo ">$PS1<"
+># <
 
 
 ## BUG:
