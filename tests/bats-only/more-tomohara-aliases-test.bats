@@ -10,7 +10,7 @@ shopt -s expand_aliases
 
 
 @test "test-1" {
-	testfolder="/tmp/batspp-160365/test-1"
+	testfolder="/tmp/batspp-137402/test-1"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -43,7 +43,7 @@ END_EXPECTED
 
 
 @test "test-3" {
-	testfolder="/tmp/batspp-160365/test-3"
+	testfolder="/tmp/batspp-137402/test-3"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -78,7 +78,7 @@ END_EXPECTED
 
 
 @test "test-4" {
-	testfolder="/tmp/batspp-160365/test-4"
+	testfolder="/tmp/batspp-137402/test-4"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -111,7 +111,7 @@ END_EXPECTED
 
 
 @test "test-5" {
-	testfolder="/tmp/batspp-160365/test-5"
+	testfolder="/tmp/batspp-137402/test-5"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -145,7 +145,7 @@ END_EXPECTED
 
 
 @test "test-6" {
-	testfolder="/tmp/batspp-160365/test-6"
+	testfolder="/tmp/batspp-137402/test-6"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 

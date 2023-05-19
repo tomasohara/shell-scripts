@@ -1089,52 +1089,6 @@
 		<lineToCover lineNumber="502" covered="true"/>
 		<lineToCover lineNumber="503" covered="true"/>
 	</file>
-	<file path="/tmp/bats-run-UlHi1A/bats.164479.src">
-		<lineToCover lineNumber="5" covered="true"/>
-		<lineToCover lineNumber="8" covered="true"/>
-		<lineToCover lineNumber="13" covered="true"/>
-		<lineToCover lineNumber="14" covered="true"/>
-		<lineToCover lineNumber="15" covered="true"/>
-		<lineToCover lineNumber="17" covered="true"/>
-		<lineToCover lineNumber="18" covered="true"/>
-		<lineToCover lineNumber="19" covered="true"/>
-		<lineToCover lineNumber="20" covered="true"/>
-		<lineToCover lineNumber="21" covered="true"/>
-		<lineToCover lineNumber="24" covered="true"/>
-		<lineToCover lineNumber="29" covered="true"/>
-		<lineToCover lineNumber="31" covered="true"/>
-		<lineToCover lineNumber="37" covered="true"/>
-		<lineToCover lineNumber="39" covered="true"/>
-		<lineToCover lineNumber="46" covered="true"/>
-		<lineToCover lineNumber="47" covered="true"/>
-		<lineToCover lineNumber="48" covered="true"/>
-		<lineToCover lineNumber="50" covered="true"/>
-		<lineToCover lineNumber="51" covered="true"/>
-		<lineToCover lineNumber="52" covered="true"/>
-		<lineToCover lineNumber="53" covered="true"/>
-		<lineToCover lineNumber="54" covered="true"/>
-		<lineToCover lineNumber="57" covered="true"/>
-		<lineToCover lineNumber="62" covered="true"/>
-		<lineToCover lineNumber="64" covered="true"/>
-		<lineToCover lineNumber="70" covered="true"/>
-		<lineToCover lineNumber="72" covered="true"/>
-		<lineToCover lineNumber="79" covered="true"/>
-		<lineToCover lineNumber="80" covered="true"/>
-		<lineToCover lineNumber="81" covered="true"/>
-		<lineToCover lineNumber="83" covered="true"/>
-		<lineToCover lineNumber="84" covered="true"/>
-		<lineToCover lineNumber="85" covered="true"/>
-		<lineToCover lineNumber="86" covered="true"/>
-		<lineToCover lineNumber="87" covered="true"/>
-		<lineToCover lineNumber="90" covered="true"/>
-		<lineToCover lineNumber="95" covered="true"/>
-		<lineToCover lineNumber="97" covered="true"/>
-		<lineToCover lineNumber="103" covered="true"/>
-		<lineToCover lineNumber="105" covered="true"/>
-		<lineToCover lineNumber="110" covered="true"/>
-		<lineToCover lineNumber="111" covered="true"/>
-		<lineToCover lineNumber="112" covered="true"/>
-	</file>
 	<file path="/usr/local/lib/bats-core/test_functions.bash">
 		<lineToCover lineNumber="3" covered="true"/>
 		<lineToCover lineNumber="7" covered="true"/>
@@ -1889,6 +1843,52 @@
 		<lineToCover lineNumber="2" covered="true"/>
 		<lineToCover lineNumber="4" covered="true"/>
 		<lineToCover lineNumber="6" covered="true"/>
+	</file>
+	<file path="/tmp/bats-run-rrcgEg/bats.141784.src">
+		<lineToCover lineNumber="5" covered="true"/>
+		<lineToCover lineNumber="8" covered="true"/>
+		<lineToCover lineNumber="13" covered="true"/>
+		<lineToCover lineNumber="14" covered="true"/>
+		<lineToCover lineNumber="15" covered="true"/>
+		<lineToCover lineNumber="17" covered="true"/>
+		<lineToCover lineNumber="18" covered="true"/>
+		<lineToCover lineNumber="19" covered="true"/>
+		<lineToCover lineNumber="20" covered="true"/>
+		<lineToCover lineNumber="21" covered="true"/>
+		<lineToCover lineNumber="24" covered="true"/>
+		<lineToCover lineNumber="29" covered="true"/>
+		<lineToCover lineNumber="31" covered="true"/>
+		<lineToCover lineNumber="37" covered="true"/>
+		<lineToCover lineNumber="39" covered="true"/>
+		<lineToCover lineNumber="46" covered="true"/>
+		<lineToCover lineNumber="47" covered="true"/>
+		<lineToCover lineNumber="48" covered="true"/>
+		<lineToCover lineNumber="50" covered="true"/>
+		<lineToCover lineNumber="51" covered="true"/>
+		<lineToCover lineNumber="52" covered="true"/>
+		<lineToCover lineNumber="53" covered="true"/>
+		<lineToCover lineNumber="54" covered="true"/>
+		<lineToCover lineNumber="57" covered="true"/>
+		<lineToCover lineNumber="62" covered="true"/>
+		<lineToCover lineNumber="64" covered="true"/>
+		<lineToCover lineNumber="70" covered="true"/>
+		<lineToCover lineNumber="72" covered="true"/>
+		<lineToCover lineNumber="79" covered="true"/>
+		<lineToCover lineNumber="80" covered="true"/>
+		<lineToCover lineNumber="81" covered="true"/>
+		<lineToCover lineNumber="83" covered="true"/>
+		<lineToCover lineNumber="84" covered="true"/>
+		<lineToCover lineNumber="85" covered="true"/>
+		<lineToCover lineNumber="86" covered="true"/>
+		<lineToCover lineNumber="87" covered="true"/>
+		<lineToCover lineNumber="90" covered="true"/>
+		<lineToCover lineNumber="95" covered="true"/>
+		<lineToCover lineNumber="97" covered="true"/>
+		<lineToCover lineNumber="103" covered="true"/>
+		<lineToCover lineNumber="105" covered="true"/>
+		<lineToCover lineNumber="110" covered="true"/>
+		<lineToCover lineNumber="111" covered="true"/>
+		<lineToCover lineNumber="112" covered="true"/>
 	</file>
 	<file path="/usr/local/lib/bats-core/common.bash">
 		<lineToCover lineNumber="4" covered="true"/>

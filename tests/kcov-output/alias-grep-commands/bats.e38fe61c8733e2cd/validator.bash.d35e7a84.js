@@ -2,9 +2,9 @@ var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
 {"lineNum":"    2","line":""},
 {"lineNum":"    3","line":"bats_test_count_validator() {"},
-{"lineNum":"    4","line":"  trap \'\' INT # continue forwarding","class":"lineCov","hits":"1","order":"95","possible_hits":"0",},
-{"lineNum":"    5","line":"  header_pattern=\'[0-9]+\\.\\.[0-9]+\'","class":"lineCov","hits":"1","order":"96","possible_hits":"0",},
-{"lineNum":"    6","line":"  IFS= read -r header","class":"lineCov","hits":"2","order":"97","possible_hits":"0",},
+{"lineNum":"    4","line":"  trap \'\' INT # continue forwarding","class":"lineCov","hits":"1","order":"96","possible_hits":"0",},
+{"lineNum":"    5","line":"  header_pattern=\'[0-9]+\\.\\.[0-9]+\'","class":"lineCov","hits":"1","order":"97","possible_hits":"0",},
+{"lineNum":"    6","line":"  IFS= read -r header","class":"lineCov","hits":"2","order":"98","possible_hits":"0",},
 {"lineNum":"    7","line":"  # repeat the header"},
 {"lineNum":"    8","line":"  printf \"%s\\n\" \"$header\"","class":"lineCov","hits":"1","order":"220","possible_hits":"0",},
 {"lineNum":"    9","line":""},
@@ -38,5 +38,5 @@ var data = {lines:[
 {"lineNum":"   37","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-18 22:52:24", "instrumented" : 14, "covered" : 11,};
+var header = { "command" : "bats", "date" : "2023-05-19 18:20:07", "instrumented" : 14, "covered" : 11,};
 var merged_data = [];

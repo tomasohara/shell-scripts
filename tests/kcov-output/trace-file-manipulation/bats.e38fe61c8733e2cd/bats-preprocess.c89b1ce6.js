@@ -97,7 +97,7 @@ var data = {lines:[
 {"lineNum":"   96","line":"      # shellcheck disable=SC2034 # used in `bats_sort tags`/`extract_tags`"},
 {"lineNum":"   97","line":"      test_tags=() # reset test tags for next test"},
 {"lineNum":"   98","line":"    else"},
-{"lineNum":"   99","line":"      if [[ \"$line\" =~ $BATS_COMMENT_COMMAND_PATTERN ]]; then","class":"lineCov","hits":"1532","order":"146","possible_hits":"0",},
+{"lineNum":"   99","line":"      if [[ \"$line\" =~ $BATS_COMMENT_COMMAND_PATTERN ]]; then","class":"lineCov","hits":"1531","order":"146","possible_hits":"0",},
 {"lineNum":"  100","line":"        command=${BASH_REMATCH[1]}","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  101","line":"        case $command in","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  102","line":"        \'test_tags=\'*)"},
@@ -117,8 +117,8 @@ var data = {lines:[
 {"lineNum":"  116","line":"  printf \'bats_test_function %s\\n\' \"$test_name\"","class":"lineCov","hits":"38","order":"182","possible_hits":"0",},
 {"lineNum":"  117","line":"done"},
 {"lineNum":"  118","line":""},
-{"lineNum":"  119","line":"exit $exit_code","class":"lineCov","hits":"2","order":"188","possible_hits":"0",},
+{"lineNum":"  119","line":"exit $exit_code","class":"lineCov","hits":"2","order":"186","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-18 22:52:56", "instrumented" : 71, "covered" : 35,};
+var header = { "command" : "bats", "date" : "2023-05-19 18:20:30", "instrumented" : 71, "covered" : 35,};
 var merged_data = [];

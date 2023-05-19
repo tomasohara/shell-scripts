@@ -5,15 +5,15 @@ var data = {lines:[
 {"lineNum":"    4","line":"  while IFS= read -r line; do","class":"lineCov","hits":"428","order":"556","possible_hits":"0",},
 {"lineNum":"    5","line":"    printf \'# %s\\n\' \"$line\" || break # avoid feedback loop when errors are redirected into BATS_OUT (see #353)","class":"lineCov","hits":"203","order":"557","possible_hits":"0",},
 {"lineNum":"    6","line":"  done"},
-{"lineNum":"    7","line":"  if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"11","order":"558","possible_hits":"0",},
+{"lineNum":"    7","line":"  if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"11","order":"561","possible_hits":"0",},
 {"lineNum":"    8","line":"    printf \'# %s\\n\' \"$line\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    9","line":"  fi"},
 {"lineNum":"   10","line":"}"},
 {"lineNum":"   11","line":""},
 {"lineNum":"   12","line":"function bats_replace_filename() {"},
-{"lineNum":"   13","line":"  local line","class":"lineCov","hits":"11","order":"559","possible_hits":"0",},
-{"lineNum":"   14","line":"  while read -r line; do","class":"lineCov","hits":"214","order":"560","possible_hits":"0",},
-{"lineNum":"   15","line":"    printf \"%s\\n\" \"${line//$BATS_TEST_SOURCE/$BATS_TEST_FILENAME}\"","class":"lineCov","hits":"203","order":"561","possible_hits":"0",},
+{"lineNum":"   13","line":"  local line","class":"lineCov","hits":"11","order":"558","possible_hits":"0",},
+{"lineNum":"   14","line":"  while read -r line; do","class":"lineCov","hits":"214","order":"559","possible_hits":"0",},
+{"lineNum":"   15","line":"    printf \"%s\\n\" \"${line//$BATS_TEST_SOURCE/$BATS_TEST_FILENAME}\"","class":"lineCov","hits":"203","order":"560","possible_hits":"0",},
 {"lineNum":"   16","line":"  done"},
 {"lineNum":"   17","line":"  if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"11","order":"562","possible_hits":"0",},
 {"lineNum":"   18","line":"    printf \"%s\\n\" \"${line//$BATS_TEST_SOURCE/$BATS_TEST_FILENAME}\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -250,5 +250,5 @@ var data = {lines:[
 {"lineNum":"  249","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-18 22:52:34", "instrumented" : 121, "covered" : 35,};
+var header = { "command" : "bats", "date" : "2023-05-19 18:20:14", "instrumented" : 121, "covered" : 35,};
 var merged_data = [];

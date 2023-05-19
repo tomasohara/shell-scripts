@@ -1,7 +1,7 @@
 var data = {files:[
-{"link":"bats.161324.src.749796c1.html","title":"bats.161324.src","summary_name":"/tmp/bats-run-oo3b0h/bats.161324.src","covered_class":"linePartCov","covered":"74.7","covered_lines":"354","uncovered_lines":"120","total_lines" : "474"},
 {"link":"cpufreqctl-aveey.eba110ce.html","title":"cpufreqctl-aveey","summary_name":"/usr/local/bin/cpufreqctl-aveey","covered_class":"lineNoCov","covered":"0.0","covered_lines":"0","uncovered_lines":"806","total_lines" : "806"},
 {"link":"bats.51601793.html","title":"bats","summary_name":"/usr/local/bin/bats","covered_class":"lineNoCov","covered":"23.3","covered_lines":"7","uncovered_lines":"23","total_lines" : "30"},
+{"link":"bats.138345.src.24747f9a.html","title":"bats.138345.src","summary_name":"/tmp/bats-run-fHDZ6s/bats.138345.src","covered_class":"linePartCov","covered":"74.7","covered_lines":"354","uncovered_lines":"120","total_lines" : "474"},
 {"link":"bats.b5ee664b.html","title":"bats","summary_name":"/usr/local/libexec/bats-core/bats","covered_class":"linePartCov","covered":"36.8","covered_lines":"91","uncovered_lines":"156","total_lines" : "247"},
 {"link":"test_functions.bash.e2c749da.html","title":"test_functions.bash","summary_name":"/usr/local/lib/bats-core/test_functions.bash","covered_class":"lineNoCov","covered":"1.9","covered_lines":"2","uncovered_lines":"101","total_lines" : "103"},
 {"link":"validator.bash.d35e7a84.html","title":"validator.bash","summary_name":"/usr/local/lib/bats-core/validator.bash","covered_class":"lineCov","covered":"78.6","covered_lines":"11","uncovered_lines":"3","total_lines" : "14"},
@@ -16,5 +16,5 @@ var data = {files:[
 {"link":"tracing.bash.d47fd49d.html","title":"tracing.bash","summary_name":"/usr/local/lib/bats-core/tracing.bash","covered_class":"linePartCov","covered":"70.2","covered_lines":"118","uncovered_lines":"50","total_lines" : "168"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-18 22:53:03", "instrumented" : 2691, "covered" : 953,};
+var header = { "command" : "bats", "date" : "2023-05-19 18:20:35", "instrumented" : 2691, "covered" : 953,};
 var merged_data = [];

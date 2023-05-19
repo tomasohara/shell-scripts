@@ -156,7 +156,7 @@ Coverage Ratio: {round(report_RatioLine, 4)}
         facts_JSON["ratio"] = report_RatioLine
         facts_array.append(facts_JSON)
 
-        if not self.SUMMARY_OPT or not self.LIST_OPT:
+        if not (self.SUMMARY_OPT and self.LIST_OPT):
             print (REPORT_PATTERN)
         
         if self.EXPORT_OPT:

@@ -1,12 +1,157 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
-<coverage line-rate="0.293" lines-covered="690" lines-valid="2358" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1684429655">
+<coverage line-rate="0.293" lines-covered="690" lines-valid="2358" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1684499715">
 	<sources>
 		<source>/</source>
 	</sources>
 	<packages>
 		<package name="bats" line-rate="0.293" lines-covered="690" lines-valid="2358" branch-rate="1.0" complexity="1.0">
 			<classes>
+				<class name="bats_129770_src" filename="tmp/bats-run-XB2HvA/bats.129770.src" branch-rate="1.0" complexity="1.0" line-rate="0.702">
+					<lines>
+						<line number="5" hits="12"/>
+						<line number="8" hits="12"/>
+						<line number="13" hits="2"/>
+						<line number="14" hits="2"/>
+						<line number="15" hits="2"/>
+						<line number="17" hits="2"/>
+						<line number="18" hits="2"/>
+						<line number="19" hits="8"/>
+						<line number="20" hits="2"/>
+						<line number="21" hits="2"/>
+						<line number="24" hits="8"/>
+						<line number="29" hits="4"/>
+						<line number="31" hits="4"/>
+						<line number="37" hits="4"/>
+						<line number="39" hits="12"/>
+						<line number="48" hits="2"/>
+						<line number="49" hits="2"/>
+						<line number="50" hits="2"/>
+						<line number="52" hits="2"/>
+						<line number="53" hits="2"/>
+						<line number="54" hits="2"/>
+						<line number="55" hits="2"/>
+						<line number="56" hits="2"/>
+						<line number="59" hits="8"/>
+						<line number="64" hits="4"/>
+						<line number="71" hits="4"/>
+						<line number="73" hits="4"/>
+						<line number="80" hits="2"/>
+						<line number="81" hits="2"/>
+						<line number="82" hits="2"/>
+						<line number="84" hits="2"/>
+						<line number="85" hits="2"/>
+						<line number="86" hits="2"/>
+						<line number="87" hits="2"/>
+						<line number="88" hits="2"/>
+						<line number="91" hits="8"/>
+						<line number="96" hits="4"/>
+						<line number="98" hits="4"/>
+						<line number="104" hits="4"/>
+						<line number="106" hits="4"/>
+						<line number="117" hits="2"/>
+						<line number="118" hits="2"/>
+						<line number="119" hits="2"/>
+						<line number="121" hits="2"/>
+						<line number="122" hits="2"/>
+						<line number="123" hits="0"/>
+						<line number="124" hits="0"/>
+						<line number="125" hits="0"/>
+						<line number="128" hits="0"/>
+						<line number="133" hits="2"/>
+						<line number="135" hits="4"/>
+						<line number="141" hits="0"/>
+						<line number="143" hits="0"/>
+						<line number="151" hits="2"/>
+						<line number="152" hits="2"/>
+						<line number="153" hits="2"/>
+						<line number="155" hits="2"/>
+						<line number="156" hits="2"/>
+						<line number="157" hits="0"/>
+						<line number="158" hits="0"/>
+						<line number="159" hits="0"/>
+						<line number="162" hits="0"/>
+						<line number="167" hits="2"/>
+						<line number="169" hits="6"/>
+						<line number="175" hits="0"/>
+						<line number="177" hits="0"/>
+						<line number="204" hits="2"/>
+						<line number="205" hits="2"/>
+						<line number="206" hits="2"/>
+						<line number="208" hits="2"/>
+						<line number="209" hits="2"/>
+						<line number="210" hits="0"/>
+						<line number="211" hits="0"/>
+						<line number="212" hits="0"/>
+						<line number="215" hits="0"/>
+						<line number="220" hits="2"/>
+						<line number="222" hits="4"/>
+						<line number="228" hits="0"/>
+						<line number="230" hits="0"/>
+						<line number="238" hits="2"/>
+						<line number="239" hits="2"/>
+						<line number="240" hits="2"/>
+						<line number="242" hits="2"/>
+						<line number="243" hits="2"/>
+						<line number="244" hits="0"/>
+						<line number="245" hits="0"/>
+						<line number="246" hits="0"/>
+						<line number="249" hits="0"/>
+						<line number="254" hits="2"/>
+						<line number="256" hits="4"/>
+						<line number="262" hits="0"/>
+						<line number="264" hits="0"/>
+						<line number="272" hits="2"/>
+						<line number="273" hits="2"/>
+						<line number="274" hits="2"/>
+						<line number="276" hits="2"/>
+						<line number="277" hits="2"/>
+						<line number="278" hits="0"/>
+						<line number="279" hits="0"/>
+						<line number="280" hits="0"/>
+						<line number="283" hits="0"/>
+						<line number="288" hits="2"/>
+						<line number="290" hits="4"/>
+						<line number="296" hits="0"/>
+						<line number="298" hits="0"/>
+						<line number="315" hits="2"/>
+						<line number="316" hits="2"/>
+						<line number="317" hits="2"/>
+						<line number="319" hits="2"/>
+						<line number="320" hits="2"/>
+						<line number="321" hits="0"/>
+						<line number="322" hits="0"/>
+						<line number="323" hits="0"/>
+						<line number="326" hits="0"/>
+						<line number="331" hits="2"/>
+						<line number="333" hits="4"/>
+						<line number="339" hits="0"/>
+						<line number="341" hits="0"/>
+						<line number="348" hits="2"/>
+						<line number="349" hits="2"/>
+						<line number="350" hits="2"/>
+						<line number="352" hits="2"/>
+						<line number="353" hits="2"/>
+						<line number="354" hits="0"/>
+						<line number="355" hits="0"/>
+						<line number="356" hits="0"/>
+						<line number="359" hits="0"/>
+						<line number="364" hits="2"/>
+						<line number="366" hits="6"/>
+						<line number="372" hits="0"/>
+						<line number="374" hits="0"/>
+						<line number="390" hits="12"/>
+						<line number="391" hits="12"/>
+						<line number="392" hits="12"/>
+						<line number="393" hits="12"/>
+						<line number="394" hits="12"/>
+						<line number="395" hits="12"/>
+						<line number="396" hits="12"/>
+						<line number="397" hits="12"/>
+						<line number="398" hits="12"/>
+						<line number="399" hits="12"/>
+					</lines>
+				</class>
 				<class name="cpufreqctl_aveey" filename="usr/local/bin/cpufreqctl-aveey" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="24" hits="0"/>
@@ -1486,7 +1631,7 @@
 						<line number="114" hits="3"/>
 						<line number="115" hits="1"/>
 						<line number="116" hits="0"/>
-						<line number="121" hits="378"/>
+						<line number="121" hits="377"/>
 						<line number="122" hits="377"/>
 						<line number="123" hits="366"/>
 						<line number="125" hits="10"/>
@@ -1867,151 +2012,6 @@
 						<line number="2" hits="1"/>
 						<line number="4" hits="1"/>
 						<line number="6" hits="1"/>
-					</lines>
-				</class>
-				<class name="bats_152133_src" filename="tmp/bats-run-fpEtAL/bats.152133.src" branch-rate="1.0" complexity="1.0" line-rate="0.702">
-					<lines>
-						<line number="5" hits="12"/>
-						<line number="8" hits="12"/>
-						<line number="13" hits="2"/>
-						<line number="14" hits="2"/>
-						<line number="15" hits="2"/>
-						<line number="17" hits="2"/>
-						<line number="18" hits="2"/>
-						<line number="19" hits="8"/>
-						<line number="20" hits="2"/>
-						<line number="21" hits="2"/>
-						<line number="24" hits="8"/>
-						<line number="29" hits="4"/>
-						<line number="31" hits="4"/>
-						<line number="37" hits="4"/>
-						<line number="39" hits="12"/>
-						<line number="48" hits="2"/>
-						<line number="49" hits="2"/>
-						<line number="50" hits="2"/>
-						<line number="52" hits="2"/>
-						<line number="53" hits="2"/>
-						<line number="54" hits="2"/>
-						<line number="55" hits="2"/>
-						<line number="56" hits="2"/>
-						<line number="59" hits="8"/>
-						<line number="64" hits="4"/>
-						<line number="71" hits="4"/>
-						<line number="73" hits="4"/>
-						<line number="80" hits="2"/>
-						<line number="81" hits="2"/>
-						<line number="82" hits="2"/>
-						<line number="84" hits="2"/>
-						<line number="85" hits="2"/>
-						<line number="86" hits="2"/>
-						<line number="87" hits="2"/>
-						<line number="88" hits="2"/>
-						<line number="91" hits="8"/>
-						<line number="96" hits="4"/>
-						<line number="98" hits="4"/>
-						<line number="104" hits="4"/>
-						<line number="106" hits="4"/>
-						<line number="117" hits="2"/>
-						<line number="118" hits="2"/>
-						<line number="119" hits="2"/>
-						<line number="121" hits="2"/>
-						<line number="122" hits="2"/>
-						<line number="123" hits="0"/>
-						<line number="124" hits="0"/>
-						<line number="125" hits="0"/>
-						<line number="128" hits="0"/>
-						<line number="133" hits="2"/>
-						<line number="135" hits="4"/>
-						<line number="141" hits="0"/>
-						<line number="143" hits="0"/>
-						<line number="151" hits="2"/>
-						<line number="152" hits="2"/>
-						<line number="153" hits="2"/>
-						<line number="155" hits="2"/>
-						<line number="156" hits="2"/>
-						<line number="157" hits="0"/>
-						<line number="158" hits="0"/>
-						<line number="159" hits="0"/>
-						<line number="162" hits="0"/>
-						<line number="167" hits="2"/>
-						<line number="169" hits="6"/>
-						<line number="175" hits="0"/>
-						<line number="177" hits="0"/>
-						<line number="204" hits="2"/>
-						<line number="205" hits="2"/>
-						<line number="206" hits="2"/>
-						<line number="208" hits="2"/>
-						<line number="209" hits="2"/>
-						<line number="210" hits="0"/>
-						<line number="211" hits="0"/>
-						<line number="212" hits="0"/>
-						<line number="215" hits="0"/>
-						<line number="220" hits="2"/>
-						<line number="222" hits="4"/>
-						<line number="228" hits="0"/>
-						<line number="230" hits="0"/>
-						<line number="238" hits="2"/>
-						<line number="239" hits="2"/>
-						<line number="240" hits="2"/>
-						<line number="242" hits="2"/>
-						<line number="243" hits="2"/>
-						<line number="244" hits="0"/>
-						<line number="245" hits="0"/>
-						<line number="246" hits="0"/>
-						<line number="249" hits="0"/>
-						<line number="254" hits="2"/>
-						<line number="256" hits="4"/>
-						<line number="262" hits="0"/>
-						<line number="264" hits="0"/>
-						<line number="272" hits="2"/>
-						<line number="273" hits="2"/>
-						<line number="274" hits="2"/>
-						<line number="276" hits="2"/>
-						<line number="277" hits="2"/>
-						<line number="278" hits="0"/>
-						<line number="279" hits="0"/>
-						<line number="280" hits="0"/>
-						<line number="283" hits="0"/>
-						<line number="288" hits="2"/>
-						<line number="290" hits="4"/>
-						<line number="296" hits="0"/>
-						<line number="298" hits="0"/>
-						<line number="315" hits="2"/>
-						<line number="316" hits="2"/>
-						<line number="317" hits="2"/>
-						<line number="319" hits="2"/>
-						<line number="320" hits="2"/>
-						<line number="321" hits="0"/>
-						<line number="322" hits="0"/>
-						<line number="323" hits="0"/>
-						<line number="326" hits="0"/>
-						<line number="331" hits="2"/>
-						<line number="333" hits="4"/>
-						<line number="339" hits="0"/>
-						<line number="341" hits="0"/>
-						<line number="348" hits="2"/>
-						<line number="349" hits="2"/>
-						<line number="350" hits="2"/>
-						<line number="352" hits="2"/>
-						<line number="353" hits="2"/>
-						<line number="354" hits="0"/>
-						<line number="355" hits="0"/>
-						<line number="356" hits="0"/>
-						<line number="359" hits="0"/>
-						<line number="364" hits="2"/>
-						<line number="366" hits="6"/>
-						<line number="372" hits="0"/>
-						<line number="374" hits="0"/>
-						<line number="390" hits="12"/>
-						<line number="391" hits="12"/>
-						<line number="392" hits="12"/>
-						<line number="393" hits="12"/>
-						<line number="394" hits="12"/>
-						<line number="395" hits="12"/>
-						<line number="396" hits="12"/>
-						<line number="397" hits="12"/>
-						<line number="398" hits="12"/>
-						<line number="399" hits="12"/>
 					</lines>
 				</class>
 				<class name="common_bash" filename="usr/local/lib/bats-core/common.bash" branch-rate="1.0" complexity="1.0" line-rate="0.289">

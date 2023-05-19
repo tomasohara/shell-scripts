@@ -9,9 +9,9 @@
     {"file": "/usr/local/libexec/bats-core/bats-exec-suite", "percent_covered": "36.73", "covered_lines": "90", "total_lines": "245"},
     {"file": "/usr/local/libexec/bats-core/bats-exec-test", "percent_covered": "52.69", "covered_lines": "98", "total_lines": "186"},
     {"file": "/usr/local/libexec/bats-core/bats-format-cat", "percent_covered": "100.00", "covered_lines": "3", "total_lines": "3"},
-    {"file": "/tmp/bats-run-HXUoIU/bats.155609.src", "percent_covered": "85.81", "covered_lines": "254", "total_lines": "296"},
     {"file": "/usr/local/lib/bats-core/common.bash", "percent_covered": "28.93", "covered_lines": "35", "total_lines": "121"},
     {"file": "/usr/local/lib/bats-core/preprocessing.bash", "percent_covered": "87.50", "covered_lines": "7", "total_lines": "8"},
+    {"file": "/tmp/bats-run-qNUOcx/bats.132729.src", "percent_covered": "85.81", "covered_lines": "254", "total_lines": "296"},
     {"file": "/usr/local/lib/bats-core/warnings.bash", "percent_covered": "8.70", "covered_lines": "2", "total_lines": "23"},
     {"file": "/usr/local/libexec/bats-core/bats-preprocess", "percent_covered": "49.30", "covered_lines": "35", "total_lines": "71"},
     {"file": "/usr/local/lib/bats-core/tracing.bash", "percent_covered": "69.64", "covered_lines": "117", "total_lines": "168"}
@@ -22,5 +22,5 @@
   "percent_low": 25,
   "percent_high": 75,
   "command": "bats",
-  "date": "2023-05-18 22:52:46"
+  "date": "2023-05-19 18:20:22"
 }

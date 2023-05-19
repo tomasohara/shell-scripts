@@ -5,14 +5,14 @@ var data = {lines:[
 {"lineNum":"    4","line":"  while IFS= read -r line; do","class":"lineCov","hits":"1068","order":"571","possible_hits":"0",},
 {"lineNum":"    5","line":"    printf \'# %s\\n\' \"$line\" || break # avoid feedback loop when errors are redirected into BATS_OUT (see #353)","class":"lineCov","hits":"509","order":"572","possible_hits":"0",},
 {"lineNum":"    6","line":"  done"},
-{"lineNum":"    7","line":"  if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"25","order":"573","possible_hits":"0",},
+{"lineNum":"    7","line":"  if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"25","order":"575","possible_hits":"0",},
 {"lineNum":"    8","line":"    printf \'# %s\\n\' \"$line\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    9","line":"  fi"},
 {"lineNum":"   10","line":"}"},
 {"lineNum":"   11","line":""},
 {"lineNum":"   12","line":"function bats_replace_filename() {"},
-{"lineNum":"   13","line":"  local line","class":"lineCov","hits":"25","order":"574","possible_hits":"0",},
-{"lineNum":"   14","line":"  while read -r line; do","class":"lineCov","hits":"534","order":"575","possible_hits":"0",},
+{"lineNum":"   13","line":"  local line","class":"lineCov","hits":"25","order":"573","possible_hits":"0",},
+{"lineNum":"   14","line":"  while read -r line; do","class":"lineCov","hits":"534","order":"574","possible_hits":"0",},
 {"lineNum":"   15","line":"    printf \"%s\\n\" \"${line//$BATS_TEST_SOURCE/$BATS_TEST_FILENAME}\"","class":"lineCov","hits":"509","order":"576","possible_hits":"0",},
 {"lineNum":"   16","line":"  done"},
 {"lineNum":"   17","line":"  if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"25","order":"577","possible_hits":"0",},
@@ -132,7 +132,7 @@ var data = {lines:[
 {"lineNum":"  131","line":"# check if all search values (must be sorted!) are in the (sorted!) array"},
 {"lineNum":"  132","line":"# Intended for short lists/arrays!"},
 {"lineNum":"  133","line":"bats_all_in() { # <sorted-array> <sorted search values...>"},
-{"lineNum":"  134","line":"  local -r haystack_array=$1","class":"lineCov","hits":"26","order":"191","possible_hits":"0",},
+{"lineNum":"  134","line":"  local -r haystack_array=$1","class":"lineCov","hits":"26","order":"190","possible_hits":"0",},
 {"lineNum":"  135","line":"  shift","class":"lineCov","hits":"26","order":"192","possible_hits":"0",},
 {"lineNum":"  136","line":""},
 {"lineNum":"  137","line":"  local -i haystack_length # just to appease shellcheck","class":"lineCov","hits":"26","order":"193","possible_hits":"0",},
@@ -250,5 +250,5 @@ var data = {lines:[
 {"lineNum":"  249","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
-var header = { "command" : "bats", "date" : "2023-05-18 22:52:43", "instrumented" : 121, "covered" : 35,};
+var header = { "command" : "bats", "date" : "2023-05-19 18:20:21", "instrumented" : 121, "covered" : 35,};
 var merged_data = [];

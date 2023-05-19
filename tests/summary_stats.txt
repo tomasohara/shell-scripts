@@ -2,7 +2,7 @@
 ------------------------------------
 kcov REPORT [1]: trace-unix-alias
 ------------------------------------
-Date: 2023-05-18 22:52:43
+Date: 2023-05-19 18:20:21
 Instrumented Lines: 361
 Covered Lines: 307
 Coverage Ratio: 0.8504
@@ -11,214 +11,214 @@ Coverage Ratio: 0.8504
 ------------------------------------
 kcov REPORT [2]: test-check-errors
 ------------------------------------
-Date: 2023-05-18 22:53:12
+Date: 2023-05-19 18:20:43
 Instrumented Lines: 142
 Covered Lines: 124
 Coverage Ratio: 0.8732
 
 
 ------------------------------------
-kcov REPORT [3]: 1_SOURCE_TEST_NEW
+kcov REPORT [3]: trace-extensionless-shortcut-V2
 ------------------------------------
-Date: 2023-05-18 22:52:36
-Instrumented Lines: 126
-Covered Lines: 108
-Coverage Ratio: 0.8571
-
-
-------------------------------------
-kcov REPORT [4]: trace-extensionless-shortcut-V2
-------------------------------------
-Date: 2023-05-18 22:52:54
+Date: 2023-05-19 18:20:29
 Instrumented Lines: 556
 Covered Lines: 460
 Coverage Ratio: 0.8273
 
 
 ------------------------------------
-kcov REPORT [5]: trace-python-commands
+kcov REPORT [4]: trace-python-commands
 ------------------------------------
-Date: 2023-05-18 22:53:03
+Date: 2023-05-19 18:20:35
 Instrumented Lines: 474
 Covered Lines: 354
 Coverage Ratio: 0.7468
 
 
 ------------------------------------
-kcov REPORT [6]: more-tomohara-aliases-test
+kcov REPORT [5]: more-tomohara-aliases-test
 ------------------------------------
-Date: 2023-05-18 22:52:58
+Date: 2023-05-19 18:20:32
 Instrumented Lines: 72
 Covered Lines: 66
 Coverage Ratio: 0.9167
 
 
 ------------------------------------
-kcov REPORT [7]: trace-extensionless-shortcut-unicode
+kcov REPORT [6]: trace-extensionless-shortcut-unicode
 ------------------------------------
-Date: 2023-05-18 22:52:49
+Date: 2023-05-19 18:20:25
 Instrumented Lines: 169
 Covered Lines: 151
 Coverage Ratio: 0.8935
 
 
 ------------------------------------
-kcov REPORT [8]: alias-grep-commands
+kcov REPORT [7]: alias-grep-commands
 ------------------------------------
-Date: 2023-05-18 22:52:24
+Date: 2023-05-19 18:20:07
 Instrumented Lines: 238
 Covered Lines: 208
 Coverage Ratio: 0.8739
 
 
 ------------------------------------
-kcov REPORT [9]: alias-calculator-commands
+kcov REPORT [8]: alias-calculator-commands
 ------------------------------------
-Date: 2023-05-18 22:52:33
+Date: 2023-05-19 18:20:13
 Instrumented Lines: 226
 Covered Lines: 178
 Coverage Ratio: 0.7876
 
 
 ------------------------------------
-kcov REPORT [10]: trace-linux-admin-alias
+kcov REPORT [9]: trace-linux-admin-alias
 ------------------------------------
-Date: 2023-05-18 22:52:31
+Date: 2023-05-19 18:20:12
 Instrumented Lines: 321
 Covered Lines: 267
 Coverage Ratio: 0.8318
 
 
 ------------------------------------
-kcov REPORT [11]: dir-aliases-test-revised
+kcov REPORT [10]: dir-aliases-test-revised
 ------------------------------------
-Date: 2023-05-18 22:52:46
+Date: 2023-05-19 18:20:22
 Instrumented Lines: 296
 Covered Lines: 254
 Coverage Ratio: 0.8581
 
 
 ------------------------------------
-kcov REPORT [12]: calc-entropy-tests
+kcov REPORT [11]: calc-entropy-tests
 ------------------------------------
-Date: 2023-05-18 22:52:36
+Date: 2023-05-19 18:20:15
 Instrumented Lines: 141
 Covered Lines: 99
 Coverage Ratio: 0.7021
 
 
 ------------------------------------
-kcov REPORT [13]: alias-trace-misc-commands
+kcov REPORT [12]: alias-trace-misc-commands
 ------------------------------------
-Date: 2023-05-18 22:52:41
+Date: 2023-05-19 18:20:19
 Instrumented Lines: 524
 Covered Lines: 440
 Coverage Ratio: 0.8397
 
 
 ------------------------------------
-kcov REPORT [14]: hello-world-revised
+kcov REPORT [13]: hello-world-revised
 ------------------------------------
-Date: 2023-05-18 22:53:04
+Date: 2023-05-19 18:20:37
 Instrumented Lines: 114
 Covered Lines: 90
 Coverage Ratio: 0.7895
 
 
 ------------------------------------
-kcov REPORT [15]: trace-setup-sorting-wrappers
+kcov REPORT [14]: trace-setup-sorting-wrappers
 ------------------------------------
-Date: 2023-05-18 22:52:25
+Date: 2023-05-19 18:20:08
 Instrumented Lines: 212
 Covered Lines: 170
 Coverage Ratio: 0.8019
 
 
 ------------------------------------
-kcov REPORT [16]: command-override-cp-mv
+kcov REPORT [15]: command-override-cp-mv
 ------------------------------------
-Date: 2023-05-18 22:52:58
+Date: 2023-05-19 18:20:31
 Instrumented Lines: 183
 Covered Lines: 171
 Coverage Ratio: 0.9344
 
 
 ------------------------------------
-kcov REPORT [17]: alias-html-test
+kcov REPORT [16]: alias-html-test
 ------------------------------------
-Date: 2023-05-18 22:52:34
+Date: 2023-05-19 18:20:14
 Instrumented Lines: 168
 Covered Lines: 156
 Coverage Ratio: 0.9286
 
 
 ------------------------------------
-kcov REPORT [18]: hello-world-basic
+kcov REPORT [17]: hello-world-basic
 ------------------------------------
-Date: 2023-05-18 22:53:10
+Date: 2023-05-19 18:20:41
 Instrumented Lines: 44
 Covered Lines: 44
 Coverage Ratio: 1.0
 
 
 ------------------------------------
-kcov REPORT [19]: alias-cd-commands
+kcov REPORT [18]: alias-cd-commands
 ------------------------------------
-Date: 2023-05-18 22:53:09
+Date: 2023-05-19 18:20:41
 Instrumented Lines: 170
 Covered Lines: 146
 Coverage Ratio: 0.8588
 
 
 ------------------------------------
-kcov REPORT [20]: trace-line-words-commands
+kcov REPORT [19]: trace-line-words-commands
 ------------------------------------
-Date: 2023-05-18 22:52:29
+Date: 2023-05-19 18:20:10
 Instrumented Lines: 238
 Covered Lines: 196
 Coverage Ratio: 0.8235
 
 
 ------------------------------------
-kcov REPORT [21]: tomasohara-aliases-test
+kcov REPORT [20]: tomasohara-aliases-test
 ------------------------------------
-Date: 2023-05-18 22:52:34
+Date: 2023-05-19 18:20:15
 Instrumented Lines: 30
 Covered Lines: 18
 Coverage Ratio: 0.6
 
 
 ------------------------------------
-kcov REPORT [22]: trace-unix-general
+kcov REPORT [21]: trace-unix-general
 ------------------------------------
-Date: 2023-05-18 22:53:08
+Date: 2023-05-19 18:20:40
 Instrumented Lines: 251
 Covered Lines: 239
 Coverage Ratio: 0.9522
 
 
 ------------------------------------
-kcov REPORT [23]: testbook-test-dir-aliases
+kcov REPORT [22]: testbook-test-dir-aliases
 ------------------------------------
-Date: 2023-05-18 22:52:48
+Date: 2023-05-19 18:20:24
 Instrumented Lines: 321
 Covered Lines: 285
 Coverage Ratio: 0.8879
 
 
 ------------------------------------
-kcov REPORT [24]: test-dir-alias
+kcov REPORT [23]: test-dir-alias
 ------------------------------------
-Date: 2023-05-18 22:52:22
+Date: 2023-05-19 18:20:05
 Instrumented Lines: 267
 Covered Lines: 237
 Coverage Ratio: 0.8876
 
 
 ------------------------------------
+kcov REPORT [24]: hello-world-source
+------------------------------------
+Date: 2023-05-19 18:20:36
+Instrumented Lines: 126
+Covered Lines: 108
+Coverage Ratio: 0.8571
+
+
+------------------------------------
 kcov REPORT [25]: trace-file-manipulation
 ------------------------------------
-Date: 2023-05-18 22:52:56
+Date: 2023-05-19 18:20:30
 Instrumented Lines: 267
 Covered Lines: 225
 Coverage Ratio: 0.8427
@@ -227,7 +227,7 @@ Coverage Ratio: 0.8427
 ------------------------------------
 kcov REPORT [26]: json-related-alias
 ------------------------------------
-Date: 2023-05-18 22:53:06
+Date: 2023-05-19 18:20:38
 Instrumented Lines: 295
 Covered Lines: 223
 Coverage Ratio: 0.7559
@@ -236,11 +236,135 @@ Coverage Ratio: 0.7559
 ------------------------------------
 kcov REPORT [27]: test-cond-env-setting
 ------------------------------------
-Date: 2023-05-18 22:52:27
+Date: 2023-05-19 18:20:09
 Instrumented Lines: 198
 Covered Lines: 180
 Coverage Ratio: 0.9091
 
+
+====================================
+    LIST MODE (--list) ENABLED
+
+------------------------------------
+LARGEST TESTFILES (DESC): 
+------------------------------------
+1) trace-extensionless-shortcut-V2
+						[556]
+2) alias-trace-misc-commands
+						[524]
+3) trace-python-commands
+						[474]
+4) trace-unix-alias
+						[361]
+5) trace-linux-admin-alias
+						[321]
+5) testbook-test-dir-aliases
+						[321]
+7) dir-aliases-test-revised
+						[296]
+8) json-related-alias
+						[295]
+9) test-dir-alias
+						[267]
+9) trace-file-manipulation
+						[267]
+11) trace-unix-general
+						[251]
+12) alias-grep-commands
+						[238]
+12) trace-line-words-commands
+						[238]
+14) alias-calculator-commands
+						[226]
+15) trace-setup-sorting-wrappers
+						[212]
+16) test-cond-env-setting
+						[198]
+17) command-override-cp-mv
+						[183]
+18) alias-cd-commands
+						[170]
+19) trace-extensionless-shortcut-unicode
+						[169]
+20) alias-html-test
+						[168]
+21) test-check-errors
+						[142]
+22) calc-entropy-tests
+						[141]
+23) hello-world-source
+						[126]
+24) hello-world-revised
+						[114]
+25) more-tomohara-aliases-test
+						[72]
+26) hello-world-basic
+						[44]
+27) tomasohara-aliases-test
+						[30]
+
+------------------------------------
+MOST SUCCESSFUL TESTFILES (DESC): 
+------------------------------------
+1) hello-world-basic
+						[1.0]
+2) trace-unix-general
+						[0.9522]
+3) command-override-cp-mv
+						[0.9344]
+4) alias-html-test
+						[0.9286]
+5) more-tomohara-aliases-test
+						[0.9167]
+6) test-cond-env-setting
+						[0.9091]
+7) trace-extensionless-shortcut-unicode
+						[0.8935]
+8) testbook-test-dir-aliases
+						[0.8879]
+9) test-dir-alias
+						[0.8876]
+10) alias-grep-commands
+						[0.8739]
+11) test-check-errors
+						[0.8732]
+12) alias-cd-commands
+						[0.8588]
+13) dir-aliases-test-revised
+						[0.8581]
+14) hello-world-source
+						[0.8571]
+15) trace-unix-alias
+						[0.8504]
+16) trace-file-manipulation
+						[0.8427]
+17) alias-trace-misc-commands
+						[0.8397]
+18) trace-linux-admin-alias
+						[0.8318]
+19) trace-extensionless-shortcut-V2
+						[0.8273]
+20) trace-line-words-commands
+						[0.8235]
+21) trace-setup-sorting-wrappers
+						[0.8019]
+22) hello-world-revised
+						[0.7895]
+23) alias-calculator-commands
+						[0.7876]
+24) json-related-alias
+						[0.7559]
+25) trace-python-commands
+						[0.7468]
+26) calc-entropy-tests
+						[0.7021]
+27) tomasohara-aliases-test
+						[0.6]
+
+=====================================
+
+
+[SUMMARY MODE (--summary) ENABLED]
 
 ===============================================
 

@@ -10,7 +10,7 @@ shopt -s expand_aliases
 
 
 @test "test-1" {
-	testfolder="/tmp/batspp-151240/test-1"
+	testfolder="/tmp/batspp-128884/test-1"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -46,7 +46,7 @@ END_EXPECTED
 
 
 @test "test-3" {
-	testfolder="/tmp/batspp-151240/test-3"
+	testfolder="/tmp/batspp-128884/test-3"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -79,7 +79,7 @@ END_EXPECTED
 
 
 @test "test-4" {
-	testfolder="/tmp/batspp-151240/test-4"
+	testfolder="/tmp/batspp-128884/test-4"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -116,7 +116,7 @@ END_EXPECTED
 
 
 @test "test-5" {
-	testfolder="/tmp/batspp-151240/test-5"
+	testfolder="/tmp/batspp-128884/test-5"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -149,7 +149,7 @@ END_EXPECTED
 
 
 @test "test-6" {
-	testfolder="/tmp/batspp-151240/test-6"
+	testfolder="/tmp/batspp-128884/test-6"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -185,7 +185,7 @@ END_EXPECTED
 
 
 @test "test-7" {
-	testfolder="/tmp/batspp-151240/test-7"
+	testfolder="/tmp/batspp-128884/test-7"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -224,7 +224,7 @@ END_EXPECTED
 
 
 @test "test-8" {
-	testfolder="/tmp/batspp-151240/test-8"
+	testfolder="/tmp/batspp-128884/test-8"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -260,7 +260,7 @@ END_EXPECTED
 
 
 @test "test-9" {
-	testfolder="/tmp/batspp-151240/test-9"
+	testfolder="/tmp/batspp-128884/test-9"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -293,7 +293,7 @@ END_EXPECTED
 
 
 @test "test-10" {
-	testfolder="/tmp/batspp-151240/test-10"
+	testfolder="/tmp/batspp-128884/test-10"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -326,7 +326,7 @@ END_EXPECTED
 
 
 @test "test-11" {
-	testfolder="/tmp/batspp-151240/test-11"
+	testfolder="/tmp/batspp-128884/test-11"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -359,7 +359,7 @@ END_EXPECTED
 
 
 @test "test-12" {
-	testfolder="/tmp/batspp-151240/test-12"
+	testfolder="/tmp/batspp-128884/test-12"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
@@ -392,7 +392,7 @@ END_EXPECTED
 
 
 @test "test-13" {
-	testfolder="/tmp/batspp-151240/test-13"
+	testfolder="/tmp/batspp-128884/test-13"
 	mkdir --parents "$testfolder"
 	cd "$testfolder" || echo Warning: Unable to "cd $testfolder"
 
