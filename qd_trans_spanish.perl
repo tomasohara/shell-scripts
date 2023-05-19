@@ -41,7 +41,10 @@ BEGIN {
 }
 require 'spanish.perl';
 use vars qw/$sp_options $sp_word_pattern $first_sense $subsenses $redirect $sp_remove_diacritics $verbose $trans_line/;
-use vars qw/$utf8 $prompt/;
+## OLD: use vars qw/$utf8 $prompt/;
+## NOTE: utf8 handled by spanish.perl
+## TODO1: straighten out perl utf8 morass
+use vars qw/$prompt/;
 
 my($misc_usage_notes) = <<END_MISC_NOTES;
 Notes:
@@ -212,7 +215,8 @@ while (<>) {
 	# note: useful for sp-, etc. aliases
 	if ($_ =~ /^!/) {               # ' (maldito emacs)
 	    my($command) = $';
-	    print(&run_command("bash -i -c '$command' 2>| $log"));
+	    ## OLD: print(&run_command("bash -i -c '$command' 2>| $log"));
+	    print(&to_utf8(&run_command("bash -i -c '$command' 2>| $log")));
 	    print("\n");
 	    debug_out(6, "log: {\n%s}\n", &read_file($log));
 	    next outer;
@@ -229,8 +233,11 @@ while (<>) {
 	my($env_spec) = "FROM=$from TO=$to";
 	my($save_trace_level) = &DEBUG_LEVEL;
 	&debug_on(3);
-        print(&run_command_over("$env_spec machine_translation.py 2>| $log", 
-                                "$text\n", 3));
+	## OLD:
+        ## print(&run_command_over("$env_spec machine_translation.py 2>| $log", 
+        ##                         "$text\n", 3));
+        print(&to_utf8(&run_command_over("$env_spec machine_translation.py 2>| $log", 
+					 "$text\n", 3)));
 	print("\n\n");
 	debug_out(6, "log: {\n%s}\n", &read_file($log));
 	&debug_on($save_trace_level);
@@ -338,4 +345,16 @@ sub check_word {
     if ($noun ne "") {
 	print "$word:\t($noun, $person)\t$sp_trans{$noun}\n";
     }
+}
+
+# to_utf8 (text): encodes as UTF8 if enabled
+#
+sub to_utf8 {
+    my($text) = @_;
+    my($result) = $text;
+    if ($utf8) {
+	$result = decode_utf8($result);
+    }
+    &debug_print(&TL_VERBOSE, "to_utf8(@_) => $text\n");
+    return ($result);
 }
