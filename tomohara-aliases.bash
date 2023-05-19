@@ -1705,7 +1705,7 @@ function show-all-macros () {
     show-functions-aux | perlgrep -i -para $pattern;
 }
 
-# show-macros(pattern): like show-all-macros, exlcuding leading _ in name
+# show-macros(pattern): like show-all-macros, excluding leading _ in name
 function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
 # shellcheck disable=SC2016
 alias-fn show-macros-proper 'show-macros | $GREP "^\w"'
@@ -2600,7 +2600,15 @@ function script {
 }
 # TODO: put this in a separate file
 ## OLD: alias script-update='script _update-$(T).log'
-alias script-update='script  _update-$(T).log  make-git-update.bash'
+## OLD: alias script-update='script  _update-$(T).log  make-git-update.bash'
+function script-update {
+    local command_indicator=""
+    ## TODO: under-linux && command_indicator="-c"
+    if [ "$(under-linux)" = "1" ]; then
+	command_indicator="-c"
+    fi
+    script  _update-$(T).log  "$command_indicator" make-git-update.bash
+}
 
 # ansi-filter(filename]: wrapper around ansifilter with stdio and stdout instead of files
 # TODO: issue request for proper Unix stdin support (n.b., this function is much ado about nothing)
