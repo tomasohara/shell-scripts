@@ -1,8 +1,0 @@
-# Test for bash settings, etc.
-
-# TODO: no duplicates in path
-## $ show-path | wc -l
-## 54
-## 
-## $ show-path | sort -u | wc -l
-## 35

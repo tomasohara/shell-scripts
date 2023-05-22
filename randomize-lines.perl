@@ -11,22 +11,18 @@ eval 'exec perl -Ssw $0 "$@"'
 #      perl -e  'print "1\n2\n3\n4\n5\n";' | randomize-lines.perl -
 
 # Load in the common module, making sure the script dir is in the Perl lib path
-BEGIN { 
-    my $dir = $0; $dir =~ s/[^\\\/]*$//; unshift(@INC, $dir);
-    require 'common.perl';
-    use vars qw/$help $para/;
-}
+BEGIN { my $dir = `dirname $0`; chomp $dir; unshift(@INC, $dir); }
+require 'common.perl';
 
 # Show a usage statement if no arguments given
 # NOTE: By convention - is used when no arguments are required
 if (!defined($ARGV[0])) {
     my($options) = "main options = [-seed=real] [-timeseed]";
     $options .= "\nother options = " . &COMMON_OPTIONS;
-    my($example) = "examples:\n\n$script_name README.txt\n\n";
-    $example .= "ls -alR / > $0 -para - > _random-ls-alR.log\n\n";
+    my($example) = "examples:\n\n$script_name example\n\n";  # TODO: example
+    ## $example .= "$0 example2\n\n";		   	     # TODO: 2nd example
     my($note) = "";
-    $note .= "notes:\n\n- Use -para for paragraph input mode.\n";
-    #note .= - The input is read in memory; use mezcla's randomize_lines.py for memory-efficient version.\n";
+    ## $note .= "notes:\n\nSome usage note.\n";		     # TODO: usage note
 
     die "\nusage: $script_name [options]\n\n$options\n\n$example\n$note";
 }

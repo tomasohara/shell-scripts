@@ -18,38 +18,12 @@
 #     $((arithmetic))              evaluate arithmetic expression
 #     $(command ...)               same as `command ...`
 #     ${var:-default}              use $var or "default"
-#     ${var/from/to}               var with FROM pattern changed to TO
 #     true                         no-op
-#     $#                           number of positional arguments
-#     $*                           all positional arguments
-#     "$@"                         likewise all args but with individually quoting
-# - tools like OpenAI Codex and GitHub Copliot can be used to translate Bash constructs
-#     https://github.com/features/copilot
-# - For sake of simplicity, not all of the syntax is covered. (Likewise below.)
-# TODO:
-#  - variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
+# TODO: variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
 #     note: EXPR is C style;
 #         Format                    Example
 #         let EXPR                  let i++
 #         let VAR=(EXPR)            let max_mem=(4 * 1024)
-#   - array variable
-#         list=(v1 value2 ... vN)   initialize
-#         ${list[1]}                second element
-#         ${list[*]}                all elements
-#         "${list[@]}"              likewise all but individually quoted (a la "$@")
-#         list+=(value)             append value
-#   - conditional expression
-#   - echo to stderr (or print)
-#   - expression evaluation
-#         (( EXPR ))                (( L++ ))
-#     Preferred for arithmetic: see https://wiki.bash-hackers.org/commands/builtin/let.
-#   - early return
-#      return                       just inside functions
-#      exit                         early script termination; avoid in functions or if script sourced
-#   - history mechanism
-#     !?string[?]                   find last command with string
-#  - local variable declaration     note: space-separated not comma; simplified
-#      local var1[=val1] [var2[=val2] ...]
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
@@ -70,7 +44,6 @@
 # - Mention some useful variables:
 #   (e.g., ${!#} for last argument--see https://stackoverflow.com/questions/1853946/getting-the-last-argument-passed-to-a-shell-script).
 # - Document regex match quirks.
-# - Document file tests (e.g., -e fubar.txt).
 #
 
 # Uncomment following line(s) for tracing:
@@ -118,10 +91,9 @@ while [ "$moreoptions" = "1" ]; do
     # TODO : add real options
     if [ "$1" = "--trace" ]; then
 	set -o xtrace
-    elif [ "$1" = "--TODO-fubar" ]; then
-	## TODO: implement
-	echo "TODO-fubar"
-    elif [[ ("$1" = "--") || ("$1" = "-") ]]; then
+    elif [ "$1" = "--fubar" ]; then
+	echo "fubar"
+    elif [ "$1" = "--" ]; then
 	break
     else
 	echo "ERROR: Unknown option: $1";

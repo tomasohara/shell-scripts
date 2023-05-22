@@ -1,0 +1,78 @@
+# Setup (OPTIONAL - USED IF NEEDED)
+## bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+# Setting a temp directory for tests
+$ TMP=/tmp/test-cp-mv
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+$ alias | wc -l
+0
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 6869)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-6869
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-cp-mv/test-6869
+
+# Count aliases proper
+$ alias | wc -l
+1
+
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+0
+
+$ source $BIN_DIR/tomohara-aliases.bash
+
+# SHOWS CURRENT WORKING DIRECTORY
+$ pwd
+/tmp/test-cp-mv/test-6869
+
+## chdir works as cd
+$ chdir ..
+$ chdir test-6869/
+]1;test-cp-mv [/tmp/test-cp-mv]]2;test-cp-mv [/tmp/test-cp-mv]/tmp/test-cp-mv/test-6869
+]1;test-6869 [/tmp/test-cp-mv/test-6869]]2;test-6869 [/tmp/test-cp-mv/test-6869]
+
+## cd-this-realdir works as cd as well
+$ chdir ..
+$ chdir test-6869/
+]1;test-cp-mv [/tmp/test-cp-mv]]2;test-cp-mv [/tmp/test-cp-mv]/tmp/test-cp-mv/test-6869
+]1;test-6869 [/tmp/test-cp-mv/test-6869]]2;test-6869 [/tmp/test-cp-mv/test-6869]
+
+$ rm -rf ./* > /dev/null
+$ mkdir testdir89 testdir90
+$ echo "Testfile1" > testdir89/f11.txt
+$ echo "Testfile2" > testdir89/f12.txt
+
+$ pushd-q testdir89
+$ ls
+$ linebr
+$ popd-q 
+$ ls
+f11.txt  f12.txt
+--------------------------------------------------------------------------------
+testdir89  testdir90

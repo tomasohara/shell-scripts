@@ -1,4 +1,3 @@
-#! /usr/bin/env bash
 #! /bin/bash
 #
 # Sets the xterm title bar to the string given on the command line.
@@ -96,7 +95,7 @@
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #  
-## BASIC: echo "in $0: args=$@"
+## BASIC: echo "in $0: args: $@"
 ## HACK: echo "BATCH_MODE=$BATCH_MODE"
 ## USUAL: set -o xtrace
 ## DEBUG: set -o verbose
@@ -210,17 +209,14 @@ if [  "$DEFAULT_HOST" != "" ]; then
 fi
 
 # If sudo being used, add current user name to end (e.g., "...; user=root")
-# OLD: (("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER"))
-# TODO: just use LOGNAME test???
-if [[ ((("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER")) || ("$LOGNAME" != "$USER")) ]]; then
-    ## DEBUG: echo "adding user"
-    full="$full; user=$USER"
-    icon="$icon; user=$USER"
+if [[ ("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER") ]]; then
+   full="$full; user=$USER"
+   icon="$icon; user=$USER"
 fi
 # Add suffix from XTERM_TITLE_SUFFIX env. var.:
 if [ "$XTERM_TITLE_SUFFIX" != "" ]; then
-    full="$full; $XTERM_TITLE_SUFFIX"
-    icon="$icon; $XTERM_TITLE_SUFFIX"
+   full="$full; $XTERM_TITLE_SUFFIX"
+   icon="$icon; $XTERM_TITLE_SUFFIX"
 fi
 
 # If SCRIPT_PID set, add this at start
@@ -262,12 +258,12 @@ fi
 #
 declare PS_symbol
 if [ "$PS_symbol" != "" ]; then
-    ## BAD: if [[ ! ($PS_symbol =~ [$﹩＄💲]) ]]; then
-    if [[ ($PS_symbol =~ ^.*[﹩＄💲].*$) ]]; then
-	## DEBUG:
-	echo "Omitting special dollar-sign PS_symbol ($PS_symbol) from title"
-	true
-    else
+    ## OLD
+    ## full="$PS_symbol $full"
+    ## icon="$PS_symbol $icon"
+    ## OLD:  if [ "$PS_symbol" != '$' ]; then
+    ## OLD: if [[ ! ($PS_symbol =~ [$＄]) ]]; then
+    if [[ ! ($PS_symbol =~ [$﹩＄💲]) ]]; then
 	full="$PS_symbol $full"
 	icon="$PS_symbol $icon"
     fi

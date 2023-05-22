@@ -98,13 +98,11 @@ fi
 function startup-trace () { if [ "$STARTUP_TRACING" = "1" ]; then echo $* [$HOST `date`] >> $HOME/temp/.startup-$HOST-$$.log; fi; }
 conditional-source $BIN/startup-tracing.bash
 #
-
-## OLD
-## alias trace='startup-trace'
-## alias enable-startup-tracing='export STARTUP_TRACING=1'
-## alias disable-startup-tracing='export STARTUP_TRACING=0'
-## alias enable-console-tracing='export CONSOLE_TRACING=1'
-## alias disable-console-tracing='export CONSOLE_TRACING=0'
+alias trace='startup-trace'
+alias enable-startup-tracing='export STARTUP_TRACING=1'
+alias disable-startup-tracing='export STARTUP_TRACING=0'
+alias enable-console-tracing='export CONSOLE_TRACING=1'
+alias disable-console-tracing='export CONSOLE_TRACING=0'
 
 #-------------------------------------------------------------------------------
 trace 'in do_setup.bash'
@@ -502,9 +500,8 @@ if [ "$PS1" = "" ]; then export PS1="$ "; fi
 export USE_GNOME=1
 
 # General Settings for my perl scripts
-## OLD
-## export DEBUG_LEVEL=2
-## alias debug-on='export DEBUG_LEVEL=3'
+export DEBUG_LEVEL=2
+alias debug-on='export DEBUG_LEVEL=3'
 ## OLD: export ORIGINAL_PERLLIB=$PERLLIB
 if [ "$PERLLIB" = "" ]; then PERLLIB="."; else PERLLIB="$PERLLIB:."; fi
 ## export PERLLIB="$BIN:$PERLLIB:$HOME/perl/lib/perl5/site_perl/5.8.0:$HOME/perl/lib/perl5/site_perl/5.8.0/i386-linux-thread-multi/:$HOME/lib/perl5/5.00503/i386-linux:$BIN/MODULES"
@@ -609,59 +606,58 @@ alias copy-readonly='copy-readonly.sh'
 #
 NICE="nice -19"
 
-## OLD:
-## #------------------------------------------------------------------------
-## # Directory commands (via ls):
-## trace directory commands
-## 
-##  
-## # ls options: # -a all files; -l long listing; -t by time; -k in KB; -h human readable; -G no group; -d no subdirectory listings
-## #
-## core_dir_options="-altkh"
-## dir_options="${core_dir_options}G"
-## if [ "$OSTYPE" = "solaris" ]; then dir_options="-alt"; fi
-## if [ "$BAREBONES_HOST" = "1" ]; then dir_options="-altk"; fi
-## function dir () { ls ${dir_options} "$@" 2>&1 | $PAGER; }
-## alias ls-full='ls ${core_dir_options}'
-## function dir-full () { ls-full "$@" 2>&1 | $PAGER; }
-## ## OLD: alias dir-='dir-full'
-## alias dir-='ls ${dir_options}'
-## function dir-sans-backups () { ls ${dir_options} "$@" 2>&1 | grep -v '~[0-9]*~' | $PAGER; }
-## #
-## # Miscellaneous directory helpers
-## # Shows read-only files (for user)
-## # ex: -r-xr-xr-x  1 root 4.7K 2013-12-13 17:18 ngram_filter.py
-## function dir-ro () { ls ${dir_options} "$@" 2>&1 | grep -v '^[^ld].w' | $PAGER; }
-## # Shows writable files (for user)
-## # ex: -rwxr-x--x  1 root 9.4K 2014-06-26 20:18 gensim_test.py
-## function dir-rw () { ls ${dir_options} "$@" 2>&1 | grep '^[^ld].w' | $PAGER; }
-## # Shows files not executable
-## # ex -rw-r--r-- 1 root 3.9K 2014-06-09 01:54 /mnt/tohara/src/sandbox/tohara/randomize_lines.py
-## function dir-non-executable () { ls ${dir_options} "$@" 2>&1 | grep -v '^[^ld]..x' | $PAGER; }
-## 
-## function subdirs () { ls ${dir_options} "$@" 2>&1 | grep ^d | $PAGER; }
-## ## OLD: alias subdirs-proper='find . -maxdepth 1 -type d | grep -v "^\.\$"'
-## alias subdirs-proper='find . -maxdepth 1 -type d | grep -v "^\.\$" | perl -pe "s@^\./@@;" | column'
-## # note: -f option overrides -t: Unix sorts alphabetically by default; via ls manpage:
-## #    -f     do not sort, enable -aU, disable -ls --color
-## ## OLD: function subdirs-alpha () { ls ${dir_options} -f "$@" 2>&1 | grep ^d | $PAGER; }
-## # drwxr-xr-x   3 root root     4096 Jun 12 02:39 boot
-## # 1            2 3    4        5    6   7  8     9
-## ## TEST: function subdirs-alpha () { ls -al "$@" 2>&1 | grep ^d | cut -d' ' -f9- | $PAGER; }
-## function subdirs-alpha () { ls -al "$@" 2>&1 | grep ^d | $PAGER; }
-## function sublinks () { ls ${dir_options} "$@" 2>&1 | grep ^l | $PAGER; }
-## ## OLD: function sublinks-alpha () { ls ${dir_options} -f "$@" 2>&1 | grep ^l | $PAGER; }
-## ## TEST: function sublinks-alpha () { ls -al "$@" 2>&1 | grep ^l | cut -d' ' -f9- | $PAGER; }
-## function sublinks-alpha () { ls -al "$@" 2>&1 | grep ^l | $PAGER; }
-## #
-## alias glob-links='find . -maxdepth 1 -type l | sed -e "s/.\///g"'
-## alias glob-subdirs='find . -mindepth 1 -maxdepth 1 -type d | sed -e "s/.\///g"'
-## 
-## #
-## alias ls-R='ls -R >| ls-R.list; wc -l ls-R.list'
-## #
-## # TODO: create ls alias that shows file name with symbolic links (as with ls -l but without other information
-## # ex: ls -l | perl -pe 's/^.* \d\d:\d\d //;'
+#------------------------------------------------------------------------
+# Directory commands (via ls):
+trace directory commands
+
+ 
+# ls options: # -a all files; -l long listing; -t by time; -k in KB; -h human readable; -G no group; -d no subdirectory listings
+#
+core_dir_options="-altkh"
+dir_options="${core_dir_options}G"
+if [ "$OSTYPE" = "solaris" ]; then dir_options="-alt"; fi
+if [ "$BAREBONES_HOST" = "1" ]; then dir_options="-altk"; fi
+function dir () { ls ${dir_options} "$@" 2>&1 | $PAGER; }
+alias ls-full='ls ${core_dir_options}'
+function dir-full () { ls-full "$@" 2>&1 | $PAGER; }
+## OLD: alias dir-='dir-full'
+alias dir-='ls ${dir_options}'
+function dir-sans-backups () { ls ${dir_options} "$@" 2>&1 | grep -v '~[0-9]*~' | $PAGER; }
+#
+# Miscellaneous directory helpers
+# Shows read-only files (for user)
+# ex: -r-xr-xr-x  1 root 4.7K 2013-12-13 17:18 ngram_filter.py
+function dir-ro () { ls ${dir_options} "$@" 2>&1 | grep -v '^[^ld].w' | $PAGER; }
+# Shows writable files (for user)
+# ex: -rwxr-x--x  1 root 9.4K 2014-06-26 20:18 gensim_test.py
+function dir-rw () { ls ${dir_options} "$@" 2>&1 | grep '^[^ld].w' | $PAGER; }
+# Shows files not executable
+# ex -rw-r--r-- 1 root 3.9K 2014-06-09 01:54 /mnt/tohara/src/sandbox/tohara/randomize_lines.py
+function dir-non-executable () { ls ${dir_options} "$@" 2>&1 | grep -v '^[^ld]..x' | $PAGER; }
+
+function subdirs () { ls ${dir_options} "$@" 2>&1 | grep ^d | $PAGER; }
+## OLD: alias subdirs-proper='find . -maxdepth 1 -type d | grep -v "^\.\$"'
+alias subdirs-proper='find . -maxdepth 1 -type d | grep -v "^\.\$" | perl -pe "s@^\./@@;" | column'
+# note: -f option overrides -t: Unix sorts alphabetically by default; via ls manpage:
+#    -f     do not sort, enable -aU, disable -ls --color
+## OLD: function subdirs-alpha () { ls ${dir_options} -f "$@" 2>&1 | grep ^d | $PAGER; }
+# drwxr-xr-x   3 root root     4096 Jun 12 02:39 boot
+# 1            2 3    4        5    6   7  8     9
+## TEST: function subdirs-alpha () { ls -al "$@" 2>&1 | grep ^d | cut -d' ' -f9- | $PAGER; }
+function subdirs-alpha () { ls -al "$@" 2>&1 | grep ^d | $PAGER; }
+function sublinks () { ls ${dir_options} "$@" 2>&1 | grep ^l | $PAGER; }
+## OLD: function sublinks-alpha () { ls ${dir_options} -f "$@" 2>&1 | grep ^l | $PAGER; }
+## TEST: function sublinks-alpha () { ls -al "$@" 2>&1 | grep ^l | cut -d' ' -f9- | $PAGER; }
+function sublinks-alpha () { ls -al "$@" 2>&1 | grep ^l | $PAGER; }
+#
+alias glob-links='find . -maxdepth 1 -type l | sed -e "s/.\///g"'
+alias glob-subdirs='find . -mindepth 1 -maxdepth 1 -type d | sed -e "s/.\///g"'
+
+#
+alias ls-R='ls -R >| ls-R.list; wc -l ls-R.list'
+#
+# TODO: create ls alias that shows file name with symbolic links (as with ls -l but without other information
+# ex: ls -l | perl -pe 's/^.* \d\d:\d\d //;'
 
 # Grep commands
 trace grep commands
@@ -848,12 +844,11 @@ function em-file () { set_xterm_title.bash "`basename $1` [`full-dirname $1`]"; 
 alias em-this-dir='em .'
 alias em-devel='em --devel'
 #
-## OLD
-## function em-debug () { em -debug-init "$@"; }
-## function em-quick () { em -q "$@"; }
-## function em-small () { em -fn "-adobe-courier-bold-r-normal--12-120-75-75-m-70-iso8859-1" "$@"; }
-## function em-large () { em -fn "-adobe-courier-bold-r-normal--18-180-75-75-m-110-iso8859-1" -geometry 70x30 "$@"; }
-## function em-very-large () { em -fn "-adobe-courier-bold-r-normal--24-240-75-75-m-150-iso8859-1" -geometry 60x20 "$@"; }
+function em-debug () { em -debug-init "$@"; }
+function em-quick () { em -q "$@"; }
+function em-small () { em -fn "-adobe-courier-bold-r-normal--12-120-75-75-m-70-iso8859-1" "$@"; }
+function em-large () { em -fn "-adobe-courier-bold-r-normal--18-180-75-75-m-110-iso8859-1" -geometry 70x30 "$@"; }
+function em-very-large () { em -fn "-adobe-courier-bold-r-normal--24-240-75-75-m-150-iso8859-1" -geometry 60x20 "$@"; }
 
 # Simple TODO-list maintenance commands
 #
@@ -953,91 +948,90 @@ alias view-mail-aliases='$PAGER $HOME/.mailrc'
 ## function mail-tpo () { mail -s $1 tom_o_hara@msn.com < $1; }
 ## function mail-tpo () { mail -s $1 tomohara@umbc.edu < $1; }
 
-## OLD:
-## # Simple calculator commands
-## function old-calc () { echo "$@" | bc -l; }
-## ## function perl-calc () { echo "$@" | perl- perlcalc.perl -; }
-## function perl-calc () { perl- perlcalc.perl -args "$@"; }
-## # TODO: read up on variable expansion in function environments
-## function perl-calc-init () { initexpr=$1; shift; echo "$@" | perl- perlcalc.perl -init="$initexpr" -; }
-## alias calc='perl-calc'
-## alias calc-init='perl-calc-init'
-## alias calc-int='perl-calc -integer'
-## function old-perl-calc () { perl -e "print $*;"; }
-## function hex2dec { perl -e "printf '%d', 0x$1;" -e 'print "\n";'; }
-## ## OLD: function oct2dec { perl -e "printf '%d', 0$1;" -e 'print "\n";'; }
-## ## OLD: function oct2hex { perl -e "printf '%x', oct(q/$1/);" -e 'print "\n";'; }
-## function dec2hex { perl -e "printf '%x', $1;" -e 'print "\n";'; }
-## ## OLD: function dec2oct { perl -e "printf '%o', $1;" -e 'print "\n";'; }
-## function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
-## function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
-## alias hv='hexview.perl'
-## 
-## # Miscellaneous commands
-## trace Miscellaneous commands
-## #
-## alias startx-='startx >| startx.log 2>&1'
-## alias xt='xterm.sh &'
-## alias gt='gnome-terminal &'
-## ## OLD: alias h='history $LINES'
-## alias hist='history $LINES'
-## # Removes timestamp from history (e.g., " 1972  [2014-05-02 14:34:12] dir *py" => " 1972  dir *py")
-## # TEST: function hist { h | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
-## # note: funciton used to simplify specification of quotes
-## function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
-## ## alias lynx='lynx -cookies'
-## alias new-lynx='lynx-2.8.4'
-## alias fix-keyboard='kbd_mode -a'
-## function asctime() { perl -e "print (scalar localtime($1));"; echo ""; }
-## function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
-## ## alias ns="nice -10 netscape &"
-## ## alias ns="netscape &"
-## alias ns="$NICE netscape >| $HOME/temp/netscape-$$.log 2>&1 &"
-## ## alias netscape-6.1='/opt/local/pkg/netscape6.1/netscape >| /tmp/netscape-6.1.log 2>&1 &'
-## ## alias ns6.1='netscape-6.1'
-## ## alias netscape-6.2='/opt/local/pkg/netscape6.2/netscape >| /tmp/netscape-6.2.log 2>&1 &'
-## ## alias ns6.2='netscape-6.2'
-## 
-## # alias type='cat'  # interferes with type command
-## alias reverse='tac'
-## function backup-file () { local file="$1"; if [ -e "$file" ]; then dobackup.sh "$file"; fi; }
-## alias tpo-backup='make-tpo-backup.sh'
-## function relativize-path () { echo "$@" | perl -pe "s@(^| )$HOME/@~/@;g"; }
-## #
-## ## OLDER: function usage () { du --kilobytes --one-file-system 2>&1 | sort -rn >| usage.list 2>&1; $PAGER usage.list; }
-## ## OLD: function usage () { $NICE du --kilobytes --one-file-system 2>&1 | $NICE sort -rn >| usage.list 2>&1; $PAGER usage.list; }
-## function usage () { output_file="usage.list"; backup-file $output_file; $NICE du --block-size=1K --one-file-system 2>&1 | $NICE sort -rn >| $output_file 2>&1; $PAGER $output_file; }
-## ## TODO: function usage () { du --one-file-system --human-readable 2>&1 | sort -rn >| usage.list 2>&1; $PAGER usage.list; }
-## #
-## ## OLD: function check-errors () { (check_errors.perl -skip_warnings -context=5 "$@") 2>&1 | $PAGER; }
-## function check-errors () { (check_errors.perl -context=5 "$@") 2>&1 | $PAGER; }
-## ## function check-all-errors () { (check_errors.perl -skip_warnings=0 -context=5 "$@") 2>&1 | $PAGER; }
-## function check-all-errors () { (check_errors.perl -warnings -context=5 "$@") 2>&1 | $PAGER; }
-##     ## function check-all-warnings () { (check_errors.perl -skip_warnings=0 -context=5 -all_possible_warnings "$@") 2>&1 | $PAGER; }
-## alias check-all-warnings='echo use check-all-errors instead; check-all-errors'
-## 
-## ## OLD: alias clock='xclock -geom 80x80+6+62 -analog -fg black -bg ivory &'
-## 
-## function tkdiff () { wish -f $BIN/tkdiff.tcl "$@" & }
-## function old-tkdiff () { wish -f $BIN/old_tkdiff.tcl "$@" & }
-## function new-tkdiff () { wish -f $BIN/tkdiff.tcl "$@" & }
-## ## OLD: alias vdiff='tkdiff'
-## alias vdiff='kdiff'
-## alias rdiff='rev_vdiff.sh'
-## alias tkdiff-='tkdiff -noopt'
-## alias vd=tkdiff
-## alias vd-=tkdiff-
-## alias diff='command diff -wb'
-## function diff-verbose () { echo "Issuing: diff -wb ..."; command diff -wb "$@"; }
-## alias diff-='command diff'
-## ## OLD:
-## ## function vdiff-rev () {
-## ##     local left_file="$2"
-## ##     local right_file="$1"
-## ##     if [ -d "$left_file" ]; then left_file="$left_file/$right_file"; fi
-## ##     vdiff "$left_file" "$right_file"
-## ## }
+# Simple calculator commands
+function old-calc () { echo "$@" | bc -l; }
+## function perl-calc () { echo "$@" | perl- perlcalc.perl -; }
+function perl-calc () { perl- perlcalc.perl -args "$@"; }
+# TODO: read up on variable expansion in function environments
+function perl-calc-init () { initexpr=$1; shift; echo "$@" | perl- perlcalc.perl -init="$initexpr" -; }
+alias calc='perl-calc'
+alias calc-init='perl-calc-init'
+alias calc-int='perl-calc -integer'
+function old-perl-calc () { perl -e "print $*;"; }
+function hex2dec { perl -e "printf '%d', 0x$1;" -e 'print "\n";'; }
+## OLD: function oct2dec { perl -e "printf '%d', 0$1;" -e 'print "\n";'; }
+## OLD: function oct2hex { perl -e "printf '%x', oct(q/$1/);" -e 'print "\n";'; }
+function dec2hex { perl -e "printf '%x', $1;" -e 'print "\n";'; }
+## OLD: function dec2oct { perl -e "printf '%o', $1;" -e 'print "\n";'; }
+function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
+function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
+alias hv='hexview.perl'
 
+# Miscellaneous commands
+trace Miscellaneous commands
+#
+alias startx-='startx >| startx.log 2>&1'
+alias xt='xterm.sh &'
+alias gt='gnome-terminal &'
+## OLD: alias h='history $LINES'
+alias hist='history $LINES'
+# Removes timestamp from history (e.g., " 1972  [2014-05-02 14:34:12] dir *py" => " 1972  dir *py")
+# TEST: function hist { h | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
+# note: funciton used to simplify specification of quotes
+function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
+## alias lynx='lynx -cookies'
+alias new-lynx='lynx-2.8.4'
+alias fix-keyboard='kbd_mode -a'
+function asctime() { perl -e "print (scalar localtime($1));"; echo ""; }
+function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
+## alias ns="nice -10 netscape &"
+## alias ns="netscape &"
+alias ns="$NICE netscape >| $HOME/temp/netscape-$$.log 2>&1 &"
+## alias netscape-6.1='/opt/local/pkg/netscape6.1/netscape >| /tmp/netscape-6.1.log 2>&1 &'
+## alias ns6.1='netscape-6.1'
+## alias netscape-6.2='/opt/local/pkg/netscape6.2/netscape >| /tmp/netscape-6.2.log 2>&1 &'
+## alias ns6.2='netscape-6.2'
+
+# alias type='cat'  # interferes with type command
+alias reverse='tac'
+function backup-file () { local file="$1"; if [ -e "$file" ]; then dobackup.sh "$file"; fi; }
+alias tpo-backup='make-tpo-backup.sh'
+function relativize-path () { echo "$@" | perl -pe "s@(^| )$HOME/@~/@;g"; }
+#
+## OLDER: function usage () { du --kilobytes --one-file-system 2>&1 | sort -rn >| usage.list 2>&1; $PAGER usage.list; }
+## OLD: function usage () { $NICE du --kilobytes --one-file-system 2>&1 | $NICE sort -rn >| usage.list 2>&1; $PAGER usage.list; }
+function usage () { output_file="usage.list"; backup-file $output_file; $NICE du --block-size=1K --one-file-system 2>&1 | $NICE sort -rn >| $output_file 2>&1; $PAGER $output_file; }
+## TODO: function usage () { du --one-file-system --human-readable 2>&1 | sort -rn >| usage.list 2>&1; $PAGER usage.list; }
+#
+## OLD: function check-errors () { (check_errors.perl -skip_warnings -context=5 "$@") 2>&1 | $PAGER; }
+function check-errors () { (check_errors.perl -context=5 "$@") 2>&1 | $PAGER; }
+## function check-all-errors () { (check_errors.perl -skip_warnings=0 -context=5 "$@") 2>&1 | $PAGER; }
+function check-all-errors () { (check_errors.perl -warnings -context=5 "$@") 2>&1 | $PAGER; }
+    ## function check-all-warnings () { (check_errors.perl -skip_warnings=0 -context=5 -all_possible_warnings "$@") 2>&1 | $PAGER; }
+alias check-all-warnings='echo use check-all-errors instead; check-all-errors'
+
+## OLD: alias clock='xclock -geom 80x80+6+62 -analog -fg black -bg ivory &'
+
+function tkdiff () { wish -f $BIN/tkdiff.tcl "$@" & }
+function old-tkdiff () { wish -f $BIN/old_tkdiff.tcl "$@" & }
+function new-tkdiff () { wish -f $BIN/tkdiff.tcl "$@" & }
+## OLD: alias vdiff='tkdiff'
+alias vdiff='kdiff'
+alias rdiff='rev_vdiff.sh'
+alias tkdiff-='tkdiff -noopt'
+alias vd=tkdiff
+alias vd-=tkdiff-
+alias diff='command diff -wb'
+function diff-verbose () { echo "Issuing: diff -wb ..."; command diff -wb "$@"; }
+alias diff-='command diff'
+## OLD:
+## function vdiff-rev () {
+##     local left_file="$2"
+##     local right_file="$1"
+##     if [ -d "$left_file" ]; then left_file="$left_file/$right_file"; fi
+##     vdiff "$left_file" "$right_file"
+## }
+ 
 # Bookmark commands
 # TODO: have version that just uses a single bookmark source
 function view-bookmarks () { perl- bookmark2ascii.perl "$@" $HOME/.netscape/bookmarks.html $HOME/lynx_bookmarks.html | $PAGER; }
@@ -1051,75 +1045,74 @@ alias lynx-bookmarks='lynx-bookmarks- | $PAGER'
 ## alias lynx-book-marks=lynx-bookmarks
 function lookup-lynx-bookmark () { lynx-bookmarks- | $GREP $MY_GREP_OPTIONS -A1 "$@"; }
 
-## OLD:
-## # Tar archive creation and manipulation
-## # tar options:
-## # -x extract; -v verbose; -f file source; -z compressed; -k don't overwrite files
-## trace tar archive commands
-## GTAR="tar"
-## alias gtar="$GTAR"
-## #
-## # ls-relative(file): show pathname of FILE relative to $HOME (e.g., ~/xfer/do_setup.bash)
-## function ls-relative () { ls -d "$1" | perl -pe "s@$HOME@~@;"; }
-## #
-## # make-tar(archive_basename, [dir=.], [depth=max], [filter=pattern]): tar up directory with results placed 
-## #   in archive_base.tar.gz and log file in base.log; afterwards display the tar size, log, and path.
-## # Filenames matching the optional filter are excluded.
-## # EX: make-tar ~/xfer/program-files-structure 'C:\Program Files' 1
-## #   
-## find_options=""
-## function make-tar () { 
-## 	 local base=$1; local dir=$2; local depth=$3; local filter=$4;
-## 	 local depth_arg=""; local filter_arg="."
-## 	 if [ "$dir" = "" ]; then dir="."; fi;
-## 	 if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
-## 	 if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
-## 	 # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
-## 	 (find "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.log" 2>&1; 
-## 	 (ls -l "$base.tar.gz"; cat "$base.log") 2>&1 | $PAGER; 
-## 	 ls-full "$base.tar.gz";
-## 	 ls-relative "$base.tar.gz"; 
-## }
-## # TODO: handle filenames with embedded spaces
-## #
-## # tar-dir(dir, depth, [filter]): create archive of DIR in ~/xfer, using subdirectories up to DEPTH, and optionally 
-## # filtering files matching exlusion filter.
-## #
-## function tar-dir () {
-## 	local dir=$1; local depth=$2;
-## 	local archive_base=$TEMP/`basename "$dir"`
-## 	make-tar "$archive_base" "$dir" $depth
-## }
-## function tar-just-dir () { tar-dir $1 1; }
-## #
-## function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`"; popd-q; }
-## #
-## # tar-this-dir-normal: creates archive of directory, excluding archive, backup, and temp subdirectories
-## function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`" "" "/(archive|backup|temp)/"; popd-q; }
-## #
-## function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`" 1; popd-q; }
-## function make-recent-tar () { (find . -type f -mtime -$2 | $GTAR cvfzT $1 -; ) 2>&1 | $PAGER; ls-relative $1; }
-## #
-## # " (for Emacs)
-## # NOTE: above quote needed to correct for Emacs color coding
-## # TODO: rework basename extraction
-## #
-## function view-tar () { $GTAR tvfz "$@" 2>&1 | $PAGER; }
-## function extract-tar () { $NICE $GTAR xvfzk "$@" 2>&1 | $PAGER; }
-## function extract-tar-force () { $NICE $GTAR xvfz "$@" 2>&1 | $PAGER; }
-## function extract-tar-here () { pushd ..; $NICE $GTAR xvfzk "$@" 2>&1 | $PAGER; popd; }
-## alias untar='extract-tar'
-## alias untar-here='extract-tar-here'
-## alias un-tar=untar
-## alias untar-force='extract-tar-force'
-## ## alias make-tar='make-tar-with-subdirs'
-## alias create-tar='make-tar-with-subdirs'
-## alias make-full-tar='make-tar'
-## # TODO: handle filenames with embedded spaces
-## ## alias tar-this-dir='make-tar-with-subdirs $TEMP/`basename "$PWD"`'
-## ## alias tar-just-this-dir='make-tar-sans-subdirs $TEMP/`basename $PWD`'
-## alias recent-tar-this-dir='make-recent-tar $TEMP/recent-`basename "$PWD"`'
-## function sort-tar-archive() { (tar tvfz "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
+# Tar archive creation and manipulation
+# tar options:
+# -x extract; -v verbose; -f file source; -z compressed; -k don't overwrite files
+trace tar archive commands
+GTAR="tar"
+alias gtar="$GTAR"
+#
+# ls-relative(file): show pathname of FILE relative to $HOME (e.g., ~/xfer/do_setup.bash)
+function ls-relative () { ls -d "$1" | perl -pe "s@$HOME@~@;"; }
+#
+# make-tar(archive_basename, [dir=.], [depth=max], [filter=pattern]): tar up directory with results placed 
+#   in archive_base.tar.gz and log file in base.log; afterwards display the tar size, log, and path.
+# Filenames matching the optional filter are excluded.
+# EX: make-tar ~/xfer/program-files-structure 'C:\Program Files' 1
+#   
+find_options=""
+function make-tar () { 
+	 local base=$1; local dir=$2; local depth=$3; local filter=$4;
+	 local depth_arg=""; local filter_arg="."
+	 if [ "$dir" = "" ]; then dir="."; fi;
+	 if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
+	 if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
+	 # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
+	 (find "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.log" 2>&1; 
+	 (ls -l "$base.tar.gz"; cat "$base.log") 2>&1 | $PAGER; 
+	 ls-full "$base.tar.gz";
+	 ls-relative "$base.tar.gz"; 
+}
+# TODO: handle filenames with embedded spaces
+#
+# tar-dir(dir, depth, [filter]): create archive of DIR in ~/xfer, using subdirectories up to DEPTH, and optionally 
+# filtering files matching exlusion filter.
+#
+function tar-dir () {
+	local dir=$1; local depth=$2;
+	local archive_base=$TEMP/`basename "$dir"`
+	make-tar "$archive_base" "$dir" $depth
+}
+function tar-just-dir () { tar-dir $1 1; }
+#
+function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`"; popd-q; }
+#
+# tar-this-dir-normal: creates archive of directory, excluding archive, backup, and temp subdirectories
+function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`" "" "/(archive|backup|temp)/"; popd-q; }
+#
+function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "`basename "$dir"`" 1; popd-q; }
+function make-recent-tar () { (find . -type f -mtime -$2 | $GTAR cvfzT $1 -; ) 2>&1 | $PAGER; ls-relative $1; }
+#
+# " (for Emacs)
+# NOTE: above quote needed to correct for Emacs color coding
+# TODO: rework basename extraction
+#
+function view-tar () { $GTAR tvfz "$@" 2>&1 | $PAGER; }
+function extract-tar () { $NICE $GTAR xvfzk "$@" 2>&1 | $PAGER; }
+function extract-tar-force () { $NICE $GTAR xvfz "$@" 2>&1 | $PAGER; }
+function extract-tar-here () { pushd ..; $NICE $GTAR xvfzk "$@" 2>&1 | $PAGER; popd; }
+alias untar='extract-tar'
+alias untar-here='extract-tar-here'
+alias un-tar=untar
+alias untar-force='extract-tar-force'
+## alias make-tar='make-tar-with-subdirs'
+alias create-tar='make-tar-with-subdirs'
+alias make-full-tar='make-tar'
+# TODO: handle filenames with embedded spaces
+## alias tar-this-dir='make-tar-with-subdirs $TEMP/`basename "$PWD"`'
+## alias tar-just-this-dir='make-tar-sans-subdirs $TEMP/`basename $PWD`'
+alias recent-tar-this-dir='make-recent-tar $TEMP/recent-`basename "$PWD"`'
+function sort-tar-archive() { (tar tvfz "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
 
 alias color-xterm='rxvt&'
 
@@ -1428,11 +1421,10 @@ function clisp-apropos() { $GREP -i "$@" $HOME/info/online-reference-works/clisp
 #------------------------------------------------------------------------
 # Bilingual dictionary access
 trace bilingual dict support
-## OLD: multiling_dir=$HOME/multilingual
-multiling_dir=${MULTILINGUAL_DIR:-"$HOME/multilingual"}
+multiling_dir=$HOME/multilingual
 cond-setenv SPANISH_DICT $multiling_dir/spanish/spanish_english.dict
-cond-setenv SPANISH_IRREG_DICT $multiling_dir/spanish/spanish_irregular.dict
-cond-setenv ENGLISH_DICT $multiling_dir/spanish/english_spanish.dict
+cond-setenv SPANISH_IRREG_DICT $multiling_dir/spanish/spanish_irregular.dict;
+cond-setenv ENGLISH_DICT $multiling_dir/spanish/english_spanish.dict;
 # NOTE: grep flags file UTF-8 indicator at top as binary
 dict_grep="zegrep --ignore-case --text"
 dict_word_grep="$dict_grep --word-regexp"
@@ -1453,7 +1445,6 @@ alias eng-='english-'
 function add-multilingual-dicts() {
     ## OLD: cond-setenv SPANISH_IRREG_DICT $multiling_dir/spanish/spanish_irregular.dict;
     ## OLD: cond-setenv ENGLISH_DICT $multiling_dir/spanish/english_spanish.dict;
-    ## TODO: reword lang-lookup- to lang-lookup-loose
     cond-setenv _FRENCH_DICT $multiling_dir/French/french_english.dict;
     cond-setenv GERMAN_DICT $multiling_dir/German/german_english.dict;
     cond-setenv ITALIAN_DICT $multiling_dir/Italian/italian_english.dict;
@@ -1491,12 +1482,9 @@ fi
 alias spanish-='spanish-lookup-'
 alias spanish='spanish-lookup'
 alias sp=spanish
-## TODO: reword sp- to sp-loose
 alias sp-=spanish-
 alias pp-spanish='pp_spanish_entry.perl'
-## TODO: reword sp-pp- to sp-pp-aux
 function sp-pp- () { sp $@ | pp-spanish; }
-function sp-pp-loose () { sp- $@ | pp-spanish; }
 function sp-pp () { sp-pp- $1 >| $1.pp; $PAGER $1.pp; }
 
 function spanish-trans-phrase () { phrase=$1; shift; echo "$phrase" | $multiling_dir/Spanish/qd_trans_spanish.perl "$@" -; }

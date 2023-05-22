@@ -1,5 +1,4 @@
-#! /usr/bin/env bash
-## OLD: #! /bin/bash
+#! /bin/bash
 #
 # domainname.sh: wrapper around domainname in case under CygWin
 #
@@ -21,8 +20,7 @@ name=""
 if [ "$OSTYPE" = "cygwin" ]; then
     name=`command ipconfig | perl -ne 'print "$1\n" if /DNS Suffix.*:\s*(\S+)/;'`
 else
-    ## OLD: name=`domainname`
-    name=$(domainname 2> /dev/null)
+    name=`domainname`
 fi
 
 if [ "$name" = "" ]; then name="n/a"; fi

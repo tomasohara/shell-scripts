@@ -33,20 +33,15 @@
 
 """
 BATSPP
-
 This process and run custom tests using bats-core.
-
 You can run tests for aliases and more using the
 command line with '$ [command]' followed by the
 expected output:
-
  $ echo -e "hello\nworld"
  hello
  world
-
  $ echo "this is a test" | wc -c
  15
-
 Also you can test bash functions:
  [functions + args] => [expected]:
  fibonacci 9 => "0 1 1 2 3 5 8 13 21 34"
@@ -143,7 +138,6 @@ T9 = (T8 + 1)
 def merge_continuation(actual, expected):
     """Merge EXPECTED into ACTUAL if line continuation (e.g., function definition)
     Note: returns tuple with new actual and expected
-
     >>> merge_continuation(
     ...      '''
     ...          function f {

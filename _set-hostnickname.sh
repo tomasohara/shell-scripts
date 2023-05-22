@@ -1,4 +1,4 @@
-# Adhoc script to set host nickname until Bash initiation scrips resolved with respect
+# Adhoc scrip to set host nickname until Bash initiation scrips resolved with respect
 # to ssh login shells.
 # Usage:
 # $ source ~/bin/_set-hostnickname.sh

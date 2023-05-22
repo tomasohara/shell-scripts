@@ -35,17 +35,17 @@ BEGIN {
 # for command-line arguments (see init_var's in &init).
 use strict;
 use vars qw/$warning $warnings $skip_warnings $context $no_asterisks $skip_ruby_lib $ruby/;
-use vars qw/$relaxed $strict $quiet/;
+use vars qw/$relaxed $strict/;
 
 if (!defined($ARGV[0])) {
     my $options = "options = [-warnings] [-context=N] [-no_astericks] [-skip_ruby_lib]";
-    $options .= " [-relaxed | -strict] [-verbose] [-quiet]";
+    $options .= " [-relaxed | -strict]";
     my $example = "ex: $script_name whatever\n";
     my $note = "Notes:\n";
-    $note .= "- The default context is 1.\n";
-    $note .= "- Warnings are skipped by default.\n";
-    $note .= "- Use -no_astericks if input uses ***'s outside of error contexts.\n";
-    $note .= "- Use -relaxed to include special cases (e.g., xyz='error').\n";
+    $note .= "- The default context is 1\n";
+    $note .= "- Warnings are skipped by default\n";
+    $note .= "- Use -no_astericks if input uses ***'s outside of error contexts\n";
+    $note .= "Use -relaxed to exclude special cases (e.g., xyz='error')\n";
 
     die "\nusage: $script_name [options]\n\n$options\n\n$example\n\n$note\n";
 }
@@ -60,8 +60,7 @@ my $asterisks = (! $no_asterisks);
 &init_var(*ruby, &FALSE);	   	# alias for -skip_ruby_lib
 &init_var(*skip_ruby_lib, $ruby);	# skip Ruby library related errors
 &init_var(*relaxed, &FALSE);            # relaxed for special cases
-&init_var(*strict, ! $relaxed);         # alias for relaxed=0 
-&init_var(*quiet, &FALSE);              # just output errors proper (e.g., no filenames)
+&init_var(*strict, ! $relaxed);         # alias for relaxed=0
 
 my $NULL = chr(0);			# null character ('\0')
 my(@before_context);			# prior context
@@ -81,7 +80,6 @@ while (<>) {
 	# Null chars usually indicate file corruption (eg, multiple writers)
 	$has_error = &TRUE;
 	s/$NULL/^@/g;		# change null char '^@' to "^@" ('^' & '@')
-	&debug_print(&TL_VERY_VERBOSE, "1. has_error=$has_error\n");
     }
 
     # Check for known errors
@@ -92,10 +90,8 @@ while (<>) {
     # NOTE: It can be easier to add special-case rules rather than devise a general regex;
     # ex: 'error' occuring within a line even at word boundaries can be too broad.
     elsif (## &debug_print(7, "here\n", 7) &&
-	   /^(ERROR|Error)\b/	   
-	   ## OLD: || /command not found/i
-	   ## NOTE: maldito modules package polutes environment and man page not clear about disabling
-	   || (/command not found/i && (! /Cannot switch to Modules/))
+	   /^(ERROR|Error)\b/
+	   || /command not found/i
 	   || /No space/
 	   || /Segmentation fault/
 	   || /Assertion failed/
@@ -121,12 +117,9 @@ while (<>) {
 	   || /Variable name must contain/
 	   || /unexpected EOF/
 	   || /unexpected end of file/
-	   ## OLD: || /command not found/
+	   || /command not found/
 	   || /^sh: /
            || /\[Errno \d+\]/
-	   || /Operation not permitted/
-	   || /Command exited with non-zero status/
-	   || /ommand terminated by signal/
 
 	   # Perl interpretation errors
 	   # TODO: Add more examples like not-a-number, which might not be apparent.
@@ -142,17 +135,12 @@ while (<>) {
 	   || /Unmatched .* in regex/
 	   || /at .*\.(perl|prl|pl|pm) line \d+/	# catch-all for other perl errors
 
-	   # Build errors (also cp, etc.)
+	   # Build errors
 	   || /(Make|Dependency) .* failed/
-	   || /cannot create/
 	   || /cannot open/
 	   || /cannot find/
-	   || /cannot overwrite/
 	   || /:( fatal)? error /
 
-	   # Git errors (WTH: can't modern tools say 'error'???)
-	   || /^fatal:/
-	   
 	   # Java errors
 	   || /^Exception\b/
 
@@ -172,18 +160,14 @@ while (<>) {
 
 	   # Miscellaneous errors
 	   || /wn: invalid search/
-	   || /socket has failed to (bind|listen)/
 	   ) {
 	$has_error = &TRUE;
-	&debug_print(&TL_VERY_VERBOSE, "2. has_error=$has_error\n");
     }
 
     # Check for warnings and starred messages
     # TODO: Have option for restricting ***'s to start of line.
-    # NOTE: $strict includes "error" or "warning" occurring anywhere, etc.;
-    # It was added to excluded keyword usage as in "conflict_handler='error'".
-    # TODO: Put strict in separate section, such as having 4 sections overall :
-    #    {error, warning} x {non-strict, strict}
+    # NOTE: $strict includes "error" or "warning" occurring anywhere;
+    # added to excluded keywords usage as in "conflict_handler='error'".
     elsif ($show_warnings &&
 	   ((/\b(warning)\b/i           # warning token occuring 
 	     && ((! /='warning'/i) || $strict)) # ... includes quotes if strict
@@ -193,22 +177,17 @@ while (<>) {
 	    || /: warning\b/		# Ruby warnings
 	    || /^bash: /                # ex: "bash: [: : unary operator expected"
 	    || /Traceback|\S+Error/     # Python exceptions (caught)
-	    || (/exception|failed/      # logger messages (e.g., "Training job failed")
-		&& $strict)
 	    || ($asterisks && /\*\*\*/))) {
 	$has_error = &TRUE;
-	&debug_print(&TL_VERY_VERBOSE, "3. has_error=$has_error\n");
     }
 
     # Filter certain case
     if ($has_error && $skip_ruby_lib && /\/usr\/lib\/ruby/) {
 	&debug_print(&TL_DETAILED, "Skipping ruby library error at line $. ($_)\n");
-	$has_error = &FALSE;
-	&debug_print(&TL_VERY_VERBOSE, "4. has_error=$has_error\n");
+	$has_error = &FALSE
     }
 
     # If an error, then display line preceded by pre-context
-    &debug_print(&TL_VERY_VERBOSE, "final has_error=$has_error\n");
     if ($has_error) {
 	# Show up the N preceding context lines, unless there is an overlap
 	# with previous error context in which no pre-context is shown.
@@ -254,7 +233,7 @@ print "\n" if ($verbose);
 # show_current_file_info(): display name of current file (and warning inclusion status)
 #
 sub show_current_file_info {
-    if (($current_file ne "") && ($quiet == &FALSE)) {
+    if ($current_file ne "") {
 	if ($verbose) {
 	    print "========================================================================\n";
 	    printf "Errors%s\n\n", ($skip_warnings ? "" : " and Warnings");

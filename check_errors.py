@@ -1,18 +1,12 @@
 #! /usr/bin/env python
 #
-# check_errors.py: Scan the error log for errors, warnings and other
+# check_errors.perl: Scan the error log for errors, warnings and other
 # suspicious results. This prints the offending line bracketted by >>>
 # and <<< along with N lines before and after to provide context.
-#
-# NOTE:
-# - To facilitate testing this and other scripts converted from Perl,
-#   the environment variable PERL_SWITCH_PARSING can be used (see main.py).
 #
 # TODO:
 # - ** Have option to disable line number
 # - * Change 'error' in filename test as warning.
-# - * Fix comments to reflect Python option spec. (e.g., -opt => --opt).
-# - Update overview comments to reflect current version.
 # - Don't reproduce lines in case of overlapping context regions.
 # - Have option to make search case-insensitive.
 # - Add option to show which case is being violated (since context display can be confusing, especially when control characters occur in context [as with output form linux script command]).
@@ -31,7 +25,7 @@ ex: check_errors.py whatever\n
 Notes:\n
 - The default context is 1\n
 - Warnings are skipped by default\n
-- Use -no_asterisks if input uses ***'s outside of error contexts\n
+- Use -no_astericks if input uses ***'s outside of error contexts\n
 Use -relaxed to exclude special cases (e.g., xyz='error')\n
 """
 
@@ -66,7 +60,7 @@ class CheckErrors(Main):
     # class-level member variables for arguments (avoids need for class constructor)
     show_warnings = False
     context       = 0
-    asterisks     = False
+    astericks     = False
     skip_ruby_lib = False
     strict        = False
     verbose       = False
@@ -87,11 +81,10 @@ class CheckErrors(Main):
         skip_warnings      = self.has_parsed_option(SKIP_WARNINGS) or not warnings
         self.show_warnings = not skip_warnings
         self.context       = self.get_parsed_option(CONTEXT, 3)
-        self.asterisks     = not self.has_parsed_option(NO_ASTERISKS)
+        self.astericks     = not self.has_parsed_option(NO_ASTERISKS)
         self.skip_ruby_lib = self.has_parsed_option(RUBY) or self.has_parsed_option(SKIP_RUBY_LIB)
         self.strict        = self.has_parsed_option(STRICT) or not self.has_parsed_option(RELAXED)
         self.verbose       = self.has_parsed_option(VERBOSE)
-        debug.trace_object(5, self, label="Script instance")
 
 
     def process_line(self, line):
@@ -111,7 +104,7 @@ class CheckErrors(Main):
         if self.show_warnings and re.search('\0', line):
             has_error = True
             line = re.sub('\0', '^@', line)
-            debug.trace(debug.QUITE_VERBOSE, f"1. has_error={int(has_error)}")
+
 
         # Check for known errors
         # NOTE: case-sensitive to avoid false negatives
@@ -120,116 +113,110 @@ class CheckErrors(Main):
         # TODO: rework error in line test to omit files
         # NOTE: It can be easier to add special-case rules rather than devise a general regex;
         # ex: 'error' occuring within a line even at word boundaries can be too broad.
-        # TODO1: rework so that individual regex's are used as in Perl version
-        # Also see https://stackoverflow.com/questions/18842779/string-concatenation-without-operator.
-        known_errors            = (r'^(ERROR|Error)\b'   '|' +
-                                   'No space'            '|' +
-                                   'Segmentation fault'  '|' +
-                                   'Assertion failed'    '|' +
-                                   'Assertion .* failed' '|' +
-                                   'Floating exception'  '|' +
+        known_errors            = ('^(ERROR|Error)\b'    '|'
+                                   'No space'            '|'
+                                   'Segmentation fault'  '|'
+                                   'Assertion failed'    '|'
+                                   'Assertion .* failed' '|'
+                                   'Floating exception'  '|'
 
                                    # Unix shell errors (e.g., bash or csh)
-                                   'Can\'t execute'               '|' +
-                                   'Can\'t locate'                '|' +
-                                   'Word too long'                '|' +
-                                   'Arg list too long'            '|' +
-                                   'Badly placed'                 '|' +
-                                   'Expression Syntax'            '|' +
-                                   'No such file or directory'    '|' +
-                                   'Illegal variable name'        '|' +
-                                   'Unmatched [\"\']\\.'          '|' +   # HACK: emacs highlight fix (")
-                                   'Bad : modifier in'            '|' +
-                                   'Syntax Error'                 '|' +
-                                   'Too many (\\(|\\)|arguments)' '|' +
-                                   'illegal option'               '|' +
-                                   'Missing name for redirect'    '|' +
-                                   'Variable name must contain'   '|' +
-                                   'unexpected EOF'               '|' +
-                                   'unexpected end of file'       '|' +
-                                   'command not found'            '|' +
-                                   '^sh: '                        '|' +
-                                   '\\[Errno \\d+\\]'             '|' +
+                                   'Can\'t execute'               '|'
+                                   'Can\'t locate'                '|'
+                                   'Word too long'                '|'
+                                   'Arg list too long'            '|'
+                                   'Badly placed'                 '|'
+                                   'Expression Syntax'            '|'
+                                   'No such file or directory'    '|'
+                                   'Illegal variable name'        '|'
+                                   'Unmatched [\"\']\\.'          '|' # HACK: emacs highlight fix (")
+                                   'Bad : modifier in'            '|'
+                                   'Syntax Error'                 '|'
+                                   'Too many (\\(|\\)|arguments)' '|'
+                                   'illegal option'               '|'
+                                   'Missing name for redirect'    '|'
+                                   'Variable name must contain'   '|'
+                                   'unexpected EOF'               '|'
+                                   'unexpected end of file'       '|'
+                                   'command not found'            '|'
+                                   '^sh: '                        '|'
+                                   '\\[Errno \\d+\\]'             '|'
 
                                    # Perl interpretation errors
                                    # TODO: Add more examples like not-a-number, which might not be apparent.
                                    # ex: Argument "not-a-number" isn't numeric in addition (+) at /home/tomohara/bin/cooccurrence.perl line 67, <> line 1.
-                                   '^\\S+: Undefined variable'                      '|' +
-                                   'Invalid conversion in printf'                   '|' +
-                                   'Execution .* aborted'                           '|' +
-                                   'used only once: possible typo'                  '|' +
-                                   'Use of uninitialized'                           '|' +
-                                   'Undefined subroutine'                           '|' +
-                                   'Reference found where even-sized list expected' '|' +
-                                   'Out of memory'                                  '|' +
-                                   'Unmatched .* in regex'                          '|' +
-                                   'at .*\\.(perl|prl|pl|pm) line \\d+'             '|' +   # catch-all for other perl errors
+                                   '^\\S+: Undefined variable'                      '|'
+                                   'Invalid conversion in printf'                   '|'
+                                   'Execution .* aborted'                           '|'
+                                   'used only once: possible typo'                  '|'
+                                   'Use of uninitialized'                           '|'
+                                   'Undefined subroutine'                           '|'
+                                   'Reference found where even-sized list expected' '|'
+                                   'Out of memory'                                  '|'
+                                   'Unmatched .* in regex'                          '|'
+                                   'at .*\\.(perl|prl|pl|pm) line \\d+'             '|' # catch-all for other perl errors
 
                                    # Build errors
-                                   '(Make|Dependency) .* failed' '|' +
-                                   'cannot open'                 '|' +
-                                   'cannot find'                 '|' +
-                                   ':( fatal)? error '           '|' +
+                                   '(Make|Dependency) .* failed' '|'
+                                   'cannot open'                 '|'
+                                   'cannot find'                 '|'
+                                   ':( fatal)? error '           '|'
 
                                    # Java errors
-                                   r'^Exception\b' '|' +
+                                   '^Exception\b' '|'
 
                                    # Ruby errors
-                                   r': undefined\b'       '|' +
-                                   '\\(\\S+Error\\)'      '|' +   # ex: wrong number of arguments (1 for 0) (ArgumentError)
-                                   'Exception.*at.*\\.rb' '|' +
+                                   ': undefined\b'        '|'
+                                   '\\(\\S+Error\\)'      '|' # ex: wrong number of arguments (1 for 0) (ArgumentError)
+                                   'Exception.*at.*\\.rb' '|'
 
                                    # Python errors
-                                   '^Traceback'      '|' +   # stack trace
-                                   '^\\S+Error'      '|' +   # exception (e.g., TypeError)
+                                   '^Traceback'      '|' # stack trace
+                                   '^\\S+Error'      '|' # exception (e.g., TypeError)
 
                                    # Cygwin errors
-                                   r'\bunable to remap\b' '|' +
+                                   '\bunable to remap\b' '|'
 
                                    # Miscellaneous errors
                                    'wn: invalid search')
-        known_errors_ignorecase = ('command not found'   '|' +
+        known_errors_ignorecase = ('command not found'   '|'
 
                                    # Unix shell errors (e.g., bash or csh)
-                                   'permission denied'            '|' +
+                                   'permission denied'            '|'
 
                                    # Python errors
-                                   ':\\s*error\\s*:' '|' +   # argparse error (e.g., main.py: error: unrecognized arguments
-                                   r'^FAILED\b')             # pytest failure
+                                   ':\\s*error\\s*:' '|' # argparse error (e.g., main.py: error: unrecognized arguments
+                                   '^FAILED\b')          # pytest failure
 
 
         if not has_error and (re.search(known_errors, line) or re.search(known_errors_ignorecase, line, flags=re.IGNORECASE)):
             has_error = True
-            debug.trace(debug.QUITE_VERBOSE, f"2. has_error={int(has_error)}")
 
 
         # Check for warnings and starred messages
         # TODO: Have option for restricting ***'s to start of line.
         # NOTE: $strict includes "error" or "warning" occurring anywhere;
         # added to excluded keywords usage as in "conflict_handler='error'".
-        if  (not has_error and self.show_warnings and
-             ((re.search(r'\b(warning)\b', line, flags=re.IGNORECASE) and       # warning token occuring
-               ((not re.search("='warning'", line, flags=re.IGNORECASE)) or self.strict)) or # ... includes quotes if strict
-              (re.search(r'\b(error)\b', line, flags=re.IGNORECASE) and         # matches within line error case above
-               ((not re.search("='error'", line, flags=re.IGNORECASE)) or self.strict)) or   # ... includes quotes if strict
-              re.search(': No match', line) or                                              # shell warning?
-              re.search(r': warning\b', line) or                                             # Ruby warnings
-              re.search('^bash: ', line) or                                                 # ex: "bash: [: : unary operator expected"
-              re.search('Traceback|\\S+Error', line) or                                     # Python exceptions (caught)
-              (self.asterisks and re.search('\\*\\*\\*', line)))):
+        if      (not has_error and self.show_warnings and (
+                (re.search('\b(warning)\b', line, flags=re.IGNORECASE) and                    # warning token occuring
+                ((not re.search("='warning'", line, flags=re.IGNORECASE)) or self.strict)) or # ... includes quotes if strict
+                (re.search('\b(error)\b', line, flags=re.IGNORECASE) and                      # matches within line error case above
+                ((not re.search("='error'", line, flags=re.IGNORECASE)) or self.strict)) or   # ... includes quotes if strict
+                re.search(': No match', line) or                                              # shell warning?
+                re.search(': warning\b', line) or                                             # Ruby warnings
+                re.search('^bash: ', line) or                                                 # ex: "bash: [: : unary operator expected"
+                re.search('Traceback|\\S+Error', line) or                                     # Python exceptions (caught)
+                (self.astericks and re.search('\\*\\*\\*', line)))):
             has_error = True
-            debug.trace(debug.QUITE_VERBOSE, f"3. has_error={int(has_error)}")
 
 
-        # Filter certain cases (e.g., posthoc fixup)
+        # Filter certain case
         if has_error and self.skip_ruby_lib and re.search('\\/usr\\/lib\\/ruby', line):
             debug.trace(debug.DETAILED, f'Skipping ruby library error at line ({line})')
-            debug.trace(debug.QUITE_VERBOSE, f"4. has_error={int(has_error)}")
             has_error = False
 
 
         # If an error, then display line preceded by pre-context
-        debug.trace(debug.QUITE_VERBOSE, f"final has_error={int(has_error)}")
         if has_error:
             # Show up the N preceding context lines, unless there is an overlap
             # with previous error context in which no pre-context is shown.

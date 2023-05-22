@@ -17,7 +17,6 @@
 diff=kdiff.sh
 ignore='((0x)?[0-9A-Fa-f]{7,16})'
 include_time=0
-show_usage=0
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 while [ "$moreoptions" = "1" ]; do
     if [ "$1" = "--trace" ]; then
@@ -39,21 +38,14 @@ while [ "$moreoptions" = "1" ]; do
 	ignore="$ignore|($2)";
 	shift
     else
-	if [ "$1" != "--help" ]; then
-	    echo "unknown option: $1";
-	fi
-	show_usage=1
+	echo "unknown option: $1";
+	# TODO: show_usage=1
     fi
     shift 1;
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 done
 #
-## OLD: if [ "$1" = "" ]; then
-
 if [ "$1" = "" ]; then
-    show_usage=1
-fi
-if [ "$show_usage" = "1" ]; then
     script_name=$(basename "$0")
     echo ""
     echo "Usage: $script_name [options] file1 file2-or-dir"

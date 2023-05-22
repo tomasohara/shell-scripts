@@ -23,7 +23,7 @@ BEGIN {
 # for command-line arguments (see init_var's in &init).
 use strict;
 use vars qw/$keys $filter $comments $default $preserve $i $fold_case $preserve_order 
-            $preserve_case $labels $undefined $delimiter $cols $use_line_nums/;
+            $preserve_case $labels $undefined $delimiter/;
 
 &init_var(*keys, &FALSE);		# column 1 specifies keys of lines to be joined
 &init_var(*filter, "");			# pattern for lines to skip
@@ -38,21 +38,15 @@ use vars qw/$keys $filter $comments $default $preserve $i $fold_case $preserve_o
 &init_var(*labels, "");			# labels for the column headers
 &init_var(*undefined, "");		# value to use for undefined data
 &init_var(*delimiter, "\t");		# column delimiter
-&init_var(*cols, "");                   # columns to include
-&init_var(*use_line_nums, &FALSE);      # add line number to keys
 
 if (!defined($ARGV[0])) {
-    my($options) = "options = [-keys] [-labels=list] [-filter=\"pattern\"] [-default=value] [-fold_case] [-preserve] [-preserve_order] [-cols=string-list] [-use_line_nums]";
-    my($example) = "Examples:\n\n$script_name -keys eval_061798.report eval_061898.report\n\n";
+    my($options) = "options = [-keys] [-labels=list] [-filter=\"pattern\"] [-default=value] [-fold_case] [-preserve] [-preserve_order]";
+    my($example) = "examples:\n\n$script_name -keys eval_061798.report eval_061898.report\n\n";
     ## $example .= "$script_name -keys manufacturing.list construction.list | perl -pe \"s/^([^\\t]+)\\t(.*)/\\2\\t\\1/;\" >| combined.list\n";
-    $example .= "$script_name -keys senseval2-all-ci-hyper-eval-040604.report senseval2-both-all-both-eval-040104.report\n\n";
-    my($note) = "";
-    $note .= "Notes:\n\n- The -use_line_nums to makes key unique.\n\n";
 
-    # Print the usage (n.b., examples and notes should end in double newlines)
-    &assertion(($example =~ /\n\n$/) && ($note =~ /\n\n$/));
-    print STDERR "\nUsage: $script_name [options] file ...\n\n$options\n\n$example$note";
-    &exit();
+    $example .= "$script_name -keys senseval2-all-ci-hyper-eval-040604.report senseval2-both-all-both-eval-040104.report\n";
+
+    die "\nusage: $script_name [options] file1 file2 ...\n\n$options\n\n$example\n\n";
 }
 
 my(%all_keys);
@@ -63,14 +57,6 @@ my($i);
 my(@labels) = ($labels ne "") ? &tokenize($labels) : @ARGV;
 my(@col_arrays);
 
-# Get list of 1-based column numbers to include
-our(@columns) = split(/[, ]/, $cols);
-&trace_array(\@columns, 4, "columns");
-
-## TODO:
-## $/ = "" if ($para);		# paragraph input mode
-## / = 0777 if ($slurp);	# complete-file input mode
-
 # Read in all the files into separate column arrays
 # For keys, these are %col_0, %col_1, ..., otherwise @col_0, @col_1, ....
 #
@@ -79,7 +65,6 @@ for ($i = 0; $i < $num_cols; $i++) {
     my($num) = &read_columns($ARGV[$i], $col_arrays[$i]);
     $max_row = &max($max_row, $num);
 }
-&debug_print(4, "max_row=$max_row; num_cols=$num_cols\n");
 
 # Print the columns row by row. If by key, then the first column is the
 # key and a column entry is printed if it corresponds to the key.
@@ -99,7 +84,7 @@ else {
 # Read the data in the file and store into the column array. If by-key, then
 # the data is assumed to be in two columns with the first providing the key
 # and the second the value for the entry column_array<key>. Otherwise,
-# the line is stored as column_array[row].
+# the line is stored as colum_array[row].
 #
 # Returns the number of rows read.
 #
@@ -133,23 +118,7 @@ sub read_columns {
 	    my($key, $data) = ($_ =~ /^([^$delimiter]*)$delimiter(.*)/);
 	    $key = $_ if (!defined($key));
 	    $key = &to_lower($key) unless ($preserve_case);
-	    if ($use_line_nums) {
-		$key = "$. $key";
-	    }
 	    $data = $undefined if (!defined($data));
-	    # Optionally filter data by columns:
-	    if (scalar (@columns)) {
-		my(@values) = split($delimiter, $data);
-		&trace_array(\@values, 5, "values");
-		$data = "";
-		foreach my $c (@columns) {
-		    # note: col 1 is key, which gets stripped, so val[c - 2]
-		    $data .= $delimiter if ($data ne "");
-		    my($value) = $values[$c - 2];
-		    $data .= (defined($value) ? $values[$c - 2] : "");
-		}
-		&debug_print(5, "new data: $data\n");
-	    }
 	    # make sure extraneous delimiters not included in key
 	    &assert(index($key, $delimiter) == -1);
 	    $data =~ s/$delimiter/, /g;		# make sure no tabs in data
@@ -171,17 +140,6 @@ sub read_columns {
 }
 
 
-# by_numeric_prefix(list): comparison function for sortsing lists by line number prefix
-sub by_numeric_prefix {
-    my($value_a) = $a;
-    my($value_b) = $b;
-    $value_a =~ s/^\s*(\d+).*/$1/;
-    $value_b =~ s/^\s*(\d+).*/$1/;
-    my($result) = ($value_a <=> $value_b);
-    &debug_print(7, "by_numeric_prefix($a, $b) => $result\n");
-    return $result;
-}
-
 # Print the columns in order corresponding to the sorted list of keys.
 # The data for the column entries is in %col_0, %col_1, ....
 # globals: %all_keys, @labels
@@ -189,10 +147,8 @@ sub by_numeric_prefix {
 sub print_columns_by_key {
     &debug_print(4, "print_columns_by_key(@_)\n");
     my(@keys) = ($preserve_order ? @ordered_keys : sort(keys(%all_keys)));
-    if ($use_line_nums) {
-	@keys = (sort by_numeric_prefix @keys);
-    }
     my($r, $c);
+
     
     # Print a comment giving the source of each column
     printf "# key";
@@ -223,19 +179,10 @@ sub print_columns_by_row {
     my($r, $c);
 
     for ($r = 0; $r < $max_row; $r++) {
-	my($num_printed_cols) = 0;
 	for ($c = 0; $c < $num_cols; $c++) {
-	    # Skip columns if not in explicit inclusion list.
-	    # TODO: cache the column-incluson check
-	    if ((scalar @columns > 0) && (find(\@columns, $c + 1) == -1)) {
-		&debug_out(5, "Skipping column %d\n", $c + 1);
-		next;
-	    }
-	    
 	    my($col_array) = $col_arrays[$c];
 
-	    printf "\t" if ($num_printed_cols > 0);
-	    $num_printed_cols++;
+	    printf "\t" if ($c > 0);
 	    printf "%s", $$col_array[$r] unless (!defined($$col_array[$r]));
 	}
 	printf "\n";

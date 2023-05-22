@@ -30,16 +30,15 @@
 #
 # TODO:
 # - Have option to duplicate headers at end.
-# - *** Optionally make the filters case insensitive.
-# - ** Cleanup source (remove comments flagged with OLD).
 #
 
 
 # Uncomment (or comment) the following for enabling (or disabling) tracing
-## DEBUG: set echo=1
+## set echo=1
 
 set user = `whoami`
 set verbose_mode = 0
+## OLD: set filter = '($)(^)'		# filters nothing (i.e., unsatisfiable regex)
 set exclude_filter = '($)(^)'		# exclude nothing (i.e., unsatisfiable regex)
 set include_filter = '.'                # include everything
 if (("$1" == "-?") || ("$*" =~ *-h*) || ("$*" =~ *--help*)) then
@@ -69,6 +68,7 @@ while ("$1" =~ -*)
 	shift
     else if ("$1" == "--filtered") then
 	# TODO: What is -csh exclusion for?
+	## OLD: set filter = '((bash *$)|\-csh|(csh.*ps_mine.sh)|<defunct>)'
 	set exclude_filter = '((bash *$)|\-csh|(csh.*ps_mine.sh)|<defunct>)'
     else if (("$1" == "--verbose") || ("$1" == "-v")) then
 	set verbose_mode = 1
@@ -98,19 +98,32 @@ endif
 #        flag, and is only useful when operating in the sunos4 personality.
 #     w  Wide output.  Use this option twice for unlimited width.
 #     x  Lift the BSD-style "must have a tty" restriction[.]
+## OLD: set ps_command = "ps auxwww"
+## OLD2: set ps_command = "ps auxgww"
 set ps_command = "ps auxww"
+## OLD: set grep_command = "grep ^$user"
 ## TODO: break down into grep_command and grep_options (see HACK below)
 set grep_command = "grep '^$user'"
+## OLD: set sort_command = "sort +2 +3 -rn"
+## OLD: set sort_command = "sort --key=2 --key=3 -rn"
 set sort_command = "sort --key=3 --key=4 -rn"
 if ($OSTYPE == solaris) then
     set ps_command = "ps -ef"
-    set grep_command = "egrep -i '^ +$user'"
+    ## set grep_command = "grep '^ *$user'"
+    set grep_command = "egrep '^ +$user'"
+    ## OLD: set sort_command = "sort +3 -rn"
     set sort_command = "sort --key=3 -rn"
+## OLD
+## else if ($OSTYPE == "linux") then
+##    ## TODO: specify long widths for each column
+##    set ps_command = "ps auxwww"
 endif
     
 
 # Show optional status
 if ($verbose_mode) then
+    ## OLD: echo "Issuing: $ps_command | $grep_command | egrep -v '$filter' | $sort_command"
+    ## OLD: echo "Issuing: $ps_command | $grep_command | egrep -v '$exclude_filter' | egrep '$include_filter' | $sort_command"
     echo "Issuing: $ps_command | $grep_command | egrep -v '$exclude_filter' | egrep '$include_filter' | $sort_command"
 endif
 
@@ -120,14 +133,18 @@ $ps_command | head -1
 # Display the processes sorted by cpu usage
 # NOTE: ps output first written to an output file  so that grep and sort commands not listed
 set ps_output = /tmp/ps_$$.list
+## OLD: $ps_command > $ps_output
 $ps_command | tail --line=+2 > $ps_output
 if ($OSTYPE == solaris) then
     # TODO: fix stupid problem with grep under Solaris ("No match" reported but OK interactively issuing same command)
+    ## OLD: grep "^ *$user" $ps_output | egrep -v "$filter" | grep -v "$ps_command" | $sort_command
     grep "^ *$user" $ps_output | egrep -v "$exclude_filter" | egrep "$include_filter" | grep -v "$ps_command" | $sort_command
     ## grep "^ *$user" $ps_output | $sort_command
 else
+    ## OLD: $grep_command $ps_output | egrep -v "$filter" | grep -v "$ps_command" | $sort_command
+    ## OLD: $grep_command $ps_output | egrep -v "$exclude_filter" | egrep "$include_filter" | grep -v "$ps_command" | $sort_command
     ## HACK
-    grep "^$user" $ps_output | egrep -i -v "$exclude_filter" | egrep -i "$include_filter" | grep -i -v "$ps_command" | $sort_command
+    grep "^$user" $ps_output | egrep -v "$exclude_filter" | egrep "$include_filter" | grep -v "$ps_command" | $sort_command
 endif
 
 # Cleanup

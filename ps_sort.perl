@@ -49,24 +49,13 @@ BEGIN {
 use strict;
 no strict "refs";		# to allow for old-style references to arrays (TODO: use #xyz_ref = \@array)
 use vars qw/$by $xyz $ps_options $cut_options $num_times $LINES $COLUMNS $max_count $delay $line_len $testing $justuser $USER $username/;
-use vars qw/$batch $full $once $lines $columns $alpha $time2num/;
+use vars qw/$batch $full $once $lines $columns/;
 
 # Check the command-line options
-# note: OSTYPE needs to be in environment for this to work (see tomohara-aliases.bash)
 &init_var(*by, "cpu");
 &init_var(*OSTYPE, "???");
-## TEST:
-## $OSTYPE = "n/a" if ($OSTYPE = "???");
-&debug_print(&TL_DETAILED, "OSTYPE=$OSTYPE\n");
-## OLD:
-## my($is_solaris) = ($OSTYPE =~ "solaris");
-## my($is_linux) = ($OSTYPE =~ "linux");
-## my($is_mac) = ($OSTYPE =~ "darwin");
-my($is_solaris) = ($OSTYPE =~ "solaris") ? 1 : 0;
-my($is_linux) = ($OSTYPE =~ "linux") ? 1 : 0;
-my($is_mac) = ($OSTYPE =~ ".*darwin.*") ? 1 : 0;
-## TODO:
-&debug_print(&TL_DETAILED, "is_solaris=$is_solaris is_linux=$is_linux is_mac=$is_mac\n");
+my($is_solaris) = ($OSTYPE =~ "solaris");
+my($is_linux) = ($OSTYPE =~ "linux");
 &init_var(*ps_options, ($is_solaris ? "-efl" : $is_linux ? "auxgww" : "auxg"));
 ## OLD: &init_var(*cut_options, ($is_solaris ? "-c1-36,46-52,62-70,79-132" : "-c1-132"));
 ## OLD: &init_var(*num_times, 60);
@@ -92,8 +81,6 @@ $columns = ($full ? &MAXINT : $COLUMNS) if ! defined($columns);
 &init_var(*username,		# just show this user
 	  ($justuser ? $USER : ""));
 &init_var(*batch, &FALSE);      # batch mode (don't poll console for early quit)
-&init_var(*alpha, &FALSE);      # sort alphabetically (i.e., lexicographic)
-&init_var(*time2num, &FALSE);   # convert time to a number for sorting purposes
 
 use vars qw/@uid @xyz @line @line_index @user @pid @cpu @mem @sz @rss @tt @stat @f @s @ppid @pri @ni @stime @time @cmd/;
 use vars qw/@vsz @command @tty @start/;
@@ -108,18 +95,15 @@ local(*uid) = *user;
 ## TODO: my($xyz_ref = \@line; my($uid_ref) = \@user;
 &debug_out(&TL_VERBOSE, "\$#uid = %d\n", $#uid);
 
-## TEMP: &debug_print(&TL_VERBOSE, "is_solaris=$is_solaris is_linux=$is_linux is_mac=$is_mac\n");
-
 # Show a usage statement if no arguments given
 # NOTE: By convention - is used when no arguments are required
 if (!defined($ARGV[0])) {
-    my($options) = "main options = [-by=FIELD] [-username=user] [-num_times=N] [-max_count=N] [-delay=N] [-justuser]";
-    # TODO: show defaults
-    $options .= " [-batch] [-once] [-full] [-alpha] [-time2num]";
+    my($options) = "main options = [-by=FIELD] [-username=user] [-num_times=N] [-max_count=N] [-delay=B] [-justuser]";
+    $options .= " [-batch] [-once] [-full]";
     if ($is_solaris) {
 	$options .= "\nfield = [f|s|uid|pid|ppid|c|pri|ni|addr|sz|wchan|stime|tty|time|cmd]";
     }
-    elsif ($is_linux || $is_mac) {
+    elsif ($is_linux) {
 	$options .= "\nfield = [user|pid|cpu|mem|vsz|rss|tty|stat|start|time|command]";
     }
     else {
@@ -130,7 +114,7 @@ if (!defined($ARGV[0])) {
     $example .= "$script_name -by=mem -\n\n";
     $example .= "$script_name -justuser -\n\n";
     $example .= "$script_name -username=cpuhog -\n\n";
-    $example .= "LINES=1000 $script_name -num_times=1 -by=time - | less\n\n";
+    $example .= "LINES=1000 $script_name -num_times=1 -by=time -\n\n";
     $example .= "$script_name -once -full -by=command -\n\n";
 
     my($note) = "";
@@ -138,7 +122,6 @@ if (!defined($ARGV[0])) {
     $note .= "- Use -num_times for number of iterations.\n";
     $note .= "- Use -max_count for number of process listing entries.\n";
     $note .= "- Use -once and -full for stdout: uses -num_times=1 and no row/col truncation).\n";
-    $note .= "- Use -time2num for converting time field to seconds when sorting\n";
     $note .= "- env-var LINES determines number of entries.\n";
     $note .= "- env-var COLUMNS determines width.\n";
 
@@ -191,36 +174,12 @@ for ($t = 1; $t <= $num_times; $t++) {
 		= split;
 	    $mem[$i] = $sz[$i];
 	}
-	elsif ($is_linux || $is_mac) {
+	elsif ($is_linux) {
 	    ## OLD:
 	    ## ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $vsz[$i], $rss[$i], 
 	    ##  $tt[$i], $stat[$i], $stime[$i], $time[$i], $command[$i]) = split;
 	    ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $vsz[$i], $rss[$i], 
 	     $tty[$i], $stat[$i], $start[$i], $time[$i], $command[$i]) = split;
-
-	    # Make sure hour is two digits (internally) for proper sorting
-	    # Note: it is still printed as is
-	    if (($by eq "time") && ($time[$i] =~ /^\d:/)) {
-		$time[$i] = ("0" . $time[$i]);
-		&debug_print(7, "Made hour two digit: $time[$i]\n");
-	    }
-	    # Convert time (internally) to numeric seconds for sorting purposes
-	    # note: fraction optionally included as is (*e.g., under macos)
-	    if ($time2num) {
-		# examples:    306:25.88    0:04.36
-		if ($time[$i] =~ /^((\d+):)?((\d+):)?(\d+)(\.\d+)?/) {
-		    # groups:      1  2     3  4     5      6
-		    my($hour) = defined($2) ? $2 : 0;
-		    my($min) = defined($4) ? $4 : 0;
-		    my($sec) = $5;
-		    my($fract) = defined($6) ? $6 : "";
-		    $time[$i] = ($hour * 3600 + $min * 60 + $sec + $fract);
-		    &debug_print(5, "Converted time to seconds $time[$i]\n");
-		}
-		else {
-		    &debug_print(5, "Warning: unable to parse time field: $time[$i]\n");
-		}
-	    }
 	}
 	else {
 	    ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $sz[$i], $rss[$i], 
@@ -234,12 +193,10 @@ for ($t = 1; $t <= $num_times; $t++) {
     # Determine the array to sort by
     #
     # *by_xyz = ($by eq "cpu" ? *by_cpu :
-    #	         $by eq "mem" ? *by_mem :
-    #	         $by eq "sz" ? *by_sz :
-    #	         $by eq "rss" ? *by_rss :
-    #	         *by_default);
-    #
-    # Note: See by_xyz function below.
+    #	       $by eq "mem" ? *by_mem :
+    #	       $by eq "sz" ? *by_sz :
+    #	       $by eq "rss" ? *by_rss :
+    #	       *by_default);
     #
     &debug_print(&TL_VERBOSE, "eval \"*xyz = *$by\"\n");
     eval "*xyz = *$by";
@@ -282,7 +239,6 @@ for ($t = 1; $t <= $num_times; $t++) {
 #------------------------------------------------------------------------------
 
 # Sort routines for the processor status arrays
-# TODO: add support for time
 # Notes:
 # - The global parameters ($a, $b) give the indices of the index array.
 # - The global @xyz is alias to array of values for metric given by global $by.
@@ -305,8 +261,7 @@ sub by_xyz {
     # Otherwise, uses ascending sort.
     # TODO: Add option to override.
     my($comparison) = 0;
-    ## OLD: if (&is_numeric($value_b) && &is_numeric($value_a)) {
-    if ((! $alpha) && (&is_numeric($value_b) && &is_numeric($value_a))) {
+    if (&is_numeric($value_b) && &is_numeric($value_a)) {
 	&debug_print(&TL_MOST_VERBOSE, "Using (descending) numeric sort\n");
 	$comparison = ($value_b <=> $value_a);
     }

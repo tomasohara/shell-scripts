@@ -29,16 +29,13 @@ set aux_file1=$aux_base.lst1
 # Note: by default requires number [from time] prior to process spec.
 set pattern_prefix = ":[0-9][0-9] [^ ]*"
 set filter = '($)(^)'		# filters nothing (i.e., unsatisfiable regex)
-set is_root = 0
 set user = `whoami`
-if ("$user" == "root") set is_root = 1
 ## OLD:
 ## set graphling = 0
 ## set copy_result = 0
 set test = 0
 set verbose_mode = 0
 set command_line = "$0 $argv"
-set force = 0
 
 # Parse command-line arguments
 set ignore = "-i"		# ignore-case flag
@@ -49,7 +46,7 @@ if ("$1" == "") then
     echo "Usage: $0 options [process_name]"
     echo ""
     ## OLD: echo "Options: [--pattern|-p] [--filter pattern] [--ignore-case] [--preserve-case|-i-] [--all] [--graphling [--copy]] [--test] [--verbose]"
-    echo "Options: [--pattern | -p] [--filter pattern] [--ignore-case | -i-] [--preserve-case] [--user id] [--all | -a] [--test] [--verbose] [--trace] [--force]"
+    echo "Options: [--pattern | -p] [--filter pattern] [--ignore-case | -i-] [--preserve-case] [--user id] [--all | -a] [--test] [--verbose] [--trace]"
     echo ""
     echo "notes:"
     echo "- The --pattern (-p) option treats process_name as regex for egrep."
@@ -61,7 +58,6 @@ if ("$1" == "") then
     echo "- The --all option includes processes for all users."
     echo "- The --verbose options displays progress output."
     echo "- The --trace options shows commands to be executed (via csh echo=1)."
-    echo "- The --force is required if running as root (e.g., via sudo)."
     echo ""
     echo "Examples:"
     echo ""
@@ -96,8 +92,6 @@ while ("$1" =~ -*)
 	shift
     else if ("$1" == "--trace") then
         set echo=1
-    else if ("$1" == "--force") then
-        set force=1
     else if ("$1" == "--verbose") then
         set verbose_mode=1
 	echo "command: $command_line"
@@ -131,10 +125,6 @@ end
 set pattern = "${pattern_prefix}$*"
 echo "pattern=/$pattern/"
 echo "filter=/$filter/"
-if (("$is_root" == "1") && ("$force" == "0")) then
-    echo "Error: The --force option is required if running as root (or via sudo)"
-    exit
-endif
 
 # Determine the processes for the user.
 # This is optionally restricted to the pattern (by default case insensitive)

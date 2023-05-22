@@ -1,8 +1,8 @@
 #! /usr/bin/env python
-## TODO: handle case when env installed elsehere (e.g., maldito mac)
-## #! env python
 # 
 # TODO what the script does (detailed)
+#
+# The software is Open Source, licensed under the GNU Lesser General Public Version 3 (LGPLv3). See LICENSE.txt in repository.
 #
 ## TODO: see example/template.py for simpler version suitable for cut-n-paste from online examples
 #
@@ -10,7 +10,8 @@
 """TODO: what module does (brief)"""
 
 # Standard modules
-## TODO: from collections import defaultdict
+import re
+
 # Installed modules
 ## TODO: import numpy
 
@@ -19,21 +20,17 @@
 from mezcla import debug
 from mezcla.main import Main
 from mezcla import system
-from mezcla.my_regex import my_re
 ## TODO:
+## from mezcla.my_regex import my_re
 ## from mezcla import glue_helpers as gh
-##
-## Optional:
-## # Increase trace level for regex searching, etc. (e.g., from 6 to 7)
-## my_re.TRACE_LEVEL = debug.QUITE_VERBOSE
 
 ## TODO: Constants for switches omitting leading dashes (e.g., DEBUG_MODE = "debug-mode")
 ## Note: Run following in Emacs to interactively replace TODO_ARG with option label
 ##    M-: (query-replace-regexp "todo\\([-_]\\)arg" "arg\\1name")
 ## where M-: is the emacs keystroke short-cut for eval-expression.
 TODO_ARG = "TODO-arg"
-## TODO_TEXT_ARG = "alt-todo-arg"
-## TODO_FILENAME = "TODO_filename"
+## ALT_TODO_ARG = "alt-todo-arg"
+## TODO_FILENAME = "TODO-filename"
 
 ## TODO:
 ## # Environment options
@@ -51,24 +48,20 @@ class Script(Main):
     # TODO: -or-: """Adhoc script class (e.g., no I/O loop, just run calls)"""
     ## TODO: class-level member variables for arguments (avoids need for class constructor)
     todo_arg = False
-    ## todo_text_arg = ""
+    ## alt_todo_arg = ""
 
     # TODO: add class constructor if needed for non-standard initialization
-    ## WARNING: For Script classes involving complex logic, it is best to use helper classes,
-    ## as done in show_bert_representation.py.
-    ## NOTE: Such class decomposition is also beneficial for unit tests.
-    #
     ## def __init__(self, *args, **kwargs):
     ##     debug.trace_fmtd(5, "Script.__init__({a}): keywords={kw}; self={s}",
     ##                      a=",".join(args), kw=kwargs, s=self)
-    ##     super().__init__(*args, **kwargs)
+    ##     super(Script, self).__init__(*args, **kwargs)
     
     def setup(self):
         """Check results of command line processing"""
         debug.trace_fmtd(5, "Script.setup(): self={s}", s=self)
         ## TODO: extract argument values
         self.todo_arg = self.get_parsed_option(TODO_ARG, self.todo_arg)
-        ## self.todo_text_arg = self.get_parsed_option(todo_text_arg, self.todo_text_arg)
+        ## self.alt_todo_arg = self.get_parsed_option(alt_todo_arg, self.alt_todo_arg)
         # TODO: self.TODO_filename = self.get_parsed_argument(TODO_FILENAME)
         debug.trace_object(5, self, label="Script instance")
 
@@ -77,9 +70,9 @@ class Script(Main):
         debug.trace_fmtd(6, "Script.process_line({l})", l=line)
         # TODO: flesh out
         if self.todo_arg and "TODO" in line:
-            print(f"arg1 line ({self.line_num}): {line}")
+            print("arg1 line ({n}): {l}".format(n=self.line_num, l=line))
         ## TODO: regex pattern matching
-        ## elif my_re.search(self.todo_text_arg, line):
+        ## elif my_re.search(self.alt_todo_arg, line):
         ##     print("arg2 line: %s" % line)
 
     ## TODO: if no input proocessed, customize run_main_step instead
@@ -95,35 +88,27 @@ class Script(Main):
     ##           debug.trace(6, f"Script.wrap_up(); self={self}")
     ##           # ...
 
-def main():
-    """Entry point"""
-    app = Script(
-        description=__doc__,
-        # Note: skip_input controls the line-by-line processing, which is inefficient but simple to
-        # understand; in contrast, manual_input controls iterator-based input (the opposite of both).
-        skip_input=False,
-        manual_input=False,
-        ## TODO (specify auto_help such as when manual_input set):
-        ## # Note: shows brief usage if no arguments given
-        ## auto_help=True,
-        ## -or-: # Disable inference of --help argument
-        ## auto_help=False,
-        ## TODO: specify options and (required) arguments
-        boolean_options=[(TODO_ARG, "TODO-desc")],
-        # Note: FILENAME is default argument unless skip_input
-        ## positional_arguments=[FILENAME1, FILENAME2], 
-        ## text_options=[(todo_text_arg, "TODO-desc")],
-        # Note: Following added for indentation: float options are not common
-        float_options=None)
-    app.run()
-    # Make sure no TODO_vars above (i.e., in namespace)
-    debug.assertion(not any(my_re.search(r"^TODO_", m, my_re.IGNORECASE)
-                            for m in dir(app)))    
-    
 #-------------------------------------------------------------------------------
     
 if __name__ == '__main__':
     debug.trace_current_context(level=debug.QUITE_DETAILED)
     debug.trace_fmt(4, "Environment options: {eo}",
                     eo=system.formatted_environment_option_descriptions())
-    main()
+    app = Script(
+        description=__doc__,
+        # Note: skip_input controls the line-by-line processing, which is inefficient but simple to
+        # understand; in contrast, manual_input controls iterator-based input (the opposite of both).
+        skip_input=False,
+        manual_input=False,
+        # TODO: Disable inference of --help argument
+        ## auto_help=False,
+        ## TODO: specify options and (required) arguments
+        boolean_options=[(TODO_ARG, "TODO-desc")],
+        # Note: FILENAME is default argument unless skip_input
+        ## positional_arguments=[FILENAME1, FILENAME2], 
+        ## text_options=[(alt_todo_arg, "TODO-desc")],
+        # Note: Following added for indentation: float options are not common
+        float_options=None)
+    app.run()
+    debug.assertion(not any(re.search(r"^TODO_", m, re.IGNORECASE)
+                            for m in dir(app)))

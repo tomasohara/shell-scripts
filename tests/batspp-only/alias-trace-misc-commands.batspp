@@ -1,0 +1,522 @@
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+# Setting a temp directory for tests
+$ TMP=/tmp/test-trace-misc
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+## You will need to run jupyter from that directory.
+$ alias | wc -l
+0
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 1210)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-1210
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-trace-misc/test-1210
+
+# Count aliases proper
+$ alias | wc -l
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+1
+0
+
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+$ alias testnumhex="sed -r "s/[0-9,a-f,A-F]/h/g"" 
+
+$ source $BIN_DIR/tomohara-aliases.bash
+
+##1 SHOWS HISTORY OF BASH COMMANDS
+$ alias hist='history $LINES'
+##2 SHOWS HISTORY WITHOUT TIMESTAMPS
+$ function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
+## CREATES ERROR (INVALID SYNTAX)
+# $ hist
+# $ h
+
+##3 ASCTIME
+$ function asctime() { perl -e 'print (scalar localtime($1));'; echo ''; }
+$ asctime | perl -pe 's/\d/N/g; s/\w+ \w+/DDD MMM/;'
+DDD MMM  N NN:NN:NN NNNN
+
+##4 FILTER DIRECTORY NAMES
+$ function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
+# awk is used for removing PID column (1st col)
+$ ps | filter-dirnames | testnum
+    PID TTY          TIME CMD
+  NNNNN pts/N    NN:NN:NN bash
+  NNNNN pts/N    NN:NN:NN ps
+  NNNNN pts/N    NN:NN:NN bash
+  NNNNN pts/N    NN:NN:NN sed
+  NNNNN pts/N    NN:NN:NN perl
+
+##5 COMMAIZE NUMBERS
+$ echo '99012342305324254' | comma-ize-number
+99,012,342,305,324,254
+
+##6 APPLYING NUMERIC SUFFIXES
+$ echo "8000000000" | apply-numeric-suffixes
+7.45G
+
+##6.1 APPLYING USAGE NUMERIC SUFFIXES
+$ echo "8000000000" | apply-usage-numeric-suffixes
+$ echo "8000000" | apply-usage-numeric-suffixes 
+7.45T
+7.63G
+
+# #7 usage-pp
+# ## BATSPP 2.1.X EXCEPTION ERROR AT LINE 8
+# function usage {
+#     output_file=$(default_assignment "$1" "usage.list")
+#     rename-with-file-date "$output_file";
+#     $NICE du --block-size=1K --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1;
+#     $PAGER $output_file;
+# }
+# function usage-alt {
+#     local output_file=$TEMP/$(basename $PWD)"-usage.list";
+#     usage "$output_file"
+# }
+# function byte-usage () { output_file="usage.bytes.list"; backup-file $output_file; $NICE du --bytes --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1; $PAGER $output_file; }
+# alias usage-pp='usage | apply-usage-numeric-suffixes | $PAGER'
+$ byte-usage | testnum
+$ usage-pp | testnum
+Backing up 'usage.bytes.list' to './backup/usage.bytes.list'
+NN.NM	.
+N.NNM	./backup
+NNK	.
+NNK	./backup
+
+# ERROR GENERATED - MULTIPLE
+# $ ups a > psa.txt
+# $ usage psa.txt
+# | bash: ups: command not found
+# | bash: default_assignment: command not found
+# | bash: rename-with-file-date: command not found
+# | bash: $output_file: ambiguous redirect
+# | sort: fflush failed: 'standard output': Broken pipe
+# | sort: write error
+$ usage 
+renamed 'usage.list' -> 'usage.list.06Dec22'
+[?1h=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[H[2J[H[H[2J[H76K     .
+16K     ./backup
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[K[?1l>
+
+#8.1) 
+$ rm -rf ./* > /dev/null
+$ mkdir backup
+$ printf "THIS IS THE START\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS THE END\n" > thisisatest.txt
+$ ps -aux > process.txt
+$ number-columns thisisatest.txt
+$ number-columns-comma process.txt
+1: THIS IS THE START
+1: USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+
+#9) reverse REVERSES cat COMMAND
+$ alias reverse='tac'
+$ cat thisisatest.txt
+$ linebr
+$ reverse thisisatest.txt
+THIS IS THE START
+THIS IS A TEST
+THIS IS A TEST
+THIS IS A TEST
+THIS IS A TEST
+THIS IS A TEST
+THIS IS THE END
+--------------------------------------------------------------------------------
+THIS IS THE END
+THIS IS A TEST
+THIS IS A TEST
+THIS IS A TEST
+THIS IS A TEST
+THIS IS A TEST
+THIS IS THE START
+
+## BATSPP 2.1.X EXCEPTION ERROR AT LINE 4 (OUTPUT)
+$ backup-file thisisatest.txt
+Backing up 'thisisatest.txt' to './backup/thisisatest.txt'
+
+## BATSPP 2.1.X EXCEPTION ERROR AT LINE 5 (OUTPUT)
+$ byte-usage process.txt | testnum
+# (Same output for 'byte-usage "Hi Mom"' and 'byte-usage thisisatest.txt')
+NN.NM	.
+N.NNM	./backup
+
+#11 - LOG FILES ARE REQUIRED FOR check-errors
+## BATSPP 2.1.X EXCEPTION ERROR AT LINE 10 (OUTPUT)
+$ check-errors process.txt
+$ linebr
+$ check-all-errors process.txt
+$ linebr
+$ check-warnings
+$ linebr
+$ check-all-warnings
+$ linebr
+$ check-errors-excerpt process.txt
+[?1h=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[H[2J[H[H[2J[Hprocess.txt
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[K[?1l>--------------------------------------------------------------------------------
+[?1h=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[H[2J[H[H[2J[Hprocess.txt
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[K[?1l>--------------------------------------------------------------------------------
+*** Error: use check-all-errors instead ***
+    check-all-errors
+--------------------------------------------------------------------------------
+[?1h=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[H[2J[H[H[2J[H
+usage: check_errors.perl [options]
+
+options = [-warnings] [-context=N] [-no_astericks] [-skip_ruby_lib] [-relaxed | -strict]
+
+ex: check_errors.perl whatever
+
+
+Notes:
+- The default context is 1
+- Warnings are skipped by default
+- Use -no_astericks if input uses ***'s outside of error contexts
+Use -relaxed to exclude special cases (e.g., xyz='error')
+
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[K[?1l>--------------------------------------------------------------------------------
+process.txt
+
+## Issue (Doesn't halt tests, command not found error)
+# $ rdiff process1.txt psa.txt | testnum
+# | Echo: Command not found.
+# | ???
+# | cvs: Command not found.
+# |
+# | echo: No match.
+# | echo: No match.
+# | issuing: tkdiff.tcl -r.-X processX.txt
+# | [X] XXXX
+# | tkdiff.tcl: Command not found.
+
+## Issue (testnum not working)
+# $ tkdiff- process.txt psa.txt
+# | [1] 5244
+
+## Issue (testnum not working)
+# $ vdiff process.txt psa.txt
+# | Error in startup script: couldn't read file "/home/xaea12/bin/tkdiff.tcl": no such file or directory
+# | [2] 5251
+# | [1]   Exit 1                  wish -f $TOM_BIN/tkdiff.tcl "$@"
+
+# diff
+$ diff_options="--ignore-space-change --ignore-blank-lines"
+$ alias diff='command diff $diff_options'
+$ alias diff-default='command diff'
+$ alias diff-ignore-spacing='diff --ignore-all-space'
+$ alias do-diff='do_diff.sh'
+$ function diff-rev () {
+$     local diff_program="diff"
+$     if [ "$1" = "--diff-prog" ]; then
+$         diff_program="$2"
+$         shift 2
+$     fi
+$     local right_file="$1"
+$     local left_file="$2"
+$     if [ -d "$left_file" ]; then left_file="$left_file"/$(basename "$right_file"); fi
+$     "$diff_program" "$left_file" "$right_file"
+$ }
+$ alias kdiff-rev='diff-rev --diff-prog kdiff'
+$ alias diff-log-output='compare-log-output.sh'
+$ alias vdiff-rev=kdiff-rev
+
+# # TESTING diff COMMANDS
+# # EVERY DIFF COMMANDS WORK NORMALLY, BUT TESTS HALT AFTER
+# linebr
+$ ps -u > process1.txt
+$ ps -u > process2.txt
+
+# #1) diff - HALTS PROCESS (WORKS FINE)
+# $ diff process1.txt process2.txt #(DIFFERENTIATING PROCESSES FOR DIFFERENT INSTANCES)
+$ diff process1.txt process2.txt | testuser | testnumhex
+hhhhhhhhhhh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
+---
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
+
+# #2) diff-default - HALTED (WORKS FINE)
+# $ diff-default process1.txt process2.txt
+$ diff-default process1.txt process2.txt | testuser | testnumhex
+hhhhhhhhhhh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
+---
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
+
+# #3) diff-ignore-spacing -HALTED (WORKS FINE)
+$ diff-ignore-spacing process1.txt process2.txt | testuser | testnumhex
+hhhhhhhhhhh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
+---
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
+
+# #4) do-diff - HALTED (WORKS FINE)
+$ do-diff process1.txt process2.txt | testuser | testnumhex
+prohhssh.txt vs. prohhssh.txt
+hihhhrhnhhs: prohhssh.txt prohhssh.txt
+-rw-rw-r-- h ushrxhhhh ushrxhhhh hhhh hhh  h hh:hh prohhssh.txt
+-rw-rw-r-- h ushrxhhhh ushrxhhhh hhhh hhh  h hh:hh prohhssh.txt
+hhhhhhhhhhh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+< ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
+---
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    Ss   hh:hh   h:hh /usr/hin/hhsh
+> ushrxhhhh      hhhhh  h.h  h.h  hhhhh  hhhh pts/h    R+   hh:hh   h:hh ps -u
+------------------------------------------------------------------------
+
+
+# #5) kdiff-rev & vdiff-rev PERFORM THE SAME TASK - HALTS (WORKS FINE)
+# $ kdiff-rev process1.txt process2.txt
+# $ linebr
+# $ vdiff-rev process1.txt process2.txt
+# | [1] 7234
+# | --------------------------------------------------------------------------------
+# | [1]+  Done                    kdiff.sh "$@"
+# | [1] 7238
+
+# 6) diff-log-output
+# A. CREATING log files for tests
+$ printf "TESTFILE1\nNEXT LINE" > testtxt1.txt
+$ printf "TESTFILE2\nNEXT LINE2" > testtxt2.txt
+$ prepare-find-files-here | testuser | testnum | awk '!($6="")'
+-rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-alR.list
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list.log
+-rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-R.list
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-R.list.log
+
+# Opens kdiff (doesn't halt process)
+$ diff-log-output ls-alR.list.log ls-R.list.log
+
+$ rm -rf $HOME/info > /dev/null
+$ mkdir -p $HOME/info
+$ echo "THIS IS A NOICE SIGNATURE" > $HOME/info/.noice-signature
+
+$ signature noice | testuser
+/home/userxf333/info/.noice-signature:
+THIS IS A NOICE SIGNATURE
+
+# most-recent-backup(file): returns most recent backup for FILE in ./backup, accounting for revisions (e.g., extract_matches.perl.~4~)
+## BATSPP 2.1.X EXCEPTION ERROR AT LINE 13
+# function most-recent-backup() {
+#     if [ '$1' = '' ]; then
+#         echo 'usage: most-recent-backup filename'
+#         echo 'use BACKUP_DIR=dir ... to override use of ./backup'
+#         return
+#     fi
+#     local file='$1';
+#         local dir='$BACKUP_DIR'; if [ '$dir' = '' ]; then dir=./backup; fi
+#     $LS -t $dir/* | /bin/egrep '/$file(~|.~*)?' | head -1;
+# }
+# function diff-backup-helper {
+#     local diff='$1'; local file='$2'; 
+#     '$diff' $(most-recent-backup "$file") '$file';
+# }
+# alias diff-backup='diff-backup-helper diff'
+# alias kdiff-backup='diff-backup-helper kdiff'
+
+$ dobackup process1.txt
+Backing up 'process1.txt' to './backup/process1.txt'
+
+## WORKS FINE - MAY HALT THE NOTEBOOK TESTS (Opens kdiff)
+# $ diff-backup process1.txt
+$ diff-backup process1.txt
+
+## WORKS FINE - MAY HALT THE NOTEBOOK TESTS (Opens kdiff)
+$ kdiff-backup process1.txt
+[1] 24771
+[1]+  Done                    kdiff.sh "$@"
+
+$ echo "Done"
+Done

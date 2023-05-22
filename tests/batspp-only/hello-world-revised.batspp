@@ -1,0 +1,22 @@
+$ shopt -s expand_aliases
+
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+
+# SKIP
+$ echo "Hi Mom!"
+
+$ echo 'Hello world' | wc -l
+
+$ pwd | testuser
+
+# THIS IS A COMMENT
+
+$ which systemd
+
+$ man date | head -n 10 | testnum
+
+# awk will be used to remove any factors that may cause an error
+$ ps -l | awk '!($3=$4=$5=$10=$13="")' | testnum
+
+$ ps | head -n 10 | testuser | testnum

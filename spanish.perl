@@ -80,7 +80,6 @@ $sp_prefix = ($sp_trans_listing ? "\t" : "");
 &init_var(*show_suffix, &FALSE);	# show stem; TODO: use sp_show_suffix
 &init_var(*sp_skip_irreg_verb, &FALSE); # skip irregular verb inflections
 &init_var(*strip_conj, &FALSE);		# remove (irregular) verb conjugation info
-&init_var(*multingual_dir, $script_dir);  # where the multilingual dict's reside
 
 # If suffixes are allowed (e.g., "-amos") then grep a dummy word for
 # the dash
@@ -95,20 +94,14 @@ if ($sp_suffix) {
 if ($sp_test) {
     ## OLD: $sp_dict = "${script_dir}/sp_test.dict" unless defined($sp_dict);
     ## OLD: $sp_irreg_dict = "${script_dir}/sp_test_irreg.dict" unless defined($sp_irreg_dict);
-    ## OLD2
-    ## &init_var(*sp_dict, "${script_dir}/sp_test.dict");
-    ## &init_var(*sp_irreg_dict, "${script_dir}/sp_test_irreg.dict");
-    &init_var(*sp_dict, "${multingual_dir}/sp_test.dict");
-    &init_var(*sp_irreg_dict, "${multingual_dir}/sp_test_irreg.dict");
+    &init_var(*sp_dict, "${script_dir}/sp_test.dict");
+    &init_var(*sp_irreg_dict, "${script_dir}/sp_test_irreg.dict");
 }
 else {
     ## OLD: $sp_dict = &get_env(SPANISH_DICT, "${script_dir}/spanish_english.dict") unless defined($sp_dict);
     ## OLD: $sp_irreg_dict = &get_env(SPANISH_IRREG_DICT, "${script_dir}/spanish_irregular.dict") unless defined($sp_irreg_dict);
-    ## OLD2
-    ## &init_var(*sp_dict, &get_env(SPANISH_DICT, "${script_dir}/spanish_english.dict"));
-    ## &init_var(*sp_irreg_dict, &get_env(SPANISH_IRREG_DICT, "${script_dir}/spanish_irregular.dict"));
-    &init_var(*sp_dict, &get_env(SPANISH_DICT, "${multingual_dir}/spanish_english.dict"));
-    &init_var(*sp_irreg_dict, &get_env(SPANISH_IRREG_DICT, "${multingual_dir}/spanish_irregular.dict"));
+    &init_var(*sp_dict, &get_env(SPANISH_DICT, "${script_dir}/spanish_english.dict"));
+    &init_var(*sp_irreg_dict, &get_env(SPANISH_IRREG_DICT, "${script_dir}/spanish_irregular.dict"));
 }
 
 # sp_init(): initialize the spanish module
@@ -190,7 +183,6 @@ sub sp_init {
 #
 
 sub sp_read_dicts {
-    &debug_print(4, "sp_read_dicts(@_)\n");
     &sp_read_dict();
     if (-e $sp_irreg_dict) {
 	&sp_read_dict($sp_irreg_dict);

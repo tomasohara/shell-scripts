@@ -21,20 +21,20 @@ Script for extracting text in a file matching a particuar pattern
 examples:\n\n
 ls -l | extract_matches.py \"\\.([^\\.]+\\$)\"\n\n
 echo '(trace' `extract_matches.py \"^\\(defun (\\S+)\" init.lisp` ')'\n\n
-extract_matches.py --replacement='$1-$2-method' '^\\(def-instance-method \\((\\S+) (\\S+)' /home/tom/cycl/subloop-class-example.lisp\n\n
-extract_matches.py --para --replacement='A $1 : $2' 'def\\S+\\s*(\\S+)\\s*[^\\\"]*\\s*\\\"([^\\\"]+)\\\"' parse-template-utilities.lisp\n\n
-echo \"a b c d\" | extract_matches.py --restore=$2' --fields=2 \"(\\S) (\\S)\"\n\n
+extract_matches.py --replacement='\\{match.group(2)}-\\{match.group(2)}-method' '^\\(def-instance-method \\((\\S+) (\\S+)' /home/tom/cycl/subloop-class-example.lisp\n\n
+extract_matches.py --para --replacement='A \\{match.group(1)} : \\{match.group(2)}' 'def\\S+\\s*(\\S+)\\s*[^\\\"]*\\s*\\\"([^\\\"]+)\\\"' parse-template-utilities.lisp\n\n
+echo \"a b c d\" | extract_matches.py --restore=\\{match.group(2)}' --fields=2 \"(\\S) (\\S)\"\n\n
 
 \n\n
 Use --restore to simulate look-ahead (see example above).\n
 With - for pattern, it defaults to tab-delimited fields (e.g., via --fields=N).\n
-use {match.group(N in --replacement as pointer to N match group.
+use {match.group(N)} in --replacement as pointer to N match group.
 """
 
 
 # Standard packages
 # TODO: replace re by the local implementation my_re
-## OLD: import re
+import re
 
 
 # Local packages
@@ -42,7 +42,7 @@ from mezcla.main import Main
 from mezcla import debug
 from mezcla import system
 from mezcla import misc_utils
-from mezcla.my_regex import my_re
+
 
 # Command-line labels constants
 PATTERN        = 'pattern'        # regex pattern to check for
@@ -99,7 +99,7 @@ class ExtractMatches(Main):
         self.ignore_case     = self.has_parsed_option(IGNORE)
         self.preserve        = self.has_parsed_option(PRESERVE)
         self.chomp           = (self.has_parsed_option(CHOMP) or
-                                not my_re.match('\\n', self.pattern))
+                                not re.match('\\n', self.pattern))
 
 
         if not self.preserve:
@@ -113,21 +113,10 @@ class ExtractMatches(Main):
 
 
         # Enforce a single pattern per line when beginning-of-line pattern (^) used
-        if my_re.search(r'^\^.*|.*\$$', self.pattern):
+        if re.search(r'^\^.*|.*\$$', self.pattern):
             self.max_count = 1
         debug.trace(debug.QUITE_DETAILED, f'max_count={self.max_count}')
 
-        # Replace perl-style $N replacements with {match.group(N)}
-        placeholder_regex = r'(^|[^\\])\$(\d+)'
-        while my_re.search(placeholder_regex, self.replacement):
-            old_replacement = self.replacement
-            num = system.to_int(my_re.group(2))
-            self.replacement = (self.replacement[0: my_re.start() + 1] + f"{{my_re.group({num})}}" + self.replacement[my_re.end():])
-            if (self.replacement == old_replacement):
-                system.print_error("Error: Unxpected error during replacement $N fix")
-                break
-            debug.trace(5, f"modified replacement: {old_replacement!r} => {self.replacement!r}")
-        debug.trace(4, f"new replacement {self.replacement!r}")
 
         # For multiple-field patterns, generate a replacement with tab separated fillers
         # note: this assumes that replacement is same as "{match.group(1)}" default
@@ -143,12 +132,12 @@ class ExtractMatches(Main):
 
         # Put grouping parenthesis around pattern, if none present
         # NOTE: Escaped parentheses are ignored.
-        if not my_re.search(r'^\(|[^\\]\(.*[^\\]\)', self.pattern):
+        if not re.search(r'^\(|[^\\]\(.*[^\\]\)', self.pattern):
             self.pattern = '(' + self.pattern + ')'
 
 
         debug.trace(debug.QUITE_DETAILED, f'pattern={self.pattern}; replacement={self.replacement}; restore={self.restore}')
-        debug.trace_object(5, self, label="Script instance")
+
 
     def process_line(self, line):
         """Process each line of the input stream"""
@@ -168,10 +157,7 @@ class ExtractMatches(Main):
         # NOTE: glue_helpers.py->extract_matches_from_text() could be used too, but it would be
         #       necessary to implement on this function the params restore and replacement
         count = 0
-        ## OLD: while (self.ignore_case and (match := re.search(self.pattern, line, flags=re.IGNORECASE))) or (match := re.search(self.pattern, line)):
-        flags = (my_re.IGNORECASE if self.ignore_case else 0)
-        while (my_re.search(self.pattern, line, flags=flags)):
-            match = my_re.get_match()
+        while (self.ignore_case and (match := re.search(self.pattern, line, flags=re.IGNORECASE))) or (match := re.search(self.pattern, line)):
             debug.trace(debug.QUITE_DETAILED, f'match={match}')
 
 
@@ -197,10 +183,10 @@ class ExtractMatches(Main):
             debug.trace(debug.QUITE_DETAILED, f'replacement text: {replacement_text}')
 
             output_text = match.group(0)
-            try:
-                output_text = my_re.sub(self.pattern, replacement_text, output_text, flags=flags)
-            except:
-                system.print_exception_info("replacement_text substitution")
+            if self.ignore_case:
+                output_text = re.sub(self.pattern, replacement_text, output_text, flags=re.IGNORECASE)
+            else:
+                output_text = re.sub(self.pattern, replacement_text, output_text)
 
             debug.trace(debug.QUITE_DETAILED, f'resulting text: {output_text}')
             print(output_text)

@@ -70,11 +70,7 @@ if ("$2" == "") then
     echo ""
     echo '(for f in master_delta_extraction.py main.py delta_posting_extraction.py tpo_common.py; do' $script '$f $SANDBOX; done) 2>&1 | less'
     echo ""
-    ## OLD
-    ## echo "$script .perl" '$SCRIPT_DIR >| _perl_diff.list 2>&1'
-    ## echo ""
-    ## OLD: cho "$script" '--match-dot-files ".*bash*" dot-file-archive >| _bash-dot-file-diff.list 2>&1'
-    echo "$script" '--match-dot-files ".*bash* .*emacs*" .. >| _bash-emacs-diff.list 2>&1'
+    echo "$script .perl" '$SCRIPT_DIR >| _perl_diff.list 2>&1'
     echo ""
     ## echo "$script --diff diff.sh ./Parser/prune.lisp ../new-Full_Analyzer"
     ## echo ""
@@ -86,7 +82,6 @@ if ("$2" == "") then
     echo "- When . occurs in pattern, it is treated as a file extension:"
     echo "   'py' => '*py*' but '.py' => '*.py' (not '*.py*')"
     echo "- Use --match-dot-files, to ensure that . matches Unix dot files (e.g., .bashrc)"
-    # TODO: interchange .bash and emacs here and in example above
     echo "   '.emacs' => '.emacs*' (not '*.emacs*')"
     echo "- The --nopattern option treats pattern as a file (and likewise for master_dir)"
     echo "- Changes due to whitespace are ignored by default (i.e., --ignore-space-change, and --ignore-blank-lines [diff -wB])."
@@ -117,7 +112,6 @@ while ("$1" =~ -*)
 	shift
     else if ("$1" == "--quiet") then
 	set quiet = "1"
-	set verbose_mode = "0"
     else if ("$1" == "--verbose") then
 	set verbose_mode = "1"
     else if ("$1" == "--nopattern") then
