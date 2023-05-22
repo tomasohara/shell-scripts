@@ -22,6 +22,8 @@
 # Any files with _, except specified cases
 **/_*
 !**/*__init__.py
+# Likewise for trailing _'s (e.g., adb_)
+**/*_
 
 # Backup file
 **/*.bak
