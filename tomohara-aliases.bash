@@ -1386,8 +1386,14 @@ function most-recent-backup {
 # TODO: fix handling of dot files
 function diff-backup-helper {
     local diff="$1"; local file="$2";
-    echo "Issuing: '$diff' '$(most-recent-backup "$file")' '$file'"
-    "$diff" "$(most-recent-backup "$file")" "$file";
+    local backup_file
+    backup_file="$(most-recent-backup "$file")"
+    if [ "$backup_file" = "" ]; then
+	echo "Error: no backup for '$file'"
+    else 
+	echo "Issuing: '$diff' '$(most-recent-backup "$file")' '$file'"
+	"$diff" "" "$file";
+    fi
 }
 alias diff-backup='diff-backup-helper diff'
 alias kdiff-backup='diff-backup-helper kdiff'
@@ -2607,7 +2613,8 @@ function script-update {
     if [ "$(under-linux)" = "1" ]; then
 	command_indicator="-c"
     fi
-    script  _update-$(T).log  "$command_indicator" make-git-update.bash
+    # shellcheck disable=SC2046,SC2086
+    script  "_update-$(T).log"  $command_indicator make-git-update.bash
 }
 
 # ansi-filter(filename]: wrapper around ansifilter with stdio and stdout instead of files
