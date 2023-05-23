@@ -698,11 +698,20 @@ alias git-next-checkin='invoke-alt-checkin'
 # NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
 ## OLD: alias git-checkout-branch='git-command checkout'
 function git-checkout-branch {
-    git branch | grep -c "$1";
+    local branch="$1"
+    # TODO2: define helper function for usage
+    if [[ ("$branch" = "") || ("$branch" == "--help") ]]; then
+	echo "usage: git-checkout-branch [--help | branch]"
+	echo "note: available branches:"
+	# TODO: get maldito git to cooperate better (e.g., plain text option)!
+	PAGER= git branch --all | extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
+	return
+    fi
+    git branch | grep -c "$branch";
     if [ $? ]; then
-        ## OLD: git-command checkout "$1";
+        ## OLD: git-command checkout "$branch";
         # note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
-        git-command checkout "$1" --;
+        git-command checkout "$branch" --;
     else
         echo "Error: unknown branch"
     fi;
