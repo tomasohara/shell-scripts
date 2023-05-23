@@ -142,7 +142,7 @@ $ dir | grep ??? | perl -pe "s/$this_month.*( [a-z]{3})/\1/;"
 -rw-rw-r--   1 tomohara    0 Apr 16 01:13 jkl
 drwxrwxr-x   2 tomohara 4.0K Apr 16 01:13 abc
 drwxrwxr-x   2 tomohara 4.0K Apr 16 01:13 def
-## TODO: note discovered via followingL
+## TODO: note discovered via following:
 ##   $ git-diff tomohara-aliases.bash | count-it -i '([a-z0-9_-]+)' - 
 ## 
 
@@ -295,7 +295,7 @@ $ alt-randomize-lines.perl -seed=13 alt-randomize-lines.perl | head -3
 # See bad-download-and-test-tomohara-aliases.ipynb
 
 # setup
-$ copy tomohara-aliases.bash $TMP
+$ copy tomohara-aliases.bash "$TMP"
 # test
 $ PATH=fubar BATCH_MODE=1 bash -i -c "source $TMP/tomohara-aliases.bash; echo done" 2> /dev/null
 done
