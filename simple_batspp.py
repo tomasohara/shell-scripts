@@ -11,6 +11,14 @@
 # hacks enabled via environment variables to work around quirks in the example parsing. For example,
 #   TEST_FILE=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 python ./simple_batspp.py tests/adhoc-tests.test
 #
+# - Regex cheatsheet:
+#     (?:regex)               non-capturing group
+#     (?#comment)             comment; used below for labeling regex segments
+#     *?  and  +?             non-greedy match
+# - See https://www.rexegg.com/regex-quickstart.html for comprehensive cheatsheet.
+# - See https://regex101.com for a tool to explain regex's.
+#................................................................................
+#
 ## TODO1:
 ## - Add option to use bash-compiant syntax for tests; via https://bats-core.readthedocs.io/en/stable/gotchas.html
 ##     function bash_compliant_function_name_as_test_name { # @test
@@ -40,7 +48,6 @@
 ##   This requires that the test definitions be converted to proper bash functions:
 ##      perl -pe 's/^\@test "(.*)"/function $1/;' my-test.bats > my-text.bash
 ## - add examples below to help clarify processing
-##
 
 """
 BATSPP
@@ -339,7 +346,8 @@ class Batspp(Main):
             debug.trace(T7, f'batspp - running test {self.temp_file}')
             debug.assertion(not (BASH_EVAL and BATS_OPTIONS.strip()))
             eval_prog = ("bats" if not BASH_EVAL else "bash")
-            bats_output = gh.run(f'{eval_prog} {BATS_OPTIONS} {batsfile}')
+            # note: uses empty stdin in case of buggy tests (to avoid hangup)
+            bats_output = gh.run(f'{eval_prog} {BATS_OPTIONS} {batsfile} < /dev/null')
             print(bats_output)
             debug.assertion(not my_re.search(r"^0 tests", bats_output, re.MULTILINE))
 
@@ -453,14 +461,19 @@ class Batspp(Main):
 
         # Generate optional code to evaluate tests directly via Bash
         if BASH_EVAL:
-            self.bats_content += "total=0\nbad=0\n"
-            for test_id in all_test_ids:
-                self.bats_content += (
-                    ## TODO: f'let total++;  result="ok";  eval "{test_id}" > /dev/null 2>&1;\n' +
-                    f'let total++;  result="ok";  eval "{test_id}"\n' +
-                    f'if [ $? -ne 0 ]; then let bad++; result="not ok"; fi\n' +
-                    f'echo "$result $total {test_id}"\n')
-            self.bats_content += f'echo "$total tests, $bad failure(s)"\n'
+            self.bats_content += 'n=0\nbad=0\n'
+            self.bats_content += (
+                'function run-test {\n'
+                '    local id="$1"\n'
+                '    let n++\n'
+                '    result="ok"\n'
+                '    eval "$id"; if [ $? -ne 0 ]; then let bad++; result="not ok"; fi\n'
+                '    echo "$result $n $id"\n'
+                '    }\n'
+                )
+            self.bats_content += f'tests=({" ".join(all_test_ids)}); echo "1..${{#tests[@]}}"\n'
+            self.bats_content += 'for id in ${tests[*]}; do run-test "$id"; done\n'
+            self.bats_content += f'echo "$n tests, $bad failure(s)"\n'
 
 #-------------------------------------------------------------------------------
         
@@ -619,7 +632,7 @@ class CustomTestsToBats:
                       f'\tmkdir --parents "$testfolder"\n' +
                       (f'\tcommand cp ./*.* "$testfolder"\n' if COPY_DIR else '') +
                       # note: warning added for sake of shellcheck
-                      f'\tcd "$testfolder" || echo Warning: Unable to "cd $testfolder"\n')
+                      f'\tbuiltin cd "$testfolder" || echo Warning: Unable to "cd $testfolder"\n')
         setup_sans_prompt = my_re.sub(r'^\s*\$', '\t', setup, flags=my_re.MULTILINE)
         setup_text += setup_sans_prompt + "\n"
         debug.trace_expr(T6, setup_text)
@@ -875,7 +888,7 @@ class CommandTests(CustomTestsToBats):
         flags = re.DOTALL | re.MULTILINE | re.IGNORECASE
 
         # Notes:
-        # - Non-capturing groups '(?:regex)' used for ignore certain groupings.
+        # - Non-capturing groups '(?:regex)' used to ignore certain groupings.
         # - INDENT_PATTERN='^[^\w\$\(\n\{\}]{0}\s*' for batspp file (e.g., from Jupyter).
         # - The optional setup is for commands issued but output not tested.
         # - Example 1:
