@@ -34,6 +34,7 @@
 #         let VAR=(EXPR)            let max_mem=(4 * 1024)
 #   - array variable
 #         list=(v1 value2 ... vN)   initialize
+#         ${#list[@]}               number of elements (i.e., length)
 #         ${list[1]}                second element
 #         ${list[*]}                all elements
 #         "${list[@]}"              likewise all but individually quoted (a la "$@")
