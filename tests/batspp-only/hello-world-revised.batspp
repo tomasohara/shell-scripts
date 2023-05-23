@@ -1,8 +1,13 @@
+<<<<<<< HEAD
 # shopt -s expand_aliases
+=======
+$ shopt -s expand_aliases
+>>>>>>> integration-testing-3fa2c13
 
 $ alias testuser="sed -r "s/"$USER"+/userxf333/g""
 $ alias testnum="sed -r "s/[0-9]/N/g"" 
 
+<<<<<<< HEAD
 $ echo "Hi Mom!"
 Hi Mom!
 
@@ -45,3 +50,22 @@ $ ps | head -n 10 | testuser | testnum
   NNNNN pts/N    NN:NN:NN head
   NNNNN pts/N    NN:NN:NN sed
   NNNNN pts/N    NN:NN:NN sed
+=======
+# SKIP
+$ echo "Hi Mom!"
+
+$ echo 'Hello world' | wc -l
+
+$ pwd | testuser
+
+# THIS IS A COMMENT
+
+$ which systemd
+
+$ man date | head -n 10 | testnum
+
+# awk will be used to remove any factors that may cause an error
+$ ps -l | awk '!($3=$4=$5=$10=$13="")' | testnum
+
+$ ps | head -n 10 | testuser | testnum
+>>>>>>> integration-testing-3fa2c13

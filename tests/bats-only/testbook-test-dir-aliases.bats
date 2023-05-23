@@ -4,6 +4,7 @@
 # Make executables ./tests/../ visible to PATH
 PATH="/home/aveey/tom-project/shell-scripts/tests/batspp-only/../:$PATH"
 
+<<<<<<< HEAD
 # Enable aliases
 shopt -s expand_aliases
 
@@ -790,4 +791,296 @@ total N
 lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
 lrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp
 END_EXPECTED
+=======
+# Source files
+shopt -s expand_aliases
+
+
+@test "test0" {
+	test_folder=$(echo /tmp/test0-$$)
+	mkdir $test_folder && cd $test_folder
+
+	bind 'set enable-bracketed-paste off'
+}
+
+
+@test "test1" {
+	test_folder=$(echo /tmp/test1-$$)
+	mkdir $test_folder && cd $test_folder
+
+	unalias -a
+	for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+}
+
+
+@test "test2" {
+	test_folder=$(echo /tmp/test2-$$)
+	mkdir $test_folder && cd $test_folder
+
+	TEST_BIN=/home/$USER/tom-project/shell-scripts/tests
+	TMP=/tmp/test-dir-aliases
+	source $TEST_BIN/_dir-aliases.bash
+	actual=$(test2-assert4-actual)
+	expected=$(test2-assert4-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test2-assert4-actual () {
+	alias | wc -l
+}
+function test2-assert4-expected () {
+	echo -e '8'
+}
+
+@test "test3" {
+	test_folder=$(echo /tmp/test3-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test3-assert1-actual)
+	expected=$(test3-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test3-assert1-actual () {
+	alias | wc -l
+}
+function test3-assert1-expected () {
+	echo -e '8'
+}
+
+@test "test4" {
+	test_folder=$(echo /tmp/test4-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test4-assert1-actual)
+	expected=$(test4-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test4-assert1-actual () {
+	typeset -f | egrep '^\w+' | wc -l
+}
+function test4-assert1-expected () {
+	echo -e '2'
+}
+
+@test "test5" {
+	test_folder=$(echo /tmp/test5-$$)
+	mkdir $test_folder && cd $test_folder
+
+	temp_dir=$TMP/test-$$
+	cd "$temp_dir"
+}
+
+
+@test "test6" {
+	test_folder=$(echo /tmp/test6-$$)
+	mkdir $test_folder && cd $test_folder
+
+	alias testnum="sed -r "s/[0-9]/N/g"" 
+	alias testuser="sed -r "s/"$USER"+/userxf333/g""
+}
+
+
+@test "test7" {
+	test_folder=$(echo /tmp/test7-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test7-assert1-actual)
+	expected=$(test7-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test7-assert1-actual () {
+	echo $USER | testuser
+}
+function test7-assert1-expected () {
+	echo -e 'userxf333'
+}
+
+@test "test8" {
+	test_folder=$(echo /tmp/test8-$$)
+	mkdir $test_folder && cd $test_folder
+
+	touch file1
+}
+
+
+@test "test9" {
+	test_folder=$(echo /tmp/test9-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test9-assert1-actual)
+	expected=$(test9-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test9-assert1-actual () {
+	ls
+}
+function test9-assert1-expected () {
+	echo -e 'file1  link1'
+}
+
+@test "test10" {
+	test_folder=$(echo /tmp/test10-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test10-assert1-actual)
+	expected=$(test10-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test10-assert1-actual () {
+	ls -l | testnum | testuser | awk '!($6="")'
+}
+function test10-assert1-expected () {
+	echo -e 'total N    -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileNlrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN'
+}
+
+@test "test11" {
+	test_folder=$(echo /tmp/test11-$$)
+	mkdir $test_folder && cd $test_folder
+
+	bash $TEST_BIN/_dir-aliases.bash
+}
+
+
+@test "test12" {
+	test_folder=$(echo /tmp/test12-$$)
+	mkdir $test_folder && cd $test_folder
+
+}
+
+
+@test "test13" {
+	test_folder=$(echo /tmp/test13-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test13-assert1-actual)
+	expected=$(test13-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test13-assert1-actual () {
+	ls -l | testnum | testuser | awk '!($6="")'
+}
+function test13-assert1-expected () {
+	echo -e 'total N    -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileNlrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileNlrwxrwxrwx N userxf333 userxf333 N  N NN:NN temp-link -> /tmp'
+}
+
+@test "test14" {
+	test_folder=$(echo /tmp/test14-$$)
+	mkdir $test_folder && cd $test_folder
+
+}
+
+
+@test "test15" {
+	test_folder=$(echo /tmp/test15-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test15-assert1-actual)
+	expected=$(test15-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test15-assert1-actual () {
+	ls -l | testnum | testuser | awk '!($6="")'
+}
+function test15-assert1-expected () {
+	echo -e 'total N    -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileNlrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileNlrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp'
+}
+
+@test "test16" {
+	test_folder=$(echo /tmp/test16-$$)
+	mkdir $test_folder && cd $test_folder
+
+	alias ln-symbolic-force='ln-symbolic --force'
+}
+
+
+@test "test17" {
+	test_folder=$(echo /tmp/test17-$$)
+	mkdir $test_folder && cd $test_folder
+
+}
+
+
+@test "test18" {
+	test_folder=$(echo /tmp/test18-$$)
+	mkdir $test_folder && cd $test_folder
+
+}
+
+
+@test "test19" {
+	test_folder=$(echo /tmp/test19-$$)
+	mkdir $test_folder && cd $test_folder
+
+	actual=$(test19-assert1-actual)
+	expected=$(test19-assert1-expected)
+	echo "========== actual =========="
+	echo "$actual" | hexview.perl
+	echo "========= expected ========="
+	echo "$expected" | hexview.perl
+	echo "============================"
+	[ "$actual" == "$expected" ]
+
+}
+
+function test19-assert1-actual () {
+	ls -l | testnum | testuser | awk '!($6="")'
+}
+function test19-assert1-expected () {
+	echo -e 'total N    -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileNlrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileNlrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp'
+>>>>>>> integration-testing-3fa2c13
 }

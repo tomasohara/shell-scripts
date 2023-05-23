@@ -1,0 +1,26 @@
+# Tests for idiosyncratic aliases
+
+# Make sure adhoc notes use MMMYY not DDMMMYY
+# _$ cmd-trace em-adhoc-notes 2>&1 | perl-grep 'notes-\w\w\w\d\d'
+++ tpo-invoke-emacs.sh _reempl-adhoc-notes-oct22.txt
+
+$ cmd-trace em-adhoc-notes 2>&1 | perl-grep -c 'notes-\w\w\w\d\d'
+1
+
+#...............................................................................
+# pwd aliases
+
+# Make sure nickname and full name note empty
+#
+# note: '(pwd-host-info) ...' used due to odd output w/ pwd alias
+
+## $ pwd-host-info 
+## /home/ubuntu/ds-notebooks/supporting-code
+## n/a
+## ip-172-31-95-148
+
+$ (pwd-host-info) 2>&1 | wc -l
+3
+
+$ (pwd-host-info) 2>&1 | grep -c '^ *$'
+0

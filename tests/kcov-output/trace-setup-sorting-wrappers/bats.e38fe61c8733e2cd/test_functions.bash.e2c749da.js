@@ -1,11 +1,19 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
 {"lineNum":"    2","line":""},
+<<<<<<< HEAD
 {"lineNum":"    3","line":"BATS_TEST_DIRNAME=\"${BATS_TEST_FILENAME%/*}\"","class":"lineCov","hits":"16","order":"317","possible_hits":"0",},
 {"lineNum":"    4","line":"BATS_TEST_NAMES=()"},
 {"lineNum":"    5","line":""},
 {"lineNum":"    6","line":"# shellcheck source=lib/bats-core/warnings.bash"},
 {"lineNum":"    7","line":"source \"$BATS_ROOT/lib/bats-core/warnings.bash\"","class":"lineCov","hits":"16","order":"318","possible_hits":"0",},
+=======
+{"lineNum":"    3","line":"BATS_TEST_DIRNAME=\"${BATS_TEST_FILENAME%/*}\"","class":"lineCov","hits":"19","order":"317","possible_hits":"0",},
+{"lineNum":"    4","line":"BATS_TEST_NAMES=()"},
+{"lineNum":"    5","line":""},
+{"lineNum":"    6","line":"# shellcheck source=lib/bats-core/warnings.bash"},
+{"lineNum":"    7","line":"source \"$BATS_ROOT/lib/bats-core/warnings.bash\"","class":"lineCov","hits":"19","order":"318","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"    8","line":""},
 {"lineNum":"    9","line":"# find_in_bats_lib_path echoes the first recognized load path to"},
 {"lineNum":"   10","line":"# a library in BATS_LIB_PATH or relative to BATS_TEST_DIRNAME."},
@@ -372,5 +380,9 @@ var data = {lines:[
 {"lineNum":"  371","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
+<<<<<<< HEAD
 var header = { "command" : "bats", "date" : "2023-05-19 18:20:08", "instrumented" : 103, "covered" : 2,};
+=======
+var header = { "command" : "bats", "date" : "2023-05-06 21:38:23", "instrumented" : 103, "covered" : 2,};
+>>>>>>> integration-testing-3fa2c13
 var merged_data = [];

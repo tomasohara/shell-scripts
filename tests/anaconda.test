@@ -1,0 +1,57 @@
+# Tests for anaconda setup
+#
+# note:
+# - These are mostly drafts.
+#
+
+## problem with Anaconda after environment cleanup:
+##    ~/.conda/envs vs. /usr/local/misc/programs/anaconda3/envs
+##
+##
+## $ pwd
+## /home/tomohara
+## 
+## $ which python
+## /home/tomohara/.conda/envs/nlp-py-3-8/bin/python
+## 
+## $ which jupyter
+## /home/tomohara/.conda/envs/nlp-py-3-8/bin/jupyter
+## 
+## $ jupyter
+## bash: /home/tomohara/.conda/envs/nlp-py-3-8/bin/jupyter: /usr/local/misc/programs/anaconda3/envs/nlp-py-3-8/bin/python: bad interpreter: No such file or directory
+## 
+## ¢ ls /usr/local/misc/programs/anaconda3/envs/nlp-py-3-8
+ls: cannot access '/usr/local/misc/programs/anaconda3/envs/nlp-py-3-8': No such file or directory
+##
+
+## $ which jupyter
+## /home/tomohara/.conda/envs/nlp-py-3-8/bin/jupyter
+##
+¢ which jupyter | wc -l
+1
+
+¢ jupyter
+usage: jupyter [-h] [--version] [--config-dir] [--data-dir] [--runtime-dir]
+               [--paths] [--json] [--debug]
+               [subcommand]
+jupyter: error: one of the arguments --version subcommand --config-dir --data-dir --runtime-dir --paths is required
+
+#-------------------------------------------------------------------------------
+# check for problem with activation
+
+## $ conda-activate-env pando-nlp-py-3-8
+## $ which pip
+## /home/tomohara/.conda/envs/nlp-py-3-9/bin/pip
+##                            ^^^^^^^^^^
+## 
+## $ prepend-path /home/tomohara/anaconda3/envs/pando-nlp-py-3-8/bin
+## 
+## $ which pip
+## /home/tomohara/anaconda3/envs/pando-nlp-py-3-8/bin/pip
+##
+
+$ TEST_ENV=nlp-py-3-9
+$ conda-activate-env $TEST_ENV
+$ which pip | grep -c $TEST_ENV
+1
+ 

@@ -83,6 +83,7 @@ parser.add_option(
     help=f"Generates report for all available testfiles (NOBATSPP testfiles were ignored by default)"
 )
 
+<<<<<<< HEAD
 parser.add_option(
     "-s", "--switch",
     default=0,
@@ -91,13 +92,18 @@ parser.add_option(
     help=f"Uses batspp library instead of ../simple_batspp.py script"
 )
 
+=======
+>>>>>>> integration-testing-3fa2c13
 (options, args) = parser.parse_args()
 
 NO_OPTION = options.no_option
 TXT_OPTION = options.txt_option
 KCOV_OPTION = options.kcov_option
 ALL_OPTION = options.all_option
+<<<<<<< HEAD
 BATSPP_SWITCH_OPTION = options.batspp_switch_option
+=======
+>>>>>>> integration-testing-3fa2c13
 
 if not NO_OPTION:
     gh.run(f"rm -rf ./{BATSPP_STORE}/*")
@@ -106,8 +112,11 @@ if not NO_OPTION:
 if KCOV_OPTION:
     gh.run(f"rm -rf ./{KCOV_STORE}/*")
 
+<<<<<<< HEAD
 BATSPP_SWITCH_COND = "PARA_BLOCKS=1 ../simple_batspp.py" if not BATSPP_SWITCH_OPTION else "batspp"
 
+=======
+>>>>>>> integration-testing-3fa2c13
 
 # 1) Identifying .ipynb files
 i = 1
@@ -165,12 +174,20 @@ else:
             
             if TXT_OPTION == 1:
                 TXT_MESSAGE = f"REPORT PATH: ./{TXT_STORE}/{txt_from_batspp}"
+<<<<<<< HEAD
                 gh.run(f"{BATSPP_SWITCH_COND} ./{BATSPP_STORE}/{batsppfile} --output ./{TXT_STORE}/{txt_from_batspp}")
+=======
+                gh.run(f"./simple_batspp.py ./{BATSPP_STORE}/{batsppfile} --output ./{TXT_STORE}/{txt_from_batspp}")
+>>>>>>> integration-testing-3fa2c13
                 print (gh.indent(TXT_MESSAGE, indentation="  >>  ", max_width=512))
                 i += 1
 
             else:
+<<<<<<< HEAD
                 gh.run(f"{BATSPP_SWITCH_COND} ./{BATSPP_STORE}/{batsppfile} --output ./{BATS_STORE}/{bats_from_batspp}")
+=======
+                gh.run(f"./simple_batspp.py ./{BATSPP_STORE}/{batsppfile} --output ./{BATS_STORE}/{bats_from_batspp}")
+>>>>>>> integration-testing-3fa2c13
                 i += 1
                 
                 if KCOV_OPTION == 1:
@@ -197,7 +214,10 @@ faulty_count = ipynb_count - batspp_count
 
 print(f"\n======================================================")
 print(f"SUMMARY STATISTICS:\n")
+<<<<<<< HEAD
 print(f"simple_batspp.py used: {bool(BATSPP_SWITCH_OPTION)}")
+=======
+>>>>>>> integration-testing-3fa2c13
 print(f"No. of IPYNB testfiles: {ipynb_count + avoid_count}")
 print(f"No. of BATSPP files (generated): {batspp_count if TXT_OPTION or NO_OPTION != 1 else 'NaN'}")
 print(f"No. of FAULTY testfiles: {faulty_count if TXT_OPTION or NO_OPTION != 1 else 'NaN'}")

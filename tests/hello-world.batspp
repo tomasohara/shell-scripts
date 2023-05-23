@@ -1,0 +1,4 @@
+# The hello world of Bats-pp tests
+
+$ echo 'Hello world' | wc -l
+1

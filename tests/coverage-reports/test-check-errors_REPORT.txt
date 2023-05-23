@@ -1,1 +1,5 @@
+<<<<<<< HEAD
 124 out of 142 tests passed overall (87.32%)
+=======
+62 out of 71 tests passed overall (87.32%)
+>>>>>>> integration-testing-3fa2c13

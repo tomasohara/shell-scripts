@@ -2,9 +2,15 @@ var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
 {"lineNum":"    2","line":""},
 {"lineNum":"    3","line":"bats_test_count_validator() {"},
+<<<<<<< HEAD
 {"lineNum":"    4","line":"  trap \'\' INT # continue forwarding","class":"lineCov","hits":"1","order":"96","possible_hits":"0",},
 {"lineNum":"    5","line":"  header_pattern=\'[0-9]+\\.\\.[0-9]+\'","class":"lineCov","hits":"1","order":"97","possible_hits":"0",},
 {"lineNum":"    6","line":"  IFS= read -r header","class":"lineCov","hits":"2","order":"98","possible_hits":"0",},
+=======
+{"lineNum":"    4","line":"  trap \'\' INT # continue forwarding","class":"lineCov","hits":"1","order":"95","possible_hits":"0",},
+{"lineNum":"    5","line":"  header_pattern=\'[0-9]+\\.\\.[0-9]+\'","class":"lineCov","hits":"1","order":"96","possible_hits":"0",},
+{"lineNum":"    6","line":"  IFS= read -r header","class":"lineCov","hits":"2","order":"97","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"    7","line":"  # repeat the header"},
 {"lineNum":"    8","line":"  printf \"%s\\n\" \"$header\"","class":"lineCov","hits":"1","order":"220","possible_hits":"0",},
 {"lineNum":"    9","line":""},
@@ -14,10 +20,17 @@ var data = {lines:[
 {"lineNum":"   13","line":"    local expected_number_of_tests=\"${header:3}\"","class":"lineCov","hits":"1","order":"222","possible_hits":"0",},
 {"lineNum":"   14","line":"    # ... count the actual number of [not ] oks..."},
 {"lineNum":"   15","line":"    local actual_number_of_tests=0","class":"lineCov","hits":"1","order":"223","possible_hits":"0",},
+<<<<<<< HEAD
 {"lineNum":"   16","line":"    while IFS= read -r line; do","class":"lineCov","hits":"546","order":"224","possible_hits":"0",},
 {"lineNum":"   17","line":"      # forward line"},
 {"lineNum":"   18","line":"      printf \"%s\\n\" \"$line\"","class":"lineCov","hits":"272","order":"489","possible_hits":"0",},
 {"lineNum":"   19","line":"      case \"$line\" in","class":"lineCov","hits":"272","order":"490","possible_hits":"0",},
+=======
+{"lineNum":"   16","line":"    while IFS= read -r line; do","class":"lineCov","hits":"130","order":"224","possible_hits":"0",},
+{"lineNum":"   17","line":"      # forward line"},
+{"lineNum":"   18","line":"      printf \"%s\\n\" \"$line\"","class":"lineCov","hits":"64","order":"468","possible_hits":"0",},
+{"lineNum":"   19","line":"      case \"$line\" in","class":"lineCov","hits":"64","order":"469","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"   20","line":"      \'ok \'*)"},
 {"lineNum":"   21","line":"        ((++actual_number_of_tests))"},
 {"lineNum":"   22","line":"        ;;"},
@@ -27,7 +40,11 @@ var data = {lines:[
 {"lineNum":"   26","line":"      esac"},
 {"lineNum":"   27","line":"    done"},
 {"lineNum":"   28","line":"    # ... and error if they are not the same"},
+<<<<<<< HEAD
 {"lineNum":"   29","line":"    if [[ \"${actual_number_of_tests}\" != \"${expected_number_of_tests}\" ]]; then","class":"lineCov","hits":"1","order":"776","possible_hits":"0",},
+=======
+{"lineNum":"   29","line":"    if [[ \"${actual_number_of_tests}\" != \"${expected_number_of_tests}\" ]]; then","class":"lineCov","hits":"1","order":"712","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"   30","line":"      printf \'# bats warning: Executed %s instead of expected %s tests\\n\' \"$actual_number_of_tests\" \"$expected_number_of_tests\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   31","line":"      return 1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   32","line":"    fi"},
@@ -38,5 +55,9 @@ var data = {lines:[
 {"lineNum":"   37","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
+<<<<<<< HEAD
 var header = { "command" : "bats", "date" : "2023-05-19 18:20:09", "instrumented" : 14, "covered" : 11,};
+=======
+var header = { "command" : "bats", "date" : "2023-05-06 21:38:26", "instrumented" : 14, "covered" : 11,};
+>>>>>>> integration-testing-3fa2c13
 var merged_data = [];

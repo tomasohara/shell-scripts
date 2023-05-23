@@ -1733,5 +1733,9 @@ var data = {lines:[
 {"lineNum":" 1732","line":"main \"$@\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
+<<<<<<< HEAD
 var header = { "command" : "bats", "date" : "2023-05-19 18:20:21", "instrumented" : 806, "covered" : 0,};
+=======
+var header = { "command" : "bats", "date" : "2023-05-06 21:38:53", "instrumented" : 806, "covered" : 0,};
+>>>>>>> integration-testing-3fa2c13
 var merged_data = [];

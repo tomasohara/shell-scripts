@@ -60,5 +60,9 @@ var data = {lines:[
 {"lineNum":"   59","line":"exec env BATS_ROOT=\"$BATS_ROOT\" \"$BATS_ROOT/libexec/bats-core/bats\" \"$@\"","class":"lineCov","hits":"1","order":"7","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
+<<<<<<< HEAD
 var header = { "command" : "bats", "date" : "2023-05-19 18:20:09", "instrumented" : 30, "covered" : 7,};
+=======
+var header = { "command" : "bats", "date" : "2023-05-06 21:38:26", "instrumented" : 30, "covered" : 7,};
+>>>>>>> integration-testing-3fa2c13
 var merged_data = [];

@@ -1,0 +1,493 @@
+# This is a set of adhoc tests using a simple format based on the interaction
+# in a terminal session. It is designed for ease of preparation rather than
+# generality.
+#
+# TODO: convert to Jupyter format (using bash kernel)
+#
+
+#-------------------------------------------------------------------------------
+# Tests for calc_entropy.perl script
+#
+# note: this is the simplified input for batspp
+#
+
+$ calc_entropy.perl -simple .25 .25 .25 .25
+Entropy
+2.000
+
+#...............................................................................
+
+# TODO (encode blank lines, here and below):
+# head ~/bin/tests/calc_entropy.*input* | perl -pe 's/^$/;;/;'
+
+#----------
+# Input data
+
+$ head calc_entropy.*input* | perl -pe 's/^$/<nl>/;'
+==> calc_entropy.input <==
+# Frequency of 'between' in Penn Treebank II WSJ annotations
+24	pp-clr
+6	pp-dir
+4	pp-ext
+35	pp-loc
+2	pp-nom
+7	pp-prd
+42	pp-tmp
+<NL>
+==> calc_entropy.simple.input <==
+.25 .25 .25 .25
+<NL>
+==> calc_entropy.simple.input2 <==
+.47 .42 .06 .05
+
+#...............................................................................
+# Simple input format
+
+$ calc_entropy.perl -simple - < calc_entropy.simple.input
+Entropy
+2.000
+
+
+$ calc_entropy.perl -simple - < calc_entropy.simple.input2
+Entropy
+1.497
+
+#---------
+# Verbose output
+
+
+$ calc_entropy.perl -verbose -simple - < calc_entropy.simple.input2
+#	prob	-p lg(p)    max p
+#--------------------------------
+#	0.470	0.512
+#	0.420	0.526
+#	0.060	0.244
+#	0.050	0.216
+#--------------------------------
+# word	classes	freq	entropy	max_prob
+#	1.000	1.497	   0.470
+Entropy
+1.497
+
+
+# TODO: drop as shown above
+$ cat calc_entropy.input
+# Frequency of 'between' in Penn Treebank II WSJ annotations
+24	pp-clr
+6	pp-dir
+4	pp-ext
+35	pp-loc
+2	pp-nom
+7	pp-prd
+42	pp-tmp
+
+$ calc_entropy.perl - < calc_entropy.input
+2.230
+
+$ calc_entropy.perl -verbose - < calc_entropy.input  | perl -pe 's/^$/<nl>/;'
+#		class	freq	prob	-p lg(p)
+#		pp-tmp	42	0.350	0.530
+#		pp-loc	35	0.292	0.518
+#		pp-clr	24	0.200	0.464
+#		pp-prd	7	0.058	0.239
+#		pp-dir	6	0.050	0.216
+#		pp-ext	4	0.033	0.164
+#		pp-nom	2	0.017	0.098
+#		total	120	1.000	2.230
+<nl>
+# word	classes	freq	entropy	max_prob
+-	7	120	2.230	0.350
+
+#----------
+# multiple input files
+
+$ calc_entropy.perl calc_entropy.input calc_entropy.input2
+2.230
+1.750
+
+#===============================================================================
+# Numeric text processing
+
+$ echo 2520878057 | comma-ize-number 
+2,520,878,057
+ 
+$ echo 2520878057 | apply-numeric-suffixes 
+2.348G
+
+$ calc "403.4 * 1000**3" | comma-ize-number 
+403,400,000,000.000
+
+#===============================================================================
+# Inspired by idiot-in-chief making anal retentive changes to quiet shellcheck
+
+$ echo $core_dir_options
+--all -l -t --human-readable
+
+$ echo $dir_options
+--all -l -t --human-readable --no-group
+
+$ dir_options_sans_t
+--all -l   --human-readable --no-group
+
+$ test_dir="$TMP/test-dir"
+$ mkdir "$test_dir"
+$ cd "$test_dir"
+$ mkdir abc def
+$ touch ghi jkl
+$ echo > mno
+$ this_month=$(date +b)
+$ dir | grep ??? | perl -pe "s/$this_month.*( [a-z]{3})/\1/;"
+-rw-rw-r--   1 tomohara    1 Apr 16 01:13 mno
+-rw-rw-r--   1 tomohara    0 Apr 16 01:13 ghi
+-rw-rw-r--   1 tomohara    0 Apr 16 01:13 jkl
+drwxrwxr-x   2 tomohara 4.0K Apr 16 01:13 abc
+drwxrwxr-x   2 tomohara 4.0K Apr 16 01:13 def
+## TODO: note discovered via followingL
+##   $ git-diff tomohara-aliases.bash | count-it -i '([a-z0-9_-]+)' - 
+## 
+
+#===============================================================================
+
+# Make sure copy and move trace operations, preserve timestamps, and confirms overwrites or deletions (e.g., a la cp -ivp)
+
+# copy alias traces operation
+$ cd $TMP
+$ touch file1
+$ copy file1 file1-copy
+'file1' -> 'file1-copy'
+
+# copy alias doesn't overwrite files
+$ cd $TMP
+$ touch file1 file2
+$ echo | copy file1 file2
+/bin/cp: overwrite 'file2'? $ 
+
+$ move file1 file3
+'file1' -> 'file3'
+
+$ echo | move file2 file3
+/bin/cp: overwrite 'file3'? $ 
+
+#===============================================================================
+# stuff todo
+
+$ tar-this-dir
+TODO
+
+# TODO : all of following
+
+pushd-q
+
+popd-q
+
+copy-readonly
+
+delete-force
+
+ed-past-info
+
+sublinks-alpha
+
+tar-dir
+cd-this-realdi
+
+clear
+delete
+
+cd-realdir
+
+em-aliases
+
+#-------------------------------------------------------------------------------
+
+# Make sure copy and move trace operations, preserve timestamps, and confirms overwrites or deletions (e.g., a la cp -ivp)
+
+# copy alias traces operation
+$ cd $TMP
+$ touch file1
+$ copy file1 file1-copy
+'file1' -> 'file1-copy'
+
+# copy alias doesn't overwrite files
+$ cd $TMP
+$ touch file1 file2
+$ echo | copy file1 file2
+/bin/cp: overwrite 'file2'? $ 
+
+#===============================================================================
+# TODO: following aliases
+
+move
+
+update-today-vars
+
+pushd
+popd
+
+usage
+
+quiet-unalias
+
+tar-dir
+
+set-xterm-title
+
+tar-this-dir
+
+cd-this-realdir
+
+alt-xterm-title
+
+ls-full
+
+copy-readonly-to-dir
+
+tar-just-dir
+
+new-tar-this-dir
+
+# Make sure the following doesn't hang
+cond-export _ENV_VAR_=123
+
+#-------------------------------------------------------------------------------
+
+$ touch it5; cmd-trace move it5 _it5 | cat
+start: Sat Apr 16 20:47:38 CDT 2022
++ eval move it5 _it5
+++ /bin/mv -i -v it5 _it5
+'it5' -> '_it5'
++ set - -o xtrace
+end: Sat Apr 16 20:47:38 CDT 2022
+
+
+
+#================================================================================
+# Stuff that is currently broken
+
+$ run-jupyter-notebook | grep ^URL
+URL: http://127.0.0.1:8888
+
+#================================================================================
+# simple test for mezcla system
+# note: used to check that mezcla accessible
+
+$ python -c 'from mezcla import system; system.print_error("hey"); print("joe")' 2> /dev/null
+joe
+
+# Make sure ngram_tfidf runs
+# note: stupid problem under AWS server
+# 
+$ python -m mezcla.ngram_tfidf
+Warning: not intended for command-line use; simple test follows
+Usage: /home/tomohara/python/Mezcla/mezcla/ngram_tfidf.py [--help] [-]
+
+
+#===============================================================================
+# randomization
+
+$ alt-randomize-lines.perl -seed=13 alt-randomize-lines.perl | head -3
+    ## $note .= "notes:\n\nSome usage note.\n";		     # TODO: usage note
+    my($options) = "main options = [-seed=real] [-timeseed]";
+# *-*-perl-*-*
+
+#===============================================================================
+# TODO: make sure aliases sourcing doesn't hang (e.g., due to missing startup-trace alias)
+# See bad-download-and-test-tomohara-aliases.ipynb
+
+# setup
+$ copy tomohara-aliases.bash $TMP
+# test
+$ PATH=fubar BATCH_MODE=1 bash -i -c "source $TMP/tomohara-aliases.bash; echo done" 2> /dev/null
+done
+
+#-------------------------------------------------------------------------------
+# TODO: rename/copy reports unknown files (at least if DEBUG_LEVEL > 2)
+
+$ rename-with-file-date fubar | grep -i warning | wc -l;
+1
+
+#===============================================================================
+
+# TODO: make sure script alias doesn't mess up the prompt when changed to '$$'
+
+# NOTE: This occurs due to interpretation of $$ as PID, as demonstrated here:
+# ¢ bash
+# ¢ echo $PS1
+# ¢
+# ¢ PS1='$$ '
+# 23139 exit
+# ¢ 
+
+$ reset-prompt '$'
+$ script _test-script-$$.log
+$$ exit
+
+#...............................................................................
+# Other prompt-related tests
+
+$ reset-prompt '¢'
+¢
+
+#...............................................................................
+# tests for python module aliases (e.g., python-import-path)
+
+$ python-import-path six | extract-matches "(/lib.*)"
+/lib/python3.8/site-packages/six.py
+
+# ¢ python -c "import eldar"
+# ¢ python -c "import eldar; print(eldar)"
+# <module 'eldar' from '/home/tomohara/anaconda3/envs/nlp-py-3-8/lib/python3.8/site-packages/eldar-0.0.7-py3.8.egg/eldar/__init__.py'>
+
+# setup
+$ python -m easy_install eldar-0.0.7-py3.8.egg
+# command
+$ python-import-path eldar | grep -ic egg
+1
+
+#----------
+
+# bug w/ resolving some imports
+# $ python-import-path re 
+# matches /home/tomohara/anaconda3/envs/nlp-py-3-8/lib/python3.8/reprlib.py
+
+$ python-import-path re | extract-matches "\w+.py$"
+re.py
+
+
+#-------------------------------------------------------------------------------
+# tests for path manipulation
+
+$ prepend-path /usr/local/fubar/bin
+
+$ show-path | head -2
+PATH:
+/usr/local/fubar/bin
+
+#...............................................................................
+
+# make sure none of the known aliases lead to 'command not found'
+# TODO: derive list via static analysis of bash source
+# EX: known_aliases=$(extract_matches.perl -i -replacement='$2' "^(alias|function) ([^ =\(\{]+)" tomohara-aliases.bash)
+#
+
+# known not to be aliases or function (500+)
+
+¢ fubar
+fubar: command not found
+
+# known to be aliases
+
+¢ conditional-export 2>&1 | grep  -c "command not found"
+0
+
+# ...
+
+¢ more-tomohara-aliases 2>&1 | grep  -c "command not found"
+0
+
+
+
+# 400+ aliases proper
+# note: currently 430
+
+¢ show-macros | grep cond-export
+alias cond-export='conditional-export'
+
+¢ show-macros | grep -c ^alias | grep -c ^4[0-9][0-9]
+1
+
+
+# 300+ functions proper
+# note: currently 348
+
+¢ show-macros | perlgrep.perl -para ^dir-proper
+dir-proper () 
+{ 
+    $LS ${dir_options} --directory "$@" 2>&1 | $PAGER
+}
+
+¢ show-macros | grep -c ^{ | grep -c ^3[0-9][0-9]
+1
+
+¢ show-macros | grep -c ^} | grep -c ^3[0-9][0-9]
+1
+
+#===============================================================================
+# dump-url vs get-url (e.g., wget vs. curl)
+
+$ echo "<html><a href=fubar.txt>fubar.txt</a><html>' > fubar.html
+
+$ dump-url fubar.html
+$ wc -l fubar.html 2>&1; wc -l fubar.txt 2>&1
+wc: fubar.html: No such file or directory
+1 fubar.txt
+
+$ rename-files fubar old-fubar fubar.txt fubar.html
+$ get-url fubar.html > fubar.txt; wc -l fubar.html 2>&1
+
+#===============================================================================
+# diff-based aliases
+
+# TODO: regression test for dot-file issue
+#
+# $ cd
+# $ diff-backup .bashrc
+# =/>
+# diff: : No such file or directory
+#
+
+#===============================================================================
+
+# TODO figure out test for prompt issues under Emacs
+# \302\242 reset-prompt '$'
+# ^^^^^^^^
+# $ 
+
+#===============================================================================
+# Error checking
+
+$ echo "Error: ..." | check-errors
+1    >>> Error: ... <<<
+
+$ echo "DUH: ..." | check-errors -
+$
+
+#===============================================================================
+# pylint support
+
+¢ python-lint template.py | grep -c "too long"
+0
+
+¢ python-lint-work template.py | grep -c "too long"
+2
+
+# note: make sure line-continuation filtering support works
+
+## ¢ pylint _it.py | cat
+## ************* Module _it
+## _it.py:4:9: C0326: Exactly one space required after assignment
+## SKIP_ADS =  (IS_GI_JOB_SEARCH or system.getenv_bool("SKIP_ADS", False))
+##          ^ (bad-whitespace)
+## 
+## ------------------------------------------------------------------
+## Your code has been rated at 6.67/10 (previous run: 6.67/10, +0.00)
+## 
+
+
+$ cat >_it.py <<END_IT
+"""it"""
+import system
+IS_GI_JOB_SEARCH = False
+SKIP_ADS =  (IS_GI_JOB_SEARCH or system.getenv_bool("SKIP_ADS", False))
+END_IT
+
+## BAD:
+## ¢ python-lint _it.py | cat
+## ************* Module _it
+## SKIP_ADS =  (IS_GI_JOB_SEARCH or system.getenv_bool("SKIP_ADS", False))
+
+¢ python-lint _it.py | cat
+************* Module _it
+
+
+

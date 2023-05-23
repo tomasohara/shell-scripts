@@ -1,5 +1,6 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
+<<<<<<< HEAD
 {"lineNum":"    2","line":"set -e","class":"lineCov","hits":"1","order":"99","possible_hits":"0",},
 {"lineNum":"    3","line":""},
 {"lineNum":"    4","line":"count_only_flag=\'\'","class":"lineCov","hits":"1","order":"100","possible_hits":"0",},
@@ -13,6 +14,21 @@ var data = {lines:[
 {"lineNum":"   12","line":"setup_suite_file=\'\'","class":"lineCov","hits":"1","order":"107","possible_hits":"0",},
 {"lineNum":"   13","line":"BATS_TRACE_LEVEL=\"${BATS_TRACE_LEVEL:-0}\"","class":"lineCov","hits":"1","order":"108","possible_hits":"0",},
 {"lineNum":"   14","line":"BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=","class":"lineCov","hits":"1","order":"109","possible_hits":"0",},
+=======
+{"lineNum":"    2","line":"set -e","class":"lineCov","hits":"1","order":"98","possible_hits":"0",},
+{"lineNum":"    3","line":""},
+{"lineNum":"    4","line":"count_only_flag=\'\'","class":"lineCov","hits":"1","order":"99","possible_hits":"0",},
+{"lineNum":"    5","line":"filter=\'\'","class":"lineCov","hits":"1","order":"100","possible_hits":"0",},
+{"lineNum":"    6","line":"num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}","class":"lineCov","hits":"1","order":"101","possible_hits":"0",},
+{"lineNum":"    7","line":"bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}","class":"lineCov","hits":"1","order":"102","possible_hits":"0",},
+{"lineNum":"    8","line":"bats_no_parallelize_within_files=","class":"lineCov","hits":"1","order":"103","possible_hits":"0",},
+{"lineNum":"    9","line":"filter_status=\'\'","class":"lineCov","hits":"1","order":"104","possible_hits":"0",},
+{"lineNum":"   10","line":"filter_tags_list=()"},
+{"lineNum":"   11","line":"flags=(\'--dummy-flag\') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions","class":"lineCov","hits":"1","order":"105","possible_hits":"0",},
+{"lineNum":"   12","line":"setup_suite_file=\'\'","class":"lineCov","hits":"1","order":"106","possible_hits":"0",},
+{"lineNum":"   13","line":"BATS_TRACE_LEVEL=\"${BATS_TRACE_LEVEL:-0}\"","class":"lineCov","hits":"1","order":"107","possible_hits":"0",},
+{"lineNum":"   14","line":"BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=","class":"lineCov","hits":"1","order":"108","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"   15","line":""},
 {"lineNum":"   16","line":"abort() {"},
 {"lineNum":"   17","line":"  printf \'Error: %s\\n\' \"$1\" >&2","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -20,7 +36,11 @@ var data = {lines:[
 {"lineNum":"   19","line":"}"},
 {"lineNum":"   20","line":""},
 {"lineNum":"   21","line":"# shellcheck source=lib/bats-core/common.bash disable=SC2153"},
+<<<<<<< HEAD
 {"lineNum":"   22","line":"source \"$BATS_ROOT/lib/bats-core/common.bash\"","class":"lineCov","hits":"1","order":"110","possible_hits":"0",},
+=======
+{"lineNum":"   22","line":"source \"$BATS_ROOT/lib/bats-core/common.bash\"","class":"lineCov","hits":"1","order":"109","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"   23","line":""},
 {"lineNum":"   24","line":"while [[ \"$#\" -ne 0 ]]; do","class":"lineCov","hits":"2","order":"111","possible_hits":"0",},
 {"lineNum":"   25","line":"  case \"$1\" in","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -110,18 +130,31 @@ var data = {lines:[
 {"lineNum":"  109","line":"TESTS_LIST_FILE=\"${BATS_RUN_TMPDIR}/test_list_file.txt\"","class":"lineCov","hits":"1","order":"116","possible_hits":"0",},
 {"lineNum":"  110","line":"focus_mode=","class":"lineCov","hits":"1","order":"117","possible_hits":"0",},
 {"lineNum":"  111","line":"bats_gather_tests() {"},
+<<<<<<< HEAD
 {"lineNum":"  112","line":"  local line test_line tags","class":"lineCov","hits":"1","order":"129","possible_hits":"0",},
 {"lineNum":"  113","line":"  all_tests=()"},
 {"lineNum":"  114","line":"  for filename in \"$@\"; do","class":"lineCov","hits":"3","order":"130","possible_hits":"0",},
 {"lineNum":"  115","line":"    if [[ ! -f \"$filename\" ]]; then","class":"lineCov","hits":"1","order":"131","possible_hits":"0",},
+=======
+{"lineNum":"  112","line":"  local line test_line tags","class":"lineCov","hits":"1","order":"126","possible_hits":"0",},
+{"lineNum":"  113","line":"  all_tests=()"},
+{"lineNum":"  114","line":"  for filename in \"$@\"; do","class":"lineCov","hits":"3","order":"127","possible_hits":"0",},
+{"lineNum":"  115","line":"    if [[ ! -f \"$filename\" ]]; then","class":"lineCov","hits":"1","order":"128","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"  116","line":"      abort \"Test file \\\"${filename}\\\" does not exist\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  117","line":"    fi"},
 {"lineNum":"  118","line":""},
 {"lineNum":"  119","line":"    test_names=()"},
 {"lineNum":"  120","line":"    test_dupes=()"},
+<<<<<<< HEAD
 {"lineNum":"  121","line":"    while read -r line; do","class":"lineCov","hits":"113","order":"132","possible_hits":"0",},
 {"lineNum":"  122","line":"      if [[ ! \"$line\" =~ ^bats_test_function\\  ]]; then","class":"lineCov","hits":"112","order":"148","possible_hits":"0",},
 {"lineNum":"  123","line":"        continue","class":"lineCov","hits":"109","order":"149","possible_hits":"0",},
+=======
+{"lineNum":"  121","line":"    while read -r line; do","class":"lineCov","hits":"67","order":"129","possible_hits":"0",},
+{"lineNum":"  122","line":"      if [[ ! \"$line\" =~ ^bats_test_function\\  ]]; then","class":"lineCov","hits":"66","order":"148","possible_hits":"0",},
+{"lineNum":"  123","line":"        continue","class":"lineCov","hits":"63","order":"149","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"  124","line":"      fi"},
 {"lineNum":"  125","line":"      line=\"${line%$\'\\r\'}\"","class":"lineCov","hits":"3","order":"184","possible_hits":"0",},
 {"lineNum":"  126","line":"      line=\"${line#* }\"","class":"lineCov","hits":"3","order":"185","possible_hits":"0",},
@@ -201,6 +234,7 @@ var data = {lines:[
 {"lineNum":"  200","line":"TEST_ROOT=${1-}","class":"lineCov","hits":"1","order":"118","possible_hits":"0",},
 {"lineNum":"  201","line":"TEST_ROOT=${TEST_ROOT%/*}","class":"lineCov","hits":"1","order":"119","possible_hits":"0",},
 {"lineNum":"  202","line":"BATS_RUN_LOGS_DIRECTORY=\"$TEST_ROOT/.bats/run-logs\"","class":"lineCov","hits":"1","order":"120","possible_hits":"0",},
+<<<<<<< HEAD
 {"lineNum":"  203","line":"if [[ ! -d \"$BATS_RUN_LOGS_DIRECTORY\" ]]; then","class":"lineCov","hits":"1","order":"123","possible_hits":"0",},
 {"lineNum":"  204","line":"  if [[ -n \"$filter_status\" ]]; then","class":"lineCov","hits":"1","order":"125","possible_hits":"0",},
 {"lineNum":"  205","line":"    printf \"Error: --filter-status needs \'%s/\' to save failed tests. Please create this folder, add it to .gitignore and try again.\\n\" \"$BATS_RUN_LOGS_DIRECTORY\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -210,6 +244,17 @@ var data = {lines:[
 {"lineNum":"  209","line":"  fi"},
 {"lineNum":"  210","line":"  # discard via sink instead of having a conditional later"},
 {"lineNum":"  211","line":"  export BATS_RUNLOG_FILE=\'/dev/null\'","class":"lineCov","hits":"2","order":"127","possible_hits":"0",},
+=======
+{"lineNum":"  203","line":"if [[ ! -d \"$BATS_RUN_LOGS_DIRECTORY\" ]]; then","class":"lineCov","hits":"1","order":"121","possible_hits":"0",},
+{"lineNum":"  204","line":"  if [[ -n \"$filter_status\" ]]; then","class":"lineCov","hits":"1","order":"122","possible_hits":"0",},
+{"lineNum":"  205","line":"    printf \"Error: --filter-status needs \'%s/\' to save failed tests. Please create this folder, add it to .gitignore and try again.\\n\" \"$BATS_RUN_LOGS_DIRECTORY\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"  206","line":"    exit 1","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"  207","line":"  else"},
+{"lineNum":"  208","line":"    BATS_RUN_LOGS_DIRECTORY=","class":"lineCov","hits":"1","order":"123","possible_hits":"0",},
+{"lineNum":"  209","line":"  fi"},
+{"lineNum":"  210","line":"  # discard via sink instead of having a conditional later"},
+{"lineNum":"  211","line":"  export BATS_RUNLOG_FILE=\'/dev/null\'","class":"lineCov","hits":"2","order":"124","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"  212","line":"else"},
 {"lineNum":"  213","line":"  # use UTC (-u) to avoid problems with TZ changes"},
 {"lineNum":"  214","line":"  BATS_RUNLOG_DATE=$(date -u \'+%Y-%m-%d %H:%M:%S UTC\')","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -220,7 +265,11 @@ var data = {lines:[
 {"lineNum":"  219","line":"  fi"},
 {"lineNum":"  220","line":"fi"},
 {"lineNum":"  221","line":""},
+<<<<<<< HEAD
 {"lineNum":"  222","line":"bats_gather_tests \"$@\"","class":"lineCov","hits":"1","order":"128","possible_hits":"0",},
+=======
+{"lineNum":"  222","line":"bats_gather_tests \"$@\"","class":"lineCov","hits":"1","order":"125","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"  223","line":""},
 {"lineNum":"  224","line":"if [[ -n \"$filter_status\" ]]; then","class":"lineCov","hits":"1","order":"209","possible_hits":"0",},
 {"lineNum":"  225","line":"  case \"$filter_status\" in","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -353,8 +402,13 @@ var data = {lines:[
 {"lineNum":"  352","line":""},
 {"lineNum":"  353","line":"# shellcheck disable=SC2317"},
 {"lineNum":"  354","line":"bats_suite_exit_trap() {"},
+<<<<<<< HEAD
 {"lineNum":"  355","line":"  local print_bats_out=\"${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS}\"","class":"lineCov","hits":"2","order":"626","possible_hits":"0",},
 {"lineNum":"  356","line":"  if [[ -z \"${BATS_SETUP_SUITE_COMPLETED}\" || -z \"${BATS_TEARDOWN_SUITE_COMPLETED}\" ]]; then","class":"lineCov","hits":"3","order":"627","possible_hits":"0",},
+=======
+{"lineNum":"  355","line":"  local print_bats_out=\"${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS}\"","class":"lineCov","hits":"2","order":"524","possible_hits":"0",},
+{"lineNum":"  356","line":"  if [[ -z \"${BATS_SETUP_SUITE_COMPLETED}\" || -z \"${BATS_TEARDOWN_SUITE_COMPLETED}\" ]]; then","class":"lineCov","hits":"3","order":"525","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"  357","line":"    if [[ -z \"${BATS_SETUP_SUITE_COMPLETED}\" ]]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  358","line":"      printf \"not ok 1 setup_suite\\n\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  359","line":"    elif [[ -z \"${BATS_TEARDOWN_SUITE_COMPLETED}\" ]]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -368,6 +422,7 @@ var data = {lines:[
 {"lineNum":"  367","line":"    bats_exec_suite_status=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  368","line":"  fi"},
 {"lineNum":"  369","line":""},
+<<<<<<< HEAD
 {"lineNum":"  370","line":"  if [[ -n \"$print_bats_out\" ]]; then","class":"lineCov","hits":"2","order":"628","possible_hits":"0",},
 {"lineNum":"  371","line":"    bats_prefix_lines_for_tap_output <\"$BATS_OUT\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  372","line":"  fi"},
@@ -392,6 +447,32 @@ var data = {lines:[
 {"lineNum":"  391","line":"  teardown_suite >>\"$BATS_OUT\" 2>&1 || bats_teardown_suite_status=$?","class":"lineCov","hits":"2","order":"620","possible_hits":"0",},
 {"lineNum":"  392","line":"  if ((bats_teardown_suite_status == 0)); then","class":"lineCov","hits":"2","order":"622","possible_hits":"0",},
 {"lineNum":"  393","line":"    BATS_TEARDOWN_SUITE_COMPLETED=1","class":"lineCov","hits":"2","order":"623","possible_hits":"0",},
+=======
+{"lineNum":"  370","line":"  if [[ -n \"$print_bats_out\" ]]; then","class":"lineCov","hits":"2","order":"526","possible_hits":"0",},
+{"lineNum":"  371","line":"    bats_prefix_lines_for_tap_output <\"$BATS_OUT\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"  372","line":"  fi"},
+{"lineNum":"  373","line":""},
+{"lineNum":"  374","line":"  if [[ ${BATS_INTERRUPTED-NOTSET} != NOTSET ]]; then","class":"lineCov","hits":"2","order":"527","possible_hits":"0",},
+{"lineNum":"  375","line":"    printf \"\\n# Received SIGINT, aborting ...\\n\\n\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"  376","line":"  fi"},
+{"lineNum":"  377","line":""},
+{"lineNum":"  378","line":"  if [[ -d \"$BATS_RUN_LOGS_DIRECTORY\" && -n \"${BATS_INTERRUPTED:-}\" ]]; then","class":"lineCov","hits":"2","order":"528","possible_hits":"0",},
+{"lineNum":"  379","line":"    # aborting a test run with CTRL+C does not save the runlog file"},
+{"lineNum":"  380","line":"    [[ \"$BATS_RUNLOG_FILE\" != /dev/null ]] && rm \"$BATS_RUNLOG_FILE\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"  381","line":"  fi"},
+{"lineNum":"  382","line":"  exit \"$bats_exec_suite_status\"","class":"lineCov","hits":"2","order":"529","possible_hits":"0",},
+{"lineNum":"  383","line":"} >&3","class":"lineNoCov","hits":"0","possible_hits":"0",},
+{"lineNum":"  384","line":""},
+{"lineNum":"  385","line":"bats_run_teardown_suite() {"},
+{"lineNum":"  386","line":"  local bats_teardown_suite_status=0","class":"lineCov","hits":"2","order":"515","possible_hits":"0",},
+{"lineNum":"  387","line":"  # avoid being called twice, in case this is not called through bats_teardown_suite_trap"},
+{"lineNum":"  388","line":"  # but from the end of file"},
+{"lineNum":"  389","line":"  trap bats_suite_exit_trap EXIT","class":"lineCov","hits":"2","order":"516","possible_hits":"0",},
+{"lineNum":"  390","line":"  BATS_TEARDOWN_SUITE_COMPLETED=","class":"lineCov","hits":"2","order":"517","possible_hits":"0",},
+{"lineNum":"  391","line":"  teardown_suite >>\"$BATS_OUT\" 2>&1 || bats_teardown_suite_status=$?","class":"lineCov","hits":"2","order":"518","possible_hits":"0",},
+{"lineNum":"  392","line":"  if ((bats_teardown_suite_status == 0)); then","class":"lineCov","hits":"2","order":"520","possible_hits":"0",},
+{"lineNum":"  393","line":"    BATS_TEARDOWN_SUITE_COMPLETED=1","class":"lineCov","hits":"2","order":"521","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"  394","line":"  elif [[ -n \"${BATS_SETUP_SUITE_COMPLETED:-}\" ]]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  395","line":"    BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=1","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  396","line":"    BATS_ERROR_STATUS=$bats_teardown_suite_status","class":"lineNoCov","hits":"0","possible_hits":"0",},
@@ -406,7 +487,11 @@ var data = {lines:[
 {"lineNum":"  405","line":"}"},
 {"lineNum":"  406","line":""},
 {"lineNum":"  407","line":"teardown_suite() {"},
+<<<<<<< HEAD
 {"lineNum":"  408","line":"  :","class":"lineCov","hits":"2","order":"621","possible_hits":"0",},
+=======
+{"lineNum":"  408","line":"  :","class":"lineCov","hits":"2","order":"519","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"  409","line":"}"},
 {"lineNum":"  410","line":""},
 {"lineNum":"  411","line":"trap bats_teardown_suite_trap EXIT","class":"lineCov","hits":"2","order":"260","possible_hits":"0",},
@@ -449,6 +534,7 @@ var data = {lines:[
 {"lineNum":"  448","line":"      bats_exec_suite_status=130 # bash\'s code for SIGINT exits","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  449","line":"      break","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  450","line":"    fi"},
+<<<<<<< HEAD
 {"lineNum":"  451","line":"    bats-exec-file \"${flags[@]}\" \"$filename\" \"${TESTS_LIST_FILE}\" || bats_exec_suite_status=1","class":"lineCov","hits":"4","order":"267","possible_hits":"0",},
 {"lineNum":"  452","line":"  done"},
 {"lineNum":"  453","line":"fi"},
@@ -457,6 +543,16 @@ var data = {lines:[
 {"lineNum":"  456","line":"bats_run_teardown_suite","class":"lineCov","hits":"2","order":"616","possible_hits":"0",},
 {"lineNum":"  457","line":""},
 {"lineNum":"  458","line":"if [[ \"$focus_mode\" == 1 && $bats_exec_suite_status -eq 0 ]]; then","class":"lineCov","hits":"2","order":"624","possible_hits":"0",},
+=======
+{"lineNum":"  451","line":"    bats-exec-file \"${flags[@]}\" \"$filename\" \"${TESTS_LIST_FILE}\" || bats_exec_suite_status=1","class":"lineCov","hits":"2","order":"267","possible_hits":"0",},
+{"lineNum":"  452","line":"  done"},
+{"lineNum":"  453","line":"fi"},
+{"lineNum":"  454","line":""},
+{"lineNum":"  455","line":"set -eET","class":"lineCov","hits":"2","order":"513","possible_hits":"0",},
+{"lineNum":"  456","line":"bats_run_teardown_suite","class":"lineCov","hits":"2","order":"514","possible_hits":"0",},
+{"lineNum":"  457","line":""},
+{"lineNum":"  458","line":"if [[ \"$focus_mode\" == 1 && $bats_exec_suite_status -eq 0 ]]; then","class":"lineCov","hits":"2","order":"522","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"  459","line":"  if [[ ${BATS_NO_FAIL_FOCUS_RUN-} == 1 ]]; then","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  460","line":"    printf \"WARNING: This test run only contains tests tagged \\`bats:focus\\`!\\n\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"  461","line":"  else"},
@@ -465,8 +561,15 @@ var data = {lines:[
 {"lineNum":"  464","line":"  fi"},
 {"lineNum":"  465","line":"fi"},
 {"lineNum":"  466","line":""},
+<<<<<<< HEAD
 {"lineNum":"  467","line":"exit \"$bats_exec_suite_status\" # the actual exit code will be set by the exit trap using bats_exec_suite_status","class":"lineCov","hits":"2","order":"625","possible_hits":"0",},
 ]};
 var percent_low = 25;var percent_high = 75;
 var header = { "command" : "bats", "date" : "2023-05-19 18:20:41", "instrumented" : 245, "covered" : 90,};
+=======
+{"lineNum":"  467","line":"exit \"$bats_exec_suite_status\" # the actual exit code will be set by the exit trap using bats_exec_suite_status","class":"lineCov","hits":"2","order":"523","possible_hits":"0",},
+]};
+var percent_low = 25;var percent_high = 75;
+var header = { "command" : "bats", "date" : "2023-05-06 21:39:38", "instrumented" : 245, "covered" : 90,};
+>>>>>>> integration-testing-3fa2c13
 var merged_data = [];

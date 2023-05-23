@@ -1,10 +1,17 @@
 var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
 {"lineNum":"    2","line":""},
+<<<<<<< HEAD
 {"lineNum":"    3","line":"BATS_TMPNAME=\"$BATS_RUN_TMPDIR/bats.$$\"","class":"lineCov","hits":"11","order":"284","possible_hits":"0",},
 {"lineNum":"    4","line":"BATS_PARENT_TMPNAME=\"$BATS_RUN_TMPDIR/bats.$PPID\"","class":"lineCov","hits":"11","order":"285","possible_hits":"0",},
 {"lineNum":"    5","line":"# shellcheck disable=SC2034"},
 {"lineNum":"    6","line":"BATS_OUT=\"${BATS_TMPNAME}.out\" # used in bats-exec-file","class":"lineCov","hits":"11","order":"286","possible_hits":"0",},
+=======
+{"lineNum":"    3","line":"BATS_TMPNAME=\"$BATS_RUN_TMPDIR/bats.$$\"","class":"lineCov","hits":"10","order":"284","possible_hits":"0",},
+{"lineNum":"    4","line":"BATS_PARENT_TMPNAME=\"$BATS_RUN_TMPDIR/bats.$PPID\"","class":"lineCov","hits":"10","order":"285","possible_hits":"0",},
+{"lineNum":"    5","line":"# shellcheck disable=SC2034"},
+{"lineNum":"    6","line":"BATS_OUT=\"${BATS_TMPNAME}.out\" # used in bats-exec-file","class":"lineCov","hits":"10","order":"286","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"    7","line":""},
 {"lineNum":"    8","line":"bats_preprocess_source() {"},
 {"lineNum":"    9","line":"  # export to make it visible to bats_evaluate_preprocessed_source"},
@@ -14,14 +21,26 @@ var data = {lines:[
 {"lineNum":"   13","line":"}"},
 {"lineNum":"   14","line":""},
 {"lineNum":"   15","line":"bats_evaluate_preprocessed_source() {"},
+<<<<<<< HEAD
 {"lineNum":"   16","line":"  if [[ -z \"${BATS_TEST_SOURCE:-}\" ]]; then","class":"lineCov","hits":"10","order":"413","possible_hits":"0",},
+=======
+{"lineNum":"   16","line":"  if [[ -z \"${BATS_TEST_SOURCE:-}\" ]]; then","class":"lineCov","hits":"9","order":"412","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"   17","line":"    BATS_TEST_SOURCE=\"${BATS_PARENT_TMPNAME}.src\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   18","line":"  fi"},
 {"lineNum":"   19","line":"  # Dynamically loaded user files provided outside of Bats."},
 {"lineNum":"   20","line":"  # shellcheck disable=SC1090"},
+<<<<<<< HEAD
 {"lineNum":"   21","line":"  source \"$BATS_TEST_SOURCE\"","class":"lineCov","hits":"10","order":"414","possible_hits":"0",},
 {"lineNum":"   22","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
 var header = { "command" : "bats", "date" : "2023-05-19 18:20:15", "instrumented" : 8, "covered" : 7,};
+=======
+{"lineNum":"   21","line":"  source \"$BATS_TEST_SOURCE\"","class":"lineCov","hits":"9","order":"413","possible_hits":"0",},
+{"lineNum":"   22","line":"}"},
+]};
+var percent_low = 25;var percent_high = 75;
+var header = { "command" : "bats", "date" : "2023-05-06 21:38:40", "instrumented" : 8, "covered" : 7,};
+>>>>>>> integration-testing-3fa2c13
 var merged_data = [];

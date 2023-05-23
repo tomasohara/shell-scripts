@@ -1,0 +1,15 @@
+# Adhoc tests for merge_notes.py
+# perhaps macos related
+
+# DEBUG_LEVEL=4 xargs $PYTHON -m mezcla.merge_notes --ignore-dividers --output-dividers --show-file-info < "$new_base.files.list" > "$new_base.list" 2> "$new_base.list.$(TODAY).log";
+#
+# UnicodeEncodeError: 'ascii' codec can't encode character '\ufeff' in position 0: ordinal not in range(128)
+
+# 
+# $ python -c 'print("\uFEFF")'
+# Traceback (most recent call last):
+#   File "<string>", line 1, in <module>
+# UnicodeEncodeError: 'ascii' codec can't encode character '\ufeff' in position 0: ordinal not in range(128)
+
+## $ (python ~/mezcla/data_utils.py 2>&1 | check-errors | cat)
+## 1    >>> Error: data_utils.py now needs pandas 1.3.0 or higher <<<

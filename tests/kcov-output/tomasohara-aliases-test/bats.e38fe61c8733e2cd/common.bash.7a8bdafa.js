@@ -2,26 +2,45 @@ var data = {lines:[
 {"lineNum":"    1","line":"#!/usr/bin/env bash"},
 {"lineNum":"    2","line":""},
 {"lineNum":"    3","line":"bats_prefix_lines_for_tap_output() {"},
+<<<<<<< HEAD
 {"lineNum":"    4","line":"  while IFS= read -r line; do","class":"lineCov","hits":"16","order":"547","possible_hits":"0",},
 {"lineNum":"    5","line":"    printf \'# %s\\n\' \"$line\" || break # avoid feedback loop when errors are redirected into BATS_OUT (see #353)","class":"lineCov","hits":"6","order":"549","possible_hits":"0",},
 {"lineNum":"    6","line":"  done"},
 {"lineNum":"    7","line":"  if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"2","order":"552","possible_hits":"0",},
+=======
+{"lineNum":"    4","line":"  while IFS= read -r line; do","class":"lineCov","hits":"8","order":"538","possible_hits":"0",},
+{"lineNum":"    5","line":"    printf \'# %s\\n\' \"$line\" || break # avoid feedback loop when errors are redirected into BATS_OUT (see #353)","class":"lineCov","hits":"2","order":"539","possible_hits":"0",},
+{"lineNum":"    6","line":"  done"},
+{"lineNum":"    7","line":"  if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"2","order":"540","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"    8","line":"    printf \'# %s\\n\' \"$line\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"    9","line":"  fi"},
 {"lineNum":"   10","line":"}"},
 {"lineNum":"   11","line":""},
 {"lineNum":"   12","line":"function bats_replace_filename() {"},
+<<<<<<< HEAD
 {"lineNum":"   13","line":"  local line","class":"lineCov","hits":"2","order":"548","possible_hits":"0",},
 {"lineNum":"   14","line":"  while read -r line; do","class":"lineCov","hits":"8","order":"550","possible_hits":"0",},
 {"lineNum":"   15","line":"    printf \"%s\\n\" \"${line//$BATS_TEST_SOURCE/$BATS_TEST_FILENAME}\"","class":"lineCov","hits":"6","order":"551","possible_hits":"0",},
 {"lineNum":"   16","line":"  done"},
 {"lineNum":"   17","line":"  if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"2","order":"553","possible_hits":"0",},
+=======
+{"lineNum":"   13","line":"  local line","class":"lineCov","hits":"2","order":"541","possible_hits":"0",},
+{"lineNum":"   14","line":"  while read -r line; do","class":"lineCov","hits":"4","order":"542","possible_hits":"0",},
+{"lineNum":"   15","line":"    printf \"%s\\n\" \"${line//$BATS_TEST_SOURCE/$BATS_TEST_FILENAME}\"","class":"lineCov","hits":"2","order":"543","possible_hits":"0",},
+{"lineNum":"   16","line":"  done"},
+{"lineNum":"   17","line":"  if [[ -n \"$line\" ]]; then","class":"lineCov","hits":"2","order":"544","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"   18","line":"    printf \"%s\\n\" \"${line//$BATS_TEST_SOURCE/$BATS_TEST_FILENAME}\"","class":"lineNoCov","hits":"0","possible_hits":"0",},
 {"lineNum":"   19","line":"  fi"},
 {"lineNum":"   20","line":"}"},
 {"lineNum":"   21","line":""},
 {"lineNum":"   22","line":"bats_quote_code() { # <var> <code>"},
+<<<<<<< HEAD
 {"lineNum":"   23","line":"  printf -v \"$1\" -- \"%s%s%s\" \"$BATS_BEGIN_CODE_QUOTE\" \"$2\" \"$BATS_END_CODE_QUOTE\"","class":"lineCov","hits":"4","order":"501","possible_hits":"0",},
+=======
+{"lineNum":"   23","line":"  printf -v \"$1\" -- \"%s%s%s\" \"$BATS_BEGIN_CODE_QUOTE\" \"$2\" \"$BATS_END_CODE_QUOTE\"","class":"lineCov","hits":"2","order":"525","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"   24","line":"}"},
 {"lineNum":"   25","line":""},
 {"lineNum":"   26","line":"bats_check_valid_version() {"},
@@ -219,6 +238,7 @@ var data = {lines:[
 {"lineNum":"  218","line":""},
 {"lineNum":"  219","line":"bats_format_file_line_reference() { # <output> <file> <line>"},
 {"lineNum":"  220","line":"  # shellcheck disable=SC2034 # will be used in subimplementation"},
+<<<<<<< HEAD
 {"lineNum":"  221","line":"  local output=\"${1?}\"","class":"lineCov","hits":"4","order":"505","possible_hits":"0",},
 {"lineNum":"  222","line":"  shift","class":"lineCov","hits":"4","order":"506","possible_hits":"0",},
 {"lineNum":"  223","line":"  \"bats_format_file_line_reference_${BATS_LINE_REFERENCE_FORMAT?}\" \"$@\"","class":"lineCov","hits":"4","order":"507","possible_hits":"0",},
@@ -226,6 +246,15 @@ var data = {lines:[
 {"lineNum":"  225","line":""},
 {"lineNum":"  226","line":"bats_format_file_line_reference_comma_line() {"},
 {"lineNum":"  227","line":"  printf -v \"$output\" \"%s, line %d\" \"$@\"","class":"lineCov","hits":"4","order":"508","possible_hits":"0",},
+=======
+{"lineNum":"  221","line":"  local output=\"${1?}\"","class":"lineCov","hits":"2","order":"497","possible_hits":"0",},
+{"lineNum":"  222","line":"  shift","class":"lineCov","hits":"2","order":"498","possible_hits":"0",},
+{"lineNum":"  223","line":"  \"bats_format_file_line_reference_${BATS_LINE_REFERENCE_FORMAT?}\" \"$@\"","class":"lineCov","hits":"2","order":"499","possible_hits":"0",},
+{"lineNum":"  224","line":"}"},
+{"lineNum":"  225","line":""},
+{"lineNum":"  226","line":"bats_format_file_line_reference_comma_line() {"},
+{"lineNum":"  227","line":"  printf -v \"$output\" \"%s, line %d\" \"$@\"","class":"lineCov","hits":"2","order":"500","possible_hits":"0",},
+>>>>>>> integration-testing-3fa2c13
 {"lineNum":"  228","line":"}"},
 {"lineNum":"  229","line":""},
 {"lineNum":"  230","line":"bats_format_file_line_reference_colon() {"},
@@ -250,5 +279,9 @@ var data = {lines:[
 {"lineNum":"  249","line":"}"},
 ]};
 var percent_low = 25;var percent_high = 75;
+<<<<<<< HEAD
 var header = { "command" : "bats", "date" : "2023-05-19 18:20:15", "instrumented" : 121, "covered" : 35,};
+=======
+var header = { "command" : "bats", "date" : "2023-05-06 21:38:39", "instrumented" : 121, "covered" : 35,};
+>>>>>>> integration-testing-3fa2c13
 var merged_data = [];

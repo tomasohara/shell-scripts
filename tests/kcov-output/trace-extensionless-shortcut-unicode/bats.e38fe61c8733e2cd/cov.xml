@@ -1,10 +1,15 @@
 <?xml version="1.0" ?>
 <!DOCTYPE coverage SYSTEM 'http://cobertura.sourceforge.net/xml/coverage-04.dtd'>
+<<<<<<< HEAD
 <coverage line-rate="0.314" lines-covered="750" lines-valid="2386" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1684499725">
+=======
+<coverage line-rate="0.289" lines-covered="672" lines-valid="2324" branch-rate="1.0" branches-covered="1.0" branches-rate="1.0" complexity="1.0" version="1.9" timestamp="1683388443">
+>>>>>>> integration-testing-3fa2c13
 	<sources>
 		<source>/</source>
 	</sources>
 	<packages>
+<<<<<<< HEAD
 		<package name="bats" line-rate="0.314" lines-covered="750" lines-valid="2386" branch-rate="1.0" complexity="1.0">
 			<classes>
 				<class name="bats_134287_src" filename="tmp/bats-run-uFOv5W/bats.134287.src" branch-rate="1.0" complexity="1.0" line-rate="0.893">
@@ -180,6 +185,10 @@
 						<line number="471" hits="14"/>
 					</lines>
 				</class>
+=======
+		<package name="bats" line-rate="0.289" lines-covered="672" lines-valid="2324" branch-rate="1.0" complexity="1.0">
+			<classes>
+>>>>>>> integration-testing-3fa2c13
 				<class name="cpufreqctl_aveey" filename="usr/local/bin/cpufreqctl-aveey" branch-rate="1.0" complexity="1.0" line-rate="0.000">
 					<lines>
 						<line number="24" hits="0"/>
@@ -1277,8 +1286,13 @@
 				</class>
 				<class name="test_functions_bash" filename="usr/local/lib/bats-core/test_functions.bash" branch-rate="1.0" complexity="1.0" line-rate="0.019">
 					<lines>
+<<<<<<< HEAD
 						<line number="3" hits="13"/>
 						<line number="7" hits="13"/>
+=======
+						<line number="3" hits="12"/>
+						<line number="7" hits="12"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="19" hits="0"/>
 						<line number="20" hits="0"/>
 						<line number="22" hits="0"/>
@@ -1391,9 +1405,15 @@
 						<line number="11" hits="1"/>
 						<line number="13" hits="1"/>
 						<line number="15" hits="1"/>
+<<<<<<< HEAD
 						<line number="16" hits="580"/>
 						<line number="18" hits="289"/>
 						<line number="19" hits="289"/>
+=======
+						<line number="16" hits="74"/>
+						<line number="18" hits="36"/>
+						<line number="19" hits="36"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="29" hits="1"/>
 						<line number="30" hits="0"/>
 						<line number="31" hits="0"/>
@@ -1510,6 +1530,7 @@
 						<line number="212" hits="0"/>
 						<line number="215" hits="0"/>
 						<line number="218" hits="0"/>
+<<<<<<< HEAD
 						<line number="222" hits="24"/>
 						<line number="223" hits="24"/>
 						<line number="224" hits="96"/>
@@ -1522,6 +1543,20 @@
 						<line number="233" hits="20"/>
 						<line number="234" hits="20"/>
 						<line number="238" hits="24"/>
+=======
+						<line number="222" hits="22"/>
+						<line number="223" hits="22"/>
+						<line number="224" hits="88"/>
+						<line number="225" hits="22"/>
+						<line number="226" hits="10"/>
+						<line number="228" hits="12"/>
+						<line number="229" hits="12"/>
+						<line number="230" hits="0"/>
+						<line number="231" hits="0"/>
+						<line number="233" hits="12"/>
+						<line number="234" hits="12"/>
+						<line number="238" hits="22"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="242" hits="0"/>
 						<line number="243" hits="0"/>
 						<line number="244" hits="0"/>
@@ -1538,11 +1573,19 @@
 						<line number="265" hits="0"/>
 						<line number="269" hits="1"/>
 						<line number="272" hits="1"/>
+<<<<<<< HEAD
 						<line number="273" hits="13"/>
 						<line number="277" hits="12"/>
 						<line number="279" hits="12"/>
 						<line number="280" hits="12"/>
 						<line number="283" hits="12"/>
+=======
+						<line number="273" hits="12"/>
+						<line number="277" hits="11"/>
+						<line number="279" hits="11"/>
+						<line number="280" hits="11"/>
+						<line number="283" hits="11"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="284" hits="1"/>
 						<line number="288" hits="0"/>
 						<line number="289" hits="1"/>
@@ -1562,12 +1605,21 @@
 						<line number="316" hits="0"/>
 						<line number="317" hits="0"/>
 						<line number="319" hits="2"/>
+<<<<<<< HEAD
 						<line number="321" hits="24"/>
 						<line number="322" hits="24"/>
 						<line number="323" hits="0"/>
 						<line number="324" hits="0"/>
 						<line number="327" hits="24"/>
 						<line number="330" hits="24"/>
+=======
+						<line number="321" hits="22"/>
+						<line number="322" hits="22"/>
+						<line number="323" hits="0"/>
+						<line number="324" hits="0"/>
+						<line number="327" hits="22"/>
+						<line number="330" hits="22"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="338" hits="1"/>
 						<line number="339" hits="1"/>
 						<line number="340" hits="0"/>
@@ -1659,6 +1711,7 @@
 						<line number="114" hits="3"/>
 						<line number="115" hits="1"/>
 						<line number="116" hits="0"/>
+<<<<<<< HEAD
 						<line number="121" hits="449"/>
 						<line number="122" hits="449"/>
 						<line number="123" hits="435"/>
@@ -1669,13 +1722,31 @@
 						<line number="129" hits="24"/>
 						<line number="130" hits="12"/>
 						<line number="135" hits="12"/>
+=======
+						<line number="121" hits="201"/>
+						<line number="122" hits="200"/>
+						<line number="123" hits="189"/>
+						<line number="125" hits="11"/>
+						<line number="126" hits="11"/>
+						<line number="127" hits="11"/>
+						<line number="128" hits="11"/>
+						<line number="129" hits="22"/>
+						<line number="130" hits="11"/>
+						<line number="135" hits="11"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="136" hits="0"/>
 						<line number="138" hits="0"/>
 						<line number="141" hits="0"/>
 						<line number="144" hits="0"/>
+<<<<<<< HEAD
 						<line number="146" hits="12"/>
 						<line number="148" hits="0"/>
 						<line number="151" hits="12"/>
+=======
+						<line number="146" hits="11"/>
+						<line number="148" hits="0"/>
+						<line number="151" hits="11"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="152" hits="0"/>
 						<line number="153" hits="0"/>
 						<line number="155" hits="0"/>
@@ -1695,6 +1766,7 @@
 						<line number="174" hits="0"/>
 						<line number="177" hits="0"/>
 						<line number="178" hits="0"/>
+<<<<<<< HEAD
 						<line number="181" hits="24"/>
 						<line number="182" hits="12"/>
 						<line number="183" hits="12"/>
@@ -1702,6 +1774,15 @@
 						<line number="186" hits="0"/>
 						<line number="187" hits="0"/>
 						<line number="189" hits="12"/>
+=======
+						<line number="181" hits="22"/>
+						<line number="182" hits="11"/>
+						<line number="183" hits="11"/>
+						<line number="185" hits="21"/>
+						<line number="186" hits="0"/>
+						<line number="187" hits="0"/>
+						<line number="189" hits="11"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="190" hits="0"/>
 						<line number="192" hits="1"/>
 						<line number="193" hits="0"/>
@@ -1847,6 +1928,7 @@
 				</class>
 				<class name="bats_exec_test" filename="usr/local/libexec/bats-core/bats-exec-test" branch-rate="1.0" complexity="1.0" line-rate="0.527">
 					<lines>
+<<<<<<< HEAD
 						<line number="2" hits="12"/>
 						<line number="5" hits="12"/>
 						<line number="6" hits="12"/>
@@ -1858,6 +1940,19 @@
 						<line number="12" hits="12"/>
 						<line number="14" hits="24"/>
 						<line number="15" hits="24"/>
+=======
+						<line number="2" hits="11"/>
+						<line number="5" hits="11"/>
+						<line number="6" hits="11"/>
+						<line number="7" hits="11"/>
+						<line number="8" hits="11"/>
+						<line number="9" hits="11"/>
+						<line number="10" hits="11"/>
+						<line number="11" hits="11"/>
+						<line number="12" hits="11"/>
+						<line number="14" hits="22"/>
+						<line number="15" hits="22"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="17" hits="0"/>
 						<line number="21" hits="0"/>
 						<line number="23" hits="0"/>
@@ -1867,6 +1962,7 @@
 						<line number="35" hits="0"/>
 						<line number="38" hits="0"/>
 						<line number="39" hits="0"/>
+<<<<<<< HEAD
 						<line number="42" hits="12"/>
 						<line number="45" hits="12"/>
 						<line number="48" hits="24"/>
@@ -1930,20 +2026,94 @@
 						<line number="157" hits="0"/>
 						<line number="159" hits="10"/>
 						<line number="160" hits="10"/>
+=======
+						<line number="42" hits="11"/>
+						<line number="45" hits="11"/>
+						<line number="48" hits="22"/>
+						<line number="49" hits="22"/>
+						<line number="50" hits="22"/>
+						<line number="51" hits="22"/>
+						<line number="52" hits="11"/>
+						<line number="54" hits="11"/>
+						<line number="55" hits="0"/>
+						<line number="56" hits="0"/>
+						<line number="57" hits="11"/>
+						<line number="58" hits="0"/>
+						<line number="59" hits="0"/>
+						<line number="63" hits="11"/>
+						<line number="64" hits="11"/>
+						<line number="65" hits="0"/>
+						<line number="66" hits="0"/>
+						<line number="69" hits="11"/>
+						<line number="70" hits="11"/>
+						<line number="71" hits="0"/>
+						<line number="72" hits="0"/>
+						<line number="75" hits="11"/>
+						<line number="77" hits="11"/>
+						<line number="82" hits="11"/>
+						<line number="84" hits="11"/>
+						<line number="87" hits="17"/>
+						<line number="88" hits="16"/>
+						<line number="93" hits="16"/>
+						<line number="98" hits="16"/>
+						<line number="99" hits="16"/>
+						<line number="101" hits="16"/>
+						<line number="102" hits="16"/>
+						<line number="103" hits="0"/>
+						<line number="104" hits="0"/>
+						<line number="105" hits="0"/>
+						<line number="108" hits="16"/>
+						<line number="112" hits="11"/>
+						<line number="115" hits="16"/>
+						<line number="116" hits="16"/>
+						<line number="117" hits="16"/>
+						<line number="118" hits="16"/>
+						<line number="119" hits="16"/>
+						<line number="121" hits="0"/>
+						<line number="124" hits="16"/>
+						<line number="125" hits="0"/>
+						<line number="126" hits="0"/>
+						<line number="127" hits="0"/>
+						<line number="129" hits="16"/>
+						<line number="130" hits="0"/>
+						<line number="133" hits="16"/>
+						<line number="134" hits="16"/>
+						<line number="135" hits="0"/>
+						<line number="138" hits="16"/>
+						<line number="140" hits="16"/>
+						<line number="141" hits="26"/>
+						<line number="142" hits="6"/>
+						<line number="152" hits="0"/>
+						<line number="154" hits="6"/>
+						<line number="155" hits="0"/>
+						<line number="156" hits="0"/>
+						<line number="157" hits="0"/>
+						<line number="159" hits="6"/>
+						<line number="160" hits="6"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="161" hits="0"/>
 						<line number="162" hits="0"/>
 						<line number="163" hits="0"/>
 						<line number="164" hits="0"/>
+<<<<<<< HEAD
 						<line number="165" hits="10"/>
 						<line number="166" hits="10"/>
 						<line number="167" hits="10"/>
 						<line number="168" hits="10"/>
 						<line number="170" hits="10"/>
+=======
+						<line number="165" hits="6"/>
+						<line number="166" hits="6"/>
+						<line number="167" hits="6"/>
+						<line number="168" hits="6"/>
+						<line number="170" hits="6"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="171" hits="0"/>
 						<line number="172" hits="0"/>
 						<line number="174" hits="0"/>
 						<line number="175" hits="0"/>
 						<line number="177" hits="0"/>
+<<<<<<< HEAD
 						<line number="179" hits="10"/>
 						<line number="180" hits="10"/>
 						<line number="181" hits="10"/>
@@ -1955,12 +2125,30 @@
 						<line number="193" hits="14"/>
 						<line number="194" hits="20"/>
 						<line number="197" hits="14"/>
+=======
+						<line number="179" hits="6"/>
+						<line number="180" hits="6"/>
+						<line number="181" hits="6"/>
+						<line number="184" hits="10"/>
+						<line number="186" hits="10"/>
+						<line number="187" hits="10"/>
+						<line number="190" hits="16"/>
+						<line number="191" hits="16"/>
+						<line number="193" hits="16"/>
+						<line number="194" hits="12"/>
+						<line number="197" hits="16"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="198" hits="0"/>
 						<line number="199" hits="0"/>
 						<line number="200" hits="0"/>
 						<line number="202" hits="0"/>
+<<<<<<< HEAD
 						<line number="204" hits="14"/>
 						<line number="205" hits="14"/>
+=======
+						<line number="204" hits="16"/>
+						<line number="205" hits="16"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="213" hits="0"/>
 						<line number="214" hits="0"/>
 						<line number="215" hits="0"/>
@@ -1998,6 +2186,7 @@
 						<line number="279" hits="0"/>
 						<line number="280" hits="0"/>
 						<line number="285" hits="0"/>
+<<<<<<< HEAD
 						<line number="289" hits="24"/>
 						<line number="290" hits="48"/>
 						<line number="291" hits="36"/>
@@ -2005,10 +2194,20 @@
 						<line number="294" hits="24"/>
 						<line number="297" hits="24"/>
 						<line number="301" hits="12"/>
+=======
+						<line number="289" hits="22"/>
+						<line number="290" hits="44"/>
+						<line number="291" hits="33"/>
+						<line number="292" hits="0"/>
+						<line number="294" hits="22"/>
+						<line number="297" hits="22"/>
+						<line number="301" hits="11"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="302" hits="0"/>
 						<line number="303" hits="0"/>
 						<line number="304" hits="0"/>
 						<line number="305" hits="0"/>
+<<<<<<< HEAD
 						<line number="309" hits="12"/>
 						<line number="313" hits="0"/>
 						<line number="317" hits="12"/>
@@ -2033,6 +2232,32 @@
 						<line number="349" hits="12"/>
 						<line number="350" hits="12"/>
 						<line number="351" hits="12"/>
+=======
+						<line number="309" hits="11"/>
+						<line number="313" hits="0"/>
+						<line number="317" hits="11"/>
+						<line number="318" hits="11"/>
+						<line number="319" hits="0"/>
+						<line number="320" hits="0"/>
+						<line number="322" hits="11"/>
+						<line number="323" hits="11"/>
+						<line number="324" hits="11"/>
+						<line number="325" hits="11"/>
+						<line number="326" hits="11"/>
+						<line number="329" hits="22"/>
+						<line number="331" hits="44"/>
+						<line number="332" hits="22"/>
+						<line number="334" hits="10"/>
+						<line number="336" hits="10"/>
+						<line number="337" hits="10"/>
+						<line number="340" hits="11"/>
+						<line number="343" hits="11"/>
+						<line number="345" hits="11"/>
+						<line number="347" hits="11"/>
+						<line number="349" hits="11"/>
+						<line number="350" hits="11"/>
+						<line number="351" hits="11"/>
+>>>>>>> integration-testing-3fa2c13
 					</lines>
 				</class>
 				<class name="bats_format_cat" filename="usr/local/libexec/bats-core/bats-format-cat" branch-rate="1.0" complexity="1.0" line-rate="1.000">
@@ -2042,6 +2267,7 @@
 						<line number="6" hits="1"/>
 					</lines>
 				</class>
+<<<<<<< HEAD
 				<class name="common_bash" filename="usr/local/lib/bats-core/common.bash" branch-rate="1.0" complexity="1.0" line-rate="0.289">
 					<lines>
 						<line number="4" hits="528"/>
@@ -2054,6 +2280,131 @@
 						<line number="17" hits="10"/>
 						<line number="18" hits="0"/>
 						<line number="23" hits="13"/>
+=======
+				<class name="bats_19459_src" filename="tmp/bats-run-0RLvNY/bats.19459.src" branch-rate="1.0" complexity="1.0" line-rate="0.738">
+					<lines>
+						<line number="5" hits="13"/>
+						<line number="8" hits="13"/>
+						<line number="12" hits="4"/>
+						<line number="13" hits="4"/>
+						<line number="19" hits="4"/>
+						<line number="20" hits="4"/>
+						<line number="22" hits="2"/>
+						<line number="23" hits="4"/>
+						<line number="24" hits="66"/>
+						<line number="25" hits="0"/>
+						<line number="26" hits="0"/>
+						<line number="27" hits="0"/>
+						<line number="28" hits="0"/>
+						<line number="29" hits="0"/>
+						<line number="30" hits="0"/>
+						<line number="31" hits="0"/>
+						<line number="32" hits="0"/>
+						<line number="33" hits="0"/>
+						<line number="38" hits="0"/>
+						<line number="41" hits="0"/>
+						<line number="45" hits="4"/>
+						<line number="46" hits="4"/>
+						<line number="48" hits="4"/>
+						<line number="49" hits="4"/>
+						<line number="50" hits="2"/>
+						<line number="51" hits="4"/>
+						<line number="52" hits="2"/>
+						<line number="53" hits="4"/>
+						<line number="54" hits="2"/>
+						<line number="55" hits="2"/>
+						<line number="60" hits="4"/>
+						<line number="63" hits="2"/>
+						<line number="67" hits="4"/>
+						<line number="68" hits="4"/>
+						<line number="70" hits="2"/>
+						<line number="71" hits="4"/>
+						<line number="72" hits="0"/>
+						<line number="77" hits="4"/>
+						<line number="78" hits="4"/>
+						<line number="80" hits="2"/>
+						<line number="81" hits="2"/>
+						<line number="86" hits="4"/>
+						<line number="87" hits="4"/>
+						<line number="89" hits="4"/>
+						<line number="90" hits="4"/>
+						<line number="91" hits="2"/>
+						<line number="92" hits="4"/>
+						<line number="93" hits="2"/>
+						<line number="94" hits="4"/>
+						<line number="95" hits="2"/>
+						<line number="96" hits="4"/>
+						<line number="101" hits="6"/>
+						<line number="104" hits="2"/>
+						<line number="108" hits="4"/>
+						<line number="109" hits="4"/>
+						<line number="111" hits="2"/>
+						<line number="112" hits="2"/>
+						<line number="117" hits="4"/>
+						<line number="118" hits="4"/>
+						<line number="120" hits="2"/>
+						<line number="125" hits="4"/>
+						<line number="126" hits="4"/>
+						<line number="128" hits="7"/>
+						<line number="129" hits="0"/>
+						<line number="130" hits="0"/>
+						<line number="131" hits="0"/>
+						<line number="132" hits="0"/>
+						<line number="133" hits="0"/>
+						<line number="134" hits="0"/>
+						<line number="135" hits="0"/>
+						<line number="140" hits="6"/>
+						<line number="143" hits="0"/>
+						<line number="147" hits="4"/>
+						<line number="148" hits="4"/>
+						<line number="150" hits="7"/>
+						<line number="151" hits="0"/>
+						<line number="152" hits="0"/>
+						<line number="153" hits="0"/>
+						<line number="154" hits="0"/>
+						<line number="155" hits="0"/>
+						<line number="156" hits="0"/>
+						<line number="157" hits="0"/>
+						<line number="162" hits="6"/>
+						<line number="165" hits="0"/>
+						<line number="169" hits="4"/>
+						<line number="170" hits="4"/>
+						<line number="172" hits="4"/>
+						<line number="173" hits="4"/>
+						<line number="174" hits="2"/>
+						<line number="175" hits="4"/>
+						<line number="176" hits="2"/>
+						<line number="177" hits="4"/>
+						<line number="178" hits="2"/>
+						<line number="179" hits="2"/>
+						<line number="184" hits="2"/>
+						<line number="187" hits="2"/>
+						<line number="190" hits="13"/>
+						<line number="191" hits="13"/>
+						<line number="192" hits="13"/>
+						<line number="193" hits="13"/>
+						<line number="194" hits="13"/>
+						<line number="195" hits="13"/>
+						<line number="196" hits="13"/>
+						<line number="197" hits="13"/>
+						<line number="198" hits="13"/>
+						<line number="199" hits="13"/>
+						<line number="200" hits="13"/>
+					</lines>
+				</class>
+				<class name="common_bash" filename="usr/local/lib/bats-core/common.bash" branch-rate="1.0" complexity="1.0" line-rate="0.289">
+					<lines>
+						<line number="4" hits="38"/>
+						<line number="5" hits="13"/>
+						<line number="7" hits="6"/>
+						<line number="8" hits="0"/>
+						<line number="13" hits="6"/>
+						<line number="14" hits="19"/>
+						<line number="15" hits="13"/>
+						<line number="17" hits="6"/>
+						<line number="18" hits="0"/>
+						<line number="23" hits="6"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="27" hits="0"/>
 						<line number="28" hits="0"/>
 						<line number="29" hits="0"/>
@@ -2089,11 +2440,19 @@
 						<line number="90" hits="0"/>
 						<line number="92" hits="0"/>
 						<line number="97" hits="0"/>
+<<<<<<< HEAD
 						<line number="103" hits="24"/>
 						<line number="104" hits="24"/>
 						<line number="106" hits="24"/>
 						<line number="107" hits="48"/>
 						<line number="108" hits="24"/>
+=======
+						<line number="103" hits="22"/>
+						<line number="104" hits="22"/>
+						<line number="106" hits="22"/>
+						<line number="107" hits="44"/>
+						<line number="108" hits="22"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="111" hits="0"/>
 						<line number="112" hits="0"/>
 						<line number="113" hits="0"/>
@@ -2105,6 +2464,7 @@
 						<line number="120" hits="0"/>
 						<line number="123" hits="0"/>
 						<line number="128" hits="0"/>
+<<<<<<< HEAD
 						<line number="134" hits="12"/>
 						<line number="135" hits="12"/>
 						<line number="137" hits="12"/>
@@ -2114,12 +2474,27 @@
 						<line number="142" hits="0"/>
 						<line number="143" hits="24"/>
 						<line number="144" hits="48"/>
+=======
+						<line number="134" hits="11"/>
+						<line number="135" hits="11"/>
+						<line number="137" hits="11"/>
+						<line number="138" hits="22"/>
+						<line number="140" hits="11"/>
+						<line number="141" hits="11"/>
+						<line number="142" hits="0"/>
+						<line number="143" hits="22"/>
+						<line number="144" hits="44"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="145" hits="0"/>
 						<line number="146" hits="0"/>
 						<line number="148" hits="0"/>
 						<line number="149" hits="0"/>
 						<line number="150" hits="0"/>
+<<<<<<< HEAD
 						<line number="153" hits="12"/>
+=======
+						<line number="153" hits="11"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="157" hits="0"/>
 						<line number="163" hits="0"/>
 						<line number="164" hits="0"/>
@@ -2139,6 +2514,7 @@
 						<line number="188" hits="0"/>
 						<line number="190" hits="0"/>
 						<line number="191" hits="0"/>
+<<<<<<< HEAD
 						<line number="196" hits="48"/>
 						<line number="197" hits="144"/>
 						<line number="198" hits="48"/>
@@ -2156,6 +2532,25 @@
 						<line number="222" hits="13"/>
 						<line number="223" hits="13"/>
 						<line number="227" hits="13"/>
+=======
+						<line number="196" hits="44"/>
+						<line number="197" hits="132"/>
+						<line number="198" hits="44"/>
+						<line number="199" hits="44"/>
+						<line number="201" hits="88"/>
+						<line number="202" hits="0"/>
+						<line number="205" hits="22"/>
+						<line number="207" hits="22"/>
+						<line number="208" hits="0"/>
+						<line number="209" hits="0"/>
+						<line number="212" hits="22"/>
+						<line number="213" hits="0"/>
+						<line number="215" hits="22"/>
+						<line number="221" hits="6"/>
+						<line number="222" hits="6"/>
+						<line number="223" hits="6"/>
+						<line number="227" hits="6"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="231" hits="0"/>
 						<line number="236" hits="0"/>
 						<line number="237" hits="0"/>
@@ -2169,6 +2564,7 @@
 				</class>
 				<class name="preprocessing_bash" filename="usr/local/lib/bats-core/preprocessing.bash" branch-rate="1.0" complexity="1.0" line-rate="0.875">
 					<lines>
+<<<<<<< HEAD
 						<line number="3" hits="13"/>
 						<line number="4" hits="13"/>
 						<line number="6" hits="13"/>
@@ -2177,11 +2573,25 @@
 						<line number="16" hits="12"/>
 						<line number="17" hits="0"/>
 						<line number="21" hits="12"/>
+=======
+						<line number="3" hits="12"/>
+						<line number="4" hits="12"/>
+						<line number="6" hits="12"/>
+						<line number="11" hits="2"/>
+						<line number="12" hits="2"/>
+						<line number="16" hits="11"/>
+						<line number="17" hits="0"/>
+						<line number="21" hits="11"/>
+>>>>>>> integration-testing-3fa2c13
 					</lines>
 				</class>
 				<class name="warnings_bash" filename="usr/local/lib/bats-core/warnings.bash" branch-rate="1.0" complexity="1.0" line-rate="0.087">
 					<lines>
+<<<<<<< HEAD
 						<line number="4" hits="13"/>
+=======
+						<line number="4" hits="12"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="8" hits="0"/>
 						<line number="9" hits="0"/>
 						<line number="10" hits="0"/>
@@ -2203,12 +2613,17 @@
 						<line number="41" hits="0"/>
 						<line number="42" hits="0"/>
 						<line number="43" hits="0"/>
+<<<<<<< HEAD
 						<line number="44" hits="13"/>
+=======
+						<line number="44" hits="12"/>
+>>>>>>> integration-testing-3fa2c13
 					</lines>
 				</class>
 				<class name="bats_preprocess" filename="usr/local/libexec/bats-core/bats-preprocess" branch-rate="1.0" complexity="1.0" line-rate="0.493">
 					<lines>
 						<line number="2" hits="2"/>
+<<<<<<< HEAD
 						<line number="5" hits="24"/>
 						<line number="6" hits="24"/>
 						<line number="7" hits="24"/>
@@ -2217,6 +2632,16 @@
 						<line number="11" hits="24"/>
 						<line number="12" hits="24"/>
 						<line number="13" hits="24"/>
+=======
+						<line number="5" hits="22"/>
+						<line number="6" hits="22"/>
+						<line number="7" hits="22"/>
+						<line number="9" hits="22"/>
+						<line number="10" hits="22"/>
+						<line number="11" hits="22"/>
+						<line number="12" hits="22"/>
+						<line number="13" hits="22"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="15" hits="0"/>
 						<line number="16" hits="0"/>
 						<line number="18" hits="0"/>
@@ -2227,7 +2652,11 @@
 						<line number="23" hits="0"/>
 						<line number="25" hits="0"/>
 						<line number="26" hits="0"/>
+<<<<<<< HEAD
 						<line number="31" hits="24"/>
+=======
+						<line number="31" hits="22"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="34" hits="2"/>
 						<line number="36" hits="2"/>
 						<line number="37" hits="2"/>
@@ -2256,6 +2685,7 @@
 						<line number="71" hits="2"/>
 						<line number="76" hits="2"/>
 						<line number="77" hits="2"/>
+<<<<<<< HEAD
 						<line number="79" hits="1796"/>
 						<line number="80" hits="896"/>
 						<line number="81" hits="896"/>
@@ -2270,10 +2700,27 @@
 						<line number="93" hits="24"/>
 						<line number="94" hits="24"/>
 						<line number="99" hits="868"/>
+=======
+						<line number="79" hits="760"/>
+						<line number="80" hits="378"/>
+						<line number="81" hits="378"/>
+						<line number="82" hits="734"/>
+						<line number="83" hits="22"/>
+						<line number="84" hits="22"/>
+						<line number="85" hits="22"/>
+						<line number="86" hits="22"/>
+						<line number="87" hits="22"/>
+						<line number="89" hits="0"/>
+						<line number="92" hits="22"/>
+						<line number="93" hits="22"/>
+						<line number="94" hits="22"/>
+						<line number="99" hits="356"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="100" hits="0"/>
 						<line number="101" hits="0"/>
 						<line number="103" hits="0"/>
 						<line number="106" hits="0"/>
+<<<<<<< HEAD
 						<line number="110" hits="868"/>
 						<line number="113" hits="0"/>
 						<line number="115" hits="24"/>
@@ -2371,6 +2818,105 @@
 						<line number="173" hits="1076"/>
 						<line number="175" hits="1076"/>
 						<line number="179" hits="292"/>
+=======
+						<line number="110" hits="356"/>
+						<line number="113" hits="0"/>
+						<line number="115" hits="22"/>
+						<line number="116" hits="22"/>
+						<line number="119" hits="2"/>
+					</lines>
+				</class>
+				<class name="tracing_bash" filename="usr/local/lib/bats-core/tracing.bash" branch-rate="1.0" complexity="1.0" line-rate="0.667">
+					<lines>
+						<line number="4" hits="25"/>
+						<line number="7" hits="189"/>
+						<line number="8" hits="189"/>
+						<line number="9" hits="189"/>
+						<line number="13" hits="424"/>
+						<line number="16" hits="212"/>
+						<line number="17" hits="212"/>
+						<line number="18" hits="212"/>
+						<line number="19" hits="212"/>
+						<line number="21" hits="176"/>
+						<line number="24" hits="49"/>
+						<line number="25" hits="13"/>
+						<line number="31" hits="6"/>
+						<line number="33" hits="6"/>
+						<line number="34" hits="5"/>
+						<line number="36" hits="1"/>
+						<line number="39" hits="0"/>
+						<line number="47" hits="6"/>
+						<line number="48" hits="6"/>
+						<line number="49" hits="6"/>
+						<line number="50" hits="6"/>
+						<line number="51" hits="6"/>
+						<line number="53" hits="6"/>
+						<line number="54" hits="6"/>
+						<line number="55" hits="6"/>
+						<line number="56" hits="6"/>
+						<line number="58" hits="6"/>
+						<line number="59" hits="6"/>
+						<line number="60" hits="6"/>
+						<line number="62" hits="0"/>
+						<line number="65" hits="6"/>
+						<line number="66" hits="6"/>
+						<line number="67" hits="6"/>
+						<line number="70" hits="0"/>
+						<line number="71" hits="0"/>
+						<line number="72" hits="0"/>
+						<line number="73" hits="0"/>
+						<line number="76" hits="6"/>
+						<line number="77" hits="6"/>
+						<line number="78" hits="6"/>
+						<line number="79" hits="6"/>
+						<line number="81" hits="0"/>
+						<line number="89" hits="12"/>
+						<line number="90" hits="6"/>
+						<line number="91" hits="0"/>
+						<line number="93" hits="6"/>
+						<line number="94" hits="6"/>
+						<line number="95" hits="6"/>
+						<line number="96" hits="6"/>
+						<line number="97" hits="6"/>
+						<line number="99" hits="6"/>
+						<line number="100" hits="6"/>
+						<line number="101" hits="6"/>
+						<line number="102" hits="6"/>
+						<line number="103" hits="6"/>
+						<line number="104" hits="6"/>
+						<line number="105" hits="6"/>
+						<line number="107" hits="6"/>
+						<line number="110" hits="0"/>
+						<line number="113" hits="6"/>
+						<line number="114" hits="3"/>
+						<line number="116" hits="3"/>
+						<line number="121" hits="12"/>
+						<line number="125" hits="6"/>
+						<line number="126" hits="6"/>
+						<line number="130" hits="12"/>
+						<line number="131" hits="12"/>
+						<line number="133" hits="12"/>
+						<line number="134" hits="12"/>
+						<line number="136" hits="12"/>
+						<line number="140" hits="6"/>
+						<line number="141" hits="6"/>
+						<line number="143" hits="1178"/>
+						<line number="144" hits="589"/>
+						<line number="145" hits="6"/>
+						<line number="146" hits="6"/>
+						<line number="148" hits="0"/>
+						<line number="152" hits="6"/>
+						<line number="153" hits="6"/>
+						<line number="157" hits="6"/>
+						<line number="163" hits="1001"/>
+						<line number="164" hits="1001"/>
+						<line number="165" hits="0"/>
+						<line number="167" hits="1001"/>
+						<line number="171" hits="0"/>
+						<line number="173" hits="1001"/>
+						<line number="175" hits="1001"/>
+						<line number="179" hits="189"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="180" hits="0"/>
 						<line number="182" hits="0"/>
 						<line number="183" hits="0"/>
@@ -2388,6 +2934,7 @@
 						<line number="198" hits="0"/>
 						<line number="199" hits="0"/>
 						<line number="200" hits="0"/>
+<<<<<<< HEAD
 						<line number="255" hits="1076"/>
 						<line number="256" hits="1076"/>
 						<line number="257" hits="1076"/>
@@ -2424,6 +2971,44 @@
 						<line number="340" hits="14"/>
 						<line number="342" hits="14"/>
 						<line number="343" hits="14"/>
+=======
+						<line number="255" hits="1001"/>
+						<line number="256" hits="1001"/>
+						<line number="257" hits="1001"/>
+						<line number="258" hits="1946"/>
+						<line number="259" hits="1946"/>
+						<line number="260" hits="811"/>
+						<line number="261" hits="811"/>
+						<line number="267" hits="0"/>
+						<line number="268" hits="0"/>
+						<line number="269" hits="1381"/>
+						<line number="270" hits="0"/>
+						<line number="271" hits="0"/>
+						<line number="274" hits="190"/>
+						<line number="275" hits="190"/>
+						<line number="276" hits="191"/>
+						<line number="277" hits="189"/>
+						<line number="292" hits="32"/>
+						<line number="293" hits="32"/>
+						<line number="294" hits="22"/>
+						<line number="295" hits="22"/>
+						<line number="296" hits="0"/>
+						<line number="298" hits="22"/>
+						<line number="303" hits="39"/>
+						<line number="304" hits="0"/>
+						<line number="305" hits="0"/>
+						<line number="307" hits="78"/>
+						<line number="308" hits="0"/>
+						<line number="309" hits="0"/>
+						<line number="310" hits="0"/>
+						<line number="312" hits="39"/>
+						<line number="335" hits="13"/>
+						<line number="336" hits="13"/>
+						<line number="339" hits="13"/>
+						<line number="340" hits="13"/>
+						<line number="342" hits="13"/>
+						<line number="343" hits="13"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="345" hits="0"/>
 						<line number="346" hits="0"/>
 						<line number="347" hits="0"/>
@@ -2431,6 +3016,7 @@
 						<line number="350" hits="0"/>
 						<line number="351" hits="0"/>
 						<line number="352" hits="0"/>
+<<<<<<< HEAD
 						<line number="355" hits="14"/>
 						<line number="357" hits="28"/>
 						<line number="358" hits="14"/>
@@ -2445,6 +3031,22 @@
 						<line number="377" hits="0"/>
 						<line number="378" hits="0"/>
 						<line number="381" hits="10"/>
+=======
+						<line number="355" hits="13"/>
+						<line number="357" hits="26"/>
+						<line number="358" hits="13"/>
+						<line number="359" hits="13"/>
+						<line number="360" hits="13"/>
+						<line number="365" hits="13"/>
+						<line number="366" hits="26"/>
+						<line number="370" hits="15"/>
+						<line number="374" hits="0"/>
+						<line number="375" hits="0"/>
+						<line number="376" hits="21"/>
+						<line number="377" hits="0"/>
+						<line number="378" hits="0"/>
+						<line number="381" hits="9"/>
+>>>>>>> integration-testing-3fa2c13
 						<line number="386" hits="0"/>
 						<line number="387" hits="0"/>
 						<line number="395" hits="0"/>

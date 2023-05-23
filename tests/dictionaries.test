@@ -1,0 +1,5 @@
+# Tests for aliases dealing with dicitonary lookup
+
+## TODO: add test for following error
+## _$ wn-n-gr champp
+## grep: /index.noun: No such file or directory
