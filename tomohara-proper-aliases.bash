@@ -45,8 +45,7 @@ function clone-repo () {
     fi
     #
     # shellcheck disable=SC2086
-    ## OLD: command script "$log" $command_indicator git clone "$url"
-    command script "$log" $command_indicator "git clone '$url'"
+    command script "$log"  $command_indicator "git clone '$url'"
     ls -R "$repo" >> "$log"
     ## Note: output warning that script now done (to avoid user closing the window assuming script active)
     ## TODO: add trace-stderr
@@ -110,6 +109,15 @@ function trace-array-vars {
     echo
 }
 
+
+
+#...............................................................................
+# Organizer stuff
+
+# rename-adhoc-notes(): rename adhoc notes under $PWD from HOST-adhoc-notes to {dir-basename}-adhoc-notes-HOST
+# shellcheck disable=SC2016
+alias-fn rename-adhoc-notes 'rename-files -q "$(get-host-nickname)-adhoc-notes" "$(basename $PWD)-adhoc-notes-$(get-host-nickname)"'
+
 #................................................................................
 # Snapshot related
 
@@ -137,6 +145,21 @@ function rename-last-snapshot {
 #
 # fix-transcript-timestamp(): put text on same line in YouTube transcripts
 alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
+
+#...............................................................................
+# System stuff
+
+# host-nickname(): return HOST_NICKNAME or ~/.host-nickname or tpo-host
+function get-host-nickname {
+    local nickname="$HOST_NICKNAME"
+    if [ "$nickname" = "" ]; then
+	nickname="$(grep -v '^#' ~/.host-nickname 2> /dev/null)"
+    fi
+    if [ "$nickname" = "" ]; then
+	nickname="tpo-host"
+    fi
+    echo "$nickname"
+}
 
 #................................................................................
 # Linux stuff
