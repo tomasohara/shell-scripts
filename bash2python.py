@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 #
-# Tana-TODO: Refine overview comments (e.g., notes and technique used)
-# Note: no need to get detailed. Just write down main intention and some ideas how it will work.
-#
 # This script converts from Bash snippets to Python. This is not intended as a general purpose
 # conversion utility, which is a major undertaking given the complexities of Bash syntax.
 # Instead, this is intended to capture commonly used constructs, such as by Tom O'Hara
@@ -36,6 +33,12 @@
 # - OpenAI API reference: https://platform.openai.com/docs/api-reference
 # - Bash manual: https://www.gnu.org/software/bash/manual/bash.html
 # - Devloped by Tana Alvarez and Tom O'Hara.
+# - Regex cheatsheet:
+#     (?:regex)               non-capturing group
+#     (?<!regex)              negative lookbehind
+#     (?!regex)               negative lookahead
+#     *?  and  +?             non-greedy match
+# - See https://www.rexegg.com/regex-quickstart.html for comprehensive cheatsheet.
 #
 # Tips:
 # - **** Err on the side of special case code rather than general purpose. It is easier to
@@ -45,7 +48,7 @@
 # - ** Avoid regular string searching or replacements (e.g., "done" in line => re.search('\bdone\b', line).
 # - * Be liberal with variables (e.g., don't reuse same variable for different purpose and make name self explanatory)@.
 #
-# Tana-TODO1:
+# TODO1:
 # - Add a bunch of more sanity checks (e.g., via debug.assertion).
 # - Clean up var_replace, which is a veritable achilles heel. There should be a separate version that
 #   converts partly converted bash code.
@@ -56,12 +59,11 @@
 # TODO3:
 # - Flag constructs not yet implemented:
 #   -- C-style for loops (maybe use cursed-for module--more for extensing Python syntax).
-#   -- Bash arrays and hashes #Tana-note: Working on this in a separate file
+#   -- Bash arrays and hashes
 #
 
-# Tana-TODO refine a little
-"""Bash snippet to Python conversion"""
-import sys
+"""Bash snippet to Python conversion using heuristics for common constructs"""
+
 # Standard modules
 from collections import defaultdict
 import json
@@ -78,7 +80,7 @@ import openai
 import mezcla
 from mezcla import debug
 from mezcla import glue_helpers as gh
-from mezcla.main import Main
+from mezcla.main import Main, BRIEF_USAGE, INDENT
 from mezcla.my_regex import my_re
 from mezcla import system
 from mezcla.text_utils import version_to_number
@@ -87,13 +89,14 @@ from mezcla.text_utils import version_to_number
 debug.assertion(version_to_number("1.3.4") <= version_to_number(mezcla.__version__))
 
 # Constants
+TL = debug.TL
 CODEX_PREFIX = "# codex: "
 
 # Environment constants
 USER = system.getenv_text("USER", "unknown-user",
                           "User ID")
 USE_MEZCLA = system.getenv_bool("USE_MEZCLA", (USER == "tomohara"),
-                                "Whether to use mezcla support")
+                                "Whether to use mezcla support, such as for regex tracing")
 INIT_FILE = system.getenv_value("INIT_FILE", None,
                                 "File to source before running Bash command")
 DISK_CACHE = system.getenv_value("DISK_CACHE", None,
@@ -179,7 +182,6 @@ def get_bash_var_hash():
     if debug.detailed_debugging():
         env_vars = sorted(list(os.environ.keys()))
         bash_vars = sorted(list(var_hash.keys()))
-        ## TODO: debug.trace_expr(5, bash_vars, env_vars, max_len=2048, sep="\n")
         debug.trace_expr(5, bash_vars, max_len=4096)
         debug.trace_expr(5, env_vars, max_len=4096)
         debug.assertion(not system.difference(env_vars, bash_vars))
@@ -216,12 +218,13 @@ class Bash2Python:
         "function": "def",
         "true": "pass"}
     LOOP_CONTROL = ["break", "continue"]
+
     def __init__(self, bash, skip_comments=None, segment_prefix=None, segment_divider=None):
         """Class initializer: using BASH command with SHELL executable
         Note: Optionally SKIP_COMMENTS and changes SEGMENT_DIVIDER for command iteration (or newline)"""
         self.cmd = bash
         self.bash_var_hash = get_bash_var_hash()
-        self.variables = []             # TODO: obsolete???
+        self.variables = []
         if skip_comments is None:
             skip_comments = SKIP_COMMENTS
         self.skip_comments = skip_comments
@@ -249,11 +252,7 @@ class Bash2Python:
 
     def contains_embedded_for(self, bash_snippet):
         """Simple method to get perl regex detection of embedded for loops"""
-        ## OLD
-        ## file = (system.open_file(bash_snippet).read() if system.file_exists(bash_snippet)
-        ##             else bash_snippet)
-        ## debug.trace_expr(7, file)
-        ## OLD: command = f"echo '{file}' | perl -0777 -ne 's/.*/\\L$&/; s/\\bdone\\b/D/g; print(\"embedded for: $&\n\") if (/\\bfor\\b[^D]*\\bfor\\b/m);'"
+        debug.assertion(not system.file_exists(bash_snippet))
         bash_snippet = re.sub(r"#.*$", "", bash_snippet, flags=re.MULTILINE)  # Remove comments
         bash_snippet = re.sub(r"'([^'\\]*(?:\\.[^'\\]*)*)'", "", bash_snippet)  # Remove single-quoted strings
         bash_snippet = re.sub(r'"([^"\\]*(?:\\.[^"\\]*)*)"', "", bash_snippet)  # Remove double-quoted strings
@@ -262,7 +261,10 @@ class Bash2Python:
         command = f"echo '{bash_snippet}' | perl -0777 -ne 's/.*/\\L$&/; s/\\bdone\\b/D/g; print(\"Warning: embedded for: $&\n\") if (/\\bfor\\b[^D]*\\bfor\\b/m);'"
         process = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
         output, _ = process.communicate()
-        return output.decode()
+        result = output.decode()
+        debug.trace(6, f"contains_embedded_for({bash_snippet!r})\n\tself={self} => {result}")
+        return result
+
     def map_keyword(self, line):
         """Perform conversion for single keyword statement"""
         in_line = line
@@ -301,7 +303,6 @@ class Bash2Python:
         # note: normalize for sake of caching
         line = line.rstrip("\n") + "\n"
         
-        # Tana-TODO1: eliminate the extraneus invocations
         # Note: Non-code uses both prefix and comment indicator (n.b., former stripped in format below)
         if SKIP_CODEX:
             return CODEX_PREFIX + "# internal warning (SKIP_CODEX set)"
@@ -321,7 +322,6 @@ class Bash2Python:
         # Define the code generation prompt
         TARGET_LANG = system.getenv_text("TARGET_LANG", "Python",
                                          "Target language for Codex")
-        ## OLD: prompt = f"Convert this Bash snippet to a one-liner {TARGET_LANG} snippet: {line}"
         prompt = f"Convert this Bash snippet to {TARGET_LANG}:\n{line}"
         debug.trace_expr(6, prompt)
         
@@ -338,15 +338,15 @@ class Bash2Python:
             }
             params_tuple = tuple(list(params.values()))
             response = None
+            # Check if the response is already in the cache before calling the API
             if self.cache is not None:
                 debug.trace(5, "Checking cached Codex result")
                 response = self.cache.get(params_tuple)
 
             # Submit request to OpenAI
-            # Check if the response is already in the cache before calling the API
-            response = self.cache.get(params_tuple)
             if response is None:
                 # If the response is not in the cache, make the API call and store the result in the cache
+                debug.trace(5, "Submitting Codex request")
                 response = openai.Completion.create(**params)
                 self.cache[params_tuple] = response
             if EXPORT_RESPONSE:
@@ -358,11 +358,11 @@ class Bash2Python:
 
             # Extract text for first choice and convert into single-line comment
             comment += CODEX_PREFIX + response["choices"][0]["text"].replace("\n", "\n" + CODEX_PREFIX).rstrip()
-        except openai.Error as e:  # Catch OpenAI API errors
+        except openai.APIError:     # Catch OpenAI API errors
             system.print_exception_info("Error communicating with OpenAI API in codex_convert")
-        except IOError as e:  # Catch file I/O errors
+        except IOError:             # Catch file I/O errors
             system.print_exception_info("File I/O error in codex_convert")
-        except Exception as e:  # Catch all other exceptions
+        except:                     # Catch all other exceptions
             system.print_exception_info("Unexpected error in codex_convert")
         return comment
 
@@ -388,13 +388,9 @@ class Bash2Python:
         def handle_arithmetic_expansion(line):
             """Returns corrected arithmetic expansion"""
             # - ex: $(( x + y )) => f"{x + y}"
-            while True:
-                match = my_re.search(r"(.*)\$\(\( *(.*) *\)\)(.*)", line)
-                if not match:
-                    break
+            while my_re.search(r"(.*)\$\(\( *(.*) *\)\)(.*)", line):
                 debug.trace(4, "processing arithmetic expansion")
-                (pre, expression, post) = match.groups()
-                ## OLD:  line = f"{pre} ({expression}) {post}"
+                (pre, expression, post) = my_re.groups()
                 # Note: converts expression to f-string
                 ## BAD:
                 line = pre + 'f"{' + expression + '}"' + post
@@ -404,10 +400,13 @@ class Bash2Python:
 
         def replace_var_references(line):
             """Processes variables"""
-            #Inicialize variables
+            # Inicialize variables
+            nonlocal bash_commands
+            bash_commands = re.findall(r'\$\(.*\)', line)  # finds all bash commands
             nonlocal has_bash_var, has_default
             bash_vars_with_defaults = re.findall(r'\$\{\w+:-[^\}]+\}', line)
             bash_vars = re.findall(r'\$\w+', line)
+            # TODO2: add $n => sys.argv[n]
             bash_commmon_special_vars = re.findall(r'\$[\?\@]', line)
             if other_vars:
                 bash_vars += other_vars
@@ -450,7 +449,7 @@ class Bash2Python:
                     pass
 
                 # If the variable wasn't converted yet
-                if ((not converted)):
+                if (not converted):
                     # If it's a loop, drop the $-prefix from the variable
                     if is_loop:
                         line = my_re.sub(fr"\${var[1:]}\b", var[1:], line)
@@ -464,16 +463,22 @@ class Bash2Python:
             return line
 
         def process_conditions_and_loops(line):
-            nonlocal is_loop
+            ## BAD: nonlocal is_loop
+
             # Early exit for loops
             if is_loop:
                 if var_pos == 1:
                     line = f"{static}f{line}"
                 if var_pos == 0:
                     line = f"f{line}{static}"
-                debug.trace(5, f"[early exit 3] {var_replace_call} => {line!r}")
-                return line
-            line = line.replace(';', '')
+                debug.trace(5, f"[early exit 3a; process_conditions_and_loops] {var_replace_call} => ({line!r}, '')")
+                return line, ""
+            
+            # TODO: add constraint to avoid over-generation
+            ## BAD:
+            ## debug.assertion(not embedded_in_quoted_string(";", line))
+            ## line = line.replace(';', '')
+            
             # Isolate comment
             inline_comment = ""
             if my_re.search(r"^([^#]+)(\s*#.*)", line):
@@ -487,8 +492,8 @@ class Bash2Python:
             is_multiline_statement = ("\n" in line)
             if is_multiline_statement:
                 system.print_stderr("Warning: unexpected multi-line statement in var_replace")
-                debug.trace(5, f"[early exit 3] {var_replace_call} => {line!r}")
-                return line
+                debug.trace(5, f"[early exit 3b; process_conditions_and_loops] {var_replace_call} => ({line!r}, {inline_comment!r})")
+                return line, inline_comment
             is_compound_statement = (my_re.search(r"\s*\S+\s*;\s*\S+\s*", line) and
                                      (not re.search(r"""^(['"])[^\1]*;\1$""", line)))
             if is_compound_statement:
@@ -528,13 +533,14 @@ class Bash2Python:
                     line = "f" + line
                 debug.assertion(re.search(r"""^f?(['"]).*\1$""", line))
             debug.trace(6, f"line5.5={line!r}")
-            return line
+            return line, inline_comment
 
         def derive_run_invocation(line):
             """Creates run() for necessary lines"""
             nonlocal has_assignment
             # Derive run invocation, with output omitted for variable assignments
-            bash_commands = re.findall(r'\$\(.*\)', line)  # finds all bash commands
+            ## BAD: bash_commands = re.findall(r'\$\(.*\)', line)  # finds all bash commands
+            nonlocal bash_commands
             has_assignment = (variable != "")
             comment = ""
             debug.trace(6, f"line5.55={line!r}")
@@ -562,12 +568,10 @@ class Bash2Python:
                 pass
             elif has_default:
                 debug.trace(6, f"line5.9={line!r}")
-                ## OLD: line = line
                 pass
             elif INLINE_CODEX:
                 debug.trace(6, f"line5.95={line!r}")
                 comment = self.codex_convert(line)
-                ## OLD: line = f"run({line!r})"
                 line = f"run({line})"
             else:
                 # Run shell over entire line
@@ -587,7 +591,7 @@ class Bash2Python:
             debug.trace(6, f"line6={line!r}")
             return line
 
-        def special_case_fixups(line):
+        def special_case_fixups(line, inline_comment):
             # Special case fixup's
             # echo statement not converted
             # ex: 'echo "a + b  = " f"{a + b}"' => 'run(echo "a + b  = " f"{a + b}")'
@@ -600,8 +604,10 @@ class Bash2Python:
                 line = my_re.sub(r'\bf"', '"', line)
                 line = f"run(f{line!r})"
 
+            # Convert from inner f-strings to a single outer one
             matches = re.findall(r'f"{(.*?)}"', line)
             if len(matches) >= 2:
+                debug.trace(4, "Combining f-strings in {line!r}")
                 contents = ' '.join(matches)
                 line = re.sub(r'f"{.*?}"', '', line)
                 line += f'f"{contents}"'
@@ -614,16 +620,20 @@ class Bash2Python:
 
         # Main function body for var_replace
         in_line = line
-        indent = ""
+        if indent is None:
+            indent = ""
         var_pos = ""
         variable = ""
         static = ""
         has_bash_var = ""
         has_default = ""
         has_assignment = ""
-        var_replace_call = f"var_replace({in_line!r}, othvar={other_vars} ind={indent}"
+        var_replace_call = f"var_replace({in_line!r}, othvar={other_vars!r} ind={indent!r})"
+        # TODO2: straighten out spaghetti references
+        bash_commands = None
+        
         # Check for assignment
-        # Tana-TODO: document what's going on!
+        # TODO3: document what's going on!
         ## TODO: if is_loop:
         ## BAD: if "=" in line:
         if my_re.search(r"^\s*\w+=", line):
@@ -646,11 +656,13 @@ class Bash2Python:
                 var_pos = 1
             elif not "$" in line[0] and not "$" in line[1]:
                 result = " = ".join(line)
-                debug.trace(5, f"[early exit 1] {var_replace_call} => {result!r}")
-                return result
+                converted = True
+                debug.trace(5, f"[early exit 1] {var_replace_call} => ({converted}, {result!r}, '')")
+                return (converted, result, "")
             if variable != "":
-                # Tana-TODO: add constraint to avoid clobbering entire line
+                # TODO2: add constraint to avoid clobbering entire line
                 line = variable
+
         # Check for assignment within expression statement; ex: (( z = x + y ))
         if my_re.search(r"^\s+\(\(\s*(\w+)\s*=.*\)\)", line):
             variable = my_re.group(1)
@@ -667,12 +679,16 @@ class Bash2Python:
         line = derive_indentation(line)
         line = handle_arithmetic_expansion(line)
         line = replace_var_references(line)
-        line = process_conditions_and_loops(line)
-        line = derive_run_invocation(line)
-        line = special_case_fixups(line)
+        line, inline_comment = process_conditions_and_loops(line)
+        if not is_loop:
+            line = derive_run_invocation(line)
+            line = special_case_fixups(line, inline_comment)
+        else:
+            debug.assertion(not inline_comment.strip())
 
-        debug.trace(5, f"{var_replace_call} => {line!r}")
-        return (converted_statement, line, "")
+        converted = True
+        debug.trace(5, f"{var_replace_call} => ({converted}, {line!r}, '')\n\tself={self}")
+        return (converted, line, "")
 
     def operators(self, line):
         """Returns line with operators converted to Python equivalents
@@ -681,6 +697,7 @@ class Bash2Python:
         # Dictionary with Bash operators and their Python equivalents
         # Split into binary and unary operators
         binary_operators = {
+            # TODO2: drop space around '=' and '!=' (and use regex boundry matching)
             " = ": " == ",
             " != ": " != ",
             "-eq ": " == ",
@@ -716,8 +733,12 @@ class Bash2Python:
         operators = {**binary_operators, **unary_operators}
 
         # Iterate over operators and replace them with Python equivalents
+        # TODO3: account for token boundaries (e.g., make sure [ or ] not in string)
         for bash_operator, python_equivalent in operators.items():
-            line = re.sub(fr"(?<!\S) *{bash_operator} *(?!\S)", python_equivalent, line)
+            ## OLD:
+            line = re.sub(fr"(\S*) *{bash_operator} *(\S*)", fr"\1{python_equivalent}\2", line)
+            ## BAD: line = re.sub(fr"(?<!\S) *{bash_operator} *(?!\S)", python_equivalent, line)
+            ## NEW: line = re.sub(fr"(?<!\S) +{bash_operator.strip()} +(?!\S)", python_equivalent, line)
 
         # Likewise handle file operators
         quoted_string = r'(?:\"[^\"]+\")|(?:\'[^\']+\')'
@@ -732,13 +753,16 @@ class Bash2Python:
 
         # Remove square brackets
         for bracket in [r"\[", r"\]", r"\[\[", r"\]\]"]:
-            debug.assertion(not embedded_in_quoted_string(bracket, line),
+            debug.assertion(not embedded_in_quoted_string(bracket, line),      \
                             f"test bracket '{bracket}' in quoted expression")
         line = my_re.sub(r"(^\s* \[) | (\] \s*$)", "", line, flags=my_re.VERBOSE)
         line = my_re.sub(r"(^\s* \[\[) | ( \]\]) \s*$", "", line, flags=my_re.VERBOSE)
 
-        debug.trace(5, f"operators({in_line!r}) => {line!r}")
-        return (was - converted, python, remainder)
+        debug.trace(5, f"operators({in_line!r}) => (True, {line!r}, '')\n\tself={self}")
+        ## BAD: return (was - converted, python, remainder)
+        ## TEMP
+        return (True, line, "")
+
     def process_keyword_statement(self, line):
         """Process simple built-in keyword statement (e.g., true to pass)
         Returns (was-converted, python, remainder): see process_compound)
@@ -756,7 +780,7 @@ class Bash2Python:
         """Process simple statement conversion for LINE
         Returns (was-converted, python, remainder): see process_compound)
         """
-        debug.trace(6, f"in process_simple({line!r})")
+        debug.trace(6, f"in process_simple({line!r})\n\tself={self}")
         in_line = line
         converted = False
         has_var_refs = False
@@ -897,8 +921,14 @@ class Bash2Python:
                     loop_count += 1
                     indent = "    " * (loop_count - 1)
                 compound_stack.append(start_keyword + "_loop")
-                var = self.var_replace(test_expression, is_loop=True)
-                var = self.operators(var)
+                ## BAD: var = self.var_replace(test_expression, is_loop=True)
+                (converted, var, test_remainder) = self.var_replace(test_expression, is_loop=True)
+                debug.assertion(converted)
+                debug.assertion(not test_remainder.strip())
+                ## BAD: var = self.operators(var)
+                (converted, var, oper_remainder) = self.operators(var)
+                debug.assertion(converted)
+                debug.assertion(not oper_remainder.strip())
                 # TODO1: rework to avoid need for eval!
                 actual_loop = (eval(compound_stack[-1]) if compound_stack else dummy_loop)
                 debug.trace(6, f"actual_loop2:{actual_loop}")
@@ -942,7 +972,6 @@ class Bash2Python:
                     debug.trace(4, "Not a compound statement")
                     debug.assertion(loop_count == 0)
                     return (False, line, "")
-                    ## OLD: break
                 if my_re.search(fr"^\s*{actual_loop[1]}\b(.*)", loop_line):
                     debug.trace(5, f"Processing compound inner {actual_loop[1]}")
                     loop_line = my_re.group(1)
@@ -971,8 +1000,14 @@ class Bash2Python:
                         body += indent + "    " + loop_line + "\n"
                     else:
                         debug.assertion(not my_re.search(fr"{start_keyword_regex}.*;.*{middle_keyword_regex}", loop_line))
-                        body += "" + self.var_replace(loop_line.strip("\n"),
-                                                indent="    " * loop_count) + "\n"
+                        ## BAD
+                        ## body += "" + self.var_replace(loop_line.strip("\n"),
+                        ##                               indent="    " * loop_count) + "\n"
+                        (converted, new_loop_line, loop_remainder) = self.var_replace(loop_line.strip("\n"),
+                                                                                      indent="    " * loop_count)
+                        debug.assertion(converted)
+                        debug.assertion(not loop_remainder.strip())
+                        body += new_loop_line + "\n"
                 else:
                     debug.trace(5, f"Warning: unexpected condition: blank loop line {loop_line!r}")
                 converted = True
@@ -1035,7 +1070,6 @@ class Bash2Python:
                     try:
                         remainder = self.convert_bash(remainder, cmd_iter, python_commands, codex)
                     except(NotImplementedError) as exc:
-                        ## OLD: print(f"Warning: {exc}")
                         python_commands.append(f"Warning: {exc}")
                         debug.trace_exception(4, "format/convert unimplemented")
                     except:
@@ -1046,7 +1080,7 @@ class Bash2Python:
         """Convert bash LINE with additional input from CMD_ITER via CODEX
         Modifies PYTHON_COMMANDS in place and returns any unprocessed text
         """
-        debug.trace(5, f"convert_bash({bash_line!r}, ..., {codex})")
+        debug.trace(5, f"convert_bash({bash_line!r}, ..., {codex})\n\tself={self}")
         # Optionally filter non-code lines
         # Note: comments useful for Codex so included by default (i.e., not STRIP_INPUT)
         include = True
@@ -1112,12 +1146,28 @@ class Bash2Python:
     
     def header(self):
         """Returns Python header to use for converted snippet code"""
-        debug.trace(6, "{self.__class__.__name__}.header()")
+        debug.trace(6, f"{self.__class__.__name__}.header()\n\tself={self}")
         return PYTHON_HEADER
 
 
 # -------------------------------------------------------------------------------
-@click.command()
+
+# Format optional usage notes
+# Note: uses \b hack: see
+#    https://stackoverflow.com/questions/42446923/python-click-help-formatting-newline
+# TODO4: make notes section flush left (not indented two spaces)
+usage_notes = ""
+if "--verbose" in system.get_args():
+    env_opts = system.formatted_environment_option_descriptions(sort=True, indent=INDENT)
+    usage_notes += (
+        "\b\n"
+        "Notes:\n"
+        "- It is best to integrate regular and Codex output\n"
+        "- See bash2python_diff.py for way to compare regular vs codex output\n"
+        f"- Available env. options:\n{INDENT}{env_opts}\n"
+    )
+
+@click.command(epilog=usage_notes)
 # Tana-TODO: separate script option into separate ones (e.g., script-file and script-text arguments)
 # For example, line-numbers option currently only works for former.
 @click.option("--script", "-s", help="Script or snippet to convert")
@@ -1127,9 +1177,11 @@ class Bash2Python:
 @click.option("--line-numbers", is_flag=True, help="Add line numbers to the output")
 @click.option("--codex", is_flag=True, help="Use OpenAI Codex to port all the code. It's SLOW")
 @click.option("--stdin", "-i", is_flag=True, help="Get input from stdin")
+@click.option("--verbose", is_flag=True, help="Verbose output")
 
-def main(script, output, overview, execute, line_numbers, codex, stdin):
+def main(script, output, overview, execute, line_numbers, codex, stdin, verbose):
     """Entry point"""
+    debug.trace_current_context(level=TL.QUITE_DETAILED)
     if overview:
         print("""Working:
             -If, elif, else, and while.
@@ -1146,11 +1198,11 @@ Not working yet:
             -Any kind of subprocess
             -C-style loops """)
     debug.trace(3,
-                f"main{(script, output, overview, execute, line_numbers, codex, stdin)}: script={system.real_path(__file__)}")
+                f"main{(script, output, overview, execute, line_numbers, codex, stdin, verbose)}: script={system.real_path(__file__)}")
     bash_snippet = script
 
     # Convert filename script to text
-    if system.file_exists(bash_snippet):
+    if bash_snippet and system.file_exists(bash_snippet):
         bash_snippet = system.read_file(bash_snippet)
     
     # Optionally get script from standard input (stdin)
@@ -1162,6 +1214,15 @@ Not working yet:
     #
     if not bash_snippet:
         print("No script or snippet specified. Use --help for usage or --script to specify a script")
+
+        # Show synopsis of options (TODO4: figure out how to do within maldito click)
+        if BRIEF_USAGE:
+            prog = __file__
+            options = gh.run(fr"{prog} --help 2>&1 | extract_matches.perl '(\-\-.*)  '")
+            options = re.sub(r"(.*?)\s+$", r"[\1]", options, flags=re.MULTILINE)
+            options = options.replace("\n", " ")
+            prog = gh.basename(prog)
+            print(f"usage: {prog} {options}")
         return
 
     # HACK: override global flag
@@ -1178,11 +1239,11 @@ Not working yet:
 
     # Optionally add line numbers
     # Tana-TODO: put this above (before script => bash_snippet support);
-    # Tana-TODO: use a temporary file (e.g., /tmp/filename-numbered), not filename.b2py
     if line_numbers:
         debug.assertion(system.file_exists(script))
+        temp_script = gh.get_temp_file(gh.basename(script) + ".b2py.numbered")
         with open(script, encoding='UTF-8', mode='r') as infile, \
-                open(f"/tmp/{script}", encoding='UTF-8', mode='w') as outfile:
+                open(temp_script, encoding='UTF-8', mode='w') as outfile:
             # Loop through each line in the input file
             for i, line in enumerate(infile):
                 # Write the modified line to the output file
@@ -1192,7 +1253,7 @@ Not working yet:
                     outfile.write(line)
                 else:
                     outfile.write(f"{line}#b2py #Line {i}" + "\n")
-        bash_snippet = f"/tmp/{script}"
+        bash_snippet = temp_script
 
     # Convert and print snippet
     debug.trace_expr(6, bash_snippet)
@@ -1209,8 +1270,9 @@ Not working yet:
         # TODO; print(gh.run("python " + write_temp_file(cmd)))
         print(safe_eval(str(cmd)))
     else:
-        #if INCLUDE_HEADER:
-            #print(b2p.header())
+        ## OLD:
+        ## if INCLUDE_HEADER:
+        ##    print(b2p.header())
         print(b2p.format(codex))
         print(b2p.contains_embedded_for(bash_snippet))
 
