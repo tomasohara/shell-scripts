@@ -75,7 +75,7 @@ def bash2py(bash, python, skip_normalize=False, keep_comments=False):
     """
     debug.trace(6, f"bash2py{(bash, python, skip_normalize, keep_comments)}")
     debug.trace_expr(5, bash, python, delim="\n")
-    b2p = B2P(bash, None, skip_comments=(not keep_comments))
+    b2p = B2P(bash, skip_comments=(not keep_comments))
     output = b2p.format(False)
     if not skip_normalize:
         output = normalize_whitespace(output)
@@ -91,7 +91,7 @@ def test_codex():
     """Simple test for codex using an very standard input"""
     bash = "echo Hello World"
     ## OLD: python = b2p.codex_convert(None, bash)
-    b2p = B2P(bash, None, skip_comments=True)
+    b2p = B2P(bash, skip_comments=True)
     python = b2p.format(True)
     output = 'print("Hello World")'
     #
@@ -327,7 +327,7 @@ def test_echo_to_stderr():
     bash2py(bash, python)
 
 
-@pytest.mark.xfail(reason="Complex systax not implemented")
+@pytest.mark.xfail(reason="Complex syntax not implemented")
 def test_complex_for_loop():
     """Tests complex for loop. Includes some arrays. Doomed to fail"""
     bash = """
