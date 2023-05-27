@@ -51,6 +51,11 @@
 #     !?string[?]                   find last command with string
 #  - local variable declaration     note: space-separated not comma; simplified
 #      local var1[=val1] [var2[=val2] ...]
+#  - common file tests
+#      -s file                      non-empty file (n.b., nothing like csh's -z)
+#      -e file                      file exists
+#      -f file                      regular file
+#      -d file                      file is directory
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
