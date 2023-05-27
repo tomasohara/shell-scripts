@@ -16,9 +16,16 @@
 **/*.log
 **/*.list
 
-# Any files with _, except specified cases
+# Any files with leading _, except specified cases
 **/_*
 !**/*__init__.py
+# Likewise for trailing _'s (e.g., requirements.link_)
+**/*_
+
+# Special cases
+# TODO: see why excluded by the rules
+# Workflow files (e.g., .github/workflows/tests.yml).
+!.github/**
 
 # Backup file
 **/*.bak
@@ -32,11 +39,16 @@
 **/log-files
 **/output-files
 
-# Jupyter
-.ipynb_checkpoints
-
-# (maldito) Mac
-.DS_Store
+## OLD
+## # Jupyter
+## .ipynb_checkpoints
+## 
+## # (maldito) Mac
+## .DS_Store
+#
+# Top-level dot files
+# ex: .hypothesis
+.*
 
 #...............................................................................
 # Idiosyncratic stuff for Tom
@@ -54,6 +66,14 @@ versioned-files
 
 # Emacs
 TAGS
+
+# Unit test, coverage reports, etc.
+# TODO: show examples
+.pytest_cache
+**/tests/htmlcov
+.coverage
+.coverage.*
+.hypothesis**
 
 # OS-specific directories
 linux
