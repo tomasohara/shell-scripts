@@ -62,7 +62,7 @@ def segment_input(file_handle):
             # Print divider for subsequent segments
             if segment_num:
                 # note: use two dividiers: one is full length and the other is shortened
-                # so not consumed by split (see format() in main script).
+                # so not consumed by split (see convert_snippet() in main script).
                 output += f"{SMALL_SEGMENT_DIVIDER}"
                 output += f"{SEGMENT_DIVIDER}"
             # Print segment indicator
@@ -81,7 +81,7 @@ def bash_to_python(output):
         b2p = bash2python.Bash2Python(output, None,
                                       segment_prefix=SEGMENT_COMMENT,
                                       segment_divider=SEGMENT_DIVIDER)
-        formatted_output = b2p.format(codex)
+        formatted_output = b2p.convert_snippet(codex)
         formatted_outputs.append(formatted_output.splitlines())
     return formatted_outputs
 
