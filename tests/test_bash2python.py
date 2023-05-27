@@ -31,6 +31,7 @@
 """Tests for bash2python.py"""
 
 # Standard modules
+import json
 import subprocess
 
 # Installed modules
@@ -41,7 +42,9 @@ from click.testing import CliRunner
 from bash2python import Bash2Python as B2P, OPENAI_API_KEY
 from bash2python_diff import main
 from mezcla import debug
+from mezcla import glue_helpers as gh
 from mezcla.my_regex import my_re
+from mezcla import system
 
 #-------------------------------------------------------------------------------
 # Helper functions
@@ -456,6 +459,66 @@ def test_tabular_tests(bash, python):
     """Tests in tabular format. Uses pytest parametrize"""
     bash2py_helper(bash, python)
 
+
+def do_test_external_script(bash_filename, python_filename=None, diff_program=None, diff_threshold=None):
+    """Tests external script given by BASH_FILENAME and PYTHON_FILENAME
+    using DIFF_PROGRAM to compute score based on DIFF_THRESHOLD"""
+    debug.trace(6, f"do_test_external_script{(bash_filename, python_filename, diff_program, diff_threshold)}")
+    if python_filename is None:
+        python_filename = gh.remove_extension(bash_filename, ".bash") + ".py"
+    if diff_program is None:
+        diff_program = "char-diff.bash"
+    if diff_threshold is None:
+        diff_threshold = 0.25
+
+    # Run conversion
+    script_dir = gh.form_path(gh.dirname(__file__), "..")
+    script = gh.form_path(script_dir, "bash2python.py")
+    temp_file = gh.get_temp_file()
+    gh.run(f"python {script} --script {bash_filename} > {temp_file}.bash.py 2> {temp_file}.bash.log")
+
+    # Compute diff-based score
+    epsilon = 0.001
+    num_diffs = system.to_int(gh.run(f"{diff_program} {temp_file}.bash.py {python_filename} | wc -l"))
+    num_lines = len(system.read_lines(python_filename))
+    score = 100 * (1.0 - min(1, ((num_diffs + epsilon) * 0.25) / (num_lines + epsilon)))
+    debug.trace_expr(5, num_diffs, num_lines, score)
+    assert(score >= diff_threshold)
+
+
+def do_test_directory(dir_path, config_file=None):
+    """Run test with each mnaually converted file in PATH, using optional CONFIG_FILE
+    For each .py file, the corresponding .bash file is the input. 
+    In addition, CONFIG_FILE can be used to override the default threshold for comparison
+    """
+    debug.trace(5, f"do_test_directory({dir_path}, [{config_file}])")
+    if config_file is None:
+        config_file = gh.form_path(dir_path, "config.json")
+    config = {}
+    if config_file and system.file_exists(config_file):
+        config = json.loads(system.read_file(config_file))
+    for filename in gh.get_matching_files(gh.form_path(dir_path, "*.bash")):
+        try:
+            config_hash = config.get(filename, {})
+            threshold = system.to_float(config_hash.get("threshold", 0))
+        except:
+            system.print_exception_info("test_directory/threshold")
+        do_test_external_script(filename, diff_threshold=threshold)
+
+
+## TAKE1
+## @pytest.mark.xfail
+## def test_external_scripts():
+##     """Test conversion of scripts in external directories"""
+##     debug.trace(5, "test_external_scripts()")
+##     do_test_directory(gh.resolve_path("bash2py-data"))
+
+@pytest.mark.xfail                      # uses xfail for convenience (TODO: have separate version for good tests)
+@pytest.mark.parametrize("filename",
+                         gh.get_matching_files(gh.form_path(gh.resolve_path("bash2py-data"), "*.bash")))
+def test_bash_script(filename):
+    """Test conversion of Bash FILENAME againt corresponding .py file"""
+    do_test_external_script(filename)
 
 ## TODO1: put bash2python_diff tests in test_bash2python_diff
 ##
