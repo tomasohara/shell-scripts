@@ -46,6 +46,10 @@ from mezcla import glue_helpers as gh
 from mezcla.my_regex import my_re
 from mezcla import system
 
+# Constants
+RUN_SLOW_TESTS = system.getenv_bool("RUN_SLOW_TESTS", False,
+                                    "Run tests that can a while to run")
+
 #-------------------------------------------------------------------------------
 # Helper functions
 
@@ -514,6 +518,7 @@ def do_test_directory(dir_path, config_file=None):
 ##     do_test_directory(gh.resolve_path("bash2py-data"))
 
 @pytest.mark.xfail                      # uses xfail for convenience (TODO: have separate version for good tests)
+@pytest.mark.skipif(not RUN_SLOW_TESTS, reason='Ignoring slow tests')
 @pytest.mark.parametrize("filename",
                          gh.get_matching_files(gh.form_path(gh.resolve_path("bash2py-data"), "*.bash")))
 def test_bash_script(filename):
