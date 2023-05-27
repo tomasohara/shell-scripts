@@ -30,6 +30,12 @@
 ## - Have option to save each test in a separate bats file: a simple syntax error (e.g., wrong closing quote) can cause the entire test to fail.
 ## TODO3:
 ## - Warn if expecting command and non-comment and non-$ line encounters (e.g., Tom's funky ¢ prompt)
+## - Stay in synh with Batspp:
+##   https://github.com/LimaBD/batspp/tree/main/tests/cases
+## TODO4:
+## - Integrate features from similar utilities:
+##   https://pypi.org/project/docshtest/
+##   https://github.com/lehmannro/assert.sh
 ## TODO:
 ## - extend usage guide or docstring.
 ## - Add some directives in the test or script comments:
