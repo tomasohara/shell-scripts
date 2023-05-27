@@ -69,13 +69,14 @@
 ## alias printenv="set | egrep '[^ ]+='"
 ## printenv.sh
 
-# Bash customizations (e.g., no beep)
-set bell-style none
-export HISTCONTROL=erasedups
-# via `man 3 strftime`:
-#    %F     Equivalent to %Y-%m-%d (the ISO 8601 date format). (C99)
-#    %T     The time in 24-hour notation (%H:%M:%S). (SU)
-export HISTTIMEFORMAT='[%F %T] '
+## OLD
+## # Bash customizations (e.g., no beep)
+## set bell-style none
+## export HISTCONTROL=erasedups
+## # via `man 3 strftime`:
+## #    %F     Equivalent to %Y-%m-%d (the ISO 8601 date format). (C99)
+## #    %T     The time in 24-hour notation (%H:%M:%S). (SU)
+## export HISTTIMEFORMAT='[%F %T] '
 
 # Directory for scripts
 if [ "$BIN" = "" ]; then export BIN="$TOM_BIN"; fi
@@ -118,30 +119,31 @@ case "$OSTYPE" in solaris*)
      alias printenv='printenv.sh'
 esac
 
-# Settings for less command 
-# LESS="-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"
-#
-# less options:
-#     -c   full screen repaints to be painted from the top line down
-#     -F   automatically exit if the entire file can  be  displayed on first screen
-#     -I   searches ignore case even if the pattern contains uppercase letters
-#     -S   Causes lines longer than the screen width to be chopped
-#     -X   Disables sending the termcap initialization and deinitialization
-#     -P   changes the prompt
-# to override on command line
-#     -+<option> 	ex: -+F
-#     
-export LESS="-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"
-# Disables full-screen repaints under minimal-installation hosts (e.g., Beowolf nodes)
-if [ "$BAREBONES_HOST" = "1" ]; then export LESS="-cIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"; fi
-## export LESSCHARSET=latin1
-export PAGER=less
-export PAGER_CHOPPED="less -S"
-export PAGER_NOEXIT="less -+F"
-function zless () { zcat "$@" | $PAGER; }
-alias less-="$PAGER_NOEXIT"
-alias less-tail="$PAGER_NOEXIT +G"
-export ZPAGER=zless
+## OLD:
+## # Settings for less command 
+## # LESS="-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"
+## #
+## # less options:
+## #     -c   full screen repaints to be painted from the top line down
+## #     -F   automatically exit if the entire file can  be  displayed on first screen
+## #     -I   searches ignore case even if the pattern contains uppercase letters
+## #     -S   Causes lines longer than the screen width to be chopped
+## #     -X   Disables sending the termcap initialization and deinitialization
+## #     -P   changes the prompt
+## # to override on command line
+## #     -+<option> 	ex: -+F
+## #     
+## export LESS="-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"
+## # Disables full-screen repaints under minimal-installation hosts (e.g., Beowolf nodes)
+## if [ "$BAREBONES_HOST" = "1" ]; then export LESS="-cIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"; fi
+## ## export LESSCHARSET=latin1
+## export PAGER=less
+## export PAGER_CHOPPED="less -S"
+## export PAGER_NOEXIT="less -+F"
+## function zless () { zcat "$@" | $PAGER; }
+## alias less-="$PAGER_NOEXIT"
+## alias less-tail="$PAGER_NOEXIT +G"
+## export ZPAGER=zless
 
 #-------------------------------------------------------------------------------
 trace start of main settings
@@ -168,29 +170,31 @@ append-path $PERLLIB
 export PATH="$PATH:."
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib:$LD_LIBRARY_PATH
 
-# Bash settings
-#
-# FIGNORE: A colon-separated list of suffixes to ignore when performing filename completion ("tab completion")
-export FIGNORE=".o:.fasl:.fas:.lib"
-## TEST: export FIGNORE=".o:.fasl:.fas:.lib:.log"
-## TODO: figure out how to exlcude .log for executable-tab-expansion (e.g., first position)
-export FIGNORE=".o:.fasl:.fas:.lib"
-set -o noclobber
-# MAILCHECK: Specifies how often (in seconds) bash checks for mail.
-# ... If this variable is unset, the shell disables mail checking.
-unset MAILCHECK
-
-# MAIL If this parameter is set to a file name and the MAILPATH variable is not
-#      set, bash informs the user of the arrival of mail in the specified file.
-unset MAIL
+## OLD
+## # Bash settings
+## #
+## # FIGNORE: A colon-separated list of suffixes to ignore when performing filename completion ("tab completion")
+## export FIGNORE=".o:.fasl:.fas:.lib"
+## ## TEST: export FIGNORE=".o:.fasl:.fas:.lib:.log"
+## ## TODO: figure out how to exlcude .log for executable-tab-expansion (e.g., first position)
+## export FIGNORE=".o:.fasl:.fas:.lib"
+## set -o noclobber
+## # MAILCHECK: Specifies how often (in seconds) bash checks for mail.
+## # ... If this variable is unset, the shell disables mail checking.
+## unset MAILCHECK
+## 
+## # MAIL If this parameter is set to a file name and the MAILPATH variable is not
+## #      set, bash informs the user of the arrival of mail in the specified file.
+## unset MAIL
 
 # Unix environ
 # note:
 # - TEMP is my private temp dir; TMP is system temp dir
 # - these settings should be done in .bashrc, .cshrc, etc. so that trace could use TEMP
-export TEMP=$HOME/temp
-export TMP=/tmp
-export TMPDIR=$TEMP
+## OLD:
+## export TEMP=$HOME/temp
+## export TMP=/tmp
+## export TMPDIR=$TEMP
 ## # The following are in support of ps_sort.perl
 ## export LINES
 ## export COLUMNS
@@ -856,51 +860,53 @@ alias em-devel='em --devel'
 ## function em-large () { em -fn "-adobe-courier-bold-r-normal--18-180-75-75-m-110-iso8859-1" -geometry 70x30 "$@"; }
 ## function em-very-large () { em -fn "-adobe-courier-bold-r-normal--24-240-75-75-m-150-iso8859-1" -geometry 60x20 "$@"; }
 
-# Simple TODO-list maintenance commands
-#
-# add-todo(text): adds text<TAB><timestamp> to to-do list
-# todo: print example of using add-todo (for cut-n-paste purposes)
-# TODO: figure out way to have example copied into bash input buffer
-#
-# NOTE: tac is GNU reverse program ('reverse' of cat)
-# TODO: document all bash aliases (and functions) for benefit of others (and yourself!)
-## OLD: alias view-todo="perl -SSw reverse.perl $HOME/info/todo_list.text | $PAGER_CHOPPED"
-# TODO: revert to using tac; why was reverse.perl used instead???
-alias view-todo="perl -SSw reverse.perl $HOME/organizer/todo_list.text | $PAGER_CHOPPED"
-#
-## OLD: function add-todo () { echo "$@" \	`date` >> $HOME/info/todo_list.text ; view-todo; }
-function add-todo () { echo "$@" \	`date` >> $HOME/organizer/todo_list.text ; view-todo; }
-#
-function todo-one-week () { add-todo "[within 1 week] " "$@"; }
-#
-## function todo () { echo add-todo '"[within N weeks] ..."'; }
-function todo () { if [ "$1" == "" ]; then echo add-todo '"[within N weeks] ..."'; else todo-one-week "$@"; fi; }
-#
-# todo:(text): convenience alias for todo() for cut-n-paste of 'TODO: ...' notes from files
-alias todo:='todo'
-# TODO: enable bash case insensitivity for support of TODO and TODO: as well
-# (eg, via "shopt -s nocaseglob" and "set completion-ignore-case on" in .bash_profile??
-alias TODO='todo'
-alias TODO:='todo'
-function TODO1() { todo "$@"'!'; }
-alias todo1=TODO1
-#
-function todo! () { if [ "$1" == "" ]; then todo; else todo "$@"'!'; fi; }
-#
-# mail-todo: version of todo that also ends email
-# TODO: use lynx to submit send-to type URL
-function mail-todo () { add-todo "$*"; echo TODO: "$*" | mail -s "TODO: $*" ${USER}@${DOMAIN_NAME}; }
-#
-# Likewise for time tracking
-## OLD: alias view-track-time="tac $HOME/info/time_tracking_list.text | $PAGER_CHOPPED"
-alias view-track-time="tac $HOME/organizer/time_tracking_list.text | $PAGER_CHOPPED"
-alias view-time-tracking=view-track-time
-#
-## OLD: function add-track-time () { echo "$@" \	`date` >> $HOME/info/time_tracking_list.text ; view-track-time; }
-function add-track-time () { echo "$@" \	`date` >> $HOME/organizer/time_tracking_list.text ; view-track-time; }
-#
-function track-time () { if [ "$1" == "" ]; then echo add-track-time '"..."'; else add-track-time "$@"; fi; }
+## OLD:
+## # Simple TODO-list maintenance commands
+## #
+## # add-todo(text): adds text<TAB><timestamp> to to-do list
+## # todo: print example of using add-todo (for cut-n-paste purposes)
+## # TODO: figure out way to have example copied into bash input buffer
+## #
+## # NOTE: tac is GNU reverse program ('reverse' of cat)
+## # TODO: document all bash aliases (and functions) for benefit of others (and yourself!)
+## ## OLD: alias view-todo="perl -SSw reverse.perl $HOME/info/todo_list.text | $PAGER_CHOPPED"
+## # TODO: revert to using tac; why was reverse.perl used instead???
+## alias view-todo="perl -SSw reverse.perl $HOME/organizer/todo_list.text | $PAGER_CHOPPED"
+## #
+## ## OLD: function add-todo () { echo "$@" \	`date` >> $HOME/info/todo_list.text ; view-todo; }
+## function add-todo () { echo "$@" \	`date` >> $HOME/organizer/todo_list.text ; view-todo; }
+## #
+## function todo-one-week () { add-todo "[within 1 week] " "$@"; }
+## #
+## ## function todo () { echo add-todo '"[within N weeks] ..."'; }
+## function todo () { if [ "$1" == "" ]; then echo add-todo '"[within N weeks] ..."'; else todo-one-week "$@"; fi; }
+## #
+## # todo:(text): convenience alias for todo() for cut-n-paste of 'TODO: ...' notes from files
+## alias todo:='todo'
+## # TODO: enable bash case insensitivity for support of TODO and TODO: as well
+## # (eg, via "shopt -s nocaseglob" and "set completion-ignore-case on" in .bash_profile??
+## alias TODO='todo'
+## alias TODO:='todo'
+## function TODO1() { todo "$@"'!'; }
+## alias todo1=TODO1
+## #
+## function todo! () { if [ "$1" == "" ]; then todo; else todo "$@"'!'; fi; }
+## #
+## # mail-todo: version of todo that also ends email
+## # TODO: use lynx to submit send-to type URL
+## function mail-todo () { add-todo "$*"; echo TODO: "$*" | mail -s "TODO: $*" ${USER}@${DOMAIN_NAME}; }
+## #
+## # Likewise for time tracking
+## ## OLD: alias view-track-time="tac $HOME/info/time_tracking_list.text | $PAGER_CHOPPED"
+## alias view-track-time="tac $HOME/organizer/time_tracking_list.text | $PAGER_CHOPPED"
+## alias view-time-tracking=view-track-time
+## #
+## ## OLD: function add-track-time () { echo "$@" \	`date` >> $HOME/info/time_tracking_list.text ; view-track-time; }
+## function add-track-time () { echo "$@" \	`date` >> $HOME/organizer/time_tracking_list.text ; view-track-time; }
+## #
+## function track-time () { if [ "$1" == "" ]; then echo add-track-time '"..."'; else add-track-time "$@"; fi; }
 
+## OLD:
 # TODO: put signature in tomohara-aliases.bash
 # TODO: use ~/organizer instead of ~/info???
 ## OLD: alias address-info='cat $HOME/info/address.text'
