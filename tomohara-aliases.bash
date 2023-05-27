@@ -261,11 +261,15 @@ alias TODAY=todays-date
 alias date-central='TZ="America/Chicago" date'
 
 ## TOM-IDIOSYNCRATIC
-# em-adhoc-notes(): edit adhoc notes file using format _{host}-adhoc-{date} (e.g., _reempl-adhoc-notes.13may22.txt)
+# em-adhoc-notes(): edit adhoc notes file using format _{dir}-notes-{host}-{date} (e.g., _bin-notes-reempl-may22.txt)
+## OLD: em-adhoc-notes(): edit adhoc notes file using format _{host}-adhoc-{date} (e.g., _reempl-adhoc-notes.13may22.txt)
 ## OLD: alias em-adhoc-notes='emacs-tpo _adhoc-notes.$(TODAY).txt'
 ## OLD: alias em-adhoc-notes='emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes-$(TODAY).txt'
 ## BAD: alias-fn em-adhoc-notes 'emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes-$(todays-date-mmmYY).txt'
-function em-adhoc-notes { emacs-tpo "_${HOST_NICKNAME:misc}-adhoc-notes-$(todays-date-mmmYY).txt"; }
+## OLD: function em-adhoc-notes { emacs-tpo "_${HOST_NICKNAME:misc}-adhoc-notes-$(todays-date-mmmYY).txt"; }
+function em-adhoc-notes {
+    emacs-tpo $(downcase-text "$(basename "$PWD")-notes-${HOST_NICKNAME:tpo-host}-$(todays-date-mmmYY).txt");
+}
 
 alias T='TODAY'
 # update-today-vars() & todays-update: update the various today-related variables
@@ -485,9 +489,9 @@ unset MAIL
 # Note:
 # - TEMP is private temp dir (e.g., ~/temp); TMP is system temp dir (e.g., /tmp)
 # TODO: Put settings in .bashrc, so that trace could use TEMP.
-export TEMP="$HOME/temp"
-export TMP="$TEMP/tmp"
-export TMPDIR="$TMP"
+cond-export TEMP "$HOME/temp"
+cond-export TMP "$TEMP/tmp"
+cond-export TMPDIR "$TMP"
 mkdir -p "$TEMP" "$TMP" "$TMPDIR"
 # NOTE: LINE and COLUMNS are in support of ps_sort.perl and h (history).
 # They get reset via resize.
@@ -1391,8 +1395,8 @@ function diff-backup-helper {
     if [ "$backup_file" = "" ]; then
 	echo "Error: no backup for '$file'"
     else 
-	echo "Issuing: '$diff' '$(most-recent-backup "$file")' '$file'"
-	"$diff" "" "$file";
+	echo "Issuing: '$diff' '$backup_file' '$file'"
+	"$diff" "$backup_file" "$file";
     fi
 }
 alias diff-backup='diff-backup-helper diff'
@@ -3088,6 +3092,7 @@ function shell-check {
     # note: filters out following
     # - SC1090: Can't follow non-constant source. Use a directive to specify location.
     # - SC1091: Not following: ./my-git-credentials-etc.bash was not specified as input (see shellcheck -x).
+    # - SC2004: $/${} is unnecessary on arithmetic variables
     # - SC2009: Consider using pgrep instead of grepping ps output.
     # - SC2012: Use find instead of ls to better handle non-alphanumeric filenames
     # - SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects.
@@ -3098,7 +3103,7 @@ function shell-check {
     # - SC2230: which is non-standard
     # - TODO2: -e 'SC1090,SC1091,SC2009,SC2012,SC2129,SC2164,SC2181'
     ## OLD: shell-check-full "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;' | perl-grep -para -v '(SC1090|SC1091|SC2009|SC2012|SC2129|SC2164|SC2181|SC2219|SC2230)';
-    shell-check-full --exclude="SC1090,SC1091,SC2009,SC2012,SC2129,SC2164,SC2181,SC2196,SC2219,SC2230" "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;';
+    shell-check-full --exclude="SC1090,SC1091,SC2004,SC2009,SC2012,SC2129,SC2164,SC2181,SC2196,SC2219,SC2230" "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;';
 }
 
 #-------------------------------------------------------------------------------
