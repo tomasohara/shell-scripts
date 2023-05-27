@@ -85,10 +85,13 @@ function tabify {
 # trace-vars(var, ...): trace each VAR in command line
 # note: output format: VAR1=VAL1; ... VARn=VALn;
 function trace-vars {
-    local var
+    local var value
     for var in "$@"; do
 	# shellcheck disable=SC2027,SC2046
-	echo -n "$var="$(eval echo "\$$var")"; "
+	## echo -n "$var="$(eval echo "\$$var")"; "
+	## TODO: value="$(eval "echo \$$var")"
+	value="$(set | grep "^$var=")"
+	echo -n "$var=$value; "
     done
     echo
     ##
@@ -160,6 +163,19 @@ function get-host-nickname {
     fi
     echo "$nickname"
 }
+
+#...............................................................................
+# Archive related
+
+# create-zip(dir): create zip archive with DIR
+function create-zip {
+    local dir="$1"
+    shift
+    local archive
+    archive="$TEMP/$(basename "$dir").zip"
+    zip -r "$archive" "$dir";
+}
+
 
 #................................................................................
 # Linux stuff
