@@ -37,16 +37,20 @@ eval 'exec perl -Ssw $0 "$@"'
 BEGIN { 
     my $dir = `dirname $0`; chomp $dir; unshift(@INC, $dir);
     require 'common.perl';
-    use vars qw/$verbose/;
+    use vars qw/$verbose &set_init_var_export/;
 }
 
 use strict;
 use vars qw/$fract $diff $labels $headings $f $f1 $f2 $col $col1 $col2 $fix
     $ttest $paired_ttest $paired $anova $mann_whitney $each $interactive $stats
     $stdev $keep_nonnumeric $skip_nonnumeric $cumulative $average $context $flag_index_change $show_sum $dollars $commas $delim/;
-use vars qw/$strip/;
+use vars qw/$strip $args/;
 
 # Check options for statistical tests
+&init_var(*args, &FALSE);       # get data from arguments (i.,e., command line)
+if ($args) {
+    &set_init_var_export(&TRUE);
+}
 &init_var(*ttest, &FALSE);	# perform standard t-test analysis
 &init_var(*paired, &FALSE); 	# alias for -paired_ttest
 &init_var(*paired_ttest, $paired); # perform paired t-test analys
@@ -157,6 +161,17 @@ if ($cumulative) {
     print "Num\tSum${optional_header}\n";
 }
 
+# If -args specified, reformat via stdin
+if ($args) {
+    &debug_print(&TL_DETAILED, "Re-invoking with stdin; ARGV=(@ARGV)\n");
+    my($data) = "@ARGV";
+    &debug_print(&TL_VERY_DETAILED, "data: $data\n");
+    $data =~ s/ +/\n/g;
+    &debug_print(&TL_VERY_DETAILED, "data: $data\n");
+    printf "%s\n", &run_command_over("$0 -args=0 -fix - <", $data);
+    &exit();
+}
+
 # Process each line of the input stream
 # Look for a number (or optionally a fraction)
 #
@@ -219,7 +234,7 @@ while (<>) {
     $num1 =~ s/\"//g;
     $num2 =~ s/\"//g;
     if (($num1 eq "-") || ($num2 eq "-")) {
-	&debug_print(4, "ignoring entry due to -'s: $_\n");
+	&debug_print(4, "warning: ignoring entry at line $. due to -'s: $_\n");
 	next;
     }
     &debug_print(&TL_VERBOSE, "num1=$num1 num2=$num2\n");
