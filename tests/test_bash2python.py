@@ -67,21 +67,21 @@ def normalize_whitespace(text):
     return result
 
 
-def bash2py(bash, python, skip_normalize=False, keep_comments=False):
+def bash2py_helper(bash, expect, skip_normalize=False, keep_comments=False):
     """Helper for call bash2python as a module
     Notes:
     - Applies whitespace normalization unless SKIP_NORMALIZE
     - Omits conversion comments unless KEEP_COMMENTS (for sake of simpler matching)
     """
-    debug.trace(6, f"bash2py{(bash, python, skip_normalize, keep_comments)}")
-    debug.trace_expr(5, bash, python, delim="\n")
+    debug.trace(6, f"bash2py{(bash, expect, skip_normalize, keep_comments)}")
+    debug.trace_expr(5, bash, expect, delim="\n")
     b2p = B2P(bash, skip_comments=(not keep_comments))
-    output = b2p.format(False)
+    actual = b2p.convert_snippet(False)
     if not skip_normalize:
-        output = normalize_whitespace(output)
-        python = normalize_whitespace(python)
-    debug.trace_expr(5, output, python, delim="\n")
-    assert output == python
+        actual = normalize_whitespace(actual)
+        expect = normalize_whitespace(expect)
+    debug.trace_expr(5, actual, expect, delim="\n")
+    assert actual == expect
 
 #-------------------------------------------------------------------------------
 # Tests proper
@@ -90,24 +90,23 @@ def bash2py(bash, python, skip_normalize=False, keep_comments=False):
 def test_codex():
     """Simple test for codex using an very standard input"""
     bash = "echo Hello World"
-    ## OLD: python = b2p.codex_convert(None, bash)
     b2p = B2P(bash, skip_comments=True)
-    python = b2p.format(True)
-    output = 'print("Hello World")'
+    actual = b2p.convert_snippet(True)
+    expect = 'print("Hello World")'
     #
-    output = normalize_whitespace(output)
-    python = normalize_whitespace(python)
+    actual = normalize_whitespace(actual)
+    expect = normalize_whitespace(expect)
     #
-    if python == '# internal error':
+    if actual == '# internal error':
         print("Usually a problem with OPENAI_API_KEY")
-    assert output in python
+    assert actual in expect
 
 
 def test_variable_substitution():
     """Test to check if a simple echo $foo variable is ported"""
     bash = "echo $foo"
     python = "run(f'echo {foo}')"
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 def test_operator_substitution():
@@ -128,21 +127,21 @@ if 1 > 0:
     if 0 < 2:
         run('echo "Hello"')
     """
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 def test_comments_1():
     """Test if comments maintain their integrity, expected same input as output"""
     bash = "# This is a comment"
     python = "# This is a comment"
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 def test_comments_2():
     """Checks in-line comments to ensure integrity"""
     bash = "echo $foo # Another comment"
     python = "run(f'echo {foo}')# Another comment"
-    bash2py(bash, python, keep_comments=True)
+    bash2py_helper(bash, python, keep_comments=True)
 
 
 def test_while_loop():
@@ -162,21 +161,21 @@ while c <= 5:
     run(f'echo {c}')
     c += 1
 """
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 def test_command_substitution():
     """Checks if commands are correctly converted adding run()"""
     bash = "echo $(ls)"
     python = "run('echo $(ls)', skip_print=False)"
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 def test_command_pipe():
     """Makes sure a simple pipe is ported"""
     bash = "ls | grep test | wc -l"
     python = "run('ls | grep test | wc -l')"
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 def test_variable_assignment():
@@ -185,7 +184,7 @@ def test_variable_assignment():
     ## NOTE: need newline so echo resolved properly (old test moved below as xfail)
     bash = "name='John Doe'\necho $name"
     python = "name = 'John Doe'\nrun(f'echo {name}')"
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 def test_arithmetic_expression():
@@ -193,14 +192,14 @@ def test_arithmetic_expression():
     bash = "echo $((2+3*4))"
     ## OLD: python = "run('echo $((2+3*4))', skip_print=False)"
     python = "run('echo f\"{2+3*4}\"')"
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 def test_double_quotes():
     """Make sure double quotes escaped inside run calls"""
     bash = 'echo "Hello world"'
     python = "run('echo \"Hello world\"')"
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 def test_embedded_for_not_supported():
@@ -216,13 +215,13 @@ done
     ## TODO: call directly
     python = "embedded for"
     debug.trace_expr(5, bash, python, delim="\n") 
-    output = (
+    actual = (
         subprocess.check_output(["python", "bash2python.py", "--script", bash])
         .decode()
         .strip()
     )
     debug.trace_expr(4, python)
-    assert python in output
+    assert python in actual
 
 
 @pytest.mark.xfail
@@ -240,7 +239,7 @@ fi
     python = (
         "if a == b:\n run('echo 'Equal'')\nelse:\n run('echo 'Not Equal'')"
     )
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 @pytest.mark.xfail
@@ -265,7 +264,7 @@ elif x < 0:
 else:
     run(f'"echo {x} positive"')
     """
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 @pytest.mark.xfail                      # note: c-style loops not supported
@@ -273,7 +272,7 @@ def test_for_c_style():
     """Tests C-style for loops"""
     bash = "for ((i=0; i < 10; i++)); do  echo $i; done"
     python = "for i in range(10):\n    run(f'print {i}')"
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 @pytest.mark.xfail
@@ -300,7 +299,7 @@ esac
     else:
         run('echo "var is not x, y or z"')
     """
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 def test_let_command():
@@ -308,14 +307,14 @@ def test_let_command():
     bash = 'let "x=1+2"'
     ## TODO: python = "x=1+2"
     python = "x = 1+2"
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 def test_history_substitution():
     """Tests the history mechanism ($!)"""
     bash = "echo hello && echo world && echo !$"
     python = "run('echo hello && echo world && echo !$')"
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 @pytest.mark.xfail(reason="Extraenous quotes produced")
@@ -324,7 +323,7 @@ def test_echo_to_stderr():
     bash = "echo 'This is an error' >&2"
     ## OLD: python = """run("echo \\\\\'This is an error\\\\\' >&2")"""
     python = """run("echo 'This is an error' >&2")"""
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 @pytest.mark.xfail(reason="Complex syntax not implemented")
@@ -343,12 +342,12 @@ for file in files:
     run("echo \"Reading file: $file\"")
     run(f"cat {file}")
     """
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 @pytest.mark.xfail
 # note: uses xfail for convenience (TODO: have separate version for important tests)
-@pytest.mark.parametrize("bash_line, expected_result", [
+@pytest.mark.parametrize("bash_line, expect_result", [
     # input                             result
     ("""echo $fubar""",                 """run(f'echo {fubar}')"""),      # TODO: print(f"{fubar}")
     # note: results with multiple run's requires var_replace to be incremental (as with process_compound)
@@ -356,13 +355,15 @@ for file in files:
     ("""ls\npwd\n""",                   """run('ls')\nrun('pwd')"""),
     ("""ls\n\npwd\n""",                 """run('ls')\n\nrun('pwd')"""),
     ])
-def test_tabular_var_replace(bash_line, expected_result):
+def test_tabular_var_replace(bash_line, expect_result):
     """Tests in tabular format for var_replace. Uses pytest parametrize"""
-    b2p = B2P(None, None)
-    actual_result = b2p.var_replace(bash_line)
+    debug.trace(6, f"test_tabular_var_replace({bash_line!r}, {expect_result!r})")
+    b2p = B2P(None, skip_comments=True)
+    (_converted, actual_result, _remainder) = b2p.var_replace(bash_line)
     norm_actual_result = normalize_whitespace(actual_result)
-    norm_expected_result = normalize_whitespace(expected_result)
-    assert(norm_actual_result == norm_expected_result)
+    norm_expect_result = normalize_whitespace(expect_result)
+    debug.trace_expr(5, norm_actual_result, norm_expect_result, delim="\n")
+    assert(norm_actual_result == norm_expect_result)
 
 
 @pytest.mark.xfail                      # uses xfail for convenience (TODO: have separate version for good tests)
@@ -383,6 +384,8 @@ def test_tabular_var_replace(bash_line, expected_result):
      "z = x + y"),
     ("z=$((x + y))",
      'z = f"{x + y}"'),
+    ("echo a$((1+2))b",
+     "run(f'echo a{1+2}b')"),
     # simple if statement(s)
     ("""if [ $? -eq 0 ]; then echo "Success"; fi""",
      """if run("echo $?") == "0":\n   print("Success")"""),
@@ -410,11 +413,15 @@ def test_tabular_var_replace(bash_line, expected_result):
     # default values (n.b., the support needs to be changed in bash2python.py)
     ("""if [ ${HOME:-n/a} = "n/a" ]; then echo "no HOME"; fi""",
      """if os.getenv("HOME", "n/a") == "n/a":\n    print("no HOME")"""),
-    # special test conditions (TOOD: rework in terms of tests for operator function)
+    # special test conditions (TODO: rework in terms of tests for operator function)
     ("""if [ 1 ]; then true; fi""",
      """if True:\n    pass"""),
-    ("""if [ 1 ]; then true; fi""",
+    ("""if [ 0 ]; then true; fi""",
+     """if False:\n    pass"""),
+    ("""if true; then true; fi""",
      """if True:\n    pass"""),
+    ("""if false; then true; fi""",
+     """if False:\n    pass"""),
     # operators (TODO: isolate from if/then/fi verbiage)
     ("""if [[ ($? -gt 0) && ($? -lt 0) ]]; then echo "bad status"; fi""",
      """if run("$?") > 0 and run("$?") < 0:\n    print("bad status")"""),
@@ -447,7 +454,7 @@ echo 1 2 \
     ])
 def test_tabular_tests(bash, python):
     """Tests in tabular format. Uses pytest parametrize"""
-    bash2py(bash, python)
+    bash2py_helper(bash, python)
 
 
 ## TODO1: put bash2python_diff tests in test_bash2python_diff
@@ -483,11 +490,6 @@ def test_diff_opts():
     debug.trace_expr(6, result.output, max_len=4096)
     debug.trace_object(7, result)
     assert result.exit_code == 0
-    ##
-    ## OLD
-    ## assert 'print("Hello World")' in result.output
-    ## assert "foo = 'bar'" in result.output
-    ##
     # example output (simplified):
     #   # b2py                           | codex
     #   run('echo "Hello World"')        |
