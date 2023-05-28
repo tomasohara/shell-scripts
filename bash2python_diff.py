@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 # Converts a bash script to python using two approaches, one based on old-school pattern
-# matching and the other based on large language models trained over code (e.g., Codex).
+# matching and the other based on large language models trained over code (e.g., OpenAI Codex).
 #
 # Notes:
 # - Info on perl paragraph mode [via perlrun manpage]:
@@ -13,8 +13,7 @@
 #      [To slurp files whole, use the value 0777.]
 #
 
-# Tana-TODO2: something like """Wrapper around bash2python.py showing regex vs codex diff"""
-"""Segments a script and makes a diff"""
+"""Wrapper around bash2python.py showing regex vs Codex diff"""
 
 # Standard modules
 import difflib
@@ -92,7 +91,7 @@ def print_diff(formatted_outputs):
     diff = list(difflib.ndiff(formatted_outputs[0], formatted_outputs[1]))
     debug.trace_expr(6, diff)
 
-    ## Tana-TODO2: code a simple alternative using 'diff --side-by-side'
+    ## TODO2: code a simple alternative using 'diff --side-by-side'
     ## NOTE: It is not good to re-invent the wheel.
     ##   temp1 = f"{TMP}/_b2p_diff.codex.list"
     ##   temp2 = f"{TMP}/_b2p_diff.regex.list"
@@ -111,7 +110,7 @@ def print_diff(formatted_outputs):
         content = line[2:]
         debug.assertion(line[1] == " ")
 
-        ## Tana-TODO1: explain what you were trying to do
+        # Convert to side-by-side diff
         if content.strip():             # Check if the content is not an empty string
             content_clipped = content[:HALF_DIFF_MAX]
             blanks = (" " * HALF_DIFF_MAX)
@@ -179,26 +178,26 @@ def main(perl, diff):
     debug.trace(6, f"main({perl}, {diff})")
     file_handle = sys.stdin
 
-    # Read the input, segmenting into units such as by paragraph (e.,g., Perl style)
+    # Read the input, segmenting into units such as by paragraph (e.g., Perl style)
+    # TODO3: have option for user segmentation (e.g., read as is & verify segment comments)
     if perl:
-        output = perl_segment_input(file_handle)
+        bash_snippet = perl_segment_input(file_handle)
     else:
-        output = segment_input(file_handle)
-        
-    debug.trace_expr(7, output)
+        bash_snippet = segment_input(file_handle)
+    debug.trace_expr(7, bash_snippet)
     
-    # note: output is script text and formatted_outputs converted version (Tana-TODO2: rename both--see 'Tips' in main script)
-    formatted_outputs = bash_to_python(output)
+    # Convert using regular and Codex-based approaches
+    python_conversions = bash_to_python(bash_snippet)
     
-    # If using diff function, creates the diff
+    # If using diff option, creates the diff listing indirectly
     # note: diff is side-by-side
     if diff:
-        print_diff(formatted_outputs)
+        print_diff(python_conversions)
     else:
-        for index, formatted_output in enumerate(formatted_outputs):
+        for index, conversion in enumerate(python_conversions):
             file_label = LABEL_BASH2PYTHON if index == 0 else LABEL_CODEX
             sys.stdout.write(f"------------{file_label}------------\n")
-            for line in formatted_output:
+            for line in conversion:
                 sys.stdout.write(line + "\n")
     return
 
