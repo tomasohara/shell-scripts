@@ -72,6 +72,7 @@ import re
 import subprocess
 
 # Installed modules
+import bashlex
 import click
 import diskcache
 import openai
@@ -131,6 +132,8 @@ TEMPERATURE = system.getenv_float("TEMPERATURE", 0.6,
                                   description="Next token probability")
 PARA_SPLIT = system.getenv_bool("PARA_SPLIT", False,
                                 "Split code in Perl-style paragraph mode")
+BASHLEX_CHECKS = system.getenv_bool("BASHLEX_CHECKS", False,
+                                    "Includee bashlex sanity checks over AST--abstract syntax tree")
 
 # Global settings
 if USE_MEZCLA:
@@ -201,6 +204,92 @@ def embedded_in_quoted_string(subtext, text):
     return result
 
 
+#................................................................................
+    
+class BashAST:
+    """Abstract syntax tree for Bash snippets
+    Example:
+    this_ast = BashAST("if true; then echo hey; fi;")
+    other_ast = BashAST("echo hey;")
+    this_ast.embedded_in(other_ast)
+    """
+    # note: Usage based on https://github.com/idank/bashlex
+
+    def __init__(self, snippet=None):
+        self.snippet = None
+        self.parts = None
+        if snippet is not None:
+            self.parse(snippet)
+        return
+
+    def parse(self, snippet):
+        """Parse SNIPPET into AST"""
+        self.snippet = snippet
+        try:
+            self.parts = bashlex.parse(snippet)
+        except:
+            system.print_exception_info("BashAST.parse")
+        result = self.parts
+        debug.trace(6, f"BashAST.parse({snippet!r}) => {result!r}")
+        return result
+
+    def dump(self):
+        """Return DUMP of AST"""
+        result = ""
+        try:
+            result = "".join(ast.dump() for ast in self.parts)
+        except:
+            system.print_exception_info("BashAST.dump")
+        return result
+
+    def embedded_in(self, other):
+        """Whether AST for current snippet embedded in that for another"""
+        # note: implements tree traversal ignoring offsets (i.e., pos attribute)
+        return self.ast_embedded_in(self.parts, other.parts)
+
+    @staticmethod
+    def ast_embedded_in(ast, other_ast, depth=0):
+        """Whether AST is embedded in OTHER (i.e., ignoring offset)"""
+        indent = (" " * depth)
+        debug.trace(8, f"{indent}ast_embedded_in({ast!r}, {other_ast!r}, [d={depth}])")
+        embedded = False
+        if len(ast) == len(other_ast):
+            embedded = all(BashAST.same_ast_node(ast[i], other_ast[i]) for i in range(len(ast)))
+        else:
+            for sub_node in ast:
+                embedded = BashAST.ast_embedded_in(sub_node, other_ast,
+                                                   depth=(1 + depth))
+                if embedded:
+                    break
+        if not embedded:
+            embedded = (BashAST.ast_node_repr(ast, loose=True)
+                        in BashAST.ast_node_repr(other_ast, loose=True))
+        debug.trace(7, f"{indent}ast_embedded_in() => {embedded}")
+        return embedded
+    
+    @staticmethod
+    def same_ast_node(ast, other_ast):
+        """Whether AST node is same as OTHER ignoring offset"""
+        # example:
+        #   CommandNode(pos=(0, 8), parts=[WordNode(pos=(0, 4), word='echo'), WordNode(pos=(5, 8), word='hey'),])
+        #   CommandNode(pos=(14, 22), parts=[WordNode(pos=(14, 18), word='echo'), WordNode(pos=(19, 22), word='hey'),])
+        same_node = ((ast.kind == other_ast.kind)
+                     and (BashAST.ast_node_repr(ast) == BashAST.ast_node_repr(other_ast)))
+        debug.trace(7, f"same_ast_node({ast!r}, {other_ast!r}) => {same_node}")
+        return same_node
+
+    @staticmethod
+    def ast_node_repr(ast, include_pos=False, loose=False):
+        """Return representation for node optionally INCLUDing_POS and using LOOSE format"""
+        node_repr = str(ast)
+        if not include_pos:
+            node_repr = my_re.sub(r"pos=\(\d+, *\d+\) *", "", node_repr)
+        if loose:
+            node_repr = my_re.sub(r"^\[(.*)\]$", r"\1", node_repr)
+        return node_repr
+
+#................................................................................
+    
 class Bash2Python:
     """Returns a Python-like file based on Bash input"""
     KEYWORD_MAP = {
@@ -223,6 +312,7 @@ class Bash2Python:
             segment_divider = ("\n\n" if PARA_SPLIT else "\n")
         self.segment_divider = segment_divider
         self.segment_prefix = segment_prefix
+        self.global_ast = None
         self.cache = None
         self.codex_count = 0
         self.line_num = 0
@@ -758,20 +848,20 @@ class Bash2Python:
         """Process simple built-in keyword statement (e.g., true to pass)
         Returns (was-converted, python, remainder): see process_compound)
         """
-        debug.trace(6, f"in process_keyword_statement({line!r})")
+        debug.trace(7, f"in process_keyword_statement({line!r})")
         in_line = line
         converted = False
         line = self.map_keyword(line)
         if (line != in_line):
             converted = True
-        debug.trace(7, f"process_keyword_statement({in_line!r}) => ({converted}, {line!r}, "")")
+        debug.trace(6, f"process_keyword_statement({in_line!r}) => ({converted}, {line!r}, "")")
         return (converted, line, "")
 
     def process_simple(self, line):
         """Process simple statement conversion for LINE
         Returns (was-converted, python, remainder): see process_compound)
         """
-        debug.trace(6, f"in process_simple({line!r})\n\tself={self}")
+        debug.trace(7, f"in process_simple({line!r})\n\tself={self}")
         in_line = line
         converted = False
         has_var_refs = False
@@ -814,7 +904,7 @@ class Bash2Python:
         if converted and has_var_refs:
             ## TODO: line = self.var_replace(line)
             pass
-        debug.trace(7, f"process_simple({in_line!r}) => ({converted}, {line!r}, "")")
+        debug.trace(6, f"process_simple({in_line!r}) => ({converted}, {line!r}, "")")
         return converted, line, ""
 
     def process_compound(self, line, cmd_iter):
@@ -835,7 +925,6 @@ class Bash2Python:
         loops = (elif_loop, for_loop, while_loop, if_loop, else_loop)
         dummy_loop = ("dummy-start", "dummy-middle", "dummy-end")
         debug.trace_values(8, loops, "loops")
-        # note: (?:...) is for a non-capturing group: see www.rexegg.com/regex-quickstart.html
         start_keyword_regex = "(?:" + "|".join([l[0] for l in loops]) + ")"
         middle_keyword_regex = "(?:" + "|".join([l[1] for l in loops]) + ")"
         end_keyword_regex = "(?:" + "|".join([l[2] for l in loops]) + ")"
@@ -845,7 +934,9 @@ class Bash2Python:
         actual_loop = ()
         debug.trace(6, f"actual_loop0:{actual_loop}")
         converted = False
-        # Tane-TODO: rename "loop" => "compound"
+        # TODO2: rename "loop" => "compound"
+        all_compounds = []
+        all_loop_line = line
         loop_line = line
         indent = ""
         max_loop_count = 0
@@ -886,6 +977,7 @@ class Bash2Python:
                 indent = "    " * (loop_count - 1)
                 saw_middle = True
                 compound_stack.append("for_loop")
+                all_compounds.append(compound_stack[-1])
                 actual_loop = for_loop
                 debug.trace(6, f"actual_loop1:{actual_loop}")
                 quoted_values = ('["' + '", "'.join(values_spec.split()) + '"]')
@@ -912,6 +1004,7 @@ class Bash2Python:
                     loop_count += 1
                     indent = "    " * (loop_count - 1)
                 compound_stack.append(start_keyword + "_loop")
+                all_compounds.append(compound_stack[-1])
                 ## BAD: var = self.var_replace(test_expression, is_loop=True)
                 (converted, var, test_remainder) = self.var_replace(test_expression, is_loop=True)
                 debug.assertion(converted)
@@ -975,8 +1068,7 @@ class Bash2Python:
                     saw_middle = True
                 if loop_line.strip() in self.LOOP_CONTROL:
                     debug.trace(5, "Processing compound loop control")
-                    body += loop_line + "\n"
-                    body += self.map_keyword(loop_line) + "\n"
+                    body += indent + "    " + self.map_keyword(loop_line) + "\n"
                 elif loop_line.strip():
                     debug.trace(5, "Processing compound body statement")
                     if (my_re.search(fr"^(.*?)(;|\n)\s*({end_keyword_regex}\b.*?)$", loop_line, flags=my_re.DOTALL)):
@@ -1017,12 +1109,24 @@ class Bash2Python:
                         body += f"{indent}# L{self.line_num}: {alt_bash_line_spec}\n"
                         self.line_num += (alt_bash_line.count("\n"))
                     loop_line = alt_bash_line
+                    all_loop_line += ((alt_bash_line or "") + "\n")
         debug.trace_expr(6, body)
         comment = ""
         if not self.skip_comments:
             comment = f"#b2py: Founded loop of order {max_loop_count}. Please be careful\n"
         body = comment + body
         debug.assertion(remainder == "")
+
+        # Make sure AST agrees with compound statements found here (e.g., sequence subsumed)
+        # example: 'while true; if false ... fi; done' should have WhileNode.*IfNode in AST
+        if BASHLEX_CHECKS and all_loop_line:
+            debug.trace_expr(5, all_loop_line)
+            compound_ast = BashAST(all_loop_line)
+            debug.trace(5, f"Compound AST: {{\n\t{compound_ast.dump()}\n}}")
+            compound_regex = ".*".join(compound.replace("_loop", "Node") for compound in reversed(all_compounds))
+            if not my_re.search(compound_regex, BashAST.ast_node_repr(compound_ast)):
+                system.print_error("Warning: compound at line {self.line} not ascertained in AST")
+                
         debug.trace(7, f"process_compound() => ({converted}, {body!r}, {loop_line!r})")
         return converted, body, loop_line
 
@@ -1030,6 +1134,12 @@ class Bash2Python:
         """Convert self.cmd into python, returning text           # TODO3: refine comments
         Note: Optionally does conversion via OpenAI CODEX"""  
         debug.trace(6, f"{self.__class__.__name__}.convert_snippet({codex})")
+
+        # Make note of the overall bashlex AST
+        if BASHLEX_CHECKS:
+            self.global_ast = BashAST(self.cmd)
+            debug.trace(5, f"Global AST: {{\n\t{self.global_ast.dump()}\n}}")
+        
         # Tom-Note: This will need to be restructured. I preserved original for sake of diff.
         # Split the code into segments (see bash2python_diff.py, which uses dashes instead of newlines.
         # TODO3: cleanup cmd as file vs as text support (n.b., error prone)
@@ -1257,7 +1367,7 @@ Not working yet:
         cmd = (b2p.header() if INCLUDE_HEADER else "")
         cmd += b2p.convert_snippet(codex)
         debug.trace(3, f"Running generated python: {cmd!r}")
-        print(gh.run("python " + gh.write_temp_file(cmd)))
+        print(gh.run("python " + gh.get_temp_file(cmd)))
     else:
         if INCLUDE_HEADER:
            print(b2p.header())
