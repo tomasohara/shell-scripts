@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #
-# pylint: disable=line-too-long
-# Simple test suite for bash2python.py. oming up with general tests will be difficult,
+# Simple test suite for bash2python.py. Coming up with general tests will be difficult,
 # given the open-ended nature of the task. So just concentrate on the conversion of
 # simple examples that should be converted for each of the main supported features
 # (e.g., assignments, loops, and environment support).
@@ -36,11 +35,9 @@ import subprocess
 
 # Installed modules
 import pytest
-from click.testing import CliRunner
 
 # Local modules
 from bash2python import Bash2Python as B2P, OPENAI_API_KEY
-from bash2python_diff import main
 from mezcla import debug
 from mezcla import glue_helpers as gh
 from mezcla.my_regex import my_re
@@ -524,52 +521,6 @@ def do_test_directory(dir_path, config_file=None):
 def test_bash_script(filename):
     """Test conversion of Bash FILENAME againt corresponding .py file"""
     do_test_external_script(filename)
-
-## TODO1: put bash2python_diff tests in test_bash2python_diff
-##
-@pytest.mark.skipif(not OPENAI_API_KEY, reason='OPENAI_API_KEY not set')
-def test_diff_no_opts():
-    """Tests bash2python_diff without flags enabled"""
-    debug.trace(5, "test_diff_no_opts()")
-    runner = CliRunner(mix_stderr=False)
-    # NOTE: disable stderr tracing
-    bash = "line1\n\nline2\n"
-    result = runner.invoke(main, env={"DEBUG_LEVEL": "0"},
-                           input=bash)
-    python = result.output
-    debug.trace_expr(5, bash, python, delim="\n")
-    debug.trace_object(6, result)
-    assert result.exit_code == 0
-    assert "------------codex------------" in result.output
-    assert "------------b2py------------" in result.output
-##
-@pytest.mark.skipif(not OPENAI_API_KEY, reason='OPENAI_API_KEY not set')
-def test_diff_opts():
-    """Tests bash2python_diff with all flags enabled"""
-    debug.trace(5, "test_diff_opts()")
-    runner = CliRunner(mix_stderr=False)
-    # NOTE: disable stderr tracing
-    bash = "echo Hello World;\nfoo='bar';\n"
-    result = runner.invoke(main, args=["--perl", "--diff"], env={"DEBUG_LEVEL": "0"},
-                           ## TODO2: input="echo Hello World\n\nfoo='bar'\n",
-                           input=bash)
-    python = result.output
-    debug.trace_expr(5, bash, python, delim="\n")
-    debug.trace_expr(6, result.output, max_len=4096)
-    debug.trace_object(7, result)
-    assert result.exit_code == 0
-    # example output (simplified):
-    #   # b2py                           | codex
-    #   run('echo "Hello World"')        |
-    #                                    | print("Hello World")
-    #   fuu='bar'                        |
-    #                                    | foo = 'bar'
-    assert(my_re.search(r"""# b2py\s+\|\s+codex""", result.output))
-    assert(my_re.search(r"""run\(.*echo Hello World.*\).*\|""", result.output))
-    # TODO2: assert(my_re.search(r"""run\('echo Hello World'\).*\|""", result.output))
-    assert(my_re.search(r"""\|.*print\("Hello World"\)""", result.output))
-    assert(my_re.search(r"""foo\s*=\s*['"]bar['"].*\|""", result.output))
-    assert(my_re.search(r"""\|.*foo\s*=\s*['"]bar['"]""", result.output))
 
 #-------------------------------------------------------------------------------
 
