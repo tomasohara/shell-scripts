@@ -1,3 +1,6 @@
 # Basic requirements for python scripts
 mezcla
+numpy
 pyyaml
+six
+textwrap
