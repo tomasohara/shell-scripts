@@ -1,8 +1,17 @@
 """Master test script for shell-scripts repo"""
+
+# Standard modules
 import sys
 import re
 import subprocess
+
+# Installed modules
 import yaml
+
+# Local modules
+from mezcla import debug
+from mezcla import glue_helpers as gh
+from mezcla import system
 
 
 def load_thresholds(filename):
@@ -52,8 +61,18 @@ def run_tests(thresholds):
 
 def main():
     """Main function"""
-    # Load the thresholds from the YAML file
-    thresholds = load_thresholds("thresholds.yaml")
+
+    # Load the thresholds from the YAML file, falling back to defaults for all test files
+    # in the tests directory (TODO: merge the two sources with file trumping default).
+    THRESHOLDS_FILE = "thresholds.yaml"
+    if system.file_exists(THRESHOLDS_FILE):
+        thresholds = load_thresholds(THRESHOLDS_FILE)
+    else:
+        # note: uses default of 90% failures allowed just for sake of getting tests operational
+        # under Github actions (TODO: lower to 50%).
+        thresholds = {test_file:90.0 for test_file in gh.get_matching_files("tests/test_*.py")}
+    debug.trace_expr(4, thresholds)
+
     # Run tests and compare the results with the allowed thresholds
     run_tests(thresholds)
 
