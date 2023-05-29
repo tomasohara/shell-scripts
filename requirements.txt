@@ -3,4 +3,3 @@ mezcla
 numpy
 pyyaml
 six
-textwrap
