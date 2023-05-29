@@ -1,3 +1,5 @@
+# Workflow for running locally (e.g., via https://github.com/nektos/act)
+
 name: Tests
 
 on:
@@ -35,6 +37,5 @@ jobs:
           PYTHONPATH="$(pwd):$PYTHONPATH" python3 tests/master_test.py
 
       - name: Run Bats-PP Alias Tests
-        working-directory: tests
         run: |
-          sh ./summary_stats.bash
+          PYTHONPATH="$(pwd):$PYTHONPATH" bash tests/summary_stats.bash
