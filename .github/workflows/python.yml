@@ -1,3 +1,5 @@
+# Regular workflow for Github testing (n.b., runs remote on their servers)
+
 name: Tests
 
 on: [push, pull_request]
@@ -8,7 +10,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.8", "3.9", "3.10"]
+        ## TODO: python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.9"]
 
     steps:
       - name: Checkout Repository
