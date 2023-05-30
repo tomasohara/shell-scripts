@@ -1,3 +1,5 @@
+# Docker file to support CI/CD via Github actions
+
 # Use the GitHub Actions runner image with Ubuntu
 FROM ghcr.io/catthehacker/ubuntu:act-latest
 
@@ -10,14 +12,15 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Set the Python version to install
+## TODO: keep in sync with .github/workflows
 ARG PYTHON_VERSION=3.9.16
 
 # Download, extract, and install the specified Python version
 RUN wget -qO /tmp/python-${PYTHON_VERSION}-linux-22.04-x64.tar.gz \
-    "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-3647595251/python-${PYTHON_VERSION}-linux-22.04-x64.tar.gz" && \
+        "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-3647595251/python-${PYTHON_VERSION}-linux-22.04-x64.tar.gz" && \
     mkdir -p /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 && \
     tar -xzf /tmp/python-${PYTHON_VERSION}-linux-22.04-x64.tar.gz \
-    -C /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 --strip-components=1 && \
+        -C /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 --strip-components=1 && \
     rm /tmp/python-${PYTHON_VERSION}-linux-22.04-x64.tar.gz
 
 # Set environment variables to use the installed Python version as the default
