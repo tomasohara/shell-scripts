@@ -1,5 +1,8 @@
-# Basic requirements for python scripts
+# Basic requirements for python scripts. This is mainly in support
+# of running Github actions locally for testing (e.g., aliases via Batspp).
+batspp
 mezcla
 numpy
+pipreqs
 pyyaml
 six
