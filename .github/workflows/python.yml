@@ -40,6 +40,5 @@ jobs:
           python3 ./tests/master_test.py
 
       - name: Run Alias Tests
-        working-directory: tests
         run: |
-          bash summary_stats.bash
+          bash ./tests/summary_stats.bash
