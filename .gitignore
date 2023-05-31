@@ -19,7 +19,7 @@
 **/*.log
 **/*.list
 
-# Any files with _, except specified cases
+# Any files starting with _, except for specified cases
 **/_*
 !**/*__init__.py
 # Likewise for trailing _'s (e.g., adb_)
