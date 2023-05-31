@@ -72,13 +72,13 @@ import re
 import subprocess
 
 # Installed modules
-import bashlex
 import click
 import diskcache
 import openai
 
 # Local modules
 import mezcla
+from mezcla.bash_ast import BashAST
 from mezcla import debug
 from mezcla import glue_helpers as gh
 from mezcla.main import Main, BRIEF_USAGE, INDENT
@@ -104,6 +104,8 @@ DISK_CACHE = system.getenv_value("DISK_CACHE", None,
                                  "Path to directory with disk cache")
 OPENAI_API_KEY = system.getenv_value("OPENAI_API_KEY", None,
                                      "API key for OpenAI")
+OPENAI_PAUSE = system.getenv_number("OPENAI_PAUSE", 1.0,
+                                     "Delay in seconds after each OpenAI API call")
 JUST_CODEX = system.getenv_bool("JUST_CODEX", False,
                                 "Only do conversion via Codex")
 USE_CODEX = system.getenv_bool("USE_CODEX", (OPENAI_API_KEY or JUST_CODEX),
@@ -139,13 +141,9 @@ BASHLEX_CHECKS = system.getenv_bool("BASHLEX_CHECKS", False,
 if USE_MEZCLA:
     re = my_re
 
-## TEMP:
-## NOTE: Eventually most pylint issues should be resolved (excepting nitpicking ones)
-## pylint: disable=unneeded-not, line-too-long, fixme
-
 PYTHON_HEADER = """# Output from bash2python.py
 '''Python code from Bash snippet'''
-import os
+import os, sys
 from mezcla.glue_helpers import run_via_bash
 from mezcla import system
 
@@ -159,7 +157,10 @@ def run(command, skip_print=False):
        print(result)
     return result
 """
+# TODO1: rework run via class so that the commands can be batched
+# TODO2: track down quirk with gh.run("echo ...") not outputting result--by design?
 
+#...............................................................................
 
 def get_bash_var_hash():
     """Return a lookup hash for checking whether Bash variable is defined
@@ -198,96 +199,90 @@ def embedded_in_quoted_string(subtext, text):
     """Whether SUBTEXT of TEXT in contained in a quote"""
     # ex: embedded_in_quoted_string("#", "echo '#-sign'")
     # ex: not embedded_in_quoted_string("#", 'let x++     # incr x w/ init')
+    # ex: ex: embedded_in_quoted_string("$fu", "echo '$fu'")
+    in_subtext = subtext
+    subtext = my_re.escape(subtext)
     result = (my_re.search(fr"'[^']*{subtext}[^']*'", text) or
               my_re.search(rf'"[^"]*{subtext}[^"]*"', text))
-    debug.trace(7, f"embedded_in_quoted_string{(subtext, text)} => {result}")
+    debug.trace(7, f"embedded_in_quoted_string{(in_subtext, text)} => {result}")
     return result
 
 
-#................................................................................
-    
-class BashAST:
-    """Abstract syntax tree for Bash snippets
-    Example:
-    this_ast = BashAST("if true; then echo hey; fi;")
-    other_ast = BashAST("echo hey;")
-    this_ast.embedded_in(other_ast)
+last_line = None
+#
+def trace_line(line, label=None):
+    """Trace LINE if changed"""
+    if label is None:
+        label = "ln"
+    global last_line
+    if line != last_line:
+        debug.trace(6, f"{label}=\t{line!r}")
+        last_line = line
+
+## TEST
+def remove_extra_quotes(line, label=None):
+    """Remove extraneous quote characters from LINE"""
+    # EX: remove_extra_quotes('f"print("{os.getenv("HOME")}")"') => 'f"print({os.getenv("HOME")})"'
+    ## TODO
+    ## line = my_re.sub(r'("[^"]*)"([^"]*)"([^"]*")', line,
+    ##                 r"\1\2\3")
+    while (my_re.search(r'^(.*)("[^"]*)"([^"]*)"([^"]*")(.*)$', line) or
+           my_re.search("'^(.*)('[^']*)'([^']*)'([^']*')(.*)$", line)):
+        line = "".join(my_re.groups())
+        trace_line(line, label=label)
+    return line
+
+
+def fix_embedded_quotes(line, label=None, reset_on_spaces=False):
+    """Fix quote characters embedded in other quote characters in LINE
+    Notes:
+    - Embedded double quotes escaped with '\' unless already quoted.
+    - Outer single quotes changed to double quotes if embedded
+    - If RESET_ON_SPACES then embedding status reset if space encountered
     """
-    # note: Usage based on https://github.com/idank/bashlex
+    # EX: fix_embedded_quotes('print(f"{os.getenv("HOME")}")') => 'print(f"{os.getenv(\\"HOME\\")})"'
+    # EX: fix_embedded_quotes(' "abc"def"ghi" ') => ' "abc\"def\"ghi" '
+    # EX: fix_embedded_quotes(" 'abc'def\"ghi' ") => ' "abc'def\"ghi" '
+    quote_num = 0
+    start = 0
+    new_line = []
+    first_quote = last_quote = -1
 
-    def __init__(self, snippet=None):
-        self.snippet = None
-        self.parts = None
-        if snippet is not None:
-            self.parse(snippet)
-        return
+    # Escape embedded double quotes, keeping track of outer quote positions
+    while (start < len(line)):
+        if (line[start] == '"') or (line[start] == "'"):
+            quote_num += 1
+            if (quote_num == 1):
+                first_quote = len(new_line)
+            else:
+                if ((start > 0) and (line[start] == '"') and (line[start - 1] != "\\")):
+                    new_line.append("\\")
+            last_quote = len(new_line)
+        debug.trace_expr(8, start, line[start], quote_num, first_quote, last_quote)
+        new_line.append(line[start])
 
-    def parse(self, snippet):
-        """Parse SNIPPET into AST"""
-        self.snippet = snippet
-        try:
-            self.parts = bashlex.parse(snippet)
-        except:
-            system.print_exception_info("BashAST.parse")
-        result = self.parts
-        debug.trace(6, f"BashAST.parse({snippet!r}) => {result!r}")
-        return result
+        # Reset quote status on spaces
+        if ((line[start] == " ") and (first_quote > 0) and reset_on_spaces):
+            new_line[first_quote] = '"'
+            new_line[last_quote - 1] = ""
+            new_line[last_quote] = '"'
+            first_quote = last_quote = -1
 
-    def dump(self):
-        """Return DUMP of AST"""
-        result = ""
-        try:
-            result = "".join(ast.dump() for ast in self.parts)
-        except:
-            system.print_exception_info("BashAST.dump")
-        return result
-
-    def embedded_in(self, other):
-        """Whether AST for current snippet embedded in that for another"""
-        # note: implements tree traversal ignoring offsets (i.e., pos attribute)
-        return self.ast_embedded_in(self.parts, other.parts)
-
-    @staticmethod
-    def ast_embedded_in(ast, other_ast, depth=0):
-        """Whether AST is embedded in OTHER (i.e., ignoring offset)"""
-        indent = (" " * depth)
-        debug.trace(8, f"{indent}ast_embedded_in({ast!r}, {other_ast!r}, [d={depth}])")
-        embedded = False
-        if len(ast) == len(other_ast):
-            embedded = all(BashAST.same_ast_node(ast[i], other_ast[i]) for i in range(len(ast)))
-        else:
-            for sub_node in ast:
-                embedded = BashAST.ast_embedded_in(sub_node, other_ast,
-                                                   depth=(1 + depth))
-                if embedded:
-                    break
-        if not embedded:
-            embedded = (BashAST.ast_node_repr(ast, loose=True)
-                        in BashAST.ast_node_repr(other_ast, loose=True))
-        debug.trace(7, f"{indent}ast_embedded_in() => {embedded}")
-        return embedded
-    
-    @staticmethod
-    def same_ast_node(ast, other_ast):
-        """Whether AST node is same as OTHER ignoring offset"""
-        # example:
-        #   CommandNode(pos=(0, 8), parts=[WordNode(pos=(0, 4), word='echo'), WordNode(pos=(5, 8), word='hey'),])
-        #   CommandNode(pos=(14, 22), parts=[WordNode(pos=(14, 18), word='echo'), WordNode(pos=(19, 22), word='hey'),])
-        same_node = ((ast.kind == other_ast.kind)
-                     and (BashAST.ast_node_repr(ast) == BashAST.ast_node_repr(other_ast)))
-        debug.trace(7, f"same_ast_node({ast!r}, {other_ast!r}) => {same_node}")
-        return same_node
-
-    @staticmethod
-    def ast_node_repr(ast, include_pos=False, loose=False):
-        """Return representation for node optionally INCLUDing_POS and using LOOSE format"""
-        node_repr = str(ast)
-        if not include_pos:
-            node_repr = my_re.sub(r"pos=\(\d+, *\d+\) *", "", node_repr)
-        if loose:
-            node_repr = my_re.sub(r"^\[(.*)\]$", r"\1", node_repr)
-        return node_repr
-
+        # Advance to next character in input line
+        start += 1
+                
+    # Change outer quote to double if any embedded (n.b., removes final escape)
+    if (first_quote > 0):
+        new_line[first_quote] = '"'
+        new_line[last_quote - 1] = ""
+        new_line[last_quote] = '"'
+        first_quote = last_quote = -1
+    new_line = "".join(new_line)
+        
+    trace_line(new_line, label=label)
+    debug.trace(7, f"fix_embedded_quotes({line!r}) => {new_line!r}")
+    return new_line
+        
 #................................................................................
     
 class Bash2Python:
@@ -303,7 +298,7 @@ class Bash2Python:
         debug.trace(6, "Bash2Python.__init__()")
         self.cmd = bash
         self.bash_var_hash = get_bash_var_hash()
-        self.variables = []
+        self.variables = []             # TODO2: see if obsolete
         if skip_comments is None:
             skip_comments = SKIP_COMMENTS
         self.skip_comments = skip_comments
@@ -332,6 +327,7 @@ class Bash2Python:
 
     def contains_embedded_for(self, bash_snippet):
         """Simple method to get perl regex detection of embedded for loops"""
+        # NOTE: obsolete
         debug.assertion(not system.file_exists(bash_snippet))
         bash_snippet = re.sub(r"#.*$", "", bash_snippet, flags=re.MULTILINE)  # Remove comments
         bash_snippet = re.sub(r"'([^'\\]*(?:\\.[^'\\]*)*)'", "", bash_snippet)  # Remove single-quoted strings
@@ -428,7 +424,9 @@ class Bash2Python:
                 # If the response is not in the cache, make the API call and store the result in the cache
                 debug.trace(5, "Submitting Codex request")
                 response = openai.Completion.create(**params)
-                self.cache[params_tuple] = response
+                if self.cache is not None:
+                    self.cache[params_tuple] = response
+                system.sleep(OPENAI_PAUSE)
             if EXPORT_RESPONSE:
                 self.codex_count += 1
                 json_filename = f"{OUTPUT_BASENAME}-codex-{self.codex_count}.json"
@@ -462,7 +460,7 @@ class Bash2Python:
                 if not indent:
                     indent = my_re.group(1)
                 line = my_re.group(2)
-                debug.trace(6, f"line2={line!r}")
+                debug.trace(6, f"ln2=\t{line!r}")
             return line
 
         def handle_arithmetic_expansion(line):
@@ -472,9 +470,11 @@ class Bash2Python:
                 debug.trace(4, "processing arithmetic expansion")
                 (pre, expression, post) = my_re.groups()
                 # Note: converts expression to f-string
-                ## BAD:
-                line = pre + 'f"{' + expression + '}"' + post
-            debug.trace(6, f"line3={line!r}")
+                ## BAD: line = pre + 'f"{' + expression + '}"' + post
+                line = pre + '"{' + expression + '}"' + post
+                nonlocal has_python_var
+                has_python_var = True
+            debug.trace(6, f"ln3=\t{line!r}")
             return line
 
         def replace_var_references(line):
@@ -482,18 +482,17 @@ class Bash2Python:
             # Inicialize variables
             nonlocal bash_commands
             bash_commands = re.findall(r'\$\(.*\)', line)  # finds all bash commands
-            nonlocal has_bash_var, has_default
+            nonlocal has_python_var, has_default
             bash_vars_with_defaults = re.findall(r'\$\{\w+:-[^\}]+\}', line)
-            bash_vars = re.findall(r'\$\w+', line)
-            # TODO2: add $n => sys.argv[n]
-            bash_commmon_special_vars = re.findall(r'\$[\?\@]', line)
+            bash_vars = re.findall(r"\$[A-Za-z][A-Za-z0-9_]*", line)
+            bash_commmon_special_vars = re.findall(r'\$[\$\?\@\*0-9]', line)
             if other_vars:
                 bash_vars += other_vars
-            has_bash_var = False
             has_default = False
 
             # Iterate through the list of variables to convert Bash variable syntax to Python variable syntax
             for var in bash_vars + bash_vars_with_defaults + bash_commmon_special_vars:
+                debug.assertion(var.startswith("$"))
                 converted = False
 
                 # If the variable is in the bash_vars_with_defaults list
@@ -505,40 +504,69 @@ class Bash2Python:
                     var_default = re.search(r'\$\{\w+:-(.*)\}', var).group(1)
 
                     # If the variable name is uppercase (assumed to be an environment variable), replace it with Python os.getenv syntax
-                    if my_re.search(r"^[A-Z0-9_]$", var_name):
+                    if my_re.search(r"^[A-Z0-9_]+$", var_name):
                         replacement = f'os.getenv("{var_name}", "{var_default}")'
                     else:
                         # Replace the variable with Python syntax and a check for None
-                        replacement = f"{{{var_name} if {var_name} is not None else '{var_default}'}}"
+                        replacement = f"{{{var_name}}} if {{{var_name}}} is not None else '{var_default}'"
 
                     # Replace the Bash variable in the line with the Python-style variable
-                    line = my_re.sub(fr"{var}\b", replacement, line)
-                    has_bash_var = True
+                    var_regex = my_re.escape(var)
+                    line = my_re.sub(fr"{var_regex}", replacement, line)
+                    debug.trace(6, f"ln3a=\t{line!r}")
+                    has_python_var = True
                     has_default = True
                 elif var in bash_commmon_special_vars:
                     # If the variable is a commonly used special variable, replace it with a function run call
-                    if is_loop:
+                    # ex: "[ $? -eq 0 ]" , echo "$1"
+                    if (is_loop and var in ["$?"]):
                         line = line.replace(var, f"run(echo '{var}')")
-                        debug.trace(4, f"Special case handling of Bash special variable {var}: line={line!r}")
+                        debug.trace(4, f"Special case handling of Bash special variable {var}\nln3b=\t{line!r}")
+                    else:
+                        # TODO: keep track of context (e.g., function vs. script); use lookup table
+                        replacement = var[1:]
+                        if my_re.search(r"\$([0-9])", var):
+                            replacement = "sys.argv[" + my_re.group(1) + "]"
+                        elif my_re.search(r"\$\$", var):
+                            replacement = 'os.getpid()'
+                        elif my_re.search(r"\$\*", var):
+                            replacement = '" ".join(sys.argv)'
+                        elif my_re.search(r"\$\@", var):
+                            replacement = '" ".join(f"{v}" for v in sys.argv)'
+                        line = line.replace(var, f"{{{replacement}}}")
+                        debug.trace(4, f"Special case handling of Bash special variable {var}\nln3b=\t{line!r}")
                     converted = True
+                    has_python_var = True
                 elif (var[1:] in self.bash_var_hash) and (var not in self.variables):
                     # If the variable is a Bash-defined variable and not in self.variables, exclude it from the conversion
-                    debug.trace(4, "Excluding Bash-defined variable {var}")
+                    debug.trace(4, f"Excluding Bash-defined variable {var}")
                 else:
                     pass
 
                 # If the variable wasn't converted yet
                 if (not converted):
                     # If it's a loop, drop the $-prefix from the variable
-                    if is_loop:
-                        line = my_re.sub(fr"\${var[1:]}\b", var[1:], line)
+                    python_var = var[1:]
+                    if (is_loop and (not embedded_in_quoted_string(var, line))):
+                        line = my_re.sub(fr"\${python_var}\b", python_var, line)
+                        debug.trace(6, f"ln3c=\t{line!r}")
+                    # Treat capitalized variable as from environment
+                    elif my_re.search(r"^[A-Z]+$", python_var):
+                        line = my_re.sub(fr"\${python_var}\b", f'{{os.getenv("{{{python_var}}}")}}', line)
+                        debug.trace(6, f"ln3ca=\t{line!r}")
+                        has_python_var = True
+                    # Otherwise, replace the Bash variable in the line with the Python-style variable
                     else:
-                        # Replace the Bash variable in the line with the Python-style variable
-                        line = my_re.sub(fr"\${var[1:]}\b", "{" + var[1:] + "}", line)
-                        has_bash_var = True
+                        line = my_re.sub(fr"\${python_var}\b", "{" + python_var + "}", line)
+                        debug.trace(6, f"ln3d=\t{line!r}")
+                        has_python_var = True
 
+            # Remove extraneous embedded quotes
+            ## BAD: line = remove_extra_quotes(line, "ln3e")
+            line = fix_embedded_quotes(line, "ln3e", reset_on_spaces=True)
+                        
             # Trace output
-            debug.trace(6, f"line4={line!r}")
+            debug.trace(6, f"ln4=\t{line!r}")
             return line
 
         def process_conditions_and_loops(line):
@@ -553,13 +581,17 @@ class Bash2Python:
                     line = pre + keyword.capitalize() + post
                     debug.trace(5, "Capitalized {keyword} in {line!r}")
 
-                # note: static are a hack to account for variable assignments
+                # note: static is a hack to account for variable assignments
                 if var_pos == 1:
                     line = f"{static}f{line}"
-                    debug.trace(5, "Re-instated pre-static {static!r} in line: {line!r}")
-                if var_pos == 0:
+                    debug.trace(5, "Reinstated pre-static {static!r} in line: {line!r}")
+                elif var_pos == 0:
                     line = f"f{line}{static}"
-                    debug.trace(5, "Re-instated post-static {static!r} in line: {line!r}")
+                    debug.trace(5, "Reinstated post-static {static!r} in line: {line!r}")
+                elif my_re.search("^([^\'\"]*[^f])([\'\"].*{.*}.*[\'\"])(.*)$", line):
+                    (pre, quoted_string, post) = my_re.groups()
+                    line = pre + f"f{quoted_string}" + post
+                    debug.trace(5, f"Adding f-string prefix to loop line string: {line!r}")
                 debug.trace(5, f"[early exit 3a; process_conditions_and_loops] {var_replace_call} => ({line!r}, '')")
                 return line, ""
             
@@ -583,11 +615,11 @@ class Bash2Python:
                 debug.assertion(not embedded_in_quoted_string(";", line))
                 inline_comment += " # Warning: review conversion of compound statement"
             if not line.strip():
-                debug.trace(6, f"line4.5={line!r}")
+                debug.trace(6, f"ln4.5=\t{line!r}")
                 pass
             ## TEST
-            ## elif not has_bash_var:
-            ##     debug.trace(6, f"line4.75={line!r}")
+            ## elif not has_python_var:
+            ##     debug.trace(6, f"ln4.75=\t{line!r}")
             ##     pass
             else:
                 ## TEST
@@ -599,23 +631,20 @@ class Bash2Python:
                 ##     line = re.sub(r"(?<!\\)(')", r"\\\\\1", line)
                 ## line = f"'{line!r}'"
                 ##
-                # Make sure line has outer single quotes, with any internal ones quoted
-                if "'" in line:
+                # Make sure line has outer double quotes, with any internal ones quoted
+                if '"' in line:
                     # note: Bash $'...' strings allows for escaped single quotes unlike '...'
                     # The regex (?<...) is for negative lookbehind
-                    # OLD: line = re.sub(r"[^\\]'", r"\\\\'", line)
-                    line = re.sub(r"(?<!\\)(')", r"\\\\\1", line)
-                    line = f'"{line}"'
-                else:
-                    line = f"'{line}'"
-                debug.trace(6, f"line5={line!r}")
+                    line = re.sub(r'(?<!\\)(")', r"\\\1", line)
+                line = f'"{line}"'
+                debug.trace(6, f"ln5=\t{line!r}")
                 debug.assertion(re.search(r"""^(['"]).*\1$""", line))
                 #
                 # Use f-strings if local Python variable to be resolved
-                if has_bash_var:
+                if has_python_var:
                     line = "f" + line
                 debug.assertion(re.search(r"""^f?(['"]).*\1$""", line))
-            debug.trace(6, f"line5.5={line!r}")
+            debug.trace(6, f"ln5.5=\t{line!r}")
             return line, inline_comment
 
         def derive_run_invocation(line):
@@ -626,38 +655,42 @@ class Bash2Python:
             nonlocal bash_commands
             has_assignment = (variable != "")
             comment = ""
-            debug.trace(6, f"line5.55={line!r}")
+            debug.trace(6, f"ln5.55=\t{line!r}")
             if (has_assignment and ("$" not in line)):
-                debug.trace(6, f"line5.65={line!r}")
+                debug.trace(6, f"ln5.65=\t{line!r}")
                 # Remove outer quotes (e.g., '"my dog"' => "my dog" and '123' => 123)
                 line = re.sub(r"^'(.*)'$", r"\1", line)
             elif not line.strip():
-                debug.trace(6, f"line5.75={line!r}")
+                debug.trace(6, f"ln5.75=\t{line!r}")
                 pass
             elif bash_commands:
-                debug.trace(6, f"line5.85={line!r}")
+                debug.trace(6, f"ln5.85=\t{line!r}")
                 # Note: uses echo command with $(...) unless line already uses one
                 if (not re.search(r"^f?'echo ", line)):
                     line = re.sub("'", "'echo ", line, count=1)
+                    debug.trace(6, f"ln5.86=\t{line!r}")
                 if INLINE_CODEX:
                     comment = self.codex_convert(line)
-                # note: avoids nested outer quotes (TODO2: generalize)
-                if ((line[0] == "'") and (line[-1] == "'")):
-                    line = line[1:-1]
-                line = f"run({line!r}, skip_print={has_assignment})"
-                debug.trace(6, f"line5.89={line!r}")
+                ## OLD
+                ## if not my_re.search(r"f?'(.*)'", line):
+                ##     debug.assertion(not my_re.search(r"{\w+}", line))
+                ##     line = f"'{line}'"
+                ##     debug.trace(6, f"ln5.87=\t{line!r}")
+                line = f"run({line}, skip_print={has_assignment})"
+                debug.trace(6, f"ln5.89=\t{line!r}")
             elif converted_statement:
                 pass
             elif has_default:
-                debug.trace(6, f"line5.9={line!r}")
+                debug.trace(6, f"ln5.9=\t{line!r}")
                 pass
             elif INLINE_CODEX:
-                debug.trace(6, f"line5.95={line!r}")
+                debug.trace(6, f"ln5.95=\t{line!r}")
                 comment = self.codex_convert(line)
                 line = f"run({line})"
             else:
                 # Run shell over entire line
                 line = f"run({line})"
+                debug.trace(6, f"ln5.99=\t{line!r}")
             debug.trace_expr(3, line, comment)
 
             # Add variable assignment and indentation
@@ -670,7 +703,7 @@ class Bash2Python:
                 pass
             if indent:
                 line = indent + line
-            debug.trace(6, f"line6={line!r}")
+            debug.trace(6, f"ln6=\t{line!r}")
             return line
 
         def special_case_fixups(line, inline_comment):
@@ -697,7 +730,7 @@ class Bash2Python:
             # Restore comment
             if not self.skip_comments:
                 line = (line + inline_comment)
-            debug.trace(6, f"line7={line!r}")
+            debug.trace(6, f"ln7=\t{line!r}")
             return line
 
         # Main function body for var_replace
@@ -707,13 +740,18 @@ class Bash2Python:
         var_pos = ""
         variable = ""
         static = ""
-        has_bash_var = ""
+        has_python_var = ""
         has_default = ""
         has_assignment = ""
         var_replace_call = f"var_replace({in_line!r}, othvar={other_vars!r} ind={indent!r})"
         # TODO2: straighten out spaghetti references
         bash_commands = None
-        
+
+        # Make sure the line has no compound statements
+        if (BASHLEX_CHECKS and line.strip() and not converted_statement):
+            ast_pp = BashAST(line).dump()
+            debug.assertion(not ast_pp.startswith("CompoundNode"))
+
         # Check for assignment
         # TODO3: document what's going on!
         ## TODO2: if is_loop:
@@ -755,7 +793,7 @@ class Bash2Python:
             variable = my_re.group(1)
             converted_statement = True
         debug.trace_expr(5, static, var_pos, variable, converted_statement)
-        debug.trace(6, f"line1={line!r}")
+        debug.trace(6, f"ln1=\t{line!r}")
 
         line = derive_indentation(line)
         line = handle_arithmetic_expansion(line)
@@ -782,19 +820,19 @@ class Bash2Python:
             " = ": " == ",
             " != ": " != ",
             "-eq ": " == ",
-            "-ne": " != ",
-            "-gt": " > ",
-            "-ge": " >= ",
-            "-lt": " < ",
-            "-le": " <= ",
+            "-ne ": " != ",
+            "-gt ": " > ",
+            "-ge ": " >= ",
+            "-lt ": " < ",
+            "-le ": " <= ",
             "&&": " and ",
             r"\|\|": " or ",  # NOTE: need to escape | for Python
         }
 
         unary_operators = {
             " ! ": " not ",
-            "-z": " '' == ",
-            "-n": " '' != ",
+            "-z ": " '' == ",
+            "-n ": " '' != ",
         }
 
         file_operators = {
@@ -820,17 +858,20 @@ class Bash2Python:
             line = re.sub(fr"(\S*) *{bash_operator} *(\S*)", fr"\1{python_equivalent}\2", line)
             ## BAD: line = re.sub(fr"(?<!\S) *{bash_operator} *(?!\S)", python_equivalent, line)
             ## NEW: line = re.sub(fr"(?<!\S) +{bash_operator.strip()} +(?!\S)", python_equivalent, line)
+            trace_line(line, "ln8a")
 
-        # Likewise handle file operators
-        quoted_string = r'(?:\"[^\"]+\")|(?:\'[^\']+\')'
+        # Likewise handle file operators (TODO3: handle unquoted tokens)
+        # ex: '[ -f "$filename" ]' => 'os.path.isfile(f"filename")'; likewise '[ -f f"{sys.argv[1]}" ]'
+        quoted_string = r'(?:(?:\"[^\"]+\")|(?:\'[^\']+\'))'
         for bash_operator, python_template in file_operators.items():
-            line = re.sub(r"([\[\(]\s*){bash_operator}\s+({quoted_string}|[^ \]]+)"
-                          .format(bash_operator=bash_operator, quoted_string=quoted_string),
+            line = re.sub(fr"([\[\(]\s*){bash_operator}\s+(f?{quoted_string})",
                           r"\1{}".format(python_template.format(r"\2")), line)
+            trace_line(line, "ln8b")
 
         # Replace Bash true/false statements with Python equivalent
         line = re.sub(r"\[ 1 \]", "True", line)
         line = re.sub(r"\[ 0 \]", "False", line)
+        trace_line(line, "ln8c")
 
         # Remove square brackets
         for bracket in [r"\[", r"\]", r"\[\[", r"\]\]"]:
@@ -838,7 +879,12 @@ class Bash2Python:
                             f"test bracket '{bracket}' in quoted expression")
         line = my_re.sub(r"(^\s* \[) | (\] \s*$)", "", line, flags=my_re.VERBOSE)
         line = my_re.sub(r"(^\s* \[\[) | ( \]\]) \s*$", "", line, flags=my_re.VERBOSE)
+        trace_line(line, "ln8d")
 
+        # Remove extraneous embedded quotes
+        ## BAD: line = remove_extra_quotes(line, "ln8e")
+        line = fix_embedded_quotes(line, "ln8e", reset_on_spaces=True)
+        
         debug.trace(5, f"operators({in_line!r}) => (True, {line!r}, '')\n\tself={self}")
         ## BAD: return (was - converted, python, remainder)
         ## TEMP
@@ -881,6 +927,7 @@ class Bash2Python:
             expression = my_re.group(2)
             line = (indent + expression)
             converted = True
+            has_var_refs = my_re.search(r"\w+", line)
         # Check for let with quoted expression (TODO: make sure operators converted)
         # ex:  let 'z=2*3'
         elif my_re.search(r"^\s*let\s+(([\'\"])(.*)\2)\s*(.*)$", line):
@@ -894,16 +941,15 @@ class Bash2Python:
         elif re.search(r"\blet\s+(\S*)", line):
             debug.trace(4, "processing let")
             line = re.sub(r"\blet\s+(\S*)", r"\1", line)
-            # HACK: convert postfix increment to += 1
-            # TODO: handle more common variants (e.g., prefix)
-            line = re.sub(r"\b(\w+)\+\+", r"\1 += 1", line)
-            line = re.sub(r"\b(\w+)\-\-", r"\1 -= 1", line)
             converted = True
             has_var_refs = True
         # Fixup any variable references
         if converted and has_var_refs:
             ## TODO: line = self.var_replace(line)
-            pass
+            # HACK: convert postfix increment to += 1
+            # TODO: handle more common variants (e.g., prefix)
+            line = re.sub(r"\b(\w+)\+\+", r"\1 += 1", line)
+            line = re.sub(r"\b(\w+)\-\-", r"\1 -= 1", line)
         debug.trace(6, f"process_simple({in_line!r}) => ({converted}, {line!r}, "")")
         return converted, line, ""
 
@@ -985,7 +1031,8 @@ class Bash2Python:
                 body += new_body
                 loop_line = ""
                 debug.trace(5, f"Conversion of for-in clause; new body={new_body!r}")
-            # Flag c-style for as unimplemented; ex: for (( c=0; c<5; c++ )); do  echo $c; done
+            # Flag c-style for loop as unimplemented; ex: for (( c=0; c<5; c++ )); do  echo $c; done
+            # Note: This is known as the arithmetic for command.
             ## TODO: elif my_re.search(r"^\s* for \(\( \s*\S*\s*\; \s*\S+\s*\; \s*\S*\s* \)\)\s*\;",
             elif my_re.search(r"^\s* for \s* \(\( .* \)\)\s*\;",
                               loop_line, flags=my_re.VERBOSE):
@@ -1122,7 +1169,7 @@ class Bash2Python:
         if BASHLEX_CHECKS and all_loop_line:
             debug.trace_expr(5, all_loop_line)
             compound_ast = BashAST(all_loop_line)
-            debug.trace(5, f"Compound AST: {{\n\t{compound_ast.dump()}\n}}")
+            debug.trace(5, f"compound AST: {{\n\t{compound_ast.dump()}\n}}")
             compound_regex = ".*".join(compound.replace("_loop", "Node") for compound in reversed(all_compounds))
             if not my_re.search(compound_regex, BashAST.ast_node_repr(compound_ast)):
                 system.print_error("Warning: compound at line {self.line} not ascertained in AST")
@@ -1138,7 +1185,7 @@ class Bash2Python:
         # Make note of the overall bashlex AST
         if BASHLEX_CHECKS:
             self.global_ast = BashAST(self.cmd)
-            debug.trace(5, f"Global AST: {{\n\t{self.global_ast.dump()}\n}}")
+            debug.trace(5, f"snippet AST: {{\n\t{self.global_ast.dump()}\n}}")
         
         # Tom-Note: This will need to be restructured. I preserved original for sake of diff.
         # Split the code into segments (see bash2python_diff.py, which uses dashes instead of newlines.
@@ -1374,7 +1421,7 @@ Not working yet:
         print(b2p.convert_snippet(codex))
 
     # Run sanity checks
-    print(b2p.contains_embedded_for(bash_snippet))
+    ## OLD: print(b2p.contains_embedded_for(bash_snippet))
 
 # -------------------------------------------------------------------------------
 if __name__ == '__main__':
