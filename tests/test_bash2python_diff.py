@@ -25,8 +25,8 @@ def test_diff_no_opts():
     """Tests bash2python_diff without flags enabled"""
     debug.trace(5, "test_diff_no_opts()")
     runner = CliRunner(mix_stderr=False)
-    # NOTE: disable stderr tracing
-    bash = "line1\n\nline2\n"
+    # NOTE: disables stderr tracing
+    bash = "time\n\nuptime\n"
     result = runner.invoke(main, env={"DEBUG_LEVEL": "0"},
                            input=bash)
     python = result.output
