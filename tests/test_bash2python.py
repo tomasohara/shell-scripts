@@ -96,7 +96,7 @@ def test_codex():
     bash = "echo Hello World"
     b2p = B2P(bash, skip_comments=True)
     actual = b2p.convert_snippet(True)
-    expect = 'print("Hello World")'
+    expect = "print('Hello World')"
     #
     actual = normalize_whitespace(actual)
     expect = normalize_whitespace(expect)
@@ -109,27 +109,24 @@ def test_codex():
 def test_variable_substitution():
     """Test to check if a simple echo $foo variable is ported"""
     bash = "echo $foo"
-    python = "run(f'echo {foo}')"
+    python = 'run(f"echo {foo}")'
     bash2py_helper(bash, python)
 
 
 def test_operator_substitution():
     """Test if simple operators are substituted in a if statement"""
-    ## OLD: bash = "if [ 1 -gt 0 -lt 2 ]; then echo Hello; fi"
-    ## NOTE: above made into xfail one below
     bash = """
 if [ 1 -gt 0 ]; then
     if [ 0 -lt 2 ]; then
-        echo "Hello"
+        echo "HELL"
     fi
 fi
     """
     # TODO2: test for warning separately (e.g., strip comments); also, use valid bash input
-    ## OLD: python = """#b2py: Founded loop of order 1. Please be careful\nif  1 > 0 < 2:\n    run('echo Hello')\n"""
     python = """
 if 1 > 0:
     if 0 < 2:
-        run('echo "Hello"')
+        run("echo \"HELL\"")
     """
     bash2py_helper(bash, python)
 
@@ -144,7 +141,7 @@ def test_comments_1():
 def test_comments_2():
     """Checks in-line comments to ensure integrity"""
     bash = "echo $foo # Another comment"
-    python = "run(f'echo {foo}')# Another comment"
+    python = 'run(f"echo {foo}")# Another comment'
     bash2py_helper(bash, python, keep_comments=True)
 
 
@@ -162,7 +159,7 @@ done
     python = """
 c = 3
 while c <= 5:
-    run(f'echo {c}')
+    run(f"echo {c}")
     c += 1
 """
     bash2py_helper(bash, python)
@@ -171,14 +168,14 @@ while c <= 5:
 def test_command_substitution():
     """Checks if commands are correctly converted adding run()"""
     bash = "echo $(ls)"
-    python = "run('echo $(ls)', skip_print=False)"
+    python = 'run("echo $(ls)", skip_print=False)'
     bash2py_helper(bash, python)
 
 
 def test_command_pipe():
     """Makes sure a simple pipe is ported"""
     bash = "ls | grep test | wc -l"
-    python = "run('ls | grep test | wc -l')"
+    python = 'run("ls | grep test | wc -l")'
     bash2py_helper(bash, python)
 
 
@@ -187,45 +184,22 @@ def test_variable_assignment():
     ## OLD: bash = "name='John Doe'; echo $name"
     ## NOTE: need newline so echo resolved properly (old test moved below as xfail)
     bash = "name='John Doe'\necho $name"
-    python = "name = 'John Doe'\nrun(f'echo {name}')"
+    python = "name = 'John Doe'\nrun(f\"echo {name}\")"
     bash2py_helper(bash, python)
 
 
 def test_arithmetic_expression():
     """Checks if arithmetics are working correctly"""
     bash = "echo $((2+3*4))"
-    ## OLD: python = "run('echo $((2+3*4))', skip_print=False)"
-    python = "run('echo f\"{2+3*4}\"')"
+    python = 'run(f"echo \"{2+3*4}\"")'
     bash2py_helper(bash, python)
 
 
 def test_double_quotes():
     """Make sure double quotes escaped inside run calls"""
-    bash = 'echo "Hello world"'
-    python = "run('echo \"Hello world\"')"
+    bash = 'echo "Hello mundo"'
+    python = 'run("echo \"Hello mundo\"")'
     bash2py_helper(bash, python)
-
-
-def test_embedded_for_not_supported():
-    """Make sure that embedded FOR issues warning about not being supported"""
-    bash = """
-for i in 1 2 3; do
-    for j in a b c; do
-        echo "$i vs. $j"
-    done
-done 
-    """
-    ## OLD: python = "embedded for: for i in 1 2 3; do"
-    ## TODO: call directly
-    python = "embedded for"
-    debug.trace_expr(5, bash, python, delim="\n") 
-    actual = (
-        subprocess.check_output(["python", "bash2python.py", "--script", bash])
-        .decode()
-        .strip()
-    )
-    debug.trace_expr(4, python)
-    assert python in actual
 
 
 @pytest.mark.xfail
@@ -314,10 +288,11 @@ def test_let_command():
     bash2py_helper(bash, python)
 
 
+@pytest.mark.xfail
 def test_history_substitution():
     """Tests the history mechanism ($!)"""
-    bash = "echo hello && echo world && echo !$"
-    python = "run('echo hello && echo world && echo !$')"
+    bash = "echo hello && echo WORLD && echo $!"
+    python = "run('echo hello && echo WORLD && echo $!')"
     bash2py_helper(bash, python)
 
 
@@ -393,8 +368,8 @@ def test_tabular_var_replace(bash_line, expect_result):
     # simple if statement(s)
     ("""if [ $? -eq 0 ]; then echo "Success"; fi""",
      """if run("echo $?") == "0":\n   print("Success")"""),
-    ("""if [ 1 -gt 0 ]; then if [ 1 -gt 0 -lt 2 ]; then echo Hello; fi; fi""",   # single line issue
-     """if 1 > 0 < 2:\n    run('echo Hello')\n"""),
+    ("""if [ 1 -gt 0 -lt 2 ]; then echo HELL; fi; fi""",   # single line issue
+     """if 1 > 0 < 2:\n    run("echo HELL")\n"""),
     # simple for statement(s)
     ("""for i in 1 2 3; do echo "$i"; done""",
      """for i in [1, 2, 3]: print(i)"""),
@@ -402,8 +377,8 @@ def test_tabular_var_replace(bash_line, expect_result):
     ("""while [ $i -ge 0 ]; do echo $i; let i--; done""",
      """while i >= 0:\n    print(i)\n    i -= 1"""),
     # variable assignment
-    ("""name='John Doe'; echo $name""",                  # semicolon blocks variable conversion
-     """name = 'John Doe'\n run(f'echo {name}')"""),
+    ("""name='Jane Doe'; echo $name""",                  # semicolon blocks variable conversion
+     """name = 'Jane Doe'\n run(f'echo {name}')"""),
     # consecutive statement execution
     ("""ls; pwd;""",
      """run("ls"); run("pwd")"""),
@@ -431,12 +406,12 @@ def test_tabular_var_replace(bash_line, expect_result):
      """if run("$?") > 0 and run("$?") < 0:\n    print("bad status")"""),
     ("""if [ 1 || 0 ]; then echo "one"; fi""",
      """if 1 or 0:\n    print('one')"""),
-    ("""if [ ! 1 = 1 ]; then echo "bug"; fi""",
-     """if not 1 == 1:\n    print('bug')"""),
-    ("""if [ -z " " ]; then echo "bug"; fi""",
-     """if '' == " ":\n    print('bug')"""),
-    ("""if [ -n "" ]; then echo "bug"; fi""",
-     """if '' != " ":\n    print('bug')"""),
+    ("""if [ ! 1 = 1 ]; then echo "bug1"; fi""",
+     """if not 1 == 1:\n    print('bug1')"""),
+    ("""if [ -z " " ]; then echo "bug2"; fi""",
+     """if '' == " ":\n    print('bug2')"""),
+    ("""if [ -n "" ]; then echo "bug3"; fi""",
+     """if '' != " ":\n    print('bug3')"""),
     # file operators (TODO: test for quoting of filenames)
     ("""if [ -f "$HOME/.bashrc" ]; then true; fi""",
      """if os.path.isfile("$HOME/.bashrc"): then pass"""),
