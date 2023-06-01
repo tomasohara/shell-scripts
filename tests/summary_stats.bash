@@ -6,4 +6,7 @@
 # 3) Output of the process is also stored in ./summary_stats.txt
 # BUG: Might fail on first run
 
-./batspp_report.py -k && ./kcov_result.py --list --summary --export | tee summary_stats.txt
+## OLD: ./batspp_report.py -k && ./kcov_result.py --list --summary --export | tee summary_stats.txt
+
+cd $(dirname "$0")
+python3 ./batspp_report.py -k && python3 ./kcov_result.py --list --summary --export | tee summary_stats.txt

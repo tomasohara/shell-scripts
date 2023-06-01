@@ -141,7 +141,7 @@ for testfile in ipynb_array:
     if is_ipynb:
         batspp_from_ipynb = testfile.replace(IPYNB, BATSPP)
         print (f"IPYNB TESTFILE [{i}]: {testfile} => {batspp_from_ipynb}")
-        gh.run(f"./jupyter_to_batspp.py ./{testfile} --output ./{BATSPP_STORE}/{batspp_from_ipynb}")
+        gh.run(f"./jupyter_to_batspp.py {testfile} --output ./{BATSPP_STORE}/{batspp_from_ipynb}")
         i += 1
 
 ipynb_count = i - 1
