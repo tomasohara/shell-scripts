@@ -25,6 +25,8 @@
 # TODO3:
 # - Convert """-based-string input to include indentation that gets stripped prior to test invocation:
 #   so that not flush left in source.
+# - Add variations throughout with constructs intended to throw off parsing (e.g., comments with syntax).
+# - Look into synthetic test sets (e.g., via Codex translation of bash test suite)!
 #
 
 """Tests for bash2python.py"""
@@ -46,6 +48,8 @@ from mezcla import system
 # Constants
 RUN_SLOW_TESTS = system.getenv_bool("RUN_SLOW_TESTS", False,
                                     "Run tests that can a while to run")
+NORMALIZE_LOOSE = system.getenv_bool("NORMALIZE_LOOSE", False,
+                                    "Use loose normalization such as collapsinng all whitespace")
 
 #-------------------------------------------------------------------------------
 # Helper functions
@@ -60,14 +64,22 @@ def run_bash(bash, python):                # Note: run_bash no longer used
     assert output == python
 
 
-def normalize_whitespace(text):
+def normalize_whitespace(text, loose=None):
     """Perform normalization of TEXT to facilitate comparisons: carriage returns changed to newlines, spaces and newlines are collapsed, and outer whitespace is stripped"""
-    # EX: normalize("Hey  Joe\r\n!") => Hey Joe\n!"                                    
+    # EX: normalize("Hey  Joe\r\n!") => Hey Joe\n!"
+    if loose is None:
+        loose = NORMALIZE_LOOSE
     result = text.strip()
-    result = my_re.sub(r"\r", "\n", result)
+    if loose:
+        result = my_re.sub("[\v\f\t\r]", " ", result)
+        result = my_re.sub("( \n)|(\n )", "\n", result)
+        ## TEMP
+        result = my_re.sub("\n", " ", result)
+        ## HACK: result = my_re.sub("\\n", " ", result)
+    result = my_re.sub("\r", "\n", result)
     result = my_re.sub(r"\s+\n+\s+", "\n", result)
     result = my_re.sub(r"  +", " ", result)
-    debug.trace(7, f"normalize({text!r}) => {result!r}")
+    debug.trace(7, f"normalize_whitespace({text!r}) => {result!r}")
     return result
 
 
@@ -78,7 +90,6 @@ def bash2py_helper(bash, expect, skip_normalize=False, keep_comments=False):
     - Omits conversion comments unless KEEP_COMMENTS (for sake of simpler matching)
     """
     debug.trace(6, f"bash2py{(bash, expect, skip_normalize, keep_comments)}")
-    debug.trace_expr(5, bash, expect, delim="\n")
     b2p = B2P(bash, skip_comments=(not keep_comments))
     actual = b2p.convert_snippet(False)
     if not skip_normalize:
@@ -123,7 +134,7 @@ if [ 1 -gt 0 ]; then
 fi
     """
     # TODO2: test for warning separately (e.g., strip comments); also, use valid bash input
-    python = """
+    python = r"""
 if 1 > 0:
     if 0 < 2:
         run("echo \"HELL\"")
@@ -155,7 +166,6 @@ while [ $c -le 5 ]; do
     let c++
 done
 """
-    ## OLD: python = "#b2py: Founded loop of order 1. Please be careful\nwhile i <= 5 :\n    run(f'echo {i}')\n"
     python = """
 c = 3
 while c <= 5:
@@ -181,30 +191,38 @@ def test_command_pipe():
 
 def test_variable_assignment():
     """Tests a simple case of variable assignment in two lines"""
-    ## OLD: bash = "name='John Doe'; echo $name"
-    ## NOTE: need newline so echo resolved properly (old test moved below as xfail)
     bash = "name='John Doe'\necho $name"
-    python = "name = 'John Doe'\nrun(f\"echo {name}\")"
+    python = r"name = 'John Doe'\nrun(f\"echo {name}\")"
     bash2py_helper(bash, python)
 
+def test_unquoted_arg():
+    """Check that unquoted arguments treated consistently"""
+    bash = 'echo unquoted-token1'
+    python = r'run("echo \"unquoted-token1\"")'
+    # TODO3?: python = r'run("echo \"unquoted-token1\"")'
+    bash2py_helper(bash, python)
+    bash = 'echo "quoted-token1"'
+    python = r'run("echo \"quoted-token1\"")'
+    bash2py_helper(bash, python)
+    
 
 def test_arithmetic_expression():
     """Checks if arithmetics are working correctly"""
-    bash = "echo $((2+3*4))"
-    python = 'run(f"echo \"{2+3*4}\"")'
+    bash = 'echo "$((2+3*4))"'
+    python = r'run(f"echo \"{2+3*4}\"")'
     bash2py_helper(bash, python)
 
 
 def test_double_quotes():
     """Make sure double quotes escaped inside run calls"""
     bash = 'echo "Hello mundo"'
-    python = 'run("echo \"Hello mundo\"")'
+    python = r'run("echo \"Hello mundo\"")'
     bash2py_helper(bash, python)
 
 
 @pytest.mark.xfail
 def test_if_else_condition():
-    """TODO3 flesh out comment: test if/else"""
+    """Test if/elif/else"""
     bash = """
 if [ -f "$1" ]; then
     echo "$1 exists and is a regular file."
@@ -214,9 +232,19 @@ else
     echo "$1 does not exist."
 fi
     """
-    python = (
-        "if a == b:\n run('echo 'Equal'')\nelse:\n run('echo 'Not Equal'')"
-    )
+    python = r'''
+if os.path.isfile(f"{sys.argv[1]}"):
+    run(f"echo \"{sys.argv[1]} exists and is a regular file.\"")
+elif os.path.exists(f"{sys.argv[1]}"):
+    run(f"echo \"{sys.argv[1]} exists but is not a regular file.\"")
+else:
+    run(f"echo \"{sys.argv[1]} does not exist.\"")
+
+    '''
+    bash2py_helper(bash, python)
+    #
+    base = 'if [ a -eq b ]: then echo "Equal"; else echo "Not Equal")'
+    python = r'if a == b:\n    run("echo \"Equal\"")\nelse:\n    run("echo \"Not Equal\"")'
     bash2py_helper(bash, python)
 
 
@@ -233,14 +261,14 @@ else
     echo "$x positive"
 fi
     """                                 # TODO: x=$(calc-int "rand() * 1024")
-    python = """
+    python = r"""
 x = run("echo $RANDOM")
 if x == 0:
-    run(f'"echo {x} zero"')
+    run(f"echo \"{x} zero\"")
 elif x < 0:
-    run(f'"echo {x} negative"')
+    run(f"echo \"{x} negative\"")
 else:
-    run(f'"echo {x} positive"')
+    run(f"echo \"{x} positive\"")
     """
     bash2py_helper(bash, python)
 
@@ -283,7 +311,6 @@ esac
 def test_let_command():
     """Test if a let command is converted correctly"""
     bash = 'let "x=1+2"'
-    ## TODO: python = "x=1+2"
     python = "x = 1+2"
     bash2py_helper(bash, python)
 
@@ -291,8 +318,8 @@ def test_let_command():
 @pytest.mark.xfail
 def test_history_substitution():
     """Tests the history mechanism ($!)"""
-    bash = "echo hello && echo WORLD && echo $!"
-    python = "run('echo hello && echo WORLD && echo $!')"
+    bash = """echo hello && echo WORLD && echo $!"""
+    python = """run("echo hello && echo WORLD && echo $!")"""
     bash2py_helper(bash, python)
 
 
@@ -300,8 +327,7 @@ def test_history_substitution():
 def test_echo_to_stderr():
     """Tests if echo to stderr is converted"""
     bash = "echo 'This is an error' >&2"
-    ## OLD: python = """run("echo \\\\\'This is an error\\\\\' >&2")"""
-    python = """run("echo 'This is an error' >&2")"""
+    python = r"""run("echo \"This is an error\" >&2")"""
     bash2py_helper(bash, python)
 
 
@@ -315,10 +341,10 @@ for file in "${files[@]}"; do
     cat $file
 done
 """
-    python = """
+    python = r"""
 files=['file1.txt', 'file2.txt', 'file3.txt', 'file4.txt', 'file5.txt']
 for file in files:
-    run("echo \"Reading file: $file\"")
+    run(f"echo \"Reading file: {file}\"")
     run(f"cat {file}")
     """
     bash2py_helper(bash, python)
@@ -328,11 +354,12 @@ for file in files:
 # note: uses xfail for convenience (TODO: have separate version for important tests)
 @pytest.mark.parametrize("bash_line, expect_result", [
     # input                             result
-    ("""echo $fubar""",                 """run(f'echo {fubar}')"""),      # TODO: print(f"{fubar}")
+    ("""echo $fubar""",                 r'''run(f"echo {fubar}")'''),      # TODO3: print(f"{fubar}")
+    ('''echo "$fubar"''',               r'''run(f"echo \"{fubar}\"")'''),
     # note: results with multiple run's requires var_replace to be incremental (as with process_compound)
-    ("""ls; pwd""",                     """run('ls; pwd')"""),
-    ("""ls\npwd\n""",                   """run('ls')\nrun('pwd')"""),
-    ("""ls\n\npwd\n""",                 """run('ls')\n\nrun('pwd')"""),
+    ("""ls; pwd""",                     """run("ls; pwd")"""),
+    ("""ls\npwd\n""",                   """run("ls")\nrun("pwd")"""),
+    ("""ls\n\npwd\n""",                 """run("ls")\n\nrun("pwd")"""),
     ])
 def test_tabular_var_replace(bash_line, expect_result):
     """Tests in tabular format for var_replace. Uses pytest parametrize"""
@@ -349,49 +376,53 @@ def test_tabular_var_replace(bash_line, expect_result):
 @pytest.mark.parametrize("bash, python", [
     # Bash. => Python
     ("echo foo",
-     "run('echo foo')"),  # simple control test to check parametrize decorator
+     'run("echo foo")'),                # simple control test to check parametrize decorator
     ("let v++",
      "let_value['v'] += 1; v = let_value['v']"),  # doomed to fail (hash usage)
     ("foo=$bar",
-     "foo = f'{bar}'"),
+     'foo = f"{bar}"'),
     ("ls -a",
-     "run('ls -a')"),
+     'run("ls -a")'),
     ("echo $bar",
-     "run(f'echo {bar}')"),
+     'run(f"echo {bar}")'),
     # arithmetic expressions and expansions (latter results in string)
     ("(( z = x + y ))",
      "z = x + y"),
     ("z=$((x + y))",
      'z = f"{x + y}"'),
     ("echo a$((1+2))b",
-     "run(f'echo a{1+2}b')"),
+     'run(f"echo a{1+2}b")'),
     # simple if statement(s)
     ("""if [ $? -eq 0 ]; then echo "Success"; fi""",
-     """if run("echo $?") == "0":\n   print("Success")"""),
+     r'''if run("echo $?") == 0:\n   run("echo \"Success\"")'''),
     ("""if [ 1 -gt 0 -lt 2 ]; then echo HELL; fi; fi""",   # single line issue
-     """if 1 > 0 < 2:\n    run("echo HELL")\n"""),
+     """if 1 > 0 < 2:\n    run("echo HELL")"""),
     # simple for statement(s)
     ("""for i in 1 2 3; do echo "$i"; done""",
-     """for i in [1, 2, 3]: print(i)"""),
+     r'''for i in ["1", "2", "3"]:\n    run("echo f\"{i}\"")'''),
     # simple while statement(s)
     ("""while [ $i -ge 0 ]; do echo $i; let i--; done""",
-     """while i >= 0:\n    print(i)\n    i -= 1"""),
+     r'''while i >= 0:\n    run(f"echo \"{i}\"")\n    i -= 1'''),
+    ("""while [ $i -ge 0 ]; do\n    echo $i\n    let i--\ndone""",
+     r'''while i >= 0:\n    run(f"echo \"{i}\"")\n    i -= 1'''),
     # variable assignment
-    ("""name='Jane Doe'; echo $name""",                  # semicolon blocks variable conversion
-     """name = 'Jane Doe'\n run(f'echo {name}')"""),
+    ("""name='Jane Doe'\necho $name""",
+     r'''name = "Jane Doe"\nrun(f"echo \"{name}\"')'''),
+    ("""name='Jane Doe'; echo $name""",                  # issue: semicolon blocks variable conversion
+     r'''name = "Jane Doe"\nrun(f"echo \"{name}\"')'''),
     # consecutive statement execution
     ("""ls; pwd;""",
-     """run("ls"); run("pwd")"""),
+     """run("ls; pwd")"""),
     ("""ls\npwd\n""",
-     """run("ls"); run("pwd")"""),                          # newline getting munged into run call
+     """run("ls");\nrun("pwd")"""),
     # no-op statement
     ("true",
      "pass"),
     ("true;",
-     "pass"),          # semicolon needs to be dropped
+     "pass;"),                          # issue: semicolon should be dropped
     # default values (n.b., the support needs to be changed in bash2python.py)
     ("""if [ ${HOME:-n/a} = "n/a" ]; then echo "no HOME"; fi""",
-     """if os.getenv("HOME", "n/a") == "n/a":\n    print("no HOME")"""),
+     '''if os.getenv("HOME", "n/a") == "n/a":\n    run("echo \"no HOME\"")'''),
     # special test conditions (TODO: rework in terms of tests for operator function)
     ("""if [ 1 ]; then true; fi""",
      """if True:\n    pass"""),
@@ -403,33 +434,33 @@ def test_tabular_var_replace(bash_line, expect_result):
      """if False:\n    pass"""),
     # operators (TODO: isolate from if/then/fi verbiage)
     ("""if [[ ($? -gt 0) && ($? -lt 0) ]]; then echo "bad status"; fi""",
-     """if run("$?") > 0 and run("$?") < 0:\n    print("bad status")"""),
+     r'''if run("echo \"$?\"") > 0 and run("echo \"$?\"") < 0:\n    run("echo \"bad status\"")'''),
     ("""if [ 1 || 0 ]; then echo "one"; fi""",
-     """if 1 or 0:\n    print('one')"""),
+     r'''if 1 or 0:\n    run("echo \"one\"")'''),
     ("""if [ ! 1 = 1 ]; then echo "bug1"; fi""",
-     """if not 1 == 1:\n    print('bug1')"""),
+     r'''if not 1 == 1:\n    run("echo \"bug1\"")'''),
     ("""if [ -z " " ]; then echo "bug2"; fi""",
-     """if '' == " ":\n    print('bug2')"""),
+     r'''if "" == " ":\n    run("echo \"bug2\"")'''),
     ("""if [ -n "" ]; then echo "bug3"; fi""",
-     """if '' != " ":\n    print('bug3')"""),
+     r'''if "" != " ":\n    run("echo \"bug3\"")'''),
     # file operators (TODO: test for quoting of filenames)
     ("""if [ -f "$HOME/.bashrc" ]; then true; fi""",
-     """if os.path.isfile("$HOME/.bashrc"): then pass"""),
+     r"""if os.path.isfile(f"{os.getenv(\"HOME\")}/.bashrc"):\n    pass"""),
     ("""if [ -d "/tmp" ]; then true; fi""",
-     """if os.path.isdir("/tmp"): then pass"""),
+     """if os.path.isdir("/tmp"):\n    pass"""),
     ("""if [[ (-d "/tmp") || (-d "$HOME/temp") ]]; then true; fi""",
-     """if os.path.isdir("/tmp") or os.path.isdir("$HOME/temp"): then pass"""),
+     """if os.path.isdir("/tmp") or os.path.isdir("{os.getenv(\"HOME\")}/temp"):\n    pass"""),
     # Unimplemented operators
     ("""if [[ $fu =~ bar ]]; then true; fi""",       # regex matching
-     """if re.search("bar", fu): \n    pass"""),
+     """if re.search("bar", fu):\n    pass"""),
     # Unimplemented features
     ("""
 echo 1 2 \
 3""",                                   # line continuation
-     """run('echo 1 2 3');"""),
+     """run("echo 1 2 3");"""),
     # Exit statement (n.b., keep last as all bash input converted to script)
     ("exit",
-     "run('exit')")
+     'run("exit")')
     ])
 def test_tabular_tests(bash, python):
     """Tests in tabular format. Uses pytest parametrize"""
@@ -488,6 +519,7 @@ def do_test_directory(dir_path, config_file=None):
 ##     """Test conversion of scripts in external directories"""
 ##     debug.trace(5, "test_external_scripts()")
 ##     do_test_directory(gh.resolve_path("bash2py-data"))
+## TODO2: add config_file to do_test_external_script
 
 @pytest.mark.xfail                      # uses xfail for convenience (TODO: have separate version for good tests)
 @pytest.mark.skipif(not RUN_SLOW_TESTS, reason='Ignoring slow tests')
