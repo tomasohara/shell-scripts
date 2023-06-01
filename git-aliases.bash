@@ -214,6 +214,9 @@ function git-update-plus {
     git stash >> "$log"
     echo "issuing: git pull --all"
     git pull --all >> "$log"
+    if [ $? -eq 0 ]; then
+	echo "Warning: problem with pull (status=$?)"
+    fi
     echo "issuing: git stash pop"
     git stash pop >> "$log"
 
@@ -346,11 +349,11 @@ EOF
 function git-update-commit-push {
     # DEBUG: set -o xtrace
     git-update-plus
-    if [ $? ]; then
+    if [ $? -ne 0 ]; then
         ## TODO:
         ## echo "Warning: aborting git-update-commit-push due to possible update error"
         ## return 1
-        echo "Warning: consider canceling given possible update error"
+        echo "Warning: consider canceling given possible update error (status=$?)"
     fi
     git-commit-and-push "$@"
     # DEBUG: set - -o xtrace
@@ -707,13 +710,14 @@ function git-checkout-branch {
 	PAGER= git branch --all | extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
 	return
     fi
-    git branch | grep -c "$branch";
-    if [ $? ]; then
+    local branch_ref
+    branch_ref=$(git branch | grep -c "$branch")
+    if [ "$branch_ref" -gt 0 ]; then
         ## OLD: git-command checkout "$branch";
         # note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
         git-command checkout "$branch" --;
     else
-        echo "Error: unknown branch"
+        echo "Error: unknown branch '$branch'"
     fi;
 }
 
