@@ -243,41 +243,49 @@ def fix_embedded_quotes(line, label=None, reset_on_spaces=False):
     # EX: fix_embedded_quotes('print(f"{os.getenv("HOME")}")') => 'print(f"{os.getenv(\\"HOME\\")})"'
     # EX: fix_embedded_quotes(' "abc"def"ghi" ') => ' "abc\"def\"ghi" '
     # EX: fix_embedded_quotes(" 'abc'def\"ghi' ") => ' "abc'def\"ghi" '
+    # EX: fix_embedded_quotes(' "abc" "def" ', reset_on_spaces=False) => (' "abc\" \"def" ')
+    # EX: fix_embedded_quotes(' "abc" "def" ', reset_on_spaces=True) => (' "abc" "def" ')
     quote_num = 0
     start = 0
-    new_line = []
+    new_line_buffer = []
     first_quote = last_quote = -1
 
+    def adjust_quotes():
+        """Switch to outer double quote if embedded; reset state"""
+        nonlocal first_quote, last_quote, quote_num, new_line_buffer
+        new_line_buffer[first_quote] = '"'
+        if new_line_buffer[first_quote - 1] == '\\':
+            new_line_buffer[first_quote - 1] = ""
+        new_line_buffer[last_quote] = '"'
+        if new_line_buffer[last_quote - 1] == '\\':
+            new_line_buffer[last_quote - 1] = ""
+        first_quote = last_quote = -1
+        quote_num = 0
+    
     # Escape embedded double quotes, keeping track of outer quote positions
     while (start < len(line)):
         if (line[start] == '"') or (line[start] == "'"):
             quote_num += 1
             if (quote_num == 1):
-                first_quote = len(new_line)
+                first_quote = len(new_line_buffer)
             else:
                 if ((start > 0) and (line[start] == '"') and (line[start - 1] != "\\")):
-                    new_line.append("\\")
-            last_quote = len(new_line)
+                    new_line_buffer.append("\\")
+            last_quote = len(new_line_buffer)
         debug.trace_expr(8, start, line[start], quote_num, first_quote, last_quote)
-        new_line.append(line[start])
+        new_line_buffer.append(line[start])
 
-        # Reset quote status on spaces
-        if ((line[start] == " ") and (first_quote > 0) and reset_on_spaces):
-            new_line[first_quote] = '"'
-            new_line[last_quote - 1] = ""
-            new_line[last_quote] = '"'
-            first_quote = last_quote = -1
+        # Reset quote status on spaces (n.b., removes final escape)
+        if ((line[start] == " ") and (first_quote >= 0) and reset_on_spaces):
+            adjust_quotes()
 
         # Advance to next character in input line
         start += 1
                 
     # Change outer quote to double if any embedded (n.b., removes final escape)
-    if (first_quote > 0):
-        new_line[first_quote] = '"'
-        new_line[last_quote - 1] = ""
-        new_line[last_quote] = '"'
-        first_quote = last_quote = -1
-    new_line = "".join(new_line)
+    if (first_quote >= 0):
+        adjust_quotes()
+    new_line = "".join(new_line_buffer)
         
     trace_line(new_line, label=label)
     debug.trace(7, f"fix_embedded_quotes({line!r}) => {new_line!r}")
