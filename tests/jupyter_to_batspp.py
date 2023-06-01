@@ -3,7 +3,7 @@
 # Jupyter to Batspp tests module
 #
 # This converts Jupyter to Batspp tests
-#
+# NOTE: Doesn't suppport mezcla>=1.3.1
 
 
 """

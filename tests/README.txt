@@ -6,4 +6,5 @@ TODO:
 
 BUGS:
 - batspp_report.py fails on first execution.
+- jupyter_to_batspp.py supports mezcla <= 1.3.5
 
