@@ -1,0 +1,9 @@
+# Setup
+$ bind 'set enable-bracketed-paste off'
+$ echo "BIND ON!"
+
+$ echo "Hi Mom!"
+Hi Mom!
+
+$ echo 'Hello world' | wc -l
+1

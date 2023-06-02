@@ -210,7 +210,7 @@ Coverage Ratio: {round(report_RatioLine, 4)}
 
         INSTRUMENTED_TOTAL = np.sum(instrumented_array)
         COVERED_TOTAL = np.sum(covered_array)
-        
+
         INSTRUMENTED_MAX = np.max(instrumented_array)
         INSTRUMENTED_MIN = np.min(instrumented_array)
 

@@ -1,0 +1,253 @@
+Building Docker image: local/test-act:latest
+Running Github Actions locally
+[Tests/Run Tests] 🚀  Start image=local/test-act
+[Tests/Run Tests]   🐳  docker pull image=local/test-act platform=linux/amd64 username= forcePull=false
+[Tests/Run Tests]   🐳  docker create image=local/test-act platform=linux/amd64 entrypoint=["tail" "-f" "/dev/null"] cmd=[]
+[Tests/Run Tests]   🐳  docker run image=local/test-act platform=linux/amd64 entrypoint=["tail" "-f" "/dev/null"] cmd=[]
+[Tests/Run Tests] 🧪  Matrix: map[os:ubuntu-latest python-version:3.9]
+[Tests/Run Tests] ⭐ Run Main Checkout Repository
+[Tests/Run Tests]   🐳  docker cp src=/home/aveey/tom-project/shell-scripts/. dst=/home/aveey/tom-project/shell-scripts
+[Tests/Run Tests]   ✅  Success - Main Checkout Repository
+[Tests/Run Tests] ⭐ Run Main Configure Environment
+[Tests/Run Tests]   🐳  docker exec cmd=[sh -e /var/run/act/workflow/1.sh] user= workdir=
+[Tests/Run Tests]   ✅  Success - Main Configure Environment
+[Tests/Run Tests]   ⚙  ::set-env:: PATH=/opt/hostedtoolcache/Python/3.9.16/x64/bin:/opt/hostedtoolcache/node/16.20.0/x64/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+[Tests/Run Tests]   ⚙  ::set-env:: PYTHONPATH=:/usr/local/lib/python3.9/dist-packages
+[Tests/Run Tests] ⭐ Run Main Run Python Tests
+[Tests/Run Tests]   🐳  docker exec cmd=[sh -e /var/run/act/workflow/2.sh] user= workdir=
+[Tests/Run Tests]   | WARNING: No tests were found for test tests/test_check_errors.py.
+[Tests/Run Tests]   | WARNING: No tests were found for test tests/test_extract_matches.py.
+[Tests/Run Tests]   | WARNING: No tests were found for test tests/test_tpo_count_it.py.
+[Tests/Run Tests]   ✅  Success - Main Run Python Tests
+[Tests/Run Tests] ⭐ Run Main Run Bats-PP Alias Tests
+[Tests/Run Tests]   🐳  docker exec cmd=[sh -e /var/run/act/workflow/3.sh] user= workdir=
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | === BATSPP REPORT GENERATOR (simple_batspp.py / BATSPP 1.5.X) ===
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | NOBATSPP File Found [1]: NOBATSPPsudo_test_simplebatspp.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [2]: more-tomohara-aliases-test.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [3]: calc-entropy-tests.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [4]: testbook-test-dir-aliases.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [5]: hello-world-revised.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [6]: alias-html-test.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [7]: json-related-alias.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [8]: trace-unix-alias.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [9]: trace-unix-general.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [10]: trace-python-commands.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [11]: hello-world-basic.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [12]: test-dir-alias.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [13]: alias-cd-commands.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [14]: test-cond-env-setting.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [15]: trace-line-words-commands.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [16]: trace-extensionless-shortcut-unicode.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [17]: command-override-cp-mv.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [18]: trace-extensionless-shortcut-V2.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [19]: test-check-errors.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [20]: trace-setup-sorting-wrappers.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [21]: hello-world-source.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [22]: trace-file-manipulation.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [23]: alias-grep-commands.ipynb
+[Tests/Run Tests]   | NOBATSPP File Found [24]: NOBATSPPsudocommentstest.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [25]: trace-linux-admin-alias.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [26]: dir-aliases-test-revised.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [27]: tomasohara-aliases-test.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [28]: alias-calculator-commands.ipynb
+[Tests/Run Tests]   | JUPYTER Testfile Found [29]: alias-trace-misc-commands.ipynb
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | IPYNB Files Found (Total - NOBATSPP): 29 - 2 = 27
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | === GENERATING BATSPP FILES ===
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | IPYNB TESTFILE [1]: more-tomohara-aliases-test.ipynb => more-tomohara-aliases-test.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [2]: calc-entropy-tests.ipynb => calc-entropy-tests.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [3]: testbook-test-dir-aliases.ipynb => testbook-test-dir-aliases.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [4]: hello-world-revised.ipynb => hello-world-revised.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [5]: alias-html-test.ipynb => alias-html-test.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [6]: json-related-alias.ipynb => json-related-alias.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [7]: trace-unix-alias.ipynb => trace-unix-alias.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [8]: trace-unix-general.ipynb => trace-unix-general.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [9]: trace-python-commands.ipynb => trace-python-commands.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [10]: hello-world-basic.ipynb => hello-world-basic.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [11]: test-dir-alias.ipynb => test-dir-alias.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [12]: alias-cd-commands.ipynb => alias-cd-commands.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [13]: test-cond-env-setting.ipynb => test-cond-env-setting.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [14]: trace-line-words-commands.ipynb => trace-line-words-commands.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [15]: trace-extensionless-shortcut-unicode.ipynb => trace-extensionless-shortcut-unicode.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [16]: command-override-cp-mv.ipynb => command-override-cp-mv.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [17]: trace-extensionless-shortcut-V2.ipynb => trace-extensionless-shortcut-V2.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [18]: test-check-errors.ipynb => test-check-errors.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [19]: trace-setup-sorting-wrappers.ipynb => trace-setup-sorting-wrappers.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [20]: hello-world-source.ipynb => hello-world-source.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [21]: trace-file-manipulation.ipynb => trace-file-manipulation.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [22]: alias-grep-commands.ipynb => alias-grep-commands.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [23]: trace-linux-admin-alias.ipynb => trace-linux-admin-alias.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [24]: dir-aliases-test-revised.ipynb => dir-aliases-test-revised.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [25]: tomasohara-aliases-test.ipynb => tomasohara-aliases-test.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [26]: alias-calculator-commands.ipynb => alias-calculator-commands.batspp
+[Tests/Run Tests]   | IPYNB TESTFILE [27]: alias-trace-misc-commands.ipynb => alias-trace-misc-commands.batspp
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | ==========BATS GENERATED==========
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [1]: test-dir-alias.batspp => test-dir-alias.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/test-dir-alias/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [2]: alias-grep-commands.batspp => alias-grep-commands.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/alias-grep-commands/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [3]: trace-setup-sorting-wrappers.batspp => trace-setup-sorting-wrappers.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/trace-setup-sorting-wrappers/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [4]: test-cond-env-setting.batspp => test-cond-env-setting.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/test-cond-env-setting/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [5]: trace-line-words-commands.batspp => trace-line-words-commands.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/trace-line-words-commands/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [6]: trace-linux-admin-alias.batspp => trace-linux-admin-alias.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/trace-linux-admin-alias/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [7]: alias-calculator-commands.batspp => alias-calculator-commands.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/alias-calculator-commands/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [8]: alias-html-test.batspp => alias-html-test.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/alias-html-test/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [9]: tomasohara-aliases-test.batspp => tomasohara-aliases-test.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/tomasohara-aliases-test/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [10]: calc-entropy-tests.batspp => calc-entropy-tests.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/calc-entropy-tests/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [11]: alias-trace-misc-commands.batspp => alias-trace-misc-commands.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/alias-trace-misc-commands/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [12]: trace-unix-alias.batspp => trace-unix-alias.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/trace-unix-alias/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [13]: dir-aliases-test-revised.batspp => dir-aliases-test-revised.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/dir-aliases-test-revised/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [14]: testbook-test-dir-aliases.batspp => testbook-test-dir-aliases.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/testbook-test-dir-aliases/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [15]: trace-extensionless-shortcut-unicode.batspp => trace-extensionless-shortcut-unicode.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/trace-extensionless-shortcut-unicode/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [16]: trace-extensionless-shortcut-V2.batspp => trace-extensionless-shortcut-V2.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/trace-extensionless-shortcut-V2/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [17]: trace-file-manipulation.batspp => trace-file-manipulation.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/trace-file-manipulation/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [18]: command-override-cp-mv.batspp => command-override-cp-mv.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/command-override-cp-mv/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [19]: more-tomohara-aliases-test.batspp => more-tomohara-aliases-test.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/more-tomohara-aliases-test/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [20]: trace-python-commands.batspp => trace-python-commands.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/trace-python-commands/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [21]: hello-world-source.batspp => hello-world-source.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/hello-world-source/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [22]: hello-world-revised.batspp => hello-world-revised.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/hello-world-revised/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [23]: json-related-alias.batspp => json-related-alias.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/json-related-alias/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [24]: trace-unix-general.batspp => trace-unix-general.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/trace-unix-general/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [25]: alias-cd-commands.batspp => alias-cd-commands.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/alias-cd-commands/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [26]: hello-world-basic.batspp => hello-world-basic.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/hello-world-basic/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | BATSPP FILE DETECTED [27]: test-check-errors.batspp => test-check-errors.bats
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   |   >>  KCOV REPORT PATH: ./kcov-output/test-check-errors/
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | ======================================================
+[Tests/Run Tests]   | SUMMARY STATISTICS:
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | simple_batspp.py used: False
+[Tests/Run Tests]   | No. of IPYNB testfiles: 29
+[Tests/Run Tests]   | No. of BATSPP files (generated): 27
+[Tests/Run Tests]   | No. of FAULTY testfiles: 0
+[Tests/Run Tests]   | No. of AVOIDED testfiles: 2
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | FAULTY TESTFILES:
+[Tests/Run Tests]   | NaN
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | AVOIDED TESTFILES:
+[Tests/Run Tests]   | >> NOBATSPPsudo_test_simplebatspp.ipynb
+[Tests/Run Tests]   | >> NOBATSPPsudocommentstest.ipynb
+[Tests/Run Tests]   | ======================================================
+[Tests/Run Tests]   | /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/numpy/core/fromnumeric.py:3464: RuntimeWarning: Mean of empty slice.
+[Tests/Run Tests]   |   return _methods._mean(a, axis=axis, dtype=dtype,
+[Tests/Run Tests]   | /opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/numpy/core/_methods.py:192: RuntimeWarning: invalid value encountered in scalar divide
+[Tests/Run Tests]   |   ret = ret.dtype.type(ret / rcount)
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | ====================================
+[Tests/Run Tests]   |     LIST MODE (--list) ENABLED
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | ------------------------------------
+[Tests/Run Tests]   | LARGEST TESTFILES (DESC): 
+[Tests/Run Tests]   | ------------------------------------
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | ------------------------------------
+[Tests/Run Tests]   | MOST SUCCESSFUL TESTFILES (DESC): 
+[Tests/Run Tests]   | ------------------------------------
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | =====================================
+[Tests/Run Tests]   | 
+[Tests/Run Tests]   | Traceback (most recent call last):
+[Tests/Run Tests]   |   File "/home/aveey/tom-project/shell-scripts/tests/./kcov_result.py", line 388, in <module>
+[Tests/Run Tests]   |     app.run()
+[Tests/Run Tests]   |   File "/opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/mezcla/main.py", line 613, in run
+[Tests/Run Tests]   |     self.run_main_step()
+[Tests/Run Tests]   |   File "/home/aveey/tom-project/shell-scripts/tests/./kcov_result.py", line 359, in run_main_step
+[Tests/Run Tests]   |     kcov_test_coverage.do_it()
+[Tests/Run Tests]   |   File "/home/aveey/tom-project/shell-scripts/tests/./kcov_result.py", line 107, in do_it
+[Tests/Run Tests]   |     self.summary_stats()
+[Tests/Run Tests]   |   File "/home/aveey/tom-project/shell-scripts/tests/./kcov_result.py", line 214, in summary_stats
+[Tests/Run Tests]   |     INSTRUMENTED_MAX = np.max(instrumented_array)
+[Tests/Run Tests]   |   File "<__array_function__ internals>", line 200, in amax
+[Tests/Run Tests]   |   File "/opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/numpy/core/fromnumeric.py", line 2820, in amax
+[Tests/Run Tests]   |     return _wrapreduction(a, np.maximum, 'max', axis, None, out,
+[Tests/Run Tests]   |   File "/opt/hostedtoolcache/Python/3.9.16/x64/lib/python3.9/site-packages/numpy/core/fromnumeric.py", line 86, in _wrapreduction
+[Tests/Run Tests]   |     return ufunc.reduce(obj, axis, dtype, out, **passkwargs)
+[Tests/Run Tests]   | ValueError: zero-size array to reduction operation maximum which has no identity
+[Tests/Run Tests]   ✅  Success - Main Run Bats-PP Alias Tests
+[Tests/Run Tests] 🏁  Job succeeded

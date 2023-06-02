@@ -1,0 +1,158 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TESTS START FROM LINE 2066 (tomohara-aliases.bash)
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+# Setting a temp directory for tests
+$ TMP=/tmp/test-unix
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+$ alias | wc -l
+0
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 3245)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-3245
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-unix/test-3245
+
+# Count aliases proper
+$ alias | wc -l
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+1
+0
+
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+
+# SOURCING
+$ source $BIN_DIR/tomohara-aliases.bash
+
+$ ps-all | wc -l | testnum
+NNN
+
+# SORTS ALL PROCESS BY TIME
+# Hidden: USER, TTY, STAT, COMMAND
+$ ps-sort-time | head -n 10 | testnum | awk '!($1=$7=$8=$11="")'
+ PID %CPU %MEM VSZ RSS   START TIME 
+ NNNN N.N N.N NNNNNNN NNNNN   NN:NN NN:NN 
+ NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN 
+ NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNNN NNNNN   NN:NN N:NN 
+
+# ACTS THE SAME AS ps-sort-time
+$ ps-time | head -n 10  | testnum | awk '!($1=$7=$8=$11="")'
+ PID %CPU %MEM VSZ RSS   START TIME 
+ NNNN N.N N.N NNNNNNN NNNNN   NN:NN NN:NN 
+ NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN 
+ NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNNN NNNNN   NN:NN N:NN 
+
+# SORTS ALL PROCESS BY MEMORY
+$ ps-sort-mem | head -n 10  | testnum | awk '!($1=$7=$8=$11="")' 
+ PID %CPU %MEM VSZ RSS   START TIME 
+ NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN 
+ NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN 
+ NNNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN 
+ NNNNN N.N N.N NNNNNNN NNNNN   NN:NN N:NN 
+
+# ps-mem IS AN ALTERNATIVE OF ps-sort-mem
+$ ps-mem | head -n 10  | testnum | awk '!($1=$7=$8=$11="")'
+ PID %CPU %MEM VSZ RSS   START TIME 
+ NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN 
+ NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN 
+ NNNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN 
+ NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN 
+ NNNNN N.N N.N NNNNNNN NNNNN   NN:NN N:NN 
+
+# ERROR GENERATED FOR ps-script [OLD]
+# $ ps-script
+# | bash: -v: command not found
+# | bash: -i: command not found
+# | OSTYPE: Undefined variable.
+$ ps-script
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+
+$ ps al | egrep "(PID|$$)" | head -n 10 | testnum | awk '!($1="")'
+$ linebr
+# get-process-parent : return parent process-id for PID
+$ get-process-parent | testnum
+ UID PID PPID PRI NI VSZ RSS WCHAN STAT TTY TIME COMMAND
+ NNNN NNNNN NNNNN NN N NNNNN NNNN do_wai Ss pts/NN N:NN /usr/bi
+ NNNN NNNNN NNNNN NN N NNNNN NNNN - R+ pts/NN N:NN ps al
+ NNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN grep -E
+ NNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN head -n
+ NNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN sed -r
+ NNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN awk !($
+--------------------------------------------------------------------------------
+NNNNN
+
+# # ERROR (To be identified)
+# $ script-update
+# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.full.list: No such file or directory
+# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.icon.list: No such file or directory
+# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.full.list: No such file or directory
+# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.icon.list: No such file or directory
+# | ]1;script:5848 test-3245 [/tmp/test-unix/test-3245]]2;script:5848 test-3245 [/tmp/test-unix/test-3245]]1;script:5848 test-3245 [/tmp/test-unix/test-3245]]2;script:5848 test-3245 [/tmp/test-unix/test-3245]Script started, output log file is '_update-06dec22.log'.
+
+## EXAMPLE FOR ansi-filter (a brief example required)
+$ rm -rf ./* > /dev/null
+$ echo "How to use the ansi-filter? " > ansi-filter-test.txt
+$ ansi-filter *.txt
+How to use the ansi-filter? 
+
+## pause-for-enter: EXITS AFTER PRESSING ENTER, WITH A MESSAGE
+## DOESN'T WORK FOR JUPYTER, WORKS FOR TERMINAL
+# $ pause-for-enter
+# | Press enter to continue 
+## (program terminates after pressing Enter Key)
+
+$ echo "Done"
+Done
