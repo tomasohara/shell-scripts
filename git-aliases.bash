@@ -711,7 +711,7 @@ function git-checkout-branch {
 	return
     fi
     local branch_ref
-    branch_ref=$(git branch | grep -c "$branch")
+    branch_ref=$(git branch --all | grep -c "$branch")
     if [ "$branch_ref" -gt 0 ]; then
         ## OLD: git-command checkout "$branch";
         # note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
