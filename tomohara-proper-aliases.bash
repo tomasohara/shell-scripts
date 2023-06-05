@@ -39,13 +39,13 @@ function clone-repo () {
     log="_clone-$repo-$(T).log"
     ## OLD: command script "$log" git clone "$url"
     # maldito linux: -c option required for command for
-    local command_indicator=""
+    # shellcheck disable=SC2086
     if [ "$(under-linux)" = "1" ]; then
-	command_indicator="-c"
+	command script "$log"  -c "git clone '$url'"
+    else
+	command script "$log"  git clone "$url"
     fi
     #
-    # shellcheck disable=SC2086
-    command script "$log"  $command_indicator "git clone '$url'"
     ls -R "$repo" >> "$log"
     ## Note: output warning that script now done (to avoid user closing the window assuming script active)
     ## TODO: add trace-stderr
@@ -168,12 +168,13 @@ function get-host-nickname {
 # Archive related
 
 # create-zip(dir): create zip archive with DIR
+# note: -r for recursive and -u for update
 function create-zip {
     local dir="$1"
     shift
     local archive
     archive="$TEMP/$(basename "$dir").zip"
-    zip -r "$archive" "$dir";
+    zip -r -u "$archive" "$dir";
 }
 
 
