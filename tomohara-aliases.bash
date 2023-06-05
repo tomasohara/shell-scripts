@@ -1399,8 +1399,11 @@ function diff-backup-helper {
 	"$diff" "$backup_file" "$file";
     fi
 }
-alias diff-backup='diff-backup-helper diff'
-alias kdiff-backup='diff-backup-helper kdiff'
+## TODO:
+## alias-fn diff-backup 'diff-backup-helper diff "$@"'
+## alias-fn kdiff-backup 'diff-backup-helper kdiff "$@"'
+function diff-backup { diff-backup-helper diff "$@"; }
+function kdiff-backup { diff-backup-helper kdiff "$@"; }
 
 # signature(prefix): show ~/info/<prefix>-signature
 # See
