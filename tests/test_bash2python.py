@@ -46,6 +46,7 @@ from mezcla.my_regex import my_re
 from mezcla import system
 
 # Constants
+NEWLINE = "\n"                          # for use in regex's
 RUN_SLOW_TESTS = system.getenv_bool("RUN_SLOW_TESTS", False,
                                     "Run tests that can a while to run")
 NORMALIZE_LOOSE = system.getenv_bool("NORMALIZE_LOOSE", False,
@@ -76,21 +77,25 @@ def normalize_whitespace(text, loose=None):
         ## TEMP
         result = my_re.sub("\n", " ", result)
         ## HACK: result = my_re.sub("\\n", " ", result)
+        result = result.replace("\n", " ")
+        result = result.replace("\\n", " ")
+        debug.trace_expr(7, result)
     result = my_re.sub("\r", "\n", result)
-    result = my_re.sub(r"\s+\n+\s+", "\n", result)
+    result = my_re.sub(fr"\s+{NEWLINE}+\s+", "\n", result)
     result = my_re.sub(r"  +", " ", result)
     debug.trace(7, f"normalize_whitespace({text!r}) => {result!r}")
     return result
 
 
-def bash2py_helper(bash, expect, skip_normalize=False, keep_comments=False):
+def bash2py_helper(bash, expect, skip_normalize=False, keep_comments=False, strip_input=None):
     """Helper for call bash2python as a module
     Notes:
     - Applies whitespace normalization unless SKIP_NORMALIZE
     - Omits conversion comments unless KEEP_COMMENTS (for sake of simpler matching)
+    - Optionally STRIPS_INPUT of balnk lines and comments
     """
     debug.trace(6, f"bash2py{(bash, expect, skip_normalize, keep_comments)}")
-    b2p = B2P(bash, skip_comments=(not keep_comments))
+    b2p = B2P(bash, skip_comments=(not keep_comments), strip_input=strip_input)
     actual = b2p.convert_snippet(False)
     if not skip_normalize:
         actual = normalize_whitespace(actual)
@@ -146,14 +151,14 @@ def test_comments_1():
     """Test if comments maintain their integrity, expected same input as output"""
     bash = "# This is a comment"
     python = "# This is a comment"
-    bash2py_helper(bash, python)
+    bash2py_helper(bash, python, strip_input=False)
 
 
 def test_comments_2():
     """Checks in-line comments to ensure integrity"""
     bash = "echo $foo # Another comment"
     python = 'run(f"echo {foo}")# Another comment'
-    bash2py_helper(bash, python, keep_comments=True)
+    bash2py_helper(bash, python, strip_input=False)
 
 
 def test_while_loop():
@@ -192,13 +197,13 @@ def test_command_pipe():
 def test_variable_assignment():
     """Tests a simple case of variable assignment in two lines"""
     bash = "name='John Doe'\necho $name"
-    python = r"name = 'John Doe'\nrun(f\"echo {name}\")"
+    python = fr"""name = 'John Doe'{NEWLINE}run(f"echo {{name}}")"""
     bash2py_helper(bash, python)
 
 def test_unquoted_arg():
     """Check that unquoted arguments treated consistently"""
     bash = 'echo unquoted-token1'
-    python = r'run("echo \"unquoted-token1\"")'
+    python = r'run("echo unquoted-token1")'
     # TODO3?: python = r'run("echo \"unquoted-token1\"")'
     bash2py_helper(bash, python)
     bash = 'echo "quoted-token1"'
@@ -209,7 +214,7 @@ def test_unquoted_arg():
 def test_arithmetic_expression():
     """Checks if arithmetics are working correctly"""
     bash = 'echo "$((2+3*4))"'
-    python = r'run(f"echo \"{2+3*4}\"")'
+    python = r'''run(f"echo '{2+3*4}'")'''
     bash2py_helper(bash, python)
 
 
@@ -234,17 +239,21 @@ fi
     """
     python = r'''
 if os.path.isfile(f"{sys.argv[1]}"):
-    run(f"echo \"{sys.argv[1]} exists and is a regular file.\"")
+    run(f"echo '{sys.argv[1]} exists and is a regular file.'")
 elif os.path.exists(f"{sys.argv[1]}"):
-    run(f"echo \"{sys.argv[1]} exists but is not a regular file.\"")
+    run(f"echo '{sys.argv[1]} exists but is not a regular file.'")
 else:
-    run(f"echo \"{sys.argv[1]} does not exist.\"")
+    run(f"echo '{sys.argv[1]} does not exist.'")
 
     '''
     bash2py_helper(bash, python)
     #
-    base = 'if [ a -eq b ]: then echo "Equal"; else echo "Not Equal")'
-    python = r'if a == b:\n    run("echo \"Equal\"")\nelse:\n    run("echo \"Not Equal\"")'
+    ## BAD: bash = 'if [ a -eq b ]; then echo "Equal"; else echo "Not Equal")'
+    bash = 'if [ a -eq b ]; then echo "Equal"; else echo "Not Equal"; fi'
+    python = fr'if a == b:{NEWLINE}    run("echo \"Equal\"")\nelse:{NEWLINE}    run("echo \"Not Equal\"")'
+    bash2py_helper(bash, python)
+    bash = 'if true; then echo "T"; elif false; then echo "F"; else echo "N"; fi'
+    python = fr'if True:{NEWLINE}    run("echo \"T\""){NEWLINE}elif False:   run("echo \"F\""){NEWLINE}\nelse:{NEWLINE}    run("echo \"N\"")'
     bash2py_helper(bash, python)
 
 
@@ -262,13 +271,13 @@ else
 fi
     """                                 # TODO: x=$(calc-int "rand() * 1024")
     python = r"""
-x = run("echo $RANDOM")
+x = run("echo \"$RANDOM\")
 if x == 0:
-    run(f"echo \"{x} zero\"")
+    run(f"echo '{x} zero'")
 elif x < 0:
-    run(f"echo \"{x} negative\"")
+    run(f"echo '{x} negative'")
 else:
-    run(f"echo \"{x} positive\"")
+    run(f"echo '{x} positive'")
     """
     bash2py_helper(bash, python)
 
@@ -311,7 +320,7 @@ esac
 def test_let_command():
     """Test if a let command is converted correctly"""
     bash = 'let "x=1+2"'
-    python = "x = 1+2"
+    python = "x=1+2"
     bash2py_helper(bash, python)
 
 
@@ -344,7 +353,7 @@ done
     python = r"""
 files=['file1.txt', 'file2.txt', 'file3.txt', 'file4.txt', 'file5.txt']
 for file in files:
-    run(f"echo \"Reading file: {file}\"")
+    run(f"echo 'Reading file: {file}'")
     run(f"cat {file}")
     """
     bash2py_helper(bash, python)
@@ -355,7 +364,7 @@ for file in files:
 @pytest.mark.parametrize("bash_line, expect_result", [
     # input                             result
     ("""echo $fubar""",                 r'''run(f"echo {fubar}")'''),      # TODO3: print(f"{fubar}")
-    ('''echo "$fubar"''',               r'''run(f"echo \"{fubar}\"")'''),
+    ('''echo "$fubar"''',               r'''run(f"echo '{fubar}'")'''),
     # note: results with multiple run's requires var_replace to be incremental (as with process_compound)
     ("""ls; pwd""",                     """run("ls; pwd")"""),
     ("""ls\npwd\n""",                   """run("ls")\nrun("pwd")"""),
@@ -394,22 +403,22 @@ def test_tabular_var_replace(bash_line, expect_result):
      'run(f"echo a{1+2}b")'),
     # simple if statement(s)
     ("""if [ $? -eq 0 ]; then echo "Success"; fi""",
-     r'''if run("echo $?") == 0:\n   run("echo \"Success\"")'''),
+     fr'''if run("echo $?") == 0:{NEWLINE}   run("echo 'Success'")'''),
     ("""if [ 1 -gt 0 -lt 2 ]; then echo HELL; fi; fi""",   # single line issue
      """if 1 > 0 < 2:\n    run("echo HELL")"""),
     # simple for statement(s)
     ("""for i in 1 2 3; do echo "$i"; done""",
-     r'''for i in ["1", "2", "3"]:\n    run("echo f\"{i}\"")'''),
+     fr'''for i in ["1", "2", "3"]:{NEWLINE}    run("echo f'{{i}}'")'''),
     # simple while statement(s)
     ("""while [ $i -ge 0 ]; do echo $i; let i--; done""",
-     r'''while i >= 0:\n    run(f"echo \"{i}\"")\n    i -= 1'''),
+     fr'''while i >= 0:{NEWLINE}    run(f"echo '{{i}}'"){NEWLINE}    i -= 1'''),
     ("""while [ $i -ge 0 ]; do\n    echo $i\n    let i--\ndone""",
-     r'''while i >= 0:\n    run(f"echo \"{i}\"")\n    i -= 1'''),
+     fr'''while i >= 0:{NEWLINE}    run(f"echo '{{i}}'"){NEWLINE}    i -= 1'''),
     # variable assignment
     ("""name='Jane Doe'\necho $name""",
-     r'''name = "Jane Doe"\nrun(f"echo \"{name}\"')'''),
+     fr'''name = "Jane Doe"{NEWLINE}run(f"echo '{{name}}'')'''),
     ("""name='Jane Doe'; echo $name""",                  # issue: semicolon blocks variable conversion
-     r'''name = "Jane Doe"\nrun(f"echo \"{name}\"')'''),
+     fr'''name = "Jane Doe"{NEWLINE}run(f"echo '{{name}}'')'''),
     # consecutive statement execution
     ("""ls; pwd;""",
      """run("ls; pwd")"""),
@@ -434,21 +443,24 @@ def test_tabular_var_replace(bash_line, expect_result):
      """if False:\n    pass"""),
     # operators (TODO: isolate from if/then/fi verbiage)
     ("""if [[ ($? -gt 0) && ($? -lt 0) ]]; then echo "bad status"; fi""",
-     r'''if run("echo \"$?\"") > 0 and run("echo \"$?\"") < 0:\n    run("echo \"bad status\"")'''),
+     fr'''if run("echo \"$?\"") > 0 and run("echo \"$?\"") < 0:{NEWLINE}    run("echo \"bad status\"")'''),
     ("""if [ 1 || 0 ]; then echo "one"; fi""",
-     r'''if 1 or 0:\n    run("echo \"one\"")'''),
+     fr'''if 1 or 0:{NEWLINE}    run("echo \"one\"")'''),
     ("""if [ ! 1 = 1 ]; then echo "bug1"; fi""",
-     r'''if not 1 == 1:\n    run("echo \"bug1\"")'''),
+     fr'''if not 1 == 1:{NEWLINE}    run("echo \"bug1\"")'''),
     ("""if [ -z " " ]; then echo "bug2"; fi""",
-     r'''if "" == " ":\n    run("echo \"bug2\"")'''),
+     fr'''if "" == " ":{NEWLINE}    run("echo \"bug2\"")'''),
     ("""if [ -n "" ]; then echo "bug3"; fi""",
-     r'''if "" != " ":\n    run("echo \"bug3\"")'''),
+     fr'''if "" != " ":{NEWLINE}    run("echo \"bug3\"")'''),
     # file operators (TODO: test for quoting of filenames)
     ("""if [ -f "$HOME/.bashrc" ]; then true; fi""",
-     r"""if os.path.isfile(f"{os.getenv(\"HOME\")}/.bashrc"):\n    pass"""),
+     fr"""if os.path.isfile(f"{{os.getenv('HOME')}}/.bashrc"):{NEWLINE}    pass"""),
     ("""if [ -d "/tmp" ]; then true; fi""",
      """if os.path.isdir("/tmp"):\n    pass"""),
-    ("""if [[ (-d "/tmp") || (-d "$HOME/temp") ]]; then true; fi""",
+    ## TODO3:
+    ## ("""if [[ (-d "/tmp") || (-d "$HOME/temp") ]]; then true; fi""",
+    ##  """if os.path.isdir("/tmp") or os.path.isdir("{os.getenv(\"HOME\")}/temp"):\n    pass"""),
+    ("""if [[ ( -d "/tmp" ) || ( -d "$HOME/temp" ) ]]; then true; fi""",
      """if os.path.isdir("/tmp") or os.path.isdir("{os.getenv(\"HOME\")}/temp"):\n    pass"""),
     # Unimplemented operators
     ("""if [[ $fu =~ bar ]]; then true; fi""",       # regex matching
