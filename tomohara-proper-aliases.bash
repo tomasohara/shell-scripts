@@ -174,6 +174,7 @@ function create-zip {
     shift
     local archive
     archive="$TEMP/$(basename "$dir").zip"
+    echo "issuing: zip -r -u \"$archive\" \"$dir\""
     zip -r -u "$archive" "$dir";
 }
 
