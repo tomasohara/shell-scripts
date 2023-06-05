@@ -9,4 +9,6 @@
 ## OLD: ./batspp_report.py -k && ./kcov_result.py --list --summary --export | tee summary_stats.txt
 
 cd $(dirname "$0")
+# python3 ./batspp_report.py -k && python3 ./kcov_result.py --list --summary --export | tee summary_stats.txt
+python3 ./batspp_report.py > /dev/null 2>&1
 python3 ./batspp_report.py -k && python3 ./kcov_result.py --list --summary --export | tee summary_stats.txt
