@@ -138,6 +138,9 @@ PARA_SPLIT = system.getenv_bool("PARA_SPLIT", False,
                                 "Split code in Perl-style paragraph mode")
 BASHLEX_CHECKS = system.getenv_bool("BASHLEX_CHECKS", False,
                                     "Includee bashlex sanity checks over AST--abstract syntax tree")
+SKIP_VAR_INIT = system.getenv_bool("SKIP_VAR_INIT", False,
+                                   "Don't initialize variables")
+## OLD: INIT_VARS = not SKIP_VAR_INIT
 
 # Global settings
 regular_re = re
@@ -146,7 +149,8 @@ if USE_MEZCLA:
 
 PYTHON_HEADER = """# Output from bash2python.py
 '''Python code from Bash snippet'''
-import os, sys
+import os
+import sys
 from mezcla.glue_helpers import run_via_bash
 from mezcla import system
 
@@ -159,9 +163,14 @@ def run(command, skip_print=False):
     if (not skip_print) and result:
        print(result)
     return result
+
+def arg(arg_num):
+    '''Returns Nth arg or ""'''
+    return (sys.argv[arg_num] if (arg_num < len(sys.argv)) else "")
 """
 # TODO1: rework run via class so that the commands can be batched
 # TODO2: track down quirk with gh.run("echo ...") not outputting result--by design?
+# TODO3: isolate stderr from stdout
 
 #...............................................................................
 
@@ -316,6 +325,7 @@ def split_statements(line):
     """Split LINE into separate statements"""
     # EX: split_statements("echo 1; echo 2; echo 3") => ["echo 1", "echo 2", "echo 3"]
     # TODO3: account for braces
+    in_line = line
     statements = []
     while line:
         line_split = has_multiple_statements(line)
@@ -325,7 +335,7 @@ def split_statements(line):
         (line, remainder) = line_split
         statements.append(line.strip())
         line = remainder
-    debug.trace(6, f"split_statements({line!r}) => {statements!r}")
+    debug.trace(6, f"split_statements({in_line!r}) => {statements!r}")
     return statements
     
 
@@ -338,14 +348,15 @@ class Bash2Python:
         "true": "pass"}
     LOOP_CONTROL = ["break", "continue"]
 
-    def __init__(self, bash, skip_comments=None, strip_input=None, segment_prefix=None, segment_divider=None):
+    def __init__(self, bash, skip_comments=None, strip_input=None, segment_prefix=None, segment_divider=None, skip_var_init=None):
         """Class initializer: using BASH command to convert
         Note: Optionally SKIPs_COMMENT (conversion annotations), STRIPs_INPUT (input comments and blank lines), sets SEGMENT_PREFIX for filtering, and changes SEGMENT_DIVIDER for command iteration (or newline)"""
         ## TODO3: skip_comments=>skip_annotations
         debug.trace(6, "Bash2Python.__init__()")
         self.cmd = bash
         self.bash_var_hash = get_bash_var_hash()
-        self.variables = []             # TODO2: see if obsolete
+        self.string_variables = []
+        self.numeric_variables = []
         if skip_comments is None:
             skip_comments = SKIP_COMMENTS
         self.skip_comments = skip_comments
@@ -357,6 +368,9 @@ class Bash2Python:
             segment_divider = ("\n\n" if PARA_SPLIT else "\n")
         self.segment_divider = segment_divider
         self.segment_prefix = segment_prefix
+        if skip_var_init is None:
+            skip_var_init = SKIP_VAR_INIT
+        self.skip_var_init = skip_var_init
         self.global_ast = None
         self.cache = None
         self.codex_count = 0
@@ -521,13 +535,16 @@ class Bash2Python:
             while my_re.search(r"(.*)\$\(\( *(.*) *\)\)(.*)", line):
                 debug.trace(4, "processing arithmetic expansion")
                 (pre, expression, post) = my_re.groups()
-                # Note: converts expression to f-string
+                # Note: converts expression to f-string, omitting (user) quotes as arithmetic
                 ## BAD: line = pre + 'f"{' + expression + '}"' + post
                 ## OLD: line = pre + '"{' + expression + '}"' + post
-                line = pre.strip("'\"") + "'{" + expression + "}'" + post.strip("'\"")
+                ## OLD2: line = pre.strip("'\"") + "'{" + expression + "}'" + post.strip("'\"")
+                line = pre.strip("'\"") + "{" + expression + "}" + post.strip("'\"")
                 trace_line(line, "ln2a")
                 nonlocal has_python_var
                 has_python_var = True
+                # Make note of variable references
+                self.numeric_variables += my_re.findall(r"\b[a-z][a-z0-9]*", expression, flags=my_re.IGNORECASE)
             trace_line(line, "ln3")
             return line
 
@@ -572,6 +589,7 @@ class Bash2Python:
                     trace_line(line, "ln3a")
                     has_python_var = True
                     has_default = True
+                    converted = True
                 elif var in bash_commmon_special_vars:
                     # If the variable is a commonly used special variable, replace it with a function run call
                     # exs: '[ $? -eq 0 ]' => 'run("echo $?") -gt 0';  "$1"' => "{sys.argv[1]}"
@@ -579,7 +597,7 @@ class Bash2Python:
                         old_line = line
                         var_escape = my_re.escape(var)
                         line = my_re.sub(fr"(?<!run\(\"echo ){var_escape}",
-                                         f"run(\"echo {var}\")", line)
+                                         f"int(run(\"echo {var}\"))", line)
                         debug.trace(4, "Bash special variable in loop")
                         trace_line(line, "ln3b")
                         debug.assertion(line != old_line)
@@ -587,7 +605,7 @@ class Bash2Python:
                         # TODO: keep track of context (e.g., function vs. script); use lookup table
                         replacement = var[1:]
                         if my_re.search(r"\$([0-9])", var):
-                            replacement = "sys.argv[" + my_re.group(1) + "]"
+                            replacement = "arg(" + my_re.group(1) + ")"
                         elif my_re.search(r"\$\$", var):
                             replacement = 'os.getpid()'
                         elif my_re.search(r"\$\*", var):
@@ -599,11 +617,12 @@ class Bash2Python:
                         trace_line(line, "ln3b2")
                     converted = True
                     has_python_var = True
-                elif (var[1:] in self.bash_var_hash) and (var not in self.variables):
-                    # If the variable is a Bash-defined variable and not in self.variables, exclude it from the conversion
-                    debug.trace(4, f"Excluding Bash-defined variable {var})")
+                elif ((var[1:] in self.bash_var_hash) and (var not in self.string_variables)):
+                    # If the variable is Bash-defined variable or already processed, exclude it from conversion
+                    # TODO3: See whether this clauser is still needed
+                    debug.trace(4, f"Excluding Bash-defined or known var {var})")
                 else:
-                    pass
+                    debug.trace(7, f"Regular var {var}")
 
                 # If the variable wasn't converted yet
                 if (not converted):
@@ -614,7 +633,9 @@ class Bash2Python:
                         trace_line(line, "ln3c")
                     # Treat capitalized variable as from environment
                     elif my_re.search(r"^[A-Z]+$", python_var):
-                        line = my_re.sub(fr"\${python_var}\b", f'{{os.getenv("{python_var}")}}', line)
+                        ## OLD: line = my_re.sub(fr"\${python_var}\b", f'{{os.getenv("{python_var}")}}', line)
+                        ## NOTE: initialized via INIT_VAR check
+                        line = my_re.sub(fr"\${python_var}\b", f'{{{python_var}}}', line)
                         trace_line(line, "ln3ca")
                         has_python_var = True
                     # Otherwise, replace the Bash variable in the line with the Python-style variable
@@ -622,6 +643,8 @@ class Bash2Python:
                         line = my_re.sub(fr"\${python_var}\b", "{" + python_var + "}", line)
                         trace_line(line, "ln3d")
                         has_python_var = True
+                    # Make note of variable references
+                    self.string_variables.append(python_var)
 
             # Remove extraneous embedded quotes
             ## BAD: line = remove_extra_quotes(line, "ln3e")
@@ -656,6 +679,19 @@ class Bash2Python:
                     (pre, quoted_string, post) = my_re.groups()
                     line = pre + f"f{quoted_string}" + post
                     debug.trace(5, f"Adding f-string prefix to loop line string: {line!r}")
+
+                ## TODO3 (use strings for all variables and expressions)
+                ## # Convert unqouted numbers to strings
+                ## while my_re.search(r"^(.* )([0-9]+)( .*)$", line):
+                ##     pre, num, post = my_re.groups()
+                ##     debug.assertion(not embedded_in_quoted_string("num", line))
+                ##     line = pre + "'" + num + "'" + post
+                ##     debug.trace(5, f"quoting number in loop test: {line!r}")
+                    
+                # note: gets bare variable references (excluding tokens in tests like -eq)
+                # HACK: excludes python tokens for already processed expression
+                variable_refs = my_re.findall(r"[^\w-]([a-z][a-z0-9]*)", line, flags=my_re.IGNORECASE)
+                self.string_variables += system.difference(variable_refs, "os getenv sys argv arg int run echo".split())
                 debug.trace(5, f"[early exit 3a; process_conditions_and_loops] {var_replace_call} => ({line!r}, '')")
                 return line, ""
             
@@ -691,6 +727,7 @@ class Bash2Python:
                 debug.trace(6, "Ignoring assignment")
                 pass
             elif my_re.search(r"^\s*#", line):
+                debug.trace(6, "Ignoring comment")
                 pass
             ## TEST
             ## elif not has_python_var:
@@ -754,14 +791,12 @@ class Bash2Python:
                 line = f"run({line}, skip_print={has_assignment})"
                 trace_line(line, "ln5.89")
             elif converted_statement:
-                pass
+                debug.trace(6, "Ignoring converted")
             elif has_default:
-                ## OLD: trace_line(line, "ln5.9")
-                pass
+                debug.trace(6, "Ignoring has_default")
             elif my_re.search(r"^\s*#", line):
-                pass
+                debug.trace(7, "Ignoring comment")
             elif INLINE_CODEX:
-                ## OLD: trace_line(line, "ln5.91")
                 comment = self.codex_convert(line)
                 line = f"run({line})"
                 trace_line(line, "ln5.95")
@@ -829,7 +864,7 @@ class Bash2Python:
                 trace_line(line, "ln6c")
 
             # Restore comment
-            if (not self.skip_comments) or (not self.strip_input):
+            if (not self.skip_comments):
                 line = (line + inline_comment)
                 trace_line(line, "ln7")
             return line
@@ -856,8 +891,16 @@ class Bash2Python:
         # Check for assignment
         # TODO3: document what's going on!
         ## TODO2: if is_loop:
-        if my_re.search(r"^\s*\w+=", line):
+        if my_re.search(r"^\s*(\w+)=(.*)", line):
+            var, value = my_re.groups()
+            debug.assertion(not var[0].isdigit())
+            debug.assertion(not value.startswith("("))
             line = line.replace("[", "").replace("]", "")
+            ## TODO2:
+            ## if (system.is_numeric(value)):
+            ##     system.numeric_variables.append(var)
+            ## else:
+            ##     system.numeric_variables.append(var)
             ## TODO2: *** Don't mix-n-match variable types with the same name: very confusing! ***
             ## TODO3: pre_assign, post_assign = line.split(" = ", maxsplit=1)
             if " = " in line:
@@ -1038,19 +1081,32 @@ class Bash2Python:
             line = (indent + expression)
             converted = True
             has_var_refs = my_re.search(r"\w+", line)
+            ## TODO3: flag reference to special variable like RANDOM and SECONDS
+            # Make note of variable references
+            self.numeric_variables += my_re.findall(r"\b[a-z][a-z0-9]*", expression, flags=my_re.IGNORECASE)
         # Check for let with quoted expression (TODO: make sure operators converted)
         # ex:  let 'z=2*3'
-        elif my_re.search(r"^\s*let\s+(([\'\"])(.*)\2)\s*(.*)$", line):
-            debug.trace(4, "processing let expression")
-            line = my_re.group(3)
-            remainder = my_re.group(4) or ""
-            debug.assertion(not remainder.strip())
+        ## OLD: my_re.search(r"^\s*let\s+(([\'\"])(.*)\2)\s*(.*)$", line)
+        elif my_re.search(r"^\s*let\s+ ([\'\"]) (.*)\1 \s* (.*?)$", line, my_re.VERBOSE):
+            quote, expression, remainder = my_re.groups()
+            line = expression
+            debug.trace(4, f"processing general let: expr={expression!r} rem={remainder!r}")
+            debug.assertion(quote not in expression)
+            debug.assertion(not (remainder or "").strip())
             converted = True 
+            # Make note of variable references
+            self.numeric_variables += my_re.findall(r"\b[a-z][a-z0-9]*", expression, flags=my_re.IGNORECASE)
         # - variable assignments
         # - ex: let v++
         elif re.search(r"\blet\s+(\S*)", line):
-            debug.trace(4, "processing let")
-            line = re.sub(r"\blet\s+(\S*)", r"\1", line)
+            debug.trace(4, "processing simple let")
+            ## OLD: line = re.sub(r"\blet\s+(\S*)", r"\1", line)
+            # note: variable not added to self.string_variables to avoid initialization to ""
+            if my_re.search(r"^(\s*)\blet\s+(\w+)(\S*)(.*)$", line):
+                pre, var, expr, post = my_re.groups()
+                line = pre + var + expr + post
+                if var not in self.string_variables:
+                    self.numeric_variables.append(var)
             converted = True
             has_var_refs = True
         # Fixup any variable references
@@ -1391,7 +1447,21 @@ class Bash2Python:
                         debug.trace_exception(4, "convert_snippet/convert unimplemented")
                     except:
                         system.print_exception_info("convert_snippet/convert other")
-        result = "\n".join(python_commands)
+        # Add in variable initialization
+        result = ""
+        if not self.skip_var_init:
+            ## TODO?
+            ## based on https://www.oreilly.com/library/view/python-cookbook/0596001673/ch17s02.html
+            ## result += "\n".join(f'try:\n    {var};\nexcept:\n    {var} = ""\n'
+            ##                    for var in system.unique_items(self.string_variables))
+            if self.string_variables:
+                result += ("\n".join(f'{var} = os.getenv("{var}", "")'
+                                     for var in system.unique_items(self.string_variables)) + "\n")
+            if self.numeric_variables:
+                result += ("\n".join(f'{var} = 0' for var in system.unique_items(self.numeric_variables)) + "\n")
+            if result:
+                result += "\n"
+        result += "\n".join(python_commands)
         debug.assertion(("\\n" not in result) or INCLUDE_ORIGINAL)
         return result
 
@@ -1413,7 +1483,7 @@ class Bash2Python:
                 debug.trace(4, f"FYI: Ignoring comment line {self.line_num}: {bash_line!r}")
                 include = False
             else:
-                pass
+                debug.trace(7, "Nothing to strip")
         # Add ignored text to return buffer
         if not include:
             debug.trace(5, f"Ignoring stripped input {bash_line!r}")
