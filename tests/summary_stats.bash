@@ -10,5 +10,7 @@
 
 cd $(dirname "$0")
 # python3 ./batspp_report.py -k && python3 ./kcov_result.py --list --summary --export | tee summary_stats.txt
-python3 ./batspp_report.py > /dev/null 2>&1
+## OLD: python3 ./batspp_report.py > /dev/null 2>&1
+## NOTE: Runs it twice to workaround bug
+python3 ./batspp_report.py -k && python3 ./kcov_result.py --list --summary --export
 python3 ./batspp_report.py -k && python3 ./kcov_result.py --list --summary --export | tee summary_stats.txt
