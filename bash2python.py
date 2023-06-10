@@ -140,7 +140,6 @@ BASHLEX_CHECKS = system.getenv_bool("BASHLEX_CHECKS", False,
                                     "Includee bashlex sanity checks over AST--abstract syntax tree")
 SKIP_VAR_INIT = system.getenv_bool("SKIP_VAR_INIT", False,
                                    "Don't initialize variables")
-## OLD: INIT_VARS = not SKIP_VAR_INIT
 
 # Global settings
 regular_re = re
@@ -536,9 +535,6 @@ class Bash2Python:
                 debug.trace(4, "processing arithmetic expansion")
                 (pre, expression, post) = my_re.groups()
                 # Note: converts expression to f-string, omitting (user) quotes as arithmetic
-                ## BAD: line = pre + 'f"{' + expression + '}"' + post
-                ## OLD: line = pre + '"{' + expression + '}"' + post
-                ## OLD2: line = pre.strip("'\"") + "'{" + expression + "}'" + post.strip("'\"")
                 line = pre.strip("'\"") + "{" + expression + "}" + post.strip("'\"")
                 trace_line(line, "ln2a")
                 nonlocal has_python_var
@@ -633,8 +629,7 @@ class Bash2Python:
                         trace_line(line, "ln3c")
                     # Treat capitalized variable as from environment
                     elif my_re.search(r"^[A-Z]+$", python_var):
-                        ## OLD: line = my_re.sub(fr"\${python_var}\b", f'{{os.getenv("{python_var}")}}', line)
-                        ## NOTE: initialized via INIT_VAR check
+                        # NOTE: initialized via INIT_VAR check
                         line = my_re.sub(fr"\${python_var}\b", f'{{{python_var}}}', line)
                         trace_line(line, "ln3ca")
                         has_python_var = True
@@ -720,7 +715,6 @@ class Bash2Python:
                 debug.assertion(not embedded_in_quoted_string(";", line))
                 inline_comment += " # Warning: review conversion of compound statement"
             if not line.strip():
-                ## OLD: trace_line(line, "ln4.5")
                 debug.trace(6, "Ignoring blank line")
                 pass
             elif my_re.search(r"^\s*(\w+)\s*=", line):
@@ -773,8 +767,7 @@ class Bash2Python:
                 line = re.sub(r"^'(.*)'$", r"\1", line)
                 trace_line(line, "ln5.65")
             elif not line.strip():
-                ## OLD: trace_line(line, "ln5.75")
-                pass
+                debug.trace(6, "ignoring empty line")
             elif bash_commands:
                 trace_line(line, "ln5.85")
                 # Note: uses echo command with $(...) unless line already uses one
@@ -783,11 +776,6 @@ class Bash2Python:
                     trace_line(line, "ln5.86")
                 if INLINE_CODEX:
                     comment = self.codex_convert(line)
-                ## OLD
-                ## if not my_re.search(r"f?'(.*)'", line):
-                ##     debug.assertion(not my_re.search(r"{\w+}", line))
-                ##     line = f"'{line}'"
-                ##     trace_line(line, "ln5.87")
                 line = f"run({line}, skip_print={has_assignment})"
                 trace_line(line, "ln5.89")
             elif converted_statement:
@@ -829,10 +817,6 @@ class Bash2Python:
             # ex: 'echo "a + b  = " f"{a + b}"' => 'run(echo "a + b  = " f"{a + b}")'
             if my_re.search(r"^\s*echo .*", line):
                 debug.trace(5, "Special case unconverted-echo fixup")
-                ## if my_re.search(r'\bf".*"', line):
-                ##     debug.trace(6, f"Resolving f-strings in line {line!r}")
-                ##     line = eval(repr(line))
-                ##     debug.trace_expr(6, line)
                 line = my_re.sub(r'\bf"', '"', line)
                 line = f"run(f{line!r})"
                 trace_line(line, "ln6a")
@@ -1009,7 +993,6 @@ class Bash2Python:
 
         # Likewise handle file operators (TODO3: handle unquoted tokens)
         # ex: '[ -f "$filename" ]' => 'os.path.isfile(f"filename")'; likewise '[ -f f"{sys.argv[1]}" ]'
-        ## OLD: quoted_string = r'(?: (?:\"[^\"]+\") | (?:\'[^\']+\'))'
         for bash_operator, python_template in file_operators.items():
             ## OLD:
             ## line = re.sub(fr"([\[\(]\s*){bash_operator}\s+(f?{quoted_string})",
@@ -1087,7 +1070,6 @@ class Bash2Python:
             self.numeric_variables += my_re.findall(r"\b[a-z][a-z0-9]*", expression, flags=my_re.IGNORECASE)
         # Check for let with quoted expression (TODO: make sure operators converted)
         # ex:  let 'z=2*3'
-        ## OLD: my_re.search(r"^\s*let\s+(([\'\"])(.*)\2)\s*(.*)$", line)
         elif my_re.search(r"^\s*let\s+ ([\'\"]) (.*)\1 \s* (.*?)$", line, my_re.VERBOSE):
             quote, expression, remainder = my_re.groups()
             line = expression
@@ -1101,7 +1083,6 @@ class Bash2Python:
         # - ex: let v++
         elif re.search(r"\blet\s+(\S*)", line):
             debug.trace(4, "processing simple let")
-            ## OLD: line = re.sub(r"\blet\s+(\S*)", r"\1", line)
             # note: variable not added to self.string_variables to avoid initialization to ""
             if my_re.search(r"^(\s*)\blet\s+(\w+)(\S*)(.*)$", line):
                 pre, var, expr, post = my_re.groups()
@@ -1202,7 +1183,6 @@ class Bash2Python:
                 all_compounds.append(compound_stack[-1])
                 actual_loop = for_loop
                 debug.trace(6, f"actual_loop1:{actual_loop}")
-                ## OLD: quoted_values = ('["' + '", "'.join(values_spec.split()) + '"]')
                 quoted_values = ('["' +
                                  '", "'.join(v.strip('"') for v in values_spec.split()) +
                                  '"]')
@@ -1253,13 +1233,6 @@ class Bash2Python:
                 loop_line = rem_line
                 debug.trace(5, f"Conversion of {compound_stack[-1]} clause; new body={new_body!r} new loop_line={loop_line!r}")
             ##
-            ## OLD
-            ## elif loop_line == "else":
-            ##     new_body = indent + loop_line.strip() + ":\n"
-            ##     body += new_body
-            ##     loop_line = ""
-            ##     debug.trace(5, f"Processing compound else; new body={new_body!r}")
-            ##     loop_count += 1
             elif my_re.search(r"^\s*(else)\b(.*)$", loop_line):
                 # hack: special case else block handling
                 (loop_line, remainder) = my_re.groups()
@@ -1285,9 +1258,6 @@ class Bash2Python:
                     debug.trace(6, f"actual_loop3:{actual_loop}")
                 except IndexError:
                     break
-                ## OLD:
-                ## if (actual_loop[0] != "else"):
-                ##     loop_count -= 1
             else:
                 debug.trace(7, "Processing compound misc.")
                 if not actual_loop:
@@ -1446,7 +1416,6 @@ class Bash2Python:
                     try:
                         remainder = self.convert_bash(remainder, cmd_iter, python_commands, codex)
                     except(NotImplementedError) as exc:
-                        ## OLD: python_commands.append(f"Warning: {exc}")
                         python_commands.append(f"# Warning: {exc}")
                         debug.trace_exception(4, "convert_snippet/convert unimplemented")
                     except:
@@ -1669,9 +1638,6 @@ Not working yet:
         if INCLUDE_HEADER:
            print(b2p.header())
         print(b2p.convert_snippet(codex))
-
-    # Run sanity checks
-    ## OLD: print(b2p.contains_embedded_for(bash_snippet))
 
 # -------------------------------------------------------------------------------
 if __name__ == '__main__':
