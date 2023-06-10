@@ -268,7 +268,7 @@ alias date-central='TZ="America/Chicago" date'
 ## BAD: alias-fn em-adhoc-notes 'emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes-$(todays-date-mmmYY).txt'
 ## OLD: function em-adhoc-notes { emacs-tpo "_${HOST_NICKNAME:misc}-adhoc-notes-$(todays-date-mmmYY).txt"; }
 function em-adhoc-notes {
-    emacs-tpo $(downcase-text "$(basename "$PWD")-notes-${HOST_NICKNAME:tpo-host}-$(todays-date-mmmYY).txt");
+    emacs-tpo "$(downcase-text "$(basename "$PWD")-notes-${HOST_NICKNAME:tpo-host}-$(todays-date-mmmYY).txt")";
 }
 
 alias T='TODAY'
@@ -616,11 +616,14 @@ function set-title-to-current-dir () {
 if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-dir; fi
 #
 alias reset-xterm-title='set-xterm-window "$HOSTNAME $PWD"'
-quiet-unalias alt-xterm-title
+## OLD: quiet-unalias alt-xterm-title
+# alt-xterm-title([prefix=alt]): change xterm title to PREFIX DIR-BASENAME [PWD]
 function alt-xterm-title() { 
     local dir
+    local prefix="$1"
+    if [ "$prefix" = "" ]; then prefix="alt"; fi
     dir=$(basename "$PWD")
-    set-xterm-window "alt: $dir $PWD"; 
+    set-xterm-window "$prefix: $dir [$PWD]"; 
 }
 # TODO: see if DEFAULT_HOST used outside of xterm title
 alias set-xterm-default-host='export DEFAULT_HOST=n/a; cd .'
@@ -2500,6 +2503,7 @@ alias ps-sort-time='ps-sort-once -by=time'
 alias ps-time=ps-sort-time
 alias ps-sort-mem='ps-sort-once -by=mem '
 alias ps-mem=ps-sort-mem
+alias ps-sort-help='ps_sort.perl'
 
 # get-process-parent(pid): return parent process-id for PID
 # ¢ ps al | egrep "(PID|$$)"
@@ -3065,6 +3069,7 @@ alias ed-trans-sp=em-trans-sp
 
 #-------------------------------------------------------------------------------
 # WordNet related
+# See do_setup.bash
 
 # Adhoc fixup's
 wn="$(which wn > /dev/null 2>&1)"
