@@ -177,7 +177,16 @@ function create-zip {
     echo "issuing: zip -r -u \"$archive\" \"$dir\""
     zip -r -u "$archive" "$dir";
 }
-
+#
+# create-zip-dir(dir): create zip of dir in context of parent
+function create-zip-from-parent {
+    local path="$1"
+    local dir
+    dir="$(basename "$path")"
+    pushd "$(realpath "$path/..")";
+    create-zip "$dir"
+    popd
+}
 
 #................................................................................
 # Linux stuff
