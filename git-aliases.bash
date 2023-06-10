@@ -60,8 +60,8 @@
 #      GIT_MESSAGE               message for update (TODO: rework to use optional arg)
 #
 # - maldito shellcheck:
-#   SC2086 (info): Double quote to prevent globbing and word splitting
-#
+#   SC2016 [Expressions don't expand in single, use double]
+#   SC2086 [Double quote to prevent globbing and word splitting]
 #
 #................................................................................
 # Examples:
@@ -139,6 +139,7 @@ function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 check_errors.perl -context=5
 # get-temp-log-name([label=temp]: Return unique file name of the form _git-LABEL-MMDDYY-HHMM-NNN.log
 #
 LOG_DIR="${GIT_LOG_DIR:-./log-files}"
+mkdir --parents "$LOG_DIR"
 #
 function get-temp-log-name {
     local label=${1:-temp}
@@ -246,6 +247,31 @@ function git-update-plus {
     git-alias-review-log "$log"
 }
 
+function git-rename-file {    # Rename file OLD to NEW and update index
+    local old_file="$1"
+    local new_file="$2"
+    
+    invoke-git-command mv "$old_file" "$new_file"
+    git-commit-and-push "$new_file"
+    # do same as git-revert-file-alias
+    invoke-git-command reset HEAD "$old_file"
+}
+
+
+# git-move-to-dir(dir, file1, file2, ...)
+function git-move-to-dir {    # Move files to specified directory
+    local dir="$1"
+    shift
+    local file
+    for file in "$@"; do
+	invoke-git-command mv "$file" "$dir"
+	# TODO2: cut down on extraneous confirmations
+	git-commit-and-push "$dir/$new_file"
+	# do same as git-revert-file-alias
+	invoke-git-command reset HEAD "$file"
+    done
+}
+
 # sets globals for user, password (or token), etc. by sourcing external file
 # note: deprecated approach checking for _my-git-credentials-etc.bash.list in current dir and home dir
 function set-global-credentials {
@@ -295,6 +321,8 @@ function git-commit-and-push {
     local dir
     if [ "$file_spec" = "" ]; then
         echo "Warning: *** No file specified (cuidado!)"
+    elif [ "${GIT_SKIP_ADD:-0}" = "1" ]; then
+	echo "skipping: git add $*"
     else
         echo "issuing: git add \"$*\""
         git-add-plus "$@" >> "$log"
@@ -340,7 +368,6 @@ function git-update-commit-push {
 # git-update-commit-push-all(): adds all files for checkin
 alias git-update-commit-push-all='git-update-commit-push *'
 
-
 # run git COMMAND with output saved to command-specific temp file
 #
 function invoke-git-command {
@@ -367,6 +394,7 @@ alias git-status='invoke-git-command status'
 function git-log-plus { invoke-git-command log --name-status "$@" | less --quit-if-one-screen; }
 # note: git-log-diff-plus shows diff-style log
 alias git-log-diff-plus='invoke-git-command log --patch'
+alias git-log-follow='git-log-plus --follow'
 alias git-blame-alias='invoke-git-command blame'
 
 # git-add-plus: add filename(s) to repository
@@ -636,7 +664,8 @@ function git-checkout-branch {
 	echo "usage: git-checkout-branch [--help | branch]"
 	echo "note: available branches:"
 	# TODO: get maldito git to cooperate better (e.g., plain text option)!
-	PAGER= git branch --all | extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
+	# shellcheck disable=SC2016
+	PAGER="" git branch --all | extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
 	return
     fi
     local branch_ref
@@ -652,7 +681,6 @@ function git-checkout-branch {
 #-------------------------------------------------------------------------------
 
 # git-alias-usage (): tips on interactive usage (n.b., aka git-template)
-# maldito shellcheck: SC2016 [Expressions don't expand in single, use double].
 # shellcheck disable=SC2016
 function git-alias-usage () {
     # Refresh
@@ -700,7 +728,6 @@ function git-alias-usage () {
 # git-misc-alias-usage: Show miscelleanous tips
 #
 # Notes:
-# - Disables spurious spellcheck SC2016 [Expressions don't expand in single, use double].
 # - Unfortunately just for next statement, so applied to entire funtion
 #    See https://github.com/koalaman/shellcheck/issues/1295 [Allow directives in trailing comments].
 #
@@ -731,12 +758,15 @@ function git-misc-alias-usage() {
     echo "    GIT_MESSAGE='initial version' git-update-commit-push file..."
     echo ""
     echo "To move or rename (cuidado):"
-    echo "   git mv --verbose old-file new-file"
-    echo "   GIT_MESSAGE='renamed' git-update-commit-push new-file"
+    ## OLD:
+    ## echo "   git mv --verbose old-file new-file"
+    ## echo "   GIT_MESSAGE='renamed' GIT_SKIP_ADD=1 git-update-commit-push old-file new-file"
+    echo "    GIT_MESSAGE='renamed' git-rename-file old-file new-file"
+    echo "    GIT_MESSAGE='moved' git-move-to-dir dir file1 file2"
     echo ""
     echo "To delete files (mucho cuidado):"
     echo "   git rm old-file"
-    echo "   GIT_MESSAGE='deleted' git-update-commit-push old-file"
+    echo "   GIT_MESSAGE='deleted' GIT_SKIP_ADD=1 git-update-commit-push old-file"
     echo ""
     echo "To check in all tracked with changed:"
     echo "    git-checkin-multiple-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
