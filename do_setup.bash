@@ -506,34 +506,36 @@ if [ "$PS1" = "" ]; then export PS1="$ "; fi
 # flag for turning off GNOME, which can be flakey at times
 export USE_GNOME=1
 
-# General Settings for my perl scripts
-## OLD
-## export DEBUG_LEVEL=2
-## alias debug-on='export DEBUG_LEVEL=3'
-## OLD: export ORIGINAL_PERLLIB=$PERLLIB
-if [ "$PERLLIB" = "" ]; then PERLLIB="."; else PERLLIB="$PERLLIB:."; fi
-## export PERLLIB="$BIN:$PERLLIB:$HOME/perl/lib/perl5/site_perl/5.8.0:$HOME/perl/lib/perl5/site_perl/5.8.0/i386-linux-thread-multi/:$HOME/lib/perl5/5.00503/i386-linux:$BIN/MODULES"
-# NOTE: perl uses architecture-specific subdirectories under PERLLIB
-export PERLLIB="$BIN:$PERLLIB:$HOME/perl/lib/perl5/site_perl/5.8"
-# HACK: not all cygwin directories being recognized
-export PERLLIB="$PERLLIB:$HOME/perl/lib/perl5/site_perl/5.8/cygwin"
-alias perl-='perl -Ssw'
-## if [ "$MANPATH" = "" ]; then MANPATH="."; else MANPATH="$MANPATH:."; fi
-export MANPATH="$HOME/perl/share/man/man1:$MANPATH"
-append-path $HOME/perl/bin
+## OLD:
+## # General Settings for my perl scripts
+## ## OLD
+## ## export DEBUG_LEVEL=2
+## ## alias debug-on='export DEBUG_LEVEL=3'
+## ## OLD: export ORIGINAL_PERLLIB=$PERLLIB
+## if [ "$PERLLIB" = "" ]; then PERLLIB="."; else PERLLIB="$PERLLIB:."; fi
+## ## export PERLLIB="$BIN:$PERLLIB:$HOME/perl/lib/perl5/site_perl/5.8.0:$HOME/perl/lib/perl5/site_perl/5.8.0/i386-linux-thread-multi/:$HOME/lib/perl5/5.00503/i386-linux:$BIN/MODULES"
+## # NOTE: perl uses architecture-specific subdirectories under PERLLIB
+## export PERLLIB="$BIN:$PERLLIB:$HOME/perl/lib/perl5/site_perl/5.8"
+## # HACK: not all cygwin directories being recognized
+## export PERLLIB="$PERLLIB:$HOME/perl/lib/perl5/site_perl/5.8/cygwin"
+## alias perl-='perl -Ssw'
+## ## if [ "$MANPATH" = "" ]; then MANPATH="."; else MANPATH="$MANPATH:."; fi
+## export MANPATH="$HOME/perl/share/man/man1:$MANPATH"
+## append-path $HOME/perl/bin
 
-# Set the title for the current xterm, unless if not running X
-function set-title-to-current-dir () { 
-    local dir=`basename "$PWD"`; 
-    local other_info=""; 
-    if [ "$CLEARCASE_ROOT" != "" ]; then other_info="; $other_info cc=$CLEARCASE_ROOT"; fi
-    set_xterm_title.bash "$dir [$PWD]$other_info";
-}
-## if [ "$TERM" = "xterm" ]; then set-title-to-current-dir; fi
-if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-dir; fi
-#
-alias reset-xterm-title='set_xterm_title.bash "$HOSTNAME $PWD"'
-alias alt-xterm-title='set_xterm_title.bash "alt $PWD"'
+## OLD:
+## # Set the title for the current xterm, unless if not running X
+## function set-title-to-current-dir () { 
+##     local dir=`basename "$PWD"`; 
+##     local other_info=""; 
+##     if [ "$CLEARCASE_ROOT" != "" ]; then other_info="; $other_info cc=$CLEARCASE_ROOT"; fi
+##     set_xterm_title.bash "$dir [$PWD]$other_info";
+## }
+## ## if [ "$TERM" = "xterm" ]; then set-title-to-current-dir; fi
+## if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-dir; fi
+## #
+## alias reset-xterm-title='set_xterm_title.bash "$HOSTNAME $PWD"'
+## alias alt-xterm-title='set_xterm_title.bash "alt $PWD"'
 
 # Set file creation permission mask to enable RWX for user & group and none for others
 # NOTE:
