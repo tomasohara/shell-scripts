@@ -39,17 +39,17 @@ function clone-repo () {
     log="_clone-$repo-$(T).log"
     ## OLD: command script "$log" git clone "$url"
     # maldito linux: -c option required for command for
-    local command_indicator=""
+    # shellcheck disable=SC2086
     if [ "$(under-linux)" = "1" ]; then
-	command_indicator="-c"
+	command script "$log"  -c "git clone '$url'"
+    else
+	command script "$log"  git clone "$url"
     fi
     #
-    # shellcheck disable=SC2086
-    command script "$log" $command_indicator git clone "$url"
     ls -R "$repo" >> "$log"
     ## Note: output warning that script now done (to avoid user closing the window assuming script active)
     ## TODO: add trace-stderr
-    echo "FYI: script-based clone done (see $log)" 1>&1
+    echo "FYI: script-based clone done (see $log)" 1>&2
 }
 
 # JSON stuff
@@ -75,7 +75,7 @@ function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -p
 # The snippet should be bracketted by lines with "$: {" and "}"
 function shell-check-last-snippet {
     # shellcheck disable=SC2002
-    cat "$1" | perl-grep -v '^\s*#' | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
+    cat "$1" | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
 }
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
@@ -85,10 +85,13 @@ function tabify {
 # trace-vars(var, ...): trace each VAR in command line
 # note: output format: VAR1=VAL1; ... VARn=VALn;
 function trace-vars {
-    local var
+    local var value
     for var in "$@"; do
 	# shellcheck disable=SC2027,SC2046
-	echo -n "$var="$(eval echo "\$$var")"; "
+	## echo -n "$var="$(eval echo "\$$var")"; "
+	## TODO: value="$(eval "echo \$$var")"
+	value="$(set | grep "^$var=")"
+	echo -n "$var=$value; "
     done
     echo
     ##
@@ -109,6 +112,15 @@ function trace-array-vars {
     echo
 }
 
+
+
+#...............................................................................
+# Organizer stuff
+
+# rename-adhoc-notes(): rename adhoc notes under $PWD from HOST-adhoc-notes to {dir-basename}-adhoc-notes-HOST
+# shellcheck disable=SC2016
+alias-fn rename-adhoc-notes 'rename-files -q "$(get-host-nickname)-adhoc-notes" "$(basename $PWD)-adhoc-notes-$(get-host-nickname)"'
+
 #................................................................................
 # Snapshot related
 
@@ -121,9 +133,11 @@ function rename-last-snapshot {
     local new_name="$1"
     # Append dated image suffix unless date-like suffix w/ extension used
     if [[ ! "$new_name" =~ [0-9][0-9]*.png ]]; then
+	# TODO: derive timestamp via rename-with-file-date (in case last snapshit taken earlier)
 	new_name="$new_name-$(T).png"
     fi
     local last_file
+    # TODO: have options to use latest file (regardless of name) 
     # shellcheck disable=SC2010
     last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
     move "$last_file" "$new_name"		
@@ -134,6 +148,45 @@ function rename-last-snapshot {
 #
 # fix-transcript-timestamp(): put text on same line in YouTube transcripts
 alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
+
+#...............................................................................
+# System stuff
+
+# host-nickname(): return HOST_NICKNAME or ~/.host-nickname or tpo-host
+function get-host-nickname {
+    local nickname="$HOST_NICKNAME"
+    if [ "$nickname" = "" ]; then
+	nickname="$(grep -v '^#' ~/.host-nickname 2> /dev/null)"
+    fi
+    if [ "$nickname" = "" ]; then
+	nickname="tpo-host"
+    fi
+    echo "$nickname"
+}
+
+#...............................................................................
+# Archive related
+
+# create-zip(dir): create zip archive with DIR
+# note: -r for recursive and -u for update
+function create-zip {
+    local dir="$1"
+    shift
+    local archive
+    archive="$TEMP/$(basename "$dir").zip"
+    echo "issuing: zip -r -u \"$archive\" \"$dir\""
+    zip -r -u "$archive" "$dir";
+}
+#
+# create-zip-dir(dir): create zip of dir in context of parent
+function create-zip-from-parent {
+    local path="$1"
+    local dir
+    dir="$(basename "$path")"
+    pushd "$(realpath "$path/..")";
+    create-zip "$dir"
+    popd
+}
 
 #................................................................................
 # Linux stuff

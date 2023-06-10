@@ -161,6 +161,8 @@ my($num) = 0;			# number of distinct cases (pattern instances)
 $/ = "" if ($para);		# paragraph input mode
 $/ = 0777 if ($slurp);		# complete-file input mode
 
+# Enable UTF8 I/O
+# TODO2: make this automatic in common.perl
 if ($utf8) {
     use Encode 'decode_utf8';
 }

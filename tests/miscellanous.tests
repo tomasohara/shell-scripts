@@ -16,7 +16,7 @@
 ## bash: git-next-checkin: command not found
 ##
 
-
+#...............................................................................
 ## TODO:
 ## - check for merge_notes.py incorporating results of existing merger.
 ##
@@ -34,4 +34,16 @@
 ## - The issue is the grep filename prefix.
 ## - Also see ~/bin/adhoc/consolidate-notes.bash, which has some heuristics for finding note files.
 ##
+
+#...............................................................................
+# user-specific tests
+#
+# Make sure in my branch for shell-scripts (tom-dev not main):
+#
+$ if [ "$USER" =~ t*ohara ];
+$    command pushd ~/bin
+$    git-status | grep -c "On branch tom-dev"
+$    command popd
+$ fi
+1
 

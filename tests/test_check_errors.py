@@ -6,9 +6,11 @@
 """Tests for check_errors.py module"""
 
 
-# Standart packages
+# Standard packages
 import unittest
 
+# Installed packages
+import pytest
 
 # Local packages
 from mezcla.unittest_wrapper import TestWrapper
@@ -53,24 +55,28 @@ class TestIt(TestWrapper):
         self.assertEqual(gh.run(f'{input_string} | {SCRIPT} --context 2 -'), result_context_2)
 
 
+    @pytest.mark.xfail
     def test_no_asterisks(self):
         """test no asterisks option"""
         ## WORK-IN-PROGRESS
         assert(False)
 
 
+    @pytest.mark.xfail
     def test_skip_ruby_lib(self):
         """test skip ruby lib and ruby options"""
         ## WORK-IN-PROGRESS
         assert(False)
 
 
+    @pytest.mark.xfail
     def test_relaxed_strict(self):
         """test relaxed and strict options"""
         ## WORK-IN-PROGRESS
         assert(False)
 
 
+    @pytest.mark.xfail
     def test_verbose(self):
         """test verbose option"""
         ## WORK-IN-PROGRESS

@@ -11,6 +11,7 @@ eval 'exec perl -Ssw $0 "$@"'
 # TODO:
 # - ** Set unbuffered I/O if batch mode.
 # - * Make sure all linux fields handled: this script was started a long time ago!
+# - Allow for arbitrary fields
 #
 #-------------------------------------------------------------------------------
 # Examples:
@@ -223,6 +224,7 @@ for ($t = 1; $t <= $num_times; $t++) {
 	    }
 	}
 	else {
+	    # note: based on SunOS (TODO: what else valid for?)
 	    ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $sz[$i], $rss[$i], 
 	     $tt[$i]) = split;
 	}

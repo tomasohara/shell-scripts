@@ -34,6 +34,7 @@
 #         let VAR=(EXPR)            let max_mem=(4 * 1024)
 #   - array variable
 #         list=(v1 value2 ... vN)   initialize
+#         ${#list[@]}               number of elements (i.e., length)
 #         ${list[1]}                second element
 #         ${list[*]}                all elements
 #         "${list[@]}"              likewise all but individually quoted (a la "$@")
@@ -50,6 +51,11 @@
 #     !?string[?]                   find last command with string
 #  - local variable declaration     note: space-separated not comma; simplified
 #      local var1[=val1] [var2[=val2] ...]
+#  - common file tests
+#      -s file                      non-empty file (n.b., nothing like csh's -z)
+#      -e file                      file exists
+#      -f file                      regular file
+#      -d file                      file is directory
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi

@@ -2,6 +2,8 @@
 # file extension but also accounting for some idiosyncratic usages.
 #
 # Note:
+# - *** Please add examples when adding exclusions.
+# - ** Also explain if used for non standard stuff (e.g., tox.ini with Python).
 # - This is shared across projects, so there might seem to be
 #   some apparently extraneous patterns included.
 # - Used to pruned 'git status' output, which gets
@@ -11,7 +13,7 @@
 # - See 'man gitignore' for details.
 #
 # TODO:
-# - Re-enable linux subdir ignore spec.
+# - Address the TODO's below.
 #
 
 # Log files and listings
@@ -19,9 +21,16 @@
 **/*.log
 **/*.list
 
-# Any files with _, except specified cases
+# Any files with leading _, except specified cases
 **/_*
 !**/*__init__.py
+# Likewise for trailing _'s (e.g., master-dir-link_)
+**/*_
+
+# Special cases
+# TODO: see why excluded by the rules
+# Workflow files (e.g., .github/workflows/tests.yml).
+!.github/**
 
 # Backup file
 **/*.bak
@@ -34,6 +43,7 @@
 # Output or log-file directories
 **/log-files
 **/output-files
+**/downloads
 
 # Jupyter
 .ipynb_checkpoints
@@ -46,7 +56,7 @@
 
 # Personal note files
 # ex: reempl-notes.txt
-**/*-notes*txt
+**/*notes*txt
 
 # Dated backup files
 # ex: html_utils.py.09mar22
@@ -57,6 +67,14 @@ versioned-files
 
 # Emacs
 TAGS
+
+# Unit test, coverage reports, etc.
+# TODO: show examples
+.pytest_cache
+**/tests/htmlcov
+.coverage
+.coverage.*
+.hypothesis**
 
 # OS-specific directories
 ## TODO: re-enable

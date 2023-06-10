@@ -142,7 +142,7 @@ $ dir | grep ??? | perl -pe "s/$this_month.*( [a-z]{3})/\1/;"
 -rw-rw-r--   1 tomohara    0 Apr 16 01:13 jkl
 drwxrwxr-x   2 tomohara 4.0K Apr 16 01:13 abc
 drwxrwxr-x   2 tomohara 4.0K Apr 16 01:13 def
-## TODO: note discovered via followingL
+## TODO: note discovered via following:
 ##   $ git-diff tomohara-aliases.bash | count-it -i '([a-z0-9_-]+)' - 
 ## 
 
@@ -151,13 +151,13 @@ drwxrwxr-x   2 tomohara 4.0K Apr 16 01:13 def
 # Make sure copy and move trace operations, preserve timestamps, and confirms overwrites or deletions (e.g., a la cp -ivp)
 
 # copy alias traces operation
-$ cd $TMP
+$ cd "$TMP"
 $ touch file1
 $ copy file1 file1-copy
 'file1' -> 'file1-copy'
 
 # copy alias doesn't overwrite files
-$ cd $TMP
+$ cd "$TMP"
 $ touch file1 file2
 $ echo | copy file1 file2
 /bin/cp: overwrite 'file2'? $ 
@@ -203,13 +203,13 @@ em-aliases
 # Make sure copy and move trace operations, preserve timestamps, and confirms overwrites or deletions (e.g., a la cp -ivp)
 
 # copy alias traces operation
-$ cd $TMP
+$ cd "$TMP"
 $ touch file1
 $ copy file1 file1-copy
 'file1' -> 'file1-copy'
 
 # copy alias doesn't overwrite files
-$ cd $TMP
+$ cd "$TMP"
 $ touch file1 file2
 $ echo | copy file1 file2
 /bin/cp: overwrite 'file2'? $ 
@@ -295,7 +295,7 @@ $ alt-randomize-lines.perl -seed=13 alt-randomize-lines.perl | head -3
 # See bad-download-and-test-tomohara-aliases.ipynb
 
 # setup
-$ copy tomohara-aliases.bash $TMP
+$ copy tomohara-aliases.bash "$TMP"
 # test
 $ PATH=fubar BATCH_MODE=1 bash -i -c "source $TMP/tomohara-aliases.bash; echo done" 2> /dev/null
 done
@@ -303,7 +303,7 @@ done
 #-------------------------------------------------------------------------------
 # TODO: rename/copy reports unknown files (at least if DEBUG_LEVEL > 2)
 
-$ rename-with-file-date fubar | grep -i warning | wc -l;
+$ rename-with-file-date fubar | grep -c -i warning;
 1
 
 #===============================================================================
@@ -338,9 +338,9 @@ $ python-import-path six | extract-matches "(/lib.*)"
 # ¢ python -c "import eldar; print(eldar)"
 # <module 'eldar' from '/home/tomohara/anaconda3/envs/nlp-py-3-8/lib/python3.8/site-packages/eldar-0.0.7-py3.8.egg/eldar/__init__.py'>
 
-# setup
+# Setup
 $ python -m easy_install eldar-0.0.7-py3.8.egg
-# command
+# Command
 $ python-import-path eldar | grep -ic egg
 1
 
@@ -415,7 +415,7 @@ dir-proper ()
 #===============================================================================
 # dump-url vs get-url (e.g., wget vs. curl)
 
-$ echo "<html><a href=fubar.txt>fubar.txt</a><html>' > fubar.html
+$ echo "<html><a href=fubar.txt>fubar.txt</a><html>" > fubar.html
 
 $ dump-url fubar.html
 $ wc -l fubar.html 2>&1; wc -l fubar.txt 2>&1
@@ -473,21 +473,33 @@ $
 ## Your code has been rated at 6.67/10 (previous run: 6.67/10, +0.00)
 ## 
 
-
-$ cat >_it.py <<END_IT
-"""it"""
-import system
-IS_GI_JOB_SEARCH = False
-SKIP_ADS =  (IS_GI_JOB_SEARCH or system.getenv_bool("SKIP_ADS", False))
-END_IT
-
-## BAD:
-## ¢ python-lint _it.py | cat
+## ALL SORTS OF FUBAR
+## # Setup
+## ## NOTE: Bats-PP uses '<<END' for test definitions
+## ## TODO:
+## ## $ cat >_it.py <<END_IT
+## ## """it"""
+## ## import system
+## ## IS_GI_JOB_SEARCH = False
+## ## SKIP_ADS =  (IS_GI_JOB_SEARCH or system.getenv_bool("SKIP_ADS", False))
+## ## END_IT
+## $ echo $'"""it"""\nimport system\nIS_GI_JOB_SEARCH = False\nSKIP_ADS =  (IS_GI_JOB_SEARCH or system.getenv_bool("SKIP_ADS", False))\n" > _it.py
+##                                                      ^ DUH! (after-the-fact)
+## # Command
+## ## END_IT
+## #
+## ##
+## ## BAD:
+## ## ¢ python-lint _it.py | cat
+## ## ************* Module _it
+## ## SKIP_ADS =  (IS_GI_JOB_SEARCH or system.getenv_bool("SKIP_ADS", False))
+## ##
+## $ python-lint _it.py | cat
 ## ************* Module _it
-## SKIP_ADS =  (IS_GI_JOB_SEARCH or system.getenv_bool("SKIP_ADS", False))
 
-¢ python-lint _it.py | cat
+# Command
+$ echo $'"""it"""\nimport system\nIS_GI_JOB_SEARCH = False\nSKIP_ADS =  (IS_GI_JOB_SEARCH or system.getenv_bool("SKIP_ADS", False))\n' > _it.py
+# Setup
+$ python-lint _it.py | cat
 ************* Module _it
-
-
 

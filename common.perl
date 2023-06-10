@@ -1031,12 +1031,18 @@ sub blocking_stdin {
 #   requiring it (e.g., those that call helper scripts with same arguments).
 # - Add option to disable environment variable usage.
 #
-sub EXPORT {&TRUE;}
+our($export_default) = &FALSE;
+sub set_init_var_export {
+    my($default) = @_;
+    $export_default = $default;
+}
+#
+## OLD: sub EXPORT {&TRUE;}
 #
 sub init_var {
     use vars qw/$var_name $var_value $export_var/;
     local(*var_name, $var_value, $export_var) = @_;
-    my($default_export_var) = &FALSE;
+    my($default_export_var) = $export_default;
     $export_var = $default_export_var if (!defined($export_var));
 
     # Determine the environment variable name, which the variable w/o the package 
