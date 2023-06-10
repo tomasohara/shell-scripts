@@ -139,6 +139,7 @@ function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 check_errors.perl -context=5
 # get-temp-log-name([label=temp]: Return unique file name of the form _git-LABEL-MMDDYY-HHMM-NNN.log
 #
 LOG_DIR="${GIT_LOG_DIR:-./log-files}"
+mkdir --parents "$LOG_DIR"
 #
 function get-temp-log-name {
     local label=${1:-temp}
@@ -295,6 +296,8 @@ function git-commit-and-push {
     local dir
     if [ "$file_spec" = "" ]; then
         echo "Warning: *** No file specified (cuidado!)"
+    elif [ "${GIT_SKIP_ADD:-0}" = "1" ]; then
+	echo "skipping: git add $*"
     else
         echo "issuing: git add \"$*\""
         git-add-plus "$@" >> "$log"
@@ -367,6 +370,7 @@ alias git-status='invoke-git-command status'
 function git-log-plus { invoke-git-command log --name-status "$@" | less --quit-if-one-screen; }
 # note: git-log-diff-plus shows diff-style log
 alias git-log-diff-plus='invoke-git-command log --patch'
+alias git-log-follow='git-log-plus --follow'
 alias git-blame-alias='invoke-git-command blame'
 
 # git-add-plus: add filename(s) to repository
@@ -732,11 +736,11 @@ function git-misc-alias-usage() {
     echo ""
     echo "To move or rename (cuidado):"
     echo "   git mv --verbose old-file new-file"
-    echo "   GIT_MESSAGE='renamed' git-update-commit-push new-file"
+    echo "   GIT_MESSAGE='renamed' GIT_SKIP_ADD=1 git-update-commit-push old-file new-file"
     echo ""
     echo "To delete files (mucho cuidado):"
     echo "   git rm old-file"
-    echo "   GIT_MESSAGE='deleted' git-update-commit-push old-file"
+    echo "   GIT_MESSAGE='deleted' GIT_SKIP_ADD=1 git-update-commit-push old-file"
     echo ""
     echo "To check in all tracked with changed:"
     echo "    git-checkin-multiple-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
