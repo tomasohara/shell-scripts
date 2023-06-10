@@ -20,7 +20,7 @@ function usage() {
     base=$(basename "$0");
     echo "";
     echo "usage: $0 [options]";
-    echo "options: [--delay n] [--help] [--trace]  [--]";
+    echo "options: [--delay n] [--help] [--trace] [--verbose] [--]";
     echo "";
     # TODO: two examples; also add alias to tomohara.bash
     echo "examples:"
@@ -35,6 +35,7 @@ function usage() {
 # Parse command-line options
 #
 delay=60
+verbose="false"
 # TODO: show_usage=(( "$1" != "" ))
 show_usage=0; if [ "$1" = "" ]; then show_usage=1; fi
 more_options=0; case "$1" in -*) more_options=1 ;; esac
@@ -48,6 +49,8 @@ while [ "$more_options" = "1" ]; do
     elif [ "$1" = "--delay" ]; then
 	delay="$2"
 	shift
+    elif [ "$1" = "--verbose" ]; then
+	verbose="true"
     elif [ "$1" = "--" ]; then
 	break
     elif [ "$1" = "" ]; then
@@ -69,10 +72,10 @@ fi
 ## TODO: add other commands (e.g., sensors)
 synch_count=0
 echo "Running file system sync every $delay seconds"
-while [ 1 ]; do
+while true; do
       let synch_count++
-      echo "synching (iteration $synch_count)"
+      $verbose && echo "synching (iteration $synch_count)"
       sync
       sync
-      sleep $delay
+      sleep "$delay"
 done
