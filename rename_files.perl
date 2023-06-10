@@ -27,7 +27,7 @@ BEGIN {
 # for command-line arguments (see init_var's in &init).
 use strict;
 use vars qw/$q $f $regex $quick $force $test $evalre $global $i $ignore/;
-use vars qw/$t $para/;
+use vars qw/$t $nt $para/;
 use vars qw/$rename_old/;
 
 &init_var(*q, &FALSE);		# alias for -q
@@ -41,8 +41,10 @@ use vars qw/$rename_old/;
 ## OLD: &init_var(*regex, &FALSE);	# allow regular expression in pattern
 &init_var(*regex, $para);	# allow regular expression in pattern
 &init_var(*evalre, &FALSE);	# run replacement through eval environment
-&init_var(*t, &FALSE);          # alias for -test
-&init_var(*test, $t);	        # just test the rename operation
+my($nt_default) = (defined($t) ? (! $t) : &TRUE);  # abbrev. for 'not t'
+&init_var(*nt, $nt_default);    # alias for -test=0
+&init_var(*t, (! $nt));         # alias for -test
+&init_var(*test, $t);           # just test the rename operation
 &init_var(*global, &FALSE);	# global replacement
 &init_var(*rename_old, &FALSE); # rename old file as {old}.{MMDDDYY}
 

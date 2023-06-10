@@ -142,15 +142,19 @@ lower_file=$(echo "$file" | perl -pe 's/(.*)/\L$1/;')
 office_program="libreoffice"
 pdf_program="evince"
 image_program="eog"
+default_program="emacs"
 # TODO: doc_program="libreoffice"
 if [ "$for_editting" = "1" ]; then
     pdf_program="okular"
     image_program="pinta"
 fi
 if [ "$under_mac" = "1" ]; then
+    # HACK: use 'command open'
+    # NOTE: unfortunately there is no dispatcher for office programs as under Windows
     pdf_program="open"
     image_program="open"
     office_program="open"
+    default_program="open"
 fi
 if [[ $lower_file =~ ^.*\.xcf$ ]]; then
     image_program="gimp"
@@ -162,7 +166,7 @@ case "$lower_file" in
     *.pdf | *.ps) invoke "$pdf_program" "$@" & ;;
 
     # Image files
-    # note: uses viewer that Files invokes (eog, the "eye of GNOME")
+    # note: uses viewer that Files invokes, such as eog [the "eye of GNOME"] for images
     *.gif | *.ico | *.jpeg | *.jpg | *.png | .svg | *.xcf) invoke "$image_program"  "$@" & ;;
 
     # Video files
@@ -172,7 +176,11 @@ case "$lower_file" in
     *.mp3 | *.wav) invoke vlc "$@" & ;;
     
     # MS Office and LibreOffice files: word processor files, spreadsheets, etc.
-    *.doc | *.docx | *.pptx | *.odp | *.odt | *.odg | *.xls | *.xlsx | *.csv) invoke "$office_program" "$@" & ;;
+    # warning: this only works well for MS-specific extension (.
+    # if other applications are associated (e.g,. TextEdit for .rtf), then need to invoke via specific office program [maldito mac/microsoft].
+    # note: MacOs has awkware sequence via [Finder > GetInfo > OpenWith/ChangeAll] to change the default. See
+    #    https://www.macworld.com/article/672511/how-to-change-default-apps-on-mac.html
+    *.doc | *.docx | *.pptx | *.odp | *.odt | *.odg | *.rtf | *.xls | *.xlsx | *.csv) invoke "$office_program" "$@" & ;;
 
     # HTML files and XML files
     # TODO: convert filename arguments to use file:// prefix (to distinguish from URL's)
@@ -193,6 +201,10 @@ case "$lower_file" in
     # Default processing
     *)
        echo ""
-       echo "*** Warning: Unknown extension in $1; using Emacs"
-       invoke emacs "$@" & ;;
+       ## OLD
+       ## echo "*** Warning: Unknown extension in $1; using Emacs"
+       ## invoke emacs "$@" & ;;
+       echo "*** Warning: Unknown extension in $1; using $default_program"
+       invoke "$default_program" "$@" & ;;
+
 esac

@@ -17,7 +17,8 @@ import shutil
 import logging
 import tarfile
 from datetime import date
-import py7zr
+## OLD
+## import py7zr
 import click
 from tqdm import tqdm
 
@@ -34,8 +35,10 @@ BACKUP_DIR = system.getenv_text("BACKUP_DIR", HOME_DIR,
 LOG_DIR = system.getenv_text("LOG_DIR", ".",
                              "Directory for log files")
 DRY_RUN = system.getenv_bool("DRY_RUN", False, "Dry run mode")
+
 def create_backup_folder(source):
     """Try to create the backup folder if it doesn't exist"""
+    debug.trace(6, f"create_backup_folder({source})")
     ## OLD: backup_dir = os.path.join(os.environ["HOME"], socket.gethostname())
     backup_dir = os.path.join(BACKUP_DIR, socket.gethostname())
     ## OLD: base_dir = source.split("/")[-2]
@@ -55,6 +58,7 @@ def create_backup_folder(source):
     print(f"{backup_dir}: Total={total:1f} Used={used:.1f} Free={free:.1f} "
         f"{free/total*100:.1f}% of the total space)"
     )
+    # TODO: report error file not writable
     logging.basicConfig(
         ## OLD: filename=f"{backup_dir}/_make-{base_dir}-incremental-backup-"
         ## filename=f"_make-{base_dir}-incremental-backup-"
@@ -69,6 +73,7 @@ def create_backup_folder(source):
 
 def backup_derive(source, max_days_old, max_size_chars):
     """Sets type of backup depending on modification time and file max_size_chars"""
+    debug.trace(6, f"backup_derive{(source, max_days_old, max_size_chars)}")
     logging.info("Starts setting basename")
     # Backup source, equivalent to $HOME/$HOSTNAME
     ## OLD: backup_dir = os.path.join(os.environ["HOME"], socket.gethostname())
@@ -106,6 +111,7 @@ def backup_derive(source, max_days_old, max_size_chars):
 
 def sort_files(walkdir, days, size):
     """Walks inside selected path and sift files based on given parameters"""
+    debug.trace(4, f"sort_files{(walkdir, days, size)}")
     logging.info("Starts walking inside path, some errors are expected")
     max_days_old = days * 86400  # Time in days converted to seconds
     max_size_chars = size * 1048576  # max_size_chars in megabytes converted to bytes
@@ -115,10 +121,16 @@ def sort_files(walkdir, days, size):
         system.print_stderr("Dry run: Creating list of files to backup")
     expr = os.walk(walkdir) if not DRY_RUN else tqdm(os.walk(walkdir), desc='Creating list')
     #OLD:for root, _, files in os.walk(walkdir):
+    last_root = None
     for root, _, files in expr:
+        if (root != last_root):
+            debug.trace(5, f"new root: {root}")
+            last_root = root
+        debug.trace_expr(6, root, _, files)
         for file in files:
             try:
                 #OLD:if os.path.getsize(filepath) < max_size_chars and time.time() - os.path.getmtime(filepath) < max_days_old
+                # TODO: add  option to exclude metafiles (e.g., @PaxHeader under MacOS)
                 if (
                     os.stat(os.path.join(root, file)).st_size < max_size_chars
                     and time.time() - os.path.getmtime(os.path.join(root, file))
@@ -158,6 +170,8 @@ def create_tar(basename, lista):
 
 def create_encrypted_tar(password, basename):
     """Creates a GPG encrypted tar.gz file"""
+    debug.trace(4, f"create_encrypted_7z(********, _)")
+    debug.trace_expr(5, lista)
     logging.info("Starts creating encrypted tar.gz file")
     os.system(
         f"gpg --batch --yes --passphrase {password} --symmetric {basename}.tar.gz"
@@ -168,8 +182,10 @@ def create_encrypted_tar(password, basename):
 
 def create_encrypted_7z(password, basename, lista):
     """Creates a encrypted 7z file and writes files on it"""
-    debug.trace(4, f"create_encrypted_7z(********, {basename}, {lista}")
+    debug.trace(4, f"create_encrypted_7z(********, {basename}, _)")
+    debug.trace_expr(5, lista)
     logging.info("Starts creating encrypted 7z file")
+    import py7zr                         # pylint: disable=import-outside-toplevel
     with py7zr.SevenZipFile(basename + ".7z", "w", password=password) as archive:
         for file in tqdm(lista, desc="Creating archive"):
             try:
@@ -185,7 +201,8 @@ def create_encrypted_7z(password, basename, lista):
 
 
 def deactivate_prompts(ctx, _, value):
-    """Deactivates prompt except if -e is on"""
+    """Deactivates prompt except if -f is on (e.g., password prompt if full backup)"""
+    debug.trace(6, f"deactivate_prompts{(ctx, _, value)}")
     if not value:
         for param in ctx.command.params:
             param.prompt = None
@@ -200,7 +217,7 @@ def deactivate_prompts(ctx, _, value):
     hide_input=True,
     default="",
     confirmation_prompt=True,
-    help="Blank for no encryptation",
+    help="Blank for no encryption",
 )
 @click.option("-S", "--source", default=os.getcwd, help="Alternative source")
 ## OLD
@@ -216,13 +233,19 @@ def deactivate_prompts(ctx, _, value):
 )
 @click.option('--DRY_RUN', is_flag=True)
 
-def main(password, source, full, days, size, gpg): # pylint: disable=too-many-arguments
+def main(password, source, full, days, size, gpg, dry_run): # pylint: disable=too-many-arguments
     """Main function"""
     debug.trace_fmt(3, "main{args}",
-                    args=tuple([password, source, full, days, size, gpg, DRY_RUN]))
+                    args=(password, source, full, days, size, gpg, dry_run))
+    #
+    # note: --dry-run overrides DRY_RUN
+    global DRY_RUN
+    DRY_RUN = dry_run
+    #
     if DRY_RUN:
         logging.info("Dry run")
         system.print_stderr("Dry run")
+    #
     create_backup_folder(source)
     logging.info("Checking --full flag")
     if full:

@@ -17,6 +17,7 @@
 diff=kdiff.sh
 ignore='((0x)?[0-9A-Fa-f]{7,16})'
 include_time=0
+retain_whitespace=0
 show_usage=0
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 while [ "$moreoptions" = "1" ]; do
@@ -34,8 +35,9 @@ while [ "$moreoptions" = "1" ]; do
         include_time=1;
     elif [ "$1" = "--reset-ignore" ]; then
         ignore="";
+    elif [ "$1" = "--retain-whitespace" ]; then
+        retain_whitespace=1;
     elif [ "$1" = "--ignore" ]; then
-	## OLD: ignore="$2";
 	ignore="$ignore|($2)";
 	shift
     else
@@ -48,7 +50,6 @@ while [ "$moreoptions" = "1" ]; do
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 done
 #
-## OLD: if [ "$1" = "" ]; then
 
 if [ "$1" = "" ]; then
     show_usage=1
@@ -103,17 +104,18 @@ cp "$file2" "$TMP/$base2"
 if [ "$include_time" = "1" ]; then
     timestamp_regex1="(\\S+\\s*\\S+\\s*\\d{4} \\d{1,2}:\\d{2}:\\d{2} [ap]m )"
     timestamp_regex2="(\\d{1,2}\\/\\d{2}\\/\\d{2} \\d{1,2}:\\d{2}:\\d{2})"
-    ## OLD:
-    ## perl -pe "s/$timestamp_regex1//ig; s/$timestamp_regex2//ig;" "$file1" > "$TMP/$base1"
-    ## perl -pe "s/$timestamp_regex1//ig; s/$timestamp_regex2//ig;" "$file2" > "$TMP/$base2"
     perl -i.bak0 -pe "s/$timestamp_regex1//ig; s/$timestamp_regex2//ig;" "$TMP/$base1" "$TMP/$base2"
 fi
 
 # Strip out user-specified patterns
 # Note: include hex address stripping
 if [ "$ignore" != "" ]; then
-    ## OLD: perl -i.bak -pe "s@($ignore)@@gi;" "$TMP/$base1" "$TMP/$base2"
     perl -i.bak1 -pe "s@($ignore)@@gi;" "$TMP/$base1" "$TMP/$base2"
+fi
+
+# Collapse whitespace
+if [ "$retain_whitespace" = "0" ]; then
+   perl -i.bak2 -pe "s/\s+/ /g; s/$/\n/;" "$TMP/$base1" "$TMP/$base2"
 fi
 
 # Do comparison of the result

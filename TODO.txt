@@ -3,4 +3,10 @@ Things to do
 - Check for duplicate code such as inadvertent merges artifacts. This is
   probably more of an issue with aliases (e.g., tomohara-aliases.bash).
 - Add simple example-based tests for common scripts (see simple_batspp.py).
-
+- check for stupid Perl argument unpacking bugs (e.g., long-standing one in common.perl)
+    sub debug_on {
+      ## BAD: my($level) = $_;
+      my($level) = @_;
+      ...
+      }
+- prune temporary scripts (e.g., it.perl)

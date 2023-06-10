@@ -13,7 +13,7 @@
 # TODO: import re
 
 # Intalled module
-import gradio as gr
+## OLD: import gradio as gr
 ## TODO: import transformers
 ## OLD: from transformers import pipeline
 
@@ -21,6 +21,7 @@ import gradio as gr
 from mezcla import debug
 from mezcla.main import Main
 from mezcla import system
+from mezcla import glue_helpers as gh
 
 # Constants
 TL = debug.TL
@@ -46,6 +47,7 @@ MT_TASK = f"translation_{SOURCE_LANG}_to_{TARGET_LANG}"
 DEFAULT_MODEL = f"Helsinki-NLP/opus-mt-{SOURCE_LANG}-{TARGET_LANG}"
 MT_MODEL = system.getenv_text("MT_MODEL", DEFAULT_MODEL,
                               "Hugging Face model for MT")
+TEXT_ARG = "text"
 
 #-------------------------------------------------------------------------------
 
@@ -54,16 +56,29 @@ TEXT_FILE = system.getenv_text("TEXT_FILE", "-",
 USE_INTERFACE = system.getenv_bool("USE_INTERFACE", False,
                                    "Use web-based interface via gradio")
 
+# Optionally load UI support
+gr = None
+if USE_INTERFACE:
+    import gradio as gr                 # pylint: disable=import-error
+
+
 def main():
     """Entry point"""
     debug.trace(TL.USUAL, f"main(): script={system.real_path(__file__)}")
 
     # Show simple usage if --help given
-    dummy_app = Main(description=__doc__, skip_input=False, manual_input=False)
+    ## OLD: dummy_app = Main(description=__doc__, skip_input=False, manual_input=False)
+    dummy_app = Main(description=__doc__, skip_input=False, manual_input=True,
+                     text_options=[(TEXT_ARG, "Text to translate")])
+    debug.trace_object(5, dummy_app)
+    debug.assertion(dummy_app.parsed_args)
+    text = dummy_app.get_parsed_option(TEXT_ARG)
 
     # Get input file
     text_file = TEXT_FILE
-    if (text_file == "-"):
+    if (text is not None):
+        pass
+    elif (text_file == "-"):
         text_file = dummy_app.temp_file
         text = dummy_app.read_entire_input()
     else:
@@ -78,8 +93,10 @@ def main():
         pipeline_if = gr.Interface.from_pipeline(
             model,
             title="Machine translation (MT)",
-            description="Using pipeline with default",
-            examples=[text_file])
+            ## OLD:
+            ## description="Using pipeline with default",
+            ## examples=[text_file])
+            )
         pipeline_if.launch()
     else:
         TRANSLATION_TEXT = "translation_text"
@@ -90,6 +107,7 @@ def main():
             print(translation[0].get(TRANSLATION_TEXT) or "")
         except:
             system.print_exception_info("translation")
+    debug.code(4, lambda: debug.trace(1, gh.run("nvidia-smi")))
 
     return
 

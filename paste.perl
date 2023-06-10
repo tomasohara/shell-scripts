@@ -67,6 +67,10 @@ my(@col_arrays);
 our(@columns) = split(/[, ]/, $cols);
 &trace_array(\@columns, 4, "columns");
 
+## TODO:
+## $/ = "" if ($para);		# paragraph input mode
+## / = 0777 if ($slurp);	# complete-file input mode
+
 # Read in all the files into separate column arrays
 # For keys, these are %col_0, %col_1, ..., otherwise @col_0, @col_1, ....
 #
@@ -95,7 +99,7 @@ else {
 # Read the data in the file and store into the column array. If by-key, then
 # the data is assumed to be in two columns with the first providing the key
 # and the second the value for the entry column_array<key>. Otherwise,
-# the line is stored as colum_array[row].
+# the line is stored as column_array[row].
 #
 # Returns the number of rows read.
 #

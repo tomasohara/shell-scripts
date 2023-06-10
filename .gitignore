@@ -2,6 +2,8 @@
 # file extension but also accounting for some idiosyncratic usages.
 #
 # Note:
+# - *** Please add examples when adding exclusions.
+# - ** Also explain if used for non standard stuff (e.g., tox.ini with Python).
 # - This is shared across projects, so there might seem to be
 #   some apparently extraneous patterns included.
 # - Used to pruned 'git status' output, which gets
@@ -9,6 +11,9 @@
 # - The patterns are glob-like with the extension that **/GLOB
 #   matches the glob pattern in any subdirectory.
 # - See 'man gitignore' for details.
+#
+# TODO:
+# - Address the TODO's below.
 #
 
 # Log files and listings
@@ -19,7 +24,7 @@
 # Any files with leading _, except specified cases
 **/_*
 !**/*__init__.py
-# Likewise for trailing _'s (e.g., requirements.link_)
+# Likewise for trailing _'s (e.g., master-dir-link_)
 **/*_
 
 # Special cases
@@ -38,24 +43,20 @@
 # Output or log-file directories
 **/log-files
 **/output-files
+**/downloads
 
-## OLD
-## # Jupyter
-## .ipynb_checkpoints
-## 
-## # (maldito) Mac
-## .DS_Store
-#
-# Top-level dot files
-# ex: .hypothesis
-.*
+# Jupyter
+.ipynb_checkpoints
+
+# (maldito) Mac
+.DS_Store
 
 #...............................................................................
 # Idiosyncratic stuff for Tom
 
 # Personal note files
 # ex: reempl-notes.txt
-**/*-notes*txt
+**/*notes*txt
 
 # Dated backup files
 # ex: html_utils.py.09mar22
@@ -76,7 +77,8 @@ TAGS
 .hypothesis**
 
 # OS-specific directories
-linux
+## TODO: re-enable
+## linux
 win32
 mac-os
 # note: darwin21.1.0 => mac-os

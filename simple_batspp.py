@@ -11,6 +11,31 @@
 # hacks enabled via environment variables to work around quirks in the example parsing. For example,
 #   TEST_FILE=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 python ./simple_batspp.py tests/adhoc-tests.test
 #
+# - Regex cheatsheet:
+#     (?:regex)               non-capturing group
+#     (?#comment)             comment; used below for labeling regex segments
+#     *?  and  +?             non-greedy match
+# - See https://www.rexegg.com/regex-quickstart.html for comprehensive cheatsheet.
+# - See https://regex101.com for a tool to explain regex's.
+#................................................................................
+#
+## TODO1:
+## - Add option to use bash-compiant syntax for tests; via https://bats-core.readthedocs.io/en/stable/gotchas.html
+##     function bash_compliant_function_name_as_test_name { # @test
+##         # your code
+##     }
+## - Issue a warning about tests with '<<END' and other arcane syntax that conflict with
+##   the .bats file generation.
+## TODO2:
+## - Have option to save each test in a separate bats file: a simple syntax error (e.g., wrong closing quote) can cause the entire test to fail.
+## TODO3:
+## - Warn if expecting command and non-comment and non-$ line encounters (e.g., Tom's funky ¢ prompt)
+## - Stay in synh with Batspp:
+##   https://github.com/LimaBD/batspp/tree/main/tests/cases
+## TODO4:
+## - Integrate features from similar utilities:
+##   https://pypi.org/project/docshtest/
+##   https://github.com/lehmannro/assert.sh
 ## TODO:
 ## - extend usage guide or docstring.
 ## - Add some directives in the test or script comments:
@@ -29,7 +54,6 @@
 ##   This requires that the test definitions be converted to proper bash functions:
 ##      perl -pe 's/^\@test "(.*)"/function $1/;' my-test.bats > my-text.bash
 ## - add examples below to help clarify processing
-##
 
 """
 BATSPP
@@ -98,15 +122,17 @@ RANDOM_ID = system.getenv_bool("RANDOM_ID", False,
 OMIT_PATH = system.getenv_bool("OMIT_PATH", False,
                                "Omit PATH spec. for directory of .Batspp file")
 BATS_OPTIONS = system.getenv_text("BATS_OPTIONS", " ",
-                                  "Options for bats command")
+                                  "Options for bats command such as --pretty")
 SKIP_BATS = system.getenv_bool("SKIP_BATS", False,
                                "Do not run the bats test script")
 OMIT_TRACE = system.getenv_bool("OMIT_TRACE", False,
                                 "Omit actual/expected trace from bats file")
 OMIT_MISC = system.getenv_bool("OMIT_MISC", False,
-                               "Omit miscellaenous/obsolete bats stuff")
+                               "Omit miscellaenous/obsolete bats stuff such as diagnostic code in test")
 TEST_FILE = system.getenv_bool("TEST_FILE", False,
                                "Treat input as example-base test file, not a bash script")
+BASH_EVAL = system.getenv_bool("BASH_EVAL", False,
+                               "Evaluate tests via bash rather than bats--for quicker results")
 #
 # Shameless hacks
 ## TEST: GLOBAL_SETUP = system.getenv_text("GLOBAL_SETUP", " ",
@@ -220,7 +246,6 @@ def preprocess_batspp(contents):
     ## Bruno: can you fix this regex replacement?
     ## TODO: new_contents = my_re.sub(r"^(.*[^\\])\\(\n)$", r"\1\n", contents, flags=re.MULTILINE)
     lines = contents.split("\n")
-    ## OLD: for s in range(len(lines) - 1):
     s = 0
     while (s < len(lines)):
         line = lines[s]
@@ -261,7 +286,8 @@ class Batspp(Main):
     # Global States
     is_test_file = False
     file_content = ''
-    bats_content = '#!/usr/bin/env bats\n\n\n'
+    eval_prog = ("bats" if not BASH_EVAL else "bash")
+    bats_content = f'#!/usr/bin/env {eval_prog}\n\n\n'
 
 
     def setup(self):
@@ -271,7 +297,6 @@ class Batspp(Main):
         self.testfile     = self.get_parsed_argument(TESTFILE, "")
         self.output       = self.get_parsed_argument(OUTPUT, "")
         self.source       = self.get_parsed_argument(SOURCE, "")
-        ## OLD: self.verbose      = self.has_parsed_option(VERBOSE)
         self.verbose      = (self.has_parsed_option(VERBOSE) or system.getenv("VERBOSE"))
 
         debug.trace(T7, (f'batspp - testfile: {self.testfile}, '
@@ -287,17 +312,10 @@ class Batspp(Main):
         self.is_test_file = (TEST_FILE or self.testfile.endswith(BATSPP_EXTENSION))
         debug.trace(T7, f'batspp - {self.testfile} is a test file (not shell script): {self.is_test_file}')
 
-
         # Read file content
         self.file_content = system.read_file(self.testfile)
         if (self.is_test_file and PREPROCESS_BATSPP):
             self.file_content = preprocess_batspp(self.file_content)
-        ## OLD
-        ## if PARA_BLOCKS:
-        ##     # Put spcial sentinel (U+FF) after perl-style paragraphs to facilitate isolating tests
-        ##     # HACK: throws in extra newlines so that pattern matching works
-        ##     debug.assertion("\xFF" not in self.file_content)
-        ##     self.file_content = my_re.sub("\n\n", "\n\n\xFF", self.file_content)
 
         # Check if finish with newline
         if not self.file_content.endswith('\n\n'):
@@ -313,7 +331,6 @@ class Batspp(Main):
         if self.output:
             batsfile = self.output
             if batsfile.endswith('/'):
-                ## BAD: name = re.search(r"\/(\w+)\.", self.test_file).group(0)
                 ## TODO: fixme (e.g., filename '##.batspp')-- ex via glue_helpers.remove_extension
                 name = re.search(r"\/(\w+)\.", batsfile).group(0)
                 batsfile += f'{name}.bats'
@@ -333,7 +350,10 @@ class Batspp(Main):
         # Run
         if not SKIP_BATS:
             debug.trace(T7, f'batspp - running test {self.temp_file}')
-            bats_output = gh.run(f'bats {BATS_OPTIONS} {batsfile}')
+            debug.assertion(not (BASH_EVAL and BATS_OPTIONS.strip()))
+            eval_prog = ("bats" if not BASH_EVAL else "bash")
+            # note: uses empty stdin in case of buggy tests (to avoid hangup)
+            bats_output = gh.run(f'{eval_prog} {BATS_OPTIONS} {batsfile} < /dev/null')
             print(bats_output)
             debug.assertion(not my_re.search(r"^0 tests", bats_output, re.MULTILINE))
 
@@ -371,6 +391,11 @@ class Batspp(Main):
             
 
         # Source Files
+        # Notes: This is used to enable aliases globally. Unfortunately, it gets reloaded for each test
+        # and can take a long time to run under bats-core, which can be slow to begin with (e.g., each
+        # test gets run in a separate process).
+        # See https://bats-core.readthedocs.io/en/stable/faq.html#how-can-i-include-my-own-sh-files-for-testing.
+        # - The setup_file function mentioned there is not helpful as that doesn't allow for aliases.
         if (self.source or (not self.is_test_file)):
             self.bats_content += ('# Source files\n')
 
@@ -408,6 +433,9 @@ class Batspp(Main):
 
         command_tests  = CommandTests(verbose_debug=self.verbose)
         function_tests = FunctionTests(verbose_debug=self.verbose)
+        # TODO: add is_test_file to constructor; simplify class inter-dependencies
+        command_tests.is_test_file = self.is_test_file
+        function_tests.is_test_file = self.is_test_file
 
         # Do the test extraction, optionally removing regular content from bash scripts (i.e., extract comments and empty lines)
         file_content = self.file_content
@@ -417,7 +445,6 @@ class Batspp(Main):
             # Note: This simplifies pattern matching for text extraction, such as in helping
             # to avoid the expected output field from incorporating extraneous content.
             # TODO: allow for here-documents with comments and other special cases
-            ## BAD: file_content = my_re.sub(r"^[^#][^\n]*\n", "\n", file_content, flags=re.MULTILINE)
             file_content = ""
             for line in self.file_content.splitlines():
                 if not my_re.search("^[^#].*$", line):
@@ -425,10 +452,34 @@ class Batspp(Main):
             debug.trace(T8, f"content after non-comment stripping:\n\t{file_content!r}")
             system.write_file(gh.form_path(TMP, "file_content.list"), file_content)
         #
-        self.bats_content += command_tests.get_bats_tests(file_content)
+        all_test_ids = []
+        ## OLD: self.bats_content += command_tests.get_bats_tests(file_content)
+        content, ids = command_tests.get_bats_tests(file_content)
+        self.bats_content += content
+        all_test_ids += ids
+        
         if not self.is_test_file:
             # TODO: sort combined set of tests based on file offset to make order more intuitive
-            self.bats_content += function_tests.get_bats_tests(file_content)
+            ## OLD: self.bats_content += function_tests.get_bats_tests(file_content)
+            content, ids = function_tests.get_bats_tests(file_content)
+            self.bats_content += content
+            all_test_ids += ids
+
+        # Generate optional code to evaluate tests directly via Bash
+        if BASH_EVAL:
+            self.bats_content += 'n=0\nbad=0\n'
+            self.bats_content += (
+                'function run-test {\n'
+                '    local id="$1"\n'
+                '    let n++\n'
+                '    result="ok"\n'
+                '    eval "$id"; if [ $? -ne 0 ]; then let bad++; result="not ok"; fi\n'
+                '    echo "$result $n $id"\n'
+                '    }\n'
+                )
+            self.bats_content += f'tests=({" ".join(all_test_ids)}); echo "1..${{#tests[@]}}"\n'
+            self.bats_content += 'for id in ${tests[*]}; do run-test "$id"; done\n'
+            self.bats_content += f'echo "$n tests, $bad failure(s)"\n'
 
 #-------------------------------------------------------------------------------
         
@@ -445,9 +496,9 @@ class CustomTestsToBats:
         self._patterns      = None
         self._assert_equals = True
         self._setup_funct   = None
-        ## OLD: self._test_id       = f'id{random.randint(1, 999999)}' # differentiate tests
         self._test_id       = self.next_id()
         self._indent_used   = None
+        self.is_test_file   = False
 
         # Add optional header and trailer patterns
         self._patterns = patterns
@@ -473,7 +524,6 @@ class CustomTestsToBats:
         # NOTE: this must be overriden.
         # TODO: raise NotImplementedError()
         # NOTE: the returned values must be like:
-        ## OLD: result = ['title', 'setup', 'actual', 'expected']
         result = TestFieldTypes._fields
 
         debug.trace(T7, f'batspp (test {self._test_id}) - CustomTestsToBats._first_process({match}) => {result}')
@@ -548,14 +598,13 @@ class CustomTestsToBats:
         return result
 
     def _convert_to_bats(self, test):
-        """Convert tests to bats format"""
+        """Convert tests to bats format, returning test text and title"""
         entire, title, setup, actual, expected = test
         debug.trace_expr(T6, entire, title, setup, actual, expected, prefix="_convert_to_bats: ", delim="\n")
         (actual, expected) = self.merge_continuation(actual, expected)
 
         # Process title
         # Note: The test label starts with a number and includes optional user name (e.g, test-1-hello-world).
-        ## OLD: title = title if title else f'test {self._test_id}'
         title_prefix = f'test-{self._test_id}'
         if title:
             title = (title_prefix + "-" + title.replace(" ", "-"))
@@ -582,9 +631,6 @@ class CustomTestsToBats:
         # Process setup commands
         # Note: set COPY_DIR to copy files in current dir to temp. dir.
         ## TODO: temp_dir = Main.temp_base
-        ## OLD:
-        ## setup_text = (f'\ttestfolder=$(echo /tmp/{unspaced_title}-$$)\n'
-        ##               f'\tmkdir $testfolder && cd $testfolder\n')
         gh.full_mkdir(TEMP_DIR)
         setup_text = (
                       ## TEST: ("" if not GLOBAL_SETUP.strip() else ("\t" + GLOBAL_SETUP + ";\n")) +
@@ -592,18 +638,8 @@ class CustomTestsToBats:
                       f'\tmkdir --parents "$testfolder"\n' +
                       (f'\tcommand cp ./*.* "$testfolder"\n' if COPY_DIR else '') +
                       # note: warning added for sake of shellcheck
-                      f'\tcd "$testfolder" || echo Warning: Unable to "cd $testfolder"\n')
-        ## BAD: (splitlines doesn't account for line continuations):
-        ## for command in setup.splitlines():
-        ##    if command:
-        ##        OLD: command     = my_re.sub(r'(^\$\s+|\n+$)', '', command, flags=re.MULTILINE)
-        ##        debug.assertion("\n" not in command)
-        ##        command     = my_re.sub(r'^\$\s+', '', command, re.MULTILINE)
-        ##        setup_text += f'\t{command}\n'
+                      f'\tbuiltin cd "$testfolder" || echo Warning: Unable to "cd $testfolder"\n')
         setup_sans_prompt = my_re.sub(r'^\s*\$', '\t', setup, flags=my_re.MULTILINE)
-        ## OLD
-        ## HACK: fixup lingering $
-        ## setup_sans_prompt = setup_sans_prompt.replace("\n$", "\n")
         setup_text += setup_sans_prompt + "\n"
         debug.trace_expr(T6, setup_text)
 
@@ -611,17 +647,6 @@ class CustomTestsToBats:
         actual_label   = 'actual'
         expected_label = 'expected' if self._assert_equals else 'not_expected'
         setup_label   = 'setup'
-
-
-        ## OLD: (moved later)
-        ## Process debug
-        ##
-        ## verbose_print = '| hexview.perl' if  self._verbose else ''
-        ## debug_text = (f'\techo "==========" ${actual!r} "=========="\n'
-        ##               f'\techo ${actual!r} {verbose_print}\n'
-        ##               f'\techo "=========" ${expected!r} "========="\n'
-        ##               f'\techo ${expected!r} {verbose_print}\n'
-        ##               '\techo "============================"\n')
 
 
         # Process assertion
@@ -634,7 +659,6 @@ class CustomTestsToBats:
         setup_function    = None
         functions_text    = ''
         functions_text   += self._get_bash_function(actual_function, actual)
-        ## BAD: functions_text   += self._get_bash_function(expected_function, f'echo -e {repr(expected)}')
         # Note: to minimize issues with bash syntax, a bash here-document is used (e.g., <<END\n...\nEND\n).
         # TOOO?: Use <<- variant so that leading tabs are ingored.
         # TODO: use an external file (as the @here might fail if the example uses << as well)
@@ -680,17 +704,17 @@ class CustomTestsToBats:
             misc_code = (
                 f'\t# ???: {actual!r}=$({actual_function})\n' +         # TODO: fix (Bruno, what is for?)
                 f'\t# ???: {expected!r}=$({expected_function})\n')      # TODO: fix (ditto)
-        result = (f'@test "{title}" {{\n' +
+        test_header = (f'@test "{title}"' if not BASH_EVAL else f'function {title}')
+        result = (f'{test_header} {{\n' +
                   (f'{setup_text}' if not use_setup_function else setup_call) +
                   f'{debug_text}' +
                   misc_code + 
-                  ## BAD: f'\t[ ${actual!r} {assertion_text} ${expected!r} ]\n' +
                   f'\t[ "$({actual_function})" {assertion_text} "$({expected_function})" ]\n' +
                   f'}}\n\n' +
                   f'{functions_text}\n')
 
         debug.trace(T7, f'batspp (test {self._test_id}) - _convert_to_bats({test}) =>\n{result}')
-        return result
+        return result, unspaced_title
 
     def _get_bash_function(self, name, content, output=False):
         """Return bash function with NAME and code CONTENT, optionally for expected OUTPUT"""
@@ -738,7 +762,6 @@ class CustomTestsToBats:
 
             # Do next search
             # Note: If text consumed, search is over dummy newline.
-            ## OLD: pattern_spec = f"{p + 1} (of {len(self._patterns)})"
             pattern_spec = f"{p + 1}"
             debug.trace(T6, f"Checking pattern {pattern_spec} at offset {start}; {gh.elide(text[start:], 10)!r}")
             over_actual_text = (len(text[start:]) > 0)
@@ -784,11 +807,12 @@ class CustomTestsToBats:
         return text
     
     def get_bats_tests(self, text):
-        """Returns BATS tests"""
+        """Returns BATS tests as string plus list of test names"""
 
         debug.trace(T7, f'batspp - pattern used ({self._re_flags}): {self._patterns}')
 
         bats_tests = ''
+        test_ids = []
 
         ## TODO:
         ## NORMALIZE_WHITESPACE = system.getenv_bool("NORMALIZE_WHITESPACE", False,
@@ -820,7 +844,6 @@ class CustomTestsToBats:
         # Process each match
         for match in all_matches:
             debug.trace(T7, f'batspp (test {self._test_id}) - processing match: {match}')
-            ## OLD: debug.assertion(len(match) >= 4, 'Insufficient groups, you should review the used regex pattern.')
             debug.assertion(len(match) == 5, 'Incorrect number of groups (see TextTypes), you should review the used regex pattern.')
 
             test = self._first_process(match)
@@ -835,12 +858,14 @@ class CustomTestsToBats:
             
             test = self._common_process(test)
             test = self._last_process(test)
-            bats_tests += self._convert_to_bats(test)
+            ## OLD: bats_tests += self._convert_to_bats(test)
+            test_spec, title = self._convert_to_bats(test)
+            bats_tests += test_spec
+            test_ids.append(title)
 
-            ## OLD: self._test_id = f'id{random.randint(1, 999999)}'
             self._test_id = self.next_id()
 
-        return bats_tests
+        return bats_tests, test_ids
 
     def merge_continuation(self, actual, expected):
         """Merge EXPECTED content to ACTUAL if likely contintuation lines"""
@@ -869,7 +894,7 @@ class CommandTests(CustomTestsToBats):
         flags = re.DOTALL | re.MULTILINE | re.IGNORECASE
 
         # Notes:
-        # - Non-capturing groups '(?:regex)' used for ignore certain groupings.
+        # - Non-capturing groups '(?:regex)' used to ignore certain groupings.
         # - INDENT_PATTERN='^[^\w\$\(\n\{\}]{0}\s*' for batspp file (e.g., from Jupyter).
         # - The optional setup is for commands issued but output not tested.
         # - Example 1:
@@ -891,13 +916,14 @@ class CommandTests(CustomTestsToBats):
                 r'(.+?)\n',                                         # expected output; non-greedy
                 fr'{INDENT_PATTERN}$']                              # end test
         else:
+            comment = ("" if Batspp.is_test_file else "#")
             patterns = [
                 r'(?#title    )(?:^ *\# *Test +([^\n]*)\n)?',      # optional test title
                 # optional setup code w/ explicit start ('# setup') and end ('# actual') indicators
                 r'(?#setup    )((?:^ *\# *Setup\n)'        \
                               r'(?:^ *\#? *\$ +[^\n]+\n)*' \
                               r'(?:^ *\# *Actual\n))?',
-                r'(?#actual   )(^ *\#? *\$ +[^\n]+\n)',            # command line [actual]
+                fr'(?#actual   )(^ *{comment}? *\$ +[^\n]+\n)',    # command line [actual]
                 r'(?#expected )(.*)',                              # expected output
                 r'(?#end      )^ *\#?\s*\n']                       # end test (blank line)
 
@@ -910,7 +936,6 @@ class CommandTests(CustomTestsToBats):
         #         title     setup     actual    expected
 
         assert (len(match) == 5)
-        ## OLD: result = [match[1], match[2], match[4], match[5]]
         entire, title, setup, actual, expected = match
         actual, expected = self.merge_continuation(actual, expected)
 
@@ -928,11 +953,9 @@ class CommandTests(CustomTestsToBats):
         
         # Remove $
         # TODO?: flags=re.MULTILINE
-        ## OLD: actual = my_re.sub(r'^\$\s*', '', actual)
         actual = my_re.sub(r'^\$ ', '', actual)
         setup = my_re.sub(r'^\$ ', '', setup, flags=re.MULTILINE)
 
-        ## OLD: result = title, setup, actual, expected
         result = TestFieldTypes(*[entire, title, setup, actual, expected])
         debug.trace(T7, f'batspp (test {self._test_id}) - CommandTests._last_process({test}) => {result}')
         return result
@@ -991,26 +1014,17 @@ class FunctionTests(CustomTestsToBats):
     def _first_process(self, match):
         """First process after match, format matched results into [entire, title, setup, actual, expected]"""
 
-        ## OLD: _, title, actual, assertion, expected, _ = match
         entire, title, setup, actual, expected = match
 
         # Check assertion
         # HACK: assertion put into instance
         # TODO: use OO apprach (e.g., FunctionResult w/ assertion field versus CommandResult with setup)
-        ## OLD:
-        ## if assertion == self.assert_eq:
-        ##     self._assert_equals = True
-        ## elif assertion == self.assert_ne:
-        ##     self._assert_equals = False
-        ## else:
-        ##     self._assert_equals = None
         if my_re.search(fr'(.*)({self.assert_eq}|{self.assert_ne}).*$', actual):
             actual = my_re.group(1)
             self._assert_equals = (my_re.group(2) == self.assert_eq)
 
         # Format values
         # Note: uses empty setup
-        ## OLD: result = [entire, title, '', actual, expected]
         result = TestFieldTypes(*[entire, title, setup, actual, expected])
 
         debug.trace(T7, f'batspp (test {self._test_id}) - _first_process({match}) => {result}')
@@ -1026,7 +1040,6 @@ class FunctionTests(CustomTestsToBats):
         ## TODO: example
         ## BAD: actual = '\\' + actual
 
-        ## OLD: result = [entire, title, setup, actual, expected]
         result = TestFieldTypes(*[entire, title, setup, actual, expected])
         debug.trace(T7, f'batspp (test {self._test_id}) - _last_process({test}) => {result}')
         return result

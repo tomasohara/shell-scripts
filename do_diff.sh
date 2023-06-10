@@ -184,7 +184,11 @@ foreach file ($pattern)
 	echo "Warning: Ignoring file with $ in name"
 	continue
    endif
+   # Derive base name for file, including relative directory (e.g., in case pattern specifies subdirectory)
+   ## OLD: set base = `basename "$file"`
    set base = `basename "$file"`
+   set dir = `dirname "$file"`
+   if ("$dir" != ".")  set base = "$dir/$base"
    set other_file="$master"
 
    if (-d "$file") then

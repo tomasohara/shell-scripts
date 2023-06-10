@@ -53,6 +53,13 @@ if [ "$1" = "" ]; then
     exit
 fi
 
+# Make sure the utility exists
+utility=nvidia-smi
+if [ "" = "$(which "$utility")" ]; then
+    echo "Error: utility $utility not found"
+    exit
+fi
+
 # Parse command-line options
 # TODO: set getopt-type utility
 #
@@ -83,6 +90,6 @@ if [ "$2" != "" ]; then s="$2"; fi
 if [ "$n" = "n/a" ]; then n=1000000; fi
 
 for (( i=0; i<n; i++ )); do
-    nvidia-smi
+    "$utility"
     sleep "$s"
 done

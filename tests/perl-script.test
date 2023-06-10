@@ -53,3 +53,19 @@ PQR	-	-	R2C3	r2c3
 
 $ echo "\t" | cut.perl -f=2 -missing=FU -
 FU
+
+#................................................................................
+# extract_matches.perl
+# TODO: add mucho mas!
+
+$ extract_matches.perl -i -utf8 'tom\S+s' ~/organizer/tomas.txt | head -1
+Tomás
+
+#...............................................................................
+# perlcalc.perl
+
+# note: should not be itegral
+$ calc "round(100e12, 0)"
+100000000000000
+$ calc-int '100e12'
+100000000000000
