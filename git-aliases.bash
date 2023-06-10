@@ -11,11 +11,11 @@
 # Usage example(s):
 #   source git-aliases.bash
 #
-#   git-template                     ## show detailed usage template
+#   git-template                     # show detailed usage template
 #
-#   git-update-plus                  ## git-pull with stashed changes
+#   git-update-plus                  # git-pull with stashed changes
 #
-#   git-commit-and-push file...      ## commits file and pushes to remote
+#   git-commit-and-push file...      # commits file and pushes to remote
 #
 #...............................................................................
 # Notes:
@@ -118,13 +118,10 @@ function pause-for-enter () {
 }
 
 # downcase-stdin-alias: return stdin made lowercase
-# OLD: only will be defined here if tomohara-aliases not sourced
-## if [ "" = "$(typeset -f downcase-stdin)" ]; then
 function downcase-stdin-alias () 
 { 
     perl -pe "use open ':std', ':encoding(UTF-8)'; s/.*/\L$&/;"
 }
-## OLD: fi
 
 # quiet-unalias-alias(name): undefines NAME alias w/o error message
 # NOTE: used during transition from an alias proper to a function
@@ -140,12 +137,15 @@ function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 check_errors.perl -context=5
 #................................................................................
 
 # get-temp-log-name([label=temp]: Return unique file name of the form _git-LABEL-MMDDYY-HHMM-NNN.log
+#
+LOG_DIR="${GIT_LOG_DIR:-./log-files}"
+#
 function get-temp-log-name {
     local label=${1:-temp}
     local now_mmddyyhhmm
     now_mmddyyhhmm=$(date '+%d%b%y-%H%M' | downcase-stdin-alias);
     # TODO: use integral suffix (not hex)
-    mktemp "_git-$label-${now_mmddyyhhmm}-XXX.log"
+    mktemp "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log"
 }
 
 # git-alias-review-log(file): review log FILE checking for common errors
@@ -223,13 +223,6 @@ function git-update-plus {
     # Optionally restore timestamps for changed files
     if [ "$changed_files" != "" ]; then
         if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
-	    ## OLD:
-            ## # Restore working directory
-            ## if [ "$restore_dir" != "" ]; then
-            ##     echo "Restoring working directory: $restore_dir"
-            ##     cd "$restore_dir"
-            ## fi
-
             echo "issuing: unzip over _stash.zip (to restore timestamps)"
             # note: unzip options: -o overwrite; -v verbose:
             echo "unzip -v -o _stash.zip" >> "$log"
@@ -306,18 +299,6 @@ function git-commit-and-push {
         echo "issuing: git add \"$*\""
         git-add-plus "$@" >> "$log"
     fi
-    ##
-    ## OLD:
-    ## # TODO: rework so that message passed as argument (to avoid stale messages from environment)
-    ## local message="$GIT_MESSAGE";
-    ## if [ "$message" = "..." ]; then
-    ##     echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
-    ##     return 1
-    ## fi
-    ## if [ "$message" = "" ]; then
-    ##     echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE error)"
-    ##     return 1
-    ## fi
 
     # Push the changes after showing synopsis and getting user confirmation
     echo ""
@@ -350,9 +331,6 @@ function git-update-commit-push {
     # DEBUG: set -o xtrace
     git-update-plus
     if [ $? -ne 0 ]; then
-        ## TODO:
-        ## echo "Warning: aborting git-update-commit-push due to possible update error"
-        ## return 1
         echo "Warning: consider canceling given possible update error (status=$?)"
     fi
     git-commit-and-push "$@"
@@ -363,34 +341,11 @@ function git-update-commit-push {
 alias git-update-commit-push-all='git-update-commit-push *'
 
 
-## TODO: see if something like this might still be useful
-## NOTE: Obsolete/work-in-progress function (n.b., intended for usage on client computers)
-##
-## function git-pull-and-update() {
-##     echo "
-##     return
-##     # Don't proceed if repo not read-only (TODO: fix)
-##     if [ "$(grep ^repo ~/.gitrc)" = "" ]; then
-##         echo "*** Warning: fix ~/.gitrc for read-only access ***";
-##     else
-##         local git="python -u /usr/bin/git";
-##         local log
-##      log=$(get-temp-log-name "update")
-##         ## OLD: ($git pull --noninteractive --verbose;  $git update --noninteractive --verbose) >> "$log" 2>&1; less "$log"
-##      echo "issuing: $git --noninteractive --verbose"
-##         $git pull --noninteractive --verbose >> "$log" 2>&1
-##      echo "issuing: $git update --noninteractive --verbose"
-##         $git update --noninteractive --verbose >> "$log" 2>&1; 
-##         less "$log"
-##     fi;
-## }
-
 # run git COMMAND with output saved to command-specific temp file
 #
 function invoke-git-command {
     local command="$1"
     shift
-    ## OLD: local log="_git-$command-$(TODAY).$$.log";   ## OLD: log="_git-$command-$(TODAY).$$.log";
     local log
     log=$(get-temp-log-name "$command")
     echo "issuing: git $command $*"
@@ -403,24 +358,12 @@ function invoke-git-command {
 }
 # TODO: git-command => git-command-alias
 alias git-command='invoke-git-command'
-
-## OLD
-## function git-push() {
-##     ## NOTE: This read-write is broken (similar to git-pull-and-update)
-##     if [ "$(grep ^repo ~/.gitrc)" != "" ]; then
-##         echo "*** Warning: fix ~/.gitrc for read-write access ***";
-##     else
-##         invoke-git-command push --verbose "$@"
-##     fi;
-## }
 alias git-push-plus='invoke-git-command push'
 
 # Misc git commands (redirected to log file)
 # NOTE: commands with much output like git-log invoke less
 # TODO: add invoke-git-command-paged wrapper (a la git ... | less)
 alias git-status='invoke-git-command status'
-## OLD: alias git-log-plus='invoke-git-command log --name-status'
-quiet-unalias-alias git-log-plus        ## TEMP
 function git-log-plus { invoke-git-command log --name-status "$@" | less --quit-if-one-screen; }
 # note: git-log-diff-plus shows diff-style log
 alias git-log-diff-plus='invoke-git-command log --patch'
@@ -433,13 +376,7 @@ function git-add-plus {
     log=$(get-temp-log-name "add");
     local options=""
     if [ "$GIT_FORCE" = "1" ]; then options="--force"; fi
-    ## OLD: git add "$@" >| "$log" 2>&1;
     git add $options "$@" >| "$log" 2>&1;
-    ## TEMP:
-    ## check-errors "$log" | cat;
-    ## if [ "$(extract-matches '^fatal:' "$log")" != "" ]; then
-    ##     echo "*** Error during add"
-    ## fi
 
     # Sanity check
     git-alias-review-log "$log"
@@ -557,7 +494,6 @@ function git-difftool-plus {
 }
 #
 # maldito Bash:
-## OLD: quiet-unalias git-vdiff
 # TODO: see if way to have functions trump aliases
 #
 function git-vdiff-alias {
@@ -631,7 +567,6 @@ function alt-invoke-next-single-checkin {
             local divider
             divider=$(perl -e 'print("." x 80);')
             echo "$divider"
-            ## OLD: git-status | head
             git-status
             echo "..."
             return;
@@ -642,17 +577,13 @@ function alt-invoke-next-single-checkin {
     # note: shows visual diff (TODO: and pauses so user can start message)
     # TODO: position cursor at start of ... (instead of pause)
     local is_text
-    ## TODO: fix problem identifing scripts with UTF-8 as text (e.g., common.perl reported as data by file command)
+    ## TODO: fix problem identifying scripts with UTF-8 as text (e.g., common.perl reported as data by file command)
     is_text=$(file "$mod_file" | grep -i ':.*text')
     ## HACK: add special case exceptions
-    ## TODO: figure out how to get file to check the maldito extensions!
-    ## TAKE1: if [[ ("$is_text" = "") && ($mod_file =~ .*.(css|csv|html|java|js|perl|py|[a-z]*sh|text|txt)$) ]]; then
-    ## TAKE2: maldito Bash
     if [ "$is_text" = "" ]; then
         case "$mod_file" in *.css | *.csv | *.html | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
     fi;
     if [ "$is_text" != "" ]; then
-        ## OLD: git-vdiff "$mod_file"
         # note: pauses a little so that user can update cursor before focus shifts
         # TODO: see how to keep focus on terminal window for git update
         local delay=5
@@ -664,7 +595,6 @@ function alt-invoke-next-single-checkin {
         git diff --numstat "$mod_file" | head
         true
     fi
-    ## BAD: sleep 3
     local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
     local command
     echo "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
@@ -699,7 +629,6 @@ alias-fn git-next-checkin 'invoke-alt-checkin'
 ## TEST: hide tracing output alias git-next-checkin='invoke-alt-checkin 2> /dev/null'
 # TODO:
 # NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
-## OLD: alias git-checkout-branch='git-command checkout'
 function git-checkout-branch {
     local branch="$1"
     # TODO2: define helper function for usage
@@ -713,7 +642,6 @@ function git-checkout-branch {
     local branch_ref
     branch_ref=$(git branch --all | grep -c "$branch")
     if [ "$branch_ref" -gt 0 ]; then
-        ## OLD: git-command checkout "$branch";
         # note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
         git-command checkout "$branch" --;
     else
