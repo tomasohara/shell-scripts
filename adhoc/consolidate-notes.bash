@@ -2,7 +2,7 @@
 #
 # consolidate-notes.bash: adhoc script for merging notes in chronological order
 #
-# Notee:
+# Notes:
 # - TOM-IDIOSYNCRATIC as per tomohara-aliases.bash
 # - Addding to user crontab (assuming run in home directory):
 #    crontab -e
@@ -10,6 +10,9 @@
 #       # merge notes once a day at 2:30am
 #       30 2 * * * ./bin/adhoc/consolidate-notes.bash
 #       # format: m h dom mon dow command
+# - maldito shellcheck:
+#       SC2046: Quote this to prevent word splitting
+#       SC2086 (info): Double quote to prevent globbing and word splitting.
 #
 
 ## DEBUG:
@@ -114,14 +117,17 @@ set-xterm-title "merge-notes [$PWD]"
 # TODO2: use two-part filtering (e.g., first find and then grep)
 # TODO1: filter inaccesible files, such as emacs lock files
 #     .#_toms-mac-adhoc-notes-jan23.txt -> tohara@tohara-mac.lan.50018
+find_command_options="${FIND_COMMAND_OPTIONS:-}"
+find_global_options="${FIND_GLOBAL_OPTIONS:-}"
+# shellcheck disable=SC2086
 if [ "${ALL_TEXT:-0}" = "1" ]; then
     # TODO: rework so that pattern-type options specified individially (e.g., LOG_FILES, ADHOC_NOTES, etc)
-    find "${SRC_DIR:-.}" \(  -iname '*.txt' -o -iname '*.text' \) 2> "$new_base.files.log" | egrep -iv '/(backup|old|temp)/' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
+    find $find_command_options "${SRC_DIR:-.}" $find_global_options \(  -iname '*.txt' -o -iname '*.text' \) 2> "$new_base.files.log" | egrep -iv '/(backup|old|temp)/' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
 else
     # Note: Filters log files starting with _ unless adhoc in the name (e.g., /home/tohara/config/_consolidate-experiment-notes-05apr23.log).
     # This uses the perl-style zero-width negative lookahead regex.
     ## OLD: find "${SRC_DIR:-.}" \( -iname '*adhoc*[0-9][0-9]*.txt*' -o -iname '*adhoc*[0-9][0-9]*.log*' -o -iname '*-notes*.txt' -o -iname '*-notes*.list' -o -iname '*-notes*.log' \) 2> "$new_base.files.log" | egrep -iv '/(backup|old|temp)/' | egrep -iv '/_[^\/]+(?!adhoc)[^\/]+.log' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
-    find "${SRC_DIR:-.}" \( -iname '*adhoc*[0-9][0-9]*.txt' -o -iname '*adhoc*[0-9][0-9]*.list' -o -iname '*adhoc*[0-9][0-9]*.log' -o -iname '*-notes*.txt' -o -iname '*-notes*.list' -o -iname '*-notes*.log' \) 2> "$new_base.files.log" | egrep -iv '/(backup|old|temp)/' | egrep -iv '/_[^\/]+(?!adhoc)[^\/]+.log' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
+    find $find_command_options "${SRC_DIR:-.}" $find_global_options \( -iname '*adhoc*[0-9][0-9]*.txt' -o -iname '*adhoc*[0-9][0-9]*.list' -o -iname '*adhoc*[0-9][0-9]*.log' -o -iname '*-notes*.txt' -o -iname '*-notes*.list' -o -iname '*-notes*.log' \) 2> "$new_base.files.log" | egrep -iv '/(backup|old|temp)/' | egrep -iv '/_[^\/]+(?!adhoc)[^\/]+.log' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
 fi
 ## TODO: if [ -z "$new_base.files.list" ]; then
 if [ "$(wc -l < "$new_base.files.list")" = "0" ]; then
@@ -132,7 +138,6 @@ check-errors-excerpt "$new_base.files.log"
 
 # Perform the note entry merging
 # TODO: check stdin support in main.py
-# maldito shellcheck: SC2086 (info): Double quote to prevent globbing and word splitting.
 # shellcheck disable=SC2086
 DEBUG_LEVEL=4 xargs $PYTHON -m mezcla.merge_notes --ignore-dividers --output-dividers --show-file-info < "$new_base.files.list" > "$new_base.list" 2> "$new_base.list.log";
 check-errors-excerpt "$new_base.list.log";
@@ -150,6 +155,5 @@ rename-with-file-date "$base.files.list" "$base.files.log" "$base.list" "$base.l
 # Rename new file to use target name
 # TODO1: fix following
 #    "_master-note-info.list.06apr23.log" already exists! not mv'ing "_new-_master-note-info.list.06apr23.log" "_master-note-info.list.06apr23.log"
-# maldito shellcheck: SC2046: Quote this to prevent word splitting
 # shellcheck disable=SC2046
 rename-files "$new_base" "$base" $(ls "$new_base"* | egrep -v "\d{2}\w+\d{2}")
