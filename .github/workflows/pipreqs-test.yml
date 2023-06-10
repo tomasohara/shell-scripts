@@ -1,0 +1,47 @@
+# This workflow will be a test for pipreqs
+#
+# More information on:
+# - https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+
+name: tests
+
+# Trigger the workflow on push and pull request events
+on: [push, pull_request]
+
+# Define the build job for the workflow
+jobs:
+  build:
+    
+    # Set the operating system and Python version for the test environment
+    runs-on: ${{ matrix.os }}
+    
+    # Define the test matrix with different os and Python versions
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.8"]
+        
+    # Define the steps to execute in the build job
+    steps:
+    # Check out the repository code in the test environment
+    - uses: actions/checkout@v3
+    
+    # Set up the specified Python version in the test environment
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pipreqs
+        echo "Current directory:"
+        pwd
+        echo "Directory listing:"
+        ls -la
+        echo "Generating requirements.txt"
+        pipreqs ../
+        echo "Generated requirements.txt contents:"
+        cat ../requirements.txt
+

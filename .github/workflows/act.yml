@@ -1,0 +1,41 @@
+# Workflow for running locally (e.g., via https://github.com/nektos/act)
+
+name: Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Run Tests
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: ["3.9"]
+
+    container:
+      image: local/test-act
+      options: --user=root
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Configure Environment
+        run: |
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> $GITHUB_ENV
+
+      - name: Run Python Tests
+        run: |
+          PYTHONPATH="$(pwd):$PYTHONPATH" python3 tests/master_test.py
+
+      - name: Run Bats-PP Alias Tests
+        run: |
+          PYTHONPATH="$(pwd):$PYTHONPATH" bash tests/summary_stats.bash
