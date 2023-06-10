@@ -1030,13 +1030,14 @@ class Bash2Python:
         for bracket in [r"\[", r"\]", r"\[\[", r"\]\]"]:
             debug.assertion(not embedded_in_quoted_string(bracket, line),      \
                             f"test bracket '{bracket}' in quoted expression")
-        line = my_re.sub(r"(^\s* \[) | (\] \s*(:|$))", "", line, flags=my_re.VERBOSE)
         line = my_re.sub(r"(^\s* \[\[) | ( \]\] \s*(:|$))", "", line, flags=my_re.VERBOSE)
         trace_line(line, "ln8d")
+        line = my_re.sub(r"(^\s* \[) | (\] \s*(:|$))", "", line, flags=my_re.VERBOSE)
+        trace_line(line, "ln8e")
 
         # Remove extraneous embedded quotes
         ## BAD: line = remove_extra_quotes(line, "ln8e")
-        line = fix_embedded_quotes(line, "ln8e", reset_on_spaces=True)
+        line = fix_embedded_quotes(line, "ln8f", reset_on_spaces=True)
         
         debug.trace(5, f"operators({in_line!r}) => (True, {line!r}, '')\n\tself={self}")
         ## BAD: return (was - converted, python, remainder)
@@ -1326,6 +1327,9 @@ class Bash2Python:
                             remainder = (remainder2 + sep + remainder)
                             debug.trace(5, f"Isolated compound middle statement: loop_line={loop_line!r}; remainder={remainder!r} ")
                             debug.trace_expr(5, loop_line2, remainder2, delim="\n")
+                            if my_re.search(r"^(.*)(;\s*)$", loop_line):
+                                (loop_line, post) = my_re.groups()
+                                debug.trace(5, f"Stripped trailing semicolon from loop_line: {post!r}")
                         # Hack: handle else with command on same line
                         if ((actual_loop[0] == "if") and (loop_line.strip == "else")):
                             body +=  indent + "    " + loop_line + ":" + "\n"
