@@ -1852,8 +1852,13 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 # TODO: make this less of a sledgehammer
 ## BAD: alias rename-utf8-encoded='rename-files -global -regex "[0x80-0xFF]\{3,\}" "_"'
 ## OLD: alias rename-utf8-encoded='rename-files -global -regex "[\x80-\xFF]\{3,\}" "_"'
-alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]+" "_"'
-alias rename-emoji=rename-utf8-encoded
+## OLD: alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]+" "_"'
+alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]{1,4}" "_"'
+## OLD: alias rename-emoji=rename-utf8-encoded
+# via https://en.wikipedia.org/wiki/UTF-8:
+#    U+10000	U+10FFFF	11110xxx	10xxxxxx	10xxxxxx	10xxxxxx;   note: F[8-F]{3}
+# rename-utf8-emoji: replace U+10000 characters in filenames with _'s
+alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"'
 alias rename-bad-dashes="rename-files -quick -global -regex ' \-' '_'; rename-files -quick -global -regex '\-' '_' -*"; 
 
 #-------------------------------------------------------------------------------
