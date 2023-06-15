@@ -1,0 +1,202 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+# Setting a temp directory for tests
+$ TMP=/tmp/test-grep
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+## You will need to run jupyter from that directory.
+$ alias | wc -l
+0
+
+# Aliases for censoring username and/or numbers
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 7071)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-7371
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-grep/test-7371
+
+# Count aliases proper
+$ alias | wc -l
+3
+
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+0
+
+$ source $BIN_DIR/tomohara-aliases.bash
+
+# TEST-1
+# check for a modern version of grep. For example,
+#
+# $ grep -V
+# grep (GNU grep) 2.4.2
+#
+# Copyright 1988, 1992-1999, 2000 Free Software Foundation, Inc.
+# ...
+$ grep -V | testnum
+grep (GNU grep) N.N
+Copyright (C) NNNN Free Software Foundation, Inc.
+License GPLvN+: GNU GPL version N or later <https://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by Mike Haertel and others; see
+<https://git.sv.gnu.org/cgit/grep.git/tree/AUTHORS>.
+
+## SETTING UP FOR GREP TEST
+$ rm -rf ./* > /dev/null
+# THE WORD TO BE TESTED - sensitive
+$ mkdir testdir1 testdir2
+$ echo "As grep commands are case sensitive, one of the most useful operators for grep searches as they are sensitive is -i. Instead of printing lowercase results only, the terminal displays both uppercase and lowercase results. The output includes lines with mixed case entries.
+$ " > testgrep1
+$ echo "sensitive sensitive sensitive Sensitive SENSITIVE lorem ipsum" > testgrep2
+$ echo "no mentions here" > testgrep3
+$ echo "Passwords are generally case sensitive" > testgrep4
+$ printf "Non ASCII: Ñ\nNext\nNon ASCII: §" > testgrep5
+
+## TEST-2: TESTING GREP ALIASES
+# 0) grep 
+$ grep sensitive testgrep1 testgrep2 testgrep3 testgrep4
+$ linebr
+# A) gu (grep-unique i-)
+$ gu sensitive testgrep1 testgrep2 testgrep3 testgrep4
+$ linebr
+# B) gu- (grep-unique)
+$ gu- sensitive testgrep1 testgrep2 testgrep3 testgrep4
+$ linebr
+# C) grepl- (grep-to-less)
+$ grepl- "sensitive" testgrep1 testgrep2 testgrep3 testgrep4 | wc -l
+# NOTE: wc -l is pipelined as command goes to a loop
+testgrep1:As grep commands are case sensitive, one of the most useful operators for grep searches as they are sensitive is -i. Instead of printing lowercase results only, the terminal displays both uppercase and lowercase results. The output includes lines with mixed case entries.
+testgrep2:sensitive sensitive sensitive Sensitive SENSITIVE lorem ipsum
+testgrep4:Passwords are generally case sensitive
+--------------------------------------------------------------------------------
+testgrep4:1
+testgrep2:1
+testgrep1:1
+--------------------------------------------------------------------------------
+testgrep4:1
+testgrep2:1
+testgrep1:1
+--------------------------------------------------------------------------------
+3
+
+# # Halts test
+# show-line-context testgrep3
+
+$ cat testgrep2 | gr-less lorem
+[?1h=
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[H[2J[H[H[2J[H1:sensitive sensitive sensitive Sensitive SENSITIVE lorem ipsum
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[K[?1l>
+
+$ cat testgrep5 | grep-nonascii
+Non ASCII: Ñ
+Non ASCII: §
+
+# Need help for: fs-, findgrep, fgr, fgr-py
+
+$ prepare-find-files-here | testuser | testnum | awk '!($6="")'
+-rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-alR.list
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list.log
+-rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-R.list
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-R.list.log
+
+$ mkdir backup/
+$ ls
+backup	     ls-alR.list.log  ls-R.list.log  testdir2	testgrep2  testgrep4
+ls-alR.list  ls-R.list	      testdir1	     testgrep1	testgrep3  testgrep5
+
+$ find-files "ls*" | testuser | testnum | awk '!($6="")'
+.:     
+total NN    
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list.log
+-rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-R.list
+-rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-R.list.log
+./testdirN:     
+total N    
+./testdirN:     
+total N    
+
+# # Need Help (Non-ending process)
+# $ find-files- "testgrep4" | wc -l
+
+# # # ISSUE
+# # $ make-file-listing
+# | cp: cannot stat 'ls-aR.list': No such file or directory
+# | chmod: cannot access './backup/ls-aR.list': No such file or directory

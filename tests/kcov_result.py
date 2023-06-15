@@ -58,13 +58,14 @@ EXPORT_REPORT = "export"
 # Function Constants
 JS_PATTERN = f"bats.*/bats.*.src.*.js"
 JSON_REGEX = r'\{[^}]*\}'
-REPORT_EXPORT_PATH = f"./coverage-reports/"
-KCOV_FOLDER = "kcov-output"
+COVERAGE_EXPORT_PATH = f"./coverage-reports/"
+KCOV_FOLDER = f"./kcov-output/"
 LIST_MODE_INS = "instrumented_line"
 LIST_MODE_RATIO = "ratio"
 
 ## Main function: kcov_test_coverage(SUMMARY_OPT, LIST_OPT, REPORT_MODE, INCLUDE_OPT, EXCLUDE_OPT)
 kcov_folder_exists = gh.file_exists(KCOV_FOLDER)
+coverage_folder_exists = gh.file_exists(COVERAGE_EXPORT_PATH)
 
 class KcovTestCoverage:
     """Consists of functions for the necessary result operations and summary"""
@@ -165,9 +166,12 @@ Coverage Ratio: {round(report_RatioLine, 4)}
             # pretty_facts_JSON = json.dumps(facts_JSON_obj)
 
             # [OLD]: JSON output is replaced by simple output
-            # gh.write_file(filename=f"{REPORT_EXPORT_PATH}/{report_name}_REPORT.txt", text=str(facts_JSON))
+            # gh.write_file(filename=f"{COVERAGE_EXPORT_PATH}/{report_name}_REPORT.txt", text=str(facts_JSON))
+            if coverage_folder_exists == False:
+                gh.create_directory(COVERAGE_EXPORT_PATH)
+
             export_summary = f"{report_CovLine} out of {report_InsLine} tests passed overall ({report_RatioLine*100}%)"
-            gh.write_file(filename=f"{REPORT_EXPORT_PATH}/{report_name}_REPORT.txt", text=export_summary)
+            gh.write_file(f"{COVERAGE_EXPORT_PATH}/{report_name}_REPORT.txt", text=export_summary)
 
     # 2. report_process() uses extract_report(report); act as a calculating function
     def report_process(self):

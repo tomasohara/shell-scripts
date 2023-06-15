@@ -1,0 +1,680 @@
+# Warning: this creates a temporary directory for aliases
+
+# Set directory for alias work
+$ export TOM_BIN=/tmp/tomasohara-shell-scripts
+$ export TOM_ALIAS_FILE="$TOM_BIN/tomohara-aliases.bash"
+$ mkdir -p "$TOM_BIN"
+
+# Get latest version of aliases
+$ curl https://raw.githubusercontent.com/tomasohara/shell-scripts/main/tomohara-aliases.bash > "$TOM_ALIAS_FILE"
+
+$ file "$TOM_ALIAS_FILE"
+/tmp/tomasohara-shell-scripts/tomohara-aliases.bash: Bourne-Again shell script, UTF-8 Unicode text executable, with very long lines
+
+# Note: batch mode needed for Jupyter usage
+$ export BATCH_MODE=1
+$ set -o xtrace
+$ source "$TOM_ALIAS_FILE"
+$ echo done
++ source /tmp/tomasohara-shell-scripts/tomohara-aliases.bash
+++ alias conditional-setenv=conditional-export
+++ alias cond-export=conditional-export
+++ alias cond-setenv=conditional-export
+++ conditional-export TOM_DIR /home/tomohara
+++ local var value
+++ local args
+++ '[' TOM_DIR '!=' '' ']'
+++ var=TOM_DIR
+++ value=/home/tomohara
++++ printenv TOM_DIR
+++ '[' /home/tomohara == '' ']'
+++ args='TOM_DIR /home/tomohara'
+++ shift 2
+++ '[' 'TOM_DIR /home/tomohara' = '' ']'
+++ '[' '' '!=' '' ']'
+++ '[' '!' -d /home/tomohara ']'
+++ conditional-export TOM_BIN /home/tomohara/bin
+++ local var value
+++ local args
+++ '[' TOM_BIN '!=' '' ']'
+++ var=TOM_BIN
+++ value=/home/tomohara/bin
++++ printenv TOM_BIN
+++ '[' /tmp/tomasohara-shell-scripts == '' ']'
+++ args='TOM_BIN /home/tomohara/bin'
+++ shift 2
+++ '[' 'TOM_BIN /home/tomohara/bin' = '' ']'
+++ '[' '' '!=' '' ']'
+++ '[' '!' -e /tmp/tomasohara-shell-scripts/tomohara-aliases.bash ']'
+++ alias 'tomohara-setup=source $TOM_BIN/tomohara-aliases.bash'
+++ '[' '!' -e /home/tomohara/temp ']'
+++ conditional-source /tmp/tomasohara-shell-scripts/startup-tracing.bash
+++ '[' -e /tmp/tomasohara-shell-scripts/startup-tracing.bash ']'
+++ echo 'Warning: bash script file not found (so not sourced):'
+Warning: bash script file not found (so not sourced):
+++ echo '    /tmp/tomasohara-shell-scripts/startup-tracing.bash'
+    /tmp/tomasohara-shell-scripts/startup-tracing.bash
+++ alias trace=startup-trace
+++ alias 'enable-startup-tracing=export STARTUP_TRACING=1'
+++ alias 'disable-startup-tracing=export STARTUP_TRACING=0'
+++ alias 'enable-console-tracing=export CONSOLE_TRACING=1'
+++ alias 'disable-console-tracing=export CONSOLE_TRACING=0'
+++ alias hoy=todays-date
++++ todays-date
++++ date +%d%b%y
++++ downcase-stdin
++++ perl -pe 'use open '\'':std'\'', '\'':encoding(UTF-8)'\''; s/.*/\L$&/;'
+++ hoy=02may22
+++ alias TODAY=todays-date
+++ alias 'date-central=TZ="America/Chicago" date'
+++ alias 'em-adhoc-notes=emacs-tpo _adhoc-notes.$(TODAY).txt'
+++ alias T=TODAY
++++ todays-date
++++ date +%d%b%y
++++ downcase-stdin
++++ perl -pe 'use open '\'':std'\'', '\'':encoding(UTF-8)'\''; s/.*/\L$&/;'
+++ T=02may22
+++ update-today-vars
++++ todays-date
++++ date +%d%b%y
++++ downcase-stdin
++++ perl -pe 'use open '\'':std'\'', '\'':encoding(UTF-8)'\''; s/.*/\L$&/;'
+++ TODAY=02may22
+++ T=02may22
+++ alias todays-update=update-today-vars
+++ reference-variable '02may22, 02may22'
+++ true
+++ set bell-style none
+++ export HISTCONTROL=ignoredups
+++ HISTCONTROL=ignoredups
+++ export 'HISTTIMEFORMAT=[%F %T] '
+++ HISTTIMEFORMAT='[%F %T] '
+++ set histappend
+++ export HISTSIZE=25000
+++ HISTSIZE=25000
+++ export HISTFILESIZE=32767
+++ HISTFILESIZE=32767
+++ shopt -s nocasematch
+++ startup-trace do_setup.bash invocation
+++ '[' 0 = 1 ']'
+++ '[' -e /tmp/tomasohara-shell-scripts/do_setup.bash ']'
+++ startup-trace 'in tomohara-aliases.bash'
+++ '[' 0 = 1 ']'
+++ case "$OSTYPE" in
+++ case "$OSTYPE" in
+++ export 'LESS=-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t'
+++ LESS='-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t'
+++ '[' '' = 1 ']'
+++ export PAGER=less
+++ PAGER=less
+++ export 'PAGER_CHOPPED=less -S'
+++ PAGER_CHOPPED='less -S'
+++ export 'PAGER_NOEXIT=less -+F'
+++ PAGER_NOEXIT='less -+F'
+++ alias 'less-=$PAGER_NOEXIT'
+++ alias 'less-clipped=$PAGER_NOEXIT -S'
+++ alias 'less-tail=$PAGER_NOEXIT +G'
+++ alias 'less-tail-clipped=$PAGER_NOEXIT +G -S'
+++ alias ltc=less-tail-clipped
+++ export ZPAGER=zless
+++ ZPAGER=zless
+++ startup-trace start of main settings
+++ '[' 0 = 1 ']'
+++ alias 'show-path=show-path-dir PATH'
++++ printenv PATH
++++ /bin/grep /tmp/tomasohara-shell-scripts:
+++ '[' '' = '' ']'
+++ export PATH=/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.
+++ PATH=/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.
++++ printenv PATH
++++ /bin/grep /tmp/tomasohara-shell-scripts/linux:
+++ '[' '' = '' ']'
+++ export PATH=/tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.
+++ PATH=/tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.
+++ append-path /home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8
+++ [[ /tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:. =~ ^/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8: ]]
+++ [[ /tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:. =~ :/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8: ]]
+++ [[ /tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:. =~ :/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8$ ]]
+++ export PATH=/tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8
+++ PATH=/tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8
+++ append-path /home/tomohara/python
+++ [[ /tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8 =~ ^/home/tomohara/python: ]]
+++ [[ /tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8 =~ :/home/tomohara/python: ]]
+++ export PATH=/tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.
+++ PATH=/tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.
+++ export LD_LIBRARY_PATH=:/home/tomohara/lib::/home/tomohara/lib:/home/tomohara/lib/linux:/home/tomohara/lib::/home/tomohara/lib::/home/tomohara/lib:/home/tomohara/lib/linux:/home/tomohara/lib:/home/tomohara/lib/linux:/home/tomohara/lib:/home/tomohara/lib/linux
+++ LD_LIBRARY_PATH=:/home/tomohara/lib::/home/tomohara/lib:/home/tomohara/lib/linux:/home/tomohara/lib::/home/tomohara/lib::/home/tomohara/lib:/home/tomohara/lib/linux:/home/tomohara/lib:/home/tomohara/lib/linux:/home/tomohara/lib:/home/tomohara/lib/linux
+++ export FIGNORE=.o:.fasl:.fas:.lib
+++ FIGNORE=.o:.fasl:.fas:.lib
+++ export FIGNORE=.o:.fasl:.fas:.lib
+++ FIGNORE=.o:.fasl:.fas:.lib
+++ set -o noclobber
+++ shopt -s nocaseglob
+++ unset MAILCHECK
+++ unset MAIL
+++ export TEMP=/home/tomohara/temp
+++ TEMP=/home/tomohara/temp
+++ export TMP=/home/tomohara/temp/tmp
+++ TMP=/home/tomohara/temp/tmp
+++ export TMPDIR=/home/tomohara/temp/tmp
+++ TMPDIR=/home/tomohara/temp/tmp
+++ mkdir -p /home/tomohara/temp /home/tomohara/temp/tmp /home/tomohara/temp/tmp
+++ conditional-export LINES 52
+++ local var value
+++ local args
+++ '[' LINES '!=' '' ']'
+++ var=LINES
+++ value=52
++++ printenv LINES
+++ '[' 24 == '' ']'
+++ args='LINES 52'
+++ shift 2
+++ '[' 'LINES 52' = '' ']'
+++ '[' '' '!=' '' ']'
+++ conditional-export COLUMNS 80
+++ local var value
+++ local args
+++ '[' COLUMNS '!=' '' ']'
+++ var=COLUMNS
+++ value=80
++++ printenv COLUMNS
+++ '[' 80 == '' ']'
+++ args='COLUMNS 80'
+++ shift 2
+++ '[' 'COLUMNS 80' = '' ']'
+++ '[' '' '!=' '' ']'
+++ '[' '(none)' = '' ']'
+++ alias 'run-csh=export USE_CSH=1; csh; export USE_CSH=0'
+++ conditional-export PS_symbol '$'
+++ local var value
+++ local args
+++ '[' PS_symbol '!=' '' ']'
+++ var=PS_symbol
+++ value='$'
++++ printenv PS_symbol
+++ '[' ¢ == '' ']'
+++ args='PS_symbol $'
+++ shift 2
+++ '[' 'PS_symbol $' = '' ']'
+++ '[' '' '!=' '' ']'
+++ alias 'reset-prompt-root=reset-prompt "# "'
+++ alias 'reset-prompt-dollar=reset-prompt "\$"'
+++ alias 'reset-prompt-default=reset-prompt '\''¢'\'''
+++ export CDPATH=.
+++ CDPATH=.
+++ [[ himxBCHs =~ i ]]
+++ reset-prompt
+++ local new_PS_symbol=
+++ '[' '' = '' ']'
+++ new_PS_symbol=¢
+++ export PS_symbol=¢
+++ PS_symbol=¢
+++ export 'PS1=¢ '
+++ PS1='¢ '
+++ set-title-to-current-dir
+++ local dir
++++ basename /home/tomohara/bin/jupyter
+++ dir=jupyter
+++ local other_info=
+++ '[' '' '!=' '' ']'
+++ set_xterm_title.bash 'jupyter [/home/tomohara/bin/jupyter]'
+++ export USE_GNOME=1
+++ USE_GNOME=1
+++ export DEBUG_LEVEL=2
+++ DEBUG_LEVEL=2
+++ export PRECISION=3
+++ PRECISION=3
+++ alias 'debug-on=export DEBUG_LEVEL=3'
+++ '[' /home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8 = '' ']'
+++ PERLLIB=/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.
+++ export PERLLIB=/tmp/tomasohara-shell-scripts:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8
+++ PERLLIB=/tmp/tomasohara-shell-scripts:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8
+++ export PERLLIB=/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/tmp/tomasohara-shell-scripts:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8
+++ PERLLIB=/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/tmp/tomasohara-shell-scripts:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8
+++ alias 'perl-=perl -Ssw'
+++ export MANPATH=/home/tomohara/perl/share/man/man1:/home/tomohara/perl/share/man/man1:/home/tomohara/perl/share/man/man1:/home/tomohara/perl/share/man/man1:/home/tomohara/perl/share/man/man1:
+++ MANPATH=/home/tomohara/perl/share/man/man1:/home/tomohara/perl/share/man/man1:/home/tomohara/perl/share/man/man1:/home/tomohara/perl/share/man/man1:/home/tomohara/perl/share/man/man1:
+++ append-path /home/tomohara/perl/bin
+++ [[ /tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:. =~ ^/home/tomohara/perl/bin: ]]
+++ [[ /tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:. =~ :/home/tomohara/perl/bin: ]]
+++ export TIME_CMD=/usr/bin/time
+++ TIME_CMD=/usr/bin/time
+++ export 'PERL=nice -19 /usr/bin/time perl -Ssw'
+++ PERL='nice -19 /usr/bin/time perl -Ssw'
+++ export BRIEF_USAGE=1
+++ BRIEF_USAGE=1
+++ alias set-xterm-title=set_xterm_title.bash
+++ alias set-xterm-window=set-xterm-title
+++ [[ xterm-256color = \x\t\e\r\m ]]
+++ [[ xterm-256color = \c\y\g\w\i\n ]]
+++ alias 'reset-xterm-title=set-xterm-window "$HOSTNAME $PWD"'
+++ quiet-unalias alt-xterm-title
+++ '[' '' '!=' '' ']'
+++ unalias alt-xterm-title
+++ true
+++ alias 'set-xterm-default-host=export DEFAULT_HOST=n/a; cd .'
+++ alias gterm=gnome-terminal
+++ alias 'gdisk-mgr=background-app gnome-disks'
+++ conditional-export LANGUAGE_TOOL_HOME /home/tomohara/programs/java/LanguageTool-2.1
+++ local var value
+++ local args
+++ '[' LANGUAGE_TOOL_HOME '!=' '' ']'
+++ var=LANGUAGE_TOOL_HOME
+++ value=/home/tomohara/programs/java/LanguageTool-2.1
++++ printenv LANGUAGE_TOOL_HOME
+++ '[' /home/tomohara/programs/java/LanguageTool-2.1 == '' ']'
+++ args='LANGUAGE_TOOL_HOME /home/tomohara/programs/java/LanguageTool-2.1'
+++ shift 2
+++ '[' 'LANGUAGE_TOOL_HOME /home/tomohara/programs/java/LanguageTool-2.1' = '' ']'
+++ '[' '' '!=' '' ']'
+++ startup-trace alias overrides
+++ '[' 0 = 1 ']'
+++ '[' '' '!=' 1 ']'
+++ alias chdir=cd
+++ alias 'cd-this-realdir=cd-realdir .'
+++ other_file_args=-v
+++ '[' linux = solaris ']'
+++ alias 'clear=echo '\''use cls instead (or /bin/clear)'\'''
+++ alias 'cls=command clear -x'
+++ MV='/bin/mv -i -v'
+++ alias 'mv=$MV'
+++ alias move=mv
+++ alias 'move-force=move -f'
+++ CP='/bin/cp -ip -v'
+++ reference-variable '/bin/cp -ip -v'
+++ true
+++ alias 'copy=$CP'
+++ alias 'copy-force=/bin/cp -fp $other_file_args'
+++ alias 'cp=/bin/cp -i $other_file_args'
+++ alias 'rm=/bin/rm -i $other_file_args'
+++ alias 'delete=/bin/rm -i $other_file_args'
+++ alias del=delete
+++ alias 'delete-force=/bin/rm -f $other_file_args'
+++ alias remove-force=delete-force
+++ alias 'remove-dir=/bin/rm -rv'
+++ alias delete-dir=remove-dir
+++ alias 'remove-dir-force=/bin/rm -rfv'
+++ alias delete-dir-force=remove-dir-force
+++ alias copy-readonly=copy-readonly.sh
+++ export 'NICE=nice -19'
+++ NICE='nice -19'
+++ export TIME_CMD=/usr/bin/time
+++ TIME_CMD=/usr/bin/time
+++ alias 'fix-dir-permissions=find . -type d -exec chmod go+xs {} \;'
+++ startup-trace directory commands
+++ '[' 0 = 1 ']'
+++ LS=/bin/ls
+++ core_dir_options='--all -l -t  --human-readable'
+++ dir_options='--all -l -t  --human-readable --no-group'
+++ '[' linux = solaris ']'
+++ '[' '' = 1 ']'
+++ alias 'ls-full=$LS ${core_dir_options}'
+++ quiet-unalias subdirs-proper
+++ '[' '' '!=' '' ']'
+++ unalias subdirs-proper
+++ alias symlinks=sublinks
+++ alias 'symlinks-proper=symlinks | cut --characters=43-'
+++ alias symlinks-proper=sublinks-proper
+++ alias 'glob-links=find . -maxdepth 1 -type l | sed -e "s/.\///g"'
+++ alias 'glob-subdirs=find . -mindepth 1 -maxdepth 1 -type d | sed -e "s/.\///g"'
+++ alias 'ls-R=$LS -R >| ls-R.list; wc -l ls-R.list'
+++ alias 'ln-symbolic=ln --symbolic --verbose'
+++ alias 'link-symbolic-safe=ln-symbolic --no-target-directory --no-dereference'
+++ alias link-symbolic-regular=ln-symbolic
+++ startup-trace grep commands
+++ '[' 0 = 1 ']'
+++ skip_dirs=
++++ grep --color=auto --version
+++ [[ grep (GNU grep) 3.1
+Copyright (C) 2017 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+Written by Mike Haertel and others, see <http://git.sv.gnu.org/cgit/grep.git/tree/AUTHORS>. =~ Copyright.*2[0-9][0-9][0-9] ]]
+++ skip_dirs='-d skip'
+++ GREP=/bin/grep
+++ EGREP='/bin/grep -E'
+++ export 'MY_GREP_OPTIONS=-n -d skip -s'
+++ MY_GREP_OPTIONS='-n -d skip -s'
+++ SORT_COL2=--key=2
+++ alias 'gu=grep-unique -i'
+++ alias gu-=grep-unique
+++ alias grepl-=grep-to-less
+++ alias 'grep-nonascii=perlgrep.perl "[\x80-\xFF]"'
+++ alias 'fs-=findspec-all .'
+++ findgrep_opts=-in
+++ alias 'fgr-py=fgr-ext py'
+++ alias find-files=find-files-here
+++ alias find-files-=find-files-there
+++ alias 'make-file-listing=listing="ls-aR.list"; dobackup.sh "$listing"; $LS -aR >| "$listing" 2>&1'
+++ alias emacs-tpo=tpo-invoke-emacs.sh
+++ alias em=emacs-tpo
+++ alias em-tags=etags
+++ alias 'em-large=em-fn "-DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"'
+++ alias 'em-nw=emacs -l ~/.emacs --no-windows'
+++ alias 'em-tpo-nw=emacs -l ~/.emacs --no-windows'
+++ alias em_nw=em-nw
+++ alias em-dir=em-file
+++ alias 'em-this-dir=em .'
+++ alias 'em-devel=em --devel'
+++ quiet-unalias view-todo
+++ '[' '' '!=' '' ']'
+++ unalias view-todo
+++ true
+++ alias todo:=todo
+++ alias TODO=todo
+++ alias TODO:=todo
+++ alias todo1=TODO1
+++ alias 'view-track-time=tac $HOME/organizer/time_tracking_list.text | $PAGER_CHOPPED'
+++ alias view-time-tracking=view-track-time
+++ alias time-tracking=track-time
+++ alias track-time:=track-time
+++ alias calc=perl-calc
+++ alias 'calc-prec6=perl-calc -precision=6'
+++ alias calc-init=perl-calc-init
+++ alias 'calc-int=perl-calc -integer'
+++ startup-trace Miscellaneous commands
+++ '[' 0 = 1 ']'
+++ alias 'hist=history $LINES'
+++ quiet-unalias h
+++ '[' '' '!=' '' ']'
+++ unalias h
+++ true
+++ alias 'usage-pp=usage | apply-usage-numeric-suffixes | $PAGER'
+++ alias reverse=tac
+++ alias 'check-warnings=echo "*** Error: use check-all-errors instead ***"; echo "    check-all-errors"'
+++ alias 'check-all-warnings=check-all-errors -strict'
+++ alias rdiff=rev_vdiff.sh
+++ alias 'tkdiff-=tkdiff -noopt'
+++ alias vdiff=kdiff
+++ diff_options='--ignore-space-change --ignore-blank-lines'
+++ alias 'diff=command diff $diff_options'
+++ alias 'diff-default=command diff'
+++ alias 'diff-ignore-spacing=diff --ignore-all-space'
+++ alias do-diff=do_diff.sh
+++ alias 'kdiff-rev=diff-rev --diff-prog kdiff'
+++ alias diff-log-output=compare-log-output.sh
+++ alias vdiff-rev=kdiff-rev
+++ alias 'diff-backup=diff-backup-helper diff'
+++ alias 'kdiff-backup=diff-backup-helper kdiff'
+++ alias 'cell-signature=signature cell'
+++ alias 'home-signature=signature home'
+++ alias 'po-signature=signature po'
+++ alias 'tpo-signature=signature tpo'
+++ alias 'tpo-scrappycito-signature=signature tpo-scrappycito'
+++ alias 'scrappycito-signature=signature scrappycito'
+++ alias 'farm-signature=signature farm'
+++ alias 'circulo-signature=signature circulo'
+++ startup-trace file archiving commands
+++ '[' 0 = 1 ']'
+++ GTAR=tar
+++ alias gtar=tar
+++ find_options=-xdev
+++ alias untar=extract-tar
+++ alias untar-here=extract-tar-here
+++ alias un-tar=untar
+++ alias untar-force=extract-tar-force
+++ alias create-tar=make-tar-with-subdirs
+++ alias make-full-tar=make-tar
+++ alias 'recent-tar-this-dir=make-recent-tar $TEMP/recent-$(basename "$PWD")'
+++ alias 'tar-this-dir-dated=USE_DATE=1 tar-this-dir'
+++ alias 'view-zip=command-to-pager unzip -v'
+++ alias 'un-zip=command-to-pager unzip'
+++ alias 'color-xterm=rxvt&'
+++ alias 'count-it=perl- count_it.perl'
+++ alias count_it=count-it
+++ alias extract-matches=extract_matches.perl
+++ alias 'perlgrep=perl- perlgrep.perl'
+++ alias perl-grep=perlgrep
+++ alias 'para-gr=para-grep -i -n'
+++ notes_glob='*notes*.txt  *notes*.list *notes*.log'
+++ alias 'notes-entry-gr=notes-entry-gr-aux "$notes_glob"'
+++ alias entry-notes=notes-entry-gr
+++ alias 'cached-entry-gr=notes-entry-gr-aux _master-note-info.list'
+++ alias grepl-entry=cached-entry-gr-less-p
+++ alias grepl-entry-here=entry-notes
+++ alias 'foxit=run-app /opt/foxitsoftware/foxitreader/FoxitReader'
+++ alias 'gimp=run-app gimp'
+++ alias 'do-resize=resize >| /home/tomohara/temp/resize.sh; conditional-source /home/tomohara/temp/resize.sh'
+++ startup-trace alias/function info
+++ '[' 0 = 1 ']'
+++ alias 'show-functions-aux=typeset -f | perl -pe "s/^}/}\n/;"'
+++ alias 'show-aliases=alias | $PAGER'
+++ alias 'show-functions=show-functions-aux | $PAGER'
+++ startup-trace setup and sorting wrappers
+++ '[' 0 = 1 ']'
+++ alias 'do-setup=conditional-source /home/tomohara/.bashrc'
+++ alias 'tab-sort=sort -t $'\''\t'\'''
+++ alias 'colon-sort=sort --key=2 -t '\'':'\'''
+++ alias 'colon-sort-rev-num=colon-sort -rn'
+++ alias 'freq-sort=tab-sort -rn $SORT_COL2'
+++ startup-trace file manipulation and conversions
+++ '[' 0 = 1 ']'
+++ alias 'remove-cr=tr -d "\r"'
+++ alias 'perl-slurp=perl -0777'
+++ alias 'alt-remove-cr=perl-slurp -pe "s/\r//g;"'
+++ alias 'perl-remove-cr=perl -i.bak -pn -e "s/\r//;"'
+++ alias intersection=intersection.perl
+++ alias 'difference=intersection.perl -diff'
+++ alias 'line-intersection=intersection.perl -line'
+++ alias 'line-difference=intersection.perl -diff -line'
+++ startup-trace line/word count, etc. commands
+++ '[' 0 = 1 ']'
+++ alias line-word-len=line-wc
+++ alias 'ls-line-len=$LS | line-len | sort -rn | less'
+++ alias 2bib=bibitem2bib
+++ startup-trace extension-less shortcuts
+++ '[' 0 = 1 ']'
+++ alias 'convert-termstrings=perl- convert_termstrings.perl'
+++ alias do-rcsdiff=do_rcsdiff.sh
+++ alias dobackup=dobackup.sh
+++ alias kill-em=kill_em.sh
+++ alias 'kill-it=kill-em --pattern'
+++ alias ps_mine=ps-mine
+++ alias 'ps-mine-all=ps-mine --all'
+++ alias 'rename-files=perl- rename_files.perl'
+++ alias rename_files=rename-files
+++ alias 'testwn=perl- testwn.perl'
+++ alias 'perlgrep=perl- perlgrep.perl'
+++ alias 'foreach=perl- foreach.perl'
+++ alias 'rename-spaces=rename-files -q -global " " "_"'
+++ alias 'rename-quotes=rename-files -q -global "'\''" ""'
+++ alias 'rename-special-punct=rename-files -q -global -regex "[&\!\*?\(\)]" ""'
+++ alias 'move-duplicates=mkdir -p duplicates; move *\([0-9]\).* duplicates 2>&1 | $GREP -iv cannot.stat.*..No.such'
+++ alias 'rename-parens=rename-files -global -regex "[\(\)]" "" *[\(\)]*'
+++ alias 'rename-etc=rename-spaces; rename-quotes; rename-special-punct; move-duplicates'
+++ alias 'move-log-files=move-versioned-files "{log,debug}" "log-files"'
+++ alias 'move-output-files=move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
+++ alias 'move-adhoc-files=move-log-files; move-output-files'
+++ alias 'bigrams=perl -sw $TOM_BIN/count_bigrams.perl -N=2'
+++ alias 'unigrams=perl -sw $TOM_BIN/count_bigrams.perl -N=1'
+++ alias word-count=unigrams
+++ '[' '' = 1 ']'
+++ alias 'lynx-html=lynx -force_html'
+++ alias unsetenv=unset
+++ alias unexport=unset
+++ startup-trace Unix aliases
+++ '[' 0 = 1 ']'
+++ alias 'merge=echo "do-merge MODFILE1 OLDFILE MODFILE2 > NEWFILE"'
+++ alias 'do-merge=/usr/bin/merge -p'
+++ alias 'diff3-merge=/usr/bin/diff3 --merge --text --diff-program=diff.sh'
+++ quiet-unalias which
+++ '[' '' '!=' '' ']'
+++ unalias which
+++ true
+++ alias 'dump-url=wget --recursive --relative'
+++ alias gtime=/usr/bin/time
+++ alias 'linux-version=cat /etc/os-release'
+++ alias os-release=linux-version
+++ alias 'system-status=system_status.sh -'
+++ alias tokenize=split-tokens
+++ '[' linux '!=' cygwin ']'
+++ alias ipconfig=ifconfig
+++ alias 'set-display-local=export DISPLAY=localhost:0.0'
+++ alias 'bash-trace-on=set -o xtrace'
+++ alias 'bash-trace-off=set - -o xtrace'
+++ alias cmd-trace=trace-cmd
+++ alias 'compress-this-dir=compress-dir $PWD'
+++ alias 'ununcompress-this-dir=uncompress-dir $PWD'
+++ alias 'old-count-exts=$LS | count-it "\.[^.]*\w" | sort $SORT_COL2 -rn | $PAGER'
+++ alias 'kill-iceweasel=kill_em.sh iceweasel'
+++ alias 'configure=./configure --prefix ~'
+++ alias 'pp-xml=xmllint --format'
+++ alias 'pp-html=pp-xml --html'
+++ alias 'pp-url-aux=perl -pe "s/[\&\?]/\n\t$&/g;"'
+++ alias 'check-xml=xmllint --noout'
+++ alias 'check-xml-valid=check-xml --valid'
+++ alias 'soffice-calc=/usr/lib/libreoffice/program/soffice.bin --calc'
+++ alias 'libreoffice-write=run-app libreoffice --writer'
+++ alias 'libreoffice-pdf=run-app libreoffice --draw'
+++ alias 'libreoffice-calc=run-app libreoffice --calc'
+++ alias start=start.sh
+++ alias 'edit=start.sh --edit'
+++ alias 'open=start.sh --open'
+++ alias explore-dir=nautilus
+++ alias 'em-docs=em-dir ~/Documents'
+++ alias 'ed-setup=em-dir "$TOM_BIN/tomohara-aliases.bash"'
+++ alias em-setup=ed-setup
+++ alias 'ed-past-info=em-dir ~/organizer/past-info.txt'
+++ alias em-past-info=ed-past-info
+++ alias 'ed-tomas=start.sh ~/organizer/tomas.odt'
+++ alias em-tomas=ed-tomas
+++ alias 'magnifier=run-app kmag'
+++ alias 'apt-install=sudo apt-get install --yes --fix-missing --no-remove'
+++ alias 'apt-search=sudo apt-cache search'
+++ alias 'apt-installed=sudo apt list --installed'
+++ alias 'apt-uninstall=sudo apt-get remove'
+++ alias 'dpkg-install=sudo dpkg --install '
+++ alias 'restart-network=sudo ifdown eth0; sudo ifup eth0'
+++ alias 'hibernate-system=sudo systemctl hibernate'
+++ alias 'suspend-system=sudo systemctl suspend'
+++ alias 'blank-screen=xset dpms force off'
+++ alias 'stop-service=systemctl stop'
+++ alias 'restart-service=sudo systemctl restart'
+++ alias 'sync2=sync; sync'
+++ alias 'check-html=check-xml --html'
+++ TPO_SSH_KEY=/home/tomohara/.ssh/tomohara-key.pem
+++ SSH_PORT=22
+++ export AWS_HOST=52.15.125.52
+++ AWS_HOST=52.15.125.52
+++ aws_micro_host=ec2-52-15-125-52.us-east-2.compute.amazonaws.com
+++ alias 'aws-login-micro=ssh-host-login-aws $aws_micro_host'
+++ alias 'aws-upload-micro=scp-aws-up $aws_micro_host'
+++ alias 'aws-download-micro=scp-aws-down $aws_micro_host'
+++ alias aws-login=aws-login-micro
+++ alias ssh-aws=aws-login
+++ alias aws-upload=aws-upload-micro
+++ alias aws-download=aws-download-micro
+++ alias 'hw-login=ssh-host-login-aws $HOSTWINDS_HOST'
+++ alias 'hw-upload=scp-aws-up $HOSTWINDS_HOST'
+++ alias 'hw-download=scp-aws-down $HOSTWINDS_HOST'
+++ alias 'new-hw-login=ssh-host-login-aws $NEW_HOSTWINDS_HOST'
+++ alias 'new-hw-upload=scp-aws-up $NEW_HOSTWINDS_HOST'
+++ alias 'new-hw-download=scp-aws-down $NEW_HOSTWINDS_HOST'
+++ alias old-hw-login=hw-login
+++ alias old-hw-upload=hw-upload
+++ alias old-hw-download=hw-download
+++ alias hw1-login=old-hw-login
+++ alias hw1-upload=old-hw-upload
+++ alias hw1-download=old-hw-download
+++ alias hw2-login=new-hw-login
+++ alias hw2-upload=new-hw-upload
+++ alias hw2-download=new-hw-download
+++ [[ '' = '' ]]
+++ [[ tpo-magro =~ ip-* ]]
+++ [[ tpo-magro =~ cvps* ]]
+++ alias gr-juju-archive-notes=gr-juju-notes-archive
+++ alias 'uname-node=uname -n'
+++ alias 'pwd-host-info=pwd; echo $HOST_NICKNAME; uname-node'
+++ job_tracker_port=40001
+++ alias 'kill-job-trackers= kill_em.sh -p L$job_tracker_port'
+++ alias 'json-pp=json_pp -json_opt utf8,pretty'
+++ alias pp-json=json-pp
+++ alias 'pp-json-sorted=json_pp -json_opt utf8,pretty,canonical'
+++ export HOSTWINDS_HOST=23.254.204.34
+++ HOSTWINDS_HOST=23.254.204.34
+++ export NEW_HOSTWINDS_HOST=142.11.227.157
+++ NEW_HOSTWINDS_HOST=142.11.227.157
+++ alias 'ps-script=ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
+++ alias 'ps-sort-time=ps-sort-once -by=time'
+++ alias ps-time=ps-sort-time
+++ alias 'ps-sort-mem=ps-sort-once -by=mem '
+++ alias ps-mem=ps-sort-mem
+++ alias 'script-update=script _update-$(T).log'
+++ export 'PYTHON_CMD=/usr/bin/time python -u'
+++ PYTHON_CMD='/usr/bin/time python -u'
+++ export 'PYTHON=nice -19 /usr/bin/time python -u'
+++ PYTHON='nice -19 /usr/bin/time python -u'
+++ export PYTHONPATH=/home/tomohara/python:/usr/local/misc/programs/python/mezcla-tom-clone:/home/tomohara/python:/usr/local/misc/programs/python/mezcla-tom-clone:/home/tomohara/python:
+++ PYTHONPATH=/home/tomohara/python:/usr/local/misc/programs/python/mezcla-tom-clone:/home/tomohara/python:/usr/local/misc/programs/python/mezcla-tom-clone:/home/tomohara/python:
+++ alias 'mezcla-devel=add-python-path $HOME/python/Mezcla/mezcla'
+++ alias 'mezcla-main=add-python-path $HOME/python/Mezcla-main/mezcla'
+++ alias 'mezcla-tom=add-python-path $HOME/python/Mezcla-tom/mezcla'
+++ [[ ! /tmp/tomasohara-shell-scripts/linux:/tmp/tomasohara-shell-scripts:/usr/local/misc/programs/google/google-cloud-sdk/bin:/home/tomohara/anaconda3/envs/nlp-py-3-8/bin:/home/tomohara/anaconda3/condabin:/home/tomohara/python/Mezcla/mezcla:/home/tomohara/bin/linux:/home/tomohara/.local/bin:/home/tomohara/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:.:.:/home/tomohara/perl/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:/home/tomohara/python:.:/home/tomohara/bin/bruno:/usr/local/misc/programs/anaconda3/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:/home/tomohara/perl/lib/perl5/5.16:/home/tomohara/perl/lib/perl5/5.16/vender_perl:/home/tomohara/bin:/home/tomohara/bin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:/home/tomohara/perl/lib/perl5/site_perl/5.8/cygwin:.:/home/tomohara/perl/lib/perl5/site_perl/5.8:. =~ mezcla ]]
+++ alias 'ps-python-full=ps-all python'
+++ alias 'ps-python=ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|update-manager|software-properties|networkd-dispatcher)"'
+++ alias 'show-python-path=show-path-dir PYTHONPATH'
+++ alias delete-compiled-python-files=delete-compiled-python-files-aux
+++ alias 'delete-compiled-python-files-force=delete-compiled-python-files-aux -vf'
+++ alias 'python-setup-install=log=setup.log;  rename-with-file-date $log;  uname -a > $log;  python setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
+++ alias 'python-uninstall-setup=cat installed-files.list | xargs /bin/rm -vi; rename_files.perl -regex ^ un installed-files.list'
+++ alias 'elide-data=python -m transpose_data --elide'
+++ alias 'kill-python=kill_em.sh --filter '\''ipython|emacs'\'' python'
+++ alias 'kill-python-all=kill_em.sh python'
+++ alias 'which-python=which python'
+++ alias jupyter-notebook-redir=run-jupyter-notebook
+++ alias 'jupyter-notebook-redir-open=run-jupyter-notebook 8888 0.0.0.0'
+++ alias xtract-text=extract-text
+++ alias 'test-script-debug=ALLOW_SUBCOMMAND_TRACING=1 DEBUG_LEVEL=5 MISC_TRACING_LEVEL=5 test-script'
+++ conditional-source /tmp/tomasohara-shell-scripts/anaconda-aliases.bash
+++ '[' -e /tmp/tomasohara-shell-scripts/anaconda-aliases.bash ']'
+++ echo 'Warning: bash script file not found (so not sourced):'
+Warning: bash script file not found (so not sourced):
+++ echo '    /tmp/tomasohara-shell-scripts/anaconda-aliases.bash'
+    /tmp/tomasohara-shell-scripts/anaconda-aliases.bash
+++ conditional-source /tmp/tomasohara-shell-scripts/git-aliases.bash
+++ '[' -e /tmp/tomasohara-shell-scripts/git-aliases.bash ']'
+++ echo 'Warning: bash script file not found (so not sourced):'
+Warning: bash script file not found (so not sourced):
+++ echo '    /tmp/tomasohara-shell-scripts/git-aliases.bash'
+    /tmp/tomasohara-shell-scripts/git-aliases.bash
+++ alias 'chromium=invoke-browser /usr/lib/chromium-browser/chromium-browser'
++++ which firefox
++++ command which firefox
+++ alias 'firefox=invoke-browser "/usr/bin/firefox"'
++++ which opera
++++ command which opera
+++ alias 'opera=invoke-browser "/usr/bin/opera"'
++++ which tor-browser-en.sh
++++ command which tor-browser-en.sh
+++ alias 'tor-browser=invoke-browser "/home/tomohara/bin/linux/tor-browser-en.sh"'
+++ alias run-tor-browser=tor-browser
+++ alias 'run-epiphany-browser=invoke-browser epiphany-browser'
+++ alias 'nvidia-smi-loop=nvidia-smi --loop=1'
+++ alias 'emacs-qd-trans-sp=pushd $TOM_DIR/multilingual; ./emacs-qd-trans-sp.sh; popd'
+++ alias em-trans-sp=emacs-qd-trans-sp
+++ alias ed-trans-sp=em-trans-sp
++++ which wn
+++ wn=
+++ '[' '' == '' ']'
+++ wn=/usr/bin/wn
+++ for _dir_ in /usr/share/wordnet /c/cygwin/lib/wnres/dict
+++ [[ ! -d /usr/share/wordnet ]]
+++ for _dir_ in /usr/share/wordnet /c/cygwin/lib/wnres/dict
+++ [[ ! -d /usr/share/wordnet ]]
+++ startup-trace bash helpers
+++ '[' 0 = 1 ']'
+++ '[' tomohara = root ']'
+++ alias update-software=/usr/bin/update-manager
+++ alias 'kill-clam-antivirus=kill_em.sh --all -p clamd'
+++ startup-trace misc local helpers
+++ '[' 0 = 1 ']'
+++ alias sleepy=sleepyhead
+++ alias 'tomohara-aliases=source /tmp/tomasohara-shell-scripts/tomohara-aliases.bash'
+++ alias 'tomohara-settings=source /tmp/tomasohara-shell-scripts/tomohara-settings.bash'
+++ alias 'more-tomohara-aliases=source /tmp/tomasohara-shell-scripts/more-tomohara-aliases.bash'
+++ startup-trace 'out tomohara-aliases.bash'
+++ '[' 0 = 1 ']'
+
+$ show-macros | wc -l

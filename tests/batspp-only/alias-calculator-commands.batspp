@@ -1,0 +1,157 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it.
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+$ alias | wc -l
+0
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 1210)
+## *** All output from one run to the next needs to be the same ***
+# Setting a temp directory for tests
+$ TMP=/tmp/test-calc
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-1210
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-calc/test-1210
+
+# Count aliases proper
+$ alias | wc -l
+1
+
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+0
+
+# Aliases for censoring any number or username
+$ alias testnumhex="sed -r "s/[0-9,A-F,a-f]/N/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g"" 
+
+# Making sure that the tests run from ./tests directory
+$ source $BIN_DIR/tomohara-aliases.bash
+
+## TEST 1 - old-calc SEEMS TO WORK PRETTY WELL
+# returns -19 as float
+$ old-calc "24 / 4.0 - (35 / 7.0) * 5" 
+$ linebr
+# returns 32
+$ old-calc "(2^3)*(2^2)"
+# returns 121
+$ linebr
+$ old-calc "5*4*3*2*1+1" 
+-19.00000000000000000000
+--------------------------------------------------------------------------------
+32
+--------------------------------------------------------------------------------
+121
+
+## TEST 2 - old-perl-calc WORKS TOO
+$ old-perl-calc "70 + 69 + 68"
+$ printf "\n"
+$ linebr
+$ old-perl-calc "8/8/8/8/8"
+$ printf "\n"
+$ linebr
+207
+
+--------------------------------------------------------------------------------
+0.001953125
+
+--------------------------------------------------------------------------------
+
+## TEST 3A - hex2dec
+$ hex2dec 42Df5D144 
+#cases don't matter in the number
+$ linebr
+$ hex2dec "F"
+17950953796
+--------------------------------------------------------------------------------
+15
+
+## TEST 3B - hex2dec
+$ dec2hex "128"
+#inclusion of non-decimal numbers yield 0 as a result
+$ dec2hex "A12" 
+80
+0
+
+## TEST 3C - bin2dec
+$ bin2dec "11110011"
+$ linebr
+#inclusion of non-binary numbers leads to error
+$ bin2dec "0110" 
+243
+--------------------------------------------------------------------------------
+6
+
+## TEST 3D - dec2bin
+$ dec2bin "70419"
+#inclusion of non-decimal number leads to error
+$ dec2bin "10" 
+$ dec2bin "7" | testnumhex
+10001001100010011
+1010
+NNN
+
+$ pwd
+$ rm -rf ./* > /dev/null
+$ ps -l > testforhv.txt
+$ hv testforhv.txt | testnumhex
+/tmp/test-calc/test-1210
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  N S   UIN     PI
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  N    PPIN  N PRI
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN    NI NNNR SZ WNH
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  NN  TTY         
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN   TIMN NMN.N S  N
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  NNN   NNNNN   NN
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  NNN  N  NN   N -
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN    NNNN No_wNi pt
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  s/N    NN:NN:NN 
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  NNsh.N R  NNNN  
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN   NNNNN   NNNNN  
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  N  NN   N -  NNN
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN NN NN  N -      pts/N  
+NNNNNNNN  NN NN NN NN NN NN NN NN - NN NN NN NN NN NN          NN:NN:NN ps.
+
+## TEST 5 - calc AND ITS ALIASES
+$ calc "100/(24*5)"
+$ linebr
+$ calc-prec6 "49/3"
+$ linebr
+# NEED HELP
+$ calc-init "+" "100/3"
+$ linebr
+$ calc-int "100/23"
+0.833
+--------------------------------------------------------------------------------
+16.333333
+--------------------------------------------------------------------------------
+33.333
+--------------------------------------------------------------------------------
+4

@@ -1,0 +1,227 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9]/N/g""
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 1210)
+## *** All output from one run to the next needs to be the same ***
+$ TMP=./tmp/test-cp-mv
+$ BIN_DIR=$PWD/..
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-1210
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd | testuser
+$ alias | wc -l
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/home/userxf333/tom-project/shell-scripts/tests/tmp/test-cp-mv/test-1210
+2
+
+# Count aliases proper
+$ alias | wc -l
+3
+
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+0
+
+$ source $BIN_DIR/tomohara-aliases.bash
+
+#Shows that cls must be used instead of clear
+$ clear
+use cls instead (or /bin/clear)
+
+# TEST 1 - MOVE ALIASES
+## CLEARS TEST FOLDER
+$ rm -rf ./*
+$ linebr
+## CREATES TEST SUBJECTS
+$ touch abc def ghi
+$ mkdir mvtest_dir1
+## WORK OF ALIASES
+$ mv abc ./mvtest_dir1
+$ move def ./mvtest_dir1
+$ move-force ghi ./mvtest_dir1
+$ linebr
+## VIEWING THE CHANGES MADE
+$ ls -l | awk '!($6="")' | testnum | testuser
+$ linebr
+$ ls -l ./mvtest_dir1 | awk '!($6="")' | testnum | testuser
+$ linebr
+removed './testdir1/.bashrc'
+removed directory './testdir1'
+--------------------------------------------------------------------------------
+renamed 'abc' -> './mvtest_dir1/abc'
+renamed 'def' -> './mvtest_dir1/def'
+renamed 'ghi' -> './mvtest_dir1/ghi'
+--------------------------------------------------------------------------------
+total N    
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN mvtest_dirN
+--------------------------------------------------------------------------------
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+--------------------------------------------------------------------------------
+
+# TEST 2 - COPY ALIASES
+## CLEARS TEST FOLDER
+$ rm -rf ./*
+$ linebr
+## CREATES TEST SUBJECTS
+$ touch abc def ghi
+$ mkdir cptest_dir1
+## WORK OF ALIASES
+$ cp abc ./cptest_dir1
+$ copy def ./cptest_dir1
+$ copy-force ghi ./cptest_dir1
+$ linebr
+## VIEWING THE CHANGES MADE
+$ ls -l | awk '!($6="")' | testnum | testuser
+$ linebr
+$ ls -l ./cptest_dir1 | awk '!($6="")' | testnum | testuser
+$ linebr
+removed './mvtest_dir1/abc'
+removed './mvtest_dir1/ghi'
+removed './mvtest_dir1/def'
+removed directory './mvtest_dir1'
+--------------------------------------------------------------------------------
+'abc' -> './cptest_dir1/abc'
+'def' -> './cptest_dir1/def'
+'ghi' -> './cptest_dir1/ghi'
+--------------------------------------------------------------------------------
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN cptest_dirN
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+--------------------------------------------------------------------------------
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+--------------------------------------------------------------------------------
+
+# #=================(TEST ERROR: "/bin/rm: remove regular empty file 'f1'?")=========================#
+# # TEST 3 - REMOVE/DELETE ALIASES
+# ## CLEARS TEST FOLDER
+# rm -rf ./*
+# linebr
+# ## CREATES TEST SUBJECTS
+# touch f1 f2 f3 f4 f5
+# ## WORK OF ALIASES
+# rm f1
+# delete f2
+# remove-force f3
+# linebr
+# ## VIEWING THE CHANGES MADE
+# ls -l
+# linebr
+
+# TEST 4 - REMOVE DIRECTORY ALIASES
+## CLEARS TEST FOLDER
+$ rm -rf ./* > /dev/null
+$ linebr
+## CREATES TEST SUBJECTS
+$ touch abc def ghi
+$ mkdir TDIR1 TDIR2 TDIR3 TDIR4
+$ ls -l | awk '!($6="")' | testnum | testuser
+$ linebr
+## WORK OF ALIASES
+$ remove-dir "TDIR1"
+$ delete-dir "TDIR2"
+$ remove-dir-force TDIR3
+$ delete-dir-force TDIR4
+$ linebr
+## VIEWING THE CHANGES MADE
+$ ls -l | awk '!($6="")' | testnum | testuser
+$ linebr
+--------------------------------------------------------------------------------
+total NN    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+--------------------------------------------------------------------------------
+removed directory 'TDIR1'
+removed directory 'TDIR2'
+removed directory 'TDIR3'
+removed directory 'TDIR4'
+--------------------------------------------------------------------------------
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+--------------------------------------------------------------------------------
+
+# RUNNING FOR DETAILS
+$ copy-readonly | testuser
+$ linebr
+# COPYING .bashrc TO TEST DIRECTORY
+$ rm -rf ./* > /dev/null
+$ mkdir testdir1
+$ linebr
+$ copy-readonly ~/.bashrc ./testdir1/ | awk '!($6="")' | testnum | testuser
+$ linebr
+# VIEWING THE COPIED FILE (IN DIR AND CAT)
+$ cat ./testdir1/.bashrc | head 
+
+Usage: /home/userxf333/bin/copy-readonly.sh source-file [--force] [--verbose] [file | directory]
+
+Examples (under Bash):
+
+  /home/userxf333/bin/copy-readonly.sh ~/.bashrc ~/dot-file-archive
+
+  for f in copyright.py search_page.mako index.mako visual_diff_server.py; do copy-readonly $f ~/visual-diff; done
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-r--r--r-- N userxf333 userxf333 NNNN  N NN:NN ./testdirN//.bashrc
+--------------------------------------------------------------------------------
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# for examples
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+
+# # BEFORE fix-dir-permissions 
+# $ ls -l  
+# | total 4
+# | drwxrwxr-x 2 xaea12 xaea12 4096 Jul  4 21:41 testdir1
+$ fix-dir-permissions
+# # AFTER fix-dir-permissions
+$ ls -l | awk '!($6="")' | testnum | testuser
+total N    
+drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN testdirN
