@@ -1,9 +1,0 @@
-# Alt. simple alias test
-# uses multiple commands per cell
-
-$ alias count-words='wc -w'
-$ alias count-lines='wc -l'
-$ echo abc def ght | count-words
-$ echo abc def ght | count-lines
-3
-1

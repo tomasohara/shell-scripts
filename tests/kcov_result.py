@@ -128,13 +128,14 @@ class KcovTestCoverage:
     # 1. extract_report
     def extract_report(self, report_name, i):
         """Extracts the required line of code from each report by accessing required .js"""
-
         global report_InsLine, report_CovLine, report_RatioLine, report_JSON, facts_JSON
-
         REQUIRED_LINE = gh.run(f"cat ./{KCOV_FOLDER}/{report_name}/{JS_PATTERN} | tail -2 | head -1")
-        json_extract = (gh.extract_match_from_text(JSON_REGEX, REQUIRED_LINE)).replace(',}','}')
-        report_JSON = json.loads(json_extract)
-                
+        
+        json_extract = gh.extract_match_from_text(JSON_REGEX, REQUIRED_LINE)
+        if json_extract is not None:
+            json_extract = json_extract.replace(",}", "}")
+        
+        report_JSON = json.loads(json_extract)           
         report_Date = report_JSON["date"]
         report_InsLine = report_JSON["instrumented"]
         report_CovLine = report_JSON["covered"]
