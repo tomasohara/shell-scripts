@@ -138,12 +138,13 @@ function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 check_errors.perl -context=5
 
 # get-temp-log-name([label=temp]: Return unique file name of the form _git-LABEL-MMDDYY-HHMM-NNN.log
 #
-LOG_DIR="${GIT_LOG_DIR:-./log-files}"
-mkdir --parents "$LOG_DIR"
 #
 function get-temp-log-name {
     local label=${1:-temp}
     local now_mmddyyhhmm
+    # note: done each time in case user cd's to a different directory
+    local LOG_DIR="${GIT_LOG_DIR:-./log-files}"
+    mkdir --parents "$LOG_DIR"
     now_mmddyyhhmm=$(date '+%d%b%y-%H%M' | downcase-stdin-alias);
     # TODO: use integral suffix (not hex)
     mktemp "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log"
