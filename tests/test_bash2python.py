@@ -28,6 +28,9 @@
 # - Add variations throughout with constructs intended to throw off parsing (e.g., comments with syntax).
 # - Look into synthetic test sets (e.g., via Codex translation of bash test suite)!
 #
+# TODO4:
+# - Add tests to make sure formatting changes not required (e.g., via black).
+#
 
 """Tests for bash2python.py"""
 
