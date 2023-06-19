@@ -61,6 +61,8 @@
 # - Flag constructs not yet implemented:
 #   -- C-style for loops (maybe use cursed-for module--more for extensing Python syntax).
 #   -- Bash arrays and hashes
+# TODO4:
+# - Add option for Black formatting
 #
 
 """Bash snippet to Python conversion using heuristics for common constructs"""
