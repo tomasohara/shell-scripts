@@ -490,6 +490,9 @@ unset MAIL
 # - TEMP is private temp dir (e.g., ~/temp); TMP is system temp dir (e.g., /tmp)
 # TODO: Put settings in .bashrc, so that trace could use TEMP.
 cond-export TEMP "$HOME/temp"
+## HACK: don't allow /tmp for TMP
+## TODO1: move TMP, etc. into tomohara-settings.bash
+if [ "$TMP" = "/tmp" ]; then unset TMP; fi
 cond-export TMP "$TEMP/tmp"
 cond-export TMPDIR "$TMP"
 mkdir -p "$TEMP" "$TMP" "$TMPDIR"
@@ -732,9 +735,13 @@ alias rm='command rm -i $other_file_args'
 alias delete='command rm -i $other_file_args'
 ## OLD: alias delete-force='/bin/rm -f $other_file_args'
 # shellcheck disable=SC2034
+{
 force_echo=""
-alias disable-forced-deletions='force_echo="echo Warning: run enable-forced-deletions or issue: "'
+newline_tab=$'\n\t'
+# TODO1: fix newline/tab support
+alias disable-forced-deletions='force_echo="echo Warning: run enable-forced-deletions or issue:$newline_tab"'
 alias enable-forced-deletions='force_echo=""'
+}
 disable-forced-deletions
 #
 ## OLD
@@ -1312,9 +1319,10 @@ function check-errors-excerpt () {
     local base="$TMP/check-errors-excerpt-$$"
     local head="$base.head"
     local tail="$base.tail"
-    check-errors "$@" | head | truncate-width >| "$head";
+    # TODO3: add options for before and after
+    check-errors -before=1 -after=2 "$@" | head | truncate-width >| "$head";
     cat "$head"
-    check-errors "$@" | tail | truncate-width >| "$tail";
+    check-errors -before=1 -after=2 "$@" | tail | truncate-width >| "$tail";
     diff "$head" "$tail" >| /dev/null
     
     # Show tail unless same as head
