@@ -16,7 +16,8 @@ fi
 ## set -e
 
 # we'll write all git versions of the file to this folder:
-EXPORT_TO=/tmp/all_versions_exported
+TMP=${TMP:-/tmp}
+EXPORT_TO=$TMP/all_versions_exported
 
 # take relative path to the file to inspect
 GIT_PATH_TO_FILE="$1"
