@@ -6,51 +6,59 @@
 #
 
 # Set bash tracing
+verbose=false
+if [ "${VERBOSE:-0}" = "1" ]; then
+    verbose=true
+fi
 if [ "${TRACE:-0}" = "1" ]; then
     set -o xtrace
-fi
-if [ "${VERBOSE:-0}" = "1" ]; then
-    set -o verbose
+    $verbose && set -o verbose
 fi
 ## TODO: set strict more (i.e., fail immediately on error)
 ## set -e
 
 # we'll write all git versions of the file to this folder:
 TMP=${TMP:-/tmp}
-EXPORT_TO=$TMP/all_versions_exported
+DEFAULT_EXPORT_TO="$TMP/all_versions_exported"
+EXPORT_TO="${2:-$DEFAULT_EXPORT_TO}"
 
 # take relative path to the file to inspect
 GIT_PATH_TO_FILE="$1"
 
-# ---------------- don't edit below this line --------------
-
-## OLD: USAGE="Please cd to the root of your git proj and specify path to file you with to inspect (example: $0 some/path/to/file)"
-USAGE=$'\nNote:\n- cd to the root of your git proj, as follows:\n  cd "$(git rev-parse --show-toplevel)"\n- specify path to file you with to inspect\n- example:\n  '"$0 some/path/to/file"
+## OLD: USAGE=$'\nNote:\n- cd to the root of your git proj, as follows:\n  cd "$(git rev-parse --show-toplevel)"\n- specify path to file you with to inspect\n- example:\n  '"$0 some/path/to/file"
+NEWLINE=$'\n'
+TWO_NEWLINES="$NEWLINE$NEWLINE"
+USAGE="Usage: $(basename "$0") path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example: $0 README.md /tmp/README-versions"
 
 # check if got argument
 if [ "${GIT_PATH_TO_FILE}" == "" ]; then
-    echo "error: no arguments given. ${USAGE}" >&2
+    ## OLD: echo "error: no arguments given. ${USAGE}" >&2
+    echo "${USAGE}" >&2
     exit 1
 fi
 
 # check if file exists
 if [ ! -f "${GIT_PATH_TO_FILE}" ]; then
-    echo "error: File '${GIT_PATH_TO_FILE}' does not exist. ${USAGE}" >&2
+    echo "Error: File '${GIT_PATH_TO_FILE}' does not exist.${TWO_NEWLINES}${USAGE}" >&2
     exit 1
 fi
 
 # make sure in repo dir
 if ! git rev-parse --show-toplevel >/dev/null 2>&1 ; then
-    echo "Error: you must run this from within a git working directory. ${USAGE}" >&2
+    echo "Error: you must run this from within a git working directory.${TWO_NEWLINES}${USAGE}" >&2
     exit 1
 fi
+
+# Resolve relative path with respect to git root directory
+GIT_ROOT_DIR="$(realpath "$(git rev-parse --show-toplevel)")"
+REL_GIT_PATH_TO_FILE="$(realpath "$GIT_PATH_TO_FILE" | perl -pe "s@$GIT_ROOT_DIR/@@;")"
 
 # extract just a filename from given relative path (will be used in result file names)
 GIT_SHORT_FILENAME=$(basename "$GIT_PATH_TO_FILE")
 
 # create folder to store all revisions of the file
 if [ ! -d "${EXPORT_TO}" ]; then
-    echo "creating folder: ${EXPORT_TO}"
+    $verbose && echo "creating folder: ${EXPORT_TO}"
     mkdir "${EXPORT_TO}"
 fi
 
@@ -60,52 +68,20 @@ fi
 # reset coutner
 COUNT=0
 
-# iterate all revisions
-##
-## OLD:
-## git rev-list --all --objects -- ${GIT_PATH_TO_FILE} | \
-##     cut -d ' ' -f1 | \
-## while read h; do \
-##      COUNT=$((COUNT + 1)); \
-##      COUNT_PRETTY=$(printf "%04d" $COUNT); \
-##      COMMIT_DATE=`git show $h | head -3 | grep 'Date:' | awk '{print $4"-"$3"-"$6}'`; \
-##      if [ "${COMMIT_DATE}" != "" ]; then \
-##          git cat-file -p ${h}:${GIT_PATH_TO_FILE} > ${EXPORT_TO}/${COUNT_PRETTY}.${COMMIT_DATE}.${h}.${GIT_SHORT_FILENAME};\
-##      fi;\
-## done    
-##
-# note: -r treats backslash literally
-##
-## OLD2:
-## (while read -r h; do 
-##      COUNT=$((COUNT + 1));
-##      COUNT_PRETTY=$(printf "%04d" $COUNT);
-##      COMMIT_DATE=$(git show "$h" | head -3 | grep 'Date:' | awk '{print $4"-"$3"-"$6}');
-##      if [ "${COMMIT_DATE}" != "" ]; then
-##          git cat-file -p "${h}:${GIT_PATH_TO_FILE}" > "${EXPORT_TO}/${GIT_SHORT_FILENAME}.${COUNT_PRETTY}.${COMMIT_DATE}";
-##  
-##      fi;
-## done) <<<"$(git rev-list --all --objects -- "${GIT_PATH_TO_FILE}" |  cut -d ' ' -f1)"
-##
-## ALT:
-## git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$FILE_PATH" | grep -v '^commit' | \
-##     while read LINE; do \
-##         COMMIT_DATE=`echo $LINE | cut -d ' ' -f 1`; \
-##         COMMIT_SHA=`echo $LINE | cut -d ' ' -f 2`; \
-##         printf '.' ; \
-##         git cat-file -p "$COMMIT_SHA:$FILE_PATH" > "$EXPORT_TO/$COMMIT_DATE.$COMMIT_SHA.$FILE_NAME" ; \
-##     done
-## echo
-
-(while read -r LINE; do
-     # ex: 2021-05-09T22:27:20-05:00 d124b2a3c1de2b2c0cd834b0fa9097e871d7f141
-     COUNT=$((COUNT + 1))
-     COMMIT_DATE=$(echo "$LINE" | cut -d ' ' -f 1)
-     COMMIT_SHA=$(echo "$LINE" | cut -d ' ' -f 2)
-     printf '.'
-     git cat-file -p "$COMMIT_SHA:$GIT_PATH_TO_FILE" > "$EXPORT_TO/$GIT_SHORT_FILENAME.$COUNT.$COMMIT_DATE"
-done) <<<"$(git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit')"
+base=$(basename "$0" .bash)
+info="$TMP/_$base.$$.info"
+git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
+while read -r LINE; do
+    # ex: 2021-05-09T22:27:20-05:00 d124b2a3c1de2b2c0cd834b0fa9097e871d7f141
+    COUNT=$((COUNT + 1))
+    COMMIT_DATE=$(echo "$LINE" | cut -d ' ' -f 1)
+    COMMIT_SHA=$(echo "$LINE" | cut -d ' ' -f 2)
+    ## DEBUG: echo "COUNT=$COUNT LINE=$LINE COMMIT_DATE=$COMMIT_DATE COMMIT_SHA=$COMMIT_SHA"
+    $verbose && printf '.'
+    git cat-file -p "$COMMIT_SHA:$REL_GIT_PATH_TO_FILE" > "$EXPORT_TO/$GIT_SHORT_FILENAME.$COUNT.$COMMIT_DATE"
+done <"$info"
 
 # return success code
-echo "result stored to ${EXPORT_TO}"
+$verbose && echo ""
+echo "$COUNT versions stored in ${EXPORT_TO} for $GIT_PATH_TO_FILE"
 exit 0
