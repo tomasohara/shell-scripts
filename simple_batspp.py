@@ -99,6 +99,8 @@ TESTFILE = 'testfile' # target test path
 OUTPUT   = 'output'   # output BATS test
 VERBOSE  = 'verbose'  # show verbose debug
 SOURCE   = 'source'   # source another file
+JUPYTER  = 'jupyter'  # run jupyter conversion (i.e., ipynb to .batspp)
+FORCE    = 'force'    # run bats even if admin-like user
 
 # Environment options
 TMP = system.getenv_text("TMP", "/tmp",
@@ -281,6 +283,8 @@ class Batspp(Main):
     output       = ''
     source       = ''
     verbose      = False
+    force        = False
+    jupyter      = False
 
 
     # Global States
@@ -297,17 +301,29 @@ class Batspp(Main):
         self.testfile     = self.get_parsed_argument(TESTFILE, "")
         self.output       = self.get_parsed_argument(OUTPUT, "")
         self.source       = self.get_parsed_argument(SOURCE, "")
+        self.jupyter      = self.get_parsed_option(JUPYTER, self.jupyter)
+        self.force        = self.get_parsed_option(FORCE, self.force)
         self.verbose      = (self.has_parsed_option(VERBOSE) or system.getenv("VERBOSE"))
 
         debug.trace(T7, (f'batspp - testfile: {self.testfile}, '
                          f'output: {self.output}, '
                          f'source: {self.source}, '
+                         f'force: {self.force}, '
+                         f'jupyter: {self.jupyter}, '
                          f'verbose: {self.verbose}'))
 
 
     def run_main_step(self):
         """Process main script"""
+        # TODO4: remove temp files unless debugging
 
+        # Optionally convert Jupyter notebook (.ipynb) to BatsPP file (.batspp)
+        if self.jupyter:
+            debug.assertion(self.testfile.endswith("ipynb"))
+            temp_batspp_file = self.temp_file + ".batspp"
+            gh.run(f"jupyter_to_batspp.py --output '{temp_batspp_file}' '{self.testfile}'")
+            self.testfile = temp_batspp_file
+        
         # Check if is test of shell script file
         self.is_test_file = (TEST_FILE or self.testfile.endswith(BATSPP_EXTENSION))
         debug.trace(T7, f'batspp - {self.testfile} is a test file (not shell script): {self.is_test_file}')
@@ -339,7 +355,7 @@ class Batspp(Main):
 
 
         # Save Bats file
-        gh.write_file(batsfile, self.bats_content)
+        system.write_file(batsfile, self.bats_content)
 
 
         # Add execution permission to directly run the result test file
@@ -347,7 +363,16 @@ class Batspp(Main):
             gh.run(f'chmod +x {batsfile}')
 
 
-        # Run
+        # Run unless adminstrative user and --force not 
+        skip_bats = SKIP_BATS
+        if not skip_bats:
+            is_admin = my_re.search(r"root|admin|adm", gh.run("groups"))
+            if is_admin:
+                if not self.force:
+                    system.exit("Error: running bats under admin-like account requires --{force} option", force=FORCE)
+                system.print_error("FYI: not recommended to run under admin account")
+    
+            
         if not SKIP_BATS:
             debug.trace(T7, f'batspp - running test {self.temp_file}')
             debug.assertion(not (BASH_EVAL and BATS_OPTIONS.strip()))
@@ -1050,7 +1075,9 @@ if __name__ == '__main__':
     app = Batspp(description          = __doc__,
                  ## TODO: use_temp_base_dir=True,
                  positional_arguments = [(TESTFILE, 'test file path')],
-                 boolean_options      = [(VERBOSE,  'show verbose debug')],
+                 boolean_options      = [(VERBOSE,  'show verbose debug'),
+                                         (FORCE,    'Run even under admin-like account'),
+                                         (JUPYTER,  'Convert jupyter file to batspp')],
                  text_options         = [(OUTPUT,   'target output .bats filepath'),
                                          (SOURCE,   'file to be sourced')],
                  manual_input         = True)
