@@ -2191,8 +2191,11 @@ function uncompress-dir() {
 alias compress-this-dir='compress-dir $PWD'
 alias ununcompress-this-dir='uncompress-dir $PWD'
 
-alias old-count-exts='$LS | count-it "\.[^.]*\w" | sort $SORT_COL2 -rn | $PAGER'
+# count-exts(): tabulate the file extensions in current directory
+# count-exts-all(): likewise including cases with no extension (e.g., 'it')
+## OLD: alias old-count-exts='$LS | count-it "\.[^.]*\w" | sort $SORT_COL2 -rn | $PAGER'
 function count-exts () { $LS | count-it '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
+function count-exts-all { (count-exts | cat; $LS | count-it '^[^.]+(\.*)$') | sort $SORT_COL2 -rn | $PAGER; }
 
 alias kill-iceweasel='kill_em.sh iceweasel'
 
