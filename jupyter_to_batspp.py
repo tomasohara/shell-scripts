@@ -25,6 +25,7 @@ import re
 from mezcla.main import Main
 from mezcla import debug
 from mezcla import glue_helpers as gh
+from mezcla import system
 
 
 # Command-line labels constants
@@ -67,7 +68,7 @@ class JupyterToBatspp(Main):
 
         # Get Jupyter content
         assert self.jupyter_file.endswith(JUPYTER_EXTENSION), f'the file {self.jupyter_file} must be an Jupyter notebook'
-        jupyter_content = gh.read_file(self.jupyter_file)
+        jupyter_content = system.read_file(self.jupyter_file)
         assert jupyter_content != '', f'Error: {self.jupyter_file} not founded or is empty'
 
 
@@ -125,7 +126,7 @@ class JupyterToBatspp(Main):
 
 
         # Save Batspp file
-        gh.write_file(self.output, batspp_content)
+        system.write_file(self.output, batspp_content)
 
 
         # Print output
