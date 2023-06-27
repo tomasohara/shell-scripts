@@ -2714,8 +2714,10 @@ fi
 #
 ## OLD: alias ps-python-full='ps-all python'
 alias ps-python-full='ps-mine python'
-# note: excludes ipython and known system-related python scripts
-alias ps-python='ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|update-manager|software-properties|networkd-dispatcher)"'
+# note: excludes ipython and known system-related python scripts;
+# also excludes related bash and time processes.
+## OLD: alias ps-python='ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|update-manager|software-properties|networkd-dispatcher)"'
+alias ps-python='ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|perl-regexp|update-manager|software-properties|networkd-dispatcher|((bash|emacs|time) .*python))"'
 alias show-python-path='show-path-dir PYTHONPATH'
 
 # Remove compiled files .pyc for regular (debug) version and .pyo for optimized
