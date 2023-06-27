@@ -678,6 +678,7 @@ function git-checkout-branch {
         echo "Error: unknown branch '$branch'"
     fi;
 }
+simple-alias-fn git-branch-checkout  git-checkout-branch 
 
 #-------------------------------------------------------------------------------
 
