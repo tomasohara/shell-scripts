@@ -134,7 +134,7 @@ OMIT_MISC = system.getenv_bool("OMIT_MISC", False,
 TEST_FILE = system.getenv_bool("TEST_FILE", False,
                                "Treat input as example-base test file, not a bash script")
 BASH_EVAL = system.getenv_bool("BASH_EVAL", False,
-                               "Evaluate tests via bash rather than bats--for quicker results")
+                               "Evaluate tests via bash rather than bats: provides quicker results and global context")
 #
 # Shameless hacks
 ## TEST: GLOBAL_SETUP = system.getenv_text("GLOBAL_SETUP", " ",
@@ -322,6 +322,9 @@ class Batspp(Main):
             debug.assertion(self.testfile.endswith("ipynb"))
             temp_batspp_file = self.temp_file + ".batspp"
             gh.run(f"jupyter_to_batspp.py --output '{temp_batspp_file}' '{self.testfile}'")
+            ## DEBUG (tracking down TEMP_FILE issue):
+            ## gh.run(f"cp -v {temp_batspp_file} /tmp")
+            ## debug.assertion(system.file_exists(gh.form_path("/tmp", gh.basename(temp_batspp_file, temp_batspp_file))))
             self.testfile = temp_batspp_file
         
         # Check if is test of shell script file
@@ -370,7 +373,7 @@ class Batspp(Main):
             if is_admin:
                 if not self.force:
                     system.exit("Error: running bats under admin-like account requires --{force} option", force=FORCE)
-                system.print_error("FYI: not recommended to run under admin account")
+                system.print_error("FYI: not recommended to run under admin-like account (to avoid inadvertant deletions, etc..)")
     
             
         if not SKIP_BATS:
@@ -478,14 +481,12 @@ class Batspp(Main):
             system.write_file(gh.form_path(TMP, "file_content.list"), file_content)
         #
         all_test_ids = []
-        ## OLD: self.bats_content += command_tests.get_bats_tests(file_content)
         content, ids = command_tests.get_bats_tests(file_content)
         self.bats_content += content
         all_test_ids += ids
         
         if not self.is_test_file:
             # TODO: sort combined set of tests based on file offset to make order more intuitive
-            ## OLD: self.bats_content += function_tests.get_bats_tests(file_content)
             content, ids = function_tests.get_bats_tests(file_content)
             self.bats_content += content
             all_test_ids += ids
