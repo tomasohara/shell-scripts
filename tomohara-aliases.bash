@@ -173,6 +173,7 @@ alias cond-setenv='conditional-export'
 #   environment variables to be set as in 'alias-fn echo-ENV1 'echo "$ENV1"'; ENV1=one echo-ENV1
 # - Use dummy command if a background command is invoked: gotta hate Bash!
 #   ex: alias-fn eyes 'xeyes & true'
+# - General version as replacement for complex aliases with multiple commands
 ##
 # ex: alias-fn trace-PS1 'echo \$PS1="$PS1" 1>&2'
 # TODO: fix problem with embedded invocations (see em-adhoc-notes below)
@@ -181,8 +182,19 @@ function alias-fn {
     shift
     local body="$*"
     eval "function $alias { $body; }"
-    }
-
+}
+# simple-alias-fn(name, command): variant that takes command and appends "$@"
+# Note: this is streamlined version of alias-fn intended as replacement for 'alias name=command' usages
+function simple-alias-fn {
+    if [ "$3" != "" ]; then
+	echo "usage: simple-alias-fn alias command"
+	echo "note: '\$\@' gets appended to command"
+	return
+    fi
+    local alias="$1"
+    local command="$2"
+    eval "function $alias { $command \"\$@\"; }"
+}
 #................................................................................
 # General environment settings
 ## TOM-IDIOSYNCRATIC
