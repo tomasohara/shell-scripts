@@ -2712,7 +2712,8 @@ if [[ ! "$PATH" =~ mezcla ]]; then
     true
 fi
 #
-alias ps-python-full='ps-all python'
+## OLD: alias ps-python-full='ps-all python'
+alias ps-python-full='ps-mine python'
 # note: excludes ipython and known system-related python scripts
 alias ps-python='ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|update-manager|software-properties|networkd-dispatcher)"'
 alias show-python-path='show-path-dir PYTHONPATH'
