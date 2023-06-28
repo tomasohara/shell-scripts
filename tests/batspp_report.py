@@ -164,9 +164,9 @@ else:
             print(f"\nBATSPP FILE DETECTED [{i}]: {batsppfile} => {bats_from_batspp}\n")
             
             if TXT_OPTION == 1:
-                TXT_MESSAGE = f"REPORT PATH: ./{TXT_STORE}/{txt_from_batspp}"
-                gh.run(f"{BATSPP_SWITCH_COND} ./{BATSPP_STORE}/{batsppfile} --output ./{TXT_STORE}/{txt_from_batspp}")
-                print (gh.indent(TXT_MESSAGE, indentation="  >>  ", max_width=512))
+                TXT_MESSAGE = f"OUTPUT PATH: ./{TXT_STORE}/{txt_from_batspp}"
+                # gh.run(f"{BATSPP_SWITCH_COND} ./{BATSPP_STORE}/{batsppfile} --output ./{TXT_STORE}/{txt_from_batspp}")
+                print (gh.indent(TXT_MESSAGE, indentation="  -  ", max_width=512))
                 i += 1
 
             else:

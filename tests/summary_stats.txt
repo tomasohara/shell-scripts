@@ -1,0 +1,178 @@
+
+====================================
+    LIST MODE (--list) ENABLED
+
+------------------------------------
+LARGEST TESTFILES (DESC): 
+------------------------------------
+1) trace-extensionless-shortcut-V2
+						[556]
+2) alias-trace-misc-commands
+						[524]
+3) trace-python-commands
+						[474]
+4) trace-unix-alias
+						[361]
+5) trace-linux-admin-alias
+						[321]
+5) testbook-test-dir-aliases
+						[321]
+7) dir-aliases-test-revised
+						[296]
+8) json-related-alias
+						[295]
+9) test-dir-alias
+						[267]
+9) trace-file-manipulation
+						[267]
+11) trace-unix-general
+						[251]
+12) alias-grep-commands
+						[238]
+12) trace-line-words-commands
+						[238]
+14) alias-calculator-commands
+						[226]
+15) trace-setup-sorting-wrappers
+						[212]
+16) test-cond-env-setting
+						[198]
+17) command-override-cp-mv
+						[183]
+18) alias-cd-commands
+						[170]
+19) trace-extensionless-shortcut-unicode
+						[169]
+20) alias-html-test
+						[168]
+21) test-check-errors
+						[142]
+22) calc-entropy-tests
+						[141]
+23) hello-world-source
+						[126]
+24) hello-world-revised
+						[114]
+25) test-tomohara-aliases-access
+						[86]
+26) more-tomohara-aliases-test
+						[72]
+27) hello-world-basic
+						[44]
+28) simple-alias-test
+						[30]
+28) tomasohara-aliases-test
+						[30]
+30) empty-test-file
+						[16]
+30) hello-world
+						[16]
+30) alt-simple-alias-test
+						[16]
+
+------------------------------------
+MOST SUCCESSFUL TESTFILES (DESC): 
+------------------------------------
+1) empty-test-file
+						[1.0]
+1) hello-world
+						[1.0]
+1) hello-world-basic
+						[1.0]
+1) alt-simple-alias-test
+						[1.0]
+5) trace-unix-general
+						[0.9522]
+6) command-override-cp-mv
+						[0.9344]
+7) test-tomohara-aliases-access
+						[0.9302]
+8) alias-html-test
+						[0.9286]
+9) more-tomohara-aliases-test
+						[0.9167]
+10) test-cond-env-setting
+						[0.9091]
+11) trace-extensionless-shortcut-unicode
+						[0.8935]
+12) testbook-test-dir-aliases
+						[0.8879]
+13) test-dir-alias
+						[0.8876]
+14) alias-grep-commands
+						[0.8739]
+15) test-check-errors
+						[0.8732]
+16) alias-cd-commands
+						[0.8588]
+17) dir-aliases-test-revised
+						[0.8581]
+18) hello-world-source
+						[0.8571]
+19) trace-unix-alias
+						[0.8504]
+20) trace-file-manipulation
+						[0.8427]
+21) alias-trace-misc-commands
+						[0.8397]
+22) trace-linux-admin-alias
+						[0.8318]
+23) trace-extensionless-shortcut-V2
+						[0.8273]
+24) trace-line-words-commands
+						[0.8235]
+25) trace-setup-sorting-wrappers
+						[0.8019]
+26) simple-alias-test
+						[0.8]
+27) hello-world-revised
+						[0.7895]
+28) alias-calculator-commands
+						[0.7876]
+29) json-related-alias
+						[0.7559]
+30) trace-python-commands
+						[0.7468]
+31) calc-entropy-tests
+						[0.7021]
+32) tomasohara-aliases-test
+						[0.6]
+
+=====================================
+
+
+[SUMMARY MODE (--summary) ENABLED]
+
+===============================================
+
+SUMMARY STATISTICS: 
+------------------------------------
+
+EXCLUDED TESTS: None
+EXCLUSIVELY INCLUDED TESTS: None
+
+REPORTS DETECTED: [32]
+Total Instrumented Lines = 6568
+Total Covered Lines = 5548
+Coverage Ratio: 
+   1. AVERAGE = 0.8613
+   2. MEDIAN = 0.8584
+   3. TOTAL LINES (COV/INS) = 0.8447
+
+FILES FACTS:
+------------------------------------
+
+Largest Testfile:
+>> trace-extensionless-shortcut-V2 [LINES = 556]
+
+Smallest Testfile:
+>> alt-simple-alias-test [LINES = 16]
+
+Highest Success Rate:
+>> alt-simple-alias-test [RATIO = 1.0]
+
+Lowest Success Rate:
+>> tomasohara-aliases-test [RATIO = 0.6]
+
+===============================================
+
