@@ -105,7 +105,8 @@ FORCE    = 'force'    # run bats even if admin-like user
 # Environment options
 TMP = system.getenv_text("TMP", "/tmp",
                          "Temporary directory")
-TEMP_DIR =  system.getenv_text("TEMP_DIR", gh.form_path(TMP, f"batspp-{os.getpid()}"),
+TEMP_DIR_DEFAULT = (gh.TEMP_BASE or gh.form_path(TMP, f"batspp-{os.getpid()}"))
+TEMP_DIR =  system.getenv_text("TEMP_DIR", TEMP_DIR_DEFAULT,
                                "Temporary directory to use for tests")
 COPY_DIR = system.getenv_bool("COPY_DIR", False,
                               "Copy current directory to temp. dir for input files, etc.")
@@ -874,7 +875,7 @@ class CustomTestsToBats:
 
             test = self._first_process(match)
             debug.assertion(len(test) == 5, f'Incorrect number of fields, every test should be {TestFieldTypes._fields}')
-            # Add global setup section to directly BATS output mostly as is (except for prompt removal)
+            # Add global setup section directly to BATS output mostly as is (except for prompt removal)
             # pylint: disable=no-member
             if re.search(r"^\s*# Global Setup", test.entire, flags=(re.MULTILINE | re.IGNORECASE)):
                 global_setup = my_re.sub(r'^\s*\$\s*', '', test.entire, flags=re.MULTILINE)
