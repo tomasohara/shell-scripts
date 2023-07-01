@@ -1,4 +1,19 @@
 # Docker file to support CI/CD via Github actions
+#
+# Usage:
+# 1. Build the image:
+#   $ docker build -t shell-scripts-dev -f- . <Dockerfile
+#   # TODO: build --platform linux/x86_64 ...
+# 2. Run tests using the created image (n.b., uses entrypoint at end below with run_tests.bash):
+#   $ docker run -it --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+#   NOTE: --rm removes container afterwards; -it is for --interactive with --tty
+#   TODO: --mount => --volume???
+# 3. [Optional] Run a bash shell using the created image:
+#   $ docker run -it --rm --entrypoint='/bin/bash' --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+# 4. Remove the image:
+#   $ docker rmi shell-scripts-dev
+#
+
 
 # Use the GitHub Actions runner image with Ubuntu
 FROM ghcr.io/catthehacker/ubuntu:act-latest
@@ -41,3 +56,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+# Run the test, normally pytest over mezcla/tests
+# Note: the status code (i.e., $?) determines whether docker run succeeds (e.h., OK if 0)
+ENTRYPOINT './tests/run_tests.bash'
