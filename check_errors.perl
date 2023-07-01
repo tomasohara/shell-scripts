@@ -199,6 +199,7 @@ while (<>) {
 	    || /: warning\b/		# Ruby warnings
 	    || /^bash: /                # ex: "bash: [: : unary operator expected"
 	    || /Traceback|\S+Error/     # Python exceptions (caught)
+	    || /\b\S+Warning/           # Python warning (e.g., RuntimeWarning)
 	    || (/exception|failed/      # logger messages (e.g., "Training job failed")
 		&& $strict)
 	    || ($asterisks && /\*\*\*/))) {
