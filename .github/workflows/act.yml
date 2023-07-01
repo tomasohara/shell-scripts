@@ -2,13 +2,16 @@
 
 name: Tests
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+## OLD [WTF? This is supposed to be local testing!]
+## on:
+##   push:
+##     branches:
+##       - main
+##   pull_request:
+##     branches:
+##       - main
+
+on: [push, pull_request]
 
 jobs:
   build:
