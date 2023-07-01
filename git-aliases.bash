@@ -653,8 +653,9 @@ alias git-invoke-next-single-checkin=invoke-next-single-checkin
 # NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
 # shellcheck disable=SC2139
 alias-fn git-alias-refresh "source '${BASH_SOURCE[0]}'"    # bash idiom for current script filename
-alias-fn git-refresh-aliases 'git-alias-refresh'
-alias-fn git-next-checkin 'invoke-alt-checkin'
+simple-alias-fn git-refresh-aliases 'git-alias-refresh'
+simple-alias-fn git-next-checkin 'invoke-alt-checkin'
+simple-alias-fn git-extract-all-versions 'extract-all-git-versions.bash'
 ## TEST: hide tracing output alias git-next-checkin='invoke-alt-checkin 2> /dev/null'
 # TODO:
 # NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
