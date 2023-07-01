@@ -142,6 +142,7 @@ esac
 ## export PAGER_NOEXIT="less -+F"
 ## function zless () { zcat "$@" | $PAGER; }
 ## alias less-="$PAGER_NOEXIT"
+alias less-pager="$PAGER_NOEXIT"
 ## alias less-tail="$PAGER_NOEXIT +G"
 ## export ZPAGER=zless
 
@@ -1445,7 +1446,7 @@ cond-setenv ENGLISH_DICT $multiling_dir/spanish/english_spanish.dict
 # NOTE: grep flags file UTF-8 indicator at top as binary
 dict_grep="zegrep --ignore-case --text"
 dict_word_grep="$dict_grep --word-regexp"
-function spanish-lookup- () { $dict_grep "$@" $SPANISH_DICT | less- -S; }
+function spanish-lookup- () { $dict_grep "$@" $SPANISH_DICT | less-pager -S; }
 ## OLD: function old-spanish-lookup () { $dict_grep "((^$@)|(	$@))\b" $SPANISH_DICT; }
 # Note: spanish-lookup only looks for entry words (i.e., accent-less key or entry word)
 # whereas spanish-lookup- checks entire entry. Likewise for english-lookup[-]
