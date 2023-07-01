@@ -14,17 +14,25 @@ REPO_DIR_NAME="shell-scripts"
 IMAGE_NAME="local/test-act:latest"
 ACT_WORKFLOW="ubuntu-latest=local/test-act"
 ACT_PULL="false"
+LOCAL_REPO_DIR="$PWD"
 
-## BAD (local workflows are intended for testing before checkin!):
-## # Clone the GitHub repository
-## echo "Cloning repository: $REPO_URL"
-## git clone "$REPO_URL"
-## cd "$REPO_DIR_NAME"
+# Optionally clone the GitHub repository into temp. dir
+# note: normally skipped as local workflows intended for testing before checkin
+if [ "${CLONE_REPO:-0}" = "1" ]; then
+    echo "Cloning repository: $REPO_URL"
+    cd "$TMP"
+    git clone "$REPO_URL"
+    cd "$REPO_DIR_NAME"
+fi
 
-## OLD (Now uses ./requirements.txt):
-## # Generate pip requirements file
-## echo "Generating pip requirements file"
-## pipreqs .
+# Optionally, generate pip requirements file
+# Note: normally uses ./requirements.txt (n.b., avoid extraneous modules in one off scripts)
+export REQUIREMENTS="$LOCAL_REPO_DIR/requirements.txt"
+if [ "${AUTO_REQS:-0}" = "1" ]; then
+    export REQUIREMENTS="$PWD/requirements.auto"
+    echo "Generating pip requirements file ($REQUIREMENTS)"
+    pipreqs --print "$LOCAL_REPO_DIR" > "$REQUIREMENTS"
+fi
 
 # Build the Docker image
 echo "Building Docker image: $IMAGE_NAME"
