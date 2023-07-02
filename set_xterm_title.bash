@@ -105,7 +105,8 @@
 # TODO: put argument processing in loop (see template.bash)
 ## NOTE: Uses /tmp as the files accumlate a lot over time
 ## OLD: restore_base="$TMP/_set_xterm_title.$USER.$PPID"
-restore_base="/tmp/_set_xterm_title.$USER.$PPID"
+restore_base="/tmp/set-xterm-title/.$USER.$PPID"
+mkdir --parents "$restore_base"
 restore_title=0
 save_title=1
 print_full=0
