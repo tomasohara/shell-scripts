@@ -86,6 +86,15 @@
 ## echo "$@"
 ## set -o xtrace
 ## DEBUG: set -o verbose
+#
+## ALT:
+## # Set bash tracing
+## if [ "${TRACE:-0}" = "1" ]; then
+##     set -o xtrace
+## fi
+## if [ "${VERBOSE:-0}" = "1" ]; then
+##     set -o verbose
+## fi
 
 # Show usage statement
 # TODO: convert into a function that get invoked when $1 is empty or --help
