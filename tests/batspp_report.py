@@ -79,11 +79,6 @@ def main():
             gh.full_mkdir(dir_path)
 
     batspp_count = 0
-<<<<<<< Updated upstream
-=======
-
-    # 0.2) Option Parsing
->>>>>>> Stashed changes
 
     # 0.2) Option Parsing
     NO_REPORTS_ARG = "no"
@@ -93,7 +88,6 @@ def main():
     BATSPP_SWITCH_ARG = "switch"
     FORCE_ARG = "force"
     CLEAN_ARG = "clean"
-<<<<<<< Updated upstream
     main_app = Main(
         description=__doc__.format(script=gh.basename(__file__)).strip("\n"),
         boolean_options=[
@@ -109,19 +103,6 @@ def main():
         manual_input=False,
         short_options=True,
     )
-=======
-    main_app = Main(description=__doc__.format(script=gh.basename(__file__)).strip("\n"),
-                    boolean_options=[
-                        (NO_REPORTS_ARG, "No reports are generated, testfiles are shown"),
-                        (KCOV_REPORTS_ARG, f"KCOV (HTML based) reports generated, stored at ./{KCOV_STORE}"),
-                        (TEXT_REPORTS_ARG, f"Textfile based reports generated, stored at ./{TXT_STORE}"),
-                        (ALL_REPORTS_ARG, "Generates report for all available testfiles (NOBATSPP testfiles were ignored by default)"),
-                        (FORCE_ARG, "Force running under adm account"),
-                        (CLEAN_ARG, "Remove output from previous runs--warning removes entire directories"),
-                        (BATSPP_SWITCH_ARG, "Uses batspp library instead of ../simple_batspp.py script")],
-                    skip_input=False, manual_input=False, short_options=True)
-    debug.assertion(main_app.parsed_args)
->>>>>>> Stashed changes
     #
     debug.assertion(main_app.parsed_args)
     NO_OPTION = main_app.get_parsed_option(NO_REPORTS_ARG)
@@ -132,10 +113,7 @@ def main():
     CLEAN_OPTION = main_app.get_parsed_option(CLEAN_ARG)
     BATSPP_SWITCH_OPTION = main_app.get_parsed_option(BATSPP_SWITCH_ARG)
     USE_SIMPLE_BATSPP = (not BATSPP_SWITCH_OPTION)
-<<<<<<< Updated upstream
     debug.trace_expr(4, NO_OPTION, TXT_OPTION, KCOV_OPTION, FORCE_OPTION, CLEAN_OPTION, BATSPP_SWITCH_OPTION, USE_SIMPLE_BATSPP)
-=======
->>>>>>> Stashed changes
 
     # Do check for adminstrative user and exit unless --force
     is_admin = my_re.search(r"root|admin|adm", gh.run("groups"))
@@ -143,7 +121,6 @@ def main():
         if not FORCE_OPTION:
             msy.exit("Error: running under admin account requires --force option")
         msy.print_stderr("FYI: not recommended to run under admin account")
-<<<<<<< Updated upstream
 
     # Cleanup up previous rusn
     # Warning: 'rm -rf' is a very dangerous command:
@@ -180,24 +157,6 @@ def main():
     ## # TODO2: use directory for (e.g., ./resources)
     ## debug.trace(4, "Copying over potential input files into bats directory")
     ## gh.run(f"cp -vf *.html *.input* *.yaml *.list *.rst *.txt *.text ./{BATS_STORE}/")
-=======
-    
-    if CLEAN_OPTION and not NO_OPTION:
-        gh.run(f"rm -rf ./{BATSPP_STORE}/*")
-        gh.run(f"rm -rf ./{BATS_STORE}/*")
-        
-    if CLEAN_OPTION and KCOV_OPTION:
-        gh.run(f"rm -rf ./{KCOV_STORE}/*")
-    
-    ## OLD: BATSPP_SWITCH_COND = "PARA_BLOCKS=1 ../simple_batspp.py" if not BATSPP_SWITCH_OPTION else "batspp"
-    ##
-    def run_batspp(input_file, output_file):
-        """Run BatsPP over INPUT_FILE to produce OUTPUT_FILE"""
-        if USE_SIMPLE_BATSPP:
-            gh.run(f"PARA_BLOCKS=1 ../simple_batspp.py {input_file} --output ./{output_file}")
-        else:
-            gh.run(f"batspp {input_file} --save ./{output_file}")
->>>>>>> Stashed changes
     
     # 1) Identifying .ipynb files
     i = 1
@@ -276,7 +235,6 @@ def main():
                     debug.assertion(my_re.search(r"^1\.\.\d+", header_line))
                 debug.assertion(len(output_lines_filtered))
                 
-<<<<<<< Updated upstream
                 ## BAD: count_total = len(output_lines_filtered)
                 count_ok = len([item for item in output_lines_filtered if item.startswith("ok")])
                 count_bad = len([item for item in output_lines_filtered if item.startswith("not ok")])
@@ -300,24 +258,6 @@ def main():
             else:
                 run_batspp(f"./{BATSPP_STORE}/{batsppfile}", f"./{BATS_STORE}/{bats_from_batspp}")
                 gh.run(f"kcov ./{KCOV_STORE}/{test_extensionless} bats ./{BATS_STORE}/{bats_from_batspp}")
-=======
-                if TXT_OPTION:
-                    TXT_MESSAGE = f"REPORT PATH: ./{TXT_STORE}/{txt_from_batspp}"
-                    ## OLD: gh.run(f"{BATSPP_SWITCH_COND} ./{BATSPP_STORE}/{batsppfile} --output ./{TXT_STORE}/{txt_from_batspp}")
-                    run_batspp(f"./{BATSPP_STORE}/{batsppfile}", f"./{TXT_STORE}/{txt_from_batspp}")
-                    print (gh.indent(TXT_MESSAGE, indentation="  >>  ", max_width=512))
-                    i += 1
-    
-                else:
-                    ## OLD: gh.run(f"{BATSPP_SWITCH_COND} ./{BATSPP_STORE}/{batsppfile} --output ./{BATS_STORE}/{bats_from_batspp}")
-                    run_batspp(f"./{BATSPP_STORE}/{batsppfile}", f"./{BATS_STORE}/{bats_from_batspp}")
-                    i += 1
-                    
-                    if KCOV_OPTION:
-                        KCOV_MESSAGE = f"KCOV REPORT PATH: ./{KCOV_STORE}/{kcov_folder}/"
-                        print(gh.indent(KCOV_MESSAGE, indentation="  >>  ", max_width=512))
-                        gh.run(f"kcov ./{KCOV_STORE}/{kcov_folder} bats ./{BATS_STORE}/{bats_from_batspp}")
->>>>>>> Stashed changes
                     
                 if KCOV_OPTION:
                     KCOV_MESSAGE = f"KCOV REPORT PATH: ./{KCOV_STORE}/{test_extensionless}/"
@@ -357,7 +297,7 @@ def main():
     else:
         for tf in error_testfiles:
             print(f">> {tf}")
-
+            
     print("\nAVOIDED TESTFILES:")
     if avoid_count == 0:
         print("NaN")
