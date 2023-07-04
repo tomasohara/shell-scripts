@@ -2,8 +2,8 @@
 #
 # Usage:
 # 1. Build the image:
-#   $ docker build -t shell-scripts-dev -f- . <Dockerfile
-#   # TODO: build --platform linux/x86_64 ...
+#   $ docker build --tag shell-scripts-dev -f- . <Dockerfile
+#   # TODO: build --platform linux/x86_64 ...; what the hell is -f- for (why so effing cryptic, docker)!
 # 2. Run tests using the created image (n.b., uses entrypoint at end below with run_tests.bash):
 #   $ docker run -it --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
 #   NOTE: --rm removes container afterwards; -it is for --interactive with --tty
