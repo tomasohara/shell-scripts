@@ -503,7 +503,13 @@ alias git-revert-commit-alias='git-command revert'
 function git-diff-plus {
     local log;
     log=$(get-temp-log-name "diff");
-    git diff "$@" >| "$log";
+    # Perform diff and convert a/ and /b path prefixes to 'a: ' and 'b: '
+    # ex: diff --git a/.github/act.yml b/.github/... => "diff --git a: .github/,,,"
+    # ex: --- "a/.github/act.yml" => "--- a: .github/act.yml"
+    ## TODO? (account for subdirectories 'a' or 'b'):
+    ## git diff "$@" | perl -pe 's@^(diff|\-\-\-|\+\+\+) (?!.*[ab]/.*)([ab])/@\1\2 \3: @;' >| "$log";
+    local files=("$@")
+    git diff "${files[@]}" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >| "$log";
     less -p '^diff' "$log";
     ## TODO: less --quit-if-one-screen --pattern='^diff' "$log";
 }
