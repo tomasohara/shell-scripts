@@ -8,10 +8,19 @@
 #   This is a no-op otherwise (e.g., under Linux) as x64_64 is used by defauly.
 #
 
+# Set bash regular and/or verbose tracing
+if [ "${TRACE:-0}" = "1" ]; then
+    set -o xtrace
+fi
+if [ "${VERBOSE:-0}" = "1" ]; then
+    set -o verbose
+fi
+
 # Variables
 REPO_URL="https://github.com/tomasohara/shell-scripts.git"
 REPO_DIR_NAME="shell-scripts"
-IMAGE_NAME="local/test-act:latest"
+## OLD: IMAGE_NAME="local/test-act:latest"
+IMAGE_NAME="${REPO_DIR_NAME}-dev"
 ACT_WORKFLOW="ubuntu-latest=local/test-act"
 ACT_PULL="false"
 LOCAL_REPO_DIR="$PWD"
@@ -36,7 +45,8 @@ fi
 
 # Build the Docker image
 echo "Building Docker image: $IMAGE_NAME"
-docker build --platform linux/x86_64 -t "$IMAGE_NAME" .
+## OLD: docker build --platform linux/x86_64 -t "$IMAGE_NAME" .
+docker build --platform linux/x86_64 --tag "$IMAGE_NAME" .
 
 # Run the Github Actions workflow locally
 echo "Running Github Actions locally"
