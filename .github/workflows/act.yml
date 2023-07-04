@@ -1,6 +1,10 @@
 # Workflow for running locally (e.g., via https://github.com/nektos/act)
+#
+# Note:
+# - Invoked via local-workflows.sh:
+#   act --container-architecture linux/amd64 --pull="false" -P "ubuntu-latest=local/test-act" -W ./.github/workflows/act.yml
 
-name: Tests
+name: Act-Tests
 
 ## OLD [WTF? This is supposed to be local testing!]
 ## on:
@@ -23,7 +27,8 @@ jobs:
         python-version: ["3.9"]
 
     container:
-      image: local/test-act
+      ## OLD: image: local/test-act
+      image: shell-scripts-dev
       options: --user=root
 
     steps:
