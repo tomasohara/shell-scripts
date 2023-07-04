@@ -1,0 +1,777 @@
+1..34
+not ok 1 test-1
+# (in test file batspp-only/trace-python-commands.bats, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== echo $PS1
+#  ==========
+#
+# ========= [PEXP\[\]ECT_PROMPT> =========
+# [PEXP\[\]ECT_PROMPT>
+# ============================
+not ok 2 test-3
+# (in test file batspp-only/trace-python-commands.bats, line 59)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ alias | wc -l\n$ for f in ; do unset -f ; done\n$ typeset -f | egrep '^\w+' | wc -l\n0\n0 =========
+# $ alias | wc -l
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-10-actual ()
+# test-10-expected ()
+# PYTHONPATH:
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# END_EXPECTED
+# test-12-actual ()
+# test-12-expected ()
+# END_EXPECTED
+# test-13-actual ()
+# test-13-expected ()
+# END_EXPECTED
+# test-14-actual ()
+# test-14-expected ()
+# END_EXPECTED
+# test-15-actual ()
+# test-15-expected ()
+# matches /usr/local/lib/pythonN.NN/dist-packages/mezcla/__init__.py
+# matches /usr/local/lib/pythonN.NN/dist-packages/mezcla/__init__.py
+# matches /usr/local/lib/pythonN.NN/dist-packages/mezcla/debug.py
+# matches /usr/local/lib/pythonN.NN/dist-packages/mezcla/sys_version_info_hack.py
+# matches /usr/local/lib/pythonN.NN/dist-packages/mezcla/glue_helpers.py
+# matches /usr/local/lib/pythonN.NN/dist-packages/mezcla/system.py
+# matches /usr/local/lib/pythonN.NN/dist-packages/mezcla/tpo_common.py
+# END_EXPECTED
+# test-16-actual ()
+# test-16-expected ()
+# 2
+# END_EXPECTED
+# test-17-actual ()
+# test-17-expected ()
+# N.N.N
+# N.N.N
+# END_EXPECTED
+# test-18-actual ()
+# test-18-expected ()
+# END_EXPECTED
+# test-19-actual ()
+# test-19-expected ()
+# THIS IS THE HEAD
+# N
+# N
+# N
+# N
+# N
+# N
+# N
+# THIS IS THE TAIL.
+# END_EXPECTED
+# test-20-actual ()
+# test-20-expected ()
+# THIS IS THE HEAD
+# N
+# N
+# N
+# N
+# N
+# N
+# N
+# THIS IS THE TAIL.
+# END_EXPECTED
+# test-21-actual ()
+# test-21-expected ()
+# THIS IS THE HEAD
+# N
+# N
+# N
+# N
+# N
+# N
+# N
+# THIS IS THE TAIL.
+# END_EXPECTED
+# test-22-actual ()
+# test-22-expected ()
+# THIS IS THE HEAD
+# N
+# N
+# N
+# N
+# N
+# N
+# N
+# THIS IS THE TAIL.
+# END_EXPECTED
+# test-23-actual ()
+# test-23-expected ()
+# THIS IS THE HEAD
+# N
+# N
+# N
+# N
+# N
+# N
+# N
+# THIS IS THE TAIL.
+# END_EXPECTED
+# test-24-actual ()
+# test-24-expected ()
+# Cannot run file '/home/aveey/tom-project/shell-scripts/tests/../tests/auto_batspp.py' because: [Errno 2] No such file or directory: './batspp-only/'
+# Command exited with non-zero status 1
+# 0.08user 0.00system 0:00.10elapsed 82%CPU (0avgtext+0avgdata 12548maxresident)k
+# 0inputs+0outputs (0major+1816minor)pagefaults 0swaps
+# auto_batspp.py(N): """
+# auto_batspp.py(NN): import os
+# auto_batspp.py(NN): import sys
+# auto_batspp.py(NN): IPYNB = ".ipynb"
+# auto_batspp.py(NN): BATSPP = ".batspp"
+# auto_batspp.py(NN): BATS = ".bats"
+# auto_batspp.py(NN): TXT = ".txt"
+# auto_batspp.py(NN): BATSPP_STORE = r"batspp-only"
+# auto_batspp.py(NN): BATS_STORE = r"bats-only"
+# auto_batspp.py(NN): TXT_STORE = r"txt-reports"
+# auto_batspp.py(NN): KCOV_STORE = r"kcov-output"
+# auto_batspp.py(NN): files = os.listdir(r"./")
+# auto_batspp.py(NN): filesys_bpp = os.listdir(r"./batspp-only/")
+# END_EXPECTED
+# test-25-actual ()
+# test-25-expected ()
+# END_EXPECTED
+# test-26-actual ()
+# test-26-expected ()
+# Assuming implicit --no-glob, as otherwise  would be in extension
+# abcN.py vs. atest.py
+# Differences: abcN.py atest.py
+# NcN
+# atest.py vs. atest.py
+# xyz.py vs. atest.py
+# END_EXPECTED
+# test-27-actual ()
+# test-27-expected ()
+# END_EXPECTED
+# test-28-actual ()
+# test-28-expected ()
+# sleeping N seconds for log to stabalize (effing jupyter)
+# END_EXPECTED
+# test-29-actual ()
+# test-29-expected ()
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# 0
+# 0
+# END_EXPECTED
+# test-30-actual ()
+# test-30-expected ()
+# END_EXPECTED
+# test-31-actual ()
+# test-31-expected ()
+# END_EXPECTED
+# test-32-actual ()
+# test-32-expected ()
+# print('THIS IS A TEST10')
+# print('THIS IS A TEST10')
+# print('THIS IS A TEST11')
+# print('THIS IS A TEST12')
+# END_EXPECTED
+# test-33-actual ()
+# test-33-expected ()
+# abc1.py  atest.py  file1  link1  random_line_test.py  xyz.py
+# END_EXPECTED
+# test-34-actual ()
+# test-34-expected ()
+# 100  1256  100  1256    0     0    615      0  0:00:02  0:00:02 --:--:--   615
+# total NN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# file:////home/userxf333/tom-project/shell-scripts/tests/auto_batspp.py
+# END_EXPECTED
+# test-35-actual ()
+# test-35-expected ()
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# 0
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# NN
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# NN
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# test_test-2d11 ()
+# test_test-2d12 ()
+# test_test-2d13 ()
+# test_test-2d14 ()
+# test_test-2d15 ()
+# test_test-2d16 ()
+# 2' "=========";
+# test_test-2d17 ()
+# test_test-2d18 ()
+# test_test-2d19 ()
+# N
+# N
+# N
+# N
+# N
+# N
+# N
+# THIS IS THE TAIL.' "=========";
+# test_test-2d20 ()
+# N
+# N
+# N
+# N
+# N
+# N
+# N
+# THIS IS THE TAIL.' "=========";
+# test_test-2d21 ()
+# N
+# N
+# N
+# N
+# N
+# N
+# N
+# THIS IS THE TAIL.' "=========";
+# test_test-2d22 ()
+# N
+# N
+# N
+# N
+# N
+# N
+# N
+# THIS IS THE TAIL.' "=========";
+# test_test-2d23 ()
+# N
+# N
+# N
+# N
+# N
+# N
+# N
+# THIS IS THE TAIL.' "=========";
+# test_test-2d24 ()
+# Cannot run file '\''/home/aveey/tom-project/shell-scripts/tests/../tests/auto_batspp.py'\'' because: [Errno 2] No such file or directory: '\''./batspp-only/'\''
+# Command exited with non-zero status 1
+# 0.08user 0.00system 0:00.10elapsed 82%CPU (0avgtext+0avgdata 12548maxresident)k
+# 0inputs+0outputs (0major+1816minor)pagefaults 0swaps
+# auto_batspp.py(N): """
+# auto_batspp.py(NN): import os
+# auto_batspp.py(NN): import sys
+# auto_batspp.py(NN): IPYNB = ".ipynb"
+# auto_batspp.py(NN): BATSPP = ".batspp"
+# auto_batspp.py(NN): BATS = ".bats"
+# auto_batspp.py(NN): TXT = ".txt"
+# auto_batspp.py(NN): BATSPP_STORE = r"batspp-only"
+# auto_batspp.py(NN): BATS_STORE = r"bats-only"
+# auto_batspp.py(NN): TXT_STORE = r"txt-reports"
+# auto_batspp.py(NN): KCOV_STORE = r"kcov-output"
+# auto_batspp.py(NN): files = os.listdir(r"./")
+# auto_batspp.py(NN): filesys_bpp = os.listdir(r"./batspp-only/")' "=========";
+# test_test-2d25 ()
+# test_test-2d26 ()
+# Assuming implicit --no-glob, as otherwise  would be in extension
+# abcN.py vs. atest.py
+# Differences: abcN.py atest.py
+# NcN
+# atest.py vs. atest.py
+# xyz.py vs. atest.py
+# test_test-2d27 ()
+# test_test-2d28 ()
+# sleeping N seconds for log to stabalize (effing jupyter)
+# test_test-2d29 ()
+# test_test-2d3 ()
+# test_test-2d30 ()
+# test_test-2d31 ()
+# test_test-2d32 ()
+# test_test-2d33 ()
+# test_test-2d34 ()
+# 100  1256  100  1256    0     0    615      0  0:00:02  0:00:02 --:--:--   615
+# total NN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# file:////home/userxf333/tom-project/shell-scripts/tests/auto_batspp.py' "=========";
+# test_test-2d35 ()
+# test_test-2d4 ()
+# 0' "=========";
+# test_test-2d5 ()
+# test_test-2d6 ()
+# test_test-2d7 ()
+# test_test-2d8 ()
+# NN' "=========";
+# test_test-2d9 ()
+# NN' "=========";; do unset -f ; done
+# $ typeset -f | egrep '^\w+' | wc -l
+# 0
+# 0
+# ============================
+not ok 3 test-4
+# (in test file batspp-only/trace-python-commands.bats, line 97)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== TMP=/tmp/test-py-commands
+#  ==========
+# ========= $ BIN_DIR=$PWD/..
+# ## You will need to run jupyter from that directory.
+# ## source $TEMP_BIN/_dir-aliases.bash
+# $ alias | wc -l
+# 0 =========
+# $ BIN_DIR=/tmp/batspp-94651/test-4/..
+# ## You will need to run jupyter from that directory.
+# ## source /_dir-aliases.bash
+# $ alias | wc -l
+# 0
+# ============================
+not ok 4 test-5
+# (in test file batspp-only/trace-python-commands.bats, line 135)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== temp_dir=$TMP/test-7766
+#  ==========
+# ========= $ mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+# /tmp/test-py-commands/test-7766 =========
+# $ mkdir -p "/test-7766"
+# # TODO: /bin/rm -rvf "/test-7766"
+# $ cd "/test-7766"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "80" '' | tr ' ' -"
+# /tmp/test-py-commands/test-7766
+# ============================
+not ok 5 test-6
+# (in test file batspp-only/trace-python-commands.bats, line 175)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== alias testuser="sed -r "s/"$USER"+/userxf333/g""
+#  ==========
+# ========= $ alias testnum="sed -r "s/[0-9]/N/g""
+# # alias testmonth="sed -r "s/['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']/M/g"" =========
+# $ alias testnum="sed -r "s/[0-9]/N/g""
+# # alias testmonth="sed -r "s/['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']/M/g""
+# ============================
+not ok 6 test-7
+# (from function `test-7-actual' in file batspp-only/trace-python-commands.bats, line 217,
+#  in test file batspp-only/trace-python-commands.bats, line 204)
+#   `test-7-actual ' failed
+# ========== source $BIN_DIR/tomohara-aliases.bash
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 217: /tomohara-aliases.bash: No such file or directory
+not ok 7 test-8
+# (from function `test-8-actual' in file batspp-only/trace-python-commands.bats, line 251,
+#  in test file batspp-only/trace-python-commands.bats, line 238)
+#   `test-8-actual ' failed with status 127
+# ========== ps-python-full | wc -l | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 251: ps-python-full: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 251: testnum: command not found
+not ok 8 test-9
+# (from function `test-9-actual' in file batspp-only/trace-python-commands.bats, line 286,
+#  in test file batspp-only/trace-python-commands.bats, line 273)
+#   `test-9-actual ' failed with status 127
+# ========== ps-python | wc -l | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 286: ps-python: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 286: testnum: command not found
+not ok 9 test-10
+# (from function `test-10-actual' in file batspp-only/trace-python-commands.bats, line 321,
+#  in test file batspp-only/trace-python-commands.bats, line 308)
+#   `test-10-actual ' failed with status 127
+# ========== show-python-path | testuser
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 321: show-python-path: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 321: testuser: command not found
+not ok 10 test-11
+# (from function `test-11-actual' in file batspp-only/trace-python-commands.bats, line 356,
+#  in test file batspp-only/trace-python-commands.bats, line 343)
+#   `test-11-actual ' failed with status 127
+# ========== python-lint os | testnum | testuser
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 356: python-lint: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 356: testnum: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 356: testuser: command not found
+not ok 11 test-12
+# (from function `test-12-actual' in file batspp-only/trace-python-commands.bats, line 448,
+#  in test file batspp-only/trace-python-commands.bats, line 435)
+#   `test-12-actual ' failed with status 127
+# ========== python-lint-work os | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 448: python-lint-work: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 448: testnum: command not found
+not ok 12 test-13
+# (from function `test-13-actual' in file batspp-only/trace-python-commands.bats, line 546,
+#  in test file batspp-only/trace-python-commands.bats, line 533)
+#   `test-13-actual ' failed with status 127
+# ========== python-lint os | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 546: python-lint: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 546: testnum: command not found
+not ok 13 test-14
+# (from function `test-14-actual' in file batspp-only/trace-python-commands.bats, line 638,
+#  in test file batspp-only/trace-python-commands.bats, line 625)
+#   `test-14-actual ' failed with status 127
+# ========== run-python-lint-batched $BIN_DIR/tests/auto_batspp.py | testuser | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 638: run-python-lint-batched: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 638: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 638: testnum: command not found
+not ok 14 test-15
+# (from function `test-15-actual' in file batspp-only/trace-python-commands.bats, line 679,
+#  in test file batspp-only/trace-python-commands.bats, line 666)
+#   `test-15-actual ' failed with status 127
+# ========== python-import-path 'mezcla' | testnum\n ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 679: python-import-path: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 679: testnum: command not found
+not ok 15 test-16
+# (in test file batspp-only/trace-python-commands.bats, line 724)
+#   `[ "$(test-16-actual)" == "$(test-16-expected)" ]' failed
+# ========== rm -rf ./* > /dev/null
+#  ==========
+# ========= $ pip3 freeze | grep ipython | wc -l
+# 2 =========
+# $ pip3 freeze | grep ipython | wc -l
+# 2
+# ============================
+not ok 16 test-17
+# (from function `test-17-actual' in file batspp-only/trace-python-commands.bats, line 766,
+#  in test file batspp-only/trace-python-commands.bats, line 753)
+#   `test-17-actual ' failed with status 127
+# ========== python-module-version-full mezcla | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 766: python-module-version-full: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 766: testnum: command not found
+not ok 17 test-18
+# (in test file batspp-only/trace-python-commands.bats, line 803)
+#   `[ "$(test-18-actual)" == "$(test-18-expected)" ]' failed
+# ========== pwd
+#  ==========
+# /tmp/batspp-94651/test-18
+# ========= $ printf "THIS IS THE HEAD\n1\n2\n3\n4\n5\n6\n7\nTHIS IS THE TAIL." >> testless.txt
+# /tmp/test-py-commands/test-7766 =========
+# $ printf "THIS IS THE HEAD\n1\n2\n3\n4\n5\n6\n7\nTHIS IS THE TAIL." >> testless.txt
+# /tmp/test-py-commands/test-7766
+# ============================
+not ok 18 test-19
+# (from function `test-19-actual' in file batspp-only/trace-python-commands.bats, line 845,
+#  in test file batspp-only/trace-python-commands.bats, line 832)
+#   `test-19-actual ' failed with status 127
+# ========== ltc testless.txt | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 845: ltc: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 845: testnum: command not found
+not ok 19 test-20
+# (from function `test-20-actual' in file batspp-only/trace-python-commands.bats, line 887,
+#  in test file batspp-only/trace-python-commands.bats, line 874)
+#   `test-20-actual ' failed with status 127
+# ========== less-tail testless.txt | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 887: less-tail: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 887: testnum: command not found
+not ok 20 test-21
+# (from function `test-21-actual' in file batspp-only/trace-python-commands.bats, line 929,
+#  in test file batspp-only/trace-python-commands.bats, line 916)
+#   `test-21-actual ' failed with status 127
+# ========== less-tail-clipped testless.txt | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 929: less-tail-clipped: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 929: testnum: command not found
+not ok 21 test-22
+# (from function `test-22-actual' in file batspp-only/trace-python-commands.bats, line 971,
+#  in test file batspp-only/trace-python-commands.bats, line 958)
+#   `test-22-actual ' failed with status 127
+# ========== less-clipped testless.txt | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 971: less-clipped: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 971: testnum: command not found
+not ok 22 test-23
+# (from function `test-23-actual' in file batspp-only/trace-python-commands.bats, line 1013,
+#  in test file batspp-only/trace-python-commands.bats, line 1000)
+#   `test-23-actual ' failed with status 127
+# ========== less- testless.txt | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 1013: less-: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 1013: testnum: command not found
+not ok 23 test-24
+# (from function `test-24-actual' in file batspp-only/trace-python-commands.bats, line 1055,
+#  in test file batspp-only/trace-python-commands.bats, line 1042)
+#   `test-24-actual ' failed with status 127
+# ========== ipython --version | testuser | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 1055: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 1055: testnum: command not found
+# Exception ignored in: <_io.TextIOWrapper name='<stdout>' mode='w' encoding='utf-8'>
+# BrokenPipeError: [Errno 32] Broken pipe
+not ok 24 test-25
+# (from function `test-25-actual' in file batspp-only/trace-python-commands.bats, line 1111,
+#  in test file batspp-only/trace-python-commands.bats, line 1098)
+#   `test-25-actual ' failed with status 127
+# ========== which-python
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 1111: which-python: command not found
+not ok 25 test-26
+# (in test file batspp-only/trace-python-commands.bats, line 1142)
+#   `[ "$(test-26-actual)" == "$(test-26-expected)" ]' failed
+# ========== rm -rf ./* > /dev/null
+#  ==========
+# ========= $ printf "print('THIS IS A TEST')" > atest.py
+# $ printf "print('THIS IS A TEST')" > xyz.py
+# $ printf "print('THIS IS A TEST11')" > abc1.py
+# # SHOWS ALL THE DIFFERENCES BETWEEN THE PYTHON SCRIPTS
+# # WORKS FINE - HALTS TESTS
+# $ py-diff atest.py xyz.py | testuser | testnum | awk '!($6="")'
+# Assuming implicit --no-glob, as otherwise  would be in extension
+# abcN.py vs. atest.py
+# Differences: abcN.py atest.py
+# -rw-rw-r-- N userxfNNN userxfNNN NN  N NN:NN abcN.py
+# -rw-rw-r-- N userxfNNN userxfNNN NN  N NN:NN atest.py
+# NcN
+# < print('THIS IS A TESTNN')
+# \ No newline at end  file
+# ---
+# > print('THIS IS A TEST')
+# \ No newline at end  file
+# ------------------------------------------------------------------------
+#
+# atest.py vs. atest.py
+# ------------------------------------------------------------------------
+#
+# xyz.py vs. atest.py
+# ------------------------------------------------------------------------ =========
+# $ printf "print('THIS IS A TEST')" > atest.py
+# $ printf "print('THIS IS A TEST')" > xyz.py
+# $ printf "print('THIS IS A TEST11')" > abc1.py
+# # SHOWS ALL THE DIFFERENCES BETWEEN THE PYTHON SCRIPTS
+# # WORKS FINE - HALTS TESTS
+# $ py-diff atest.py xyz.py | testuser | testnum | awk '!(="")'
+# Assuming implicit --no-glob, as otherwise  would be in extension
+# abcN.py vs. atest.py
+# Differences: abcN.py atest.py
+# -rw-rw-r-- N userxfNNN userxfNNN NN  N NN:NN abcN.py
+# -rw-rw-r-- N userxfNNN userxfNNN NN  N NN:NN atest.py
+# NcN
+# < print('THIS IS A TESTNN')
+# \ No newline at end  file
+# ---
+# > print('THIS IS A TEST')
+# \ No newline at end  file
+# ------------------------------------------------------------------------
+#
+# atest.py vs. atest.py
+# ------------------------------------------------------------------------
+#
+# xyz.py vs. atest.py
+# ------------------------------------------------------------------------
+# ============================
+not ok 26 test-27
+# (in test file batspp-only/trace-python-commands.bats, line 1199)
+#   `[ "$(test-27-actual)" == "$(test-27-expected)" ]' failed
+# ========== # $ echo $OSTYPE
+#  ==========
+# ========= #   linebr
+# #   elide-data $BIN_DIR/template.py
+# #   linebr
+# #   kill-python
+# #   linebr
+# #   kill-python-all
+# # | linux-gnu
+# # | --------------------------------------------------------------------------------
+# # | /home/xaea12/miniconda3/bin/python: No module named transpose_data
+# # | --------------------------------------------------------------------------------
+# # | pattern=/:[0-9][0-9] [^ ]*python/
+# # | filter=/ipython|emacs/
+# # | OSTYPE: Undefined variable.
+# # | --------------------------------------------------------------------------------
+# # | pattern=/:[0-9][0-9] [^ ]*python/
+# # | filter=/($)(^)/
+# # | OSTYPE: Undefined variable. =========
+# #   linebr
+# #   elide-data /template.py
+# #   linebr
+# #   kill-python
+# #   linebr
+# #   kill-python-all
+# # | linux-gnu
+# # | --------------------------------------------------------------------------------
+# # | /home/xaea12/miniconda3/bin/python: No module named transpose_data
+# # | --------------------------------------------------------------------------------
+# # | pattern=/:[0-9][0-9] [^ ]*python/
+# # | filter=/ipython|emacs/
+# # | OSTYPE: Undefined variable.
+# # | --------------------------------------------------------------------------------
+# # | pattern=/:[0-9][0-9] [^ ]*python/
+# # | filter=/($)(^)/
+# # | OSTYPE: Undefined variable.
+# ============================
+not ok 27 test-28
+# (in test file batspp-only/trace-python-commands.bats, line 1248)
+#   `[ "$(test-28-actual)" == "$(test-28-expected)" ]' failed
+# ========== # $ jupyter-notebook-redir-open
+#  ==========
+# ========= # | [1] 5335
+# # | /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log
+# # | sleeping 5 seconds for log to stabalize (effing jupyter)
+# # | bash: /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log: Permission denied
+# # | [1]+  Exit 1                  jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1
+# # | tail: cannot open '/jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log' for reading: No such file or directory
+# # | URL: Can't open /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log: No such file or directory at /home/xaea12/bin/extract_matches.perl line 132.
+# $ jupyter-notebook-redir-open | testnum | testuser | head -n 5
+# /home/userxf333/temp/jupyter-NNdecNN.log
+# sleeping N seconds for log to stabalize (effing jupyter)
+# [I NNNN-NN-NN NN:NN:NN.NNN LabApp] JupyterLab application directory is /home/userxf333/.local/share/jupyter/lab
+# [I NN:NN:NN.NNN NotebookApp] The port NNNN is already in use, trying another port.
+# [I NN:NN:NN.NNN NotebookApp] The port NNNN is already in use, trying another port. =========
+# # | [1] 5335
+# # | /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log
+# # | sleeping 5 seconds for log to stabalize (effing jupyter)
+# # | bash: /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log: Permission denied
+# # | [1]+  Exit 1                  jupyter notebook --NotebookApp.token='' --no-browser --port  --ip  >> "" 2>&1
+# # | tail: cannot open '/jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log' for reading: No such file or directory
+# # | URL: Can't open /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log: No such file or directory at /home/xaea12/bin/extract_matches.perl line 132.
+# $ jupyter-notebook-redir-open | testnum | testuser | head -n 5
+# /home/userxf333/temp/jupyter-NNdecNN.log
+# sleeping N seconds for log to stabalize (effing jupyter)
+# [I NNNN-NN-NN NN:NN:NN.NNN LabApp] JupyterLab application directory is /home/userxf333/.local/share/jupyter/lab
+# [I NN:NN:NN.NNN NotebookApp] The port NNNN is already in use, trying another port.
+# [I NN:NN:NN.NNN NotebookApp] The port NNNN is already in use, trying another port.
+# ============================
+not ok 28 test-29
+# (in test file batspp-only/trace-python-commands.bats, line 1293)
+#   `[ "$(test-29-actual)" == "$(test-29-expected)" ]' failed
+# ========== # $ rm -rf ./*
+#  ==========
+# ========= #   printf "print('THIS IS A TEST FOR TEXT EXTRACT ALIAS.')" > textex.py
+# #   xtract-text ./textex.py
+# # | /home/xaea12/miniconda3/bin/python: No module named extract_document_text =========
+# #   printf "print('THIS IS A TEST FOR TEXT EXTRACT ALIAS.')" > textex.py
+# #   xtract-text ./textex.py
+# # | /home/xaea12/miniconda3/bin/python: No module named extract_document_text
+# ============================
+not ok 29 test-30
+# (in test file batspp-only/trace-python-commands.bats, line 1328)
+#   `[ "$(test-30-actual)" == "$(test-30-expected)" ]' failed
+# ========== # $ test-script ./textex.py
+#  ==========
+# ========= # | abort: no repository found in '/tmp/test-py-commands/test-3443' (.hg not found)\n# | bash: tests/_test_textex.03sep22.log: No such file or directory\n# | tests/_test_textex.03sep22.log: No such file or directory =========
+# # | abort: no repository found in '/tmp/test-py-commands/test-3443' (.hg not found)
+# # | bash: tests/_test_textex.03sep22.log: No such file or directory
+# # | tests/_test_textex.03sep22.log: No such file or directory
+# ============================
+ok 30 test-31
+not ok 31 test-32
+# (from function `test-32-actual' in file batspp-only/trace-python-commands.bats, line 1404,
+#  in test file batspp-only/trace-python-commands.bats, line 1391)
+#   `test-32-actual ' failed with status 127
+# ========== randomize-datafile random_line_test.py
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 1404: randomize-datafile: command not found
+not ok 32 test-33
+# (from function `test-33-actual' in file batspp-only/trace-python-commands.bats, line 1442,
+#  in test file batspp-only/trace-python-commands.bats, line 1429)
+#   `test-33-actual ' failed with status 127
+# ========== conditional-source $BIN_DIR/tests/_dir-aliases.bash
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 1442: conditional-source: command not found
+not ok 33 test-34
+# (from function `test-34-actual' in file batspp-only/trace-python-commands.bats, line 1482,
+#  in test file batspp-only/trace-python-commands.bats, line 1469)
+#   `test-34-actual ' failed with status 127
+# ========== curl-dump https://www.example.com/
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-python-commands.bats: line 1482: curl-dump: command not found
+not ok 34 test-35
+# (in test file batspp-only/trace-python-commands.bats, line 1526)
+#   `[ "$(test-35-actual)" == "$(test-35-expected)" ]' failed
+# ========== pwd |  sed -r "s/"$USER"+/user/g"
+#  ==========
+# /tmp/batspp-94651/test-35
+# ========= $ rm -rf * > /dev/null
+# /tmp/test-py-commands/test-7766 =========
+# $ rm -rf * > /dev/null
+# /tmp/test-py-commands/test-7766
+# ============================

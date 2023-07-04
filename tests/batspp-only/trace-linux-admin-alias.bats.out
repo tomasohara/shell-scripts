@@ -1,0 +1,437 @@
+1..23
+not ok 1 test-1
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== # $ jupyter notebook --allow-root
+#  ==========
+# ========= ## Bracketed Paste is disabled to prevent characters after output\n## Example: \n# $ echo 'Hi'\n# | Hi?2004l\n# bind 'set enable-bracketed-paste off' =========
+# ## Bracketed Paste is disabled to prevent characters after output
+# ## Example:
+# # $ echo 'Hi'
+# # | Hi?2004l
+# # bind 'set enable-bracketed-paste off'
+# ============================
+not ok 2 test-3
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 62)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== echo $PS1
+#  ==========
+#
+# ========= [PEXP\[\]ECT_PROMPT> =========
+# [PEXP\[\]ECT_PROMPT>
+# ============================
+not ok 3 test-4
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 96)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ alias | wc -l\n$ for f in ; do unset -f ; done\n$ typeset -f | egrep '^\w+' | wc -l\n0\n0 =========
+# $ alias | wc -l
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-10-actual ()
+# test-10-expected ()
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# END_EXPECTED
+# test-12-actual ()
+# test-12-expected ()
+# rolldice - virtual dice roller
+# END_EXPECTED
+# test-13-actual ()
+# test-13-expected ()
+# END_EXPECTED
+# test-14-actual ()
+# test-14-expected ()
+# END_EXPECTED
+# test-15-actual ()
+# test-15-expected ()
+# END_EXPECTED
+# test-16-actual ()
+# test-16-expected ()
+# END_EXPECTED
+# test-17-actual ()
+# test-17-expected ()
+# ufw.service                                           loaded active exited  Uncomplicated firewall
+# END_EXPECTED
+# test-18-actual ()
+# test-18-expected ()
+# END_EXPECTED
+# test-19-actual ()
+# test-19-expected ()
+# END_EXPECTED
+# test-20-actual ()
+# test-20-expected ()
+# END_EXPECTED
+# test-21-actual ()
+# test-21-expected ()
+# END_EXPECTED
+# test-22-actual ()
+# test-22-expected ()
+# abc.txt22
+# total N
+# HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.
+# END_EXPECTED
+# test-23-actual ()
+# test-23-expected ()
+# END_EXPECTED
+# test-24-actual ()
+# test-24-expected ()
+# Warning: no sudo user for current shell
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# 0
+# 0
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# 2
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# 3
+# 0
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# test_test-2d11 ()
+# test_test-2d12 ()
+# test_test-2d13 ()
+# test_test-2d14 ()
+# test_test-2d15 ()
+# test_test-2d16 ()
+# test_test-2d17 ()
+# test_test-2d18 ()
+# test_test-2d19 ()
+# test_test-2d20 ()
+# test_test-2d21 ()
+# test_test-2d22 ()
+# abc.txt22
+# total N
+# HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.' "=========";
+# test_test-2d23 ()
+# test_test-2d24 ()
+# test_test-2d3 ()
+# test_test-2d4 ()
+# test_test-2d5 ()
+# test_test-2d6 ()
+# 2' "=========";
+# test_test-2d7 ()
+# test_test-2d8 ()
+# test_test-2d9 () ; do unset -f ; done
+# $ typeset -f | egrep '^\w+' | wc -l
+# 0
+# 0
+# ============================
+not ok 4 test-5
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 134)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== alias testuser="sed -r "s/"$USER"+/userxf333/g""
+#  ==========
+# ========= $ alias testnum="sed -r "s/[0-9]/N/g"" =========
+# $ alias testnum="sed -r "s/[0-9]/N/g""
+# ============================
+not ok 5 test-6
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 168)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== TMP=/tmp/test-admin-commands
+#  ==========
+# ========= ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=$PWD/..
+# $ alias | wc -l
+# 2 =========
+# ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=/tmp/batspp-95680/test-6/..
+# $ alias | wc -l
+# 2
+# ============================
+not ok 6 test-7
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 205)
+#   `[ "$(test-7-actual)" == "$(test-7-expected)" ]' failed
+# ========== temp_dir=$TMP/test-3245
+#  ==========
+# ========= $ mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+# /tmp/test-admin-commands/test-3245 =========
+# $ mkdir -p "/test-3245"
+# # TODO: /bin/rm -rvf "/test-3245"
+# $ cd "/test-3245"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "80" '' | tr ' ' -"
+# /tmp/test-admin-commands/test-3245
+# ============================
+not ok 7 test-8
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 245)
+#   `[ "$(test-8-actual)" == "$(test-8-expected)" ]' failed
+# ========== alias | wc -l
+#  ==========
+# 0
+# ========= # Count functions\n$ typeset -f | egrep '^\w+' | wc -l\n3\n0 =========
+# # Count functions
+# $ typeset -f | egrep '^\w+' | wc -l
+# 3
+# 0
+# ============================
+not ok 8 test-9
+# (from function `test-9-actual' in file batspp-only/trace-linux-admin-alias.bats, line 289,
+#  in test file batspp-only/trace-linux-admin-alias.bats, line 276)
+#   `test-9-actual ' failed
+# ========== source $BIN_DIR/tomohara-aliases.bash
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-linux-admin-alias.bats: line 289: /tomohara-aliases.bash: No such file or directory
+not ok 9 test-10
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 316)
+#   `[ "$(test-10-actual)" == "$(test-10-expected)" ]' failed
+# ========== alias apt-install='apt-get install --yes --fix-missing --no-remove'\n ==========
+# ========= $ alias apt-search='apt-cache search'\n$ alias apt-installed='apt list --installed'\n$ alias apt-uninstall='apt-get remove'\n$ alias dpkg-install='dpkg --install ' =========
+# $ alias apt-search='apt-cache search'
+# $ alias apt-installed='apt list --installed'
+# $ alias apt-uninstall='apt-get remove'
+# $ alias dpkg-install='dpkg --install '
+# ============================
+not ok 10 test-11
+# (from function `test-11-actual' in file batspp-only/trace-linux-admin-alias.bats, line 360,
+#  in test file batspp-only/trace-linux-admin-alias.bats, line 347)
+#   `test-11-actual ' failed with status 127
+# ========== apt-installed *python3* | grep ipython | cut -d \/ -f 1 | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-linux-admin-alias.bats: line 360: apt-installed: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-linux-admin-alias.bats: line 360: testnum: command not found
+not ok 11 test-12
+# (from function `test-12-actual' in file batspp-only/trace-linux-admin-alias.bats, line 394,
+#  in test file batspp-only/trace-linux-admin-alias.bats, line 381)
+#   `test-12-actual ' failed with status 127
+# ========== apt-search rolldice
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-linux-admin-alias.bats: line 394: apt-search: command not found
+not ok 12 test-13
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 421)
+#   `[ "$(test-13-actual)" == "$(test-13-expected)" ]' failed
+# ========== apt-installed | grep acpi | wc -l
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-linux-admin-alias.bats: line 428: apt-installed: command not found
+# 0
+# =========  =========
+#
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-linux-admin-alias.bats: line 428: apt-installed: command not found
+not ok 13 test-14
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 455)
+#   `[ "$(test-14-actual)" == "$(test-14-expected)" ]' failed
+# ========== # $ apt-uninstall rolldice
+#  ==========
+# ========= # | E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)
+# # | E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root? =========
+# # | E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)
+# # | E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root?
+# ============================
+not ok 14 test-15
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 489)
+#   `[ "$(test-15-actual)" == "$(test-15-expected)" ]' failed
+# ========== # $ dpkg-install rolldice
+#  ==========
+# ========= # | dpkg: error: requested operation requires superuser privilege =========
+# # | dpkg: error: requested operation requires superuser privilege
+# ============================
+not ok 15 test-16
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 522)
+#   `[ "$(test-16-actual)" == "$(test-16-expected)" ]' failed
+# ========== alias start-service='systemctl start'\n ==========
+# ========= $ alias list-all-service='systemctl --type=service'\n$ alias restart-service-sudoless='systemctl restart'\n$ alias status-service='systemctl status'\n$ alias service-status='status-service' =========
+# $ alias list-all-service='systemctl --type=service'
+# $ alias restart-service-sudoless='systemctl restart'
+# $ alias status-service='systemctl status'
+# $ alias service-status='status-service'
+# ============================
+not ok 16 test-17
+# (from function `test-17-actual' in file batspp-only/trace-linux-admin-alias.bats, line 566,
+#  in test file batspp-only/trace-linux-admin-alias.bats, line 553)
+#   `test-17-actual ' failed
+# ========== list-all-service | grep ufw
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-linux-admin-alias.bats: line 566: list-all-service: command not found
+not ok 17 test-18
+# (from function `test-18-actual' in file batspp-only/trace-linux-admin-alias.bats, line 600,
+#  in test file batspp-only/trace-linux-admin-alias.bats, line 587)
+#   `test-18-actual ' failed with status 127
+# ========== stop-service unattended-upgrades
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-linux-admin-alias.bats: line 600: stop-service: command not found
+not ok 18 test-19
+# (from function `test-19-actual' in file batspp-only/trace-linux-admin-alias.bats, line 636,
+#  in test file batspp-only/trace-linux-admin-alias.bats, line 623)
+#   `test-19-actual ' failed with status 127
+# ========== start-service unattended-upgrades
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-linux-admin-alias.bats: line 636: start-service: command not found
+not ok 19 test-20
+# (from function `test-20-actual' in file batspp-only/trace-linux-admin-alias.bats, line 672,
+#  in test file batspp-only/trace-linux-admin-alias.bats, line 659)
+#   `test-20-actual ' failed with status 127
+# ========== restart-service-sudoless unattended-upgrades
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-linux-admin-alias.bats: line 672: restart-service-sudoless: command not found
+not ok 20 test-21
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 702)
+#   `[ "$(test-21-actual)" == "$(test-21-expected)" ]' failed
+# ========== pwd
+#  ==========
+# /tmp/batspp-95680/test-21
+# ========= /tmp/test-admin-commands/test-3245 =========
+# /tmp/test-admin-commands/test-3245
+# ============================
+not ok 21 test-22
+# (in test file batspp-only/trace-linux-admin-alias.bats, line 736)
+#   `[ "$(test-22-actual)" == "$(test-22-expected)" ]' failed
+# ========== printf "HELLO THERE,\nI AM EXTREMELY PLEASED TO USE UBUNTU." >> abc.txt
+#  ==========
+# ========= $ get-free-filename "abc.txt" 2      #DOUBT(?)
+# $ linebr
+# $ ls -l | awk '!($6="")' | testnum | testuser
+# $ linebr
+# $ cat "abc.txt"
+# abc.txt22
+# --------------------------------------------------------------------------------
+# total N
+# -rw-rw-r-- N userxf333 userxf333 NNN  N NN:NN abc.txt
+# --------------------------------------------------------------------------------
+# HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU. =========
+# $ get-free-filename "abc.txt" 2      #DOUBT(?)
+# $ linebr
+# $ ls -l | awk '!(="")' | testnum | testuser
+# $ linebr
+# $ cat "abc.txt"
+# abc.txt22
+# --------------------------------------------------------------------------------
+# total N
+# -rw-rw-r-- N userxf333 userxf333 NNN  N NN:NN abc.txt
+# --------------------------------------------------------------------------------
+# HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+# I AM EXTREMELY PLEASED TO USE UBUNTU.
+# ============================
+not ok 22 test-23
+# (from function `test-23-actual' in file batspp-only/trace-linux-admin-alias.bats, line 793,
+#  in test file batspp-only/trace-linux-admin-alias.bats, line 780)
+#   `test-23-actual ' failed with status 127
+# ========== sync2
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-linux-admin-alias.bats: line 793: sync2: command not found
+not ok 23 test-24
+# (from function `test-24-actual' in file batspp-only/trace-linux-admin-alias.bats, line 827,
+#  in test file batspp-only/trace-linux-admin-alias.bats, line 814)
+#   `test-24-actual ' failed with status 127
+# ========== fix-sudoer-home-permission
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-linux-admin-alias.bats: line 827: fix-sudoer-home-permission: command not found

@@ -1,0 +1,680 @@
+1..26
+not ok 1 test-1
+# (in test file batspp-output/trace-unix-alias.outputpp, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== echo $PS1
+#  ==========
+#
+# ========= [PEXP\[\]ECT_PROMPT> =========
+# [PEXP\[\]ECT_PROMPT>
+# ============================
+not ok 2 test-3
+# (in test file batspp-output/trace-unix-alias.outputpp, line 59)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ alias | wc -l\n$ for f in ; do unset -f ; done\n$ typeset -f | egrep '^\w+' | wc -l\n0\n0 =========
+# $ alias | wc -l
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-10-actual ()
+# test-10-expected ()
+# do-merge MODFILE1 OLDFILE MODFILE2 > NEWFILE tf1.txt tf2.txt
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# END_EXPECTED
+# test-12-actual ()
+# test-12-expected ()
+# END_EXPECTED
+# test-13-actual ()
+# test-13-expected ()
+# END_EXPECTED
+# test-14-actual ()
+# test-14-expected ()
+# time (GNU Time) UNKNOWN
+# Copyright (C) NNNN Free Software Foundation, Inc.
+# License GPLvN+: GNU GPL version N or later <https://gnu.org/licenses/gpl.html>.
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+# END_EXPECTED
+# test-15-actual ()
+# test-15-expected ()
+# VERSION_ID="NN.NN"
+# END_EXPECTED
+# test-16-actual ()
+# test-16-expected ()
+# total used free shared buff/cache available
+# Mem: NNNNNNN NNNNNNN NNNNNN NNNNNN NNNNNN NNNNNN
+# Swap: NNNNNNN NNNNNNN NNNNNNN
+# NN:NN:NN up N:NN, N user, load average:  N.NN, N.NN
+# USER TTY FROM LOGIN@ IDLE JCPU PCPU
+# userxf333 ttyN :N NN:NN N:NNm NN:NN N.NNs
+# END_EXPECTED
+# test-17-actual ()
+# test-17-expected ()
+# N
+# END_EXPECTED
+# test-18-actual ()
+# test-18-expected ()
+# Hi Dad!
+# Hi
+# Dad!
+# END_EXPECTED
+# test-19-actual ()
+# test-19-expected ()
+# make:
+# Nothing
+# to
+# be
+# done
+# for
+# END_EXPECTED
+# test-20-actual ()
+# test-20-expected ()
+# This
+# This
+# END_EXPECTED
+# test-21-actual ()
+# test-21-expected ()
+# ONE KISS IS ALL IT TAKES
+# 2
+# 3
+# 5
+# 7
+# 11
+# A B C D E F G
+# END_EXPECTED
+# test-22-actual ()
+# test-22-expected ()
+# localhost:N.N
+# END_EXPECTED
+# test-23-actual ()
+# test-23-expected ()
+# start: Thu Dec  N NN:NN:NN PM +NNNN NNNN
+# end: Thu Dec  N NN:NN:NN PM +NNNN NNNN
+# start: Thu Dec  N NN:NN:NN PM +NNNN NNNN
+# end: Thu Dec  N NN:NN:NN PM +NNNN NNNN
+# END_EXPECTED
+# test-24-actual ()
+# test-24-expected ()
+# hidad.txt  _make.log	  testfolder  tf2.txt
+# himom.txt  _old_make.log  tf1.txt     tf3.txt
+# gzip: /tmp/test-unix-alias/test-NNNN is a directory -- ignored
+# gzip: /tmp/test-unix-alias/test-NNNN/testfolder is a directory -- ignored
+# hidad.txt.gz  _make.log.gz	testfolder  tf2.txt.gz
+# himom.txt.gz  _old_make.log.gz	tf1.txt.gz  tf3.txt.gz
+# gzip: /tmp/test-unix-alias/test-NNNN is a directory -- ignored
+# gzip: /tmp/test-unix-alias/test-NNNN/testfolder is a directory -- ignored
+# END_EXPECTED
+# test-25-actual ()
+# test-25-expected ()
+# END_EXPECTED
+# test-26-actual ()
+# test-26-expected ()
+# END_EXPECTED
+# test-27-actual ()
+# test-27-expected ()
+# Done!
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# 0
+# 0
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# 0
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# 1
+# 0
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# do-merge MODFILE1 OLDFILE MODFILE2 > NEWFILE tf1.txt tf2.txt' "=========";
+# test_test-2d11 ()
+# test_test-2d12 ()
+# test_test-2d13 ()
+# test_test-2d14 ()
+# test_test-2d15 ()
+# VERSION_ID="NN.NN"' "=========";
+# test_test-2d16 ()
+# Mem: NNNNNNN NNNNNNN NNNNNN NNNNNN NNNNNN NNNNNN
+# Swap: NNNNNNN NNNNNNN NNNNNNN
+# NN:NN:NN up N:NN, N user, load average:  N.NN, N.NN
+# USER TTY FROM LOGIN@ IDLE JCPU PCPU
+# userxf333 ttyN :N NN:NN N:NNm NN:NN N.NNs' "=========";
+# test_test-2d17 ()
+# test_test-2d18 ()
+# Hi Dad!
+# Hi
+# Dad!' "=========";
+# test_test-2d19 ()
+# test_test-2d20 ()
+# This
+# This' "=========";
+# test_test-2d21 ()
+# ONE KISS IS ALL IT TAKES
+# 2
+# 3
+# 5
+# 7
+# 11
+# A B C D E F G
+# test_test-2d22 ()
+# localhost:N.N' "=========";
+# test_test-2d23 ()
+# start: Thu Dec  N NN:NN:NN PM +NNNN NNNN
+# end: Thu Dec  N NN:NN:NN PM +NNNN NNNN
+# start: Thu Dec  N NN:NN:NN PM +NNNN NNNN
+# end: Thu Dec  N NN:NN:NN PM +NNNN NNNN' "=========";
+# test_test-2d24 ()
+# test_test-2d25 ()
+# test_test-2d26 ()
+# test_test-2d27 ()
+# test_test-2d3 ()
+# test_test-2d4 ()
+# 0
+# test_test-2d5 ()
+# test_test-2d6 ()
+# test_test-2d7 ()
+# test_test-2d8 ()
+# test_test-2d9 () ; do unset -f ; done
+# $ typeset -f | egrep '^\w+' | wc -l
+# 0
+# 0
+# ============================
+not ok 3 test-4
+# (in test file batspp-output/trace-unix-alias.outputpp, line 97)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== TMP=/tmp/test-unix-alias
+#  ==========
+# ========= $ BIN_DIR=$PWD/..
+# $ alias | wc -l
+# $ temp_dir=$TMP/test-2899
+# $ mkdir -p "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+# 0
+# /tmp/test-unix-alias/test-2899 =========
+# $ BIN_DIR=/tmp/batspp-72408/test-4/..
+# $ alias | wc -l
+# $ temp_dir=/tmp/test-unix-alias/test-2899
+# $ mkdir -p ""
+# $ cd ""
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "80" '' | tr ' ' -"
+# 0
+# /tmp/test-unix-alias/test-2899
+# ============================
+not ok 4 test-5
+# (in test file batspp-output/trace-unix-alias.outputpp, line 140)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== alias | wc -l
+#  ==========
+# 0
+# ========= # Count functions\n$ typeset -f | egrep '^\w+' | wc -l\n1\n0 =========
+# # Count functions
+# $ typeset -f | egrep '^\w+' | wc -l
+# 1
+# 0
+# ============================
+not ok 5 test-6
+# (in test file batspp-output/trace-unix-alias.outputpp, line 177)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== alias testnum="sed -r "s/[0-9]/N/g""
+#  ==========
+# ========= $ alias testuser="sed -r "s/"$USER"+/userxf333/g"" =========
+# $ alias testuser="sed -r "s/"aveey"+/userxf333/g""
+# ============================
+not ok 6 test-7
+# (from function `test-7-actual' in file batspp-output/trace-unix-alias.outputpp, line 218,
+#  in test file batspp-output/trace-unix-alias.outputpp, line 205)
+#   `test-7-actual ' failed
+# ========== source $BIN_DIR/tomohara-aliases.bash
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 218: /tomohara-aliases.bash: No such file or directory
+not ok 7 test-8
+# (in test file batspp-output/trace-unix-alias.outputpp, line 245)
+#   `[ "$(test-8-actual)" == "$(test-8-expected)" ]' failed
+# ========== # $ group-members
+#  ==========
+# ========= # | ypcat: can't get local yp domain: Local domain name not set =========
+# # | ypcat: can't get local yp domain: Local domain name not set
+# ============================
+not ok 8 test-9
+# (in test file batspp-output/trace-unix-alias.outputpp, line 278)
+#   `[ "$(test-9-actual)" == "$(test-9-expected)" ]' failed
+# ========== rm -rf ./* > /dev/null
+#  ==========
+# ========= $ mkdir testfolder
+# $ echo "Hi Mom!" > himom.txt
+# $ echo "Hi Dad!" > hidad.txt
+# $ do-make "himom.txt"
+# $ cat _make.log
+# $ do-make "hidad.txt"
+# $ cat _make.log
+# $ ls -l | awk '!($6="")' | testuser | testnum
+# /bin/mv: cannot stat '_make.log': No such file or directory
+# [?1h= =========
+# $ mkdir testfolder
+# $ echo "Hi Mom!" > himom.txt
+# $ echo "Hi Dad!" > hidad.txt
+# $ do-make "himom.txt"
+# $ cat _make.log
+# $ do-make "hidad.txt"
+# $ cat _make.log
+# $ ls -l | awk '!(="")' | testuser | testnum
+# /bin/mv: cannot stat '_make.log': No such file or directory
+# [?1h=
+# ============================
+not ok 9 test-10
+# (in test file batspp-output/trace-unix-alias.outputpp, line 321)
+#   `[ "$(test-10-actual)" == "$(test-10-expected)" ]' failed
+# ========== printf "THIS IS THE 1ST FILE." > tf1.txt
+#  ==========
+# ========= $ printf "THIS IS THE 2ND FILE." > tf2.txt
+# $ printf "THIS IS THE 3RD FILE." > tf3.txt
+# # MESSAGE SHOWN IF MERGE IS USED
+# $ merge tf1.txt tf2.txt
+# do-merge MODFILE1 OLDFILE MODFILE2 > NEWFILE tf1.txt tf2.txt =========
+# $ printf "THIS IS THE 2ND FILE." > tf2.txt
+# $ printf "THIS IS THE 3RD FILE." > tf3.txt
+# # MESSAGE SHOWN IF MERGE IS USED
+# $ merge tf1.txt tf2.txt
+# do-merge MODFILE1 OLDFILE MODFILE2 > NEWFILE tf1.txt tf2.txt
+# ============================
+not ok 10 test-11
+# (in test file batspp-output/trace-unix-alias.outputpp, line 359)
+#   `[ "$(test-11-actual)" == "$(test-11-expected)" ]' failed
+# ========== # $ do-merge tf1.txt tf2.txt tf3.txt
+#  ==========
+# ========= # | <<<<<<< tf1.txt
+# # | THIS IS THE 1ST FILE.=======
+# # | THIS IS THE 3RD FILE.>>>>>>> tf3.txt
+# # | merge: warning: conflicts during merge =========
+# # | <<<<<<< tf1.txt
+# # | THIS IS THE 1ST FILE.=======
+# # | THIS IS THE 3RD FILE.>>>>>>> tf3.txt
+# # | merge: warning: conflicts during merge
+# ============================
+not ok 11 test-12
+# (in test file batspp-output/trace-unix-alias.outputpp, line 395)
+#   `[ "$(test-12-actual)" == "$(test-12-expected)" ]' failed
+# ========== # $ diff3-merge tf1.txt tf2.txt tf3.txt -A
+#  ==========
+# ========= # | <<<<<<< tf1.txt
+# # | THIS IS THE 1ST FILE.||||||| tf2.txt
+# # | THIS IS THE 2ND FILE.=======
+# # | THIS IS THE 3RD FILE.>>>>>>> tf3.txt =========
+# # | <<<<<<< tf1.txt
+# # | THIS IS THE 1ST FILE.||||||| tf2.txt
+# # | THIS IS THE 2ND FILE.=======
+# # | THIS IS THE 3RD FILE.>>>>>>> tf3.txt
+# ============================
+not ok 12 test-13
+# (in test file batspp-output/trace-unix-alias.outputpp, line 431)
+#   `[ "$(test-13-actual)" == "$(test-13-expected)" ]' failed
+# ========== which python
+#  ==========
+# /usr/bin/python
+# ========= # 3A) full-dirname RETURNS THE FULL PATH OF THE FILE
+# $ full-dirname himom.txt | testuser
+# # 3B) base-name-with-dir RETURNS THE BASENAME INCLUDING dir
+# $ basename-with-dir himom.txt
+# /usr/bin/python
+# /tmp/test-unix-alias/test-2899/himom.txt
+# ./himom.txt =========
+# # 3A) full-dirname RETURNS THE FULL PATH OF THE FILE
+# $ full-dirname himom.txt | testuser
+# # 3B) base-name-with-dir RETURNS THE BASENAME INCLUDING dir
+# $ basename-with-dir himom.txt
+# /usr/bin/python
+# /tmp/test-unix-alias/test-2899/himom.txt
+# ./himom.txt
+# ============================
+not ok 13 test-14
+# (in test file batspp-output/trace-unix-alias.outputpp, line 471)
+#   `[ "$(test-14-actual)" == "$(test-14-expected)" ]' failed
+# ========== # $ gtime
+#  ==========
+# ========= # | /usr/bin/time: missing program to run\n# | Try '/usr/bin/time --help' for more information\n$ gtime -V | testnum\ntime (GNU Time) UNKNOWN\nCopyright (C) NNNN Free Software Foundation, Inc.\nLicense GPLvN+: GNU GPL version N or later <https://gnu.org/licenses/gpl.html>.\nThis is free software: you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law. =========
+# # | /usr/bin/time: missing program to run
+# # | Try '/usr/bin/time --help' for more information
+# $ gtime -V | testnum
+# time (GNU Time) UNKNOWN
+# Copyright (C) NNNN Free Software Foundation, Inc.
+# License GPLvN+: GNU GPL version N or later <https://gnu.org/licenses/gpl.html>.
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+# ============================
+not ok 14 test-15
+# (from function `test-15-actual' in file batspp-output/trace-unix-alias.outputpp, line 518,
+#  in test file batspp-output/trace-unix-alias.outputpp, line 505)
+#   `test-15-actual ' failed with status 127
+# ========== linux-version | grep VERSION_ID | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 518: testnum: command not found
+# Usage: /usr/bin/linux-version compare VERSION1 OP VERSION2
+#        /usr/bin/linux-version sort [--reverse] [VERSION1 VERSION2 ...]
+#        /usr/bin/linux-version list [--paths]
+#
+# The version arguments should be kernel version strings as shown by
+# 'uname -r' and used in filenames.
+#
+# The valid comparison operators are: lt le eq ge gt
+not ok 15 test-16
+# (in test file batspp-output/trace-unix-alias.outputpp, line 546)
+#   `[ "$(test-16-actual)" == "$(test-16-expected)" ]' failed
+# ========== system-status | testnum | testuser | tail -n +2 | awk '!($8="")'
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 553: system-status: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 553: testnum: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 553: testuser: command not found
+# ========= total used free shared buff/cache available
+# Mem: NNNNNNN NNNNNNN NNNNNN NNNNNN NNNNNN NNNNNN
+# Swap: NNNNNNN NNNNNNN NNNNNNN
+# NN:NN:NN up N:NN, N user, load average:  N.NN, N.NN
+# USER TTY FROM LOGIN@ IDLE JCPU PCPU
+# userxf333 ttyN :N NN:NN N:NNm NN:NN N.NNs =========
+# total used free shared buff/cache available
+# Mem: NNNNNNN NNNNNNN NNNNNN NNNNNN NNNNNN NNNNNN
+# Swap: NNNNNNN NNNNNNN NNNNNNN
+# NN:NN:NN up N:NN, N user, load average:  N.NN, N.NN
+# USER TTY FROM LOGIN@ IDLE JCPU PCPU
+# userxf333 ttyN :N NN:NN N:NNm NN:NN N.NNs
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 553: system-status: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 553: testnum: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 553: testuser: command not found
+not ok 16 test-17
+# (from function `test-17-actual' in file batspp-output/trace-unix-alias.outputpp, line 592,
+#  in test file batspp-output/trace-unix-alias.outputpp, line 579)
+#   `test-17-actual ' failed with status 127
+# ========== apropos-command time | grep asctime | wc -l | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 592: apropos-command: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 592: testnum: command not found
+not ok 17 test-18
+# (from function `test-18-actual' in file batspp-output/trace-unix-alias.outputpp, line 626,
+#  in test file batspp-output/trace-unix-alias.outputpp, line 613)
+#   `test-18-actual ' failed
+# ========== cat hidad.txt
+#  ==========
+# cat: hidad.txt: No such file or directory
+not ok 18 test-19
+# (from function `test-19-actual' in file batspp-output/trace-unix-alias.outputpp, line 665,
+#  in test file batspp-output/trace-unix-alias.outputpp, line 652)
+#   `test-19-actual ' failed with status 127
+# ========== tokenize _old_make.log
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 665: tokenize: command not found
+not ok 19 test-20
+# (in test file batspp-output/trace-unix-alias.outputpp, line 698)
+#   `[ "$(test-20-actual)" == "$(test-20-expected)" ]' failed
+# ========== PERL_PRINT='This is Ubuntu!'\n ==========
+# ========= $ perl-echo $PERL_PRINT
+# $ perl-echo-sans-newline $PERL_PRINT
+# This
+# This =========
+# $ perl-echo This is Ubuntu!
+# $ perl-echo-sans-newline This is Ubuntu!
+# This
+# This
+# ============================
+not ok 20 test-21
+# (from function `test-21-actual' in file batspp-output/trace-unix-alias.outputpp, line 742,
+#  in test file batspp-output/trace-unix-alias.outputpp, line 729)
+#   `test-21-actual ' failed with status 127
+# ========== perl-printf 'ONE KISS IS ALL IT TAKES\n'\n ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 742: perl-printf: command not found
+not ok 21 test-22
+# (from function `test-22-actual' in file batspp-output/trace-unix-alias.outputpp, line 786,
+#  in test file batspp-output/trace-unix-alias.outputpp, line 773)
+#   `test-22-actual ' failed with status 127
+# ========== set-display-local
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 786: set-display-local: command not found
+not ok 22 test-23
+# (from function `test-23-actual' in file batspp-output/trace-unix-alias.outputpp, line 821,
+#  in test file batspp-output/trace-unix-alias.outputpp, line 808)
+#   `test-23-actual ' failed with status 127
+# ========== bash-trace-on | testuser | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 821: bash-trace-on: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 821: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 821: testnum: command not found
+not ok 23 test-24
+# (in test file batspp-output/trace-unix-alias.outputpp, line 864)
+#   `[ "$(test-24-actual)" == "$(test-24-expected)" ]' failed
+# ========== ls
+#  ==========
+# adhoc-tests.test
+# alias-calculator-commands.ipynb
+# alias-cd-commands.ipynb
+# alias-grep-commands.ipynb
+# alias-html-test.ipynb
+# alias-proper.test
+# alias-trace-misc-commands.ipynb
+# alt-simple-alias-test.ipynb
+# anaconda.test
+# aviyan-git-log.txt
+# batspp_report.py
+# calc_entropy.input
+# calc_entropy.input2
+# calc_entropy.simple.input
+# calc_entropy.simple.input2
+# calc-entropy-tests.ipynb
+# command-override-cp-mv.ipynb
+# command-vars.text
+# dickenson-the-chariot.txt
+# dictionaries.test
+# dir-aliases-test-revised.ipynb
+# docshtest.rst
+# download-and-test-tomohara-aliases.ipynb
+# dummy-test.ipynb
+# eldar-0.0.7-py3.8.egg
+# empty-test-file.ipynb
+# file-util.test
+# hello-world-basic.ipynb
+# hello-world.ipynb
+# hello-world-revised.batspp
+# hello-world-revised.ipynb
+# hello-world-source.ipynb
+# json-related-alias.batspp
+# json-related-alias.ipynb
+# jupyter_to_batspp.py
+# kcov_result.py
+# macos.test
+# master_test.py
+# merge-notes.test
+# miscellanous.tests
+# more-tomohara-aliases-test.ipynb
+# NOBATSPPsudocommentstest.ipynb
+# NOBATSPPsudo_test_simplebatspp.ipynb
+# not.a.url.html
+# not.a.url.txt
+# perl-script.test
+# README.txt
+# settings.test
+# shell-prompt.test
+# simple-alias-test.ipynb
+# ssh-commands.test
+# stanza1-dickenson-the-chariot.txt
+# summary_stats.bash
+# summary_stats.txt
+# test_bash2python_diff.py
+# test_bash2python.py
+# testbook-test-dir-aliases.ipynb
+# test-check-errors.ipynb
+# test_check_errors.py
+# test-cond-env-setting.ipynb
+# test-dir-alias.batspp
+# test-dir-alias.ipynb
+# test_extract_matches.py
+# test_tom_batspp_report.py
+# test-tomohara-aliases-access.ipynb
+# test_tomohara_aliases.bats
+# test_tpo_count_it.py
+# thresholds.yaml
+# tomasohara-aliases-test.ipynb
+# tom_batspp_report.py
+# tom-idiosyncratic.test
+# tom_kcov_result.py
+# tom_summary_stats.bash
+# tom_test_tomohara_aliases.bats
+# trace-extensionless-shortcut-unicode.ipynb
+# trace-extensionless-shortcut-V2.ipynb
+# trace-file-manipulation.ipynb
+# trace-line-words-commands.ipynb
+# trace-linux-admin-alias.ipynb
+# trace-python-commands.ipynb
+# trace-setup-sorting-wrappers.ipynb
+# trace-unix-alias.ipynb
+# trace-unix-general.ipynb
+# yet-more-tomasohara-aliases.test
+# ========= $ cp tf2.txt testfolder/\n$ linebr\n$ compress-this-dir ./testfolder | testnum\n$ linebr\n$ ls\n$ linebr\n$ ununcompress-this-dir ./testfolder | testnum\nhidad.txt  _make.log\t  testfolder  tf2.txt\nhimom.txt  _old_make.log  tf1.txt     tf3.txt\n'tf2.txt' -> 'testfolder/tf2.txt'\n--------------------------------------------------------------------------------\ngzip: /tmp/test-unix-alias/test-NNNN is a directory -- ignored\n/tmp/test-unix-alias/test-NNNN/hidad.txt:\t-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/hidad.txt.gz\n/tmp/test-unix-alias/test-NNNN/himom.txt:\t-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/himom.txt.gz\n/tmp/test-unix-alias/test-NNNN/tfN.txt:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt.gz\n/tmp/test-unix-alias/test-NNNN/tfN.txt:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt.gz\ngzip: /tmp/test-unix-alias/test-NNNN/testfolder is a directory -- ignored\n/tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt.gz\n/tmp/test-unix-alias/test-NNNN/_old_make.log:\t -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_old_make.log.gz\n/tmp/test-unix-alias/test-NNNN/tfN.txt:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt.gz\n/tmp/test-unix-alias/test-NNNN/_make.log:\t -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_make.log.gz\n--------------------------------------------------------------------------------\nhidad.txt.gz  _make.log.gz\ttestfolder  tf2.txt.gz\nhimom.txt.gz  _old_make.log.gz\ttf1.txt.gz  tf3.txt.gz\n--------------------------------------------------------------------------------\ngzip: /tmp/test-unix-alias/test-NNNN is a directory -- ignored\n/tmp/test-unix-alias/test-NNNN/_make.log.gz:\t -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_make.log\n/tmp/test-unix-alias/test-NNNN/tfN.txt.gz:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt\n/tmp/test-unix-alias/test-NNNN/tfN.txt.gz:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt\n/tmp/test-unix-alias/test-NNNN/_old_make.log.gz:\t -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_old_make.log\n/tmp/test-unix-alias/test-NNNN/himom.txt.gz:\t-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/himom.txt\n/tmp/test-unix-alias/test-NNNN/hidad.txt.gz:\t-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/hidad.txt\ngzip: /tmp/test-unix-alias/test-NNNN/testfolder is a directory -- ignored\n/tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt.gz:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt\n/tmp/test-unix-alias/test-NNNN/tfN.txt.gz:\t  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt =========
+# $ cp tf2.txt testfolder/
+# $ linebr
+# $ compress-this-dir ./testfolder | testnum
+# $ linebr
+# $ ls
+# $ linebr
+# $ ununcompress-this-dir ./testfolder | testnum
+# hidad.txt  _make.log	  testfolder  tf2.txt
+# himom.txt  _old_make.log  tf1.txt     tf3.txt
+# 'tf2.txt' -> 'testfolder/tf2.txt'
+# --------------------------------------------------------------------------------
+# gzip: /tmp/test-unix-alias/test-NNNN is a directory -- ignored
+# /tmp/test-unix-alias/test-NNNN/hidad.txt:	-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/hidad.txt.gz
+# /tmp/test-unix-alias/test-NNNN/himom.txt:	-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/himom.txt.gz
+# /tmp/test-unix-alias/test-NNNN/tfN.txt:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt.gz
+# /tmp/test-unix-alias/test-NNNN/tfN.txt:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt.gz
+# gzip: /tmp/test-unix-alias/test-NNNN/testfolder is a directory -- ignored
+# /tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt.gz
+# /tmp/test-unix-alias/test-NNNN/_old_make.log:	 -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_old_make.log.gz
+# /tmp/test-unix-alias/test-NNNN/tfN.txt:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt.gz
+# /tmp/test-unix-alias/test-NNNN/_make.log:	 -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_make.log.gz
+# --------------------------------------------------------------------------------
+# hidad.txt.gz  _make.log.gz	testfolder  tf2.txt.gz
+# himom.txt.gz  _old_make.log.gz	tf1.txt.gz  tf3.txt.gz
+# --------------------------------------------------------------------------------
+# gzip: /tmp/test-unix-alias/test-NNNN is a directory -- ignored
+# /tmp/test-unix-alias/test-NNNN/_make.log.gz:	 -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_make.log
+# /tmp/test-unix-alias/test-NNNN/tfN.txt.gz:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt
+# /tmp/test-unix-alias/test-NNNN/tfN.txt.gz:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt
+# /tmp/test-unix-alias/test-NNNN/_old_make.log.gz:	 -N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/_old_make.log
+# /tmp/test-unix-alias/test-NNNN/himom.txt.gz:	-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/himom.txt
+# /tmp/test-unix-alias/test-NNNN/hidad.txt.gz:	-NN.N% -- replaced with /tmp/test-unix-alias/test-NNNN/hidad.txt
+# gzip: /tmp/test-unix-alias/test-NNNN/testfolder is a directory -- ignored
+# /tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt.gz:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/testfolder/tfN.txt
+# /tmp/test-unix-alias/test-NNNN/tfN.txt.gz:	  N.N% -- replaced with /tmp/test-unix-alias/test-NNNN/tfN.txt
+# ============================
+not ok 24 test-25
+# (in test file batspp-output/trace-unix-alias.outputpp, line 932)
+#   `[ "$(test-25-actual)" == "$(test-25-expected)" ]' failed
+# ========== # $ kill-iceweasel
+#  ==========
+# ========= # | pattern=/:[0-9][0-9] [^ ]*iceweasel/
+# # | filter=/($)(^)/
+# # | Warning: No processes matched the pattern =========
+# # | pattern=/:[0-9][0-9] [^ ]*iceweasel/
+# # | filter=/($)(^)/
+# # | Warning: No processes matched the pattern
+# ============================
+not ok 25 test-26
+# (from function `test-26-actual' in file batspp-output/trace-unix-alias.outputpp, line 974,
+#  in test file batspp-output/trace-unix-alias.outputpp, line 961)
+#   `test-26-actual ' failed with status 127
+# ========== old-count-exts | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 974: old-count-exts: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-unix-alias.outputpp: line 974: testnum: command not found
+ok 26 test-27

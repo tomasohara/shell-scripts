@@ -1,0 +1,395 @@
+1..21
+not ok 1 test-1
+# (in test file batspp-only/json-related-alias.bats, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== # $ echo 'Hi'\n ==========
+# ========= # | Hi?2004l\n$ bind 'set enable-bracketed-paste off' =========
+# # | Hi?2004l
+# $ bind 'set enable-bracketed-paste off'
+# ============================
+not ok 2 test-3
+# (in test file batspp-only/json-related-alias.bats, line 59)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== echo $PS1
+#  ==========
+#
+# ========= [PEXP\[\]ECT_PROMPT> =========
+# [PEXP\[\]ECT_PROMPT>
+# ============================
+not ok 3 test-4
+# (in test file batspp-only/json-related-alias.bats, line 93)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ alias | wc -l\n$ for f in ; do unset -f ; done\n$ typeset -f | egrep '^\w+' | wc -l\n0\n0 =========
+# $ alias | wc -l
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-10-actual ()
+# test-10-expected ()
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# END_EXPECTED
+# test-12-actual ()
+# test-12-expected ()
+# END_EXPECTED
+# test-13-actual ()
+# test-13-expected ()
+# This
+# is
+# Line
+# 1
+# 3
+# 5
+# END_EXPECTED
+# test-14-actual ()
+# test-14-expected ()
+# END_EXPECTED
+# test-15-actual ()
+# test-15-expected ()
+# 2
+# 4
+# A.
+# END_EXPECTED
+# test-16-actual ()
+# test-16-expected ()
+# 1 3 5 7 9
+# This is Line B.
+# END_EXPECTED
+# test-17-actual ()
+# test-17-expected ()
+# I am using Ubuntu
+# END_EXPECTED
+# test-18-actual ()
+# test-18-expected ()
+# Hi Mom, I am using Ubuntu
+# END_EXPECTED
+# test-19-actual ()
+# test-19-expected ()
+# Hi Mom, I am using Ubuntu
+# END_EXPECTED
+# test-20-actual ()
+# test-20-expected ()
+# Hi Mom, I am using Ubuntu
+# END_EXPECTED
+# test-21-actual ()
+# test-21-expected ()
+# Hi Mom,
+# 1
+# 2
+# 3
+# END_EXPECTED
+# test-22-actual ()
+# test-22-expected ()
+# I can use a backslash n to start a new line.
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# 0
+# 0
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# 1
+# 0
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# test_test-2d11 ()
+# test_test-2d12 ()
+# test_test-2d13 ()
+# is
+# Line
+# 1
+# 3
+# 5' "=========";
+# test_test-2d14 ()
+# test_test-2d15 ()
+# 4
+# A.' "=========";
+# test_test-2d16 ()
+# This is Line B.' "=========";
+# test_test-2d17 ()
+# test_test-2d18 ()
+# test_test-2d19 ()
+# test_test-2d20 ()
+# Hi Mom, I am using Ubuntu' "=========";
+# test_test-2d21 ()
+# Hi Mom,
+# 1
+# 2
+# 3' "=========";
+# test_test-2d22 ()
+# test_test-2d3 ()
+# test_test-2d4 ()
+# test_test-2d5 ()
+# test_test-2d6 ()
+# test_test-2d7 ()
+# test_test-2d8 ()
+# test_test-2d9 () ; do unset -f ; done
+# $ typeset -f | egrep '^\w+' | wc -l
+# 0
+# 0
+# ============================
+not ok 4 test-5
+# (in test file batspp-only/json-related-alias.bats, line 131)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== TMP=/tmp/test-json-alias
+#  ==========
+# ========= ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=$PWD/..
+# ## temp_dir=$TMP/test-$$
+# $ temp_dir=$TMP/test-3214
+# $ mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+# /tmp/test-json-alias/test-3214 =========
+# ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=/tmp/batspp-99593/test-5/..
+# ## temp_dir=/tmp/test-json-alias/test-99740
+# $ temp_dir=/tmp/test-json-alias/test-3214
+# $ mkdir -p ""
+# # TODO: /bin/rm -rvf ""
+# $ cd ""
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "80" '' | tr ' ' -"
+# /tmp/test-json-alias/test-3214
+# ============================
+not ok 5 test-6
+# (in test file batspp-only/json-related-alias.bats, line 175)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== alias | wc -l
+#  ==========
+# 0
+# ========= # Count functions\n$ typeset -f | egrep '^\w+' | wc -l\n1\n0 =========
+# # Count functions
+# $ typeset -f | egrep '^\w+' | wc -l
+# 1
+# 0
+# ============================
+not ok 6 test-7
+# (from function `test-7-actual' in file batspp-only/json-related-alias.bats, line 219,
+#  in test file batspp-only/json-related-alias.bats, line 206)
+#   `test-7-actual ' failed
+# ========== source $BIN_DIR/tomohara-aliases.bash
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/json-related-alias.bats: line 219: /tomohara-aliases.bash: No such file or directory
+not ok 7 test-8
+# (from function `test-8-actual' in file batspp-only/json-related-alias.bats, line 253,
+#  in test file batspp-only/json-related-alias.bats, line 240)
+#   `test-8-actual ' failed with status 127
+# ========== perl -e 'print q|{"foo":"HI MOM!","bar":1234567890000000000000000}|' | pp-json -f json -t dumper
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/json-related-alias.bats: line 253: pp-json: command not found
+not ok 8 test-9
+# (from function `test-9-actual' in file batspp-only/json-related-alias.bats, line 290,
+#  in test file batspp-only/json-related-alias.bats, line 277)
+#   `test-9-actual ' failed with status 127
+# ========== perl -e'print q|{"foo":"あい","bar":1234567890000000000000000}|' | json-pp -f json -t dumper -json_opt pretty,utf8,allow_bignum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/json-related-alias.bats: line 290: json-pp: command not found
+not ok 9 test-10
+# (from function `test-10-actual' in file batspp-only/json-related-alias.bats, line 334,
+#  in test file batspp-only/json-related-alias.bats, line 321)
+#   `test-10-actual ' failed with status 127
+# ========== perl -e'print q|{"foo":"あい","bar":1234567890000000000000000}|' | pp-json-sorted -f json -t dumper
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/json-related-alias.bats: line 334: pp-json-sorted: command not found
+not ok 10 test-11
+# (in test file batspp-only/json-related-alias.bats, line 364)
+#   `[ "$(test-11-actual)" == "$(test-11-expected)" ]' failed
+# ========== pwd
+#  ==========
+# /tmp/batspp-99593/test-11
+# ========= /tmp/test-json-alias/test-3214 =========
+# /tmp/test-json-alias/test-3214
+# ============================
+not ok 11 test-12
+# (in test file batspp-only/json-related-alias.bats, line 398)
+#   `[ "$(test-12-actual)" == "$(test-12-expected)" ]' failed
+# ========== rm -rf ./* > /dev/null
+#  ==========
+# ========= $ printf "This is Line A.\n1 2 3 4 5" > file_a.txt
+# $ printf "This is Line B.\n1 3 5 7 9" > file_b.txt =========
+# $ printf "This is Line A.\n1 2 3 4 5" > file_a.txt
+# $ printf "This is Line B.\n1 3 5 7 9" > file_b.txt
+# ============================
+not ok 12 test-13
+# (from function `test-13-actual' in file batspp-only/json-related-alias.bats, line 440,
+#  in test file batspp-only/json-related-alias.bats, line 427)
+#   `test-13-actual ' failed with status 127
+# ========== intersection ./file_a.txt ./file_b.txt
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/json-related-alias.bats: line 440: intersection: command not found
+not ok 13 test-14
+# (from function `test-14-actual' in file batspp-only/json-related-alias.bats, line 479,
+#  in test file batspp-only/json-related-alias.bats, line 466)
+#   `test-14-actual ' failed with status 127
+# ========== line-intersection ./file_b.txt ./file_a.txt
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/json-related-alias.bats: line 479: line-intersection: command not found
+not ok 14 test-15
+# (from function `test-15-actual' in file batspp-only/json-related-alias.bats, line 513,
+#  in test file batspp-only/json-related-alias.bats, line 500)
+#   `test-15-actual ' failed with status 127
+# ========== difference ./file_a.txt ./file_b.txt
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/json-related-alias.bats: line 513: difference: command not found
+not ok 15 test-16
+# (from function `test-16-actual' in file batspp-only/json-related-alias.bats, line 549,
+#  in test file batspp-only/json-related-alias.bats, line 536)
+#   `test-16-actual ' failed with status 127
+# ========== line-difference ./file_b.txt ./file_a.txt
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/json-related-alias.bats: line 549: line-difference: command not found
+not ok 16 test-17
+# (in test file batspp-only/json-related-alias.bats, line 577)
+#   `[ "$(test-17-actual)" == "$(test-17-expected)" ]' failed
+# ========== printf "Hi Mom, \rI am using Ubuntu\n"
+#  ==========
+# Hi Mom, 
+I am using Ubuntu
+# ========= I am using Ubuntu =========
+# I am using Ubuntu
+# ============================
+not ok 17 test-18
+# (from function `test-18-actual' in file batspp-only/json-related-alias.bats, line 618,
+#  in test file batspp-only/json-related-alias.bats, line 605)
+#   `test-18-actual ' failed with status 127
+# ========== printf "Hi Mom,\r I am using Ubuntu\n" | remove-cr
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/json-related-alias.bats: line 618: remove-cr: command not found
+not ok 18 test-19
+# (from function `test-19-actual' in file batspp-only/json-related-alias.bats, line 652,
+#  in test file batspp-only/json-related-alias.bats, line 639)
+#   `test-19-actual ' failed with status 127
+# ========== printf "Hi Mom,\r I am using Ubuntu\n" | alt-remove-cr
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/json-related-alias.bats: line 652: alt-remove-cr: command not found
+not ok 19 test-20
+# (from function `test-20-actual' in file batspp-only/json-related-alias.bats, line 686,
+#  in test file batspp-only/json-related-alias.bats, line 673)
+#   `test-20-actual ' failed with status 127
+# ========== printf "Hi Mom,\r I am using Ubuntu\n" | perl-remove-cr
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/json-related-alias.bats: line 686: perl-remove-cr: command not found
+not ok 20 test-21
+# (in test file batspp-only/json-related-alias.bats, line 714)
+#   `[ "$(test-21-actual)" == "$(test-21-expected)" ]' failed
+# ========== pwd
+#  ==========
+# /tmp/batspp-99593/test-21
+# ========= $ rm -rf ./* > /dev/null
+# $ printf "Hi Mom,\nThs is the use of printf\nI can use a backslash n to start a new line.\n1\n2\n3"> abc-test.txt
+# $ last-n-with-header 3 abc-test.txt
+# /tmp/test-json-alias/test-3214
+# Hi Mom,
+# 1
+# 2
+# 3 =========
+# $ rm -rf ./* > /dev/null
+# $ printf "Hi Mom,\nThs is the use of printf\nI can use a backslash n to start a new line.\n1\n2\n3"> abc-test.txt
+# $ last-n-with-header 3 abc-test.txt
+# /tmp/test-json-alias/test-3214
+# Hi Mom,
+# 1
+# 2
+# 3
+# ============================
+not ok 21 test-22
+# (from function `test-22-actual' in file batspp-only/json-related-alias.bats, line 762,
+#  in test file batspp-only/json-related-alias.bats, line 749)
+#   `test-22-actual ' failed with status 127
+# ========== show-line 3 abc-test.txt
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/json-related-alias.bats: line 762: show-line: command not found

@@ -1,0 +1,11 @@
+1..2
+ok 1 test-1
+not ok 2 test-3
+# (in test file batspp-output/dummy-test.outputpp, line 59)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== date
+#  ==========
+# Tue Jul  4 10:10:59 PM +0545 2023
+# ========= Wed Jun 21 06:30:51 CDT 2023 =========
+# Wed Jun 21 06:30:51 CDT 2023
+# ============================

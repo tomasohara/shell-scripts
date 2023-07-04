@@ -1,0 +1,66 @@
+1..7
+not ok 1 test-1
+# (in test file batspp-output/NOBATSPPsudo_test_simplebatspp.outputpp, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== alias testnum="sed -r "s/[0-9]/X/g""
+#  ==========
+# ========= $ alias testuser="sed -r "s/"$USER"+/user/g"" =========
+# $ alias testuser="sed -r "s/"aveey"+/user/g""
+# ============================
+ok 2 test-3
+ok 3 test-4
+not ok 4 test-5
+# (in test file batspp-output/NOBATSPPsudo_test_simplebatspp.outputpp, line 127)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== iwconfig | tee wireless_info.txt
+#  ==========
+# lo        no wireless extensions.
+#
+# eno1      no wireless extensions.
+#
+# wlp4s0    IEEE 802.11  ESSID:"Sudhir_DHFibernet"
+#           Mode:Managed  Frequency:2.462 GHz  Access Point: 6C:14:6E:5A:B7:58
+#           Bit Rate=104 Mb/s   Tx-Power=3 dBm
+#           Retry short limit:7   RTS thr:off   Fragment thr:off
+#           Power Management:on
+#           Link Quality=45/70  Signal level=-65 dBm
+#           Rx invalid nwid:0  Rx invalid crypt:0  Rx invalid frag:0
+#           Tx excessive retries:4  Invalid misc:3   Missed beacon:0
+#
+# ========= lo        no wireless extensions. =========
+# lo        no wireless extensions.
+# ============================
+# lo        no wireless extensions.
+#
+# eno1      no wireless extensions.
+#
+not ok 5 test-6
+# (from function `test-6-actual' in file batspp-output/NOBATSPPsudo_test_simplebatspp.outputpp, line 168,
+#  in test file batspp-output/NOBATSPPsudo_test_simplebatspp.outputpp, line 155)
+#   `test-6-actual ' failed
+# ========== cat wireless_info.txt
+#  ==========
+# cat: wireless_info.txt: No such file or directory
+ok 6 test-7
+not ok 7 test-8
+# (in test file batspp-output/NOBATSPPsudo_test_simplebatspp.outputpp, line 236)
+#   `[ "$(test-8-actual)" == "$(test-8-expected)" ]' failed
+# ========== sudo apt search libnoise
+#  ==========
+#
+# WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+#
+# Sorting...
+# Full Text Search...
+# libnoise-dev/jammy 1.0.0+repack-1build1 amd64
+#   Portable, coherent noise-generating library for C++
+#
+# libnoise0/jammy 1.0.0+repack-1build1 amd64
+#   Portable, coherent noise-generating library for C++
+#
+# =========  =========
+#
+# ============================
+#
+# WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+#

@@ -1,0 +1,515 @@
+1..13
+not ok 1 test-1
+# (in test file batspp-only/command-override-cp-mv.bats, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== echo $PS1
+#  ==========
+#
+# ========= [PEXP\[\]ECT_PROMPT> =========
+# [PEXP\[\]ECT_PROMPT>
+# ============================
+not ok 2 test-3
+# (in test file batspp-only/command-override-cp-mv.bats, line 59)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ alias | wc -l\n$ for f in ; do unset -f ; done\n$ typeset -f | egrep '^\w+' | wc -l\n0\n0 =========
+# $ alias | wc -l
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-10-actual ()
+# test-10-expected ()
+# removed './testdir1/.bashrc'
+# removed directory './testdir1'
+# renamed 'abc' -> './mvtest_dir1/abc'
+# renamed 'def' -> './mvtest_dir1/def'
+# renamed 'ghi' -> './mvtest_dir1/ghi'
+# total N
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN mvtest_dirN
+# total N
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# removed './mvtest_dir1/abc'
+# removed './mvtest_dir1/ghi'
+# removed './mvtest_dir1/def'
+# removed directory './mvtest_dir1'
+# total N
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN cptest_dirN
+# total N
+# END_EXPECTED
+# test-12-actual ()
+# test-12-expected ()
+# total NN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# removed directory 'TDIR1'
+# removed directory 'TDIR2'
+# removed directory 'TDIR3'
+# removed directory 'TDIR4'
+# total N
+# END_EXPECTED
+# test-13-actual ()
+# test-13-expected ()
+# END_EXPECTED
+# test-14-actual ()
+# test-14-expected ()
+# total N
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN testdirN
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# 0
+# 0
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# 2
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# 3
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# 0
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# use cls instead (or /bin/clear)
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# removed '\''./testdir1/.bashrc'\''
+# removed directory '\''./testdir1'\''
+# renamed '\''abc'\'' -> '\''./mvtest_dir1/abc'\''
+# renamed '\''def'\'' -> '\''./mvtest_dir1/def'\''
+# renamed '\''ghi'\'' -> '\''./mvtest_dir1/ghi'\''
+# total N
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN mvtest_dirN
+# total N
+# test_test-2d11 ()
+# removed '\''./mvtest_dir1/abc'\''
+# removed '\''./mvtest_dir1/ghi'\''
+# removed '\''./mvtest_dir1/def'\''
+# removed directory '\''./mvtest_dir1'\''
+# total N
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN cptest_dirN
+# total N
+# test_test-2d12 ()
+# total NN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# removed directory '\''TDIR1'\''
+# removed directory '\''TDIR2'\''
+# removed directory '\''TDIR3'\''
+# removed directory '\''TDIR4'\''
+# total N
+# test_test-2d13 ()
+# test_test-2d14 ()
+# total N
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN testdirN' "=========";
+# test_test-2d3 ()
+# test_test-2d4 ()
+# test_test-2d5 ()
+# 2' "=========";
+# test_test-2d6 ()
+# test_test-2d7 ()
+# test_test-2d8 ()
+# test_test-2d9 () ; do unset -f ; done
+# $ typeset -f | egrep '^\w+' | wc -l
+# 0
+# 0
+# ============================
+not ok 3 test-4
+# (in test file batspp-only/command-override-cp-mv.bats, line 97)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== alias testuser="sed -r "s/"$USER"+/userxf333/g""
+#  ==========
+# ========= $ alias testnum="sed -r "s/[0-9]/N/g"" =========
+# $ alias testnum="sed -r "s/[0-9]/N/g""
+# ============================
+not ok 4 test-5
+# (in test file batspp-only/command-override-cp-mv.bats, line 131)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== TMP=./tmp/test-cp-mv
+#  ==========
+# ========= $ BIN_DIR=$PWD/..
+# ## temp_dir=$TMP/test-$$
+# $ temp_dir=$TMP/test-1210
+# $ mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd | testuser
+# $ alias | wc -l
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+# /home/userxf333/tom-project/shell-scripts/tests/tmp/test-cp-mv/test-1210
+# 2 =========
+# $ BIN_DIR=/tmp/batspp-91747/test-5/..
+# ## temp_dir=./tmp/test-cp-mv/test-91870
+# $ temp_dir=./tmp/test-cp-mv/test-1210
+# $ mkdir -p ""
+# # TODO: /bin/rm -rvf ""
+# $ cd ""
+# $ pwd | testuser
+# $ alias | wc -l
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "80" '' | tr ' ' -"
+# /home/userxf333/tom-project/shell-scripts/tests/tmp/test-cp-mv/test-1210
+# 2
+# ============================
+not ok 5 test-6
+# (in test file batspp-only/command-override-cp-mv.bats, line 176)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== alias | wc -l
+#  ==========
+# 0
+# ========= 3 =========
+# 3
+# ============================
+not ok 6 test-7
+# (in test file batspp-only/command-override-cp-mv.bats, line 210)
+#   `[ "$(test-7-actual)" == "$(test-7-expected)" ]' failed
+# ========== typeset -f | egrep '^\w+' | wc -l\n ==========
+# 182
+# ========= 0 =========
+# 0
+# ============================
+not ok 7 test-8
+# (from function `test-8-actual' in file batspp-only/command-override-cp-mv.bats, line 251,
+#  in test file batspp-only/command-override-cp-mv.bats, line 238)
+#   `test-8-actual ' failed
+# ========== source $BIN_DIR/tomohara-aliases.bash
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/command-override-cp-mv.bats: line 251: /tomohara-aliases.bash: No such file or directory
+not ok 8 test-9
+# (in test file batspp-only/command-override-cp-mv.bats, line 278)
+#   `[ "$(test-9-actual)" == "$(test-9-expected)" ]' failed
+# ========== clear
+#  ==========
+# [H[2J[3J========= use cls instead (or /bin/clear) =========
+# use cls instead (or /bin/clear)
+# ============================
+not ok 9 test-10
+# (in test file batspp-only/command-override-cp-mv.bats, line 312)
+#   `[ "$(test-10-actual)" == "$(test-10-expected)" ]' failed
+# ========== rm -rf ./*
+#  ==========
+# ========= $ linebr
+# ## CREATES TEST SUBJECTS
+# $ touch abc def ghi
+# $ mkdir mvtest_dir1
+# ## WORK OF ALIASES
+# $ mv abc ./mvtest_dir1
+# $ move def ./mvtest_dir1
+# $ move-force ghi ./mvtest_dir1
+# $ linebr
+# ## VIEWING THE CHANGES MADE
+# $ ls -l | awk '!($6="")' | testnum | testuser
+# $ linebr
+# $ ls -l ./mvtest_dir1 | awk '!($6="")' | testnum | testuser
+# $ linebr
+# removed './testdir1/.bashrc'
+# removed directory './testdir1'
+# --------------------------------------------------------------------------------
+# renamed 'abc' -> './mvtest_dir1/abc'
+# renamed 'def' -> './mvtest_dir1/def'
+# renamed 'ghi' -> './mvtest_dir1/ghi'
+# --------------------------------------------------------------------------------
+# total N
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN mvtest_dirN
+# --------------------------------------------------------------------------------
+# total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+# -------------------------------------------------------------------------------- =========
+# $ linebr
+# ## CREATES TEST SUBJECTS
+# $ touch abc def ghi
+# $ mkdir mvtest_dir1
+# ## WORK OF ALIASES
+# $ mv abc ./mvtest_dir1
+# $ move def ./mvtest_dir1
+# $ move-force ghi ./mvtest_dir1
+# $ linebr
+# ## VIEWING THE CHANGES MADE
+# $ ls -l | awk '!(="")' | testnum | testuser
+# $ linebr
+# $ ls -l ./mvtest_dir1 | awk '!(="")' | testnum | testuser
+# $ linebr
+# removed './testdir1/.bashrc'
+# removed directory './testdir1'
+# --------------------------------------------------------------------------------
+# renamed 'abc' -> './mvtest_dir1/abc'
+# renamed 'def' -> './mvtest_dir1/def'
+# renamed 'ghi' -> './mvtest_dir1/ghi'
+# --------------------------------------------------------------------------------
+# total N
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN mvtest_dirN
+# --------------------------------------------------------------------------------
+# total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+# --------------------------------------------------------------------------------
+# ============================
+not ok 10 test-11
+# (in test file batspp-only/command-override-cp-mv.bats, line 374)
+#   `[ "$(test-11-actual)" == "$(test-11-expected)" ]' failed
+# ========== rm -rf ./*
+#  ==========
+# ========= $ linebr
+# ## CREATES TEST SUBJECTS
+# $ touch abc def ghi
+# $ mkdir cptest_dir1
+# ## WORK OF ALIASES
+# $ cp abc ./cptest_dir1
+# $ copy def ./cptest_dir1
+# $ copy-force ghi ./cptest_dir1
+# $ linebr
+# ## VIEWING THE CHANGES MADE
+# $ ls -l | awk '!($6="")' | testnum | testuser
+# $ linebr
+# $ ls -l ./cptest_dir1 | awk '!($6="")' | testnum | testuser
+# $ linebr
+# removed './mvtest_dir1/abc'
+# removed './mvtest_dir1/ghi'
+# removed './mvtest_dir1/def'
+# removed directory './mvtest_dir1'
+# --------------------------------------------------------------------------------
+# 'abc' -> './cptest_dir1/abc'
+# 'def' -> './cptest_dir1/def'
+# 'ghi' -> './cptest_dir1/ghi'
+# --------------------------------------------------------------------------------
+# total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN cptest_dirN
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+# --------------------------------------------------------------------------------
+# total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+# -------------------------------------------------------------------------------- =========
+# $ linebr
+# ## CREATES TEST SUBJECTS
+# $ touch abc def ghi
+# $ mkdir cptest_dir1
+# ## WORK OF ALIASES
+# $ cp abc ./cptest_dir1
+# $ copy def ./cptest_dir1
+# $ copy-force ghi ./cptest_dir1
+# $ linebr
+# ## VIEWING THE CHANGES MADE
+# $ ls -l | awk '!(="")' | testnum | testuser
+# $ linebr
+# $ ls -l ./cptest_dir1 | awk '!(="")' | testnum | testuser
+# $ linebr
+# removed './mvtest_dir1/abc'
+# removed './mvtest_dir1/ghi'
+# removed './mvtest_dir1/def'
+# removed directory './mvtest_dir1'
+# --------------------------------------------------------------------------------
+# 'abc' -> './cptest_dir1/abc'
+# 'def' -> './cptest_dir1/def'
+# 'ghi' -> './cptest_dir1/ghi'
+# --------------------------------------------------------------------------------
+# total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN cptest_dirN
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+# --------------------------------------------------------------------------------
+# total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+# --------------------------------------------------------------------------------
+# ============================
+not ok 11 test-12
+# (in test file batspp-only/command-override-cp-mv.bats, line 441)
+#   `[ "$(test-12-actual)" == "$(test-12-expected)" ]' failed
+# ========== rm -rf ./* > /dev/null
+#  ==========
+# ========= $ linebr
+# ## CREATES TEST SUBJECTS
+# $ touch abc def ghi
+# $ mkdir TDIR1 TDIR2 TDIR3 TDIR4
+# $ ls -l | awk '!($6="")' | testnum | testuser
+# $ linebr
+# ## WORK OF ALIASES
+# $ remove-dir "TDIR1"
+# $ delete-dir "TDIR2"
+# $ remove-dir-force TDIR3
+# $ delete-dir-force TDIR4
+# $ linebr
+# ## VIEWING THE CHANGES MADE
+# $ ls -l | awk '!($6="")' | testnum | testuser
+# $ linebr
+# --------------------------------------------------------------------------------
+# total NN
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# --------------------------------------------------------------------------------
+# removed directory 'TDIR1'
+# removed directory 'TDIR2'
+# removed directory 'TDIR3'
+# removed directory 'TDIR4'
+# --------------------------------------------------------------------------------
+# total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+# -------------------------------------------------------------------------------- =========
+# $ linebr
+# ## CREATES TEST SUBJECTS
+# $ touch abc def ghi
+# $ mkdir TDIR1 TDIR2 TDIR3 TDIR4
+# $ ls -l | awk '!(="")' | testnum | testuser
+# $ linebr
+# ## WORK OF ALIASES
+# $ remove-dir "TDIR1"
+# $ delete-dir "TDIR2"
+# $ remove-dir-force TDIR3
+# $ delete-dir-force TDIR4
+# $ linebr
+# ## VIEWING THE CHANGES MADE
+# $ ls -l | awk '!(="")' | testnum | testuser
+# $ linebr
+# --------------------------------------------------------------------------------
+# total NN
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN TDIRN
+# --------------------------------------------------------------------------------
+# removed directory 'TDIR1'
+# removed directory 'TDIR2'
+# removed directory 'TDIR3'
+# removed directory 'TDIR4'
+# --------------------------------------------------------------------------------
+# total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN abc
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN def
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN ghi
+# --------------------------------------------------------------------------------
+# ============================
+not ok 12 test-13
+# (from function `test-13-actual' in file batspp-only/command-override-cp-mv.bats, line 516,
+#  in test file batspp-only/command-override-cp-mv.bats, line 503)
+#   `test-13-actual ' failed with status 127
+# ========== copy-readonly | testuser
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/command-override-cp-mv.bats: line 516: copy-readonly: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/command-override-cp-mv.bats: line 516: testuser: command not found
+not ok 13 test-14
+# (in test file batspp-only/command-override-cp-mv.bats, line 551)
+#   `[ "$(test-14-actual)" == "$(test-14-expected)" ]' failed
+# ========== # $ ls -l
+#  ==========
+# ========= # | total 4
+# # | drwxrwxr-x 2 xaea12 xaea12 4096 Jul  4 21:41 testdir1
+# $ fix-dir-permissions
+# # # AFTER fix-dir-permissions
+# $ ls -l | awk '!($6="")' | testnum | testuser
+# total N
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN testdirN =========
+# # | total 4
+# # | drwxrwxr-x 2 xaea12 xaea12 4096 Jul  4 21:41 testdir1
+# $ fix-dir-permissions
+# # # AFTER fix-dir-permissions
+# $ ls -l | awk '!(="")' | testnum | testuser
+# total N
+# drwxrwsr-x N userxf333 userxf333 NNNN  N NN:NN testdirN
+# ============================

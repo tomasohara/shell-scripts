@@ -1,0 +1,12 @@
+1..1
+not ok 1 test-1
+# (in test file batspp-output/alt-simple-alias-test.outputpp, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== alias count-words='wc -w'\n ==========
+# ========= $ alias count-lines='wc -l'\n$ echo abc def ght | count-words\n$ echo abc def ght | count-lines\n3\n1 =========
+# $ alias count-lines='wc -l'
+# $ echo abc def ght | count-words
+# $ echo abc def ght | count-lines
+# 3
+# 1
+# ============================

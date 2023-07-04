@@ -1,0 +1,10 @@
+# Dummy test for debugging purposes
+# For use with BatsPP.
+
+# This test will pass
+$ echo dummy
+dummy
+
+# This test will fail: the time will be different when tested
+$ date
+Wed Jun 21 06:30:51 CDT 2023

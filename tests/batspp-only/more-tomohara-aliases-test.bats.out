@@ -1,0 +1,53 @@
+1..5
+not ok 1 test-1
+# (in test file batspp-only/more-tomohara-aliases-test.bats, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== basename $PWD
+#  ==========
+# test-1
+# ========= tests =========
+# tests
+# ============================
+not ok 2 test-3
+# (in test file batspp-only/more-tomohara-aliases-test.bats, line 55)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== /bin/rm -rf "/tmp/test-dir-15485863"
+#  ==========
+# ========= $ test_dir="/tmp/test-dir-15485863"
+# $ mkdir -p "$test_dir"
+# $ command cd "$test_dir" =========
+# $ test_dir="/tmp/test-dir-15485863"
+# $ mkdir -p ""
+# $ command cd ""
+# ============================
+not ok 3 test-4
+# (from function `test-4-actual' in file batspp-only/more-tomohara-aliases-test.bats, line 110,
+#  in test file batspp-only/more-tomohara-aliases-test.bats, line 97)
+#   `test-4-actual ' failed with status 2
+# ========== ls ../*.html
+#  ==========
+# ls: cannot access '../*.html': No such file or directory
+not ok 4 test-5
+# (in test file batspp-only/more-tomohara-aliases-test.bats, line 137)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== dir=$(realpath "..")
+#  ==========
+# ========= $ url-path ../template.html | perl -pe "s@$dir@/x/y/z@;"
+# file:////x/y/z/template.html =========
+# $ url-path ../template.html | perl -pe "s@/tmp/batspp-95327@/x/y/z@;"
+# file:////x/y/z/template.html
+# ============================
+not ok 5 test-6
+# (in test file batspp-only/more-tomohara-aliases-test.bats, line 172)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== umask ug=rwx,o=r
+#  ==========
+# ========= $ mkdir abc def
+# $ touch ghi jkl
+# $ echo > mno
+# $ dir | perl -pe "s/ (\d+) [\w ]{2,8}/ \1 username /; s/\w\w\w \d+ \d\d:\d\d/mon \1 hh:mm/;"; =========
+# $ mkdir abc def
+# $ touch ghi jkl
+# $ echo > mno
+# $ dir | perl -pe "s/ (\d+) [\w ]{2,8}/ \1 username /; s/\w\w\w \d+ \d\d:\d\d/mon \1 hh:mm/;";
+# ============================

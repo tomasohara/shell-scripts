@@ -1,0 +1,452 @@
+1..18
+not ok 1 test-1
+# (in test file batspp-only/trace-unix-general.bats, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== echo $PS1
+#  ==========
+#
+# ========= [PEXP\[\]ECT_PROMPT> =========
+# [PEXP\[\]ECT_PROMPT>
+# ============================
+not ok 2 test-3
+# (in test file batspp-only/trace-unix-general.bats, line 59)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ alias | wc -l\n$ for f in ; do unset -f ; done\n$ typeset -f | egrep '^\w+' | wc -l\n0\n0 =========
+# $ alias | wc -l
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-10-actual ()
+# test-10-expected ()
+# PID %CPU %MEM VSZ RSS   START TIME
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# PID %CPU %MEM VSZ RSS   START TIME
+# END_EXPECTED
+# test-12-actual ()
+# test-12-expected ()
+# PID %CPU %MEM VSZ RSS   START TIME
+# END_EXPECTED
+# test-13-actual ()
+# test-13-expected ()
+# PID %CPU %MEM VSZ RSS   START TIME
+# END_EXPECTED
+# test-14-actual ()
+# test-14-expected ()
+# USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+# END_EXPECTED
+# test-15-actual ()
+# test-15-expected ()
+# NNNNN
+# END_EXPECTED
+# test-16-actual ()
+# test-16-expected ()
+# END_EXPECTED
+# test-17-actual ()
+# test-17-expected ()
+# How to use the ansi-filter?
+# END_EXPECTED
+# test-18-actual ()
+# test-18-expected ()
+# END_EXPECTED
+# test-19-actual ()
+# test-19-expected ()
+# Done
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# 0
+# 0
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# 0
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# 1
+# 0
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# NNN
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# test_test-2d11 ()
+# test_test-2d12 ()
+# test_test-2d13 ()
+# test_test-2d14 ()
+# USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND' "=========";
+# test_test-2d15 ()
+# NNNNN' "=========";
+# test_test-2d16 ()
+# test_test-2d17 ()
+# How to use the ansi-filter?' "=========";
+# test_test-2d18 ()
+# test_test-2d19 ()
+# test_test-2d3 ()
+# test_test-2d4 ()
+# 0' "=========";
+# test_test-2d5 ()
+# test_test-2d6 ()
+# test_test-2d7 ()
+# test_test-2d8 ()
+# test_test-2d9 () ; do unset -f ; done
+# $ typeset -f | egrep '^\w+' | wc -l
+# 0
+# 0
+# ============================
+not ok 3 test-4
+# (in test file batspp-only/trace-unix-general.bats, line 97)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== TMP=/tmp/test-unix
+#  ==========
+# ========= ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=$PWD/..
+# $ alias | wc -l
+# 0 =========
+# ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=/tmp/batspp-94269/test-4/..
+# $ alias | wc -l
+# 0
+# ============================
+not ok 4 test-5
+# (in test file batspp-only/trace-unix-general.bats, line 134)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== temp_dir=$TMP/test-3245
+#  ==========
+# ========= $ mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+# /tmp/test-unix/test-3245 =========
+# $ mkdir -p "/test-3245"
+# # TODO: /bin/rm -rvf "/test-3245"
+# $ cd "/test-3245"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "80" '' | tr ' ' -"
+# /tmp/test-unix/test-3245
+# ============================
+not ok 5 test-6
+# (in test file batspp-only/trace-unix-general.bats, line 174)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== alias | wc -l
+#  ==========
+# 0
+# ========= # Count functions\n$ typeset -f | egrep '^\w+' | wc -l\n1\n0 =========
+# # Count functions
+# $ typeset -f | egrep '^\w+' | wc -l
+# 1
+# 0
+# ============================
+not ok 6 test-7
+# (in test file batspp-only/trace-unix-general.bats, line 211)
+#   `[ "$(test-7-actual)" == "$(test-7-expected)" ]' failed
+# ========== alias testnum="sed -r "s/[0-9]/N/g""
+#  ==========
+# ========= $ alias testuser="sed -r "s/"$USER"+/userxf333/g"" =========
+# $ alias testuser="sed -r "s/"aveey"+/userxf333/g""
+# ============================
+not ok 7 test-8
+# (from function `test-8-actual' in file batspp-only/trace-unix-general.bats, line 252,
+#  in test file batspp-only/trace-unix-general.bats, line 239)
+#   `test-8-actual ' failed
+# ========== source $BIN_DIR/tomohara-aliases.bash
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 252: /tomohara-aliases.bash: No such file or directory
+not ok 8 test-9
+# (from function `test-9-actual' in file batspp-only/trace-unix-general.bats, line 286,
+#  in test file batspp-only/trace-unix-general.bats, line 273)
+#   `test-9-actual ' failed with status 127
+# ========== ps-all | wc -l | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 286: ps-all: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 286: testnum: command not found
+not ok 9 test-10
+# (in test file batspp-only/trace-unix-general.bats, line 313)
+#   `[ "$(test-10-actual)" == "$(test-10-expected)" ]' failed
+# ========== ps-sort-time | head -n 10 | testnum | awk '!($1=$7=$8=$11="")'
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 320: ps-sort-time: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 320: testnum: command not found
+# ========= PID %CPU %MEM VSZ RSS   START TIME
+#  NNNN N.N N.N NNNNNNN NNNNN   NN:NN NN:NN
+#  NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNN   NN:NN N:NN =========
+# PID %CPU %MEM VSZ RSS   START TIME
+#  NNNN N.N N.N NNNNNNN NNNNN   NN:NN NN:NN
+#  NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNN   NN:NN N:NN
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 320: ps-sort-time: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 320: testnum: command not found
+not ok 10 test-11
+# (in test file batspp-only/trace-unix-general.bats, line 356)
+#   `[ "$(test-11-actual)" == "$(test-11-expected)" ]' failed
+# ========== ps-time | head -n 10  | testnum | awk '!($1=$7=$8=$11="")'
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 363: ps-time: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 363: testnum: command not found
+# ========= PID %CPU %MEM VSZ RSS   START TIME
+#  NNNN N.N N.N NNNNNNN NNNNN   NN:NN NN:NN
+#  NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNN   NN:NN N:NN =========
+# PID %CPU %MEM VSZ RSS   START TIME
+#  NNNN N.N N.N NNNNNNN NNNNN   NN:NN NN:NN
+#  NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNN   NN:NN N:NN
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 363: ps-time: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 363: testnum: command not found
+not ok 11 test-12
+# (in test file batspp-only/trace-unix-general.bats, line 399)
+#   `[ "$(test-12-actual)" == "$(test-12-expected)" ]' failed
+# ========== ps-sort-mem | head -n 10  | testnum | awk '!($1=$7=$8=$11="")'
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 406: ps-sort-mem: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 406: testnum: command not found
+# ========= PID %CPU %MEM VSZ RSS   START TIME
+#  NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNNN N.N N.N NNNNNNN NNNNN   NN:NN N:NN =========
+# PID %CPU %MEM VSZ RSS   START TIME
+#  NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNNN N.N N.N NNNNNNN NNNNN   NN:NN N:NN
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 406: ps-sort-mem: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 406: testnum: command not found
+not ok 12 test-13
+# (in test file batspp-only/trace-unix-general.bats, line 442)
+#   `[ "$(test-13-actual)" == "$(test-13-expected)" ]' failed
+# ========== ps-mem | head -n 10  | testnum | awk '!($1=$7=$8=$11="")'
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 449: ps-mem: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 449: testnum: command not found
+# ========= PID %CPU %MEM VSZ RSS   START TIME
+#  NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNNN N.N N.N NNNNNNN NNNNN   NN:NN N:NN =========
+# PID %CPU %MEM VSZ RSS   START TIME
+#  NNNN N.N NN.N NNNNNNN NNNNNN   NN:NN NN:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNNN N.N N.N NNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNNNN NNNNNN   NN:NN N:NN
+#  NNNN N.N N.N NNNNNN NNNNN   NN:NN N:NN
+#  NNNNN N.N N.N NNNNNNN NNNNN   NN:NN N:NN
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 449: ps-mem: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 449: testnum: command not found
+not ok 13 test-14
+# (in test file batspp-only/trace-unix-general.bats, line 485)
+#   `[ "$(test-14-actual)" == "$(test-14-expected)" ]' failed
+# ========== # $ ps-script
+#  ==========
+# ========= # | bash: -v: command not found
+# # | bash: -i: command not found
+# # | OSTYPE: Undefined variable.
+# $ ps-script
+# USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND =========
+# # | bash: -v: command not found
+# # | bash: -i: command not found
+# # | OSTYPE: Undefined variable.
+# $ ps-script
+# USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+# ============================
+not ok 14 test-15
+# (in test file batspp-only/trace-unix-general.bats, line 522)
+#   `[ "$(test-15-actual)" == "$(test-15-expected)" ]' failed
+# ========== ps al | egrep "(PID|$$)" | head -n 10 | testnum | awk '!($1="")'
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 529: testnum: command not found
+# ========= $ linebr
+# # get-process-parent : return parent process-id for PID
+# $ get-process-parent | testnum
+#  UID PID PPID PRI NI VSZ RSS WCHAN STAT TTY TIME COMMAND
+#  NNNN NNNNN NNNNN NN N NNNNN NNNN do_wai Ss pts/NN N:NN /usr/bi
+#  NNNN NNNNN NNNNN NN N NNNNN NNNN - R+ pts/NN N:NN ps al
+#  NNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN grep -E
+#  NNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN head -n
+#  NNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN sed -r
+#  NNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN awk !($
+# --------------------------------------------------------------------------------
+# NNNNN =========
+# $ linebr
+# # get-process-parent : return parent process-id for PID
+# $ get-process-parent | testnum
+#  UID PID PPID PRI NI VSZ RSS WCHAN STAT TTY TIME COMMAND
+#  NNNN NNNNN NNNNN NN N NNNNN NNNN do_wai Ss pts/NN N:NN /usr/bi
+#  NNNN NNNNN NNNNN NN N NNNNN NNNN - R+ pts/NN N:NN ps al
+#  NNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN grep -E
+#  NNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN head -n
+#  NNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN sed -r
+#  NNNN NNNNN NNNNN NN N NNNNN NNNN pipe_r S+ pts/NN N:NN awk !($
+# --------------------------------------------------------------------------------
+# NNNNN
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-unix-general.bats: line 529: testnum: command not found
+not ok 15 test-16
+# (in test file batspp-only/trace-unix-general.bats, line 567)
+#   `[ "$(test-16-actual)" == "$(test-16-expected)" ]' failed
+# ========== # $ script-update
+#  ==========
+# ========= # | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.full.list: No such file or directory\n# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.icon.list: No such file or directory\n# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.full.list: No such file or directory\n# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.icon.list: No such file or directory\n# | \x1b]1;script:5848 test-3245 [/tmp/test-unix/test-3245]\x07\x1b]2;script:5848 test-3245 [/tmp/test-unix/test-3245]\x07\x1b]1;script:5848 test-3245 [/tmp/test-unix/test-3245]\x07\x1b]2;script:5848 test-3245 [/tmp/test-unix/test-3245]\x07Script started, output log file is '_update-06dec22.log'. =========
+# # | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.full.list: No such file or directory
+# # | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.icon.list: No such file or directory
+# # | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.full.list: No such file or directory
+# # | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.icon.list: No such file or directory
+# # | ]1;script:5848 test-3245 [/tmp/test-unix/test-3245]]2;script:5848 test-3245 [/tmp/test-unix/test-3245]]1;script:5848 test-3245 [/tmp/test-unix/test-3245]]2;script:5848 test-3245 [/tmp/test-unix/test-3245]Script started, output log file is '_update-06dec22.log'.
+# ============================
+not ok 16 test-17
+# (in test file batspp-only/trace-unix-general.bats, line 604)
+#   `[ "$(test-17-actual)" == "$(test-17-expected)" ]' failed
+# ========== rm -rf ./* > /dev/null
+#  ==========
+# ========= $ echo "How to use the ansi-filter? " > ansi-filter-test.txt
+# $ ansi-filter *.txt
+# How to use the ansi-filter? =========
+# $ echo "How to use the ansi-filter? " > ansi-filter-test.txt
+# $ ansi-filter *.txt
+# How to use the ansi-filter?
+# ============================
+not ok 17 test-18
+# (in test file batspp-only/trace-unix-general.bats, line 640)
+#   `[ "$(test-18-actual)" == "$(test-18-expected)" ]' failed
+# ========== # $ pause-for-enter
+#  ==========
+# ========= # | Press enter to continue
+# ## (program terminates after pressing Enter Key) =========
+# # | Press enter to continue
+# ## (program terminates after pressing Enter Key)
+# ============================
+ok 18 test-19

@@ -1,0 +1,97 @@
+# Tests for calc_entropy.perl (or calc_entropy.py)
+#
+# NOTE: *** This is a test of the scripts, not of tomohara-aliases.bash, etc. ***
+
+# Setup
+$ bind 'set enable-bracketed-paste off'
+$ unalias -a
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ BIN_DIR=$PWD/..
+
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+# $ echo 'Hii'
+# | Hi?2004l
+
+# Global Setup
+# Tests for calc_entropy.perl and calc_entropy.py) scripts
+# Settings
+$ calc_entropy=calc_entropy.perl
+$ simple="-simple"
+$ verbose="-verbose"
+# -or-: calc_entropy="calc_entropy.py"; simple="--simple"; verbose="--verbose"
+#
+# Convenience alias to use <NL> for entirely blank lines (i.e., no spaces)
+$ alias encode-blank-line='perl -pe "s/^$/<NL>/;"'
+
+$ $calc_entropy $simple .25 .25 .25 .25
+Entropy
+2.000
+
+# Show input
+$ head calc_entropy.*input* | encode-blank-line
+==> calc_entropy.input <==
+# Frequency of 'between' in Penn Treebank II WSJ annotations
+24	pp-clr
+6	pp-dir
+4	pp-ext
+35	pp-loc
+2	pp-nom
+7	pp-prd
+42	pp-tmp
+<NL>
+==> calc_entropy.input2 <==
+2	abc
+4	def
+1	ghi
+1	jkl
+<NL>
+==> calc_entropy.simple.input <==
+.25 .25 .25 .25
+<NL>
+==> calc_entropy.simple.input2 <==
+.47 .42 .06 .05
+
+# Simple input format
+
+$ $calc_entropy $simple - < ./calc_entropy.simple.input
+Entropy
+2.000
+
+$ $calc_entropy $simple - < ./calc_entropy.simple.input2
+Entropy
+1.497
+
+# Verbose output
+
+$ $calc_entropy $verbose $simple - < ./calc_entropy.simple.input2
+#	prob	-p lg(p)    max p
+#--------------------------------
+#	0.470	0.512
+#	0.420	0.526
+#	0.060	0.244
+#	0.050	0.216
+#--------------------------------
+# word	classes	freq	entropy	max_prob
+#	1.000	1.497	   0.470
+Entropy
+1.497
+
+# Usual input format
+
+$ $calc_entropy - < ./calc_entropy.input
+2.230
+
+$ $calc_entropy $verbose - < calc_entropy.input | encode-blank-line
+#		class	freq	prob	-p lg(p)
+#		pp-tmp	42	0.350	0.530
+#		pp-loc	35	0.292	0.518
+#		pp-clr	24	0.200	0.464
+#		pp-prd	7	0.058	0.239
+#		pp-dir	6	0.050	0.216
+#		pp-ext	4	0.033	0.164
+#		pp-nom	2	0.017	0.098
+#		total	120	1.000	2.230
+<NL>
+# word	classes	freq	entropy	max_prob
+-	7	120	2.230	0.350

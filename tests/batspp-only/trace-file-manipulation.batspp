@@ -1,0 +1,268 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> " 
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+$ alias testuser="sed -r "s/"$USER"+/user/g""
+$ alias testnum="sed -r "s/[0-9]/X/g""
+
+# Setting a temp directory for tests
+$ TMP=/tmp/test-file-manipulation
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+$ alias | wc -l
+2
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 9890)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-9890
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-file-manipulation/test-9890
+
+# Count aliases proper
+$ alias | wc -l
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+3
+0
+
+$ source $BIN_DIR/tomohara-aliases.bash
+
+$ rm -rf ./*
+$ free -m > freemem_mb.txt
+$ linebr
+$ asc-it freemem_mb.txt 
+#(NEED SOLUTION FOR bash: BACKUP/freemem_mb.txt: No such file or directory)
+#(IN CASE OF 'BACKUP'->'backup' IN asc-it, ERROR = bash: asc: command not found)
+$ linebr
+$ ls -l ./backup/ | testuser | testnum | awk '!($6="")'
+$ linebr
+$ cat ./backup/freemem_mb.txt | testnum 
+--------------------------------------------------------------------------------
+Backing up 'freemem_mb.txt' to './backup/freemem_mb.txt'
+bash: BACKUP/freemem_mb.txt: No such file or directory
+--------------------------------------------------------------------------------
+total X    
+-r--r--r-- X user user XXX  X XX:XX freemem_mb.txt
+--------------------------------------------------------------------------------
+               total        used        free      shared  buff/cache   available
+Mem:            XXXX        XXXX         XXX         XXX         XXX         XXX
+Swap:           XXXX         XXX        XXXX
+
+# perl-slurp IS AN ALIAS FOR 'perl -0777'
+$ perl-slurp -v | testnum
+
+This is perl X, version XX, subversion X (vX.XX.X) built for xXX_XX-linux-gnu-thread-multi
+(with XX registered patches, see perl -V for more detail)
+
+Copyright XXXX-XXXX, Larry Wall
+
+Perl may be copied only under the terms of either the Artistic License or the
+GNU General Public License, which may be found in the Perl X source kit.
+
+Complete documentation for Perl, including FAQ lists, should be found on
+this system using "man perl" or "perldoc perl".  If you have access to the
+Internet, point your browser at http://www.perl.org/, the Perl Home Page.
+
+
+# remove-cr & alt-remove-cr REMOVES \r from TEXT
+$ function test-text () { printf "THIS IS A TEST. \rTHIS IS ALSO A TEST\r. THIS IS A TEST TOO."; }
+$ test-text
+$ printf "\n"
+$ linebr
+$ test-text | remove-cr
+$ printf "\n"
+$ linebr
+$ test-text | alt-remove-cr
+. THIS IS A TEST TOO.
+--------------------------------------------------------------------------------
+THIS IS A TEST. THIS IS ALSO A TEST. THIS IS A TEST TOO.
+--------------------------------------------------------------------------------
+THIS IS A TEST. THIS IS ALSO A TEST. THIS IS A TEST TOO.
+
+# remove-cr-and-backup REMOVES \r AND ALSO CREATES A BACKUP IN THE BACKUP FOLDER
+$ ps -l > process_list.txt
+$ remove-cr-and-backup process_list.txt
+Backing up 'process_list.txt' to './backup/process_list.txt'
+
+# perl-remove-cr REMOVES \r USING PERL 
+$ test-text | perl-remove-cr
+-i used with no filenames on the command line, reading from STDIN.
+. THIS IS A TEST TOO.IS ALSO A TEST
+
+# TESTING INTERSECTION FOR ps
+$ ps -u > ntest1.txt
+$ ps -l > ntest2.txt
+$ intersection ntest1.txt ntest2.txt | testnum
+PID
+TTY
+TIME
+bash
+bash
+bash
+XXXX
+pts/X
+pts/X
+ps
+
+# difference = intersection -diff
+$ difference ntest1.txt ntest2.txt | testuser | testnum
+%CPU
+%MEM
+-u
+/usr/bin/bash
+/usr/bin/pyth
+X.X
+X.X
+X.X
+X:XX
+X:XX
+X:XX
+X.X
+XXXXXX
+XXXXXX
+XXXXX
+XXXXX
+XXXXX
+XXXXX
+XXXXX
+XXXXX
+XX:XX
+XX:XX
+XX:XX
+XX:XX
+X.X
+X.X
+XX:XX
+XX:XX
+XX:XX
+XX:XX
+XX:XX
+XX:XX
+XXXXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+XXXX
+COMMAND
+R+
+RSS
+START
+STAT
+Sl+
+Ss
+Ss+
+USER
+VSZ
+user
+pts/X
+pts/X
+pts/X
+pts/X
+pts/X
+pts/X
+pts/X
+pts/X
+pts/X
+tomohara-a
+vi
+
+# line-intersection = intersection -line
+$ free -m > free1.txt
+$ free > free2.txt
+$ line-intersection free1.txt free2.txt
+               total        used        free      shared  buff/cache   available
+
+# line-difference = intersecton -diff -line
+$ line-difference free1.txt free2.txt | testnum
+$ linebr
+$ line-difference free2.txt free1.txt | testnum
+Mem:            XXXX        XXXX         XXX         XXX         XXX         XXX
+Swap:           XXXX         XXX        XXXX
+--------------------------------------------------------------------------------
+Mem:         XXXXXXX     XXXXXXX      XXXXXX      XXXXXX     XXXXXXX      XXXXXX
+Swap:        XXXXXXX      XXXXXX     XXXXXXX
+
+# show-line SHOWS n LINE FROM A FILE 
+# (SYNTAX: show-line [LINE-NUMBER] [SOURCE-FILE])
+$ cat ntest1.txt | testuser | testnum
+$ linebr
+$ show-line 3 ntest1.txt | testuser | testnum
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX bash
+user       XXXX  X.X  X.X XXXXXX XXXXXX pts/X   Sl+  XX:XX   X:XX /usr/bin/pyth
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX bash
+user       XXXX  X.X  X.X XXXXXX XXXXX pts/X    Sl+  XX:XX   X:XX vi tomohara-a
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/bin/bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+--------------------------------------------------------------------------------
+user       XXXX  X.X  X.X XXXXXX XXXXXX pts/X   Sl+  XX:XX   X:XX /usr/bin/pyth
+
+# last-n-with-header GIVES LAST n LINES + HEADING LINE
+$ last-n-with-header 4 ntest1.txt | testuser | testnum
+$ linebr
+$ last-n-with-header 2 ntest2.txt | testuser | testnum
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/bin/bash
+user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+--------------------------------------------------------------------------------
+F S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
+X S  XXXX    XXXX    XXXX  X  XX   X -  XXXX do_wai pts/X    XX:XX:XX bash
+X R  XXXX    XXXX    XXXX  X  XX   X -  XXXX -      pts/X    XX:XX:XX ps
+
+# CLEARS THE TEST FOLDER
+$ rm -rf ./* > /dev/null

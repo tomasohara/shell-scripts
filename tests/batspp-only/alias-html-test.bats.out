@@ -1,0 +1,241 @@
+1..12
+not ok 1 test-1
+# (in test file batspp-only/alias-html-test.bats, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== # $ jupyter notebook --allow-root
+#  ==========
+# ========= ## Bracketed Paste is disabled to prevent characters after output\n## Example: \n# $ echo 'Hi'\n# | Hi?2004l\n# bind 'set enable-bracketed-paste off' =========
+# ## Bracketed Paste is disabled to prevent characters after output
+# ## Example:
+# # $ echo 'Hi'
+# # | Hi?2004l
+# # bind 'set enable-bracketed-paste off'
+# ============================
+not ok 2 test-3
+# (in test file batspp-only/alias-html-test.bats, line 62)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== echo $PS1
+#  ==========
+#
+# ========= [PEXP\[\]ECT_PROMPT> =========
+# [PEXP\[\]ECT_PROMPT>
+# ============================
+not ok 3 test-4
+# (in test file batspp-only/alias-html-test.bats, line 96)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ alias | wc -l\n$ for f in ; do unset -f ; done\n$ typeset -f | egrep '^\w+' | wc -l\n0\n0 =========
+# $ alias | wc -l
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-10-actual ()
+# test-10-expected ()
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# END_EXPECTED
+# test-12-actual ()
+# test-12-expected ()
+# END_EXPECTED
+# test-13-actual ()
+# test-13-expected ()
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# 0
+# 0
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# 2
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# 3
+# 0
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# test_test-2d11 ()
+# test_test-2d12 ()
+# test_test-2d13 ()
+# test_test-2d3 ()
+# test_test-2d4 ()
+# test_test-2d5 ()
+# test_test-2d6 ()
+# 2' "=========";
+# test_test-2d7 ()
+# test_test-2d8 ()
+# test_test-2d9 () ; do unset -f ; done
+# $ typeset -f | egrep '^\w+' | wc -l
+# 0
+# 0
+# ============================
+not ok 4 test-5
+# (in test file batspp-only/alias-html-test.bats, line 134)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== alias testuser="sed -r "s/"$USER"+/userxf333/g""
+#  ==========
+# ========= $ alias testnum="sed -r "s/[0-9]/N/g"" =========
+# $ alias testnum="sed -r "s/[0-9]/N/g""
+# ============================
+not ok 5 test-6
+# (in test file batspp-only/alias-html-test.bats, line 168)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== TMP=/tmp/test-admin-commands
+#  ==========
+# ========= ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=$PWD/..
+# $ alias | wc -l
+# 2 =========
+# ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=/tmp/batspp-97204/test-6/..
+# $ alias | wc -l
+# 2
+# ============================
+not ok 6 test-7
+# (in test file batspp-only/alias-html-test.bats, line 205)
+#   `[ "$(test-7-actual)" == "$(test-7-expected)" ]' failed
+# ========== temp_dir=$TMP/test-5400
+#  ==========
+# ========= $ mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+# /tmp/test-admin-commands/test-5400 =========
+# $ mkdir -p "/test-5400"
+# # TODO: /bin/rm -rvf "/test-5400"
+# $ cd "/test-5400"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "80" '' | tr ' ' -"
+# /tmp/test-admin-commands/test-5400
+# ============================
+not ok 7 test-8
+# (in test file batspp-only/alias-html-test.bats, line 245)
+#   `[ "$(test-8-actual)" == "$(test-8-expected)" ]' failed
+# ========== alias | wc -l
+#  ==========
+# 0
+# ========= # Count functions\n$ typeset -f | egrep '^\w+' | wc -l\n3\n0 =========
+# # Count functions
+# $ typeset -f | egrep '^\w+' | wc -l
+# 3
+# 0
+# ============================
+not ok 8 test-9
+# (from function `test-9-actual' in file batspp-only/alias-html-test.bats, line 289,
+#  in test file batspp-only/alias-html-test.bats, line 276)
+#   `test-9-actual ' failed
+# ========== source $BIN_DIR/tomohara-aliases.bash
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/alias-html-test.bats: line 289: /tomohara-aliases.bash: No such file or directory
+not ok 9 test-10
+# (in test file batspp-only/alias-html-test.bats, line 316)
+#   `[ "$(test-10-actual)" == "$(test-10-expected)" ]' failed
+# ========== rm -rf ./* > /dev/null
+#  ==========
+# ========= $ printf "<html><h1>THIS IS A HEADER OF SIZE 1</h1><br><i>THIS IS IN ITALICS</i></html>" >> template1.html =========
+# $ printf "<html><h1>THIS IS A HEADER OF SIZE 1</h1><br><i>THIS IS IN ITALICS</i></html>" >> template1.html
+# ============================
+not ok 10 test-11
+# (from function `test-11-actual' in file batspp-only/alias-html-test.bats, line 357,
+#  in test file batspp-only/alias-html-test.bats, line 344)
+#   `test-11-actual ' failed with status 127
+# ========== check-html template1.html
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/alias-html-test.bats: line 357: check-html: command not found
+ok 11 test-12
+not ok 12 test-13
+# (in test file batspp-only/alias-html-test.bats, line 418)
+#   `[ "$(test-13-actual)" == "$(test-13-expected)" ]' failed
+# ========== # $ check-html-java-script template2.js
+#  ==========
+# ========= # | bash: jsl: command not found =========
+# # | bash: jsl: command not found
+# ============================

@@ -1,0 +1,55 @@
+1..6
+not ok 1 test-1
+# (in test file batspp-output/test-tomohara-aliases-access.outputpp, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== export TEMP_TOM_BIN=tmp/tomasohara-shell-scripts
+#  ==========
+# ========= $ export TOM_ALIAS_FILE="$TEMP_TOM_BIN/tomohara-aliases.bash"
+# $ mkdir -p "$TEMP_TOM_BIN" =========
+# $ export TOM_ALIAS_FILE="tmp/tomasohara-shell-scripts/tomohara-aliases.bash"
+# $ mkdir -p "tmp/tomasohara-shell-scripts"
+# ============================
+not ok 2 test-3
+# (from function `test-3-actual' in file batspp-output/test-tomohara-aliases-access.outputpp, line 67,
+#  in test file batspp-output/test-tomohara-aliases-access.outputpp, line 54)
+#   `test-3-actual ' failed
+# ========== curl https://raw.githubusercontent.com/tomasohara/shell-scripts/main/tomohara-aliases.bash > "$TOM_ALIAS_FILE"
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/test-tomohara-aliases-access.outputpp: line 67: : No such file or directory
+not ok 3 test-4
+# (in test file batspp-output/test-tomohara-aliases-access.outputpp, line 96)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== file "$TOM_ALIAS_FILE"
+#  ==========
+# cannot open `' (No such file or directory)
+# ========= tmp/tomasohara-shell-scripts/tomohara-aliases.bash: Bourne-Again shell script, UTF-8 Unicode text executable, with very long lines =========
+# tmp/tomasohara-shell-scripts/tomohara-aliases.bash: Bourne-Again shell script, UTF-8 Unicode text executable, with very long lines
+# ============================
+not ok 4 test-5
+# (in test file batspp-output/test-tomohara-aliases-access.outputpp, line 130)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== export BATCH_MODE=1
+#  ==========
+# ========= $ source "$TOM_ALIAS_FILE" =========
+# $ source ""
+# ============================
+not ok 5 test-6
+# (in test file batspp-output/test-tomohara-aliases-access.outputpp, line 164)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== show-macros | wc -l
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/test-tomohara-aliases-access.outputpp: line 171: show-macros: command not found
+# 0
+# ========= 4161 =========
+# 4161
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/test-tomohara-aliases-access.outputpp: line 171: show-macros: command not found
+not ok 6 test-7
+# (in test file batspp-output/test-tomohara-aliases-access.outputpp, line 198)
+#   `[ "$(test-7-actual)" == "$(test-7-expected)" ]' failed
+# ========== rm -rf "$TEMP_TOM_BIN"
+#  ==========
+# ========= removed 'tmp/tomasohara-shell-scripts/tomohara-aliases.bash'\nremoved directory 'tmp/tomasohara-shell-scripts' =========
+# removed 'tmp/tomasohara-shell-scripts/tomohara-aliases.bash'
+# removed directory 'tmp/tomasohara-shell-scripts'
+# ============================

@@ -1,0 +1,718 @@
+1..19
+not ok 1 test-1
+# (in test file batspp-output/test-dir-alias.outputpp, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== echo $PS1
+#  ==========
+#
+# ========= [PEXP\[\]ECT_PROMPT> =========
+# [PEXP\[\]ECT_PROMPT>
+# ============================
+not ok 2 test-3
+# (in test file batspp-output/test-dir-alias.outputpp, line 59)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ alias | wc -l\n$ for f in ; do unset -f ; done\n$ typeset -f | egrep '^\w+' | wc -l\n0\n0 =========
+# $ alias | wc -l
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-10-actual ()
+# test-10-expected ()
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# total 0
+# lrwxrwxrwx -> file1
+# END_EXPECTED
+# test-12-actual ()
+# test-12-expected ()
+# temp-link' -> '/tmp
+# END_EXPECTED
+# test-13-actual ()
+# test-13-expected ()
+# total 0
+# lrwxrwxrwx -> file1
+# lrwxrwxrwx ink -> /tmp
+# END_EXPECTED
+# test-14-actual ()
+# test-14-expected ()
+# temp-link' -> '/tmp/tmp
+# END_EXPECTED
+# test-15-actual ()
+# test-15-expected ()
+# total 0
+# lrwxrwxrwx -> file1
+# lrwxrwxrwx ink -> /tmp/tmp
+# END_EXPECTED
+# test-16-actual ()
+# test-16-expected ()
+# END_EXPECTED
+# test-17-actual ()
+# test-17-expected ()
+# END_EXPECTED
+# test-18-actual ()
+# test-18-expected ()
+# temp-link' -> '/tmp
+# END_EXPECTED
+# test-19-actual ()
+# test-19-expected ()
+# temp-link' -> '/tmp/tmp
+# END_EXPECTED
+# test-20-actual ()
+# test-20-expected ()
+# total 0
+# lrwxrwxrwx -> file1
+# lrwxrwxrwx ink -> /tmp/tmp
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# 0
+# 0
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# 8
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# 8
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# 2
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# ln: failed to create symbolic link 'link1': File exists
+# 3
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# test_test-2d11 ()
+# lrwxrwxrwx -> file1' "=========";
+# test_test-2d12 ()
+# test_test-2d13 ()
+# lrwxrwxrwx -> file1
+# lrwxrwxrwx ink -> /tmp' "=========";
+# test_test-2d14 ()
+# test_test-2d15 ()
+# lrwxrwxrwx -> file1
+# lrwxrwxrwx ink -> /tmp/tmp' "=========";
+# test_test-2d16 ()
+# test_test-2d17 ()
+# test_test-2d18 ()
+# test_test-2d19 ()
+# test_test-2d20 ()
+# lrwxrwxrwx -> file1
+# lrwxrwxrwx ink -> /tmp/tmp' "=========";
+# test_test-2d3 ()
+# test_test-2d4 ()
+# 8' "=========";
+# test_test-2d5 ()
+# test_test-2d6 ()
+# test_test-2d7 ()
+# test_test-2d8 ()
+# test_test-2d9 ()
+# ln: failed to create symbolic link '\''link1'\'': File exists
+# 3' "=========";; do unset -f ; done
+# $ typeset -f | egrep '^\w+' | wc -l
+# 0
+# 0
+# ============================
+not ok 3 test-4
+# (in test file batspp-output/test-dir-alias.outputpp, line 97)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== TMP=/tmp/test-dir-aliases
+#  ==========
+# ========= ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=$PWD/..
+# ## You will need to run jupyter from that directory.
+# ## source $TEMP_BIN/_dir-aliases.bash
+# $ source _dir-aliases.bash
+# $ alias | wc -l
+# 8 =========
+# ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=/tmp/batspp-77106/test-4/..
+# ## You will need to run jupyter from that directory.
+# ## source /_dir-aliases.bash
+# $ source _dir-aliases.bash
+# $ alias | wc -l
+# 8
+# ============================
+not ok 4 test-5
+# (in test file batspp-output/test-dir-alias.outputpp, line 137)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== alias | wc -l
+#  ==========
+# 0
+# ========= 8 =========
+# 8
+# ============================
+not ok 5 test-6
+# (in test file batspp-output/test-dir-alias.outputpp, line 171)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== typeset -f | egrep '^\w+' | wc -l\n ==========
+# 177
+# ========= 2 =========
+# 2
+# ============================
+not ok 6 test-7
+# (in test file batspp-output/test-dir-alias.outputpp, line 205)
+#   `[ "$(test-7-actual)" == "$(test-7-expected)" ]' failed
+# ========== temp_dir=$TMP/test-7919
+#  ==========
+# ========= $ mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd
+# /tmp/test-dir-aliases/test-7919 =========
+# $ mkdir -p "/test-7919"
+# # TODO: /bin/rm -rvf "/test-7919"
+# $ cd "/test-7919"
+# $ pwd
+# /tmp/test-dir-aliases/test-7919
+# ============================
+ok 7 test-8
+not ok 8 test-9
+# (in test file batspp-output/test-dir-alias.outputpp, line 277)
+#   `[ "$(test-9-actual)" == "$(test-9-expected)" ]' failed
+# ========== touch file1
+#  ==========
+# ========= $ ln-symbolic file1 link1
+# # 'link1' -> 'file1'
+# # The second case should should fail
+# $ ln-symbolic file1 link1
+# # => "ln: failed to create symbolic link 'link1': File exists?"
+# # Should only be four files total (along with . and ..)
+# $ ls -R | wc -l
+# # => 3
+# 'link1' -> 'file1'
+# ln: failed to create symbolic link 'link1': File exists
+# 3 =========
+# $ ln-symbolic file1 link1
+# # 'link1' -> 'file1'
+# # The second case should should fail
+# $ ln-symbolic file1 link1
+# # => "ln: failed to create symbolic link 'link1': File exists?"
+# # Should only be four files total (along with . and ..)
+# $ ls -R | wc -l
+# # => 3
+# 'link1' -> 'file1'
+# ln: failed to create symbolic link 'link1': File exists
+# 3
+# ============================
+not ok 9 test-10
+# (from function `test-10-actual' in file batspp-output/test-dir-alias.outputpp, line 328,
+#  in test file batspp-output/test-dir-alias.outputpp, line 315)
+#   `test-10-actual ' failed with status 127
+# ========== bash $BIN_DIR/tests/_dir-aliases.bash
+#  ==========
+# bash: /tests/_dir-aliases.bash: No such file or directory
+not ok 10 test-11
+# (in test file batspp-output/test-dir-alias.outputpp, line 355)
+#   `[ "$(test-11-actual)" == "$(test-11-expected)" ]' failed
+# ========== ls -l | cut --characters=12-46 --complement
+#  ==========
+# total 2832
+# -rw-rw-r-- adhoc-tests.test
+# -rw-rw-r-- alias-calculator-commands.ipynb
+# -rw-rw-r-- alias-cd-commands.ipynb
+# -rw-rw-r-- alias-grep-commands.ipynb
+# -rw-rw-r-- alias-html-test.ipynb
+# -rw-rw-r-- alias-proper.test
+# -rwxrwxr-x alias-trace-misc-commands.ipynb
+# -rw-rw-r-- alt-simple-alias-test.ipynb
+# -rw-rw-r-- anaconda.test
+# -rw-rw-r-- aviyan-git-log.txt
+# -rwxrwxr-x batspp_report.py
+# -rw-rw-r-- calc_entropy.input
+# -rw-rw-r-- calc_entropy.input2
+# -rw-rw-r-- calc_entropy.simple.input
+# -rw-rw-r-- calc_entropy.simple.input2
+# -rw-rw-r-- calc-entropy-tests.ipynb
+# -rw-rw-r-- command-override-cp-mv.ipynb
+# -rw-rw-r-- command-vars.text
+# -rw-rw-r-- dickenson-the-chariot.txt
+# -rw-rw-r-- dictionaries.test
+# -rw-rw-r-- dir-aliases-test-revised.ipynb
+# -rw-rw-r-- docshtest.rst
+# -rw-rw-r-- download-and-test-tomohara-aliases.ipynb
+# -rw-rw-r-- dummy-test.ipynb
+# -rw-rw-r-- eldar-0.0.7-py3.8.egg
+# -rw-rw-r-- empty-test-file.ipynb
+# -rw-rw-r-- file-util.test
+# -rw-rw-r-- hello-world-basic.ipynb
+# -rw-rw-r-- hello-world.ipynb
+# -rw-rw-r-- hello-world-revised.batspp
+# -rw-rw-r-- hello-world-revised.ipynb
+# -rw-rw-r-- hello-world-source.ipynb
+# -rw-rw-r-- json-related-alias.batspp
+# -rw-rw-r-- json-related-alias.ipynb
+# -rwxrwxr-x jupyter_to_batspp.py
+# -rwxrwxr-x kcov_result.py
+# -rw-rw-r-- macos.test
+# -rwxrwxr-x master_test.py
+# -rw-rw-r-- merge-notes.test
+# -rw-rw-r-- miscellanous.tests
+# -rw-rw-r-- more-tomohara-aliases-test.ipynb
+# -rw-rw-r-- NOBATSPPsudocommentstest.ipynb
+# -rw-rw-r-- NOBATSPPsudo_test_simplebatspp.ipynb
+# -rw-rw-r-- not.a.url.html
+# -rw-rw-r-- not.a.url.txt
+# -rw-rw-r-- perl-script.test
+# -rw-rw-r-- README.txt
+# -rw-rw-r-- settings.test
+# -rw-rw-r-- shell-prompt.test
+# -rw-rw-r-- simple-alias-test.ipynb
+# -rw-rw-r-- ssh-commands.test
+# -rw-rw-r-- stanza1-dickenson-the-chariot.txt
+# -rwxrwxr-x summary_stats.bash
+# -rw-rw-r-- summary_stats.txt
+# -rwxrwxr-x test_bash2python_diff.py
+# -rwxrwxr-x test_bash2python.py
+# -rw-rw-r-- testbook-test-dir-aliases.ipynb
+# -rw-rw-r-- test-check-errors.ipynb
+# -rwxrwxr-x test_check_errors.py
+# -rw-rw-r-- test-cond-env-setting.ipynb
+# -rw-rw-r-- test-dir-alias.batspp
+# -rw-rw-r-- test-dir-alias.ipynb
+# -rwxrwxr-x test_extract_matches.py
+# -rwxrw-r-- test_tom_batspp_report.py
+# -rw-rw-r-- test-tomohara-aliases-access.ipynb
+# -rwxrwxr-x test_tomohara_aliases.bats
+# -rwxrwxr-x test_tpo_count_it.py
+# -rw-rw-r-- thresholds.yaml
+# -rw-rw-r-- tomasohara-aliases-test.ipynb
+# -rwxrwxr-x tom_batspp_report.py
+# -rw-rw-r-- tom-idiosyncratic.test
+# -rwxrwxr-x tom_kcov_result.py
+# -rwxrwxr-x tom_summary_stats.bash
+# -rw-rw-r-- tom_test_tomohara_aliases.bats
+# -rw-rw-r-- trace-extensionless-shortcut-unicode.ipynb
+# -rw-rw-r-- trace-extensionless-shortcut-V2.ipynb
+# -rw-rw-r-- trace-file-manipulation.ipynb
+# -rw-rw-r-- trace-line-words-commands.ipynb
+# -rw-rw-r-- trace-linux-admin-alias.ipynb
+# -rw-rw-r-- trace-python-commands.ipynb
+# -rw-rw-r-- trace-setup-sorting-wrappers.ipynb
+# -rw-rw-r-- trace-unix-alias.ipynb
+# -rw-rw-r-- trace-unix-general.ipynb
+# -rw-rw-r-- yet-more-tomasohara-aliases.test
+# ========= total 0
+# -rw-rw-r--
+# lrwxrwxrwx -> file1 =========
+# total 0
+# -rw-rw-r--
+# lrwxrwxrwx -> file1
+# ============================
+not ok 11 test-12
+# (from function `test-12-actual' in file batspp-output/test-dir-alias.outputpp, line 398,
+#  in test file batspp-output/test-dir-alias.outputpp, line 385)
+#   `test-12-actual ' failed with status 127
+# ========== ln-symbolic /tmp temp-link
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/test-dir-alias.outputpp: line 398: ln-symbolic: command not found
+not ok 12 test-13
+# (in test file batspp-output/test-dir-alias.outputpp, line 425)
+#   `[ "$(test-13-actual)" == "$(test-13-expected)" ]' failed
+# ========== ls -l | cut --characters=12-46 --complement
+#  ==========
+# total 2832
+# -rw-rw-r-- adhoc-tests.test
+# -rw-rw-r-- alias-calculator-commands.ipynb
+# -rw-rw-r-- alias-cd-commands.ipynb
+# -rw-rw-r-- alias-grep-commands.ipynb
+# -rw-rw-r-- alias-html-test.ipynb
+# -rw-rw-r-- alias-proper.test
+# -rwxrwxr-x alias-trace-misc-commands.ipynb
+# -rw-rw-r-- alt-simple-alias-test.ipynb
+# -rw-rw-r-- anaconda.test
+# -rw-rw-r-- aviyan-git-log.txt
+# -rwxrwxr-x batspp_report.py
+# -rw-rw-r-- calc_entropy.input
+# -rw-rw-r-- calc_entropy.input2
+# -rw-rw-r-- calc_entropy.simple.input
+# -rw-rw-r-- calc_entropy.simple.input2
+# -rw-rw-r-- calc-entropy-tests.ipynb
+# -rw-rw-r-- command-override-cp-mv.ipynb
+# -rw-rw-r-- command-vars.text
+# -rw-rw-r-- dickenson-the-chariot.txt
+# -rw-rw-r-- dictionaries.test
+# -rw-rw-r-- dir-aliases-test-revised.ipynb
+# -rw-rw-r-- docshtest.rst
+# -rw-rw-r-- download-and-test-tomohara-aliases.ipynb
+# -rw-rw-r-- dummy-test.ipynb
+# -rw-rw-r-- eldar-0.0.7-py3.8.egg
+# -rw-rw-r-- empty-test-file.ipynb
+# -rw-rw-r-- file-util.test
+# -rw-rw-r-- hello-world-basic.ipynb
+# -rw-rw-r-- hello-world.ipynb
+# -rw-rw-r-- hello-world-revised.batspp
+# -rw-rw-r-- hello-world-revised.ipynb
+# -rw-rw-r-- hello-world-source.ipynb
+# -rw-rw-r-- json-related-alias.batspp
+# -rw-rw-r-- json-related-alias.ipynb
+# -rwxrwxr-x jupyter_to_batspp.py
+# -rwxrwxr-x kcov_result.py
+# -rw-rw-r-- macos.test
+# -rwxrwxr-x master_test.py
+# -rw-rw-r-- merge-notes.test
+# -rw-rw-r-- miscellanous.tests
+# -rw-rw-r-- more-tomohara-aliases-test.ipynb
+# -rw-rw-r-- NOBATSPPsudocommentstest.ipynb
+# -rw-rw-r-- NOBATSPPsudo_test_simplebatspp.ipynb
+# -rw-rw-r-- not.a.url.html
+# -rw-rw-r-- not.a.url.txt
+# -rw-rw-r-- perl-script.test
+# -rw-rw-r-- README.txt
+# -rw-rw-r-- settings.test
+# -rw-rw-r-- shell-prompt.test
+# -rw-rw-r-- simple-alias-test.ipynb
+# -rw-rw-r-- ssh-commands.test
+# -rw-rw-r-- stanza1-dickenson-the-chariot.txt
+# -rwxrwxr-x summary_stats.bash
+# -rw-rw-r-- summary_stats.txt
+# -rwxrwxr-x test_bash2python_diff.py
+# -rwxrwxr-x test_bash2python.py
+# -rw-rw-r-- testbook-test-dir-aliases.ipynb
+# -rw-rw-r-- test-check-errors.ipynb
+# -rwxrwxr-x test_check_errors.py
+# -rw-rw-r-- test-cond-env-setting.ipynb
+# -rw-rw-r-- test-dir-alias.batspp
+# -rw-rw-r-- test-dir-alias.ipynb
+# -rwxrwxr-x test_extract_matches.py
+# -rwxrw-r-- test_tom_batspp_report.py
+# -rw-rw-r-- test-tomohara-aliases-access.ipynb
+# -rwxrwxr-x test_tomohara_aliases.bats
+# -rwxrwxr-x test_tpo_count_it.py
+# -rw-rw-r-- thresholds.yaml
+# -rw-rw-r-- tomasohara-aliases-test.ipynb
+# -rwxrwxr-x tom_batspp_report.py
+# -rw-rw-r-- tom-idiosyncratic.test
+# -rwxrwxr-x tom_kcov_result.py
+# -rwxrwxr-x tom_summary_stats.bash
+# -rw-rw-r-- tom_test_tomohara_aliases.bats
+# -rw-rw-r-- trace-extensionless-shortcut-unicode.ipynb
+# -rw-rw-r-- trace-extensionless-shortcut-V2.ipynb
+# -rw-rw-r-- trace-file-manipulation.ipynb
+# -rw-rw-r-- trace-line-words-commands.ipynb
+# -rw-rw-r-- trace-linux-admin-alias.ipynb
+# -rw-rw-r-- trace-python-commands.ipynb
+# -rw-rw-r-- trace-setup-sorting-wrappers.ipynb
+# -rw-rw-r-- trace-unix-alias.ipynb
+# -rw-rw-r-- trace-unix-general.ipynb
+# -rw-rw-r-- yet-more-tomasohara-aliases.test
+# ========= total 0
+# -rw-rw-r--
+# lrwxrwxrwx -> file1
+# lrwxrwxrwx ink -> /tmp =========
+# total 0
+# -rw-rw-r--
+# lrwxrwxrwx -> file1
+# lrwxrwxrwx ink -> /tmp
+# ============================
+not ok 13 test-14
+# (from function `test-14-actual' in file batspp-output/test-dir-alias.outputpp, line 469,
+#  in test file batspp-output/test-dir-alias.outputpp, line 456)
+#   `test-14-actual ' failed with status 127
+# ========== link-symbolic-safe --force /tmp/tmp temp-link
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/test-dir-alias.outputpp: line 469: link-symbolic-safe: command not found
+not ok 14 test-15
+# (in test file batspp-output/test-dir-alias.outputpp, line 496)
+#   `[ "$(test-15-actual)" == "$(test-15-expected)" ]' failed
+# ========== ls -l | cut --characters=12-46 --complement
+#  ==========
+# total 2832
+# -rw-rw-r-- adhoc-tests.test
+# -rw-rw-r-- alias-calculator-commands.ipynb
+# -rw-rw-r-- alias-cd-commands.ipynb
+# -rw-rw-r-- alias-grep-commands.ipynb
+# -rw-rw-r-- alias-html-test.ipynb
+# -rw-rw-r-- alias-proper.test
+# -rwxrwxr-x alias-trace-misc-commands.ipynb
+# -rw-rw-r-- alt-simple-alias-test.ipynb
+# -rw-rw-r-- anaconda.test
+# -rw-rw-r-- aviyan-git-log.txt
+# -rwxrwxr-x batspp_report.py
+# -rw-rw-r-- calc_entropy.input
+# -rw-rw-r-- calc_entropy.input2
+# -rw-rw-r-- calc_entropy.simple.input
+# -rw-rw-r-- calc_entropy.simple.input2
+# -rw-rw-r-- calc-entropy-tests.ipynb
+# -rw-rw-r-- command-override-cp-mv.ipynb
+# -rw-rw-r-- command-vars.text
+# -rw-rw-r-- dickenson-the-chariot.txt
+# -rw-rw-r-- dictionaries.test
+# -rw-rw-r-- dir-aliases-test-revised.ipynb
+# -rw-rw-r-- docshtest.rst
+# -rw-rw-r-- download-and-test-tomohara-aliases.ipynb
+# -rw-rw-r-- dummy-test.ipynb
+# -rw-rw-r-- eldar-0.0.7-py3.8.egg
+# -rw-rw-r-- empty-test-file.ipynb
+# -rw-rw-r-- file-util.test
+# -rw-rw-r-- hello-world-basic.ipynb
+# -rw-rw-r-- hello-world.ipynb
+# -rw-rw-r-- hello-world-revised.batspp
+# -rw-rw-r-- hello-world-revised.ipynb
+# -rw-rw-r-- hello-world-source.ipynb
+# -rw-rw-r-- json-related-alias.batspp
+# -rw-rw-r-- json-related-alias.ipynb
+# -rwxrwxr-x jupyter_to_batspp.py
+# -rwxrwxr-x kcov_result.py
+# -rw-rw-r-- macos.test
+# -rwxrwxr-x master_test.py
+# -rw-rw-r-- merge-notes.test
+# -rw-rw-r-- miscellanous.tests
+# -rw-rw-r-- more-tomohara-aliases-test.ipynb
+# -rw-rw-r-- NOBATSPPsudocommentstest.ipynb
+# -rw-rw-r-- NOBATSPPsudo_test_simplebatspp.ipynb
+# -rw-rw-r-- not.a.url.html
+# -rw-rw-r-- not.a.url.txt
+# -rw-rw-r-- perl-script.test
+# -rw-rw-r-- README.txt
+# -rw-rw-r-- settings.test
+# -rw-rw-r-- shell-prompt.test
+# -rw-rw-r-- simple-alias-test.ipynb
+# -rw-rw-r-- ssh-commands.test
+# -rw-rw-r-- stanza1-dickenson-the-chariot.txt
+# -rwxrwxr-x summary_stats.bash
+# -rw-rw-r-- summary_stats.txt
+# -rwxrwxr-x test_bash2python_diff.py
+# -rwxrwxr-x test_bash2python.py
+# -rw-rw-r-- testbook-test-dir-aliases.ipynb
+# -rw-rw-r-- test-check-errors.ipynb
+# -rwxrwxr-x test_check_errors.py
+# -rw-rw-r-- test-cond-env-setting.ipynb
+# -rw-rw-r-- test-dir-alias.batspp
+# -rw-rw-r-- test-dir-alias.ipynb
+# -rwxrwxr-x test_extract_matches.py
+# -rwxrw-r-- test_tom_batspp_report.py
+# -rw-rw-r-- test-tomohara-aliases-access.ipynb
+# -rwxrwxr-x test_tomohara_aliases.bats
+# -rwxrwxr-x test_tpo_count_it.py
+# -rw-rw-r-- thresholds.yaml
+# -rw-rw-r-- tomasohara-aliases-test.ipynb
+# -rwxrwxr-x tom_batspp_report.py
+# -rw-rw-r-- tom-idiosyncratic.test
+# -rwxrwxr-x tom_kcov_result.py
+# -rwxrwxr-x tom_summary_stats.bash
+# -rw-rw-r-- tom_test_tomohara_aliases.bats
+# -rw-rw-r-- trace-extensionless-shortcut-unicode.ipynb
+# -rw-rw-r-- trace-extensionless-shortcut-V2.ipynb
+# -rw-rw-r-- trace-file-manipulation.ipynb
+# -rw-rw-r-- trace-line-words-commands.ipynb
+# -rw-rw-r-- trace-linux-admin-alias.ipynb
+# -rw-rw-r-- trace-python-commands.ipynb
+# -rw-rw-r-- trace-setup-sorting-wrappers.ipynb
+# -rw-rw-r-- trace-unix-alias.ipynb
+# -rw-rw-r-- trace-unix-general.ipynb
+# -rw-rw-r-- yet-more-tomasohara-aliases.test
+# ========= total 0
+# -rw-rw-r--
+# lrwxrwxrwx -> file1
+# lrwxrwxrwx ink -> /tmp/tmp =========
+# total 0
+# -rw-rw-r--
+# lrwxrwxrwx -> file1
+# lrwxrwxrwx ink -> /tmp/tmp
+# ============================
+ok 15 test-16
+not ok 16 test-17
+# (in test file batspp-output/test-dir-alias.outputpp, line 567)
+#   `[ "$(test-17-actual)" == "$(test-17-expected)" ]' failed
+# ========== # $ ln-symbolic /tmp temp-link
+#  ==========
+# ========= # | ln: failed to create symbolic link 'temp-link': File exists =========
+# # | ln: failed to create symbolic link 'temp-link': File exists
+# ============================
+not ok 17 test-18
+# (from function `test-18-actual' in file batspp-output/test-dir-alias.outputpp, line 607,
+#  in test file batspp-output/test-dir-alias.outputpp, line 594)
+#   `test-18-actual ' failed with status 127
+# ========== ln-symbolic-force /tmp temp-link
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/test-dir-alias.outputpp: line 607: ln-symbolic-force: command not found
+not ok 18 test-19
+# (from function `test-19-actual' in file batspp-output/test-dir-alias.outputpp, line 641,
+#  in test file batspp-output/test-dir-alias.outputpp, line 628)
+#   `test-19-actual ' failed with status 127
+# ========== link-symbolic-safe --force /tmp/tmp temp-link
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/test-dir-alias.outputpp: line 641: link-symbolic-safe: command not found
+not ok 19 test-20
+# (in test file batspp-output/test-dir-alias.outputpp, line 668)
+#   `[ "$(test-20-actual)" == "$(test-20-expected)" ]' failed
+# ========== ls -l | cut --characters=12-46 --complement
+#  ==========
+# total 2832
+# -rw-rw-r-- adhoc-tests.test
+# -rw-rw-r-- alias-calculator-commands.ipynb
+# -rw-rw-r-- alias-cd-commands.ipynb
+# -rw-rw-r-- alias-grep-commands.ipynb
+# -rw-rw-r-- alias-html-test.ipynb
+# -rw-rw-r-- alias-proper.test
+# -rwxrwxr-x alias-trace-misc-commands.ipynb
+# -rw-rw-r-- alt-simple-alias-test.ipynb
+# -rw-rw-r-- anaconda.test
+# -rw-rw-r-- aviyan-git-log.txt
+# -rwxrwxr-x batspp_report.py
+# -rw-rw-r-- calc_entropy.input
+# -rw-rw-r-- calc_entropy.input2
+# -rw-rw-r-- calc_entropy.simple.input
+# -rw-rw-r-- calc_entropy.simple.input2
+# -rw-rw-r-- calc-entropy-tests.ipynb
+# -rw-rw-r-- command-override-cp-mv.ipynb
+# -rw-rw-r-- command-vars.text
+# -rw-rw-r-- dickenson-the-chariot.txt
+# -rw-rw-r-- dictionaries.test
+# -rw-rw-r-- dir-aliases-test-revised.ipynb
+# -rw-rw-r-- docshtest.rst
+# -rw-rw-r-- download-and-test-tomohara-aliases.ipynb
+# -rw-rw-r-- dummy-test.ipynb
+# -rw-rw-r-- eldar-0.0.7-py3.8.egg
+# -rw-rw-r-- empty-test-file.ipynb
+# -rw-rw-r-- file-util.test
+# -rw-rw-r-- hello-world-basic.ipynb
+# -rw-rw-r-- hello-world.ipynb
+# -rw-rw-r-- hello-world-revised.batspp
+# -rw-rw-r-- hello-world-revised.ipynb
+# -rw-rw-r-- hello-world-source.ipynb
+# -rw-rw-r-- json-related-alias.batspp
+# -rw-rw-r-- json-related-alias.ipynb
+# -rwxrwxr-x jupyter_to_batspp.py
+# -rwxrwxr-x kcov_result.py
+# -rw-rw-r-- macos.test
+# -rwxrwxr-x master_test.py
+# -rw-rw-r-- merge-notes.test
+# -rw-rw-r-- miscellanous.tests
+# -rw-rw-r-- more-tomohara-aliases-test.ipynb
+# -rw-rw-r-- NOBATSPPsudocommentstest.ipynb
+# -rw-rw-r-- NOBATSPPsudo_test_simplebatspp.ipynb
+# -rw-rw-r-- not.a.url.html
+# -rw-rw-r-- not.a.url.txt
+# -rw-rw-r-- perl-script.test
+# -rw-rw-r-- README.txt
+# -rw-rw-r-- settings.test
+# -rw-rw-r-- shell-prompt.test
+# -rw-rw-r-- simple-alias-test.ipynb
+# -rw-rw-r-- ssh-commands.test
+# -rw-rw-r-- stanza1-dickenson-the-chariot.txt
+# -rwxrwxr-x summary_stats.bash
+# -rw-rw-r-- summary_stats.txt
+# -rwxrwxr-x test_bash2python_diff.py
+# -rwxrwxr-x test_bash2python.py
+# -rw-rw-r-- testbook-test-dir-aliases.ipynb
+# -rw-rw-r-- test-check-errors.ipynb
+# -rwxrwxr-x test_check_errors.py
+# -rw-rw-r-- test-cond-env-setting.ipynb
+# -rw-rw-r-- test-dir-alias.batspp
+# -rw-rw-r-- test-dir-alias.ipynb
+# -rwxrwxr-x test_extract_matches.py
+# -rwxrw-r-- test_tom_batspp_report.py
+# -rw-rw-r-- test-tomohara-aliases-access.ipynb
+# -rwxrwxr-x test_tomohara_aliases.bats
+# -rwxrwxr-x test_tpo_count_it.py
+# -rw-rw-r-- thresholds.yaml
+# -rw-rw-r-- tomasohara-aliases-test.ipynb
+# -rwxrwxr-x tom_batspp_report.py
+# -rw-rw-r-- tom-idiosyncratic.test
+# -rwxrwxr-x tom_kcov_result.py
+# -rwxrwxr-x tom_summary_stats.bash
+# -rw-rw-r-- tom_test_tomohara_aliases.bats
+# -rw-rw-r-- trace-extensionless-shortcut-unicode.ipynb
+# -rw-rw-r-- trace-extensionless-shortcut-V2.ipynb
+# -rw-rw-r-- trace-file-manipulation.ipynb
+# -rw-rw-r-- trace-line-words-commands.ipynb
+# -rw-rw-r-- trace-linux-admin-alias.ipynb
+# -rw-rw-r-- trace-python-commands.ipynb
+# -rw-rw-r-- trace-setup-sorting-wrappers.ipynb
+# -rw-rw-r-- trace-unix-alias.ipynb
+# -rw-rw-r-- trace-unix-general.ipynb
+# -rw-rw-r-- yet-more-tomasohara-aliases.test
+# ========= total 0
+# -rw-rw-r--
+# lrwxrwxrwx -> file1
+# lrwxrwxrwx ink -> /tmp/tmp =========
+# total 0
+# -rw-rw-r--
+# lrwxrwxrwx -> file1
+# lrwxrwxrwx ink -> /tmp/tmp
+# ============================

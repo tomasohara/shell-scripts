@@ -1,0 +1,657 @@
+1..40
+ok 1 test-1
+not ok 2 test-3
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 59)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ alias | wc -l\n$ for f in ; do unset -f ; done\n$ typeset -f | egrep '^\w+' | wc -l\n# Setting a temp directory for tests\n$ TMP=/tmp/test-extensionless\n$ BIN_DIR=/tmp/batspp-96430/test-3/.. =========
+# $ alias | wc -l
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-10-actual ()
+# test-10-expected ()
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# END_EXPECTED
+# test-12-actual ()
+# test-12-expected ()
+# END_EXPECTED
+# test-13-actual ()
+# test-13-expected ()
+# END_EXPECTED
+# test-14-actual ()
+# test-14-expected ()
+# END_EXPECTED
+# test-15-actual ()
+# test-15-expected ()
+# END_EXPECTED
+# test-16-actual ()
+# test-16-expected ()
+# END_EXPECTED
+# test-17-actual ()
+# test-17-expected ()
+# END_EXPECTED
+# test-18-actual ()
+# test-18-expected ()
+# END_EXPECTED
+# test-19-actual ()
+# test-19-expected ()
+# END_EXPECTED
+# test-20-actual ()
+# test-20-expected ()
+# END_EXPECTED
+# test-21-actual ()
+# test-21-expected ()
+# END_EXPECTED
+# test-22-actual ()
+# test-22-expected ()
+# END_EXPECTED
+# test-23-actual ()
+# test-23-expected ()
+# END_EXPECTED
+# test-24-actual ()
+# test-24-expected ()
+# END_EXPECTED
+# test-25-actual ()
+# test-25-expected ()
+# END_EXPECTED
+# test-26-actual ()
+# test-26-expected ()
+# END_EXPECTED
+# test-27-actual ()
+# test-27-expected ()
+# END_EXPECTED
+# test-28-actual ()
+# test-28-expected ()
+# END_EXPECTED
+# test-29-actual ()
+# test-29-expected ()
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# END_EXPECTED
+# test-30-actual ()
+# test-30-expected ()
+# END_EXPECTED
+# test-31-actual ()
+# test-31-expected ()
+# END_EXPECTED
+# test-32-actual ()
+# test-32-expected ()
+# END_EXPECTED
+# test-33-actual ()
+# test-33-expected ()
+# END_EXPECTED
+# test-34-actual ()
+# test-34-expected ()
+# END_EXPECTED
+# test-35-actual ()
+# test-35-expected ()
+# END_EXPECTED
+# test-36-actual ()
+# test-36-expected ()
+# END_EXPECTED
+# test-37-actual ()
+# test-37-expected ()
+# END_EXPECTED
+# test-38-actual ()
+# test-38-expected ()
+# END_EXPECTED
+# test-39-actual ()
+# test-39-expected ()
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# END_EXPECTED
+# test-40-actual ()
+# test-40-expected ()
+# END_EXPECTED
+# test-41-actual ()
+# test-41-expected ()
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# test_test-2d11 ()
+# test_test-2d12 ()
+# test_test-2d13 ()
+# test_test-2d14 ()
+# test_test-2d15 ()
+# test_test-2d16 ()
+# test_test-2d17 ()
+# test_test-2d18 ()
+# test_test-2d19 ()
+# test_test-2d20 ()
+# test_test-2d21 ()
+# test_test-2d22 ()
+# test_test-2d23 ()
+# test_test-2d24 ()
+# test_test-2d25 ()
+# test_test-2d26 ()
+# test_test-2d27 ()
+# test_test-2d28 ()
+# test_test-2d29 ()
+# test_test-2d3 ()
+# test_test-2d30 ()
+# test_test-2d31 ()
+# test_test-2d32 ()
+# test_test-2d33 ()
+# test_test-2d34 ()
+# test_test-2d35 ()
+# test_test-2d36 ()
+# test_test-2d37 ()
+# test_test-2d38 ()
+# test_test-2d39 ()
+# test_test-2d4 ()
+# test_test-2d40 ()
+# test_test-2d41 ()
+# test_test-2d5 ()
+# test_test-2d6 ()
+# test_test-2d7 ()
+# test_test-2d8 ()
+# test_test-2d9 () ; do unset -f ; done
+# $ typeset -f | egrep '^\w+' | wc -l
+# # Setting a temp directory for tests
+# $ TMP=/tmp/test-extensionless
+# $ BIN_DIR=/tmp/batspp-96430/test-3/..
+# ============================
+not ok 3 test-4
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 98)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== alias | wc -l
+#  ==========
+# 0
+# =========  =========
+#
+# ============================
+ok 4 test-5
+not ok 5 test-6
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 166)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== temp_dir=$TMP/test-3570
+#  ==========
+# ========= $ mkdir -p "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -" =========
+# $ mkdir -p "/test-3570"
+# $ cd "/test-3570"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "80" '' | tr ' ' -"
+# ============================
+not ok 6 test-7
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 204)
+#   `[ "$(test-7-actual)" == "$(test-7-expected)" ]' failed
+# ========== alias | wc -l
+#  ==========
+# 0
+# ========= # Count functions\n$ typeset -f | egrep '^\w+' | wc -l =========
+# # Count functions
+# $ typeset -f | egrep '^\w+' | wc -l
+# ============================
+not ok 7 test-8
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 239)
+#   `[ "$(test-8-actual)" == "$(test-8-expected)" ]' failed
+# ========== alias testnum="sed -r "s/[0-9]/N/g""
+#  ==========
+# ========= $ alias testuser="sed -r "s/"$USER"+/userxf333/g"" =========
+# $ alias testuser="sed -r "s/"aveey"+/userxf333/g""
+# ============================
+not ok 8 test-9
+# (from function `test-9-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 280,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 267)
+#   `test-9-actual ' failed
+# ========== source $BIN_DIR/tomohara-aliases.bash
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 280: /tomohara-aliases.bash: No such file or directory
+not ok 9 test-10
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 307)
+#   `[ "$(test-10-actual)" == "$(test-10-expected)" ]' failed
+# ========== kill-em --test firefox | wc -l
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 314: kill-em: command not found
+# 0
+# =========  =========
+#
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 314: kill-em: command not found
+not ok 10 test-11
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 341)
+#   `[ "$(test-11-actual)" == "$(test-11-expected)" ]' failed
+# ========== kill-it --test firefox | wc -l
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 348: kill-it: command not found
+# 0
+# =========  =========
+#
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 348: kill-it: command not found
+not ok 11 test-12
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 375)
+#   `[ "$(test-12-actual)" == "$(test-12-expected)" ]' failed
+# ========== # $ convert-termstrings
+#  ==========
+# ========= # | Can't open perl script "convert_termstrings.perl": No such file or directory =========
+# # | Can't open perl script "convert_termstrings.perl": No such file or directory
+# ============================
+not ok 12 test-13
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 408)
+#   `[ "$(test-13-actual)" == "$(test-13-expected)" ]' failed
+# ========== rm -rf ./* > /dev/null
+#  ==========
+# ========= $ printf "TOP\nTHIS IS A TEST\nBOTTOM" > test.txt
+# $ printf "THIS IS A FILE TO MOVE" > tomove.txt
+# $ mkdir newdir1
+# $ move tomove.txt ./newdir1/
+# $ ls
+# $ dobackup test.txt
+# $ linebr
+# $ ls =========
+# $ printf "TOP\nTHIS IS A TEST\nBOTTOM" > test.txt
+# $ printf "THIS IS A FILE TO MOVE" > tomove.txt
+# $ mkdir newdir1
+# $ move tomove.txt ./newdir1/
+# $ ls
+# $ dobackup test.txt
+# $ linebr
+# $ ls
+# ============================
+not ok 13 test-14
+# (from function `test-14-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 456,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 443)
+#   `test-14-actual ' failed with status 127
+# ========== ps-mine-all | wc -l | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 456: ps-mine-all: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 456: testnum: command not found
+not ok 14 test-15
+# (from function `test-15-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 490,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 477)
+#   `test-15-actual ' failed with status 127
+# ========== do-rcsdiff
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 490: do-rcsdiff: command not found
+not ok 15 test-16
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 517)
+#   `[ "$(test-16-actual)" == "$(test-16-expected)" ]' failed
+# ========== uname -r > versionR.txt
+#  ==========
+# ========= $ uname -a > versionA.txta
+# $ uname -v > versionV.txt
+# $ uname -i > versionI.txt
+# $ uname > "version none.txt"
+# $ uname -ra > "version?.txt"
+# $ man grep > grep_manual.txt
+# $ cp ./versionR.txt ./versionR-1.txt
+# $ ls =========
+# $ uname -a > versionA.txta
+# $ uname -v > versionV.txt
+# $ uname -i > versionI.txt
+# $ uname > "version none.txt"
+# $ uname -ra > "version?.txt"
+# $ man grep > grep_manual.txt
+# $ cp ./versionR.txt ./versionR-1.txt
+# $ ls
+# ============================
+not ok 16 test-17
+# (from function `test-17-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 565,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 552)
+#   `test-17-actual ' failed with status 127
+# ========== rename-files -q test.txt harry.txt
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 565: rename-files: command not found
+not ok 17 test-18
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 592)
+#   `[ "$(test-18-actual)" == "$(test-18-expected)" ]' failed
+# ========== # $ testwn
+#  ==========
+# ========= # | Undefined subroutine &main::NO_OP called at /home/xaea12/bin/common.perl line 2172. =========
+# # | Undefined subroutine &main::NO_OP called at /home/xaea12/bin/common.perl line 2172.
+# ============================
+not ok 18 test-19
+# (from function `test-19-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 632,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 619)
+#   `test-19-actual ' failed with status 127
+# ========== perlgrep "print" ./grep_manual.txt
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 632: perlgrep: command not found
+not ok 19 test-20
+# (from function `test-20-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 666,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 653)
+#   `test-20-actual ' failed with status 127
+# ========== foreach "echo $f" *.txt
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 666: foreach: command not found
+not ok 20 test-21
+# (from function `test-21-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 700,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 687)
+#   `test-21-actual ' failed with status 127
+# ========== rename-spaces
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 700: rename-spaces: command not found
+not ok 21 test-22
+# (from function `test-22-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 734,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 721)
+#   `test-22-actual ' failed with status 127
+# ========== rename-special-punct
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 734: rename-special-punct: command not found
+not ok 22 test-23
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 761)
+#   `[ "$(test-23-actual)" == "$(test-23-expected)" ]' failed
+# ========== ps -l >> "process(L).md"
+#  ==========
+# ========= $ ps -u >> "process(U).md"
+# $ ps -x >> "process(X).md"
+# $ ps -al >> "process'all'.md"
+# $ ps -aux >> 'psaux(1).txt'
+# $ ps -aux >> 'psaux(2).txt'
+# $ ps -aux >> 'psaux(3).txt' =========
+# $ ps -u >> "process(U).md"
+# $ ps -x >> "process(X).md"
+# $ ps -al >> "process'all'.md"
+# $ ps -aux >> 'psaux(1).txt'
+# $ ps -aux >> 'psaux(2).txt'
+# $ ps -aux >> 'psaux(3).txt'
+# ============================
+not ok 23 test-24
+# (from function `test-24-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 807,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 794)
+#   `test-24-actual ' failed with status 127
+# ========== move-duplicates
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 807: move-duplicates: command not found
+not ok 24 test-25
+# (from function `test-25-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 841,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 828)
+#   `test-25-actual ' failed with status 127
+# ========== rename-parens -v
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 841: rename-parens: command not found
+not ok 25 test-26
+# (from function `test-26-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 875,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 862)
+#   `test-26-actual ' failed with status 127
+# ========== rename-quotes -v
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 875: rename-quotes: command not found
+not ok 26 test-27
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 902)
+#   `[ "$(test-27-actual)" == "$(test-27-expected)" ]' failed
+# ========== ls
+#  ==========
+# 1.output
+# adhoc-tests.test
+# alias-calculator-commands.ipynb
+# alias-cd-commands.ipynb
+# alias-grep-commands.ipynb
+# alias-html-test.ipynb
+# alias-proper.test
+# alias-trace-misc-commands.ipynb
+# alt-simple-alias-test.ipynb
+# anaconda.test
+# aviyan-git-log.txt
+# batspp_report.py
+# calc_entropy.input
+# calc_entropy.input2
+# calc_entropy.simple.input
+# calc_entropy.simple.input2
+# calc-entropy-tests.ipynb
+# command-override-cp-mv.ipynb
+# command-vars.text
+# dickenson-the-chariot.txt
+# dictionaries.test
+# dir-aliases-test-revised.ipynb
+# docshtest.rst
+# download-and-test-tomohara-aliases.ipynb
+# dummy-test.ipynb
+# eldar-0.0.7-py3.8.egg
+# empty-test-file.ipynb
+# file-util.test
+# hello-world-basic.ipynb
+# hello-world.ipynb
+# hello-world-revised.batspp
+# hello-world-revised.ipynb
+# hello-world-source.ipynb
+# json-related-alias.batspp
+# json-related-alias.ipynb
+# jupyter_to_batspp.py
+# kcov_result.py
+# macos.test
+# master_test.py
+# merge-notes.test
+# miscellanous.tests
+# more-tomohara-aliases-test.ipynb
+# NOBATSPPsudocommentstest.ipynb
+# NOBATSPPsudo_test_simplebatspp.ipynb
+# not.a.url.html
+# not.a.url.txt
+# perl-script.test
+# README.txt
+# settings.test
+# shell-prompt.test
+# simple-alias-test.ipynb
+# ssh-commands.test
+# stanza1-dickenson-the-chariot.txt
+# summary_stats.bash
+# summary_stats.txt
+# test_bash2python_diff.py
+# test_bash2python.py
+# testbook-test-dir-aliases.ipynb
+# test-check-errors.ipynb
+# test_check_errors.py
+# test-cond-env-setting.ipynb
+# test-dir-alias.batspp
+# test-dir-alias.ipynb
+# test_extract_matches.py
+# test_tom_batspp_report.py
+# test-tomohara-aliases-access.ipynb
+# test_tomohara_aliases.bats
+# test_tpo_count_it.py
+# thresholds.yaml
+# tomasohara-aliases-test.ipynb
+# tom_batspp_report.py
+# tom-idiosyncratic.test
+# tom_kcov_result.py
+# tom_summary_stats.bash
+# tom_test_tomohara_aliases.bats
+# trace-extensionless-shortcut-unicode.ipynb
+# trace-extensionless-shortcut-V2.ipynb
+# trace-file-manipulation.ipynb
+# trace-line-words-commands.ipynb
+# trace-linux-admin-alias.ipynb
+# trace-python-commands.ipynb
+# trace-setup-sorting-wrappers.ipynb
+# trace-unix-alias.ipynb
+# trace-unix-general.ipynb
+# yet-more-tomasohara-aliases.test
+# =========  =========
+#
+# ============================
+not ok 27 test-28
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 936)
+#   `[ "$(test-28-actual)" == "$(test-28-expected)" ]' failed
+# ========== man sudo > sudo_manual.out
+#  ==========
+# ========= $ man ansifilter > fakelog.log
+# $ ps -aux > process_all.html =========
+# $ man ansifilter > fakelog.log
+# $ ps -aux > process_all.html
+# ============================
+not ok 28 test-29
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 971)
+#   `[ "$(test-29-actual)" == "$(test-29-expected)" ]' failed
+# ========== # $ move-log-files
+#  ==========
+# ========= # | /bin/mv: missing destination file operand after 'log-files'\n# | Try '/bin/mv --help' for more information. =========
+# # | /bin/mv: missing destination file operand after 'log-files'
+# # | Try '/bin/mv --help' for more information.
+# ============================
+not ok 29 test-30
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 1005)
+#   `[ "$(test-30-actual)" == "$(test-30-expected)" ]' failed
+# ========== # $ move-output-files
+#  ==========
+# ========= # | mv: cannot stat '': No such file or directory =========
+# # | mv: cannot stat '': No such file or directory
+# ============================
+not ok 30 test-31
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 1038)
+#   `[ "$(test-31-actual)" == "$(test-31-expected)" ]' failed
+# ========== copy-with-file-date *.md | wc -l
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 1045: copy-with-file-date: command not found
+# 0
+# =========  =========
+#
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 1045: copy-with-file-date: command not found
+ok 31 test-32
+not ok 32 test-33
+# (from function `test-33-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 1113,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 1100)
+#   `test-33-actual ' failed with status 127
+# ========== unigrams ./man_cat.txt | testuser | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 1113: unigrams: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 1113: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 1113: testnum: command not found
+not ok 33 test-34
+# (from function `test-34-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 1147,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 1134)
+#   `test-34-actual ' failed with status 127
+# ========== word-count ./man_cat.txt | testuser | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 1147: word-count: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 1147: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 1147: testnum: command not found
+not ok 34 test-35
+# (from function `test-35-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 1181,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 1168)
+#   `test-35-actual ' failed with status 127
+# ========== bigrams ./man_cat.txt | testuser | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 1181: bigrams: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 1181: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 1181: testnum: command not found
+ok 35 test-36
+ok 36 test-37
+not ok 37 test-38
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 1275)
+#   `[ "$(test-38-actual)" == "$(test-38-expected)" ]' failed
+# ========== # $ lynx-dump
+#  ==========
+# ========= # | bash: .txt: cannot overwrite existing file =========
+# # | bash: .txt: cannot overwrite existing file
+# ============================
+not ok 38 test-39
+# (from function `test-39-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 1315,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 1302)
+#   `test-39-actual ' failed with status 127
+# ========== setenv MY_USERNAME xaea12-temp
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 1315: setenv: command not found
+not ok 39 test-40
+# (from function `test-40-actual' in file batspp-only/trace-extensionless-shortcut-V2.bats, line 1349,
+#  in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 1336)
+#   `test-40-actual ' failed with status 127
+# ========== unexport MY_USERNAME
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/trace-extensionless-shortcut-V2.bats: line 1349: unexport: command not found
+not ok 40 test-41
+# (in test file batspp-only/trace-extensionless-shortcut-V2.bats, line 1376)
+#   `[ "$(test-41-actual)" == "$(test-41-expected)" ]' failed
+# ========== echo "END"
+#  ==========
+# END
+# =========  =========
+#
+# ============================

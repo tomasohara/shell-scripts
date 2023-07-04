@@ -1,0 +1,156 @@
+1..9
+not ok 1 test-1
+# (in test file batspp-output/calc-entropy-tests.outputpp, line 21)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== bind 'set enable-bracketed-paste off'\n ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/calc-entropy-tests.outputpp: line 28: bind: warning: line editing not enabled
+# ========= $ unalias -a\n$ for f in ; do unset -f ; done\n$ BIN_DIR=/tmp/batspp-74056/test-1/.. =========
+# $ unalias -a
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-1-setup ()
+# test-10-actual ()
+# test-10-expected ()
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# Entropy
+# 2.000
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# 24	pp-clr
+# 6	pp-dir
+# 4	pp-ext
+# 35	pp-loc
+# 2	pp-nom
+# 7	pp-prd
+# 42	pp-tmp
+# 2	abc
+# 4	def
+# 1	ghi
+# 1	jkl
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# Entropy
+# 2.000
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# Entropy
+# 1.497
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# Entropy
+# 1.497
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# 2.230
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# test_test-2d3 ()
+# test_test-2d4 ()
+# 2.000' "=========";
+# test_test-2d5 ()
+# test_test-2d6 ()
+# 2.000' "=========";
+# test_test-2d7 ()
+# 1.497' "=========";
+# test_test-2d8 ()
+# Entropy
+# 1.497' "=========";
+# test_test-2d9 () ; do unset -f ; done
+# $ BIN_DIR=/tmp/batspp-74056/test-1/..
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/calc-entropy-tests.outputpp: line 28: bind: warning: line editing not enabled
+not ok 2 test-3
+# (in test file batspp-output/calc-entropy-tests.outputpp, line 69)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== # $ echo 'Hii'\n ==========
+# ========= # | Hi?2004l =========
+# # | Hi?2004l
+# ============================
+ok 3 test-4
+ok 4 test-5
+ok 5 test-6
+ok 6 test-7
+ok 7 test-8
+ok 8 test-9
+ok 9 test-10

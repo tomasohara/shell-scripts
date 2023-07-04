@@ -1,0 +1,3 @@
+# Empty testfiles leads to NoneType error (kcov_result.py)
+$ clear
+[H[2J[3J

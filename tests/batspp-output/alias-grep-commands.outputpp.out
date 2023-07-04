@@ -1,0 +1,415 @@
+1..17
+not ok 1 test-1
+# (in test file batspp-output/alias-grep-commands.outputpp, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== echo $PS1
+#  ==========
+#
+# ========= [PEXP\[\]ECT_PROMPT> =========
+# [PEXP\[\]ECT_PROMPT>
+# ============================
+not ok 2 test-3
+# (in test file batspp-output/alias-grep-commands.outputpp, line 59)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ alias | wc -l\n$ for f in ; do unset -f ; done\n$ typeset -f | egrep '^\w+' | wc -l\n0\n0 =========
+# $ alias | wc -l
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-10-actual ()
+# test-10-expected ()
+# grep (GNU grep) N.N
+# Copyright (C) NNNN Free Software Foundation, Inc.
+# License GPLvN+: GNU GPL version N or later <https://gnu.org/licenses/gpl.html>.
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# END_EXPECTED
+# test-12-actual ()
+# test-12-expected ()
+# testgrep1:As grep commands are case sensitive, one of the most useful operators for grep searches as they are sensitive is -i. Instead of printing lowercase results only, the terminal displays both uppercase and lowercase results. The output includes lines with mixed case entries.
+# testgrep2:sensitive sensitive sensitive Sensitive SENSITIVE lorem ipsum
+# testgrep4:Passwords are generally case sensitive
+# testgrep4:1
+# testgrep2:1
+# testgrep1:1
+# testgrep4:1
+# testgrep2:1
+# testgrep1:1
+# 3
+# END_EXPECTED
+# test-13-actual ()
+# test-13-expected ()
+# END_EXPECTED
+# test-14-actual ()
+# test-14-expected ()
+# Non ASCII: Ñ
+# Non ASCII: §
+# END_EXPECTED
+# test-15-actual ()
+# test-15-expected ()
+# END_EXPECTED
+# test-16-actual ()
+# test-16-expected ()
+# backup	     ls-alR.list.log  ls-R.list.log  testdir2	testgrep2  testgrep4
+# ls-alR.list  ls-R.list	      testdir1	     testgrep1	testgrep3  testgrep5
+# END_EXPECTED
+# test-17-actual ()
+# test-17-expected ()
+# total NN
+# total N
+# total N
+# END_EXPECTED
+# test-18-actual ()
+# test-18-expected ()
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# 0
+# 0
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# 0
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# 3
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# 0
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# grep (GNU grep) N.N
+# Copyright (C) NNNN Free Software Foundation, Inc.
+# License GPLvN+: GNU GPL version N or later <https://gnu.org/licenses/gpl.html>.
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.' "=========";
+# test_test-2d11 ()
+# test_test-2d12 ()
+# testgrep1:As grep commands are case sensitive, one of the most useful operators for grep searches as they are sensitive is -i. Instead of printing lowercase results only, the terminal displays both uppercase and lowercase results. The output includes lines with mixed case entries.
+# testgrep2:sensitive sensitive sensitive Sensitive SENSITIVE lorem ipsum
+# testgrep4:Passwords are generally case sensitive
+# testgrep4:1
+# testgrep2:1
+# testgrep1:1
+# testgrep4:1
+# testgrep2:1
+# testgrep1:1
+# 3' "=========";
+# test_test-2d13 ()
+# test_test-2d14 ()
+# Non ASCII: §' "=========";
+# test_test-2d15 ()
+# test_test-2d16 ()
+# backup	     ls-alR.list.log  ls-R.list.log  testdir2	testgrep2  testgrep4
+# ls-alR.list  ls-R.list	      testdir1	     testgrep1	testgrep3  testgrep5' "=========";
+# test_test-2d17 ()
+# total NN
+# total N
+# total N' "=========";
+# test_test-2d18 ()
+# test_test-2d3 ()
+# test_test-2d4 ()
+# 0' "=========";
+# test_test-2d5 ()
+# test_test-2d6 ()
+# test_test-2d7 ()
+# test_test-2d8 ()
+# test_test-2d9 () ; do unset -f ; done
+# $ typeset -f | egrep '^\w+' | wc -l
+# 0
+# 0
+# ============================
+not ok 3 test-4
+# (in test file batspp-output/alias-grep-commands.outputpp, line 97)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== TMP=/tmp/test-grep
+#  ==========
+# ========= ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=$PWD/..
+# ## You will need to run jupyter from that directory.
+# $ alias | wc -l
+# 0 =========
+# ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=/tmp/batspp-74694/test-4/..
+# ## You will need to run jupyter from that directory.
+# $ alias | wc -l
+# 0
+# ============================
+not ok 4 test-5
+# (in test file batspp-output/alias-grep-commands.outputpp, line 135)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== alias testnum="sed -r "s/[0-9]/N/g""
+#  ==========
+# ========= $ alias testuser="sed -r "s/"$USER"+/userxf333/g"" =========
+# $ alias testuser="sed -r "s/"aveey"+/userxf333/g""
+# ============================
+not ok 5 test-6
+# (in test file batspp-output/alias-grep-commands.outputpp, line 169)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== temp_dir=$TMP/test-7371
+#  ==========
+# ========= $ mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+# /tmp/test-grep/test-7371 =========
+# $ mkdir -p "/test-7371"
+# # TODO: /bin/rm -rvf "/test-7371"
+# $ cd "/test-7371"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "80" '' | tr ' ' -"
+# /tmp/test-grep/test-7371
+# ============================
+not ok 6 test-7
+# (in test file batspp-output/alias-grep-commands.outputpp, line 209)
+#   `[ "$(test-7-actual)" == "$(test-7-expected)" ]' failed
+# ========== alias | wc -l
+#  ==========
+# 0
+# ========= 3 =========
+# 3
+# ============================
+not ok 7 test-8
+# (in test file batspp-output/alias-grep-commands.outputpp, line 243)
+#   `[ "$(test-8-actual)" == "$(test-8-expected)" ]' failed
+# ========== typeset -f | egrep '^\w+' | wc -l\n ==========
+# 186
+# ========= 0 =========
+# 0
+# ============================
+not ok 8 test-9
+# (from function `test-9-actual' in file batspp-output/alias-grep-commands.outputpp, line 284,
+#  in test file batspp-output/alias-grep-commands.outputpp, line 271)
+#   `test-9-actual ' failed
+# ========== source $BIN_DIR/tomohara-aliases.bash
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 284: /tomohara-aliases.bash: No such file or directory
+not ok 9 test-10
+# (in test file batspp-output/alias-grep-commands.outputpp, line 311)
+#   `[ "$(test-10-actual)" == "$(test-10-expected)" ]' failed
+# ========== # $ grep -V
+#  ==========
+# ========= # grep (GNU grep) 2.4.2
+# #
+# # Copyright 1988, 1992-1999, 2000 Free Software Foundation, Inc.
+# # ...
+# $ grep -V | testnum
+# grep (GNU grep) N.N
+# Copyright (C) NNNN Free Software Foundation, Inc.
+# License GPLvN+: GNU GPL version N or later <https://gnu.org/licenses/gpl.html>.
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law. =========
+# # grep (GNU grep) 2.4.2
+# #
+# # Copyright 1988, 1992-1999, 2000 Free Software Foundation, Inc.
+# # ...
+# $ grep -V | testnum
+# grep (GNU grep) N.N
+# Copyright (C) NNNN Free Software Foundation, Inc.
+# License GPLvN+: GNU GPL version N or later <https://gnu.org/licenses/gpl.html>.
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+# ============================
+not ok 10 test-11
+# (in test file batspp-output/alias-grep-commands.outputpp, line 353)
+#   `[ "$(test-11-actual)" == "$(test-11-expected)" ]' failed
+# ========== rm -rf ./* > /dev/null
+#  ==========
+# ========= # THE WORD TO BE TESTED - sensitive
+# $ mkdir testdir1 testdir2
+# $ echo "As grep commands are case sensitive, one of the most useful operators for grep searches as they are sensitive is -i. Instead of printing lowercase results only, the terminal displays both uppercase and lowercase results. The output includes lines with mixed case entries.
+# $ " > testgrep1
+# $ echo "sensitive sensitive sensitive Sensitive SENSITIVE lorem ipsum" > testgrep2
+# $ echo "no mentions here" > testgrep3
+# $ echo "Passwords are generally case sensitive" > testgrep4
+# $ printf "Non ASCII: Ñ\nNext\nNon ASCII: §" > testgrep5 =========
+# # THE WORD TO BE TESTED - sensitive
+# $ mkdir testdir1 testdir2
+# $ echo "As grep commands are case sensitive, one of the most useful operators for grep searches as they are sensitive is -i. Instead of printing lowercase results only, the terminal displays both uppercase and lowercase results. The output includes lines with mixed case entries.
+# $ " > testgrep1
+# $ echo "sensitive sensitive sensitive Sensitive SENSITIVE lorem ipsum" > testgrep2
+# $ echo "no mentions here" > testgrep3
+# $ echo "Passwords are generally case sensitive" > testgrep4
+# $ printf "Non ASCII: Ñ\nNext\nNon ASCII: §" > testgrep5
+# ============================
+not ok 11 test-12
+# (from function `test-12-actual' in file batspp-output/alias-grep-commands.outputpp, line 401,
+#  in test file batspp-output/alias-grep-commands.outputpp, line 388)
+#   `test-12-actual ' failed with status 2
+# ========== grep sensitive testgrep1 testgrep2 testgrep3 testgrep4
+#  ==========
+# grep: testgrep1: No such file or directory
+# grep: testgrep2: No such file or directory
+# grep: testgrep3: No such file or directory
+# grep: testgrep4: No such file or directory
+not ok 12 test-13
+# (from function `test-13-actual' in file batspp-output/alias-grep-commands.outputpp, line 457,
+#  in test file batspp-output/alias-grep-commands.outputpp, line 444)
+#   `test-13-actual ' failed with status 127
+# ========== cat testgrep2 | gr-less lorem
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 457: gr-less: command not found
+# cat: testgrep2: No such file or directory
+not ok 13 test-14
+# (from function `test-14-actual' in file batspp-output/alias-grep-commands.outputpp, line 491,
+#  in test file batspp-output/alias-grep-commands.outputpp, line 478)
+#   `test-14-actual ' failed with status 127
+# ========== cat testgrep5 | grep-nonascii
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 491: grep-nonascii: command not found
+# cat: testgrep5: No such file or directory
+not ok 14 test-15
+# (in test file batspp-output/alias-grep-commands.outputpp, line 519)
+#   `[ "$(test-15-actual)" == "$(test-15-expected)" ]' failed
+# ========== prepare-find-files-here | testuser | testnum | awk '!($6="")'
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 526: prepare-find-files-here: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 526: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 526: testnum: command not found
+# ========= -rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-alR.list
+# -rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list.log
+# -rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-R.list
+# -rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-R.list.log =========
+# -rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-alR.list
+# -rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list.log
+# -rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-R.list
+# -rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-R.list.log
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 526: prepare-find-files-here: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 526: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 526: testnum: command not found
+not ok 15 test-16
+# (in test file batspp-output/alias-grep-commands.outputpp, line 556)
+#   `[ "$(test-16-actual)" == "$(test-16-expected)" ]' failed
+# ========== mkdir backup/
+#  ==========
+# ========= $ ls
+# backup	     ls-alR.list.log  ls-R.list.log  testdir2	testgrep2  testgrep4
+# ls-alR.list  ls-R.list	      testdir1	     testgrep1	testgrep3  testgrep5 =========
+# $ ls
+# backup	     ls-alR.list.log  ls-R.list.log  testdir2	testgrep2  testgrep4
+# ls-alR.list  ls-R.list	      testdir1	     testgrep1	testgrep3  testgrep5
+# ============================
+# mkdir: cannot create directory ‘backup/’: File exists
+not ok 16 test-17
+# (in test file batspp-output/alias-grep-commands.outputpp, line 592)
+#   `[ "$(test-17-actual)" == "$(test-17-expected)" ]' failed
+# ========== find-files "ls*" | testuser | testnum | awk '!($6="")'
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 599: find-files: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 599: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 599: testnum: command not found
+# ========= .:
+# total NN
+# -rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list
+# -rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list.log
+# -rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-R.list
+# -rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-R.list.log
+# ./testdirN:
+# total N
+# ./testdirN:
+# total N =========
+# .:
+# total NN
+# -rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list
+# -rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-alR.list.log
+# -rw-rw-r-- N userxfNNN userxfNNN NNN  N NN:NN ls-R.list
+# -rw-rw-r-- N userxfNNN userxfNNN N  N NN:NN ls-R.list.log
+# ./testdirN:
+# total N
+# ./testdirN:
+# total N
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 599: find-files: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 599: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/alias-grep-commands.outputpp: line 599: testnum: command not found
+ok 17 test-18

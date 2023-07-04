@@ -1,0 +1,134 @@
+1..9
+not ok 1 test-1
+# (in test file batspp-output/hello-world-source.outputpp, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== function count-aliases { alias | wc -l; }
+#  ==========
+# ========= $ function clear-aliases { unalias -a; } =========
+# $ function clear-aliases { unalias -a; }
+# ============================
+not ok 2 test-3
+# (from function `test-3-actual' in file batspp-output/hello-world-source.outputpp, line 66,
+#  in test file batspp-output/hello-world-source.outputpp, line 53)
+#   `test-3-actual ' failed with status 127
+# ========== clear-aliases
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: line 66: clear-aliases: command not found
+not ok 3 test-4
+# (in test file batspp-output/hello-world-source.outputpp, line 94)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== function count-aliases { alias | wc -l; }
+#  ==========
+# ========= $ function list-functions { typeset -f | egrep '^[A-ZZa-z_-]'; }\n$ function count-functions { list-functions | wc -l; } =========
+# $ function list-functions { typeset -f | egrep '^[A-ZZa-z_-]'; }
+# $ function count-functions { list-functions | wc -l; }
+# ============================
+not ok 4 test-5
+# (in test file batspp-output/hello-world-source.outputpp, line 129)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== BIN_DIR=$PWD/..
+#  ==========
+# ========= $ echo $BIN_DIR
+# # source $BIN_DIR/tomohara-aliases.bash
+# /home/aveey/tom-project/shell-scripts/tests/.. =========
+# $ echo /tmp/batspp-78591/test-5/..
+# # source /tmp/batspp-78591/test-5/../tomohara-aliases.bash
+# /home/aveey/tom-project/shell-scripts/tests/..
+# ============================
+not ok 5 test-6
+# (from function `test-6-actual' in file batspp-output/hello-world-source.outputpp, line 172,
+#  in test file batspp-output/hello-world-source.outputpp, line 159)
+#   `test-6-actual ' failed
+# ========== source $BIN_DIR/tomohara-aliases.bash
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: line 172: /tomohara-aliases.bash: No such file or directory
+not ok 6 test-7
+# (in test file batspp-output/hello-world-source.outputpp, line 199)
+#   `[ "$(test-7-actual)" == "$(test-7-expected)" ]' failed
+# ========== clear
+#  ==========
+# [H[2J[3J========= use cls instead (or /bin/clear) =========
+# use cls instead (or /bin/clear)
+# ============================
+not ok 7 test-8
+# (in test file batspp-output/hello-world-source.outputpp, line 233)
+#   `[ "$(test-8-actual)" == "$(test-8-expected)" ]' failed
+# ========== help
+#  ==========
+# GNU bash, version 5.1.16(1)-release (x86_64-pc-linux-gnu)
+# These shell commands are defined internally.  Type `help' to see this list.
+# Type `help name' to find out more about the function `name'.
+# Use `info bash' to find out more about the shell in general.
+# Use `man -k' or `info' to find out more about commands not in this list.
+#
+# A star (*) next to a name means that the command is disabled.
+#
+#  job_spec [&]                            history [-c] [-d offset] [n] or hist>
+#  (( expression ))                        if COMMANDS; then COMMANDS; [ elif C>
+#  . filename [arguments]                  jobs [-lnprs] [jobspec ...] or jobs >
+#  :                                       kill [-s sigspec | -n signum | -sigs>
+#  [ arg... ]                              let arg [arg ...]
+#  [[ expression ]]                        local [option] name[=value] ...
+#  alias [-p] [name[=value] ... ]          logout [n]
+#  bg [job_spec ...]                       mapfile [-d delim] [-n count] [-O or>
+#  bind [-lpsvPSVX] [-m keymap] [-f file>  popd [-n] [+N | -N]
+#  break [n]                               printf [-v var] format [arguments]
+#  builtin [shell-builtin [arg ...]]       pushd [-n] [+N | -N | dir]
+#  caller [expr]                           pwd [-LP]
+#  case WORD in [PATTERN [| PATTERN]...)>  read [-ers] [-a array] [-d delim] [->
+#  cd [-L|[-P [-e]] [-@]] [dir]            readarray [-d delim] [-n count] [-O >
+#  command [-pVv] command [arg ...]        readonly [-aAf] [name[=value] ...] o>
+#  compgen [-abcdefgjksuv] [-o option] [>  return [n]
+#  complete [-abcdefgjksuv] [-pr] [-DEI]>  select NAME [in WORDS ... ;] do COMM>
+#  compopt [-o|+o option] [-DEI] [name .>  set [-abefhkmnptuvxBCHP] [-o option->
+#  continue [n]                            shift [n]
+#  coproc [NAME] command [redirections]    shopt [-pqsu] [-o] [optname ...]
+#  declare [-aAfFgiIlnrtux] [-p] [name[=>  source filename [arguments]
+#  dirs [-clpv] [+N] [-N]                  suspend [-f]
+#  disown [-h] [-ar] [jobspec ... | pid >  test [expr]
+#  echo [-neE] [arg ...]                   time [-p] pipeline
+#  enable [-a] [-dnps] [-f filename] [na>  times
+#  eval [arg ...]                          trap [-lp] [[arg] signal_spec ...]
+#  exec [-cl] [-a name] [command [argume>  true
+#  exit [n]                                type [-afptP] name [name ...]
+#  export [-fn] [name[=value] ...] or ex>  typeset [-aAfFgiIlnrtux] [-p] name[=>
+#  false                                   ulimit [-SHabcdefiklmnpqrstuvxPT] [l>
+#  fc [-e ename] [-lnr] [first] [last] o>  umask [-p] [-S] [mode]
+#  fg [job_spec]                           unalias [-a] name [name ...]
+#  for NAME [in WORDS ... ] ; do COMMAND>  unset [-f] [-v] [-n] [name ...]
+#  for (( exp1; exp2; exp3 )); do COMMAN>  until COMMANDS; do COMMANDS; done
+#  function name { COMMANDS ; } or name >  variables - Names and meanings of so>
+#  getopts optstring name [arg ...]        wait [-fn] [-p var] [id ...]
+#  hash [-lr] [-p pathname] [-dt] [name >  while COMMANDS; do COMMANDS; done
+#  help [-dms] [pattern ...]               { COMMANDS ; }
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 228: unexpected EOF while looking for matching `''
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 229: syntax error: unexpected end of file
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 228: unexpected EOF while looking for matching `''
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 229: syntax error: unexpected end of file
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 228: unexpected EOF while looking for matching `''
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 229: syntax error: unexpected end of file
+# ========= GNU bash, version 5.1.16(1)-release (x86_64-pc-linux-gnu)\nThese shell commands are defined internally.  Type help name' to find out more about the function info bash' to find out more about the shell in general.\nUse info' to find out more about commands not in this list. =========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 248: unexpected EOF while looking for matching `''
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 250: syntax error: unexpected end of file
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 248: unexpected EOF while looking for matching `''
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 250: syntax error: unexpected end of file
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 248: unexpected EOF while looking for matching `''
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 249: syntax error: unexpected end of file
+# GNU bash, version 5.1.16(1)-release (x86_64-pc-linux-gnu)
+# These shell commands are defined internally.  Type help name' to find out more about the function info bash' to find out more about the shell in general.
+# Use info' to find out more about commands not in this list.
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 248: unexpected EOF while looking for matching `''
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 250: syntax error: unexpected end of file
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 248: unexpected EOF while looking for matching `''
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 250: syntax error: unexpected end of file
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 248: unexpected EOF while looking for matching `''
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: command substitution: line 249: syntax error: unexpected end of file
+ok 8 test-9
+not ok 9 test-10
+# (from function `test-10-actual' in file batspp-output/hello-world-source.outputpp, line 312,
+#  in test file batspp-output/hello-world-source.outputpp, line 299)
+#   `test-10-actual ' failed with status 127
+# ========== hist
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/hello-world-source.outputpp: line 312: hist: command not found

@@ -1,0 +1,300 @@
+1..10
+not ok 1 test-1
+# (in test file batspp-only/test-check-errors.bats, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== echo $PS1
+#  ==========
+#
+# ========= [PEXP\[\]ECT_PROMPT> =========
+# [PEXP\[\]ECT_PROMPT>
+# ============================
+not ok 2 test-3
+# (in test file batspp-only/test-check-errors.bats, line 59)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ for f in ; do unset -f ; done\n$ BIN_DIR=/tmp/batspp-99195/test-3/.. =========
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-10-actual ()
+# test-10-expected ()
+# usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# test_test-2d11 ()
+# test_test-2d3 ()
+# test_test-2d4 ()
+# test_test-2d5 ()
+# test_test-2d6 ()
+# test_test-2d7 ()
+# test_test-2d8 ()
+# test_test-2d9 () ; do unset -f ; done
+# $ BIN_DIR=/tmp/batspp-99195/test-3/..
+# ============================
+not ok 3 test-4
+# (in test file batspp-only/test-check-errors.bats, line 94)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== TMP=/tmp/test-check-errors
+#  ==========
+# ========= ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=$PWD/.. =========
+# ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=/tmp/batspp-99195/test-4/..
+# ============================
+not ok 4 test-5
+# (in test file batspp-only/test-check-errors.bats, line 129)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== temp_dir=$TMP/test-2334
+#  ==========
+# ========= $ mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+# /tmp/test-check-errors/test-2334 =========
+# $ mkdir -p "/test-2334"
+# # TODO: /bin/rm -rvf "/test-2334"
+# $ cd "/test-2334"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "80" '' | tr ' ' -"
+# /tmp/test-check-errors/test-2334
+# ============================
+not ok 5 test-6
+# (in test file batspp-only/test-check-errors.bats, line 169)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== alias testnum="sed -r "s/[0-9]/X/g""
+#  ==========
+# ========= $ alias testuser="sed -r "s/"$USER"+/user/g"" =========
+# $ alias testuser="sed -r "s/"aveey"+/user/g""
+# ============================
+not ok 6 test-7
+# (from function `test-7-actual' in file batspp-only/test-check-errors.bats, line 210,
+#  in test file batspp-only/test-check-errors.bats, line 197)
+#   `test-7-actual ' failed with status 127
+# ========== pwd | testuser
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/test-check-errors.bats: line 210: testuser: command not found
+not ok 7 test-8
+# (in test file batspp-only/test-check-errors.bats, line 237)
+#   `[ "$(test-8-actual)" == "$(test-8-expected)" ]' failed
+# ========== check_errors.py
+#  ==========
+# usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
+#                        [--no_asterisks] [--ruby] [--skip_ruby_lib] [--relaxed]
+#                        [--strict] [--verbose] [--context CONTEXT]
+#                        [filename]
+#
+# Scan the error log for errors, warnings and other suspicious results.
+# This prints the offending line bracketted by >>> and <<< along with N
+# lines before and after to provide context.
+#
+# ex: check_errors.py whatever
+#
+# Notes:
+#
+# - The default context is 1
+#
+# - Warnings are skipped by default
+#
+# - Use -no_asterisks if input uses ***'s outside of error contexts
+#
+# Use -relaxed to exclude special cases (e.g., xyz='error')
+#
+# positional arguments:
+#   filename           Input filename
+#
+# options:
+#   -h, --help         show this help message and exit
+#   --warning          alias for -warnings
+#   --warnings         include warnings?
+#   --skip_warnings    omit warnings?
+#   --no_asterisks     skip warnings for "***" in text
+#   --ruby             alias for -skip_ruby_lib
+#   --skip_ruby_lib    skip Ruby library related errors
+#   --relaxed          relaxed for special cases
+#   --strict           alias for relaxed=0
+#   --verbose          show more details
+#   --context CONTEXT  context lines before and after
+#
+# Notes:
+# - Use - for filename to skip usage (i.e., a la stdin).
+# - Use "ENV1='v1' ENV2='v2' python .../check_errors.py ..." for environment options.
+# ========= usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
+#                        [--no_asterisks] [--ruby] [--skip_ruby_lib] [--relaxed]
+#                        [--strict] [--verbose] [--context CONTEXT]
+#                        [filename] =========
+# usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
+#                        [--no_asterisks] [--ruby] [--skip_ruby_lib] [--relaxed]
+#                        [--strict] [--verbose] [--context CONTEXT]
+#                        [filename]
+# ============================
+not ok 8 test-9
+# (from function `test-9-actual' in file batspp-only/test-check-errors.bats, line 281,
+#  in test file batspp-only/test-check-errors.bats, line 268)
+#   `test-9-actual ' failed with status 127
+# ========== pip3 install mezcla | testnum > /dev/null
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/test-check-errors.bats: line 281: testnum: command not found
+# ERROR: Pipe to stdout was broken
+# Exception ignored in: <_io.TextIOWrapper name='<stdout>' mode='w' encoding='utf-8'>
+# BrokenPipeError: [Errno 32] Broken pipe
+not ok 9 test-10
+# (in test file batspp-only/test-check-errors.bats, line 308)
+#   `[ "$(test-10-actual)" == "$(test-10-expected)" ]' failed
+# ========== check_errors.py
+#  ==========
+# usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
+#                        [--no_asterisks] [--ruby] [--skip_ruby_lib] [--relaxed]
+#                        [--strict] [--verbose] [--context CONTEXT]
+#                        [filename]
+#
+# Scan the error log for errors, warnings and other suspicious results.
+# This prints the offending line bracketted by >>> and <<< along with N
+# lines before and after to provide context.
+#
+# ex: check_errors.py whatever
+#
+# Notes:
+#
+# - The default context is 1
+#
+# - Warnings are skipped by default
+#
+# - Use -no_asterisks if input uses ***'s outside of error contexts
+#
+# Use -relaxed to exclude special cases (e.g., xyz='error')
+#
+# positional arguments:
+#   filename           Input filename
+#
+# options:
+#   -h, --help         show this help message and exit
+#   --warning          alias for -warnings
+#   --warnings         include warnings?
+#   --skip_warnings    omit warnings?
+#   --no_asterisks     skip warnings for "***" in text
+#   --ruby             alias for -skip_ruby_lib
+#   --skip_ruby_lib    skip Ruby library related errors
+#   --relaxed          relaxed for special cases
+#   --strict           alias for relaxed=0
+#   --verbose          show more details
+#   --context CONTEXT  context lines before and after
+#
+# Notes:
+# - Use - for filename to skip usage (i.e., a la stdin).
+# - Use "ENV1='v1' ENV2='v2' python .../check_errors.py ..." for environment options.
+# ========= usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
+#                        [--no_asterisks] [--ruby] [--skip_ruby_lib] [--relaxed]
+#                        [--strict] [--verbose] [--context CONTEXT]
+#                        [filename] =========
+# usage: check_errors.py [-h] [--warning] [--warnings] [--skip_warnings]
+#                        [--no_asterisks] [--ruby] [--skip_ruby_lib] [--relaxed]
+#                        [--strict] [--verbose] [--context CONTEXT]
+#                        [filename]
+# ============================
+not ok 10 test-11
+# (from function `test-11-actual' in file batspp-only/test-check-errors.bats, line 352,
+#  in test file batspp-only/test-check-errors.bats, line 339)
+#   `test-11-actual ' failed with status 2
+# ========== python3 $BIN_DIR/check_errors.py -h
+#  ==========
+# python3: can't open file '/check_errors.py': [Errno 2] No such file or directory

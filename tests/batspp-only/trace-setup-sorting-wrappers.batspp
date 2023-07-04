@@ -1,0 +1,547 @@
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+[PEXP\[\]ECT_PROMPT>
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ alias | wc -l
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+$ typeset -f | egrep '^\w+' | wc -l
+0
+0
+
+# Setting a temp directory for tests
+$ TMP=/tmp/test-setupsort
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+$ alias | wc -l
+0
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 6411)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-6411
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-setupsort/test-6411
+
+# Count aliases proper
+$ alias | wc -l
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+1
+0
+
+$ alias testnum="sed -r "s/[0-9]/H/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g"" 
+
+$ source $BIN_DIR/tomohara-aliases.bash
+
+$ pwd | testuser
+/tmp/test-setupsort/test-6411
+
+# FOR SOME REASONS "cat bashrc-setup" COMMAND GIVES AN ERROR
+# cat ~/.bashrc | tab-sort
+# linebr
+# cat ~/.bashrc | colon-sort
+# linebr
+# cat ~/.bashrc | colon-sort-rev-num
+# linebr
+# cat ~/.bashrc | freq-sort
+# linebr
+$ rm -rf ./* > /dev/null
+$ man printf > pf_manual.txt
+$ cat pf_manual.txt | tab-sort | testnum | testuser
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              $'' syntax.
+       \a     alert (BEL)
+       and all C format specifications ending with one of diouxXfeEgGcs,  with
+       ARGUMENTs converted to proper type first.  Variable widths are handled.
+       %%     a single %
+AUTHOR
+       \\     backslash
+       %b     ARGUMENT  as  a string with '\' escapes interpreted, except that
+       \b     backspace
+COPYRIGHT
+       Copyright  ©  HHHH  Free Software Foundation, Inc.  License GPLvH+: GNU
+       \c     produce no further output
+DESCRIPTION
+       \"     double quote
+       \e     escape
+       \f     form feed
+       FORMAT controls the output as in C printf.  Interpreted sequences are:
+       Full documentation <https://www.gnu.org/software/coreutils/printf>
+GNU coreutils H.HH               February HHHH                       PRINTF(H)
+       GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
+       GPL version H or later <https://gnu.org/licenses/gpl.html>.
+       --help display this help and exit
+NAME
+       \n     new line
+       \NNN   byte with octal value NNN (H to H digits)
+       NOTE:  your shell may have its own version of printf, which usually su‐
+              octal escapes are of the form \H or \HNNN
+       or available locally via: info '(coreutils) printf invocation'
+              output version information and exit
+       persedes the version described here.  Please refer to your shell's doc‐
+       Print ARGUMENT(s) according to FORMAT, or execute according to OPTION:
+PRINTF(H)                        User Commands                       PRINTF(H)
+       printf(H)
+       printf - format and print data
+       printf FORMAT [ARGUMENT]...
+       printf OPTION
+              put,  escaping  non-printable characters with the proposed POSIX
+       %q     ARGUMENT is printed in a format that can be reused as shell  in‐
+       \r     carriage return
+       Report any translation bugs to <https://translationproject.org/team/>
+REPORTING BUGS
+SEE ALSO
+SYNOPSIS
+       There is NO WARRANTY, to the extent permitted by law.
+       This is free software: you are free  to  change  and  redistribute  it.
+       \t     horizontal tab
+       \UHHHHHHHH
+       \uHHHH Unicode (ISO/IEC HHHHH) character with hex value HHHH (H digits)
+       umentation for details about the options it supports.
+              Unicode character with hex value HHHHHHHH (H digits)
+       --version
+       \v     vertical tab
+       Written by David MacKenzie.
+       \xHH   byte with hexadecimal value HH (H to H digits)
+
+$ cat pf_manual.txt | colon-sort | testnum | testuser
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              $'' syntax.
+       \a     alert (BEL)
+       and all C format specifications ending with one of diouxXfeEgGcs,  with
+       ARGUMENTs converted to proper type first.  Variable widths are handled.
+       %%     a single %
+AUTHOR
+       \\     backslash
+       %b     ARGUMENT  as  a string with '\' escapes interpreted, except that
+       \b     backspace
+COPYRIGHT
+       \c     produce no further output
+DESCRIPTION
+       \"     double quote
+       \e     escape
+       \f     form feed
+       FORMAT controls the output as in C printf.  Interpreted sequences are:
+GNU coreutils H.HH               February HHHH                       PRINTF(H)
+       --help display this help and exit
+NAME
+       \n     new line
+       \NNN   byte with octal value NNN (H to H digits)
+              octal escapes are of the form \H or \HNNN
+              output version information and exit
+       persedes the version described here.  Please refer to your shell's doc‐
+       Print ARGUMENT(s) according to FORMAT, or execute according to OPTION:
+PRINTF(H)                        User Commands                       PRINTF(H)
+       printf(H)
+       printf - format and print data
+       printf FORMAT [ARGUMENT]...
+       printf OPTION
+              put,  escaping  non-printable characters with the proposed POSIX
+       %q     ARGUMENT is printed in a format that can be reused as shell  in‐
+       \r     carriage return
+REPORTING BUGS
+SEE ALSO
+SYNOPSIS
+       There is NO WARRANTY, to the extent permitted by law.
+       \t     horizontal tab
+       \UHHHHHHHH
+       \uHHHH Unicode (ISO/IEC HHHHH) character with hex value HHHH (H digits)
+       umentation for details about the options it supports.
+              Unicode character with hex value HHHHHHHH (H digits)
+       --version
+       \v     vertical tab
+       Written by David MacKenzie.
+       \xHH   byte with hexadecimal value HH (H to H digits)
+       Copyright  ©  HHHH  Free Software Foundation, Inc.  License GPLvH+: GNU
+       GPL version H or later <https://gnu.org/licenses/gpl.html>.
+       GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
+       or available locally via: info '(coreutils) printf invocation'
+       Report any translation bugs to <https://translationproject.org/team/>
+       Full documentation <https://www.gnu.org/software/coreutils/printf>
+       This is free software: you are free  to  change  and  redistribute  it.
+       NOTE:  your shell may have its own version of printf, which usually su‐
+
+$ cat pf_manual.txt | colon-sort-rev-num | testnum | testuser
+       \xHH   byte with hexadecimal value HH (H to H digits)
+       Written by David MacKenzie.
+       \v     vertical tab
+       --version
+              Unicode character with hex value HHHHHHHH (H digits)
+       umentation for details about the options it supports.
+       \uHHHH Unicode (ISO/IEC HHHHH) character with hex value HHHH (H digits)
+       \UHHHHHHHH
+       \t     horizontal tab
+       This is free software: you are free  to  change  and  redistribute  it.
+       There is NO WARRANTY, to the extent permitted by law.
+SYNOPSIS
+SEE ALSO
+REPORTING BUGS
+       Report any translation bugs to <https://translationproject.org/team/>
+       \r     carriage return
+       %q     ARGUMENT is printed in a format that can be reused as shell  in‐
+              put,  escaping  non-printable characters with the proposed POSIX
+       printf OPTION
+       printf FORMAT [ARGUMENT]...
+       printf - format and print data
+       printf(H)
+PRINTF(H)                        User Commands                       PRINTF(H)
+       Print ARGUMENT(s) according to FORMAT, or execute according to OPTION:
+       persedes the version described here.  Please refer to your shell's doc‐
+              output version information and exit
+       or available locally via: info '(coreutils) printf invocation'
+              octal escapes are of the form \H or \HNNN
+       NOTE:  your shell may have its own version of printf, which usually su‐
+       \NNN   byte with octal value NNN (H to H digits)
+       \n     new line
+NAME
+       --help display this help and exit
+       GPL version H or later <https://gnu.org/licenses/gpl.html>.
+       GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
+GNU coreutils H.HH               February HHHH                       PRINTF(H)
+       Full documentation <https://www.gnu.org/software/coreutils/printf>
+       FORMAT controls the output as in C printf.  Interpreted sequences are:
+       \f     form feed
+       \e     escape
+       \"     double quote
+DESCRIPTION
+       \c     produce no further output
+       Copyright  ©  HHHH  Free Software Foundation, Inc.  License GPLvH+: GNU
+COPYRIGHT
+       \b     backspace
+       %b     ARGUMENT  as  a string with '\' escapes interpreted, except that
+       \\     backslash
+AUTHOR
+       %%     a single %
+       ARGUMENTs converted to proper type first.  Variable widths are handled.
+       and all C format specifications ending with one of diouxXfeEgGcs,  with
+       \a     alert (BEL)
+              $'' syntax.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$ cat pf_manual.txt | freq-sort | testnum | testuser
+       \xHH   byte with hexadecimal value HH (H to H digits)
+       Written by David MacKenzie.
+       \v     vertical tab
+       --version
+              Unicode character with hex value HHHHHHHH (H digits)
+       umentation for details about the options it supports.
+       \uHHHH Unicode (ISO/IEC HHHHH) character with hex value HHHH (H digits)
+       \UHHHHHHHH
+       \t     horizontal tab
+       This is free software: you are free  to  change  and  redistribute  it.
+       There is NO WARRANTY, to the extent permitted by law.
+SYNOPSIS
+SEE ALSO
+REPORTING BUGS
+       Report any translation bugs to <https://translationproject.org/team/>
+       \r     carriage return
+       %q     ARGUMENT is printed in a format that can be reused as shell  in‐
+              put,  escaping  non-printable characters with the proposed POSIX
+       printf OPTION
+       printf FORMAT [ARGUMENT]...
+       printf - format and print data
+       printf(H)
+PRINTF(H)                        User Commands                       PRINTF(H)
+       Print ARGUMENT(s) according to FORMAT, or execute according to OPTION:
+       persedes the version described here.  Please refer to your shell's doc‐
+              output version information and exit
+       or available locally via: info '(coreutils) printf invocation'
+              octal escapes are of the form \H or \HNNN
+       NOTE:  your shell may have its own version of printf, which usually su‐
+       \NNN   byte with octal value NNN (H to H digits)
+       \n     new line
+NAME
+       --help display this help and exit
+       GPL version H or later <https://gnu.org/licenses/gpl.html>.
+       GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
+GNU coreutils H.HH               February HHHH                       PRINTF(H)
+       Full documentation <https://www.gnu.org/software/coreutils/printf>
+       FORMAT controls the output as in C printf.  Interpreted sequences are:
+       \f     form feed
+       \e     escape
+       \"     double quote
+DESCRIPTION
+       \c     produce no further output
+       Copyright  ©  HHHH  Free Software Foundation, Inc.  License GPLvH+: GNU
+COPYRIGHT
+       \b     backspace
+       %b     ARGUMENT  as  a string with '\' escapes interpreted, except that
+       \\     backslash
+AUTHOR
+       %%     a single %
+       ARGUMENTs converted to proper type first.  Variable widths are handled.
+       and all C format specifications ending with one of diouxXfeEgGcs,  with
+       \a     alert (BEL)
+              $'' syntax.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ECHOES THE FILE 
+$ uname -r > linux-info.txt
+$ cat linux-info.txt | echoize | testnum | testuser
+# $ cat ~/.bashrc | echoize
+H.HH.H-HH-generic
+
+# SORTS BY PARAGRAPH
+$ cat pf_manual.txt | para-sort | testnum | testuser
+       %%     a single %
+
+
+       %b     ARGUMENT  as  a string with '\' escapes interpreted, except that
+              octal escapes are of the form \H or \HNNN
+
+
+       %q     ARGUMENT is printed in a format that can be reused as shell  in‐
+              put,  escaping  non-printable characters with the proposed POSIX
+              $'' syntax.
+
+
+       --help display this help and exit
+
+
+       --version
+              output version information and exit
+
+
+       FORMAT controls the output as in C printf.  Interpreted sequences are:
+
+
+       Full documentation <https://www.gnu.org/software/coreutils/printf>
+       or available locally via: info '(coreutils) printf invocation'
+
+
+       NOTE:  your shell may have its own version of printf, which usually su‐
+       persedes the version described here.  Please refer to your shell's doc‐
+       umentation for details about the options it supports.
+
+
+       \"     double quote
+
+
+       \NNN   byte with octal value NNN (H to H digits)
+
+
+       \UHHHHHHHH
+              Unicode character with hex value HHHHHHHH (H digits)
+
+
+       \\     backslash
+
+
+       \a     alert (BEL)
+
+
+       \b     backspace
+
+
+       \c     produce no further output
+
+
+       \e     escape
+
+
+       \f     form feed
+
+
+       \n     new line
+
+
+       \r     carriage return
+
+
+       \t     horizontal tab
+
+
+       \uHHHH Unicode (ISO/IEC HHHHH) character with hex value HHHH (H digits)
+
+
+       \v     vertical tab
+
+
+       \xHH   byte with hexadecimal value HH (H to H digits)
+
+
+       and all C format specifications ending with one of diouxXfeEgGcs,  with
+       ARGUMENTs converted to proper type first.  Variable widths are handled.
+
+
+AUTHOR
+       Written by David MacKenzie.
+
+
+COPYRIGHT
+       Copyright  ©  HHHH  Free Software Foundation, Inc.  License GPLvH+: GNU
+       GPL version H or later <https://gnu.org/licenses/gpl.html>.
+       This is free software: you are free  to  change  and  redistribute  it.
+       There is NO WARRANTY, to the extent permitted by law.
+
+
+DESCRIPTION
+       Print ARGUMENT(s) according to FORMAT, or execute according to OPTION:
+
+
+GNU coreutils H.HH               February HHHH                       PRINTF(H)
+
+NAME
+       printf - format and print data
+
+
+PRINTF(H)                        User Commands                       PRINTF(H)
+
+
+REPORTING BUGS
+       GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
+       Report any translation bugs to <https://translationproject.org/team/>
+
+
+SEE ALSO
+       printf(H)
+
+
+SYNOPSIS
+       printf FORMAT [ARGUMENT]...
+       printf OPTION
+
+
+$ cat pf_manual.txt | echoize | head -n 5 | testuser | testnum
+PRINTF(H)                        User Commands                       PRINTF(H)
+
+NAME        printf - format and print data
+
+SYNOPSIS        printf FORMAT [ARGUMENT]...        printf OPTION

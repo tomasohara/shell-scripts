@@ -1,0 +1,26 @@
+# Warning: this creates a temporary directory for aliases
+
+# Set directory for alias work
+$ export TEMP_TOM_BIN=tmp/tomasohara-shell-scripts
+$ export TOM_ALIAS_FILE="$TEMP_TOM_BIN/tomohara-aliases.bash"
+$ mkdir -p "$TEMP_TOM_BIN"
+
+# Get latest version of aliases
+$ curl https://raw.githubusercontent.com/tomasohara/shell-scripts/main/tomohara-aliases.bash > "$TOM_ALIAS_FILE"
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  137k  100  137k    0     0   194k      0 --:--:-- --:--:-- --:--:--  194k
+
+$ file "$TOM_ALIAS_FILE"
+tmp/tomasohara-shell-scripts/tomohara-aliases.bash: Bourne-Again shell script, UTF-8 Unicode text executable, with very long lines
+
+# Note: batch mode needed for Jupyter usage
+$ export BATCH_MODE=1
+$ source "$TOM_ALIAS_FILE"
+
+$ show-macros | wc -l
+4161
+
+$ rm -rf "$TEMP_TOM_BIN"
+removed 'tmp/tomasohara-shell-scripts/tomohara-aliases.bash'
+removed directory 'tmp/tomasohara-shell-scripts'

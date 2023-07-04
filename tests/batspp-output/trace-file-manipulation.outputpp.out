@@ -1,0 +1,647 @@
+1..19
+not ok 1 test-1
+# (in test file batspp-output/trace-file-manipulation.outputpp, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== echo $PS1
+#  ==========
+#
+# ========= [PEXP\[\]ECT_PROMPT> =========
+# [PEXP\[\]ECT_PROMPT>
+# ============================
+not ok 2 test-3
+# (in test file batspp-output/trace-file-manipulation.outputpp, line 59)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ alias | wc -l\n$ for f in ; do unset -f ; done\n$ typeset -f | egrep '^\w+' | wc -l\n0\n0 =========
+# $ alias | wc -l
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-10-actual ()
+# test-10-expected ()
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# THIS IS A TEST. THIS IS ALSO A TEST. THIS IS A TEST TOO.
+# THIS IS A TEST. THIS IS ALSO A TEST. THIS IS A TEST TOO.
+# END_EXPECTED
+# test-12-actual ()
+# test-12-expected ()
+# Backing up 'process_list.txt' to './backup/process_list.txt'
+# END_EXPECTED
+# test-13-actual ()
+# test-13-expected ()
+# END_EXPECTED
+# test-14-actual ()
+# test-14-expected ()
+# PID
+# TTY
+# TIME
+# bash
+# bash
+# bash
+# XXXX
+# pts/X
+# pts/X
+# ps
+# END_EXPECTED
+# test-15-actual ()
+# test-15-expected ()
+# X.X
+# X.X
+# X.X
+# X:XX
+# X:XX
+# X:XX
+# X.X
+# XXXXXX
+# XXXXXX
+# XXXXX
+# XXXXX
+# XXXXX
+# XXXXX
+# XXXXX
+# XXXXX
+# XX:XX
+# XX:XX
+# XX:XX
+# XX:XX
+# X.X
+# X.X
+# XX:XX
+# XX:XX
+# XX:XX
+# XX:XX
+# XX:XX
+# XX:XX
+# XXXXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# COMMAND
+# R+
+# RSS
+# START
+# STAT
+# Sl+
+# Ss
+# Ss+
+# USER
+# VSZ
+# user
+# pts/X
+# pts/X
+# pts/X
+# pts/X
+# pts/X
+# pts/X
+# pts/X
+# pts/X
+# pts/X
+# tomohara-a
+# vi
+# END_EXPECTED
+# test-16-actual ()
+# test-16-expected ()
+# END_EXPECTED
+# test-17-actual ()
+# test-17-expected ()
+# Mem:            XXXX        XXXX         XXX         XXX         XXX         XXX
+# Swap:           XXXX         XXX        XXXX
+# Mem:         XXXXXXX     XXXXXXX      XXXXXX      XXXXXX     XXXXXXX      XXXXXX
+# Swap:        XXXXXXX      XXXXXX     XXXXXXX
+# END_EXPECTED
+# test-18-actual ()
+# test-18-expected ()
+# USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX bash
+# user       XXXX  X.X  X.X XXXXXX XXXXXX pts/X   Sl+  XX:XX   X:XX /usr/bin/pyth
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX bash
+# user       XXXX  X.X  X.X XXXXXX XXXXX pts/X    Sl+  XX:XX   X:XX vi tomohara-a
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+# user       XXXX  X.X  X.X XXXXXX XXXXXX pts/X   Sl+  XX:XX   X:XX /usr/bin/pyth
+# END_EXPECTED
+# test-19-actual ()
+# test-19-expected ()
+# USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+# F S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
+# X S  XXXX    XXXX    XXXX  X  XX   X -  XXXX do_wai pts/X    XX:XX:XX bash
+# X R  XXXX    XXXX    XXXX  X  XX   X -  XXXX -      pts/X    XX:XX:XX ps
+# END_EXPECTED
+# test-20-actual ()
+# test-20-expected ()
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# 0
+# 0
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# 2
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# 3
+# 0
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# Backing up 'freemem_mb.txt' to './backup/freemem_mb.txt'
+# bash: BACKUP/freemem_mb.txt: No such file or directory
+# total X
+# Mem:            XXXX        XXXX         XXX         XXX         XXX         XXX
+# Swap:           XXXX         XXX        XXXX
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# test_test-2d11 ()
+# THIS IS A TEST. THIS IS ALSO A TEST. THIS IS A TEST TOO.
+# THIS IS A TEST. THIS IS ALSO A TEST. THIS IS A TEST TOO.' "=========";
+# test_test-2d12 ()
+# test_test-2d13 ()
+# test_test-2d14 ()
+# PID
+# TTY
+# TIME
+# bash
+# bash
+# bash
+# XXXX
+# pts/X
+# pts/X
+# ps' "=========";
+# test_test-2d15 ()
+# X.X
+# X.X
+# X.X
+# X:XX
+# X:XX
+# X:XX
+# X.X
+# XXXXXX
+# XXXXXX
+# XXXXX
+# XXXXX
+# XXXXX
+# XXXXX
+# XXXXX
+# XXXXX
+# XX:XX
+# XX:XX
+# XX:XX
+# XX:XX
+# X.X
+# X.X
+# XX:XX
+# XX:XX
+# XX:XX
+# XX:XX
+# XX:XX
+# XX:XX
+# XXXXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# XXXX
+# COMMAND
+# R+
+# RSS
+# START
+# STAT
+# Sl+
+# Ss
+# Ss+
+# USER
+# VSZ
+# user
+# pts/X
+# pts/X
+# pts/X
+# pts/X
+# pts/X
+# pts/X
+# pts/X
+# pts/X
+# pts/X
+# tomohara-a
+# vi' "=========";
+# test_test-2d16 ()
+# test_test-2d17 ()
+# Mem:            XXXX        XXXX         XXX         XXX         XXX         XXX
+# Swap:           XXXX         XXX        XXXX
+# Mem:         XXXXXXX     XXXXXXX      XXXXXX      XXXXXX     XXXXXXX      XXXXXX
+# Swap:        XXXXXXX      XXXXXX     XXXXXXX' "=========";
+# test_test-2d18 ()
+# USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX bash
+# user       XXXX  X.X  X.X XXXXXX XXXXXX pts/X   Sl+  XX:XX   X:XX /usr/bin/pyth
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX bash
+# user       XXXX  X.X  X.X XXXXXX XXXXX pts/X    Sl+  XX:XX   X:XX vi tomohara-a
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+# user       XXXX  X.X  X.X XXXXXX XXXXXX pts/X   Sl+  XX:XX   X:XX /usr/bin/pyth' "=========";
+# test_test-2d19 ()
+# USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss+  XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    Ss   XX:XX   X:XX /usr/bin/bash
+# user       XXXX  X.X  X.X  XXXXX  XXXX pts/X    R+   XX:XX   X:XX ps -u
+# F S   UID     PID    PPID  C PRI  NI ADDR SZ WCHAN  TTY          TIME CMD
+# X S  XXXX    XXXX    XXXX  X  XX   X -  XXXX do_wai pts/X    XX:XX:XX bash
+# X R  XXXX    XXXX    XXXX  X  XX   X -  XXXX -      pts/X    XX:XX:XX ps' "=========";
+# test_test-2d20 ()
+# test_test-2d3 ()
+# test_test-2d4 ()
+# test_test-2d5 ()
+# 2' "=========";
+# test_test-2d6 ()
+# test_test-2d7 ()
+# test_test-2d8 ()
+# test_test-2d9 ()
+# Backing up '\''freemem_mb.txt'\'' to '\''./backup/freemem_mb.txt'\''
+# bash: BACKUP/freemem_mb.txt: No such file or directory
+# total X
+# Mem:            XXXX        XXXX         XXX         XXX         XXX         XXX
+# Swap:           XXXX         XXX        XXXX' "=========";; do unset -f ; done
+# $ typeset -f | egrep '^\w+' | wc -l
+# 0
+# 0
+# ============================
+not ok 3 test-4
+# (in test file batspp-output/trace-file-manipulation.outputpp, line 97)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== alias testuser="sed -r "s/"$USER"+/user/g""
+#  ==========
+# ========= $ alias testnum="sed -r "s/[0-9]/X/g"" =========
+# $ alias testnum="sed -r "s/[0-9]/X/g""
+# ============================
+not ok 4 test-5
+# (in test file batspp-output/trace-file-manipulation.outputpp, line 131)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== TMP=/tmp/test-file-manipulation
+#  ==========
+# ========= ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=$PWD/..
+# $ alias | wc -l
+# 2 =========
+# ## NOTE: Source it directly from the ./tests directory.
+# $ BIN_DIR=/tmp/batspp-76059/test-5/..
+# $ alias | wc -l
+# 2
+# ============================
+not ok 5 test-6
+# (in test file batspp-output/trace-file-manipulation.outputpp, line 168)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== temp_dir=$TMP/test-9890
+#  ==========
+# ========= $ mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+# /tmp/test-file-manipulation/test-9890 =========
+# $ mkdir -p "/test-9890"
+# # TODO: /bin/rm -rvf "/test-9890"
+# $ cd "/test-9890"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "80" '' | tr ' ' -"
+# /tmp/test-file-manipulation/test-9890
+# ============================
+not ok 6 test-7
+# (in test file batspp-output/trace-file-manipulation.outputpp, line 208)
+#   `[ "$(test-7-actual)" == "$(test-7-expected)" ]' failed
+# ========== alias | wc -l
+#  ==========
+# 0
+# ========= # Count functions\n$ typeset -f | egrep '^\w+' | wc -l\n3\n0 =========
+# # Count functions
+# $ typeset -f | egrep '^\w+' | wc -l
+# 3
+# 0
+# ============================
+not ok 7 test-8
+# (from function `test-8-actual' in file batspp-output/trace-file-manipulation.outputpp, line 252,
+#  in test file batspp-output/trace-file-manipulation.outputpp, line 239)
+#   `test-8-actual ' failed
+# ========== source $BIN_DIR/tomohara-aliases.bash
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 252: /tomohara-aliases.bash: No such file or directory
+not ok 8 test-9
+# (in test file batspp-output/trace-file-manipulation.outputpp, line 279)
+#   `[ "$(test-9-actual)" == "$(test-9-expected)" ]' failed
+# ========== rm -rf ./*
+#  ==========
+# ========= $ free -m > freemem_mb.txt
+# $ linebr
+# $ asc-it freemem_mb.txt
+# #(NEED SOLUTION FOR bash: BACKUP/freemem_mb.txt: No such file or directory)
+# #(IN CASE OF 'BACKUP'->'backup' IN asc-it, ERROR = bash: asc: command not found)
+# $ linebr
+# $ ls -l ./backup/ | testuser | testnum | awk '!($6="")'
+# $ linebr
+# $ cat ./backup/freemem_mb.txt | testnum
+# --------------------------------------------------------------------------------
+# Backing up 'freemem_mb.txt' to './backup/freemem_mb.txt'
+# bash: BACKUP/freemem_mb.txt: No such file or directory
+# --------------------------------------------------------------------------------
+# total X
+# -r--r--r-- X user user XXX  X XX:XX freemem_mb.txt
+# --------------------------------------------------------------------------------
+#                total        used        free      shared  buff/cache   available
+# Mem:            XXXX        XXXX         XXX         XXX         XXX         XXX
+# Swap:           XXXX         XXX        XXXX =========
+# $ free -m > freemem_mb.txt
+# $ linebr
+# $ asc-it freemem_mb.txt
+# #(NEED SOLUTION FOR bash: BACKUP/freemem_mb.txt: No such file or directory)
+# #(IN CASE OF 'BACKUP'->'backup' IN asc-it, ERROR = bash: asc: command not found)
+# $ linebr
+# $ ls -l ./backup/ | testuser | testnum | awk '!(="")'
+# $ linebr
+# $ cat ./backup/freemem_mb.txt | testnum
+# --------------------------------------------------------------------------------
+# Backing up 'freemem_mb.txt' to './backup/freemem_mb.txt'
+# bash: BACKUP/freemem_mb.txt: No such file or directory
+# --------------------------------------------------------------------------------
+# total X
+# -r--r--r-- X user user XXX  X XX:XX freemem_mb.txt
+# --------------------------------------------------------------------------------
+#                total        used        free      shared  buff/cache   available
+# Mem:            XXXX        XXXX         XXX         XXX         XXX         XXX
+# Swap:           XXXX         XXX        XXXX
+# ============================
+not ok 9 test-10
+# (from function `test-10-actual' in file batspp-output/trace-file-manipulation.outputpp, line 338,
+#  in test file batspp-output/trace-file-manipulation.outputpp, line 325)
+#   `test-10-actual ' failed with status 127
+# ========== perl-slurp -v | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 338: perl-slurp: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 338: testnum: command not found
+not ok 10 test-11
+# (in test file batspp-output/trace-file-manipulation.outputpp, line 365)
+#   `[ "$(test-11-actual)" == "$(test-11-expected)" ]' failed
+# ========== function test-text () { printf "THIS IS A TEST. \rTHIS IS ALSO A TEST\r. THIS IS A TEST TOO."; }
+#  ==========
+# ========= $ test-text
+# $ printf "\n"
+# $ linebr
+# $ test-text | remove-cr
+# $ printf "\n"
+# $ linebr
+# $ test-text | alt-remove-cr
+# . THIS IS A TEST TOO.
+# --------------------------------------------------------------------------------
+# THIS IS A TEST. THIS IS ALSO A TEST. THIS IS A TEST TOO.
+# --------------------------------------------------------------------------------
+# THIS IS A TEST. THIS IS ALSO A TEST. THIS IS A TEST TOO. =========
+# $ test-text
+# $ printf "\n"
+# $ linebr
+# $ test-text | remove-cr
+# $ printf "\n"
+# $ linebr
+# $ test-text | alt-remove-cr
+# . THIS IS A TEST TOO.
+# --------------------------------------------------------------------------------
+# THIS IS A TEST. THIS IS ALSO A TEST. THIS IS A TEST TOO.
+# --------------------------------------------------------------------------------
+# THIS IS A TEST. THIS IS ALSO A TEST. THIS IS A TEST TOO.
+# ============================
+not ok 11 test-12
+# (in test file batspp-output/trace-file-manipulation.outputpp, line 410)
+#   `[ "$(test-12-actual)" == "$(test-12-expected)" ]' failed
+# ========== ps -l > process_list.txt
+#  ==========
+# ========= $ remove-cr-and-backup process_list.txt\nBacking up 'process_list.txt' to './backup/process_list.txt' =========
+# $ remove-cr-and-backup process_list.txt
+# Backing up 'process_list.txt' to './backup/process_list.txt'
+# ============================
+not ok 12 test-13
+# (from function `test-13-actual' in file batspp-output/trace-file-manipulation.outputpp, line 452,
+#  in test file batspp-output/trace-file-manipulation.outputpp, line 439)
+#   `test-13-actual ' failed with status 127
+# ========== test-text | perl-remove-cr
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 452: test-text: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 452: perl-remove-cr: command not found
+not ok 13 test-14
+# (in test file batspp-output/trace-file-manipulation.outputpp, line 480)
+#   `[ "$(test-14-actual)" == "$(test-14-expected)" ]' failed
+# ========== ps -u > ntest1.txt
+#  ==========
+# ========= $ ps -l > ntest2.txt
+# $ intersection ntest1.txt ntest2.txt | testnum
+# PID
+# TTY
+# TIME
+# bash
+# bash
+# bash
+# XXXX
+# pts/X
+# pts/X
+# ps =========
+# $ ps -l > ntest2.txt
+# $ intersection ntest1.txt ntest2.txt | testnum
+# PID
+# TTY
+# TIME
+# bash
+# bash
+# bash
+# XXXX
+# pts/X
+# pts/X
+# ps
+# ============================
+not ok 14 test-15
+# (from function `test-15-actual' in file batspp-output/trace-file-manipulation.outputpp, line 532,
+#  in test file batspp-output/trace-file-manipulation.outputpp, line 519)
+#   `test-15-actual ' failed with status 127
+# ========== difference ntest1.txt ntest2.txt | testuser | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 532: difference: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 532: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 532: testnum: command not found
+not ok 15 test-16
+# (in test file batspp-output/trace-file-manipulation.outputpp, line 637)
+#   `[ "$(test-16-actual)" == "$(test-16-expected)" ]' failed
+# ========== free -m > free1.txt
+#  ==========
+# ========= $ free > free2.txt
+# $ line-intersection free1.txt free2.txt
+#                total        used        free      shared  buff/cache   available =========
+# $ free > free2.txt
+# $ line-intersection free1.txt free2.txt
+#                total        used        free      shared  buff/cache   available
+# ============================
+not ok 16 test-17
+# (from function `test-17-actual' in file batspp-output/trace-file-manipulation.outputpp, line 680,
+#  in test file batspp-output/trace-file-manipulation.outputpp, line 667)
+#   `test-17-actual ' failed with status 127
+# ========== line-difference free1.txt free2.txt | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 680: line-difference: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 680: testnum: command not found
+not ok 17 test-18
+# (from function `test-18-actual' in file batspp-output/trace-file-manipulation.outputpp, line 720,
+#  in test file batspp-output/trace-file-manipulation.outputpp, line 707)
+#   `test-18-actual ' failed with status 127
+# ========== cat ntest1.txt | testuser | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 720: testnum: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 720: testuser: command not found
+# cat: ntest1.txt: No such file or directory
+not ok 18 test-19
+# (from function `test-19-actual' in file batspp-output/trace-file-manipulation.outputpp, line 771,
+#  in test file batspp-output/trace-file-manipulation.outputpp, line 758)
+#   `test-19-actual ' failed with status 127
+# ========== last-n-with-header 4 ntest1.txt | testuser | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 771: last-n-with-header: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 771: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-file-manipulation.outputpp: line 771: testnum: command not found
+ok 19 test-20

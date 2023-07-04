@@ -1,0 +1,105 @@
+# Setup
+$ bind 'set enable-bracketed-paste off'
+
+# Delete all aliases and function
+# TODO: Instead start from pristine environment
+$ unalias -a
+$ for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+
+## OLD: TEST_BIN=/home/test3513/bin
+# SPECIFYING AN IDENTIFIER FOR TMP
+$ TEST_BIN=/home/$USER/tom-project/shell-scripts/tests
+$ TMP=/tmp/test-dir-aliases
+$ source $TEST_BIN/_dir-aliases.bash
+$ alias | wc -l
+8
+
+# Count aliases proper
+$ alias | wc -l
+8
+
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+2
+
+# Test safe symbolic links
+$ temp_dir=$TMP/test-$$
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ cd "$temp_dir"
+$ pwd
+/tmp/test-dir-aliases/test-4781
+
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+
+$ echo $USER | testuser
+userxf333
+
+# The first case succeed
+$ touch file1
+$ ln-symbolic file1 link1
+# 'link1' -> 'file1'
+# The second case should should fail
+$ ln-symbolic file1 link1
+# => "ln: failed to create symbolic link 'link1': File exists?"
+# Should only be four files total (along with . and ..)
+$ ls -R | wc -l
+# => 3
+'link1' -> 'file1'
+ln: failed to create symbolic link 'link1': File exists
+3
+
+## FYI: the current aliases and functions
+## ERROR PRONE COMMAND (BATSPP) - WORKS WELL
+# $ cat $TEST_BIN/_dir-aliases.bash
+
+$ ls
+file1  link1
+
+$ ls -l | testnum | testuser | awk '!($6="")'
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+
+$ bash $TEST_BIN/_dir-aliases.bash
+
+$ ln-symbolic /tmp temp-link
+'temp-link' -> '/tmp'
+
+$ ls -l | testnum | testuser | awk '!($6="")'
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+lrwxrwxrwx N userxf333 userxf333 N  N NN:NN temp-link -> /tmp
+
+$ link-symbolic-safe --force ~/temp temp-link | testuser
+'temp-link' -> '/home/userxf333/temp'
+
+$ ls -l | testnum | testuser | awk '!($6="")'
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+lrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp
+
+$ alias ln-symbolic-force='ln-symbolic --force'
+
+# # THIS THROWS AN ERROR AS A SYMBOLIC LINK ALREADY EXISTS
+# $ ln-symbolic /tmp temp-link
+# | ln: failed to create symbolic link 'temp-link/tmp': File exists
+
+# ln CANNOT OVERWRITE DIRECTORY AS WELL, EVEN ON FORCE
+# $ ln-symbolic-force /tmp temp-link
+# | ln: temp-link/tmp: cannot overwrite directory
+
+$ ln-symbolic-force /tmp1 temp-link
+'temp-link/tmp1' -> '/tmp1'
+
+$ link-symbolic-safe --force ~/temp temp-link | testuser | testnum
+'temp-link' -> '/home/userxfNNN/temp'
+
+$ ls -l | testnum | testuser | awk '!($6="")'
+total N    
+-rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+lrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp

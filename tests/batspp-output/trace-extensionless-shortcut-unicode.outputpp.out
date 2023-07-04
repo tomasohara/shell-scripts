@@ -1,0 +1,291 @@
+1..12
+not ok 1 test-1
+# (in test file batspp-output/trace-extensionless-shortcut-unicode.outputpp, line 25)
+#   `[ "$(test-1-actual)" == "$(test-1-expected)" ]' failed
+# ========== echo $PS1
+#  ==========
+#
+# ========= [PEXP\[\]ECT_PROMPT> =========
+# [PEXP\[\]ECT_PROMPT>
+# ============================
+not ok 2 test-3
+# (in test file batspp-output/trace-extensionless-shortcut-unicode.outputpp, line 59)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ alias | wc -l\n$ for f in ; do unset -f ; done\n$ typeset -f | egrep '^\w+' | wc -l\n# Setting a temp directory for tests\n$ TMP=/tmp/test-extensionless\n$ BIN_DIR=/tmp/batspp-77473/test-3/..\n0\n0 =========
+# $ alias | wc -l
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-10-actual ()
+# test-10-expected ()
+# XhXr	orX	oXXsXt	XnXoXing
+# X.XX.X-XX-gXnXriX: XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# g	XXXX	XX	XX
+# X	XXXX	XX	XX
+# n	XXXX	XX	XX
+# X	XXXX	XX	XX
+# r	XXXX	XX	XX
+# i	XXXX	XX	XX
+# X	XXXX	XX	XX
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# XhXr	orX	oXXsXt	XnXoXing
+# X.XX.X-XX-gXnXriX: XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# g	XXXX	XX	XX
+# X	XXXX	XX	XX
+# n	XXXX	XX	XX
+# X	XXXX	XX	XX
+# r	XXXX	XX	XX
+# i	XXXX	XX	XX
+# X	XXXX	XX	XX
+# END_EXPECTED
+# test-12-actual ()
+# test-12-expected ()
+# END_EXPECTED
+# test-13-actual ()
+# test-13-expected ()
+# END
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# 0
+# 0
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# 0
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# END_EXPECTED
+# test-7-actual ()
+# test-7-expected ()
+# 3
+# 0
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# X.XX.X-XX-gXnXriX: XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# g	XXXX	XX	XX
+# X	XXXX	XX	XX
+# n	XXXX	XX	XX
+# X	XXXX	XX	XX
+# r	XXXX	XX	XX
+# i	XXXX	XX	XX
+# X	XXXX	XX	XX' "=========";
+# test_test-2d11 ()
+# X.XX.X-XX-gXnXriX: XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# X	XXXX	X	XX
+# g	XXXX	XX	XX
+# X	XXXX	XX	XX
+# n	XXXX	XX	XX
+# X	XXXX	XX	XX
+# r	XXXX	XX	XX
+# i	XXXX	XX	XX
+# X	XXXX	XX	XX' "=========";
+# test_test-2d12 ()
+# test_test-2d13 ()
+# test_test-2d3 ()
+# test_test-2d4 ()
+# test_test-2d5 ()
+# test_test-2d6 ()
+# test_test-2d7 ()
+# test_test-2d8 ()
+# test_test-2d9 () ; do unset -f ; done
+# $ typeset -f | egrep '^\w+' | wc -l
+# # Setting a temp directory for tests
+# $ TMP=/tmp/test-extensionless
+# $ BIN_DIR=/tmp/batspp-77473/test-3/..
+# 0
+# 0
+# ============================
+ok 3 test-4
+not ok 4 test-5
+# (in test file batspp-output/trace-extensionless-shortcut-unicode.outputpp, line 134)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== temp_dir=$TMP/test-3570
+#  ==========
+# ========= $ mkdir -p "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+# /tmp/test-extensionless/test-3570 =========
+# $ mkdir -p "/test-3570"
+# $ cd "/test-3570"
+# $ pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# $ alias linebr="printf '%*s\n' "80" '' | tr ' ' -"
+# /tmp/test-extensionless/test-3570
+# ============================
+not ok 5 test-6
+# (in test file batspp-output/trace-extensionless-shortcut-unicode.outputpp, line 173)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== alias testnum="sed -r "s/[0-9,A-F,a-f]/X/g""
+#  ==========
+# ========= $ alias testuser="sed -r "s/"$USER"+/user/g"" =========
+# $ alias testuser="sed -r "s/"aveey"+/user/g""
+# ============================
+not ok 6 test-7
+# (in test file batspp-output/trace-extensionless-shortcut-unicode.outputpp, line 207)
+#   `[ "$(test-7-actual)" == "$(test-7-expected)" ]' failed
+# ========== alias | wc -l
+#  ==========
+# 0
+# ========= # Count functions\n$ typeset -f | egrep '^\w+' | wc -l\n3\n0 =========
+# # Count functions
+# $ typeset -f | egrep '^\w+' | wc -l
+# 3
+# 0
+# ============================
+not ok 7 test-8
+# (in test file batspp-output/trace-extensionless-shortcut-unicode.outputpp, line 244)
+#   `[ "$(test-8-actual)" == "$(test-8-expected)" ]' failed
+# ========== pwd
+#  ==========
+# /tmp/batspp-77473/test-8
+# ========= $ rm -rf ./*
+# $ uname -r > version1.txt
+# /tmp/test-extensionless/test-3570 =========
+# $ rm -rf ./*
+# $ uname -r > version1.txt
+# /tmp/test-extensionless/test-3570
+# ============================
+not ok 8 test-9
+# (from function `test-9-actual' in file batspp-output/trace-extensionless-shortcut-unicode.outputpp, line 287,
+#  in test file batspp-output/trace-extensionless-shortcut-unicode.outputpp, line 274)
+#   `test-9-actual ' failed
+# ========== source $BIN_DIR/tomohara-aliases.bash
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-extensionless-shortcut-unicode.outputpp: line 287: /tomohara-aliases.bash: No such file or directory
+not ok 9 test-10
+# (from function `test-10-actual' in file batspp-output/trace-extensionless-shortcut-unicode.outputpp, line 321,
+#  in test file batspp-output/trace-extensionless-shortcut-unicode.outputpp, line 308)
+#   `test-10-actual ' failed with status 127
+# ========== show-unicode-code-info-aux ./version1.txt | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-extensionless-shortcut-unicode.outputpp: line 321: show-unicode-code-info-aux: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-extensionless-shortcut-unicode.outputpp: line 321: testnum: command not found
+not ok 10 test-11
+# (from function `test-11-actual' in file batspp-output/trace-extensionless-shortcut-unicode.outputpp, line 373,
+#  in test file batspp-output/trace-extensionless-shortcut-unicode.outputpp, line 360)
+#   `test-11-actual ' failed with status 127
+# ========== show-unicode-code-info ./version1.txt | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-extensionless-shortcut-unicode.outputpp: line 373: show-unicode-code-info: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/trace-extensionless-shortcut-unicode.outputpp: line 373: testnum: command not found
+not ok 11 test-12
+# (in test file batspp-output/trace-extensionless-shortcut-unicode.outputpp, line 418)
+#   `[ "$(test-12-actual)" == "$(test-12-expected)" ]' failed
+# ========== # $ show-unicode-code-info-stdin ./catmanual.txt
+#  ==========
+# ========= # | bash: /show-unicode-code-info.5292: Permission denied
+# # | bash: /show-unicode-code-info.5292: No such file or directory =========
+# # | bash: /show-unicode-code-info.5292: Permission denied
+# # | bash: /show-unicode-code-info.5292: No such file or directory
+# ============================
+ok 12 test-13

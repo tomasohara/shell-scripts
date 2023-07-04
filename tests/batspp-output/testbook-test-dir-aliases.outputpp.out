@@ -1,0 +1,511 @@
+1..23
+ok 1 test-1
+not ok 2 test-3
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 67)
+#   `[ "$(test-3-actual)" == "$(test-3-expected)" ]' failed
+# ========== unalias -a
+#  ==========
+# ========= $ for f in ; do unset -f ; done =========
+# $ for f in bats_abort_timeout_countdown ()
+# bats_add_debug_exclude_path ()
+# bats_all_in ()
+# bats_any_in ()
+# bats_append_arrays_as_args ()
+# bats_approx_realpath ()
+# bats_binary_search ()
+# bats_capture_stack_trace ()
+# bats_check_status_from_trap ()
+# bats_check_valid_version ()
+# bats_create_test_tmpdirs ()
+# bats_debug_trap ()
+# bats_emit_trace ()
+# bats_error_trap ()
+# bats_evaluate_preprocessed_source ()
+# bats_execute ()
+# bats_exit_trap ()
+# bats_extract_line ()
+# bats_format_file_line_reference ()
+# bats_format_file_line_reference_colon ()
+# bats_format_file_line_reference_comma_line ()
+# bats_format_file_line_reference_uri ()
+# bats_frame_filename ()
+# bats_frame_function ()
+# bats_frame_lineno ()
+# bats_generate_warning ()
+# bats_get_child_processes_of ()
+# bats_get_failure_stack_trace ()
+# bats_internal_load ()
+# bats_interrupt_trap ()
+# bats_interrupt_trap_in_run ()
+# bats_kill_childprocesses_of ()
+# bats_load_library ()
+# bats_load_library_safe ()
+# bats_load_safe ()
+# bats_merge_stdout_and_stderr ()
+# bats_normalize_windows_dir_path ()
+# bats_perform_test ()
+# bats_prefix_lines_for_tap_output ()
+# bats_preprocess_source ()
+# bats_print_failed_command ()
+# bats_print_stack_trace ()
+# bats_quote_code ()
+# bats_readlinkf ()
+# declare -fx bats_readlinkf
+# bats_redirect_stderr_into_file ()
+# bats_replace_filename ()
+# bats_require_minimum_version ()
+# bats_separate_lines ()
+# bats_setup_tracing ()
+# bats_should_retry_test ()
+# bats_sort ()
+# bats_start_timeout_countdown ()
+# bats_strip_string ()
+# bats_teardown_trap ()
+# bats_test_begin ()
+# bats_test_function ()
+# bats_timeout_trap ()
+# bats_trim ()
+# bats_trim_filename ()
+# bats_version_lt ()
+# bats_warn_minimum_guaranteed_version ()
+# find_in_bats_lib_path ()
+# get_mills_since_epoch ()
+# load ()
+# run ()
+# setup ()
+# skip ()
+# teardown ()
+# test-1-actual ()
+# test-1-expected ()
+# END_EXPECTED
+# test-1-setup ()
+# test-10-actual ()
+# test-10-expected ()
+# ln: failed to create symbolic link 'link1': File exists
+# 3
+# END_EXPECTED
+# test-11-actual ()
+# test-11-expected ()
+# END_EXPECTED
+# test-12-actual ()
+# test-12-expected ()
+# file1  link1
+# END_EXPECTED
+# test-13-actual ()
+# test-13-expected ()
+# total N
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# END_EXPECTED
+# test-14-actual ()
+# test-14-expected ()
+# END_EXPECTED
+# test-15-actual ()
+# test-15-expected ()
+# temp-link' -> '/tmp
+# END_EXPECTED
+# test-16-actual ()
+# test-16-expected ()
+# total N
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN temp-link -> /tmp
+# END_EXPECTED
+# test-17-actual ()
+# test-17-expected ()
+# temp-link' -> '/home/userxf333/temp
+# END_EXPECTED
+# test-18-actual ()
+# test-18-expected ()
+# total N
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# lrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp
+# END_EXPECTED
+# test-19-actual ()
+# test-19-expected ()
+# END_EXPECTED
+# test-20-actual ()
+# test-20-expected ()
+# END_EXPECTED
+# test-21-actual ()
+# test-21-expected ()
+# END_EXPECTED
+# test-22-actual ()
+# test-22-expected ()
+# temp-link/tmp1' -> '/tmp1
+# END_EXPECTED
+# test-23-actual ()
+# test-23-expected ()
+# temp-link' -> '/home/userxfNNN/temp
+# END_EXPECTED
+# test-24-actual ()
+# test-24-expected ()
+# total N
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# lrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp
+# END_EXPECTED
+# test-3-actual ()
+# test-3-expected ()
+# END_EXPECTED
+# test-4-actual ()
+# test-4-expected ()
+# 8
+# END_EXPECTED
+# test-5-actual ()
+# test-5-expected ()
+# 8
+# END_EXPECTED
+# test-6-actual ()
+# test-6-expected ()
+# 2
+# END_EXPECTED
+# test-7-safe-symbolic-links-actual ()
+# test-7-safe-symbolic-links-expected ()
+# END_EXPECTED
+# test-8-actual ()
+# test-8-expected ()
+# END_EXPECTED
+# test-9-actual ()
+# test-9-expected ()
+# userxf333
+# END_EXPECTED
+# test_test-2d1 ()
+# test_test-2d10 ()
+# ln: failed to create symbolic link '\''link1'\'': File exists
+# 3' "=========";
+# test_test-2d11 ()
+# test_test-2d12 ()
+# test_test-2d13 ()
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN' "=========";
+# test_test-2d14 ()
+# test_test-2d15 ()
+# test_test-2d16 ()
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN temp-link -> /tmp' "=========";
+# test_test-2d17 ()
+# test_test-2d18 ()
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# lrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp' "=========";
+# test_test-2d19 ()
+# test_test-2d20 ()
+# test_test-2d21 ()
+# test_test-2d22 ()
+# test_test-2d23 ()
+# test_test-2d24 ()
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# lrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp' "=========";
+# test_test-2d3 ()
+# test_test-2d4 ()
+# 8' "=========";
+# test_test-2d5 ()
+# test_test-2d6 ()
+# test_test-2d7-2dsafe-2dsymbolic-2dlinks ()
+# test_test-2d8 ()
+# test_test-2d9 () ; do unset -f ; done
+# ============================
+not ok 3 test-4
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 101)
+#   `[ "$(test-4-actual)" == "$(test-4-expected)" ]' failed
+# ========== TEST_BIN=/home/$USER/tom-project/shell-scripts/tests
+#  ==========
+# ========= $ TMP=/tmp/test-dir-aliases
+# $ source $TEST_BIN/_dir-aliases.bash
+# $ alias | wc -l
+# 8 =========
+# $ TMP=/tmp/test-dir-aliases
+# $ source /home/aveey/tom-project/shell-scripts/tests/_dir-aliases.bash
+# $ alias | wc -l
+# 8
+# ============================
+not ok 4 test-5
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 138)
+#   `[ "$(test-5-actual)" == "$(test-5-expected)" ]' failed
+# ========== alias | wc -l
+#  ==========
+# 0
+# ========= 8 =========
+# 8
+# ============================
+not ok 5 test-6
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 172)
+#   `[ "$(test-6-actual)" == "$(test-6-expected)" ]' failed
+# ========== typeset -f | egrep '^\w+' | wc -l\n ==========
+# 194
+# ========= 2 =========
+# 2
+# ============================
+not ok 6 test-7-safe-symbolic-links
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 206)
+#   `[ "$(test-7-safe-symbolic-links-actual)" == "$(test-7-safe-symbolic-links-expected)" ]' failed
+# ========== temp_dir=$TMP/test-$$
+#  ==========
+# ========= $ mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# $ cd "$temp_dir"
+# $ pwd
+# /tmp/test-dir-aliases/test-4781 =========
+# $ mkdir -p "/test-71463"
+# # TODO: /bin/rm -rvf "/test-71463"
+# $ cd "/test-71463"
+# $ pwd
+# /tmp/test-dir-aliases/test-4781
+# ============================
+not ok 7 test-8
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 244)
+#   `[ "$(test-8-actual)" == "$(test-8-expected)" ]' failed
+# ========== alias testnum="sed -r "s/[0-9]/N/g""
+#  ==========
+# ========= $ alias testuser="sed -r "s/"$USER"+/userxf333/g"" =========
+# $ alias testuser="sed -r "s/"aveey"+/userxf333/g""
+# ============================
+not ok 8 test-9
+# (from function `test-9-actual' in file batspp-output/testbook-test-dir-aliases.outputpp, line 285,
+#  in test file batspp-output/testbook-test-dir-aliases.outputpp, line 272)
+#   `test-9-actual ' failed with status 127
+# ========== echo $USER | testuser
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 285: testuser: command not found
+not ok 9 test-10
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 312)
+#   `[ "$(test-10-actual)" == "$(test-10-expected)" ]' failed
+# ========== touch file1
+#  ==========
+# ========= $ ln-symbolic file1 link1
+# # 'link1' -> 'file1'
+# # The second case should should fail
+# $ ln-symbolic file1 link1
+# # => "ln: failed to create symbolic link 'link1': File exists?"
+# # Should only be four files total (along with . and ..)
+# $ ls -R | wc -l
+# # => 3
+# 'link1' -> 'file1'
+# ln: failed to create symbolic link 'link1': File exists
+# 3 =========
+# $ ln-symbolic file1 link1
+# # 'link1' -> 'file1'
+# # The second case should should fail
+# $ ln-symbolic file1 link1
+# # => "ln: failed to create symbolic link 'link1': File exists?"
+# # Should only be four files total (along with . and ..)
+# $ ls -R | wc -l
+# # => 3
+# 'link1' -> 'file1'
+# ln: failed to create symbolic link 'link1': File exists
+# 3
+# ============================
+ok 10 test-11
+not ok 11 test-12
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 389)
+#   `[ "$(test-12-actual)" == "$(test-12-expected)" ]' failed
+# ========== ls
+#  ==========
+# adhoc-tests.test
+# alias-calculator-commands.ipynb
+# alias-cd-commands.ipynb
+# alias-grep-commands.ipynb
+# alias-html-test.ipynb
+# alias-proper.test
+# alias-trace-misc-commands.ipynb
+# alt-simple-alias-test.ipynb
+# anaconda.test
+# aviyan-git-log.txt
+# batspp_report.py
+# calc_entropy.input
+# calc_entropy.input2
+# calc_entropy.simple.input
+# calc_entropy.simple.input2
+# calc-entropy-tests.ipynb
+# command-override-cp-mv.ipynb
+# command-vars.text
+# dickenson-the-chariot.txt
+# dictionaries.test
+# dir-aliases-test-revised.ipynb
+# docshtest.rst
+# download-and-test-tomohara-aliases.ipynb
+# dummy-test.ipynb
+# eldar-0.0.7-py3.8.egg
+# empty-test-file.ipynb
+# file-util.test
+# hello-world-basic.ipynb
+# hello-world.ipynb
+# hello-world-revised.batspp
+# hello-world-revised.ipynb
+# hello-world-source.ipynb
+# json-related-alias.batspp
+# json-related-alias.ipynb
+# jupyter_to_batspp.py
+# kcov_result.py
+# macos.test
+# master_test.py
+# merge-notes.test
+# miscellanous.tests
+# more-tomohara-aliases-test.ipynb
+# NOBATSPPsudocommentstest.ipynb
+# NOBATSPPsudo_test_simplebatspp.ipynb
+# not.a.url.html
+# not.a.url.txt
+# perl-script.test
+# README.txt
+# settings.test
+# shell-prompt.test
+# simple-alias-test.ipynb
+# ssh-commands.test
+# stanza1-dickenson-the-chariot.txt
+# summary_stats.bash
+# summary_stats.txt
+# test_bash2python_diff.py
+# test_bash2python.py
+# testbook-test-dir-aliases.ipynb
+# test-check-errors.ipynb
+# test_check_errors.py
+# test-cond-env-setting.ipynb
+# test-dir-alias.batspp
+# test-dir-alias.ipynb
+# test_extract_matches.py
+# test_tom_batspp_report.py
+# test-tomohara-aliases-access.ipynb
+# test_tomohara_aliases.bats
+# test_tpo_count_it.py
+# thresholds.yaml
+# tomasohara-aliases-test.ipynb
+# tom_batspp_report.py
+# tom-idiosyncratic.test
+# tom_kcov_result.py
+# tom_summary_stats.bash
+# tom_test_tomohara_aliases.bats
+# trace-extensionless-shortcut-unicode.ipynb
+# trace-extensionless-shortcut-V2.ipynb
+# trace-file-manipulation.ipynb
+# trace-line-words-commands.ipynb
+# trace-linux-admin-alias.ipynb
+# trace-python-commands.ipynb
+# trace-setup-sorting-wrappers.ipynb
+# trace-unix-alias.ipynb
+# trace-unix-general.ipynb
+# yet-more-tomasohara-aliases.test
+# ========= file1  link1 =========
+# file1  link1
+# ============================
+not ok 12 test-13
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 423)
+#   `[ "$(test-13-actual)" == "$(test-13-expected)" ]' failed
+# ========== ls -l | testnum | testuser | awk '!($6="")'
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 430: testnum: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 430: testuser: command not found
+# ========= total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN =========
+# total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 430: testnum: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 430: testuser: command not found
+not ok 13 test-14
+# (from function `test-14-actual' in file batspp-output/testbook-test-dir-aliases.outputpp, line 466,
+#  in test file batspp-output/testbook-test-dir-aliases.outputpp, line 453)
+#   `test-14-actual ' failed with status 127
+# ========== bash $TEST_BIN/_dir-aliases.bash
+#  ==========
+# bash: /_dir-aliases.bash: No such file or directory
+not ok 14 test-15
+# (from function `test-15-actual' in file batspp-output/testbook-test-dir-aliases.outputpp, line 500,
+#  in test file batspp-output/testbook-test-dir-aliases.outputpp, line 487)
+#   `test-15-actual ' failed with status 127
+# ========== ln-symbolic /tmp temp-link
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 500: ln-symbolic: command not found
+not ok 15 test-16
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 527)
+#   `[ "$(test-16-actual)" == "$(test-16-expected)" ]' failed
+# ========== ls -l | testnum | testuser | awk '!($6="")'
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 534: testnum: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 534: testuser: command not found
+# ========= total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN temp-link -> /tmp =========
+# total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN temp-link -> /tmp
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 534: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 534: testnum: command not found
+not ok 16 test-17
+# (from function `test-17-actual' in file batspp-output/testbook-test-dir-aliases.outputpp, line 571,
+#  in test file batspp-output/testbook-test-dir-aliases.outputpp, line 558)
+#   `test-17-actual ' failed with status 127
+# ========== link-symbolic-safe --force ~/temp temp-link | testuser
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 571: link-symbolic-safe: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 571: testuser: command not found
+not ok 17 test-18
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 598)
+#   `[ "$(test-18-actual)" == "$(test-18-expected)" ]' failed
+# ========== ls -l | testnum | testuser | awk '!($6="")'
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 605: testnum: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 605: testuser: command not found
+# ========= total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# lrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp =========
+# total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# lrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 605: testnum: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 605: testuser: command not found
+ok 18 test-19
+not ok 19 test-20
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 669)
+#   `[ "$(test-20-actual)" == "$(test-20-expected)" ]' failed
+# ========== # $ ln-symbolic /tmp temp-link
+#  ==========
+# ========= # | ln: failed to create symbolic link 'temp-link/tmp': File exists =========
+# # | ln: failed to create symbolic link 'temp-link/tmp': File exists
+# ============================
+not ok 20 test-21
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 702)
+#   `[ "$(test-21-actual)" == "$(test-21-expected)" ]' failed
+# ========== # $ ln-symbolic-force /tmp temp-link
+#  ==========
+# ========= # | ln: temp-link/tmp: cannot overwrite directory =========
+# # | ln: temp-link/tmp: cannot overwrite directory
+# ============================
+not ok 21 test-22
+# (from function `test-22-actual' in file batspp-output/testbook-test-dir-aliases.outputpp, line 742,
+#  in test file batspp-output/testbook-test-dir-aliases.outputpp, line 729)
+#   `test-22-actual ' failed with status 127
+# ========== ln-symbolic-force /tmp1 temp-link
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 742: ln-symbolic-force: command not found
+not ok 22 test-23
+# (from function `test-23-actual' in file batspp-output/testbook-test-dir-aliases.outputpp, line 776,
+#  in test file batspp-output/testbook-test-dir-aliases.outputpp, line 763)
+#   `test-23-actual ' failed with status 127
+# ========== link-symbolic-safe --force ~/temp temp-link | testuser | testnum
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 776: link-symbolic-safe: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 776: testuser: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 776: testnum: command not found
+not ok 23 test-24
+# (in test file batspp-output/testbook-test-dir-aliases.outputpp, line 803)
+#   `[ "$(test-24-actual)" == "$(test-24-expected)" ]' failed
+# ========== ls -l | testnum | testuser | awk '!($6="")'
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 810: testnum: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 810: testuser: command not found
+# ========= total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# lrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp =========
+# total N
+# -rw-rw-r-- N userxf333 userxf333 N  N NN:NN fileN
+# lrwxrwxrwx N userxf333 userxf333 N  N NN:NN linkN -> fileN
+# lrwxrwxrwx N userxf333 userxf333 NN  N NN:NN temp-link -> /home/userxf333/temp
+# ============================
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 810: testnum: command not found
+# /home/aveey/tom-project/shell-scripts/tests/batspp-output/testbook-test-dir-aliases.outputpp: line 810: testuser: command not found

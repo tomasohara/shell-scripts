@@ -1,0 +1,9 @@
+1..2
+ok 1 test-1
+not ok 2 test-3
+# (from function `test-3-actual' in file batspp-only/NOBATSPPsudocommentstest.bats, line 66,
+#  in test file batspp-only/NOBATSPPsudocommentstest.bats, line 53)
+#   `test-3-actual ' failed
+# ========== sudo -S apt search caffeine < ./temp/pass.txt
+#  ==========
+# /home/aveey/tom-project/shell-scripts/tests/batspp-only/NOBATSPPsudocommentstest.bats: line 66: ./temp/pass.txt: No such file or directory
