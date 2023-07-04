@@ -44,14 +44,23 @@ sub log10 {
 }
 
 # round_num(number, [precision=3]): rounds NUMBER to PRECISION places
-# TODO: round
+# NOTE: Use -precision=N or PRECISION=N when invoking script for output rounding.
 #
 sub round_num {
+    &debug_print(&TL_DETAILED, "round_num(@_)\n");
     my($number, $places) = @_;
     $places = $precision if (! defined($places));
-    my($result) = sprintf(".${places}f", $number);
+    &debug_print(&TL_VERBOSE, "n=$number p=$places\n");
+    my($result) = sprintf("%.${places}f", $number);
     return $number;
 }
+#
+## TODO: sub round { &round_num($_[0]); }
+#
+sub round1 { &round_num($_[0], 1); }
+sub round2 { &round_num($_[0], 2); }
+sub round3 { &round_num($_[0], 2); }
+sub round6 { &round_num($_[0], 6); }
 
 # ceil(number): number rounded to nearest integer
 #
