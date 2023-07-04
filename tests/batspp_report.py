@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # SCRIPT_NAME: batspp_report.py
 # DESCRIPTION: Test automation & report generation for ipynb test files (for BatsPP 1.5.X).
@@ -53,6 +53,11 @@ ESSENTIAL_DIRS_present = all(gh.file_exists(dir) for dir in ESSENTIAL_DIRS)
 # (e.g., [Main member] initialization, run-time value, and argument spec., along
 # with string constant definition).
 #
+
+HOME = system.getenv_text("HOME", "~",
+                          "Home directory for user")
+DOCKER_HOME = "/home/shell-scripts"
+UNDER_DOCKER = (HOME == DOCKER_HOME)
 
 TEST_REGEX = system.getenv_value("TEST_REGEX", None,
                                  "Regex for tests to include; ex: 'c.*' for debugging")
@@ -109,7 +114,7 @@ def main():
     TXT_OPTION = main_app.get_parsed_option(TEXT_REPORTS_ARG)
     KCOV_OPTION = main_app.get_parsed_option(KCOV_REPORTS_ARG)
     ALL_OPTION = main_app.get_parsed_option(ALL_REPORTS_ARG)
-    FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG)
+    FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_DOCKER))
     CLEAN_OPTION = main_app.get_parsed_option(CLEAN_ARG)
     BATSPP_SWITCH_OPTION = main_app.get_parsed_option(BATSPP_SWITCH_ARG)
     USE_SIMPLE_BATSPP = (not BATSPP_SWITCH_OPTION)
@@ -119,7 +124,7 @@ def main():
     is_admin = my_re.search(r"root|admin|adm", gh.run("groups"))
     if is_admin:
         if not FORCE_OPTION:
-            msy.exit("Error: running under admin account requires --force option")
+            msy.exit("Error: running under admin account requires --force option, unless under docker shell-scripts-dev image")
         msy.print_stderr("FYI: not recommended to run under admin account")
 
     # Cleanup up previous rusn
