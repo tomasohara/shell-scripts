@@ -87,6 +87,6 @@ RUN apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Run the test, normally pytest over mezcla/tests
+# Run the test, normally pytest over ./tests
 # Note: the status code (i.e., $?) determines whether docker run succeeds (e.h., OK if 0)
 ENTRYPOINT './tests/run_tests.bash'
