@@ -10,7 +10,7 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name:Build and Run; Tests
+    name: Build and Run Tests
     runs-on: ${{ matrix.os }}
     
     strategy:
@@ -44,6 +44,6 @@ jobs:
       ##   run: |
       ##     bash ./tests/summary_stats.bash
 
-    - name: Run tests
-      run: |
-        docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+      - name: Run tests
+        run: |
+          docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
