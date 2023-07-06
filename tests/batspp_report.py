@@ -14,7 +14,7 @@
 ## TODO: import json
 
 # Installed modules
-## TODO: import batspp
+import yaml
 
 # Local modules
 from mezcla import debug
@@ -37,15 +37,23 @@ TXT = ".txt"
 NOBATSPP = "NOBATSPP"
 OUTPUTPP = ".outputpp"
 
-BATSPP_STORE = "batspp-only"
-BATS_STORE = "bats-only"
+OUTPUT_DIR = system.getenv_text("OUTPUT_DIR", ".",
+                                "Directory for output files such as .batspp test specs")
+
+BATSPP_STORE = gh.form_path(OUTPUT_DIR, "batspp-only")
+BATS_STORE = gh.form_path(OUTPUT_DIR, "bats-only")
 BATS_STORE = BATSPP_STORE
-TXT_STORE = "txt-reports"
-KCOV_STORE = "kcov-output"
-BATSPP_OUTPUT_STORE = "batspp-output"
+TXT_STORE = gh.form_path(OUTPUT_DIR, "txt-reports")
+KCOV_STORE = gh.form_path(OUTPUT_DIR, "kcov-output")
+BATSPP_OUTPUT_STORE = gh.form_path(OUTPUT_DIR, "batspp-output")
 
 ESSENTIAL_DIRS = [BATSPP_STORE, BATS_STORE, KCOV_STORE, TXT_STORE, BATSPP_OUTPUT_STORE]
+## TODO:
+## ESSENTIAL_DIRS = map(gh.form_path(TMP, filename)
+##                      for filename in [BATSPP_STORE, BATS_STORE, KCOV_STORE, TXT_STORE, BATSPP_OUTPUT_STORE])
 ESSENTIAL_DIRS_present = all(gh.file_exists(dir) for dir in ESSENTIAL_DIRS)
+THRESHOLDS_FILE = "thresholds.yaml"
+DEFAULT_MIN_SCORE = 50
 
 # Environment options
 # Note: These are just intended for internal options, not for end users.
@@ -63,10 +71,21 @@ TEST_REGEX = system.getenv_value("TEST_REGEX", None,
                                  "Regex for tests to include; ex: 'c.*' for debugging")
 SINGLE_STORE = system.getenv_bool("SINGLE_STORE", False,
                                   f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
-## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in save place as .bats)
+## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
 if SINGLE_STORE:
     BATSPP_STORE = BATS_STORE = TXT_STORE = BATSPP_OUTPUT_STORE
-    debug.trace(3, f"FYI: Using single store for text-based output files, etc.")
+    debug.trace(3, f"FYI: Using single store for text-based output files, etc.: {BATSPP_STORE}")
+
+#-------------------------------------------------------------------------------
+
+def load_thresholds(filename):
+    """Load test failure thresholds from a YAML file."""
+    # TODO: put in utility module
+    result = {}
+    with open(filename, "r", encoding="utf-8") as yamlfile:
+        result = yaml.safe_load(yamlfile)
+    debug.trace(5, f"load_thresholds({filename}) => {result}")
+    return result
 
 #-------------------------------------------------------------------------------
 # NOTE: *** This function is too monolithinc: it should be structured like kcov_result.py ***
@@ -76,7 +95,7 @@ if SINGLE_STORE:
 
 def main():
     """Entry point"""
-    files = msy.read_directory("./")
+    files = msy.read_directory(".")
 
     # 0.1) CHECKING IF THE DIRECTORY EXISTS
     if not ESSENTIAL_DIRS_present:
@@ -97,8 +116,8 @@ def main():
         description=__doc__.format(script=gh.basename(__file__)).strip("\n"),
         boolean_options=[
             (NO_REPORTS_ARG, "No reports are generated, testfiles are shown"),
-            (KCOV_REPORTS_ARG, f"KCOV (HTML based) reports generated, stored at ./{KCOV_STORE}"),
-            (TEXT_REPORTS_ARG, f"Textfile based reports generated, stored at ./{TXT_STORE}"),
+            (KCOV_REPORTS_ARG, f"KCOV (HTML based) reports generated, stored at {KCOV_STORE}"),
+            (TEXT_REPORTS_ARG, f"Textfile based reports generated, stored at {TXT_STORE}"),
             (ALL_REPORTS_ARG, "Generates report for all available testfiles (NOBATSPP testfiles were ignored by default)"),
             (FORCE_ARG, "Force running under admin-like account"),
             (CLEAN_ARG, "Remove output from previous runs; *** warning: this removes entire subdirectories"),
@@ -114,7 +133,7 @@ def main():
     TXT_OPTION = main_app.get_parsed_option(TEXT_REPORTS_ARG)
     KCOV_OPTION = main_app.get_parsed_option(KCOV_REPORTS_ARG)
     ALL_OPTION = main_app.get_parsed_option(ALL_REPORTS_ARG)
-    FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_DOCKER))
+    FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_DOCKER)
     CLEAN_OPTION = main_app.get_parsed_option(CLEAN_ARG)
     BATSPP_SWITCH_OPTION = main_app.get_parsed_option(BATSPP_SWITCH_ARG)
     USE_SIMPLE_BATSPP = (not BATSPP_SWITCH_OPTION)
@@ -132,14 +151,14 @@ def main():
     # it should only be done in temporary directories (i.e., not under
     if CLEAN_OPTION:
         if not NO_OPTION:
-            gh.run(f"rm -rf ./{BATSPP_STORE}/*")
-            gh.run(f"rm -rf ./{BATS_STORE}/*")
+            gh.run(f"rm -rf {BATSPP_STORE}/*")
+            gh.run(f"rm -rf {BATS_STORE}/*")
         
         if not KCOV_OPTION:
-            gh.run(f"rm -rf ./{KCOV_STORE}/*")
+            gh.run(f"rm -rf {KCOV_STORE}/*")
     
         if not TXT_OPTION:
-            gh.run(f"rm -rf ./{TXT_STORE}/*")
+            gh.run(f"rm -rf {TXT_STORE}/*")
 
     def run_batspp(input_file, output_file):
         """Run BatsPP over INPUT_FILE to produce OUTPUT_FILE"""
@@ -149,9 +168,9 @@ def main():
         log_file = output_file + ".log"
         debug.trace(5, f"run_batspp{(input_file, output_file)}")
         if USE_SIMPLE_BATSPP:
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 COPY_DIR=1 ../simple_batspp.py {input_file} --output ./{output_file} > ./{real_output_file} 2> ./{log_file}")
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 COPY_DIR=1 ../simple_batspp.py {input_file} --output {output_file} > {real_output_file} 2> {log_file}")
         else:
-            run_output = gh.run(f"batspp {input_file} --save ./{output_file} 2> ./{log_file}")
+            run_output = gh.run(f"batspp {input_file} --save {output_file} 2> {log_file}")
         debug.assertion(not run_output.strip())
         real_output = system.read_file(real_output_file)
         debug.trace(6, f"run_batspp() => {real_output!r}")
@@ -161,7 +180,15 @@ def main():
     ## # 0.9) Making sure input files, etc. accessible in bats directory
     ## # TODO2: use directory for (e.g., ./resources)
     ## debug.trace(4, "Copying over potential input files into bats directory")
-    ## gh.run(f"cp -vf *.html *.input* *.yaml *.list *.rst *.txt *.text ./{BATS_STORE}/")
+    ## gh.run(f"cp -vf *.html *.input* *.yaml *.list *.rst *.txt *.text {BATS_STORE}/")
+
+    # Other initialization
+
+    if system.file_exists(THRESHOLDS_FILE):
+        thresholds = load_thresholds(THRESHOLDS_FILE)
+        missing_test_files = [f for f in thresholds.keys() if not system.file_exists(f)]
+        debug.assertion(not missing_test_files,
+                        f"Extranoes file(s) in {THRESHOLDS_FILE}: {missing_test_files}")
     
     # 1) Identifying .ipynb files
     i = 1
@@ -176,7 +203,7 @@ def main():
     for file in files:
         is_ipynb = file.endswith(IPYNB)
         if is_ipynb:
-            if TEST_REGEX and not my_re.match(fr"^{TEST_REGEX}$", file):
+            if TEST_REGEX and not my_re.match(fr"{TEST_REGEX}", file):
                 debug.trace(3, f"Ignoring {file}")
                 continue
             if not ALL_OPTION and NOBATSPP in file:
@@ -198,13 +225,16 @@ def main():
     for testfile in ipynb_array:
         is_ipynb = testfile.endswith(IPYNB)
         if is_ipynb:
-            batspp_from_ipynb = testfile.replace(IPYNB, BATSPP)
+            ## OLD: batspp_from_ipynb = testfile.replace(IPYNB, BATSPP)
+            batspp_from_ipynb = gh.form_path(BATSPP_STORE,
+                                             gh.basename(testfile.replace(IPYNB, BATSPP)))
             print(f"IPYNB TESTFILE [{i}]: {testfile} => {batspp_from_ipynb}")
-            gh.run(f"./jupyter_to_batspp.py {testfile} --output ./{BATSPP_STORE}/{batspp_from_ipynb}")
+            gh.run(f"./jupyter_to_batspp.py {testfile} --output {batspp_from_ipynb}")
             batspp_array.append(batspp_from_ipynb)
             i += 1
-
     ipynb_count = i - 1
+    debug.trace_expr(5, ipynb_count, batspp_array)
+    debug.assertion(ipynb_count == len(batspp_array))
 
     # 3) Executing batspp files & storing them as bats
     print(f"\n\n==========BATS GENERATED==========\n")
@@ -213,13 +243,15 @@ def main():
     if NO_OPTION:
         print(f">> SKIPPING BATSPP CHECK (-n ARGUMENT PROVIDED)\n")
     else:
-        for batsppfile in batspp_array:
-            
+        for batsppfile_path in batspp_array:
+            batsppfile = gh.basename(batsppfile_path)
+            ipynb_from_batspp = batsppfile.replace(BATSPP, IPYNB)
             bats_from_batspp = batsppfile.replace(BATSPP, BATS)
             output_from_batspp = batsppfile.replace(BATSPP, OUTPUTPP)
             txt_from_batspp = batsppfile.replace(BATSPP, TXT)
             test_extensionless = gh.remove_extension(batsppfile, BATSPP)
             is_batspp = batsppfile.endswith(BATSPP)
+            debug.trace_expr(4, batsppfile, ipynb_from_batspp)
             
             if not is_batspp:
                 debug.trace(4, f"Ignoring non-batspp file {batsppfile}")
@@ -228,9 +260,8 @@ def main():
             i += 1
 
             if TXT_OPTION:
-                bats_output = run_batspp(f"./{BATSPP_STORE}/{batsppfile}", f"./{BATSPP_OUTPUT_STORE}/{output_from_batspp}")
+                bats_output = run_batspp(batsppfile_path, f"{BATSPP_OUTPUT_STORE}/{output_from_batspp}")
                 
-                ## OLD: output_lines = gh.read_lines(f"./{BATSPP_OUTPUT_STORE}/{output_from_batspp}")
                 output_lines = bats_output.splitlines()
                 output_lines_filtered = [item for item in output_lines if not item.startswith("#")]
                 debug.trace_expr(5, output_lines_filtered)
@@ -240,20 +271,21 @@ def main():
                     debug.assertion(my_re.search(r"^1\.\.\d+", header_line))
                 debug.assertion(len(output_lines_filtered))
                 
-                ## BAD: count_total = len(output_lines_filtered)
                 count_ok = len([item for item in output_lines_filtered if item.startswith("ok")])
                 count_bad = len([item for item in output_lines_filtered if item.startswith("not ok")])
                 count_total = (count_ok + count_bad)
                 count_success_rate = (round((count_ok / count_total)*100, 2) if count_total else 0)
-                count_success_rate_bool = (count_success_rate >= 50)
-                debug.trace_expr(4, count_ok, count_bad, count_total, count_success_rate, count_success_rate_bool)
+                min_score = system.to_float(thresholds.get(ipynb_from_batspp, DEFAULT_MIN_SCORE))
+                count_success_rate_bool = (count_success_rate >= min_score)
+                debug.trace_expr(4, min_score, count_ok, count_bad, count_total, count_success_rate, count_success_rate_bool)
                 SUMMARY_TEXT = f"{count_ok} out of {count_total} successful ({count_success_rate}%)\nSuccess: {count_success_rate_bool}"
-                gh.write_file(f"./{TXT_STORE}/{txt_from_batspp}", SUMMARY_TEXT)
+                gh.write_file(f"{TXT_STORE}/{txt_from_batspp}", SUMMARY_TEXT)
                 print(f"{test_extensionless}: {SUMMARY_TEXT}")
 
                 # Categorizing Tests if they are successful or not
                 txt_option_JSON = {}
                 txt_option_JSON["test_name"] = test_extensionless
+                txt_option_JSON["test_min_score"] = min_score
                 txt_option_JSON["test_success_rate"] = count_success_rate
                 if count_success_rate_bool:
                     success_test_array.append(txt_option_JSON)
@@ -261,13 +293,13 @@ def main():
                     failure_test_array.append(txt_option_JSON)
 
             else:
-                run_batspp(f"./{BATSPP_STORE}/{batsppfile}", f"./{BATS_STORE}/{bats_from_batspp}")
-                gh.run(f"kcov ./{KCOV_STORE}/{test_extensionless} bats ./{BATS_STORE}/{bats_from_batspp}")
+                run_batspp(batsppfile_path, f"{BATS_STORE}/{bats_from_batspp}")
+                gh.run(f"kcov {KCOV_STORE}/{test_extensionless} bats {BATS_STORE}/{bats_from_batspp}")
                     
                 if KCOV_OPTION:
-                    KCOV_MESSAGE = f"KCOV REPORT PATH: ./{KCOV_STORE}/{test_extensionless}/"
+                    KCOV_MESSAGE = f"KCOV REPORT PATH: {KCOV_STORE}/{test_extensionless}/"
                     print(gh.indent(KCOV_MESSAGE, indentation="  >>  ", max_width=512))
-                    gh.run(f"kcov ./{KCOV_STORE}/{test_extensionless} bats ./{BATS_STORE}/{bats_from_batspp}")
+                    gh.run(f"kcov {KCOV_STORE}/{test_extensionless} bats {BATS_STORE}/{bats_from_batspp}")
 
         batspp_count = i - 1 
 
@@ -312,13 +344,18 @@ def main():
 
     if TXT_OPTION:
         print("\nTEST SUCCESS (--txt ENABLED):")
-        print("No. of Successful Tests (>= 50%):", len(success_test_array))
-        print("No. of Failure Tests (< 50%):", len(failure_test_array))
+        print(f"No. of Successful Tests:", len(success_test_array))
+        print(f"No. of Failure Tests:", len(failure_test_array))
 
         def print_test_array(arr):
             """Print summary of test results in ARR"""
             for index, item in enumerate(arr):
-                print(f"{index + 1}. {item['test_name']} ({item['test_success_rate']}%)")
+                name = item['test_name']
+                rate = item['test_success_rate']
+                min_score = item['test_min_score']
+                print(f"{index + 1}. {name} ({rate}%): threshold={min_score}%")
+            if not arr:
+                print("n/a")
 
         print("\nSuccessful Tests:\n---------------------")
         print_test_array(sucess_test_array_SORT)
@@ -327,6 +364,10 @@ def main():
         
     print(f"======================================================")
 
+    # Return number of failed tests as statues (i.e., OK if 0 failed)
+    code = len(failure_test_array)
+    system.exit(status_code=code)
+    
 # -------------------------------------------------------------------------------
 
 if __name__ == '__main__':
