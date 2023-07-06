@@ -172,6 +172,13 @@ function get-host-nickname {
 function create-zip {
     local dir="$1"
     shift
+    if [ "$dir" = "" ]; then
+	echo "Usage create-zip [dirname]"
+	echo "ex: create-zip /mnt/resmed"
+	## echo "Usage: $BASH_SOURCE[0] [dirname]"
+	## echo "ex: $BASH_SOURCE[0] /mnt/resmed"
+	return
+    fi
     local archive
     archive="$TEMP/$(basename "$dir").zip"
     echo "issuing: zip -r -u \"$archive\" \"$dir\""
@@ -203,3 +210,4 @@ alias-fn screen-reattach 'screen -d -RR'
 # Idiosyncratic stuff (n.b., doubly so given "tomohara-proper" part of filename)
 alias all-tomohara-settings='tomohara-aliases; tomohara-settings; more-tomohara-aliases; tomohara-proper-aliases'
 alias kill-kdiff3='kill-it kdiff3'
+alias kill-firefox='kill-it firefox'
