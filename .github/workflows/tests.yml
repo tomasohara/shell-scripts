@@ -13,7 +13,7 @@
 #   https://docs.docker.com/storage/bind-mounts
 #
 
-name: tests
+name: Alt-Tests
 
 on: [push, pull_request]
 
