@@ -3,7 +3,7 @@
 # More information on:
 # - https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
 
-name: tests
+name: pipreqs-tests
 
 # Trigger the workflow on push and pull request events
 on: [push, pull_request]
