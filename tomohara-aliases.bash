@@ -2716,7 +2716,6 @@ if [[ ! "$PATH" =~ mezcla ]]; then
     true
 fi
 #
-## OLD: alias ps-python-full='ps-all python'
 alias ps-python-full='ps-mine python'
 # note: excludes ipython and known system-related python scripts;
 # also excludes related bash and time processes.
