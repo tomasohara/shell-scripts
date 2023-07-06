@@ -25,3 +25,18 @@ $ (pwd-host-info) 2>&1 | wc -l
 
 $ (pwd-host-info) 2>&1 | grep -c '^ *$'
 0
+
+#-------------------------------------------------------------------------------
+# python aliases
+
+# TODO: fix problem with resolving mezcla path
+# $ python-import-path mezcla
+## matches /usr/local/misc/programs/python/mezcla-tom-clone/mezcla/sys_version_info_hack.py
+# => /usr/local/misc/programs/python/mezcla-tom-clone/mezcla/__init__.py
+
+
+#...............................................................................
+
+# TODO: resolve problem w/ rename-with-file-date with spaces
+# $ rename-with-file-date 'Scrappy Web Search.html'
+# mv: target 'Search.html.04Jul23' is not a directory
