@@ -2,6 +2,7 @@
 #
 # Notes:
 # - Based on tests.yml from Python mezcla package.
+# - It runs with detailed debugging (i.e., DEBUG_LEVEL=5).
 # - Requires special permission for Github workflows.
 # - For more information see following:
 #     https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
@@ -13,7 +14,7 @@
 #   https://docs.docker.com/storage/bind-mounts
 #
 
-name: Alt-Tests
+name: debug-Tests
 
 on: [push, pull_request]
 
@@ -27,6 +28,12 @@ jobs:
       run: |
         docker build -t shell-scripts-dev -f- . <Dockerfile
 
+    ## TEST
+    - name: Configure Environment
+      run: |
+        echo "PATH=$PATH" >> $GITHUB_ENV
+        echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> $GITHUB_ENV
+
     - name: Run tests
       run: |
-        docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+        docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
