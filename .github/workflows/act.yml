@@ -35,6 +35,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
+      - name: Build docker image
+        run: |
+          docker build -t shell-scripts-dev -f- . <Dockerfile
+
       - name: Configure Environment
         run: |
           echo "PATH=$PATH" >> $GITHUB_ENV
