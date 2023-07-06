@@ -44,10 +44,13 @@ if [ "${AUTO_REQS:-0}" = "1" ]; then
 fi
 
 # Build the Docker image
-echo "Building Docker image: $IMAGE_NAME"
-## OLD: docker build --platform linux/x86_64 -t "$IMAGE_NAME" .
-docker build --platform linux/x86_64 --tag "$IMAGE_NAME" .
+if [ "${RUN_BUILD:-1}" = "1" ]; then
+    echo "Building Docker image: $IMAGE_NAME"
+    docker build --platform linux/x86_64 --tag "$IMAGE_NAME" .
+fi
 
 # Run the Github Actions workflow locally
-echo "Running Github Actions locally"
-act --container-architecture linux/amd64 --pull="$ACT_PULL" -P "$ACT_WORKFLOW" -W ./.github/workflows/act.yml
+if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
+    echo "Running Github Actions locally"
+    act --container-architecture linux/amd64 --pull="$ACT_PULL" -P "$ACT_WORKFLOW" -W ./.github/workflows/act.yml
+fi
