@@ -231,7 +231,7 @@ def main():
             batspp_from_ipynb = gh.form_path(BATSPP_STORE,
                                              gh.basename(testfile.replace(IPYNB, BATSPP)))
             print(f"IPYNB TESTFILE [{i}]: {testfile} => {batspp_from_ipynb}")
-            gh.run(f"./jupyter_to_batspp.py {testfile} --output {batspp_from_ipynb}")
+            gh.run(f"python3 /jupyter_to_batspp.py {testfile} --output {batspp_from_ipynb}")
             batspp_array.append(batspp_from_ipynb)
             i += 1
     ipynb_count = i - 1
