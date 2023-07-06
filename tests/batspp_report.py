@@ -65,7 +65,7 @@ DEFAULT_MIN_SCORE = 50
 HOME = system.getenv_text("HOME", "~",
                           "Home directory for user")
 DOCKER_HOME = "/home/shell-scripts"
-UNDER_DOCKER = (HOME == DOCKER_HOME)
+UNDER_DOCKER = ((HOME == DOCKER_HOME) or system.file_exists(DOCKER_HOME))
 
 TEST_REGEX = system.getenv_value("TEST_REGEX", None,
                                  "Regex for tests to include; ex: 'c.*' for debugging")
@@ -168,7 +168,9 @@ def main():
         log_file = output_file + ".log"
         debug.trace(5, f"run_batspp{(input_file, output_file)}")
         if USE_SIMPLE_BATSPP:
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 COPY_DIR=1 ../simple_batspp.py {input_file} --output {output_file} > {real_output_file} 2> {log_file}")
+            # note: adds sentinels around paragraph segments for simpler parsing;
+            # also uses Bash instead of Bats and copies ./tests files into bats test dir (under temp)
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 ../simple_batspp.py {input_file} --output {output_file} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} 2> {log_file}")
         debug.assertion(not run_output.strip())
