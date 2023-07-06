@@ -6,28 +6,19 @@
 
 name: Act-Tests
 
-## OLD [WTF? This is supposed to be local testing!]
-## on:
-##   push:
-##     branches:
-##       - main
-##   pull_request:
-##     branches:
-##       - main
-
 on: [push, pull_request]
 
 jobs:
   build:
-    name: Run Tests
+    name:Build and Run; Tests
     runs-on: ${{ matrix.os }}
+    
     strategy:
       matrix:
         os: [ubuntu-latest]
         python-version: ["3.9"]
 
     container:
-      ## OLD: image: local/test-act
       image: shell-scripts-dev
       options: --user=root
 
@@ -44,10 +35,15 @@ jobs:
           echo "PATH=$PATH" >> $GITHUB_ENV
           echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> $GITHUB_ENV
 
-      - name: Run Python Tests
-        run: |
-          PYTHONPATH="$(pwd):$PYTHONPATH" python3 tests/master_test.py
+      ## OLD
+      ## - name: Run Python Tests
+      ##   run: |
+      ##     python3 ./tests/master_test.py
+      ##
+      ## - name: Run Alias Tests
+      ##   run: |
+      ##     bash ./tests/summary_stats.bash
 
-      - name: Run Bats-PP Alias Tests
-        run: |
-          PYTHONPATH="$(pwd):$PYTHONPATH" bash tests/summary_stats.bash
+    - name: Run tests
+      run: |
+        docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
