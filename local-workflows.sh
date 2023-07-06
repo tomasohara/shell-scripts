@@ -51,6 +51,9 @@ fi
 
 # Run the Github Actions workflow locally
 if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
+    file="${WORKFLOW_FILE:-act.yml}"
+    ## TEST (Pass along debug level in evvironment)
+    DEBUG_LEVEL="${DEBUG_LEVEL:-2}"
     echo "Running Github Actions locally"
-    act --container-architecture linux/amd64 --pull="$ACT_PULL" -P "$ACT_WORKFLOW" -W ./.github/workflows/act.yml
+    act --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" -P "$ACT_WORKFLOW" -W ./.github/workflows/"$file"
 fi
