@@ -91,7 +91,8 @@ function trace-vars {
 	## echo -n "$var="$(eval echo "\$$var")"; "
 	## TODO: value="$(eval "echo \$$var")"
 	value="$(set | grep "^$var=")"
-	echo -n "$var=$value; "
+	## BAD: echo -n "$var=$value; "
+	echo -n "$value; "
     done
     echo
     ##
