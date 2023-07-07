@@ -170,10 +170,10 @@ def main():
         if USE_SIMPLE_BATSPP:
             # note: adds sentinels around paragraph segments for simpler parsing;
             # also uses Bash instead of Bats and copies ./tests files into bats test dir (under temp)
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 python3 ../simple_batspp.py {input_file} --output {output_file} > {real_output_file} 2> {log_file}")
-            debug.code(4, lambda: gh.run(f"check_errors.perl {log_file}"))
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 FORCE={FORCE_OPTION} python3 ../simple_batspp.py {input_file} --output {output_file} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} 2> {log_file}")
+        debug.code(4, lambda: gh.run(f"check_errors.perl {log_file}"))
         debug.assertion(not run_output.strip())
         real_output = system.read_file(real_output_file)
         debug.trace(6, f"run_batspp() => {real_output!r}")
@@ -234,7 +234,8 @@ def main():
             print(f"IPYNB TESTFILE [{i}]: {testfile} => {batspp_from_ipynb}")
             log_file = f"{batspp_from_ipynb}.log"
             gh.run(f"python3 jupyter_to_batspp.py {testfile} --output {batspp_from_ipynb}")
-            debug.code(4, lambda: gh.run(f"check_errors.perl {log_file}"))
+            # note: uses call to avoid issue with lambda function argument binding
+            debug.call(4, gh.run, f"check_errors.perl {log_file}", **{"output": True})
             batspp_array.append(batspp_from_ipynb)
             i += 1
     ipynb_count = i - 1
