@@ -13,6 +13,9 @@
 #   https://docs.docker.com/engine/reference/commandline/cli/
 #   https://docs.docker.com/storage/bind-mounts
 #
+# Warning:
+# - *** Changes need to be synchronized in 3 places: Dockerfile, local-workflow.sh, and .github/workflow/*.yml!
+#
 
 name: debug-Tests
 
@@ -20,7 +23,9 @@ on: [push, pull_request]
 
 jobs:
   build:
+    ## TODO: ubuntu-20.04 (or ubuntu:act-20.04)
     runs-on: ubuntu-latest
+    
     steps:
     - uses: actions/checkout@v3
 
@@ -36,4 +41,6 @@ jobs:
 
     - name: Run tests
       run: |
+        ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+        ## TODO???: put repo under /mnt/local-shell-scripts and installed version under /home/shell-scripts
         docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
