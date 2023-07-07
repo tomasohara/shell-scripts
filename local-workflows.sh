@@ -1,12 +1,39 @@
 #!/bin/bash
-
+#
 # This script clones a GitHub repository, generates a pip requirements file,
 # builds a Docker image, and runs a Github Actions workflow locally.
 #
 # Note:
 # - When running under a Mac M1 the architecture needs to be specified to x64_64 (amd).
 #   This is a no-op otherwise (e.g., under Linux) as x64_64 is used by defauly.
+# - Selective shellcheck whitelisting:
+#   SC2086: Double quote to prevent globbing and word splitting
 #
+# Warning:
+# - *** Changes need to be synchronized in 3 places: Dockerfile, local-workflow.sh, and .github/workflow/*.yml!
+#
+
+
+# Variables
+## DEBUG: set -o xtrace
+REPO_URL="https://github.com/tomasohara/shell-scripts.git"
+REPO_DIR_NAME="shell-scripts"
+## OLD: IMAGE_NAME="local/test-act:latest"
+IMAGE_NAME="${REPO_DIR_NAME}-dev"
+## OLD: ACT_WORKFLOW="ubuntu-latest=local/test-act"
+ACT_WORKFLOW="ubuntu:act-20.04"
+ACT_PULL="false"
+LOCAL_REPO_DIR="$PWD"
+DEBUG_LEVEL="${DEBUG_LEVEL:-2}"
+GIT_BRANCH=${GIT_BRANCH:-""}
+BUILD_OPTS=${BUILD_OPTS:-}
+RUN_OPTS=${RUN_OPTS:-}
+# TODO3: put all up here fore clarity
+#  CLONE_REPO, AUTO_REQS, RUN_BUILD, BUILD_OPTS, RUN_WORKFLOW, RUN_OPTS, WORKFLOW_FILE
+if [ "$DEBUG_LEVEL" -gt 4 ]; then
+    source "${TOM_BIN:-/home/tomohara/bin}/all-tomohara-aliases-etc.bash"
+    trace-vars IMAGE_NAME LOCAL_REPO_DIR DEBUG_LEVEL GIT_BRANCH BUILD_OPTS
+fi
 
 # Set bash regular and/or verbose tracing
 if [ "${TRACE:-0}" = "1" ]; then
@@ -15,15 +42,6 @@ fi
 if [ "${VERBOSE:-0}" = "1" ]; then
     set -o verbose
 fi
-
-# Variables
-REPO_URL="https://github.com/tomasohara/shell-scripts.git"
-REPO_DIR_NAME="shell-scripts"
-## OLD: IMAGE_NAME="local/test-act:latest"
-IMAGE_NAME="${REPO_DIR_NAME}-dev"
-ACT_WORKFLOW="ubuntu-latest=local/test-act"
-ACT_PULL="false"
-LOCAL_REPO_DIR="$PWD"
 
 # Optionally clone the GitHub repository into temp. dir
 # note: normally skipped as local workflows intended for testing before checkin
@@ -46,14 +64,19 @@ fi
 # Build the Docker image
 if [ "${RUN_BUILD:-1}" = "1" ]; then
     echo "Building Docker image: $IMAGE_NAME"
-    docker build --platform linux/x86_64 --tag "$IMAGE_NAME" .
+    # note: maldito docker doesn't support --env for build, just run
+    # Also, --build-arg misleading: see
+    #    https://stackoverflow.com/questions/42297387/docker-build-with-build-arg-with-multiple-arguments
+    ## TODO: docker build --build-arg "DEBUG_LEVEL=$DEBUG_LEVEL" --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 --tag "$IMAGE_NAME" .
+    # shellcheck disable=SC2086
+    docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --tag "$IMAGE_NAME" .
 fi
 
 # Run the Github Actions workflow locally
 if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
     file="${WORKFLOW_FILE:-act.yml}"
     ## TEST (Pass along debug level in evvironment)
-    DEBUG_LEVEL="${DEBUG_LEVEL:-2}"
     echo "Running Github Actions locally"
-    act --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" -P "$ACT_WORKFLOW" -W ./.github/workflows/"$file"
+    # shellcheck disable=SC2086
+    act --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" -platform "$ACT_WORKFLOW" --workflows ./.github/workflows/"$file" $RUN_OPTS
 fi
