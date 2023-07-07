@@ -34,6 +34,12 @@ $ (pwd-host-info) 2>&1 | grep -c '^ *$'
 ## matches /usr/local/misc/programs/python/mezcla-tom-clone/mezcla/sys_version_info_hack.py
 # => /usr/local/misc/programs/python/mezcla-tom-clone/mezcla/__init__.py
 
+#--------------------------------------------------------------------------------
+# misc aliases
+
+$ x=123; y=321
+$ trace-vars x y
+x=123; y=321; 
 
 #...............................................................................
 
