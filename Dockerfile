@@ -9,16 +9,35 @@
 #   NOTE: --rm removes container afterwards; -it is for --interactive with --tty
 #   TODO: --mount => --volume???
 # 3. [Optional] Run a bash shell using the created image:
+#   ## TODO ??? put repo under /mnt/shell-scripts and installed version under /home/shell-scripts
 #   $ docker run -it --rm --entrypoint='/bin/bash' --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
 # 4. Remove the image:
 #   $ docker rmi shell-scripts-dev
+#
+# Note:
+# - Environment overrides not supported dir build, so arg's must be used instead. See
+#       https://vsupalov.com/docker-arg-env-variable-guide/#overriding-env-values
+#
+# Warning:
+# - *** Changes need to be synchronized in 3 places: Dockerfile, local-workflow.sh, and .github/workflow/*.yml!
+#
+# TODO:
+# - for interactive use: emacs, less, etc.
 #
 
 
 # Use the GitHub Actions runner image with Ubuntu
 ## OLD: FROM ghcr.io/catthehacker/ubuntu:act-latest
 ## NOTE: Uses older 20.04 both for stability and for convenience in pre-installed Python downloads (see below).
+# See https://github.com/catthehacker/docker_images
 FROM catthehacker/ubuntu:act-20.04
+
+# Set default debug level (n.b., use docker build --build-arg "arg1=v1" to override)
+ARG DEBUG_LEVEL=2
+## TODO: ARG GIT_BRANCH=""
+## HACK: use tom-dev due to stupid problems with act/docker
+ARG GIT_BRANCH="tom-dev"
+RUN echo "DEBUG_LEVEL=$DEBUG_LEVEL; GIT_BRANCH=$GIT_BRANCH"
 
 # Set the working directory
 ## OLD: WORKDIR /app
@@ -28,7 +47,14 @@ WORKDIR $WORKDIR
 # Install necessary dependencies and tools
 RUN apt-get update && \
     apt-get install -y --no-install-recommends wget tar ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
+    true
+    ## TODO: rm -rf /var/lib/apt/lists/*
+    
+
+# Install other stuff
+# note: this is to support logging into the images for debugging issues
+RUN apt-get update && \
+    apt-get install --yes emacs, kdiff3, less tcsh, zip || true;
 
 # Set the Python version to install
 ## TODO: keep in sync with .github/workflows
@@ -68,12 +94,13 @@ RUN wget -qO /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz \
     echo TODO: rm /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz
 
 # Set environment variables to use the installed Python version as the default
-ENV PATH="/opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64/bin:${PATH}"
+ENV PATH="/opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64/bin:$WORKDIR:$WORKDIR/tests:${PATH}"
 
 # Install pip for the specified Python version
 RUN wget -qO /tmp/get-pip.py "https://bootstrap.pypa.io/get-pip.py" && \
     python3 /tmp/get-pip.py && \
-    rm /tmp/get-pip.py
+    true
+    ## TODO: rm /tmp/get-pip.py
 
 # Copy the project's requirements file to the container
 ARG REQUIREMENTS=$WORKDIR/requirements.txt
@@ -82,10 +109,15 @@ COPY requirements.txt $REQUIREMENTS
 # Install the project's dependencies
 RUN pip install --no-cache-dir -r $REQUIREMENTS
 
+# Add local version of mezcla if debugging
+# ex: DEBUG_LEVEL=4 GIT_BRANCH=aviyan-dev local-workflows.sh
+RUN if [ "$GIT_BRANCH" != "" ]; then echo "Installing mezcla@$GIT_BRANCH"; pip install --no-cache-dir git+https://github.com/tomasohara/mezcla@$GIT_BRANCH; fi
+
 # Clean up unnecessary files
 RUN apt-get autoremove -y && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    true
+    ## TODO: rm -rf /var/lib/apt/lists/*
 
 # Run the test, normally pytest over ./tests
 # Note: the status code (i.e., $?) determines whether docker run succeeds (e.h., OK if 0)
