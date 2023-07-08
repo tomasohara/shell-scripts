@@ -2,7 +2,7 @@
 #
 # Usage:
 # 1. Build the image:
-#   $ docker build --tag shell-scripts-dev -f- . <Dockerfile
+#   $ docker build --tag name:shell-scripts-dev -f- . <Dockerfile
 #   # TODO: build --platform linux/x86_64 ...; what the hell is -f- for (why so effing cryptic, docker)!
 # 2. Run tests using the created image (n.b., uses entrypoint at end below with run_tests.bash):
 #   $ docker run -it --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
@@ -30,6 +30,7 @@
 ## OLD: FROM ghcr.io/catthehacker/ubuntu:act-latest
 ## NOTE: Uses older 20.04 both for stability and for convenience in pre-installed Python downloads (see below).
 # See https://github.com/catthehacker/docker_images
+## TODO:
 FROM catthehacker/ubuntu:act-20.04
 
 # Set default debug level (n.b., use docker build --build-arg "arg1=v1" to override)
@@ -121,4 +122,4 @@ RUN apt-get autoremove -y && \
 
 # Run the test, normally pytest over ./tests
 # Note: the status code (i.e., $?) determines whether docker run succeeds (e.h., OK if 0)
-ENTRYPOINT './tests/run_tests.bash'
+ENTRYPOINT DEBUG_LEVEL=$DEBUG_LEVEL './tests/run_tests.bash'
