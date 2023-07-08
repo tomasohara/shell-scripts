@@ -173,7 +173,12 @@ class JupyterToBatspp(Main):
                     batspp_content += ensure_new_line(line)
 
                 # Append output lines
-                cell_output = [ensure_new_line(l) for output in cell['outputs'] for l in output['text']]
+                try:
+                    cell_output = [ensure_new_line(l) for output in cell['outputs']
+                                   if (output["output_type"] == "stream") for l in output['text']]
+                except:
+                    cell_output = ""
+                    system.print_exception_info(f"extraction of output for cell {c}: {cell}")
                 if not is_setup:
                     batspp_content += "".join(cell_output)
                 else:
