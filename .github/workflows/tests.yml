@@ -23,15 +23,17 @@ on: [push, pull_request]
 
 jobs:
   build:
-    ## TODO: ubuntu-20.04 (or ubuntu:act-20.04)
-    runs-on: ubuntu-latest
+    name: Debug Build and Run Tests
+    ## TODO?: runs-on: ubuntu:act-20.04
+    runs-on: ubuntu-20.04
+    ## OLD: runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v3
 
     - name: Build docker image
       run: |
-        docker build -t shell-scripts-dev -f- . <Dockerfile
+        docker build -t name:shell-scripts-dev -f- . <Dockerfile
 
     ## TEST
     - name: Configure Environment
@@ -43,4 +45,5 @@ jobs:
       run: |
         ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
         ## TODO???: put repo under /mnt/local-shell-scripts and installed version under /home/shell-scripts
-        docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+        ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+        docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts ubuntu:act-20.04
