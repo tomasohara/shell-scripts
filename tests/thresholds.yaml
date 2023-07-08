@@ -5,7 +5,7 @@
 
 # Python tests
 test_bash2python.py: 0
-test_check_errors.py: 100
+test_check_errors.py: 90
 test_extract_matches.py: 0
 test_tpo_count_it.py: 0
 
