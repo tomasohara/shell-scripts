@@ -21,6 +21,7 @@ REPO_DIR_NAME="shell-scripts"
 ## OLD: IMAGE_NAME="local/test-act:latest"
 IMAGE_NAME="${REPO_DIR_NAME}-dev"
 ## OLD: ACT_WORKFLOW="ubuntu-latest=local/test-act"
+## TODO:
 ACT_WORKFLOW="ubuntu:act-20.04"
 ACT_PULL="false"
 LOCAL_REPO_DIR="$PWD"
@@ -69,14 +70,21 @@ if [ "${RUN_BUILD:-1}" = "1" ]; then
     #    https://stackoverflow.com/questions/42297387/docker-build-with-build-arg-with-multiple-arguments
     ## TODO: docker build --build-arg "DEBUG_LEVEL=$DEBUG_LEVEL" --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 --tag "$IMAGE_NAME" .
     # shellcheck disable=SC2086
-    docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --tag "$IMAGE_NAME" .
+    docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --tag "name:$IMAGE_NAME" .
 fi
 
 # Run the Github Actions workflow locally
+# TODO: get this to effing work [maldito act]
 if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
     file="${WORKFLOW_FILE:-act.yml}"
     ## TEST (Pass along debug level in evvironment)
     echo "Running Github Actions locally"
     # shellcheck disable=SC2086
-    act --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" -platform "$ACT_WORKFLOW" --workflows ./.github/workflows/"$file" $RUN_OPTS
+    ## TODO: act --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" -platform "$ACT_WORKFLOW" --workflows ./.github/workflows/"$file" $RUN_OPTS
+    act --verbose --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" -platform "$ACT_WORKFLOW" --workflows ./.github/workflows/"$file" $RUN_OPTS
+fi
+
+if [ "${RUN_DOCKER:-1}" = "1" ]; then
+   echo "Running Tests via Docker"
+   docker run -it --env DEBUG_LEVEL="$DEBUG_LEVEL" --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
 fi
