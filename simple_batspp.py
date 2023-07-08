@@ -110,6 +110,8 @@ TEMP_DIR =  system.getenv_text("TEMP_DIR", TEMP_DIR_DEFAULT,
                                "Temporary directory to use for tests")
 COPY_DIR = system.getenv_bool("COPY_DIR", False,
                               "Copy current directory to temp. dir for input files, etc.")
+FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
+                               "Force execution of the run even if admin-like user, etc.")
 # Options to work around quirks with Batspp
 PREPROCESS_BATSPP = system.getenv_bool("PREPROCESS_BATSPP", False,
                                        "Preprocess .batspp format file, removing line continuations")
@@ -284,7 +286,7 @@ class Batspp(Main):
     output       = ''
     source       = ''
     verbose      = False
-    force        = False
+    force        = FORCE_RUN
     jupyter      = False
 
 
