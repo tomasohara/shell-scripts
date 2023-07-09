@@ -2,10 +2,11 @@
 
 # Make sure adhoc notes use MMMYY not DDMMMYY
 # _$ cmd-trace em-adhoc-notes 2>&1 | perl-grep 'notes-\w\w\w\d\d'
-++ tpo-invoke-emacs.sh _reempl-adhoc-notes-oct22.txt
-
-$ cmd-trace em-adhoc-notes 2>&1 | perl-grep -c 'notes-\w\w\w\d\d'
-1
+#  ++ tpo-invoke-emacs.sh _reempl-adhoc-notes-oct22.txt
+#
+## TODO
+## $ cmd-trace cmd.sh --time-out 5 bash -i em-adhoc-notes --foreground 2>&1 | perl-grep -c 'notes-\w\w\w\d\d'
+## 1
 
 #...............................................................................
 # pwd aliases
@@ -24,3 +25,24 @@ $ (pwd-host-info) 2>&1 | wc -l
 
 $ (pwd-host-info) 2>&1 | grep -c '^ *$'
 0
+
+#-------------------------------------------------------------------------------
+# python aliases
+
+# TODO: fix problem with resolving mezcla path
+# $ python-import-path mezcla
+## matches /usr/local/misc/programs/python/mezcla-tom-clone/mezcla/sys_version_info_hack.py
+# => /usr/local/misc/programs/python/mezcla-tom-clone/mezcla/__init__.py
+
+#--------------------------------------------------------------------------------
+# misc aliases
+
+$ x=123; y=321
+$ trace-vars x y
+x=123; y=321; 
+
+#...............................................................................
+
+# TODO: resolve problem w/ rename-with-file-date with spaces
+# $ rename-with-file-date 'Scrappy Web Search.html'
+# mv: target 'Search.html.04Jul23' is not a directory

@@ -9,8 +9,14 @@
 ## OLD: ./batspp_report.py -k && ./kcov_result.py --list --summary --export | tee summary_stats.txt
 
 cd $(dirname "$0")
-# python3 ./batspp_report.py -k && python3 ./kcov_result.py --list --summary --export | tee summary_stats.txt
-## OLD: python3 ./batspp_report.py > /dev/null 2>&1
-## NOTE: Runs it twice to workaround bug
-python3 ./batspp_report.py -k && python3 ./kcov_result.py --list --summary --export
-python3 ./batspp_report.py -k && python3 ./kcov_result.py --list --summary --export | tee summary_stats.txt
+
+## TODO by Aviyan: fix this to produce a simple summary as requested several
+## times in email. (This was both to you and Bruno a while back and then more
+## recently to you and Tana.)
+TEMP="${TEMP:-$HOME/temp}"
+mkdir --parents "$TEMP"
+OUTPUT_DIR=$TEMP python3 ./batspp_report.py --txt
+
+## NOTE: kcov is not critical and moreover is just serving to slow us down!
+## TODO: python3 ./kcov_result.py --list --summary --export | tee summary_stats.txt
+

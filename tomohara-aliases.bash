@@ -173,6 +173,7 @@ alias cond-setenv='conditional-export'
 #   environment variables to be set as in 'alias-fn echo-ENV1 'echo "$ENV1"'; ENV1=one echo-ENV1
 # - Use dummy command if a background command is invoked: gotta hate Bash!
 #   ex: alias-fn eyes 'xeyes & true'
+# - General version as replacement for complex aliases with multiple commands
 ##
 # ex: alias-fn trace-PS1 'echo \$PS1="$PS1" 1>&2'
 # TODO: fix problem with embedded invocations (see em-adhoc-notes below)
@@ -181,8 +182,19 @@ function alias-fn {
     shift
     local body="$*"
     eval "function $alias { $body; }"
-    }
-
+}
+# simple-alias-fn(name, command): variant that takes command and appends "$@"
+# Note: this is streamlined version of alias-fn intended as replacement for 'alias name=command' usages
+function simple-alias-fn {
+    if [ "$3" != "" ]; then
+	echo "usage: simple-alias-fn alias command"
+	echo "note: '\$\@' gets appended to command"
+	return
+    fi
+    local alias="$1"
+    local command="$2"
+    eval "function $alias { $command \"\$@\"; }"
+}
 #................................................................................
 # General environment settings
 ## TOM-IDIOSYNCRATIC
@@ -490,6 +502,9 @@ unset MAIL
 # - TEMP is private temp dir (e.g., ~/temp); TMP is system temp dir (e.g., /tmp)
 # TODO: Put settings in .bashrc, so that trace could use TEMP.
 cond-export TEMP "$HOME/temp"
+## HACK: don't allow /tmp for TMP
+## TODO1: move TMP, etc. into tomohara-settings.bash
+if [ "$TMP" = "/tmp" ]; then unset TMP; fi
 cond-export TMP "$TEMP/tmp"
 cond-export TMPDIR "$TMP"
 mkdir -p "$TEMP" "$TMP" "$TMPDIR"
@@ -732,9 +747,13 @@ alias rm='command rm -i $other_file_args'
 alias delete='command rm -i $other_file_args'
 ## OLD: alias delete-force='/bin/rm -f $other_file_args'
 # shellcheck disable=SC2034
+{
 force_echo=""
-alias disable-forced-deletions='force_echo="echo Warning: run enable-forced-deletions or issue: "'
+newline_tab=$'\n\t'
+# TODO1: fix newline/tab support
+alias disable-forced-deletions='force_echo="echo Warning: run enable-forced-deletions or issue:$newline_tab"'
 alias enable-forced-deletions='force_echo=""'
+}
 disable-forced-deletions
 #
 ## OLD
@@ -904,7 +923,7 @@ function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
 function gr- () { $GREP $MY_GREP_OPTIONS "$@"; }
 SORT_COL2="--key=2"
 # grep-unique(pattern, file, ...): count occurrence of pattern in file...
-function grep-unique () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0" | sort -rn $SORT_COL2 -t':'; }
+function grep-unique () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0$" | sort -rn $SORT_COL2 -t':'; }
 # grep-missing(pattern, file, ...): show files without pattern 
 # TODO: archive
 function grep-missing () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP ":0"; }
@@ -1312,9 +1331,10 @@ function check-errors-excerpt () {
     local base="$TMP/check-errors-excerpt-$$"
     local head="$base.head"
     local tail="$base.tail"
-    check-errors "$@" | head | truncate-width >| "$head";
+    # TODO3: add options for before and after
+    check-errors -before=1 -after=2 "$@" | head | truncate-width >| "$head";
     cat "$head"
-    check-errors "$@" | tail | truncate-width >| "$tail";
+    check-errors -before=1 -after=2 "$@" | tail | truncate-width >| "$tail";
     diff "$head" "$tail" >| /dev/null
     
     # Show tail unless same as head
@@ -1852,8 +1872,17 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 # TODO: make this less of a sledgehammer
 ## BAD: alias rename-utf8-encoded='rename-files -global -regex "[0x80-0xFF]\{3,\}" "_"'
 ## OLD: alias rename-utf8-encoded='rename-files -global -regex "[\x80-\xFF]\{3,\}" "_"'
-alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]+" "_"'
-alias rename-emoji=rename-utf8-encoded
+## OLD: alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]+" "_"'
+alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]{1,4}" "_"'
+## OLD: alias rename-emoji=rename-utf8-encoded
+# via https://en.wikipedia.org/wiki/UTF-8:
+#    U+10000	U+10FFFF	11110xxx	10xxxxxx	10xxxxxx	10xxxxxx;   note: F[8-F]{3}
+# rename-utf8-emoji: replace U+10000 characters in filenames with _'s
+# note: emoji considered synonymous with emoticon
+## OLD: alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"'
+alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"'
+## TODO2 (handle cases like U+2728 [sparkle] w/ UTF8 0xE29CA8):
+#    alias rename-utf8-emoji-misc='rename-files -quick -global -regex "[\xE0-\xFF][\x80-\xFF]{2,3}" "_"'
 alias rename-bad-dashes="rename-files -quick -global -regex ' \-' '_'; rename-files -quick -global -regex '\-' '_' -*"; 
 
 #-------------------------------------------------------------------------------
@@ -2178,8 +2207,11 @@ function uncompress-dir() {
 alias compress-this-dir='compress-dir $PWD'
 alias ununcompress-this-dir='uncompress-dir $PWD'
 
-alias old-count-exts='$LS | count-it "\.[^.]*\w" | sort $SORT_COL2 -rn | $PAGER'
+# count-exts(): tabulate the file extensions in current directory
+# count-exts-all(): likewise including cases with no extension (e.g., 'it')
+## OLD: alias old-count-exts='$LS | count-it "\.[^.]*\w" | sort $SORT_COL2 -rn | $PAGER'
 function count-exts () { $LS | count-it '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
+function count-exts-all { (count-exts | cat; $LS | count-it '^[^.]+(\.*)$') | sort $SORT_COL2 -rn | $PAGER; }
 
 alias kill-iceweasel='kill_em.sh iceweasel'
 
@@ -2684,9 +2716,11 @@ if [[ ! "$PATH" =~ mezcla ]]; then
     true
 fi
 #
-alias ps-python-full='ps-all python'
-# note: excludes ipython and known system-related python scripts
-alias ps-python='ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|update-manager|software-properties|networkd-dispatcher)"'
+alias ps-python-full='ps-mine python'
+# note: excludes ipython and known system-related python scripts;
+# also excludes related bash and time processes.
+## OLD: alias ps-python='ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|update-manager|software-properties|networkd-dispatcher)"'
+alias ps-python='ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|perl-regexp|update-manager|software-properties|networkd-dispatcher|((bash|emacs|time) .*python))"'
 alias show-python-path='show-path-dir PYTHONPATH'
 
 # Remove compiled files .pyc for regular (debug) version and .pyo for optimized

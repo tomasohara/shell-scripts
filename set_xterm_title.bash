@@ -103,9 +103,12 @@
 
 # Show usage if no arguments or --help
 # TODO: put argument processing in loop (see template.bash)
-restore_base="$TMP/_set_xterm_title.$PPID"
+## NOTE: Uses /tmp as the files accumlate a lot over time
+## OLD: restore_base="$TMP/_set_xterm_title.$USER.$PPID"
+restore_dir="/tmp/set-xterm-title-$USER"
+mkdir --parents "$restore_dir"
+restore_base="$restore_dir/$PPID"
 restore_title=0
-## TODO: save_title=0
 save_title=1
 print_full=0
 print_icon=0

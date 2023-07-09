@@ -6,16 +6,26 @@ on: [push, pull_request]
 
 jobs:
   build:
+    name: Build and Run Tests
     runs-on: ${{ matrix.os }}
+    
     strategy:
       matrix:
         os: [ubuntu-latest]
         ## TODO: python-version: ["3.8", "3.9", "3.10"]
         python-version: ["3.9"]
 
+    container:
+      image: shell-scripts-dev
+      options: --user=root
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
+
+      - name: Build docker image
+        run: |
+          docker build -t shell-scripts-dev -f- . <Dockerfile
 
       - name: Setup Python
         uses: actions/setup-python@v3
@@ -35,10 +45,15 @@ jobs:
         run: |
           pip install -r requirements.txt
 
-      - name: Run Python Tests
-        run: |
-          python3 ./tests/master_test.py
+      ## OLD
+      ## - name: Run Python Tests
+      ##   run: |
+      ##     python3 ./tests/master_test.py
+      ##
+      ## - name: Run Alias Tests
+      ##   run: |
+      ##     bash ./tests/summary_stats.bash
 
-      - name: Run Alias Tests
+      - name: Run tests
         run: |
-          bash ./tests/summary_stats.bash
+          docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev

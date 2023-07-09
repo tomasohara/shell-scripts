@@ -35,11 +35,11 @@ BEGIN {
 # for command-line arguments (see init_var's in &init).
 use strict;
 use vars qw/$warning $warnings $skip_warnings $context $no_asterisks $skip_ruby_lib $ruby/;
-use vars qw/$relaxed $strict $quiet $matching/;
+use vars qw/$relaxed $strict $quiet $matching $before $after/;
 
 if (!defined($ARGV[0])) {
     my $options = "options = [-warnings] [-context=N] [-no_astericks] [-skip_ruby_lib]";
-    $options .= " [-relaxed | -strict] [-verbose] [-quiet]";
+    $options .= " [-relaxed | -strict] [-verbose] [-quiet] [-before=N] [-after=N]";
     my $example = "ex: $script_name whatever\n";
     my $note = "Notes:\n";
     $note .= "- The default context is 1.\n";
@@ -55,6 +55,8 @@ if (!defined($ARGV[0])) {
 &init_var(*skip_warnings, ! $warnings);	# omit warnings?
 my($show_warnings) = (! $skip_warnings);
 &init_var(*context, 3);			# context lines before and after
+&init_var(*before, $context);		# lines of context to show before
+&init_var(*after, $context);		# "" show after
 &init_var(*no_asterisks, &FALSE);	# skip warnings for '***' in text
 my $asterisks = (! $no_asterisks);
 &init_var(*ruby, &FALSE);	   	# alias for -skip_ruby_lib
@@ -71,7 +73,7 @@ my($line);	       			# line in context
 our($current_file) = defined($ARGV[0]) ? $ARGV[0] : "";
 &show_current_file_info();
 
-my($after) = 0;				# number of more after-context lines
+my($after_lines) = 0;			# number of more after-context lines
 while (<>) {
     &dump_line();
     chop;
@@ -197,6 +199,7 @@ while (<>) {
 	    || /: warning\b/		# Ruby warnings
 	    || /^bash: /                # ex: "bash: [: : unary operator expected"
 	    || /Traceback|\S+Error/     # Python exceptions (caught)
+	    || /\b\S+Warning/           # Python warning (e.g., RuntimeWarning)
 	    || (/exception|failed/      # logger messages (e.g., "Training job failed")
 		&& $strict)
 	    || ($asterisks && /\*\*\*/))) {
@@ -217,7 +220,7 @@ while (<>) {
     if ($has_error) {
 	# Show up the N preceding context lines, unless there is an overlap
 	# with previous error context in which no pre-context is shown.
-	my($num) = ($after > 0) ? 0 : (scalar @before_context);
+	my($num) = ($after_lines > 0) ? 0 : (scalar @before_context);
 	my($i);
 	for ($i = 0; $i < $num; $i++) {
 	    printf "%-4d     %s\n", ($. - ($num - $i)), $before_context[$i]; 
@@ -228,20 +231,20 @@ while (<>) {
 	if ($matching) {
 	    printf "%-4d match: %s\n", $., $match_info;
 	}
-	$after = $context;
+	$after_lines = $after;
     }
 
     # Otherwise print line only if in the post-context
     else {
-	printf "%-4d     %s\n", $., $_ if ($after > 0);
-	printf "\n" if ($after == 1);
-	$after--;
+	printf "%-4d     %s\n", $., $_ if ($after_lines > 0);
+	printf "\n" if ($after_lines == 1);
+	$after_lines--;
     }
 
     # Update the context
     # TODO: efficiency please
     push(@before_context, $_);
-    shift @before_context if ($#before_context == $context);
+    shift @before_context if ($#before_context == $before);
 
     # Check for a change in file, if so reset the accumlators
     # NOTE: ARGV closed to reset line numbering

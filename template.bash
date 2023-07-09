@@ -77,6 +77,8 @@
 #   (e.g., ${!#} for last argument--see https://stackoverflow.com/questions/1853946/getting-the-last-argument-passed-to-a-shell-script).
 # - Document regex match quirks.
 # - Document file tests (e.g., -e fubar.txt).
+# - BASH_SOURCE usage for when source'd
+#     src_dir=$(dirname "${BASH_SOURCE[0]}")
 #
 
 # Uncomment following line(s) for tracing:
@@ -86,6 +88,14 @@
 ## echo "$@"
 ## set -o xtrace
 ## DEBUG: set -o verbose
+#
+# Set bash regular and/or verbose tracing
+if [ "${TRACE:-0}" = "1" ]; then
+    set -o xtrace
+fi
+if [ "${VERBOSE:-0}" = "1" ]; then
+    set -o verbose
+fi
 
 # Show usage statement
 # TODO: convert into a function that get invoked when $1 is empty or --help

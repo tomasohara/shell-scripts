@@ -99,14 +99,19 @@ TESTFILE = 'testfile' # target test path
 OUTPUT   = 'output'   # output BATS test
 VERBOSE  = 'verbose'  # show verbose debug
 SOURCE   = 'source'   # source another file
+JUPYTER  = 'jupyter'  # run jupyter conversion (i.e., ipynb to .batspp)
+FORCE    = 'force'    # run bats even if admin-like user
 
 # Environment options
 TMP = system.getenv_text("TMP", "/tmp",
                          "Temporary directory")
-TEMP_DIR =  system.getenv_text("TEMP_DIR", gh.form_path(TMP, f"batspp-{os.getpid()}"),
+TEMP_DIR_DEFAULT = (gh.TEMP_BASE or gh.form_path(TMP, f"batspp-{os.getpid()}"))
+TEMP_DIR =  system.getenv_text("TEMP_DIR", TEMP_DIR_DEFAULT,
                                "Temporary directory to use for tests")
 COPY_DIR = system.getenv_bool("COPY_DIR", False,
                               "Copy current directory to temp. dir for input files, etc.")
+FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
+                               "Force execution of the run even if admin-like user, etc.")
 # Options to work around quirks with Batspp
 PREPROCESS_BATSPP = system.getenv_bool("PREPROCESS_BATSPP", False,
                                        "Preprocess .batspp format file, removing line continuations")
@@ -132,7 +137,7 @@ OMIT_MISC = system.getenv_bool("OMIT_MISC", False,
 TEST_FILE = system.getenv_bool("TEST_FILE", False,
                                "Treat input as example-base test file, not a bash script")
 BASH_EVAL = system.getenv_bool("BASH_EVAL", False,
-                               "Evaluate tests via bash rather than bats--for quicker results")
+                               "Evaluate tests via bash rather than bats: provides quicker results and global context")
 #
 # Shameless hacks
 ## TEST: GLOBAL_SETUP = system.getenv_text("GLOBAL_SETUP", " ",
@@ -281,6 +286,8 @@ class Batspp(Main):
     output       = ''
     source       = ''
     verbose      = False
+    force        = FORCE_RUN
+    jupyter      = False
 
 
     # Global States
@@ -297,17 +304,32 @@ class Batspp(Main):
         self.testfile     = self.get_parsed_argument(TESTFILE, "")
         self.output       = self.get_parsed_argument(OUTPUT, "")
         self.source       = self.get_parsed_argument(SOURCE, "")
+        self.jupyter      = self.get_parsed_option(JUPYTER, self.jupyter)
+        self.force        = self.get_parsed_option(FORCE, self.force)
         self.verbose      = (self.has_parsed_option(VERBOSE) or system.getenv("VERBOSE"))
 
         debug.trace(T7, (f'batspp - testfile: {self.testfile}, '
                          f'output: {self.output}, '
                          f'source: {self.source}, '
+                         f'force: {self.force}, '
+                         f'jupyter: {self.jupyter}, '
                          f'verbose: {self.verbose}'))
 
 
     def run_main_step(self):
         """Process main script"""
+        # TODO4: remove temp files unless debugging
 
+        # Optionally convert Jupyter notebook (.ipynb) to BatsPP file (.batspp)
+        if self.jupyter:
+            debug.assertion(self.testfile.endswith("ipynb"))
+            temp_batspp_file = self.temp_file + ".batspp"
+            gh.run(f"jupyter_to_batspp.py --output '{temp_batspp_file}' '{self.testfile}'")
+            ## DEBUG (tracking down TEMP_FILE issue):
+            ## gh.run(f"cp -v {temp_batspp_file} /tmp")
+            ## debug.assertion(system.file_exists(gh.form_path("/tmp", gh.basename(temp_batspp_file, temp_batspp_file))))
+            self.testfile = temp_batspp_file
+        
         # Check if is test of shell script file
         self.is_test_file = (TEST_FILE or self.testfile.endswith(BATSPP_EXTENSION))
         debug.trace(T7, f'batspp - {self.testfile} is a test file (not shell script): {self.is_test_file}')
@@ -339,7 +361,7 @@ class Batspp(Main):
 
 
         # Save Bats file
-        gh.write_file(batsfile, self.bats_content)
+        system.write_file(batsfile, self.bats_content)
 
 
         # Add execution permission to directly run the result test file
@@ -347,7 +369,16 @@ class Batspp(Main):
             gh.run(f'chmod +x {batsfile}')
 
 
-        # Run
+        # Run unless adminstrative user and --force not 
+        skip_bats = SKIP_BATS
+        if not skip_bats:
+            is_admin = my_re.search(r"root|admin|adm", gh.run("groups"))
+            if is_admin:
+                if not self.force:
+                    system.exit("Error: running bats under admin-like account requires --{force} option", force=FORCE)
+                system.print_error("FYI: not recommended to run under admin-like account (to avoid inadvertant deletions, etc..)")
+    
+            
         if not SKIP_BATS:
             debug.trace(T7, f'batspp - running test {self.temp_file}')
             debug.assertion(not (BASH_EVAL and BATS_OPTIONS.strip()))
@@ -453,14 +484,12 @@ class Batspp(Main):
             system.write_file(gh.form_path(TMP, "file_content.list"), file_content)
         #
         all_test_ids = []
-        ## OLD: self.bats_content += command_tests.get_bats_tests(file_content)
         content, ids = command_tests.get_bats_tests(file_content)
         self.bats_content += content
         all_test_ids += ids
         
         if not self.is_test_file:
             # TODO: sort combined set of tests based on file offset to make order more intuitive
-            ## OLD: self.bats_content += function_tests.get_bats_tests(file_content)
             content, ids = function_tests.get_bats_tests(file_content)
             self.bats_content += content
             all_test_ids += ids
@@ -848,7 +877,7 @@ class CustomTestsToBats:
 
             test = self._first_process(match)
             debug.assertion(len(test) == 5, f'Incorrect number of fields, every test should be {TestFieldTypes._fields}')
-            # Add global setup section to directly BATS output mostly as is (except for prompt removal)
+            # Add global setup section directly to BATS output mostly as is (except for prompt removal)
             # pylint: disable=no-member
             if re.search(r"^\s*# Global Setup", test.entire, flags=(re.MULTILINE | re.IGNORECASE)):
                 global_setup = my_re.sub(r'^\s*\$\s*', '', test.entire, flags=re.MULTILINE)
@@ -1050,7 +1079,9 @@ if __name__ == '__main__':
     app = Batspp(description          = __doc__,
                  ## TODO: use_temp_base_dir=True,
                  positional_arguments = [(TESTFILE, 'test file path')],
-                 boolean_options      = [(VERBOSE,  'show verbose debug')],
+                 boolean_options      = [(VERBOSE,  'show verbose debug'),
+                                         (FORCE,    'Run even under admin-like account'),
+                                         (JUPYTER,  'Convert jupyter file to batspp')],
                  text_options         = [(OUTPUT,   'target output .bats filepath'),
                                          (SOURCE,   'file to be sourced')],
                  manual_input         = True)

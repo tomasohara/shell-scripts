@@ -139,7 +139,8 @@ sub process_client_request {
 # logmsg(message): write message to the log file with timestamp included
 #
 sub logmsg { 
-    &debug_out(2, "$0 $$: @_ at %s\n", scalar localtime, "\n");
+    ## OLD: &debug_out(2, "$0 $$: @_ at %s\n", scalar localtime, "\n");
+    &debug_print(2, "$0 $$: @_ at " . scalar localtime . "\n");
 }
 
 # global(variable_name)

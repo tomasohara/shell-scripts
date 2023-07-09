@@ -138,12 +138,13 @@ function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 check_errors.perl -context=5
 
 # get-temp-log-name([label=temp]: Return unique file name of the form _git-LABEL-MMDDYY-HHMM-NNN.log
 #
-LOG_DIR="${GIT_LOG_DIR:-./log-files}"
-mkdir --parents "$LOG_DIR"
 #
 function get-temp-log-name {
     local label=${1:-temp}
     local now_mmddyyhhmm
+    # note: done each time in case user cd's to a different directory
+    local LOG_DIR="${GIT_LOG_DIR:-./log-files}"
+    mkdir --parents "$LOG_DIR"
     now_mmddyyhhmm=$(date '+%d%b%y-%H%M' | downcase-stdin-alias);
     # TODO: use integral suffix (not hex)
     mktemp "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log"
@@ -502,7 +503,13 @@ alias git-revert-commit-alias='git-command revert'
 function git-diff-plus {
     local log;
     log=$(get-temp-log-name "diff");
-    git diff "$@" >| "$log";
+    # Perform diff and convert a/ and /b path prefixes to 'a: ' and 'b: '
+    # ex: diff --git a/.github/act.yml b/.github/... => "diff --git a: .github/,,,"
+    # ex: --- "a/.github/act.yml" => "--- a: .github/act.yml"
+    ## TODO? (account for subdirectories 'a' or 'b'):
+    ## git diff "$@" | perl -pe 's@^(diff|\-\-\-|\+\+\+) (?!.*[ab]/.*)([ab])/@\1\2 \3: @;' >| "$log";
+    local files=("$@")
+    git diff "${files[@]}" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >| "$log";
     less -p '^diff' "$log";
     ## TODO: less --quit-if-one-screen --pattern='^diff' "$log";
 }
@@ -652,8 +659,9 @@ alias git-invoke-next-single-checkin=invoke-next-single-checkin
 # NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
 # shellcheck disable=SC2139
 alias-fn git-alias-refresh "source '${BASH_SOURCE[0]}'"    # bash idiom for current script filename
-alias-fn git-refresh-aliases 'git-alias-refresh'
-alias-fn git-next-checkin 'invoke-alt-checkin'
+simple-alias-fn git-refresh-aliases 'git-alias-refresh'
+simple-alias-fn git-next-checkin 'invoke-alt-checkin'
+simple-alias-fn git-extract-all-versions 'extract-all-git-versions.bash'
 ## TEST: hide tracing output alias git-next-checkin='invoke-alt-checkin 2> /dev/null'
 # TODO:
 # NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
@@ -677,6 +685,7 @@ function git-checkout-branch {
         echo "Error: unknown branch '$branch'"
     fi;
 }
+simple-alias-fn git-branch-checkout  git-checkout-branch 
 
 #-------------------------------------------------------------------------------
 
@@ -718,8 +727,10 @@ function git-alias-usage () {
     echo 'Usual check-in process:'
     echo '    git-cd-root-alias; git-update-plus; git-next-checkin'
     echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-plus; git-next-checkin'
-    echo '    # alt: grep "^<<<<< " $(git-diff-list) /dev/null'
-    # TODO: xargs -I{} 'grep "^<<<<< {} | head -5' $(git-list-text-files)
+    ## OLD:
+    ## echo '    # alt: grep "^<<<<< " $(git-diff-list) /dev/null'
+    ## # TODO: xargs -I{} 'grep "^<<<<< {} | head -5' $(git-list-text-files)
+    echo "    # alt: (git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {})"
     echo '    git-next-checkin                      # repeat, as needed'
 
     ## TODO: echo '* invoke git-cd-root-alias automatically!'

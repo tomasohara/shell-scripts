@@ -1,5 +1,6 @@
 #! /usr/bin/env python
-## TODO: handle case when env installed elsehere (e.g., maldito mac)
+# TODO: # -*- coding: utf-8 -*-
+## TODO: handle case when env installed elsewhere (e.g., maldito mac)
 ## #! env python
 # 
 # TODO what the script does (detailed)
@@ -7,10 +8,16 @@
 ## TODO: see example/template.py for simpler version suitable for cut-n-paste from online examples
 #
 
-"""TODO: what module does (brief)"""
+"""
+TODO: what module does (brief)
+
+Sample usage:
+   echo $'TODO:task1\\nDONE:task2' | {script} --TODO-arg --
+"""
 
 # Standard modules
 ## TODO: from collections import defaultdict
+
 # Installed modules
 ## TODO: import numpy
 
@@ -22,28 +29,33 @@ from mezcla import system
 from mezcla.my_regex import my_re
 ## TODO:
 ## from mezcla import glue_helpers as gh
+## from mezcla import data_utils as du
 ##
 ## Optional:
 ## # Increase trace level for regex searching, etc. (e.g., from 6 to 7)
 ## my_re.TRACE_LEVEL = debug.QUITE_VERBOSE
+debug.trace(5, f"global __doc__: {__doc__}")
+debug.assertion(__doc__)
 
 ## TODO: Constants for switches omitting leading dashes (e.g., DEBUG_MODE = "debug-mode")
 ## Note: Run following in Emacs to interactively replace TODO_ARG with option label
 ##    M-: (query-replace-regexp "todo\\([-_]\\)arg" "arg\\1name")
 ## where M-: is the emacs keystroke short-cut for eval-expression.
 TODO_ARG = "TODO-arg"
-## TODO_TEXT_ARG = "alt-todo-arg"
-## TODO_FILENAME = "TODO_filename"
+## TEXT_ARG = "text-arg"
+## ALT_FILENAME = "alt_filename"
 
-## TODO:
-## # Environment options
-## # Note: These are just intended for internal options, not for end users.
-## # It also allows for enabling options in one place rather than four
-## # (e.g., [Main member] initialization, run-time value, and argument spec., along
-## # with string constant definition).
-## #
-## FUBAR = system.getenv_bool("FUBAR", False,
-##                            description="Fouled Up Beyond All Recognition processing")
+# Constants
+TL = debug.TL
+
+# Environment options
+# Note: These are just intended for internal options, not for end users.
+# It also allows for enabling options in one place rather than four
+# (e.g., [Main member] initialization, run-time value, and argument spec., along
+# with string constant definition).
+#
+TODO_FUBAR = system.getenv_bool("TODO_FUBAR", False,
+                                description="TODO:Fouled Up Beyond All Recognition processing")
 
 
 class Script(Main):
@@ -51,7 +63,7 @@ class Script(Main):
     # TODO: -or-: """Adhoc script class (e.g., no I/O loop, just run calls)"""
     ## TODO: class-level member variables for arguments (avoids need for class constructor)
     todo_arg = False
-    ## todo_text_arg = ""
+    ## text_arg = ""
 
     # TODO: add class constructor if needed for non-standard initialization
     ## WARNING: For Script classes involving complex logic, it is best to use helper classes,
@@ -59,27 +71,30 @@ class Script(Main):
     ## NOTE: Such class decomposition is also beneficial for unit tests.
     #
     ## def __init__(self, *args, **kwargs):
-    ##     debug.trace_fmtd(5, "Script.__init__({a}): keywords={kw}; self={s}",
+    ##     debug.trace_fmtd(TL.VERBOSE, "Script.__init__({a}): keywords={kw}; self={s}",
     ##                      a=",".join(args), kw=kwargs, s=self)
     ##     super().__init__(*args, **kwargs)
     
     def setup(self):
         """Check results of command line processing"""
-        debug.trace_fmtd(5, "Script.setup(): self={s}", s=self)
+        debug.trace_fmtd(TL.VERBOSE, "Script.setup(): self={s}", s=self)
         ## TODO: extract argument values
         self.todo_arg = self.get_parsed_option(TODO_ARG, self.todo_arg)
-        ## self.todo_text_arg = self.get_parsed_option(todo_text_arg, self.todo_text_arg)
-        # TODO: self.TODO_filename = self.get_parsed_argument(TODO_FILENAME)
-        debug.trace_object(5, self, label="Script instance")
+        ## TODO:
+        ## self.text_arg = self.get_parsed_option(TEXT_ARG, self.text_arg)
+        ## self.alt_filename = self.get_parsed_argument(ALT_FILENAME)
+        debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
     def process_line(self, line):
         """Processes current line from input"""
-        debug.trace_fmtd(6, "Script.process_line({l})", l=line)
+        debug.trace_fmtd(TL.QUITE_DETAILED, "Script.process_line({l})", l=line)
         # TODO: flesh out
         if self.todo_arg and "TODO" in line:
             print(f"arg1 line ({self.line_num}): {line}")
+        else:
+            debug.trace(3, f"Ignoring line ({self.line_num}): {line}")
         ## TODO: regex pattern matching
-        ## elif my_re.search(self.todo_text_arg, line):
+        ## elif my_re.search(self.text_arg, line):
         ##     print("arg2 line: %s" % line)
 
     ## TODO: if no input proocessed, customize run_main_step instead
@@ -98,7 +113,7 @@ class Script(Main):
 def main():
     """Entry point"""
     app = Script(
-        description=__doc__,
+        description=__doc__.format(script=__file__),
         # Note: skip_input controls the line-by-line processing, which is inefficient but simple to
         # understand; in contrast, manual_input controls iterator-based input (the opposite of both).
         skip_input=False,
@@ -110,10 +125,11 @@ def main():
         ## auto_help=False,
         ## TODO: specify options and (required) arguments
         boolean_options=[(TODO_ARG, "TODO-desc")],
-        # Note: FILENAME is default argument unless skip_input
-        ## positional_arguments=[FILENAME1, FILENAME2], 
-        ## text_options=[(todo_text_arg, "TODO-desc")],
-        # Note: Following added for indentation: float options are not common
+        ## TODO
+        ## Note: FILENAME is default argument unless skip_input
+        ## positional_arguments=[ALT_FILENAME], 
+        ## text_options=[(TEXT_ARG, "TODO-desc")],
+        ## Note: Following added for indentation float options not common (TODO: remove?)
         float_options=None)
     app.run()
     # Make sure no TODO_vars above (i.e., in namespace)
@@ -123,7 +139,7 @@ def main():
 #-------------------------------------------------------------------------------
     
 if __name__ == '__main__':
-    debug.trace_current_context(level=debug.QUITE_DETAILED)
-    debug.trace_fmt(4, "Environment options: {eo}",
-                    eo=system.formatted_environment_option_descriptions())
+    debug.trace_current_context(level=TL.QUITE_VERBOSE)
+    debug.trace(5, f"main __doc__: {main.__doc__}")
+    debug.assertion("TODO:" not in __doc__)
     main()
