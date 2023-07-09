@@ -74,6 +74,8 @@ TEST_REGEX = system.getenv_value("TEST_REGEX", None,
                                  "Regex for tests to include; ex: 'c.*' for debugging")
 SINGLE_STORE = system.getenv_bool("SINGLE_STORE", False,
                                   f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
+CLEAN_DEFAULT = system.getenv_bool("CLEAN_OUTPUT", not debug.detailed_debugging(),
+                                   f"Whether to clean existing output by remove entire directories")
 ## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
 if SINGLE_STORE:
     BATSPP_STORE = BATS_STORE = TXT_STORE = BATSPP_OUTPUT_STORE
@@ -141,7 +143,7 @@ def main():
     KCOV_OPTION = main_app.get_parsed_option(KCOV_REPORTS_ARG)
     ALL_OPTION = main_app.get_parsed_option(ALL_REPORTS_ARG)
     FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_DOCKER)
-    CLEAN_OPTION = main_app.get_parsed_option(CLEAN_ARG)
+    CLEAN_OPTION = main_app.get_parsed_option(CLEAN_ARG, CLEAN_DEFAULT)
     BATSPP_SWITCH_OPTION = main_app.get_parsed_option(BATSPP_SWITCH_ARG)
     USE_SIMPLE_BATSPP = (not BATSPP_SWITCH_OPTION)
     DEFINITIONS_SCRIPT = main_app.get_parsed_option(DEFINITIONS_ARG)
@@ -157,7 +159,7 @@ def main():
 
     # Cleanup up previous rusn
     # Warning: 'rm -rf' is a very dangerous command:
-    # it should only be done in temporary directories (i.e., not under
+    # it should only be done in temporary directories (e.g., not under repo)
     if CLEAN_OPTION:
         if RUN_BATS:
             gh.run(f"rm -rf {BATSPP_STORE}/*")
@@ -218,15 +220,16 @@ def main():
         is_ipynb = file.endswith(IPYNB)
         if is_ipynb:
             if TEST_REGEX and not my_re.match(fr"{TEST_REGEX}", file):
-                debug.trace(3, f"Ignoring {file}")
+                debug.trace(3, f"FYI: Ignoring {file} not mathing TEST_REGEX ({TEST_REGEX})")
                 continue
             if not ALL_OPTION and NOBATSPP in file:
+                debug.trace(4, f"FYI: Ignoring NOBATSPP file: {file}")
                 print(f"NOBATSPP File Found [{i}]: {file}")
                 avoid_array.append(file)
                 avoid_count += 1
-            else:
-                print(f"JUPYTER Testfile Found [{i}]: {file}")
-                ipynb_array.append(file)
+                continue
+            print(f"JUPYTER Testfile Found [{i}]: {file}")
+            ipynb_array.append(file)
             i += 1
 
     print(f"\nIPYNB Files Found (Total - NOBATSPP): {i-1} - {avoid_count} = {i-avoid_count-1}")
