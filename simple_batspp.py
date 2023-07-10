@@ -665,7 +665,7 @@ class CustomTestsToBats:
                       ## TEST: ("" if not GLOBAL_SETUP.strip() else ("\t" + GLOBAL_SETUP + ";\n")) +
                       f'\ttestfolder="{TEMP_DIR}/{unspaced_title}"\n' +
                       f'\tmkdir --parents "$testfolder"\n' +
-                      (f'\tcommand cp ./*.* "$testfolder"\n' if COPY_DIR else '') +
+                      (f'\tcommand cp -R ./. "$testfolder"\n' if COPY_DIR else '') +
                       # note: warning added for sake of shellcheck
                       f'\tbuiltin cd "$testfolder" || echo Warning: Unable to "cd $testfolder"\n')
         setup_sans_prompt = my_re.sub(r'^\s*\$', '\t', setup, flags=my_re.MULTILINE)
