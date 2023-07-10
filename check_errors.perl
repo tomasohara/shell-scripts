@@ -96,8 +96,9 @@ while (<>) {
     # TODO: rework error in line test to omit files
     # NOTE: It can be easier to add special-case rules rather than devise a general regex;
     # ex: 'error' occuring within a line even at word boundaries can be too broad.
-    elsif (## &debug_print(7, "here\n", 7) &&
-	   /^(ERROR|Error)\b/	   
+    elsif (## DEBUG: &debug_print(7, "here\n", 7) &&
+	   ## OLD: /^(ERROR|Error)\b/	   
+	   /^(Error)\b/i
 	   ## OLD: || /command not found/i
 	   ## NOTE: maldito modules package polutes environment and man page not clear about disabling
 	   || (/command not found/i && (! /Cannot switch to Modules/))

@@ -27,13 +27,18 @@ jobs:
     ## TODO?: runs-on: ubuntu:act-20.04
     runs-on: ubuntu-20.04
     ## OLD: runs-on: ubuntu-latest
-    
+
+    container:
+      image: my-shell-scripts
+      options: --user=root
+
     steps:
     - uses: actions/checkout@v3
 
     - name: Build docker image
       run: |
-        docker build -t name:shell-scripts-dev -f- . <Dockerfile
+        ## OLD: docker build -t name:shell-scripts-dev -f- . <Dockerfile
+        docker build  --tag my-shell-scripts  -f- . <Dockerfile
 
     ## TEST
     - name: Configure Environment
@@ -46,4 +51,6 @@ jobs:
         ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
         ## TODO???: put repo under /mnt/local-shell-scripts and installed version under /home/shell-scripts
         ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
-        docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts ubuntu:act-20.04
+        ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts ubuntu:act-20.04
+        ## TEST:
+        docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts my-shell-scripts

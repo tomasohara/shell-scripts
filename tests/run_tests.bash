@@ -3,13 +3,13 @@
 # Wrapper around master_test.py and summary_stats.bash
 #
 
-# Uncomment following line(s) for tracing:
-# - xtrace shows arg expansion (and often is sufficient)
-# - verbose shows source commands as is (but usually is superfluous w/ xtrace)
-#  
-## echo "$@"
-## set -o xtrace
-## DEBUG: set -o verbose
+# Set bash regular and/or verbose tracing
+if [ "${TRACE:-0}" = "1" ]; then
+    set -o xtrace
+fi
+if [ "${VERBOSE:-0}" = "1" ]; then
+    set -o verbose
+fi
 
 # Run the python tests and then the alias tests
 dir=$(dirname "${BASH_SOURCE[0]}")

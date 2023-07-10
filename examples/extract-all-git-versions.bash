@@ -77,8 +77,10 @@ while read -r LINE; do
     COMMIT_DATE=$(echo "$LINE" | cut -d ' ' -f 1)
     COMMIT_SHA=$(echo "$LINE" | cut -d ' ' -f 2)
     ## DEBUG: echo "COUNT=$COUNT LINE=$LINE COMMIT_DATE=$COMMIT_DATE COMMIT_SHA=$COMMIT_SHA"
-    $verbose && printf '.'
-    git cat-file -p "$COMMIT_SHA:$REL_GIT_PATH_TO_FILE" > "$EXPORT_TO/$GIT_SHORT_FILENAME.$COUNT.$COMMIT_DATE"
+    ## OLD: $verbose && printf '.'
+    output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.$COUNT.$COMMIT_DATE"
+    git cat-file -p "$COMMIT_SHA:$REL_GIT_PATH_TO_FILE" > "$output_file"
+    $verbose && echo "$output_file"
 done <"$info"
 
 # return success code

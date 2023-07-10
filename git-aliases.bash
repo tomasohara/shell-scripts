@@ -772,8 +772,8 @@ function git-misc-alias-usage() {
     ## OLD:
     ## echo "   git mv --verbose old-file new-file"
     ## echo "   GIT_MESSAGE='renamed' GIT_SKIP_ADD=1 git-update-commit-push old-file new-file"
-    echo "    GIT_MESSAGE='renamed' git-rename-file old-file new-file"
-    echo "    GIT_MESSAGE='moved' git-move-to-dir dir file1 file2"
+    echo "    GIT_MESSAGE='renamed' git-rename-file OLD NEW-file"
+    echo "    GIT_MESSAGE='moved' git-move-to-dir DIR file1 file2"
     echo ""
     echo "To delete files (mucho cuidado):"
     echo "   git rm old-file"

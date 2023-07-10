@@ -27,8 +27,17 @@ alias nvidia-batched='batch-nvidia-smi.sh'
 alias nvidia-top='nvtop'
 alias nvsmi=nvidia-smi
 
+# convert-emoticons-aux(cmd, arg, ...): rens command and converts emoticons to text
+# ex: convert-emoticons-aux black /tmp/__init__.py
+# note: stderr redirected onto stdout
+function convert-emoticons-aux {
+    "$@" 2>&1 | convert_emoticons.py -
+    }
+
+
 # Python stuff
-alias plint=python-lint
+## OLD: alias plint=python-lint
+simple-alias-fn plint 'PAGER=cat python-lint'
 alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
 #
 # clone-repo(url): clone github repo at URL into current dir with logging
@@ -51,6 +60,7 @@ function clone-repo () {
     ## TODO: add trace-stderr
     echo "FYI: script-based clone done (see $log)" 1>&2
 }
+simple-alias-fn black-plain 'convert-emoticons-aux black'
 
 # JSON stuff
 function json-validate () {
@@ -64,6 +74,8 @@ function script-config {
     mkdir -p ~/config
     script ~/config/"_config-$(T).log"
 }
+simple-alias-fn act-plain 'convert-emoticons-aux act'
+
 
 # para-len-alt(file, ...): show length of each paragraph with embedded newlines replaced with CR's to allow chaining
 # note: strips the 0-len paragraph indicator

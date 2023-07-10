@@ -184,6 +184,7 @@ function alias-fn {
     eval "function $alias { $body; }"
 }
 # simple-alias-fn(name, command): variant that takes command and appends "$@"
+# ex: simple-alias-fn git-next-checkin 'invoke-alt-checkin'
 # Note: this is streamlined version of alias-fn intended as replacement for 'alias name=command' usages
 function simple-alias-fn {
     if [ "$3" != "" ]; then
@@ -193,7 +194,7 @@ function simple-alias-fn {
     fi
     local alias="$1"
     local command="$2"
-    eval "function $alias { $command \"\$@\"; }"
+    eval "function $alias { $command" '"$@"' "; }"
 }
 #................................................................................
 # General environment settings
@@ -207,12 +208,22 @@ cond-export DEBUG_LEVEL 3
 ## TOM-IDIOSYNCRATIC
 ## DEBUG: 
 ## OLD: cond-export TOM_DIR "/home/tomohara"
-cond-export TOM_DIR ~/tomohara
-if [ ! -d "$TOM_DIR" ]; then export TOM_DIR="$HOME"; fi
+# Note: ${BASH_SOURCE[0]}" is the scirpt being sourced. The array itself gives
+# the source files for all functions on the execution call stack.
+# See https://stackoverflow.com/questions/35006457/choosing-between-0-and-bash-source.
+alias_source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
+cond-export TOM_DIR "$alias_source_dir/.."
+if [ ! -d "$TOM_DIR" ]; then
+    echo "Warning unable to resolve TOM_DIR; using $HOME" 1>&2
+    export TOM_DIR="$HOME";
+fi
 #
-cond-export TOM_BIN "$TOM_DIR/bin"
-if [ ! -e "$TOM_BIN/tomohara-aliases.bash" ]; then echo "*** Unable to resolve Tom's bin directory ***"; fi
-alias tomohara-setup='source $TOM_BIN/tomohara-aliases.bash'
+master_alias_script="all-tomohara-aliases-etc.bash"
+cond-export TOM_BIN "$alias_source_dir"
+if [ ! -e "$TOM_BIN/$master_alias_script" ]; then
+    echo "Warning: Unable to find $master_alias_script in Tom's bin directory ()" 1>&2
+fi
+alias tomohara-setup='source $TOM_BIN/$master_alias_script'
 
 # Alias for startup-script tracing via startup-trace function
 if [ ! -e "$HOME/temp" ]; then
