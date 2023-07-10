@@ -18,8 +18,8 @@ fi
 cd "$(dirname "$0")"
 
 # Derive name for output file
-# Note: Uses unique temporary directory unless BATSPP_TEMP specified.
-# Note: ./temp subdirectry used because BatsPP generate many temp files
+# Note: Uses unique output subdir under ~/temp (or $BATSPP_OUTPUT).
+# Likewise, uses unique temp subdir under /tmp  (or $BATSPP_TEMP).
 timestamp=$(date '+%d%b%y-%H%M')
 TMP=${"TMP":-/tmp}
 BATSPP_OUTPUT="${BATSPP_TEMP:-"$HOME/temp/BatsPP-$timestamp"}"
