@@ -25,20 +25,31 @@ jobs:
   build:
     name: Debug Build and Run Tests
     ## TODO?: runs-on: ubuntu:act-20.04
-    runs-on: ubuntu-20.04
+    ## OLD: runs-on: ubuntu-20.04
     ## OLD: runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
-    container:
-      image: my-shell-scripts
-      options: --user=root
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+        ## TODO: os: [ubuntu-20.04, ubuntu-latest]
+        ## TODO: python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.9"]
+
+    ## TEST
+    ## NOTE: following is for images on the hub
+    ## container:
+    ##   image: my-shell-scripts
+    ##   options: --user=root
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout Repository
+      uses: actions/checkout@v3
 
     - name: Build docker image
       run: |
         ## OLD: docker build -t name:shell-scripts-dev -f- . <Dockerfile
-        docker build  --tag my-shell-scripts  -f- . <Dockerfile
+        docker build  --tag shell-scripts-image  -f- . <Dockerfile
 
     ## TEST
     - name: Configure Environment
@@ -53,4 +64,4 @@ jobs:
         ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
         ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts ubuntu:act-20.04
         ## TEST:
-        docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts my-shell-scripts
+        docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-image
