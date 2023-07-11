@@ -28,8 +28,11 @@ fi
 # note: normally this is down without tracing
 shopt -s expand_aliases
 $show_tracing && set -o xtrace
-source "${TOM_BIN:-/home/tomohara/bin}/tomohara-aliases.bash"
-source "${TOM_BIN:-/home/tomohara/bin}/tomohara-settings.bash"
-source "${TOM_BIN:-/home/tomohara/bin}/more-tomohara-aliases.bash"
-source "${TOM_BIN:-/home/tomohara/bin}/tomohara-proper-aliases.bash"
+source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
+source "$source_dir/tomohara-aliases.bash"
+if [ "${SOURCE_SETTINGS:-0}" = "1" ]; then
+    source "$source_dir/tomohara-settings.bash"
+fi
+source "$source_dir/more-tomohara-aliases.bash"
+source "$source_dir/tomohara-proper-aliases.bash"
 $was_tracing || set - -o xtrace
