@@ -5,6 +5,7 @@
 # usage: TOM_BIN=/home/tom/shell-script; source $TOM_BIN/all-tomohara-aliases.bash
 #
 # note:
+# - Omits tomohara-settings.bash unless SOURCE_SETTINGS=1,
 # - The env.options are TRACE_/VERBOSE_SOURCE rather than TRACE/VERBOSE in
 #   case sourcedvia a script which used the latter (see local-workflows.sh).
 #
@@ -29,6 +30,7 @@ fi
 shopt -s expand_aliases
 $show_tracing && set -o xtrace
 source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
+export TOM_BIN="$source_dir"
 source "$source_dir/tomohara-aliases.bash"
 if [ "${SOURCE_SETTINGS:-0}" = "1" ]; then
     source "$source_dir/tomohara-settings.bash"
