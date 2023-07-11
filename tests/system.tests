@@ -1,0 +1,13 @@
+# System wide tests
+
+# TODO: make sure version.txt in sync with git tag
+$ file_version=$(cat ./version.txt)
+# TODO: file_version =~ '^\d+\.d+\.\d+(.*)$'
+$ last_git_tag=$(cat ./git/tags/* | perl-grep '^\d+\.d+\.\d+(.*)$' | sort -rn | head -1)
+# TODO: last_git_tag =~ '^\d+\.d+\.\d+(.*)$'
+# note: python uses tuples to handle version comparisons
+$ more_recent=$(python -c "print(bool(tuple($file_version.split('.')) >= tuple($git_version.split('.'))))")
+$ $more_recent
+1
+
+
