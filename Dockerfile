@@ -54,8 +54,8 @@ RUN apt-get update && \
 
 # Install other stuff
 # note: this is to support logging into the images for debugging issues
-RUN apt-get update && \
-    apt-get install --yes emacs, kdiff3, less tcsh, zip || true;
+## TODO: apt-get update???
+RUN if [ "$DEBUG_LEVEL" -ge 4 ]; then apt-get install --yes emacs kdiff3 less tcsh zip || true; fi
 
 # Set the Python version to install
 ## TODO: keep in sync with .github/workflows
