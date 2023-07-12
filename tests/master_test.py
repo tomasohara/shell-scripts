@@ -64,22 +64,22 @@ def run_tests(thresholds):
         elif TEST_REGEX and not my_re.search(rf"{TEST_REGEX}", test_filename):
             debug.trace(6, f"Filtering test {test_filename} not matching TEST_REGEX ({TEST_REGEX})")
             include = False
-        if not  include:
+        if not include:
             continue
 
         # Collect test cases for the test
         ## BAD: cmd = f"pytest -k {test} --collect-only"
-        cmd = f"pytest --collect-only {test_path} "
-        result = subprocess.run(cmd, shell=True, text=True, capture_output=True, check=False)
-        debug.trace_object(6, result)
+        cmd = f"pytest --collect-only {test_path}"
+        collect_result = subprocess.run(cmd, shell=True, text=True, capture_output=True, check=False)
+        debug.trace_object(6, collect_result)
         total_tests = len(my_re.findall(r"<TestCaseFunction|<TestCaseClass|<Function|<Class",
-                                        result.stdout))
+                                        collect_result.stdout))
 
         # Run tests for the test
         cmd = f"pytest {test_path}"
-        result = subprocess.run(cmd, shell=True, text=True, capture_output=True, check=False)
-        debug.trace_object(6, result)
-        failed_tests = len(my_re.findall(r"FAILED", result.stdout))
+        run_result = subprocess.run(cmd, shell=True, text=True, capture_output=True, check=False)
+        debug.trace_object(6, run_result)
+        failed_tests = len(my_re.findall(r"FAILED", run_result.stdout))
         debug.assertion(failed_tests <= total_tests)
 
         # Calculate the number of allowed failures
@@ -92,6 +92,7 @@ def run_tests(thresholds):
         # Check if the number of failed tests exceeds the allowed threshold
         if total_tests == 0:
             print(f"Warning: No tests were found for test {test_path}.")
+            debug.trace_expr(5, collect_result.stdout, collect_result.stderr)
             continue
         module_failure = (failed_tests and (failed_tests <= allowed_failures))
         failed_percent = round_p2str(failed_tests / total_tests * 100)
