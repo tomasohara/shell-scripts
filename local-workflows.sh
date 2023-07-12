@@ -83,11 +83,12 @@ if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
     echo "Running Github Actions locally w/ $file"
     # shellcheck disable=SC2086
     ## TODO: act --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" -platform "$ACT_WORKFLOW" --workflows ./.github/workflows/"$file" $RUN_OPTS
-    act --verbose --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" -platform my-shell-scripts --workflows ./.github/workflows/"$file" $RUN_OPTS
+    ## TEST: act --verbose --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" -platform my-shell-scripts --workflows ./.github/workflows/"$file" $RUN_OPTS
+    act --verbose --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" --workflows ./.github/workflows/"$file" $RUN_OPTS
 fi
 
 # Run via docker directly
-if [ "${RUN_DOCKER:-1}" = "1" ]; then
+if [ "${RUN_DOCKER:-0}" = "1" ]; then
    echo "Running Tests via Docker"
    ## OLD: docker run -it --env DEBUG_LEVEL="$DEBUG_LEVEL" --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
    docker run -it --env DEBUG_LEVEL="$DEBUG_LEVEL" --mount type=bind,source="$(pwd)",target=/home/shell-scripts my-shell-scripts

@@ -76,6 +76,8 @@ SINGLE_STORE = system.getenv_bool("SINGLE_STORE", False,
                                   f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
 CLEAN_DEFAULT = system.getenv_bool("CLEAN_OUTPUT", not debug.detailed_debugging(),
                                    f"Whether to clean existing output by remove entire directories")
+TEST_DIR = system.getenv_value("TEST_DIR", None,
+                               "Directory with BatsPP test definitions")
 ## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
 if SINGLE_STORE:
     BATSPP_STORE = BATS_STORE = TXT_STORE = BATSPP_OUTPUT_STORE
@@ -100,7 +102,14 @@ def load_thresholds(filename):
 
 def main():
     """Entry point"""
-    files = msy.read_directory(".")
+
+    # Get files in test definition dir
+    # note: uses TEST_DIR or basename of this file, with "." as fallback
+    ## OLD: files = msy.read_directory(".")
+    test_path = system.real_path(TEST_DIR or ".")
+    # note: script should either run in ./tests dir or define TEST_DIR
+    debug.assertion(test_path.endswith("tests"))
+    files = msy.read_directory(test_path)
 
     # 0.1) CHECKING IF THE DIRECTORY EXISTS
     if not ESSENTIAL_DIRS_present:
@@ -157,7 +166,7 @@ def main():
             msy.exit("Error: running under admin account requires --force option, unless under docker shell-scripts-dev image")
         msy.print_stderr("FYI: not recommended to run under admin account")
 
-    # Cleanup up previous rusn
+    # Cleanup up previous runs
     # Warning: 'rm -rf' is a very dangerous command:
     # it should only be done in temporary directories (e.g., not under repo)
     if CLEAN_OPTION:

@@ -13,6 +13,7 @@ fi
 
 # Run the python tests and then the alias tests
 dir=$(dirname "${BASH_SOURCE[0]}")
+export PYTHONUNBUFFERED=1
 python3 "$dir"/master_test.py
 ## TODO: python3 "$dir"/batspp_report.py --text
 bash "$dir"/summary_stats.bash

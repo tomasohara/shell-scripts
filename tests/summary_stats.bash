@@ -21,7 +21,7 @@ cd "$(dirname "$0")"
 # Note: Uses unique output subdir under ~/temp (or $BATSPP_OUTPUT).
 # Likewise, uses unique temp subdir under /tmp  (or $BATSPP_TEMP).
 timestamp=$(date '+%d%b%y-%H%M')
-TMP=${"TMP":-/tmp}
+TMP=${TMP:-/tmp}
 BATSPP_OUTPUT="${BATSPP_TEMP:-"$HOME/temp/BatsPP-$timestamp"}"
 BATSPP_TEMP="${BATSPP_TEMP:-"$TMP/BatsPP-$timestamp"}"
 mkdir --parents "$BATSPP_OUTPUT" "$BATSPP_TEMP"
