@@ -14,7 +14,7 @@ import pytest
 from click.testing import CliRunner
 
 # Local modules
-from bash2python import Bash2Python as OPENAI_API_KEY
+from bash2python import OPENAI_API_KEY
 from bash2python_diff import main
 from mezcla import debug
 from mezcla.my_regex import my_re
