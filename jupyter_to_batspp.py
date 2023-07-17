@@ -81,7 +81,7 @@ Jupyter to Batspp
 This converts Jupyter to Batspp tests
 
 usage example:
-$ python3 --output ./result.batspp jupyter_to_batspp.py
+$ python3 jupyter_to_batspp.py tests/hello-world.ipynb
 """
 
 
@@ -101,6 +101,7 @@ from mezcla import system
 JUPYTER_FILE = 'jupyter-file'
 OUTPUT       = 'output'
 VERBOSE      = 'verbose'
+STDOUT       = 'stdout'
 
 # Other constants
 JUPYTER_EXTENSION = 'ipynb'
@@ -113,7 +114,8 @@ class JupyterToBatspp(Main):
     # Class-level member variables for arguments (avoids need for class constructor)
     jupyter_file = ''
     output       = ''
-    verbose      = True
+    verbose      = None
+    stdout       = None
 
 
     def setup(self):
@@ -122,12 +124,9 @@ class JupyterToBatspp(Main):
         # Check the command-line options
         self.jupyter_file = self.get_parsed_argument(JUPYTER_FILE, self.jupyter_file)
         self.output       = self.get_parsed_argument(OUTPUT, self.output)
-        self.verbose      = self.get_parsed_option(VERBOSE, self.verbose)
+        self.stdout       = self.get_parsed_argument(STDOUT, not self.output)
+        self.verbose      = self.get_parsed_option(VERBOSE, not self.stdout)
 
-        debug.trace(6, (f'jupyter_to_batspp.setup({self}) -'
-                        f'jupyter_file={self.jupyter_file},'
-                        f'output={self.output},'
-                        f'verbose={self.verbose}'))
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
 
@@ -199,15 +198,17 @@ class JupyterToBatspp(Main):
             self.output = my_re.sub(fr'\.{JUPYTER_EXTENSION}$', f'.{BATSPP_EXTENSION}',
                                     self.jupyter_file)
         # Save Batspp file
-        system.write_file(self.output, batspp_content)
+        if self.output:
+            system.write_file(self.output, batspp_content)
 
         # Print output
-        if self.verbose:
+        if self.verbose or self.stdout:
             print(batspp_content)
 
-        final_stdout = f'Resulting Batspp tests saved on {self.output}'
-        print('=' * len(final_stdout))
-        print(final_stdout)
+        if self.verbose:
+            final_stdout = f'Resulting Batspp tests saved on {self.output}'
+            system.print_stderr('=' * len(final_stdout))
+            system.print_stderr(final_stdout)
 
 
 def ensure_new_line(string):
@@ -218,8 +219,9 @@ def ensure_new_line(string):
 if __name__ == '__main__':
     app = JupyterToBatspp(
         description          = __doc__,
-        positional_arguments = [(JUPYTER_FILE, 'test file path')],
-        text_options         = [(OUTPUT,      f'target output .{BATSPP_EXTENSION} file path')],
-        boolean_options      = [(VERBOSE,      'show verbose debug')],
+        positional_arguments = [(JUPYTER_FILE, 'Test file path')],
+        text_options         = [(OUTPUT,      f'Target output .{BATSPP_EXTENSION} file path')],
+        boolean_options      = [(VERBOSE,      'Show verbose debug'),
+                                (STDOUT,      f'Print to standard output (default unless --{OUTPUT}')],
         manual_input         = True)
     app.run()
