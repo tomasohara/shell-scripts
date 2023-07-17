@@ -44,7 +44,8 @@ alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
 function clone-repo () {
     local url repo log
     url="$1"
-    repo=$(basename "$url")
+    ## OLD: repo=$(basename "$url")
+    repo=$(basename "$url" .git)
     log="_clone-$repo-$(T).log"
     ## OLD: command script "$log" git clone "$url"
     # maldito linux: -c option required for command for
