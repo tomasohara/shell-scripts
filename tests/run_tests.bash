@@ -12,6 +12,7 @@ if [ "${VERBOSE:-0}" = "1" ]; then
 fi
 
 # Run the python tests and then the alias tests
+# note: the python stdout and stderr streams are unbuffered so interleaved
 dir=$(dirname "${BASH_SOURCE[0]}")
 export PYTHONUNBUFFERED=1
 python3 "$dir"/master_test.py
