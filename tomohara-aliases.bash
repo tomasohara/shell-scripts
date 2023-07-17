@@ -886,7 +886,7 @@ alias ls-R='$LS -R >| ls-R.list; wc -l ls-R.list'
 alias ln-symbolic='ln --symbolic --verbose'
 alias link-symbolic-safe='ln-symbolic --no-target-directory --no-dereference'
 alias link-symbolic-regular='ln-symbolic'
-## TODO: alias ln-symbolic-force='link-symbolic --force'
+alias ln-symbolic-force='link-symbolic --force'
 
 #-------------------------------------------------------------------------------
 trace grep commands
