@@ -21,6 +21,8 @@ fi
 TMP=${TMP:-/tmp}
 DEFAULT_EXPORT_TO="$TMP/all_versions_exported"
 EXPORT_TO="${2:-$DEFAULT_EXPORT_TO}"
+pretty=false
+if [ "$PRETTY" = "1" ]; then pretty=true; fi
 
 # take relative path to the file to inspect
 GIT_PATH_TO_FILE="$1"
@@ -75,10 +77,18 @@ while read -r LINE; do
     # ex: 2021-05-09T22:27:20-05:00 d124b2a3c1de2b2c0cd834b0fa9097e871d7f141
     COUNT=$((COUNT + 1))
     COMMIT_DATE=$(echo "$LINE" | cut -d ' ' -f 1)
+    # optionaly, convert date into DDmmmYY-HHMM format
+    version_spec="$COUNT"
+    date_spec="COMMIT_DATE"
+    if $pretty; then
+	date_spec="$(date "+%d%b%y_%H%M" --date="$COMMIT_DATE")"
+	version_spec="v$COUNT"
+    fi
     COMMIT_SHA=$(echo "$LINE" | cut -d ' ' -f 2)
     ## DEBUG: echo "COUNT=$COUNT LINE=$LINE COMMIT_DATE=$COMMIT_DATE COMMIT_SHA=$COMMIT_SHA"
     ## OLD: $verbose && printf '.'
-    output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.$COUNT.$COMMIT_DATE"
+    ## OLD: output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.$COUNT.$COMMIT_DATE"
+    output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.${version_spec}-${date_spec}"
     git cat-file -p "$COMMIT_SHA:$REL_GIT_PATH_TO_FILE" > "$output_file"
     $verbose && echo "$output_file"
 done <"$info"
