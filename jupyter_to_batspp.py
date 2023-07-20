@@ -134,11 +134,15 @@ class JupyterToBatspp(Main):
         """Process main script"""
 
         # Get Jupyter content
-        debug.assertion(self.jupyter_file.endswith(JUPYTER_EXTENSION),
-                        f'the file {self.jupyter_file} must be an Jupyter notebook')
+        # TODO: add explicit error handling
         jupyter_content = system.read_file(self.jupyter_file)
+        debug.trace_expr(5, jupyter_content)
         debug.assertion(jupyter_content != '',
                         f'Error: {self.jupyter_file} not found or is empty')
+        is_jupyter_notebook = (self.jupyter_file.endswith(JUPYTER_EXTENSION) or
+                               '"cells:"' in jupyter_content)
+        debug.assertion(is_jupyter_notebook,
+                        f'the file {self.jupyter_file} must be an Jupyter notebook')
 
         # Format Jupyter string into JSON
         jupyter_json = json.loads(jupyter_content)
@@ -194,7 +198,7 @@ class JupyterToBatspp(Main):
         debug.trace(7, f'derived batspp content: {batspp_content!r}')
 
         # Set Batspp filename
-        if not  self.output:
+        if ((not self.output) and (not self.stdout)):
             self.output = my_re.sub(fr'\.{JUPYTER_EXTENSION}$', f'.{BATSPP_EXTENSION}',
                                     self.jupyter_file)
         # Save Batspp file
