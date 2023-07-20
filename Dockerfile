@@ -10,7 +10,8 @@
 #   TODO: --mount => --volume???
 # 3. [Optional] Run a bash shell using the created image:
 #   ## TODO ??? put repo under /mnt/shell-scripts and installed version under /home/shell-scripts
-#   $ docker run -it --rm --entrypoint='/bin/bash' --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+#   $ docker run -it --rm --entrypoint='/bin/bash' --mount type=bind,source="$(pwd)",target=/home/shell-scripts my-shell-scripts
+#   # note: might need to tag the image (maldito docker): see local-workflows.sh
 # 4. Remove the image:
 #   $ docker rmi shell-scripts-dev
 #
@@ -34,10 +35,20 @@
 FROM catthehacker/ubuntu:act-20.04
 
 # Set default debug level (n.b., use docker build --build-arg "arg1=v1" to override)
-ARG DEBUG_LEVEL=2
-## TODO: ARG GIT_BRANCH=""
-## HACK: use tom-dev due to stupid problems with act/docker
-ARG GIT_BRANCH="tom-dev"
+## TODO: ARG DEBUG_LEVEL=2
+ARG DEBUG_LEVEL=4
+
+# Set branch override: this is not working due to subtle problem with the tfidf package
+#   ValueError: '/home/tomohara/python/tfidf' is not in the subpath of '/tmp/pip-req-build-4wdbom6g'
+#   OR one path is relative and the other is absolute.
+# Note: this is intended to avoid having to publish an update to PyPI.
+##
+## TODO:
+ARG GIT_BRANCH=""
+## HACK: hardcode branch to tom-dev due to stupid problems with act/docker
+## DEBUG: ARG GIT_BRANCH="tom-dev"
+
+# Trace overridable settings
 RUN echo "DEBUG_LEVEL=$DEBUG_LEVEL; GIT_BRANCH=$GIT_BRANCH"
 
 # Set the working directory
@@ -108,11 +119,15 @@ ARG REQUIREMENTS=$WORKDIR/requirements.txt
 COPY requirements.txt $REQUIREMENTS
 
 # Install the project's dependencies
-RUN pip install --no-cache-dir -r $REQUIREMENTS
+RUN pip install --verbose --no-cache-dir --requirement $REQUIREMENTS
 
+# Display environment (e.g., for tracking down stupid pip problems)
+## TODO: RUN if [ "$DEBUG_LEVEL" -ge 5 ]; then printenv | sort; fi
+RUN printenv | sort
+#
 # Add local version of mezcla if debugging
 # ex: DEBUG_LEVEL=4 GIT_BRANCH=aviyan-dev local-workflows.sh
-RUN if [ "$GIT_BRANCH" != "" ]; then echo "Installing mezcla@$GIT_BRANCH"; pip install --no-cache-dir git+https://github.com/tomasohara/mezcla@$GIT_BRANCH; fi
+RUN if [ "$GIT_BRANCH" != "" ]; then echo "Installing mezcla@$GIT_BRANCH"; pip install --verbose --no-cache-dir git+https://github.com/tomasohara/mezcla@$GIT_BRANCH; fi
 
 # Clean up unnecessary files
 RUN apt-get autoremove -y && \
