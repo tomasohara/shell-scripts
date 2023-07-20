@@ -883,10 +883,13 @@ alias ls-R='$LS -R >| ls-R.list; wc -l ls-R.list'
 
 # link-symbolic-safe: creates symbolic link and avoids quirks with links to directories
 # EX: link-symbolic-safe /tmp temp-link; link-symbolic-safe --force ~/temp temp-link; ls -l temp-link | grep /tmp => ""
+# TODO3: decide on using ln-symbolic vs link-symbolic vs both
 alias ln-symbolic='ln --symbolic --verbose'
+alias link-symbolic=ln-symbolic
 alias link-symbolic-safe='ln-symbolic --no-target-directory --no-dereference'
 alias link-symbolic-regular='ln-symbolic'
 alias ln-symbolic-force='link-symbolic --force'
+alias link-symbolic-force=ln-symbolic-force
 
 #-------------------------------------------------------------------------------
 trace grep commands
