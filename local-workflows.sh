@@ -12,6 +12,21 @@
 # Warning:
 # - *** Changes need to be synchronized in 3 places: Dockerfile, local-workflow.sh, and .github/workflow/*.yml!
 #
+#--------------------------------------------------------------------------------
+# Aside: [maldito] docker image info
+#
+# after RUN_WORKFLOW:
+# $ docker images
+# REPOSITORY            TAG         IMAGE ID       CREATED       SIZE
+# <none>                <none>      e5423ec78b75   6 hours ago   1.76GB
+# catthehacker/ubuntu   act-20.04   02147d5b7ca9   2 weeks ago   1.11GB
+#
+# $ docker tag $(docker images | head -1) my-shell-scripts
+# $ docker images
+# ...
+# my-shell-scripts      latest      e5423ec78b75   7 hours ago   1.76GB
+# 
+#
 
 
 # Variables
@@ -85,6 +100,8 @@ if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
     ## TODO: act --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" -platform "$ACT_WORKFLOW" --workflows ./.github/workflows/"$file" $RUN_OPTS
     ## TEST: act --verbose --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" -platform my-shell-scripts --workflows ./.github/workflows/"$file" $RUN_OPTS
     act --verbose --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" --workflows ./.github/workflows/"$file" $RUN_OPTS
+    # TODO: docker tag IMAGE-ID my-shell-scripts
+    # EX (see above): docker tag $(docker images --quiet | head -1) my-shell-scripts
 fi
 
 # Run via docker directly
