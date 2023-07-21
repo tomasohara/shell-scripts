@@ -86,7 +86,7 @@ while (<>) {
 	$has_error = &TRUE;
 	$match_info = "E1 [$&]";
 	s/$NULL/^@/g;		# change null char '^@' to "^@" ('^' & '@')
-	&debug_print(&TL_VERY_VERBOSE, "1. has_error=$has_error\n");
+	&debug_print(&TL_MOST_DETAILED, "1. has_error=$has_error\n");
     }
 
     # Check for known errors
@@ -96,7 +96,7 @@ while (<>) {
     # TODO: rework error in line test to omit files
     # NOTE: It can be easier to add special-case rules rather than devise a general regex;
     # ex: 'error' occuring within a line even at word boundaries can be too broad.
-    elsif (## DEBUG: &debug_print(7, "here\n", 7) &&
+    elsif (## DEBUG: &debug_print(&TL_MOST_DETAILED, "here\n", 7) &&
 	   ## OLD: /^(ERROR|Error)\b/	   
 	   /^(Error)\b/i
 	   ## OLD: || /command not found/i
@@ -182,7 +182,7 @@ while (<>) {
 	   ) {
 	$has_error = &TRUE;
 	$match_info = "E2 [$&]";
-	&debug_print(&TL_VERY_VERBOSE, "2. has_error=$has_error\n");
+	&debug_print(&TL_MOST_DETAILED, "2. has_error=$has_error\n");
     }
 
     # Check for warnings and starred messages
@@ -206,18 +206,18 @@ while (<>) {
 	    || ($asterisks && /\*\*\*/))) {
 	$has_error = &TRUE;
 	$match_info = "W1 [$&]";
-	&debug_print(&TL_VERY_VERBOSE, "3. has_error=$has_error\n");
+	&debug_print(&TL_MOST_DETAILED, "3. has_error=$has_error\n");
     }
 
     # Filter certain case
     if ($has_error && $skip_ruby_lib && /\/usr\/lib\/ruby/) {
 	&debug_print(&TL_DETAILED, "Skipping ruby library error at line $. ($_)\n");
 	$has_error = &FALSE;
-	&debug_print(&TL_VERY_VERBOSE, "4. has_error=$has_error\n");
+	&debug_print(&TL_MOST_DETAILED, "4. has_error=$has_error\n");
     }
 
     # If an error, then display line preceded by pre-context
-    &debug_print(&TL_VERY_VERBOSE, "final has_error=$has_error\n");
+    &debug_print(&TL_MOST_DETAILED, "final has_error=$has_error\n");
     if ($has_error) {
 	# Show up the N preceding context lines, unless there is an overlap
 	# with previous error context in which no pre-context is shown.
