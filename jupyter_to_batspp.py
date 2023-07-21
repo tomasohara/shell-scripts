@@ -140,7 +140,7 @@ class JupyterToBatspp(Main):
         debug.assertion(jupyter_content != '',
                         f'Error: {self.jupyter_file} not found or is empty')
         is_jupyter_notebook = (self.jupyter_file.endswith(JUPYTER_EXTENSION) or
-                               '"cells:"' in jupyter_content)
+                               '"cells":' in jupyter_content)
         debug.assertion(is_jupyter_notebook,
                         f'the file {self.jupyter_file} must be an Jupyter notebook')
 
