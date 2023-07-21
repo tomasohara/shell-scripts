@@ -223,7 +223,11 @@ alias-fn screen-reattach 'screen -d -RR'
 #................................................................................
 # Idiosyncratic stuff (n.b., doubly so given "tomohara-proper" part of filename)
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
-alias all-tomohara-settings='tomohara-aliases; tomohara-settings; more-tomohara-aliases; tomohara-proper-aliases'
+#
+## OLD: alias all-tomohara-settings='tomohara-aliases; tomohara-settings; more-tomohara-aliases; tomohara-proper-aliases'
+alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
+alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
+#
 alias kill-kdiff3='kill-it kdiff3'
 alias kill-firefox='kill-it firefox'
 alias kill-jupyter='kill-it jupyter'
