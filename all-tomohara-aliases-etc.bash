@@ -29,6 +29,7 @@ fi
 # note: normally this is down without tracing
 shopt -s expand_aliases
 $show_tracing && set -o xtrace
+##
 source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
 export TOM_BIN="$source_dir"
 source "$source_dir/tomohara-aliases.bash"
@@ -37,4 +38,8 @@ if [ "${SOURCE_SETTINGS:-0}" = "1" ]; then
 fi
 source "$source_dir/more-tomohara-aliases.bash"
 source "$source_dir/tomohara-proper-aliases.bash"
+##
+## TEST: for testing alias tests (see tests/batspp_report.py)
+unalias link-symbolic link-symbolic-force link-symbolic-regular link-symbolic-safe ln-symbolic ln-symbolic-force
+##
 $was_tracing || set - -o xtrace
