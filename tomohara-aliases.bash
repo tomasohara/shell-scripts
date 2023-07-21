@@ -2901,8 +2901,10 @@ alias which-python='which python'
 # run-jupyter-notebook-posthoc(): try to show log info previously not shown via run-jupyter-notebook
 # TODO: enable multiple-versions backups
 function run-jupyter-notebook-posthoc() {
-    local log
-    log="$TEMP/jupyter-$(TODAY).log"
+    ## OLD:
+    ## local log
+    ## log="$TEMP/jupyter-$(TODAY).log"
+    local log="$1"
     echo "checking log: $log"
     # TODO: resolve problem extracting URL
     # TEMP:
@@ -2917,7 +2919,7 @@ function run-jupyter-notebook () {
     local port="$1"; if [ "$port" = "" ]; then port=8888; fi
     local ip="$2"; if [ "$ip" = "" ]; then ip="127.0.0.1"; fi
     local log
-    log="$TEMP/jupyter-$(TODAY).log"
+    log="$TEMP/jupyter-p$port-$(TODAY).log"
     # note: clears notebook token to disable authentication
     jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
     ## OLD
@@ -2933,7 +2935,7 @@ function run-jupyter-notebook () {
     ## # Show URL
     ## echo -n "URL: "
     ## extract-matches 'http:\S+' "$log" | sort -u    
-    run-jupyter-notebook-posthoc
+    run-jupyter-notebook-posthoc "$log"
 }
 alias jupyter-notebook-redir=run-jupyter-notebook
 alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'
