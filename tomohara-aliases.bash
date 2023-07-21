@@ -888,7 +888,7 @@ alias ln-symbolic='ln --symbolic --verbose'
 alias link-symbolic=ln-symbolic
 alias link-symbolic-safe='ln-symbolic --no-target-directory --no-dereference'
 alias link-symbolic-regular='ln-symbolic'
-alias ln-symbolic-force='link-symbolic --force'
+alias ln-symbolic-force='ln-symbolic --force'
 alias link-symbolic-force=ln-symbolic-force
 
 #-------------------------------------------------------------------------------
