@@ -107,6 +107,8 @@ fi
 #
 if [ "$1" = "" ]; then
     script=$(basename "$0")
+    ## TODO: remove following which is only meant for when ./template.bash run
+    if [ "$script" = "template.bash" ]; then echo "Warning: not intended for standalone usage"; fi;
     ## TODO: if [ $script ~= *\ * ]; then script='"'$script'"; fi
     ## TODO: base=$(basename "$0" .bash)
     echo ""

@@ -17,6 +17,8 @@
 ## TODO: Revise with respect to more current scripts (e.g., start.sh).
 if ("$1" == "") then
     set script_name = `basename $0`
+    ## TODO: remove following which is only meant for when ./template.csh run
+    if ("$script_name" == "template.csh") echo "Warning: not intended for standalone usage"
     ## set log_name = `echo "$script_name" | perl -pe "s/.sh/.log/;"`
     echo ""
     echo "usage: `basename $0` [options]"
