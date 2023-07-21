@@ -26,6 +26,9 @@
 # - tools like OpenAI Codex and GitHub Copliot can be used to translate Bash constructs
 #     https://github.com/features/copilot
 # - For sake of simplicity, not all of the syntax is covered. (Likewise below.)
+# - Running bash in a fresh environment:
+#      env --ignore-environment bash --noprofile --norc
+#   See https://unix.stackexchange.com/questions/48994/how-to-run-a-program-in-a-clean-environment-in-bash.
 # TODO:
 #  - variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
 #     note: EXPR is C style;
