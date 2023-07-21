@@ -40,6 +40,17 @@ source "$source_dir/more-tomohara-aliases.bash"
 source "$source_dir/tomohara-proper-aliases.bash"
 ##
 ## TEST: for testing alias tests (see tests/batspp_report.py)
-unalias link-symbolic link-symbolic-force link-symbolic-regular link-symbolic-safe ln-symbolic ln-symbolic-force
+##
+if [ "${DIR_ALIAS_HACK:-0}" = "1" ]; then
+    unalias link-symbolic link-symbolic-force link-symbolic-regular
+    unalias link-symbolic-safe ln-symbolic ln-symbolic-force
+    #
+    unalias compress-this-dir create-index-this-dir debug-index-this-dir debug-index-this-dir-by-type debug-search-this-dir delete-dir delete-dir-force em-dir em-this-dir explore-dir fix-dir-permissions index-this-dir index-this-dir-by-type recent-tar-this-dir remove-dir remove-dir-force search-this-dir tar-this-dir-dated ununcompress-this-dir
+    #
+    unalias glob-link glob-subdirs symlinks-proper
+    #
+    for f in aux-debug-index-dir aux-debug-index-type-in-dir aux-debug-search-dir aux-index-dir aux-index-type-in-dir aux-search-dir basename-with-dir clean-tex-dir compress-dir copy-readonly-to-dir cs-download-dir dir get-python-lint-dir git-move-to-dir new-tar-this-dir set-title-to-current-dir show-path-dir tar-dir tar-just-dir tar-just-this-dir tar-this-dir tex-dir uncompress-dir; do unset -f $f; done
+    #
+fi
 ##
 $was_tracing || set - -o xtrace
