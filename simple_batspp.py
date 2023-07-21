@@ -18,6 +18,13 @@
 # - See https://www.rexegg.com/regex-quickstart.html for comprehensive cheatsheet.
 # - See https://regex101.com for a tool to explain regex's.
 #................................................................................
+# Tips:
+# - The parser is regex based so certain contructs confuse it.
+# - Use separate blocks for comments following a command.
+#      [ echo a; # TODO: echo b; ]   => [ echo a; ] [ # TODO: echo b; ]
+#   where the brackets indicate distinct text paragraph blocks or Jupyter cells.
+# - Run the Bash-formatted output through shellcheck (e.g., BASH_EVAL=1 OMIT_TRACE=1).
+#................................................................................
 #
 ## TODO1:
 ## - Add option to use bash-compiant syntax for tests; via https://bats-core.readthedocs.io/en/stable/gotchas.html
@@ -138,6 +145,8 @@ TEST_FILE = system.getenv_bool("TEST_FILE", False,
                                "Treat input as example-base test file, not a bash script")
 BASH_EVAL = system.getenv_bool("BASH_EVAL", False,
                                "Evaluate tests via bash rather than bats: provides quicker results and global context")
+MAX_ESCAPED_LEN = system.getenv_int("MAX_ESCAPED_LEN", 64,
+                                    "Maximum length for escaped actual vs. expected")
 #
 # Shameless hacks
 ## TEST: GLOBAL_SETUP = system.getenv_text("GLOBAL_SETUP", " ",
@@ -291,7 +300,7 @@ class Batspp(Main):
 
 
     # Global States
-    is_test_file = False
+    is_test_file = None
     file_content = ''
     eval_prog = ("bats" if not BASH_EVAL else "bash")
     bats_content = f'#!/usr/bin/env {eval_prog}\n\n\n'
@@ -314,11 +323,13 @@ class Batspp(Main):
                          f'force: {self.force}, '
                          f'jupyter: {self.jupyter}, '
                          f'verbose: {self.verbose}'))
+        debug.trace_object(T8, self, label=f"{self.__class__.__name__} instance")
 
 
     def run_main_step(self):
         """Process main script"""
         # TODO4: remove temp files unless debugging
+        debug.trace_object(T7, f"{self.__class__.__name__}.run_main_step()")
 
         # Optionally convert Jupyter notebook (.ipynb) to BatsPP file (.batspp)
         if self.jupyter:
@@ -333,6 +344,10 @@ class Batspp(Main):
         # Check if is test of shell script file
         self.is_test_file = (TEST_FILE or self.testfile.endswith(BATSPP_EXTENSION))
         debug.trace(T7, f'batspp - {self.testfile} is a test file (not shell script): {self.is_test_file}')
+        ## TODO: debug.assertion(self.is_test_file == Batspp.is_test_file)
+        debug.assertion(self.is_test_file == Batspp.is_test_file, assert_level=T8)
+        # TEMP: make sure global same as instance
+        Batspp.is_test_file = self.is_test_file
 
         # Read file content
         self.file_content = system.read_file(self.testfile)
@@ -383,8 +398,10 @@ class Batspp(Main):
             debug.trace(T7, f'batspp - running test {self.temp_file}')
             debug.assertion(not (BASH_EVAL and BATS_OPTIONS.strip()))
             eval_prog = ("bats" if not BASH_EVAL else "bash")
-            # note: uses empty stdin in case of buggy tests (to avoid hangup)
-            bats_output = gh.run(f'{eval_prog} {BATS_OPTIONS} {batsfile} < /dev/null')
+            # note: uses empty stdin in case of buggy tests (to avoid hangup);
+            # uses .eval.log to avoid conflict with batspp_report.py
+            log_file = self.temp_file + ".eval.log"
+            bats_output = gh.run(f'{eval_prog} {BATS_OPTIONS} {batsfile} < /dev/null 2> {log_file}')
             print(bats_output)
             debug.assertion(not my_re.search(r"^0 tests", bats_output, re.MULTILINE))
 
@@ -527,7 +544,7 @@ class CustomTestsToBats:
         self._setup_funct   = None
         self._test_id       = self.next_id()
         self._indent_used   = None
-        self.is_test_file   = False
+        self.is_test_file   = None
 
         # Add optional header and trailer patterns
         self._patterns = patterns
@@ -538,6 +555,7 @@ class CustomTestsToBats:
             ## TODO: trailer =  r'(?#trailer  )(?:# *End[^\n]*\n)'
             trailer =  r'(?#trailer  )'
             self._patterns = [header] + patterns + [trailer]
+        debug.trace_object(T8, self, label=f"{self.__class__.__name__} instance")
         
     def next_id(self):
         """Return next ID for test"""
@@ -630,6 +648,8 @@ class CustomTestsToBats:
         """Convert tests to bats format, returning test text and title"""
         entire, title, setup, actual, expected = test
         debug.trace_expr(T6, entire, title, setup, actual, expected, prefix="_convert_to_bats: ", delim="\n")
+        debug.assertion(not my_re.search(r"^\$", expected, flags=re.MULTILINE),
+                        f"The expected output shouldn't have $ prompt at start of line: {expected!r}")
         (actual, expected) = self.merge_continuation(actual, expected)
 
         # Process title
@@ -721,10 +741,29 @@ class CustomTestsToBats:
         debug_text = ""
         if not OMIT_TRACE:
             verbose_print = '| hexview.perl' if  self._verbose else ''
-            debug_text = (f'\techo "==========" ${actual!r} "=========="\n'
-                          f'\t{actual_function} {verbose_print}\n'
-                          f'\techo "=========" ${expected!r} "========="\n'
-                          f'\t{expected_function} {verbose_print}\n'
+            #
+            def esc(text, max_len=None):
+                """Escape text for printing with single quotes replaced with doubel
+                Note: Uses string representation (repr), up to MAX_LEN characters;
+                intended for bash echo inside single quoted string, which precludes use of \'
+                """
+                ## TODO: single quoted text with unicode prime symbol
+                ## TEST: return text.replace("'", '\\"')
+                ## TODO: result = repr(text).replace("'", "\u2032")         # U+2032: prime (′)
+                if max_len is None:
+                    max_len = MAX_ESCAPED_LEN
+                result = gh.elide(repr(text).replace("'", '"'), max_len=max_len)
+                debug.trace(T9, f"esc({text!r} => {result}")
+                return result
+            #
+            # note: actual here is the code
+            # TODO1: only evaluate functions once in case there are side effects
+            debug_text = (f"\techo '========== actual: {esc(actual)} =========='\n" +   
+                          f"\t{actual_function}\n" +
+                          (f"\t{actual_function} {verbose_print}\n" if self._verbose else "") +
+                          f"\techo '========== expect: {esc(expected)} =========='\n" +
+                          f"\t{expected_function}\n" +
+                          (f"\t{expected_function} {verbose_print}\n" if self._verbose else "") +
                           '\techo "============================"\n')
 
         # Construct bats tests
@@ -880,6 +919,10 @@ class CustomTestsToBats:
             # Add global setup section directly to BATS output mostly as is (except for prompt removal)
             # pylint: disable=no-member
             if re.search(r"^\s*# Global Setup", test.entire, flags=(re.MULTILINE | re.IGNORECASE)):
+                debug.trace_expr(T7, test.entire)
+                entire_code = my_re.sub(r"^\s*\n", "", test.entire, flags=re.MULTILINE)
+                debug.assertion(not my_re.search(r"^([^\$#])", entire_code, flags=re.MULTILINE),
+                                "Global setup should not have expected output")
                 global_setup = my_re.sub(r'^\s*\$\s*', '', test.entire, flags=re.MULTILINE)
                 debug.trace_expr(T6, global_setup)
                 bats_tests += global_setup + "\n"
@@ -952,7 +995,7 @@ class CommandTests(CustomTestsToBats):
                 r'(?#setup    )((?:^ *\# *Setup\n)'        \
                               r'(?:^ *\#? *\$ +[^\n]+\n)*' \
                               r'(?:^ *\# *Actual\n))?',
-                fr'(?#actual   )(^ *{comment}? *\$ +[^\n]+\n)',    # command line [actual]
+                fr'(?#actual   )((?:^ *{comment}? *\$ +[^\n]+\n)+)', # command line(s) [actual]
                 r'(?#expected )(.*)',                              # expected output
                 r'(?#end      )^ *\#?\s*\n']                       # end test (blank line)
 
