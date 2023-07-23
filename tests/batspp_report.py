@@ -190,9 +190,10 @@ def main():
         source_spec = (f"--source '{DEFINITIONS_SCRIPT}'" if DEFINITIONS_SCRIPT else "")
         if USE_SIMPLE_BATSPP:
             # note: adds sentinels around paragraph segments for simpler parsing;
-            # uses Bash instead of Bats (to bypass need for global setup sections)
-            # and copies ./tests files into bats test dir (under temp).
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 FORCE_RUN={FORCE_OPTION} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            # uses Bash instead of Bats (to bypass need for global setup sections);
+            # copies ./tests files into bats test dir (under temp); retains outer
+            # quotation marks in output; uses single test directory; passes along --force option
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} 2> {log_file}")
         debug.code(4, lambda: gh.run(f"check_errors.perl {log_file}"))
