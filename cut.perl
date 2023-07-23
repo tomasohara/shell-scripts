@@ -65,6 +65,7 @@ if ($fix) {
 }
 
 my(@fields);
+my($num_columns) = 0;
 
 # Extract fields from each line of input
 while (<>) {
@@ -82,8 +83,10 @@ while (<>) {
     $line = &encode_delimiter($line);
     my(@columns) = split(/$delimiter/, $line);
     &trace_array(\@columns, &TL_VERY_DETAILED, "\@columns");
-    if (! defined($fields[0])) {
-	@fields = &derive_fields($field_spec, scalar @columns);
+    my($new_num_columns) = scalar @columns;
+    if ($new_num_columns != $num_columns) {
+	$num_columns = $new_num_columns;
+	@fields = &derive_fields($field_spec, $num_columns);
     }
 
     # Print each of column entries for the fields specified
