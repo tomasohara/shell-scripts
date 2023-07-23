@@ -553,6 +553,8 @@ function reset-prompt {
     local new_PS_symbol="$*"
     ## OLD:
     if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="${DEFAULT_PS_SYMBOL:-$PS_symbol}"; fi
+    # Do nothing if empty
+    if [ "$new_PS_symbol" = "" ]; then return; fi    
     ## TODO: if [ "$new_PS_symbol" = "" ]; then echo $'Usage: reset-prompt symbol\nex: reset-prompt §"\n'; return; fi
     ## TODO: add options to reset PS1 and to list good symbols for prompts
     # Make the change
@@ -864,12 +866,16 @@ function sublinks-alpha () { $LS $(dir_options_sans_t) "$@" 2>&1 | $GREP ^l | $P
 #
 alias symlinks='sublinks'
 # symlinks-proper: just show file name info for symbolic links, which starts at column 43
-alias symlinks-proper='symlinks | cut --characters=43-'
+## OLD: alias symlinks-proper='symlinks | cut --characters=43-'
 #
 ## OLD: function sublinks-proper { sublinks "$@" | cut --characters=42-  | $PAGER; }
-ls_filename_col=40
-if [ "$(under-macos)" = "1" ]; then ls_filename_col=42; fi
-function sublinks-proper { sublinks "$@" | cut --characters=${ls_filename_col}-  | $PAGER; }
+## BAD
+## ls_filename_col=40
+## if [ "$(under-macos)" = "1" ]; then ls_filename_col=42; fi
+## function sublinks-proper { sublinks "$@" | cut --characters=${ls_filename_col}-  | $PAGER; }
+## example: "lrwxrwxrwx   1 tomohara   20 2023-06-23 16:50 mezcla -> python/Mezcla/mezcla"
+##           1            2 3          4  5          6     7
+function sublinks-proper { sublinks --time-style=long-iso "$@" | cut.perl -fix -fields="7-" - | tr $'\t' ' ' | $PAGER; }
 alias symlinks-proper=sublinks-proper
 #
 alias glob-links='find . -maxdepth 1 -type l | sed -e "s/.\///g"'
