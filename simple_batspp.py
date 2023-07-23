@@ -39,6 +39,7 @@
 ## - Warn if expecting command and non-comment and non-$ line encounters (e.g., Tom's funky ¢ prompt)
 ## - Stay in synh with Batspp:
 ##   https://github.com/LimaBD/batspp/tree/main/tests/cases
+## - Use gh.form_path consistently (n.b., someday this might run under Window).
 ## TODO4:
 ## - Integrate features from similar utilities:
 ##   https://pypi.org/project/docshtest/
@@ -147,6 +148,8 @@ BASH_EVAL = system.getenv_bool("BASH_EVAL", False,
                                "Evaluate tests via bash rather than bats: provides quicker results and global context")
 MAX_ESCAPED_LEN = system.getenv_int("MAX_ESCAPED_LEN", 64,
                                     "Maximum length for escaped actual vs. expected")
+GLOBAL_TEST_DIR =  system.getenv_bool("GLOBAL_TEST_DIR", False,
+                                      "Use single directory for tests")
 #
 # Shameless hacks
 ## TEST: GLOBAL_SETUP = system.getenv_text("GLOBAL_SETUP", " ",
@@ -167,8 +170,11 @@ USE_INDENT_PATTERN = system.getenv_bool("USE_INDENT_PATTERN", False,
 ## Bruno: can you explain this pattern?
 INDENT_PATTERN = r'^[^\w\$\(\n\{\}]'               # note: modified in __process_tests
 BATSPP_EXTENSION = '.batspp'
-# Trace levels either go from 4 .. 7 or from 6 .. 9
-T6 = system.getenv_int("T6", 6,
+# Trace levels usually go from from 6 .. 9, but from 4 .. 7 for tom, tohara, etc.
+USER = system.getenv_text("USER", "user",
+                          "User name")
+T6_DEFAULT = (6 if not USER.startswith("to") else 4)
+T6 = system.getenv_int("T6", T6_DEFAULT,
                        "Trace level to use for T6")
 T7 = (T6 + 1)
 T8 = (T7 + 1)
@@ -334,8 +340,9 @@ class Batspp(Main):
         # Optionally convert Jupyter notebook (.ipynb) to BatsPP file (.batspp)
         if self.jupyter:
             debug.assertion(self.testfile.endswith("ipynb"))
-            temp_batspp_file = self.temp_file + ".batspp"
-            gh.run(f"jupyter_to_batspp.py --output '{temp_batspp_file}' '{self.testfile}'")
+            temp_batspp_file = self.temp_file + BATSPP_EXTENSION
+            log_file = temp_batspp_file + ".log"
+            gh.run(f"jupyter_to_batspp.py --output '{temp_batspp_file}' '{self.testfile}' 2> {log_file}")
             ## DEBUG (tracking down TEMP_FILE issue):
             ## gh.run(f"cp -v {temp_batspp_file} /tmp")
             ## debug.assertion(system.file_exists(gh.form_path("/tmp", gh.basename(temp_batspp_file, temp_batspp_file))))
@@ -403,6 +410,7 @@ class Batspp(Main):
             log_file = self.temp_file + ".eval.log"
             bats_output = gh.run(f'{eval_prog} {BATS_OPTIONS} {batsfile} < /dev/null 2> {log_file}')
             print(bats_output)
+            system.print_stderr(debug.call(4, gh.run, f"check_errors.perl {log_file}") or "")
             debug.assertion(not my_re.search(r"^0 tests", bats_output, re.MULTILINE))
 
 
@@ -432,7 +440,7 @@ class Batspp(Main):
         enable_aliases = (not DISABLE_ALIASES)
         if not enable_aliases:
             all_content = (self.file_content + (system.read_file(self.source) if self.source else ""))
-            debug.assertion(re.search(r"alias \w+\s*=", all_content))
+            debug.assertion(re.search(r"(alias \S+ =)|(function \S+ \(\) \{)", all_content, flags=my_re.VERBOSE))
         if enable_aliases:
             self.bats_content += ('# Enable aliases\n'
                                   'shopt -s expand_aliases\n\n')
@@ -545,6 +553,7 @@ class CustomTestsToBats:
         self._test_id       = self.next_id()
         self._indent_used   = None
         self.is_test_file   = None
+        self.num_tests      = 0
 
         # Add optional header and trailer patterns
         self._patterns = patterns
@@ -679,13 +688,18 @@ class CustomTestsToBats:
 
         # Process setup commands
         # Note: set COPY_DIR to copy files in current dir to temp. dir.
-        ## TODO: temp_dir = Main.temp_base
-        gh.full_mkdir(TEMP_DIR)
+        ## TODO: temp_dir = Main.temp_base; put copy in setup if GLOBAL_TEST_DIR
+        debug.assertion(BASH_EVAL or not GLOBAL_TEST_DIR)
+        test_subdir = unspaced_title if not GLOBAL_TEST_DIR else "test-dir"
+        test_folder = gh.form_path(TEMP_DIR, test_subdir)
+        gh.full_mkdir(test_folder)
+        copy_dir = (COPY_DIR and ((not GLOBAL_TEST_DIR) or (self.num_tests == 0)))
+        self.num_tests += 1
         setup_text = (
                       ## TEST: ("" if not GLOBAL_SETUP.strip() else ("\t" + GLOBAL_SETUP + ";\n")) +
-                      f'\ttestfolder="{TEMP_DIR}/{unspaced_title}"\n' +
+                      f'\ttestfolder="{test_folder}"\n' +
                       f'\tmkdir --parents "$testfolder"\n' +
-                      (f'\tcommand cp -R ./. "$testfolder"\n' if COPY_DIR else '') +
+                      (f'\tcommand cp -R ./. "$testfolder"\n' if copy_dir else '') +
                       # note: warning added for sake of shellcheck
                       f'\tbuiltin cd "$testfolder" || echo Warning: Unable to "cd $testfolder"\n')
         setup_sans_prompt = my_re.sub(r'^\s*\$', '\t', setup, flags=my_re.MULTILINE)
@@ -697,22 +711,24 @@ class CustomTestsToBats:
         expected_label = 'expected' if self._assert_equals else 'not_expected'
         setup_label   = 'setup'
 
-
         # Process assertion
         assertion_text = "==" if self._assert_equals else "!="
 
-
         # Process functions
         actual_function   = f'{unspaced_title}-{actual_label}'
+        actual_var = f'{actual_function}-result'.replace("-", "_")
         expected_function = f'{unspaced_title}-{expected_label}'
+        expected_var = f'{expected_function}-result'.replace("-", "_")
         setup_function    = None
         functions_text    = ''
         functions_text   += self._get_bash_function(actual_function, actual)
         # Note: to minimize issues with bash syntax, a bash here-document is used (e.g., <<END\n...\nEND\n).
         # TOOO?: Use <<- variant so that leading tabs are ingored.
         # TODO: use an external file (as the @here might fail if the example uses << as well)
-        expected_output = ('\tcat <<END_EXPECTED\n' +
-                           (expected + "\n") +
+        # Note: The here-document delimiter is quoted to block variable interpolation
+        #    https://stackoverflow.com/questions/4937792/using-variables-inside-a-bash-heredoc
+        expected_output = ('\tcat <<"END_EXPECTED"\n' +
+                           ((expected + "\n") if expected else "") +
                            'END_EXPECTED')
         functions_text   += self._get_bash_function(expected_function, expected_output,
                                                     output=True)
@@ -737,6 +753,12 @@ class CustomTestsToBats:
             ## TODO: self._setup_funct = None
             pass
 
+        # Get actual and expected results
+        # TODO: use helper bash function to minimize boilerplate code
+        main_body = (f"\tlocal {actual_var} {expected_var}\n" +
+                     f'\t{actual_var}="$({actual_function})"\n' +
+                     f'\t{expected_var}="$({expected_function})"\n')
+        
         ## Process debug
         debug_text = ""
         if not OMIT_TRACE:
@@ -756,28 +778,29 @@ class CustomTestsToBats:
                 debug.trace(T9, f"esc({text!r} => {result}")
                 return result
             #
-            # note: actual here is the code
-            # TODO1: only evaluate functions once in case there are side effects
-            debug_text = (f"\techo '========== actual: {esc(actual)} =========='\n" +   
-                          f"\t{actual_function}\n" +
-                          (f"\t{actual_function} {verbose_print}\n" if self._verbose else "") +
+            # note: 'actual' here is the code, but 'expected' is the output
+            debug_text = ('\techo ""\n' +
+                          f"\techo '========== actual: {esc(actual)} =========='\n" +   
+                          f'\techo "${actual_var}"\n' +
+                          (f'\t"${actual_var}" {verbose_print}\n' if self._verbose else "") +
                           f"\techo '========== expect: {esc(expected)} =========='\n" +
-                          f"\t{expected_function}\n" +
-                          (f"\t{expected_function} {verbose_print}\n" if self._verbose else "") +
+                          f'\techo "${expected_var}"\n' +
+                          (f'\t"${expected_var}" {verbose_print}\n' if self._verbose else "") +
                           '\techo "============================"\n')
 
         # Construct bats tests
         misc_code = ""
         if not OMIT_MISC:
             misc_code = (
-                f'\t# ???: {actual!r}=$({actual_function})\n' +         # TODO: fix (Bruno, what is for?)
-                f'\t# ???: {expected!r}=$({expected_function})\n')      # TODO: fix (ditto)
+                f'\t# actual {{ {actual!r} }} => "${actual_var}"\n' +
+                f'\t# expect {{ {expected!r} }} => "${expected_var}"\n')
         test_header = (f'@test "{title}"' if not BASH_EVAL else f'function {title}')
         result = (f'{test_header} {{\n' +
                   (f'{setup_text}' if not use_setup_function else setup_call) +
+                  f'{main_body}' +
                   f'{debug_text}' +
                   misc_code + 
-                  f'\t[ "$({actual_function})" {assertion_text} "$({expected_function})" ]\n' +
+                  f'\t[ "${actual_var}" {assertion_text} "${expected_var}" ]\n' +
                   f'}}\n\n' +
                   f'{functions_text}\n')
 
