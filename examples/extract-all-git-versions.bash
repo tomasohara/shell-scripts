@@ -30,7 +30,9 @@ GIT_PATH_TO_FILE="$1"
 ## OLD: USAGE=$'\nNote:\n- cd to the root of your git proj, as follows:\n  cd "$(git rev-parse --show-toplevel)"\n- specify path to file you with to inspect\n- example:\n  '"$0 some/path/to/file"
 NEWLINE=$'\n'
 TWO_NEWLINES="$NEWLINE$NEWLINE"
-USAGE="Usage: $(basename "$0") path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example: $0 README.md /tmp/README-versions"
+script="$(basename "$0")"
+USAGE="Usage: $(basename "$0") path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example(s):${NEWLINE}${NEWLINE}$0 README.md /tmp/README-versions${NEWLINE}${NEWLINE}PRETTY=1 VERBOSE=1 ${script} Dockerfile"
+
 
 # check if got argument
 if [ "${GIT_PATH_TO_FILE}" == "" ]; then
