@@ -873,9 +873,10 @@ alias symlinks='sublinks'
 ## ls_filename_col=40
 ## if [ "$(under-macos)" = "1" ]; then ls_filename_col=42; fi
 ## function sublinks-proper { sublinks "$@" | cut --characters=${ls_filename_col}-  | $PAGER; }
-## example: "lrwxrwxrwx   1 tomohara   20 2023-06-23 16:50 mezcla -> python/Mezcla/mezcla"
-##           1            2 3          4  5          6     7
-function sublinks-proper { sublinks --time-style=long-iso "$@" | cut.perl -fix -fields="7-" - | tr $'\t' ' ' | $PAGER; }
+## example: "lrwxrwxrwx   1 tomohara tomohara   20 2023-06-23 16:50 mezcla -> python/Mezcla/mezcla"
+##           1            2 3        4          5  6          7     8
+function ls-long-tsv { ls -l --time-style=long-iso "$@" | perl -pe 's/ +/\t/g;'; }
+function sublinks-proper { ls-long-tsv "$@" | $GREP ^l | cut.perl -fields="8-" - | tr $'\t' ' ' | $PAGER; }
 alias symlinks-proper=sublinks-proper
 #
 alias glob-links='find . -maxdepth 1 -type l | sed -e "s/.\///g"'
