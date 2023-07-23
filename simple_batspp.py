@@ -150,6 +150,8 @@ MAX_ESCAPED_LEN = system.getenv_int("MAX_ESCAPED_LEN", 64,
                                     "Maximum length for escaped actual vs. expected")
 GLOBAL_TEST_DIR =  system.getenv_bool("GLOBAL_TEST_DIR", False,
                                       "Use single directory for tests")
+KEEP_OUTER_QUOTES = system.getenv_bool("KEEP_OUTER_QUOTES", False,
+                                       "Retain outer quotation characters in output")
 #
 # Shameless hacks
 ## TEST: GLOBAL_SETUP = system.getenv_text("GLOBAL_SETUP", " ",
@@ -601,7 +603,8 @@ class CustomTestsToBats:
         return field
 
     def _preprocess_command(self, field):
-        """Preprocess command FIELD"""
+        """Preprocess command FIELD
+        Note: currenlty a no-op."""
         field = self._preprocess_field(field)
         return field
 
@@ -615,7 +618,9 @@ class CustomTestsToBats:
         field = field.strip()
 
         # Remove initial and trailing quotes
-        field = my_re.sub(f'^(\"|\')(.*)(\"|\')$', r'\2', field)
+        ## OLD: field = my_re.sub(f'^(\"|\')(.*)(\"|\')$', r'\2', field)
+        if not KEEP_OUTER_QUOTES:
+            field = my_re.sub(r'^(\"|\')(.*)\1$', r'\2', field)
         debug.trace(T8, f"_preprocess_output({in_field!r}) ==  {field!r}")
         return field
 
@@ -723,7 +728,7 @@ class CustomTestsToBats:
         functions_text    = ''
         functions_text   += self._get_bash_function(actual_function, actual)
         # Note: to minimize issues with bash syntax, a bash here-document is used (e.g., <<END\n...\nEND\n).
-        # TOOO?: Use <<- variant so that leading tabs are ingored.
+        # TOOO?: Use <<- variant so that leading tabs are ignored.
         # TODO: use an external file (as the @here might fail if the example uses << as well)
         # Note: The here-document delimiter is quoted to block variable interpolation
         #    https://stackoverflow.com/questions/4937792/using-variables-inside-a-bash-heredoc
@@ -754,7 +759,8 @@ class CustomTestsToBats:
             pass
 
         # Get actual and expected results
-        # TODO: use helper bash function to minimize boilerplate code
+        # TODO3: use helper bash function to minimize boilerplate code
+        # TODO1: add output normalization (similar to _preprocess_output)
         main_body = (f"\tlocal {actual_var} {expected_var}\n" +
                      f'\t{actual_var}="$({actual_function})"\n' +
                      f'\t{expected_var}="$({expected_function})"\n')
