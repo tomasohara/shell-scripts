@@ -126,7 +126,12 @@ function trace-array-vars {
     echo
 }
 
-
+# remote-prompt([prompt="_nickname[0]"@]): set prompt to _N@ where N is first letter of host nickname
+function remote-prompt {
+    local prompt="$1"
+    if [ "$prompt" = "" ]; then prompt="_$(echo "$HOST_NICKNAME" | perl -pe 's/^(.).*/$1/;')@"; fi
+    reset-prompt "$prompt"
+}
 
 #...............................................................................
 # Organizer stuff
@@ -219,6 +224,14 @@ alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by
 # screen-reattach: restart GNU screen session
 # options: -d -RR: reattach a session and if necessary detach or create it
 alias-fn screen-reattach 'screen -d -RR'
+
+# sleep-for(seconds, [message]): sleep for SECONDS with MESSAGE ("delay for Ns")
+function sleep-for {
+    local sec="$1"
+    local msg="${2:-"delay for ${sec}s"}"
+    echo "$msg"
+    sleep "$sec"
+}
 
 #................................................................................
 # Idiosyncratic stuff (n.b., doubly so given "tomohara-proper" part of filename)
