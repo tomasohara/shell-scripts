@@ -138,8 +138,9 @@ esac
 ## if [ "$BAREBONES_HOST" = "1" ]; then export LESS="-cIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"; fi
 ## ## export LESSCHARSET=latin1
 ## export PAGER=less
-## export PAGER_CHOPPED="less -S"
-## export PAGER_NOEXIT="less -+F"
+## NOTE: following needed for multilingual aliases
+export PAGER_CHOPPED="less -S"
+export PAGER_NOEXIT="less -+F"
 ## function zless () { zcat "$@" | $PAGER; }
 ## alias less-="$PAGER_NOEXIT"
 alias less-pager="$PAGER_NOEXIT"
