@@ -75,7 +75,8 @@ if ($use_time_out == 1) then
     set force_option = ""
     if ( "`printenv OSTYPE`" == "cygwin" ) set force_option = "-f"
     if ($detailed == 1) then
-	echo "Issuing: (sleep $time_out ... kill $force_option -9 $$) &" >> "$log_file"
+	## OLD: echo "Issuing: (sleep $time_out ... kill $force_option -9 $$) &" >> "$log_file"
+	echo "Issuing: (sleep $time_out ... kill $force_option -9 $$) &"
     endif
     ( (sleep $time_out; kill $force_option -9 $$) & ) >& /dev/null
 endif
@@ -84,8 +85,12 @@ endif
 # NOTE: redirection doesn't work with time-out's since the script gets killed
 if ($redirect == 1) then
     if ($detailed == 1) then
-	echo "Issuing: $command" >>&! "$log_file"
+	## OLD: echo "Issuing: $command" >>&! "$log_file"
+	echo "Issuing: $command"
     endif
+    ## DEBUG:
+    ## set echo=1
+    ## $command
     $command >>&! "$log_file"
     if ($temp_log == 1) then
 	cat "$log_file"
