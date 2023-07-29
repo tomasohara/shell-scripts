@@ -90,6 +90,22 @@ function shell-check-last-snippet {
     # shellcheck disable=SC2002
     cat "$1" | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
 }
+#
+# shell-check-stdin(): run shell-check over stdin
+function shell-check-stdin {
+    ## DEBUG: echo "in shell-check-stdin: args='$*'"
+    ## BAD:
+    ## local snippet
+    ## read -d . -p $'Enter snippet lines with single . on end line\n' snippet
+    ## ## DEBUG: echo "$snippet"
+    ## trace-vars snippet
+    ## shell-check - <<<"$snippet"
+    ## DEBUG: cat <<<"$snippet"
+    ## echo "out shell-check-stdin"
+    echo "Enter snippet lines and then ^D"
+    python -c 'import sys; sys.stdin.read()' | shell-check -
+}
+
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
 function tabify {
