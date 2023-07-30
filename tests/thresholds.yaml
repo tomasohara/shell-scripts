@@ -13,7 +13,7 @@ test_tpo_count_it.py: 0
 hello-world-revised.ipynb: 20.0
 trace-extensionless-shortcut-unicode.ipynb: 15
 test-cond-env-setting.ipynb: 12.5
-dir-aliases-test-revised.ipynb: 12.5
+dir-aliases-test-revised.ipynb: 20
 testbook-test-dir-aliases.ipynb: 10
 trace-extensionless-shortcut-V2.ipynb: 10
 hello-world-source.ipynb: 10

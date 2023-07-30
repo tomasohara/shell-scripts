@@ -20,15 +20,26 @@ fi
 # we'll write all git versions of the file to this folder:
 TMP=${TMP:-/tmp}
 DEFAULT_EXPORT_TO="$TMP/all_versions_exported"
-EXPORT_TO="${2:-$DEFAULT_EXPORT_TO}"
+pretty=false
+if [ "${PRETTY:-0}" = "1" ]; then pretty=true; fi
 
+# Command line argument checks
+if [ "$1" = "--human" ]; then
+    verbose=true
+    pretty=true
+    shift
+fi
+EXPORT_TO="${2:-$DEFAULT_EXPORT_TO}"
+#
 # take relative path to the file to inspect
 GIT_PATH_TO_FILE="$1"
 
 ## OLD: USAGE=$'\nNote:\n- cd to the root of your git proj, as follows:\n  cd "$(git rev-parse --show-toplevel)"\n- specify path to file you with to inspect\n- example:\n  '"$0 some/path/to/file"
 NEWLINE=$'\n'
 TWO_NEWLINES="$NEWLINE$NEWLINE"
-USAGE="Usage: $(basename "$0") path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example: $0 README.md /tmp/README-versions"
+script="$(basename "$0")"
+USAGE="Usage: $(basename "$0") [--human] path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example(s):${NEWLINE}${NEWLINE}$0 README.md /tmp/README-versions${NEWLINE}${NEWLINE}PRETTY=1 VERBOSE=1 ${script} Dockerfile"
+
 
 # check if got argument
 if [ "${GIT_PATH_TO_FILE}" == "" ]; then
@@ -75,10 +86,24 @@ while read -r LINE; do
     # ex: 2021-05-09T22:27:20-05:00 d124b2a3c1de2b2c0cd834b0fa9097e871d7f141
     COUNT=$((COUNT + 1))
     COMMIT_DATE=$(echo "$LINE" | cut -d ' ' -f 1)
+    # optionaly, convert date into DDmmmYY-HHMM format
+    version_spec="$COUNT"
+    date_spec="COMMIT_DATE"
+    hour_spec=""
+    if $pretty; then
+	date_spec="$(date "+%d%b%y" --date="$COMMIT_DATE")"
+	hour_spec="$(date "+%H%M" --date="$COMMIT_DATE")"
+	version_spec="v$COUNT"
+    fi
     COMMIT_SHA=$(echo "$LINE" | cut -d ' ' -f 2)
     ## DEBUG: echo "COUNT=$COUNT LINE=$LINE COMMIT_DATE=$COMMIT_DATE COMMIT_SHA=$COMMIT_SHA"
     ## OLD: $verbose && printf '.'
-    output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.$COUNT.$COMMIT_DATE"
+    ## OLD: output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.$COUNT.$COMMIT_DATE"
+    output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.${version_spec}-${date_spec}"
+    if [ -e "$output_file" ]; then
+	echo "Warning: adding time of day ($hour_spec) to distinguish '$output_file'";
+	output_file="${output_file}_${hour_spec}";
+    fi
     git cat-file -p "$COMMIT_SHA:$REL_GIT_PATH_TO_FILE" > "$output_file"
     $verbose && echo "$output_file"
 done <"$info"

@@ -190,9 +190,10 @@ def main():
         source_spec = (f"--source '{DEFINITIONS_SCRIPT}'" if DEFINITIONS_SCRIPT else "")
         if USE_SIMPLE_BATSPP:
             # note: adds sentinels around paragraph segments for simpler parsing;
-            # uses Bash instead of Bats (to bypass need for global setup sections)
-            # and copies ./tests files into bats test dir (under temp).
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 FORCE_RUN={FORCE_OPTION} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            # uses Bash instead of Bats (to bypass need for global setup sections);
+            # copies ./tests files into bats test dir (under temp); retains outer
+            # quotation marks in output; uses single test directory; passes along --force option
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} 2> {log_file}")
         debug.code(4, lambda: gh.run(f"check_errors.perl {log_file}"))
@@ -305,7 +306,7 @@ def main():
                     header_line = output_lines_filtered.pop(0)
                     debug.trace_expr(5, header_line)
                     debug.assertion(my_re.search(r"^1\.\.\d+", header_line) or (header_line == "0..0"),
-                                    f"Unexpected header line for {output_from_batspp_path}")
+                                    f"Unexpected header line for {output_from_batspp_path}: {header_line!r}")
                 debug.assertion(len(output_lines_filtered))
                 
                 count_ok = len([item for item in output_lines_filtered if item.startswith("ok")])
@@ -316,7 +317,7 @@ def main():
                 successful = (success_rate >= min_score)
                 debug.trace_expr(4, min_score, count_ok, count_bad, count_total, success_rate, successful)
                 SUMMARY_TEXT = f"{count_ok} out of {count_total} successful ({success_rate}%)\nSuccess: {successful}"
-                gh.write_file(f"{TXT_STORE}/{txt_from_batspp}", SUMMARY_TEXT)
+                msy.write_file(f"{TXT_STORE}/{txt_from_batspp}", SUMMARY_TEXT)
                 print(f"{test_extensionless}: {SUMMARY_TEXT}")
                 total_count_ok += count_ok
                 total_count_total += count_total
@@ -377,12 +378,13 @@ def main():
     if batspp_count:
         avg_successful = total_num_successful / batspp_count * 100
         macro_success_rate = total_success_rate / batspp_count
+    if total_count_total:
         micro_success_rate = total_count_ok / total_count_total * 100
     print(f"Total no. files OK w/ threshold: {total_num_successful}")
-    print(f"Average no. files OK / threshold: {system.round_num(avg_successful)}%")
-    print(f"Macro success score: {system.round_num(macro_success_rate)}%")
-    print(f"Micro success score: {system.round_num(micro_success_rate)}%")
-    print("    where successful macro is mean of individual scores and micro is global metric")
+    print(f"Average no. files OK w/ threshold: {system.round3(avg_successful)}%")
+    print(f"Macro success score: {system.round3(macro_success_rate)}%")
+    print(f"Micro success score: {system.round3(micro_success_rate)}%")
+    print("    where successful based on threshold, macro is mean of individual scores, and micro is global metric")
 
     print(f"\nFAULTY TESTFILES:")
     if faulty_count == 0:

@@ -59,10 +59,10 @@ def run_tests(thresholds):
         # Exclude certain test files (e.g., non-python test files listed in thresholds.yml)
         include = True
         if not my_re.search(r"^test_.*\.py$", gh.basename(test_filename)):
-            debug.trace(6, f"Ignoring non-python test: {test_filename}")
+            debug.trace(5, f"Ignoring non-python test: {test_filename}")
             include = False
         elif TEST_REGEX and not my_re.search(rf"{TEST_REGEX}", test_filename):
-            debug.trace(6, f"Filtering test {test_filename} not matching TEST_REGEX ({TEST_REGEX})")
+            debug.trace(5, f"Filtering test {test_filename} not matching TEST_REGEX ({TEST_REGEX})")
             include = False
         if not include:
             continue
@@ -96,7 +96,7 @@ def run_tests(thresholds):
             continue
         module_failure = (failed_tests and (failed_tests <= allowed_failures))
         failed_percent = round_p2str(failed_tests / total_tests * 100)
-        debug.trace_expr(5, failed_tests, allowed_failures, total_tests, module_failure, required_successes)
+        debug.trace_expr(6, failed_tests, allowed_failures, total_tests, module_failure, required_successes)
 
         # Format message to stdout: either error, warning or FYI on test summary.
         label = ("Error" if module_failure else "Warning" if failed_tests else "FYI")
@@ -131,7 +131,7 @@ def main():
     # under Github actions (TODO: lower to 50%).
     THRESHOLDS_FILE = "thresholds.yaml"
     thresholds = {test_file: 25.0 for test_file in gh.get_matching_files("tests/test_*.py")}
-    debug.trace_expr(4, thresholds, "default thresholds")
+    debug.trace_expr(5, thresholds, "default thresholds")
     if system.file_exists(THRESHOLDS_FILE):
         thresholds.update(load_thresholds(THRESHOLDS_FILE))
         debug.trace_expr(5, thresholds, "final thresholds")

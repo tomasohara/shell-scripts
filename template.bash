@@ -18,7 +18,7 @@
 #     $((arithmetic))              evaluate arithmetic expression
 #     $(command ...)               same as `command ...`
 #     ${var:-default}              use $var or "default"
-#     ${var/from/to}               var with FROM pattern changed to TO
+#     ${var//from/to}              var with FROM pattern changed to TO
 #     true                         no-op
 #     $#                           number of positional arguments
 #     $*                           all positional arguments
@@ -26,6 +26,9 @@
 # - tools like OpenAI Codex and GitHub Copliot can be used to translate Bash constructs
 #     https://github.com/features/copilot
 # - For sake of simplicity, not all of the syntax is covered. (Likewise below.)
+# - Running bash in a fresh environment:
+#      env --ignore-environment bash --noprofile --norc
+#   See https://unix.stackexchange.com/questions/48994/how-to-run-a-program-in-a-clean-environment-in-bash.
 # TODO:
 #  - variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
 #     note: EXPR is C style;
@@ -104,6 +107,8 @@ fi
 #
 if [ "$1" = "" ]; then
     script=$(basename "$0")
+    ## TODO: remove following which is only meant for when ./template.bash run
+    if [ "$script" = "template.bash" ]; then echo "Warning: not intended for standalone usage"; fi;
     ## TODO: if [ $script ~= *\ * ]; then script='"'$script'"; fi
     ## TODO: base=$(basename "$0" .bash)
     echo ""

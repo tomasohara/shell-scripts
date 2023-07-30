@@ -17,17 +17,9 @@ set time_out = 30
 set time_out_specified = 0
 set redirect = 1
 set detailed = 0
+set log_file = "/tmp/temp_$$.log"
+set temp_log = 1
 
-## OLD:
-## if ("$1" == "") then
-##     set script_name = `basename $0`
-##     echo ""
-##     echo "usage: `basename $0` [--verbose] [--time-out [N]] command args ..."
-##     echo ""
-##     echo "ex: `basename $0` --time-out 5 prep.exe access.txt"
-##     echo ""
-##     exit
-## endif
 set show_usage = "0"
 if ("$1" == "") set show_usage = "1"
 while ("$1" =~ -*)
@@ -41,6 +33,10 @@ while ("$1" =~ -*)
 	set redirect = 0
     else if ("$1" == "--redirect") then
 	set redirect = 1
+    else if ("$1" == "--out-file") then
+	set log_file = "$2"
+	set temp_log = 0
+	shift
     else if ("$1" == "--verbose") then
 	set detailed = 1
     else if ("$1" == "--trace") then
@@ -57,7 +53,7 @@ set command = "$*"
 if ("$show_usage" != "0") then
     set script_name = `basename $0`
     echo ""
-    echo "usage: `basename $0` [--verbose] [--time-out [N]] command args ..."
+    echo "usage: `basename $0` [--verbose] [--time-out [N]] [--redirect] [--out-file F] command args ..."
     echo ""
     echo "ex: `basename $0` --time-out 5 prep.exe access.txt"
     echo ""
@@ -65,9 +61,9 @@ if ("$show_usage" != "0") then
 endif
 
 # Clear log file
-set log_file = "/tmp/temp_$$.log"
+## OLD: set log_file = "/tmp/temp_$$.log"
 if (($redirect == 1) || ($use_time_out == 1)) then
-    echo "" > $log_file
+    echo "" > "$log_file"
 endif
 
 # Setup process to kill the script if timeout occurs
@@ -79,7 +75,8 @@ if ($use_time_out == 1) then
     set force_option = ""
     if ( "`printenv OSTYPE`" == "cygwin" ) set force_option = "-f"
     if ($detailed == 1) then
-	echo "Issuing: (sleep $time_out ... kill $force_option -9 $$) &" >> $log_file
+	## OLD: echo "Issuing: (sleep $time_out ... kill $force_option -9 $$) &" >> "$log_file"
+	echo "Issuing: (sleep $time_out ... kill $force_option -9 $$) &"
     endif
     ( (sleep $time_out; kill $force_option -9 $$) & ) >& /dev/null
 endif
@@ -88,11 +85,19 @@ endif
 # NOTE: redirection doesn't work with time-out's since the script gets killed
 if ($redirect == 1) then
     if ($detailed == 1) then
-	echo "Issuing: $command" >>&! $log_file
+	## OLD: echo "Issuing: $command" >>&! "$log_file"
+	echo "Issuing: $command"
     endif
-    $command >>&! $log_file
-    cat $log_file
-    rm $log_file
+    ## DEBUG:
+    ## set echo=1
+    ## $command
+    $command >>&! "$log_file"
+    if ($temp_log == 1) then
+	cat "$log_file"
+	rm "$log_file"
+    else
+	echo "See $log_file for output"
+    endif
 else
     if ($detailed == 1) then
 	echo "Issuing: $command"

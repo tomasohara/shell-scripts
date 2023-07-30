@@ -44,7 +44,8 @@ alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
 function clone-repo () {
     local url repo log
     url="$1"
-    repo=$(basename "$url")
+    ## OLD: repo=$(basename "$url")
+    repo=$(basename "$url" .git)
     log="_clone-$repo-$(T).log"
     ## OLD: command script "$log" git clone "$url"
     # maldito linux: -c option required for command for
@@ -89,6 +90,22 @@ function shell-check-last-snippet {
     # shellcheck disable=SC2002
     cat "$1" | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
 }
+#
+# shell-check-stdin(): run shell-check over stdin
+function shell-check-stdin {
+    ## DEBUG: echo "in shell-check-stdin: args='$*'"
+    ## BAD:
+    ## local snippet
+    ## read -d . -p $'Enter snippet lines with single . on end line\n' snippet
+    ## ## DEBUG: echo "$snippet"
+    ## trace-vars snippet
+    ## shell-check - <<<"$snippet"
+    ## DEBUG: cat <<<"$snippet"
+    ## echo "out shell-check-stdin"
+    echo "Enter snippet lines and then ^D"
+    python -c 'import sys; sys.stdin.read()' | shell-check -
+}
+
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
 function tabify {
@@ -125,7 +142,12 @@ function trace-array-vars {
     echo
 }
 
-
+# remote-prompt([prompt="_nickname[0]"@]): set prompt to _N@ where N is first letter of host nickname
+function remote-prompt {
+    local prompt="$1"
+    if [ "$prompt" = "" ]; then prompt="_$(echo "$HOST_NICKNAME" | perl -pe 's/^(.).*/$1/;')@"; fi
+    reset-prompt "$prompt"
+}
 
 #...............................................................................
 # Organizer stuff
@@ -219,8 +241,22 @@ alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by
 # options: -d -RR: reattach a session and if necessary detach or create it
 alias-fn screen-reattach 'screen -d -RR'
 
+# sleep-for(seconds, [message]): sleep for SECONDS with MESSAGE ("delay for Ns")
+function sleep-for {
+    local sec="$1"
+    local msg="${2:-"delay for ${sec}s"}"
+    echo "$msg"
+    sleep "$sec"
+}
+
 #................................................................................
 # Idiosyncratic stuff (n.b., doubly so given "tomohara-proper" part of filename)
-alias all-tomohara-settings='tomohara-aliases; tomohara-settings; more-tomohara-aliases; tomohara-proper-aliases'
+# note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
+#
+## OLD: alias all-tomohara-settings='tomohara-aliases; tomohara-settings; more-tomohara-aliases; tomohara-proper-aliases'
+alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
+alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
+#
 alias kill-kdiff3='kill-it kdiff3'
 alias kill-firefox='kill-it firefox'
+alias kill-jupyter='kill-it jupyter'

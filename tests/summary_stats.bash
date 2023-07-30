@@ -27,6 +27,10 @@ BATSPP_TEMP="${BATSPP_TEMP:-"$TMP/BatsPP-$timestamp"}"
 mkdir --parents "$BATSPP_OUTPUT" "$BATSPP_TEMP"
 echo "FYI: Using $BATSPP_OUTPUT for ouput and $BATSPP_TEMP for temp. files"
 
+## TEMP: Enable flag for deleting aliases in order to force fail some tests
+## NOTE: this enables a bunch of alias removals in all-tomohara-aliases-etc.bas
+## export DIR_ALIAS_HACK=1
+
 # Run the set of alias tests, making sure Tom's aliases are defined
 OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py --txt --definitions ../all-tomohara-aliases-etc.bash
 

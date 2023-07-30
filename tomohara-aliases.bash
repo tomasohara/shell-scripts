@@ -553,6 +553,8 @@ function reset-prompt {
     local new_PS_symbol="$*"
     ## OLD:
     if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="${DEFAULT_PS_SYMBOL:-$PS_symbol}"; fi
+    # Do nothing if empty
+    if [ "$new_PS_symbol" = "" ]; then return; fi    
     ## TODO: if [ "$new_PS_symbol" = "" ]; then echo $'Usage: reset-prompt symbol\nex: reset-prompt §"\n'; return; fi
     ## TODO: add options to reset PS1 and to list good symbols for prompts
     # Make the change
@@ -864,12 +866,17 @@ function sublinks-alpha () { $LS $(dir_options_sans_t) "$@" 2>&1 | $GREP ^l | $P
 #
 alias symlinks='sublinks'
 # symlinks-proper: just show file name info for symbolic links, which starts at column 43
-alias symlinks-proper='symlinks | cut --characters=43-'
+## OLD: alias symlinks-proper='symlinks | cut --characters=43-'
 #
 ## OLD: function sublinks-proper { sublinks "$@" | cut --characters=42-  | $PAGER; }
-ls_filename_col=40
-if [ "$(under-macos)" = "1" ]; then ls_filename_col=42; fi
-function sublinks-proper { sublinks "$@" | cut --characters=${ls_filename_col}-  | $PAGER; }
+## BAD
+## ls_filename_col=40
+## if [ "$(under-macos)" = "1" ]; then ls_filename_col=42; fi
+## function sublinks-proper { sublinks "$@" | cut --characters=${ls_filename_col}-  | $PAGER; }
+## example: "lrwxrwxrwx   1 tomohara tomohara   20 2023-06-23 16:50 mezcla -> python/Mezcla/mezcla"
+##           1            2 3        4          5  6          7     8
+function ls-long-tsv { ls -l --time-style=long-iso "$@" | perl -pe 's/ +/\t/g;'; }
+function sublinks-proper { ls-long-tsv "$@" | $GREP ^l | cut.perl -fields="8-" - | tr $'\t' ' ' | $PAGER; }
 alias symlinks-proper=sublinks-proper
 #
 alias glob-links='find . -maxdepth 1 -type l | sed -e "s/.\///g"'
@@ -883,10 +890,13 @@ alias ls-R='$LS -R >| ls-R.list; wc -l ls-R.list'
 
 # link-symbolic-safe: creates symbolic link and avoids quirks with links to directories
 # EX: link-symbolic-safe /tmp temp-link; link-symbolic-safe --force ~/temp temp-link; ls -l temp-link | grep /tmp => ""
+# TODO3: decide on using ln-symbolic vs link-symbolic vs both
 alias ln-symbolic='ln --symbolic --verbose'
+alias link-symbolic=ln-symbolic
 alias link-symbolic-safe='ln-symbolic --no-target-directory --no-dereference'
 alias link-symbolic-regular='ln-symbolic'
-## TODO: alias ln-symbolic-force='link-symbolic --force'
+alias ln-symbolic-force='ln-symbolic --force'
+alias link-symbolic-force=ln-symbolic-force
 
 #-------------------------------------------------------------------------------
 trace grep commands
@@ -2784,8 +2794,7 @@ function python-lint-full() {
 function python-lint-work() { python-lint-full "$@" 2>&1 | $EGREP -v '\((bad-continuation|bad-option-value|fixme|invalid-name|locally-disabled|too-few-public-methods|too-many-\S+|trailing-whitespace|star-args|unnecessary-pass)\)' | $EGREP -v '^(([A-Z]:[0-9]+)|(Your code has been rated)|(No config file found)|(PYLINTHOME is now)|(\-\-\-\-\-))' | $PAGER; }
 # TODO: rename as python-lint-tpo for clarity (and make python-lint as alias for it)
 # note: R0801 is for duplicate lines across source files (no mnemonic)
-function python-lint() { python-lint-work "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-f-string|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|missing-final-newline|no-self-use|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position|R0801)\)' | $PAGER; }
-# TODO: fix R0801 support
+function python-lint() { python-lint-work --disable=R0801 "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-f-string|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|missing-final-newline|no-self-use|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
 
 # run-python-lint-batched([file_spec="*.py"]: Run python-lint in batch mode over
 # files in FILE_SPEC, placing results in pylint/<today>.
@@ -2898,8 +2907,10 @@ alias which-python='which python'
 # run-jupyter-notebook-posthoc(): try to show log info previously not shown via run-jupyter-notebook
 # TODO: enable multiple-versions backups
 function run-jupyter-notebook-posthoc() {
-    local log
-    log="$TEMP/jupyter-$(TODAY).log"
+    ## OLD:
+    ## local log
+    ## log="$TEMP/jupyter-$(TODAY).log"
+    local log="$1"
     echo "checking log: $log"
     # TODO: resolve problem extracting URL
     # TEMP:
@@ -2914,7 +2925,7 @@ function run-jupyter-notebook () {
     local port="$1"; if [ "$port" = "" ]; then port=8888; fi
     local ip="$2"; if [ "$ip" = "" ]; then ip="127.0.0.1"; fi
     local log
-    log="$TEMP/jupyter-$(TODAY).log"
+    log="$TEMP/jupyter-p$port-$(TODAY).log"
     # note: clears notebook token to disable authentication
     jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
     ## OLD
@@ -2930,7 +2941,7 @@ function run-jupyter-notebook () {
     ## # Show URL
     ## echo -n "URL: "
     ## extract-matches 'http:\S+' "$log" | sort -u    
-    run-jupyter-notebook-posthoc
+    run-jupyter-notebook-posthoc "$log"
 }
 alias jupyter-notebook-redir=run-jupyter-notebook
 alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'

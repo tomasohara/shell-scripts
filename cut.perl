@@ -64,24 +64,8 @@ if ($fix) {
     &assertion($delimiter =~ /^\s+$/);
 }
 
-# Extract the fields, expanding N-M into enumeration
-&debug_print(&TL_VERY_DETAILED, "fs=$field_spec\n");
-while ($field_spec =~ /(\d+)-(\d+)/) {
-    my($start, $end) = ($1, $2);
-    &debug_print(&TL_VERY_DETAILED, "s=$start, e=$end\n");
-    my($subfield_spec) = "";
-
-    # Convert i-j format (e.g., "4-7" => "4,5,6,7")
-    for (my $i = $start; $i < $end; $i++) {
-	$subfield_spec .= "$i,"
-    }
-    $subfield_spec .= "$end";
-
-    # Replace range
-    $field_spec = $PREMATCH . $subfield_spec . $POSTMATCH; 
-}
-# HACK: allow fields to have embedded comma's (as in value support below)
-my(@fields) = split(/,/, $field_spec);
+my(@fields);
+my($num_columns) = 0;
 
 # Extract fields from each line of input
 while (<>) {
@@ -99,6 +83,11 @@ while (<>) {
     $line = &encode_delimiter($line);
     my(@columns) = split(/$delimiter/, $line);
     &trace_array(\@columns, &TL_VERY_DETAILED, "\@columns");
+    my($new_num_columns) = scalar @columns;
+    if ($new_num_columns != $num_columns) {
+	$num_columns = $new_num_columns;
+	@fields = &derive_fields($field_spec, $num_columns);
+    }
 
     # Print each of column entries for the fields specified
     my(%missing_columns);
@@ -166,3 +155,34 @@ sub decode_delimiter {
     return ($text);
 }
     
+# derive_fields(spec, num_cols): derive column numbers from field spec
+# EX: derive_fields("3-", 5) => (3, 4, 5)
+#
+sub derive_fields {
+    &debug_print(&TL_DETAILED, "derive_fields(@_)\n");
+    my($field_spec, $num_columns) = @_;
+    # Extract the fields, expanding N-M into enumeration
+    &debug_print(&TL_VERY_DETAILED, "fs=$field_spec\n");
+    while ($field_spec =~ /(\d+)-(\d+)?/) {
+        my($start, $end) = ($1, $2);
+        if (! defined($end)) {
+	    $end = $num_columns;
+        }
+        &debug_print(&TL_VERY_DETAILED, "s=$start, e=$end\n");
+        my($subfield_spec) = "";
+    
+        # Convert i-j format (e.g., "4-7" => "4,5,6,7")
+        for (my $i = $start; $i < $end; $i++) {
+	    $subfield_spec .= "$i,"
+        }
+        $subfield_spec .= "$end";
+    
+        # Replace range
+        $field_spec = $PREMATCH . $subfield_spec . $POSTMATCH; 
+    }
+    
+    # HACK: allow fields to have embedded comma's (as in value support below)
+    my(@fields) = split(/,/, $field_spec);
+    &debug_print(&TL_VERBOSE, "derive_fields() => @fields\n");
+    return (@fields);
+}
