@@ -20,10 +20,17 @@ fi
 # we'll write all git versions of the file to this folder:
 TMP=${TMP:-/tmp}
 DEFAULT_EXPORT_TO="$TMP/all_versions_exported"
-EXPORT_TO="${2:-$DEFAULT_EXPORT_TO}"
 pretty=false
-if [ "$PRETTY" = "1" ]; then pretty=true; fi
+if [ "${PRETTY:-0}" = "1" ]; then pretty=true; fi
 
+# Command line argument checks
+if [ "$1" = "--human" ]; then
+    verbose=true
+    pretty=true
+    shift
+fi
+EXPORT_TO="${2:-$DEFAULT_EXPORT_TO}"
+#
 # take relative path to the file to inspect
 GIT_PATH_TO_FILE="$1"
 
@@ -31,7 +38,7 @@ GIT_PATH_TO_FILE="$1"
 NEWLINE=$'\n'
 TWO_NEWLINES="$NEWLINE$NEWLINE"
 script="$(basename "$0")"
-USAGE="Usage: $(basename "$0") path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example(s):${NEWLINE}${NEWLINE}$0 README.md /tmp/README-versions${NEWLINE}${NEWLINE}PRETTY=1 VERBOSE=1 ${script} Dockerfile"
+USAGE="Usage: $(basename "$0") [--human] path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example(s):${NEWLINE}${NEWLINE}$0 README.md /tmp/README-versions${NEWLINE}${NEWLINE}PRETTY=1 VERBOSE=1 ${script} Dockerfile"
 
 
 # check if got argument
@@ -82,8 +89,10 @@ while read -r LINE; do
     # optionaly, convert date into DDmmmYY-HHMM format
     version_spec="$COUNT"
     date_spec="COMMIT_DATE"
+    hour_spec=""
     if $pretty; then
-	date_spec="$(date "+%d%b%y_%H%M" --date="$COMMIT_DATE")"
+	date_spec="$(date "+%d%b%y" --date="$COMMIT_DATE")"
+	hour_spec="$(date "+%H%M" --date="$COMMIT_DATE")"
 	version_spec="v$COUNT"
     fi
     COMMIT_SHA=$(echo "$LINE" | cut -d ' ' -f 2)
@@ -91,6 +100,10 @@ while read -r LINE; do
     ## OLD: $verbose && printf '.'
     ## OLD: output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.$COUNT.$COMMIT_DATE"
     output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.${version_spec}-${date_spec}"
+    if [ -e "$output_file" ]; then
+	echo "Warning: adding time of day ($hour_spec) to distinguish '$output_file'";
+	output_file="${output_file}_${hour_spec}";
+    fi
     git cat-file -p "$COMMIT_SHA:$REL_GIT_PATH_TO_FILE" > "$output_file"
     $verbose && echo "$output_file"
 done <"$info"
