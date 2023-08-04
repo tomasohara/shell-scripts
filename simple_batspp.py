@@ -146,6 +146,8 @@ TEST_FILE = system.getenv_bool("TEST_FILE", False,
                                "Treat input as example-base test file, not a bash script")
 BASH_EVAL = system.getenv_bool("BASH_EVAL", False,
                                "Evaluate tests via bash rather than bats: provides quicker results and global context")
+BASH_TRACE = system.getenv_bool("BASH_TRACE", False,
+                               "Trace commands during test evaluation")
 MAX_ESCAPED_LEN = system.getenv_int("MAX_ESCAPED_LEN", 64,
                                     "Maximum length for escaped actual vs. expected")
 GLOBAL_TEST_DIR =  system.getenv_bool("GLOBAL_TEST_DIR", False,
@@ -311,8 +313,9 @@ class Batspp(Main):
     is_test_file = None
     file_content = ''
     eval_prog = ("bats" if not BASH_EVAL else "bash")
-    bats_content = f'#!/usr/bin/env {eval_prog}\n\n\n'
-
+    bats_content = f'#!/usr/bin/env {eval_prog}\n\n'
+    if BASH_TRACE:
+        bats_content += "# enable command tracing\nset -o xtrace\n\n"
 
     def setup(self):
         """Process arguments"""
@@ -456,14 +459,20 @@ class Batspp(Main):
         # - The setup_file function mentioned there is not helpful as that doesn't allow for aliases.
         if (self.source or (not self.is_test_file)):
             self.bats_content += ('# Source files\n')
+            num_sourced = 0
 
             if not self.is_test_file:
                 self.bats_content += f'source {gh.real_path(self.testfile)} || true\n'
+                num_sourced += 1
 
             if self.source:
                 self.bats_content += f'source {gh.real_path(self.source)} || true\n'
+                num_sourced += 1
 
-        self.bats_content += '\n\n'
+            if num_sourced:
+                self.bats_content += '\n'
+
+        ## OLD: self.bats_content += '\n\n'
 
 
     # pylint: disable=no-self-use

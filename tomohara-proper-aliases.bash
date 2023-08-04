@@ -35,6 +35,8 @@ function convert-emoticons-aux {
     }
 
 
+#...............................................................................
+
 # Python stuff
 ## OLD: alias plint=python-lint
 simple-alias-fn plint 'PAGER=cat python-lint'
@@ -62,6 +64,38 @@ function clone-repo () {
     echo "FYI: script-based clone done (see $log)" 1>&2
 }
 simple-alias-fn black-plain 'convert-emoticons-aux black'
+
+# run-python-script(script, args): run SCRIPT with ARGS with output to _base-#.out
+# and stderr to _base-#.log where # is value of global $_PSL_.
+# note: Checks for errors afterwards.
+function run-python-script {
+    ## DEBUG: trace-vars _PSL_ out_base log
+    if [ "$1" = "" ]; then
+        echo "Usage: $0 script arg ..."
+        return
+    fi
+    # Check args
+    local script_path="$1";
+    shift;
+    local script_args="$*";
+    local script_base
+    script_base=$(basename-with-dir "$script_path" .py);
+    #
+    # Run script and check for errors
+    let _PSL_++;
+    local out_base
+    out_base="$script_base.$(TODAY).$_PSL_";
+    local log="$out_base.log";
+    ## DEBUG: trace-vars _PSL_ out_base log
+    # TODO2: fix _PSL_ value retention
+    _PSL_=666; command rm -v "$out_base.out" "$log";
+    # shellcheck disable=SC2086
+    echo "$script_args" | DEBUG_LEVEL=4 $PYTHON "$script_path" - > "$out_base.out" 2> "$log";
+    check-errors-excerpt "$log";
+    tail "$log" "$out_base.out"
+}
+
+#...............................................................................
 
 # JSON stuff
 function json-validate () {
@@ -104,6 +138,7 @@ function shell-check-stdin {
     ## echo "out shell-check-stdin"
     echo "Enter snippet lines and then ^D"
     python -c 'import sys; sys.stdin.read()' | shell-check -
+    if [ "$?" -eq 0 ]; then echo "shellcheck OK"; fi
 }
 
 # tabify(text): convert spaces in TEXT to tabs
@@ -247,6 +282,16 @@ function sleep-for {
     local msg="${2:-"delay for ${sec}s"}"
     echo "$msg"
     sleep "$sec"
+}
+
+#...............................................................................
+# Emacs related
+
+# reset-under-emacs: clear settings added for Bash under emacs
+# note: for use in external terminal invoked under Emacs term (e.g., via gterm)
+function reset-under-emacs {
+    unset UNDER_EMACS SCRIPT_PID
+    all-tomohara-settings
 }
 
 #................................................................................
