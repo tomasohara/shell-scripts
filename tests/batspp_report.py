@@ -229,7 +229,7 @@ def main():
     for file in files:
         is_ipynb = file.endswith(IPYNB)
         if is_ipynb:
-            if TEST_REGEX and not my_re.match(fr"{TEST_REGEX}", file):
+            if TEST_REGEX and not my_re.search(fr"{TEST_REGEX}", file):
                 debug.trace(3, f"FYI: Ignoring {file} not mathing TEST_REGEX ({TEST_REGEX})")
                 continue
             if not ALL_OPTION and NOBATSPP in file:
