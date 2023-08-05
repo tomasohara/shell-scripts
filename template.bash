@@ -4,7 +4,8 @@
 #
 # NOTES:
 # - templates for common bash expressions:
-#     if [ $x = value ]; then STMT; fi
+#     template                     comment
+#     if [ $x == value ]; then STMT; fi    old-style is [ $x = value ] ...
 #     if [ EXPR_a ]; then STMT_a; elif [ EXPR_a  ]; then STMT_b; else STMT_c; fi
 #     if [[ (EXPR1) && (EXPR2) ]]; then STMT; fi
 #     if [[ $var =~ pattern ]]; then STMT; fi       note: requires Bash 3.0+
@@ -61,6 +62,9 @@
 #      -e file                      file exists
 #      -f file                      regular file
 #      -d file                      file is directory
+#  - other common tests
+#      -n string                    whether string is non-empty
+#      -z string                    whether string is empty
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
