@@ -1374,7 +1374,8 @@ function tkdiff () { wish -f "$TOM_BIN"/tkdiff.tcl "$@" & }
 alias rdiff='rev_vdiff.sh'
 alias tkdiff-='tkdiff -noopt'
 #
-function kdiff () { kdiff.sh "$@" & }
+## OLD: function kdiff () { kdiff.sh "$@" & }
+simple-alias-fn kdiff kdiff.sh
 alias vdiff='kdiff'
 #
 # TOM-IDIOSYNCRATIC
