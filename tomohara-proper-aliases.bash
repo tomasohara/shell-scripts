@@ -4,12 +4,13 @@
 # (e.g., new location for idiosyncratic stuff in tomoohara-aliases.bash)
 #
 # note:
-# - Maldito shellcheck (i.e., lack of menomic codes on top of nitpicking):
+# - Maldito shellcheck (i.e., lack of mnemonic codes on top of nitpicking):
 #   SC2002 (style): Useless cat. Consider 'cmd < file | ..' or 'cmd file | ..' instead.
 #   SC2010 (warning): Don't use ls | grep. Use a glob or a for loop with a condition to allow non-alphanumeric filenames.
 #   SC2016 (info): Expressions don't expand in single quotes
 #   SC2027 (warning): The surrounding quotes actually unquote this.
 #   SC2086: Double quote to prevent globbing)
+#   SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?.
 #
 
 # Change git-xyz-plus to git-xyz- for sake of tab completion
@@ -83,16 +84,27 @@ function run-python-script {
     #
     # Run script and check for errors
     let _PSL_++;
+    ## TODO2: fix _PSL_ value retention
+    ## _PSL_=666;
     local out_base
     out_base="$script_base.$(TODAY).$_PSL_";
     local log="$out_base.log";
     ## DEBUG: trace-vars _PSL_ out_base log
-    # TODO2: fix _PSL_ value retention
-    _PSL_=666; command rm -v "$out_base.out" "$log";
+    ## TEMP: workaround _PSL_ update
+    rename-with-file-date "$out_base.out" "$log";
+    ## TODO: >| => > [maldito bash]
     # shellcheck disable=SC2086
-    echo "$script_args" | DEBUG_LEVEL=4 $PYTHON "$script_path" - > "$out_base.out" 2> "$log";
+    local python_arg="-"
+    if [ "$script_args" = "" ]; then python_arg=""; fi
+    # shellcheck disable=SC2086
+    echo "$script_args" | DEBUG_LEVEL=4 $PYTHON "$script_path" $python_arg >| "$out_base.out" 2>| "$log";
     check-errors-excerpt "$log";
     tail "$log" "$out_base.out"
+}
+
+# test-python-script(test-script): run TEST-SCRIPT via  pytest
+function test-python-script {
+     PYTHONUNBUFFERED=1 PYTHON="pytest -vv --capture=tee-sys" run-python-script "$@";
 }
 
 #...............................................................................
@@ -116,7 +128,9 @@ simple-alias-fn act-plain 'convert-emoticons-aux act'
 # note: strips the 0-len paragraph indicator
 function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -pe 's/^0\t//;'; }
 
+#...............................................................................
 # Bash stuff
+
 # shell-check-last-snippet(notes-file): extract last Bash snippet from notes
 # file and run through shellcheck
 # The snippet should be bracketted by lines with "$: {" and "}"
@@ -138,6 +152,7 @@ function shell-check-stdin {
     ## echo "out shell-check-stdin"
     echo "Enter snippet lines and then ^D"
     python -c 'import sys; sys.stdin.read()' | shell-check -
+    # shellcheck disable=SC2181
     if [ "$?" -eq 0 ]; then echo "shellcheck OK"; fi
 }
 
@@ -182,6 +197,11 @@ function remote-prompt {
     local prompt="$1"
     if [ "$prompt" = "" ]; then prompt="_$(echo "$HOST_NICKNAME" | perl -pe 's/^(.).*/$1/;')@"; fi
     reset-prompt "$prompt"
+}
+
+# pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
+function pristine-bash {
+    env --ignore-environment PS1='pristine $ ' bash --noprofile --norc
 }
 
 #...............................................................................
