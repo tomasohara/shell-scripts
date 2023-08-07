@@ -4,9 +4,7 @@
 #    source ~/bin/tomohara-aliases.bash
 #    source ~/bin/anaconda-aliases.bash
 #
-# TODO:
-# - ** Integrate Tana's work with Conda API!
-# - Reproduce alias definitions from tomohara-aliases.bash here so independent.
+# TODO: reproduce alias definitions from tomohara-aliases.bash here so independent
 #
 #------------------------------------------------------------------------
 # Copyright (c) 2020 Thomas P. O'Hara
