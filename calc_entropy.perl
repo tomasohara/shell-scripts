@@ -50,12 +50,12 @@ no strict "refs";		# allow for symbolic file handles
 use vars qw/$class_filter $max_count $label $word $last $freq_last
     $freq_first $header $show_header $skip_header $classes $show_classes
     $simple $normalize $fix $alpha $preserve $cumulative $just_freq $no_comments/;
-use vars qw /$strip_comments $first/;
+use vars qw /$strip_comments $first $class_width/;
 
 
 if (! defined($ARGV[0])) {
     my($options) = "options = [-max_count=N] [-word=w] [-class_filter=\"list\"] [-simple] [-normalize] [-cumulative] [-no_comments] [-verbose]";
-    $options .= "[-[freq_]first] [-[freq_]last] [-label=text] [-[show_|skip_]header] [-[show_]classes] [-alpha] [-preserve] [-just_freq]";
+    $options .= "[-[freq_]first] [-[freq_]last] [-label=text] [-[show_|skip_]header] [-[show_]classes] [-alpha] [-preserve] [-just_freq] [-class_width=N]";
     $options .= "\nother options = " . &COMMON_OPTIONS;
     my($example) = "ex: $script_name -d=5 -class_filter=\"pp-bnf pp-dir pp-mnr pp-prp pp-tmp pp=ext pp-loc\" as.freq\n\n";
     $example = "examples:\n\n$script_name -verbose -simple .47 .42 .06 .05\n\n";
@@ -107,6 +107,7 @@ if ($class_filter ne "") {
 ## OLD: &init_var(*no_comments, &FALSE);	# used to bypass comment stripping
 &init_var(*strip_comments, &FALSE);     # alias for (confusing) -no_comments=0
 &init_var(*no_comments, ! $strip_comments); # used to bypass comment stripping
+&init_var(*class_width, 0);            # width to use for label (if > 0)
 
 my($LOG2) = log(2);
 
@@ -160,8 +161,26 @@ foreach my $file (@ARGV) {
 
 #------------------------------------------------------------------------------
 
-# simple_calc_entropy(handle, label): Calculate entropy for the probability distribution,
+# regular_calc_entropy(handle, label): Calculate entropy for the probability distribution,
 # taken from input HANDLE for class label (e.g., word).
+#
+# sample input:
+#
+#    green	0.5
+#    eggs	0.25
+#    with	0.125
+#    spam	0.125
+#
+# sample output:
+#    #		class	freq	prob	-p lg(p)
+#    #		green	0	0.500	0.500
+#    #		eggs	0	0.250	0.500
+#    #		with	0	0.125	0.375
+#    #		spam	0	0.125	0.375
+#    #		total	1	1.000	1.750
+#
+#    # word	classes	freq	entropy	max_prob
+#    -	4	1	1.750	0.500
 #
 sub regular_calc_entropy {
     &debug_print(&TL_VERBOSE, "regular_calc_entropy(@_)\n");
@@ -172,6 +191,8 @@ sub regular_calc_entropy {
 
     my($total_freq) = 0;
     my($count) = 0;
+    my($max_label) = "";
+    my($max_label_len) = 0;
     while (<$handle>) {
 	&dump_line();
 	chomp;
@@ -198,6 +219,12 @@ sub regular_calc_entropy {
 	$rest = "" if (!defined($rest));
 	&debug_print(&TL_DETAILED, "class='$class' freq='$freq' rest='$rest'\n");
 
+	# Keep track of max label length, etc.
+	if (length($class) > $max_label_len) {
+	    $max_label_len = length($class);
+	    $max_label = $class;
+	}
+
 	# See if the item should be ignored
 	if (! &is_numeric($freq)) {
 	    &warning("unexpected input at line $. ($_)\nUse -last if class comes first\n");
@@ -221,21 +248,30 @@ sub regular_calc_entropy {
     }
     close($handle);
 
+    # Make sure sufficient data and show summary
     if ($total_freq == 0) {
 	# TODO: add argument for filename for error message
 	&warning("unexpected distribution for $handle (all 0)\n");
 	return;
     }
-
+    &debug_print(&TL_VERBOSE, "max label: $max_label; len: $max_label_len\n");
+    
     my($entropy) = 0.0;
     my($max_prob) = 0.0;
     my($sum_p) = 0.0;
-    print "#\t\tclass\tfreq\tprob\t-p lg(p)\n" if ($verbose && (! $just_freq));
+    ## OLD: print "#\t\tclass\tfreq\tprob\t-p lg(p)\n" if ($verbose && (! $just_freq));
+    my($class) = "class";
+    my($label_width) = (($class_width > 0) ? $class_width : $max_label_len);
+    if (length($class) < $label_width) {
+	$class .= (" " x ($label_width - length($class)));
+    }
+    print("#\t\t$class\tfreq\tprob\t-p lg(p)\n") if ($verbose && (! $just_freq));
     my($num_classes) = 0;
     my(@sorted_keys) = ($alpha ? sort(@keys) : 
 			$preserve ? @keys : 
 			&sorted_hash_keys_reverse_numeric(\%class_frequency));
     foreach my $class (@sorted_keys) {
+	&debug_print(&TL_VERBOSE, "class: $class\n");
 	my($freq) = &get_entry(\%class_frequency, $class);
 	next if ($freq == 0);
 	my($prob) = $freq / $total_freq;
@@ -249,7 +285,14 @@ sub regular_calc_entropy {
 	    print &round($prob_value), "\n";
 	}
 	elsif ($verbose) {
-	    printf ("#\t\t%s\t%d\t%s\t%s\n", $class, $freq, &round($prob_value), &round($p_lg_p));
+	    ## OLD: printf ("#\t\t%s\t%d\t%s\t%s\n", $class, $freq, &round($prob_value), &round($p_lg_p));
+	    my($label_width) = (($class_width > 0) ? $class_width : $max_label_len);
+	    &debug_print(&TL_VERBOSE, "width: $label_width\n");
+	    ## TEST: printf("#\t\t%.*s%d\t%s\t%s\n", $label_width, $class, $freq, &round($prob_value), &round($p_lg_p));
+	    if (length($class) < $label_width) {
+		$class .= (" " x ($label_width - length($class)));
+	    }
+	    printf("#\t\t%s\t%d\t%s\t%s\n", $class, $freq, &round($prob_value), &round($p_lg_p));
 	}
 	$num_classes++;
     }
@@ -269,6 +312,12 @@ sub regular_calc_entropy {
 
 
 # simple_calc_entropy(dist): Calculate entropy for the probability distribution
+#
+# example input:
+#    0.5 0.25 0.125 0.125
+#
+# example output:
+#    1.750
 #
 sub simple_calc_entropy {
     &debug_print(&TL_VERBOSE, "simple_calc_entropy(@_)\n");
