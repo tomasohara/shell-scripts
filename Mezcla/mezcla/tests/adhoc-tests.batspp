@@ -1,0 +1,39 @@
+# This is a set of adhoc tests using a simple format based on the interaction
+# in a terminal session. It is designed for ease of preparation rather than
+# generality.
+#
+# It is designed for use with BatsPP:
+#    See https://github.com/LimaBD/batspp.
+#
+
+#-------------------------------------------------------------------------------
+# Tests for cut.py
+#
+
+
+$ echo $'ABC\t"DEF GHI"\tJKL' | cut.py -
+ABC	"DEF GHI"	JKL
+
+## TODO: handle automatic carriage return stripping
+## $ echo $'ABC\t"DEF GHI"\tJKL' | cut.py --output-dialect excel-tab -
+
+$ echo $'ABC\t"DEF GHI"\tJKL' | cut.py --output-dialect excel-tab - | tr -d "\r"
+ABC	"""DEF GHI"""	JKL
+
+
+$ echo $'ABC,"DEF GHI",JKL' | cut.py --csv --output-tsv - 
+ABC	DEF GHI	JKL
+
+#-------------------------------------------------------------------------------
+# Tests for count_it.py
+
+## note: odd quirk in pattern matching
+## $ ls *.py | count-it 'test_(m)'
+## m	5
+## $ ls | count-it '^test_(.)*.py$' | grep m
+## m	2
+
+$ r1=$(ls *.py | count-it 'test_(m)')
+$ r2=$(ls | count-it '^test_(.)*.py$' | grep m)
+$ [ "$r1" = "$r2" ]; echo "$?"
+0

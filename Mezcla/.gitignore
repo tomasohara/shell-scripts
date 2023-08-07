@@ -1,0 +1,93 @@
+# Rules for telling git which untracked files to ignore, mainly based on
+# file extension but also accounting for some idiosyncratic usages.
+#
+# Note:
+# - *** Please add examples when adding exclusions.
+# - ** Also explain if used for non standard stuff (e.g., tox.ini with Python).
+# - This is shared across projects, so there might seem to be
+#   some apparently extraneous patterns included.
+# - Used to pruned 'git status' output, which gets
+#   shown during check-in's (as a sanity check).
+# - The patterns are glob-like with the extension that **/GLOB
+#   matches the glob pattern in any subdirectory.
+# - See 'man gitignore' for details.
+#
+# TODO:
+# - Address the TODO's below.
+#
+
+# Log files and listings
+# TODO: figure out how to apply to subdirs
+**/*.log
+**/*.list
+
+# Any files with leading _, except specified cases (e.g., __xyz__.py)
+# TODO2?: _xyz.py
+**/_*
+## OLD: !**/*__init__.py
+!**/*__*__.py
+# Likewise for trailing _'s (e.g., master-dir-link_)
+**/*_
+
+# Special cases
+# TODO: see why excluded by the rules
+# Workflow files (e.g., .github/workflows/tests.yml).
+!.github/**
+
+# Backup file
+**/*.bak
+**/backup/
+
+# Old or archived files
+**/old
+**/archive
+
+# Output or log-file directories
+**/log-files
+**/output-files
+**/downloads
+
+# Top level distribution dir and related
+# Note: tox support PyPi packaging
+# TODO: dist created by tox utiility???
+dist
+.tox
+
+# Jupyter
+.ipynb_checkpoints
+
+# (maldito) Mac
+.DS_Store
+
+#...............................................................................
+# Idiosyncratic stuff for Tom
+#
+
+# Personal note files
+# ex: reempl-notes.txt
+**/*notes*txt
+
+# Dated backup files
+# ex: html_utils.py.09mar22
+**/*.[0-9][0-9][A-Za-z]*[0-9][0-9]
+# ex: usage.list.08Jan22.2
+**/*.[0-9][0-9][A-Za-z]*[0-9][0-9].*
+versioned-files
+
+# Emacs
+TAGS
+
+# Unit test, coverage reports, etc.
+# TODO: show examples
+.pytest_cache
+**/tests/htmlcov
+.coverage
+.coverage.*
+.hypothesis**
+
+# OS-specific directories
+linux
+win32
+mac-os
+# note: darwin21.1.0 => mac-os
+darwin21.1.0

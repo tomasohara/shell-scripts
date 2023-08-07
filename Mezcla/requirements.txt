@@ -1,0 +1,99 @@
+# Basic requirements for main scripts
+#
+# By default only the cases used in multuiple scripts are installed.
+#
+# Note:
+# - Usage examples:
+#   1. Usual
+#      pip install -r requirements.txt
+#   2. Optional (i.e., including most optional):
+#      pip install --verbose $(perl -pe 's/^#opt#\s*//;' ~/python/Mezcla/requirements.txt | grep -v '^#')
+#   3. Full (i.e., including all optional):
+#      pip install --verbose $(perl -pe 's/^#full#\s*//;' ~/python/Mezcla/requirements.txt | grep -v '^#')
+# - use `pip freeze` to get current list of package specifications (n.b., >= better than == unless specific version needed)
+# - installing textract from PyPI fails https://github.com/deanmalmgren/textract/issues/461
+#
+# TODO:
+# - check absl module ($ grep -r "absl" .)
+# - add support for this to setup.py
+#...............................................................................
+# Regular requirements
+#
+HTMLParser==0.0.2
+absl_py==1.2.0
+beautifulsoup4==4.11.1
+bs4
+cachetools
+cherrypy
+extcolors>=1.0.0
+git+https://github.com/tehabstract/textract.git
+gradio
+lxml
+mako
+matplotlib
+nltk
+numpy>=1.18.5
+pandas>=1.3.0
+pyaml
+pyenchant
+pysbd==0.3.4
+pytest
+requests
+scikit-learn==1.1.2
+scipy
+scispacy==0.5.0
+six
+stop_words==2018.7.23
+tensorflow_hub==0.12.0
+vaderSentiment==3.3.2
+webcolors
+wheel==0.38.4
+xgboost
+#
+#...............................................................................
+# Optional requirements
+#
+# TODO:
+# - download Spacy model(s):
+#   python -m spacy download en_core_web_lg
+# - install bash kernel
+#   python -m bash_kernel.install
+# - add '#opt#deprecated#' (e,.g., useful for deprecated functions/modules)
+# NOTE:
+# - tensorflow and related not installed by default due to size of repo and C compilation overhead.
+# - ipython, pylint, etc. used for setting up development environment
+#
+#opt# SpeechRecognition
+#opt# accelerate
+#opt# bash_kernel
+#opt# coverage
+#opt# datasets
+#opt# diffusers
+#opt# flask
+#opt# flit
+#opt# gensim
+#opt# ibm-watson
+#opt# ibm_cloud_sdk_core==3.15.3
+#opt# ipython
+#opt# jupyter
+#opt# kenlm
+#opt# librosa
+#opt# more_itertools
+#opt# pylint
+#opt# pyyaml
+#opt# selenium
+#opt# spacy>=3.0.0
+#opt# torch
+#opt# transformers
+#...............................................................................
+# "Fully optional" requirements
+# Note: these generally involve large or long installations.
+#
+#full# bert==2.2.0
+#full# albert==1.3.1
+#full# bert-tensorflow
+#full# keras
+#full# lucene
+#full# sacremoses
+#full# sentencepiece
+#full# tensorflow

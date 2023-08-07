@@ -1,0 +1,28 @@
+[run]
+parallel = True
+branch = True
+source =
+  mezcla
+  mezcla.tfidf
+
+[report]
+omit =
+  # Omit test files and init
+  */test_*
+  */__init__.py
+
+  # Omit lowest testing priority
+  ./mezcla/bert_multi_classification.py
+  ./mezcla/bert_text_classification.py
+  ./mezcla/show_bert_representation.py
+  ./mezcla/_postprocess_bert_predictions.py
+  ./mezcla/run_albert_classifier.py
+  ./mezcla/run_bert_classifier.py
+exclude_lines =
+  .*sys.version_info.major *< *3.*
+
+[html]
+directory = mezcla/tests/htmlcov
+
+[xml]
+output = mezcla/tests/coverage.xml

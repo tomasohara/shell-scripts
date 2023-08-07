@@ -1,0 +1,15 @@
+# Simple tests for quick-n-dirty testing
+
+$ ./spell.py - < ./spell.py | head -5
+usr
+env
+py
+sys
+fileinput
+
+$ echo 'how now browne cow?' | ./spell.py -
+browne
+
+# Make sure none of the python files havbe embedded tabs
+$ grep $'\t' *.py tests/*.py | wc -l
+0

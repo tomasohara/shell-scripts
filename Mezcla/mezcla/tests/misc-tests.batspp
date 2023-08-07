@@ -1,0 +1,5 @@
+# Miscelleaneous tests for use with BatsPP
+
+# merge_notes.py should not pull in control charctars
+$ echo $'\x00' > _test-notes.txt; consolidate-notes.bash -; perl-grep -c '\x00' _master-note-info.list 
+0

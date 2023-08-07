@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <!-- Fills in screen and window dimensions using JavaScript -->
+  <head>
+    <meta charset="UTF-8">
+    <title>Simple window dimensions</title>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  </head>
+
+  <body>
+
+    <!--.....................................................................-->
+    <h3>Simple window dimensions</h3>
+
+    <!-- Legend -->
+    <div class="legend">
+      Legend:<br>
+      <ul>
+	<li>Screen dimensions:    <span id="screen-dim-id">???</span></li>
+	<li>Browser dimensions:   <span id="browser-dim-id">???</span></li>
+      </ul>
+    </div>
+
+    <script>
+       var height, width
+       height = $(window).height();
+       width = $(window).width();
+       $("#browser-dim-id").text(width + "x" + height);
+       console.debug("Browser window dimensions: " + width + "x" + height);
+       //
+       height = window.screen.height;
+       width = window.screen.width;
+       $("#screen-dim-id").text(width + "x" + height);
+       console.debug("Screen dimensions: " + width + "x" + height);
+    </script>
+    <noscript>JavaScript is required</noscript>
+
+  </body>
+</html>

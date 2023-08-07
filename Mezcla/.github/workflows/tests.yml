@@ -1,0 +1,33 @@
+# This workflow will install Python dependencies, run tests and lint, using
+# different versions of Python.
+#
+# Notes:
+# - Requires special permission for Github workflows.
+# - For more information see following:
+#     https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+#     https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+# - Based initially on version from https://github.com/LimaBD/batspp.
+# - Running Github Actions with Docker: https://stackoverflow.com/a/64373702
+# - Docker documentation:
+#   https://docs.docker.com/engine/reference/commandline/cli/
+#   https://docs.docker.com/storage/bind-mounts
+#
+
+name: tests
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Build docker image
+      run: |
+        docker build -t mezcla-dev -f- . <Dockerfile
+
+    - name: Run tests
+      run: |
+        ## TODO???: put repo under /mnt/local-mezcla and installed version under /home/mezcla
+        docker run --rm --mount type=bind,source="$(pwd)",target=/home/mezcla mezcla-dev

@@ -1,0 +1,10 @@
+Things to do
+
+- diagnose python-lint problems with examples/inspect_checkpoint.py!
+- * straighten out python requirement (e.g., 3.8 vs. 3.9)
+- *** document dependencies among the various configuration files:
+  -- .github/workflows/tests.yml
+  -- setup.py & mezcla/__init__.py
+  -- pyproject.toml [for flit] & tox.ini [obsolete?]
+  -- Dockerfile and tests/run_tests.bash
+  -- etc.

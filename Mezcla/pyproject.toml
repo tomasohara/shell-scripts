@@ -1,0 +1,29 @@
+## TODO: eliminate redundancy
+
+[tool.poetry]
+name = "mezcla"
+version = "1.3.9.2"
+description = "Miscellaneous Python scripts developed over the course of several independent consulting projects. [Mezcla is Spanish for mixture.]"
+authors = ["Tom O'Hara <tomasohara@gmail.com>"]
+license = "LGPLv3"
+
+[tool.poetry.dependencies]
+python = ">=3.9"
+
+[tool.poetry.dev-dependencies]
+
+[tool.poetry.scripts]
+realpython = "mezcla.__main__:main"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
+[tool.flit.metadata]
+## note: information taken from setup.py
+module = "mezcla"
+license = "LGPLv3"
+author="Tomás O'Hara"
+author-email="tomasohara@gmail.com"
+home-page = "https://github.com/tomasohara/mezcla"
+description-file="README.txt"
