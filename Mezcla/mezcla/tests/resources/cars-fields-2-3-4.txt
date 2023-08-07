@@ -1,4 +1,0 @@
-"symboling","CarName","fueltype"
-"3","car model one","gas"
-"3","car model two","gas"
-"1","cat model three","gas"
