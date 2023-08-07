@@ -97,7 +97,7 @@ function run-python-script {
     local python_arg="-"
     if [ "$script_args" = "" ]; then python_arg=""; fi
     # shellcheck disable=SC2086
-    echo "$script_args" | DEBUG_LEVEL=4 $PYTHON "$script_path" $python_arg >| "$out_base.out" 2>| "$log";
+    echo "$script_args" | $PYTHON "$script_path" $python_arg >| "$out_base.out" 2>| "$log";
     check-errors-excerpt "$log";
     tail "$log" "$out_base.out"
 }
