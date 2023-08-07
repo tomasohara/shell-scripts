@@ -2982,10 +2982,10 @@ alias test-script-debug='ALLOW_SUBCOMMAND_TRACING=1 DEBUG_LEVEL=5 MISC_TRACING_L
 function randomize-datafile() {
     local file="$1"
     local num_lines="$2"
-    if [ "$num_lines" = "" ]; then num_lines=$(wc -l "$file"); fi
+    if [ "$num_lines" = "" ]; then num_lines=$(wc -l < "$file"); fi
     #
     head -1 "$file"
-    tail --lines=+2 "$file" | python -m randomize_lines | head -"$num_lines"
+    tail --lines=+2 "$file" | python -m mezcla.randomize_lines | head -"$num_lines"
 }
 
 # filter-random(pct, file, [include_header=1])Randomize lines based on percentages, using output lile (e.g., _r10pct-fubar.data).
