@@ -703,6 +703,7 @@ sub debug_on {
 #
 sub debug_out {
     my($level, $format_text, @args) = @_;
+    &debug_print(&TL_MOST_VERBOSE, "debug_out(@_)\n");
 
     # Do sanity check to ensure printf formatting present
     # TODO: move inside trace level test to avoid too many warnings.
@@ -2185,7 +2186,7 @@ sub filter_warnings {
 # This is just a no-op function used for referencing variables that might
 # be defined in other modules.
 #
-sub NO_op { &FALSE; }
+sub NO_OP { &FALSE; }
 
 sub reference_vars { &NO_OP; }
 
