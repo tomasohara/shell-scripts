@@ -534,12 +534,13 @@ class Batspp(Main):
         if BASH_EVAL:
             self.bats_content += 'n=0\nbad=0\n'
             self.bats_content += (
-                'function run-test {\n'
-                '    local id="$1"\n'
-                '    let n++\n'
-                '    result="ok"\n'
-                '    eval "$id"; if [ $? -ne 0 ]; then let bad++; result="not ok"; fi\n'
-                '    echo "$result $n $id"\n'
+                'function run-test {\n' +
+                '    local id="$1"\n' +
+                ('    echo Running test "$id"\n' if BASH_TRACE else '') +
+                '    let n++\n' +
+                '    result="ok"\n' +
+                '    eval "$id"; if [ $? -ne 0 ]; then let bad++; result="not ok"; fi\n' +
+                '    echo "$result $n $id"\n' +
                 '    }\n'
                 )
             self.bats_content += f'tests=({" ".join(all_test_ids)}); echo "1..${{#tests[@]}}"\n'
@@ -713,7 +714,7 @@ class CustomTestsToBats:
                       ## TEST: ("" if not GLOBAL_SETUP.strip() else ("\t" + GLOBAL_SETUP + ";\n")) +
                       f'\ttestfolder="{test_folder}"\n' +
                       f'\tmkdir --parents "$testfolder"\n' +
-                      (f'\tcommand cp -R ./. "$testfolder"\n' if copy_dir else '') +
+                      (f'\tcommand cp -Rp ./. "$testfolder"\n' if copy_dir else '') +
                       # note: warning added for sake of shellcheck
                       f'\tbuiltin cd "$testfolder" || echo Warning: Unable to "cd $testfolder"\n')
         setup_sans_prompt = my_re.sub(r'^\s*\$', '\t', setup, flags=my_re.MULTILINE)
