@@ -1794,6 +1794,7 @@ alias tab-sort="sort -t $'\t'"
 alias colon-sort="sort \$SORT_COL2 -t ':'"
 alias colon-sort-rev-num='colon-sort -rn'
 alias freq-sort='tab-sort -rn $SORT_COL2'
+alias comma-sort="sort -t ','"
 #
 # para-sort: sort paragraphs alphabetically
 function para-sort() { perl -00 -e '@paras=(); while (<>) {push(@paras, $_);} print(join("\n", sort @paras));' "$@"; }
