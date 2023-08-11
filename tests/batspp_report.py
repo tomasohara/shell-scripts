@@ -69,7 +69,8 @@ HOME = system.getenv_text("HOME", "~",
                           "Home directory for user")
 DOCKER_HOME = "/home/shell-scripts"
 UNDER_DOCKER = ((HOME == DOCKER_HOME) or system.file_exists(DOCKER_HOME))
-UNDER_RUNNER = ("/home/runner" in HOME)
+## TODO? UNDER_RUNNER = ("/home/runner" in HOME)
+UNDER_RUNNER = (("/home/runner" in HOME) or UNDER_DOCKER)
 
 TEST_REGEX = system.getenv_value("TEST_REGEX", None,
                                  "Regex for tests to include; ex: 'c.*' for debugging")
