@@ -4,6 +4,8 @@
 #    source ~/bin/tomohara-aliases.bash
 #    source ~/bin/anaconda-aliases.bash
 #
+# NOTE: This depends on Tom usual aliases (see all-tomohara-aliases-etc.bash).
+#
 # TODO: reproduce alias definitions from tomohara-aliases.bash here so independent
 #
 #------------------------------------------------------------------------
@@ -67,8 +69,10 @@ function init-condaN {
 
     ## DEBUG: echo "out: init-condaN()"
 }
-alias init-conda3='init-condaN $anaconda3_dir'
-alias init-conda2='init-condaN $anaconda2_dir'
+alias init-conda3='init-condaN "$anaconda3_dir"'
+alias init-conda2='init-condaN "$anaconda2_dir"'
+## TODO: reference-var "$anaconda2_dir"
+echo "$anaconda2_dir" > /dev/null
 
 # Work around for intermittent problems w/ 'conda activate' requiring 'source activate' instead.
 # activation-helper is to handle deactivate as well
@@ -139,8 +143,12 @@ function conda-activate-env-like {
     #                                            /.../_ENV_/bin/python
     local bin_dir
     bin_dir=$(which python | perl -pe "s@^((.*)/[^/]+/bin/python$)@\2/$env_name/bin@;")
-    echo "Warning: only prepending PATH w/ $bin_dir (e.g., no CONDA_ env updates)"
-    export PATH="$bin_dir:$PATH";
+    if [ ! -e "$bin_dir" ]; then
+	echo "Error: unable to resolve anaconda bin dir from current path"
+    else
+	echo "Warning: only prepending PATH w/ $bin_dir (e.g., no CONDA_ env updates)"
+	export PATH="$bin_dir:$PATH";
+    fi
 }
 #
 function conda-deactivate-env {
