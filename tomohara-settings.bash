@@ -43,9 +43,13 @@ append-path "$TOM_BIN/adhoc"
 append-path "$TOM_BIN/examples"
 # Put current directoy at end of path; can be overwritting with ./ prefix
 export PATH="$PATH:."
+
 # Note: ~/lib only used to augment existing library, not pre-empt
 ## OLD: export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib:$HOME/lib/linux
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib:$HOME/lib/$OSTYPE_BRIEF"
+
+# Setup pythonpath to include .. for sake of testing
+export PYTHONPATH="$PYTHONPATH:.."
 
 # Define HOST_NICKNAME from ~/.host-nickname if unset or the default
 if [[ ("$HOST_NICKNAME" = "") || ("$HOST_NICKNAME" = "tpo-host") ]]; then
