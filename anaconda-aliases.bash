@@ -149,6 +149,7 @@ function conda-activate-env-like {
 	echo "Warning: only prepending PATH w/ $bin_dir (e.g., no CONDA_ env updates)"
 	export PATH="$bin_dir:$PATH";
     fi
+    add-conda-env-to-xterm-title
 }
 #
 function conda-deactivate-env {
