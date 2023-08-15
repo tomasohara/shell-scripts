@@ -1112,7 +1112,14 @@ alias em-tags=etags
 ## OLD: alias em-large='em-fn "-DAMA-Ubuntu Mono-normal-normal-normal-*-28-*-*-*-m-0-iso10646-1"'
 ## OLD: function em-large { em-fn "-DAMA-Ubuntu Mono-normal-normal-normal-*-28-*-*-*-m-0-iso10646-1" "$@"; }
 ## Note: Bash construct ${VAR:-VAL} use VAL if VAR not defined, and here VAL starts with -!
-function em-large { em-fn "${EMACS_LARGE_FONT:--DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1}" "$@"; }
+## TODO?: cond-export EMACS_LARGE_FONT "-DAMA-Ubuntu\\ Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"
+##
+## HACK: uses <space> due to stupid shell tricks (see tpo-invoke-emacs.sh)
+## cond-export EMACS_LARGE_FONT "-DAMA-Ubuntu<space>Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"
+cond-export EMACS_LARGE_FONT "-DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"
+cond-export EMACS_OPTIONS ""
+function em-large-default { export EMACS_OPTIONS="$EMACS_OPTIONS -fn '$EMACS_LARGE_FONT'"; }
+function em-large { em-fn "$EMACS_LARGE_FONT" "$@"; }
 alias em-nw='emacs -l ~/.emacs --no-windows'
 ## TODO: alias em-tpo='emacs -l ~/.emacs'
 alias em-tpo-nw='emacs -l ~/.emacs --no-windows'
