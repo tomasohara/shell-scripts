@@ -1,5 +1,17 @@
 Adhoc tests
 
+*** WARNING: ***
+- The tests can be very dangerous, leading to deleted directories in some cases.
+- Run them under a separate test account with minimal permission to be safe.
+- TODO: Weed out usage of "rm -r ./*" (instead delete before and after from command line)!
+  -- Problematic as current directory might be different.
+  -- See Tom's changes to dir-aliases-test-revised.ipynb (circa 17 Jul 23).
+
+* TIPS:
+- Use '# Global Setup' comments to flag setup sections for entire test files
+- Put expected output comment before the command (Batspp quirk).
+- For examples of both, see Tom's changes to trace-python-commands.ipynb (circa 17 Aug 23).
+
 TERMINOLOGY:
 - tests, testfiles = .ipynb files
 - batspp = batspp library that uses bats-core

@@ -1,5 +1,7 @@
 #!/bin/csh -f
 #
+# *** OBSOLETE: see do_diff.bash ***
+#
 # do_diff.sh: compare a subset of the files in two directories
 #
 # Notes:

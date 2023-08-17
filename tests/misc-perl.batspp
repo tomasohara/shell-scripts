@@ -1,0 +1,12 @@
+# Basic tests for Perl scripts
+# todo: add automatic test for corresponding Python ones
+
+$ echo "green:0.5 eggs:0.25 with:0.125 spam:0.125" | tr ": " $'\t\n' | calc_entropy.perl -last -verbose - | grep -v '^$'
+#		class	freq	prob	-p lg(p)
+#		green	0	0.500	0.500
+#		eggs	0	0.250	0.500
+#		spam	0	0.125	0.375
+#		with	0	0.125	0.375
+#		total	1	1.000	1.750
+# word	classes	freq	entropy	max_prob
+-	4	1	1.750	0.500

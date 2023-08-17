@@ -28,8 +28,14 @@ our($ignore_case) = $i;
 if (&DEBUG_LEVEL >= &TL_VERBOSE) {
     my(@l1) = ("a", "b", "c");
     my(@l2) = ("b");
-    &debug_out(4, "diff(l1, l2) = %s\n", &difference(\@l1, \@l2));
-    &debug_out(4, "int(l1, l2) = %s\n", &intersection(\@l1, \@l2));
+    ## BAD:
+    ## &debug_out(4, "diff(l1, l2) = %s\n", &difference(\@l1, \@l2));
+    ## &debug_out(4, "int(l1, l2) = %s\n", &intersection(\@l1, \@l2));
+    my(@diff) = &difference(\@l1, \@l2);
+    my(@inter) = &intersection(\@l1, \@l2);
+    &debug_print(4, "diff(l1, l2) = @diff\n");
+    &debug_print(4, "inter(l1, l2) = @inter\n");
+    &assertion((scalar @diff) > (scalar @inter));
 }
 
 # Determine which set function to use

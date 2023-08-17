@@ -85,7 +85,11 @@ fi
 # TODO: Do whatever
 
 ## {{
-   ## TODO: cd /                # for system backup
+## TODO: cd /                # for system backup
+   TARGET_DIR=${TARGET_DIR:-""}
+   if [ -n "$TARGET_DIR" ]; then
+       cd "$TARGET_DIR"
+   fi
    export MISC_FIND_OPTIONS=""
    export BASE_DIR
    BASE_DIR=$(basename "$PWD")

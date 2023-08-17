@@ -69,9 +69,13 @@ HOME = system.getenv_text("HOME", "~",
                           "Home directory for user")
 DOCKER_HOME = "/home/shell-scripts"
 UNDER_DOCKER = ((HOME == DOCKER_HOME) or system.file_exists(DOCKER_HOME))
+## TODO? UNDER_RUNNER = ("/home/runner" in HOME)
+UNDER_RUNNER = (("/home/runner" in HOME) or UNDER_DOCKER)
 
 TEST_REGEX = system.getenv_value("TEST_REGEX", None,
                                  "Regex for tests to include; ex: 'c.*' for debugging")
+SHOW_FAILURE_CONTEXT = system.getenv_bool("SHOW_FAILURE_CONTEXT", UNDER_RUNNER,
+                                          "Show context of test failures--useful with Github runner")
 SINGLE_STORE = system.getenv_bool("SINGLE_STORE", False,
                                   f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
 CLEAN_DEFAULT = system.getenv_bool("CLEAN_OUTPUT", not debug.detailed_debugging(),
@@ -195,8 +199,13 @@ def main():
             # quotation marks in output; uses single test directory; passes along --force option
             run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
-            run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} 2> {log_file}")
-        debug.code(4, lambda: gh.run(f"check_errors.perl {log_file}"))
+            run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+        # Check for common errors (e.g., command not found or insufficient permissions)
+        debug.code(4, lambda: print(gh.run(f"check_errors.perl {log_file}")))
+        ## TEMP: Show context of failed tests for help with diagnosis of Github actions runs (as temp files not accessible afterwards)
+        if SHOW_FAILURE_CONTEXT:
+            context = gh.run(f"grep -B10 '^not ok' {real_output_file}")
+            print("Failure context: " + (f"{{\n{gh.indent_lines(context)}}}" if context.strip() else "n/a"))
         debug.assertion(not run_output.strip())
         real_output = system.read_file(real_output_file)
         debug.trace(6, f"run_batspp() => {real_output!r}")
@@ -230,7 +239,7 @@ def main():
         is_ipynb = file.endswith(IPYNB)
         if is_ipynb:
             if TEST_REGEX and not my_re.search(fr"{TEST_REGEX}", file):
-                debug.trace(3, f"FYI: Ignoring {file} not mathing TEST_REGEX ({TEST_REGEX})")
+                debug.trace(3, f"FYI: Ignoring {file} not matching TEST_REGEX ({TEST_REGEX})")
                 continue
             if not ALL_OPTION and NOBATSPP in file:
                 debug.trace(4, f"FYI: Ignoring NOBATSPP file: {file}")
@@ -258,8 +267,10 @@ def main():
             print(f"IPYNB TESTFILE [{i}]: {testfile} => {batspp_from_ipynb}")
             log_file = f"{batspp_from_ipynb}.log"
             gh.run(f"python3 ../jupyter_to_batspp.py {testfile} --output {batspp_from_ipynb} 2> {log_file}")
-            # note: uses call to avoid issue with lambda function argument binding
+            ## OLD
+            ## # note: uses call to avoid issue with lambda function argument binding; also avoids silly python issue (Cell variable log_file defined in loop)
             debug.call(4, gh.run, f"check_errors.perl {log_file}", **{"output": True})
+            ## TEST: debug.code(4, lambda: print(gh.run(f"check_errors.perl {log_file}")))
             batspp_array.append(batspp_from_ipynb)
             i += 1
     ipynb_count = i - 1

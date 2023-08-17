@@ -534,12 +534,13 @@ class Batspp(Main):
         if BASH_EVAL:
             self.bats_content += 'n=0\nbad=0\n'
             self.bats_content += (
-                'function run-test {\n'
-                '    local id="$1"\n'
-                '    let n++\n'
-                '    result="ok"\n'
-                '    eval "$id"; if [ $? -ne 0 ]; then let bad++; result="not ok"; fi\n'
-                '    echo "$result $n $id"\n'
+                'function run-test {\n' +
+                '    local id="$1"\n' +
+                ('    echo Running test "$id"\n' if BASH_TRACE else '') +
+                '    let n++\n' +
+                '    result="ok"\n' +
+                '    eval "$id"; if [ $? -ne 0 ]; then let bad++; result="not ok"; fi\n' +
+                '    echo "$result $n $id"\n' +
                 '    }\n'
                 )
             self.bats_content += f'tests=({" ".join(all_test_ids)}); echo "1..${{#tests[@]}}"\n'
@@ -704,18 +705,18 @@ class CustomTestsToBats:
         # Note: set COPY_DIR to copy files in current dir to temp. dir.
         ## TODO: temp_dir = Main.temp_base; put copy in setup if GLOBAL_TEST_DIR
         debug.assertion(BASH_EVAL or not GLOBAL_TEST_DIR)
-        test_subdir = unspaced_title if not GLOBAL_TEST_DIR else "test-dir"
-        test_folder = gh.form_path(TEMP_DIR, test_subdir)
-        gh.full_mkdir(test_folder)
-        copy_dir = (COPY_DIR and ((not GLOBAL_TEST_DIR) or (self.num_tests == 0)))
+        ## OLD: gh.full_mkdir(test_folder)
         self.num_tests += 1
-        setup_text = (
-                      ## TEST: ("" if not GLOBAL_SETUP.strip() else ("\t" + GLOBAL_SETUP + ";\n")) +
-                      f'\ttestfolder="{test_folder}"\n' +
-                      f'\tmkdir --parents "$testfolder"\n' +
-                      (f'\tcommand cp -R ./. "$testfolder"\n' if copy_dir else '') +
-                      # note: warning added for sake of shellcheck
-                      f'\tbuiltin cd "$testfolder" || echo Warning: Unable to "cd $testfolder"\n')
+        setup_text = ""
+        if not GLOBAL_TEST_DIR:
+            test_subdir = unspaced_title
+            test_folder = gh.form_path(TEMP_DIR, test_subdir)
+            setup_text += (
+                f'\ttest_folder="{test_folder}"\n' +
+                f'\tmkdir --parents "$test_folder"\n' +
+                f'\tcommand cp -Rp ./. "$test_folder"\n' +
+                # note: warning added for sake of shellcheck
+                f'\tbuiltin cd "$test_folder" || echo Warning: Unable to "cd $test_folder"\n')
         setup_sans_prompt = my_re.sub(r'^\s*\$', '\t', setup, flags=my_re.MULTILINE)
         setup_text += setup_sans_prompt + "\n"
         debug.trace_expr(T6, setup_text)
@@ -920,6 +921,17 @@ class CustomTestsToBats:
         bats_tests = ''
         test_ids = []
 
+        # Add global setup if using global test dir
+        if GLOBAL_TEST_DIR:
+            test_folder = gh.form_path(TEMP_DIR, "global-test-dir")
+            bats_tests += (
+                "# Global test directory setup\n" +
+                f'test_folder="{test_folder}"\n' +
+                f'mkdir --parents "$test_folder"\n' +
+                f'command cp -Rp ./. "$test_folder"\n' +
+                # note: warning added for sake of shellcheck
+                f'command cd "$test_folder" || echo Warning: Unable to "cd $test_folder"\n' +
+                "\n")
         ## TODO:
         ## NORMALIZE_WHITESPACE = system.getenv_bool("NORMALIZE_WHITESPACE", False,
         ##                                           "Convert non-newline whitespace to space")

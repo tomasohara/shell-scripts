@@ -1112,7 +1112,14 @@ alias em-tags=etags
 ## OLD: alias em-large='em-fn "-DAMA-Ubuntu Mono-normal-normal-normal-*-28-*-*-*-m-0-iso10646-1"'
 ## OLD: function em-large { em-fn "-DAMA-Ubuntu Mono-normal-normal-normal-*-28-*-*-*-m-0-iso10646-1" "$@"; }
 ## Note: Bash construct ${VAR:-VAL} use VAL if VAR not defined, and here VAL starts with -!
-function em-large { em-fn "${EMACS_LARGE_FONT:--DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1}" "$@"; }
+## TODO?: cond-export EMACS_LARGE_FONT "-DAMA-Ubuntu\\ Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"
+##
+## HACK: uses <space> due to stupid shell tricks (see tpo-invoke-emacs.sh)
+## cond-export EMACS_LARGE_FONT "-DAMA-Ubuntu<space>Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"
+cond-export EMACS_LARGE_FONT "-DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"
+cond-export EMACS_OPTIONS ""
+function em-large-default { export EMACS_OPTIONS="$EMACS_OPTIONS -fn '$EMACS_LARGE_FONT'"; }
+function em-large { em-fn "$EMACS_LARGE_FONT" "$@"; }
 alias em-nw='emacs -l ~/.emacs --no-windows'
 ## TODO: alias em-tpo='emacs -l ~/.emacs'
 alias em-tpo-nw='emacs -l ~/.emacs --no-windows'
@@ -1374,7 +1381,8 @@ function tkdiff () { wish -f "$TOM_BIN"/tkdiff.tcl "$@" & }
 alias rdiff='rev_vdiff.sh'
 alias tkdiff-='tkdiff -noopt'
 #
-function kdiff () { kdiff.sh "$@" & }
+## OLD: function kdiff () { kdiff.sh "$@" & }
+simple-alias-fn kdiff kdiff.sh
 alias vdiff='kdiff'
 #
 # TOM-IDIOSYNCRATIC
@@ -1793,6 +1801,7 @@ alias tab-sort="sort -t $'\t'"
 alias colon-sort="sort \$SORT_COL2 -t ':'"
 alias colon-sort-rev-num='colon-sort -rn'
 alias freq-sort='tab-sort -rn $SORT_COL2'
+alias comma-sort="sort -t ','"
 #
 # para-sort: sort paragraphs alphabetically
 function para-sort() { perl -00 -e '@paras=(); while (<>) {push(@paras, $_);} print(join("\n", sort @paras));' "$@"; }
@@ -1869,10 +1878,12 @@ alias foreach='perl- foreach.perl'
 
 # rename-spaces: replace spaces in filenames of current dir with underscores
 alias rename-spaces='rename-files -q -global " " "_"'
+# TODO2: handle smart quotes
 alias rename-quotes='rename-files -q -global "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
 # rename-special-punct: replace runs of any troublesome punctuation in filename w/ _
 ## OLD: alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_"'
-alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_"; rename-files -q -global -regex "–" "-"'
+## OLD: alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_"; rename-files -q -global -regex "–" "-"'
+alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]·’®]" "_"; rename-files -q -global -regex "–" "-"'
 # TODO: test
 #     $ touch '_what-the-hell?!'; rename-special-punct; ls _what* => _what-the-hell_
 ## TODO:
@@ -1889,12 +1900,13 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 ## TODO: alias rename-parens='rename-files -rename_old -global -regex "[\(\)]" "" *[\(\)]*'
 #
 # rename-utf8-encoded: replace runs of non-ascii UTF8 encodings with _
-# note: '👇🏻' gets encoded as ; see show-unicode-code-info alias to way to illustrate encodings
+# note: '👇🏻' gets encoded as [???]; see show-unicode-code-info alias to way to illustrate encodings
 # TODO: make this less of a sledgehammer
 ## BAD: alias rename-utf8-encoded='rename-files -global -regex "[0x80-0xFF]\{3,\}" "_"'
 ## OLD: alias rename-utf8-encoded='rename-files -global -regex "[\x80-\xFF]\{3,\}" "_"'
 ## OLD: alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]+" "_"'
-alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]{1,4}" "_"'
+## OLD: alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]{1,4}" "_"'
+alias rename-utf8-encoded-sledgehammer='rename-files -quick -global -regex "[\x80-\xFF]{1,4}" "_"'
 ## OLD: alias rename-emoji=rename-utf8-encoded
 # via https://en.wikipedia.org/wiki/UTF-8:
 #    U+10000	U+10FFFF	11110xxx	10xxxxxx	10xxxxxx	10xxxxxx;   note: F[8-F]{3}
@@ -2236,6 +2248,17 @@ function count-exts-all { (count-exts | cat; $LS | count-it '^[^.]+(\.*)$') | so
 
 alias kill-iceweasel='kill_em.sh iceweasel'
 
+# cmd-output(cmd, ...): show output for cmd to _{cmd}-$(TODAY).log (with spaces
+# replaced by underscores)
+#
+function cmd-output () {
+    local command="$*"
+    local output_file
+    output_file="_$(echo "$command" | tr ' ' '_')-$(TODAY).list"
+    $command 2>&1 | ansifilter > "$output_file"
+    $PAGER_NOEXIT "$output_file"
+}
+
 # cmd-usage(command): output usage for command to _command.list (with spaces
 # replaced by underscores)
 function cmd-usage () {
@@ -2245,6 +2268,10 @@ function cmd-usage () {
     $command --help  2>&1 | ansifilter > "$usage_file"
     $PAGER_NOEXIT "$usage_file"
 }
+## TODO:
+## function cmd-usage () {
+##     cmd-output "$*" --help
+## }
 
 #-------------------------------------------------------------------------------
 # More Linux stuff
@@ -2981,10 +3008,10 @@ alias test-script-debug='ALLOW_SUBCOMMAND_TRACING=1 DEBUG_LEVEL=5 MISC_TRACING_L
 function randomize-datafile() {
     local file="$1"
     local num_lines="$2"
-    if [ "$num_lines" = "" ]; then num_lines=$(wc -l "$file"); fi
+    if [ "$num_lines" = "" ]; then num_lines=$(wc -l < "$file"); fi
     #
     head -1 "$file"
-    tail --lines=+2 "$file" | python -m randomize_lines | head -"$num_lines"
+    tail --lines=+2 "$file" | python -m mezcla.randomize_lines | head -"$num_lines"
 }
 
 # filter-random(pct, file, [include_header=1])Randomize lines based on percentages, using output lile (e.g., _r10pct-fubar.data).

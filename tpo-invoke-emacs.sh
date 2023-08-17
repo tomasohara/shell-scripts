@@ -59,6 +59,7 @@ fi
 # Aside: in general longer names preferred to minimize conflicts as with DEBUG vs. DEBUG_LEVEL.
 ## OLD: emacs_options="--geometry 80x50"
 use_nohup="0"
+## TODO: emacs_options="${EMACS_OPTIONS:-}"
 emacs_options=""
 in_background="1"
 ## OLD: emacs="emacs"
@@ -148,6 +149,11 @@ function resolve-path() {
 # Reset bash flags
 export BASHRC_PROCESSED=0 PROFILE_PROCESSED=0
 
+## TODO: resolve <space> in emacs options
+# EX: "-DAMA-Ubuntu<space>Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1" => "-DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"
+# NOTE: works around problem with space in font name in EMACS_OPTIONS env. var
+## emacs_options="${emacs_options//<space>/ /}"
+
 # Invoke emacs, adding current directory if no args (so dired invoked)
 ## DEBUG: echo "FYI: which '$emacs' => '$(which "$emacs")'"
 # note: disables shellcheck SC2046 [Quote this to prevent word splitting], SC2048 [Use $... (with quotes) to prevent whitespace problems], and SC2086 [Double quote to prevent globbing]
@@ -171,18 +177,18 @@ if [ "$in_background" = "1" ]; then
     fi
     #
     if [ "$use_nohup" = "1" ]; then
-        ## BAD: nohup emacs $emacs_options "$@" >> $TEMP/nohub.log 2>&1 &
-        ## OLD: nohup emacs $emacs_options $(realpath "$@" 2> /dev/null) >> $TEMP/nohub.log 2>&1 &
+        ## BAD: nohup emacs $emacs_options "$@" >> $TEMP/nohup.log 2>&1 &
+        ## OLD: nohup emacs $emacs_options $(realpath "$@" 2> /dev/null) >> $TEMP/nohup.log 2>&1 &
         # note: adds current directory so emacs starts in it rather than home (note< stupid nohup quirk
         # TODO: simplify awkward Bash constructions to similate csh 'unshift .'!
-        ## OLD: nohup emacs $emacs_options $(realpath "${args[*]}") >> $TEMP/nohub.log 2>&1 &
-        ## OLD2: $nohup emacs $emacs_options $(realpath "${args[*]}") >> $TEMP/nohub.log 2>&1 &
-        ## DEBUG: echo "background w/ nohub"
-        ## DEBUG: echo "issuing: $emacs $emacs_options '$(realpath ${args[*]})' \>\> $TEMP/nohub.log 2>&1 &"
-        ## OLD: nohup "$emacs" $emacs_options $(realpath "${args[*]}") >> $TEMP/nohub.log 2>&1 &
-	nohup "$emacs" $emacs_options "${args[*]}" >> $TEMP/nohub.log 2>&1 &
+        ## OLD: nohup emacs $emacs_options $(realpath "${args[*]}") >> $TEMP/nohup.log 2>&1 &
+        ## OLD2: $nohup emacs $emacs_options $(realpath "${args[*]}") >> $TEMP/nohup.log 2>&1 &
+        ## DEBUG: echo "background w/ nohup"
+        ## DEBUG: echo "issuing: $emacs $emacs_options '$(realpath ${args[*]})' \>\> $TEMP/nohup.log 2>&1 &"
+        ## OLD: nohup "$emacs" $emacs_options $(realpath "${args[*]}") >> $TEMP/nohup.log 2>&1 &
+	nohup "$emacs" $emacs_options "${args[*]}" >> $TEMP/nohup.log 2>&1 &
     else
-        ## DEBUG: echo "regular background (i.e., non-nohub)"
+        ## DEBUG: echo "regular background (i.e., non-nohup)"
         ## DEBUG: echo "issuing: $emacs $emacs_options ${args[*]} &"
 	## DEBUG: set -o xtrace
 	## DEBUG: echo "${args[@]}"

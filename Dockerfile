@@ -35,8 +35,8 @@
 FROM catthehacker/ubuntu:act-20.04
 
 # Set default debug level (n.b., use docker build --build-arg "arg1=v1" to override)
-## TODO: ARG DEBUG_LEVEL=2
-ARG DEBUG_LEVEL=4
+ARG DEBUG_LEVEL=2
+## DEBUG: ARG DEBUG_LEVEL=4
 
 # Set branch override: this is not working due to subtle problem with the tfidf package
 #   ValueError: '/home/tomohara/python/tfidf' is not in the subpath of '/tmp/pip-req-build-4wdbom6g'

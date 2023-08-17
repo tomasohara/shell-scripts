@@ -1,11 +1,8 @@
 #! /bin/bash
 #
-# kdiff.sh: Invokes kdiff over the files making sure unix paths resolved to windows.
+# kdiff.sh: Invokes kdiff3 over the files making sure unix paths resolved to windows
+# if under Cygwin.
 #
-# NOTE: Assumes kdiff3 executable is in path.
-# TODO:
-# - Add support for Unix.
-# - Check for default installation directory (e.g., C:\Program Files\KDiff3).
 #
 
 # Uncomment following line(s) for tracing:
@@ -15,16 +12,17 @@
 ## set -o xtrace
 ## set -o verbose
 
-# TODO: Parse command-line options
+# Parse command-line options
 #
 kdiff="kdiff3"
 #
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
-while [ "$moreoptions" = "1" ]; do
-    if [ "$1" = "--trace" ]; then
+show_usage=0
+while [ "$moreoptions" == "1" ]; do
+    if [ "$1" == "--trace" ]; then
 	set -o xtrace;
-    elif [ "$1" = "--fubar" ]; then
-	echo "fubar";
+    elif [ "$1" == "--help" ]; then
+	show_usage=1
     else
 	echo "ERROR: Unknown option: $1";
 	exit;
@@ -33,24 +31,31 @@ while [ "$moreoptions" = "1" ]; do
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 done
 #
-# TODO: Show usage statement
+# Show usage statement if need be
 #
-if [ "$2" = "" ]; then
+if [[ ("$2" == "") && ("$show_usage" == "0") ]]; then
     echo ""
-    echo "usage: `basename $0` [options]"
+    echo "Error: missing filename"
+    show_usage=1
+fi
+if [ "$show_usage" == "1" ]; then
+    script=$(basename "$0")
     echo ""
-    echo "ex: `basename $0` whatever"
+    echo "Usage: $script [options] filename1 filename2"
+    echo "    options: [--trace] [--help]"
+    echo ""
+    echo "Example:"
+    echo "    $0 diff.sh do_diff.sh"
     echo ""
     exit
 fi
 file1="$1"
 file2="$2"
-if [ "$OSTYPE" = "cygwin" ]; then
-    file1=`cygpath -w "$file1"`
-    file2=`cygpath -w "$file2"`
+if [ "$OSTYPE" == "cygwin" ]; then
+    file1=$(cygpath -w "$file1")
+    file2=$(cygpath -w "$file2")
     kdiff="cygstart $kdiff"
 fi
 
 # Invoke kdiff
-## OLD: $kdiff "$file1" "$file2" &
-$kdiff "$file1" "$file2" 2>| $TMP/kdiff-$$.log &
+$kdiff "$file1" "$file2" 2>| "$TMP/kdiff-$$.log" &
