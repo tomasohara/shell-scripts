@@ -72,7 +72,7 @@ simple-alias-fn black-plain 'convert-emoticons-aux black'
 function run-python-script {
     ## DEBUG: trace-vars _PSL_ out_base log
     if [ "$1" = "" ]; then
-        echo "Usage: $0 script arg ..."
+        echo "Usage: run-python-script script arg ..."
         return
     fi
     # Check args
