@@ -1878,10 +1878,12 @@ alias foreach='perl- foreach.perl'
 
 # rename-spaces: replace spaces in filenames of current dir with underscores
 alias rename-spaces='rename-files -q -global " " "_"'
+# TODO2: handle smart quotes
 alias rename-quotes='rename-files -q -global "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
 # rename-special-punct: replace runs of any troublesome punctuation in filename w/ _
 ## OLD: alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_"'
-alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_"; rename-files -q -global -regex "–" "-"'
+## OLD: alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_"; rename-files -q -global -regex "–" "-"'
+alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]·’®]" "_"; rename-files -q -global -regex "–" "-"'
 # TODO: test
 #     $ touch '_what-the-hell?!'; rename-special-punct; ls _what* => _what-the-hell_
 ## TODO:
@@ -1898,12 +1900,13 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 ## TODO: alias rename-parens='rename-files -rename_old -global -regex "[\(\)]" "" *[\(\)]*'
 #
 # rename-utf8-encoded: replace runs of non-ascii UTF8 encodings with _
-# note: '👇🏻' gets encoded as ; see show-unicode-code-info alias to way to illustrate encodings
+# note: '👇🏻' gets encoded as [???]; see show-unicode-code-info alias to way to illustrate encodings
 # TODO: make this less of a sledgehammer
 ## BAD: alias rename-utf8-encoded='rename-files -global -regex "[0x80-0xFF]\{3,\}" "_"'
 ## OLD: alias rename-utf8-encoded='rename-files -global -regex "[\x80-\xFF]\{3,\}" "_"'
 ## OLD: alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]+" "_"'
-alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]{1,4}" "_"'
+## OLD: alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]{1,4}" "_"'
+alias rename-utf8-encoded-sledgehammer='rename-files -quick -global -regex "[\x80-\xFF]{1,4}" "_"'
 ## OLD: alias rename-emoji=rename-utf8-encoded
 # via https://en.wikipedia.org/wiki/UTF-8:
 #    U+10000	U+10FFFF	11110xxx	10xxxxxx	10xxxxxx	10xxxxxx;   note: F[8-F]{3}
@@ -2245,6 +2248,17 @@ function count-exts-all { (count-exts | cat; $LS | count-it '^[^.]+(\.*)$') | so
 
 alias kill-iceweasel='kill_em.sh iceweasel'
 
+# cmd-output(cmd, ...): show output for cmd to _{cmd}-$(TODAY).log (with spaces
+# replaced by underscores)
+#
+function cmd-output () {
+    local command="$*"
+    local output_file
+    output_file="_$(echo "$command" | tr ' ' '_')-$(TODAY).list"
+    $command 2>&1 | ansifilter > "$output_file"
+    $PAGER_NOEXIT "$output_file"
+}
+
 # cmd-usage(command): output usage for command to _command.list (with spaces
 # replaced by underscores)
 function cmd-usage () {
@@ -2254,6 +2268,10 @@ function cmd-usage () {
     $command --help  2>&1 | ansifilter > "$usage_file"
     $PAGER_NOEXIT "$usage_file"
 }
+## TODO:
+## function cmd-usage () {
+##     cmd-output "$*" --help
+## }
 
 #-------------------------------------------------------------------------------
 # More Linux stuff
