@@ -2439,6 +2439,8 @@ TPO_SSH_KEY=~/.ssh/$USER-key.pem
 SSH_PORT="22"
 TPO_SSH_USER="$USER"
 #
+# ssh-host-login-aws(host): open SSH connection to HOST
+# options: -X enables X11 forwarding; -i identity file; -q quiet mode; -p port
 # TODO: For cygwin clients, unset TERM so set_xterm_title.bash not confused.
 # Maldito shellcheck [SC2029: Note that, unescaped, this expands on the client side]
 # shellcheck disable=SC2029
