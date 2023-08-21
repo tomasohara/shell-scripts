@@ -2255,7 +2255,9 @@ function cmd-output () {
     local command="$*"
     local output_file
     output_file="_$(echo "$command" | tr ' ' '_')-$(TODAY).list"
-    $command 2>&1 | ansifilter > "$output_file"
+    ## OLD: $command 2>&1 | ansifilter > "$output_file"
+    ## TODO3?: use separate invocations for aliases than for other commands
+    ($command || eval "$command") 2>&1 | ansifilter > "$output_file"
     $PAGER_NOEXIT "$output_file"
 }
 
