@@ -625,7 +625,7 @@ if [ "$(which "command" 2> /dev/null)" == "" ]; then
     export TIME_CMD=/usr/bin/time
 fi
 export PERL="$NICE $TIME_CMD perl -Ssw"
-export BRIEF_USAGE=1
+## OLD: export BRIEF_USAGE=1
 
 # Terminal window title
 alias set-xterm-title='set_xterm_title.bash'
