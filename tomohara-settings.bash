@@ -69,6 +69,10 @@ if [ -e "$HOME/mezcla-tom" ]; then add-python-path "$HOME/mezcla-tom"; fi
 # Make sure gradio apps accessible in local net
 # See https://superuser.com/questions/949428/whats-the-difference-between-127-0-0-1-and-0-0-0-0.
 export GRADIO_SERVER_NAME=0.0.0.0
+#
+# Mezcla stuff
+export BRIEF_USAGE=1
+export TRACE_INVOCATION=1
 
 # Enable timestamp preservation during git-update alias operations (n.b., stash pop quirk)
 export PRESERVE_GIT_STASH=1
