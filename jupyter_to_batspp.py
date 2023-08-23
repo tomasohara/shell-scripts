@@ -102,10 +102,12 @@ JUPYTER_FILE = 'jupyter-file'
 OUTPUT       = 'output'
 VERBOSE      = 'verbose'
 STDOUT       = 'stdout'
+JUST_CODE    = 'just-code'
 
 # Other constants
 JUPYTER_EXTENSION = 'ipynb'
 BATSPP_EXTENSION  = 'batspp'
+TL = debug.TL
 
 
 class JupyterToBatspp(Main):
@@ -116,6 +118,7 @@ class JupyterToBatspp(Main):
     output       = ''
     verbose      = None
     stdout       = None
+    just_code    = None
 
 
     def setup(self):
@@ -125,6 +128,7 @@ class JupyterToBatspp(Main):
         self.jupyter_file = self.get_parsed_argument(JUPYTER_FILE, self.jupyter_file)
         self.output       = self.get_parsed_argument(OUTPUT, self.output)
         self.stdout       = self.get_parsed_argument(STDOUT, not self.output)
+        self.just_code    = self.get_parsed_argument(JUST_CODE, not self.just_code)
         self.verbose      = self.get_parsed_option(VERBOSE, not self.stdout)
 
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
@@ -145,7 +149,11 @@ class JupyterToBatspp(Main):
                         f'the file {self.jupyter_file} must be an Jupyter notebook')
 
         # Format Jupyter string into JSON
-        jupyter_json = json.loads(jupyter_content)
+        try:
+            jupyter_json = json.loads(jupyter_content)
+        except:
+            system.print_exception_info("loading json")
+            system.exit("Error: unable to load jupter notebook")
         debug.trace(7, f'jupyter content found: {jupyter_json!r}')
 
         # Process cells
@@ -182,10 +190,10 @@ class JupyterToBatspp(Main):
                 except:
                     cell_output = ""
                     system.print_exception_info(f"extraction of output for cell {c}: {cell}")
-                if not is_setup:
+                if (not (is_setup or self.just_code)):
                     batspp_content += "".join(cell_output)
                 else:
-                    debug.trace(4, "Ignoring setup output  [cell {c + 1}]:\n\t{batspp_content}")
+                    debug.trace(4, f"Ignoring cell output  [cell {c + 1}]:\n\t{cell_output}")
 
             # Markdown cells are considered as comments or directives
             elif cell['cell_type'] == 'markdown':
@@ -219,13 +227,20 @@ def ensure_new_line(string):
     """Append new line to end if this STRING does not have it"""
     return string if string.endswith('\n') else f'{string}\n'
 
-
-if __name__ == '__main__':
+def main():
+    """Entry point"""
     app = JupyterToBatspp(
         description          = __doc__,
         positional_arguments = [(JUPYTER_FILE, 'Test file path')],
         text_options         = [(OUTPUT,      f'Target output .{BATSPP_EXTENSION} file path')],
         boolean_options      = [(VERBOSE,      'Show verbose debug'),
+                                (JUST_CODE,    'Omit output cells'),
                                 (STDOUT,      f'Print to standard output (default unless --{OUTPUT}')],
         manual_input         = True)
     app.run()
+
+#-------------------------------------------------------------------------------
+
+if __name__ == '__main__':
+    debug.trace_current_context(level=TL.QUITE_VERBOSE)
+    main()
