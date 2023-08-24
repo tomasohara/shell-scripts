@@ -14,6 +14,33 @@ if [ "${VERBOSE:-0}" = "1" ]; then
     set -o verbose
 fi
 
+# Help Message
+display_help() {
+	echo "Usage: $0 [-f]"
+	echo "	-o	Shows output log (summary_stats.log)"
+	echo "	-h	Displays this help message"
+}
+
+# Applying options for output log
+output_log=false
+
+while getopts "oh" option; do
+	case $option in
+		o)
+			output_log=true
+			;;
+		h)
+			display_help
+			exit 0
+			;;
+		\?)
+			echo  "Invalid option: -$OPTARG" >&2
+			display_help
+			exit 1
+			;;
+	esac
+done
+
 # Change into testing script directory (e.g., ~/shell-scripts/tests)
 cd "$(dirname "$0")"
 
@@ -36,3 +63,8 @@ OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py 
 
 ## NOTE: kcov is not critical, so it is not run as part of workflow tests
 ## TODO: python3 ./kcov_result.py --list --summary --export | tee summary_stats.txt
+
+# Generate output log when -o option enabled
+if $output_log; then
+	grep -B10 "^not ok" $(find $BATSPP_OUTPUT -name '*outputpp.out') | less -p "not ok" > summary_stats.log
+fi
