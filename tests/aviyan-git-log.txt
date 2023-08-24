@@ -1,3 +1,201 @@
+Wed 23 Aug 23
+
+commit a3141191392841c44ddee03ae59dcc41e5c356a7
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Tue Aug 22 21:25:12 2023 +0545
+    (Experimental - P2) Fixed a typo of cell 5
+M	tests/trace-python-commands.ipynb
+
+commit 434667b391ce8b124438aad0ff879518e9c5c8b1
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Mon Aug 21 23:04:33 2023 +0545
+    (Experimental - P2) Adding Global Setup to tests as attempt for better success rate
+M	tests/trace-file-manipulation.ipynb
+M	tests/trace-line-words-commands.ipynb
+M	tests/trace-python-commands.ipynb
+M	tests/trace-setup-sorting-wrappers.ipynb
+M	tests/trace-unix-alias.ipynb
+M	tests/trace-unix-general.ipynb
+
+commit 21ebcfc0bea19b98829a511d32583ed301472b1d
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Aug 20 22:44:03 2023 +0545
+    (Experimental - P2) Adding Global Setup to tests as attempt for better success rate
+M	tests/alias-calculator-commands.ipynb
+M	tests/alias-cd-commands.ipynb
+M	tests/alias-grep-commands.ipynb
+M	tests/alias-trace-misc-commands.ipynb
+M	tests/command-override-cp-mv.ipynb
+M	tests/hello-world-basic.ipynb
+M	tests/hello-world-revised.ipynb
+M	tests/hello-world-source.ipynb
+M	tests/json-related-alias.ipynb
+M	tests/simple-alias-test.ipynb
+M	tests/test-check-errors.ipynb
+M	tests/test-cond-env-setting.ipynb
+M	tests/test-dir-alias.ipynb
+M	tests/testbook-test-dir-aliases.ipynb
+A	tests/tmp/test-cp-mv/test-1210/testdir1/.bashrc
+M	tests/tomasohara-aliases-test.ipynb
+M	tests/trace-extensionless-shortcut-unicode.ipynb
+
+commit e51bcaf48d6766ee24075c00e37a050a66618a65
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Aug 16 23:33:14 2023 +0545
+    (Experimental - Ambiguous) Rerun the tests to check issues or working of changes
+D	tests/NOBATSPPperl-script-modified.ipynb
+D	tests/NOBATSPPsudo_test_simplebatspp.ipynb
+D	tests/NOBATSPPsudocommentstest.ipynb
+M	tests/alias-cd-commands.ipynb
+M	tests/alias-grep-commands.ipynb
+M	tests/alias-trace-misc-commands.ipynb
+M	tests/calc-entropy-tests.ipynb
+M	tests/command-override-cp-mv.ipynb
+M	tests/dir-aliases-test-revised.ipynb
+M	tests/hello-world-revised.ipynb
+M	tests/trace-extensionless-shortcut-V2.ipynb
+M	tests/trace-file-manipulation.ipynb
+M	tests/trace-unix-alias.ipynb
+M	tests/trace-unix-general.ipynb
+
+commit c61b86a2a8abb1964459998b8d13bb7058e4a29a
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Aug 16 23:30:54 2023 +0545
+    Added an argument -o that generates output log (summary_stats.log)
+M	tests/summary_stats.bash
+
+commit b11fd765591e502024447bf054c8e4f02c14f966
+Author: Aviyan Acharya <aveey@pop-os.localdomain>
+Date:   Wed Aug 16 23:26:38 2023 +0545
+    Seperated multiple tests from a single cell
+M	tests/alias-calculator-commands.ipynb
+
+commit e9749ba9a55810803caacd00719b64b8b2989571
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Thu Aug 10 23:20:20 2023 +0545
+    NOBATSPP used as postfix instead of prefix
+A	tests/perl-script-modified-NOBATSPP.ipynb
+A	tests/sudo_test_simplebatspp-NOBATSPP.ipynb
+A	tests/sudocommentstest-NOBATSPP.ipynb
+A	tests/trace-linux-admin-alias-NOBATSPP.ipynb
+
+commit 246bfe6f2b2790f638652eb9ceb30970b13cbb9a
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Thu Aug 10 23:16:55 2023 +0545
+    Commented Jupyter-halting cells
+M	tests/command-override-cp-mv.ipynb
+M	tests/dir-aliases-test-revised.ipynb
+
+commit 3587d628a73d983a5e13371972dbbdefca95cda3
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Thu Aug 10 23:15:37 2023 +0545
+    Added failure threshold (0.0%) for NOBATSPP tests
+M	tests/thresholds.yaml
+
+commit 08070a899a629f302bb8e03afd6e93ddd8474422
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Tue Aug 8 20:27:43 2023 +0545
+    Commented a cell that halted the testfile
+M	tests/dir-aliases-test-revised.ipynb
+
+commit f3c702a44b11421443321d7e60279dab54efaef1
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Mon Aug 7 23:23:04 2023 +0545
+    Experimental-P1) Checking if commands cause Jupyter hangs
+M	tests/alias-trace-misc-commands.ipynb
+M	tests/calc-entropy-tests.ipynb
+M	tests/command-override-cp-mv.ipynb
+M	tests/download-and-test-tomohara-aliases.ipynb
+M	tests/dummy-test.ipynb
+D	tests/hello-world-revised.batspp.ipynb
+M	tests/hello-world-revised.ipynb
+M	tests/hello-world-source.ipynb
+M	tests/hello-world.ipynb
+M	tests/json-related-alias.ipynb
+D	tests/perl-script-modified.ipynb
+M	tests/simple-alias-test.ipynb
+M	tests/test-check-errors.ipynb
+M	tests/test-cond-env-setting.ipynb
+M	tests/test-dir-alias.ipynb
+M	tests/test-tomohara-aliases-access.ipynb
+M	tests/testbook-test-dir-aliases.ipynb
+M	tests/trace-extensionless-shortcut-V2.ipynb
+M	tests/trace-extensionless-shortcut-unicode.ipynb
+M	tests/trace-file-manipulation.ipynb
+M	tests/trace-line-words-commands.ipynb
+M	tests/trace-linux-admin-alias--NOBATSPP.ipynb
+M	tests/trace-python-commands.ipynb
+M	tests/trace-setup-sorting-wrappers.ipynb
+M	tests/trace-unix-alias.ipynb
+M	tests/trace-unix-general.ipynb
+
+commit 953b037288912b554ecb44355dcb956664ad690f
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sat Aug 5 23:00:41 2023 +0545
+    Added NOBATSPP prefix for perl-script-modified.ipynb
+A	tests/NOBATSPPperl-script-modified.ipynb
+
+commit c2ee32b3c85e8972a1abc1b17b8e16cbf488a143
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sat Aug 5 22:55:09 2023 +0545
+    Revert "Added NOBATSPP prefix for perl-script-modified.ipynb"
+    This reverts commit a139ad4725754d3af8edce964851603832628a16.
+A	tests/perl-script-modified.ipynb
+
+commit e9143aeb1de5e80e6f88f89a3c1f45ef5f1ac244
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sat Aug 5 22:53:32 2023 +0545
+    (Experimental-P1) Checking if commands cause Jupyter hangs
+M	tests/alias-cd-commands.ipynb
+M	tests/alias-grep-commands.ipynb
+M	tests/alias-html-test.ipynb
+M	tests/alt-simple-alias-test.ipynb
+
+commit bb4de305e82b0fe1ca3e4cb6c023f801bf711e41
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sat Aug 5 22:51:26 2023 +0545
+    (Experimental) Reworked on the script as suggested by Tom
+M	tests/alias-calculator-commands.ipynb
+
+commit a139ad4725754d3af8edce964851603832628a16
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sat Aug 5 22:50:08 2023 +0545
+    Added NOBATSPP prefix for perl-script-modified.ipynb
+D	tests/perl-script-modified.ipynb
+
+commit 31efa9ed54f426b25fa5332dc9c084f2fd7ba167
+Merge: 94d5fa86 a2443b88
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sat Aug 5 20:43:21 2023 +0545
+    Updated aviyan-dev-v2 with main
+
+commit 94d5fa8675a067ca7dbc23909d49baf14d23a77f
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Thu Aug 3 18:03:20 2023 +0545
+    Renamed test_to_jupyter.py to batspp_to_jupyter.py
+A	tests/batspp_to_jupyter.py
+
+commit 68d1cec0e829178b43d4ae202270865178ea7ed3
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Thu Aug 3 17:57:55 2023 +0545
+    Fixed ZeroDivision error on execution
+M	tests/batspp_report.py
+
+commit 0600fa109436e2d0661cc2cd925709794c3171f7
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Jul 28 08:57:09 2023 +0545
+    Added test_to_jupyter.py (indev) | Added perl-script-modified.txt for testing use
+A	tests/hello-world-revised.batspp
+A	tests/hello-world-revised.batspp.ipynb
+A	tests/jupyter_to_batspp.py
+A	tests/perl-script-modified.ipynb
+A	tests/perl-script-modified.test
+A	tests/test_batspp_report_template.py
+A	tests/test_to_jupyter.py
+
+................................................................................
+Fri 9 Jul 23
+
 commit b4f52ba8add2658bcbde0f15fb7c42aa2d6585ef
 Author: Aviyan Acharya <avyn.xyz@gmail.com>
 Date:   Fri Jun 2 21:50:38 2023 +0545
