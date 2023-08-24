@@ -35,10 +35,10 @@ BEGIN {
 # for command-line arguments (see init_var's in &init).
 use strict;
 use vars qw/$warning $warnings $skip_warnings $context $no_asterisks $skip_ruby_lib $ruby/;
-use vars qw/$relaxed $strict $quiet $matching $before $after/;
+use vars qw/$relaxed $strict $quiet $matching $before $after $info/;
 
 if (!defined($ARGV[0])) {
-    my $options = "options = [-warnings] [-context=N] [-no_astericks] [-skip_ruby_lib]";
+    my $options = "options = [-warnings | -info] [-context=N] [-no_astericks] [-skip_ruby_lib]";
     $options .= " [-relaxed | -strict] [-verbose] [-quiet] [-before=N] [-after=N]";
     my $example = "ex: $script_name whatever\n";
     my $note = "Notes:\n";
@@ -54,6 +54,8 @@ if (!defined($ARGV[0])) {
 &init_var(*warnings, $warning);		# include warnings?
 &init_var(*skip_warnings, ! $warnings);	# omit warnings?
 my($show_warnings) = (! $skip_warnings);
+&init_var(*info, &FALSE);               # informative messages (e.g., FYI's)?
+my($show_informative) = $info;
 &init_var(*context, 3);			# context lines before and after
 &init_var(*before, $context);		# lines of context to show before
 &init_var(*after, $context);		# "" show after
@@ -208,12 +210,19 @@ while (<>) {
 	$match_info = "W1 [$&]";
 	&debug_print(&TL_MOST_DETAILED, "3. has_error=$has_error\n");
     }
+    elsif ($show_informative &&
+	   (/\bFYI:/i                   # ex: "FYI: Prepending mezla to path"
+	   || /information/i)) {        # ex: "How about some information, please?"
+	$has_error = &TRUE;
+	$match_info = "I1 [$&]";
+	&debug_print(&TL_MOST_DETAILED, "4. has_error=$has_error\n");
+    }
 
-    # Filter certain case
+    # Filter certain case(s)
     if ($has_error && $skip_ruby_lib && /\/usr\/lib\/ruby/) {
 	&debug_print(&TL_DETAILED, "Skipping ruby library error at line $. ($_)\n");
 	$has_error = &FALSE;
-	&debug_print(&TL_MOST_DETAILED, "4. has_error=$has_error\n");
+	&debug_print(&TL_MOST_DETAILED, "5. has_error=$has_error\n");
     }
 
     # If an error, then display line preceded by pre-context

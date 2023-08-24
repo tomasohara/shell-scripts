@@ -203,6 +203,7 @@ for file in $pattern; do
     fi
     # Derive base name for file, including relative directory (e.g., in case pattern specifies subdirectory)
     base=$(basename "$file")
+    base_proper="$base"
     dir=$(dirname "$file")
     if [ "$dir" != "." ]; then
         base="$dir/$base"
@@ -224,6 +225,7 @@ for file in $pattern; do
     # Show the timestamps if the files differ
     # Note: Outputs 'Differences: {file1} {file2}' when files differ for convenient
     # grepping (e.g., `do_diff.sh ... | grep '^Differences:'`).
+    files_differ=false
     if [ "$brief" == "0" ]; then
 	log_file="${TMP:-/tmp}/_do_diff.$$.log"
         "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" >| "$log_file"
@@ -232,17 +234,36 @@ for file in $pattern; do
 
 	# Show file info with time and size if there are differences
 	if [ "$status" != "0" ]; then
+	    files_differ=true
             ls -l "$file"
             ls -l "$other_file"
         fi
     fi
 	
+    # Perform the actual diff
+    log_file="$TMP/do_diff.$$"
+    "$diff_cmd" $space_options $diff_options "$file" "$other_file" > "$log_file" 2>&1
+    
+    # Show relative difference percent
+    ## TODO?: if [[ "$brief" == "0") && $files_differ ]]; then
+    if [ "$brief" == "0" ] && $files_differ; then
+        num_lines1=$(wc -l < "$file")
+        num_lines2=$(wc -l < "$other_file" || echo "0")
+        num_lines=$(( $num_lines1 + $num_lines2 ))
+        num_diffs=$(wc -l < "$log_file")
+        relative_diff=$(( $num_diffs * 100 / $num_lines ))
+        echo "${relative_diff}% differences for $base_proper"
+    fi
+
     # Show the actual file differences
-    "$diff_cmd" $space_options $diff_options "$file" "$other_file"
+    cat "$TMP/do_diff.$$"
+    
+    # Add line divider
     if [ "$verbose_mode" == "1" ]; then
         echo "------------------------------------------------------------------------"
     fi
 
+    # Add space divider
     if [ "$quiet" == "0" ]; then
         echo ""
     fi

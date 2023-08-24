@@ -33,6 +33,8 @@
 ##     }
 ## - Issue a warning about tests with '<<END' and other arcane syntax that conflict with
 ##   the .bats file generation.
+## - See if way to warn if empty actual output (versus expected) is likely command issue. such
+##   as based on analysis of stderr. Perhaps there was a problem with aliases added to normalize output.
 ## TODO2:
 ## - Have option to save each test in a separate bats file: a simple syntax error (e.g., wrong closing quote) can cause the entire test to fail.
 ## TODO3:

@@ -311,6 +311,13 @@ simple-alias-fn image-metadata 'identify -verbose'
 function show-sd-prompts { image-metadata "$@" | egrep --text --ignore-case '(parameters|(negative prompt)):'; }
 
 #...............................................................................
+# Linux admin
+
+alias free-memory='free --wide --human | grep -v Swap:'
+# TODO: get this to work completely
+simple-alias-fn clear-cache 'free-memory | grep -v Admin; sysctl vm.drop_caches=1; free-memory'
+
+#...............................................................................
 # Emacs related
 
 # reset-under-emacs: clear settings added for Bash under emacs

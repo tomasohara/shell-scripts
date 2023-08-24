@@ -452,6 +452,12 @@ alias show-path='show-path-dir PATH'
 ## TODO: function in-path { local path=$(tr ":" "\n" | $GREP "^$1$$"); return ($path != ""); }
 # TODO: add force argument to ensure last (or first)
 function append-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="${PATH}:$1"; fi }
+function append-path-warn {
+    if [ ! -e "$1" ]; then
+	echo "Warning: append-path non-existent: $1" 1>&2
+    fi
+    append-path "$1";
+}
 ## OLD: function prepend-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="$1:${PATH}"; fi }
 #
 function append-path-force () { export PATH="${PATH}:$1"; }
@@ -625,7 +631,7 @@ if [ "$(which "command" 2> /dev/null)" == "" ]; then
     export TIME_CMD=/usr/bin/time
 fi
 export PERL="$NICE $TIME_CMD perl -Ssw"
-export BRIEF_USAGE=1
+## OLD: export BRIEF_USAGE=1
 
 # Terminal window title
 alias set-xterm-title='set_xterm_title.bash'
@@ -2255,7 +2261,9 @@ function cmd-output () {
     local command="$*"
     local output_file
     output_file="_$(echo "$command" | tr ' ' '_')-$(TODAY).list"
-    $command 2>&1 | ansifilter > "$output_file"
+    ## OLD: $command 2>&1 | ansifilter > "$output_file"
+    ## TODO3?: use separate invocations for aliases than for other commands
+    ($command || eval "$command") 2>&1 | ansifilter > "$output_file"
     $PAGER_NOEXIT "$output_file"
 }
 
@@ -2439,6 +2447,8 @@ TPO_SSH_KEY=~/.ssh/$USER-key.pem
 SSH_PORT="22"
 TPO_SSH_USER="$USER"
 #
+# ssh-host-login-aws(host): open SSH connection to HOST
+# options: -X enables X11 forwarding; -i identity file; -q quiet mode; -p port
 # TODO: For cygwin clients, unset TERM so set_xterm_title.bash not confused.
 # Maldito shellcheck [SC2029: Note that, unescaped, this expands on the client side]
 # shellcheck disable=SC2029

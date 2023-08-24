@@ -393,10 +393,19 @@ sub set_stdin_blocking {
 	$flags &= ~&O_NDELAY;	# set off no-delay bit in flags
     }
     &debug_out(7, "flags=%08x\n", $flags);
+    # TODO?: &debug_out(7, "flags=%08x result=%08x\n", $flags, $result);
     $result = fcntl(STDIN, &F_SETFL, $flags);
-    ## TODO: drop /but true/ hack
-    $result =~ s/but true//;
-    &debug_out(&TL_VERBOSE, "fcntl(STDIN, &F_SETFL, %08x) => %08x\n",
+    if (defined($result)) {
+	## TODO: drop /but true/ hack
+	$result =~ s/but true//;
+    }
+    else {
+	$result = "";
+    }
+    ## OLD:
+    ## &debug_out(&TL_VERBOSE, "fcntl(STDIN, &F_SETFL, %08x) => %08x\n",
+    ##  	  $flags, $result);
+    &debug_out(&TL_VERBOSE, "fcntl(STDIN, &F_SETFL, %08x) => %s\n",
 	       $flags, $result);
 
     return;
