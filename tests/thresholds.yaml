@@ -27,7 +27,7 @@ trace-unix-alias.ipynb: 2.5
 trace-python-commands.ipynb: 2.5
 download-and-test-tomohara-aliases.ipynb: 0.0
 command-override-cp-mv.ipynb: 0.0
-alias-trace-misc-commands.ipynb: 0
+alias-trace-misc-commands.ipynb: 0.0
 json-related-alias.ipynb: 0.0
 test-tomohara-aliases-access.ipynb: 0.0
 alt-simple-alias-test.ipynb: 0.0
@@ -37,6 +37,9 @@ test-check-errors.ipynb: 0.0
 trace-line-words-commands.ipynb: 0.0
 alias-cd-commands.ipynb: 0.0
 tomasohara-aliases-test.ipynb: 0.0
-empty-test-file.ipynb: 0
-trace-linux-admin-alias--NOBATSPP.ipynb: 0.0
+empty-test-file.ipynb: 0.0
+trace-linux-admin-alias-NOBATSPP: 0.0
+sudocommentstest-NOBATSPP: 0.0
+perl-script-modified-NOBATSPP: 0.0
+
 
