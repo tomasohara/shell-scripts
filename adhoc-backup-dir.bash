@@ -70,7 +70,7 @@ shopt -s expand_aliases
 ## maldito shellcheck: [SC1090: Can't follow non-constant source]
 {
     # shellcheck disable=SC1090
-    source ~/bin/tomohara-aliases.bash
+    source ~/bin/all-tomohara-aliases-etc.bash
 }
 #
 # Set tracing (delayed so alias definitions not traced)
