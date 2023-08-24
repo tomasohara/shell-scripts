@@ -145,6 +145,7 @@ fi
 
        # maldito shellcheck (SC2086: Double quote to prevent globbing)
        # shellcheck disable=SC2086
+       rename-with-file-date "$basename.tar.log" 
        $NICE find ./* ./.[^.]* $MISC_FIND_OPTIONS -type f -mtime "-$max_days_old" -size "-${max_size_chars}c" | $NICE $TAR cvfzT "$basename.tar.gz" - > "$basename.tar.log" 2>&1
        dir "$basename"* | cat
        ##
