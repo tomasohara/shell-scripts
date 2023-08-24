@@ -452,6 +452,12 @@ alias show-path='show-path-dir PATH'
 ## TODO: function in-path { local path=$(tr ":" "\n" | $GREP "^$1$$"); return ($path != ""); }
 # TODO: add force argument to ensure last (or first)
 function append-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="${PATH}:$1"; fi }
+function append-path-warn {
+    if [ ! -e "$1" ]; then
+	echo "Warning: append-path non-existent: $1" 1>&2
+    fi
+    append-path "$1";
+}
 ## OLD: function prepend-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="$1:${PATH}"; fi }
 #
 function append-path-force () { export PATH="${PATH}:$1"; }
