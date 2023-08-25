@@ -76,12 +76,12 @@
 
 
 """
-Jupyter to Batspp
+Jupyter to Batspp: This converts Jupyter to Batspp tests,
 
-This converts Jupyter to Batspp tests
+Usage examples:
+  python3 {script} tests/hello-world.ipynb
 
-usage example:
-$ python3 jupyter_to_batspp.py tests/hello-world.ipynb
+  {script} --output test.batspp test.ipynb
 """
 
 
@@ -92,6 +92,7 @@ import json
 
 # Local packages
 from mezcla import debug
+from mezcla import glue_helpers as gh
 from mezcla.main import Main
 from mezcla.my_regex import my_re
 from mezcla import system
@@ -128,7 +129,7 @@ class JupyterToBatspp(Main):
         self.jupyter_file = self.get_parsed_argument(JUPYTER_FILE, self.jupyter_file)
         self.output       = self.get_parsed_argument(OUTPUT, self.output)
         self.stdout       = self.get_parsed_argument(STDOUT, not self.output)
-        self.just_code    = self.get_parsed_argument(JUST_CODE, not self.just_code)
+        self.just_code    = self.get_parsed_argument(JUST_CODE, self.just_code)
         self.verbose      = self.get_parsed_option(VERBOSE, not self.stdout)
 
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
@@ -230,12 +231,12 @@ def ensure_new_line(string):
 def main():
     """Entry point"""
     app = JupyterToBatspp(
-        description          = __doc__,
+        description          = __doc__.format(script=gh.basename(__file__)),
         positional_arguments = [(JUPYTER_FILE, 'Test file path')],
         text_options         = [(OUTPUT,      f'Target output .{BATSPP_EXTENSION} file path')],
         boolean_options      = [(VERBOSE,      'Show verbose debug'),
                                 (JUST_CODE,    'Omit output cells'),
-                                (STDOUT,      f'Print to standard output (default unless --{OUTPUT}')],
+                                (STDOUT,      f'Print to standard output (default unless --{OUTPUT})')],
         manual_input         = True)
     app.run()
 
