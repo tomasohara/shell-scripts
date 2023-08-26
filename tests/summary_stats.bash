@@ -59,7 +59,7 @@ echo "FYI: Using $BATSPP_OUTPUT for ouput and $BATSPP_TEMP for temp. files"
 ## export DIR_ALIAS_HACK=1
 
 # Run the set of alias tests, making sure Tom's aliases are defined
-OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py --txt --definitions ../all-tomohara-aliases-etc.bash
+OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py --txt --force --definitions ../all-tomohara-aliases-etc.bash
 batspp_result="$?"
 
 ## NOTE: kcov is not critical, so it is not run as part of workflow tests
