@@ -102,6 +102,7 @@ from mezcla import system
 JUPYTER_FILE = 'jupyter-file'
 OUTPUT       = 'output'
 VERBOSE      = 'verbose'
+ADD_ANNOTS   = 'add-annots'
 STDOUT       = 'stdout'
 JUST_CODE    = 'just-code'
 
@@ -118,6 +119,7 @@ class JupyterToBatspp(Main):
     jupyter_file = ''
     output       = ''
     verbose      = None
+    add_annots   = None
     stdout       = None
     just_code    = None
 
@@ -131,6 +133,7 @@ class JupyterToBatspp(Main):
         self.stdout       = self.get_parsed_argument(STDOUT, not self.output)
         self.just_code    = self.get_parsed_argument(JUST_CODE, self.just_code)
         self.verbose      = self.get_parsed_option(VERBOSE, not self.stdout)
+        self.add_annots   = self.get_parsed_option(ADD_ANNOTS, self.add_annots)
 
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
@@ -160,6 +163,8 @@ class JupyterToBatspp(Main):
         # Process cells
         batspp_content  = ''
         for c, cell in enumerate(jupyter_json['cells']):
+            if self.add_annots:
+                batspp_content += ensure_new_line(f"# Cell [{c + 1}]")
 
             # Process code cells
             if cell['cell_type'] == 'code':
@@ -199,7 +204,7 @@ class JupyterToBatspp(Main):
             # Markdown cells are considered as comments or directives
             elif cell['cell_type'] == 'markdown':
                 for line in cell['source']:
-                    batspp_content += ensure_new_line(f'# {line}')
+                    batspp_content += ensure_new_line(f'# {line} markdown')
 
             # Add blank line between cells
             batspp_content += '\n'
@@ -235,6 +240,7 @@ def main():
         positional_arguments = [(JUPYTER_FILE, 'Test file path')],
         text_options         = [(OUTPUT,      f'Target output .{BATSPP_EXTENSION} file path')],
         boolean_options      = [(VERBOSE,      'Show verbose debug'),
+                                (ADD_ANNOTS,   'Add annotations about current cells, etc.'),
                                 (JUST_CODE,    'Omit output cells'),
                                 (STDOUT,      f'Print to standard output (default unless --{OUTPUT})')],
         manual_input         = True)
