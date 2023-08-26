@@ -36,9 +36,11 @@ TL = debug.TL
 IPYNB = ".ipynb"
 BATSPP = ".batspp"
 BATS = ".bats"
-TXT = ".txt"
+## OLD: TXT = ".txt"
+TXT = ".summary.txt"
 NOBATSPP = "NOBATSPP"
-OUTPUTPP = ".outputpp"
+## OLD: OUTPUTPP = ".outputpp"
+OUTPUTPP = ".bats.outputpp"
 
 OUTPUT_DIR = system.getenv_text("OUTPUT_DIR", ".",
                                 "Directory for output files such as .batspp test specs")
