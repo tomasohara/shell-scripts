@@ -617,7 +617,18 @@ if [ "$PERLLIB" = "" ]; then PERLLIB="."; else PERLLIB="$PERLLIB:."; fi
 export PERLLIB="$TOM_BIN:$PERLLIB:$HOME/perl/lib/perl5/site_perl/5.8"
 # HACK: not all cygwin directories being recognized
 export PERLLIB="$HOME/perl/lib/perl5/5.16:$HOME/perl/lib/perl5/5.16/vender_perl:$PERLLIB"
+# perl-(): perl with following options: -S use path; -s enable switches (-x=v); -w show warnings;
+# See perlrun manpage.
+# TODO4: rename perl- to perl-usual???
 alias perl-='perl -Ssw'
+## TODO: function alias-perl { DURING_ALIAS=1 perl "$@"; }
+# alias-perl(): perl with DURING_ALIAS defined (n.b., avoids excess tracing; see common.perl)
+## BAD: alias alias-perl='DURING_ALIAS=1 perl -Ssw'
+alias alias-perl='DURING_ALIAS=1 perl.sh -Ssw'
+## TODO?
+## function alias-perl {
+##    DURING_ALIAS=1 env perl --Sw "eval $*";
+## }
 export MANPATH="$HOME/perl/share/man/man1:$MANPATH"
 append-path "$HOME/perl/bin"
 # Note: TIME is used for changing output format, so TIME_CMD used instead.
@@ -882,7 +893,8 @@ alias symlinks='sublinks'
 ## example: "lrwxrwxrwx   1 tomohara tomohara   20 2023-06-23 16:50 mezcla -> python/Mezcla/mezcla"
 ##           1            2 3        4          5  6          7     8
 function ls-long-tsv { ls -l --time-style=long-iso "$@" | perl -pe 's/ +/\t/g;'; }
-function sublinks-proper { ls-long-tsv "$@" | $GREP ^l | cut.perl -fields="8-" - | tr $'\t' ' ' | $PAGER; }
+## OLD: function sublinks-proper { ls-long-tsv "$@" | $GREP ^l | cut.perl -fields="8-" - | tr $'\t' ' ' | $PAGER; }
+function sublinks-proper { ls-long-tsv "$@" | $GREP ^l | alias-perl cut.perl -fields="8-" - | tr $'\t' ' ' | $PAGER; }
 alias symlinks-proper=sublinks-proper
 #
 alias glob-links='find . -maxdepth 1 -type l | sed -e "s/.\///g"'
@@ -994,7 +1006,8 @@ function gr-less () { gr "$@" | $PAGER; }
 # Other grep-related stuff
 #
 # EX: echo $'L1: one\nL2: \xC3\xBE \nL3: three' | gr-nonascii => "2: L2: þ"
-alias grep-nonascii='perlgrep.perl "[\x80-\xFF]"'
+## OLD: alias grep-nonascii='perlgrep.perl "[\x80-\xFF]"'
+alias grep-nonascii='alias-perl perlgrep.perl "[\x80-\xFF]"'
 
 # Searching for files
 # TODO:
@@ -1218,9 +1231,11 @@ alias 'track-time:'='track-time'
 # Simple calculator commands
 function old-calc () { echo "$@" | bc -l; }
 # EX: perl-calc "2 / 4" => 0.500
-function perl-calc () { perl- perlcalc.perl -args "$@"; }
+## OLD: function perl-calc () { DEBUG_LEVEL=3 perl- perlcalc.perl -args "$@"; }
+function perl-calc () { alias-perl perlcalc.perl -args "$@"; }
 # TODO: read up on variable expansion in function environments
-function perl-calc-init () { initexpr="$1"; shift; echo "$@" | perl- perlcalc.perl -init="$initexpr" -; }
+## OLD: function perl-calc-init () { initexpr="$1"; shift; echo "$@" | perl- perlcalc.perl -init="$initexpr" -; }
+function perl-calc-init () { initexpr="$1"; shift; echo "$@" | alias-perl perlcalc.perl -init="$initexpr" -; }
 alias calc='perl-calc'
 alias calc-prec6='perl-calc -precision=6'
 alias calc-init='perl-calc-init'
@@ -1330,11 +1345,13 @@ function byte-usage () { output_file="usage.bytes.list"; backup-file $output_fil
 # check-errors(LOG-FILE): in check for known errors in LOG-FILE...
 # also: check-all-errors|warnings: variants including more patterns and with warnings subsuming errors.
 # HACK: quiet added to disable filename with multiple files
-function check-errors-aux { check_errors.perl "$@"; }
+## OLD: function check-errors-aux { check_errors.perl "$@"; }
+function check-errors-aux { alias-perl check_errors.perl "$@"; }
 ## # -or-:
 ## function check-errors-aux { PERL_SWITCH_PARSING=1 check_errors.py "$@"; };
-# note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
-ALIAS_DEBUG_LEVEL=${DEBUG_LEVEL}
+## OLD
+## # note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
+## ALIAS_DEBUG_LEVEL=${DEBUG_LEVEL:-2}
 function check-errors () {
     ## NOTE: gotta dislike bash!
     local args=("$@");
@@ -1347,7 +1364,8 @@ function check-errors () {
 	args+=("-");
     fi;
     ## OLD: (QUIET=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL CONTEXT=5 check-errors-aux ${args[@]}) 2>&1 | $PAGER;
-    (QUIET=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | $PAGER;
+    ## OLD: (QUIET=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | $PAGER;
+    (QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | $PAGER;
 }
 ## OLD:
 ## alias check-all-errors='check-errors -warnings'
@@ -1625,14 +1643,17 @@ alias un-zip='command-to-pager unzip'
 
 alias color-xterm='rxvt&'
 
-alias count-it='perl- count_it.perl'
+## OLD: alias count-it='perl- count_it.perl'
+alias count-it='alias-perl count_it.perl'
 alias count_it=count-it
 function count-tokens () { count-it "\S+" "$@"; }
 # TODO: rework via chomp
 function count-line-text () { count-it '^([^\n\r]*)[\n\r]*$' "$@"; }
-alias extract-matches='extract_matches.perl'
+## OLD: alias extract-matches='extract_matches.perl'
+alias extract-matches='alias-perl extract_matches.perl'
 # EX: echo $'1 one\n2 two\n3' | perlgrep 'o\w' => "1 one"
-alias perlgrep='perl- perlgrep.perl'
+## OLD: alias perlgrep='perl- perlgrep.perl'
+alias perlgrep='alias-perl perlgrep.perl'
 alias perl-grep=perlgrep
 function para-grep { perlgrep -para "$@" 2>&1 | $GREP -v "Can't open \*notes\*"; }
 alias para-gr='para-grep -i -n'
@@ -2320,7 +2341,8 @@ alias em-tomas=ed-tomas
 # TODO: add truncation indicator (e.g., Unicode character for ...)
 # maldito shellcheck: [SC2120: ... references arguments, but none are ever passed]
 # shellcheck disable=SC2120
-function truncate-width { cut --characters=1-"$(calc-int "$COLUMNS - 1")" "$@"; }
+## OLD: function truncate-width { cut --characters=1-"$(calc-int "$COLUMNS - 1")" "$@"; }
+function truncate-width { cut --characters=1-"$(($COLUMNS - 1))" "$@"; }
 
 #-------------------------------------------------------------------------------
 # XWindows stuff
@@ -2588,12 +2610,14 @@ function ps-all () {
     ps_mine.sh --all | $EGREP -i "((^USER)|($pattern))" | $pager;
     }
 alias ps-script='ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
-function ps-sort-once { ps_sort.perl -num_times=1 -by=time "$@" -; }
+## OLD: function ps-sort-once { ps_sort.perl -num_times=1 -by=time "$@" -; }
+function ps-sort-once { alias-perl ps_sort.perl -num_times=1 -by=time "$@" -; }
 alias ps-sort-time='ps-sort-once -by=time'
 alias ps-time=ps-sort-time
 alias ps-sort-mem='ps-sort-once -by=mem '
 alias ps-mem=ps-sort-mem
-alias ps-sort-help='ps_sort.perl'
+## OLD: alias ps-sort-help='ps_sort.perl'
+alias ps-sort-help='alias-perl ps_sort.perl'
 
 # get-process-parent(pid): return parent process-id for PID
 # ¢ ps al | egrep "(PID|$$)"
@@ -2637,13 +2661,14 @@ function ps-all () {
         pager=$PAGER
     fi;
     ps_mine.sh --all | $EGREP -i "((^USER)|($pattern))" | $pager;
-    }
-alias ps-script='ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
-function ps-sort-once { ps_sort.perl -num_times=1 -by=time "$@" -; }
-alias ps-sort-time='ps-sort-once -by=time'
-alias ps-time=ps-sort-time
-alias ps-sort-mem='ps-sort-once -by=mem '
-alias ps-mem=ps-sort-mem
+}
+## OLD:
+## alias ps-script='ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
+## function ps-sort-once { ps_sort.perl -num_times=1 -by=time "$@" -; }
+## alias ps-sort-time='ps-sort-once -by=time'
+## alias ps-time=ps-sort-time
+## alias ps-sort-mem='ps-sort-once -by=mem '
+## alias ps-mem=ps-sort-mem
 
 # get-process-parent(pid): return parent process-id for PID
 # ¢ ps al | egrep "(PID|$$)"
@@ -2878,7 +2903,8 @@ function run-python-lint-batched () {
 # ex: /usr/local/misc/programs/anaconda3/lib/python3.8/site-packages/sklearn/__pycache__/__init__.cpython-38.pyc matches /usr/local/misc/programs/anaconda3/lib/python3.8/site-packages/sklearn/__init__.py
 function python-import-path-all() { local module="$1"; python -u -v -c "import $module" 2>&1; }
 ## OLD: function python-import-path-full() { local module="$1"; python-import-path-all "$@" | extract_matches.perl "((matches (.*\W$module[^/]*[/\.][^/]*))|ModuleNotFoundError)"; }
-function python-import-path-full() { local module="$1"; python-import-path-all "$@" | extract_matches.perl "((matches (.*\W${module}[^/]*[/\.][^/]*))|ModuleNotFoundError)"; }
+## OLD: function python-import-path-full() { local module="$1"; python-import-path-all "$@" | extract_matches.perl "((matches (.*\W${module}[^/]*[/\.][^/]*))|ModuleNotFoundError)"; }
+function python-import-path-full() { local module="$1"; python-import-path-all "$@" | alias-perl extract_matches.perl "((matches (.*\W${module}[^/]*[/\.][^/]*))|ModuleNotFoundError)"; }
 function python-import-path() { python-import-path-full "$@" | head -1; }
 
 #
@@ -2891,7 +2917,8 @@ function python-package-members() { local package="$1"; python -c "import $packa
 alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  python setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
 # TODO: add -v (the xargs usage seems to block it)
 ## OLD: alias python-uninstall-setup='cat installed-files.list | xargs /bin/rm -vi; rename_files.perl -regex ^ un installed-files.list'
-alias python-uninstall-setup='cat installed-files.list | xargs command rm -vi; rename_files.perl -regex ^ un installed-files.list'
+## OLD: alias python-uninstall-setup='cat installed-files.list | xargs command rm -vi; rename_files.perl -regex ^ un installed-files.list'
+alias python-uninstall-setup='cat installed-files.list | xargs command rm -vi; alias-perl rename_files.perl -regex ^ un installed-files.list'
 
 # ipython(): overrides ipython command to set xterm title and to add git repo base directory to python path
 function ipython() { 
