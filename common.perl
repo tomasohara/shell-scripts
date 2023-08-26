@@ -192,7 +192,21 @@ sub init_common {
 
     $initialized = &FALSE if (!defined($initialized));
     # Set debugging level to either $d, DEBUG_LEVEL evironment variable or 3 (the default)
-    map { $debug_level = $_ unless defined($debug_level); } ($d, $ENV{"DEBUG_LEVEL"}, &TL_USUAL);
+    # Note: environment check ignored if DURING_ALIAS set (see tomohara-aliases.bash)
+    my($env_debug_level) = undef;
+    my($env_during_alias) = $ENV{DURING_ALIAS};
+    ## DEBUG: print STDERR "\$ENV{DURING_ALIAS}=$env_during_alias\n";
+    if (! defined($env_during_alias) || (! $env_during_alias)) {
+	$env_debug_level = $ENV{DEBUG_LEVEL};
+    }
+    ## DEBUG: print STDERR "\$ENV{DEBUG_LEVEL}=$env_debug_level\n";
+    ## OLD:  map { $debug_level = $_ unless defined($debug_level); } ($d, $ENV{"DEBUG_LEVEL"}, &TL_USUAL);
+    map {
+	## DEBUG: print STDERR "debug_level=$debug_level _=$_\n";
+	$debug_level = $_ unless defined($debug_level); 
+	# note: uses first of the three following values that is defined
+    } ($d, $env_debug_level, &TL_USUAL);
+    ## DEBUG: print STDERR "\$ENV{DEBUG_LEVEL}=$env_debug_level\n";
     ## $debug_line_num = 0;
     &debug_print(&TL_VERBOSE, "init_common(@_)\n");
     &trace_assoc_array(\%ENV, &TL_ALL, "%ENV");
@@ -233,12 +247,13 @@ sub init_common {
     $/ = "" if ($para);			# paragraph input mode
     $/ = 0777 if ($slurp);		# complete-file input mode
 
-    # Make sure debugging level corresponds to DEBUG_LEVEL environment variable.
-    # Also, the value gets overridden by -d=N command-line switch.
-    $debug_level = &get_env("DEBUG_LEVEL", &TL_BASIC);
-    if (defined($d)) {
-	$debug_level = $d;
-    }
+    ## OLD:
+    ## # Make sure debugging level corresponds to DEBUG_LEVEL environment variable.
+    ## # Also, the value gets overridden by -d=N command-line switch.
+    ## $debug_level = &get_env("DEBUG_LEVEL", &TL_BASIC);
+    ## if (defined($d)) {
+    ##    $debug_level = $d;
+    ## }
 
     # Set or override DEBUG_LEVEL environment variable based on value determined above. 
     # NOTE: This helps propagate -d settings to perl scripts invoked by the script
