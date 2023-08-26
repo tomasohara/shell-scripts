@@ -615,8 +615,7 @@ class CustomTestsToBats:
         return field
 
     def _preprocess_command(self, field):
-        """Preprocess command FIELD
-        Note: currenlty a no-op."""
+        """Preprocess command FIELD"""
         field = self._preprocess_field(field)
         return field
 
