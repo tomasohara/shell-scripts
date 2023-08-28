@@ -1427,7 +1427,8 @@ alias diff-default='command diff'
 alias diff-ignore-spacing='diff --ignore-all-space'
 #
 # do-diff(): wrapper into do_diff.sh, which allows for glob patterns of current vs target dirs
-alias do-diff='do_diff.sh'
+## OLD: alias do-diff='do_diff.sh'
+alias do-diff='do_diff.bash'
 #
 function diff-rev () {
     local diff_program="diff"
@@ -2944,7 +2945,8 @@ function python-trace {
 
 # py-diff(dir): check for difference in python scripts versus those in target
 # TODO: specify options before the pattern (or modify do_diff.sh to allow after)
-function py-diff () { do_diff.sh '*.py *.mako' "$@" 2>&1 | $PAGER; }
+## OL:D function py-diff () { do_diff.sh '*.py *.mako' "$@" 2>&1 | $PAGER; }
+function py-diff () { do_diff.bash --no-glob '*.py *.mako' "$@" 2>&1 | $PAGER; }
 
 ## OLD
 ## # kivy-win32-env(): enables environment variabless for Kivy under cyggwin, using win32 python
@@ -3023,6 +3025,7 @@ alias xtract-text='extract-text'
 # note: run in verbose mode with unbuffered I/O so output synchronized.
 # TODO: rework to take the actual test script and to pipe results to pager
 ## TOM-IDIOSYNCRATIC
+## OBSOLETE: use test-python-script instead
 #
 function test-script () {
     local base
@@ -3051,7 +3054,7 @@ function randomize-datafile() {
     tail --lines=+2 "$file" | python -m mezcla.randomize_lines | head -"$num_lines"
 }
 
-# filter-random(pct, file, [include_header=1])Randomize lines based on percentages, using output lile (e.g., _r10pct-fubar.data).
+# filter-random(pct, file, [include_header=1]): Randomize lines based on percentages, using output lile (e.g., _r10pct-fubar.data).
 # Notes:
 # - By default, includes first line assuming it is header line.
 # - Includes support for compressed files (both input and output).
