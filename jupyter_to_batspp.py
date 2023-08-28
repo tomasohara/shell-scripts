@@ -110,6 +110,7 @@ AUTO_OUTPUT  = 'auto-output'
 # Other constants
 JUPYTER_EXTENSION = 'ipynb'
 BATSPP_EXTENSION  = 'batspp'
+SH_EXTENSION  = 'sh'
 TL = debug.TL
 
 
@@ -136,7 +137,9 @@ class JupyterToBatspp(Main):
         self.add_annots   = self.get_parsed_option(ADD_ANNOTS, self.add_annots)
         self.auto_output  = self.get_parsed_option(AUTO_OUTPUT, False)
         if self.auto_output:
-            self.output = my_re.sub(fr'\.{JUPYTER_EXTENSION}$', f'.{BATSPP_EXTENSION}',
+            # note: allows for affix (not just extension proper)
+            extension = (SH_EXTENSION if self.just_code else BATSPP_EXTENSION)
+            self.output = my_re.sub(fr'\.{JUPYTER_EXTENSION}', f'.{extension}',
                                     self.jupyter_file)
         self.output       = self.get_parsed_argument(OUTPUT, self.output)
         self.stdout       = self.get_parsed_argument(STDOUT, not self.output)        
@@ -218,9 +221,18 @@ class JupyterToBatspp(Main):
 
         debug.trace(7, f'derived batspp content: {batspp_content!r}')
 
+        # Set Batspp filename
+        if ((not self.output) and (not self.stdout)):
+            # note: older support with rename based on strict extensions and always using .batspp
+            self.output = my_re.sub(fr'\.{JUPYTER_EXTENSION}$', f'.{BATSPP_EXTENSION}',
+                                    self.jupyter_file)
         # Save Batspp file
         if self.output:
-            system.write_file(self.output, batspp_content)
+            if (self.jupyter_file != self.output):
+                system.write_file(self.output, batspp_content)
+            else:
+                system.print_stderr_fmt("Error: input same as output:\n\t{jup}\n\t{out}",
+                                        jup=self.jupyter_file, out=self.output)
 
         # Print output to stdout
         if self.verbose or self.stdout:
