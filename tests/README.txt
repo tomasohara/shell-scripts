@@ -21,6 +21,11 @@ TIPS:
 - Put expected output comment before the command (Batspp quirk).
 - For examples of both, see Tom's changes to trace-python-commands.ipynb (circa 17 Aug 23).
 
+COMMON ISSUES:
+- Files without newlines: this causes issue with diff, which is a common with printf gotcha.
+  resolution: printf "Line 1" => printf "Line1\n"
+  note: in general uses echo instead of printf
+
 TERMINOLOGY:
 - tests, testfiles = .ipynb files
 - batspp = batspp library that uses bats-core
