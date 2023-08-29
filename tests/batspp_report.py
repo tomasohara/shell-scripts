@@ -196,6 +196,7 @@ def main():
         """Run BatsPP over INPUT_FILE to produce OUTPUT_FILE"""
         # Note: for convenience, output is written to disk and returned by the function
         ## TODO2: add log_file argument for stderr; change output_file to output_script_file
+        debug.assertion(not my_re.search(r"\s", output_file))
         real_output_file = output_file + ".out"
         log_file = output_file + ".log"
         debug.trace(5, f"run_batspp{(input_file, output_file)}")
@@ -205,7 +206,8 @@ def main():
             # uses Bash instead of Bats (to bypass need for global setup sections);
             # copies ./tests files into bats test dir (under temp); retains outer
             # quotation marks in output; uses single test directory; passes along --force option
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            eval_log = output_file + ".eval.log"
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         # Check for common errors (e.g., command not found or insufficient permissions)
