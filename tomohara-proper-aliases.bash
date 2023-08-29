@@ -9,6 +9,7 @@
 #   SC2010 (warning): Don't use ls | grep. Use a glob or a for loop with a condition to allow non-alphanumeric filenames.
 #   SC2016 (info): Expressions don't expand in single quotes
 #   SC2027 (warning): The surrounding quotes actually unquote this.
+#   SC2046: Quote this to prevent word splitting
 #   SC2086: Double quote to prevent globbing)
 #   SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?.
 #
