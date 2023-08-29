@@ -2,8 +2,29 @@
 #
 # Extracts all versions of a file under git.
 #
-# via https://stackoverflow.com/questions/12850030/git-getting-all-previous-version-of-a-specific-file-folder
+# Note:
+# - based on https://stackoverflow.com/questions/12850030/git-getting-all-previous-version-of-a-specific-file-folder
+# - shell check
+#   SC2016 (info): Expressions don't expand in single quotes
+#   SC2116 (style): Useless echo?
 #
+
+# Helpers
+function full-usage {
+    echo ""
+    echo "Usage: $(basename "$0") [--human] [--help] git-path [extract-dir]"
+    echo ""
+    echo "Examples:"
+    echo ""
+    echo "$0 README.md /tmp/README-versions"
+    echo ""
+    echo "PRETTY=1 VERBOSE=1 ${script} Dockerfile"
+    echo ""
+    echo "Notes:"
+    echo "- default extract-dir: $export_to_expr"
+    echo "- Env. vars: {EXPORT_TO, PRETTY, VERBOSE, TMP}"
+    echo ""
+}
 
 # Set bash tracing
 verbose=false
@@ -19,7 +40,10 @@ fi
 
 # we'll write all git versions of the file to this folder:
 TMP=${TMP:-/tmp}
-DEFAULT_EXPORT_TO="$TMP/all_versions_exported"
+# shellcheck disable=SC2016
+export_to_expr='$TMP/all_versions_exported'
+# shellcheck disable=SC2116
+DEFAULT_EXPORT_TO="$(echo eval "$export_to_expr")"
 pretty=false
 if [ "${PRETTY:-0}" = "1" ]; then pretty=true; fi
 
@@ -28,6 +52,10 @@ if [ "$1" = "--human" ]; then
     verbose=true
     pretty=true
     shift
+fi
+if [ "$1" = "--help" ]; then
+    full-usage
+    exit
 fi
 EXPORT_TO="${2:-$DEFAULT_EXPORT_TO}"
 #
@@ -38,12 +66,11 @@ GIT_PATH_TO_FILE="$1"
 NEWLINE=$'\n'
 TWO_NEWLINES="$NEWLINE$NEWLINE"
 script="$(basename "$0")"
-USAGE="Usage: $(basename "$0") [--human] path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example(s):${NEWLINE}${NEWLINE}$0 README.md /tmp/README-versions${NEWLINE}${NEWLINE}PRETTY=1 VERBOSE=1 ${script} Dockerfile"
-
+## OLD: USAGE="Usage: $(basename "$0") [--human] path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example(s):${NEWLINE}${NEWLINE}$0 README.md /tmp/README-versions${NEWLINE}${NEWLINE}PRETTY=1 VERBOSE=1 ${script} Dockerfile"
+USAGE=$(full-usage | grep 'Usage:')
 
 # check if got argument
 if [ "${GIT_PATH_TO_FILE}" == "" ]; then
-    ## OLD: echo "error: no arguments given. ${USAGE}" >&2
     echo "${USAGE}" >&2
     exit 1
 fi
@@ -88,7 +115,7 @@ while read -r LINE; do
     COMMIT_DATE=$(echo "$LINE" | cut -d ' ' -f 1)
     # optionaly, convert date into DDmmmYY-HHMM format
     version_spec="$COUNT"
-    date_spec="COMMIT_DATE"
+    date_spec="$COMMIT_DATE"
     hour_spec=""
     if $pretty; then
 	date_spec="$(date "+%d%b%y" --date="$COMMIT_DATE")"
