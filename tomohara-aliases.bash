@@ -1545,7 +1545,7 @@ function make-tar () {
     if [ "$USE_DATE" = "1" ]; then
 	base="$base-$(TODAY)";
 	## TEST: rename-with-file-date "$base"*
-	for f in "$base"*; do move "$f" $(get-free-filename "$f" "-"); done
+	for f in "$base".tar.{gz,log}; do move "$f" $(get-free-filename "$f" "-"); done
     fi
     if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
