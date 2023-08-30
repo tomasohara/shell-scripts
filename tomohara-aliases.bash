@@ -1541,7 +1541,12 @@ function make-tar () {
     if [ "$dir" = "" ]; then dir="."; fi;
     if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
     if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
-    if [ "$USE_DATE" = "1" ]; then base="$base-$(TODAY)"; fi
+    ## OLD: if [ "$USE_DATE" = "1" ]; then base="$base-$(TODAY)"; fi
+    if [ "$USE_DATE" = "1" ]; then
+	base="$base-$(TODAY)";
+	## TEST: rename-with-file-date "$base"*
+	for f in "$base"*; do move "$f" $(get-free-filename "$f" "-"); done
+    fi
     if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
     ## OLD:
@@ -1633,6 +1638,7 @@ function sort-tar-archive() { (tar tvfz "$@" | sort --key=3 -rn) 2>&1 | $PAGER; 
 # ex: ¢ TEMP=/mnt/wd6tbp2vfat/backup/tpo-servidor tar-this-dir
 #
 alias tar-this-dir-dated='USE_DATE=1 tar-this-dir'
+alias tar-just-this-dir-dated='USE_DATE=1 tar-just-this-dir'
 
 #.......................................
 
@@ -2033,6 +2039,7 @@ function move-versioned-files-alt {
 # rename-with-file-date(file, ...): rename each file(s) with .ddMmmYY suffix
 # Notes: 1. If file.ddMmmYY exists, file.ddMmmYY.N tried (for N in 1, 2, ...).
 # 2. No warning is issued if the file doesn't exist, so can be used as a no-op.
+# 3. with IGNORE_ALL=1 any file with date-like affix is ignored
 # TODO: have option to put suffix before extension
 function rename-with-file-date() {
     ## DEBUG: set -o xtrace
@@ -2045,22 +2052,27 @@ function rename-with-file-date() {
         shift
     fi
     if [ "$1" = "--verbose" ]; then
-	verbose=1
-	shift
+        verbose=1
+        shift
     fi
     for f in "$@"; do
         ## DEBUG: echo "f=$f"
         ## OLD: if [ -e "$f" ]; then
-	if [[ "$f" =~ \.[0-9]{2}[a-z]{3,4} ]]; then
-	    ## TODO2: [ $verbose = 1 ] && echo "Ignoring file with timestamp: $f"
-	    [ $verbose = 1 ] && echo "Ignoring file with timestamp: $f"
+        ## OLD: if [[ "$f" =~ \.[0-9]{2}[a-z]{3,4} ]]; then
+        # ex1: usage.list.23Aug23
+        # ex2: Mezcla-9jan22.tar.gz
+	# note:  
+        if [[ ("$f" =~ \.[0-9]{2}[a-z]{3,4}[0-9]{2}.*$) ]]; then
+            [ $verbose = 1 ] && echo "Ignoring file with timestamp suffix: $f"
+        elif [[ ("$IGNORE_ALL" = "1") && ("$f" =~ [0-9]{2}[a-z]{3,4}[0-9]{2}) ]]; then
+            [ $verbose = 1 ] && echo "Ignoring file with timestamp affix: $f"
         elif [ -e "$f" ]; then
            new_f=$(get-free-filename "$f.$(date --reference="$f" '+%d%b%y')" ".")
            ## DEBUG: echo
            eval "$move_command" "$f" "$new_f";
-	else
-	   ## TODO2: [ $verbose ] && echo "FYI: no '$f'"
-	   [ $verbose = 1 ] && echo "FYI: no '$f'"
+        else
+           ## TODO2: [ $verbose ] && echo "FYI: no '$f'"
+           [ $verbose = 1 ] && echo "FYI: no '$f'"
         fi
     done;
     ## DEBUG: set - -o xtrace
