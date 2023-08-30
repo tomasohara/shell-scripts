@@ -8,21 +8,25 @@
 #   SC2016 (info): Expressions don't expand in single quotes
 #   SC2116 (style): Useless echo?
 #
+# TODO3: merge with alt-extract-all-git-versions.bash
+#
 
 # Helpers
 function full-usage {
+    local script
+    script="$(basename "$0")"
     echo ""
-    echo "Usage: $(basename "$0") [--human] [--help] git-path [extract-dir]"
+    echo "Usage: $script [--human] [--help] git-path [extract-dir]"
     echo ""
     echo "Examples:"
     echo ""
     echo "$0 README.md /tmp/README-versions"
     echo ""
-    echo "PRETTY=1 VERBOSE=1 ${script} Dockerfile"
+    echo "PRETTY=1 VERBOSE=1 {script} Dockerfile"
     echo ""
     echo "Notes:"
     echo "- default extract-dir: $export_to_expr"
-    echo "- Env. vars: {EXPORT_TO, PRETTY, VERBOSE, TMP}"
+    echo "- Env. vars: {EXPORT_TO, PRETTY, QUICK_MODE, VERBOSE, TMP}"
     echo ""
 }
 
@@ -42,8 +46,11 @@ fi
 TMP=${TMP:-/tmp}
 # shellcheck disable=SC2016
 export_to_expr='$TMP/all_versions_exported'
+# note: see https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
 # shellcheck disable=SC2116
-DEFAULT_EXPORT_TO="$(echo eval "$export_to_expr")"
+## DEBUG: echo "export_to_expr=$export_to_expr"
+DEFAULT_EXPORT_TO="$(eval echo "$export_to_expr")"
+## DEBUG: echo "DEFAULT_EXPORT_TO=$DEFAULT_EXPORT_TO"
 pretty=false
 if [ "${PRETTY:-0}" = "1" ]; then pretty=true; fi
 
@@ -65,7 +72,7 @@ GIT_PATH_TO_FILE="$1"
 ## OLD: USAGE=$'\nNote:\n- cd to the root of your git proj, as follows:\n  cd "$(git rev-parse --show-toplevel)"\n- specify path to file you with to inspect\n- example:\n  '"$0 some/path/to/file"
 NEWLINE=$'\n'
 TWO_NEWLINES="$NEWLINE$NEWLINE"
-script="$(basename "$0")"
+## OLD: script="$(basename "$0")"
 ## OLD: USAGE="Usage: $(basename "$0") [--human] path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example(s):${NEWLINE}${NEWLINE}$0 README.md /tmp/README-versions${NEWLINE}${NEWLINE}PRETTY=1 VERBOSE=1 ${script} Dockerfile"
 USAGE=$(full-usage | grep 'Usage:')
 
@@ -105,15 +112,25 @@ fi
 
 # reset coutner
 COUNT=0
-
+# other initializaiton
 base=$(basename "$0" .bash)
 info="$TMP/_$base.$$.info"
+
+# Get information on commits, optionally checking for additional records due to renames
 git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
+if [ "${QUICK_MODE:-1}" == "1" ]; then
+    num_cases=$(wc -l < "$info")
+    total_num_cases=$(git log --follow "$GIT_PATH_TO_FILE" | grep -v '^commit' | wc -l)
+    if [ "$num_cases" != "$total_num_cases" ]; then
+	echo "Warning: Additional cases due to renames: try alt-extract-all-git-versions.bash"
+    fi
+fi
+
 while read -r LINE; do
     # ex: 2021-05-09T22:27:20-05:00 d124b2a3c1de2b2c0cd834b0fa9097e871d7f141
     COUNT=$((COUNT + 1))
     COMMIT_DATE=$(echo "$LINE" | cut -d ' ' -f 1)
-    # optionaly, convert date into DDmmmYY-HHMM format
+    # optionally, convert date into DDmmmYY-HHMM format
     version_spec="$COUNT"
     date_spec="$COMMIT_DATE"
     hour_spec=""
