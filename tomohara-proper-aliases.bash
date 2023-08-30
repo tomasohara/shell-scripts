@@ -168,11 +168,12 @@ function tabify {
 function trace-vars {
     local var value
     for var in "$@"; do
-	# shellcheck disable=SC2027,SC2046
+	## TODO3: get old eval/echo approach to work in general
+	## # shellcheck disable=SC2027,SC2046
 	## echo -n "$var="$(eval echo "\$$var")"; "
 	## TODO: value="$(eval "echo \$$var")"
+	## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
 	value="$(set | grep "^$var=")"
-	## BAD: echo -n "$var=$value; "
 	echo -n "$value; "
     done
     echo
