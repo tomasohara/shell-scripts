@@ -37,13 +37,26 @@
 #
 
 
+# Helpers
+#
+# to_bool(value): convert {1, true} to true and everything else false
+# ex: to_bool(1) => true; to_bool(0) => false
+function to_bool {
+    if [[ ("$1" == "1") || ("$1" == "true") ]]; then
+	echo "true";
+    else
+	echo "false";
+    fi;
+}
+
 # Variables
 ## DEBUG: set -o xtrace
 REPO_URL="https://github.com/tomasohara/shell-scripts.git"
 REPO_DIR_NAME="shell-scripts"
 IMAGE_NAME="${REPO_DIR_NAME}-dev"
-ACT_WORKFLOW="ubuntu:act-20.04"
-ACT_PULL="false"
+## OLD: ACT_WORKFLOW="ubuntu:act-20.04"
+## OLD: ACT_PULL="false"
+ACT_PULL=$(to_bool "${ACT_PULL:-0}")
 LOCAL_REPO_DIR="$PWD"
 DEBUG_LEVEL="${DEBUG_LEVEL:-2}"
 GIT_BRANCH=${GIT_BRANCH:-""}
