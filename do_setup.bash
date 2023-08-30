@@ -131,7 +131,7 @@ esac
 ## #     -X   Disables sending the termcap initialization and deinitialization
 ## #     -P   changes the prompt
 ## # to override on command line
-## #     -+<option> 	ex: -+F
+## #     -+<option>     ex: -+F
 ## #     
 ## export LESS="-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"
 ## # Disables full-screen repaints under minimal-installation hosts (e.g., Beowolf nodes)
@@ -877,8 +877,8 @@ alias em-devel='em --devel'
 ## # TODO: revert to using tac; why was reverse.perl used instead???
 ## alias view-todo="perl -SSw reverse.perl $HOME/organizer/todo_list.text | $PAGER_CHOPPED"
 ## #
-## ## OLD: function add-todo () { echo "$@" \	`date` >> $HOME/info/todo_list.text ; view-todo; }
-## function add-todo () { echo "$@" \	`date` >> $HOME/organizer/todo_list.text ; view-todo; }
+## ## OLD: function add-todo () { echo "$@" \   `date` >> $HOME/info/todo_list.text ; view-todo; }
+## function add-todo () { echo "$@" \   `date` >> $HOME/organizer/todo_list.text ; view-todo; }
 ## #
 ## function todo-one-week () { add-todo "[within 1 week] " "$@"; }
 ## #
@@ -905,8 +905,8 @@ alias em-devel='em --devel'
 ## alias view-track-time="tac $HOME/organizer/time_tracking_list.text | $PAGER_CHOPPED"
 ## alias view-time-tracking=view-track-time
 ## #
-## ## OLD: function add-track-time () { echo "$@" \	`date` >> $HOME/info/time_tracking_list.text ; view-track-time; }
-## function add-track-time () { echo "$@" \	`date` >> $HOME/organizer/time_tracking_list.text ; view-track-time; }
+## ## OLD: function add-track-time () { echo "$@" \     `date` >> $HOME/info/time_tracking_list.text ; view-track-time; }
+## function add-track-time () { echo "$@" \     `date` >> $HOME/organizer/time_tracking_list.text ; view-track-time; }
 ## #
 ## function track-time () { if [ "$1" == "" ]; then echo add-track-time '"..."'; else add-track-time "$@"; fi; }
 
@@ -929,10 +929,10 @@ alias em-devel='em --devel'
 ## OLD:
 ## function signature () {
 ##     if [ "$1" = "" ]; then
-## 	ls $HOME/info/.$1-signature
-## 	echo "Usage: signature dotfile-prefix"
-## 	echo "ex: signature scrappycito"
-## 	return;
+##      ls $HOME/info/.$1-signature
+##      echo "Usage: signature dotfile-prefix"
+##      echo "ex: signature scrappycito"
+##      return;
 ##     fi
 ##     cat $HOME/info/.$1-signature
 ## }
@@ -1080,16 +1080,16 @@ function lookup-lynx-bookmark () { lynx-bookmarks- | $GREP $MY_GREP_OPTIONS -A1 
 ## #   
 ## find_options=""
 ## function make-tar () { 
-## 	 local base=$1; local dir=$2; local depth=$3; local filter=$4;
-## 	 local depth_arg=""; local filter_arg="."
-## 	 if [ "$dir" = "" ]; then dir="."; fi;
-## 	 if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
-## 	 if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
-## 	 # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
-## 	 (find "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.log" 2>&1; 
-## 	 (ls -l "$base.tar.gz"; cat "$base.log") 2>&1 | $PAGER; 
-## 	 ls-full "$base.tar.gz";
-## 	 ls-relative "$base.tar.gz"; 
+##       local base=$1; local dir=$2; local depth=$3; local filter=$4;
+##       local depth_arg=""; local filter_arg="."
+##       if [ "$dir" = "" ]; then dir="."; fi;
+##       if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
+##       if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
+##       # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
+##       (find "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.log" 2>&1; 
+##       (ls -l "$base.tar.gz"; cat "$base.log") 2>&1 | $PAGER; 
+##       ls-full "$base.tar.gz";
+##       ls-relative "$base.tar.gz"; 
 ## }
 ## # TODO: handle filenames with embedded spaces
 ## #
@@ -1097,9 +1097,9 @@ function lookup-lynx-bookmark () { lynx-bookmarks- | $GREP $MY_GREP_OPTIONS -A1 
 ## # filtering files matching exlusion filter.
 ## #
 ## function tar-dir () {
-## 	local dir=$1; local depth=$2;
-## 	local archive_base=$TEMP/`basename "$dir"`
-## 	make-tar "$archive_base" "$dir" $depth
+##      local dir=$1; local depth=$2;
+##      local archive_base=$TEMP/`basename "$dir"`
+##      make-tar "$archive_base" "$dir" $depth
 ## }
 ## function tar-just-dir () { tar-dir $1 1; }
 ## #
@@ -1149,14 +1149,14 @@ alias calc-stdev-file='calc-stdev <'
 ## alias hotbot-freq='perl- web_freq.perl -hotbot'
 ## alias altavista-freq='perl- web_freq.perl -altavista'
 ## function get-hotbot-blurbs () { web_freq.perl -full $1 | perlgrep -A=1 '^ *\d+\.' | $PAGER; }
-## function show-hotbot-precontext () { web_freq.perl -full $1 | count-it -i "\w+ $1" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
-## function show-hotbot-precontext () { web_freq.perl -full $1 | count-it -i "\w+ $1" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
-## function show-hotbot-precontext- () { web_freq.perl -full $1 | count-it -i -foldcase "\w+ $1" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
-## function show-hotbot-postcontext () { web_freq.perl -full $1 | count-it -i "$1 \w+" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
-## function show-hotbot-postcontext- () { web_freq.perl -full $1 | count-it -i -foldcase "$1 \w+" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
+## function show-hotbot-precontext () { web_freq.perl -full $1 | count-it -i "\w+ $1" | sort $SORT_COL2 -rn -t' ' | $PAGER; }
+## function show-hotbot-precontext () { web_freq.perl -full $1 | count-it -i "\w+ $1" | sort $SORT_COL2 -rn -t' ' | $PAGER; }
+## function show-hotbot-precontext- () { web_freq.perl -full $1 | count-it -i -foldcase "\w+ $1" | sort $SORT_COL2 -rn -t'      ' | $PAGER; }
+## function show-hotbot-postcontext () { web_freq.perl -full $1 | count-it -i "$1 \w+" | sort $SORT_COL2 -rn -t'        ' | $PAGER; }
+## function show-hotbot-postcontext- () { web_freq.perl -full $1 | count-it -i -foldcase "$1 \w+" | sort $SORT_COL2 -rn -t'     ' | $PAGER; }
 ## 
-## function show-altavista-precontext () { web_freq.perl -download_urls -altavista -full $1 | count-it -i "\w+ $1" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
-## function show-altavista-postcontext () { web_freq.perl -download_urls -altavista -full $1 | count-it -i "$1 \w+" | sort $SORT_COL2 -rn -t'	' | $PAGER; }
+## function show-altavista-precontext () { web_freq.perl -download_urls -altavista -full $1 | count-it -i "\w+ $1" | sort $SORT_COL2 -rn -t'    ' | $PAGER; }
+## function show-altavista-postcontext () { web_freq.perl -download_urls -altavista -full $1 | count-it -i "$1 \w+" | sort $SORT_COL2 -rn -t'   ' | $PAGER; }
 
 #------------------------------------------------------------------------
 
@@ -1205,8 +1205,8 @@ function summarize-mail- () { $GREP -h "^((From)|(Subject)|(Date)):" "$@" | $PAG
 
 # Sorting wrappers
 #
-## OLD: alias tab-sort="sort $SORT_COL2 -t '	'"
-alias tab-sort="sort -t '	'"
+## OLD: alias tab-sort="sort $SORT_COL2 -t '    '"
+alias tab-sort="sort -t '       '"
 alias colon-sort="sort $SORT_COL2 -t ':'"
 alias gc-sort='colon-sort -rn $SORT_COL2'
 alias freq-sort='tab-sort -rn $SORT_COL2'
@@ -1215,12 +1215,12 @@ function para-sort() { perl -00 -e '@paras=(); while (<>) {push(@paras,$_);} pri
 # CVS stuff
 #
 # CVS options used:
-#  -p	output to stdout (i.e., don't update in place)
-#  -d	create any directories missing from the working directory
+#  -p   output to stdout (i.e., don't update in place)
+#  -d   create any directories missing from the working directory
 # diff options
 #  -w   ignore white space when comparing lines
-#  -b	ignore changes in amount of white space
-#  -B	ignore changes that just insert or delete blank lines
+#  -b   ignore changes in amount of white space
+#  -B   ignore changes that just insert or delete blank lines
 if [ "$INCLUDE_MISC_ALIASES" = "1" ]; then
     trace CVS stuff
     #
@@ -1362,11 +1362,11 @@ alias ps-view='gv'
 ## function pdf-to-ascii () { ps2ascii "$1" > "$1.ascii"; }
 ## function all-pdf-to-ascii () { 
 ##     for f in *.pdf; do 
-## 	echo "checking $f.ascii"; 
-## 	if [ ! -e "$f.ascii" ]; then 
-## 	    echo "converting $f"; 
-## 	    pdf-to-ascii "$f"; 
-## 	fi; 
+##      echo "checking $f.ascii"; 
+##      if [ ! -e "$f.ascii" ]; then 
+##          echo "converting $f"; 
+##          pdf-to-ascii "$f"; 
+##      fi; 
 ##     done; 
 ## }
 #
@@ -1380,11 +1380,11 @@ function view-ps-or-pdf () {
     if [[ (-e "$1") && ("$WINDIR" != "") ]]; then 
          start $1;  
     elif [ -e "$basename.ps" ]; then 
-	 gv "$basename.ps"; 
+         gv "$basename.ps"; 
     elif [ -e "$basename.pdf" ]; then 
-	 pv "$basename.pdf"; 
+         pv "$basename.pdf"; 
     else 
-	 echo "Unsupported view type in $1"; 
+         echo "Unsupported view type in $1"; 
     fi; 
 }
 #
@@ -1448,14 +1448,14 @@ cond-setenv ENGLISH_DICT $multiling_dir/spanish/english_spanish.dict
 dict_grep="zegrep --ignore-case --text"
 dict_word_grep="$dict_grep --word-regexp"
 function spanish-lookup- () { $dict_grep "$@" $SPANISH_DICT | less-pager -S; }
-## OLD: function old-spanish-lookup () { $dict_grep "((^$@)|(	$@))\b" $SPANISH_DICT; }
+## OLD: function old-spanish-lookup () { $dict_grep "((^$@)|(   $@))\b" $SPANISH_DICT; }
 # Note: spanish-lookup only looks for entry words (i.e., accent-less key or entry word)
 # whereas spanish-lookup- checks entire entry. Likewise for english-lookup[-]
 # example: cena<TAB>cena<TAB>f. supper. 2 la Santa Cena, the Last Supper.
-function spanish-lookup () { $dict_grep "((^$@)|(	$@))[,	]" $SPANISH_DICT; }
+function spanish-lookup () { $dict_grep "((^$@)|(       $@))[,  ]" $SPANISH_DICT; }
 #
 function english-lookup- () { $dict_grep "$@" $ENGLISH_DICT; }
-function english-lookup () { $dict_grep "((^$@)|(	$@))\b" $ENGLISH_DICT; }
+function english-lookup () { $dict_grep "((^$@)|(       $@))\b" $ENGLISH_DICT; }
 alias english-='english-lookup-'
 alias english='english-lookup'
 alias eng='english'
@@ -1790,10 +1790,10 @@ alias vcvars='source $BIN/vcvars.sh'
 ##     if [ "$HOST" != "arahomot" ]; then
 ##         trace compiler aliases
 ##         # gcc options:
-##         # 	-g	produce debugging information
-##         #	-pedantic	Issue all the  warnings  demanded  by  strict  ANSI standard  C; reject all programs that use forbidden extensions.
-##         #	-Wall	issue all types of warning
-##         #	-O	optimize (needed for catching unitialized variables -Wuninitialized)
+##         #    -g      produce debugging information
+##         #    -pedantic       Issue all the  warnings  demanded  by  strict  ANSI standard  C; reject all programs that use forbidden extensions.
+##         #    -Wall   issue all types of warning
+##         #    -O      optimize (needed for catching unitialized variables -Wuninitialized)
 ##         ## OLD: function compile () { gcc -pedantic -g -Wall -O -o `basename $1 .c` $1; }
 ##         function compile () { gcc -g -Wall -O -o `basename $1 .c` $1; }
 ##         function anal-compile () { gcc -pedantic -g -Wall -O -o `basename $1 .c` $1; }

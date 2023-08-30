@@ -55,9 +55,9 @@ function clone-repo () {
     # maldito linux: -c option required for command for
     # shellcheck disable=SC2086
     if [ "$(under-linux)" = "1" ]; then
-	command script "$log"  -c "git clone '$url'"
+        command script "$log"  -c "git clone '$url'"
     else
-	command script "$log"  git clone "$url"
+        command script "$log"  git clone "$url"
     fi
     #
     ls -R "$repo" >> "$log"
@@ -168,13 +168,13 @@ function tabify {
 function trace-vars {
     local var value
     for var in "$@"; do
-	## TODO3: get old eval/echo approach to work in general
-	## # shellcheck disable=SC2027,SC2046
-	## echo -n "$var="$(eval echo "\$$var")"; "
-	## TODO: value="$(eval "echo \$$var")"
-	## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
-	value="$(set | grep "^$var=")"
-	echo -n "$value; "
+        ## TODO3: get old eval/echo approach to work in general
+        ## # shellcheck disable=SC2027,SC2046
+        ## echo -n "$var="$(eval echo "\$$var")"; "
+        ## TODO: value="$(eval "echo \$$var")"
+        ## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
+        value="$(set | grep "^$var=")"
+        echo -n "$value; "
     done
     echo
     ##
@@ -188,9 +188,9 @@ function trace-vars {
 function trace-array-vars {
     local var
     for var in "$@"; do
-	# note: ignores SC1087 (error): Use braces when expanding arrays
-	# shellcheck disable=SC2027,SC2046,SC1087
-	echo -n "$var="$(eval echo "\${$var[@]}")"; "
+        # note: ignores SC1087 (error): Use braces when expanding arrays
+        # shellcheck disable=SC2027,SC2046,SC1087
+        echo -n "$var="$(eval echo "\${$var[@]}")"; "
     done
     echo
 }
@@ -226,14 +226,14 @@ function rename-last-snapshot {
     local new_name="$1"
     # Append dated image suffix unless date-like suffix w/ extension used
     if [[ ! "$new_name" =~ [0-9][0-9]*.png ]]; then
-	# TODO: derive timestamp via rename-with-file-date (in case last snapshit taken earlier)
-	new_name="$new_name-$(T).png"
+        # TODO: derive timestamp via rename-with-file-date (in case last snapshit taken earlier)
+        new_name="$new_name-$(T).png"
     fi
     local last_file
     # TODO: have options to use latest file (regardless of name) 
     # shellcheck disable=SC2010
     last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
-    move "$last_file" "$new_name"		
+    move "$last_file" "$new_name"               
 }
 
 #................................................................................
@@ -249,10 +249,10 @@ alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
 function get-host-nickname {
     local nickname="$HOST_NICKNAME"
     if [ "$nickname" = "" ]; then
-	nickname="$(grep -v '^#' ~/.host-nickname 2> /dev/null)"
+        nickname="$(grep -v '^#' ~/.host-nickname 2> /dev/null)"
     fi
     if [ "$nickname" = "" ]; then
-	nickname="tpo-host"
+        nickname="tpo-host"
     fi
     echo "$nickname"
 }
@@ -266,11 +266,11 @@ function create-zip {
     local dir="$1"
     shift
     if [ "$dir" = "" ]; then
-	echo "Usage create-zip [dirname]"
-	echo "ex: create-zip /mnt/resmed"
-	## echo "Usage: $BASH_SOURCE[0] [dirname]"
-	## echo "ex: $BASH_SOURCE[0] /mnt/resmed"
-	return
+        echo "Usage create-zip [dirname]"
+        echo "ex: create-zip /mnt/resmed"
+        ## echo "Usage: $BASH_SOURCE[0] [dirname]"
+        ## echo "ex: $BASH_SOURCE[0] /mnt/resmed"
+        return
     fi
     local archive
     archive="$TEMP/$(basename "$dir").zip"

@@ -227,19 +227,19 @@ for file in $pattern; do
     # grepping (e.g., `do_diff.sh ... | grep '^Differences:'`).
     files_differ=false
     if [ "$brief" == "0" ]; then
-	log_file="${TMP:-/tmp}/_do_diff.$$.log"
+        log_file="${TMP:-/tmp}/_do_diff.$$.log"
         "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" >| "$log_file"
-	status=$?
-	perl -pe 's/Files (.*) and (.*) differ/Differences: $1 $2/;' < "$log_file"
+        status=$?
+        perl -pe 's/Files (.*) and (.*) differ/Differences: $1 $2/;' < "$log_file"
 
-	# Show file info with time and size if there are differences
-	if [ "$status" != "0" ]; then
-	    files_differ=true
+        # Show file info with time and size if there are differences
+        if [ "$status" != "0" ]; then
+            files_differ=true
             ls -l "$file"
             ls -l "$other_file"
         fi
     fi
-	
+        
     # Perform the actual diff
     log_file="$TMP/do_diff.$$"
     "$diff_cmd" $space_options $diff_options "$file" "$other_file" > "$log_file" 2>&1

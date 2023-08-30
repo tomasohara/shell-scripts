@@ -217,7 +217,7 @@ function git-update-plus {
     echo "issuing: git pull --all"
     git pull --all >> "$log"
     if [ $? -eq 0 ]; then
-	echo "Warning: problem with pull (status=$?)"
+        echo "Warning: problem with pull (status=$?)"
     fi
     echo "issuing: git stash pop"
     git stash pop >> "$log"
@@ -229,7 +229,7 @@ function git-update-plus {
             # note: unzip options: -o overwrite; -v verbose:
             echo "unzip -v -o _stash.zip" >> "$log"
             unzip -v -o _stash.zip >> "$log"
-	    
+            
             # Restore working directory
             if [ "$restore_dir" != "" ]; then
                 echo "Restoring working directory: $restore_dir"
@@ -265,11 +265,11 @@ function git-move-to-dir {    # Move files to specified directory
     shift
     local file
     for file in "$@"; do
-	invoke-git-command mv "$file" "$dir"
-	# TODO2: cut down on extraneous confirmations
-	git-commit-and-push "$dir/$new_file"
-	# do same as git-revert-file-alias
-	invoke-git-command reset HEAD "$file"
+        invoke-git-command mv "$file" "$dir"
+        # TODO2: cut down on extraneous confirmations
+        git-commit-and-push "$dir/$new_file"
+        # do same as git-revert-file-alias
+        invoke-git-command reset HEAD "$file"
     done
 }
 
@@ -323,7 +323,7 @@ function git-commit-and-push {
     if [ "$file_spec" = "" ]; then
         echo "Warning: *** No file specified (cuidado!)"
     elif [ "${GIT_SKIP_ADD:-0}" = "1" ]; then
-	echo "skipping: git add $*"
+        echo "skipping: git add $*"
     else
         echo "issuing: git add \"$*\""
         git-add-plus "$@" >> "$log"
@@ -430,8 +430,8 @@ function git-reset-file {
     ##     pause-for-enter $'Warning: reset --hard changes the both index and working tree!\nPress enter to proceed'
     ## fi
     if [ "$*" = "" ]; then
-	echo "Error: need to specify a file"
-	return 1
+        echo "Error: need to specify a file"
+        return 1
     fi
 
     # Isolate old versions
@@ -455,7 +455,7 @@ function git-reset-file {
     local stash
     stash=$(git stash list)
     if [ "$stash" != "" ]; then
-	echo "Warning: non-empty stash:"
+        echo "Warning: non-empty stash:"
         echo "$stash" | perl -pe 's/^/    /;'
         echo "Consider issuing following: git stash drop"
     fi
@@ -669,12 +669,12 @@ function git-checkout-branch {
     local branch="$1"
     # TODO2: define helper function for usage
     if [[ ("$branch" = "") || ("$branch" == "--help") ]]; then
-	echo "usage: git-checkout-branch [--help | branch]"
-	echo "note: available branches:"
-	# TODO: get maldito git to cooperate better (e.g., plain text option)!
-	# shellcheck disable=SC2016
-	PAGER="" git branch --all | extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
-	return
+        echo "usage: git-checkout-branch [--help | branch]"
+        echo "note: available branches:"
+        # TODO: get maldito git to cooperate better (e.g., plain text option)!
+        # shellcheck disable=SC2016
+        PAGER="" git branch --all | extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
+        return
     fi
     local branch_ref
     branch_ref=$(git branch --all | grep -c "$branch")

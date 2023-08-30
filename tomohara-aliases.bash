@@ -144,17 +144,17 @@ function conditional-export () {
         var="$1" value="$2";
         ## DEBUG: echo "value for env. var. $var: $(printenv "$var")"
         if [ "$(printenv "$var")" == "" ]; then
-	    # Ignores SC1066: Don't use $ on the left side of assignments
-	    # SC2046 [Quote this to prevent word splitting], and SC2086 [Double quote to prevent globbing and word splitting].
-	    # shellcheck disable=SC1066,SC2046,SC2086
+            # Ignores SC1066: Don't use $ on the left side of assignments
+            # SC2046 [Quote this to prevent word splitting], and SC2086 [Double quote to prevent globbing and word splitting].
+            # shellcheck disable=SC1066,SC2046,SC2086
             export $var="$value"
         fi
-	args="$*"
+        args="$*"
         shift 2
-	if [ "$args" = "$*" ]; then
-	    echo "Error: Unexpected value in conditional-export (var='$var'; val='$value')"
-	    return 
-	fi
+        if [ "$args" = "$*" ]; then
+            echo "Error: Unexpected value in conditional-export (var='$var'; val='$value')"
+            return 
+        fi
     done
 }
 #
@@ -188,9 +188,9 @@ function alias-fn {
 # Note: this is streamlined version of alias-fn intended as replacement for 'alias name=command' usages
 function simple-alias-fn {
     if [ "$3" != "" ]; then
-	echo "usage: simple-alias-fn alias command"
-	echo "note: '\$\@' gets appended to command"
-	return
+        echo "usage: simple-alias-fn alias command"
+        echo "note: '\$\@' gets appended to command"
+        return
     fi
     local alias="$1"
     local command="$2"
@@ -454,7 +454,7 @@ alias show-path='show-path-dir PATH'
 function append-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="${PATH}:$1"; fi }
 function append-path-warn {
     if [ ! -e "$1" ]; then
-	echo "Warning: append-path non-existent: $1" 1>&2
+        echo "Warning: append-path non-existent: $1" 1>&2
     fi
     append-path "$1";
 }
@@ -983,9 +983,9 @@ function gu- () { $GREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0"; }
 function grep-to-less () {
     # TODO: fix warning about possible discrepency between grep regex and less, such as when ^ used (e.g., with multiple files in grep output)
     if [[ ($1 =~ ^[^]) && ($# -gt 2) ]]; then
-	echo "Error: ^ will be intrepretted differently by less (e.g., due to multiple files)" 1>&2
+        echo "Error: ^ will be intrepretted differently by less (e.g., due to multiple files)" 1>&2
     else
-	$EGREP $MY_GREP_OPTIONS "$@" | $PAGER_NOEXIT -p"$1";
+        $EGREP $MY_GREP_OPTIONS "$@" | $PAGER_NOEXIT -p"$1";
     fi
 }
 alias grepl-='grep-to-less'
@@ -1054,9 +1054,9 @@ alias fgr-py='fgr-ext py'
 function prepare-find-files-here () {
     local dir="."
     if [ "$1" = "--out-dir" ]; then
-	dir="$2"
-	shift 2;
-	mkdir -p "$dir"
+        dir="$2"
+        shift 2;
+        mkdir -p "$dir"
     fi
     if [ "$1" != "" ]; then
         echo "Error: No arguments accepted; did you mean find-files-here?"
@@ -1360,8 +1360,8 @@ function check-errors () {
     # Add - if no args or last arg is option (e.g., -warnings)
     ## BAD: if [[ ($# -eq 0) || (${args[$# - 1]} != "-") ]]; then
     if [[ ($# -eq 0) || (${args[$# - 1]} =~ ^-+) ]]; then
-	## DEBUG: echo "Adding stdin"
-	args+=("-");
+        ## DEBUG: echo "Adding stdin"
+        args+=("-");
     fi;
     ## OLD: (QUIET=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL CONTEXT=5 check-errors-aux ${args[@]}) 2>&1 | $PAGER;
     ## OLD: (QUIET=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | $PAGER;
@@ -1470,10 +1470,10 @@ function diff-backup-helper {
     local backup_file
     backup_file="$(most-recent-backup "$file")"
     if [ "$backup_file" = "" ]; then
-	echo "Error: no backup for '$file'"
+        echo "Error: no backup for '$file'"
     else 
-	echo "Issuing: '$diff' '$backup_file' '$file'"
-	"$diff" "$backup_file" "$file";
+        echo "Issuing: '$diff' '$backup_file' '$file'"
+        "$diff" "$backup_file" "$file";
     fi
 }
 ## TODO:
@@ -1543,9 +1543,9 @@ function make-tar () {
     if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
     ## OLD: if [ "$USE_DATE" = "1" ]; then base="$base-$(TODAY)"; fi
     if [ "$USE_DATE" = "1" ]; then
-	base="$base-$(TODAY)";
-	## TEST: rename-with-file-date "$base"*
-	for f in "$base".tar.{gz,log}; do move "$f" $(get-free-filename "$f" "-"); done
+        base="$base-$(TODAY)";
+        ## TEST: rename-with-file-date "$base"*
+        for f in "$base".tar.{gz,log}; do move "$f" "$(get-free-filename "$f" "-")"; done
     fi
     if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
@@ -1732,10 +1732,10 @@ function image-view () { gpicview "$@" & }
 # TODO: handle filename with ... (e.g., special punctuation)???
 function pdf-to-ascii () {
     if [ "$1" = "" ]; then
-	echo "usage: pdf-to-ascii file [verbose=0] [options='-layout']"
-	echo "note: use ' ' for options to use default"
-	echo "ex: pdf-to-ascii zhang-skillspan-naccl2022.pdf 1 ' '"
-	return
+        echo "usage: pdf-to-ascii file [verbose=0] [options='-layout']"
+        echo "note: use ' ' for options to use default"
+        echo "ex: pdf-to-ascii zhang-skillspan-naccl2022.pdf 1 ' '"
+        return
     fi
     local file="$1"
     local verbose="$2";
@@ -1747,13 +1747,13 @@ function pdf-to-ascii () {
     if [ ! -s "$target" ]; then
         ## OLD: if [ "$verbose" = "1" ]; then echo "creating $target"; fi
         if [ "$verbose" = "1" ]; then
-	    echo "creating $target w/ options '$options'";
-	fi
-	# quiet shellcheck on quoting args
-	# shellcheck disable=SC2046,SC2086
+            echo "creating $target w/ options '$options'";
+        fi
+        # quiet shellcheck on quoting args
+        # shellcheck disable=SC2046,SC2086
         cmd.sh --time-out 30 pdftotext $options "$file" "$target";
     else
-	if [ "$verbose" = "1" ]; then echo "skipping existing $target"; fi
+        if [ "$verbose" = "1" ]; then echo "skipping existing $target"; fi
     fi
     $LS -lt "$target"
 }
@@ -1768,7 +1768,7 @@ function run-app {
     local log
     log=$TEMP/"$app-$(TODAY).log"
     if [ -e "$log" ]; then
-	echo "FYI: Updating $app's log $log"
+        echo "FYI: Updating $app's log $log"
     fi
     "$app" "$@" >> "$log" 2>&1 &
     ## TODO: make sure command invoked OK and then put into background
@@ -1924,8 +1924,8 @@ function rename-special-punct {
     # strip unicode punctuation, ignoring shellcheck warnings like SC1112 [This is a unicode quote]
     # shellcheck disable=SC1111,SC1112
     {
-	# note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) 
-	rename-files -q -global -regex "_*[·®“”″‶‘’–]" "_";   # note: unicode
+        # note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) 
+        rename-files -q -global -regex "_*[·®“”″‶‘’–]" "_";   # note: unicode
     }
     rename-files -q -global -regex "–" "-";
 }
@@ -1954,7 +1954,7 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 alias rename-utf8-encoded-sledgehammer='rename-files -quick -global -regex "[\x80-\xFF]{1,4}" "_"'
 ## OLD: alias rename-emoji=rename-utf8-encoded
 # via https://en.wikipedia.org/wiki/UTF-8:
-#    U+10000	U+10FFFF	11110xxx	10xxxxxx	10xxxxxx	10xxxxxx;   note: F[8-F]{3}
+#    U+10000    U+10FFFF        11110xxx        10xxxxxx        10xxxxxx        10xxxxxx;   note: F[8-F]{3}
 # rename-utf8-emoji: replace U+10000 characters in filenames with _'s
 # note: emoji considered synonymous with emoticon
 ## OLD: alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"'
@@ -1984,10 +1984,10 @@ alias rename-bad-dashes="rename-files -quick -global -regex ' \-' '_'; rename-fi
 # shellcheck disable=SC2120
 function move-versioned-files {
     if [ "$1" = "" ]; then
-	echo "usage: [ENV] move-versioned-files 'brace_pattern' dir"
-	echo "    where ENV = [READONLY=1]"
-	## TODO: echo "    where ENV = [MOVE=command] ...        use 'mv -v' to move read
-	return
+        echo "usage: [ENV] move-versioned-files 'brace_pattern' dir"
+        echo "    where ENV = [READONLY=1]"
+        ## TODO: echo "    where ENV = [MOVE=command] ...        use 'mv -v' to move read
+        return
     fi
     local ext_pattern="$1"
     if [ "$ext_pattern" = "-" ]; then ext_pattern="[a-z]*"; fi
@@ -2028,8 +2028,8 @@ function move-versioned-files-alt {
     local false_positives
     false_positives="$(ls old/*$version_regex* 2>&1 | grep -v 'No such file' | egrep "(adhoc)|(.txt$)")"
     if [ "$false_positives" != "" ]; then
-	echo "Warning: potential misplaced files"
-	echo "    $false_positives"
+        echo "Warning: potential misplaced files"
+        echo "    $false_positives"
     fi
     }
 }
@@ -2061,7 +2061,7 @@ function rename-with-file-date() {
         ## OLD: if [[ "$f" =~ \.[0-9]{2}[a-z]{3,4} ]]; then
         # ex1: usage.list.23Aug23
         # ex2: Mezcla-9jan22.tar.gz
-	# note:  
+        # note:  
         if [[ ("$f" =~ \.[0-9]{2}[a-z]{3,4}[0-9]{2}.*$) ]]; then
             [ $verbose = 1 ] && echo "Ignoring file with timestamp suffix: $f"
         elif [[ ("$IGNORE_ALL" = "1") && ("$f" =~ [0-9]{2}[a-z]{3,4}[0-9]{2}) ]]; then
@@ -2262,12 +2262,12 @@ alias bash-trace-off='set - -o xtrace'
 # show argument expansion with result piped into less
 function trace-cmd() {
     (
-	## TODO: warn about need for extra quotes
-	## if [[ "$*" =~ " " ]; then echo  "FYI: Make sure command doubly-quoted to trace-cmd""
+        ## TODO: warn about need for extra quotes
+        ## if [[ "$*" =~ " " ]; then echo  "FYI: Make sure command doubly-quoted to trace-cmd""
         echo "start: $(date)";
         bash-trace-on; 
         ## OLD: eval "$@";
-	eval "$*"; 
+        eval "$*"; 
         bash-trace-off;
         echo "end: $(date)";
     ) 2>&1 | $PAGER;
@@ -2415,7 +2415,7 @@ function get-free-filename() {
     while [ -e "$filename" ]; do
         (( L++ ))
         filename="$base$sep$L"
-	if [ "$ext" != "" ]; then filename="$filename$sep$ext"; fi
+        if [ "$ext" != "" ]; then filename="$filename$sep$ext"; fi
     done;
     ## DEBUG: local -p
     echo "$filename"
@@ -2761,7 +2761,7 @@ function script-update {
     local command_indicator=""
     ## TODO: under-linux && command_indicator="-c"
     if [ "$(under-linux)" = "1" ]; then
-	command_indicator="-c"
+        command_indicator="-c"
     fi
     # shellcheck disable=SC2046,SC2086
     script  "_update-$(T).log"  $command_indicator make-git-update.bash
@@ -2910,11 +2910,11 @@ function run-python-lint-batched () {
     (for f in $($LS $file_spec); do
          # HACK: uses basename of parent prefix if invoked with path
          local b
-	 b=$(basename "$f")
+         b=$(basename "$f")
          local pre=""
-	 # Note: uses directory name as prefix if file not in current dir
-	 local d
-	 d=$(dirname "$f")
+         # Note: uses directory name as prefix if file not in current dir
+         local d
+         d=$(dirname "$f")
          if [[ $f =~ / ]]; then pre="$(basename "$d")-"; fi
          DEBUG_LEVEL=5 python-lint "$f" >| "$out_dir/$pre$b".log 2>&1
          head "$out_dir/$pre$b".log
@@ -3265,12 +3265,12 @@ function shell-check {                  ## TOM-IDIOSYNCRATIC
     local exclude="SC1090,SC1091,SC2004,SC2009,SC2012,SC2119,SC2120,SC2129,SC2164,SC2181,SC2196,SC2219,SC2230"
     local exclude_args="--exclude=$exclude"
     if [ "$strict" != "0" ]; then
-	## TEST:
-	## # note: ignores warning about 'if [ ]; ...' (i.e., SC2212), which is as old usage 
-	## exclude="SC2212"
-	## TODO3: rework to use --exclude=""
-	##    args=""; if [ -n $exclude ]; then args=--exclude='$exclude'"; fi
-	exclude_args=""
+        ## TEST:
+        ## # note: ignores warning about 'if [ ]; ...' (i.e., SC2212), which is as old usage 
+        ## exclude="SC2212"
+        ## TODO3: rework to use --exclude=""
+        ##    args=""; if [ -n $exclude ]; then args=--exclude='$exclude'"; fi
+        exclude_args=""
     fi
     # shellcheck disable=SC2086
     shell-check-full $exclude_args "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;';

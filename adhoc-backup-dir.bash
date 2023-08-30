@@ -51,14 +51,14 @@ verbose=0
 while [ "$moreoptions" = "1" ]; do
     # TODO : add real options
     if [ "$1" = "--trace" ]; then
-	trace=1
+        trace=1
     elif [ "$1" = "--verbose" ]; then
-	verbose=1
+        verbose=1
     elif [[ ("$1" = "--") || ("$1" = "-") ]]; then
-	break
+        break
     else
-	echo "ERROR: Unknown option: $1";
-	exit
+        echo "ERROR: Unknown option: $1";
+        exit
     fi
     shift;
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
