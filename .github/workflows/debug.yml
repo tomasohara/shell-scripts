@@ -24,23 +24,14 @@ on: [push, pull_request]
 jobs:
   build:
     name: Debug Build and Run Tests
-    ## TODO?: runs-on: ubuntu:act-20.04
-    ## OLD: runs-on: ubuntu-20.04
-    ## OLD: runs-on: ubuntu-latest
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        os: [ubuntu-20.04]
         ## TODO: os: [ubuntu-20.04, ubuntu-latest]
+        os: [ubuntu-20.04]
         ## TODO: python-version: ["3.8", "3.9", "3.10"]
         python-version: ["3.9"]
-
-    ## TEST
-    ## NOTE: following is for images on the hub
-    ## container:
-    ##   image: my-shell-scripts
-    ##   options: --user=root
 
     steps:
     - name: Checkout Repository
@@ -48,10 +39,8 @@ jobs:
 
     - name: Build docker image
       run: |
-        ## OLD: docker build -t name:shell-scripts-dev -f- . <Dockerfile
         docker build  --tag shell-scripts-image  -f- . <Dockerfile
 
-    ## TEST
     - name: Configure Environment
       run: |
         echo "PATH=$PATH" >> $GITHUB_ENV
@@ -59,9 +48,4 @@ jobs:
 
     - name: Run tests
       run: |
-        ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
-        ## TODO???: put repo under /mnt/local-shell-scripts and installed version under /home/shell-scripts
-        ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
-        ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts ubuntu:act-20.04
-        ## TEST:
         docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-image

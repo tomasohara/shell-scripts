@@ -15,7 +15,6 @@ jobs:
     
     strategy:
       matrix:
-        ## OLD: os: [ubuntu-latest]
         os: [ubuntu-20.04]
         python-version: ["3.9"]
 
@@ -35,15 +34,6 @@ jobs:
         run: |
           echo "PATH=$PATH" >> $GITHUB_ENV
           echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> $GITHUB_ENV
-
-      ## OLD
-      ## - name: Run Python Tests
-      ##   run: |
-      ##     python3 ./tests/master_test.py
-      ##
-      ## - name: Run Alias Tests
-      ##   run: |
-      ##     bash ./tests/summary_stats.bash
 
       - name: Run tests
         run: |

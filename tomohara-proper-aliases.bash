@@ -9,6 +9,7 @@
 #   SC2010 (warning): Don't use ls | grep. Use a glob or a for loop with a condition to allow non-alphanumeric filenames.
 #   SC2016 (info): Expressions don't expand in single quotes
 #   SC2027 (warning): The surrounding quotes actually unquote this.
+#   SC2046: Quote this to prevent word splitting
 #   SC2086: Double quote to prevent globbing)
 #   SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?.
 #
@@ -167,11 +168,12 @@ function tabify {
 function trace-vars {
     local var value
     for var in "$@"; do
-	# shellcheck disable=SC2027,SC2046
+	## TODO3: get old eval/echo approach to work in general
+	## # shellcheck disable=SC2027,SC2046
 	## echo -n "$var="$(eval echo "\$$var")"; "
 	## TODO: value="$(eval "echo \$$var")"
+	## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
 	value="$(set | grep "^$var=")"
-	## BAD: echo -n "$var=$value; "
 	echo -n "$value; "
     done
     echo
