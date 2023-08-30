@@ -278,15 +278,16 @@ function create-zip {
     zip -r -u "$archive" "$dir";
 }
 #
-# create-zip-dir(dir): create zip of dir in context of parent
+# create-zip-dir(dir=pwd): create zip of DIR in context of parent
 function create-zip-from-parent {
-    local path="$1"
+    local path="${1:-$PWD}"
     local dir
     dir="$(basename "$path")"
     pushd "$(realpath "$path/..")";
     create-zip "$dir"
     popd
 }
+alias zip-from-parent=create-zip-from-parent
 
 #................................................................................
 # Linux stuff
