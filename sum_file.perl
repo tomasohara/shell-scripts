@@ -44,7 +44,7 @@ use strict;
 use vars qw/$fract $diff $labels $headings $f $f1 $f2 $col $col1 $col2 $fix
     $ttest $paired_ttest $paired $anova $mann_whitney $each $interactive $stats
     $stdev $keep_nonnumeric $skip_nonnumeric $cumulative $average $context $flag_index_change $show_sum $dollars $commas $delim/;
-use vars qw/$strip $args/;
+use vars qw/$strip $args $append/;
 
 # Check options for statistical tests
 &init_var(*args, &FALSE);       # get data from arguments (i.,e., command line)
@@ -113,6 +113,7 @@ if ($flag_index_change) {
 &init_var(*dollars, $strip);	# the data contain dollar signs (to be ignored)
 &init_var(*commas, $strip);	# the data contain commas (to be ignored)
 &init_var(*delim, "\t");        # column separator
+&init_var(*append, &FALSE);     # append the difference, etc.
 
 my($sum) = 0;
 my($last_index) = "";
@@ -122,25 +123,37 @@ my(@data) = ();
 my($total_num) = 0;
 
 if ( !defined($ARGV[0])) {
-    my($options) = "options = [-stats] [-col=N] [-fix] [-fract] [-labels] [-headings] [-ttest] [-paired_ttest] [-anova] [-mann_whitney] [-stdev] [-cumulative [-average] [-flag_index_change]] [-context] [-dollars] [-commas] [-delim=S]";
-    my($example) = "ex: ls -s | $script_name -fix -stdev -\n\n";
-
-    $example .= "sum_file.perl -ttest -labels -headings -f=5 -f2=6 eval_naive_bayes_4jul.report\n\n";
+    ## OLD: my($options) = "options = [-stats] [-col=N] [-fix] [-fract] [-labels] [-headings] [-ttest] [-paired_ttest] [-anova] [-mann_whitney] [-stdev] [-cumulative [-average] [-flag_index_change]] [-context] [-dollars] [-commas] [-delim=S] [-verbose] [-append]";
+    my($options) = "[-stats] [-col=N] [-fix] [-paired_ttest] [-anova] [-stdev] [-cumulative [-average] [-delim=S] [-verbose] [-append]";
+    if ($verbose) {
+	$options .= " [-fract] [-labels] [-headings] [-ttest] [-mann_whitney] [-flag_index_change]] [-context] [-dollars] [-commas]";
+    }
+    ## OLD: my($example) = "ex: ls -s | $script_name -fix -stdev -\n\n";
+    my($example) = "Examples:\n\nls -s | $script_name -fix -stdev -\n\n";
     $example .= "sum_file.perl -headings -anova -f1=3 -f2=4 resnik_typicality.data\n\n";
-    $example .= "sum_file.perl -mann_whitney -fix=0 -f1=2 -f2=4 resnik_brown_object.data\n\n";
+    if ($verbose) {
+	$example .= "sum_file.perl -ttest -labels -headings -f=5 -f2=6 eval_naive_bayes_4jul.report\n\n";
+	$example .= "sum_file.perl -mann_whitney -fix=0 -f1=2 -f2=4 resnik_brown_object.data\n\n";
+	$example .= "sum_file.perl -diff -append -col1=1 -col2=2 old-test/mendenhall_ex13.1.data\n\n";
+    }
 
-    my($note) = "NOTES:\n- Use -'s for cases with no corresponding data.\n";
+    ## OLD: my($note) = "NOTES:\n- Use -'s for cases with no corresponding data.\n";
+    my($note) = "Notes:\n- Use -'s for cases with no corresponding data.\n";
     $note .= "- Use empty cells in case one column has more data than another.\n";
     $note .= "- The -f values are 0-based, whereas the -col values are 1-based.\n";
     $note .= "- Use -fix if data not strictly tab-delimited (i.e., just whitespace delimited).\n";
-    $note .= "- Use -diff to difference column 2 versus column 1.\n";
+    $note .= "- Use -verbose for more help or to show extracted data.\n";
+    if ($verbose) {
+	$note .= "- Use -diff to show difference of column 2 versus column 1.\n";
+	$note .= "- Use -append to append the difference, etc. to line\n";
+	$note .= "- Use -labels if there are row labels (case specific) and -headings for column labels (field specific).\n";
+	$note .= "- Use -index to treate -col2 as index (e.g., for tracking cumulative average differences).\n";
+	$note .= "  This assumes the data is sorted by the index column.\n";
+	$note .= "- Use -dollars and -commas to ignore \$ and , respectively in the data.\n";
+    }
 
-    $note .= "- Use -labels if there are row labels (case specific) and -headings for column labels (field specific).\n";
-    $note .= "- Use -index to treate -col2 as index (e.g., for tracking cumulative average differences).\n";
-    $note .= "  This assumes the data is sorted by the index column.\n";
-    $note .= "- Use -dollars and -commas to ignore \$ and , respectively in the data.\n";
-
-    print STDERR "\nusage: $script_name [options] [- | file ...]\n\n$options\n\n$example\n$note\n";
+    ## OLD: print STDERR "\nusage: $script_name [options] [- | file ...]\n\n$options\n\n$example\n$note\n";
+    print STDERR "\nUsage: $script_name [options] [- | file ...]\n\n$options\n\n$example\n$note\n";
     &exit();
 }
 
@@ -354,8 +367,12 @@ while (<>) {
 	}
 
 	# Show the two values, their difference, and the remaining data
-	printf "%s\t%s\t%s\t%s\t%s\n",
-	       $label, $num1, $num2, $difference, $rest;
+	if ($append) {
+	    printf "%s\t%s\n", $line, $difference;
+	}
+	else {
+	    printf "%s\t%s\t%s\t%s\t%s\n", $label, $num1, $num2, $difference, $rest;
+	}
     }
 }
 
