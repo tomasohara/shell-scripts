@@ -77,6 +77,10 @@ if [ "${VERBOSE:-0}" = "1" ]; then
     set -o verbose
 fi
 
+# Change into script directory
+src_dir=$(dirname "${BASH_SOURCE[0]}")
+command cd "$src_dir"
+
 # Optionally clone the GitHub repository into temp. dir
 # note: normally skipped as local workflows intended for testing before checkin
 if [ "${CLONE_REPO:-0}" = "1" ]; then
