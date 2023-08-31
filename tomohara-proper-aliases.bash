@@ -331,6 +331,11 @@ function reset-under-emacs {
 }
 
 #................................................................................
+# Media stuff
+
+alias make-screencase-video=kazam
+
+#................................................................................
 # Idiosyncratic stuff (n.b., doubly so given "tomohara-proper" part of filename)
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
 #
