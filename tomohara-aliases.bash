@@ -1139,6 +1139,8 @@ cond-export EMACS_LARGE_FONT "-DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-
 cond-export EMACS_OPTIONS ""
 function em-large-default { export EMACS_OPTIONS="$EMACS_OPTIONS -fn '$EMACS_LARGE_FONT'"; }
 function em-large { em-fn "$EMACS_LARGE_FONT" "$@"; }
+function set-large-emacs-font { export EMACS_FONT="$EMACS_LARGE_FONT"; }
+function unset-large-emacs-font { unset EMACS_FONT; }
 alias em-nw='emacs -l ~/.emacs --no-windows'
 ## TODO: alias em-tpo='emacs -l ~/.emacs'
 alias em-tpo-nw='emacs -l ~/.emacs --no-windows'
@@ -1531,7 +1533,8 @@ function ls-relative () { $LS -d "$1" | perl -pe "s@$HOME@~@;"; }
 #   in archive_base.tar.gz and log file in archive_base.tar.log; afterwards display the tar archive size, log contents, and archive path.
 # Filenames matching the optional filter are excluded.
 # EX: make-tar ~/xfer/program-files-structure 'C:\Program Files' 1
-#   
+#
+# TODO1: liberate me (e.g., put main support into script)!
 # Note: -xdev is so that find doesn't use other file systems
 find_options="-xdev"
 function make-tar () { 
@@ -1541,18 +1544,18 @@ function make-tar () {
     if [ "$dir" = "" ]; then dir="."; fi;
     if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
     if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
-    ## OLD: if [ "$USE_DATE" = "1" ]; then base="$base-$(TODAY)"; fi
     if [ "$USE_DATE" = "1" ]; then
         base="$base-$(TODAY)";
         ## TEST: rename-with-file-date "$base"*
-        for f in "$base".tar.{gz,log}; do move "$f" "$(get-free-filename "$f" "-")"; done
+        for f in "$base".tar.{gz,log}; do
+	    if [ -e "$f" ]; then
+		move $f "$(get-free-filename "$f" "-")";
+	    fi;
+	done
     fi
     if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
-    ## OLD:
-    # maldito shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2086
-    ## OLD: (find "$dir" $find_options $depth_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     ## DUH: -L added to support tar-this-dir in directory that is symbolic link, but unfortunately
     ## that leads to symbolic links in the directory itself to be included
