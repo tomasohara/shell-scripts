@@ -19,7 +19,7 @@ python3 "$dir"/master_test.py
 python_result="$?"
 
 ## TODO: python3 "$dir"/batspp_report.py --text
-bash "$dir"/summary_stats.bash
+bash "$dir"/summary_stats.bash -o
 bash_result="$?"
 
 # *** Note: need to make sure both the Python tests and the bash alias ones get accounted for in the final status code
