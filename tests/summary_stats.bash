@@ -67,7 +67,7 @@ batspp_result="$?"
 
 # Generate output log when -o option enabled
 if $output_log; then
-	grep -B10 "^not ok" "$(find "$BATSPP_OUTPUT" -name '*outputpp.out')" | less -p "not ok" > summary_stats.log
+	grep -B20 "^not ok" "$(find "$BATSPP_OUTPUT" -name '*outputpp.out')" | less -p "not ok" > summary_stats.log
 fi
 
 # *** Note: the result needs to be that of alias tests (i.e., batspp_report.py)
