@@ -170,6 +170,8 @@ DISABLE_ALIASES = system.getenv_bool("DISABLE_ALIASES", False,
                                       "Disable alias expansion")
 MERGE_CONTINUATION = system.getenv_bool("MERGE_CONTINUATION", False,
                                         "Merge function or backslash continuations in expected with actual")
+STRIP_COMMENTS = system.getenv_bool("STRIP_COMMENTS", False,
+                                    "Strip comments from expected output")
 # Flags
 USE_INDENT_PATTERN = system.getenv_bool("USE_INDENT_PATTERN", False,
                                         "Use old regex for indentation")
@@ -237,7 +239,7 @@ def merge_continuation(actual, expected):
             break
         debug.trace(T9, f"Non-continuation at actual line {s + 1}: {actual_line!r}")
 
-    # If during continuuation, merge lines until no longer at a continuation
+    # If during continuation, merge lines until no longer at a continuation
     for c, expected_line in enumerate(expected_lines):
         if line_continuation or function_continuation:
             debug.trace(T8, f"Merging expected line {c + 1} with actual: {expected_line!r}")
@@ -370,7 +372,7 @@ class Batspp(Main):
         if (self.is_test_file and PREPROCESS_BATSPP):
             self.file_content = preprocess_batspp(self.file_content)
 
-        # Check if finish with newline
+        # Check if ends with newline
         if not self.file_content.endswith('\n\n'):
             self.file_content += '\n'
 
@@ -618,7 +620,14 @@ class CustomTestsToBats:
 
     def _preprocess_command(self, field):
         """Preprocess command FIELD"""
+        in_field = field
         field = self._preprocess_field(field)
+
+        # Remove comments (n.b., needs to be done after comment indicators checked
+        field = my_re.sub(r'^\s*\#.*\n', '', field, flags=re.MULTILINE|re.IGNORECASE)
+        ## TODO2: debug.trace(T8, f"_preprocess_command({in_field!r}) ==  {field!r}")
+        debug.trace(5, f"_preprocess_command({in_field!r}) == {field!r}")
+        
         return field
 
     def _preprocess_output(self, field):
@@ -630,16 +639,21 @@ class CustomTestsToBats:
         # TODO: make this optional for expected output field
         field = field.strip()
 
+        # Remove comments (n.b., needs to be done after comment indicators checked
+        if STRIP_COMMENTS:
+            debug.trace(T6, "FYI: stripping comments in output field")
+            field = my_re.sub(r'^\s*\#.*\n', '', field, flags=re.MULTILINE|re.IGNORECASE)
+        
         # Remove initial and trailing quotes
         ## OLD: field = my_re.sub(f'^(\"|\')(.*)(\"|\')$', r'\2', field)
         if not KEEP_OUTER_QUOTES:
             field = my_re.sub(r'^(\"|\')(.*)\1$', r'\2', field)
-        debug.trace(T8, f"_preprocess_output({in_field!r}) ==  {field!r}")
+        debug.trace(T8, f"_preprocess_output({in_field!r}) == {field!r}")
         return field
 
     def _common_process(self, test):
         """Common process for each field in test"""
-
+        debug.trace(6, f'in _common_process({test!r})')
         result = []
 
         # Get indent used
@@ -649,14 +663,17 @@ class CustomTestsToBats:
             debug.trace(T7, f'batspp (test {self._test_id}) - indent founded: "{self._indent_used}"')
 
         # Preprocess command and output fields
+        ## TODO4: uses T6 instead of 5 in traces (likewise elsewhere)
         entire = test.entire
         title = test.title
         setup = self._preprocess_command(test.setup)
+        debug.trace_expr(5, test.actual)
         actual = self._preprocess_command(test.actual)
+        debug.trace_expr(5, actual)
         expected = self._preprocess_output(test.expected)
 
         result = TestFieldTypes(*[entire, title, setup, actual, expected])
-        debug.trace(T7, f'batspp (test {self._test_id}) - _common_process({test}) => {result}')
+        debug.trace(T7, f'batspp (test {self._test_id}) - _common_process({test!r}) => {result!r}')
         return result
 
 
