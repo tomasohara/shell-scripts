@@ -1,4 +1,4 @@
- #! /bin/bash
+#! /bin/bash
 # 
 # Invokes Emacs with current directory unless files specified on command
 # line and using ~/.emacs.tpo instead of ~/.emacs (for when using shared
@@ -11,6 +11,8 @@
 # command (as it tends to clutter the display).
 # - Basis for em alias under Linux.
 # - See win32-emacs.sh for similar script for use under Cygwin.
+# - disables following shellcheck warnings:
+#   SC2090: [Quotes/backslashes in this variable will not be respected.]
 #
 #-------------------------------------------------------------------------------
 # Note: Based on following alias/functions definition (see tohara-aliases.bash)
@@ -60,11 +62,16 @@ fi
 ## OLD: emacs_options="--geometry 80x50"
 use_nohup="0"
 ## TODO: emacs_options="${EMACS_OPTIONS:-}"
-emacs_options=""
+## OLD: emacs_options=""
+emacs_options=()
 in_background="1"
 ## OLD: emacs="emacs"
 ## BAD: emacs="${EMACS:-emacs}"
 emacs="${EMACS_PROGRAM:-emacs}"
+if [ "${EMACS_FONT:-""}" != "" ]; then
+    ## OLD: emacs_options="$emacs_options -fn '$EMACS_FONT'"
+    emacs_options+=("-fn" "$EMACS_FONT")
+fi
 
 ## TEST
 ## # Use nohup if under Mac OS
@@ -106,10 +113,12 @@ while [ "$moreoptions" = "1" ]; do
     elif [ "$1" = "--skip-nohup" ]; then
         use_nohup="0"
     elif [[ ("$1" = "-q") || ("$1" = "--quick") ]]; then
-        emacs_options="$emacs_options -q";
+        ## OLD: emacs_options="$emacs_options -q";
+        emacs_options+=("-q")
         quick=1
     elif [ "$1" = "--options" ]; then
-        emacs_options="$emacs_options $2";
+        ## OLD: emacs_options="$emacs_options $2";
+        emacs_options+=("$2");
         shift;
     elif [ "$1" = "--" ]; then
         shift;
@@ -128,13 +137,15 @@ done
 if [ "$DISPLAY" = "" ]; then
     ## DEBUG: 
     echo "no DISPLAY setting, so adding --no-windows and setting in_background"
-    emacs_options="$emacs_options --no-windows"
+    ## OLD: emacs_options="$emacs_options --no-windows"
+    emacs_options+=("--no-windows")
     in_background="0"
 fi
 
 # Use ~/.emacs.tpo (in place of ~/.emacs) if available
 if [[ ($quick = "0") && (-e "$HOME/.emacs.tpo") ]]; then
-     emacs_options="$emacs_options -l $HOME/.emacs.tpo"
+     ## OLD: emacs_options="$emacs_options -l $HOME/.emacs.tpo"
+     emacs_options+=("-l" "$HOME/.emacs.tpo")
 fi
 
 # resolve-path(filename) => absolute filename
@@ -184,18 +195,19 @@ if [ "$in_background" = "1" ]; then
         ## OLD: nohup emacs $emacs_options $(realpath "${args[*]}") >> $TEMP/nohup.log 2>&1 &
         ## OLD2: $nohup emacs $emacs_options $(realpath "${args[*]}") >> $TEMP/nohup.log 2>&1 &
         ## DEBUG: echo "background w/ nohup"
-        ## DEBUG: echo "issuing: $emacs $emacs_options '$(realpath ${args[*]})' \>\> $TEMP/nohup.log 2>&1 &"
+        ## DEBUG: echo "issuing: $emacs "${emacs_options[@]}" '$(realpath ${args[*]})' \>\> $TEMP/nohup.log 2>&1 &"
         ## OLD: nohup "$emacs" $emacs_options $(realpath "${args[*]}") >> $TEMP/nohup.log 2>&1 &
-	nohup "$emacs" $emacs_options "${args[*]}" >> $TEMP/nohup.log 2>&1 &
+        # shellcheck disable=SC2090
+	nohup "$emacs" "${emacs_options[@]}" "${args[*]}" >> $TEMP/nohup.log 2>&1 &
     else
         ## DEBUG: echo "regular background (i.e., non-nohup)"
-        ## DEBUG: echo "issuing: $emacs $emacs_options ${args[*]} &"
+        ## DEBUG: echo "issuing: $emacs "${emacs_options[@]}" ${args[*]} &"
 	## DEBUG: set -o xtrace
 	## DEBUG: echo "${args[@]}"
-        "$emacs" $emacs_options "${args[@]}" &
+        "$emacs" "${emacs_options[@]}" "${args[@]}" &
     fi
 else
     ## DEBUG: echo "in foreground"
-    ## DEBUG: echo "issuing: $emacs $emacs_options ${args[*]}"
-    "$emacs" $emacs_options "$@"
+    ## DEBUG: echo "issuing: $emacs "${emacs_options[@]}" ${args[*]}"
+    "$emacs" "${emacs_options[@]}" "$@"
 fi
