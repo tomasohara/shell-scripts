@@ -625,8 +625,9 @@ class CustomTestsToBats:
         in_field = field
         field = self._preprocess_field(field)
 
-        # Remove comments (n.b., needs to be done after comment indicators checked
-        field = my_re.sub(r'^\s*\#.*\n', '', field, flags=re.MULTILINE|re.IGNORECASE)
+        # Remove comments (n.b., needs to be done after comment indicators checked)
+        if STRIP_COMMENTS:
+            field = my_re.sub(r'^\s*\#.*\n', '', field, flags=re.MULTILINE|re.IGNORECASE)
         ## TODO2: debug.trace(T8, f"_preprocess_command({in_field!r}) ==  {field!r}")
         debug.trace(5, f"_preprocess_command({in_field!r}) == {field!r}")
         
