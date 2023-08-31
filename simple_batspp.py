@@ -172,6 +172,8 @@ MERGE_CONTINUATION = system.getenv_bool("MERGE_CONTINUATION", False,
                                         "Merge function or backslash continuations in expected with actual")
 STRIP_COMMENTS = system.getenv_bool("STRIP_COMMENTS", False,
                                     "Strip comments from expected output")
+NORMALIZE_WHITESPACE = system.getenv_bool("NORMALIZE_WHITESPACE", False,
+                                          "Convert non-newline whitespace to space")
 # Flags
 USE_INDENT_PATTERN = system.getenv_bool("USE_INDENT_PATTERN", False,
                                         "Use old regex for indentation")
@@ -794,6 +796,9 @@ class CustomTestsToBats:
         main_body = (f"\tlocal {actual_var} {expected_var}\n" +
                      f'\t{actual_var}="$({actual_function})"\n' +
                      f'\t{expected_var}="$({expected_function})"\n')
+        if NORMALIZE_WHITESPACE:
+            main_body += (f'\t{actual_var}="$(normalize-whitespace \"${actual_var}\")"\n' +
+                          f'\t{expected_var}="$(normalize-whitespace \"${expected_var}\")"\n')
         
         ## Process debug
         debug_text = ""
@@ -941,6 +946,17 @@ class CustomTestsToBats:
         bats_tests = ''
         test_ids = []
 
+        # Add helper functions
+        if NORMALIZE_WHITESPACE:
+            bats_tests += (r"""# Helper functions
+                function normalize-whitespace { 
+                   local text
+                   text=$(echo "$*" | perl -pe "s/^\s+//;  s/[ \t]+/ /g;  s/[ \t] *$//;"); 
+                   echo "$text";
+                }
+
+                """)
+        
         # Add global setup if using global test dir
         if GLOBAL_TEST_DIR:
             test_folder = gh.form_path(TEMP_DIR, "global-test-dir")
