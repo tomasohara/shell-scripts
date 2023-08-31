@@ -402,8 +402,8 @@ def main():
         micro_success_rate = total_count_ok / total_count_total * 100
     print(f"Total no. files OK w/ threshold: {total_num_successful}")
     print(f"Average no. files OK w/ threshold: {round3(avg_successful)}%")
-    print(f"Macro success score: {round3(macro_success_rate)}%")
-    print(f"Micro success score: {round3(micro_success_rate)}%")
+    print(f"Macro success score: {round3(macro_success_rate)}% ({round3(total_success_rate)}/{batspp_count * 100})")
+    print(f"Micro success score: {round3(micro_success_rate)}% ({total_count_ok}/{total_count_total})")
     print("    where successful based on threshold, macro is mean of individual scores, and micro is global metric")
 
     print(f"\nFAULTY TESTFILES:")
