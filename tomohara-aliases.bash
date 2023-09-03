@@ -1851,11 +1851,14 @@ function echoize { perl -00 -pe 's/\n(.)/ $1/g;'; }
 #-------------------------------------------------------------------------------
 trace file manipulation and conversions
 
-function asc-it () { dobackup.sh "$1"; asc < BACKUP/"$1" >| "$1"; }
+## TODO: make obsolete
+## OLD: function asc-it () { dobackup.sh "$1"; asc < BACKUP/"$1" >| "$1"; }
+function asc-it () { dobackup.sh "$1"; asc < backup/"$1" >| "$1"; }
 # TODO: use dos2unix under CygWin
 alias remove-cr='tr -d "\r"'
 alias perl-slurp='perl -0777'
 alias alt-remove-cr='perl-slurp -pe "s/\r//g;"'
+## TODO: make obsolete
 function remove-cr-and-backup () { dobackup.sh "$1"; remove-cr < backup/"$1" >| "$1"; }
 alias perl-remove-cr='perl -i.bak -pn -e "s/\r//;"'
 
@@ -1927,8 +1930,8 @@ function rename-special-punct {
     # strip unicode punctuation, ignoring shellcheck warnings like SC1112 [This is a unicode quote]
     # shellcheck disable=SC1111,SC1112
     {
-        # note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) 
-        rename-files -q -global -regex "_*[·®“”″‶‘’–]" "_";   # note: unicode
+        # note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) U+2014 (—)
+        rename-files -q -global -regex "_*[—·®“”″‶‘’–]" "_";   # note: unicode
     }
     rename-files -q -global -regex "–" "-";
 }
@@ -3037,6 +3040,8 @@ function run-jupyter-notebook () {
 }
 alias jupyter-notebook-redir=run-jupyter-notebook
 alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'
+# TODO3: rename to run-jupyter-notebook-... for sake of tab completion
+alias run-jupyter-notebook-redir-open=jupyter-notebook-redir-open
 
 # Python-based utilities
 ## OLD: function extract-text() { python -m extract_document_text "$@"; }
