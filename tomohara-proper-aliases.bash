@@ -100,8 +100,8 @@ function run-python-script {
     if [ "$script_args" = "" ]; then python_arg=""; fi
     # shellcheck disable=SC2086
     echo "$script_args" | $PYTHON "$script_path" $python_arg >| "$out_base.out" 2>| "$log";
-    check-errors-excerpt "$log";
     tail "$log" "$out_base.out"
+    check-errors-excerpt "$log";
 }
 
 # test-python-script(test-script): run TEST-SCRIPT via  pytest
@@ -346,3 +346,4 @@ alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
 alias kill-kdiff3='kill-it kdiff3'
 alias kill-firefox='kill-it firefox'
 alias kill-jupyter='kill-it jupyter'
+alias kill-chromiun='kill-it chromium'
