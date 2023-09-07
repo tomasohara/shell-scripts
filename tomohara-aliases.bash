@@ -1798,7 +1798,7 @@ trace alias/function info
 # note: adds newline after '}' to support paragraph grep
 alias show-functions-aux='typeset -f | perl -pe "s/^}/}\n/;"'
 #
-# show-all-macros(pattern): show aliases or functions matching PATTERN
+# show-all-macros(pattern): show aliases or functions matching PATTERN, including definition
 # TODO: allow for specifying word-boundary matching
 function show-all-macros () {
     pattern="$*";
@@ -1807,10 +1807,12 @@ function show-all-macros () {
     show-functions-aux | perlgrep -i -para $pattern;
 }
 
-# show-macros(pattern): like show-all-macros, excluding leading _ in name
+# show-macros([pattern]): like show-all-macros, excluding leading _ in name
 function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
 # shellcheck disable=SC2016
-alias-fn show-macros-proper 'show-macros | $GREP "^\w"'
+## OLD: alias-fn show-macros-proper 'show-macros | $GREP "^\w"'
+# show-macros-proper([pattern]): shows names of aliases/functions matching PATTERN
+function show-macros-proper { show-macros "$@" | $GREP "^\w"; }
 # show-variables(): show defined variables
 # TODO: figure out how to exclude env. vars from show-variables output
 function show-variables () { set | $GREP -i '^[a-z].*='; }
