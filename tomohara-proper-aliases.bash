@@ -69,11 +69,12 @@ simple-alias-fn black-plain 'convert-emoticons-aux black'
 
 # run-python-script(script, args): run SCRIPT with ARGS with output to _base-#.out
 # and stderr to _base-#.log where # is value of global $_PSL_.
+# The arguments are passed along unless USE_STDIN is 1.
 # note: Checks for errors afterwards. Use non-locals _PSL_, out_base and log.
 function run-python-script {
     ## DEBUG: trace-vars _PSL_ out_base log
     if [ "$1" = "" ]; then
-        echo "Usage: run-python-script script arg ..."
+        echo "Usage: [USE_STDIN=B] run-python-script script arg ..."
         return
     fi
     # Check args
@@ -91,6 +92,7 @@ function run-python-script {
     out_base="$script_base.$(TODAY).$_PSL_";
     ## OLD: local log="$out_base.log";
     log="$out_base.log";
+    out="$out_base.out";
     ## DEBUG: trace-vars _PSL_ out_base log
     ## TEMP: workaround _PSL_ update
     rename-with-file-date "$out_base.out" "$log";
@@ -99,8 +101,14 @@ function run-python-script {
     local python_arg="-"
     if [ "$script_args" = "" ]; then python_arg=""; fi
     # shellcheck disable=SC2086
-    echo "$script_args" | $PYTHON "$script_path" $python_arg >| "$out_base.out" 2>| "$log";
-    tail "$log" "$out_base.out"
+    {
+	if [ "${USE_STDIN:-0}" = "1" ]; then
+	    echo "$script_args" | $PYTHON "$script_path" $python_arg >| "$out" 2>| "$log";
+	else
+	    $PYTHON "$script_path" $script_args $python_arg >| "$out" 2>| "$log";
+	fi
+    }
+    tail "$log" "$out"
     check-errors-excerpt "$log";
 }
 
