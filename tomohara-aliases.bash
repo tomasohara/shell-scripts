@@ -648,15 +648,19 @@ export PERL="$NICE $TIME_CMD perl -Ssw"
 alias set-xterm-title='set_xterm_title.bash'
 alias set-xterm-window='set-xterm-title'
 # Set the title for the current xterm, unless if not running X
+# set-title-to-current-dir(): use $PWD with ~ un-expansion for xterm title
 function set-title-to-current-dir () { 
     local dir
-    dir=$(basename "$PWD"); 
+    dir=$(basename "$PWD");
+    ## TODO: local pwd="${PWD/$HOME/~}"
+    local pwd
+    pwd="$(echo "$PWD" | perl -pe "s@$HOME@~@;")"
     local other_info=""; 
     if [ "$CLEARCASE_ROOT" != "" ]; then other_info="; $other_info cc=$CLEARCASE_ROOT"; fi
-    set-xterm-window "$dir [$PWD]$other_info";
+    set-xterm-window "$dir [$pwd]$other_info";
     ## Note: until VM setup for current client, the symbol is put before the directory basename.
-    ## TEST: set-xterm-window "$PS_symbol $dir [$PWD]$other_info";
-    ## TODO: set-xterm-window "$dir [$PS_symbol$PWD]$other_info";
+    ## TEST: set-xterm-window "$PS_symbol $dir [$pwd]$other_info";
+    ## TODO: set-xterm-window "$dir [$PS_symbol$pwd]$other_info";
 }
 if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-dir; fi
 #
@@ -1549,7 +1553,7 @@ function make-tar () {
         ## TEST: rename-with-file-date "$base"*
         for f in "$base".tar.{gz,log}; do
 	    if [ -e "$f" ]; then
-		move $f "$(get-free-filename "$f" "-")";
+		move "$f" "$(get-free-filename "$f" "-")";
 	    fi;
 	done
     fi
