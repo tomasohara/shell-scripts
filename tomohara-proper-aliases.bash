@@ -117,6 +117,9 @@ function test-python-script {
      PYTHONUNBUFFERED=1 PYTHON="pytest -vv --capture=tee-sys" run-python-script "$@";
 }
 
+# ocr-image(image-filename): run image through optical character recognition (OCD)
+simple-alias-fn ocr-image 'tesseract "$@" -'
+
 #...............................................................................
 
 # JSON stuff
