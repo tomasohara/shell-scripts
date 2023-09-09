@@ -189,6 +189,12 @@ function git-update-plus {
     local restore_dir=""
     if [ "$changed_files" != "" ]; then
         if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
+            # Require force to perform update when there are changed files
+            if [ "${GIT_FORCE:-0}" = "0" ]; then
+                echo "Error: Use 'GIT_FORCE=1 git-update-plus' to update with changed files"
+                return
+            fi
+            
             # Make sure root active for relative path names in zip file
             local root_dir
             root_dir="$(git-root-alias)"
@@ -689,7 +695,8 @@ simple-alias-fn git-branch-checkout  git-checkout-branch
 
 # git-branch-alias(): return current branch for repo
 function git-branch-alias {
-    local git_branch="$(git status | extract_matches.perl "On branch (\S+)")"
+    local git_branch
+    git_branch="$(git status | extract_matches.perl "On branch (\S+)")"
     echo "$git_branch"
 }
 
