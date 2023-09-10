@@ -273,9 +273,10 @@ function git-move-to-dir {    # Move files to specified directory
     for file in "$@"; do
         invoke-git-command mv "$file" "$dir"
         # TODO2: cut down on extraneous confirmations
-        git-commit-and-push "$dir/$new_file"
-        # do same as git-revert-file-alias
-        invoke-git-command reset HEAD "$file"
+        git-commit-and-push "$file" "$dir/$file"
+        ## OLD:
+        ## # do same as git-revert-file-alias
+        ## invoke-git-command reset HEAD "$file"
     done
 }
 
@@ -331,7 +332,8 @@ function git-commit-and-push {
     elif [ "${GIT_SKIP_ADD:-0}" = "1" ]; then
         echo "skipping: git add $*"
     else
-        echo "issuing: git add \"$*\""
+        ## OLD: echo "issuing: git add \"$*\""
+        echo "issuing: git add" "$@"
         git-add-plus "$@" >> "$log"
     fi
 
@@ -782,7 +784,7 @@ function git-misc-alias-usage() {
     ## echo "   git mv --verbose old-file new-file"
     ## echo "   GIT_MESSAGE='renamed' GIT_SKIP_ADD=1 git-update-commit-push old-file new-file"
     echo "    GIT_MESSAGE='renamed' git-rename-file OLD NEW-file"
-    echo "    GIT_MESSAGE='moved' git-move-to-dir file1 DIR/file2"
+    echo "    GIT_MESSAGE='moved' git-move-to-dir DIR file1 file2"
     echo ""
     echo "To delete files (mucho cuidado):"
     echo "   git rm old-file"
