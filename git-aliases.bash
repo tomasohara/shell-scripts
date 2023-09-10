@@ -222,7 +222,7 @@ function git-update-plus {
     git stash >> "$log"
     echo "issuing: git pull --all"
     git pull --all >> "$log"
-    if [ $? -eq 0 ]; then
+    if [ $? -ne 0 ]; then
         echo "Warning: problem with pull (status=$?)"
     fi
     echo "issuing: git stash pop"
@@ -739,7 +739,8 @@ function git-alias-usage () {
     echo ''
     echo 'Usual check-in process:'
     echo '    git-cd-root-alias; git-update-plus; git-next-checkin'
-    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-plus; git-next-checkin'
+    # TODO2: rework 'GIT_FORCE=1 git-update-plus' via dry-run git-update
+    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; GIT_FORCE=1 git-update-plus; git-next-checkin'
     ## OLD:
     ## echo '    # alt: grep "^<<<<< " $(git-diff-list) /dev/null'
     ## # TODO: xargs -I{} 'grep "^<<<<< {} | head -5' $(git-list-text-files)
@@ -781,11 +782,12 @@ function git-misc-alias-usage() {
     ## echo "   git mv --verbose old-file new-file"
     ## echo "   GIT_MESSAGE='renamed' GIT_SKIP_ADD=1 git-update-commit-push old-file new-file"
     echo "    GIT_MESSAGE='renamed' git-rename-file OLD NEW-file"
-    echo "    GIT_MESSAGE='moved' git-move-to-dir DIR file1 file2"
+    echo "    GIT_MESSAGE='moved' git-move-to-dir file1 DIR/file2"
     echo ""
     echo "To delete files (mucho cuidado):"
     echo "   git rm old-file"
-    echo "   GIT_MESSAGE='deleted' GIT_SKIP_ADD=1 git-update-commit-push old-file"
+    ## OLD: echo "   GIT_MESSAGE='deleted' GIT_SKIP_ADD=1 git-update-commit-push old-file"
+    echo "   GIT_MESSAGE='deleted' git-update-commit-push old-file"
     echo ""
     echo "To check in all tracked with changed:"
     echo "    git-checkin-multiple-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
