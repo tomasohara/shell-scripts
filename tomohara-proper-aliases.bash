@@ -114,7 +114,8 @@ function run-python-script {
 
 # test-python-script(test-script): run TEST-SCRIPT via  pytest
 function test-python-script {
-     PYTHONUNBUFFERED=1 PYTHON="pytest -vv --capture=tee-sys" run-python-script "$@";
+    PYTEST_OPTS="${PYTEST_OPTS:-"-vv --capture=tee-sys"}"
+    PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@";
 }
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
