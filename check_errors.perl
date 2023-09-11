@@ -106,9 +106,9 @@ while (<>) {
 	   || (/command not found/i && (! /Cannot switch to Modules/))
 	   || /No space/
 	   || /Segmentation fault/
-	   || /Assertion failed/
-	   || /Assertion .* failed/
-	   || /Floating exception/
+	   || /Assertion failed/i
+	   || /Assertion .* failed/i
+	   || /Floating exception/i
 
 	   # Unix shell errors (e.g., bash or csh)
 	   || /Can\'t execute/
