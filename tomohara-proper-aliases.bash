@@ -80,7 +80,7 @@ function run-python-script {
     # Check args
     local script_path="$1";
     shift;
-    local script_args="$*";
+    local script_args=("$@");
     local script_base
     script_base=$(basename-with-dir "$script_path" .py);
     #
@@ -103,9 +103,9 @@ function run-python-script {
     # shellcheck disable=SC2086
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
-	    echo "$script_args" | $PYTHON "$script_path" $python_arg >| "$out" 2>| "$log";
+	    echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg >| "$out" 2>| "$log";
 	else
-	    $PYTHON "$script_path" $script_args $python_arg >| "$out" 2>| "$log";
+	    $PYTHON "$script_path" "${script_args[@]}" $python_arg >| "$out" 2>| "$log";
 	fi
     }
     tail "$log" "$out"
