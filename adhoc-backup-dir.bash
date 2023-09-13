@@ -69,8 +69,9 @@ done
 shopt -s expand_aliases
 ## maldito shellcheck: [SC1090: Can't follow non-constant source]
 {
+    source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
     # shellcheck disable=SC1090
-    source ~/bin/all-tomohara-aliases-etc.bash
+    source "$source_dir"/all-tomohara-aliases-etc.bash
 }
 #
 # Set tracing (delayed so alias definitions not traced)
