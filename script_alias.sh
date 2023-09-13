@@ -1,3 +1,4 @@
+# *** Warning: Obsolete ***
 alias perl_ 'perl -Ssw'
 alias compare_tags "perl_ compare_tags.sh"
 alias count_em "perl_ count_em.pe"

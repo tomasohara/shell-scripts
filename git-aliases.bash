@@ -687,6 +687,12 @@ function git-checkout-branch {
 }
 simple-alias-fn git-branch-checkout  git-checkout-branch 
 
+# git-branch-alias(): return current branch for repo
+function git-branch-alias {
+    local git_branch="$(git status | extract_matches.perl "On branch (\S+)")"
+    echo "$git_branch"
+}
+
 #-------------------------------------------------------------------------------
 
 # git-alias-usage (): tips on interactive usage (n.b., aka git-template)

@@ -72,8 +72,8 @@ if [ -e "$HOME/mezcla-tom" ]; then add-python-path "$HOME/mezcla-tom"; fi
 export GRADIO_SERVER_NAME=0.0.0.0
 #
 # Mezcla stuff
-export BRIEF_USAGE=1
-export TRACE_INVOCATION=1
+export BRIEF_USAGE=1           # running w/o args shows usage line
+export TRACE_INVOCATION=1      # trace script invocation argv
 
 # Enable timestamp preservation during git-update alias operations (n.b., stash pop quirk)
 export PRESERVE_GIT_STASH=1

@@ -160,7 +160,7 @@ if [ -z "$pattern" ]; then
         pattern="$1"
     elif [[ "$1" =~ \*.*\ \*\. ]]; then
         # ex: "*.py *.mako"
-        echo "Assuming implicit --no-glob, as otherwise space would be in extension"
+        echo "Warning: Assuming implicit --no-glob, as otherwise space would be in extension"
         pattern="$1"
     elif [ -f "$1" ]; then
         # specific file (e.g., "README.txt")

@@ -102,12 +102,15 @@ from mezcla import system
 JUPYTER_FILE = 'jupyter-file'
 OUTPUT       = 'output'
 VERBOSE      = 'verbose'
+ADD_ANNOTS   = 'add-annots'
 STDOUT       = 'stdout'
 JUST_CODE    = 'just-code'
+AUTO_OUTPUT  = 'auto-output'
 
 # Other constants
 JUPYTER_EXTENSION = 'ipynb'
 BATSPP_EXTENSION  = 'batspp'
+SH_EXTENSION  = 'sh'
 TL = debug.TL
 
 
@@ -118,20 +121,30 @@ class JupyterToBatspp(Main):
     jupyter_file = ''
     output       = ''
     verbose      = None
+    add_annots   = None
     stdout       = None
     just_code    = None
+    auto_output  = None
 
 
     def setup(self):
         """Process arguments"""
 
         # Check the command-line options
+        # TODO2: make the defaults more intuitive (e.g., for auto_output and verbose)
         self.jupyter_file = self.get_parsed_argument(JUPYTER_FILE, self.jupyter_file)
-        self.output       = self.get_parsed_argument(OUTPUT, self.output)
-        self.stdout       = self.get_parsed_argument(STDOUT, not self.output)
         self.just_code    = self.get_parsed_argument(JUST_CODE, self.just_code)
-        self.verbose      = self.get_parsed_option(VERBOSE, not self.stdout)
-
+        self.add_annots   = self.get_parsed_option(ADD_ANNOTS, self.add_annots)
+        self.auto_output  = self.get_parsed_option(AUTO_OUTPUT, False)
+        if self.auto_output:
+            # note: allows for affix (not just extension proper)
+            extension = (SH_EXTENSION if self.just_code else BATSPP_EXTENSION)
+            self.output = my_re.sub(fr'\.{JUPYTER_EXTENSION}', f'.{extension}',
+                                    self.jupyter_file)
+        self.output       = self.get_parsed_argument(OUTPUT, self.output)
+        self.stdout       = self.get_parsed_argument(STDOUT, not self.output)        
+        self.verbose      = self.get_parsed_option(VERBOSE,
+                                                   not (self.stdout or self.auto_output))
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
 
@@ -160,6 +173,8 @@ class JupyterToBatspp(Main):
         # Process cells
         batspp_content  = ''
         for c, cell in enumerate(jupyter_json['cells']):
+            if self.add_annots:
+                batspp_content += ensure_new_line(f"# Cell [{c + 1}]")
 
             # Process code cells
             if cell['cell_type'] == 'code':
@@ -199,7 +214,7 @@ class JupyterToBatspp(Main):
             # Markdown cells are considered as comments or directives
             elif cell['cell_type'] == 'markdown':
                 for line in cell['source']:
-                    batspp_content += ensure_new_line(f'# {line}')
+                    batspp_content += ensure_new_line(f'# {line} markdown')
 
             # Add blank line between cells
             batspp_content += '\n'
@@ -208,19 +223,26 @@ class JupyterToBatspp(Main):
 
         # Set Batspp filename
         if ((not self.output) and (not self.stdout)):
+            # note: older support with rename based on strict extensions and always using .batspp
             self.output = my_re.sub(fr'\.{JUPYTER_EXTENSION}$', f'.{BATSPP_EXTENSION}',
                                     self.jupyter_file)
         # Save Batspp file
         if self.output:
-            system.write_file(self.output, batspp_content)
+            if (self.jupyter_file != self.output):
+                system.write_file(self.output, batspp_content)
+            else:
+                system.print_stderr_fmt("Error: input same as output:\n\t{jup}\n\t{out}",
+                                        jup=self.jupyter_file, out=self.output)
 
-        # Print output
+        # Print output to stdout
         if self.verbose or self.stdout:
             print(batspp_content)
 
-        if self.verbose:
+        # Show status message
+        if self.verbose or self.auto_output:
             final_stdout = f'Resulting Batspp tests saved on {self.output}'
-            system.print_stderr('=' * len(final_stdout))
+            if self.verbose:
+                system.print_stderr('=' * len(final_stdout))
             system.print_stderr(final_stdout)
 
 
@@ -235,7 +257,9 @@ def main():
         positional_arguments = [(JUPYTER_FILE, 'Test file path')],
         text_options         = [(OUTPUT,      f'Target output .{BATSPP_EXTENSION} file path')],
         boolean_options      = [(VERBOSE,      'Show verbose debug'),
+                                (ADD_ANNOTS,   'Add annotations about current cells, etc.'),
                                 (JUST_CODE,    'Omit output cells'),
+                                (AUTO_OUTPUT, f'Automatically save with .{BATSPP_EXTENSION}'),
                                 (STDOUT,      f'Print to standard output (default unless --{OUTPUT})')],
         manual_input         = True)
     app.run()

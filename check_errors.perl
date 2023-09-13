@@ -199,6 +199,7 @@ while (<>) {
 	    || (/\b(error)\b/i	        # matches within line error case above
 		&& ((! /='error'/i) || $strict))  # ... includes quotes if strict
 	    || /: No match/		# shell warning?
+	    || /\\ No newline at end/   # diff warning
 	    || /: warning\b/		# Ruby warnings
 	    || /^bash: /                # ex: "bash: [: : unary operator expected"
 	    || /Traceback|\S+Error/     # Python exceptions (caught)

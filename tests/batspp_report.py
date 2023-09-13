@@ -36,9 +36,11 @@ TL = debug.TL
 IPYNB = ".ipynb"
 BATSPP = ".batspp"
 BATS = ".bats"
-TXT = ".txt"
+## OLD: TXT = ".txt"
+TXT = ".summary.txt"
 NOBATSPP = "NOBATSPP"
-OUTPUTPP = ".outputpp"
+## OLD: OUTPUTPP = ".outputpp"
+OUTPUTPP = ".bats.outputpp"
 
 OUTPUT_DIR = system.getenv_text("OUTPUT_DIR", ".",
                                 "Directory for output files such as .batspp test specs")
@@ -71,6 +73,7 @@ DOCKER_HOME = "/home/shell-scripts"
 UNDER_DOCKER = ((HOME == DOCKER_HOME) or system.file_exists(DOCKER_HOME))
 ## TODO? UNDER_RUNNER = ("/home/runner" in HOME)
 UNDER_RUNNER = (("/home/runner" in HOME) or UNDER_DOCKER)
+DETAILED_DEBUGGING = debug.detailed_debugging()
 
 TEST_REGEX = system.getenv_value("TEST_REGEX", None,
                                  "Regex for tests to include; ex: 'c.*' for debugging")
@@ -78,7 +81,7 @@ SHOW_FAILURE_CONTEXT = system.getenv_bool("SHOW_FAILURE_CONTEXT", UNDER_RUNNER,
                                           "Show context of test failures--useful with Github runner")
 SINGLE_STORE = system.getenv_bool("SINGLE_STORE", False,
                                   f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
-CLEAN_DEFAULT = system.getenv_bool("CLEAN_OUTPUT", not debug.detailed_debugging(),
+CLEAN_DEFAULT = system.getenv_bool("CLEAN_OUTPUT", not DETAILED_DEBUGGING,
                                    f"Whether to clean existing output by remove entire directories")
 TEST_DIR = system.getenv_value("TEST_DIR", None,
                                "Directory with BatsPP test definitions")
@@ -97,6 +100,11 @@ def load_thresholds(filename):
         result = yaml.safe_load(yamlfile)
     debug.trace(5, f"load_thresholds({filename}) => {result}")
     return result
+
+def round3(num):
+    """Round NUM to 3 decimal places with result returned as string"""
+    # EX: round3(0.12) => "0.123"
+    return system.round_as_str(num, precision=3)
 
 #-------------------------------------------------------------------------------
 # NOTE: *** This function is too monolithinc: it should be structured like kcov_result.py ***
@@ -188,6 +196,7 @@ def main():
         """Run BatsPP over INPUT_FILE to produce OUTPUT_FILE"""
         # Note: for convenience, output is written to disk and returned by the function
         ## TODO2: add log_file argument for stderr; change output_file to output_script_file
+        debug.assertion(not my_re.search(r"\s", output_file))
         real_output_file = output_file + ".out"
         log_file = output_file + ".log"
         debug.trace(5, f"run_batspp{(input_file, output_file)}")
@@ -197,7 +206,8 @@ def main():
             # uses Bash instead of Bats (to bypass need for global setup sections);
             # copies ./tests files into bats test dir (under temp); retains outer
             # quotation marks in output; uses single test directory; passes along --force option
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            eval_log = output_file + ".eval.log"
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         # Check for common errors (e.g., command not found or insufficient permissions)
@@ -223,7 +233,7 @@ def main():
         thresholds = load_thresholds(THRESHOLDS_FILE)
         missing_test_files = [f for f in thresholds.keys() if not system.file_exists(f)]
         debug.assertion(not missing_test_files,
-                        f"Extranoes file(s) in {THRESHOLDS_FILE}: {missing_test_files}")
+                        f"Extraneous file(s) in {THRESHOLDS_FILE}: {missing_test_files}")
     
     # 1) Identifying .ipynb files
     i = 1
@@ -266,11 +276,10 @@ def main():
                                              gh.basename(testfile.replace(IPYNB, BATSPP)))
             print(f"IPYNB TESTFILE [{i}]: {testfile} => {batspp_from_ipynb}")
             log_file = f"{batspp_from_ipynb}.log"
-            gh.run(f"python3 ../jupyter_to_batspp.py {testfile} --output {batspp_from_ipynb} 2> {log_file}")
-            ## OLD
-            ## # note: uses call to avoid issue with lambda function argument binding; also avoids silly python issue (Cell variable log_file defined in loop)
+            ## OLD: gh.run(f"python3 ../jupyter_to_batspp.py {testfile} --output {batspp_from_ipynb} 2> {log_file}")
+            extra_args = ("--add-annots" if DETAILED_DEBUGGING else "")
+            gh.run(f"python3 ../jupyter_to_batspp.py {extra_args} --output {batspp_from_ipynb} {testfile} 2> {log_file}")
             debug.call(4, gh.run, f"check_errors.perl {log_file}", **{"output": True})
-            ## TEST: debug.code(4, lambda: print(gh.run(f"check_errors.perl {log_file}")))
             batspp_array.append(batspp_from_ipynb)
             i += 1
     ipynb_count = i - 1
@@ -392,9 +401,9 @@ def main():
     if total_count_total:
         micro_success_rate = total_count_ok / total_count_total * 100
     print(f"Total no. files OK w/ threshold: {total_num_successful}")
-    print(f"Average no. files OK w/ threshold: {system.round3(avg_successful)}%")
-    print(f"Macro success score: {system.round3(macro_success_rate)}%")
-    print(f"Micro success score: {system.round3(micro_success_rate)}%")
+    print(f"Average no. files OK w/ threshold: {round3(avg_successful)}%")
+    print(f"Macro success score: {round3(macro_success_rate)}%")
+    print(f"Micro success score: {round3(micro_success_rate)}%")
     print("    where successful based on threshold, macro is mean of individual scores, and micro is global metric")
 
     print(f"\nFAULTY TESTFILES:")

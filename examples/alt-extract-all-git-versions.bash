@@ -3,12 +3,21 @@
 # Extracts all versions of a file under git.
 #
 # Note:
+# - Akternative version that accounts for renamed files.
 # - based on https://stackoverflow.com/questions/12850030/git-getting-all-previous-version-of-a-specific-file-folder
 # - shell check
 #   SC2016 (info): Expressions don't expand in single quotes
 #   SC2116 (style): Useless echo?
+# - Uses git log with following options (seee git-log manpage):
+#      --date-order       commit timestamp order
+#      --diff-filter=d    exclude deletions
+#      --reverse          shown older commits first
+#      --format="%ad %H"  author date with hour
+#      --date=iso-strict  strict ISO 8601 format
+#      --follow           list history beyond renames
 #
-# TODO3: merge with alt-extract-all-git-versions.bash
+# TODO1: fix problem with extraneous error codes from git cat-file over alternative
+# TODO3: merge with extract-all-git-versions.bash
 #
 
 # Helpers
@@ -26,7 +35,8 @@ function full-usage {
     echo ""
     echo "Notes:"
     echo "- default extract-dir: $export_to_expr"
-    echo "- Env. vars: {EXPORT_TO, PRETTY, QUICK_MODE, VERBOSE, TMP}"
+    echo "- Env. vars: {EXPORT_TO, PRETTY, VERBOSE, TMP}"
+    echo "- Experimental ones: {MAX_NUM, ALLOW_RENAMES}"
     echo ""
 }
 
@@ -48,9 +58,7 @@ TMP=${TMP:-/tmp}
 export_to_expr='$TMP/all_versions_exported'
 # note: see https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
 # shellcheck disable=SC2116
-## DEBUG: echo "export_to_expr=$export_to_expr"
 DEFAULT_EXPORT_TO="$(eval echo "$export_to_expr")"
-## DEBUG: echo "DEFAULT_EXPORT_TO=$DEFAULT_EXPORT_TO"
 pretty=false
 if [ "${PRETTY:-0}" = "1" ]; then pretty=true; fi
 
@@ -64,7 +72,8 @@ if [ "$1" = "--help" ]; then
     full-usage
     exit
 fi
-EXPORT_TO="${2:-$DEFAULT_EXPORT_TO}"
+export_to_value="${EXPORT_TO:-$DEFAULT_EXPORT_TO}"
+EXPORT_TO="${2:-$export_to_value}"
 #
 # take relative path to the file to inspect
 GIT_PATH_TO_FILE="$1"
@@ -112,23 +121,33 @@ fi
 
 # reset coutner
 COUNT=0
-# other initializaiton
+GOOD_COUNT=0
+
 base=$(basename "$0" .bash)
 info="$TMP/_$base.$$.info"
-
-# Get information on commits, optionally checking for additional records due to renames
-git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
-if [ "${QUICK_MODE:-1}" == "1" ]; then
-    num_cases=$(wc -l < "$info")
-    total_num_cases=$(git log --follow "$GIT_PATH_TO_FILE" | grep -v '^commit' | wc -l)
-    if [ "$num_cases" != "$total_num_cases" ]; then
-	echo "Warning: Additional cases due to renames: try alt-extract-all-git-versions.bash"
-    fi
+ALLOW_RENAMES="${ALLOW_RENAMES:-1}"
+if [ "$ALLOW_RENAMES" == "0" ]; then
+    git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
+else
+    # note: --follow used to account for renames (see other options above)
+    git log --follow --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
+    # Get information on renames
+    # TODO2: factor in relative path of current directory if not invoked from git root
+    # "R100	.github/workflows/python.yml	.github/workflows/github.yml"
+    git log --name-status --follow "$GIT_PATH_TO_FILE" | grep ^R > "$info.renames"
+    ALT_PATHS=$(cut -f2 -d $'\t' "$info.renames")
+    ## DEBUG: echo "ALT_PATHS=(${ALT_PATHS[*]})"
 fi
+TOTAL_NUM=$(wc -l < "$info")
+MAX_NUM=${MAX_NUM:-$TOTAL_NUM}
 
 while read -r LINE; do
     # ex: 2021-05-09T22:27:20-05:00 d124b2a3c1de2b2c0cd834b0fa9097e871d7f141
     COUNT=$((COUNT + 1))
+    if [ "$COUNT" -gt "$MAX_NUM" ]; then
+	break
+    fi
+    ## DEBUG: echo "LINE$COUNT: $LINE"
     COMMIT_DATE=$(echo "$LINE" | cut -d ' ' -f 1)
     # optionally, convert date into DDmmmYY-HHMM format
     version_spec="$COUNT"
@@ -137,7 +156,11 @@ while read -r LINE; do
     if $pretty; then
 	date_spec="$(date "+%d%b%y" --date="$COMMIT_DATE")"
 	hour_spec="$(date "+%H%M" --date="$COMMIT_DATE")"
-	version_spec="v$COUNT"
+	VERSION_NUM="$COUNT"
+	if [ "$ALLOW_RENAMES" == "1" ]; then
+	    VERSION_NUM=$(($TOTAL_NUM - $COUNT + 1))
+	fi
+	version_spec="v$VERSION_NUM"
     fi
     COMMIT_SHA=$(echo "$LINE" | cut -d ' ' -f 2)
     ## DEBUG: echo "COUNT=$COUNT LINE=$LINE COMMIT_DATE=$COMMIT_DATE COMMIT_SHA=$COMMIT_SHA"
@@ -148,11 +171,30 @@ while read -r LINE; do
 	echo "Warning: adding time of day ($hour_spec) to distinguish '$output_file'";
 	output_file="${output_file}_${hour_spec}";
     fi
-    git cat-file -p "$COMMIT_SHA:$REL_GIT_PATH_TO_FILE" > "$output_file"
+    ## DEBUG:
+    echo "Trying main path $REL_GIT_PATH_TO_FILE for version $version_spec"
+    git cat-file -p "$COMMIT_SHA:$REL_GIT_PATH_TO_FILE" > "$output_file" 2> "$info.err"
+    if [ $? -eq 0 ]; then
+	let GOOD_COUNT++
+    else
+	head -3 "$info.err"
+	if [ "$ALLOW_RENAMES" == "1" ]; then
+	    for f in "${ALT_PATHS[@]}"; do
+		echo "Trying alternative path $f"
+		git cat-file -p "$COMMIT_SHA:$f" >| "$output_file" 2>  "$info.err"
+		if [ $? -eq 0 ]; then
+		    let GOOD_COUNT++
+		    break
+		fi
+		head -3 "$info.err"
+	    done
+	    echo "Error: unable to resolve commit $COMMIT_SHA"
+	fi
+    fi
     $verbose && echo "$output_file"
 done <"$info"
 
 # return success code
 $verbose && echo ""
-echo "$COUNT versions stored in ${EXPORT_TO} for $GIT_PATH_TO_FILE"
+echo "$GOOD_COUNT versions stored in ${EXPORT_TO} for $GIT_PATH_TO_FILE"
 exit 0

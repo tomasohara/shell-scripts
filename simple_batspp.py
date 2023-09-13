@@ -118,6 +118,8 @@ TMP = system.getenv_text("TMP", "/tmp",
 TEMP_DIR_DEFAULT = (gh.TEMP_BASE or gh.form_path(TMP, f"batspp-{os.getpid()}"))
 TEMP_DIR =  system.getenv_text("TEMP_DIR", TEMP_DIR_DEFAULT,
                                "Temporary directory to use for tests")
+EVAL_LOG = system.getenv_value("EVAL_LOG", None,
+                               "Override for temp-file based evaluation log file")
 COPY_DIR = system.getenv_bool("COPY_DIR", False,
                               "Copy current directory to temp. dir for input files, etc.")
 FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
@@ -414,10 +416,10 @@ class Batspp(Main):
             eval_prog = ("bats" if not BASH_EVAL else "bash")
             # note: uses empty stdin in case of buggy tests (to avoid hangup);
             # uses .eval.log to avoid conflict with batspp_report.py
-            log_file = self.temp_file + ".eval.log"
-            bats_output = gh.run(f'{eval_prog} {BATS_OPTIONS} {batsfile} < /dev/null 2> {log_file}')
+            eval_log = (EVAL_LOG if EVAL_LOG else (self.temp_file + ".eval.log"))
+            bats_output = gh.run(f'{eval_prog} {BATS_OPTIONS} {batsfile} < /dev/null 2> {eval_log}')
             print(bats_output)
-            system.print_stderr(debug.call(4, gh.run, f"check_errors.perl {log_file}") or "")
+            system.print_stderr(debug.call(4, gh.run, f"check_errors.perl {eval_log}") or "")
             debug.assertion(not my_re.search(r"^0 tests", bats_output, re.MULTILINE))
 
 
@@ -615,8 +617,7 @@ class CustomTestsToBats:
         return field
 
     def _preprocess_command(self, field):
-        """Preprocess command FIELD
-        Note: currenlty a no-op."""
+        """Preprocess command FIELD"""
         field = self._preprocess_field(field)
         return field
 

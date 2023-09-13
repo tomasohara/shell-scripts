@@ -1427,7 +1427,8 @@ alias diff-default='command diff'
 alias diff-ignore-spacing='diff --ignore-all-space'
 #
 # do-diff(): wrapper into do_diff.sh, which allows for glob patterns of current vs target dirs
-alias do-diff='do_diff.sh'
+## OLD: alias do-diff='do_diff.sh'
+alias do-diff='do_diff.bash'
 #
 function diff-rev () {
     local diff_program="diff"
@@ -1910,7 +1911,18 @@ alias rename-quotes='rename-files -q -global "'"'"'" ""'   # where "'"'"'" is co
 # rename-special-punct: replace runs of any troublesome punctuation in filename w/ _
 ## OLD: alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_"'
 ## OLD: alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_"; rename-files -q -global -regex "–" "-"'
-alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]·’®]" "_"; rename-files -q -global -regex "–" "-"'
+## OLD: alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]·’®]" "_"; rename-files -q -global -regex "–" "-"'
+function rename-special-punct {
+    # strip ascii punctuation
+    rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_";
+    # strip unicode punctuation, ignoring shellcheck warnings like SC1112 [This is a unicode quote]
+    # shellcheck disable=SC1111,SC1112
+    {
+	# note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) 
+	rename-files -q -global -regex "_*[·®“”″‶‘’–]" "_";   # note: unicode
+    }
+    rename-files -q -global -regex "–" "-";
+}
 # TODO: test
 #     $ touch '_what-the-hell?!'; rename-special-punct; ls _what* => _what-the-hell_
 ## TODO:
@@ -2944,7 +2956,8 @@ function python-trace {
 
 # py-diff(dir): check for difference in python scripts versus those in target
 # TODO: specify options before the pattern (or modify do_diff.sh to allow after)
-function py-diff () { do_diff.sh '*.py *.mako' "$@" 2>&1 | $PAGER; }
+## OL:D function py-diff () { do_diff.sh '*.py *.mako' "$@" 2>&1 | $PAGER; }
+function py-diff () { do_diff.bash --no-glob '*.py *.mako' "$@" 2>&1 | $PAGER; }
 
 ## OLD
 ## # kivy-win32-env(): enables environment variabless for Kivy under cyggwin, using win32 python
@@ -3023,6 +3036,7 @@ alias xtract-text='extract-text'
 # note: run in verbose mode with unbuffered I/O so output synchronized.
 # TODO: rework to take the actual test script and to pipe results to pager
 ## TOM-IDIOSYNCRATIC
+## OBSOLETE: use test-python-script instead
 #
 function test-script () {
     local base
@@ -3051,7 +3065,7 @@ function randomize-datafile() {
     tail --lines=+2 "$file" | python -m mezcla.randomize_lines | head -"$num_lines"
 }
 
-# filter-random(pct, file, [include_header=1])Randomize lines based on percentages, using output lile (e.g., _r10pct-fubar.data).
+# filter-random(pct, file, [include_header=1]): Randomize lines based on percentages, using output lile (e.g., _r10pct-fubar.data).
 # Notes:
 # - By default, includes first line assuming it is header line.
 # - Includes support for compressed files (both input and output).
@@ -3207,23 +3221,27 @@ fi
 
 #........................................................................
 # Miscellaneous bash scripting helpers
+
 # TODO: move other aliases here
 trace bash helpers
 
 # shell-check[-full](options, script, ...): run script through shellcheck
-# with filtering given it's buggy filtering mecahanism (and anal retentiveness)
+# with filtering given it's awkward filtering mecahanism
 # note: specifies checking for bash (TODO: make optional)
+# Warning: use regular shellcheck for production code
 function shell-check-full {
     shellcheck -s bash "$@";
 }
-function shell-check {
+function shell-check {                  ## TOM-IDIOSYNCRATIC
     # note: filters out following
     # - SC1090: Can't follow non-constant source. Use a directive to specify location.
     # - SC1091: Not following: ./my-git-credentials-etc.bash was not specified as input (see shellcheck -x).
     # - SC2004: $/${} is unnecessary on arithmetic variables
     # - SC2009: Consider using pgrep instead of grepping ps output.
     # - SC2012: Use find instead of ls to better handle non-alphanumeric filenames
-    # - SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects.
+    # - SC2119 [Use ... "$@" if function's $1 should mean script'1 $1]
+    # - SC2119: ... references arguments, but none are ever passed
+    # - SC2120: Consider using { cmd1; cmd2; } >> file instead of individual redirects.
     # - SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
     # - SC2181 (style): Check exit code directly with e.g. 'if mycmd;' ...
     # - SC2196 (info): egrep is non-standard
@@ -3231,7 +3249,19 @@ function shell-check {
     # - SC2230: which is non-standard
     # - TODO2: -e 'SC1090,SC1091,SC2009,SC2012,SC2129,SC2164,SC2181'
     ## OLD: shell-check-full "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;' | perl-grep -para -v '(SC1090|SC1091|SC2009|SC2012|SC2129|SC2164|SC2181|SC2219|SC2230)';
-    shell-check-full --exclude="SC1090,SC1091,SC2004,SC2009,SC2012,SC2129,SC2164,SC2181,SC2196,SC2219,SC2230" "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;';
+    local strict="${STRICT_MODE:-0}"
+    local exclude="SC1090,SC1091,SC2004,SC2009,SC2012,SC2119,SC2120,SC2129,SC2164,SC2181,SC2196,SC2219,SC2230"
+    local exclude_args="--exclude=$exclude"
+    if [ "$strict" != "0" ]; then
+	## TEST:
+	## # note: ignores warning about 'if [ ]; ...' (i.e., SC2212), which is as old usage 
+	## exclude="SC2212"
+	## TODO3: rework to use --exclude=""
+	##    args=""; if [ -n $exclude ]; then args=--exclude='$exclude'"; fi
+	exclude_args=""
+    fi
+    # shellcheck disable=SC2086
+    shell-check-full $exclude_args "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;';
 }
 
 #-------------------------------------------------------------------------------
