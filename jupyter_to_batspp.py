@@ -143,8 +143,7 @@ class JupyterToBatspp(Main):
                                     self.jupyter_file)
         self.output       = self.get_parsed_argument(OUTPUT, self.output)
         self.stdout       = self.get_parsed_argument(STDOUT, not self.output)        
-        self.verbose      = self.get_parsed_option(VERBOSE,
-                                                   not (self.stdout or self.auto_output))
+        self.verbose      = self.get_parsed_option(VERBOSE, not self.stdout)
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
 
@@ -235,7 +234,8 @@ class JupyterToBatspp(Main):
                                         jup=self.jupyter_file, out=self.output)
 
         # Print output to stdout
-        if self.verbose or self.stdout:
+        ## OLD: if self.verbose or self.stdout:
+        if self.stdout:
             print(batspp_content)
 
         # Show status message
