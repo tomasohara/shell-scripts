@@ -111,6 +111,7 @@
 #    https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
 function pause-for-enter () {
     local message="$1"
+    ## TODO2: add "enter or ^C" to user message
     if [ "$message" = "" ]; then message="Press enter to continue"; fi
     # Maldito shellcheck: SC2162 [read without -r will mangle backslashes].
     # shellcheck disable=SC2162
@@ -168,7 +169,9 @@ function git-alias-review-log {
 
 # git-update-plus(): updates local from global repo. This uses git-stash to hide local changes
 # does a git-pull, and then restores local changes.
-# Note: If PRESERVE_GIT_STASH is 1, then timestamps are preserved.
+# Note:
+# - If PRESERVE_GIT_STASH is 1, then timestamps are preserved.
+# - Requires GIT_FORCE of 1 if there are changed files (to avoid inadvertant conflict).
 function git-update-plus {
     local git_user="n/a"
     local git_token="n/a"
@@ -188,13 +191,13 @@ function git-update-plus {
     changed_files="$(git-diff-list)"
     local restore_dir=""
     if [ "$changed_files" != "" ]; then
-        if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
-            # Require force to perform update when there are changed files
-            if [ "${GIT_FORCE:-0}" = "0" ]; then
-                echo "Error: Use 'GIT_FORCE=1 git-update-plus' to update with changed files"
-                return
-            fi
+        # Require force to perform update when there are changed files
+        if [ "${GIT_FORCE:-0}" = "0" ]; then
+            echo "Error: Use 'git-update-force' to update with changed files (n.b., potential for conflicts)"
+            return
+        fi
             
+        if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
             # Make sure root active for relative path names in zip file
             local root_dir
             root_dir="$(git-root-alias)"
@@ -252,6 +255,25 @@ function git-update-plus {
     # TODO: filter unzip output
     echo >> "$log"
     git-alias-review-log "$log"
+}
+
+# git-update-force(): Run git-update-plus with forced update
+# note: used to avoid overly conservative git-update-plus
+#
+function git-update-force {
+    GIT_FORCE=1 git-update-plus
+}
+
+# git-update-verified(): Run git-update-force if user agrees
+#
+function git-update-verified {
+    local changed
+    changed=$(git-diff-list)
+    if [ "$changed" != "" ]; then
+        echo "Current changes: $changed"
+        pause-for-enter "Proceed with update even though potential for conflict? (Enter for Y otherwise ^C)"
+    fi
+    git-update-force
 }
 
 function git-rename-file {    # Rename file OLD to NEW and update index
@@ -740,9 +762,9 @@ function git-alias-usage () {
     echo '    git-next-checkin "'${next_mod_file}'"'
     echo ''
     echo 'Usual check-in process:'
-    echo '    git-cd-root-alias; git-update-plus; git-next-checkin'
-    # TODO2: rework 'GIT_FORCE=1 git-update-plus' via dry-run git-update
-    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; GIT_FORCE=1 git-update-plus; git-next-checkin'
+    echo '    git-cd-root-alias; git-update-verified; git-next-checkin'
+    # TODO2: rework git-update-force via dry-run git-update with conflict check
+    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-force; git-next-checkin'
     ## OLD:
     ## echo '    # alt: grep "^<<<<< " $(git-diff-list) /dev/null'
     ## # TODO: xargs -I{} 'grep "^<<<<< {} | head -5' $(git-list-text-files)
