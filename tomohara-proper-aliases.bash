@@ -40,7 +40,6 @@ function convert-emoticons-aux {
 #...............................................................................
 
 # Python stuff
-## OLD: alias plint=python-lint
 simple-alias-fn plint 'PAGER=cat python-lint'
 alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
 #
@@ -48,10 +47,8 @@ alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
 function clone-repo () {
     local url repo log
     url="$1"
-    ## OLD: repo=$(basename "$url")
     repo=$(basename "$url" .git)
     log="_clone-$repo-$(T).log"
-    ## OLD: command script "$log" git clone "$url"
     # maldito linux: -c option required for command for
     # shellcheck disable=SC2086
     if [ "$(under-linux)" = "1" ]; then
@@ -88,9 +85,7 @@ function run-python-script {
     let _PSL_++;
     ## TODO2: fix _PSL_ value retention
     ## _PSL_=666;
-    ## OLD: local out_base
     out_base="$script_base.$(TODAY).$_PSL_";
-    ## OLD: local log="$out_base.log";
     log="$out_base.log";
     out="$out_base.out";
     ## DEBUG: trace-vars _PSL_ out_base log
@@ -99,7 +94,7 @@ function run-python-script {
     ## TODO: '>|' => '>' [maldito bash]
     # shellcheck disable=SC2086
     local python_arg="-"
-    if [ "$script_args" = "" ]; then python_arg=""; fi
+    if [ "${script_args[*]}" = "" ]; then python_arg=""; fi
     # shellcheck disable=SC2086
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
@@ -118,8 +113,12 @@ function test-python-script {
     PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@";
 }
 
+# color-test-failures(): show color-coded test result (yellow for xfailed and red for regular fail)
+function color-test-failures { cat "$@" | colout "\bfailed" red | colout "xfailed" yellow | colout "\bpassed" green | colout "xpassed" Palegreen; };
+
 # ocr-image(image-filename): run image through optical character recognition (OCD)
-simple-alias-fn ocr-image 'tesseract "$@" -'
+## BAD: simple-alias-fn ocr-image 'tesseract "$@" -'
+alias-fn ocr-image 'tesseract "$@" -'
 
 #...............................................................................
 
@@ -130,7 +129,6 @@ function json-validate () {
 }
 
 # Misc. stuff
-## OLD: alias script-config='script ~/config/_config-$(T).log'
 function script-config {
     mkdir -p ~/config
     script ~/config/"_config-$(T).log"
@@ -351,7 +349,6 @@ alias make-screencase-video=kazam
 # Idiosyncratic stuff (n.b., doubly so given "tomohara-proper" part of filename)
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
 #
-## OLD: alias all-tomohara-settings='tomohara-aliases; tomohara-settings; more-tomohara-aliases; tomohara-proper-aliases'
 alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
 alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
 #
