@@ -582,7 +582,14 @@ function git-diff-list {
     local diff_list_script="$TMP/_git-diff-list.$$.bash"
     git-diff-list-template >| "$diff_list_script"
     source "$diff_list_script"
-    cat "$diff_list_file"
+    ## OLD: cat "$diff_list_file"
+
+    # Change path to absolute and drop current directory
+    local root
+    root=$(git-root-alias)
+    local pwd
+    pwd=$(realpath ".")
+    cat "$diff_list_file" | perl -pe "s@^@$root/@;" | perl -pe "s@^$pwd/?@@;"
 }
 
 # Output templates for doing checkin of modified files
