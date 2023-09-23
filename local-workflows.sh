@@ -29,21 +29,34 @@
 # <none>                <none>      e5423ec78b75   6 hours ago   1.76GB
 # catthehacker/ubuntu   act-20.04   02147d5b7ca9   2 weeks ago   1.11GB
 #
-# $ docker tag $(docker images | head -1) my-shell-scripts
+# $ docker tag $(docker images | head -1) shell-scripts-dev
 # $ docker images
 # ...
-# my-shell-scripts      latest      e5423ec78b75   7 hours ago   1.76GB
+# shell-scripts-dev      latest      e5423ec78b75   7 hours ago   1.76GB
 # 
 #
 
+
+# Helpers
+#
+# to_bool(value): convert {1, true} to true and everything else false
+# ex: to_bool(1) => true; to_bool(0) => false
+function to_bool {
+    if [[ ("$1" == "1") || ("$1" == "true") ]]; then
+	echo "true";
+    else
+	echo "false";
+    fi;
+}
 
 # Variables
 ## DEBUG: set -o xtrace
 REPO_URL="https://github.com/tomasohara/shell-scripts.git"
 REPO_DIR_NAME="shell-scripts"
 IMAGE_NAME="${REPO_DIR_NAME}-dev"
-ACT_WORKFLOW="ubuntu:act-20.04"
-ACT_PULL="false"
+## OLD: ACT_WORKFLOW="ubuntu:act-20.04"
+## OLD: ACT_PULL="false"
+ACT_PULL=$(to_bool "${ACT_PULL:-0}")
 LOCAL_REPO_DIR="$PWD"
 DEBUG_LEVEL="${DEBUG_LEVEL:-2}"
 GIT_BRANCH=${GIT_BRANCH:-""}
@@ -63,6 +76,10 @@ fi
 if [ "${VERBOSE:-0}" = "1" ]; then
     set -o verbose
 fi
+
+# Change into script directory
+src_dir=$(dirname "${BASH_SOURCE[0]}")
+command cd "$src_dir"
 
 # Optionally clone the GitHub repository into temp. dir
 # note: normally skipped as local workflows intended for testing before checkin
@@ -89,7 +106,7 @@ if [ "${RUN_BUILD:-1}" = "1" ]; then
     # Also, --build-arg misleading: see
     #    https://stackoverflow.com/questions/42297387/docker-build-with-build-arg-with-multiple-arguments
     # shellcheck disable=SC2086
-    docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --tag my-shell-scripts .
+    docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --tag shell-scripts-dev .
 fi
 
 # Run the Github Actions workflow locally
@@ -99,12 +116,12 @@ if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
     echo "Running Github Actions locally w/ $file"
     # shellcheck disable=SC2086
     act --verbose --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" --workflows ./.github/workflows/"$file" $RUN_OPTS
-    # TODO: docker tag IMAGE-ID my-shell-scripts
-    # EX (see above): docker tag $(docker images --quiet | head -1) my-shell-scripts
+    # TODO: docker tag IMAGE-ID shell-scripts-dev
+    # EX (see above): docker tag $(docker images --quiet | head -1) shell-scripts-dev
 fi
 
 # Run via docker directly
 if [ "${RUN_DOCKER:-0}" = "1" ]; then
    echo "Running Tests via Docker"
-   docker run -it --env DEBUG_LEVEL="$DEBUG_LEVEL" --mount type=bind,source="$(pwd)",target=/home/shell-scripts my-shell-scripts
+   docker run -it --env DEBUG_LEVEL="$DEBUG_LEVEL" --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
 fi

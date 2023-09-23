@@ -60,6 +60,7 @@
 #      GIT_MESSAGE               message for update (TODO: rework to use optional arg)
 #
 # - maldito shellcheck:
+#   SC2002 [Useless cat. Consider 'cmd < file | ..' or 'cmd file | ..' instead]
 #   SC2016 [Expressions don't expand in single, use double]
 #   SC2086 [Double quote to prevent globbing and word splitting]
 #
@@ -111,6 +112,7 @@
 #    https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
 function pause-for-enter () {
     local message="$1"
+    ## TODO2: add "enter or ^C" to user message
     if [ "$message" = "" ]; then message="Press enter to continue"; fi
     # Maldito shellcheck: SC2162 [read without -r will mangle backslashes].
     # shellcheck disable=SC2162
@@ -168,7 +170,9 @@ function git-alias-review-log {
 
 # git-update-plus(): updates local from global repo. This uses git-stash to hide local changes
 # does a git-pull, and then restores local changes.
-# Note: If PRESERVE_GIT_STASH is 1, then timestamps are preserved.
+# Note:
+# - If PRESERVE_GIT_STASH is 1, then timestamps are preserved.
+# - Requires GIT_FORCE of 1 if there are changed files (to avoid inadvertant conflict).
 function git-update-plus {
     local git_user="n/a"
     local git_token="n/a"
@@ -188,6 +192,15 @@ function git-update-plus {
     changed_files="$(git-diff-list)"
     local restore_dir=""
     if [ "$changed_files" != "" ]; then
+
+        # Require force to perform update when there are changed files
+        local git_force="${GIT_FORCE:-0}"
+        ## DEBUG: echo "git-update-plus: git_force=$git_force"
+        if [ "$git_force" = "0" ]; then
+            echo "Error: Use 'git-update-force' to update with changed files (n.b., potential for conflicts)"
+            return
+        fi
+            
         if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
             # Make sure root active for relative path names in zip file
             local root_dir
@@ -216,8 +229,8 @@ function git-update-plus {
     git stash >> "$log"
     echo "issuing: git pull --all"
     git pull --all >> "$log"
-    if [ $? -eq 0 ]; then
-	echo "Warning: problem with pull (status=$?)"
+    if [ $? -ne 0 ]; then
+        echo "Warning: problem with pull (status=$?)"
     fi
     echo "issuing: git stash pop"
     git stash pop >> "$log"
@@ -229,7 +242,7 @@ function git-update-plus {
             # note: unzip options: -o overwrite; -v verbose:
             echo "unzip -v -o _stash.zip" >> "$log"
             unzip -v -o _stash.zip >> "$log"
-	    
+            
             # Restore working directory
             if [ "$restore_dir" != "" ]; then
                 echo "Restoring working directory: $restore_dir"
@@ -246,6 +259,25 @@ function git-update-plus {
     # TODO: filter unzip output
     echo >> "$log"
     git-alias-review-log "$log"
+}
+
+# git-update-force(): Run git-update-plus with forced update
+# note: used to avoid overly conservative git-update-plus
+#
+function git-update-force {
+    GIT_FORCE=1 git-update-plus
+}
+
+# git-update-verified(): Run git-update-force if user agrees
+#
+function git-update-verified {
+    local changed
+    changed=$(git-diff-list)
+    if [ "$changed" != "" ]; then
+        echo "Current changes: $changed"
+        pause-for-enter "Proceed with update even though potential for conflict? (Enter for Y otherwise ^C)"
+    fi
+    git-update-force
 }
 
 function git-rename-file {    # Rename file OLD to NEW and update index
@@ -265,11 +297,12 @@ function git-move-to-dir {    # Move files to specified directory
     shift
     local file
     for file in "$@"; do
-	invoke-git-command mv "$file" "$dir"
-	# TODO2: cut down on extraneous confirmations
-	git-commit-and-push "$dir/$new_file"
-	# do same as git-revert-file-alias
-	invoke-git-command reset HEAD "$file"
+        invoke-git-command mv "$file" "$dir"
+        # TODO2: cut down on extraneous confirmations
+        git-commit-and-push "$file" "$dir/$file"
+        ## OLD:
+        ## # do same as git-revert-file-alias
+        ## invoke-git-command reset HEAD "$file"
     done
 }
 
@@ -323,9 +356,10 @@ function git-commit-and-push {
     if [ "$file_spec" = "" ]; then
         echo "Warning: *** No file specified (cuidado!)"
     elif [ "${GIT_SKIP_ADD:-0}" = "1" ]; then
-	echo "skipping: git add $*"
+        echo "skipping: git add $*"
     else
-        echo "issuing: git add \"$*\""
+        ## OLD: echo "issuing: git add \"$*\""
+        echo "issuing: git add" "$@"
         git-add-plus "$@" >> "$log"
     fi
 
@@ -358,7 +392,8 @@ EOF
 # TODO: skip commit if problem with update
 function git-update-commit-push {
     # DEBUG: set -o xtrace
-    git-update-plus
+    ## OLD: git-update-plus
+    git-update-force
     if [ $? -ne 0 ]; then
         echo "Warning: consider canceling given possible update error (status=$?)"
     fi
@@ -430,8 +465,8 @@ function git-reset-file {
     ##     pause-for-enter $'Warning: reset --hard changes the both index and working tree!\nPress enter to proceed'
     ## fi
     if [ "$*" = "" ]; then
-	echo "Error: need to specify a file"
-	return 1
+        echo "Error: need to specify a file"
+        return 1
     fi
 
     # Isolate old versions
@@ -455,7 +490,7 @@ function git-reset-file {
     local stash
     stash=$(git stash list)
     if [ "$stash" != "" ]; then
-	echo "Warning: non-empty stash:"
+        echo "Warning: non-empty stash:"
         echo "$stash" | perl -pe 's/^/    /;'
         echo "Consider issuing following: git stash drop"
     fi
@@ -552,7 +587,15 @@ function git-diff-list {
     local diff_list_script="$TMP/_git-diff-list.$$.bash"
     git-diff-list-template >| "$diff_list_script"
     source "$diff_list_script"
-    cat "$diff_list_file"
+    ## OLD: cat "$diff_list_file"
+
+    # Change path to absolute and drop current directory
+    local root
+    root=$(git-root-alias)
+    local pwd
+    pwd=$(realpath ".")
+    # shellcheck disable=SC2002
+    cat "$diff_list_file" | perl -pe "s@^@$root/@;" | perl -pe "s@^$pwd/?@@;"
 }
 
 # Output templates for doing checkin of modified files
@@ -669,12 +712,12 @@ function git-checkout-branch {
     local branch="$1"
     # TODO2: define helper function for usage
     if [[ ("$branch" = "") || ("$branch" == "--help") ]]; then
-	echo "usage: git-checkout-branch [--help | branch]"
-	echo "note: available branches:"
-	# TODO: get maldito git to cooperate better (e.g., plain text option)!
-	# shellcheck disable=SC2016
-	PAGER="" git branch --all | extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
-	return
+        echo "usage: git-checkout-branch [--help | branch]"
+        echo "note: available branches:"
+        # TODO: get maldito git to cooperate better (e.g., plain text option)!
+        # shellcheck disable=SC2016
+        PAGER="" git branch --all | extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
+        return
     fi
     local branch_ref
     branch_ref=$(git branch --all | grep -c "$branch")
@@ -689,8 +732,14 @@ simple-alias-fn git-branch-checkout  git-checkout-branch
 
 # git-branch-alias(): return current branch for repo
 function git-branch-alias {
-    local git_branch="$(git status | extract_matches.perl "On branch (\S+)")"
+    local git_branch
+    git_branch="$(git status | extract_matches.perl "On branch (\S+)")"
     echo "$git_branch"
+}
+
+# git-conflicts-alias(): show conflicts in the local git repo
+function git-conflicts-alias {
+    git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {};
 }
 
 #-------------------------------------------------------------------------------
@@ -731,12 +780,13 @@ function git-alias-usage () {
     echo '    git-next-checkin "'${next_mod_file}'"'
     echo ''
     echo 'Usual check-in process:'
-    echo '    git-cd-root-alias; git-update-plus; git-next-checkin'
-    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-plus; git-next-checkin'
+    echo '    git-cd-root-alias; git-update-verified; git-next-checkin'
+    # TODO2: rework git-update-force via dry-run git-update with conflict check
+    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-force; git-conflicts-alias; git-next-checkin'
     ## OLD:
     ## echo '    # alt: grep "^<<<<< " $(git-diff-list) /dev/null'
     ## # TODO: xargs -I{} 'grep "^<<<<< {} | head -5' $(git-list-text-files)
-    echo "    # alt: (git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {})"
+    ## OLD: echo "    # alt: (git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {})"
     echo '    git-next-checkin                      # repeat, as needed'
 
     ## TODO: echo '* invoke git-cd-root-alias automatically!'
@@ -778,7 +828,8 @@ function git-misc-alias-usage() {
     echo ""
     echo "To delete files (mucho cuidado):"
     echo "   git rm old-file"
-    echo "   GIT_MESSAGE='deleted' GIT_SKIP_ADD=1 git-update-commit-push old-file"
+    ## OLD: echo "   GIT_MESSAGE='deleted' GIT_SKIP_ADD=1 git-update-commit-push old-file"
+    echo "   GIT_MESSAGE='deleted' git-update-commit-push old-file"
     echo ""
     echo "To check in all tracked with changed:"
     echo "    git-checkin-multiple-template >| \$TMP/_template.sh; source \$TMP/_template.sh"

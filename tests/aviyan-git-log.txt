@@ -26660,3 +26660,352 @@ M	tests/trace-extensionless-shortcut.ipynb
 A	tests/trace-python-commands.batspp
 M	tests/trace-python-commands.ipynb
 
+--------------------------------------------------------------------------------
+Sat 23 Sep 23
+
+commit 3c5fdccd19ee22451e28b77011785711d5fe98e8
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Thu Sep 21 21:46:03 2023 +0545
+    Added terminologies: ZNZP
+M	tests/README.txt
+
+commit d8db3bda4e509e9c2d81fb4a2e915a5c4757ad91
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Thu Sep 21 21:45:08 2023 +0545
+    Cell 1: Clears temp testing dir; Cell 8, 9, 11, 18: Added ZNZP-v2 pipeline; Cell 20: New text content used for ansi-filter testing; Cell 12-15: ps-sort-time and ps-sort-mem tested using conditional statements; Cell 16-17: Added grep-echo pipeline '%CPU'(16), 'tail -n'(17); Cell 18: Added ZNZP-v2 for wc -l
+M	tests/trace-unix-general.ipynb
+
+commit 679bbb28b9c06e06ed58e92f4eec5a350264bd8c
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Thu Sep 21 21:24:14 2023 +0545
+    Cell 1: Clears the temporary dir for download; Cell 2: Added command cd , Renamed variables: TOM_BIN->TEMP_TOM_BIN and T0M_ALIAS_FILE->TEMP_TOM_ALIAS_FILE; Cell 3, 5, 11: Added ZNZP-v2 pipelines; Cell 4: Added stderr redirect to /dev/null
+M	tests/download-and-test-tomohara-aliases.ipynb
+
+commit 52a71d45059546e42ba3c666d9d34465adb6a2a7
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Thu Sep 21 19:45:00 2023 +0545
+    Renamed to NOBATSPP (byproduct of batspp_to_jupyter.py (INDEV, EXPERIMENTAL))
+D	tests/perl-script.ipynb
+
+commit 228fba9a2b83a717cdecff414b690e00337c5079
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Thu Sep 21 19:44:29 2023 +0545
+    Cell 8, 14, 15, 20: Added 2>&1 to capture stderr and stdout; Cell 15: Added command for verbose option; Cell 16, 17: Added grep-echo filter for verbose output
+M	tests/test-check-errors.ipynb
+
+commit 1768864d82d60ac369fb396034cacb96bf023109
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Thu Sep 21 19:43:43 2023 +0545
+    Cell 3: Added Global Setup aliases (testnum); Cell 5, 6: Added ZNZP-v2 pipeline;
+M	tests/test-dir-alias.ipynb
+
+commit 6e061b5249c1436ee5ff4d8f0b7f42471d71d6d9
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Thu Sep 21 19:43:09 2023 +0545
+    Cell 2: Added testnum (non-crit); Cell 13: Output stored @ dir_perl_filter.out; Cell 14: Extracted line 3 from output file; Cell 9: Output stored @ url_path.out; Cell 10: Added grep-echo filter for cat url_path.out
+M	tests/more-tomohara-aliases-test.ipynb
+
+commit 52586e58f4f32585afd3a098bbe8cac4f02d15cb
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Thu Sep 21 19:41:46 2023 +0545
+    Renamed to NOBATSPP (byproduct of batspp_to_jupyter.py (INDEV, EXPERIMENTAL))
+A	tests/perl-script-NOBATSPP.ipynb
+
+commit 82888211dbef66914376cd6f0fd1cad7c3b462ce
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Tue Sep 19 22:12:01 2023 +0545
+    Cell 4: Shifted Global Setup from Cell 7, Added testnum (non-crit); Cell 9: Seperated commands to single cell; Cell 15, 18, 20, 25, 26: Commented ls -l and replaced with ls
+M	tests/testbook-test-dir-aliases.ipynb
+
+commit bc842ec30a0a423efe3f4ef3c5827663a2b179b3
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Tue Sep 19 22:11:29 2023 +0545
+    Cell 6: Added wc -l bool-like pipeline; Cell 3: Removed /dev/null from the command
+M	tests/test-tomohara-aliases-access.ipynb
+
+commit b79584290709e1a2340d28eac583f17804edbe9d
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Tue Sep 19 22:11:00 2023 +0545
+    Cell 18: Added command for --warning, output stored in check_errors.output; Cell 19: Added grep-echo pipeline test_python_error; Cell 20: Added rm -rf to clear temp_dir
+M	tests/test-check-errors.ipynb
+
+commit 33bac5544a160a90c6255ed9262cf4fd4a748883
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Tue Sep 19 22:10:09 2023 +0545
+    Cell 6: Added template.html; Cell 7: Changed path for ls; Cell 10: Seperated tests for multiple cells
+M	tests/more-tomohara-aliases-test.ipynb
+
+commit 58883ea40c94467a92ef8430d09647a0260d3ab7
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Mon Sep 18 21:29:09 2023 +0545
+    EXPERIMENTAL: Added option for GITHUB_TOKEN (-s GITHUB_TOKEN=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)
+M	local-workflows.sh
+
+commit d5a48ef91c02a75a70a210b80f6245fbb654280f
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Mon Sep 18 21:26:05 2023 +0545
+    Cell 6: Relocated Global Setup and added testnum (non-crit); Cell 7, 8, 12-15: Added testnum pipeline; Cell 16: Added bool-like wc -l pipeline ($(wc -l < /dev/stdin) -ne 0)
+M	tests/trace-line-words-commands.ipynb
+
+commit 42d6f7466b3d8a0bf81f4cbb6aef58a1c5256bde
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Mon Sep 18 21:23:02 2023 +0545
+    Cell 10,11: Seperated free command from cell 10; Cell 14: Used vanilla ls; Cell MULTIPLE: Added grep-echo pipeline ("Swap", 15), ("man perl", 16), ("TIME", 25), ("%CPU", 26), ("shared", 28), ("libexec", 31); Cell 32-34: Added bool-like wc -l pipeline ($(wc -l < /dev/stdin) -ne 5)
+M	tests/trace-file-manipulation.ipynb
+
+commit eaca5bf9d9f54240a42ccf91cce97010c9e03ba7
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Mon Sep 18 21:19:13 2023 +0545
+    Cell 6: Added testnum (non-critical); Cell MULTIPLE: Added grep-echo pipeline ruby(8, 14), tomasohara@gmail.com(10)
+M	tests/test-check-errors.ipynb
+
+commit 8aa02a2690bb1055f6968d9b89c394c86cae7391
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Sep 13 09:27:34 2023 +0545
+    Cell 12, 13: Added two cases for grep-echo working (TrueCase, FalseCase); Cell 10, 11, 18, 19: Seperated commands to increase test score
+M	tests/trace-setup-sorting-wrappers.ipynb
+
+commit d6532c53359ce70d579e6a4e890464ba12417fcb
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Sep 13 09:27:04 2023 +0545
+    Cell 6: Added testnum (non-critical); Cell MULTIPLE: Added grep-echo pipeline ruby(8, 14), tomasohara@gmail.com(10)
+M	tests/test-check-errors.ipynb
+
+commit 2d9289e7523023ab249ce7b45ccc87d34d2ad1ae
+Merge: 8317e2d5 4e0cf9e1
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Sep 13 07:49:59 2023 +0545
+    Merged changes from main (2023Sep13)
+
+commit 8317e2d526065454628b2e1935960c13046b2aca
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Mon Sep 11 23:09:15 2023 +0545
+    # Cell 6: Commented linebr; Cell 7: Added testnum (non-crit); Cell 16, 17: Shifted ls to new cell; Cell 13: Broken output into 3 more cells; Cell 32: Commented code as useless; Cell 24: Added wc -l and testnum pipelines; Cell 41: Added grep-echo pipeline to detect 'Lynx' keyword; Cell 37-39: Added pipeline to grep the result of cat
+M	tests/trace-extensionless-shortcut-V2.ipynb
+
+commit b25879dc77088d46068d9b052eba4e300d234498
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Mon Sep 11 23:08:53 2023 +0545
+    # Cell 4: Added testnum (non-critical)
+M	tests/trace-file-manipulation.ipynb
+
+commit 01a467abef4baba38d2fbf9759a0c21d3d32cb81
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Tue Sep 5 21:40:32 2023 +0545
+    Cell 5: Added testnum (non-crit); Cell 6, 7: Added testnum pipeline; Cell 17: Added grep-echo pipeline; Cell 39,41: Added zero-true-false pipeline
+M	tests/trace-unix-alias.ipynb
+
+commit f784df55b43d95e0313703d156efee56fd1bfe3a
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Tue Sep 5 21:40:09 2023 +0545
+    Cell 2: Added testnum (non-crit, comment);  Cell 11: Added zero-or-not checking pipeline (example); Cell 12: Added grep-echo pipeline (example)
+M	tests/hello-world-revised.ipynb
+
+commit 3e40f77bd52c482b55d1a7e4345e6b1f2c0b08bb
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Mon Sep 4 18:20:06 2023 +0545
+    Cell 4: Added testnum (non-critical); Cell 7, 8, 12: Added testnum pipeline; Cell 14: Added grep-echo pipeline (return (char present) ? True : False)
+M	tests/test-cond-env-setting.ipynb
+
+commit ca758c5c6c6447637f76158bfc4fb7b6ac96373c
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Mon Sep 4 18:19:35 2023 +0545
+    Cell 3: Moved Global Setup before alias and function count; GENERAL: Added grep-echo pipeline (return (char present) ? True : False)
+M	tests/trace-setup-sorting-wrappers.ipynb
+
+commit 80e0a51c15b7ad8d4a8fd0eae2406bc2809e73ea
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Mon Sep 4 18:19:13 2023 +0545
+    Cell 5: Added testnum (non-critical); Cell 8, 9: Added testnum pipeline; Cell 17: Seperated get-process-parent command to next cell; Cell 12-17: Replaced 'head' with 'tail'
+M	tests/trace-unix-general.ipynb
+
+commit 7644123dc264abb9418f78108e58ede09fbd9486
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Sep 1 23:22:04 2023 +0545
+    Cell 7: Commented linebr alias; Cell 8, 9: Seperated the counting on aliases and functions
+M	tests/trace-unix-general.ipynb
+
+commit 2a28886c0386b70fe9630799ac31f6ec53addc74
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Sep 1 23:21:02 2023 +0545
+    Fixed the url-path (updated cut from 20 to 50
+M	tests/trace-python-commands.ipynb
+
+commit 7776855578551130a18c6ca0f02a7f7da409eacc
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Sep 1 23:19:31 2023 +0545
+    Cell 2: Last command moved to a new last cell
+M	tests/alt-simple-alias-test.ipynb
+
+commit af13097f49423d2c7c6167149647573a2614702c
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Sep 1 23:17:15 2023 +0545
+    Cell 4: Updated the linebr alias
+M	tests/tomasohara-aliases-test.ipynb
+
+commit fb0e34e46b57b334f29847274e55aaad0cdbdf4d
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Sep 1 23:07:02 2023 +0545
+    Cell 3: Contents shifted from Cell 2 and added testnum pipeline; Cell 8: Added head pipeline for minimal output; Cell 51: Added revised path from tomohara-aliases-test
+M	tests/trace-python-commands.ipynb
+
+commit 6d3cd7bd14261c3dc562f32e20ccbc3e1bd9bb85
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Sep 1 22:57:31 2023 +0545
+    Cell 17, 21: Added head pipeline for simple output; Cell 10: Need Help for asc-it; Cell 7, 8: Added testnum pipelines; Cell 11: Added adhoc fix for asc-it (not-working)
+M	tests/trace-file-manipulation.ipynb
+
+commit f77726448221cbc9ea29e9e4311abbe82ad0f3f5
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Sep 1 22:56:09 2023 +0545
+    Cell 6, 7: Added testnum pipeline
+M	tests/trace-extensionless-shortcut-unicode.ipynb
+
+commit d2b19a62f112950a25f80b9853c53497f0394792
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Sep 1 22:54:58 2023 +0545
+    Cell 7: Added shift to /dev/null for rm
+M	tests/test-tomohara-aliases-access.ipynb
+
+commit 809f2bec81277c37d2aceb3ede6d4dc9b2459fda
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Sep 1 22:51:54 2023 +0545
+    Cell 9: Commented the cell and dividing commands for each cell
+M	tests/test-dir-alias.ipynb
+
+commit 0c03c0a4534fa9a203b7bf6d4e5d5f4b84be5a8f
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Sep 1 22:51:15 2023 +0545
+    # set -o xtrace halts test; test score increases to 40
+M	tests/download-and-test-tomohara-aliases.ipynb
+
+commit 752b13910282271c75744930197b182a42f5ad96
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Sep 1 22:47:58 2023 +0545
+    Added Global Setup; Cell 7, 8: Added testnum pipeline
+M	tests/alias-html-test.ipynb
+
+commit b7fd4c8b62358af68472e84760b52828c6386edf
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Sep 1 22:47:21 2023 +0545
+    Added /dev/null to remove messy output from cd based commands; Cell 13: Seperated (no multiple output in a cell); Added testnum and testuser global alias
+M	tests/alias-cd-commands.ipynb
+
+commit 45169cbcf55f585fab658b9f4c5c1ce49fe1bb15
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Aug 30 23:29:11 2023 +0545
+    Cell 6: Updated linebr (no longer uses COLUMNS env-variable); Cell 10-14 & 16: Added head pipelines for short filtered output
+M	tests/trace-setup-sorting-wrappers.ipynb
+
+commit 401f0dc12008b1b30f1373bc381a3d7cc6c2cde6
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Aug 30 23:28:05 2023 +0545
+    Cell 17, 21: Added head pipeline for simple output; Cell 10: Need Help for asc-it
+M	tests/trace-file-manipulation.ipynb
+
+commit c71bf14fd4e50fa9812f31334b5a0d20e240942d
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Aug 30 23:27:30 2023 +0545
+    Cell 8: Added head pipeline for minimal output
+M	tests/hello-world-source.ipynb
+
+commit 584689033f13ae9e551f78e56f47dd69fdd74f7e
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Aug 30 23:25:45 2023 +0545
+    Seperated tests such that no multiple output per cell
+M	tests/command-override-cp-mv.ipynb
+
+commit 66258715363cb78a6448cdb91f33c1308ea6aab0
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Aug 30 23:24:37 2023 +0545
+    Added /dev/null to remove messy output from cd based commands; Cell 13: Seperated cell commands (no multiple output in a cell)
+M	tests/alias-cd-commands.ipynb
+
+commit f41d69eb7cc9de30c4825b41afe5e6736c763f3a
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Aug 30 23:22:25 2023 +0545
+    Seperated tests such that no multiple output per cell
+M	tests/alias-grep-commands.ipynb
+
+commit 26cc5c655520d51f1ef29d651c18708f1656540e
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Aug 27 20:15:27 2023 +0545
+    (EXPERIMENTAL - P4) Working with testfiles for improved test scores
+M	tests/test-cond-env-setting.ipynb
+M	tests/test-dir-alias.ipynb
+M	tests/trace-python-commands.ipynb
+M	tests/trace-unix-general.ipynb
+
+commit 6c912e56f7805a63d39ce96f08c585da0f6c389f
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Aug 27 20:11:53 2023 +0545
+    Cell 37: Command uses grep and head for uniform output
+M	tests/trace-extensionless-shortcut-V2.ipynb
+
+commit dc5493b061626f28f3a138d792a7e548bcc81314
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Aug 27 20:10:54 2023 +0545
+    ell 7: Command modified to display uniform path (i.e. PATH_TO_SHELL_SCRIPTS/tests/docshtest.rst)
+M	tests/test-cond-env-setting.ipynb
+M	tests/tomasohara-aliases-test.ipynb
+
+commit 211707726ad7be3e6532d5642d8626e28ca05c96
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Aug 27 19:55:12 2023 +0545
+    Cell 14: Added head pipeline to reduce output
+M	tests/test-check-errors.ipynb
+
+commit 3a179d435b84b8c0c1c9bd91d2428aa84d339398
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Aug 27 00:48:38 2023 +0545
+    (Experimental - P3) Working on testscore improvements (batspp_report.py)
+M	tests/dir-aliases-test-revised.ipynb
+M	tests/json-related-alias.ipynb
+M	tests/more-tomohara-aliases-test.ipynb
+M	tests/perl-script.ipynb
+M	tests/trace-extensionless-shortcut-unicode.ipynb
+M	tests/trace-python-commands.ipynb
+M	tests/trace-unix-alias.ipynb
+
+commit e19bf1dad15712d58f90ed6c05cd3b41df9f3bd7
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Aug 27 00:46:35 2023 +0545
+    Added --force option to the batspp_report.py command
+M	tests/summary_stats.bash
+
+commit b36db24a1140f24940c449a18a911ce9d85b46b6
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Aug 27 00:46:04 2023 +0545
+    Cell 3: Contents shifted from Cell 2 and added testnum pipeline
+M	tests/hello-world-source.ipynb
+
+commit 590cd479ee184edb09afb6c7cc9db8210ac64249
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Aug 27 00:45:17 2023 +0545
+    Cell 43: Commented the command (uses kdiff)
+M	tests/alias-trace-misc-commands.ipynb
+
+commit 9c8bd511166177232ed057800de502523f00874b
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Aug 27 00:43:40 2023 +0545
+    Cell 18: Added Global Setup tag
+M	tests/testbook-test-dir-aliases.ipynb
+
+commit 33035c5b3984f7588e5ffc02bb91ede9e399e53a
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Aug 27 00:37:38 2023 +0545
+    Cell 18: Replaced rm -rf ./* with rm -rf
+M	tests/trace-line-words-commands.ipynb
+
+commit 635e3568e4703a6c41b4eab2c719aa105225605b
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Aug 27 00:36:07 2023 +0545
+    Cell 8: Replaced old command with a pattern matching command
+M	tests/hello-world-revised.ipynb
+
+commit fed6f6c75e53bb23195bc30679f64b9927d92162
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Aug 27 00:34:48 2023 +0545
+    Added Global Setup for testnum and testuser alias
+M	tests/alias-html-test.ipynb
+

@@ -51,14 +51,14 @@ verbose=0
 while [ "$moreoptions" = "1" ]; do
     # TODO : add real options
     if [ "$1" = "--trace" ]; then
-	trace=1
+        trace=1
     elif [ "$1" = "--verbose" ]; then
-	verbose=1
+        verbose=1
     elif [[ ("$1" = "--") || ("$1" = "-") ]]; then
-	break
+        break
     else
-	echo "ERROR: Unknown option: $1";
-	exit
+        echo "ERROR: Unknown option: $1";
+        exit
     fi
     shift;
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
@@ -69,8 +69,9 @@ done
 shopt -s expand_aliases
 ## maldito shellcheck: [SC1090: Can't follow non-constant source]
 {
+    source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
     # shellcheck disable=SC1090
-    source ~/bin/all-tomohara-aliases-etc.bash
+    source "$source_dir"/all-tomohara-aliases-etc.bash
 }
 #
 # Set tracing (delayed so alias definitions not traced)

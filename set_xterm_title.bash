@@ -61,7 +61,7 @@
 #
 # 7-bit  8-bit  Hex   Description  
 #
-# ESC[ 	 CSI    0x9b  Control Sequence Introducer 
+# ESC[   CSI    0x9b  Control Sequence Introducer 
 #
 # note: ESC appears as contol-[ under Emacs (i.e., '')
 #
@@ -131,14 +131,14 @@ while [ "$moreoptions" = "1" ]; do
         save_title=1
     elif [ "$1" = "--print-full" ]; then
         print_full=1
-	restore_title=1
-	save_title=0
+        restore_title=1
+        save_title=0
     elif [ "$1" = "--print-icon" ]; then
         print_icon=1
-	restore_title=1
-	save_title=0
+        restore_title=1
+        save_title=0
     else
-	echo "ERROR: Unknown option: $1";
+        echo "ERROR: Unknown option: $1";
     fi
     shift;
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
@@ -204,12 +204,12 @@ fi
 # note: n/a used for DEFAULT_HOST to force this (see tohara-aliases.bash).
 if [  "$DEFAULT_HOST" != "" ]; then
     if [ "$HOST" != "$DEFAULT_HOST" ]; then
-    	# Add a nickname for the host from environment (e.g., set in ~/.bash_profile).
-    	if [ "$HOST_NICKNAME" != "" ]; then HOST="$HOST ($HOST_NICKNAME)"; fi
+        # Add a nickname for the host from environment (e.g., set in ~/.bash_profile).
+        if [ "$HOST_NICKNAME" != "" ]; then HOST="$HOST ($HOST_NICKNAME)"; fi
 
-	# Make the settings for the xerm title
-	full="$HOST: $full"
-	icon="$HOST: $icon"
+        # Make the settings for the xerm title
+        full="$HOST: $full"
+        icon="$HOST: $icon"
     fi
 fi
 
@@ -268,12 +268,12 @@ declare PS_symbol
 if [ "$PS_symbol" != "" ]; then
     ## BAD: if [[ ! ($PS_symbol =~ [$﹩＄💲]) ]]; then
     if [[ ($PS_symbol =~ ^.*[﹩＄💲].*$) ]]; then
-	## DEBUG:
-	echo "Omitting special dollar-sign PS_symbol ($PS_symbol) from title"
-	true
+        ## DEBUG:
+        echo "Omitting special dollar-sign PS_symbol ($PS_symbol) from title"
+        true
     else
-	full="$PS_symbol $full"
-	icon="$PS_symbol $icon"
+        full="$PS_symbol $full"
+        icon="$PS_symbol $icon"
     fi
 fi
 #

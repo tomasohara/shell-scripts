@@ -144,10 +144,10 @@ function conda-activate-env-like {
     local bin_dir
     bin_dir=$(which python | perl -pe "s@^((.*)/[^/]+/bin/python$)@\2/$env_name/bin@;")
     if [ ! -e "$bin_dir" ]; then
-	echo "Error: unable to resolve anaconda bin dir from current path"
+        echo "Error: unable to resolve anaconda bin dir from current path"
     else
-	echo "Warning: only prepending PATH w/ $bin_dir (e.g., no CONDA_ env updates)"
-	export PATH="$bin_dir:$PATH";
+        echo "Warning: only prepending PATH w/ $bin_dir (e.g., no CONDA_ env updates)"
+        export PATH="$bin_dir:$PATH";
     fi
     add-conda-env-to-xterm-title
 }

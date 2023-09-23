@@ -40,7 +40,6 @@ function convert-emoticons-aux {
 #...............................................................................
 
 # Python stuff
-## OLD: alias plint=python-lint
 simple-alias-fn plint 'PAGER=cat python-lint'
 alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
 #
@@ -48,16 +47,14 @@ alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
 function clone-repo () {
     local url repo log
     url="$1"
-    ## OLD: repo=$(basename "$url")
     repo=$(basename "$url" .git)
     log="_clone-$repo-$(T).log"
-    ## OLD: command script "$log" git clone "$url"
     # maldito linux: -c option required for command for
     # shellcheck disable=SC2086
     if [ "$(under-linux)" = "1" ]; then
-	command script "$log"  -c "git clone '$url'"
+        command script "$log"  -c "git clone '$url'"
     else
-	command script "$log"  git clone "$url"
+        command script "$log"  git clone "$url"
     fi
     #
     ls -R "$repo" >> "$log"
@@ -69,17 +66,18 @@ simple-alias-fn black-plain 'convert-emoticons-aux black'
 
 # run-python-script(script, args): run SCRIPT with ARGS with output to _base-#.out
 # and stderr to _base-#.log where # is value of global $_PSL_.
+# The arguments are passed along unless USE_STDIN is 1.
 # note: Checks for errors afterwards. Use non-locals _PSL_, out_base and log.
 function run-python-script {
     ## DEBUG: trace-vars _PSL_ out_base log
     if [ "$1" = "" ]; then
-        echo "Usage: run-python-script script arg ..."
+        echo "Usage: [USE_STDIN=B] run-python-script script arg ..."
         return
     fi
     # Check args
     local script_path="$1";
     shift;
-    local script_args="$*";
+    local script_args=("$@");
     local script_base
     script_base=$(basename-with-dir "$script_path" .py);
     #
@@ -87,27 +85,40 @@ function run-python-script {
     let _PSL_++;
     ## TODO2: fix _PSL_ value retention
     ## _PSL_=666;
-    ## OLD: local out_base
     out_base="$script_base.$(TODAY).$_PSL_";
-    ## OLD: local log="$out_base.log";
     log="$out_base.log";
+    out="$out_base.out";
     ## DEBUG: trace-vars _PSL_ out_base log
     ## TEMP: workaround _PSL_ update
     rename-with-file-date "$out_base.out" "$log";
     ## TODO: '>|' => '>' [maldito bash]
     # shellcheck disable=SC2086
     local python_arg="-"
-    if [ "$script_args" = "" ]; then python_arg=""; fi
+    if [ "${script_args[*]}" = "" ]; then python_arg=""; fi
     # shellcheck disable=SC2086
-    echo "$script_args" | $PYTHON "$script_path" $python_arg >| "$out_base.out" 2>| "$log";
+    {
+	if [ "${USE_STDIN:-0}" = "1" ]; then
+	    echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg >| "$out" 2>| "$log";
+	else
+	    $PYTHON "$script_path" "${script_args[@]}" $python_arg >| "$out" 2>| "$log";
+	fi
+    }
+    tail "$log" "$out"
     check-errors-excerpt "$log";
-    tail "$log" "$out_base.out"
 }
 
 # test-python-script(test-script): run TEST-SCRIPT via  pytest
 function test-python-script {
-     PYTHONUNBUFFERED=1 PYTHON="pytest -vv --capture=tee-sys" run-python-script "$@";
+    PYTEST_OPTS="${PYTEST_OPTS:-"-vv --capture=tee-sys"}"
+    PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@";
 }
+
+# color-test-failures(): show color-coded test result (yellow for xfailed and red for regular fail)
+function color-test-failures { cat "$@" | colout "\bfailed" red | colout "xfailed" yellow | colout "\bpassed" green | colout "xpassed" Palegreen; };
+
+# ocr-image(image-filename): run image through optical character recognition (OCD)
+## BAD: simple-alias-fn ocr-image 'tesseract "$@" -'
+alias-fn ocr-image 'tesseract "$@" -'
 
 #...............................................................................
 
@@ -118,7 +129,6 @@ function json-validate () {
 }
 
 # Misc. stuff
-## OLD: alias script-config='script ~/config/_config-$(T).log'
 function script-config {
     mkdir -p ~/config
     script ~/config/"_config-$(T).log"
@@ -168,13 +178,13 @@ function tabify {
 function trace-vars {
     local var value
     for var in "$@"; do
-	## TODO3: get old eval/echo approach to work in general
-	## # shellcheck disable=SC2027,SC2046
-	## echo -n "$var="$(eval echo "\$$var")"; "
-	## TODO: value="$(eval "echo \$$var")"
-	## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
-	value="$(set | grep "^$var=")"
-	echo -n "$value; "
+        ## TODO3: get old eval/echo approach to work in general
+        ## # shellcheck disable=SC2027,SC2046
+        ## echo -n "$var="$(eval echo "\$$var")"; "
+        ## TODO: value="$(eval "echo \$$var")"
+        ## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
+        value="$(set | grep "^$var=")"
+        echo -n "$value; "
     done
     echo
     ##
@@ -188,9 +198,9 @@ function trace-vars {
 function trace-array-vars {
     local var
     for var in "$@"; do
-	# note: ignores SC1087 (error): Use braces when expanding arrays
-	# shellcheck disable=SC2027,SC2046,SC1087
-	echo -n "$var="$(eval echo "\${$var[@]}")"; "
+        # note: ignores SC1087 (error): Use braces when expanding arrays
+        # shellcheck disable=SC2027,SC2046,SC1087
+        echo -n "$var="$(eval echo "\${$var[@]}")"; "
     done
     echo
 }
@@ -226,14 +236,14 @@ function rename-last-snapshot {
     local new_name="$1"
     # Append dated image suffix unless date-like suffix w/ extension used
     if [[ ! "$new_name" =~ [0-9][0-9]*.png ]]; then
-	# TODO: derive timestamp via rename-with-file-date (in case last snapshit taken earlier)
-	new_name="$new_name-$(T).png"
+        # TODO: derive timestamp via rename-with-file-date (in case last snapshit taken earlier)
+        new_name="$new_name-$(T).png"
     fi
     local last_file
     # TODO: have options to use latest file (regardless of name) 
     # shellcheck disable=SC2010
     last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
-    move "$last_file" "$new_name"		
+    move "$last_file" "$new_name"               
 }
 
 #................................................................................
@@ -249,10 +259,10 @@ alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
 function get-host-nickname {
     local nickname="$HOST_NICKNAME"
     if [ "$nickname" = "" ]; then
-	nickname="$(grep -v '^#' ~/.host-nickname 2> /dev/null)"
+        nickname="$(grep -v '^#' ~/.host-nickname 2> /dev/null)"
     fi
     if [ "$nickname" = "" ]; then
-	nickname="tpo-host"
+        nickname="tpo-host"
     fi
     echo "$nickname"
 }
@@ -266,11 +276,11 @@ function create-zip {
     local dir="$1"
     shift
     if [ "$dir" = "" ]; then
-	echo "Usage create-zip [dirname]"
-	echo "ex: create-zip /mnt/resmed"
-	## echo "Usage: $BASH_SOURCE[0] [dirname]"
-	## echo "ex: $BASH_SOURCE[0] /mnt/resmed"
-	return
+        echo "Usage create-zip [dirname]"
+        echo "ex: create-zip /mnt/resmed"
+        ## echo "Usage: $BASH_SOURCE[0] [dirname]"
+        ## echo "ex: $BASH_SOURCE[0] /mnt/resmed"
+        return
     fi
     local archive
     archive="$TEMP/$(basename "$dir").zip"
@@ -278,15 +288,16 @@ function create-zip {
     zip -r -u "$archive" "$dir";
 }
 #
-# create-zip-dir(dir): create zip of dir in context of parent
+# create-zip-dir(dir=pwd): create zip of DIR in context of parent
 function create-zip-from-parent {
-    local path="$1"
+    local path="${1:-$PWD}"
     local dir
     dir="$(basename "$path")"
     pushd "$(realpath "$path/..")";
     create-zip "$dir"
     popd
 }
+alias zip-from-parent=create-zip-from-parent
 
 #................................................................................
 # Linux stuff
@@ -330,13 +341,18 @@ function reset-under-emacs {
 }
 
 #................................................................................
+# Media stuff
+
+alias make-screencase-video=kazam
+
+#................................................................................
 # Idiosyncratic stuff (n.b., doubly so given "tomohara-proper" part of filename)
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
 #
-## OLD: alias all-tomohara-settings='tomohara-aliases; tomohara-settings; more-tomohara-aliases; tomohara-proper-aliases'
 alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
 alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
 #
 alias kill-kdiff3='kill-it kdiff3'
 alias kill-firefox='kill-it firefox'
 alias kill-jupyter='kill-it jupyter'
+alias kill-chromiun='kill-it chromium'

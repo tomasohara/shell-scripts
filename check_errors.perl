@@ -100,15 +100,15 @@ while (<>) {
     # ex: 'error' occuring within a line even at word boundaries can be too broad.
     elsif (## DEBUG: &debug_print(&TL_MOST_DETAILED, "here\n", 7) &&
 	   ## OLD: /^(ERROR|Error)\b/	   
-	   /^(Error)\b/i
+	   /^\s*(Error)\b/i
 	   ## OLD: || /command not found/i
 	   ## NOTE: maldito modules package polutes environment and man page not clear about disabling
 	   || (/command not found/i && (! /Cannot switch to Modules/))
 	   || /No space/
 	   || /Segmentation fault/
-	   || /Assertion failed/
-	   || /Assertion .* failed/
-	   || /Floating exception/
+	   || /Assertion failed/i
+	   || /Assertion .* failed/i
+	   || /Floating exception/i
 
 	   # Unix shell errors (e.g., bash or csh)
 	   || /Can\'t execute/
@@ -130,7 +130,7 @@ while (<>) {
 	   || /unexpected EOF/
 	   || /unexpected end of file/
 	   ## OLD: || /command not found/
-	   || /^sh: /
+	   || /^\s*sh: /
            || /\[Errno \d+\]/
 	   || /Operation not permitted/
 	   || /Command exited with non-zero status/
@@ -139,7 +139,7 @@ while (<>) {
 	   # Perl interpretation errors
 	   # TODO: Add more examples like not-a-number, which might not be apparent.
 	   # ex: Argument "not-a-number" isn't numeric in addition (+) at /home/tomohara/bin/cooccurrence.perl line 67, <> line 1.
-	   || /^\S+: Undefined variable/
+	   || /^\s*\S+: Undefined variable/
 	   || /Invalid conversion in printf/
 	   || /Execution .* aborted/
 	   || /used only once: possible typo/
@@ -159,10 +159,10 @@ while (<>) {
 	   || /:( fatal)? error /
 
 	   # Git errors (WTH: can't modern tools say 'error'???)
-	   || /^fatal:/
+	   || /^\s*fatal:/
 	   
 	   # Java errors
-	   || /^Exception\b/
+	   || /^\s*Exception\b/
 
 	   # Ruby errors
 	   || /: undefined\b/
@@ -170,10 +170,10 @@ while (<>) {
 	   || /Exception.*at.*\.rb/
 
 	   # Python errors
-	   || /^Traceback/		# stack trace
-	   || /^\S+Error/		# exception (e.g., TypeError)
+	   || /^\s*Traceback/		# stack trace
+	   || /^\s*\S+Error/		# exception (e.g., TypeError)
 	   || /:\s*error\s*:/i          # argparse error (e.g., main.py: error: unrecognized arguments
-	   || /^FAILED\b/i              # pytest failure
+	   || /^\s*FAILED\b/i              # pytest failure
 
 	   # Cygwin errors
 	   || /\bunable to remap\b/
@@ -201,7 +201,7 @@ while (<>) {
 	    || /: No match/		# shell warning?
 	    || /\\ No newline at end/   # diff warning
 	    || /: warning\b/		# Ruby warnings
-	    || /^bash: /                # ex: "bash: [: : unary operator expected"
+	    || /^\s*bash: /             # ex: "bash: [: : unary operator expected"
 	    || /Traceback|\S+Error/     # Python exceptions (caught)
 	    || /\b\S+Warning/           # Python warning (e.g., RuntimeWarning)
 	    || (/exception|failed/      # logger messages (e.g., "Training job failed")

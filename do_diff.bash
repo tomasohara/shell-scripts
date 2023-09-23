@@ -81,7 +81,8 @@ if [ -z "$2" ]; then
     echo ""
     echo "Usage: $script [option] {--all | pattern} master_dir"
     echo ""
-    echo "   options: [-b | --ignore-spacing] [--check-space-changes] [-l] [--brief] [--quiet] [--verbose] [--nopattern] [--diff-options option-text] [--match-dot-files] [--ignore-all-space] [--no-glob] [-trace]"
+    echo "   options: [--check-space-changes | --ignore-spacing] [--brief] [--quiet] [--verbose] [--diff cmd] [--diff-options text] [--match-dot-files]"
+    echo "   other options: [--ignore-all-space] [--nopattern] [--no-glob] [--kdiff] [--trace]"
     echo ""
     echo "Examples:"
     echo ""
@@ -117,7 +118,7 @@ fi
 while [[ "$1" =~ ^- ]]; do
     if [ "$1" == "--all" ]; then
         pattern="*"
-    elif [ "$1" == "-b" ] || [ "$1" == "-wb" ] || [ "$1" == "--ignore-spacing" ]; then
+    elif [ "$1" == "--ignore-spacing" ]; then
         # Ignore all spacing-related differences (i.e., -wbB)
         space_options="--ignore-space-change --ignore-all-space --ignore-blank-lines"
     elif [ "$1" == "--check-space-changes" ]; then
@@ -143,6 +144,12 @@ while [[ "$1" =~ ^- ]]; do
         match_dot_files="1"
     elif [ "$1" == "--ignore-all-space" ]; then
         diff_options="$diff_options --ignore-all-space"
+    elif [[ ("$1" == "--kdiff") || ("$1" == "--vdiff") ]]; then
+        # HACK: backdoor option for using kdiff
+        diff_cmd="kdiff.sh"
+        diff_options=""
+        space_options=""
+        brief="1"
     elif [ "$1" == "--trace" ]; then
         set -x
     else
@@ -222,24 +229,24 @@ for file in $pattern; do
         echo "$file vs. $other_file"
     fi
 
-    # Show the timestamps if the files differ
+    # Show the timestamps if the files differ, unless in brief mode.
     # Note: Outputs 'Differences: {file1} {file2}' when files differ for convenient
     # grepping (e.g., `do_diff.sh ... | grep '^Differences:'`).
     files_differ=false
     if [ "$brief" == "0" ]; then
-	log_file="${TMP:-/tmp}/_do_diff.$$.log"
+        log_file="${TMP:-/tmp}/_do_diff.$$.log"
         "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" >| "$log_file"
-	status=$?
-	perl -pe 's/Files (.*) and (.*) differ/Differences: $1 $2/;' < "$log_file"
+        status=$?
+        perl -pe 's/Files (.*) and (.*) differ/Differences: $1 $2/;' < "$log_file"
 
-	# Show file info with time and size if there are differences
-	if [ "$status" != "0" ]; then
-	    files_differ=true
+        # Show file info with time and size if there are differences
+        if [ "$status" != "0" ]; then
+            files_differ=true
             ls -l "$file"
             ls -l "$other_file"
         fi
     fi
-	
+        
     # Perform the actual diff
     log_file="$TMP/do_diff.$$"
     "$diff_cmd" $space_options $diff_options "$file" "$other_file" > "$log_file" 2>&1

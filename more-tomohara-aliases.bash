@@ -8,7 +8,7 @@ function derive-ngram-frequency() {
     file="$1"
     ngram_size="$2"
     if [ "$file" = "" ]; then
-	echo "Usage: $0 file [ngram-size]"
+        echo "Usage: $0 file [ngram-size]"
     fi
     #
     in_base=$(basename "$file" .txt)
@@ -50,16 +50,16 @@ function parse-text () {
 function json-to-yaml {      # Convert BASE
     local base file
     for file in "$@"; do
-	base=$(basename "$file" .json)
-	DEBUG_LEVEL=1 VERBOSE=0 python -c 'import json, yaml; from mezcla.main import dummy_app;  print(yaml.dump(json.loads(dummy_app.read_entire_input())));' < "$file" >| "$base.yaml";
+        base=$(basename "$file" .json)
+        DEBUG_LEVEL=1 VERBOSE=0 python -c 'import json, yaml; from mezcla.main import dummy_app;  print(yaml.dump(json.loads(dummy_app.read_entire_input())));' < "$file" >| "$base.yaml";
     done
 }
 
 function yaml-to-json {
     local base file
     for file in "$@"; do
-	base=$(basename "$file" .ymal)
-	DEBUG_LEVEL=1 VERBOSE=0 python -c 'import json, yaml; from mezcla.main import dummy_app;  print(json.dumps(yaml.safe_load(dummy_app.read_entire_input())));' < "$file" >| "$base.json";
+        base=$(basename "$file" .ymal)
+        DEBUG_LEVEL=1 VERBOSE=0 python -c 'import json, yaml; from mezcla.main import dummy_app;  print(json.dumps(yaml.safe_load(dummy_app.read_entire_input())));' < "$file" >| "$base.json";
     done
 }
 

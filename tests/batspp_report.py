@@ -85,6 +85,8 @@ CLEAN_DEFAULT = system.getenv_bool("CLEAN_OUTPUT", not DETAILED_DEBUGGING,
                                    f"Whether to clean existing output by remove entire directories")
 TEST_DIR = system.getenv_value("TEST_DIR", None,
                                "Directory with BatsPP test definitions")
+STRICT_EVAL = system.getenv_bool("STRICT_EVAL", False,
+                                 "Use strict evaluation model, such as without whitespace normalization")
 ## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
 if SINGLE_STORE:
     BATSPP_STORE = BATS_STORE = TXT_STORE = BATSPP_OUTPUT_STORE
@@ -207,7 +209,9 @@ def main():
             # copies ./tests files into bats test dir (under temp); retains outer
             # quotation marks in output; uses single test directory; passes along --force option
             eval_log = output_file + ".eval.log"
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            ## OLD: run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE=1 python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            lenient_eval = (not STRICT_EVAL)
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         # Check for common errors (e.g., command not found or insufficient permissions)
@@ -402,8 +406,8 @@ def main():
         micro_success_rate = total_count_ok / total_count_total * 100
     print(f"Total no. files OK w/ threshold: {total_num_successful}")
     print(f"Average no. files OK w/ threshold: {round3(avg_successful)}%")
-    print(f"Macro success score: {round3(macro_success_rate)}%")
-    print(f"Micro success score: {round3(micro_success_rate)}%")
+    print(f"Macro success score: {round3(macro_success_rate)}% ({round3(total_success_rate)}/{batspp_count * 100})")
+    print(f"Micro success score: {round3(micro_success_rate)}% ({total_count_ok}/{total_count_total})")
     print("    where successful based on threshold, macro is mean of individual scores, and micro is global metric")
 
     print(f"\nFAULTY TESTFILES:")
