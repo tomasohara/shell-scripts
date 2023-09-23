@@ -1767,6 +1767,8 @@ function pdf-to-ascii () {
 function all-pdf-to-ascii () { for f in *.pdf; do pdf-to-ascii "$f"; done; }
 
 # Specialized file editors
+#
+# run-app(path, [arg, ...]): run app in background saving log to TEMP/basename-date.log
 function run-app {
     local path="$1";
     local app
@@ -1777,7 +1779,7 @@ function run-app {
     if [ -e "$log" ]; then
         echo "FYI: Updating $app's log $log"
     fi
-    "$app" "$@" >> "$log" 2>&1 &
+    "$path" "$@" >> "$log" 2>&1 &
     ## TODO: make sure command invoked OK and then put into background
     sleep 5
     ## OLD: check-errors "$log" | cat
