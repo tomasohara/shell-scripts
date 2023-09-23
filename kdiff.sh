@@ -21,6 +21,9 @@ show_usage=0
 while [ "$moreoptions" == "1" ]; do
     if [ "$1" == "--trace" ]; then
 	set -o xtrace;
+    elif [ "$1" == "--cmd" ]; then
+	kdiff="$2"
+        shift
     elif [ "$1" == "--help" ]; then
 	show_usage=1
     else
@@ -42,7 +45,7 @@ if [ "$show_usage" == "1" ]; then
     script=$(basename "$0")
     echo ""
     echo "Usage: $script [options] filename1 filename2"
-    echo "    options: [--trace] [--help]"
+    echo "    options: [--trace] [--help] [--cmd diff-path]"
     echo ""
     echo "Example:"
     echo "    $0 diff.sh do_diff.sh"
@@ -55,6 +58,12 @@ if [ "$OSTYPE" == "cygwin" ]; then
     file1=$(cygpath -w "$file1")
     file2=$(cygpath -w "$file2")
     kdiff="cygstart $kdiff"
+fi
+
+# Make sure file2 exists, using file1 pattern unless absolute-ish
+base1="$(basename "$file1")"
+if [[ (-d "$file2") && (! "$file1" =~ ^[\/\.].*) && (! -e "$file2/$base1") ]]; then
+    file2="$file2/$file1"
 fi
 
 # Invoke kdiff
