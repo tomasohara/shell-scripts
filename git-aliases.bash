@@ -60,6 +60,7 @@
 #      GIT_MESSAGE               message for update (TODO: rework to use optional arg)
 #
 # - maldito shellcheck:
+#   SC2002 [Useless cat. Consider 'cmd < file | ..' or 'cmd file | ..' instead]
 #   SC2016 [Expressions don't expand in single, use double]
 #   SC2086 [Double quote to prevent globbing and word splitting]
 #
@@ -589,6 +590,7 @@ function git-diff-list {
     root=$(git-root-alias)
     local pwd
     pwd=$(realpath ".")
+    # shellcheck disable=SC2002
     cat "$diff_list_file" | perl -pe "s@^@$root/@;" | perl -pe "s@^$pwd/?@@;"
 }
 
@@ -731,6 +733,11 @@ function git-branch-alias {
     echo "$git_branch"
 }
 
+# git-conflicts-alias(): show conflicts in the local git repo
+function git-conflicts-alias {
+    git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {};
+}
+
 #-------------------------------------------------------------------------------
 
 # git-alias-usage (): tips on interactive usage (n.b., aka git-template)
@@ -771,11 +778,11 @@ function git-alias-usage () {
     echo 'Usual check-in process:'
     echo '    git-cd-root-alias; git-update-verified; git-next-checkin'
     # TODO2: rework git-update-force via dry-run git-update with conflict check
-    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-force; git-next-checkin'
+    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-force; git-conflicts-alias; git-next-checkin'
     ## OLD:
     ## echo '    # alt: grep "^<<<<< " $(git-diff-list) /dev/null'
     ## # TODO: xargs -I{} 'grep "^<<<<< {} | head -5' $(git-list-text-files)
-    echo "    # alt: (git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {})"
+    ## OLD: echo "    # alt: (git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {})"
     echo '    git-next-checkin                      # repeat, as needed'
 
     ## TODO: echo '* invoke git-cd-root-alias automatically!'
