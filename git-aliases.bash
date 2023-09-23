@@ -192,8 +192,11 @@ function git-update-plus {
     changed_files="$(git-diff-list)"
     local restore_dir=""
     if [ "$changed_files" != "" ]; then
+
         # Require force to perform update when there are changed files
-        if [ "${GIT_FORCE:-0}" = "0" ]; then
+        local git_force="${GIT_FORCE:-0}"
+        ## DEBUG: echo "git-update-plus: git_force=$git_force"
+        if [ "$git_force" = "0" ]; then
             echo "Error: Use 'git-update-force' to update with changed files (n.b., potential for conflicts)"
             return
         fi
@@ -389,7 +392,8 @@ EOF
 # TODO: skip commit if problem with update
 function git-update-commit-push {
     # DEBUG: set -o xtrace
-    git-update-plus
+    ## OLD: git-update-plus
+    git-update-force
     if [ $? -ne 0 ]; then
         echo "Warning: consider canceling given possible update error (status=$?)"
     fi
