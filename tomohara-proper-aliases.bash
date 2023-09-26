@@ -29,7 +29,7 @@ alias nvidia-batched='batch-nvidia-smi.sh'
 alias nvidia-top='nvtop'
 alias nvsmi=nvidia-smi
 
-# convert-emoticons-aux(cmd, arg, ...): rens command and converts emoticons to text
+# convert-emoticons-aux(cmd, arg, ...): runs command and converts emoticons to text
 # ex: convert-emoticons-aux black /tmp/__init__.py
 # note: stderr redirected onto stdout
 function convert-emoticons-aux {
@@ -171,7 +171,7 @@ function shell-check-stdin {
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
 function tabify {
-    perl -pe 's/ /\t/;'
+    perl -pe 's/ /\t/g;'
 }
 # trace-vars(var, ...): trace each VAR in command line
 # note: output format: VAR1=VAL1; ... VARn=VALn;
