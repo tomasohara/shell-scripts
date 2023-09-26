@@ -82,7 +82,7 @@ if [ -z "$2" ]; then
     echo "Usage: $script [option] {--all | pattern} master_dir"
     echo ""
     echo "   options: [--check-space-changes | --ignore-spacing] [--brief] [--quiet] [--verbose] [--diff cmd] [--diff-options text] [--match-dot-files]"
-    echo "   other options: [--ignore-all-space] [--nopattern] [--no-glob] [--kdiff] [--trace]"
+    echo "   other options: [-side-by-side] [--ignore-all-space] [--nopattern] [--no-glob] [--kdiff] [--trace]"
     echo ""
     echo "Examples:"
     echo ""
@@ -131,6 +131,9 @@ while [[ "$1" =~ ^- ]]; do
     elif [ "$1" == "--diff-options" ]; then
         diff_options="$diff_options $2"
         shift
+    elif [ "$1" == "--side-by-side" ]; then
+        width=$((2 * ${COLUMNS:-132}))
+        diff_options="$diff_options --side-by-side --suppress-common-lines --width=$width"
     elif [ "$1" == "--quiet" ]; then
         quiet="1"
         verbose_mode="0"
