@@ -7,6 +7,9 @@
 # TODO2:
 # - use gh.form_path instead of f"{dir}/{file}" (for sake of Windows users).
 #
+# Note:
+# - By default, this aborts if run under an admin-like account (e.g., root or power user), because the tests might inadvertantly delete files.
+#
 
 """
   Test automation & report generation for BatsPP test files for Bash.
