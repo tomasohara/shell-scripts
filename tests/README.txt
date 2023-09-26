@@ -33,6 +33,7 @@ TERMINOLOGY:
 - bats = Bash Automation Testing Script
 - bats files = .bats files (generated from batspp library or ../simple_batspp.py)
 - acc. = according
+- ZNZP = Zero/NonZero Pipeline (for conditional)
 
 TODO:
 - Add non-trivial tests as separate scripts.
