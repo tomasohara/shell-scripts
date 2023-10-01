@@ -94,12 +94,15 @@ function run-python-script {
     ## TODO: '>|' => '>' [maldito bash]
     # shellcheck disable=SC2086
     local python_arg="-"
-    if [ "${script_args[*]}" = "" ]; then python_arg=""; fi
+    ## OLD: if [ "${script_args[*]}" = "" ]; then python_arg=""; fi
     # shellcheck disable=SC2086
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
+	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
 	    echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg >| "$out" 2>| "$log";
 	else
+	    # note: disables - with explicit arguments or if running pytest
+	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
 	    $PYTHON "$script_path" "${script_args[@]}" $python_arg >| "$out" 2>| "$log";
 	fi
     }
@@ -109,12 +112,20 @@ function run-python-script {
 
 # test-python-script(test-script): run TEST-SCRIPT via  pytest
 function test-python-script {
-    PYTEST_OPTS="${PYTEST_OPTS:-"-vv --capture=tee-sys"}"
+    local default_pytest_opts="-vv --capture=tee-sys"
+    if [ "$1" = "" ]; then
+        echo "Usage: [PYTEST_OPTS=["$default_pytest_opts"]] test-python-script script"
+        return
+    fi
+    PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
     PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@";
 }
 
 # color-test-failures(): show color-coded test result (yellow for xfailed and red for regular fail)
-function color-test-failures { cat "$@" | colout "\bfailed" red | colout "xfailed" yellow | colout "\bpassed" green | colout "xpassed" Palegreen; };
+function color-test-failures {
+    ## OLD: # note: uses "$*" to avoid extraneous "" with no arguments
+    cat "$@" | colout "\bfailed" red | colout "xfailed" yellow | colout "\bpassed" green | colout "xpassed" green faint;
+}
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
 ## BAD: simple-alias-fn ocr-image 'tesseract "$@" -'
