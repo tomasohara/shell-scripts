@@ -26,7 +26,10 @@
 # Use the GitHub Actions runner image with Ubuntu
 # NOTE: Uses older 20.04 both for stability and for convenience in pre-installed Python downloads (see below).
 # See https://github.com/catthehacker/docker_images
-FROM catthehacker/ubuntu:act-20.04
+# FROM catthehacker/ubuntu:act-20.04
+
+# Use the official Ubuntu 20.04 base image
+FROM ubuntu:20.04
 
 # Set default debug level (n.b., use docker build --build-arg "arg1=v1" to override)
 ARG DEBUG_LEVEL=2
@@ -47,11 +50,22 @@ RUN echo "DEBUG_LEVEL=$DEBUG_LEVEL; GIT_BRANCH=$GIT_BRANCH"
 ARG WORKDIR=/home/shell-scripts
 WORKDIR $WORKDIR
 
+
+# Add the deadsnakes PPA to get Python 3.11
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    add-apt-repository ppa:deadsnakes/ppa
+
 # Install necessary dependencies and tools
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget tar ca-certificates && \
-    true
-    ## TODO4: rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends \
+        wget \
+        tar \
+        ca-certificates \
+        python3.11 \
+        python3-pip
+    # apt-get clean && \
+    # rm -rf /var/lib/apt/lists/*
     
 
 # Install other stuff
@@ -62,29 +76,29 @@ RUN if [ "$DEBUG_LEVEL" -ge 4 ]; then apt-get install --yes emacs kdiff3 less tc
 # Set the Python version to install
 ## TODO: keep in sync with .github/workflows
 ## OLD: ARG PYTHON_VERSION=3.9.16
-ARG PYTHON_VERSION=3.11.4
+## ARG PYTHON_VERSION=3.11.4 
 
 # Download pre-compiled python build
 # To find URL links, see https://github.com/actions/python-versions:
 # ex: https://github.com/actions/python-versions/releases/tag/3.11.4-5199054971
 #
 # maldito https://github.com/actions uses stupid idiosyncratic tag
-ARG PYTHON_TAG="5199054971"
+## ARG PYTHON_TAG="5199054971"
 #
-RUN wget -qO /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz \
-        "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-${PYTHON_TAG}/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz" && \
-    mkdir -p /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 && \
-    tar -xzf /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz \
-        -C /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 --strip-components=1 && \
-    echo TODO: rm /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz
+# RUN wget -qO /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz \
+#         "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-${PYTHON_TAG}/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz" && \
+#     mkdir -p /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 && \
+#     tar -xzf /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz \
+#         -C /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 --strip-components=1 && \
+#     echo TODO: rm /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz
 
 # Set environment variables to use the installed Python version as the default
-ENV PATH="/opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64/bin:$WORKDIR:$WORKDIR/tests:${PATH}"
+# ENV PATH="/opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64/bin:$WORKDIR:$WORKDIR/tests:${PATH}"
 
 # Install pip for the specified Python version
-RUN wget -qO /tmp/get-pip.py "https://bootstrap.pypa.io/get-pip.py" && \
-    python3 /tmp/get-pip.py && \
-    true
+# RUN wget -qO /tmp/get-pip.py "https://bootstrap.pypa.io/get-pip.py" && \
+#     python3 /tmp/get-pip.py && \
+#     true
     ## TODO: rm /tmp/get-pip.py
 
 # Copy the project's requirements file to the container
