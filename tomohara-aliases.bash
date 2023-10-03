@@ -1914,7 +1914,9 @@ function ps-mine- { ps-mine "$@" | filter-dirnames; }
 alias ps_mine='ps-mine'
 ## DUP: alias ps-mine-='ps-mine "$@" | filter-dirnames'
 alias ps-mine-all='ps-mine --all'
-alias rename-files='perl- rename_files.perl'
+## OLD: alias rename-files='perl- rename_files.perl'
+alias old-rename-files='perl- rename_files.perl'
+alias rename-files='alias-perl rename_files.perl'
 alias rename_files='rename-files'
 alias testwn='perl- testwn.perl'
 alias perlgrep='perl- perlgrep.perl'
@@ -1925,31 +1927,28 @@ alias foreach='perl- foreach.perl'
 ## TOM-IDIOSYNCRATIC#
 
 # rename-spaces: replace spaces in filenames of current dir with underscores
-alias rename-spaces='rename-files -q -global " " "_"'
+## OLD: alias rename-spaces='rename-files -q -global " " "_"'
+alias rename-spaces='rename-files -q -global -rename_old " " "_"'
 # TODO2: handle smart quotes
-alias rename-quotes='rename-files -q -global "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
+alias rename-quotes='rename-files -q -global -rename_old "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
 # rename-special-punct: replace runs of any troublesome punctuation in filename w/ _
-## OLD: alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_"'
-## OLD: alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_"; rename-files -q -global -regex "–" "-"'
-## OLD: alias rename-special-punct='rename-files -q -global -regex "_*[&\!\*?\(\)\[\]·’®]" "_"; rename-files -q -global -regex "–" "-"'
 function rename-special-punct {
     # strip ascii punctuation
-    rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_";
+    # TODO: rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_";
+    rename-files -q -global -rename_old -regex "_*[&\!\*?\(\)\[\]\,]" "_";
     # strip unicode punctuation, ignoring shellcheck warnings like SC1112 [This is a unicode quote]
     # shellcheck disable=SC1111,SC1112
     {
         # note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) U+2014 (—)
-        rename-files -q -global -regex "_*[—·®“”″‶‘’–]" "_";   # note: unicode
+        rename-files -q -global -rename_old -regex "_*[—·®“”″‶‘’–]" "_";   # note: unicode
     }
-    rename-files -q -global -regex "–" "-";
+    rename-files -q -global -rename_old -regex "–" "-";   # note: unicode dash
 }
 # TODO: test
 #     $ touch '_what-the-hell?!'; rename-special-punct; ls _what* => _what-the-hell_
 ## TODO:
 ## alias rename-spaces='rename-files -rename_old -q -global " " "_"'
 ## alias rename-quotes='rename-files -rename_old -q -global "'"'"'" ""'   # where "'"'"'" is concatenated dou[???]
-## OLD: alias rename-special-punct='rename-files -q -global -regex "[&\!\*?]" ""'
-## alias rename-special-punct='rename-files -rename_old -q -global -regex "[&\!\*?\(\)]" ""'
 # move-duplicates: move duplicate produced via Firefox downloads
 # ex: move "05-158-a-20 (1).pdf duplicates
 alias move-duplicates='mkdir -p duplicates; move *\([0-9]\).* duplicates 2>&1 | $GREP -iv cannot.stat.*..No.such'
@@ -2648,6 +2647,7 @@ function ps-all () {
     ps_mine.sh --all | $EGREP -i "((^USER)|($pattern))" | $pager;
     }
 alias ps-script='ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
+alias ps-sort='alias-perl ps_sort.perl'
 ## OLD: function ps-sort-once { ps_sort.perl -num_times=1 -by=time "$@" -; }
 function ps-sort-once { alias-perl ps_sort.perl -num_times=1 -by=time "$@" -; }
 alias ps-sort-time='ps-sort-once -by=time'
@@ -3306,7 +3306,7 @@ function shell-check {                  ## TOM-IDIOSYNCRATIC
 ## if [ "$USER" = "root" ]; then
 ##     alias kill-software-updater='kill_em.sh --all --pattern "(software-properties-gtk|gnome-software|update-manager)"'
 ## fi
-alias kill-software-updater='kill_em.sh --all --pattern "(software-properties-gtk|gnome-software|update-manager)"'
+alias kill-software-updater='kill_em.sh --force --all --pattern "(software-properties-gtk|gnome-software|update-manager)"'
 ## OLD: alias update-software='/usr/bin/update-manager'
 alias update-software='command update-manager'
 alias kill-clam-antivirus='kill_em.sh --all -p clamd'
@@ -3327,11 +3327,13 @@ alias sleepy='sleepyhead'
 
 #------------------------------------------------------------------------
 # Aliases for [re-]invoking aliases
+## TOM-IDIOSYNCRATIC
 alias tomohara-aliases='source "$TOM_BIN/tomohara-aliases.bash"'
 alias tomohara-settings='source "$TOM_BIN/tomohara-settings.bash"'
 alias more-tomohara-aliases='source "$TOM_BIN/more-tomohara-aliases.bash"'
 alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 
+#------------------------------------------------------------------------
 # Optional end tracing
 ## OLD: startup-trace 'out tomohara-aliases.bash'
 trace 'out tomohara-aliases.bash'
