@@ -129,7 +129,8 @@ function color-test-failures {
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
 ## BAD: simple-alias-fn ocr-image 'tesseract "$@" -'
-alias-fn ocr-image 'tesseract "$@" -'
+alias-fn ocr-image-old 'tesseract "$@" -'
+alias-fn ocr-image 'tesseract "$1" "$1".ocr'
 
 #...............................................................................
 
@@ -357,9 +358,10 @@ function reset-under-emacs {
 alias make-screencase-video=kazam
 
 #................................................................................
-# Idiosyncratic stuff (n.b., doubly so given "tomohara-proper" part of filename)
+# Doubly idiosyncratic stuff (i.e., given "tomohara-proper" part of filename)
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
 #
+alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
 alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
 #
