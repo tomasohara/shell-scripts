@@ -106,7 +106,7 @@ function run-python-script {
 	    $PYTHON "$script_path" "${script_args[@]}" $python_arg >| "$out" 2>| "$log";
 	fi
     }
-    tail "$log" "$out"
+    tail "$log" "$out" | truncate-width
     check-errors-excerpt "$log";
 }
 
