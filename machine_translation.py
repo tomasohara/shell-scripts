@@ -7,7 +7,14 @@
 # - Hugging Face's NLP with Transformers text
 #
 
-"""Machine translation via Hugging Face"""
+"""Machine translation via Hugging Face
+
+Example:
+
+echo "How now Bourne cow?" | FROM=en TO=es {script} -
+
+USE_INTERFACE=1 {script} -
+"""
 
 # Standard modules
 # TODO: import re
@@ -20,6 +27,7 @@
 # Local modules
 from mezcla import debug
 from mezcla.main import Main
+from mezcla import misc_utils
 from mezcla import system
 from mezcla import glue_helpers as gh
 
@@ -43,11 +51,15 @@ SOURCE_LANG = system.getenv_text("SOURCE_LANG", FROM,
                                  "Source language")
 TARGET_LANG = system.getenv_text("TARGET_LANG", TO,
                                  "Target language")
+debug.assertion(SOURCE_LANG != TARGET_LANG)
 MT_TASK = f"translation_{SOURCE_LANG}_to_{TARGET_LANG}"
 DEFAULT_MODEL = f"Helsinki-NLP/opus-mt-{SOURCE_LANG}-{TARGET_LANG}"
 MT_MODEL = system.getenv_text("MT_MODEL", DEFAULT_MODEL,
                               "Hugging Face model for MT")
+SHOW_ELAPSED = system.getenv_bool("SHOW_ELAPSED", False,
+                                  "Show elapsed time")
 TEXT_ARG = "text"
+## TODO: ELAPSED_ARG = "elapsed-time"
 
 #-------------------------------------------------------------------------------
 
@@ -68,7 +80,9 @@ def main():
 
     # Show simple usage if --help given
     ## OLD: dummy_app = Main(description=__doc__, skip_input=False, manual_input=False)
-    dummy_app = Main(description=__doc__, skip_input=False, manual_input=True,
+    dummy_app = Main(description=__doc__.format(script=__file__),
+                     skip_input=False, manual_input=True,
+                     ## TODO: bool_options=[(ELAPSED_ARG, "Show elapsed time")],
                      text_options=[(TEXT_ARG, "Text to translate")])
     debug.trace_object(5, dummy_app)
     debug.assertion(dummy_app.parsed_args)
@@ -76,7 +90,7 @@ def main():
 
     # Get input file
     text_file = TEXT_FILE
-    if (text is not None):
+    if ((text is not None) or USE_INTERFACE):
         pass
     elif (text_file == "-"):
         text_file = dummy_app.temp_file
@@ -90,11 +104,14 @@ def main():
     model = pipeline(task=MT_TASK, model=MT_MODEL)
 
     if USE_INTERFACE:
+        # TODO2: add language controls
         pipeline_if = gr.Interface.from_pipeline(
             model,
             title="Machine translation (MT)",
+            ## TODO2: subtitle=f"From: {FROM}; To: {TO}",
             ## OLD:
             ## description="Using pipeline with default",
+            description=f"From: {FROM}; To: {TO}",
             ## examples=[text_file])
             )
         pipeline_if.launch()
@@ -114,4 +131,7 @@ def main():
 #-------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    main()
+    ## OLD: main()
+    elapsed = misc_utils.time_function(main)
+    if SHOW_ELAPSED:
+       print(f"Elapsed time: {system.round_as_str(elapsed)}ms")
