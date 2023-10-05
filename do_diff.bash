@@ -82,7 +82,7 @@ if [ -z "$2" ]; then
     echo "Usage: $script [option] {--all | pattern} master_dir"
     echo ""
     echo "   options: [--check-space-changes | --ignore-spacing] [--brief] [--quiet] [--verbose] [--diff cmd] [--diff-options text] [--match-dot-files]"
-    echo "   other options: [-side-by-side] [--ignore-all-space] [--nopattern] [--no-glob] [--kdiff] [--trace]"
+    echo "   other options: [-side-by-side] [--ignore-all-space] [--no-pattern] [--no-glob] [--kdiff] [--trace]"
     echo ""
     echo "Examples:"
     echo ""
@@ -105,7 +105,7 @@ if [ -z "$2" ]; then
     echo "- Use --match-dot-files, to ensure that . matches Unix dot files (e.g., .bashrc)"
     # TODO: interchange .bash and emacs here and in example above
     echo "   '.emacs' => '.emacs*' (not '*.emacs*')"
-    echo "- The --nopattern option treats pattern as a file (and likewise for master_dir)"
+    echo "- The --no-pattern option treats pattern as a file (and likewise for master_dir)"
     echo "- Changes due to whitespace are ignored by default (i.e., --ignore-space-change, and --ignore-blank-lines [diff -wB])."
     echo "- Specify --ignore-all-space [diff -a] to ignore spacing even within tokens"
     echo "- Use --check-space-changes to check for any changes in whitespace"
@@ -139,7 +139,7 @@ while [[ "$1" =~ ^- ]]; do
         verbose_mode="0"
     elif [ "$1" == "--verbose" ]; then
         verbose_mode="1"
-    elif [ "$1" == "--nopattern" ]; then
+    elif [[ ("$1" == "--nopattern") || ("$1" == "--no-pattern") ]]; then
         nopattern="1"
     elif [ "$1" == "--no-glob" ]; then
         no_glob="1"
@@ -261,7 +261,10 @@ for file in $pattern; do
         num_lines2=$(wc -l < "$other_file" || echo "0")
         num_lines=$(( $num_lines1 + $num_lines2 ))
         num_diffs=$(wc -l < "$log_file")
-        relative_diff=$(( $num_diffs * 100 / $num_lines ))
+        relative_diff=-1
+        if [ $num_lines -gt 0 ]; then
+            relative_diff=$(( $num_diffs * 100 / $num_lines ))
+        fi
         echo "${relative_diff}% differences for $base_proper"
     fi
 
