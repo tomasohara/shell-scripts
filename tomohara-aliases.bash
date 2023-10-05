@@ -1781,9 +1781,11 @@ function run-app {
     fi
     "$path" "$@" >> "$log" 2>&1 &
     ## TODO: make sure command invoked OK and then put into background
-    sleep 5
+    ## OLD: sleep 5
+    sleep-for 5 "waiting for $log"
     ## OLD: check-errors "$log" | cat
-    check-errors -quiet=0 "$log" | cat
+    ## OLD: check-errors -quiet=0 "$log" | cat
+    check-errors-excerpt "$log"
     }
 alias foxit='run-app /opt/foxitsoftware/foxitreader/FoxitReader'
 alias gimp='run-app gimp'
@@ -1815,10 +1817,18 @@ function show-all-macros () {
 
 # show-macros([pattern]): like show-all-macros, excluding leading _ in name
 function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
-# shellcheck disable=SC2016
-## OLD: alias-fn show-macros-proper 'show-macros | $GREP "^\w"'
+#
 # show-macros-proper([pattern]): shows names of aliases/functions matching PATTERN
+## OLD: # shellcheck disable=SC2016
+## OLD: alias-fn show-macros-proper 'show-macros | $GREP "^\w"'
 function show-macros-proper { show-macros "$@" | $GREP "^\w"; }
+#
+# show-macros-proper-strict([pattern]): like show-macros-proper but omits definitions
+## TODO: function show-macros-proper { show-macros "$@" | $EGREP "^(alias )?\w"; }
+function show-macros-proper-strict {
+    show-macros "$@" | perl -pe 's/alias (\S+)=.*/\1/;  s/^(\S+) \(\)/\1/;' | $GREP "$@";
+}
+#
 # show-variables(): show defined variables
 # TODO: figure out how to exclude env. vars from show-variables output
 function show-variables () { set | $GREP -i '^[a-z].*='; }
@@ -3051,6 +3061,8 @@ alias jupyter-notebook-redir=run-jupyter-notebook
 alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'
 # TODO3: rename to run-jupyter-notebook-... for sake of tab completion
 alias run-jupyter-notebook-redir-open=jupyter-notebook-redir-open
+# TODO3: streamline the jupyter aliases
+alias jupyter-notebook-open=jupyter-notebook-redir-open
 
 # Python-based utilities
 ## OLD: function extract-text() { python -m extract_document_text "$@"; }
