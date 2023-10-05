@@ -94,7 +94,6 @@ function run-python-script {
     ## TODO: '>|' => '>' [maldito bash]
     # shellcheck disable=SC2086
     local python_arg="-"
-    ## OLD: if [ "${script_args[*]}" = "" ]; then python_arg=""; fi
     # shellcheck disable=SC2086
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
@@ -123,7 +122,6 @@ function test-python-script {
 
 # color-test-failures(): show color-coded test result (yellow for xfailed and red for regular fail)
 function color-test-failures {
-    ## OLD: # note: uses "$*" to avoid extraneous "" with no arguments
     cat "$@" | colout "\bfailed" red | colout "xfailed" yellow | colout "\bpassed" green | colout "xpassed" green faint;
 }
 
@@ -355,7 +353,8 @@ function reset-under-emacs {
 #................................................................................
 # Media stuff
 
-alias make-screencase-video=kazam
+# make-screencast-video: produce video capturing the screen interaction
+alias make-screencast-video=kazam
 
 #................................................................................
 # Doubly idiosyncratic stuff (i.e., given "tomohara-proper" part of filename)
