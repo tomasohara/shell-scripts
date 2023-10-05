@@ -117,30 +117,26 @@ class AutomateIPYNB(Main):
         ipynb_files = ipynb_files_all.copy()
 
         # Apply filtering conditions
-
         # A) SELECT_BATSPP selects each and every file
         if not SELECT_NOBATSPP:
             ipynb_files = ipynb_files_filtered.copy()
-
-        # B) --first_n_testfiles option
-        if self.opt_first_n_testfile:
-            ipynb_files = ipynb_files[:self.opt_first_n_testfile]
-
-        # C) --include option
-        if self.opt_include_file:
-            # If an include file is specified, only include that file
-            ipynb_files = [self.opt_include_file]
-
-        # D) RANDOMIZE_TESTS randomizes the order of tests
+        
+        # B) RANDOMIZE_TESTS randomizes the order of tests
         if RANDOMIZE_TESTS:
             random.shuffle(ipynb_files)
-
-        # E) DISABLE_SINGLE_INPUT when false only selects one file for test (hello-world-basic.ipynb)
+        
+        # C) DISABLE_SINGLE_INPUT when false only selects one file for test (hello-world-basic.ipynb)
         if not DISABLE_SINGLE_INPUT:
-            if not RANDOMIZE_TESTS:
+            if self.opt_first_n_testfile:
+                ipynb_files = ipynb_files[:self.opt_first_n_testfile]
+            elif not RANDOMIZE_TESTS:
                 ipynb_files = [IPYNB_HELLO_WORLD_BASIC]
             else:
                 ipynb_files = [random.choice(ipynb_files)]
+
+        if self.opt_include_file:
+            # If an include file is specified, only include that file
+            ipynb_files = [self.opt_include_file]
 
         # Iterate through all files present in the array
         for file in ipynb_files:
