@@ -195,8 +195,10 @@ function trace-vars {
         ## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
         value="$(set | grep "^$var=")"
         echo -n "$value; "
+        ## TODO: echo -n "$value; " 1>&2
     done
     echo
+    ## TODO: echo 1>&2
     ##
     ## TAKE 1
     ## local var_spec="$*"
@@ -355,6 +357,15 @@ function reset-under-emacs {
 
 # make-screencast-video: produce video capturing the screen interaction
 alias make-screencast-video=kazam
+
+#-------------------------------------------------------------------------------
+# Other stuff
+
+# oscar: run Open Source CPAP Analysis Reporter
+alias oscar="run-app OSCAR"
+
+# 1pass: run 1password (snap)
+alias 1pass="run-app 1password"
 
 #................................................................................
 # Doubly idiosyncratic stuff (i.e., given "tomohara-proper" part of filename)
