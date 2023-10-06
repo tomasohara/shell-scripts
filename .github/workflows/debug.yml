@@ -1,6 +1,8 @@
 # This workflow will run the Python and Bash alias tests
 #
 # Notes:
+# - This is used for debugging when running the workflow locally via Nektos/Act:
+#     WORKFLOW_FILE=debug.act local-workflow.sh ...
 # - Based on tests.yml from Python mezcla package.
 # - It runs with detailed debugging (i.e., DEBUG_LEVEL=5).
 # - Requires special permission for Github workflows.

@@ -1324,7 +1324,7 @@ if [[ ("$DOMAIN_NAME" = "cs.nmsu.edu") && ("$OSTYPE" != "solaris") ]]; then
 fi
 
 alias ps-users='ps_mine.sh -a | $GREP -v root'
-alias ps-sort='ps_sort.perl -'
+## OLD: alias ps-sort='ps_sort.perl -'
 
 #........................................................................
 # alias for counting words on individual lines thoughout a file

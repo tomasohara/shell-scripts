@@ -139,6 +139,11 @@ while ("$1" =~ -*)
     shift
 end
 
+# Warn that do_diff.bash should be used
+if ($quiet == 0) then
+    echo "Warning: superceded by do_diff.bash" 1>&2
+endif
+
 # Get pattern from first argument
 if ("$pattern" == "") then
     if ("$no_glob" == "1") then

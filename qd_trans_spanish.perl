@@ -230,7 +230,7 @@ while (<>) {
 	my($from) = ($translate_english ? "en" : "es");
 	my($to) = ($translate_english ? "es" : "en");
 	&debug_print(5, "running translation: f='$from' t='$to' txt='$text'\n");
-	my($env_spec) = "FROM=$from TO=$to";
+	my($env_spec) = "SHOW_ELAPSED=1 FROM=$from TO=$to";
 	my($save_trace_level) = &DEBUG_LEVEL;
 	&debug_on(3);
 	## OLD:

@@ -29,7 +29,7 @@ alias nvidia-batched='batch-nvidia-smi.sh'
 alias nvidia-top='nvtop'
 alias nvsmi=nvidia-smi
 
-# convert-emoticons-aux(cmd, arg, ...): rens command and converts emoticons to text
+# convert-emoticons-aux(cmd, arg, ...): runs command and converts emoticons to text
 # ex: convert-emoticons-aux black /tmp/__init__.py
 # note: stderr redirected onto stdout
 function convert-emoticons-aux {
@@ -94,31 +94,41 @@ function run-python-script {
     ## TODO: '>|' => '>' [maldito bash]
     # shellcheck disable=SC2086
     local python_arg="-"
-    if [ "${script_args[*]}" = "" ]; then python_arg=""; fi
     # shellcheck disable=SC2086
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
+	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
 	    echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg >| "$out" 2>| "$log";
 	else
+	    # note: disables - with explicit arguments or if running pytest
+	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
 	    $PYTHON "$script_path" "${script_args[@]}" $python_arg >| "$out" 2>| "$log";
 	fi
     }
-    tail "$log" "$out"
+    tail "$log" "$out" | truncate-width
     check-errors-excerpt "$log";
 }
 
 # test-python-script(test-script): run TEST-SCRIPT via  pytest
 function test-python-script {
-    PYTEST_OPTS="${PYTEST_OPTS:-"-vv --capture=tee-sys"}"
+    local default_pytest_opts="-vv --capture=tee-sys"
+    if [ "$1" = "" ]; then
+        echo "Usage: [PYTEST_OPTS=["$default_pytest_opts"]] test-python-script script"
+        return
+    fi
+    PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
     PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@";
 }
 
 # color-test-failures(): show color-coded test result (yellow for xfailed and red for regular fail)
-function color-test-failures { cat "$@" | colout "\bfailed" red | colout "xfailed" yellow | colout "\bpassed" green | colout "xpassed" Palegreen; };
+function color-test-failures {
+    cat "$@" | colout "\bfailed" red | colout "xfailed" yellow | colout "\bpassed" green | colout "xpassed" green faint;
+}
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
 ## BAD: simple-alias-fn ocr-image 'tesseract "$@" -'
-alias-fn ocr-image 'tesseract "$@" -'
+alias-fn ocr-image-old 'tesseract "$@" -'
+alias-fn ocr-image 'tesseract "$1" "$1".ocr'
 
 #...............................................................................
 
@@ -171,7 +181,7 @@ function shell-check-stdin {
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
 function tabify {
-    perl -pe 's/ /\t/;'
+    perl -pe 's/ /\t/g;'
 }
 # trace-vars(var, ...): trace each VAR in command line
 # note: output format: VAR1=VAL1; ... VARn=VALn;
@@ -185,8 +195,10 @@ function trace-vars {
         ## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
         value="$(set | grep "^$var=")"
         echo -n "$value; "
+        ## TODO: echo -n "$value; " 1>&2
     done
     echo
+    ## TODO: echo 1>&2
     ##
     ## TAKE 1
     ## local var_spec="$*"
@@ -343,12 +355,23 @@ function reset-under-emacs {
 #................................................................................
 # Media stuff
 
-alias make-screencase-video=kazam
+# make-screencast-video: produce video capturing the screen interaction
+alias make-screencast-video=kazam
+
+#-------------------------------------------------------------------------------
+# Other stuff
+
+# oscar: run Open Source CPAP Analysis Reporter
+alias oscar="run-app OSCAR"
+
+# 1pass: run 1password (snap)
+alias 1pass="run-app 1password"
 
 #................................................................................
-# Idiosyncratic stuff (n.b., doubly so given "tomohara-proper" part of filename)
+# Doubly idiosyncratic stuff (i.e., given "tomohara-proper" part of filename)
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
 #
+alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
 alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
 #

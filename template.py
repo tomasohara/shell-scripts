@@ -53,6 +53,8 @@ TL = debug.TL
 # It also allows for enabling options in one place rather than four
 # (e.g., [Main member] initialization, run-time value, and argument spec., along
 # with string constant definition).
+# WARNING: To minimize environment comflicts with other programs make the names
+# longer such as two or more tokens (e.g., "FUBAR" => "FUBAR_LEVEL").
 #
 TODO_FUBAR = system.getenv_bool("TODO_FUBAR", False,
                                 description="TODO:Fouled Up Beyond All Recognition processing")
@@ -71,8 +73,7 @@ class Script(Main):
     ## NOTE: Such class decomposition is also beneficial for unit tests.
     #
     ## def __init__(self, *args, **kwargs):
-    ##     debug.trace_fmtd(TL.VERBOSE, "Script.__init__({a}): keywords={kw}; self={s}",
-    ##                      a=",".join(args), kw=kwargs, s=self)
+    ##     debug.trace_expr(TL.VERBOSE, self, args, kwargs, delim="\n\t", prefix="in {self.__class__.__name__}.__init__({a})")
     ##     super().__init__(*args, **kwargs)
     
     def setup(self):
@@ -140,6 +141,6 @@ def main():
     
 if __name__ == '__main__':
     debug.trace_current_context(level=TL.QUITE_VERBOSE)
-    debug.trace(5, f"main __doc__: {main.__doc__}")
+    debug.trace(5, f"module __doc__: {__doc__}")
     debug.assertion("TODO:" not in __doc__)
     main()
