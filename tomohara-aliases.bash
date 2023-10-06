@@ -1828,6 +1828,11 @@ function show-macros-proper { show-macros "$@" | $GREP "^\w"; }
 function show-macros-proper-strict {
     show-macros "$@" | perl -pe 's/alias (\S+)=.*/\1/;  s/^(\S+) \(\)/\1/;' | $GREP "$@";
 }
+# display-macros(pattern): show definition(s) of alias or function matching pattern in name
+function display-macros {
+    ## OLD: show-macros "$@" | perl -pe 's/alias //;  s/^(\S+) \(\)/\1/;' | perlgrep -para ^"$@";
+    show-macros "$@" | perlgrep -para ^"(alias )?""$@";
+}
 #
 # show-variables(): show defined variables
 # TODO: figure out how to exclude env. vars from show-variables output
