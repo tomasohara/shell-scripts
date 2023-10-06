@@ -361,14 +361,14 @@ def main():
                 else:
                     failure_test_array.append(txt_option_JSON)
 
-            else:
+            if KCOV_OPTION:
+                debug.assertion(not USE_SIMPLE_BATSPP)
                 run_batspp(batsppfile_path, f"{BATS_STORE}/{bats_from_batspp}")
                 gh.run(f"kcov {KCOV_STORE}/{test_extensionless} bats {BATS_STORE}/{bats_from_batspp}")
                     
-                if KCOV_OPTION:
-                    KCOV_MESSAGE = f"KCOV REPORT PATH: {KCOV_STORE}/{test_extensionless}/"
-                    print(gh.indent(KCOV_MESSAGE, indentation="  >>  ", max_width=512))
-                    gh.run(f"kcov {KCOV_STORE}/{test_extensionless} bats {BATS_STORE}/{bats_from_batspp}")
+                KCOV_MESSAGE = f"KCOV REPORT PATH: {KCOV_STORE}/{test_extensionless}/"
+                print(gh.indent(KCOV_MESSAGE, indentation="  >>  ", max_width=512))
+                gh.run(f"kcov {KCOV_STORE}/{test_extensionless} bats {BATS_STORE}/{bats_from_batspp}")
 
         batspp_count = i - 1 
 
