@@ -63,7 +63,13 @@ echo "FYI: Using $BATSPP_OUTPUT for ouput and $BATSPP_TEMP for temp. files"
 ## export DIR_ALIAS_HACK=1
 
 # Run the set of alias tests, making sure Tom's aliases are defined
-OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py --txt --definitions ../all-tomohara-aliases-etc.bash
+# notes: disables SC2086: Double quote to prevent globbing and word splitting.
+# BATSPP_REPORT_OPTS can be used to run coverage tests (e.g., --kcov) instead
+# of the regular report (--txt).
+# 
+BATSPP_REPORT_OPTS=${BATSPP_REPORT_OPTS:"--txt --definitions ../all-tomohara-aliases-etc.bash"}
+# shellcheck disable=SC2086
+OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py $BATSPP_REPORT_OPTS
 batspp_result="$?"
 
 ## NOTE: kcov is not critical, so it is not run as part of workflow tests

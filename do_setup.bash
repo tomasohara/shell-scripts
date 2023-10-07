@@ -1601,7 +1601,7 @@ function count-exts () { ls | count-it '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER
 
 alias kill-netscape='kill_em.sh -p netscape; /bin/rm -v -f $HOME/.netscape/lock'
 alias kill-cmucl='kill_em.sh -p cmucl'
-alias kill-sleep='kill_em.sh sleep'
+## OLD: alias kill-sleep='kill_em.sh sleep'
 ## function kill-gnome () { foreach.sh 'kill_em.sh $f' gnome magicdev panel xscreensaver cdplayer_applet  enlightenment asclock_applet ical gtcd sproingies  }
 
 # Aliases for working with Perlfect indexing system

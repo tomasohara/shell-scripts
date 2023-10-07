@@ -37,6 +37,9 @@
 ##   as based on analysis of stderr. Perhaps there was a problem with aliases added to normalize output.
 ## TODO2:
 ## - Have option to save each test in a separate bats file: a simple syntax error (e.g., wrong closing quote) can cause the entire test to fail.
+## - Track down source of hangup's when evaluating code with a command that gets run in background:
+##   the function test-N-actual runs OK (i.e., '$ test-N-action'), but it get stuck when accessing the
+##   result text (e.g., '$ result=$(test-N-actual)'.
 ## TODO3:
 ## - Warn if expecting command and non-comment and non-$ line encounters (e.g., Tom's funky ¢ prompt)
 ## - Stay in synh with Batspp:
