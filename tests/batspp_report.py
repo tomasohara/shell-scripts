@@ -362,13 +362,14 @@ def main():
                     failure_test_array.append(txt_option_JSON)
 
             if KCOV_OPTION:
-                debug.assertion(not USE_SIMPLE_BATSPP)
+                # TODO2: extend run_batspp to handle optional coverage check
+                bats_program = ("python3 ../simple_batspp.py" if USE_SIMPLE_BATSPP else "bats")
                 run_batspp(batsppfile_path, f"{BATS_STORE}/{bats_from_batspp}")
-                gh.run(f"kcov {KCOV_STORE}/{test_extensionless} bats {BATS_STORE}/{bats_from_batspp}")
+                gh.run(f"kcov {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
                     
                 KCOV_MESSAGE = f"KCOV REPORT PATH: {KCOV_STORE}/{test_extensionless}/"
                 print(gh.indent(KCOV_MESSAGE, indentation="  >>  ", max_width=512))
-                gh.run(f"kcov {KCOV_STORE}/{test_extensionless} bats {BATS_STORE}/{bats_from_batspp}")
+                gh.run(f"kcov {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
 
         batspp_count = i - 1 
 
