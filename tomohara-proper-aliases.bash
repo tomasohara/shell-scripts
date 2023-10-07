@@ -15,7 +15,7 @@
 #
 
 # Change git-xyz-plus to git-xyz- for sake of tab completion
-# TODO: automate following
+# TODO: automate the derivation of the following (e.g., drop 'plus' or 'alias' suffix)
 alias git-add-='git-add-plus'
 alias git-diff-='git-diff-plus'
 alias git-difftool-='git-difftool-plus'
@@ -35,7 +35,6 @@ alias nvsmi=nvidia-smi
 function convert-emoticons-aux {
     "$@" 2>&1 | convert_emoticons.py -
     }
-
 
 #...............................................................................
 
@@ -58,7 +57,7 @@ function clone-repo () {
     fi
     #
     ls -R "$repo" >> "$log"
-    ## Note: output warning that script now done (to avoid user closing the window assuming script active)
+    ## Note: outputs warning that script now done (to avoid user closing the window assuming script active)
     ## TODO: add trace-stderr
     echo "FYI: script-based clone done (see $log)" 1>&2
 }
@@ -82,27 +81,25 @@ function run-python-script {
     script_base=$(basename-with-dir "$script_path" .py);
     #
     # Run script and check for errors
+    # note: $_PSL_, $log and $out are not local, so available to user afterwards
+    local out_base
     let _PSL_++;
-    ## TODO2: fix _PSL_ value retention
-    ## _PSL_=666;
     out_base="$script_base.$(TODAY).$_PSL_";
     log="$out_base.log";
     out="$out_base.out";
     ## DEBUG: trace-vars _PSL_ out_base log
-    ## TEMP: workaround _PSL_ update
     rename-with-file-date "$out_base.out" "$log";
-    ## TODO: '>|' => '>' [maldito bash]
     # shellcheck disable=SC2086
     local python_arg="-"
     # shellcheck disable=SC2086
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
 	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
-	    echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg >| "$out" 2>| "$log";
+	    echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$out" 2> "$log";
 	else
 	    # note: disables - with explicit arguments or if running pytest
 	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
-	    $PYTHON "$script_path" "${script_args[@]}" $python_arg >| "$out" 2>| "$log";
+	    $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
 	fi
     }
     tail "$log" "$out" | truncate-width
@@ -126,7 +123,6 @@ function color-test-failures {
 }
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
-## BAD: simple-alias-fn ocr-image 'tesseract "$@" -'
 alias-fn ocr-image-old 'tesseract "$@" -'
 alias-fn ocr-image 'tesseract "$1" "$1".ocr'
 
@@ -164,14 +160,6 @@ function shell-check-last-snippet {
 # shell-check-stdin(): run shell-check over stdin
 function shell-check-stdin {
     ## DEBUG: echo "in shell-check-stdin: args='$*'"
-    ## BAD:
-    ## local snippet
-    ## read -d . -p $'Enter snippet lines with single . on end line\n' snippet
-    ## ## DEBUG: echo "$snippet"
-    ## trace-vars snippet
-    ## shell-check - <<<"$snippet"
-    ## DEBUG: cat <<<"$snippet"
-    ## echo "out shell-check-stdin"
     echo "Enter snippet lines and then ^D"
     python -c 'import sys; sys.stdin.read()' | shell-check -
     # shellcheck disable=SC2181
@@ -199,20 +187,16 @@ function trace-vars {
     done
     echo
     ## TODO: echo 1>&2
-    ##
-    ## TAKE 1
-    ## local var_spec="$*"
-    ## echo "$var_spec" | tabify
-    ##  echo $(eval echo $var_spec | tabify)
 }
 # trace-array-vars(var, ...): trace each ARRAY in command line
-# note: output format: VAR1=VAL1; ... VARn=VALn;
+# note: output format: ARR1=(VAL11 ... VAL1n); ARR2=(VAL21 ... VAL2n);
 function trace-array-vars {
     local var
     for var in "$@"; do
         # note: ignores SC1087 (error): Use braces when expanding arrays
         # shellcheck disable=SC2027,SC2046,SC1087
-        echo -n "$var="$(eval echo "\${$var[@]}")"; "
+        ## OLD: echo -n "$var="$(eval echo "\${$var[@]}")"; "
+        echo -n "$var=("$(eval echo "\${$var[@]}")"); "
     done
     echo
 }
@@ -290,8 +274,6 @@ function create-zip {
     if [ "$dir" = "" ]; then
         echo "Usage create-zip [dirname]"
         echo "ex: create-zip /mnt/resmed"
-        ## echo "Usage: $BASH_SOURCE[0] [dirname]"
-        ## echo "ex: $BASH_SOURCE[0] /mnt/resmed"
         return
     fi
     local archive
@@ -313,8 +295,6 @@ alias zip-from-parent=create-zip-from-parent
 
 #................................................................................
 # Linux stuff
-## TEMP:
-quiet-unalias ps-time
 # shellcheck disable=SC2016
 alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
 #
