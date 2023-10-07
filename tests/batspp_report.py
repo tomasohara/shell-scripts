@@ -368,7 +368,7 @@ def main():
                 ## OLD: bats_program = ("python3 ../simple_batspp.py" if USE_SIMPLE_BATSPP else "bats")
                 bats_program = "bats"
                 if USE_SIMPLE_BATSPP and BASH_EVAL:
-                    bats_program = "bash"
+                    bats_program = ""
                 run_batspp(batsppfile_path, f"{BATS_STORE}/{bats_from_batspp}")
                 gh.run(f"kcov {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
                     
