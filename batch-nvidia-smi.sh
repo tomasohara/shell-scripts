@@ -20,7 +20,7 @@
 # in $@.
 # NOTE: See sync-loop.sh for an example.
 #
-if [ "$1" = "" ]; then
+if [[ ("$1" = "") || ("$1" == "--help") ]]; then
     script=$(basename "$0")
     base=$(basename "$script" sh)
     echo ""
