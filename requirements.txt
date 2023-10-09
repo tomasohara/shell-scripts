@@ -1,10 +1,22 @@
 # Basic requirements for python scripts. This is mainly in support
 # of running Github actions locally for testing (e.g., aliases via Batspp).
+#
+# Usage:
+#    pip install --requirement requirements.txt
+#
+# Advanced usage (installs optional packages):
+#    pip install --verbose $(perl -pe 's/^#opt#\s*//;' requirements.txt | grep -v '^#')
+#
 batspp
 click
-mezcla>=1.3.9.3
+mezcla>=1.3.9.4
 numpy
 pipreqs
 pytest
 pyyaml
 six
+#
+#...............................................................................
+# Optional packages
+#
+#opt# extcolors
