@@ -35,6 +35,7 @@
 ##   the .bats file generation.
 ## - See if way to warn if empty actual output (versus expected) is likely command issue. such
 ##   as based on analysis of stderr. Perhaps there was a problem with aliases added to normalize output.
+## - Refine diagnostics for test parsing (e.g., a la trace_pattern_match).
 ## TODO2:
 ## - Have option to save each test in a separate bats file: a simple syntax error (e.g., wrong closing quote) can cause the entire test to fail.
 ## - Track down source of hangup's when evaluating code with a command that gets run in background:
@@ -1011,7 +1012,7 @@ class CustomTestsToBats:
             debug.assertion(len(test) == 5, f'Incorrect number of fields, every test should be {TestFieldTypes._fields}')
             # Add global setup section directly to BATS output mostly as is (except for prompt removal)
             # pylint: disable=no-member
-            if re.search(r"^\s*# Global Setup", test.entire, flags=(re.MULTILINE | re.IGNORECASE)):
+            if my_re.search(r"^\s*# Global Setup", test.entire, flags=(re.MULTILINE | re.IGNORECASE)):
                 debug.trace_expr(T7, test.entire)
                 entire_code = my_re.sub(r"^\s*\n", "", test.entire, flags=re.MULTILINE)
                 debug.assertion(not my_re.search(r"^([^\$#])", entire_code, flags=re.MULTILINE),
