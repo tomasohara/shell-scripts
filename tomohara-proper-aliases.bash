@@ -215,6 +215,12 @@ function pristine-bash {
     env --ignore-environment PS1='pristine $ ' bash --noprofile --norc
 }
 
+# indent-text([filename]): indent text in input by 4 spaces
+# echo "some text" | indent-text => "    some text"
+function indent-text {
+    perl -pe "s/^/    /;" "$@";
+}
+
 #...............................................................................
 # Organizer stuff
 
