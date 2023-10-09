@@ -150,7 +150,7 @@ OMIT_TRACE = system.getenv_bool("OMIT_TRACE", False,
 OMIT_MISC = system.getenv_bool("OMIT_MISC", False,
                                "Omit miscellaenous/obsolete bats stuff such as diagnostic code in test")
 TEST_FILE = system.getenv_bool("TEST_FILE", False,
-                               "Treat input as example-base test file, not a bash script")
+                               "Treat input as example-based test file, not a bash script")
 BASH_EVAL = system.getenv_bool("BASH_EVAL", False,
                                "Evaluate tests via bash rather than bats: provides quicker results and global context")
 BASH_TRACE = system.getenv_bool("BASH_TRACE", False,
@@ -774,7 +774,7 @@ class CustomTestsToBats:
         functions_text   += self._get_bash_function(expected_function, expected_output,
                                                     output=True)
 
-        # Add special hooks for when '# Setup'or '# Continuation'  specified
+        # Add special hooks for when '# Setup' or '# Continuation' specified
         # HACK: Updates instance state to process such indicator comments (to avoid regex complication)
         has_setup_comment = re.search("# Setup", entire, re.IGNORECASE)
         if has_setup_comment:
@@ -877,6 +877,7 @@ class CustomTestsToBats:
         Note: Intended just as quick-n-dirty way to debug regex evaluation
         """
         debug.trace(T6, f"trace_pattern_match({gh.elide(text, 512)!r})")
+        debug.trace_expr(T7, self._re_flags)
         for p, pattern in enumerate(self._patterns):
             debug.trace(T7, f"\tp{p + 1}: {pattern}")
         # note: temporarily raises level of overly verbose regex matching
@@ -902,8 +903,9 @@ class CustomTestsToBats:
             debug.trace(T6, f"Checking pattern {pattern_spec} at offset {start}; {gh.elide(text[start:], 10)!r}")
             over_actual_text = (len(text[start:]) > 0)
             remainder = (text[start:] if over_actual_text else "\n")
-            searc_fn = (my_re.match if (p > 0) else my_re.search)
-            found = searc_fn(self._patterns[p], remainder, flags=self._re_flags)
+            # note: subsequent patterns must start at current position (hence match not search)
+            search_fn = (my_re.match if (p > 0) else my_re.search)
+            found = search_fn(self._patterns[p], remainder, flags=self._re_flags)
             if not found:
                 break
             start += my_re.end()
@@ -993,6 +995,7 @@ class CustomTestsToBats:
             text = my_re.sub(r"(\n\n+)", "\\1\xFF", text)
             for sub_text in text.split("\xFF"):
                 sub_text = self.normalize_block(sub_text)
+                debug.trace_expr(T7, sub_text)
                 sub_matches = re.findall(pattern, sub_text, flags=self._re_flags)
                 if (TRACE_MATCHING and ((len(all_matches) == 0) or debug.debugging(T6))):
                     self.trace_pattern_match(sub_text)
@@ -1072,7 +1075,7 @@ class CommandTests(CustomTestsToBats):
 
         if USE_INDENT_PATTERN:
             patterns = [
-                fr'(?:{INDENT_PATTERN} *# Test\s*([^\n]*)\s*\n)?+', # optional test title
+                fr'(?:{INDENT_PATTERN} *# Test\s*([^\n]*)\s*\n)+?', # optional test title
                 fr'((?:{INDENT_PATTERN}\$\s+[^\n]+\n)*)',           # optional setup
                 fr'({INDENT_PATTERN}\$\s+[^\n]+)\n',                # command line [actual]
                 r'(.+?)\n',                                         # expected output; non-greedy

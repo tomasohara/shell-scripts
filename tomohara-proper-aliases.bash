@@ -181,8 +181,10 @@ function trace-vars {
         ## echo -n "$var="$(eval echo "\$$var")"; "
         ## TODO: value="$(eval "echo \$$var")"
         ## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
-        value="$(set | grep "^$var=")"
-        echo -n "$value; "
+        ## OLD:
+        ## value="$(set | grep "^$var=")"
+        ## echo -n "$value; "
+        echo -n "$var="$(eval echo "\${$var}")"; "
         ## TODO: echo -n "$value; " 1>&2
     done
     echo

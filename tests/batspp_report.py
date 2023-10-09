@@ -90,6 +90,9 @@ TEST_DIR = system.getenv_value("TEST_DIR", None,
                                "Directory with BatsPP test definitions")
 STRICT_EVAL = system.getenv_bool("STRICT_EVAL", False,
                                  "Use strict evaluation model, such as without whitespace normalization")
+BATS_EVAL = system.getenv_bool("BATS_EVAL", False,
+                               "Evaluate tests via bats rather than bash")
+BASH_EVAL = (not BATS_EVAL)
 ## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
 if SINGLE_STORE:
     BATSPP_STORE = BATS_STORE = TXT_STORE = BATSPP_OUTPUT_STORE
@@ -125,7 +128,7 @@ def main():
     ## OLD: files = msy.read_directory(".")
     test_path = system.real_path(TEST_DIR or ".")
     # note: script should either run in ./tests dir or define TEST_DIR
-    debug.assertion(test_path.endswith("tests"))
+    ## OLD: debug.assertion(test_path.endswith("tests"))
     files = msy.read_directory(test_path)
 
     # 0.1) CHECKING IF THE DIRECTORY EXISTS
@@ -212,9 +215,8 @@ def main():
             # copies ./tests files into bats test dir (under temp); retains outer
             # quotation marks in output; uses single test directory; passes along --force option
             eval_log = output_file + ".eval.log"
-            ## OLD: run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE=1 python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
             lenient_eval = (not STRICT_EVAL)
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         # Check for common errors (e.g., command not found or insufficient permissions)
@@ -363,7 +365,10 @@ def main():
 
             if KCOV_OPTION:
                 # TODO2: extend run_batspp to handle optional coverage check
-                bats_program = ("python3 ../simple_batspp.py" if USE_SIMPLE_BATSPP else "bats")
+                ## OLD: bats_program = ("python3 ../simple_batspp.py" if USE_SIMPLE_BATSPP else "bats")
+                bats_program = "bats"
+                if USE_SIMPLE_BATSPP and BASH_EVAL:
+                    bats_program = ""
                 run_batspp(batsppfile_path, f"{BATS_STORE}/{bats_from_batspp}")
                 gh.run(f"kcov {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
                     

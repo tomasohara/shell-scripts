@@ -1,0 +1,31 @@
+# The following packages are required. They can be installed as follows:
+#    sudo apt-get install $(grep -v ^# required-packages.txt)
+#
+# In addition, there are some optional packages, which be installed as follows:
+#    sudo apt-get install $(perl -pe 's/^#opt#\s*//;' required-packages.txt | grep -v '^#')
+#
+# Note:
+# - The package names are based on Ubuntu, and should be compatible with other
+#   debian-based Linux distributions.
+# - See requirements.txt for Python package requirements.
+#
+diffutils
+less
+tar
+tcsh
+wget
+zip
+#
+#................................................................................
+# Optional packages
+#
+#opt# ImageMagick
+#opt# extcolors
+#opt# nmap
+#opt# poppler-utils
+#opt# shellcheck
+#opt# colout
+## TODO: docker
+## TODO: https://github.com/nektos/act
+##
+## TODO: ##opt@ xyz
