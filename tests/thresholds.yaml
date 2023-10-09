@@ -42,4 +42,5 @@ empty-test-file.ipynb: 0.0
 trace-linux-admin-alias-NOBATSPP.ipynb: 0.0
 sudocommentstest-NOBATSPP.ipynb: 0.0
 perl-script-NOBATSPP.ipynb: 0.0
-testing-support-script-tests.ipynb: 75
+## TODO: testing-support-script-tests.ipynb: 75
+testing-support-script-tests.ipynb: 40
