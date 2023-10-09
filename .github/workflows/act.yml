@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04]
-        python-version: ["3.9"]
+        #remove python version
 
     container:
       image: shell-scripts-dev
@@ -29,11 +29,6 @@ jobs:
       - name: Build docker image
         run: |
           docker build -t shell-scripts-dev -f- . <Dockerfile
-
-      - name: Configure Environment
-        run: |
-          echo "PATH=$PATH" >> $GITHUB_ENV
-          echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> $GITHUB_ENV
 
       - name: Run tests
         run: |
