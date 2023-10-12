@@ -110,7 +110,7 @@ function run-python-script {
 function test-python-script {
     local default_pytest_opts="-vv --capture=tee-sys"
     if [ "$1" = "" ]; then
-        echo "Usage: [PYTEST_OPTS=["$default_pytest_opts"]] test-python-script script"
+        echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] test-python-script script"
         return
     fi
     PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
@@ -174,7 +174,8 @@ function tabify {
 # trace-vars(var, ...): trace each VAR in command line
 # note: output format: VAR1=VAL1; ... VARn=VALn;
 function trace-vars {
-    local var value
+    ## OLD: local var value
+    local var
     for var in "$@"; do
         ## TODO3: get old eval/echo approach to work in general
         ## # shellcheck disable=SC2027,SC2046
@@ -184,7 +185,8 @@ function trace-vars {
         ## OLD:
         ## value="$(set | grep "^$var=")"
         ## echo -n "$value; "
-        echo -n "$var="$(eval echo "\${$var}")"; "
+        ## OLD: echo -n "$var="$(eval echo "\${$var}")"; "
+        echo -n "$var=$(eval echo "\${$var}"); "
         ## TODO: echo -n "$value; " 1>&2
     done
     echo
