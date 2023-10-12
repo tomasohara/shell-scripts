@@ -115,6 +115,7 @@ if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
     file="${WORKFLOW_FILE:-act.yml}"
     echo "Running Github Actions locally w/ $file"
     # shellcheck disable=SC2086
+    ## TODO: GITHUB_TOKEN="$(gh auth token)" or set via environment
     act --verbose --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" --workflows ./.github/workflows/"$file" $RUN_OPTS
     # TODO: docker tag IMAGE-ID shell-scripts-dev
     # EX (see above): docker tag $(docker images --quiet | head -1) shell-scripts-dev

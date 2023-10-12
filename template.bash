@@ -3,8 +3,9 @@
 # TODO: name.sh: explanation
 #
 # NOTES:
-# - templates for common bash expressions:
+# - cheatsheet with templates for common bash expressions:
 #     template                     comment
+#     
 #     if [ $x == value ]; then STMT; fi    old-style is [ $x = value ] ...
 #     if [ EXPR_a ]; then STMT_a; elif [ EXPR_a  ]; then STMT_b; else STMT_c; fi
 #     if [[ (EXPR1) && (EXPR2) ]]; then STMT; fi
@@ -24,6 +25,7 @@
 #     $#                           number of positional arguments
 #     $*                           all positional arguments
 #     "$@"                         likewise all args but with individually quoting
+#     $?                           status of last command: 0 for success
 # - tools like OpenAI Codex and GitHub Copliot can be used to translate Bash constructs
 #     https://github.com/features/copilot
 # - For sake of simplicity, not all of the syntax is covered. (Likewise below.)
@@ -36,7 +38,9 @@
 #         Format                    Example
 #         let EXPR                  let i++
 #         let VAR=(EXPR)            let max_mem=(4 * 1024)
-#   - array variable
+#   - comparison operators:
+#         -[eg|ne|lt|le|gt|ge]      if [ $num -eq 3 ]; then echo "tres"; fi
+#   - array variables
 #         list=(v1 value2 ... vN)   initialize
 #         ${#list[@]}               number of elements (i.e., length)
 #         ${list[1]}                second element

@@ -50,7 +50,7 @@ my($nt_default) = (defined($t) ? (! $t) : &TRUE);  # abbrev. for 'not t'
 
 # Refuse to process buggy -rename_old
 if ($rename_old) {
-    &exit("Error: The -rename_old is not yet functional\n");
+    &debug_print(&TL_DETAILED, "Warning: The -rename_old option is not fully functional\n");
 }
 
 ## TEST:
@@ -106,6 +106,9 @@ if ($quick) {
 # Apply the pattern to each file specified on command line,
 # renaming old file to new name
 &debug_print(&TL_DETAILED, "old_pattern=/$old_pattern/; new_pattern=/$new_pattern/; regex=$regex\n");
+if (($old_pattern =~ /(?<!\\)([\^\*\|\]])/) && (! $regex)) {
+    &debug_print(&TL_USUAL, "Warning: old pattern contains regex ($1), but -regex not specified\n");
+    }
 ## TODO: my $quals = ""; $quals .= "g" if ($global); 
 for (my $i = 0; $i <= $#ARGV; $i++) {
     next if (!defined($ARGV[$i]));
@@ -171,7 +174,7 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
     
     # If file with new name exists, don't overwrite unless force specified
     if ((-e $new_file) && ($force == &FALSE)) {
-	print "\"$new_file\" already exists! not mv'ing \"$old_file\" \"$new_file\"\n";
+	&debug_print(&TL_BASIC, "Warning: \"$new_file\" already exists! not mv'ing \"$old_file\" \"$new_file\"\n");
     }
 
     # Otherwise, proceed with the rename
@@ -204,7 +207,7 @@ sub usage {
     $options .= "\nother options = [-evalre] [-t | -test] [-para]";
     ## TODO: $options .= "\nother options = [-evalre] [-t | -test] [-para] [-rename_old]";
     $options .= "\ncommon options = " . &COMMON_OPTIONS;
-    my($example) = "Example(s):\n\n$script_name rename_files ' - Shortcut' '' *Shortcut*\n\n";
+    my($example) = "Example(s):\n\n$script_name ' - Shortcut' '' *Shortcut*\n\n";
     $example .= "$0 rename-files -q -- '--' '-'\n\n";
     my($note) = "";
     $note .= "Notes:\n\n-- Use -- for first argument if dashes occur in old-pattern.\n-- By default only a single occurrence of the pattern is replaced.\n\n- The -ignore option is with respect to old vs. new comparison).\n";

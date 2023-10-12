@@ -214,7 +214,7 @@ for ($t = 1; $t <= $num_times; $t++) {
 		    my($hour) = defined($2) ? $2 : 0;
 		    my($min) = defined($4) ? $4 : 0;
 		    my($sec) = $5;
-		    my($fract) = defined($6) ? $6 : "";
+		    my($fract) = defined($6) ? $6 : 0;
 		    $time[$i] = ($hour * 3600 + $min * 60 + $sec + $fract);
 		    &debug_print(5, "Converted time to seconds $time[$i]\n");
 		}

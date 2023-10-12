@@ -1,5 +1,6 @@
 # Simple alias test
 
+# Global Setup
 $ alias count-words='wc -w'
 
 $ echo abc def ght | count-words

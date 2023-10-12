@@ -15,7 +15,7 @@
 #
 
 # Change git-xyz-plus to git-xyz- for sake of tab completion
-# TODO: automate following
+# TODO: automate the derivation of the following (e.g., drop 'plus' or 'alias' suffix)
 alias git-add-='git-add-plus'
 alias git-diff-='git-diff-plus'
 alias git-difftool-='git-difftool-plus'
@@ -29,13 +29,12 @@ alias nvidia-batched='batch-nvidia-smi.sh'
 alias nvidia-top='nvtop'
 alias nvsmi=nvidia-smi
 
-# convert-emoticons-aux(cmd, arg, ...): rens command and converts emoticons to text
+# convert-emoticons-aux(cmd, arg, ...): runs command and converts emoticons to text
 # ex: convert-emoticons-aux black /tmp/__init__.py
 # note: stderr redirected onto stdout
 function convert-emoticons-aux {
     "$@" 2>&1 | convert_emoticons.py -
     }
-
 
 #...............................................................................
 
@@ -58,7 +57,7 @@ function clone-repo () {
     fi
     #
     ls -R "$repo" >> "$log"
-    ## Note: output warning that script now done (to avoid user closing the window assuming script active)
+    ## Note: outputs warning that script now done (to avoid user closing the window assuming script active)
     ## TODO: add trace-stderr
     echo "FYI: script-based clone done (see $log)" 1>&2
 }
@@ -82,43 +81,50 @@ function run-python-script {
     script_base=$(basename-with-dir "$script_path" .py);
     #
     # Run script and check for errors
+    # note: $_PSL_, $log and $out are not local, so available to user afterwards
+    local out_base
     let _PSL_++;
-    ## TODO2: fix _PSL_ value retention
-    ## _PSL_=666;
     out_base="$script_base.$(TODAY).$_PSL_";
     log="$out_base.log";
     out="$out_base.out";
     ## DEBUG: trace-vars _PSL_ out_base log
-    ## TEMP: workaround _PSL_ update
     rename-with-file-date "$out_base.out" "$log";
-    ## TODO: '>|' => '>' [maldito bash]
     # shellcheck disable=SC2086
     local python_arg="-"
-    if [ "${script_args[*]}" = "" ]; then python_arg=""; fi
     # shellcheck disable=SC2086
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
-	    echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg >| "$out" 2>| "$log";
+	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
+	    echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$out" 2> "$log";
 	else
-	    $PYTHON "$script_path" "${script_args[@]}" $python_arg >| "$out" 2>| "$log";
+	    # note: disables - with explicit arguments or if running pytest
+	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
+	    $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
 	fi
     }
-    tail "$log" "$out"
+    tail "$log" "$out" | truncate-width
     check-errors-excerpt "$log";
 }
 
 # test-python-script(test-script): run TEST-SCRIPT via  pytest
 function test-python-script {
-    PYTEST_OPTS="${PYTEST_OPTS:-"-vv --capture=tee-sys"}"
+    local default_pytest_opts="-vv --capture=tee-sys"
+    if [ "$1" = "" ]; then
+        echo "Usage: [PYTEST_OPTS=["$default_pytest_opts"]] test-python-script script"
+        return
+    fi
+    PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
     PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@";
 }
 
 # color-test-failures(): show color-coded test result (yellow for xfailed and red for regular fail)
-function color-test-failures { cat "$@" | colout "\bfailed" red | colout "xfailed" yellow | colout "\bpassed" green | colout "xpassed" Palegreen; };
+function color-test-failures {
+    cat "$@" | colout "\bfailed" red | colout "xfailed" yellow | colout "\bpassed" green | colout "xpassed" green faint;
+}
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
-## BAD: simple-alias-fn ocr-image 'tesseract "$@" -'
-alias-fn ocr-image 'tesseract "$@" -'
+alias-fn ocr-image-old 'tesseract "$@" -'
+alias-fn ocr-image 'tesseract "$1" "$1".ocr'
 
 #...............................................................................
 
@@ -154,14 +160,6 @@ function shell-check-last-snippet {
 # shell-check-stdin(): run shell-check over stdin
 function shell-check-stdin {
     ## DEBUG: echo "in shell-check-stdin: args='$*'"
-    ## BAD:
-    ## local snippet
-    ## read -d . -p $'Enter snippet lines with single . on end line\n' snippet
-    ## ## DEBUG: echo "$snippet"
-    ## trace-vars snippet
-    ## shell-check - <<<"$snippet"
-    ## DEBUG: cat <<<"$snippet"
-    ## echo "out shell-check-stdin"
     echo "Enter snippet lines and then ^D"
     python -c 'import sys; sys.stdin.read()' | shell-check -
     # shellcheck disable=SC2181
@@ -171,7 +169,7 @@ function shell-check-stdin {
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
 function tabify {
-    perl -pe 's/ /\t/;'
+    perl -pe 's/ /\t/g;'
 }
 # trace-vars(var, ...): trace each VAR in command line
 # note: output format: VAR1=VAL1; ... VARn=VALn;
@@ -183,24 +181,24 @@ function trace-vars {
         ## echo -n "$var="$(eval echo "\$$var")"; "
         ## TODO: value="$(eval "echo \$$var")"
         ## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
-        value="$(set | grep "^$var=")"
-        echo -n "$value; "
+        ## OLD:
+        ## value="$(set | grep "^$var=")"
+        ## echo -n "$value; "
+        echo -n "$var="$(eval echo "\${$var}")"; "
+        ## TODO: echo -n "$value; " 1>&2
     done
     echo
-    ##
-    ## TAKE 1
-    ## local var_spec="$*"
-    ## echo "$var_spec" | tabify
-    ##  echo $(eval echo $var_spec | tabify)
+    ## TODO: echo 1>&2
 }
 # trace-array-vars(var, ...): trace each ARRAY in command line
-# note: output format: VAR1=VAL1; ... VARn=VALn;
+# note: output format: ARR1=(VAL11 ... VAL1n); ARR2=(VAL21 ... VAL2n);
 function trace-array-vars {
     local var
     for var in "$@"; do
         # note: ignores SC1087 (error): Use braces when expanding arrays
         # shellcheck disable=SC2027,SC2046,SC1087
-        echo -n "$var="$(eval echo "\${$var[@]}")"; "
+        ## OLD: echo -n "$var="$(eval echo "\${$var[@]}")"; "
+        echo -n "$var=("$(eval echo "\${$var[@]}")"); "
     done
     echo
 }
@@ -278,8 +276,6 @@ function create-zip {
     if [ "$dir" = "" ]; then
         echo "Usage create-zip [dirname]"
         echo "ex: create-zip /mnt/resmed"
-        ## echo "Usage: $BASH_SOURCE[0] [dirname]"
-        ## echo "ex: $BASH_SOURCE[0] /mnt/resmed"
         return
     fi
     local archive
@@ -301,8 +297,6 @@ alias zip-from-parent=create-zip-from-parent
 
 #................................................................................
 # Linux stuff
-## TEMP:
-quiet-unalias ps-time
 # shellcheck disable=SC2016
 alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
 #
@@ -343,12 +337,23 @@ function reset-under-emacs {
 #................................................................................
 # Media stuff
 
-alias make-screencase-video=kazam
+# make-screencast-video: produce video capturing the screen interaction
+alias make-screencast-video=kazam
+
+#-------------------------------------------------------------------------------
+# Other stuff
+
+# oscar: run Open Source CPAP Analysis Reporter
+alias oscar="run-app OSCAR"
+
+# 1pass: run 1password (snap)
+alias 1pass="run-app 1password"
 
 #................................................................................
-# Idiosyncratic stuff (n.b., doubly so given "tomohara-proper" part of filename)
+# Doubly idiosyncratic stuff (i.e., given "tomohara-proper" part of filename)
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
 #
+alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
 alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
 #
@@ -356,3 +361,4 @@ alias kill-kdiff3='kill-it kdiff3'
 alias kill-firefox='kill-it firefox'
 alias kill-jupyter='kill-it jupyter'
 alias kill-chromiun='kill-it chromium'
+alias kill-sleep='kill_em.sh sleep'

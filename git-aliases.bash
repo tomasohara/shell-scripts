@@ -104,6 +104,8 @@
 # - Add an option for verbose tracing (and for quiet mode).
 #
 
+## DEBUG: echo "in ${BASH_SOURCE[0]}"
+
 #................................................................................
 # Aliases
 
@@ -748,6 +750,7 @@ function git-conflicts-alias {
 # shellcheck disable=SC2016
 function git-alias-usage () {
     # Refresh
+    ## TODO2: fix refresh problem: manual git-alias-refresh required; also, make optional
     git-alias-refresh
 
     # Show usage
@@ -755,9 +758,10 @@ function git-alias-usage () {
     echo "   _git-CMD-MMDDYY-HHMM-tmp.log      # ex: _git-status-03jul22-1105-HTV.log"
     echo ""
     # note: 'clear's -x option doesn't clobber history (to work around a disruptive Linux change that fell through maldito Q&A cracks!)'
-    echo "To update aliases:"
-    echo "   source \$TOM_BIN/git-aliases.bash; clear -x; git-alias-usage"
-    echo ""
+    ## OLD:
+    ## echo "To update aliases:"
+    ## echo "   source \$TOM_BIN/git-aliases.bash; clear -x; git-alias-usage"
+    ## echo ""
     echo "Get changes from repository (set PRESERVE_GIT_STASH=1 to keep timestamps)":
     echo "    git-update-plus"
     echo ""
@@ -806,7 +810,7 @@ function git-misc-alias-usage() {
     # Show usage
     echo "Warning: Some of these can be dangerous!"
     echo "   Incorrect usage might be undoable (e.g., disconnected histories with mv)."
-    echo "   *** It is safer to use github web inteface instead!"
+    echo "   *** It is safer to use github web interface instead!"
     echo ""
     echo "To revert modified file (n.b., during merge fix, dummy change might be needed):"
     echo "    git-revert-file-alias file"
@@ -835,4 +839,11 @@ function git-misc-alias-usage() {
     echo "    git-checkin-multiple-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
     echo "A lazy-man's alternative, only recommended for single-user repos:"
     echo "    git-checkin-all-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
+    echo ""
+    echo "Source code grepping:"
+    echo "   (git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
+    echo ""
+    echo "Odds and ends:"
+    echo '   head $(git-root-alias)/config'
+    echo '   git-alias-refresh'
 }
