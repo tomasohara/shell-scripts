@@ -20,3 +20,4 @@ six
 # Optional packages
 #
 #opt# extcolors
+#opt# tesseract
