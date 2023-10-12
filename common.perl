@@ -2305,15 +2305,18 @@ sub stdev {
 
 # get_file_ddmmmyy(file): returns FILE's date in DDmmmYY format (e.g., 31mar22).
 # note: keep date in synch with tomohara-aliases.perl
-# TODO: fix me: returns current year 2022 as ddmmm71 (i.e., 1971)!
 #
 sub get_file_ddmmmyy {
     my($filename) = @_;
     &debug_print(6, "get_file_ddmmmyy($filename)\n");
 
     # Get the local time structure
-    my($atime, $mtime, $ctime, $blksize, $blocks) = stat($filename);
-    &debug_print(6, "file stat: ($atime, $mtime, $ctime, $blksize, $blocks)\n");
+    ## TODO3: use File::statl see perlfunc(1) manpage
+    ## OLD:
+    ## my($atime, $mtime, $ctime, $blksize, $blocks) = stat($filename);
+    ## &debug_print(6, "file stat: ($atime, $mtime, $ctime, $blksize, $blocks)\n");
+    my($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks) = stat($filename);
+    &debug_print(6, "file stat: ($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks)\n");
     my($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime($mtime);
     &debug_print(6, "localtime: ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst)\n");
 
