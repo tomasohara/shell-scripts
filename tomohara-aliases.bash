@@ -1943,7 +1943,8 @@ alias foreach='perl- foreach.perl'
 
 # rename-spaces: replace spaces in filenames of current dir with underscores
 ## OLD: alias rename-spaces='rename-files -q -global " " "_"'
-alias rename-spaces='rename-files -q -global -rename_old " " "_"'
+## OLD: alias rename-spaces='rename-files -q -global -rename_old " " "_"'
+alias-fn rename-spaces 'rename-files -q -global -rename_old " " "_"'
 # TODO2: handle smart quotes
 alias rename-quotes='rename-files -q -global -rename_old "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
 # rename-special-punct: replace runs of any troublesome punctuation in filename w/ _
