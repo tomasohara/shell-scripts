@@ -22,6 +22,8 @@ Automates Jupyter Notebook testing using Selenium Webdriver
 # Standard modules
 import time
 import random
+import subprocess
+import requests
 
 # Installed modules
 from selenium import webdriver
@@ -49,7 +51,9 @@ JUPYTER_TOKEN = "111222"
 JUPYTER_EXTENSION = ".ipynb"
 NOBATSPP = "NOBATSPP"
 IPYNB_HELLO_WORLD_BASIC = "hello-world-basic.ipynb"
-COMMAND_RUN_JUPYTER = "run-jupyter-notebook"
+COMMAND_JUPYTER_NOTEBOOK = "jupyter-notebook"
+COMMAND_RUN_JUPYTER_NOTEBOOK = "run-jupyter-notebook"
+debug.assertion(TESTFILE_URL.endswith("/"))
 
 ## Constant II (Elements for Selenium Webdriver)
 SELENIUM_SLEEP_RERUN = 40
@@ -82,12 +86,23 @@ DISABLE_SINGLE_INPUT = system.getenv_bool("DISABLE_SINGLE_INPUT", False,
                         description="Disables single testfile automation and allows all testfiles (if --include not used) (Default: False)")
 FORCE_RUN_JUPYTER = system.getenv_bool("FORCE_RUN_JUPYTER", True,
                         description="Runs the command 'run-jupyter-notebook' when script executed (Default: True)")
+END_PAUSE = system.getenv_float("END_PAUSE", 0,
+                                "Number of seconds to pause after running")
 
 class AutomateIPYNB(Main):
     """Consists of functions for the automation of testfiles (.ipynb)"""
     opt_include_file = ""
     opt_first_n_testfile = 0
     opt_verbose = None
+    driver = None
+
+    ## EXPERIMENTAL: Run run-jupyter-notebook (if not executed before)
+    # def is_jupyter_running(self):
+    #     try:
+    #         response = requests.get("http://127.0.0.1:8888")
+    #         return response.status_code == 200
+    #     except Exception as e:
+    #         return False
 
     def get_entered_text(self, label: str, default: str = "") -> str:
         """
@@ -105,6 +120,7 @@ class AutomateIPYNB(Main):
         self.opt_include_file = self.get_entered_text(INCLUDE_TESTFILE, self.opt_include_file)
         self.opt_first_n_testfile = int(self.get_entered_text(FIRST_N_TESTFILE, self.opt_first_n_testfile))
         self.opt_verbose = self.get_parsed_option(VERBOSE, self.opt_verbose)
+        self.driver = webdriver.Firefox() if USE_FIREFOX else webdriver.Chrome()
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
     def return_ipynb_url_array(self):
@@ -150,44 +166,61 @@ class AutomateIPYNB(Main):
         test_count = 1
         print("\nDuration for each testfiles (in seconds):")
         for url in url_arr:
+            if not url.startswith("http"):
+                url = TESTFILE_URL + url
             start_time = time.time()
 
-            driver = webdriver.Firefox() if USE_FIREFOX else webdriver.Chrome()
+            ## OLD: driver = webdriver.Firefox() if USE_FIREFOX else webdriver.Chrome()
+            driver = self.driver
+            debug.trace_expr(5, url)
             driver.get(url)
             time.sleep(1)
-            token_input_box = driver.find_element(By.ID, ID_PASSWORD_INPUT)
-            token_input_submit = driver.find_element(By.ID, ID_LOGIN_SUBMIT)
-            token_input_box.send_keys(JUPYTER_PASSWORD)
-            token_input_submit.click()
+            if JUPYTER_PASSWORD:
+                token_input_box = driver.find_element(By.ID, ID_PASSWORD_INPUT)
+                token_input_submit = driver.find_element(By.ID, ID_LOGIN_SUBMIT)
+                token_input_box.send_keys(JUPYTER_PASSWORD)
+                token_input_submit.click()
 
             # TODO: In the case of Invalid Credentials
-
-            time.sleep(1)
-            driver.find_element(By.ID, ID_KERNELLINK).click()
-            time.sleep(3)
-            driver.find_element(By.ID, ID_RESTART_RUN_ALL).click()
-            time.sleep(3)
-            driver.find_element(By.XPATH, XPATH_RESTART_RUN_ALL_WARNING_RED).click()
-            time.sleep(AUTOMATION_DURATION_RERUN)
-            driver.find_element(By.ID, ID_FILELINK).click()
-            time.sleep(2)
-            driver.find_element(By.ID, ID_SAVE_CHECKPOINT).click()
-            time.sleep(2)
-            driver.find_element(By.ID, ID_FILELINK).click()
-            time.sleep(2)
-            driver.find_element(By.ID, ID_CLOSE_AND_HALT).click()
-            time.sleep(2)
-            driver.quit()
+            try:
+                time.sleep(1)
+                driver.find_element(By.ID, ID_KERNELLINK).click()
+                time.sleep(3)
+                driver.find_element(By.ID, ID_RESTART_RUN_ALL).click()
+                time.sleep(3)
+                driver.find_element(By.XPATH, XPATH_RESTART_RUN_ALL_WARNING_RED).click()
+                time.sleep(AUTOMATION_DURATION_RERUN)
+                driver.find_element(By.ID, ID_FILELINK).click()
+                time.sleep(2)
+                driver.find_element(By.ID, ID_SAVE_CHECKPOINT).click()
+                time.sleep(2)
+                driver.find_element(By.ID, ID_FILELINK).click()
+                time.sleep(2)
+                driver.find_element(By.ID, ID_CLOSE_AND_HALT).click()
+                time.sleep(2)
+                ## TODO: put quit in new wrap_up method
+                ## OLD: driver.quit()
+                driver.quit()
+            except:
+                system.print_exception_info(f"navigating url {url}")
 
             end_time = time.time()
             
             print(f"#{test_count}. {url.split('/')[-1]}: {round(end_time - start_time, 2)}")
             test_count += 1
+            if END_PAUSE:
+                time.sleep(END_PAUSE)
 
     def run_main_step(self):
         """Process main script"""
+        ## EXPERIMENTAL: Run run-jupyter-notebook (if not executed before)
+        # if (not self.is_jupyter_running()) or FORCE_RUN_JUPYTER:
+        #     gh.run(COMMAND_RUN_JUPYTER_NOTEBOOK)
+        
         start_time_main = time.time()
-        self.automate_testfile(self.return_ipynb_url_array())
+        ## OLD: self.automate_testfile(self.return_ipynb_url_array())
+        test_files = [self.filename] if (self.filename != "-") else self.return_ipynb_url_array()
+        self.automate_testfile(test_files)
         print(f"\nTotal Time (including pauses): {round(time.time() - start_time_main, 2)} sec\n")
 
 def main():
