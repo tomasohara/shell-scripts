@@ -32,6 +32,7 @@ zip
 #opt# rcs
 #opt# shellcheck
 #opt# colout
+#opt# tesseract-ocr
 ## TODO: docker
 ## TODO: https://github.com/nektos/act
 ##
