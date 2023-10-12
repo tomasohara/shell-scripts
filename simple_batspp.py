@@ -1,11 +1,15 @@
 #! /usr/bin/env python
 #
-# BATSPP
+# BatsPP: preprocessor for bats unit test
 #
-# This process and run custom tests using bats-core.
+# This script processes ands run custom tests using bats-core. It is based
+# on example-based testing, using the output from a command as a test:
 #
-# NOTE: It is only necessary to have installed bats-core
-#       no need for bats-assertions library.
+#   $ echo $'uno\ndos\ntres' | grep --count o
+#   2
+#
+# NOTE: It is only necessary to have installed bats-core, In particular, there
+# is no need for bats-assertions library.
 #
 # FYI: This version is a simplified version of the original BatsPP facility. It uses some shameless
 # hacks enabled via environment variables to work around quirks in the example parsing. For example,
@@ -17,6 +21,17 @@
 #     *?  and  +?             non-greedy match
 # - See https://www.rexegg.com/regex-quickstart.html for comprehensive cheatsheet.
 # - See https://regex101.com for a tool to explain regex's.
+# - See jupyter_to_batspp.py for conversion utility for Jupyter notebooks.
+# - The following directives are recognized:
+#     Directive              Comment
+#     Continuation           Additional setup code
+#     Global setup           Global setup code (e.g., alias definitions).
+#     Setup                  Setup code for the test (e.g., temp. file creation)
+#     Test [name]            Name to use for test instead of line number
+# - The following environment options can be useful:
+#     MATCH_SENTINELS        Wraps tests inside #Start ... # End to facilitate pattern matching.
+#     PARA_BLOCKS            Tests are paragraphs delimited by blank lines
+#     BASH_EVAL              Use Bash for evaluation instead of bats-core
 #................................................................................
 # Tips:
 # - The parser is regex based so certain contructs confuse it.
@@ -41,6 +56,7 @@
 ## - Track down source of hangup's when evaluating code with a command that gets run in background:
 ##   the function test-N-actual runs OK (i.e., '$ test-N-action'), but it get stuck when accessing the
 ##   result text (e.g., '$ result=$(test-N-actual)'.
+## - Add pytest-styles directives like xfail and skip, as well as a way to flag critical tests.
 ## TODO3:
 ## - Warn if expecting command and non-comment and non-$ line encounters (e.g., Tom's funky ¢ prompt)
 ## - Stay in synh with Batspp:
