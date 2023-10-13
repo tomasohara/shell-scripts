@@ -2278,7 +2278,7 @@ sub mean {
 
     map { $sum += $_; } @values;
     my($mean) = ($num > 0) ? ($sum / $num) : 0.0;
-    &debug_print(&TL_DETAILED, "mean(@_) => $mean\n");
+    &debug_print(&TL_VERBOSE, "mean(@_) => $mean\n");
     
     return ($mean);
 }
@@ -2298,7 +2298,7 @@ sub stdev {
     my($sum_sq_mean_diff) = 0.0;
     map { $sum_sq_mean_diff += ($_ - $mean) ** 2; } @values;
     my($stdev) = ($num > 1) ? sqrt($sum_sq_mean_diff / ($num - 1)) : 0.0;
-    &debug_print(&TL_DETAILED, "stdev(@_) => $stdev\n");
+    &debug_print(&TL_VERBOSE, "stdev(@_) => $stdev\n");
 
     return ($stdev);
 }
