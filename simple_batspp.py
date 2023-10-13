@@ -757,7 +757,7 @@ class CustomTestsToBats:
             setup_text += (
                 f'\ttest_folder="{test_folder}"\n' +
                 f'\tmkdir --parents "$test_folder"\n' +
-                f'\tcommand cp -Rp ./. "$test_folder"\n' +
+                (f'\tcommand cp -Rp ./. "$test_folder"\n' if COPY_DIR else "") +
                 # note: warning added for sake of shellcheck
                 f'\tbuiltin cd "$test_folder" || echo Warning: Unable to "cd $test_folder"\n')
         setup_sans_prompt = my_re.sub(r'^\s*\$', '\t', setup, flags=my_re.MULTILINE)
@@ -987,7 +987,7 @@ class CustomTestsToBats:
                 "# Global test directory setup\n" +
                 f'test_folder="{test_folder}"\n' +
                 f'mkdir --parents "$test_folder"\n' +
-                f'command cp -Rp ./. "$test_folder"\n' +
+                (f'command cp -Rp ./. "$test_folder"\n' if COPY_DIR else "") +
                 # note: warning added for sake of shellcheck
                 f'command cd "$test_folder" || echo Warning: Unable to "cd $test_folder"\n' +
                 "\n")
