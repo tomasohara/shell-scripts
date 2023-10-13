@@ -27,6 +27,18 @@ eval 'exec perl -Ssw $0 "$@"'
 # the column with the dash is not being anlayzed); but if the entry is empty
 # then the corresponding entries in the other columns are still considered
 # (blanks should only occur at the end).
+#
+#-------------------------------------------------------------------------------
+# via https://www.calculatorsoup.com/calculators/statistics/percentile-calculator.php
+#
+# How to Calculate Percentile
+# Arrange n number of data points in ascending order: x1, x2, x3, ... xn
+# Calculate the rank r for the percentile p you want to find: r = (p/100) * (n - 1) + 1
+# If r is an integer then the data value at location r, xr, is the percentile p: p = xr
+# If r is not an integer, p is interpolated using ri, the integer part of r, and rf, the fractional part of r:
+# p = xri + rf * (xri+1 - xri)
+#
+#-------------------------------------------------------------------------------
 # 
 # TODO:
 # - Support R in addition to xlispstat.
@@ -37,6 +49,7 @@ eval 'exec perl -Ssw $0 "$@"'
 BEGIN { 
     my $dir = `dirname $0`; chomp $dir; unshift(@INC, $dir);
     require 'common.perl';
+    require 'extra.perl';
     use vars qw/$verbose &set_init_var_export/;
     require POSIX;
 }
@@ -419,16 +432,19 @@ if ($stats == &FALSE) {
 	    print "num = 0\n";
 	}
 	else {
-	    debug_print(&TL_DETAILED, "data: @data\n");
+	    debug_print(&TL_VERBOSE, "data: @data\n");
 	    if ($verbose) {
 		print("data: @data\n");
 	    }
 	    printf "num = %d; mean = %s; stdev = %s; min = %s; max = %s; sum = %s\n", (scalar @data), &round(&mean(@data)), &round(&stdev(@data)), &round(&min_item(@data)), &round(&max_item(@data)), &round($sum);
 	    if ($extended) {
+		# Sort data
 		my(@sorted_data) = sort { $a <=> $b } @data;
-		&debug_print(4, "sorted_data: (@sorted_data)\n");
+		&debug_print(5, "sorted_data: (@sorted_data)\n");
 		my($num_values) = (scalar @data);
 		my($median);
+
+		# Get median
 		my($middle_pos) = POSIX::floor($num_values / 2);
 		&debug_print(4, "num_values=$num_values middle_pos=$middle_pos\n");
 		if ($num_values % 2) {
@@ -440,17 +456,50 @@ if ($stats == &FALSE) {
 			       $sorted_data[$middle_pos - 1], $sorted_data[$middle_pos]);
 		    $median = ($sorted_data[$middle_pos] + $sorted_data[$middle_pos - 1]) / 2;
 		}
+
+		# Get mode
 		# TODO: definite function for this
-		my($mode) = &run_command("echo @data | count_it.perl '\\S+' | head -1 | cut -f1");
+		## OLD: my($mode) = &run_command("echo @data | count_it.perl '\\S+' | head -1 | cut -f1");
+		my(%counts);
+		foreach my $num (@data) {
+		    &incr_entry(\%counts, $num);
+		}
+		my($mode, @rest) = &sorted_hash_keys_reverse_numeric(\%counts);
+
+		# Get 95th and 99th percentile
 		## OLD: my($perc95_pos) = POSIX::floor(0.95 * $num_values);
 		## BAD: my($perc95_pos) = &round(0.95 * $num_values, 0);
-		my($perc95_pos) = POSIX::ceil(0.95 * ($num_values - 1));
-		my($perc95) = $sorted_data[$perc95_pos];
+		## OLD: my($perc95_pos) = POSIX::ceil(0.95 * ($num_values - 1));
+		## OLD: my($perc95) = $sorted_data[$perc95_pos];
+		# See https://www.calculatorsoup.com/calculators/statistics/percentile-calculator.php
+		my($perc95_pos) = (0.95 * ($num_values - 1) + 1);
+		my($perc95);
+		if ($perc95_pos == int($perc95_pos)) {
+		    $perc95 = $sorted_data[$perc95_pos - 1];
+		}
+		else {
+		    my($diff) = ($sorted_data[$perc95_pos] - $sorted_data[$perc95_pos - 1]);
+		    my($fract) = ($perc95_pos - int($perc95_pos));
+		    $perc95 = $sorted_data[$perc95_pos - 1] + ($fract * $diff);
+		}
+		#
 		## OLD: my($perc99_pos) = POSIX::floor(0.99 * $num_values);
 		## BAD: my($perc99_pos) = &round(0.99 * $num_values, 0);
-		my($perc99_pos) = POSIX::ceil(0.99 * ($num_values - 1));
-		my($perc99) = $sorted_data[$perc99_pos];
+		## OLD: my($perc99_pos) = POSIX::ceil(0.99 * ($num_values - 1));
+		## OLD: my($perc99) = $sorted_data[$perc99_pos];
+		my($perc99_pos) = (0.99 * ($num_values - 1) + 1);
+		my($perc99);
+		if ($perc99_pos == int($perc99_pos)) {
+		    $perc99 = $sorted_data[$perc99_pos - 1];
+		}
+		else {
+		    my($diff) = ($sorted_data[$perc99_pos] - $sorted_data[$perc99_pos - 1]);
+		    my($fract) = ($perc99_pos - int($perc99_pos));
+		    $perc99 = $sorted_data[$perc99_pos - 1] + ($fract * $diff);
+		}
 		&debug_print(4, "perc95_pos=$perc95_pos perc99_pos=$perc99_pos\n");
+
+		# Output results
 		print "median = $median; mode = $mode; 95th-% = $perc95; 99th-% = $perc99\n";
 	    }
 	}
