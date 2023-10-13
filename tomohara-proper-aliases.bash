@@ -61,6 +61,7 @@ function clone-repo () {
     ## TODO: add trace-stderr
     echo "FYI: script-based clone done (see $log)" 1>&2
 }
+# black-plain(file): run black python reformatted over FILE filtering out emoticons
 simple-alias-fn black-plain 'convert-emoticons-aux black'
 
 # run-python-script(script, args): run SCRIPT with ARGS with output to _base-#.out
@@ -123,8 +124,11 @@ function color-test-failures {
 }
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
-alias-fn ocr-image-old 'tesseract "$@" -'
-alias-fn ocr-image 'tesseract "$1" "$1".ocr'
+## OLD:
+## alias-fn ocr-image-old 'tesseract "$@" -'
+## alias-fn ocr-image 'tesseract "$1" "$1".ocr'
+alias-fn ocr-image-stdout 'tesseract "$@" -'
+alias-fn ocr-image 'tesseract "$1" "$1"; $PAGER "$1".txt'
 
 #...............................................................................
 
