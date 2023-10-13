@@ -21,3 +21,4 @@ six
 #
 #opt# extcolors
 #opt# tesseract
+#opt# black
