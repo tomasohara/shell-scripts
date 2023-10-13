@@ -38,13 +38,14 @@ BEGIN {
     my $dir = `dirname $0`; chomp $dir; unshift(@INC, $dir);
     require 'common.perl';
     use vars qw/$verbose &set_init_var_export/;
+    require POSIX;
 }
 
 use strict;
 use vars qw/$fract $diff $labels $headings $f $f1 $f2 $col $col1 $col2 $fix
     $ttest $paired_ttest $paired $anova $mann_whitney $each $interactive $stats
     $stdev $keep_nonnumeric $skip_nonnumeric $cumulative $average $context $flag_index_change $show_sum $dollars $commas $delim/;
-use vars qw/$strip $args $append/;
+use vars qw/$strip $args $append $occurrence $extended/;
 
 # Check options for statistical tests
 &init_var(*args, &FALSE);       # get data from arguments (i.,e., command line)
@@ -65,17 +66,20 @@ my($any_stat_test) = ($ttest || $paired_ttest || $anova || $mann_whitney);
 &init_var(*diff, &FALSE);	# produce a difference column
 &init_var(*labels, &FALSE);	# labels occur in column 1
 &init_var(*headings, &FALSE);	# first line provides column headings 
-&init_var(*f, -1);		# alias for -f1
+&init_var(*occurrence, &FALSE); # second number gives occurence count
+my($needs_two_numbers) = ($any_stat_test || $occurrence);
+my($f1_default) = -1;
+&init_var(*f, $f1_default);	# alias for -f1
 &init_var(*f1, $f);		# 0-based field position for first column
-&init_var(*f2,		    	# 0-based field position for second column
-	  ($any_stat_test ? ($f1 + 1) : -1));
+my($f2_default) = ($needs_two_numbers ? ($f1 + 1) : -1);
+&init_var(*f2, $f2_default);   	# 0-based field position for second column
 &init_var(*col, 		# alias for -col1
-	  ($f1 > -1) ? ($f1 + 1) : (1 + $labels));
+	  ($f1 > $f1_default) ? ($f1 + 1) : (1 + $labels));
 &init_var(*col1, $col);		# main column of data
 &init_var(*col2, 		# other column of data
-	  ($f2 > -1) ? ($f2 + 1) : -1);
-$f1 = ($col1 - 1) if ($f1 == -1);
-$f2 = ($col2 - 1) if ($f2 == -1);
+	  ($f2 > $f2_default) ? ($f2 + 1) : (2 + $labels));
+$f1 = ($col1 - 1) if ($f1 == $f1_default);
+$f2 = ($col2 - 1) if ($f2 == $f2_default);
 &init_var(*fix, &FALSE);	# fix-up column spacing (eg, tabify)
 &assert($f1 > -1);
 &assert($col1 == ($f1 + 1));
@@ -114,6 +118,7 @@ if ($flag_index_change) {
 &init_var(*commas, $strip);	# the data contain commas (to be ignored)
 &init_var(*delim, "\t");        # column separator
 &init_var(*append, &FALSE);     # append the difference, etc.
+&init_var(*extended, &FALSE);   # include extended statistic (median, mode, percentile)
 
 my($sum) = 0;
 my($last_index) = "";
@@ -126,7 +131,7 @@ if ( !defined($ARGV[0])) {
     ## OLD: my($options) = "options = [-stats] [-col=N] [-fix] [-fract] [-labels] [-headings] [-ttest] [-paired_ttest] [-anova] [-mann_whitney] [-stdev] [-cumulative [-average] [-flag_index_change]] [-context] [-dollars] [-commas] [-delim=S] [-verbose] [-append]";
     my($options) = "[-stats] [-col=N] [-fix] [-paired_ttest] [-anova] [-stdev] [-cumulative [-average] [-delim=S] [-verbose] [-append]";
     if ($verbose) {
-	$options .= " [-fract] [-labels] [-headings] [-ttest] [-mann_whitney] [-flag_index_change]] [-context] [-dollars] [-commas]";
+	$options .= " [-fract] [-labels] [-headings] [-ttest] [-mann_whitney] [-flag_index_change]] [-context] [-dollars] [-commas] [-extended]";
     }
     ## OLD: my($example) = "ex: ls -s | $script_name -fix -stdev -\n\n";
     my($example) = "Examples:\n\nls -s | $script_name -fix -stdev -\n\n";
@@ -150,6 +155,7 @@ if ( !defined($ARGV[0])) {
 	$note .= "- Use -index to treate -col2 as index (e.g., for tracking cumulative average differences).\n";
 	$note .= "  This assumes the data is sorted by the index column.\n";
 	$note .= "- Use -dollars and -commas to ignore \$ and , respectively in the data.\n";
+	$note .= "- Use -extended for additional statistics (e.g., median, modem and percentile).\n";
     }
 
     ## OLD: print STDERR "\nusage: $script_name [options] [- | file ...]\n\n$options\n\n$example\n$note\n";
@@ -278,10 +284,29 @@ while (<>) {
     my($num) = $num1;
     if (! $fract) {
 	if (&is_numeric($num)) {
-	    $count++;
-	    $sum += $num1;
-	    &debug_out(6, "num=$num1; sum=%s\n", &round($sum));
-	    push(@data, $num);
+	    ## OLD:
+	    ## $count++;
+	    ## $sum += $num1;
+	    ## &debug_out(6, "num=$num1; sum=%s\n", &round($sum));
+	    ## push(@data, $num);
+
+	    # Regular count (no occurrence field)
+	    if (! $occurrence) {
+		$count++;
+		$sum += $num1;
+		&debug_out(6, "num=$num1; sum=%s\n", &round($sum));
+		push(@data, $num);
+	    }
+	    # Factor in occurrence count
+	    else {
+		$count += $num2;
+		$sum += ($num1 * $num2);
+		&debug_out(6, "num=$num1; count=$num2 sum=%s\n", &round($sum));
+		## TODO: push(@data, [$num1] x $num2;
+		for (my $i = 0; $i < $num2; $i++) {
+		    push(@data, $num1);
+		}
+	    }
 	}
 	else {
 	    &debug_out(5, "Warning skipping non-numeric $num\n");
@@ -409,6 +434,35 @@ if ($stats == &FALSE) {
 		print("data: @data\n");
 	    }
 	    printf "num = %d; mean = %s; stdev = %s; min = %s; max = %s; sum = %s\n", (scalar @data), &round(&mean(@data)), &round(&stdev(@data)), &round(&min_item(@data)), &round(&max_item(@data)), &round($sum);
+	    if ($extended) {
+		my(@sorted_data) = sort { $a <=> $b } @data;
+		&debug_print(4, "sorted_data: (@sorted_data)\n");
+		my($num_values) = (scalar @data);
+		my($median);
+		my($middle_pos) = POSIX::floor($num_values / 2);
+		&debug_print(4, "num_values=$num_values middle_pos=$middle_pos\n");
+		if ($num_values % 2) {
+		    &debug_print(4, "Using unique middle\n");
+		    $median = $sorted_data[$middle_pos];
+		}
+		else {
+		    &debug_out(4, "Averaging values: %s %s\n",
+			       $sorted_data[$middle_pos - 1], $sorted_data[$middle_pos]);
+		    $median = ($sorted_data[$middle_pos] + $sorted_data[$middle_pos - 1]) / 2;
+		}
+		# TODO: definite function for this
+		my($mode) = &run_command("echo @data | count_it.perl '\\S+' | head -1 | cut -f1");
+		## OLD: my($perc95_pos) = POSIX::floor(0.95 * $num_values);
+		## BAD: my($perc95_pos) = &round(0.95 * $num_values, 0);
+		my($perc95_pos) = POSIX::ceil(0.95 * ($num_values - 1));
+		my($perc95) = $sorted_data[$perc95_pos];
+		## OLD: my($perc99_pos) = POSIX::floor(0.99 * $num_values);
+		## BAD: my($perc99_pos) = &round(0.99 * $num_values, 0);
+		my($perc99_pos) = POSIX::ceil(0.99 * ($num_values - 1));
+		my($perc99) = $sorted_data[$perc99_pos];
+		&debug_print(4, "perc95_pos=$perc95_pos perc99_pos=$perc99_pos\n");
+		print "median = $median; mode = $mode; 95th-% = $perc95; 99th-% = $perc99\n";
+	    }
 	}
     }
 }
