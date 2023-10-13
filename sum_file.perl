@@ -110,9 +110,6 @@ $f2 = ($col2 - 1) if ($f2 == $f2_default);
 if ($flag_index_change) {
     &assert($col2 > 0);
 }
-## OLD:
-## &init_var(*dollars, &FALSE);	# the data contain dollar signs (to be ignored)
-## &init_var(*commas, &FALSE);	# the data contain commas (to be ignored)
 &init_var(*strip, &FALSE);      # strip comma's and dollar signs
 &init_var(*dollars, $strip);	# the data contain dollar signs (to be ignored)
 &init_var(*commas, $strip);	# the data contain commas (to be ignored)
@@ -128,12 +125,10 @@ my(@data) = ();
 my($total_num) = 0;
 
 if ( !defined($ARGV[0])) {
-    ## OLD: my($options) = "options = [-stats] [-col=N] [-fix] [-fract] [-labels] [-headings] [-ttest] [-paired_ttest] [-anova] [-mann_whitney] [-stdev] [-cumulative [-average] [-flag_index_change]] [-context] [-dollars] [-commas] [-delim=S] [-verbose] [-append]";
     my($options) = "[-stats] [-col=N] [-fix] [-paired_ttest] [-anova] [-stdev] [-cumulative [-average] [-delim=S] [-verbose] [-append]";
     if ($verbose) {
 	$options .= " [-fract] [-labels] [-headings] [-ttest] [-mann_whitney] [-flag_index_change]] [-context] [-dollars] [-commas] [-extended]";
     }
-    ## OLD: my($example) = "ex: ls -s | $script_name -fix -stdev -\n\n";
     my($example) = "Examples:\n\nls -s | $script_name -fix -stdev -\n\n";
     $example .= "sum_file.perl -headings -anova -f1=3 -f2=4 resnik_typicality.data\n\n";
     if ($verbose) {
@@ -142,7 +137,6 @@ if ( !defined($ARGV[0])) {
 	$example .= "sum_file.perl -diff -append -col1=1 -col2=2 old-test/mendenhall_ex13.1.data\n\n";
     }
 
-    ## OLD: my($note) = "NOTES:\n- Use -'s for cases with no corresponding data.\n";
     my($note) = "Notes:\n- Use -'s for cases with no corresponding data.\n";
     $note .= "- Use empty cells in case one column has more data than another.\n";
     $note .= "- The -f values are 0-based, whereas the -col values are 1-based.\n";
@@ -155,10 +149,9 @@ if ( !defined($ARGV[0])) {
 	$note .= "- Use -index to treate -col2 as index (e.g., for tracking cumulative average differences).\n";
 	$note .= "  This assumes the data is sorted by the index column.\n";
 	$note .= "- Use -dollars and -commas to ignore \$ and , respectively in the data.\n";
-	$note .= "- Use -extended for additional statistics (e.g., median, modem and percentile).\n";
+	$note .= "- Use -extended for additional statistics (e.g., median, mode and percentile).\n";
     }
 
-    ## OLD: print STDERR "\nusage: $script_name [options] [- | file ...]\n\n$options\n\n$example\n$note\n";
     print STDERR "\nUsage: $script_name [options] [- | file ...]\n\n$options\n\n$example\n$note\n";
     &exit();
 }
@@ -270,8 +263,6 @@ while (<>) {
 	for ($i = $start; $i <= $#columns; $i++) {
 	    my($datum) = (&is_numeric($columns[$i]) || ($columns[$i] eq ""))
 		            ? "$columns[$i] " : "\"$columns[$i]\" ";
-		            ## OLD: ? "$columns[$i] " : "";
-	    ## OLD: $column_data[$i] = "" if (!defined($column_data[$i]));
 	    $column_data[$i] .= $datum;
 	    $num_columns_collected++;
 	}
@@ -279,7 +270,6 @@ while (<>) {
     }
 
     # Extract the first number
-    ## OLD: $total_num += 1;
     # TODO: cut down on redundant code
     my($num) = $num1;
     if (! $fract) {
