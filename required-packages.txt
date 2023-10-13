@@ -33,7 +33,10 @@ zip
 #opt# shellcheck
 #opt# colout
 #opt# tesseract-ocr
+#opt# kazam
+#opt# screen
+#opt# nvtop
+## TODO: #opt# brew install act   # see https://github.com/nektos/act
 ## TODO: docker
-## TODO: https://github.com/nektos/act
 ##
 ## TODO: #opt# xyz
