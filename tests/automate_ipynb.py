@@ -151,7 +151,6 @@ class AutomateIPYNB(Main):
         print("\nDuration for each testfiles (in seconds):")
         for url in url_arr:
             start_time = time.time()
-
             driver = webdriver.Firefox() if USE_FIREFOX else webdriver.Chrome()
             driver.get(url)
             time.sleep(1)
@@ -183,6 +182,7 @@ class AutomateIPYNB(Main):
             
             print(f"#{test_count}. {url.split('/')[-1]}: {round(end_time - start_time, 2)}")
             test_count += 1
+        
 
     def run_main_step(self):
         """Process main script"""

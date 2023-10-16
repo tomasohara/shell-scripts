@@ -22,8 +22,6 @@ Automates Jupyter Notebook testing using Selenium Webdriver
 # Standard modules
 import time
 import random
-import subprocess
-import requests
 
 # Installed modules
 from selenium import webdriver
@@ -51,8 +49,7 @@ JUPYTER_TOKEN = "111222"
 JUPYTER_EXTENSION = ".ipynb"
 NOBATSPP = "NOBATSPP"
 IPYNB_HELLO_WORLD_BASIC = "hello-world-basic.ipynb"
-COMMAND_JUPYTER_NOTEBOOK = "jupyter-notebook"
-COMMAND_RUN_JUPYTER_NOTEBOOK = "run-jupyter-notebook"
+COMMAND_RUN_JUPYTER = "run-jupyter-notebook"
 debug.assertion(TESTFILE_URL.endswith("/"))
 
 ## Constant II (Elements for Selenium Webdriver)
@@ -95,14 +92,6 @@ class AutomateIPYNB(Main):
     opt_first_n_testfile = 0
     opt_verbose = None
     driver = None
-
-    ## EXPERIMENTAL: Run run-jupyter-notebook (if not executed before)
-    # def is_jupyter_running(self):
-    #     try:
-    #         response = requests.get("http://127.0.0.1:8888")
-    #         return response.status_code == 200
-    #     except Exception as e:
-    #         return False
 
     def get_entered_text(self, label: str, default: str = "") -> str:
         """
@@ -197,10 +186,9 @@ class AutomateIPYNB(Main):
                 driver.find_element(By.ID, ID_FILELINK).click()
                 time.sleep(2)
                 driver.find_element(By.ID, ID_CLOSE_AND_HALT).click()
-                time.sleep(2)
+                time.sleep(5)
                 ## TODO: put quit in new wrap_up method
                 ## OLD: driver.quit()
-                driver.quit()
             except:
                 system.print_exception_info(f"navigating url {url}")
 
@@ -210,13 +198,10 @@ class AutomateIPYNB(Main):
             test_count += 1
             if END_PAUSE:
                 time.sleep(END_PAUSE)
+            #driver.quit()
 
     def run_main_step(self):
         """Process main script"""
-        ## EXPERIMENTAL: Run run-jupyter-notebook (if not executed before)
-        # if (not self.is_jupyter_running()) or FORCE_RUN_JUPYTER:
-        #     gh.run(COMMAND_RUN_JUPYTER_NOTEBOOK)
-        
         start_time_main = time.time()
         ## OLD: self.automate_testfile(self.return_ipynb_url_array())
         test_files = [self.filename] if (self.filename != "-") else self.return_ipynb_url_array()
