@@ -115,7 +115,7 @@ function run-python-script {
 function test-python-script {
     local default_pytest_opts="-vv --capture=tee-sys"
     if [ "$1" = "" ]; then
-        echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] test-python-script script"
+        echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] test-python-script script"
         return
     fi
     PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
