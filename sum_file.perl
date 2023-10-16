@@ -457,14 +457,17 @@ if ($stats == &FALSE) {
 		    $median = ($sorted_data[$middle_pos] + $sorted_data[$middle_pos - 1]) / 2;
 		}
 
-		# Get mode
-		# TODO: definite function for this
+		# Get mode (n.b., uses smaller value to break ties as w/ scipy.stats.mode)/
 		## OLD: my($mode) = &run_command("echo @data | count_it.perl '\\S+' | head -1 | cut -f1");
 		my(%counts);
-		foreach my $num (@data) {
+		foreach my $num (@sorted_data) {
 		    &incr_entry(\%counts, $num);
 		}
-		my($mode, @rest) = &sorted_hash_keys_reverse_numeric(\%counts);
+		my($mode, $alt_mode, @rest) = &sorted_hash_keys_reverse_numeric(\%counts);
+		# TODO2: generalize tie breaker to more than two modes
+		if (defined($alt_mode) && ($counts{$mode} == $counts{$alt_mode}) && ($alt_mode < $mode)) {
+		    $mode = $alt_mode;
+		}
 
 		# Get 95th and 99th percentile
 		## OLD: my($perc95_pos) = POSIX::floor(0.95 * $num_values);
@@ -602,10 +605,10 @@ sub show_statistics {
 	$ENV{"XLISP_DEBUG"} = "1";
 	}
     if ($interactive) {
-	&cmd("xlispstat.sh $verbose_option $batch $non_x $in_redir $temp_file");
+	&cmd("xlispstat.bash $verbose_option $batch $non_x $in_redir $temp_file");
     }
     else {
-	my($result) = &run_command("xlispstat.sh $verbose_option $batch $non_x $in_redir $temp_file $out_redir", &TL_VERBOSE);
+	my($result) = &run_command("xlispstat.bash $verbose_option $batch $non_x $in_redir $temp_file $out_redir", &TL_VERBOSE);
 	$result =~ s/[^\000]+Copyright.*\n//; 	# drop xlisp banner
 	$result =~ s/.*xlisp_linux: can\'t connect to X server\s*\n//;
 	$result =~ s/\n>.*\n?/\n/g;		# drop command traces
