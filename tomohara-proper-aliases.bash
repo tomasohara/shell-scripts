@@ -88,6 +88,8 @@ function run-python-script {
     out_base="$script_base.$(TODAY).$_PSL_";
     log="$out_base.log";
     out="$out_base.out";
+    ## TEMP:
+    touch "$out";
     ## DEBUG: trace-vars _PSL_ out_base log
     rename-with-file-date "$out_base.out" "$log";
     # shellcheck disable=SC2086
@@ -96,11 +98,13 @@ function run-python-script {
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
 	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
-	    echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$out" 2> "$log";
+	    ## TODO2: echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$out" 2> "$log";
+            echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$log" 2>&1;
 	else
 	    # note: disables - with explicit arguments or if running pytest
 	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
-	    $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
+	    ## TODO2: $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
+	    $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1;
 	fi
     }
     tail "$log" "$out" | truncate-width
@@ -115,12 +119,17 @@ function test-python-script {
         return
     fi
     PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
-    PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@";
+    ## OLD: PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@";
+    # note: just uses .log (i.e., ignore .out)
+    # TODO3: drop inheritance spec in summary
+    # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "ests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
+    DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@" 2>&1;
 }
 
 # color-test-failures(): show color-coded test result (yellow for xfailed and red for regular fail)
+simple-alias-fn color-output 'colout --case-insensitive'
 function color-test-failures {
-    cat "$@" | colout "\bfailed" red | colout "xfailed" yellow | colout "\bpassed" green | colout "xpassed" green faint;
+    cat "$@" | color-output "\bfailed" red | color-output "(xfail(ed)?)" yellow | color-output "\bpassed" green | color-output "xpassed" green faint;
 }
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
