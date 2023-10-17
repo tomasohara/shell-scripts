@@ -2,7 +2,7 @@
 #
 # Notes:
 # - This is used for debugging when running the workflow locally via Nektos/Act:
-#     WORKFLOW_FILE=debug.act local-workflow.sh ...
+#     WORKFLOW_FILE=debug.yml local-workflow.sh ...
 # - Based on tests.yml from Python mezcla package.
 # - It runs with detailed debugging (i.e., DEBUG_LEVEL=5).
 # - Requires special permission for Github workflows.
@@ -50,4 +50,4 @@ jobs:
 
     - name: Run tests
       run: |
-        docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-image
+        docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
