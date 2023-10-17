@@ -573,6 +573,7 @@ function reset-prompt {
     ## DEBUG: echo "reset-prompt: 3. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
 }
 alias reset-prompt-root='reset-prompt "#"'
+alias root-prompt=reset-prompt-root
 alias reset-prompt-dollar='reset-prompt "\$"'
 ## OLD: alias reset-prompt-default="reset-prompt '$PS_symbol'"
 {
