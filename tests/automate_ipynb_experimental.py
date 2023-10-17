@@ -125,23 +125,20 @@ class AutomateIPYNB(Main):
         # A) SELECT_BATSPP selects each and every file
         if not SELECT_NOBATSPP:
             ipynb_files = ipynb_files_filtered.copy()
-        
+
         # B) RANDOMIZE_TESTS randomizes the order of tests
         if RANDOMIZE_TESTS:
             random.shuffle(ipynb_files)
-        
-        # C) DISABLE_SINGLE_INPUT when false only selects one file for test (hello-world-basic.ipynb)
-        if not DISABLE_SINGLE_INPUT:
-            if self.opt_first_n_testfile:
-                ipynb_files = ipynb_files[:self.opt_first_n_testfile]
-            elif not RANDOMIZE_TESTS:
-                ipynb_files = [IPYNB_HELLO_WORLD_BASIC]
-            else:
-                ipynb_files = [random.choice(ipynb_files)]
 
-        if self.opt_include_file:
+        # C) Handle the opt_first_n_testfile and opt_include_file options
+        if self.opt_first_n_testfile:
+            ipynb_files = ipynb_files[:self.opt_first_n_testfile]
+        elif self.opt_include_file:
             # If an include file is specified, only include that file
             ipynb_files = [self.opt_include_file]
+
+        # If neither opt_first_n_testfile nor opt_include_file is specified,
+        # the list ipynb_files will remain as is (all test files).
 
         # Iterate through all files present in the array
         for file in ipynb_files:
@@ -186,19 +183,22 @@ class AutomateIPYNB(Main):
                 driver.find_element(By.ID, ID_FILELINK).click()
                 time.sleep(2)
                 driver.find_element(By.ID, ID_CLOSE_AND_HALT).click()
-                time.sleep(5)
+                time.sleep(2)
                 ## TODO: put quit in new wrap_up method
                 ## OLD: driver.quit()
             except:
                 system.print_exception_info(f"navigating url {url}")
-
-            end_time = time.time()
             
-            print(f"#{test_count}. {url.split('/')[-1]}: {round(end_time - start_time, 2)}")
-            test_count += 1
-            if END_PAUSE:
-                time.sleep(END_PAUSE)
-            #driver.quit()
+            finally:
+                driver.quit()
+                end_time = time.time()
+                
+                print(f"#{test_count}. {url.split('/')[-1]}: {round(end_time - start_time, 2)}")
+                test_count += 1
+                if END_PAUSE:
+                    time.sleep(END_PAUSE)
+                
+            # driver.quit()
 
     def run_main_step(self):
         """Process main script"""
