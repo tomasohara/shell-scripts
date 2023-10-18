@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# summary_stats.bash works in the following manner:
+# summary_stats.bash works in the following manner [OLD]:
 # 1) ./batspp_report.py -k (regenerates all KCOV dirs and output in HTML)
 # 2) [optional] ./kcov_result.py --list --export (returns result according to the KCOV outputs) 
 # 3) Output of the process is also stored in ./summary_stats.txt
@@ -22,16 +22,20 @@ fi
 display_help() {
 	echo "Usage: $0 [-f]"
 	echo "	-o	Shows output log (summary_stats.log)"
+	echo "	-x	Force execution even if admin-like user"
 	echo "	-h	Displays this help message"
 }
 
 # Applying options for output log
 output_log=false
 
-while getopts "oh" option; do
+while getopts "ohx" option; do
 	case $option in
 		o)
 			output_log=true
+			;;
+		x)
+			force_opt=true
 			;;
 		h)
 			display_help
@@ -55,6 +59,7 @@ timestamp=$(date '+%d%b%y-%H%M')
 TMP=${TMP:-/tmp}
 BATSPP_OUTPUT="${BATSPP_OUTPUT:-"$HOME/temp/BatsPP-$timestamp"}"
 BATSPP_TEMP="${BATSPP_TEMP:-"$TMP/BatsPP-$timestamp"}"
+BATSPP_FORCE="${BATSPP_FORCE:-1}"
 mkdir --parents "$BATSPP_OUTPUT" "$BATSPP_TEMP"
 echo "FYI: Using $BATSPP_OUTPUT for ouput and $BATSPP_TEMP for temp. files"
 
@@ -67,10 +72,23 @@ echo "FYI: Using $BATSPP_OUTPUT for ouput and $BATSPP_TEMP for temp. files"
 # BATSPP_REPORT_OPTS can be used to run coverage tests (e.g., --kcov) instead
 # of the regular report (--txt).
 # 
-BATSPP_REPORT_OPTS=${BATSPP_REPORT_OPTS:-"--txt --definitions ../all-tomohara-aliases-etc.bash"}
-# shellcheck disable=SC2086
-OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py $BATSPP_REPORT_OPTS
-batspp_result="$?"
+## OLD: BATSPP_REPORT_OPTS=${BATSPP_REPORT_OPTS:-"--txt --definitions ../all-tomohara-aliases-etc.bash"}
+
+## OLD APPROACH
+## shellcheck disable=SC2086
+# OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py $BATSPP_REPORT_OPTS
+# batspp_result="$?"
+
+## NEW APPROACH: Using force option
+# Run under force mode when -f option enabled
+if $force_opt; then
+	echo "Force option (-f) enabled"
+	FORCE_RUN="$BATSPP_FORCE" OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py $BATSPP_REPORT_OPTS
+	batspp_result="$?"
+else
+	OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py $BATSPP_REPORT_OPTS
+	batspp_result="$?"
+fi
 
 ## NOTE: kcov is not critical, so it is not run as part of workflow tests
 ## TODO: python3 ./kcov_result.py --list --summary --export | tee summary_stats.txt
