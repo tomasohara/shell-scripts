@@ -92,7 +92,12 @@ STRICT_EVAL = system.getenv_bool("STRICT_EVAL", False,
                                  "Use strict evaluation model, such as without whitespace normalization")
 BATS_EVAL = system.getenv_bool("BATS_EVAL", False,
                                "Evaluate tests via bats rather than bash")
+FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
+                               "Force execution even if admin-like user")
+## Added FORCE_RUN: 2023Oct18
 BASH_EVAL = (not BATS_EVAL)
+FORCE_OPTION_DEFAULT = UNDER_DOCKER or FORCE_RUN
+
 ## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
 if SINGLE_STORE:
     BATSPP_STORE = BATS_STORE = TXT_STORE = BATSPP_OUTPUT_STORE
@@ -171,7 +176,8 @@ def main():
     TXT_OPTION = main_app.get_parsed_option(TEXT_REPORTS_ARG)
     KCOV_OPTION = main_app.get_parsed_option(KCOV_REPORTS_ARG)
     ALL_OPTION = main_app.get_parsed_option(ALL_REPORTS_ARG)
-    FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_DOCKER)
+    ## Old: FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_DOCKER)
+    FORCE_OPTION =main_app.get_parsed_option(FORCE_ARG, FORCE_OPTION_DEFAULT)
     CLEAN_OPTION = main_app.get_parsed_option(CLEAN_ARG, CLEAN_DEFAULT)
     BATSPP_SWITCH_OPTION = main_app.get_parsed_option(BATSPP_SWITCH_ARG)
     USE_SIMPLE_BATSPP = (not BATSPP_SWITCH_OPTION)
