@@ -148,16 +148,18 @@ class AutomateIPYNB(Main):
     def automate_testfile(self, url_arr:str):
         """Automates the testfile using URLs from argument"""
         test_count = 1
+        print(f"SELECT_NOBATSPP: {SELECT_NOBATSPP}")
         print("\nDuration for each testfiles (in seconds):")
         for url in url_arr:
             start_time = time.time()
             driver = webdriver.Firefox() if USE_FIREFOX else webdriver.Chrome()
             driver.get(url)
             time.sleep(1)
-            token_input_box = driver.find_element(By.ID, ID_PASSWORD_INPUT)
-            token_input_submit = driver.find_element(By.ID, ID_LOGIN_SUBMIT)
-            token_input_box.send_keys(JUPYTER_PASSWORD)
-            token_input_submit.click()
+            if JUPYTER_PASSWORD:
+                token_input_box = driver.find_element(By.ID, ID_PASSWORD_INPUT)
+                token_input_submit = driver.find_element(By.ID, ID_LOGIN_SUBMIT)
+                token_input_box.send_keys(JUPYTER_PASSWORD)
+                token_input_submit.click()
 
             # TODO: In the case of Invalid Credentials
 
@@ -177,12 +179,9 @@ class AutomateIPYNB(Main):
             driver.find_element(By.ID, ID_CLOSE_AND_HALT).click()
             time.sleep(2)
             driver.quit()
-
             end_time = time.time()
-            
             print(f"#{test_count}. {url.split('/')[-1]}: {round(end_time - start_time, 2)}")
             test_count += 1
-        
 
     def run_main_step(self):
         """Process main script"""
