@@ -104,6 +104,9 @@ expected output:
 Also you can test bash functions:
  [functions + args] => [expected]:
  fibonacci 9 => "0 1 1 2 3 5 8 13 21 34"
+
+Simple usage:
+MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 {prog} xyz.batspp > xyz.log 2>&1
 """
 
 
@@ -1229,7 +1232,7 @@ class FunctionTests(CustomTestsToBats):
 #-------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    app = Batspp(description          = __doc__,
+    app = Batspp(description          = __doc__.format(prog=gh.basename(__file__)),
                  ## TODO: use_temp_base_dir=True,
                  positional_arguments = [(TESTFILE, 'test file path')],
                  boolean_options      = [(VERBOSE,  'show verbose debug'),
