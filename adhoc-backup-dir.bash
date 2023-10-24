@@ -22,34 +22,27 @@ if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     ## TODO: if [ $script ~= *\ * ]; then script='"'$script'"; fi
     ## TODO: base=$(basename "$0" .bash)
     echo ""
-    ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--TODO] [--trace] [--help] [-- | -]"
+    echo "Usage: $0 [--trace] [--help] [-- | -]"
     echo ""
     echo "Examples:"
     echo ""
-    ## TODO: example 1
     echo "$0 --"
     echo ""
-    ## TODO: example 2
     echo "ROOT_BACKUP_DIR=~/usb/sd512 MAX_DAYS_OLD=\$((3*365/12)) MAX_SIZE_CHARS=\$((5 * 1024**2)) $script --"
     echo ""
     echo "Notes:"
     echo "- By default, included files mopdified within 30 days and no larger than 1mb."
     echo "- The -- option is to use default options and to avoid usage statement."
-    ## TODO: add more notes
-    ## echo ""
     echo ""
     exit
 fi
 
 # Parse command-line options
-# TODO: set getopt-type utility
 #
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 trace=0
 verbose=0
 while [ "$moreoptions" = "1" ]; do
-    # TODO : add real options
     if [ "$1" = "--trace" ]; then
         trace=1
     elif [ "$1" = "--verbose" ]; then
@@ -82,9 +75,8 @@ if [ "$verbose" = "1" ]; then
     set -o verbose
 fi
 
-
 # TODO: Do whatever
-
+# NOTE: This evolved from a scriptlet in a notes file (hence the {'s)
 ## {{
 ## TODO: cd /                # for system backup
    TARGET_DIR=${TARGET_DIR:-""}
