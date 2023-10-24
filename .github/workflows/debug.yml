@@ -41,7 +41,7 @@ jobs:
 
     - name: Build docker image
       run: |
-        docker build  --tag shell-scripts-image  -f- . <Dockerfile
+        docker build  --tag shell-scripts-dev  -f- . <Dockerfile
 
     - name: Configure Environment
       run: |
