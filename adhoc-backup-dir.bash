@@ -90,6 +90,8 @@ fi
       # note: uses "fs-root" for label if / and retricts to same file system
       export BASE_DIR=fs-root;
       export MISC_FIND_OPTIONS="-xdev"
+      ## TODO2: exclude adhoc files and directories
+      ## export EXCLUDE_REGEX = "(/proc/|/swapfile/|/tmp/)"
    fi
    export SOURCE_DIR="$PWD"
    ## TODO: pre-select based on existence (i.e., prioritized check)
