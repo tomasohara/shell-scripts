@@ -70,6 +70,7 @@ if [ "$DEBUG_LEVEL" -gt 4 ]; then
 fi
 
 # Set bash regular and/or verbose tracing
+## DEBUG: echo "TRACE=$TRACE VERBOSE=$VERBOSE"
 if [ "${TRACE:-0}" = "1" ]; then
     set -o xtrace
 fi
