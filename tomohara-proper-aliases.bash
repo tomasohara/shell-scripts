@@ -338,6 +338,12 @@ simple-alias-fn image-metadata 'identify -verbose'
 # show-sd-prompts(file): show keywords in image file for Stable Diffusion prompts
 function show-sd-prompts { image-metadata "$@" | egrep --text --ignore-case '(parameters|(negative prompt)):'; }
 
+# distro-version-info(): show various information related to distribution, including window and display managers
+# note: screenfetch sans the ascii art
+# distro-version-info-neo(): likewise using newer neofetch
+alias distro-version-info='screenfetch -n'
+alias distro-version-info-neo='neofetch --off'
+
 #...............................................................................
 # Linux admin
 
