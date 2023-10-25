@@ -54,6 +54,8 @@ debug.assertion(TESTFILE_URL.endswith("/"))
 
 ## Constant II (Elements for Selenium Webdriver)
 SELENIUM_SLEEP_RERUN = 40
+SELENIUM_IMPLICIT_WAIT = 10
+
 # HTML IDs for each component
 ID_PASSWORD_INPUT = "password_input"
 ID_LOGIN_SUBMIT = "login_submit"
@@ -62,9 +64,14 @@ ID_RESTART_RUN_ALL = "restart_run_all"
 ID_FILELINK = "filelink"
 ID_SAVE_CHECKPOINT = "save_checkpoint"
 ID_CLOSE_AND_HALT = "close_and_halt"
+
 # XPATH for some HTML elements
-XPATH_RESTART_RUN_ALL_WARNING_RED = "/html/body/div[8]/div/div/div[3]/button[2]"
-XPATH_INVALID_CREDENTIALS = "/html/body/div[2]/div/div[2]/div"
+## OLD: XPATH_RESTART_RUN_ALL_WARNING_RED = "/html/body/div[8]/div/div/div[3]/button[2]"
+## OLD: XPATH_INVALID_CREDENTIALS = "/html/body/div[2]/div/div[2]/div"
+XPATH_PASSWORD_INPUT = f"//input[@id='{ID_PASSWORD_INPUT}']"
+XPATH_LOGIN_SUBMIT = f"//button[@id='{ID_LOGIN_SUBMIT}']"
+XPATH_RESTART_RUN_ALL_WARNING_RED = "//div/button[text()='Restart and Run All Cells']"
+XPATH_INVALID_CREDENTIALS = "//div[@class='message error' and text()='Invalid credentials']"
 
 ## Environment options
 SELECT_NOBATSPP = system.getenv_bool("SELECT_NOBATSPP", False,
@@ -85,6 +92,8 @@ FORCE_RUN_JUPYTER = system.getenv_bool("FORCE_RUN_JUPYTER", True,
                         description="Runs the command 'run-jupyter-notebook' when script executed (Default: True)")
 END_PAUSE = system.getenv_float("END_PAUSE", 0,
                                 "Number of seconds to pause after running")
+IMPLICIT_WAIT = system.getenv_float("IMPLICIT_WAIT", SELENIUM_IMPLICIT_WAIT,
+                                "Number of seconds to pause Webdriver implicitly")
 
 class AutomateIPYNB(Main):
     """Consists of functions for the automation of testfiles (.ipynb)"""
@@ -106,12 +115,19 @@ class AutomateIPYNB(Main):
 
     def setup(self):
         """Check results of command line processing"""
+        # TODO: rework to make environment optional
         self.opt_include_file = self.get_entered_text(INCLUDE_TESTFILE, self.opt_include_file)
         self.opt_first_n_testfile = int(self.get_entered_text(FIRST_N_TESTFILE, self.opt_first_n_testfile))
         self.opt_verbose = self.get_parsed_option(VERBOSE, self.opt_verbose)
         self.driver = webdriver.Firefox() if USE_FIREFOX else webdriver.Chrome()
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
+    def wrapup(self):
+        """Process end of input"""
+        if self.driver:
+            self.driver(quit)
+            self.driver = None
+        
     def return_ipynb_url_array(self):
         """Returns an array of URLs of IPYNB testfiles"""
         ipynb_files_all = [file for file in system.read_directory("./") if file.endswith(JUPYTER_EXTENSION)]
@@ -146,9 +162,37 @@ class AutomateIPYNB(Main):
             print (file_url)
             ipynb_url.append(file_url)
         return ipynb_url
+
+    def find_element(self, how, elem_id):
+        """Finds ELEM_ID in DOM using HOW (e.g., By.ID)"""
+        # ex: token_input_box = self.find_element(By.ID, ID_PASSWORD_INPUT)
+        debug.trace(5, f"find_element({how}, {elem_id}); self={self}")
+        elem = None
+        try:
+            elem = self.driver.find_element(how, elem_id)
+        except:
+            system.print_exception_info(f"find_element {elem_id}")
+        debug.trace(6, f"find_element() => {elem}")
+        return elem
+
+    def click_element(self, how, elem_id, delay=2):
+        """Finds ELEM_ID in DOM using HOW (e.g., By.ID), and it clicks if found"""
+        # ex: token_input_box = self.find_element(By.ID, ID_PASSWORD_INPUT)
+        debug.trace(5, f"find_element({how}, {elem_id}); self={self}")
+        result = None
+        try:
+            elem = self.driver.find_element(how, elem_id)
+            result = elem.click()
+            time.sleep(delay)
+            ## TODO2 (for automatic debug tracing): system.pause(delay)
+        except:
+            system.print_exception_info(f"click_element {elem_id}")
+        debug.trace(6, f"click_element() => {result}")
+        return result
     
     def automate_testfile(self, url_arr:str):
         """Automates the testfile using URLs from argument"""
+        debug.trace(5, f"automate_testfile({url_arr!r})")
         test_count = 1
         print("\nDuration for each testfiles (in seconds):")
         for url in url_arr:
@@ -160,37 +204,43 @@ class AutomateIPYNB(Main):
             driver = self.driver
             debug.trace_expr(5, url)
             driver.get(url)
-            time.sleep(1)
-            if JUPYTER_PASSWORD:
-                token_input_box = driver.find_element(By.ID, ID_PASSWORD_INPUT)
-                token_input_submit = driver.find_element(By.ID, ID_LOGIN_SUBMIT)
-                token_input_box.send_keys(JUPYTER_PASSWORD)
-                token_input_submit.click()
+            driver.implicitly_wait(IMPLICIT_WAIT)
+            debug.trace_expr(5, JUPYTER_PASSWORD)
+            
+            token_input_box = self.find_element(By.XPATH, XPATH_PASSWORD_INPUT)
+            token_input_submit = self.find_element(By.XPATH, XPATH_LOGIN_SUBMIT)
+
+            if (JUPYTER_PASSWORD.strip() and token_input_box and token_input_submit):
+                # OLD: token_input_box = self.find_element(By.ID, ID_PASSWORD_INPUT)
+                if token_input_box is not None:
+                # OLD: token_input_submit = self.find_element(By.ID, ID_LOGIN_SUBMIT)
+                    token_input_box.send_keys(JUPYTER_PASSWORD)
+                if token_input_box is not None:
+                    token_input_submit.click()
+                # time.sleep(5)
+                driver.implicitly_wait(5)
 
             # TODO: In the case of Invalid Credentials
             try:
-                time.sleep(1)
-                driver.find_element(By.ID, ID_KERNELLINK).click()
-                time.sleep(3)
-                driver.find_element(By.ID, ID_RESTART_RUN_ALL).click()
-                time.sleep(3)
-                driver.find_element(By.XPATH, XPATH_RESTART_RUN_ALL_WARNING_RED).click()
-                time.sleep(AUTOMATION_DURATION_RERUN)
-                driver.find_element(By.ID, ID_FILELINK).click()
-                time.sleep(2)
-                driver.find_element(By.ID, ID_SAVE_CHECKPOINT).click()
-                time.sleep(2)
-                driver.find_element(By.ID, ID_FILELINK).click()
-                time.sleep(2)
-                driver.find_element(By.ID, ID_CLOSE_AND_HALT).click()
-                time.sleep(2)
+                self.click_element(By.ID, ID_KERNELLINK, 1)
+                ok = self.click_element(By.ID, ID_RESTART_RUN_ALL, 3)
+                if not ok:
+                    ok = self.click_element(By.XPATH, XPATH_RESTART_RUN_ALL_WARNING_RED, AUTOMATION_DURATION_RERUN)
+                ## OLD:
+                # if not ok:
+                #     ## TODO1: get the following to work
+                #     ok = self.click_element(By.XPATH, "//div/button[contains(text(), 'Run All Cells')]", AUTOMATION_DURATION_RERUN)
+                self.click_element(By.ID, ID_FILELINK)
+                self.click_element(By.ID, ID_SAVE_CHECKPOINT)
+                self.click_element(By.ID, ID_FILELINK)
+                self.click_element(By.ID, ID_CLOSE_AND_HALT)
                 ## TODO: put quit in new wrap_up method
                 ## OLD: driver.quit()
             except:
                 system.print_exception_info(f"navigating url {url}")
             
             finally:
-                driver.quit()
+                ## OLD: driver.quit()
                 end_time = time.time()
                 
                 print(f"#{test_count}. {url.split('/')[-1]}: {round(end_time - start_time, 2)}")
@@ -199,6 +249,7 @@ class AutomateIPYNB(Main):
                     time.sleep(END_PAUSE)
                 
             # driver.quit()
+            self.wrap_up()
 
     def run_main_step(self):
         """Process main script"""
