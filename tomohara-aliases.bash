@@ -77,8 +77,8 @@
 #    -- 'ENV_VAR=value command ...' runs command with temp. environment setting.
 # - Likewise commonly used Unix features which might not be familiar:
 #    -- 'realpath file' returns full path for file with relative path.
-# - Selectively ignore following shellcheck warnings
-#    -- SC2016: (info): Expressions don't expand in single quotes
+# - Selectively ignores following shellcheck warnings:
+#    -- SC2016: Expressions don't expand in single quotes
 #    -- SC2046: Quote this to prevent word splitting
 #    -- SC2086: Double quote to prevent globbing and word splitting.
 #    -- SC2155: Declare and assign separately to avoid masking return values
