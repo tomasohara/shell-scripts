@@ -56,7 +56,7 @@ TMP=${TMP:-/tmp}
 BATSPP_OUTPUT="${BATSPP_OUTPUT:-"$HOME/temp/BatsPP-$timestamp"}"
 BATSPP_TEMP="${BATSPP_TEMP:-"$TMP/BatsPP-$timestamp"}"
 mkdir --parents "$BATSPP_OUTPUT" "$BATSPP_TEMP"
-echo "FYI: Using $BATSPP_OUTPUT for ouput and $BATSPP_TEMP for temp. files"
+echo "FYI: Using $BATSPP_OUTPUT for output and $BATSPP_TEMP for temp. files"
 
 ## TEMP: Enable flag for deleting aliases in order to force fail some tests
 ## NOTE: this enables a bunch of alias removals in all-tomohara-aliases-etc.bas
@@ -69,7 +69,7 @@ echo "FYI: Using $BATSPP_OUTPUT for ouput and $BATSPP_TEMP for temp. files"
 # 
 BATSPP_REPORT_OPTS=${BATSPP_REPORT_OPTS:-"--txt --definitions ../all-tomohara-aliases-etc.bash"}
 # shellcheck disable=SC2086
-OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py $BATSPP_REPORT_OPTS
+OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py $BATSPP_REPORT_OPTS -
 batspp_result="$?"
 
 ## NOTE: kcov is not critical, so it is not run as part of workflow tests
