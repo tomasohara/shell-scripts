@@ -93,6 +93,11 @@ STRICT_EVAL = system.getenv_bool("STRICT_EVAL", False,
 BATS_EVAL = system.getenv_bool("BATS_EVAL", False,
                                "Evaluate tests via bats rather than bash")
 BASH_EVAL = (not BATS_EVAL)
+OMIT_SHORT_OPTIONS = system.getenv_bool(
+    "OMIT_SHORT_OPTIONS", False,
+    description="Only allow long command line options")
+ALLOW_SHORT_OPTIONS = (not OMIT_SHORT_OPTIONS)
+
 ## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
 if SINGLE_STORE:
     BATSPP_STORE = BATS_STORE = TXT_STORE = BATSPP_OUTPUT_STORE
@@ -139,7 +144,9 @@ def main():
     batspp_count = 0
 
     # 0.2) Option Parsing
-    NO_REPORTS_ARG = "no"
+    # note: --omit-reports used instead of --no-reports for sake of auto-short options
+    NO_REPORTS_ARG = "omit-reports"
+    NO_REPORTS_ALIAS_ARG = "no"
     KCOV_REPORTS_ARG = "kcov"
     TEXT_REPORTS_ARG = "txt"
     ALL_REPORTS_ARG = "all"
@@ -151,6 +158,7 @@ def main():
         description=__doc__.format(script=gh.basename(__file__)).strip("\n"),
         boolean_options=[
             (NO_REPORTS_ARG, "No reports are generated, testfiles are shown"),
+            (NO_REPORTS_ALIAS_ARG, f"Alias for --{NO_REPORTS_ARG}"),
             (KCOV_REPORTS_ARG, f"KCOV (HTML based) reports generated, stored at {KCOV_STORE}"),
             (TEXT_REPORTS_ARG, f"Textfile based reports generated, stored at {TXT_STORE}"),
             (ALL_REPORTS_ARG, "Generates report for all available testfiles (n.b., NOBATSPP testfiles ignored by default)"),
@@ -161,13 +169,15 @@ def main():
         text_options=[
             (DEFINITIONS_ARG, "Script with alias definitions to be sourced"),
         ],
-        skip_input=False,
+        skip_input=True,
         manual_input=False,
-        short_options=True,
+        auto_help=True,
+        short_options=ALLOW_SHORT_OPTIONS,
     )
     #
     debug.assertion(main_app.parsed_args)
-    NO_OPTION = main_app.get_parsed_option(NO_REPORTS_ARG)
+    NO_OPTION_ALIAS = main_app.get_parsed_option(NO_REPORTS_ALIAS_ARG)
+    NO_OPTION = main_app.get_parsed_option(NO_REPORTS_ARG, NO_OPTION_ALIAS)
     TXT_OPTION = main_app.get_parsed_option(TEXT_REPORTS_ARG)
     KCOV_OPTION = main_app.get_parsed_option(KCOV_REPORTS_ARG)
     ALL_OPTION = main_app.get_parsed_option(ALL_REPORTS_ARG)
@@ -366,6 +376,7 @@ def main():
             if KCOV_OPTION:
                 # TODO2: extend run_batspp to handle optional coverage check
                 ## OLD: bats_program = ("python3 ../simple_batspp.py" if USE_SIMPLE_BATSPP else "bats")
+                # note: kcov works best over the Bash version of the test file not batspp (i.e., BASH_EVAL=1)
                 bats_program = "bats"
                 if USE_SIMPLE_BATSPP and BASH_EVAL:
                     bats_program = ""
