@@ -15,7 +15,7 @@
 #   $ docker rmi shell-scripts-dev
 #
 # Note:
-# - Environment overrides not supported dir build, so arg's must be used instead. See
+# - Environment overrides not supported during build, so arg's must be used instead. See
 #       https://vsupalov.com/docker-arg-env-variable-guide/#overriding-env-values
 #
 # Warning:
@@ -29,7 +29,10 @@
 FROM catthehacker/ubuntu:act-20.04
 
 # Set default debug level (n.b., use docker build --build-arg "arg1=v1" to override)
-ARG DEBUG_LEVEL=2
+# Note: maldito act/nektos/docker not overriding properly
+## TODO: ARG DEBUG_LEVEL=2
+ARG DEBUG_LEVEL=4
+## DEBUG: ARG DEBUG_LEVEL=5
 
 # [Work in progress]
 # Set branch override: this is not working due to subtle problem with the tfidf package
