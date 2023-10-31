@@ -2,7 +2,24 @@
 #
 # Note:
 # - Invoked via local-workflows.sh:
-#   act --container-architecture linux/amd64 --pull="false" -P "ubuntu-latest=local/test-act" -W ./.github/workflows/act.yml
+#     WORKFLOW_FILE=act.yml local-workflow.sh ...
+# - This leads to the following type of invocation:
+#     act --container-architecture linux/amd64 --pull="false" -P "ubuntu-latest=local/test-act" -W ./.github/workflows/act.yml
+# - Based initially on tests.yml from Python mezcla package.
+# - It runs with detailed debugging (i.e., DEBUG_LEVEL=5).
+# - Requires special permission for Github workflows.
+# - For more information see following:
+#     https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+#     https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
+# - Based initially on version from https://github.com/LimaBD/batspp.
+# - Running Github Actions with Docker: https://stackoverflow.com/a/64373702
+# - Docker documentation:
+#   https://docs.docker.com/engine/reference/commandline/cli/
+#   https://docs.docker.com/storage/bind-mounts
+#
+# Warning:
+# - *** Changes need to be synchronized in 3 places: Dockerfile, local-workflow.sh, and .github/workflow/*.yml!
+#
 
 name: Act-Tests
 
@@ -15,7 +32,9 @@ jobs:
     
     strategy:
       matrix:
+        ## TODO: os: [ubuntu-20.04, ubuntu-latest]
         os: [ubuntu-20.04]
+        ## TODO: python-version: ["3.8", "3.9", "3.10"]
         python-version: ["3.9"]
 
     container:
@@ -28,9 +47,10 @@ jobs:
 
       - name: Build docker image
         run: |
-          docker build -t shell-scripts-dev -f- . <Dockerfile
+          docker build --tag shell-scripts-dev -f- . <Dockerfile
 
       - name: Configure Environment
+        ## TODO2: clarify why used
         run: |
           echo "PATH=$PATH" >> $GITHUB_ENV
           echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> $GITHUB_ENV
