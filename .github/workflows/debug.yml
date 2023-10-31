@@ -59,9 +59,10 @@ jobs:
         run: |
           ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
           docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
-        env: |
+        env:
           DEBUG_LEVEL: 5
           # Note: to test a subset of notebook, define a regex pattern
           # ex: TEST_REGEX: "(README|testing-tips)"
           ## TODO: TEST_REGEX: pattern
           ## DEBUG: TEST_REGEX: README
+          DUMMY_VAR: 1
