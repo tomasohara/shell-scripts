@@ -3,8 +3,10 @@
 # Notes:
 # - This is used for debugging when running the workflow locally via Nektos/Act:
 #     WORKFLOW_FILE=debug.yml local-workflow.sh ...
-# - Based on tests.yml from Python mezcla package.
-# - It runs with detailed debugging (i.e., DEBUG_LEVEL=5).
+#   Specifically, it runs with detailed debugging (i.e., DEBUG_LEVEL=5).
+# - This leads to the following type of invocation:
+#     act --container-architecture linux/amd64 --pull="false" -P "ubuntu-latest=local/test-act" -W ./.github/workflows/debug.yml
+# - Based initially on tests.yml from Python mezcla package.
 # - Requires special permission for Github workflows.
 # - For more information see following:
 #     https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
@@ -35,19 +37,31 @@ jobs:
         ## TODO: python-version: ["3.8", "3.9", "3.10"]
         python-version: ["3.9"]
 
+    container:
+      image: shell-scripts-dev
+      options: --user=root
+
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-    - name: Build docker image
-      run: |
-        docker build  --tag shell-scripts-dev  -f- . <Dockerfile
+      - name: Build docker image
+        run: |
+          docker build  --tag shell-scripts-dev  -f- . <Dockerfile
 
-    - name: Configure Environment
-      run: |
-        echo "PATH=$PATH" >> $GITHUB_ENV
-        echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> $GITHUB_ENV
+      - name: Configure Environment
+        ## TODO2: clarify why used
+        run: |
+          echo "PATH=$PATH" >> $GITHUB_ENV
+          echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> $GITHUB_ENV
 
-    - name: Run tests
-      run: |
-        docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+      - name: Run tests
+        run: |
+          ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+          docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+        env: |
+          DEBUG_LEVEL: 5
+          # Note: to test a subset of notebook, define a regex pattern
+          # ex: TEST_REGEX: "(README|testing-tips)"
+          ## TODO: TEST_REGEX: pattern
+          ## DEBUG: TEST_REGEX: README
