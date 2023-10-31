@@ -6,7 +6,6 @@
 # - This leads to the following type of invocation:
 #     act --container-architecture linux/amd64 --pull="false" -P "ubuntu-latest=local/test-act" -W ./.github/workflows/act.yml
 # - Based initially on tests.yml from Python mezcla package.
-# - It runs with detailed debugging (i.e., DEBUG_LEVEL=5).
 # - Requires special permission for Github workflows.
 # - For more information see following:
 #     https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
