@@ -20,6 +20,11 @@
 # Warning:
 # - *** Changes need to be synchronized in 3 places: Dockerfile, local-workflow.sh, and .github/workflow/*.yml!
 #
+# TODO:
+# - Use environment file to simplify passing pass environment variables:
+#   See https://docs.docker.com/engine/reference/commandline/run
+#   and act man page (https://github.com/nektos/act/blob/master/cmd/root.go).
+#
 #--------------------------------------------------------------------------------
 # Aside: [maldito] docker image info
 #
@@ -59,14 +64,16 @@ IMAGE_NAME="${REPO_DIR_NAME}-dev"
 ACT_PULL=$(to_bool "${ACT_PULL:-0}")
 LOCAL_REPO_DIR="$PWD"
 DEBUG_LEVEL="${DEBUG_LEVEL:-2}"
-GIT_BRANCH=${GIT_BRANCH:-""}
-BUILD_OPTS=${BUILD_OPTS:-}
-RUN_OPTS=${RUN_OPTS:-}
+GIT_BRANCH="${GIT_BRANCH:-}"
+BUILD_OPTS="${BUILD_OPTS:-}"
+RUN_OPTS="${RUN_OPTS:-}"
+USER_ENV="${USER_ENV:-}"
 # TODO3: put all env. init up here for clarity
 #   CLONE_REPO, AUTO_REQS, RUN_BUILD, BUILD_OPTS, RUN_WORKFLOW, RUN_OPTS, WORKFLOW_FILE
-if [ "$DEBUG_LEVEL" -gt 4 ]; then
+if [ "$DEBUG_LEVEL" -ge 4 ]; then
+    echo "in $0 $*"
     source "${TOM_BIN:-/home/tomohara/bin}/all-tomohara-aliases-etc.bash"
-    trace-vars IMAGE_NAME LOCAL_REPO_DIR DEBUG_LEVEL GIT_BRANCH BUILD_OPTS
+    trace-vars IMAGE_NAME ACT_PULL LOCAL_REPO_DIR DEBUG_LEVEL GIT_BRANCH BUILD_OPTS USER_ENV
 fi
 
 # Set bash regular and/or verbose tracing
@@ -117,13 +124,24 @@ if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
     echo "Running Github Actions locally w/ $file"
     # shellcheck disable=SC2086
     ## TODO: GITHUB_TOKEN="$(gh auth token)" or set via environment
-    act --verbose --env DEBUG_LEVEL="$DEBUG_LEVEL" --container-architecture linux/amd64 --pull="$ACT_PULL" --workflows ./.github/workflows/"$file" $RUN_OPTS
+    # Note: Unfortunately, the environment setting is not affecting the docker
+    # invocation. A workaround is to modify the 'Run tests' steps in the
+    # workflow configuration file (e.g., .github/workflows/debug.yml).
+    act --verbose --env "DEBUG_LEVEL=$DEBUG_LEVEL $USER_ENV" --container-architecture linux/amd64 --pull="$ACT_PULL" --workflows ./.github/workflows/"$file" $RUN_OPTS
     # TODO: docker tag IMAGE-ID shell-scripts-dev
     # EX (see above): docker tag $(docker images --quiet | head -1) shell-scripts-dev
 fi
 
 # Run via docker directly
 if [ "${RUN_DOCKER:-0}" = "1" ]; then
-   echo "Running Tests via Docker"
-   docker run -it --env DEBUG_LEVEL="$DEBUG_LEVEL" --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+    echo "Running Tests via Docker"
+    # Convert VAR1=val1 VAR2=val2 ... to "--env VAR1=val1 --env VAR2=val2 ..."
+    user_env_spec=$(echo " $USER_ENV" | perl -pe 's/ (\w+=)/ --env $1/g;')
+    # shellcheck disable=SC2086
+    docker run -it --env "DEBUG_LEVEL=$DEBUG_LEVEL" $user_env_spec --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+fi
+
+# End processing
+if [ "$DEBUG_LEVEL" -ge 4 ]; then
+    echo "out $0"
 fi
