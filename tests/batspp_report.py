@@ -45,8 +45,9 @@ NOBATSPP = "NOBATSPP"
 ## OLD: OUTPUTPP = ".outputpp"
 OUTPUTPP = ".bats.outputpp"
 
-OUTPUT_DIR = system.getenv_text("OUTPUT_DIR", ".",
-                                "Directory for output files such as .batspp test specs")
+OUTPUT_DIR = system.getenv_text(
+    "OUTPUT_DIR", ".",
+    description="Directory for output files such as .batspp test specs")
 
 BATSPP_STORE = gh.form_path(OUTPUT_DIR, "batspp-only")
 BATS_STORE = gh.form_path(OUTPUT_DIR, "bats-only")
@@ -70,28 +71,37 @@ DEFAULT_MIN_SCORE = 50
 # with string constant definition).
 #
 
-HOME = system.getenv_text("HOME", "~",
-                          "Home directory for user")
+HOME = system.getenv_text(
+    "HOME", "~",
+    description="Home directory for user")
 DOCKER_HOME = "/home/shell-scripts"
 UNDER_DOCKER = ((HOME == DOCKER_HOME) or system.file_exists(DOCKER_HOME))
 ## TODO? UNDER_RUNNER = ("/home/runner" in HOME)
 UNDER_RUNNER = (("/home/runner" in HOME) or UNDER_DOCKER)
 DETAILED_DEBUGGING = debug.detailed_debugging()
 
-TEST_REGEX = system.getenv_value("TEST_REGEX", None,
-                                 "Regex for tests to include; ex: 'c.*' for debugging")
-SHOW_FAILURE_CONTEXT = system.getenv_bool("SHOW_FAILURE_CONTEXT", UNDER_RUNNER,
-                                          "Show context of test failures--useful with Github runner")
-SINGLE_STORE = system.getenv_bool("SINGLE_STORE", False,
-                                  f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
-CLEAN_DEFAULT = system.getenv_bool("CLEAN_OUTPUT", not DETAILED_DEBUGGING,
-                                   f"Whether to clean existing output by remove entire directories")
-TEST_DIR = system.getenv_value("TEST_DIR", None,
-                               "Directory with BatsPP test definitions")
-STRICT_EVAL = system.getenv_bool("STRICT_EVAL", False,
-                                 "Use strict evaluation model, such as without whitespace normalization")
-BATS_EVAL = system.getenv_bool("BATS_EVAL", False,
-                               "Evaluate tests via bats rather than bash")
+TEST_REGEX = system.getenv_value(
+    ## TODO2: rename to BATSPP_TEST_REGEX
+    "TEST_REGEX", None,
+    description="Regex for tests to include; ex: '^c.*' for debugging")
+SHOW_FAILURE_CONTEXT = system.getenv_bool(
+    "SHOW_FAILURE_CONTEXT", UNDER_RUNNER,
+    description="Show context of test failures--useful with Github runner")
+SINGLE_STORE = system.getenv_bool(
+    "SINGLE_STORE", False,
+    description=f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
+CLEAN_DEFAULT = system.getenv_bool(
+    "CLEAN_OUTPUT", not DETAILED_DEBUGGING,
+    description=f"Whether to clean existing output by remove entire directories")
+TEST_DIR = system.getenv_value(
+    "TEST_DIR", None,
+    description="Directory with BatsPP test definitions")
+STRICT_EVAL = system.getenv_bool(
+    "STRICT_EVAL", False,
+    description="Use strict evaluation model, such as without whitespace normalization")
+BATS_EVAL = system.getenv_bool(
+    "BATS_EVAL", False,
+    description="Evaluate tests via bats rather than bash")
 BASH_EVAL = (not BATS_EVAL)
 OMIT_SHORT_OPTIONS = system.getenv_bool(
     "OMIT_SHORT_OPTIONS", False,
@@ -188,6 +198,7 @@ def main():
     DEFINITIONS_SCRIPT = main_app.get_parsed_option(DEFINITIONS_ARG)
     debug.trace_expr(4, NO_OPTION, TXT_OPTION, KCOV_OPTION, FORCE_OPTION, CLEAN_OPTION, BATSPP_SWITCH_OPTION, USE_SIMPLE_BATSPP, DEFINITIONS_SCRIPT)
     RUN_BATS = (TXT_OPTION or not NO_OPTION)
+    debug.assertion(TXT_OPTION or KCOV_OPTION)
 
     # Do check for adminstrative user and exit unless --force
     is_admin = my_re.search(r"root|admin|adm", gh.run("groups"))
@@ -204,10 +215,10 @@ def main():
             gh.run(f"rm -rf {BATSPP_STORE}/*")
             gh.run(f"rm -rf {BATS_STORE}/*")
         
-        if not KCOV_OPTION:
+        if KCOV_OPTION:
             gh.run(f"rm -rf {KCOV_STORE}/*")
     
-        if not TXT_OPTION:
+        if TXT_OPTION:
             gh.run(f"rm -rf {TXT_STORE}/*")
 
     def run_batspp(input_file, output_file):
@@ -262,7 +273,12 @@ def main():
     success_test_array = []
     failure_test_array = []
 
-    print(f"\n=== BATSPP REPORT GENERATOR (simple_batspp.py / BATSPP 1.5.X) ===\n")
+    batspp_version = gh.extract_match_from_text(r"version (\S+)",
+                                                gh.run("batspp --version 2> /dev/null"))
+    print(f"\n=== BATSPP REPORT GENERATOR (simple_batspp.py / BATSPP {batspp_version}) ===\n")
+    ## TEMP (tracing test for act/nektos)
+    print(f"TEST_REGEX={TEST_REGEX} DEBUG_LEVEL={system.getenv('DEBUG_LEVEL')}")
+    debug.trace_expr(1, OUTPUT_DIR, SINGLE_STORE)
 
     for file in files:
         is_ipynb = file.endswith(IPYNB)
@@ -409,7 +425,7 @@ def main():
     NaN = math.nan
     print(f"\n======================================================")
     print(f"SUMMARY STATISTICS:\n")
-    print(f"simple_batspp.py used: {bool(BATSPP_SWITCH_OPTION)}")
+    print(f"simple_batspp.py used: {bool(USE_SIMPLE_BATSPP)}")
     print(f"No. of IPYNB testfiles: {ipynb_count + avoid_count}")
     print(f"No. of BATSPP files (generated): {batspp_count if RUN_BATS else NaN}")
     print(f"No. of FAULTY testfiles: {faulty_count if RUN_BATS else NaN}")
