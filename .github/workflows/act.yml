@@ -36,9 +36,11 @@ jobs:
         ## TODO: python-version: ["3.8", "3.9", "3.10"]
         python-version: ["3.9"]
 
-    container:
-      image: shell-scripts-dev
-      options: --user=root
+    ## TEST:
+    ## NOTE: following is for images on the hub
+    ## container:
+    ##   image: shell-scripts-dev
+    ##   options: --user=root
 
     steps:
       - name: Checkout Repository
