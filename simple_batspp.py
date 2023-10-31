@@ -204,6 +204,8 @@ IGNORE_SETUP_OUTPUT = system.getenv_bool("IGNORE_SETUP_OUTPUT", False,
                                          "Ignore output from setup, wrapup, etc. sections")
 FILTER_SHELLCHECK = system.getenv_bool("FILTER_SHELLCHECK", False,
                                        description="Add shellcheck warning filters")
+OLD_ACTUAL_EVAL = system.getenv_bool("OLD_ACTUAL_EVAL", False,
+                                     description="Use actual output evaluation via implicit subshell")
 # Flags
 USE_INDENT_PATTERN = system.getenv_bool("USE_INDENT_PATTERN", False,
                                         "Use old regex for indentation")
@@ -445,6 +447,7 @@ class Batspp(Main):
     
             
         if not SKIP_BATS:
+            ## TODO2: include time out to account for hanging tests
             debug.trace(T7, f'batspp - running test {self.temp_file}')
             debug.assertion(not (BASH_EVAL and BATS_OPTIONS.strip()))
             eval_prog = ("bats" if not BASH_EVAL else "bash")
@@ -847,13 +850,16 @@ class CustomTestsToBats:
         # the current process state gets modified, not the implicit child process.
         # For example, 'actual=$(test-n-actual)' => 'test-n-actual > out; actual=$(cat out)'
         # See https://stackoverflow.com/questions/23564995/how-to-modify-a-global-variable-within-a-function-in-bash
-        main_body = (f"\tlocal {actual_var} {expected_var}\n" +
-                     ## BAD: f'\t{actual_var}="$({actual_function})"\n' +
-                     ## TODO: f'\tout_file="$TMP/{unspaced_title}.out"\n' +
+        main_body = f"\tlocal {actual_var} {expected_var}\n"
+        if OLD_ACTUAL_EVAL:
+            main_body += f'\t{actual_var}="$({actual_function})"\n'
+        else:
+            main_body += (
                      f'\tout_file="{unspaced_title}.out"\n' +
-                     f'\t{actual_function} > "$out_file"\n' +
-                     f'\t{actual_var}="$(cat "$out_file")"\n' +
-                     f'\t{expected_var}="$({expected_function})"\n')
+                     ## TODO: f'\tout_file="$TMP/{unspaced_title}.out"\n' +
+                     f'\t{actual_function} >| "$out_file"\n' +
+                     f'\t{actual_var}="$(cat "$out_file")"\n')
+        main_body += f'\t{expected_var}="$({expected_function})"\n'
         if NORMALIZE_WHITESPACE:
             main_body += (f'\t{actual_var}="$(normalize-whitespace \"${actual_var}\")"\n' +
                           f'\t{expected_var}="$(normalize-whitespace \"${expected_var}\")"\n')
