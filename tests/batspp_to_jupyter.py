@@ -1,144 +1,228 @@
-#!/usr/bin/env python3
+#! /usr/bin/env python
+# 
+# DATE: 2023-07-28 (08:44 +05:45 GMT) | INDEV: batspp_to_jupyter_EXPERIMENTAL.py
+# DATE: 2023-11-01 (22:00 +05:45 GMT) | batspp_to_jupyter.py
 
-## DATE: 2023-07-28 (08:44 +05:45 GMT)
-## INDEV: batspp_to_jupyter.py
+# Converts batspp based testfiles to Jupyter Notebook 
+# Uses nbformat for batspp_to_ipynb conversion (https://pypi.org/project/nbformat/)
+# TLDR: Reverses the work of jupyter_to_batspp.py
+# TODO: 
+# 1. Add environment options
+# 2. Add argparsing options
+# Author: Aviyan Acharya (avyn.xyz@gmail.com)
 
-## Converts batspp based testfiles to Jupyter Notebook 
-## Uses nbformat for txt2ipynb conversion (https://pypi.org/project/nbformat/)
-## TLDR: Reverses the work of jupyter_to_batspp.py
-## TODO: (A LOT!)
-## 1. Generalize the script
-## 2. Convert to a class based approach
-## 3. Set the default kernel to bash_kernel
-##
-## Author: Aviyan Acharya
+"""
+Converts batspp based testfiles to Jupyter Notebook 
+Uses nbformat for txt2ipynb conversion (https://pypi.org/project/nbformat/)
+"""
 
-# Standard Libraries
+# Standard packages
 import os
-import json
 
-# Installed Libraries 
+# Installed packages
 import nbformat
 
-# Local Libraries
+# Local packages
 from mezcla import debug
-from mezcla.main import Main
-from mezcla import system
-from mezcla.my_regex import my_re
 from mezcla import glue_helpers as gh
+from mezcla.main import Main
+from mezcla.my_regex import my_re
+from mezcla import system
 
-# Command-line labels
-OUTPUT       = 'output'
-VERBOSE      = 'verbose'
-SOURCE       = 'source'
+# Constants 0 (Command Line Labels)
+OUTPUT = "output"
+VERBOSE = "verbose"
+SOURCE = "source"
+BATSPP_FILE = "batspp-file"
 
-# Other constants
-JUPYTER_EXTENSION = 'ipynb'
-BATSPP_EXTENSION  = 'batspp'
-TESTFILE_EXTENSION = ['test', 'txt', 'batspp']
-JUPYTER_STORE = "test_to_jupyter"
-NOTEBOOK_KERNEL = "bash_kernel"
+# Constants I (Script Initials)
+TL = debug.TL
 
-## Conditions: Storage exists
-jupyter_store_exists = gh.file_exists(JUPYTER_STORE)
+# Constants II (Other Constants)
+EXTENSION_JUPYTER = "ipynb"
+EXTENSION_BATSPP = "batspp"
+EXTENSION_TESTFILES = ["test", "txt", "batspp"]
+DIR_JUPYTER_STORE = "test-to-jupyter"
+KERNEL_NOTEBOOK = "bash_kernel"
 
-# PREREQUISITES: Read the plain text file
-TEXT_FILE_PATH = "dir-aliases-test-revised-v2.sh"
+# Environment Variables
+OUTPUT_PATH = system.getenv_text("OUTPUT_PATH", ".",
+                description=f"Target output .{EXTENSION_BATSPP} file path (Default: .)")
 
-# 0. Duplicate text_lines array when required
-def duplicate_text_lines():
-    return text_lines.copy()
+class BatsppToJupyter(Main):
+    """Converts Batspp tests to Jupyter tests"""
+    # output = ""
+    batspp_file = ""
+    # verbose = None
 
-def return_test_basename(test_name:str, add_ipynb_extenstion=False):
-    basename = os.path.splitext(test_name)[0]
-    return basename if not add_ipynb_extenstion else (basename+".ipynb")
+    def get_entered_text(self, label: str, default: str = "") -> str:
+        """
+        Return entered LABEL var/arg text by command-line or environment variable,
+        also can be specified a DEFAULT value
+        """
+        result = (self.get_parsed_argument(label=label.lower()) or
+                system.getenv_text(var=label.upper()))
+        result = result if result else default
+        debug.trace(7, f'BatsppToJupyter.get_entered_text(label={label}) => {result}')
+        return result
 
-def extract_test_content(test_name:str):
-    return gh.read_lines(test_name)
+    def setup(self):
+        """Check results of command line processing"""
+        debug.trace_fmtd(TL.DETAILED, "Script.setup(): self={s}", s=self)
+        self.batspp_file = self.get_entered_text(BATSPP_FILE, self.batspp_file)
+        # self.output = self.get_parsed_argument(OUTPUT, self.output)
+        # self.verbose = self.get_parsed_option(VERBOSE, not self.verbose) 
+        debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
-text_lines = extract_test_content(TEXT_FILE_PATH)
-CONVERTED_JUPYTER_PATH = return_test_basename(TEXT_FILE_PATH, True)
+    def jupyter_store_exists(self):
+        """Checks if directory to store Jupyter file exists"""
+        result =  gh.file_exists(DIR_JUPYTER_STORE)
+        debug.trace(7, f'BatsppToJupyter.jupyter_store_exists() => {result}')
+        return result
+    
+    def get_seperating_index(self, arr, source=False):
+        """Seperates the index of given array acc. to source (bool)"""
+        result = []
+        for index, line in enumerate(arr):
+            if source:
+                if line and line[0] in ["$", "#"]:
+                    result.append(index)
+            else:
+                if not line or line[0] not in ["$", "#"]:
+                    result.append(index)
+        debug.trace(7, f"BatsppToJupyter.get_seperating_index({arr, source}) => {result}")
+        return result
+    
+    def group_cell_items(self, arr):
+        """Performs grouping of cell items"""
+        result = []
+        current_group = [arr[0]]
 
-# 1. Seperating index of test cells: seperates output index (default)
-def get_separating_index(array, source=False):
-    separating_index = []
-    for index, line in enumerate(array):
-        if source:
-            if line and line[0] in ["$", "#"]:
-                separating_index.append(index)
-        else:
-            if not line or line[0] not in ["$", "#"]:
-                separating_index.append(index)
-    return separating_index
+        for i in range(1, len(arr)):
+            if arr[i] - arr[i-1] == 1:
+                current_group.append(arr[i])
+            else:
+                result.append(current_group)
+                current_group = [arr[i]]
+        result.append(current_group)
+        debug.trace(7, f"BatsppToJupyter.group_cell_items({arr}) => {result}")
+        return result
+    
+    def remove_prompt_sign(self, line:str, source=True):
+        """Remove any prompt sign ($) present from the line"""
+        result = line[2:] if (line.startswith("$") and source) else line
+        debug.trace(7, f"BatsppToJupyter.remove_prompt_sign({line, source}) => {result}")
+        return result
+    
+    def return_test_basename(self, test:str, add_ipynb_extension=True):
+        """Returns basename of the testfile"""
+        basename = os.path.splitext(test)[0]
+        result = basename if not add_ipynb_extension else (basename+".ipynb")
+        debug.trace(7, f"BatsppToJupyter.remove_prompt_sign({test, add_ipynb_extension}) => {result}")
+        return result
+    
+    def append_batspp_to_jupyter_dict(self, dict:dict, group_arr, temp_arr, source=True):
+        """Appends data to SOURCE or OUTPUT of Jupyter Notebook"""
+        dict_init = dict.copy()
+        dict_key = SOURCE if source else OUTPUT
+        for index_arr in group_arr:
+            if not isinstance(index_arr, (list, tuple)):
+                continue
+            index_content = []
+            for i in index_arr:
+                content = self.remove_prompt_sign(temp_arr[i], source) + "\n"
+                index_content.append(content)
+            dict[dict_key].append(index_content)
+        debug.trace(7, f"BatsppToJupyter.append_batspp_to_jupyter_dict({dict_key}, {dict_init}) => {dict}")
+        # return dict
+    
+    def is_equal_length_dict(self, dict):
+        """Checks if the length of dictionary is equal to dict values"""
+        length_arr = [len(value) for value in dict.values()]
+        result = all(length == length_arr[0] for length in length_arr)
+        debug.trace(7, f"BatsppToJupyter.is_equal_length_dict({dict}) => {result}")
+        return result
 
-# 2. Grouping of seperated index: consecutive index = single group
-def group_cell_items(input_list):
-    result = []
-    current_group = [input_list[0]]
+    def return_cell_count(self, dict):
+        """Returns count of the Jupyter cells"""
+        result = len(dict[SOURCE]) if self.is_equal_length_dict(dict) else -1
+        debug.trace(7, f"BatsppToJupyter.return_cell_count({dict}) => {result}")
+        return result
 
-    for i in range(1, len(input_list)):
-        if input_list[i] - input_list[i - 1] == 1:
-            current_group.append(input_list[i])
-        else:
-            result.append(current_group)
-            current_group = [input_list[i]]
+    def add_cell_contents(self, notebook, source, output):
+        code_cell = nbformat.v4.new_code_cell(source=source)
+        notebook.cells.append(code_cell)
+        result = nbformat.v4.new_output(output_type="display_data",
+                                        data={"text/plain":output})
+        code_cell.outputs.append(result)
+        debug.trace(7, f"BatsppToJupyter.add_cell_contents{notebook}, {source}, {output}) => {code_cell}")
 
-    result.append(current_group)
-    return result
+    def msg_successful_convert(self, str_test_init:str, str_test_final:str):
+        return f"\nConverted {str_test_init} to {str_test_final} successfully.\n"
 
-# 3. Remove '$' from the starting of each cell source
-def remove_prompt_sign(line:str, source=True):
-    return line[2:] if (line.startswith("$") and source) else line
+    def process_nb(self):
+        """Assembles the functions and performs the processing"""
+        TEST_FILE_PATH = self.batspp_file
+        converted_jupyter_path = self.return_test_basename(TEST_FILE_PATH, True)
+        text_lines = gh.read_lines(TEST_FILE_PATH)
+        
+        b2j_dict = {SOURCE:[], OUTPUT:[]}
+        nb = nbformat.v4.new_notebook()
 
-# 4. Store the grouped items in dictionary
-def append_test_to_jupyter_dict(dict, group_arr, source=True):
-    dict_key = "source" if source else "output"
-    for index_arr in group_arr:
-        index_content = []
-        for i in index_arr:
-            content = remove_prompt_sign(text_lines_TEMP2[i], source) + "\n"
-            index_content.append(content)
-        dict[dict_key].append(index_content)
+        text_lines_temp1 = text_lines.copy()
+        text_lines_temp2 = text_lines.copy()
+        arr_output_index = self.get_seperating_index(text_lines_temp1, source=False)
+        arr_source_index = self.get_seperating_index(text_lines_temp1, source=True)
+        arr_output_group = self.group_cell_items(arr_output_index)
+        arr_source_group = self.group_cell_items(arr_source_index)
 
-# 5. Check if dictionary has equal lengths
-def check_equal_length(dict):
-    lengths = [len(value) for value in dict.values()]
-    return all(length == lengths[0] for length in lengths)
+        self.append_batspp_to_jupyter_dict(b2j_dict, arr_output_group, text_lines_temp2, source=False)
+        self.append_batspp_to_jupyter_dict(b2j_dict, arr_source_group, text_lines_temp2, source=True)
+        
+        cell_count = self.return_cell_count(dict=b2j_dict)
+        
+        if self.is_equal_length_dict(b2j_dict):
+            for index in range(cell_count):
+                self.add_cell_contents(notebook=nb, source=b2j_dict[SOURCE][index], output=b2j_dict[OUTPUT][index])
+            nbformat.write(nb, converted_jupyter_path)
 
-# 6. Return number of cells in dictionary
-def return_cell_count(dict:dict):
-    return len(dict["source"]) if check_equal_length(dict) else -1    
+        print(self.msg_successful_convert(TEST_FILE_PATH, converted_jupyter_path))
 
-# 7. Add cell contents to the jupyter file (simple_text or stdout?)
-def add_cell_contents(notebook, cell_source, cell_output):
-    code_cell = nbformat.v4.new_code_cell(source=cell_source)
-    notebook.cells.append(code_cell)
-    cell_result = nbformat.v4.new_output(output_type="display_data", data={"text/plain":cell_output})
-    code_cell.outputs.append(cell_result)
+    def run_main_step(self):
+        """Process main script"""
+        batspp_content = system.read_file(self.batspp_file)
+        debug.trace_expr(5, batspp_content)
+        debug.assertion(batspp_content != '', f'Error: {self.batspp_file} not found or is empty')
+        try:
+            is_batspp_file = any(self.batspp_file.endswith(ext) for ext in EXTENSION_BATSPP)
+        except:
+            is_batspp_file = False
+            # Returns extension of self.batspp_file
+            ext = os.path.splitext(self.batspp_file)[-1][1:]
+            system.print_exception_info(f"Invalid Extension: {ext}, not a BATSPP testfile")
+        if is_batspp_file:
+            self.process_nb()
 
-# MAIN
-test_to_jupyter_dict = {
-    "source":[],
-    "output":[]
-}
+        ## TODO: Working on test file not generating issue
+        ## os.path.splitext(file_path)[-1][1:]
 
-nb = nbformat.v4.new_notebook()
-text_lines_TEMP1 = duplicate_text_lines()
-text_lines_TEMP2 = duplicate_text_lines()
-output_index_arr = get_separating_index(text_lines_TEMP1, source=False)
-source_index_arr = get_separating_index(text_lines_TEMP1, source=True)
-output_group_arr = group_cell_items(output_index_arr)
-source_group_arr = group_cell_items(source_index_arr)
-
-append_test_to_jupyter_dict(test_to_jupyter_dict, output_group_arr, source=False)
-append_test_to_jupyter_dict(test_to_jupyter_dict, source_group_arr, source=True)
-cell_count = return_cell_count(dict=test_to_jupyter_dict)
-
-if check_equal_length(test_to_jupyter_dict):
-    for index in range(cell_count):
-        add_cell_contents(
-            notebook=nb,
-            cell_source=test_to_jupyter_dict["source"][index],
-            cell_output=test_to_jupyter_dict["output"][index]
+def main():
+    """Entry point"""
+    app = BatsppToJupyter(
+        description=__doc__.format(script=gh.basename(__file__)),
+        skip_input=True,
+        manual_input=True,
+        auto_help=False,
+        multiple_files=False,
+        # boolean_options=[(OUTPUT, ""),
+        #                  (VERBOSE, ""),
+        #                 ],
+        positional_arguments=[(BATSPP_FILE, "Test batspp path")]
         )
-    nbformat.write(nb, CONVERTED_JUPYTER_PATH)   
+    app.run()
+
+#-------------------------------------------------------------------------------
+    
+if __name__ == '__main__':
+    debug.trace_current_context(level=TL.QUITE_VERBOSE)
+    main()
