@@ -6,9 +6,6 @@
 # Converts batspp based testfiles to Jupyter Notebook 
 # Uses nbformat for batspp_to_ipynb conversion (https://pypi.org/project/nbformat/)
 # TLDR: Reverses the work of jupyter_to_batspp.py
-# TODO: 
-# 1. Add environment options
-# 2. Add argparsing options
 # Author: Aviyan Acharya (avyn.xyz@gmail.com)
 
 """
@@ -30,10 +27,11 @@ from mezcla.my_regex import my_re
 from mezcla import system
 
 # Constants 0 (Command Line Labels)
+BATSPP_FILE = "batspp-file"
 OUTPUT = "output"
 VERBOSE = "verbose"
 SOURCE = "source"
-BATSPP_FILE = "batspp-file"
+TXT = "txt"
 
 # Constants I (Script Initials)
 TL = debug.TL
@@ -41,19 +39,20 @@ TL = debug.TL
 # Constants II (Other Constants)
 EXTENSION_JUPYTER = "ipynb"
 EXTENSION_BATSPP = "batspp"
-EXTENSION_TESTFILES = ["test", "txt", "batspp"]
+EXTENSION_TESTFILES = ["batspp", "test", "txt"]
 DIR_JUPYTER_STORE = "test-to-jupyter"
 KERNEL_NOTEBOOK = "bash_kernel"
 
 # Environment Variables
-OUTPUT_PATH = system.getenv_text("OUTPUT_PATH", ".",
+output_path = system.getenv_text("OUTPUT_PATH", ".",
                 description=f"Target output .{EXTENSION_BATSPP} file path (Default: .)")
 
 class BatsppToJupyter(Main):
     """Converts Batspp tests to Jupyter tests"""
-    # output = ""
+    output = ""
     batspp_file = ""
-    # verbose = None
+    verbose = None
+    txt = None
 
     def get_entered_text(self, label: str, default: str = "") -> str:
         """
@@ -70,8 +69,9 @@ class BatsppToJupyter(Main):
         """Check results of command line processing"""
         debug.trace_fmtd(TL.DETAILED, "Script.setup(): self={s}", s=self)
         self.batspp_file = self.get_entered_text(BATSPP_FILE, self.batspp_file)
-        # self.output = self.get_parsed_argument(OUTPUT, self.output)
-        # self.verbose = self.get_parsed_option(VERBOSE, not self.verbose) 
+        self.output = self.get_parsed_argument(OUTPUT, self.output)
+        self.verbose = self.get_parsed_option(VERBOSE, not self.verbose) 
+        self.txt = self.get_parsed_option(TXT, self.txt) 
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
     def jupyter_store_exists(self):
@@ -150,6 +150,7 @@ class BatsppToJupyter(Main):
         return result
 
     def add_cell_contents(self, notebook, source, output):
+        """Adds contents to the cells of Jupyter notebook"""
         code_cell = nbformat.v4.new_code_cell(source=source)
         notebook.cells.append(code_cell)
         result = nbformat.v4.new_output(output_type="display_data",
@@ -157,14 +158,23 @@ class BatsppToJupyter(Main):
         code_cell.outputs.append(result)
         debug.trace(7, f"BatsppToJupyter.add_cell_contents{notebook}, {source}, {output}) => {code_cell}")
 
-    def msg_successful_convert(self, str_test_init:str, str_test_final:str):
-        return f"\nConverted {str_test_init} to {str_test_final} successfully.\n"
+    def msg_success_convert(self, str_test_init:str, str_test_final:str):
+        result = f"Converted {str_test_init} to {str_test_final} successfully."
+        debug.trace(7, f"BatsppToJupyter.msg_success_convert({str_test_init}, {str_test_final}) => {result}")
+        return result
+    
+    def return_output_path(self):
+        """Returns appropriate Jupyter testfile path acc. to given options"""
+        temp = self.return_test_basename(self.output, True) if self.output else self.return_test_basename(self.batspp_file, True)
+        result = str(os.path.splitext(temp)[0]+ "_" + EXTENSION_JUPYTER + "." + EXTENSION_TESTFILES[-1]) if self.txt else temp
+        debug.trace(7, f"BatsppToJupyter.return_output_path() => {result}\n({self.batspp_file}, output={self.output}, txt={self.txt})")
+        return result
 
     def process_nb(self):
         """Assembles the functions and performs the processing"""
-        TEST_FILE_PATH = self.batspp_file
-        converted_jupyter_path = self.return_test_basename(TEST_FILE_PATH, True)
-        text_lines = gh.read_lines(TEST_FILE_PATH)
+        batspp_path = self.batspp_file
+        output_path = self.return_output_path()
+        text_lines = gh.read_lines(batspp_path)
         
         b2j_dict = {SOURCE:[], OUTPUT:[]}
         nb = nbformat.v4.new_notebook()
@@ -184,9 +194,9 @@ class BatsppToJupyter(Main):
         if self.is_equal_length_dict(b2j_dict):
             for index in range(cell_count):
                 self.add_cell_contents(notebook=nb, source=b2j_dict[SOURCE][index], output=b2j_dict[OUTPUT][index])
-            nbformat.write(nb, converted_jupyter_path)
+            nbformat.write(nb, output_path)
 
-        print(self.msg_successful_convert(TEST_FILE_PATH, converted_jupyter_path))
+        print(self.msg_success_convert(batspp_path, output_path))
 
     def run_main_step(self):
         """Process main script"""
@@ -202,9 +212,10 @@ class BatsppToJupyter(Main):
             system.print_exception_info(f"Invalid Extension: {ext}, not a BATSPP testfile")
         if is_batspp_file:
             self.process_nb()
-
-        ## TODO: Working on test file not generating issue
-        ## os.path.splitext(file_path)[-1][1:]
+        if self.verbose:
+            final_stdout = f"Resulting ipynb file saved on {self.return_output_path()}"
+            system.print_stderr("=" * len(final_stdout))
+            system.print_stderr(final_stdout)
 
 def main():
     """Entry point"""
@@ -214,9 +225,9 @@ def main():
         manual_input=True,
         auto_help=False,
         multiple_files=False,
-        # boolean_options=[(OUTPUT, ""),
-        #                  (VERBOSE, ""),
-        #                 ],
+        text_options=[(OUTPUT, "Target output .ipynb file path")],
+        boolean_options=[(VERBOSE, "Show verbose debug"),
+                         (TXT, "Returns output in text file")],
         positional_arguments=[(BATSPP_FILE, "Test batspp path")]
         )
     app.run()
