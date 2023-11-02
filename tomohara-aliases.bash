@@ -1142,14 +1142,20 @@ alias em-tags=etags
 ## cond-export EMACS_LARGE_FONT "-DAMA-Ubuntu<space>Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"
 cond-export EMACS_LARGE_FONT "-DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"
 cond-export EMACS_OPTIONS ""
-function em-large-default { export EMACS_OPTIONS="$EMACS_OPTIONS -fn '$EMACS_LARGE_FONT'"; }
+# Note: em-large-default-old not quite functional with other em-xyz aliases
+function em-large-default-old { export EMACS_OPTIONS="$EMACS_OPTIONS -fn '$EMACS_LARGE_FONT'"; }
 function em-large { em-fn "$EMACS_LARGE_FONT" "$@"; }
+# Note: (un)set-large-emacs-font just changed the font used by tpo-invoke-emacs.sh
 function set-large-emacs-font { export EMACS_FONT="$EMACS_LARGE_FONT"; }
 function unset-large-emacs-font { unset EMACS_FONT; }
+alias em-set-large-font=set-large-emacs-font
+alias em-unset-large-font=unset-large-emacs-font
+#
 alias em-nw='emacs -l ~/.emacs --no-windows'
 ## TODO: alias em-tpo='emacs -l ~/.emacs'
 alias em-tpo-nw='emacs -l ~/.emacs --no-windows'
 alias em_nw='em-nw'
+#
 # em-file(filename): edit filename with current directory set to it's dir
 # note: This avoids stupid link resolution problem under cygwin. It is
 # also useful so that Emacs current directory is set appropriately.
@@ -1986,10 +1992,21 @@ alias rename-utf8-encoded-sledgehammer='rename-files -quick -global -regex "[\x8
 ## OLD: alias rename-emoji=rename-utf8-encoded
 # via https://en.wikipedia.org/wiki/UTF-8:
 #    U+10000    U+10FFFF        11110xxx        10xxxxxx        10xxxxxx        10xxxxxx;   note: F[8-F]{3}
-# rename-utf8-emoji: replace U+10000 characters in filenames with _'s
+# rename-emoji: replace emoji characters in filenames with _'s (e.g., U+10000+ chars and U+26nn)
 # note: emoji considered synonymous with emoticon
 ## OLD: alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"'
-alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"'
+## BAD: alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"'
+# note: check specifically for code blocks: U+26D3 [chains] is e29b93; U+1F917 [hugging face] is f09fa497
+alias rename-emoji='rename-files -quick -global -regex "(\xE2[\x80-\xFF]{2})|(\xF0[\x80-\xFF]{3})" "_"'
+# rename-emoji-verbose: replace emoji characters in filenames with brief char description (e.g., smiley-face)
+function rename-emoji-verbose {
+    # ex: "LangChain_🦜⛓️_-_Zep" => "LangChain_parrot_chains_-_Zep"
+    local f new_f
+    for f in "$@"; do
+        new_f=$(echo "$f" | DURING_ALIAS=1 convert_emoticons.py - | perl -pe 's/[\[\]]/_/g; s/__+/_/g;')
+        rename-files -t "$f" "$new_f" "$f"
+    done
+}
 ## TODO2 (handle cases like U+2728 [sparkle] w/ UTF8 0xE29CA8):
 #    alias rename-utf8-emoji-misc='rename-files -quick -global -regex "[\xE0-\xFF][\x80-\xFF]{2,3}" "_"'
 alias rename-bad-dashes="rename-files -quick -global -regex ' \-' '_'; rename-files -quick -global -regex '\-' '_' -*"; 
