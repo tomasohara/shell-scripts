@@ -337,8 +337,8 @@ function git-commit-and-push {
     log=$(get-temp-log-name "commit")
     #
     # TODO: rework so that message passed as argument (to avoid stale messages from environment)
-    local message="$GIT_MESSAGE";
-    if [ "$message" = "..." ]; then
+    local message="$GIT_MESSAGE"; ## Lorenzo review: shouldn't this be as simple as using "local message = ${1:-"$GIT_MESSAGE"}"
+    if [ "$message" = "..." ]; then 
         echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
         return 1
     fi
@@ -357,7 +357,7 @@ function git-commit-and-push {
     local dir
     if [ "$file_spec" = "" ]; then
         echo "Warning: *** No file specified (cuidado!)"
-    elif [ "${GIT_SKIP_ADD:-0}" = "1" ]; then
+    elif [ "${GIT_SKIP_ADD:-0}" = "1" ]; then ##Lorenzo review: The name of the function is confusing as it doesn't indicate it does "git add", just commit and push
         echo "skipping: git add $*"
     else
         ## OLD: echo "issuing: git add \"$*\""
@@ -501,7 +501,8 @@ function git-reset-file {
     git-alias-review-log "$log"
 }
 #
-alias git-revert-file-alias='git-reset-file'
+##Lorenzo review: having a git-revert alias that uses git reset --hard sounds like a mistake waiting to happen if you're not familiar with what it actually does   
+alias git-revert-file-alias='git-reset-file' 
 ## TODO: alias git-reset-hard-alias='git-reset-file --hard'
 
 # git-restore-file-alias(file, ...): move FILE(s) out of way and "revert" to version in repo (i.e., reset)
