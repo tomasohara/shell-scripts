@@ -36,10 +36,11 @@ echo "in $0: $(date)" >> "$log"
 # pre-init: OTHER_REPOS="$HOME/text-categorization $HOME/programs/python/visual-diff"
 other_repos="${OTHER_REPOS:-}"
 for dir in ~/bin ~/mezcla ~/visual-diff ~/programs/bash/tom-shell-scripts ~/programs/python/tom-mezcla $other_repos; do
-   echo "$dir" >> "$log"
-   command cd "$dir"
-   git-update-plus >> "$log"
-   python -c 'print("-" * 80);' >> "$log"
+    echo "$dir"
+    echo "$dir" >> "$log"
+    command cd "$dir"
+    git-update-plus >> "$log"
+    python -c 'print("-" * 80);' >> "$log"
 done
 
 check-errors-excerpt "$log"
