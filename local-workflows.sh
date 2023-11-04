@@ -2,6 +2,7 @@
 #
 # This script uses GitHub local actions via act:
 #    https://github.com/nektos/act
+# It builds a Docker image and runs a Github Actions workflow locally.
 #
 # It also has support for using directly via docker. This includes
 # building the image and running via docker, done separately to support
@@ -114,7 +115,7 @@ if [ "${RUN_BUILD:-1}" = "1" ]; then
     # Also, --build-arg misleading: see
     #    https://stackoverflow.com/questions/42297387/docker-build-with-build-arg-with-multiple-arguments
     # shellcheck disable=SC2086
-    docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --tag shell-scripts-dev .
+    docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --tag "$IMAGE_NAME" .
 fi
 
 # Run the Github Actions workflow locally
@@ -138,7 +139,7 @@ if [ "${RUN_DOCKER:-0}" = "1" ]; then
     # Convert VAR1=val1 VAR2=val2 ... to "--env VAR1=val1 --env VAR2=val2 ..."
     user_env_spec=$(echo " $USER_ENV" | perl -pe 's/ (\w+=)/ --env $1/g;')
     # shellcheck disable=SC2086
-    docker run -it --env "DEBUG_LEVEL=$DEBUG_LEVEL" $user_env_spec --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+    docker run -it --env "DEBUG_LEVEL=$DEBUG_LEVEL" $user_env_spec --mount type=bind,source="$(pwd)",target=/home/"$REPO_DIR_NAME" "$IMAGE_NAME"
 fi
 
 # End processing
