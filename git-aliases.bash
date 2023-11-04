@@ -592,12 +592,15 @@ function git-diff-list {
     ## OLD: cat "$diff_list_file"
 
     # Change path to absolute and drop current directory
+    # note: in case of sibling directories the root is shown via a variable
+    # (e.g., "/home/tomohara/python/Mezcla/README.md" => "$(git-root-alias)/README.md"
+    # TODO3: simplying regex fixup's; use relative path (e.g., "../README.md")
     local root
     root=$(git-root-alias)
     local pwd
     pwd=$(realpath ".")
     # shellcheck disable=SC2002
-    cat "$diff_list_file" | perl -pe "s@^@$root/@;" | perl -pe "s@^$pwd/?@@;"
+    cat "$diff_list_file" | perl -pe "s@^@$root/@;" | perl -pe "s@^$pwd/?@@;" | perl -pe "s@^$root/?@\\\$\(git-root-alias\)/@;"
 }
 
 # Output templates for doing checkin of modified files
