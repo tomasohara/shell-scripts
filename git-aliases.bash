@@ -718,6 +718,7 @@ function git-checkout-branch {
         echo "usage: git-checkout-branch [--help | branch]"
         echo "note: available branches:"
         # TODO: get maldito git to cooperate better (e.g., plain text option)!
+        ## Lorenzo review: what is "maldito" supposed to be? as in "maldito git", "maldito shellcheck", etc 
         # shellcheck disable=SC2016
         PAGER="" git branch --all | extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
         return
