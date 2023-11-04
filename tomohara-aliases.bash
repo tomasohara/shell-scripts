@@ -1825,15 +1825,21 @@ function show-all-macros () {
 # show-macros([pattern]): like show-all-macros, excluding leading _ in name
 function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
 #
-# show-macros-proper([pattern]): shows names of aliases/functions matching PATTERN
-## OLD: # shellcheck disable=SC2016
-## OLD: alias-fn show-macros-proper 'show-macros | $GREP "^\w"'
-function show-macros-proper { show-macros "$@" | $GREP "^\w"; }
+## OLD:
+## # show-macros-proper([pattern]): shows names of aliases/functions matching PATTERN
+## ## OLD: # shellcheck disable=SC2016
+## ## OLD: alias-fn show-macros-proper 'show-macros | $GREP "^\w"'
+## #
+## # show-macros-proper-strict([pattern]): like show-macros-proper but omits definitions
+## ## TODO: function show-macros-proper { show-macros "$@" | $EGREP "^(alias )?\w"; }
+## ## OLD: function show-macros-proper-strict {
 #
-# show-macros-proper-strict([pattern]): like show-macros-proper but omits definitions
-## TODO: function show-macros-proper { show-macros "$@" | $EGREP "^(alias )?\w"; }
-function show-macros-proper-strict {
-    show-macros "$@" | perl -pe 's/alias (\S+)=.*/\1/;  s/^(\S+) \(\)/\1/;' | $GREP "$@";
+function show-macros-proper-old { show-macros "$@" | $EGREP "^\w"; }
+# show-macros-proper([pattern]): shows names of aliases/functions matching PATTERN
+function show-macros-proper {
+    # ntoe: first filters by likely alias or function definititions
+    # ex: "alias move='mv'", "setenv () {\n    export "$1"="$2"\n}"
+    show-macros "$@" | $EGREP '(^alias)|( \(\) $)' | perl -pe 's/alias (\S+)=.*/\1/;  s/^(\S+) \(\)/\1/;' | $GREP "$@" | sort;
 }
 # display-macros(pattern): show definition(s) of alias or function matching pattern in name
 function display-macros {
