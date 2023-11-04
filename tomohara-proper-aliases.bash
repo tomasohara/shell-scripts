@@ -22,6 +22,8 @@ alias git-difftool-='git-difftool-plus'
 alias git-log-='git-log-plus'
 alias git-update-='git-update-plus' 
 alias git-vdiff='git-vdiff-alias '
+alias git-all-update='update-main-repos.bash'
+alias git-extract-all-versions='extract-all-git-versions.bash --human'
 ## TODO: alias git-X-='git-X-plus'
 
 # Other misc. stuff
@@ -140,20 +142,27 @@ alias-fn ocr-image-stdout 'tesseract "$@" -'
 alias-fn ocr-image 'tesseract "$1" "$1"; $PAGER "$1".txt'
 
 #...............................................................................
+# Misc. stuff (e.g., JSON, Yaml)
+# 
 
-# JSON stuff
+# json-validate(file): make suire file is valid JSON
 function json-validate () {
     local file="$1"
     python -c "import json; from mezcla import system; print(json.loads(system.read_file('$file')))" | head -5 | truncate-width
 }
 
-# Misc. stuff
+# yaml-validate(file): make suire file is valid YAML
+function yaml-validate () {
+    local file="$1"
+    python -c "from mezcla import file_utils; print(file_utils.read_yaml('$file'))" | head -5 | truncate-width
+}
+
+# script-config: open dated typescript under ~/config
 function script-config {
     mkdir -p ~/config
     script ~/config/"_config-$(T).log"
 }
 simple-alias-fn act-plain 'convert-emoticons-aux act'
-
 
 # para-len-alt(file, ...): show length of each paragraph with embedded newlines replaced with CR's to allow chaining
 # note: strips the 0-len paragraph indicator
@@ -386,6 +395,6 @@ alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
 #
 alias kill-kdiff3='kill-it kdiff3'
 alias kill-firefox='kill-it firefox'
-alias kill-jupyter='kill-it jupyter'
+alias kill-jupyter='kill-it python.*jupyter'
 alias kill-chromiun='kill-it chromium'
 alias kill-sleep='kill_em.sh sleep'
