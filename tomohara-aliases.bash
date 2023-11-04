@@ -1834,8 +1834,8 @@ function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
 ## ## TODO: function show-macros-proper { show-macros "$@" | $EGREP "^(alias )?\w"; }
 ## ## OLD: function show-macros-proper-strict {
 #
-function show-macros-proper-old { show-macros "$@" | $EGREP "^\w"; }
 # show-macros-proper([pattern]): shows names of aliases/functions matching PATTERN
+function show-macros-proper-old { show-macros "$@" | $EGREP "^\w"; }
 function show-macros-proper {
     # ntoe: first filters by likely alias or function definititions
     # ex: "alias move='mv'", "setenv () {\n    export "$1"="$2"\n}"
