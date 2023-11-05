@@ -130,20 +130,6 @@ class BatsppToJupyter(Main):
         debug.trace(7, f"BatsppToJupyter.remove_prompt_sign({line, source}) => {result}")
         return result
     
-    def return_test_basename(self, testfile:str, add_ipynb_extension:bool=True):
-        """Returns basename of testfile w/o Jupyter extension
-        Example:
-            testfile = "./tests/hello-world.ipynb"
-            return_test_basename(testfile, True) => "hello-world.ipynb"
-            return_test_basename(testfile, False) => "hello-world"
-        """
-        # OLD: basename = os.path.splitext(test)[0]
-        # OLD: result = basename if not add_ipynb_extension else (basename+".ipynb")
-        basename_extension = EXTENSION_JUPYTER if not add_ipynb_extension else None
-        result = gh.basename(testfile, basename_extension)
-        debug.trace(7, f"BatsppToJupyter.remove_prompt_sign({testfile}, {add_ipynb_extension}) => {result}")
-        return result
-    
     ## BAD: Fixme
     def append_batspp_to_jupyter_dict(self, dict:dict, group_arr, temp_arr, source=True):
         """Appends data to SOURCE or OUTPUT of Jupyter Notebook"""
@@ -182,18 +168,24 @@ class BatsppToJupyter(Main):
         code_cell.outputs.append(result)
         debug.trace(7, f"BatsppToJupyter.add_cell_contents{notebook}, {source}, {output}) => {code_cell}")
 
-    def msg_success_convert(self, str_test_init:str, str_test_final:str):
-        result = f"Converted {str_test_init} to {str_test_final} successfully."
-        debug.trace(7, f"BatsppToJupyter.msg_success_convert({str_test_init}, {str_test_final}) => {result}")
+    def msg_success_convert(self, testfile_init:str, testfile_final:str):
+        """
+        Returns a message indicating successful conversion
+        Example:
+            testfile_init = "hello-world.batspp"
+            testfile_final = "hello-world.ipynb"
+            msg_success_convert(testfile_init, testfile_final) => "Converted hello-world.batspp to hello-world.ipynb successfully."
+        """
+        result = f"Converted {testfile_init} to {testfile_final} successfully."
+        debug.trace(7, f"BatsppToJupyter.msg_success_convert({testfile_init}, {testfile_final}) => {result}")
         return result
     
     def return_output_path(self):
-        """Returns appropriate Jupyter testfile path acc. to given options"""
-        basename_test_output = self.return_test_basename(self.output, True)
-        basename_batspp_file = self.return_test_basename(self.batspp_file, True)
-        temp = basename_test_output if self.output else basename_batspp_file
-        result = str(os.path.splitext(temp)[0]+ "_" + EXTENSION_JUPYTER + "." + EXTENSION_TESTFILES[-1]) if self.txt else temp
-        debug.trace(7, f"BatsppToJupyter.return_output_path() => {result}\n({self.batspp_file}, output={self.output}, txt={self.txt})")
+        """Returns appropriate Jupyter testfile path acc. to given argument options"""
+        basename_batspp_file = gh.basename(self.batspp_file, extension=f".{EXTENSION_BATSPP}")
+        basename_ipynb_file = gh.basename(self.output) if self.output != "" else basename_batspp_file
+        result = (basename_ipynb_file + f"-{EXTENSION_JUPYTER}.{EXTENSION_TESTFILES[2]}") if self.txt else (basename_ipynb_file + f".{EXTENSION_JUPYTER}")
+        debug.trace(7, f"BatsppToJupyter.return_output_path() => {result}")
         return result
 
     def process_nb(self):
@@ -201,19 +193,25 @@ class BatsppToJupyter(Main):
         batspp_path = self.batspp_file
         output_path = self.return_output_path()
         text_lines = gh.read_lines(batspp_path)
-        
         b2j_dict = {SOURCE:[], OUTPUT:[]}
         nb = nbformat.v4.new_notebook()
 
-        text_lines_temp1 = text_lines.copy()
-        text_lines_temp2 = text_lines.copy()
-        arr_output_index = self.get_seperating_index(text_lines_temp1, source=False)
-        arr_source_index = self.get_seperating_index(text_lines_temp1, source=True)
+        arr_output_index = self.get_seperating_index(text_lines, source=False)
+        arr_source_index = self.get_seperating_index(text_lines, source=True)
         arr_output_group = self.group_cell_items(arr_output_index)
         arr_source_group = self.group_cell_items(arr_source_index)
+        self.append_batspp_to_jupyter_dict(b2j_dict, arr_output_group, text_lines, source=False)
+        self.append_batspp_to_jupyter_dict(b2j_dict, arr_source_group, text_lines, source=True)
 
-        self.append_batspp_to_jupyter_dict(b2j_dict, arr_output_group, text_lines_temp2, source=False)
-        self.append_batspp_to_jupyter_dict(b2j_dict, arr_source_group, text_lines_temp2, source=True)
+        # # WORKING: OLD
+        # text_lines_temp1 = text_lines.copy()
+        # text_lines_temp2 = text_lines.copy()
+        # arr_output_index = self.get_seperating_index(text_lines_temp1, source=False)
+        # arr_source_index = self.get_seperating_index(text_lines_temp1, source=True)
+        # arr_output_group = self.group_cell_items(arr_output_index)
+        # arr_source_group = self.group_cell_items(arr_source_index)
+        # self.append_batspp_to_jupyter_dict(b2j_dict, arr_output_group, text_lines_temp2, source=False)
+        # self.append_batspp_to_jupyter_dict(b2j_dict, arr_source_group, text_lines_temp2, source=True)
         
         cell_count = self.return_cell_count(dict=b2j_dict)
         
@@ -247,7 +245,7 @@ def main():
     """Entry point"""
     app = BatsppToJupyter(
         description=__doc__.format(script=gh.basename(__file__)),
-        skip_input=True,
+        skip_input=False,
         manual_input=True,
         auto_help=False,
         multiple_files=False,
