@@ -39,7 +39,7 @@ eval 'exec perl -Ssw $0 "$@"'
 BEGIN { 
     my $dir = `dirname $0`; chomp $dir; unshift(@INC, $dir);
     require 'common.perl';
-    use vars qw/$verbose $precision/;
+    use vars qw/$verbose $precision $strict/;
     require 'extra.perl';
 }
 
@@ -81,6 +81,10 @@ if (! defined($ARGV[0])) {
     
     &exit();
 }
+
+# Customize how init_var works (see common.perl)
+&set_init_var_export(&TRUE);            # treat init_var as init_var_exp
+&block_init_var_via_env($strict);       # block use of env. vars in init_var
 
 &init_var(*class_filter, "");
 if ($class_filter ne "") {
