@@ -76,64 +76,68 @@ class BatsppToJupyter:
         debug.trace(7, f'BatsppToJupyter.jupyter_store_exists() => {result}')
         return result
     
-    def get_seperating_index(self, arr_batspp_contents:list[str], source:bool=False):
-        """Returns an array of line indices for cell source or output based on the 'source' argument
-        Example:
-            arr = ['# Simple alias test', '', '# Global Setup', "$ alias count-words='wc -w'", '', '$ echo abc def ght | count-words', '3', '', '$ echo "Hi Mom"', 'Hi Mom']
-            get_seperating_index(arr, True) => [0, 2, 3, 5, 8] // CELL SOURCE (INPUT)
-            get_seperating_index(arr, False) => [1, 4, 6, 7, 9] // CELL OUTPUT
-        """
-        result = []
-        for index, line in enumerate(arr_batspp_contents):
-            if source:
-                if line and line[0] in ["$", "#"]:
-                    result.append(index)
-            else:
-                if not line or line[0] not in ["$", "#"]:
-                    result.append(index)
-        debug.trace(7, f"BatsppToJupyter.get_seperating_index({arr_batspp_contents}, {source}) => {result}")
-        return result
+    ## OLD/BAD
+    # def get_seperating_index(self, arr_batspp_contents:list[str], source:bool=False):
+    #     """Returns an array of line indices for cell source or output based on the 'source' argument
+    #     Example:
+    #         arr = ['# Simple alias test', '', '# Global Setup', "$ alias count-words='wc -w'", '', '$ echo abc def ght | count-words', '3', '', '$ echo "Hi Mom"', 'Hi Mom']
+    #         get_seperating_index(arr, True) => [0, 2, 3, 5, 8] // CELL SOURCE (INPUT)
+    #         get_seperating_index(arr, False) => [1, 4, 6, 7, 9] // CELL OUTPUT
+    #     """
+    #     result = []
+    #     for index, line in enumerate(arr_batspp_contents):
+    #         if source:
+    #             if line and line[0] in ["$", "#"]:
+    #                 result.append(index)
+    #         else:
+    #             if not line or line[0] not in ["$", "#"]:
+    #                 result.append(index)
+    #     debug.trace(7, f"BatsppToJupyter.get_seperating_index({arr_batspp_contents}, {source}) => {result}")
+    #     return result
     
-    def group_cell_items(self, line_indices:list[int]):
-        """Returns array of sublists of consecutive indices, seperating them when a gap is present
-        Example:
-            arr = [0,1,2,4,5,6,7,9,11,12,15]
-            group_cell_items(arr) => [[0,1,2],[4,5,6,7],[9],[11,12],[15]]
-        """
-        result = []
-        current_group = [line_indices[0]]
-        for i in range(1, len(line_indices)):
-            if line_indices[i] - line_indices[i-1] == 1:
-                current_group.append(line_indices[i])
-            else:
-                result.append(current_group)
-                current_group = [line_indices[i]]
-        result.append(current_group)
-        debug.trace(7, f"BatsppToJupyter.group_cell_items({line_indices}) => {result}")
-        return result
+    # def group_cell_items(self, line_indices:list[int]):
+    #     """Returns array of sublists of consecutive indices, seperating them when a gap is present
+    #     Example:
+    #         arr = [0,1,2,4,5,6,7,9,11,12,15]
+    #         group_cell_items(arr) => [[0,1,2],[4,5,6,7],[9],[11,12],[15]]
+    #     """
+    #     result = []
+    #     current_group = [line_indices[0]]
+    #     for i in range(1, len(line_indices)):
+    #         if line_indices[i] - line_indices[i-1] == 1:
+    #             current_group.append(line_indices[i])
+    #         else:
+    #             result.append(current_group)
+    #             current_group = [line_indices[i]]
+    #     result.append(current_group)
+    #     debug.trace(7, f"BatsppToJupyter.group_cell_items({line_indices}) => {result}")
+    #     return result
     
     def remove_prompt_sign(self, line:str, source:bool=True):
         """Remove any prompt sign ($) present from the line
         Example:
             line = "$ alias count-words='wc -w'" 
             remove_prompt_sign(line, True) => "alias count-words='wc -w'"
+        - Note: Designed for command lines only (actually removes "$ " from the line)
         """
-        result = line[2:] if (line.startswith("$") and source) else line
+        result = line[2:] if (line.startswith("$ ") and source) else line
         debug.trace(7, f"BatsppToJupyter.remove_prompt_sign({line, source}) => {result}")
         return result
-    
-    ## BAD: Fixme
-    def append_batspp_to_jupyter_dict(self, batspp_to_jyputer_dict:dict, group_arr:list, temp_arr:list, source:bool=True):
-        """Appends data to SOURCE or OUTPUT of Jupyter Notebook"""
-        dict_init = batspp_to_jyputer_dict.copy()
-        dict_key = SOURCE if source else OUTPUT
-        for index_arr in group_arr:
-            index_content = []
-            for i in index_arr:
-                content = self.remove_prompt_sign(temp_arr[i], source) + "\n"
-                index_content.append(content)
-            batspp_to_jyputer_dict[dict_key].append(index_content)
-        debug.trace(7, f"BatsppToJupyter.append_batspp_to_jupyter_dict({dict_key}, {dict_init}) => {batspp_to_jyputer_dict}")
+
+    ## OLD/BAD
+        
+    # ## BAD: Fixme
+    # def append_batspp_to_jupyter_dict(self, batspp_to_jyputer_dict:dict, group_arr:list, temp_arr:list, source:bool=True):
+    #     """Appends data to SOURCE or OUTPUT of Jupyter Notebook"""
+    #     dict_init = batspp_to_jyputer_dict.copy()
+    #     dict_key = SOURCE if source else OUTPUT
+    #     for index_arr in group_arr:
+    #         index_content = []
+    #         for i in index_arr:
+    #             content = self.remove_prompt_sign(temp_arr[i], source) + "\n"
+    #             index_content.append(content)
+    #         batspp_to_jyputer_dict[dict_key].append(index_content)
+    #     debug.trace(7, f"BatsppToJupyter.append_batspp_to_jupyter_dict({dict_key}, {dict_init}) => {batspp_to_jyputer_dict}")
     
     def is_equal_length_dict(self, batspp_to_jupyter_dict:dict):
         """Checks if the length of dictionary is equal to dict values
@@ -150,7 +154,7 @@ class BatsppToJupyter:
         debug.trace(7, f"BatsppToJupyter.return_cell_count({batspp_to_jupyter_dict}) => {result}")
         return result
 
-    def add_cell_contents(self, notebook, source, output):
+    def add_cell_contents(self, notebook, source:str, output:str):
         """Adds contents to the cells of Jupyter notebook"""
         code_cell = nbformat.v4.new_code_cell(source=source)
         notebook.cells.append(code_cell)
@@ -190,32 +194,82 @@ class BatsppToJupyter:
         basename_batspp_file = gh.basename(self.OPT_BATSPP_FILE, extension=f".{EXTENSION_BATSPP}")
         basename_ipynb_file = gh.basename(self.OPT_OUTPUT) if self.OPT_OUTPUT != "" else basename_batspp_file
         result = (basename_ipynb_file + f"-{EXTENSION_JUPYTER}.{EXTENSION_TESTFILES[2]}") if self.OPT_TXT else (basename_ipynb_file + f".{EXTENSION_JUPYTER}")
-        debug.trace(7, f"BatsppToJupyter.return_output_path() => {result}")
+        debug.trace(7, f"BatsppToJupyter.return_output_path() => {result}; --batspp-file={self.OPT_BATSPP_FILE}, --output={self.OPT_OUTPUT}, --txt={self.OPT_TXT}")
         return result
+
+    def is_source_line(self, line:str):
+        """
+        Returns True if the line is a Jupyter notebook source (or input)
+        - Note: Detects "$ " for the case of Bash command-line
+        """
+        result = line.startswith("$ ") or line.startswith("#")
+        debug.trace(7, f"BatsppToJupyter.is_source_line({line}) => {result}")
+        return result
+    
+    def create_batspp_to_jupyter_dict(self, test_lines:list[str]) -> dict:
+        """Assigns source and output contents for Jupyter Notebook and returns a dictionary"""
+        arr_source_group = []
+        arr_output_group = []
+        b2j_dict = {}
+
+        # Initialize with the first line
+        is_source = self.is_source_line(test_lines[0])
+        current_group = [test_lines[0]]
+
+        for line in test_lines[1:]:
+            line_is_source = self.is_source_line(line)
+            line_filtered = self.remove_prompt_sign(line)
+
+            if is_source == line_is_source:
+                current_group.append(line_filtered)
+            else:
+                if is_source:
+                    arr_source_group.append(current_group)
+                else:
+                    arr_output_group.append(current_group)
+
+                current_group = [line_filtered]
+                is_source = line_is_source
+
+        # Add the last group to the appropriate list
+        if is_source:
+            arr_source_group.append(current_group)
+        else:
+            arr_output_group.append(current_group)
+
+        b2j_dict[SOURCE] = arr_source_group
+        b2j_dict[OUTPUT] = arr_output_group
+
+
+        debug.trace(7, f"BatsppToJupyter.create_batspp_to_jupyter_dict({test_lines}) => {b2j_dict}")
+        return b2j_dict
 
     def process_nb(self):
         """Assembles the functions and performs the processing"""
         batspp_path = self.OPT_BATSPP_FILE
         output_path = self.return_output_path()
-        text_lines = gh.read_lines(batspp_path)
-        b2j_dict = {SOURCE:[], OUTPUT:[]}
+        test_lines = gh.read_lines(batspp_path)
         nb = nbformat.v4.new_notebook()
 
-        arr_output_index = self.get_seperating_index(text_lines, source=False)
-        arr_source_index = self.get_seperating_index(text_lines, source=True)
-        arr_output_group = self.group_cell_items(arr_output_index)
-        arr_source_group = self.group_cell_items(arr_source_index)
-        self.append_batspp_to_jupyter_dict(b2j_dict, arr_output_group, text_lines, source=False)
-        self.append_batspp_to_jupyter_dict(b2j_dict, arr_source_group, text_lines, source=True)
-        
+        b2j_dict = self.create_batspp_to_jupyter_dict(test_lines)
         cell_count = self.return_cell_count(b2j_dict)
-        
+
         if self.is_equal_length_dict(b2j_dict):
             for index in range(cell_count):
                 self.add_cell_contents(notebook=nb, source=b2j_dict[SOURCE][index], output=b2j_dict[OUTPUT][index])
             nbformat.write(nb, output_path)
 
         print(self.msg_success_convert(batspp_path, output_path))
+
+
+        ## OLD/BAD: This code was really "crap"
+        # arr_output_index = self.get_seperating_index(text_lines, source=False)
+        # arr_source_index = self.get_seperating_index(text_lines, source=True)
+        # arr_output_group = self.group_cell_items(arr_output_index)
+        # arr_source_group = self.group_cell_items(arr_source_index)
+
+        # self.append_batspp_to_jupyter_dict(b2j_dict, arr_output_group, text_lines, source=False)
+        # self.append_batspp_to_jupyter_dict(b2j_dict, arr_source_group, text_lines, source=True)
 
 #   END OF BatsppToJupyter 
 #   =================================================================
