@@ -74,7 +74,7 @@ eval 'exec perl -Ssw $0 "$@"'
 # init_common():	initialize this common module.
 # init_var(variable_name, initial_value)  Initializes a variable unless it is already defined.
 # intersection(list1, list2)  Returns the intersection of the two lists (passed as references).
-# iso_lower(text):	lowercase text accounting for ISO-9660 accents
+# iso_lower(text):	lowercase text accounting for ISO-9660 accents (TODO3: ISO-8859)
 # iso_remove_diacritics($text): remove diacritic marks from the text
 # issue_command(command_line, [trace_level]) Issue the specified command and ignores the result.
 # lock(*FILE):		locks the specified file for exclusive access
@@ -106,7 +106,7 @@ use vars qw/$debug_level $d $o $redirect $script_dir $script_name $TRUE $FALSE $
     $disable_commands $unix $under_WIN32 $delim $path_delim $path_var_delim $precision $verbose $help $TEMP $TMP
     $OSTYPE $OS $HOST $debugging_timestamps $disable_assertions $unbuffered $para $slurp $PATH @PATH
     $force_WIN32 $force_unix $osname $common_options $utf8 $BOM $timeout $timeout_seconds $timeout_script $wait_for_user/;
-use vars qw/$preserve_temp/;
+use vars qw/$preserve_temp $strict/;
 
 sub COMMON_OPTIONS { $common_options; }
 
@@ -162,17 +162,26 @@ sub VERBOSE_DEBUGGING { return ($debug_level >= TL_VERBOSE) };
 sub SCRIPT_DIR {$script_dir;};
 sub TEMP_DIR {$TEMP;};
 
-# Uncomment the following to help track down undeclared variables.
+# set_strict_mode(enable): set Perl strict interpretation mode with diagnostics
+sub set_strict_mode {
+    my($strict_mode) = $_[0];
+    if ($strict_mode) {
+	use strict;
+	## TODO: no strict "refs";		# to allow for symbolic file handles
+	use diagnostics;
+    }
+}
+
+# The -strict option can help track down undeclared variables.
 # Be prepared for a plethora of warnings. One that is important is
 #    'Global symbol "xyz" requires explicit package name'
 # when NOT preceded by 'Global symbol "xyz" requires explicit package name'
 # NOTE: not used since other scripts might fail with it
 # TODO: fix all client scripts to be strict as well
 #
-## use strict;
-## no strict "refs";		# to allow for symbolic file handles
-## use diagnostics;
-
+our($strict);
+# note: enable here for common.perl and later for client scripts
+&set_strict_mode(defined($strict) && $strict);
 
 # init_common()
 #
@@ -232,7 +241,8 @@ sub init_common {
     &init_var_exp(*precision, 3);	# default number of decimal places for rounding
     &init_var_exp(*verbose, &FALSE);	# verbose output mode
     &init_var(*help, &FALSE);	        # show usage
-    ## &init_var_exp(*strict, &FALSE);		# use strict perl type checking
+    &init_var_exp(*strict, &FALSE);	# use strict perl type checking
+    &set_strict_mode($strict);          # note: could be set via environment so reinvoked
     #
     &init_var_exp(*unbuffered, &FALSE);	# unbuffered I/O
     &init_var_exp(*debugging_timestamps, &FALSE);   # timestamp all debug output
@@ -1029,10 +1039,11 @@ sub blocking_stdin {
 #        &init_var(*var2, 77);  ;; $var2 => 77
 #
 # NOTE: 
-# The environment setting for the variable is checked first whenever
-# the variable hasn't been defined on the command line. In addition, the
-# environment variable can optionally be set, which faciliates passing
-# settings to sub-scripts that have similar parameters.
+# - The environment setting for the variable is checked first whenever
+#   the variable hasn't been defined on the command line. In addition, the
+#   environment variable can optionally be set, which faciliates passing
+#   settings to sub-scripts that have similar parameters.
+# - See calc_entropy.perl for an example of customizing default behavior.
 #
 # WARNING:
 # - The automatic creation of environment variables can lead to subtle problems
@@ -1046,18 +1057,30 @@ sub blocking_stdin {
 # - Make export_var false by default and require explicit usage in those scripts
 #   requiring it (e.g., those that call helper scripts with same arguments).
 # - Add option to disable environment variable usage.
+#................................................................................
+# set_init_var_export(allow): override init_var default exporting to environment
+# block_init_var_via_env(block): don't allow init_var to get defaults from environment
 #
 our($export_default) = &FALSE;
 sub set_init_var_export {
+    # note: Used so that variables are exported by default (e.g., so explicit init_var_exp not needed).
+    # TODO2: set_init_var_export => allow_init_var_exports???
     my($default) = @_;
     $export_default = $default;
 }
 #
+our($use_env_default) = &TRUE;
+sub block_init_var_via_env {
+    # note: Used so that variables are not initialized via environment
+    my($block_env_defaults) = @_;
+    $use_env_default = (! $block_env_defaults);
+}
 ## OLD: sub EXPORT {&TRUE;}
 #
 sub init_var {
     use vars qw/$var_name $var_value $export_var/;
     local(*var_name, $var_value, $export_var) = @_;
+    ## TODO: &debug_print(&TL_DETAILED + 2, "in init_var($var_name, _, _)\n");
     my($default_export_var) = $export_default;
     $export_var = $default_export_var if (!defined($export_var));
 
@@ -1065,16 +1088,24 @@ sub init_var {
     # specifier (eg, "*main::use_random_coords" => "use_random_coords").
     # TODO: Use some convention to avoid clash w/ common env vars ???
     #       Maintain the package spec ???
+    # TODO2: Make environment default explicit
     my($env_var) = *var_name;
     $env_var =~ s/^.*:://;
     ## TODO: make this optional
     $env_var = &to_upper($env_var);
     my($new_value);
 
-    if (!defined($var_name)) {
-	# Get the value of the corresponding environment variable, if set.
-	$new_value = &get_env($env_var, $var_value, &TL_VERBOSE+2);
-	$var_name = $new_value;
+    if (! defined($var_name)) {
+	if ($use_env_default) {
+	    # Get the value of the corresponding environment variable, if set.
+	    $new_value = &get_env($env_var, $var_value, &TL_VERBOSE+2);
+	    $var_name = $new_value;
+	}
+	else {
+	    # TODO3: cleanup code variable dereferencing to make more intuitive
+	    $var_name = $var_value;
+	    $new_value = $var_value;
+	}
     }
     else {
 	$new_value = $var_name;
@@ -1884,7 +1915,7 @@ sub remove_outer_quotes {
     return ($text);
 }
 
-# iso_lower(text): lowercase text accounting for ISO-9660 accents
+# iso_lower(text): lowercase text accounting for ISO-9660 accents (TODO3: ISO-8859)
 # TODO: handle the full-range of accents (not just those for Spanish)
 # BAD EX: iso_lower("AÑO") => "año"
 # EX: iso_lower("A\x{00D1}O") => "a\x{00F1}o"
@@ -1899,7 +1930,7 @@ sub iso_lower {
     return ($text);
 }
 
-# iso_upper(text): uppercase text accounting for ISO-9660 accents
+# iso_upper(text): uppercase text accounting for ISO-9660 accents (TODO3: ISO-8859)
 # TODO: handle the full-range of accents (not just those for Spanish)
 # BAD: EX: iso_upper("José") => "JOSÉ"
 # EX: iso_upper("Jos\x{00E9}") => "JOS\x{00C9}"
