@@ -1953,7 +1953,7 @@ alias foreach='perl- foreach.perl'
 
 #--------------------------------------------------------------------------------
 # Adhoc aliases for renaming aliases
-## TOM-IDIOSYNCRATIC#
+## TOM-IDIOSYNCRATIC
 
 # rename-spaces: replace spaces in filenames of current dir with underscores
 ## OLD: alias rename-spaces='rename-files -q -global " " "_"'
@@ -1970,9 +1970,14 @@ function rename-special-punct {
     # shellcheck disable=SC1111,SC1112
     {
         # note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) U+2014 (—)
-        rename-files -q -global -rename_old -regex "_*[—·®“”″‶‘’–]" "_";   # note: unicode
+        ## TODO: rename-files -q -global -rename_old -regex "_*[—·®“”″‶‘’–]" "_";   # note: all unicode
+        local char;
+        for char in — · ® “ ” ″ ‶ ‘ ’ –; do        # note: all unicode
+            rename-files -q -global -rename_old "$char" "_"; 
+        done;
+        rename-files -q -global -rename_old -regex "__+" "_"; 
     }
-    rename-files -q -global -rename_old -regex "–" "-";   # note: unicode dash
+    rename-files -q -global -rename_old -regex "–" "-";   # note: unicode dash to ascii
 }
 # TODO: test
 #     $ touch '_what-the-hell?!'; rename-special-punct; ls _what* => _what-the-hell_
@@ -2003,18 +2008,21 @@ alias rename-utf8-encoded-sledgehammer='rename-files -quick -global -regex "[\x8
 ## OLD: alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"'
 ## BAD: alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"'
 # note: check specifically for code blocks: U+26D3 [chains] is e29b93; U+1F917 [hugging face] is f09fa497
-alias rename-emoji='rename-files -quick -global -regex "(\xE2[\x80-\xFF]{2})|(\xF0[\x80-\xFF]{3})" "_"'
+alias rename-emoji-old='rename-files -quick -global -regex "(\xE2[\x80-\xFF]{2})|(\xF0[\x80-\xFF]{3})" "_"'
 # rename-emoji-verbose: replace emoji characters in filenames with brief char description (e.g., smiley-face)
 function rename-emoji-verbose {
     # ex: "LangChain_🦜⛓️_-_Zep" => "LangChain_parrot_chains_-_Zep"
+    # TODO3: rename-emoji-verbose => rename-emoji-aux
     local f new_f
     for f in "$@"; do
         new_f=$(echo "$f" | DURING_ALIAS=1 convert_emoticons.py - | perl -pe 's/[\[\]]/_/g; s/__+/_/g;')
         rename-files -t "$f" "$new_f" "$f"
     done
 }
+simple-alias-fn rename-emoji 'STRIP_EMOTICONS=1 REPLACEMENT_TEXT=_ rename-emoji-verbose'
 ## TODO2 (handle cases like U+2728 [sparkle] w/ UTF8 0xE29CA8):
 #    alias rename-utf8-emoji-misc='rename-files -quick -global -regex "[\xE0-\xFF][\x80-\xFF]{2,3}" "_"'
+# rename-bad-dashes: replace " -" in filename with "_" and replace leadind dash with underscore
 alias rename-bad-dashes="rename-files -quick -global -regex ' \-' '_'; rename-files -quick -global -regex '\-' '_' -*"; 
 
 #-------------------------------------------------------------------------------
@@ -2192,7 +2200,10 @@ function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
 # See https://stackoverflow.com/questions/42193957/errorwide-character-in-print-at-x-at-line-35-fh-read-text-files-from-comm.
 ## BAD: function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr($& + 0x2400)/eg;'; }
 function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
-
+#
+## TODO2: rework show-unicode-code-info*/show-unicode-control-chars for tab-completion
+## TEMP:
+alias display-unicode-info=show-unicode-code-info-stdin
 
 #-------------------------------------------------------------------------------
 trace Unix aliases
