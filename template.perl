@@ -22,6 +22,10 @@ my($show_help) = $help;
 # for command-line arguments (see init_var's in &init).
 use strict;
 ## use vars qw/$fu $bar/;
+## TODO:
+## # Customize how init_var works (see common.perl)
+## &set_init_var_export(&TRUE);            # treat init_var as init_var_exp
+## &block_init_var_via_env(&TRUE);         # block use of env. vars in init_var
 
 # Show a usage statement if no arguments given.
 # NOTE: By convention '-' is used when no arguments are required.
