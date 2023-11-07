@@ -353,12 +353,17 @@ function show-sd-prompts { image-metadata "$@" | egrep --text --ignore-case '(pa
 alias distro-version-info='screenfetch -n'
 alias distro-version-info-neo='neofetch --off'
 
+# detach-job: disassociate last (GUI) command from terminal (-h is for SIGHUP)
+# See https://unix.stackexchange.com/questions/484276/do-disown-h-and-nohup-work-effectively-the-same
+alias detach-job='disown -h'
+
 #...............................................................................
 # Linux admin
 
 alias free-memory='free --wide --human | grep -v Swap:'
 # TODO: get this to work completely
-simple-alias-fn clear-cache 'free-memory | grep -v Admin; sysctl vm.drop_caches=1; free-memory'
+## OLD: simple-alias-fn clear-cache 'free-memory | grep -v Admin; sysctl vm.drop_caches=1; free-memory'
+simple-alias-fn clear-cache 'echo; echo before; free-memory | grep -v Admin; sysctl vm.drop_caches=1; echo after; free-memory'
 
 #...............................................................................
 # Emacs related
