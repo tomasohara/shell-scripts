@@ -40,6 +40,7 @@ append-path "$PERLLIB"
 ## OLD (see below): prepend-path "$HOME/python/Mezcla/mezcla"
 append-path "$HOME/python"
 append-path "$TOM_BIN/adhoc"
+append-path "$TOM_BIN/archive"
 append-path "$TOM_BIN/examples"
 append-path-warn "$HOME/.local/bin"
 # Put current directoy at end of path; can be overwritting with ./ prefix
