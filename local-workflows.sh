@@ -109,7 +109,7 @@ if [ "${AUTO_REQS:-0}" = "1" ]; then
 fi
 
 # Build the Docker image
-if [ "${RUN_BUILD:-1}" = "1" ]; then
+if [ "${RUN_BUILD:-1}" = "0" ]; then
     echo "Building Docker image: $IMAGE_NAME"
     # note: maldito docker doesn't support --env for build, just run
     # Also, --build-arg misleading: see
