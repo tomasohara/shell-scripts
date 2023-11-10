@@ -16,6 +16,11 @@
 # - Address the TODO's below.
 #
 
+# Special cases
+# TODO: see why excluded by the rules
+# Workflow files (e.g., .github/workflows/tests.yml).
+!.github/**
+
 # Log files and listings
 # TODO: figure out how to apply to subdirs
 **/*.log
@@ -26,11 +31,6 @@
 !**/*__init__.py
 # Likewise for trailing _'s (e.g., master-dir-link_)
 **/*_
-
-# Special cases
-# TODO: see why excluded by the rules
-# Workflow files (e.g., .github/workflows/tests.yml).
-!.github/**
 
 # Backup file
 **/*.bak
