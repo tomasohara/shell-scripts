@@ -1,8 +1,14 @@
-# Test to avoid regressions of old errors
+# Tests to avoid regressions of old errors
 
-# BAD
+#...............................................................................
+
+# BAD & OLD
 ## $ randomize-datafile tweet_emotions.csv 4000 > random10pct-tweet-emotions.csv
 ## /home/tomohara/anaconda3/envs/nlp-py-3-10/bin/python: No module named randomize_lines
+
+$ randomize-datafile ~/Mezcla/mezcla/tests/resources/random-10pct-tweet-emotions.tsv 10% > /tmp/random-1pct-tweet-emotions.tsv
+$ wc -l < /tmp/random-1pct-tweet-emotions.tsv
+400
 
 $ head -3 ~/Mezcla/mezcla/tests/resources/cars.csv | cut.perl -delim=',' -fields=1-5,26 -
 car_ID,symboling,CarName,fueltype,aspiration,price
@@ -13,4 +19,30 @@ $ RANDOM_SEED=42 randomize-datafile Mezcla/mezcla/tests/resources/cars.csv | cut
 car_ID,symboling,CarName,fueltype,aspiration,price
 2,3,car model two,gas,std,16500
 3,1,cat model three,gas,std,16500
+
+## DEBUG
+$ display-macros randomize-datafile
+randomize-datafile () 
+{ 
+    local file="$1";
+    local num_lines="$2";
+    if [ "$num_lines" = "" ]; then
+        num_lines=$(wc -l < "$file");
+    fi;
+    head -1 "$file";
+    tail --lines=+2 "$file" | python -m mezcla.randomize_lines | head -"$num_lines"
+}
+
+#...............................................................................
+
+# Bad
+
+$ view-todo | check-errors | cat
+Can't find reverse.perl on PATH.
+
+# Good
+
+$ view-todo | check-errors | wc -l
+0
+
 
