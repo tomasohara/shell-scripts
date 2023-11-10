@@ -531,12 +531,12 @@ cond-export LINES 52
 cond-export COLUMNS 80
 #
 # NOTE: resize used to set LINES below
-
-if [ "$DOMAIN_NAME" = "" ]; then
-    # shellcheck disable=SC2155
-    # TODO: cond-export
-    export DOMAIN_NAME=$(domainname.sh);
-fi
+## OLD:
+## if [ "$DOMAIN_NAME" = "" ]; then
+##     # shellcheck disable=SC2155
+##     # TODO: cond-export
+##     export DOMAIN_NAME=$(domainname.sh);
+## fi
 alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
 
 # Note: support for prompt prefix
@@ -1844,7 +1844,7 @@ function show-macros-proper {
 # display-macros(pattern): show definition(s) of alias or function matching pattern in name
 function display-macros {
     ## OLD: show-macros "$@" | perl -pe 's/alias //;  s/^(\S+) \(\)/\1/;' | perlgrep -para ^"$@";
-    show-macros "$@" | perlgrep -para ^"(alias )?""$@";
+    show-macros "$@" | perlgrep -para ^"(alias )?""$*";
 }
 #
 # show-variables(): show defined variables
@@ -1972,7 +1972,7 @@ function rename-special-punct {
         # note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) U+2014 (—)
         ## TODO: rename-files -q -global -rename_old -regex "_*[—·®“”″‶‘’–]" "_";   # note: all unicode
         local char;
-        for char in — · ® “ ” ″ ‶ ‘ ’ –; do        # note: all unicode
+        for char in "—" "·" "®" "“" "”" "″" "‶" "‘" "’" "–"; do        # note: all unicode
             rename-files -q -global -rename_old "$char" "_"; 
         done;
         rename-files -q -global -rename_old -regex "__+" "_"; 
@@ -3137,15 +3137,19 @@ function test-script () {
 #
 alias test-script-debug='ALLOW_SUBCOMMAND_TRACING=1 DEBUG_LEVEL=5 MISC_TRACING_LEVEL=5 test-script'
 
-# randomize-datafie(file, [num[): randomize datafile optionally pruned to NUM lines, preserving header line
+# randomize-datafile(file, [num|percent]): randomize datafile optionally pruned to NUM lines (or percent), preserving header line
 #
 function randomize-datafile() {
     local file="$1"
     local num_lines="$2"
-    if [ "$num_lines" = "" ]; then num_lines=$(wc -l < "$file"); fi
-    #
-    head -1 "$file"
-    tail --lines=+2 "$file" | python -m mezcla.randomize_lines | head -"$num_lines"
+    if [[ $num_lines =~ % ]]; then
+        num_lines=${num_lines//%/}
+        python -m mezcla.randomize_lines --header --percent "$num_lines" "$file"
+    else
+        if [ "$num_lines" = "" ]; then num_lines=$(wc -l < "$file"); fi
+        head -1 "$file"
+        tail --lines=+2 "$file" | python -m mezcla.randomize_lines - | head -"$num_lines"
+    fi
 }
 
 # filter-random(pct, file, [include_header=1]): Randomize lines based on percentages, using output lile (e.g., _r10pct-fubar.data).
