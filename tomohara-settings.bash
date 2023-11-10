@@ -110,3 +110,8 @@ export EDITOR="emacs"
 if [ "$(under-linux)" = "1" ]; then
     cond-export WNSEARCHDIR /usr/share/wordnet
 fi
+if [ "$DOMAIN_NAME" = "" ]; then
+    # shellcheck disable=SC2155
+    # TODO: cond-export
+    export DOMAIN_NAME=$(domainname.sh);
+fi
