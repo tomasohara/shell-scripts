@@ -64,6 +64,8 @@ ID_RESTART_RUN_ALL = "restart_run_all"
 ID_FILELINK = "filelink"
 ID_SAVE_CHECKPOINT = "save_checkpoint"
 ID_CLOSE_AND_HALT = "close_and_halt"
+ID_MENU_CHANGE_KERNEL = "menu-change-kernel"
+ID_KERNEL_SUBMENU_BASH = "kernel-submenu-bash"
 
 # XPATH for some HTML elements
 ## OLD: XPATH_RESTART_RUN_ALL_WARNING_RED = "/html/body/div[8]/div/div/div[3]/button[2]"
@@ -72,6 +74,8 @@ XPATH_PASSWORD_INPUT = f"//input[@id='{ID_PASSWORD_INPUT}']"
 XPATH_LOGIN_SUBMIT = f"//button[@id='{ID_LOGIN_SUBMIT}']"
 XPATH_RESTART_RUN_ALL_WARNING_RED = "//div/button[text()='Restart and Run All Cells']"
 XPATH_INVALID_CREDENTIALS = "//div[@class='message error' and text()='Invalid credentials']"
+XPATH_MENU_CHANGE_KERNEL = f"//li[@id='{ID_MENU_CHANGE_KERNEL}']/a"
+XPATH_KERNEL_SUBMENU_BASH = f"//li[@id='{ID_KERNEL_SUBMENU_BASH}']/a"
 
 ## Environment options
 SELECT_NOBATSPP = system.getenv_bool("SELECT_NOBATSPP", False,
@@ -94,6 +98,8 @@ END_PAUSE = system.getenv_float("END_PAUSE", 0,
                                 "Number of seconds to pause after running")
 IMPLICIT_WAIT = system.getenv_float("IMPLICIT_WAIT", SELENIUM_IMPLICIT_WAIT,
                                 "Number of seconds to pause Webdriver implicitly")
+FORCE_SET_BASH_KERNEL = system.getenv_bool("FORCE_SET_BASH_KERNEL", False,
+                            description="Force sets Bash kernel when reruning each testfile (Default: False)")
 
 class AutomateIPYNB(Main):
     """Consists of functions for the automation of testfiles (.ipynb)"""
@@ -222,7 +228,15 @@ class AutomateIPYNB(Main):
 
             # TODO: In the case of Invalid Credentials
             try:
+
+                if FORCE_SET_BASH_KERNEL:
+                    time.sleep(1)
+                    self.click_element(By.ID, ID_KERNELLINK, 1)
+                    self.click_element(By.XPATH, XPATH_MENU_CHANGE_KERNEL, 2)
+                    self.click_element(By.XPATH, XPATH_KERNEL_SUBMENU_BASH, 2)
+               
                 self.click_element(By.ID, ID_KERNELLINK, 1)
+            
                 ok = self.click_element(By.ID, ID_RESTART_RUN_ALL, 3)
                 if not ok:
                     ok = self.click_element(By.XPATH, XPATH_RESTART_RUN_ALL_WARNING_RED, AUTOMATION_DURATION_RERUN)
