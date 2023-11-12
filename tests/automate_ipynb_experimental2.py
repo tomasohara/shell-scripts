@@ -38,13 +38,13 @@ debug.trace(5, f"global __doc__: {__doc__}")
 debug.assertion(__doc__)
 
 ## Constants 0 (Command-line Labels)
-INCLUDE_TESTFILE = "include"
-FIRST_N_TESTFILE = "first"
-VERBOSE = "verbose"
+OPT_INCLUDE_TESTFILE = "include"
+OPT_FIRST_N_TESTFILE = "first"
+OPT_VERBOSE = "verbose"
 
 ## Constants I (Initials for script)
 TL = debug.TL
-TESTFILE_URL = "http://127.0.0.1:8888/tree/"
+TESTFILE_URL = "http://127.0.0.1:8888/tree/tests/"
 JUPYTER_TOKEN = "111222"
 JUPYTER_EXTENSION = ".ipynb"
 NOBATSPP = "NOBATSPP"
@@ -101,33 +101,21 @@ IMPLICIT_WAIT = system.getenv_float("IMPLICIT_WAIT", SELENIUM_IMPLICIT_WAIT,
 FORCE_SET_BASH_KERNEL = system.getenv_bool("FORCE_SET_BASH_KERNEL", False,
                             description="Force sets Bash kernel when reruning each testfile (Default: False)")
 
-class AutomateIPYNB(Main):
+class AutomateIPYNB:
     """Consists of functions for the automation of testfiles (.ipynb)"""
-    opt_include_file = ""
-    opt_first_n_testfile = 0
-    opt_verbose = None
-    driver = None
 
-    def get_entered_text(self, label: str, default: str = "") -> str:
-        """
-        Return entered LABEL var/arg text by command-line or environment variable,
-        also can be specified a DEFAULT value
-        """
-        result = (self.get_parsed_argument(label=label.lower()) or
-                system.getenv_text(var=label.upper()))
-        result = result if result else default
-        debug.trace(7, f'automate_ipynb.get_entered_text(label={label}) => {result}')
-        return result
-
-    def setup(self):
-        """Check results of command line processing"""
-        # TODO: rework to make environment optional
-        self.opt_include_file = self.get_entered_text(INCLUDE_TESTFILE, self.opt_include_file)
-        self.opt_first_n_testfile = int(self.get_entered_text(FIRST_N_TESTFILE, self.opt_first_n_testfile))
-        self.opt_verbose = self.get_parsed_option(VERBOSE, self.opt_verbose)
+    def __init__(
+        self,
+        OPT_INCLUDE_TESTFILE,
+        OPT_FIRST_N_TESTFILE,
+        OPT_VERBOSE   
+    ):
+        """Initializer for class: AutomateIPYNB"""
+        self.OPT_INCLUDE_TESTFILE = OPT_INCLUDE_TESTFILE
+        self.OPT_FIRST_N_TESTFILE = OPT_FIRST_N_TESTFILE
+        self.OPT_VERBOSE = OPT_VERBOSE
         self.driver = webdriver.Firefox() if USE_FIREFOX else webdriver.Chrome()
-        debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
-
+        
     def wrapup(self):
         """Process end of input"""
         if self.driver:
@@ -153,11 +141,11 @@ class AutomateIPYNB(Main):
             random.shuffle(ipynb_files)
 
         # C) Handle the opt_first_n_testfile and opt_include_file options
-        if self.opt_first_n_testfile:
-            ipynb_files = ipynb_files[:self.opt_first_n_testfile]
-        elif self.opt_include_file:
+        if self.OPT_FIRST_N_TESTFILE:
+            ipynb_files = ipynb_files[:self.OPT_FIRST_N_TESTFILE]
+        elif self.OPT_INCLUDE_TESTFILE:
             # If an include file is specified, only include that file
-            ipynb_files = [self.opt_include_file]
+            ipynb_files = [self.OPT_INCLUDE_TESTFILE]
 
         # If neither opt_first_n_testfile nor opt_include_file is specified,
         # the list ipynb_files will remain as is (all test files).
@@ -167,6 +155,7 @@ class AutomateIPYNB(Main):
             file_url = TESTFILE_URL + file
             print (file_url)
             ipynb_url.append(file_url)
+
         return ipynb_url
 
     def find_element(self, how, elem_id):
@@ -228,7 +217,6 @@ class AutomateIPYNB(Main):
 
             # TODO: In the case of Invalid Credentials
             try:
-
                 if FORCE_SET_BASH_KERNEL:
                     time.sleep(1)
                     self.click_element(By.ID, ID_KERNELLINK, 1)
@@ -261,33 +249,63 @@ class AutomateIPYNB(Main):
                 test_count += 1
                 if END_PAUSE:
                     time.sleep(END_PAUSE)
-                
-            # driver.quit()
-            self.wrap_up()
+
+            self.wrapup()
+
+    def do_it(self):
+        filename = self.OPT_INCLUDE_TESTFILE
+        test_files = [filename] if (filename != "-") else self.return_ipynb_url_array()
+        self.automate_testfile(test_files)
+
+## END OF AutomateIPYNB
+
+class RunScriptAutomateIPYNB(Main):
+    """Adhoc script class (e.g., no I/O loops): just for arg-parsing"""
+    opt_include_testfile = ""
+    opt_first_n_testfile = 0
+    opt_verbose = ""
+    driver = None
+
+    def setup(self):
+        """Check results of command line processing"""
+        # TODO: rework to make environment optional
+        self.opt_include_testfile = self.get_parsed_argument(OPT_INCLUDE_TESTFILE, self.opt_include_testfile)
+        self.opt_first_n_testfile = int(self.get_parsed_argument(OPT_FIRST_N_TESTFILE, self.opt_first_n_testfile))
+        self.opt_verbose = self.get_parsed_option(OPT_VERBOSE, self.opt_verbose)
+        debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
     def run_main_step(self):
         """Process main script"""
         start_time_main = time.time()
         ## OLD: self.automate_testfile(self.return_ipynb_url_array())
-        test_files = [self.filename] if (self.filename != "-") else self.return_ipynb_url_array()
-        self.automate_testfile(test_files)
+        # test_files = [self.filename] if (self.filename != "-") else self.return_ipynb_url_array()
+        # self.automate_testfile(test_files)
+        automate_ipynb = AutomateIPYNB(
+            self.opt_include_testfile,
+            self.opt_first_n_testfile,
+            self.opt_verbose
+        )
+        if FORCE_RUN_JUPYTER:
+            time.sleep(1)
+            gh.run(COMMAND_RUN_JUPYTER)
+        automate_ipynb.do_it()
         print(f"\nTotal Time (including pauses): {round(time.time() - start_time_main, 2)} sec\n")
 
 def main():
     """Entry point"""
-    app = AutomateIPYNB(
+    app = RunScriptAutomateIPYNB(
         description = __doc__.format(script=gh.basename(__file__)),
         skip_input = False,
         manual_input = True,
         auto_help = False,
         boolean_options=[
-            (VERBOSE, "Verbose Mode"),
+            (OPT_VERBOSE, "Verbose Mode"),
         ],
         text_options=[
-            (INCLUDE_TESTFILE, "Includes a single testfile for automation"),
+            (OPT_INCLUDE_TESTFILE, "Includes a single testfile for automation"),
         ],
         int_options=[
-            (FIRST_N_TESTFILE, "Includes first N testfiles for automation"),
+            (OPT_FIRST_N_TESTFILE, "Includes first N testfiles for automation"),
         ],
         float_options=None
         )
