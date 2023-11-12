@@ -692,8 +692,13 @@ function alt-invoke-next-single-checkin {
     local command
     echo "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
     # note: options: -e use readline; -i initialize readline buffer; -r backslash is not an escape
-    read -r -e -i "$prompt" command
-
+    if [ "$GIT_NO_CONFIRM" = "0" ]; then 
+        read -r -e -i "$prompt" command
+    else 
+        echo "GIT_NO_CONFIRM set to 1, so skipping confirmation"
+        export GIT_MESSAGE=${GIT_MESSAGE:-"default"}
+        command="git-update-commit-push \"$mod_file\""
+    fi
     # Evaluate the user's checkin command
     # TODO: rework using a safer approach with reading checking comment and issuing git-update-commit-push directly
     ## DEBUG:
