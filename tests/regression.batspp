@@ -46,3 +46,30 @@ $ view-todo | check-errors | wc -l
 0
 
 
+#-------------------------------------------------------------------------------
+# Rename files
+
+# Setup
+$ base=/tmp/rename-filenames
+$ dir=/tmp/rename-filenames
+$ mkdir -p "$dir"
+$ pushd $dir
+$ for char in "—" "·" "®" "“" "”" "″" "‶" "‘" "’" "–"; do echo "$char" > $dir/_${char}_.list; done
+
+# Setup
+$ ls _*_.list 2> /dev/null > pre.list
+$ rename-special-punct > $base.log 2>&1
+
+## DEBUG:
+$ ls _*_.list
+_®_.list  _–_.list  _‘_.list  _“_.list  _″_.list
+_·_.list  _—_.list  _’_.list  _”_.list  _‶_.list
+
+# Setup
+$ ls _*_.list 2> /dev/null > post.list
+$ popd
+
+$ [ "8" -le "$(wc -l < pre.list)" ]; echo "$?"
+
+$ [ "1" -eq "$(wc -l < post.list)" ]; echo "$?"
+
