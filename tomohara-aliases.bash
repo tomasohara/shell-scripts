@@ -83,6 +83,8 @@
 #    -- SC2086: Double quote to prevent globbing and word splitting.
 #    -- SC2155: Declare and assign separately to avoid masking return values
 #    -- SC2139: This expands when defined, not when used. Consider escaping.
+#    -- SC2206: Quote to prevent word splitting/globbing
+#    -- SC2116: Useless echo?
 #
 # TODO:
 # - ***** Put work-specific stuff in separate file!"
@@ -1967,17 +1969,27 @@ function rename-special-punct {
     # TODO: rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_";
     rename-files -q -global -rename_old -regex "_*[&\!\*?\(\)\[\]\,]" "_";
     # strip unicode punctuation, ignoring shellcheck warnings like SC1112 [This is a unicode quote]
-    # shellcheck disable=SC1111,SC1112
+    # shellcheck disable=SC1111,SC1112,SC2206,SC2116
     {
+        local unicode_punct="—·®“”″‶‘’–"
+        ## TODO:
+        ## local unicode_filenames=(*[$unicode_punct]*)
+        ## if [ ${#unicode_filenames[@]} -eq 0 ]; then
+        if [ "" = "$(ls *[$unicode_punct]* 2> /dev/null)" ]; then
+            ## DEBUG: echo "No files with following unicode punctuation: $unicode_punct"
+            return
+        fi
         # note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) U+2014 (—)
         ## TODO: rename-files -q -global -rename_old -regex "_*[—·®“”″‶‘’–]" "_";   # note: all unicode
         local char;
         for char in "—" "·" "®" "“" "”" "″" "‶" "‘" "’" "–"; do        # note: all unicode
-            rename-files -q -global -rename_old "$char" "_"; 
+            ## OLD: rename-files -q -global -rename_old "$char" "_"
+            rename-files -global -rename_old "$char" "_" ./*$char*
+            ## TODO?: rename-files -global -rename_old "$char" "_" "${unicode_filenames[@]}"
         done;
         rename-files -q -global -rename_old -regex "__+" "_"; 
     }
-    rename-files -q -global -rename_old -regex "–" "-";   # note: unicode dash to ascii
+    ## OLD: rename-files -q -global -rename_old -regex "–" "-";   # note: unicode dash to ascii
 }
 # TODO: test
 #     $ touch '_what-the-hell?!'; rename-special-punct; ls _what* => _what-the-hell_
@@ -2517,7 +2529,6 @@ alias sync2='sync; sync'
 function fix-sudoer-home-permission () {
     ## OLD: local user_home="/home/$SUDO_USER"
     local user_home
-    # maldito shellchecK: SC2116 (style): Useless echo?
     # shellcheck disable=SC2116
     ## BAD: user_home="$(echo ~$SUDO_USER)"
     user_home="$(bash -c "echo ~$SUDO_USER")"
