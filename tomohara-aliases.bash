@@ -874,8 +874,9 @@ function dir-rw () { $LS ${dir_options} "$@" 2>&1 | $GREP '^..w' | $PAGER; }
 
 function subdirs () { $LS ${dir_options} "$@" 2>&1 | $GREP ^d | $PAGER; }
 #
-# subdirs-proper(): shows subdirs in colymn format omitting ones w/ leading dots
+# subdirs-proper(): shows subdirs in column format omitting ones w/ leading dots
 # note: omits cases like ./ and ./.cpan from find and then removes ./ prefix
+# TODO3: have option to include dot-file subdirs like .config
 quiet-unalias subdirs-proper
 function subdirs-proper () { find . -maxdepth 1 -type d | $EGREP -v '^((\.)|(\.\/\..*))$' | sort | perl -pe "s@^\./@@;" | column; }
 # note: -f option overrides -t: Unix sorts alphabetically by default
