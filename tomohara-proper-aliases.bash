@@ -227,12 +227,15 @@ function trace-array-vars {
     echo
 }
 
-# remote-prompt([prompt="_nickname[0]"@]): set prompt to _N@ where N is first letter of host nickname
+# remote-prompt([prompt="_nickname[0]", suffix-"@']): set prompt to _N@ where N is first letter of host nickname
+# note: uses SUFFIX for @ id specified
 function remote-prompt {
     local prompt="$1"
-    if [ "$prompt" = "" ]; then prompt="_$(echo "$HOST_NICKNAME" | perl -pe 's/^(.).*/$1/;')@"; fi
+    local suffix="${2:-'@'}"
+    if [ "$prompt" = "" ]; then prompt="_$(echo "$HOST_NICKNAME" | perl -pe 's/^(.).*/$1/;')$suffix"; fi
     reset-prompt "$prompt"
 }
+alias-fn remote-prompt-root 'remote-prompt "" "#"'
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
 function pristine-bash {
@@ -362,8 +365,7 @@ alias detach-job='disown -h'
 
 alias free-memory='free --wide --human | grep -v Swap:'
 # TODO: get this to work completely
-## OLD: simple-alias-fn clear-cache 'free-memory | grep -v Admin; sysctl vm.drop_caches=1; free-memory'
-simple-alias-fn clear-cache 'echo; echo before; free-memory | grep -v Admin; sysctl vm.drop_caches=1; echo after; free-memory'
+simple-alias-fn clear-cache 'echo; echo before; free-memory | grep -v Admin; sysctl vm.drop_caches=1; echo after; free-memory; echo'
 
 #...............................................................................
 # Emacs related
