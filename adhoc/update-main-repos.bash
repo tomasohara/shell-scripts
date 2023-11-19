@@ -32,12 +32,14 @@ if [ "${VERBOSE:-0}" = "1" ]; then
 fi
 
 log=~/config/_update-all-repos-$(T).log
+rename-with-file-date "$log"
+## DEBUG:
+echo "${BASH_SOURCE[0]} $*" | tee "$log"
 echo "in $0: $(date)" >> "$log"
 # pre-init: OTHER_REPOS="$HOME/text-categorization $HOME/programs/python/visual-diff"
 other_repos="${OTHER_REPOS:-}"
 for dir in ~/bin ~/mezcla ~/visual-diff ~/programs/bash/tom-shell-scripts ~/programs/python/tom-mezcla $other_repos; do
-    echo "$dir"
-    echo "$dir" >> "$log"
+    echo "repo: $dir" | tee --append "$log"
     command cd "$dir"
     git-update-plus >> "$log"
     python -c 'print("-" * 80);' >> "$log"
