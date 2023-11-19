@@ -1544,20 +1544,33 @@ alias gtar='$GTAR'
 function ls-relative () { $LS -d "$1" | perl -pe "s@$HOME@~@;"; }
 #
 # make-tar(archive_basename, [dir=.], [depth=max], [filter=pattern]): tar up directory with results placed 
-#   in archive_base.tar.gz and log file in archive_base.tar.log; afterwards display the tar archive size, log contents, and archive path.
-# Filenames matching the optional filter are excluded.
+# in archive_base.tar.gz and log file in archive_base.tar.log; afterwards display the tar archive size, log contents, and archive path.
+# Filenames matching the optional (exclusion) filter regex are excluded.
 # EX: make-tar ~/xfer/program-files-structure 'C:\Program Files' 1
 #
 # TODO1: liberate me (e.g., put main support into script)!
 # Note: -xdev is so that find doesn't use other file systems
+# - depth and filter args can be given via TAR_DEPTH and TAR_FILTER
 find_options="-xdev"
-function make-tar () { 
-    local base="$1"; local dir="$2"; local depth="$3"; local filter="$4";
-    local depth_arg=""; local filter_arg="."
+function make-tar () {
+    # Check arguments
+    ## OLD:
+    ## local base="$1"; local dir="$2"; local depth="$3"; local filter="$4";
+    ## local depth_arg=""; local filter_arg="."
+    local base="$1"; local dir="$2";
+    ## TODO2: dispense with acrobatic arg parsing!
+    local depth="${3:-${TAR_DEPTH:-""}}";
+    local filter="${4:-${TAR_FILTER:-"."}}"
+
+    # Derive find/tar command line options
+    ## OLD: local filter_arg="."
+    local filter_arg=(.)
+    local depth_arg=""
     local size_arg="";
     if [ "$dir" = "" ]; then dir="."; fi;
     if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
-    if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
+    ## OLD: if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
+    if [ "$filter" != "" ]; then filter_arg=(-v "$filter"); fi;
     if [ "$USE_DATE" = "1" ]; then
         base="$base-$(TODAY)";
         ## TEST: rename-with-file-date "$base"*
@@ -1568,12 +1581,17 @@ function make-tar () {
 	done
     fi
     if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
+
+    # Invoke find/tar
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
+    ## OLD: (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     # shellcheck disable=SC2086
-    (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+    (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "${filter_arg[@]}" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     ## DUH: -L added to support tar-this-dir in directory that is symbolic link, but unfortunately
     ## that leads to symbolic links in the directory itself to be included
-    ## BAD: (find -L "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1; 
+    ## BAD: (find -L "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+
+    # Show info on resulting files (TODO2: check-errors over log)
     ($LS -l "$base.tar.gz"; cat "$base.tar.log") 2>&1 | $PAGER; 
     ls-full "$base.tar.gz";
     ls-relative "$base.tar.gz"; 
@@ -1976,7 +1994,7 @@ function rename-special-punct {
         ## TODO:
         ## local unicode_filenames=(*[$unicode_punct]*)
         ## if [ ${#unicode_filenames[@]} -eq 0 ]; then
-        if [ "" = "$(ls *[$unicode_punct]* 2> /dev/null)" ]; then
+        if [ "" = "$(ls ./*[$unicode_punct]* 2> /dev/null)" ]; then
             ## DEBUG: echo "No files with following unicode punctuation: $unicode_punct"
             return
         fi
