@@ -109,7 +109,7 @@ if [ "${AUTO_REQS:-0}" = "1" ]; then
 fi
 
 # Build the Docker image
-if [ "${RUN_BUILD:-1}" = "0" ]; then
+if [ "${RUN_BUILD:-0}" = "1" ]; then
     echo "Building Docker image: $IMAGE_NAME"
     # note: maldito docker doesn't support --env for build, just run
     # Also, --build-arg misleading: see
@@ -128,6 +128,7 @@ if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
     # Note: Unfortunately, the environment setting is not affecting the docker
     # invocation. A workaround is to modify the 'Run tests' steps in the
     # workflow configuration file (e.g., .github/workflows/debug.yml).
+    ## TODO2: fix environment (see tests/run_tests.bash for workaround)
     act --verbose --env "DEBUG_LEVEL=$DEBUG_LEVEL $USER_ENV" --container-architecture linux/amd64 --pull="$ACT_PULL" --workflows ./.github/workflows/"$file" $RUN_OPTS
     # TODO: docker tag IMAGE-ID shell-scripts-dev
     # EX (see above): docker tag $(docker images --quiet | head -1) shell-scripts-dev
