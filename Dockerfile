@@ -29,10 +29,14 @@
 FROM catthehacker/ubuntu:act-20.04
 
 # Set default debug level (n.b., use docker build --build-arg "arg1=v1" to override)
+# Also optionally set the regex of tests to run.
 # Note: maldito act/nektos/docker not overriding properly
-## TODO: ARG DEBUG_LEVEL=2
+## TODO2: fixme (see tests/run_tests.bash for workaround)
+## TODO4: ARG DEBUG_LEVEL=2
 ARG DEBUG_LEVEL=4
 ## DEBUG: ARG DEBUG_LEVEL=5
+ARG TEST_REGEX=""
+## DEBUG: ARG TEST_REGEX="testing-tips"
 
 # [Work in progress]
 # Set branch override: this is not working due to subtle problem with the tfidf package
@@ -93,6 +97,7 @@ RUN wget -qO /tmp/get-pip.py "https://bootstrap.pypa.io/get-pip.py" && \
 # Copy the project's requirements file to the container
 ARG REQUIREMENTS=$WORKDIR/requirements.txt
 COPY requirements.txt $REQUIREMENTS
+## TODO3?: COPY tests/_test-config.bash $WORKDIR/tests
 
 # Install the project's dependencies
 RUN pip install --verbose --no-cache-dir --requirement $REQUIREMENTS
@@ -112,4 +117,4 @@ RUN apt-get autoremove -y && \
 
 # Run the test, normally pytest over ./tests
 # Note: the status code (i.e., $?) determines whether docker run succeeds (e.h., OK if 0)
-ENTRYPOINT DEBUG_LEVEL=$DEBUG_LEVEL './tests/run_tests.bash'
+ENTRYPOINT DEBUG_LEVEL=$DEBUG_LEVEL TEST_REGEX="$TEST_REGEX" './tests/run_tests.bash'
