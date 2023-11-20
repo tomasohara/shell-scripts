@@ -19,6 +19,8 @@
 #
 # Warning:
 # - *** Changes need to be synchronized in 3 places: Dockerfile, local-workflow.sh, and .github/workflow/*.yml!
+# - The environment overrides are not working (e.g., DEBUG_LEVEL and TEST_REGEX);
+#   see tests/run_tests.bash for workaround
 #
 
 name: debug-Tests
@@ -43,6 +45,11 @@ jobs:
     ##   image: shell-scripts-dev
     ##   options: --user=root
 
+    ## TEST: alternative environment spec for TEST_REGEX override
+    ## See https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+    env:
+      TEST_REGEX: dummy-test
+ 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -53,6 +60,7 @@ jobs:
 
       - name: Configure Environment
         ## TODO2: clarify why used
+        ## See https://stackoverflow.com/questions/57968497/how-do-i-set-an-env-var-with-a-bash-expression-in-github-actions
         run: |
           echo "PATH=$PATH" >> $GITHUB_ENV
           echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> $GITHUB_ENV
@@ -63,8 +71,8 @@ jobs:
           docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
         env:
           DEBUG_LEVEL: 5
+          ## TODO2: fix me!
           # Note: to test a subset of notebook, define a regex pattern
           # ex: TEST_REGEX: "(README|testing-tips)"
           ## TODO: TEST_REGEX: pattern
-          ## DEBUG: TEST_REGEX: README
           DUMMY_VAR: 1
