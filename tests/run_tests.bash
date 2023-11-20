@@ -2,6 +2,10 @@
 #
 # Wrapper around master_test.py and summary_stats.bash
 #
+# Note:
+# - Includes support for overriding DEBUG_LEVEL and TEST_REGEX for use with Docker,
+#   working around quirks for Nektos/Act (see local-workflows.sh).
+#
 
 # Set bash regular and/or verbose tracing
 if [ "${TRACE:-0}" = "1" ]; then
@@ -10,6 +14,11 @@ fi
 if [ "${VERBOSE:-0}" = "1" ]; then
     set -o verbose
 fi
+
+# Get environment overrides
+# TODO3: Get optional environment settings from _test-config.bash
+## DEBUG: export DEBUG_LEVEL=6
+## TEST: export TEST_REGEX="calc-entropy-tests"
 
 # Run the python tests and then the alias tests
 # note: the python stdout and stderr streams are unbuffered so interleaved
