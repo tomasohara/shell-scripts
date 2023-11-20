@@ -1560,7 +1560,7 @@ function make-tar () {
     local base="$1"; local dir="$2";
     ## TODO2: dispense with acrobatic arg parsing!
     local depth="${3:-${TAR_DEPTH:-""}}";
-    local filter="${4:-${TAR_FILTER:-"."}}"
+    local filter="${4:-${TAR_FILTER:-""}}"
 
     # Derive find/tar command line options
     ## OLD: local filter_arg="."
