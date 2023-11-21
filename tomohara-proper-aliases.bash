@@ -231,7 +231,7 @@ function trace-array-vars {
 # note: uses SUFFIX for @ id specified
 function remote-prompt {
     local prompt="$1"
-    local suffix="${2:-'@'}"
+    local suffix="${2:-"@"}"
     if [ "$prompt" = "" ]; then prompt="_$(echo "$HOST_NICKNAME" | perl -pe 's/^(.).*/$1/;')$suffix"; fi
     reset-prompt "$prompt"
 }
@@ -363,9 +363,13 @@ alias detach-job='disown -h'
 #...............................................................................
 # Linux admin
 
+# free-memory: show available memory
 alias free-memory='free --wide --human | grep -v Swap:'
-# TODO: get this to work completely
-simple-alias-fn clear-cache 'echo; echo before; free-memory | grep -v Admin; sysctl vm.drop_caches=1; echo after; free-memory; echo'
+# clear-cache: clear disk cache
+# See https://linux-mm.org/Drop_Caches and https://www.linuxatemyram.com
+# TODO: get this to work completely; explain Admin filter
+## OLD: simple-alias-fn clear-cache 'echo; echo before; free-memory | grep -v Admin; sysctl vm.drop_caches=1; echo after; free-memory; echo'
+simple-alias-fn clear-cache 'echo; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
 
 #...............................................................................
 # Emacs related
