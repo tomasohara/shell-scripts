@@ -368,7 +368,6 @@ alias free-memory='free --wide --human | grep -v Swap:'
 # clear-cache: clear disk cache
 # See https://linux-mm.org/Drop_Caches and https://www.linuxatemyram.com
 # TODO: get this to work completely; explain Admin filter
-## OLD: simple-alias-fn clear-cache 'echo; echo before; free-memory | grep -v Admin; sysctl vm.drop_caches=1; echo after; free-memory; echo'
 simple-alias-fn clear-cache 'echo; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
 
 #...............................................................................
