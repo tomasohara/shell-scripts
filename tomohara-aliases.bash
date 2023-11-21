@@ -1538,7 +1538,9 @@ fi
 if [[ ! $($GTAR --version) =~ GNU ]]; then
     echo "Warning: GNU tar not available" 1>&2
 fi
-alias gtar='$GTAR'
+## OLD: alias gtar='$GTAR'
+## TODO2: simple-alias-fn gtar '$GTAR'
+function gtar { $GTAR; }
 #
 # ls-relative(file): show pathname of FILE relative to $HOME (e.g., ~/xfer/do_setup.bash)
 function ls-relative () { $LS -d "$1" | perl -pe "s@$HOME@~@;"; }
@@ -1586,7 +1588,7 @@ function make-tar () {
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
     ## OLD: (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     # shellcheck disable=SC2086
-    (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "${filter_arg[@]}" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+    (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "${filter_arg[@]}" | $NICE $GTAR "${GTAR_OPTS}" "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     ## DUH: -L added to support tar-this-dir in directory that is symbolic link, but unfortunately
     ## that leads to symbolic links in the directory itself to be included
     ## BAD: (find -L "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
@@ -1649,16 +1651,21 @@ function new-tar-this-dir () {
 function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" "" "/(archive|backup|temp)/"; popd-q; }
 #
 function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
-function make-recent-tar () { (find . -type f -mtime -"$2" | $GTAR cvfzT "$1" -; ) 2>&1 | $PAGER; ls-relative "$1"; }
+# GTAR_OPTS: usual options for aliases using gnu tar
+GTAR_OPTS=vfz
+## TODO2: GTAR_USUAL="$GTAR GTAR_OPTS"
+function set-tar-bzip2 () { GTAR_OPTS="vfj"; }
+function unset-tar-bzip2 () { GTAR_OPTS="vfz"; }
+function make-recent-tar () { (find . -type f -mtime -"$2" | $GTAR "c${GTAR_OPTS}T" "$1" -; ) 2>&1 | $PAGER; ls-relative "$1"; }
 #
 # " (for Emacs)
 # NOTE: above quote needed to correct for Emacs color coding
 # TODO: rework basename extraction
 #
-function view-tar () { $GTAR tvfz "$@" 2>&1 | $PAGER; }
-function extract-tar () { $NICE $GTAR xvfzk "$@" 2>&1 | $PAGER; }
-function extract-tar-force () { $NICE $GTAR xvfz "$@" 2>&1 | $PAGER; }
-function extract-tar-here () { pushd ..; $NICE $GTAR xvfzk "$@" 2>&1 | $PAGER; popd; }
+function view-tar () { $GTAR "t${GTAR_OPTS}" "$@" 2>&1 | $PAGER; }
+function extract-tar () { $NICE $GTAR "x${GTAR_OPTS}k" "$@" 2>&1 | $PAGER; }
+function extract-tar-force () { $NICE $GTAR "x${GTAR_OPTS}" "$@" 2>&1 | $PAGER; }
+function extract-tar-here () { pushd ..; $NICE $GTAR "x${GTAR_OPTS}k" "$@" 2>&1 | $PAGER; popd; }
 alias untar='extract-tar'
 alias untar-here='extract-tar-here'
 alias un-tar=untar
@@ -1667,7 +1674,8 @@ alias create-tar='make-tar-with-subdirs'
 alias make-full-tar='make-tar'
 # TODO: handle filenames with embedded spaces
 alias recent-tar-this-dir='make-recent-tar $TEMP/recent-$(basename "$PWD")'
-function sort-tar-archive() { (tar tvfz "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
+## OLD: function sort-tar-archive() { (tar t${GTAR_OPTS} "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
+function sort-tar-archive() { ($GTAR "t${GTAR_OPTS}" "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
 #
 # TODO: tar-this-dir-there???
 # ex: ¢ TEMP=/mnt/wd6tbp2vfat/backup/tpo-servidor tar-this-dir
