@@ -73,3 +73,18 @@ $ [ "8" -le "$(wc -l < pre.list)" ]; echo "$?"
 
 $ [ "1" -eq "$(wc -l < post.list)" ]; echo "$?"
 
+#-------------------------------------------------------------------------------
+# git aliases
+
+# make sure git-diff-list doesn't show duplicate entries
+#
+# $ git-diff-list
+# run_tests.bash
+# run_tests.bash
+# tests/run_tests.bash
+# tests/summary_stats.bash
+#
+## TODO
+$ all_diff_counts=$(git-diff-list | sort | wc -l)
+$ unique_diff_counts=$(git-diff-list | sort -u | wc -l
+$ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
