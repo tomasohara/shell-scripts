@@ -67,8 +67,11 @@ jobs:
 
       - name: Run tests
         run: |
+          # note: command format: docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
           ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
-          docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+          ## TEST: docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+          ## TODO: if [ ! -e docker.env ]; then echo "" > user-docker.env; fi
+          docker run --env "DEBUG_LEVEL=5" --env-file user-docker.env --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
         env:
           DEBUG_LEVEL: 5
           ## TODO2: fix me!
