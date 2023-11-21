@@ -19,6 +19,12 @@ fi
 # TODO3: Get optional environment settings from _test-config.bash
 ## DEBUG: export DEBUG_LEVEL=6
 ## TEST: export TEST_REGEX="calc-entropy-tests"
+# Show environment if detailed debugging
+if [ "$DEBUG_LEVEL" -ge 5 ]; then
+    echo "Environment: {"
+    printenv | sort | perl -pe "s/^/    /;"
+    echo "   }"
+fi
 
 # Run the python tests and then the alias tests
 # note: the python stdout and stderr streams are unbuffered so interleaved
