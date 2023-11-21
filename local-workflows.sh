@@ -56,6 +56,9 @@ function to_bool {
 }
 
 # Variables
+# note:
+# - USER_ENV is of form "ENV1=val1 ENV2=val2 ...".
+# - act pull is not required (n.b., misleading error message due to permissions, etc.).
 ## DEBUG: set -o xtrace
 REPO_URL="https://github.com/tomasohara/shell-scripts.git"
 REPO_DIR_NAME="shell-scripts"
@@ -70,10 +73,13 @@ BUILD_OPTS="${BUILD_OPTS:-}"
 RUN_OPTS="${RUN_OPTS:-}"
 USER_ENV="${USER_ENV:-}"
 # TODO3: put all env. init up here for clarity
+#
+# Trace out main environment overrides
 #   CLONE_REPO, AUTO_REQS, RUN_BUILD, BUILD_OPTS, RUN_WORKFLOW, RUN_OPTS, WORKFLOW_FILE
 if [ "$DEBUG_LEVEL" -ge 4 ]; then
     echo "in $0 $*"
-    source "${TOM_BIN:-/home/tomohara/bin}/all-tomohara-aliases-etc.bash"
+    src_dir=$(dirname "${BASH_SOURCE[0]}")
+    source "${TOM_BIN:-"$src_dir"}/all-tomohara-aliases-etc.bash"
     trace-vars IMAGE_NAME ACT_PULL LOCAL_REPO_DIR DEBUG_LEVEL GIT_BRANCH BUILD_OPTS USER_ENV
 fi
 
