@@ -21,6 +21,7 @@ fi
 ## TEST: export TEST_REGEX="calc-entropy-tests"
 # Show environment if detailed debugging
 if [ "$DEBUG_LEVEL" -ge 5 ]; then
+    echo "in $0 $*"
     echo "Environment: {"
     printenv | sort | perl -pe "s/^/    /;"
     echo "   }"
