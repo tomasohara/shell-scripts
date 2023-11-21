@@ -782,7 +782,7 @@ function git-alias-usage () {
     echo ""
     echo "Check-in specific file:"
     local next_mod_file
-    next_mod_file=$(git-diff-list | head -1)
+    next_mod_file=$(git-diff-list 2> /dev/null | head -1)
     if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
     echo '    git-next-checkin "'${next_mod_file}'"'
     echo ''
