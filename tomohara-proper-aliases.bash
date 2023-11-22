@@ -24,6 +24,7 @@ alias git-update-='git-update-plus'
 alias git-vdiff='git-vdiff-alias '
 alias git-all-update='update-main-repos.bash'
 alias git-extract-all-versions='extract-all-git-versions.bash --human'
+alias git-files-changed=git-diff-list
 ## TODO: alias git-X-='git-X-plus'
 
 # Other misc. stuff
