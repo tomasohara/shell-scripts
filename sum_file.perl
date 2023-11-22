@@ -138,7 +138,7 @@ my(@data) = ();
 my($total_num) = 0;
 
 if ( !defined($ARGV[0])) {
-    my($options) = "[-stats] [-col=N] [-fix] [-paired_ttest] [-anova] [-stdev] [-cumulative [-average] [-delim=S] [-verbose] [-append]";
+    my($options) = "[-stats] [-col=N] [-fix] [-paired_ttest] [-anova] [-stdev] [-cumulative] [-average] [-delim=S] [-verbose] [-append]";
     if ($verbose) {
 	$options .= " [-fract] [-labels] [-headings] [-ttest] [-mann_whitney] [-flag_index_change]] [-context] [-dollars] [-commas] [-extended]";
     }
