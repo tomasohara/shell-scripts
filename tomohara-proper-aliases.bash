@@ -396,6 +396,14 @@ alias oscar="run-app OSCAR"
 # 1pass: run 1password (snap)
 alias 1pass="run-app 1password"
 
+# Docker
+function docker-cleanup {
+    pause-for-enter "Removing all docker containers, images, etc. (Press Enter to proceed or ^C to abort)"
+    docker rm -vf $(docker ps -aq)
+    docker rmi -f $(docker images -aq)
+    docker system prune --force
+}
+
 #................................................................................
 # Doubly idiosyncratic stuff (i.e., given "tomohara-proper" part of filename)
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
