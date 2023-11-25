@@ -59,7 +59,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends wget tar ca-certificates && \
     true
     ## TODO4: rm -rf /var/lib/apt/lists/*
-    
 
 # Install other stuff
 # note: this is to support logging into the images for debugging issues
@@ -104,8 +103,8 @@ RUN pip install --verbose --no-cache-dir --requirement $REQUIREMENTS
 
 # Display environment (e.g., for tracking down stupid pip problems)
 RUN printenv | sort
-#
-# Add local version of mezcla if debugging
+
+# Add local version of mezcla
 # ex: DEBUG_LEVEL=4 GIT_BRANCH=aviyan-dev local-workflows.sh
 RUN if [ "$GIT_BRANCH" != "" ]; then echo "Installing mezcla@$GIT_BRANCH"; pip install --verbose --no-cache-dir git+https://github.com/tomasohara/mezcla@$GIT_BRANCH; fi
 
