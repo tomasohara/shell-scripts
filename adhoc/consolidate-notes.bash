@@ -90,8 +90,12 @@ done
 
 # Enable tracing
 # note: done after alias files sourced to avoid exxtraenous tracing
-if [ "$trace" = "1" ]; then
+# TODO2: make note of TRACE and other env. var usage
+if [[ ("$trace" = "1") || ("${TRACE:-0}" = "1") ]]; then
     set -o xtrace
+fi
+if [ "${VERBOSE:-0}" = "1" ]; then
+    set -o verbose
 fi
 
 # Get settings from environment
@@ -103,6 +107,13 @@ cd "${TARGET_DIR:-.}"
 ## TEMP: ensure full path used (TODO: only if SRC_DIR equals TARGET_DIR)
 cd-realdir
 set-xterm-title "merge-notes [$PWD]"
+
+# Rename temporary files (in case of aborted run)
+temp_files="$(ls "$new_base.files.list" "$new_base.files.log" "$new_base.list" "$new_base.list.log" 2> /dev/null)"
+if [ "" != "$temp_files" ]; then
+    echo "Warning: temp files from previous run: $temp_files"
+    rename-with-file-date "$new_base.files.list" "$new_base.files.log" "$new_base.list" "$new_base.list.log"
+fi
 
 # Prepare list of notes files, excluding backup and temp directories (i.e., files with paths like */backup/* or */temp/*)
 # Inclusion pattern:
@@ -150,7 +161,6 @@ chmod ugo-w $new_base*;
 ## OLD: rename-with-file-date "$base.files.list" "$base.list" "$base.log" "$base.files.log"
 rename-with-file-date "$base.files.list" "$base.files.log" "$base.list" "$base.list.log" 
 ## TODO: rename-with-file-date "$base"*[a-z]
-
 
 # Rename new file to use target name
 # TODO1: fix following
