@@ -1,0 +1,36 @@
+# B.3 Experiment 1, Norms (Resnik, 1993)
+#
+# Object-drop verbs	Non-object-drop verbs
+# Verb Strength		Verb Strength
+#
+drink	2.83	say	2.56
+play	2.64	wear	2.30
+sing	2.63	do	2.21
+pour	2.57	hang	1.96
+eat	2.47	catch	1.92
+call	2.39	hit	1.91
+pull	2.22	open	1.88
+explain	2.20	give	1.81
+write	2.18	want	1.71
+push	1.98	make	1.58
+watch	1.86	see	1.54
+read	1.81	show	1.42
+pack	1.75	put	1.34
+hear	1.71	like	1.30
+steal	1.34	find	1.30
+		take	1.28
+		have	1.23
+		get	1.17
+		bring	1.04
+#
+# Resnik, Philip (1993), {\em Selection and Information: A Class-Based
+# Approach to Lexical Relations}, PhD Dissertation, University of
+# Pennsylvania.
+#
+# analysis:
+# % perl_ sum_file.perl -mann_whitney -fix=0 -f1=2 -f2=4 resnik_norms_object.data
+# 
+# U = 55; E(U) = 142.5; V(U) = 831.25
+# z = 3.03488489333442
+# p = 0.0012031375208637618
+#

@@ -1,0 +1,23 @@
+# Example 13.2 p. 466 [Mendenhall & Scheaffer 73]
+#
+# 1	2	3	4
+65	75	59	94
+87	69	78	89
+73	83	67	80
+79	81	62	88
+81	72	83
+69	79	76
+	90
+#
+# REF
+#
+# William Mendenhall and Richard L. Scheaffer (1973), {\em Mathematical
+# Statistics with Applications}, North Scituate, Massachusetts: Duxbury
+# Press.
+#
+#
+# NOTES:
+#
+# To analyze, use the following
+#     sum_file.perl -fix=0 -each -anova mendenhall_ex13.2.data
+#
