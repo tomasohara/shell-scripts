@@ -168,7 +168,7 @@ function git-alias-review-log {
     fi
     tail "$log" | cat | truncate-width;
     return $status
-    }
+}
 
 # git-update-plus(): updates local from global repo. This uses git-stash to hide local changes
 # does a git-pull, and then restores local changes.
@@ -638,6 +638,7 @@ function invoke-next-single-checkin {
 # with template text for checking in next change (or FILENAME if given)
 # NOTE: although potentially dangerous given eval environnment, the user still needs to
 # confirm the commit operation (and thus can verify done OK).
+# This is used for git-next-checkin with an empty filename.
 function alt-invoke-next-single-checkin {
     # If unspecified, determine file to check in, based on next modified file
     local mod_file="$1"
@@ -695,7 +696,7 @@ function alt-invoke-next-single-checkin {
     git-next-checkin
 }
 #
-# invoke-alt-checkin(filename): run alternative template-bsed checkin for filename
+# invoke-alt-checkin(filename): run alternative template-based checkin for filename
 function invoke-alt-checkin { alt-invoke-next-single-checkin "$1"; }
 
 # Various miscellaneous aliases
@@ -708,7 +709,7 @@ alias git-invoke-next-single-checkin=invoke-next-single-checkin
 # shellcheck disable=SC2139
 alias-fn git-alias-refresh "source '${BASH_SOURCE[0]}'"    # bash idiom for current script filename
 simple-alias-fn git-refresh-aliases 'git-alias-refresh'
-simple-alias-fn git-next-checkin 'invoke-alt-checkin'
+simple-alias-fn git-next-checkin 'invoke-alt-checkin'      # uses alt-invoke-next-single-checkin
 simple-alias-fn git-extract-all-versions 'extract-all-git-versions.bash'
 ## TEST: hide tracing output alias git-next-checkin='invoke-alt-checkin 2> /dev/null'
 # TODO:
