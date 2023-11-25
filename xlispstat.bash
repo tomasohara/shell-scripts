@@ -51,7 +51,8 @@ fi
 # Specify based directory
 if [[ -z "$XLISPLIB" ]]; then
     ## OLD export XLISPLIB="c:/Program-Misc/lisp/xlispstat-3-52-20"
-    export XLISPLIB="/home/tomohara/lib/xlispstat"
+    ## BAD: export XLISPLIB="/home/tomohara/lib/xlispstat"
+    export XLISPLIB="$HOME/lib/xlispstat"
 fi
 
 dir=$(dirname "$0")
@@ -66,6 +67,8 @@ if [[ -z "$1" ]]; then
     echo "example:"
     echo "$0 --interactive --non-X"
     echo ""
+    echo "note:"
+    echo "- Use XLISPLIB to indicate xlisp library file directory."
     exit 1
 fi
 
