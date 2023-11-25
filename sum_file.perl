@@ -49,6 +49,7 @@ eval 'exec perl -Ssw $0 "$@"'
 BEGIN { 
     my $dir = `dirname $0`; chomp $dir; unshift(@INC, $dir);
     require 'common.perl';
+    use vars qw/$TMP/;
     require 'extra.perl';
     use vars qw/$verbose &set_init_var_export/;
     require POSIX;
@@ -143,11 +144,11 @@ if ( !defined($ARGV[0])) {
 	$options .= " [-fract] [-labels] [-headings] [-ttest] [-mann_whitney] [-flag_index_change]] [-context] [-dollars] [-commas] [-extended]";
     }
     my($example) = "Examples:\n\nls -s | $script_name -fix -stdev -\n\n";
-    $example .= "sum_file.perl -headings -anova -f1=3 -f2=4 resnik_typicality.data\n\n";
+    $example .= "sum_file.perl -headings -anova -col1=3 -col2=4 archive/resnik_typicality.data\n\n";
     if ($verbose) {
-	$example .= "sum_file.perl -ttest -labels -headings -f=5 -f2=6 eval_naive_bayes_4jul.report\n\n";
-	$example .= "sum_file.perl -mann_whitney -fix=0 -f1=2 -f2=4 resnik_brown_object.data\n\n";
-	$example .= "sum_file.perl -diff -append -col1=1 -col2=2 old-test/mendenhall_ex13.1.data\n\n";
+	## OLD: $example .= "sum_file.perl -ttest -labels -headings -f=5 -f2=6 eval_naive_bayes_4jul.report\n\n";
+	$example .= "sum_file.perl -mann_whitney -fix=0 -col1=2 -col2=4 archive/resnik_brown_object.data\n\n";
+	$example .= "sum_file.perl -diff -append -col1=1 -col2=2 archive/mendenhall_ex13.1.data\n\n";
     }
 
     my($note) = "Notes:\n- Use -'s for cases with no corresponding data.\n";
@@ -529,7 +530,7 @@ if ($stats) {
 #
 sub show_statistics {
     &debug_print(&TL_VERBOSE, "show_statistics(@_)\n");
-    my($temp_file) = "temp_calc_stats_$$.lisp";
+    my($temp_file) = "$TMP/temp_calc_stats_$$.lisp";
     my($lisp_code);
     my($extra) = "";
     my($init) = (&DEBUG_LEVEL < 4) ? "" : "(dribble \"temp_calc_stats_$$.log\")\n";
@@ -581,9 +582,11 @@ sub show_statistics {
 	                  $col1, $col2;
     }
     if ($anova) {
-	# By default, use version of anova from XLispStat extension.
-	# See Contributions/anova2.lsp in XLispStat directory.
-	$ENV{"USE_XLISP_EXTS"} = 1 unless (defined($ENV{"USE_XLISP_EXTS"}));
+	## OLD
+	## # By default, use version of anova from XLispStat extension.
+	## # See Contributions/anova2.lsp in XLispStat directory.
+	## $ENV{"USE_XLISP_EXTS"} = 1 unless (defined($ENV{"USE_XLISP_EXTS"}));
+	$ENV{"USE_XLISP_EXTS"} = 0 unless (defined($ENV{"USE_XLISP_EXTS"}));
     }
 
     # Output the lisp code for calculating the statistics
