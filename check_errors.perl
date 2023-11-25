@@ -64,7 +64,9 @@ my $asterisks = (! $no_asterisks);
 &init_var(*ruby, &FALSE);	   	# alias for -skip_ruby_lib
 &init_var(*skip_ruby_lib, $ruby);	# skip Ruby library related errors
 &init_var(*relaxed, &FALSE);            # relaxed for special cases
-&init_var(*strict, ! $relaxed);         # alias for relaxed=0 
+## OLD: &init_var(*strict, ! $relaxed);         # alias for relaxed=0
+## TODO2: use different option for strict error checking (as -strict not commonly used)
+$strict = (! $relaxed);                 # note: overrides common.perl default of 0
 &init_var(*quiet, &FALSE);              # just output errors proper (e.g., no filenames)
 &init_var(*matching, &FALSE);           # show matching text
 
@@ -80,7 +82,7 @@ while (<>) {
     &dump_line();
     chop;
     my($has_error) = &FALSE;		# whether line has error
-    my($match_info) = "";             # text span within line that matched
+    my($match_info) = "";               # text span within line that matched
 
     # Check for error log corruption
     if ($show_warnings && /$NULL/) {
@@ -274,13 +276,22 @@ print "\n" if ($verbose);
 #------------------------------------------------------------------------
 
 # show_current_file_info(): display name of current file (and warning inclusion status)
+# Note: aborts if strict mode and file not found
 #
 sub show_current_file_info {
-    if (($current_file ne "") && ($quiet == &FALSE)) {
-	if ($verbose) {
-	    print "========================================================================\n";
-	    printf "Errors%s\n\n", ($skip_warnings ? "" : " and Warnings");
+    ## OLD: if (($current_file ne "") && ($quiet == &FALSE)) {
+    # Make sure file exists (or stderr)
+    if ($strict && ($current_file ne "-") && (! &file_exists($current_file)) && defined($ARGV[0])) {
+	&exit("Error: file '$current_file' not accessible.")
+    }
+    # Show current file if not stdin. Also adds divider if verbose mode.
+    if ($current_file ne "") {
+	if ($quiet == &FALSE) {
+	    if ($verbose) {
+		print "========================================================================\n";
+		printf "Errors%s\n\n", ($skip_warnings ? "" : " and Warnings");
+	    }
+	    print "$current_file\n";
 	}
-	print "$current_file\n";
     }
 }
