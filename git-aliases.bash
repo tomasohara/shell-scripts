@@ -696,7 +696,8 @@ function alt-invoke-next-single-checkin {
         read -r -e -i "$prompt" command
     else 
         echo "GIT_NO_CONFIRM set to 1, so skipping confirmation"
-        export GIT_MESSAGE=${GIT_MESSAGE:-"default"}
+        OLD=$GIT_MESSAGE
+        export GIT_MESSAGE=${GIT_TEST_MESSAGE:-"default"}
         command="git-update-commit-push \"$mod_file\""
     fi
     # Evaluate the user's checkin command
@@ -708,6 +709,7 @@ function alt-invoke-next-single-checkin {
 
     # Start next checkin or show if no more updates to do
     git-next-checkin
+    export GIT_MESSAGE=$OLD
 }
 #
 # invoke-alt-checkin(filename): run alternative template-bsed checkin for filename
