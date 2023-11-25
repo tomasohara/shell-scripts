@@ -34,17 +34,24 @@ randomize-datafile ()
 }
 
 #...............................................................................
+# check_errors.perl
 
-# Bad
+# Bad behavior
 
-$ view-todo | check-errors | cat
-Can't find reverse.perl on PATH.
-
-# Good
-
-$ view-todo | check-errors | wc -l
+# Make sure no error
+# ex: "Can't find reverse.perl on PATH."
+$ echo ok | check-errors 2>&1 | grep -c "Can't"
 0
 
+# Good
+$ echo ok | check-errors | wc -l
+0
+
+# Make sure QUIET=0 hides file name
+# f=$TMP/_hey.list
+$ echo warning: hey > $f
+$ QUIET=0 check-errors $f | wc -l
+0
 
 #-------------------------------------------------------------------------------
 # Rename files
