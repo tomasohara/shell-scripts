@@ -43,7 +43,7 @@ append-path "$TOM_BIN/adhoc"
 append-path "$TOM_BIN/archive"
 append-path "$TOM_BIN/examples"
 append-path-warn "$HOME/.local/bin"
-# Put current directoy at end of path; can be overwritting with ./ prefix
+# Put current directory at end of path; can be overwritting with ./ prefix
 export PATH="$PATH:."
 
 # Note: ~/lib only used to augment existing library, not pre-empt
