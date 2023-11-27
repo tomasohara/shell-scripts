@@ -95,3 +95,11 @@ $ [ "1" -eq "$(wc -l < post.list)" ]; echo "$?"
 $ all_diff_counts=$(git-diff-list | sort | wc -l)
 $ unique_diff_counts=$(git-diff-list | sort -u | wc -l
 $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
+
+# TODO2: make sure zip is install
+
+## $ GIT_MESSAGE='fix VSD_CONDA_ENV reference; shell-check cleanup' git-update-commit-push startup.txt 
+## Temporarily changing working directory to root: /home/tomohara/search-diff-engine
+## issuing: zip over changed files (for later restore)
+## The program 'zip' is currently not installed. You can install it by typing:
+## sudo apt install zip
