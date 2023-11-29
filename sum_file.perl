@@ -479,12 +479,12 @@ if ($stats == &FALSE) {
 		my($perc95_pos) = (0.95 * ($num_values - 1) + 1);
 		my($perc95);
 		if ($perc95_pos == int($perc95_pos)) {
-		    $perc95 = $sorted_data[$perc95_pos - 1];
+		    $perc95 = &round($sorted_data[$perc95_pos - 1]);
 		}
 		else {
 		    my($diff) = ($sorted_data[$perc95_pos] - $sorted_data[$perc95_pos - 1]);
 		    my($fract) = ($perc95_pos - int($perc95_pos));
-		    $perc95 = $sorted_data[$perc95_pos - 1] + ($fract * $diff);
+		    $perc95 = &round($sorted_data[$perc95_pos - 1] + ($fract * $diff));
 		}
 		#
 		## OLD: my($perc99_pos) = POSIX::floor(0.99 * $num_values);
@@ -494,12 +494,12 @@ if ($stats == &FALSE) {
 		my($perc99_pos) = (0.99 * ($num_values - 1) + 1);
 		my($perc99);
 		if ($perc99_pos == int($perc99_pos)) {
-		    $perc99 = $sorted_data[$perc99_pos - 1];
+		    $perc99 = &round($sorted_data[$perc99_pos - 1]);
 		}
 		else {
 		    my($diff) = ($sorted_data[$perc99_pos] - $sorted_data[$perc99_pos - 1]);
 		    my($fract) = ($perc99_pos - int($perc99_pos));
-		    $perc99 = $sorted_data[$perc99_pos - 1] + ($fract * $diff);
+		    $perc99 = &round($sorted_data[$perc99_pos - 1] + ($fract * $diff));
 		}
 		&debug_print(4, "perc95_pos=$perc95_pos perc99_pos=$perc99_pos\n");
 
