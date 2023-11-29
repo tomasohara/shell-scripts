@@ -31,6 +31,8 @@ fi
 # note: the python stdout and stderr streams are unbuffered so interleaved
 dir=$(dirname "${BASH_SOURCE[0]}")
 export PYTHONUNBUFFERED=1
+echo -n "Running tests under "
+python3 --version
 python3 "$dir"/master_test.py
 python_result="$?"
 
