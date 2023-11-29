@@ -34,10 +34,11 @@ jobs:
         ## TODO: os: [ubuntu-20.04, ubuntu-latest]
         os: [ubuntu-20.04]
         ## TODO: python-version: ["3.8", "3.9", "3.10"]
+        ## NOTE: only uses one version due to time to run tests locally
         python-version: ["3.9"]
 
     ## TEST:
-    ## NOTE: following is for images on the hub
+    ## NOTE: following is for docker images on the hub
     ## container:
     ##   image: shell-scripts-dev
     ##   options: --user=root
@@ -52,9 +53,28 @@ jobs:
 
       - name: Configure Environment
         ## TODO2: clarify why used
+        ## See https://stackoverflow.com/questions/57968497/how-do-i-set-an-env-var-with-a-bash-expression-in-github-actions
         run: |
           echo "PATH=$PATH" >> $GITHUB_ENV
           echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> $GITHUB_ENV
+
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+     - name: Cache Python Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+            ${{ runner.os }}-pip-
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
 
       - name: Run tests
         run: |

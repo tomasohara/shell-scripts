@@ -58,17 +58,17 @@ jobs:
         run: |
           docker build --tag shell-scripts-dev -f- . <Dockerfile
 
-      - name: Setup Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: ${{ matrix.python-version }}
-
      - name: Configure Environment
         ## TODO2: clarify why used
         ## See https://stackoverflow.com/questions/57968497/how-do-i-set-an-env-var-with-a-bash-expression-in-github-actions
         run: |
           echo "PATH=$PATH" >> $GITHUB_ENV
           echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> $GITHUB_ENV
+
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
 
       - name: Cache Python Dependencies
         uses: actions/cache@v3
