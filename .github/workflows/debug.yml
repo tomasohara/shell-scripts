@@ -20,7 +20,7 @@
 # Warning:
 # - *** Changes need to be synchronized in 3 places: Dockerfile, local-workflow.sh, and .github/workflow/*.yml!
 # - The environment overrides are not working (e.g., DEBUG_LEVEL and TEST_REGEX);
-#   see tests/run_tests.bash for workaround
+#   instead specify them in ../../_temp-user-docker.env
 #
 
 name: debug-Tests
@@ -34,21 +34,21 @@ jobs:
 
     strategy:
       matrix:
-        ## TODO: os: [ubuntu-20.04, ubuntu-latest]
         os: [ubuntu-20.04]
-        ## TODO: python-version: ["3.8", "3.9", "3.10"]
+        ## TODO: os: [ubuntu-20.04, ubuntu-latest]
         python-version: ["3.9"]
+        ## TODO: python-version: ["3.8", "3.9", "3.10"]
 
     ## TEST:
-    ## NOTE: following is for images on the hub
+    ## NOTE: following is for docker images on the hub
     ## container:
     ##   image: shell-scripts-dev
     ##   options: --user=root
 
     ## TEST: alternative environment spec for TEST_REGEX override
     ## See https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
-    env:
-      TEST_REGEX: dummy-test
+    ## env:
+    ##    TEST_REGEX: dummy-test
  
     steps:
       - name: Checkout Repository
@@ -58,24 +58,42 @@ jobs:
         run: |
           docker build --tag shell-scripts-dev -f- . <Dockerfile
 
-      - name: Configure Environment
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+     - name: Configure Environment
         ## TODO2: clarify why used
         ## See https://stackoverflow.com/questions/57968497/how-do-i-set-an-env-var-with-a-bash-expression-in-github-actions
         run: |
           echo "PATH=$PATH" >> $GITHUB_ENV
           echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> $GITHUB_ENV
 
+      - name: Cache Python Dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+            ${{ runner.os }}-pip-
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
       - name: Run tests
         run: |
           # Note: command format: docker run [OPTIONS] IMAGE [COMMAND] [ARG...];
           # The environment file normally has no entries (i.e., just comments).
-          ## OLD: docker run --env "DEBUG_LEVEL=5" --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
-          ## TEST: docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
           docker run --env "DEBUG_LEVEL=5" --env-file _temp-user-docker.env --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
-        env:
-          DEBUG_LEVEL: 5
-          ## TODO2: fix me!
-          # Note: to test a subset of notebook, define a regex pattern
-          # ex: TEST_REGEX: "(README|testing-tips)"
-          ## TODO: TEST_REGEX: pattern
-          DUMMY_VAR: 1
+        ##
+        ## TEST
+        ## env:
+        ##   DEBUG_LEVEL: 5
+        ##   ## TODO2: fix me!
+        ##   # Note: to test a subset of notebook, define a regex pattern
+        ##   # ex: TEST_REGEX: "(README|testing-tips)"
+        ##   ## TODO: TEST_REGEX: pattern
+        ##   DUMMY_VAR: 1
