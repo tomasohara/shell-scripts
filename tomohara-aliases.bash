@@ -2034,34 +2034,38 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 #
 # rename-utf8-encoded: replace runs of non-ascii UTF8 encodings with _
 # note: '👇🏻' gets encoded as [???]; see show-unicode-code-info alias to way to illustrate encodings
-# TODO: make this less of a sledgehammer
-## BAD: alias rename-utf8-encoded='rename-files -global -regex "[0x80-0xFF]\{3,\}" "_"'
-## OLD: alias rename-utf8-encoded='rename-files -global -regex "[\x80-\xFF]\{3,\}" "_"'
-## OLD: alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]+" "_"'
-## OLD: alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]{1,4}" "_"'
+# ASIDE: This seems much ado about nothing, but this is a minor accessibility issue for TPO;
+# Specifically, he is sensitive to bright icons, especially if tacky!
 alias rename-utf8-encoded-sledgehammer='rename-files -quick -global -regex "[\x80-\xFF]{1,4}" "_"'
 ## OLD: alias rename-emoji=rename-utf8-encoded
 # via https://en.wikipedia.org/wiki/UTF-8:
 #    U+10000    U+10FFFF        11110xxx        10xxxxxx        10xxxxxx        10xxxxxx;   note: F[8-F]{3}
 # rename-emoji: replace emoji characters in filenames with _'s (e.g., U+10000+ chars and U+26nn)
 # note: emoji considered synonymous with emoticon
-## OLD: alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"'
-## BAD: alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"'
 # note: check specifically for code blocks: U+26D3 [chains] is e29b93; U+1F917 [hugging face] is f09fa497
 alias rename-emoji-old='rename-files -quick -global -regex "(\xE2[\x80-\xFF]{2})|(\xF0[\x80-\xFF]{3})" "_"'
-# rename-emoji-verbose: replace emoji characters in filenames with brief char description (e.g., smiley-face)
-function rename-emoji-verbose {
+# rename-emoji-aux: renames eomji in filenames with ascii descriptions
+# note: if STRIP_EMOTICONS then uses REPLACEMENT_TEXT (see mezcla's convert_emoticons.py)
+function rename-emoji-aux {
     # ex: "LangChain_🦜⛓️_-_Zep" => "LangChain_parrot_chains_-_Zep"
-    # TODO3: rename-emoji-verbose => rename-emoji-aux
     local f new_f
     for f in "$@"; do
-        new_f=$(echo "$f" | DURING_ALIAS=1 convert_emoticons.py - | perl -pe 's/[\[\]]/_/g; s/__+/_/g;')
-        rename-files -t "$f" "$new_f" "$f"
+        new_f=$(echo "$f" | DURING_ALIAS=1 python -m mezcla.convert_emoticons - | perl -pe 's/[\[\]]/_/g; s/__+/_/g;')
+        rename-files "$f" "$new_f" "$f"
     done
 }
-simple-alias-fn rename-emoji 'STRIP_EMOTICONS=1 REPLACEMENT_TEXT=_ rename-emoji-verbose'
-## TODO2 (handle cases like U+2728 [sparkle] w/ UTF8 0xE29CA8):
-#    alias rename-utf8-emoji-misc='rename-files -quick -global -regex "[\xE0-\xFF][\x80-\xFF]{2,3}" "_"'
+# rename-emoji-verbose: replace emoji characters in filenames with brief char description (e.g., smiley-face)
+simple-alias-fn rename-emoji-verbose rename-emoji-aux
+
+simple-alias-fn rename-emoji 'STRIP_EMOTICONS=1 REPLACEMENT_TEXT=_ rename-emoji-aux'
+# rename-emoji-here: rename files in current directory with emoji
+function rename-emoji-here {
+    # note: ensures no spaces and then filters files by potential emoticons before slow rename-emoji step proper
+    # See https://stackoverflow.com/questions/39536390/match-unicode-emoji-in-python-regex.
+    rename-spaces;
+    rename-emoji $(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=1 python -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -);
+}
+
 # rename-bad-dashes: replace " -" in filename with "_" and replace leadind dash with underscore
 alias rename-bad-dashes="rename-files -quick -global -regex ' \-' '_'; rename-files -quick -global -regex '\-' '_' -*"; 
 
