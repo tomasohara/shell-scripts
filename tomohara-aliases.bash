@@ -3100,6 +3100,8 @@ function test-script () {
 #
 alias test-script-debug='ALLOW_SUBCOMMAND_TRACING=1 DEBUG_LEVEL=5 MISC_TRACING_LEVEL=5 test-script'
 
+alias tools="$PWD/test_tools.py"
+
 # randomize-datafie(file, [num[): randomize datafile optionally pruned to NUM lines, preserving header line
 #
 function randomize-datafile() {
