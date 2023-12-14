@@ -1522,7 +1522,7 @@ trace file archiving commands
 # -x extract; -v verbose; -f file source; -z compressed; -k don't overwrite files
 ## NOTE: gtar is used on some BSD-based system (e.g., MacOS), but tar is used on Linux.
 ## OLD: GTAR="tar"
-GTAR="tar" ## Lorenzo review: same as OLD above
+GTAR="tar"
 if [ "$(which gtar)" != "" ]; then
     GTAR="gtar"
 fi
