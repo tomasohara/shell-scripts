@@ -106,6 +106,9 @@ cond-export MNT /media/"$USER"
 ## TODO: export EDITOR="emacs -nw"
 export EDITOR="emacs"
 
+# Other default programs (e.g., for use with start.sh)
+export BROWSER="google-chrome"
+
 # Linux stuff
 if [ "$(under-linux)" = "1" ]; then
     cond-export WNSEARCHDIR /usr/share/wordnet
