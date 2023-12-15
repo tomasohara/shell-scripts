@@ -148,7 +148,7 @@ alias-fn ocr-image 'tesseract "$1" "$1"; $PAGER "$1".txt'
 # Misc. stuff (e.g., JSON, Yaml)
 # 
 
-# json-validate(file): make suire file is valid JSON
+# json-validate(file): make sure file is valid JSON
 function json-validate () {
     local file="$1"
     python -c "import json; from mezcla import system; print(json.loads(system.read_file('$file')))" | head -5 | truncate-width
@@ -170,6 +170,9 @@ simple-alias-fn act-plain 'convert-emoticons-aux act'
 # para-len-alt(file, ...): show length of each paragraph with embedded newlines replaced with CR's to allow chaining
 # note: strips the 0-len paragraph indicator
 function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -pe 's/^0\t//;'; }
+
+# extract-text-html(filename): extract text from HTMNL in FILENAME
+simple-alias-fn extract-text-html 'python -m mezcla.html_utils'
 
 #...............................................................................
 # Bash stuff
