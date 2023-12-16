@@ -1543,6 +1543,7 @@ function ls-relative () { $LS -d "$1" | perl -pe "s@$HOME@~@;"; }
 # Note: -xdev is so that find doesn't use other file systems
 find_options="-xdev"
 function make-tar () { 
+    ## Lorenzo: make-tar doesn't include folders inside dir no matter the specified depth
     local base="$1"; local dir="$2"; local depth="$3"; local filter="$4";
     local depth_arg=""; local filter_arg="."
     local size_arg="";
@@ -1620,10 +1621,6 @@ function new-tar-this-dir () {
 #
 # tar-this-dir-normal: creates archive of directory, excluding archive, backup, and temp subdirectories
 
-## Lorenzo review: instead of two functions this similar, wouldn't this work?
-## tar-something () {local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" "$@"; popd-q;}
-## alias tar-this-dir-normal='tar-something "" "/(archive|backup|temp)/"'
-## alias tar-just-this-dir='tar-something' 1
 function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" "" "/(archive|backup|temp)/"; popd-q; }
 #
 function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
