@@ -66,32 +66,40 @@ RUN apt-get update && \
 RUN if [ "$DEBUG_LEVEL" -ge 4 ]; then apt-get install --yes emacs kdiff3 less tcsh zip || true; fi
 
 # Set the Python version to install
+# NOTE: The workflow yaml files now handle this (e.g., via matrix support)
 ## TODO: keep in sync with .github/workflows
 ## OLD: ARG PYTHON_VERSION=3.9.16
+## TEST: ARG PYTHON_VERSION=3.8.12
 ARG PYTHON_VERSION=3.11.4
 
+
 # Download pre-compiled python build
+# TODO2: Make this step optional because it conflict with python matrix in yaml files (e.g., github/worflow/github.yml).
 # To find URL links, see https://github.com/actions/python-versions:
 # ex: https://github.com/actions/python-versions/releases/tag/3.11.4-5199054971
 #
 # maldito https://github.com/actions uses stupid idiosyncratic tag
+## OLD: ARG PYTHON_TAG=""
+## TEST: ARG PYTHON_TAG="117929"
 ARG PYTHON_TAG="5199054971"
 #
-RUN wget -qO /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz \
-        "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-${PYTHON_TAG}/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz" && \
-    mkdir -p /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 && \
-    tar -xzf /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz \
-        -C /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 --strip-components=1 && \
-    echo TODO: rm /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz
+RUN if [ "$PYTHON_VERSION" != "" ]; then                                                \
+       wget -qO /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-${PYTHON_TAG}/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz" && \
+       mkdir -p /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 &&                    \
+       tar -xzf /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz                    \
+           -C /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 --strip-components=1 && \
+       echo TODO: rm /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz;              \
+    fi
 
 # Set environment variables to use the installed Python version as the default
 ENV PATH="/opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64/bin:$WORKDIR:$WORKDIR/tests:${PATH}"
 
 # Install pip for the specified Python version
-RUN wget -qO /tmp/get-pip.py "https://bootstrap.pypa.io/get-pip.py" && \
-    python3 /tmp/get-pip.py && \
-    true
-    ## TODO: rm /tmp/get-pip.py
+RUN if [ "$PYTHON_VERSION" != "" ]; then                                                \
+        wget -qO /tmp/get-pip.py "https://bootstrap.pypa.io/get-pip.py" &&              \
+        python3 /tmp/get-pip.py &&                                                      \
+        true || /tmp/get-pip.py;                                                        \
+    fi
 
 # Copy the project's requirements file to the container
 ARG REQUIREMENTS=$WORKDIR/requirements.txt
@@ -99,7 +107,10 @@ COPY requirements.txt $REQUIREMENTS
 ## TODO3?: COPY tests/_test-config.bash $WORKDIR/tests
 
 # Install the project's dependencies
-RUN pip install --verbose --no-cache-dir --requirement $REQUIREMENTS
+## OLD: RUN pip install --verbose --no-cache-dir --requirement $REQUIREMENTS
+RUN if [ "$PYTHON_VERSION" != "" ]; then                                                \
+        pip install --verbose --no-cache-dir --requirement $REQUIREMENTS;               \
+    fi
 
 # Display environment (e.g., for tracking down stupid pip problems)
 RUN printenv | sort
