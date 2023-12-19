@@ -20,6 +20,7 @@ fi
 ## DEBUG: export DEBUG_LEVEL=6
 ## TEST: export TEST_REGEX="calc-entropy-tests"
 # Show environment if detailed debugging
+DEBUG_LEVEL=${DEBUG_LEVEL:-0}
 if [ "$DEBUG_LEVEL" -ge 5 ]; then
     echo "in $0 $*"
     echo "Environment: {"
