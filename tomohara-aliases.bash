@@ -3407,7 +3407,8 @@ function shell-check {                  ## TOM-IDIOSYNCRATIC
 ## if [ "$USER" = "root" ]; then
 ##     alias kill-software-updater='kill_em.sh --all --pattern "(software-properties-gtk|gnome-software|update-manager)"'
 ## fi
-alias kill-software-updater='kill_em.sh --force --all --pattern "(software-properties-gtk|gnome-software|update-manager)"'
+## OLD: alias kill-software-updater='kill_em.sh --force --all --pattern "(software-properties-gtk|gnome-software|update-manager)"'
+alias kill-software-updater='kill_em.sh --force --all --pattern "(software-properties|gnome-software|update-manager|update-notifier)"'
 ## OLD: alias update-software='/usr/bin/update-manager'
 alias update-software='command update-manager'
 alias kill-clam-antivirus='kill_em.sh --all -p clamd'
