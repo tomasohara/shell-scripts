@@ -366,6 +366,10 @@ alias distro-version-info-neo='neofetch --off'
 # See https://unix.stackexchange.com/questions/484276/do-disown-h-and-nohup-work-effectively-the-same
 alias detach-job='disown -h'
 
+# screenshot-window(): take screen shot of another window in 2 seconds
+# TODO3: add option for --screen and for specifying --file
+simple-alias-fn screenshot-window 'gnome-screenshot --window --delay 2'
+
 #...............................................................................
 # Linux admin
 
