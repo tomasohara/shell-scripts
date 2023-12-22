@@ -1543,7 +1543,8 @@ function ls-relative () { $LS -d "$1" | perl -pe "s@$HOME@~@;"; }
 # Note: -xdev is so that find doesn't use other file systems
 find_options="-xdev"
 function make-tar () { 
-    ## Lorenzo: make-tar doesn't include folders inside dir no matter the specified depth
+    # Warning: if no optional arguments are given, find and filtering will be skipped to preserve empty folders
+    #          Otherwise if optional args are present, empty dirs will be excluded from final tar
     local base="$1"; local dir="$2"; local depth="$3"; local filter="$4";
     local depth_arg=""; local filter_arg="."
     local size_arg="";
@@ -1559,10 +1560,16 @@ function make-tar () {
 	    fi;
 	done
     fi
+    # OLD: (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
     # shellcheck disable=SC2086
-    (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+    if [ "${depth_arg}${size_arg}${filter_arg}" == "." ]; then
+        $NICE $GTAR cvfz "$base.tar.gz" "$dir" >| "$base.tar.log" 2>&1;
+    else
+    # shellcheck disable=SC2086
+        (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+    fi
     ## DUH: -L added to support tar-this-dir in directory that is symbolic link, but unfortunately
     ## that leads to symbolic links in the directory itself to be included
     ## BAD: (find -L "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1; 
@@ -1575,7 +1582,9 @@ function make-tar () {
 # tar-dir(dir, depth, [filter]): create archive of DIR in ~/xfer, using subdirectories up to DEPTH, and optionally 
 # filtering files matching exlusion filter.
 #
-function tar-dir () { ## Lorenzo review: documentation specifies optional filters but function doesn't check for them
+function tar-dir () { 
+    #Warning: see behaviour with optional arguments and subdirs in make-tar
+    ## Lorenzo : docs specify optional args for filtering but aren't including in function definition
     local dir="$1"; local depth="$2";
     local archive_base
     archive_base="$TEMP"/$(basename "$dir")
@@ -1592,11 +1601,14 @@ function tar-dir () { ## Lorenzo review: documentation specifies optional filter
 ##    make-tar "$archive_base" "$actual_full_dir_path" $depth
 ## }
 ##
+
+# Note: will exclude folders based on make-tar behaviour with specified depth 
 function tar-just-dir () { tar-dir "$1" 1; }
 #
 # tar-this-dir(): create tar archive into TEMP, for sud-directory tree routed
 # in current directory (using directory basename as file prefix instead of .)
 # ex: TEMP=/mnt/my-external-drive/tmp tar-this-dir
+# Note: will include empty folders in dir given the unspecified optional parameters, see make-tar
 function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")"; popd-q; }
 # test of resolving problem with tar-this-dir if dir a symbolic link from apparent parent
 # TODO: fixme
@@ -1621,6 +1633,10 @@ function new-tar-this-dir () {
 #
 # tar-this-dir-normal: creates archive of directory, excluding archive, backup, and temp subdirectories
 
+#Lorenzo: tar-this-dir-normal and tar-just-this-dir can be expressend in terms of a helper function like
+# function helper() {local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" $1 $2; popd-q; }
+# alias tar-this-dir-normal=helper "" "/(archive|backup|temp)/"
+# alias tar-just-this-dir=helper "1" ""
 function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" "" "/(archive|backup|temp)/"; popd-q; }
 #
 function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
