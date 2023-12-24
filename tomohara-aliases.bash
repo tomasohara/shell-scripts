@@ -1588,7 +1588,7 @@ function tar-dir () {
     local dir="$1"; local depth="$2";
     local archive_base
     archive_base="$TEMP"/$(basename "$dir")
-    make-tar "$archive_base" "$dir" "$depth"
+    make-tar "$archive_base" "$dir" "$depth" 
 }
 ## TODO: fix indentation for tar-dir and other aliases (make sure 4 spaces used); also, make sure no tabs used as w/ tar-dir above
 ##
@@ -1638,6 +1638,7 @@ function new-tar-this-dir () {
 # alias tar-this-dir-normal=helper "" "/(archive|backup|temp)/"
 # alias tar-just-this-dir=helper "1" ""
 function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" "" "/(archive|backup|temp)/"; popd-q; }
+# WARNING tar-this-dir-normal doesn't filter because of tar-dir not accounting for filters
 #
 function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
 function make-recent-tar () { (find . -type f -mtime -"$2" | $GTAR cvfzT "$1" -; ) 2>&1 | $PAGER; ls-relative "$1"; }
