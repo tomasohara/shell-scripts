@@ -1619,6 +1619,7 @@ function new-tar-this-dir () {
     # Go to parent dir                        /home/tomohara
     pushd-q ..
     # Get real basename                       ff3410d4-5ffc-4c01-a2ca-75244b882aa2
+    # Lorenzo: where is "base" supposed to come from? right now it is null
     local real_base="$base"
     if [ -L "$base" ]; then
         real_base=$($LS -ld "$base" | perl -pe 's@^.* -> (.*/)?([^/]+)@$2@;');
