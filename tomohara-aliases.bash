@@ -1584,7 +1584,7 @@ function make-tar () {
 #
 function tar-dir () { 
     #Warning: see behaviour with optional arguments and subdirs in make-tar
-    ## Lorenzo : docs specify optional args for filtering but aren't including in function definition
+    ## TODO 2: add support for optional filtering 
     local dir="$1"; local depth="$2";
     local archive_base
     archive_base="$TEMP"/$(basename "$dir")
@@ -1613,13 +1613,13 @@ function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$d
 # test of resolving problem with tar-this-dir if dir a symbolic link from apparent parent
 # TODO: fixme
 function new-tar-this-dir () {
+    ##TODO: fix un-initialized base variable
     # example dir change: /home/tomohara/tpo-magro-p3 [=> /media/tomohara/ff3410d4-5ffc-4c01-a2ca-75244b882aa2]
     local dir
     dir=$(basename "$PWD"); 
     # Go to parent dir                        /home/tomohara
     pushd-q ..
     # Get real basename                       ff3410d4-5ffc-4c01-a2ca-75244b882aa2
-    # Lorenzo: where is "base" supposed to come from? right now it is null
     local real_base="$base"
     if [ -L "$base" ]; then
         real_base=$($LS -ld "$base" | perl -pe 's@^.* -> (.*/)?([^/]+)@$2@;');
@@ -1639,8 +1639,8 @@ function new-tar-this-dir () {
 # alias tar-this-dir-normal=helper "" "/(archive|backup|temp)/"
 # alias tar-just-this-dir=helper "1" ""
 function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" "" "/(archive|backup|temp)/"; popd-q; }
-# WARNING tar-this-dir-normal doesn't filter because of tar-dir not accounting for filters
-#
+## TODO2: fix so tar-dir takes the filter arguments
+
 function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
 function make-recent-tar () { (find . -type f -mtime -"$2" | $GTAR cvfzT "$1" -; ) 2>&1 | $PAGER; ls-relative "$1"; }
 #
@@ -1672,7 +1672,7 @@ alias tar-just-this-dir-dated='USE_DATE=1 tar-just-this-dir'
 
 #
 # command-to-pager(command, arg1, ...): helper function for use in aliases: sends command output to $PAGER (e.g., less)
-function command-to-pager { "$@" | $PAGER; }
+function command-to-pager { "$@" | $PAGER; } 
 alias view-zip='command-to-pager unzip -v'
 alias un-zip='command-to-pager unzip'
 
