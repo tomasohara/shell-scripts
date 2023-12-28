@@ -103,6 +103,7 @@ while (<>) {
     elsif (## DEBUG: &debug_print(&TL_MOST_DETAILED, "here\n", 7) &&
 	   ## OLD: /^(ERROR|Error)\b/	   
 	   /^\s*(Error)\b/i
+	   || /\serror:/i
 	   ## OLD: || /command not found/i
 	   ## NOTE: maldito modules package polutes environment and man page not clear about disabling
 	   || (/command not found/i && (! /Cannot switch to Modules/))
@@ -173,9 +174,11 @@ while (<>) {
 
 	   # Python errors
 	   || /^\s*Traceback/		# stack trace
-	   || /^\s*\S+Error/		# exception (e.g., TypeError)
+	   ## OLD: || /^\s*\S+Error/		# exception (e.g., TypeError)
+	   # note: excludes exception repr's (e.g., <class 'AssertionError'>)
+	   || /(^|\s)[A-Z]\S+Error(\s|:|$)/	# exception (e.g., TypeError)
 	   || /:\s*error\s*:/i          # argparse error (e.g., main.py: error: unrecognized arguments
-	   || /^\s*FAILED\b/i              # pytest failure
+	   || /^\s*FAILED\b/i           # pytest failure
 
 	   # Cygwin errors
 	   || /\bunable to remap\b/
