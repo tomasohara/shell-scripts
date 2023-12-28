@@ -69,8 +69,8 @@ function clone-repo () {
 # black-plain(file): run black python reformatted over FILE filtering out emoticons
 simple-alias-fn black-plain 'convert-emoticons-aux black'
 
-# run-python-script(script, args): run SCRIPT with ARGS with output to _base-#.out
-# and stderr to _base-#.log where # is value of global $_PSL_.
+# run-python-script(script, args): run SCRIPT with ARGS with output to dir/_base-#.out
+# and stderr to dir/_base-#.log where # is value of global $_PSL_.
 # The arguments are passed along unless USE_STDIN is 1.
 # note: Checks for errors afterwards. Use non-locals _PSL_, out_base and log.
 function run-python-script {
@@ -83,14 +83,16 @@ function run-python-script {
     local script_path="$1";
     shift;
     local script_args=("$@");
+    local script_dir
+    script_dir=$(dirname "$script_path");
     local script_base
-    script_base=$(basename-with-dir "$script_path" .py);
+    script_base=$(basename "$script_path" .py);
     #
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
     local out_base
     let _PSL_++;
-    out_base="$script_base.$(TODAY).$_PSL_";
+    out_base="$script_dir/_$script_base.$(TODAY).$_PSL_";
     log="$out_base.log";
     out="$out_base.out";
     ## TEMP:
