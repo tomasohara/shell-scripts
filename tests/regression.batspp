@@ -53,6 +53,22 @@ $ echo warning: hey > $f
 $ QUIET=0 check-errors $f | wc -l
 0
 
+# Make sure no exceptions reported
+# Sample ouput:
+#    $ check_errors.perl -strict=1
+#    Uncaught exception from user code:
+#    	
+#    	usage: check_errors.perl [options]
+#
+
+$ check_errors.perl -strict=0 2>&1 | count-it -show_zeros "caught exception from user code"
+caught exception from user code	0
+
+# note: the following uses a script in the archive as die will be changed to exit in current scripts
+$ archive/reverse.perl -strict=1 2>&1 | count-it -show_zeros "caught exception from user code"
+caught exception from user code	1
+
+
 #-------------------------------------------------------------------------------
 # Rename files
 
