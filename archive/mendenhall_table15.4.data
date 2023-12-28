@@ -1,0 +1,21 @@
+# Table 15.4 [Mendenhall & Scheaffer 73]
+#
+# rankA	A	rankB	B
+15	1.25	.89	1
+11	1.16	1.01	7
+18	1.33	.97	4
+10	1.15	.95	3
+14	1.23	.94	2
+12	1.20	1.02	8
+17	1.32	.98	5.5
+16	1.28	1.06	9
+13	1.21	.98	5.5
+# rank sum
+# 126			45
+#
+#------------------------------------------------------------------------
+# REF
+#
+# William Mendenhall and Richard L. Scheaffer (1973), {\em Mathematical
+# Statistics with Applications}, North Scituate, Massachusetts: Duxbury
+# Press.

@@ -77,12 +77,14 @@
 #    -- 'ENV_VAR=value command ...' runs command with temp. environment setting.
 # - Likewise commonly used Unix features which might not be familiar:
 #    -- 'realpath file' returns full path for file with relative path.
-# - Selectively ignore following shellcheck warnings
-#    -- SC2016: (info): Expressions don't expand in single quotes
+# - Selectively ignores following shellcheck warnings:
+#    -- SC2016: Expressions don't expand in single quotes
 #    -- SC2046: Quote this to prevent word splitting
 #    -- SC2086: Double quote to prevent globbing and word splitting.
 #    -- SC2155: Declare and assign separately to avoid masking return values
 #    -- SC2139: This expands when defined, not when used. Consider escaping.
+#    -- SC2206: Quote to prevent word splitting/globbing
+#    -- SC2116: Useless echo?
 #
 # TODO:
 # - ***** Put work-specific stuff in separate file!"
@@ -532,12 +534,12 @@ cond-export LINES 52
 cond-export COLUMNS 80
 #
 # NOTE: resize used to set LINES below
-
-if [ "$DOMAIN_NAME" = "" ]; then
-    # shellcheck disable=SC2155
-    # TODO: cond-export
-    export DOMAIN_NAME=$(domainname.sh);
-fi
+## OLD:
+## if [ "$DOMAIN_NAME" = "" ]; then
+##     # shellcheck disable=SC2155
+##     # TODO: cond-export
+##     export DOMAIN_NAME=$(domainname.sh);
+## fi
 alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
 
 # Note: support for prompt prefix
@@ -574,11 +576,13 @@ function reset-prompt {
     ## DEBUG: echo "reset-prompt: 3. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
 }
 alias reset-prompt-root='reset-prompt "#"'
+alias root-prompt=reset-prompt-root
 alias reset-prompt-dollar='reset-prompt "\$"'
 ## OLD: alias reset-prompt-default="reset-prompt '$PS_symbol'"
 {
     # shellcheck disable=SC2139
-    alias reset-prompt-default="reset-prompt '$PS_symbol'" ##Lorenzo review: same code marked as OLD 3 lines above
+    alias reset-prompt-default="reset-prompt '$PS_symbol'"
+    ## Lorenzo review: same code marked as OLD 3 lines above
 }
 ## TODO: alias reset-prompt-default='reset-prompt "\$PS_symbol"'
 
@@ -621,7 +625,8 @@ export PERLLIB="$HOME/perl/lib/perl5/5.16:$HOME/perl/lib/perl5/5.16/vender_perl:
 # perl-(): perl with following options: -S use path; -s enable switches (-x=v); -w show warnings;
 # See perlrun manpage.
 # TODO4: rename perl- to perl-usual???
-alias perl-='perl -Ssw' ## Lorenzo review: should change this to perl-alt following TODO's
+alias perl-='perl -Ssw'
+## Lorenzo review: should change this to perl-alt following TODO's
 ## TODO: function alias-perl { DURING_ALIAS=1 perl "$@"; }
 # alias-perl(): perl with DURING_ALIAS defined (n.b., avoids excess tracing; see common.perl)
 ## BAD: alias alias-perl='DURING_ALIAS=1 perl -Ssw'
@@ -872,8 +877,9 @@ function dir-rw () { $LS ${dir_options} "$@" 2>&1 | $GREP '^..w' | $PAGER; }
 
 function subdirs () { $LS ${dir_options} "$@" 2>&1 | $GREP ^d | $PAGER; }
 #
-# subdirs-proper(): shows subdirs in colymn format omitting ones w/ leading dots
+# subdirs-proper(): shows subdirs in column format omitting ones w/ leading dots
 # note: omits cases like ./ and ./.cpan from find and then removes ./ prefix
+# TODO3: have option to include dot-file subdirs like .config
 quiet-unalias subdirs-proper
 function subdirs-proper () { find . -maxdepth 1 -type d | $EGREP -v '^((\.)|(\.\/\..*))$' | sort | perl -pe "s@^\./@@;" | column; }
 # note: -f option overrides -t: Unix sorts alphabetically by default
@@ -964,7 +970,8 @@ export MY_GREP_OPTIONS="-n $skip_dirs -s"
 # shellcheck disable=SC2086
 {
 function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
-function gr- () { $GREP $MY_GREP_OPTIONS "$@"; } ## Lorenzo review: should change this to gr-alt following TODO's
+function gr- () { $GREP $MY_GREP_OPTIONS "$@"; }
+## Lorenzo review: should change this to gr-alt following TODO's
 SORT_COL2="--key=2"
 # grep-unique(pattern, file, ...): count occurrence of pattern in file...
 function grep-unique () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0$" | sort -rn $SORT_COL2 -t':'; }
@@ -979,7 +986,8 @@ alias gu-='grep-unique'
 # TODO: archive
 function gu-all () { grep-unique "$@" ./* | $PAGER; }
 #
-function gu- () { $GREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0"; } ## Lorenzo review: should change this to gu-alt following TODO's
+function gu- () { $GREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0"; }
+## Lorenzo review: should change this to gu-alt following TODO's
 #
 # grepl(pattern, [other_grep_args]): invokes grep over PATTERN and OTHER_GREP_ARGS and then pipes into less for PATTERN
 # NOTE: actually uses egrep
@@ -1029,10 +1037,12 @@ function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pat
 function findspec-all () { command find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | $GREP -v '^find: '; }
 function fs () { findspec . "$@" | $EGREP -iv '(/(backup|build)/)'; } 
 function fs-ls () { fs "$@" -exec ls -l {} \; ; }
-alias fs-='findspec-all .' ## Lorenzo review: should change this to fs-alt following TODO's
+alias fs-='findspec-all .'
+## Lorenzo review: should change this to fs-alt following TODO's
 function fs-ext () { find . -iname \*."$1" | $EGREP -iv '(/(backup|build)/)'; } 
 # TODO: extend fs-ext to allow for basename pattern (e.g., fs-ext java ImportXML)
-function fs-ls- () { fs- "$@" -exec ls -l {} \; ; } ## Lorenzo review: should change this to fs-ls-alt following TODO's
+function fs-ls- () { fs- "$@" -exec ls -l {} \; ; }
+## Lorenzo review: should change this to fs-ls-alt following TODO's
 #
 findgrep_opts="-in"
 #
@@ -1041,7 +1051,8 @@ function findgrep-verbose () { find "$1" -iname \*"$2"\* -print -exec $GREP $fin
 # findgrep(dir, filename_pattern, line_pattern): $GREP through files in DIR matching FILENAME_PATTERN for LINE_PATTERN
 function findgrep () { find $1 -iname \*"$2"\* -exec $GREP $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} /dev/null \;; }
 # TODO: archive
-function findgrep- () { find $1 -iname $2 -print -exec $GREP $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} \;; } ## Lorenzo review: should change this to findgrep-alt following TODO's
+function findgrep- () { find $1 -iname $2 -print -exec $GREP $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} \;; }
+## Lorenzo review: should change this to findgrep-alt following TODO's
 function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$dir" -iname "*.$ext" -exec $GREP $findgrep_opts "$@" \{\}  /dev/null \;; }
 # fgr(filename_pattern, line_pattern): $GREP through files matching FILENAME_PATTERN for LINE_PATTERN
 function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
@@ -1106,7 +1117,8 @@ function find-files-there () { perlgrep.perl -para -i "$@" | $EGREP -i '((:$)|('
 function find-files-here () { find-files-there "$1" "$PWD/ls-alR.list"; }
 # following variants for sake of tab completion
 alias find-files='find-files-here'
-alias find-files-='find-files-there' ## Lorenzo review: should change this to find-files-alt following TODO's
+alias find-files-='find-files-there'
+## Lorenzo review: should change this to find-files-alt following TODO's
 # TODO: function find-files-dated () { perlgrep.perl -para -i "$@" | $EGREP -i '((:$)|('$1'))' | $PAGER_NOEXIT -p "$1"; }
 #
 # TODO: add --quiet option to dobackup.sh (and port to bash)
@@ -1142,14 +1154,20 @@ alias em-tags=etags
 ## cond-export EMACS_LARGE_FONT "-DAMA-Ubuntu<space>Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"
 cond-export EMACS_LARGE_FONT "-DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"
 cond-export EMACS_OPTIONS ""
-function em-large-default { export EMACS_OPTIONS="$EMACS_OPTIONS -fn '$EMACS_LARGE_FONT'"; }
+# Note: em-large-default-old not quite functional with other em-xyz aliases
+function em-large-default-old { export EMACS_OPTIONS="$EMACS_OPTIONS -fn '$EMACS_LARGE_FONT'"; }
 function em-large { em-fn "$EMACS_LARGE_FONT" "$@"; }
+# Note: (un)set-large-emacs-font just changed the font used by tpo-invoke-emacs.sh
 function set-large-emacs-font { export EMACS_FONT="$EMACS_LARGE_FONT"; }
 function unset-large-emacs-font { unset EMACS_FONT; }
+alias em-set-large-font=set-large-emacs-font
+alias em-unset-large-font=unset-large-emacs-font
+#
 alias em-nw='emacs -l ~/.emacs --no-windows'
 ## TODO: alias em-tpo='emacs -l ~/.emacs'
 alias em-tpo-nw='emacs -l ~/.emacs --no-windows'
 alias em_nw='em-nw'
+#
 # em-file(filename): edit filename with current directory set to it's dir
 # note: This avoids stupid link resolution problem under cygwin. It is
 # also useful so that Emacs current directory is set appropriately.
@@ -1170,7 +1188,8 @@ alias em-devel='em --devel'
 ## OLD:
 ## function em-debug () { em --debug-init "$@"; }
 ## function em-quick () { em --quick "$@"; }
-function em-debug () { em -- --debug-init "$@"; } ## Lorenzo review: Im confused about the purpose of this double dashes, because otherwise the code is the same as OLD
+function em-debug () { em -- --debug-init "$@"; }
+## Lorenzo review: Im confused about the purpose of this double dashes, because otherwise the code is the same as OLD
 function em-quick () { em -- --quick "$@"; }
 
 #--------------------------------------------------------------------------------
@@ -1298,7 +1317,8 @@ function apply-numeric-suffixes () {
     # TODO: make only sure the first number is converted if just-once applies
     # NOTE: 3 args to sprintf: coefficient, KMGT suffix, and post-context
     ## DEBUG; perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = log($1)/log(1024);  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  print STDERR ("s=$suffixes p=$pow nn=$new_num l=$suffix\n"); sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
-    perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = int(log($1)/log(1024));  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
+    ## OLD: perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = int(log($1)/log(1024));  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
+    perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\b)@$pow = int(log($1)/log(1024));  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
 }
 #
 # apply-usage-numeric-suffixes(): factors in 1k blocksize before applying numeric suffixes
@@ -1529,28 +1549,43 @@ fi
 if [[ ! $($GTAR --version) =~ GNU ]]; then
     echo "Warning: GNU tar not available" 1>&2
 fi
-alias gtar='$GTAR'
+## OLD: alias gtar='$GTAR'
+## TODO2: simple-alias-fn gtar '$GTAR'
+function gtar { $GTAR; }
 #
 # ls-relative(file): show pathname of FILE relative to $HOME (e.g., ~/xfer/do_setup.bash)
 function ls-relative () { $LS -d "$1" | perl -pe "s@$HOME@~@;"; }
 #
 # make-tar(archive_basename, [dir=.], [depth=max], [filter=pattern]): tar up directory with results placed 
-#   in archive_base.tar.gz and log file in archive_base.tar.log; afterwards display the tar archive size, log contents, and archive path.
-# Filenames matching the optional filter are excluded.
+# in archive_base.tar.gz and log file in archive_base.tar.log; afterwards display the tar archive size, log contents, and archive path.
+# Filenames matching the optional (exclusion) filter regex are excluded.
 # EX: make-tar ~/xfer/program-files-structure 'C:\Program Files' 1
 #
 # TODO1: liberate me (e.g., put main support into script)!
 # Note: -xdev is so that find doesn't use other file systems
+# - depth and filter args can be given via TAR_DEPTH and TAR_FILTER
 find_options="-xdev"
-function make-tar () { 
+function make-tar () {
     # Warning: if no optional arguments are given, find and filtering will be skipped to preserve empty folders
     #          Otherwise if optional args are present, empty dirs will be excluded from final tar
-    local base="$1"; local dir="$2"; local depth="$3"; local filter="$4";
-    local depth_arg=""; local filter_arg="."
+    # Check arguments
+    ## OLD:
+    ## local base="$1"; local dir="$2"; local depth="$3"; local filter="$4";
+    ## local depth_arg=""; local filter_arg="."
+    local base="$1"; local dir="$2";
+    ## TODO2: dispense with acrobatic arg parsing!
+    local depth="${3:-${TAR_DEPTH:-""}}";
+    local filter="${4:-${TAR_FILTER:-""}}"
+
+    # Derive find/tar command line options
+    ## OLD: local filter_arg="."
+    local filter_arg=(.)
+    local depth_arg=""
     local size_arg="";
     if [ "$dir" = "" ]; then dir="."; fi;
     if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
-    if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
+    ## OLD: if [ "$filter" != "" ]; then filter_arg="-v $filter"; fi;
+    if [ "$filter" != "" ]; then filter_arg=(-v "$filter"); fi;
     if [ "$USE_DATE" = "1" ]; then
         base="$base-$(TODAY)";
         ## TEST: rename-with-file-date "$base"*
@@ -1562,17 +1597,21 @@ function make-tar () {
     fi
     # OLD: (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
+
+    # Invoke find/tar
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
+    ## OLD: (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     # shellcheck disable=SC2086
     if [ "${depth_arg}${size_arg}${filter_arg}" == "." ]; then
         $NICE $GTAR cvfz "$base.tar.gz" "$dir" >| "$base.tar.log" 2>&1;
     else
-    # shellcheck disable=SC2086
         (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     fi
     ## DUH: -L added to support tar-this-dir in directory that is symbolic link, but unfortunately
     ## that leads to symbolic links in the directory itself to be included
-    ## BAD: (find -L "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1; 
+    ## BAD: (find -L "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+
+    # Show info on resulting files (TODO2: check-errors over log)
     ($LS -l "$base.tar.gz"; cat "$base.tar.log") 2>&1 | $PAGER; 
     ls-full "$base.tar.gz";
     ls-relative "$base.tar.gz"; 
@@ -1583,7 +1622,7 @@ function make-tar () {
 # filtering files matching exlusion filter.
 #
 function tar-dir () { 
-    #Warning: see behaviour with optional arguments and subdirs in make-tar
+    # Warning: see behaviour with optional arguments and subdirs in make-tar
     ## TODO 2: add support for optional filtering 
     local dir="$1"; local depth="$2";
     local archive_base
@@ -1613,7 +1652,7 @@ function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$d
 # test of resolving problem with tar-this-dir if dir a symbolic link from apparent parent
 # TODO: fixme
 function new-tar-this-dir () {
-    ##TODO: fix un-initialized base variable
+    ## TODO: fix un-initialized base variable
     # example dir change: /home/tomohara/tpo-magro-p3 [=> /media/tomohara/ff3410d4-5ffc-4c01-a2ca-75244b882aa2]
     local dir
     dir=$(basename "$PWD"); 
@@ -1634,24 +1673,29 @@ function new-tar-this-dir () {
 #
 # tar-this-dir-normal: creates archive of directory, excluding archive, backup, and temp subdirectories
 
-#Lorenzo: tar-this-dir-normal and tar-just-this-dir can be expressend in terms of a helper function like
-# function helper() {local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" $1 $2; popd-q; }
-# alias tar-this-dir-normal=helper "" "/(archive|backup|temp)/"
-# alias tar-just-this-dir=helper "1" ""
+## Lorenzo: tar-this-dir-normal and tar-just-this-dir can be expressend in terms of a helper function like
+## function helper() {local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" $1 $2; popd-q; }
+## alias tar-this-dir-normal=helper "" "/(archive|backup|temp)/"
+## alias tar-just-this-dir=helper "1" ""
 function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" "" "/(archive|backup|temp)/"; popd-q; }
 ## TODO2: fix so tar-dir takes the filter arguments
 
 function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
-function make-recent-tar () { (find . -type f -mtime -"$2" | $GTAR cvfzT "$1" -; ) 2>&1 | $PAGER; ls-relative "$1"; }
+# GTAR_OPTS: usual options for aliases using gnu tar
+GTAR_OPTS=vfz
+## TODO2: GTAR_USUAL="$GTAR GTAR_OPTS"
+function set-tar-bzip2 () { GTAR_OPTS="vfj"; }
+function unset-tar-bzip2 () { GTAR_OPTS="vfz"; }
+function make-recent-tar () { (find . -type f -mtime -"$2" | $GTAR "c${GTAR_OPTS}T" "$1" -; ) 2>&1 | $PAGER; ls-relative "$1"; }
 #
 # " (for Emacs)
 # NOTE: above quote needed to correct for Emacs color coding
 # TODO: rework basename extraction
 #
-function view-tar () { $GTAR tvfz "$@" 2>&1 | $PAGER; }
-function extract-tar () { $NICE $GTAR xvfzk "$@" 2>&1 | $PAGER; }
-function extract-tar-force () { $NICE $GTAR xvfz "$@" 2>&1 | $PAGER; }
-function extract-tar-here () { pushd ..; $NICE $GTAR xvfzk "$@" 2>&1 | $PAGER; popd; }
+function view-tar () { $GTAR "t${GTAR_OPTS}" "$@" 2>&1 | $PAGER; }
+function extract-tar () { $NICE $GTAR "x${GTAR_OPTS}k" "$@" 2>&1 | $PAGER; }
+function extract-tar-force () { $NICE $GTAR "x${GTAR_OPTS}" "$@" 2>&1 | $PAGER; }
+function extract-tar-here () { pushd ..; $NICE $GTAR "x${GTAR_OPTS}k" "$@" 2>&1 | $PAGER; popd; }
 alias untar='extract-tar'
 alias untar-here='extract-tar-here'
 alias un-tar=untar
@@ -1660,7 +1704,8 @@ alias create-tar='make-tar-with-subdirs'
 alias make-full-tar='make-tar'
 # TODO: handle filenames with embedded spaces
 alias recent-tar-this-dir='make-recent-tar $TEMP/recent-$(basename "$PWD")'
-function sort-tar-archive() { (tar tvfz "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
+## OLD: function sort-tar-archive() { (tar t${GTAR_OPTS} "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
+function sort-tar-archive() { ($GTAR "t${GTAR_OPTS}" "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
 #
 # TODO: tar-this-dir-there???
 # ex: ¢ TEMP=/mnt/wd6tbp2vfat/backup/tpo-servidor tar-this-dir
@@ -1839,20 +1884,26 @@ function show-all-macros () {
 # show-macros([pattern]): like show-all-macros, excluding leading _ in name
 function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
 #
-# show-macros-proper([pattern]): shows names of aliases/functions matching PATTERN
-## OLD: # shellcheck disable=SC2016
-## OLD: alias-fn show-macros-proper 'show-macros | $GREP "^\w"'
-function show-macros-proper { show-macros "$@" | $GREP "^\w"; }
+## OLD:
+## # show-macros-proper([pattern]): shows names of aliases/functions matching PATTERN
+## ## OLD: # shellcheck disable=SC2016
+## ## OLD: alias-fn show-macros-proper 'show-macros | $GREP "^\w"'
+## #
+## # show-macros-proper-strict([pattern]): like show-macros-proper but omits definitions
+## ## TODO: function show-macros-proper { show-macros "$@" | $EGREP "^(alias )?\w"; }
+## ## OLD: function show-macros-proper-strict {
 #
-# show-macros-proper-strict([pattern]): like show-macros-proper but omits definitions
-## TODO: function show-macros-proper { show-macros "$@" | $EGREP "^(alias )?\w"; }
-function show-macros-proper-strict {
-    show-macros "$@" | perl -pe 's/alias (\S+)=.*/\1/;  s/^(\S+) \(\)/\1/;' | $GREP "$@";
+# show-macros-proper([pattern]): shows names of aliases/functions matching PATTERN
+function show-macros-proper-old { show-macros "$@" | $EGREP "^\w"; }
+function show-macros-proper {
+    # ntoe: first filters by likely alias or function definititions
+    # ex: "alias move='mv'", "setenv () {\n    export "$1"="$2"\n}"
+    show-macros "$@" | $EGREP '(^alias)|( \(\) $)' | perl -pe 's/alias (\S+)=.*/\1/;  s/^(\S+) \(\)/\1/;' | $GREP "$@" | sort;
 }
 # display-macros(pattern): show definition(s) of alias or function matching pattern in name
 function display-macros {
     ## OLD: show-macros "$@" | perl -pe 's/alias //;  s/^(\S+) \(\)/\1/;' | perlgrep -para ^"$@";
-    show-macros "$@" | perlgrep -para ^"(alias )?""$@";
+    show-macros "$@" | perlgrep -para ^"(alias )?""$*";
 }
 #
 # show-variables(): show defined variables
@@ -1879,7 +1930,8 @@ alias do-setup='conditional-source $HOME/.bashrc'
 # Sorting wrappers
 #
 alias tab-sort="sort -t $'\t'"
-alias colon-sort="sort \$SORT_COL2 -t ':'"
+alias old-colon-sort="sort \$SORT_COL2 -t ':'"
+alias colon-sort="sort -t ':'"
 alias colon-sort-rev-num='colon-sort -rn'
 alias freq-sort='tab-sort -rn $SORT_COL2'
 alias comma-sort="sort -t ','"
@@ -1960,11 +2012,12 @@ alias foreach='perl- foreach.perl'
 
 #--------------------------------------------------------------------------------
 # Adhoc aliases for renaming aliases
-## TOM-IDIOSYNCRATIC#
+## TOM-IDIOSYNCRATIC
 
 # rename-spaces: replace spaces in filenames of current dir with underscores
 ## OLD: alias rename-spaces='rename-files -q -global " " "_"'
-alias rename-spaces='rename-files -q -global -rename_old " " "_"'
+## OLD: alias rename-spaces='rename-files -q -global -rename_old " " "_"'
+alias-fn rename-spaces 'rename-files -q -global -rename_old " " "_"'
 # TODO2: handle smart quotes
 alias rename-quotes='rename-files -q -global -rename_old "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
 # rename-special-punct: replace runs of any troublesome punctuation in filename w/ _
@@ -1973,12 +2026,27 @@ function rename-special-punct {
     # TODO: rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_";
     rename-files -q -global -rename_old -regex "_*[&\!\*?\(\)\[\]\,]" "_";
     # strip unicode punctuation, ignoring shellcheck warnings like SC1112 [This is a unicode quote]
-    # shellcheck disable=SC1111,SC1112
+    # shellcheck disable=SC1111,SC1112,SC2206,SC2116
     {
+        local unicode_punct="—·®“”″‶‘’–"
+        ## TODO:
+        ## local unicode_filenames=(*[$unicode_punct]*)
+        ## if [ ${#unicode_filenames[@]} -eq 0 ]; then
+        if [ "" = "$(ls ./*[$unicode_punct]* 2> /dev/null)" ]; then
+            ## DEBUG: echo "No files with following unicode punctuation: $unicode_punct"
+            return
+        fi
         # note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) U+2014 (—)
-        rename-files -q -global -rename_old -regex "_*[—·®“”″‶‘’–]" "_";   # note: unicode
+        ## TODO: rename-files -q -global -rename_old -regex "_*[—·®“”″‶‘’–]" "_";   # note: all unicode
+        local char;
+        for char in "—" "·" "®" "“" "”" "″" "‶" "‘" "’" "–"; do        # note: all unicode
+            ## OLD: rename-files -q -global -rename_old "$char" "_"
+            rename-files -global -rename_old "$char" "_" ./*$char*
+            ## TODO?: rename-files -global -rename_old "$char" "_" "${unicode_filenames[@]}"
+        done;
+        rename-files -q -global -rename_old -regex "__+" "_"; 
     }
-    rename-files -q -global -rename_old -regex "–" "-";   # note: unicode dash
+    ## OLD: rename-files -q -global -rename_old -regex "–" "-";   # note: unicode dash to ascii
 }
 # TODO: test
 #     $ touch '_what-the-hell?!'; rename-special-punct; ls _what* => _what-the-hell_
@@ -1995,21 +2063,44 @@ alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-dupli
 #
 # rename-utf8-encoded: replace runs of non-ascii UTF8 encodings with _
 # note: '👇🏻' gets encoded as [???]; see show-unicode-code-info alias to way to illustrate encodings
-# TODO: make this less of a sledgehammer
-## BAD: alias rename-utf8-encoded='rename-files -global -regex "[0x80-0xFF]\{3,\}" "_"'
-## OLD: alias rename-utf8-encoded='rename-files -global -regex "[\x80-\xFF]\{3,\}" "_"'
-## OLD: alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]+" "_"'
-## OLD: alias rename-utf8-encoded='rename-files -quick -global -regex "[\x80-\xFF]{1,4}" "_"'
+# ASIDE: This seems much ado about nothing, but this is a minor accessibility issue for TPO;
+# Specifically, he is sensitive to bright icons, especially if tacky!
 alias rename-utf8-encoded-sledgehammer='rename-files -quick -global -regex "[\x80-\xFF]{1,4}" "_"'
 ## OLD: alias rename-emoji=rename-utf8-encoded
 # via https://en.wikipedia.org/wiki/UTF-8:
 #    U+10000    U+10FFFF        11110xxx        10xxxxxx        10xxxxxx        10xxxxxx;   note: F[8-F]{3}
-# rename-utf8-emoji: replace U+10000 characters in filenames with _'s
+# rename-emoji: replace emoji characters in filenames with _'s (e.g., U+10000+ chars and U+26nn)
 # note: emoji considered synonymous with emoticon
 ## OLD: alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"'
-alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"' ## Lorenzo review: same as OLD above
+alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"' 
 ## TODO2 (handle cases like U+2728 [sparkle] w/ UTF8 0xE29CA8):
 #    alias rename-utf8-emoji-misc='rename-files -quick -global -regex "[\xE0-\xFF][\x80-\xFF]{2,3}" "_"'
+# note: check specifically for code blocks: U+26D3 [chains] is e29b93; U+1F917 [hugging face] is f09fa497
+## Lorenzo review: same as OLD above
+alias rename-emoji-old='rename-files -quick -global -regex "(\xE2[\x80-\xFF]{2})|(\xF0[\x80-\xFF]{3})" "_"'
+# rename-emoji-aux: renames eomji in filenames with ascii descriptions
+# note: if STRIP_EMOTICONS then uses REPLACEMENT_TEXT (see mezcla's convert_emoticons.py)
+function rename-emoji-aux {
+    # ex: "LangChain_🦜⛓️_-_Zep" => "LangChain_parrot_chains_-_Zep"
+    local f new_f
+    for f in "$@"; do
+        new_f=$(echo "$f" | DURING_ALIAS=1 python -m mezcla.convert_emoticons - | perl -pe 's/[\[\]]/_/g; s/__+/_/g;')
+        rename-files "$f" "$new_f" "$f"
+    done
+}
+# rename-emoji-verbose: replace emoji characters in filenames with brief char description (e.g., smiley-face)
+simple-alias-fn rename-emoji-verbose rename-emoji-aux
+
+simple-alias-fn rename-emoji 'STRIP_EMOTICONS=1 REPLACEMENT_TEXT=_ rename-emoji-aux'
+# rename-emoji-here: rename files in current directory with emoji
+function rename-emoji-here {
+    # note: ensures no spaces and then filters files by potential emoticons before slow rename-emoji step proper
+    # See https://stackoverflow.com/questions/39536390/match-unicode-emoji-in-python-regex.
+    rename-spaces;
+    rename-emoji $(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=1 python -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -);
+}
+
+# rename-bad-dashes: replace " -" in filename with "_" and replace leadind dash with underscore
 alias rename-bad-dashes="rename-files -quick -global -regex ' \-' '_'; rename-files -quick -global -regex '\-' '_' -*"; 
 
 #-------------------------------------------------------------------------------
@@ -2187,7 +2278,10 @@ function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
 # See https://stackoverflow.com/questions/42193957/errorwide-character-in-print-at-x-at-line-35-fh-read-text-files-from-comm.
 ## BAD: function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr($& + 0x2400)/eg;'; }
 function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
-
+#
+## TODO2: rework show-unicode-code-info*/show-unicode-control-chars for tab-completion
+## TEMP:
+alias display-unicode-info=show-unicode-code-info-stdin
 
 #-------------------------------------------------------------------------------
 trace Unix aliases
@@ -2501,7 +2595,6 @@ alias sync2='sync; sync'
 function fix-sudoer-home-permission () {
     ## OLD: local user_home="/home/$SUDO_USER"
     local user_home
-    # maldito shellchecK: SC2116 (style): Useless echo?
     # shellcheck disable=SC2116
     ## BAD: user_home="$(echo ~$SUDO_USER)"
     user_home="$(bash -c "echo ~$SUDO_USER")"
@@ -2578,7 +2671,9 @@ function scp-aws-down() { local host="$1"; shift; for _file in "$@"; do scp -P $
 #
 # TODO: consolidate host keys; reword hostwinds in terms of generic host not AWS
 #
-export AWS_HOST="52.15.125.52" ## Lorenzo review: is safe to have the explicit IP in a file?
+## TODO2: put this elsewhere (e.g., ~/.bashrc)
+export AWS_HOST="52.15.125.52"
+## Lorenzo review: is safe to have the explicit IP in a file?
 aws_micro_host=ec2-52-15-125-52.us-east-2.compute.amazonaws.com
 reference-variable $aws_micro_host
 alias aws-login-micro='ssh-host-login-aws $aws_micro_host'
@@ -3122,15 +3217,19 @@ function test-script () {
 #
 alias test-script-debug='ALLOW_SUBCOMMAND_TRACING=1 DEBUG_LEVEL=5 MISC_TRACING_LEVEL=5 test-script'
 
-# randomize-datafie(file, [num[): randomize datafile optionally pruned to NUM lines, preserving header line
+# randomize-datafile(file, [num|percent]): randomize datafile optionally pruned to NUM lines (or percent), preserving header line
 #
 function randomize-datafile() {
     local file="$1"
     local num_lines="$2"
-    if [ "$num_lines" = "" ]; then num_lines=$(wc -l < "$file"); fi
-    #
-    head -1 "$file"
-    tail --lines=+2 "$file" | python -m mezcla.randomize_lines | head -"$num_lines"
+    if [[ $num_lines =~ % ]]; then
+        num_lines=${num_lines//%/}
+        python -m mezcla.randomize_lines --header --percent "$num_lines" "$file"
+    else
+        if [ "$num_lines" = "" ]; then num_lines=$(wc -l < "$file"); fi
+        head -1 "$file"
+        tail --lines=+2 "$file" | python -m mezcla.randomize_lines - | head -"$num_lines"
+    fi
 }
 
 # filter-random(pct, file, [include_header=1]): Randomize lines based on percentages, using output lile (e.g., _r10pct-fubar.data).
@@ -3345,7 +3444,8 @@ function shell-check {                  ## TOM-IDIOSYNCRATIC
 ## if [ "$USER" = "root" ]; then
 ##     alias kill-software-updater='kill_em.sh --all --pattern "(software-properties-gtk|gnome-software|update-manager)"'
 ## fi
-alias kill-software-updater='kill_em.sh --force --all --pattern "(software-properties-gtk|gnome-software|update-manager)"'
+## OLD: alias kill-software-updater='kill_em.sh --force --all --pattern "(software-properties-gtk|gnome-software|update-manager)"'
+alias kill-software-updater='kill_em.sh --force --all --pattern "(software-properties|gnome-software|update-manager|update-notifier)"'
 ## OLD: alias update-software='/usr/bin/update-manager'
 alias update-software='command update-manager'
 alias kill-clam-antivirus='kill_em.sh --all -p clamd'
@@ -3379,3 +3479,8 @@ trace 'out tomohara-aliases.bash'
 ## DEBUG: echo 'out tomohara-aliases.bash'
 
 ## Lorenzo review: what's the purpose of keeping the OLD lines that only change /usr/bin to command or use alias-perl?
+## note: '## OLD" is used for three reasons:
+## 1. to facilitate manual merge,
+## 2. to highlight old approach when new changes are work-in-progress; and,
+## 3. because Tom is a packrat (i.e., cachivachero)!
+

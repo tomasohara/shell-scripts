@@ -1,0 +1,25 @@
+# Plausible Implausible Verb Object Max Class Object Max Class
+#
+# from Resnik's (1993) dissertation
+see	friend	4.42	<entity>	method	-0.02	<method>	
+read	article	6.26	<written_comm>	fashion	-0.00	<fashion>	
+find	label	0.06	<communication>	fever	2.35	<evidence>	
+hear	story	4.63	<communication>	issue	4.63	<communication>	
+write	letter	7.85	<writing>	market	0.31	<artifact>	
+urge	daughter	10.31	<agent>	contrast	0.31	<relation>	
+warn	driver	10.66	<agent>	engine	7.25	<entity>	
+judge	contest	1.58	<contest>	climate	0.22	<state>	
+teach	language	1.96	<cognition>	distance	1.76	<psych_feature>	
+show	sample	2.07	<psych_feature>	travel	0.92	<happening>	
+expect	visit	2.54	<act>	mouth	0.06	<reply>	
+answer	request	5.14	<speech_act>	tragedy	3.70	<communication>	
+recognize	author	0.62	<agent>	pocket	-0.00	<concave_shape>	
+repeat	comment	6.02	<social_relation>	journal	6.02	<social_relation>	
+understand	concept	4.13	<psych_feature>	session	2.69	<social_relation>	
+remember	reply	0.00	<answer>	smoke	7.49	<entity>
+#
+# Table 3.1: Selectional association for NP-bias verbs
+#
+# Resnik, Philip (1993), {\em Selection and Information: A Class-Based
+# Approach to Lexical Relations}, PhD Dissertation, University of
+# Pennsylvania.

@@ -173,7 +173,7 @@ function git-alias-review-log {
     fi
     tail "$log" | cat | truncate-width;
     return $status
-    }
+}
 
 # git-update-plus(): updates local from global repo. This uses git-stash to hide local changes
 # does a git-pull, and then restores local changes.
@@ -605,12 +605,15 @@ function git-diff-list {
     ## OLD: cat "$diff_list_file"
 
     # Change path to absolute and drop current directory
+    # note: in case of sibling directories the root is shown via a variable
+    # (e.g., "/home/tomohara/python/Mezcla/README.md" => "$(git-root-alias)/README.md"
+    # TODO3: simplying regex fixup's; use relative path (e.g., "../README.md")
     local root
     root=$(git-root-alias)
     local pwd
     pwd=$(realpath ".")
     # shellcheck disable=SC2002
-    cat "$diff_list_file" | perl -pe "s@^@$root/@;" | perl -pe "s@^$pwd/?@@;"
+    cat "$diff_list_file" | perl -pe "s@^@$root/@;" | perl -pe "s@^$pwd/?@@;" | perl -pe "s@^$root/?@\\\$\(git-root-alias\)/@;"
 }
 
 # Output templates for doing checkin of modified files
@@ -648,6 +651,7 @@ function invoke-next-single-checkin {
 # with template text for checking in next change (or FILENAME if given)
 # NOTE: although potentially dangerous given eval environnment, the user still needs to
 # confirm the commit operation (and thus can verify done OK).
+# This is used for git-next-checkin with an empty filename.
 function alt-invoke-next-single-checkin {
     # If unspecified, determine file to check in, based on next modified file
     local mod_file="$1"
@@ -712,7 +716,7 @@ function alt-invoke-next-single-checkin {
     export GIT_MESSAGE=$OLD
 }
 #
-# invoke-alt-checkin(filename): run alternative template-bsed checkin for filename
+# invoke-alt-checkin(filename): run alternative template-based checkin for filename
 function invoke-alt-checkin { alt-invoke-next-single-checkin "$1"; }
 
 # Various miscellaneous aliases
@@ -725,7 +729,7 @@ alias git-invoke-next-single-checkin=invoke-next-single-checkin
 # shellcheck disable=SC2139
 alias-fn git-alias-refresh "source '${BASH_SOURCE[0]}'"    # bash idiom for current script filename
 simple-alias-fn git-refresh-aliases 'git-alias-refresh'
-simple-alias-fn git-next-checkin 'invoke-alt-checkin'
+simple-alias-fn git-next-checkin 'invoke-alt-checkin'      # uses alt-invoke-next-single-checkin
 simple-alias-fn git-extract-all-versions 'extract-all-git-versions.bash'
 ## TEST: hide tracing output alias git-next-checkin='invoke-alt-checkin 2> /dev/null'
 # TODO:
@@ -801,14 +805,14 @@ function git-alias-usage () {
     echo ""
     echo "Check-in specific file:"
     local next_mod_file
-    next_mod_file=$(git-diff-list | head -1)
+    next_mod_file=$(git-diff-list 2> /dev/null | head -1)
     if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
     echo '    git-next-checkin "'${next_mod_file}'"'
     echo ''
     echo 'Usual check-in process:'
-    echo '    git-cd-root-alias; git-update-verified; git-next-checkin'
     # TODO2: rework git-update-force via dry-run git-update with conflict check
-    echo '    # -or-: git-cd-root-alias; tar-this-dir-dated; git-update-force; git-conflicts-alias; git-next-checkin'
+    echo '    git-cd-root-alias; tar-this-dir-dated; git-update-force; git-next-checkin'
+    echo '    # -or-: git-cd-root-alias; git-update-verified; git-conflicts-alias; git-next-checkin'
     ## OLD:
     ## echo '    # alt: grep "^<<<<< " $(git-diff-list) /dev/null'
     ## # TODO: xargs -I{} 'grep "^<<<<< {} | head -5' $(git-list-text-files)

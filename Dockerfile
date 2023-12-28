@@ -15,7 +15,7 @@
 #   $ docker rmi shell-scripts-dev
 #
 # Note:
-# - Environment overrides not supported dir build, so arg's must be used instead. See
+# - Environment overrides not supported during build, so arg's must be used instead. See
 #       https://vsupalov.com/docker-arg-env-variable-guide/#overriding-env-values
 #
 # Warning:
@@ -29,7 +29,14 @@
 FROM catthehacker/ubuntu:act-20.04
 
 # Set default debug level (n.b., use docker build --build-arg "arg1=v1" to override)
-ARG DEBUG_LEVEL=2
+# Also optionally set the regex of tests to run.
+# Note: maldito act/nektos/docker not overriding properly
+## TODO2: fixme (see tests/run_tests.bash for workaround)
+## TODO4: ARG DEBUG_LEVEL=2
+ARG DEBUG_LEVEL=4
+## DEBUG: ARG DEBUG_LEVEL=5
+ARG TEST_REGEX=""
+## DEBUG: ARG TEST_REGEX="testing-tips"
 
 # [Work in progress]
 # Set branch override: this is not working due to subtle problem with the tfidf package
@@ -52,7 +59,6 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends wget tar ca-certificates && \
     true
     ## TODO4: rm -rf /var/lib/apt/lists/*
-    
 
 # Install other stuff
 # note: this is to support logging into the images for debugging issues
@@ -60,44 +66,56 @@ RUN apt-get update && \
 RUN if [ "$DEBUG_LEVEL" -ge 4 ]; then apt-get install --yes emacs kdiff3 less tcsh zip || true; fi
 
 # Set the Python version to install
+# NOTE: The workflow yaml files now handle this (e.g., via matrix support)
 ## TODO: keep in sync with .github/workflows
 ## OLD: ARG PYTHON_VERSION=3.9.16
+## TEST: ARG PYTHON_VERSION=3.8.12
 ARG PYTHON_VERSION=3.11.4
 
+
 # Download pre-compiled python build
+# TODO2: Make this step optional because it conflict with python matrix in yaml files (e.g., github/worflow/github.yml).
 # To find URL links, see https://github.com/actions/python-versions:
 # ex: https://github.com/actions/python-versions/releases/tag/3.11.4-5199054971
 #
 # maldito https://github.com/actions uses stupid idiosyncratic tag
+## OLD: ARG PYTHON_TAG=""
+## TEST: ARG PYTHON_TAG="117929"
 ARG PYTHON_TAG="5199054971"
 #
-RUN wget -qO /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz \
-        "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-${PYTHON_TAG}/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz" && \
-    mkdir -p /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 && \
-    tar -xzf /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz \
-        -C /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 --strip-components=1 && \
-    echo TODO: rm /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz
+RUN if [ "$PYTHON_VERSION" != "" ]; then                                                \
+       wget -qO /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-${PYTHON_TAG}/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz" && \
+       mkdir -p /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 &&                    \
+       tar -xzf /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz                    \
+           -C /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 --strip-components=1 && \
+       echo TODO: rm /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz;              \
+    fi
 
 # Set environment variables to use the installed Python version as the default
 ENV PATH="/opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64/bin:$WORKDIR:$WORKDIR/tests:${PATH}"
 
 # Install pip for the specified Python version
-RUN wget -qO /tmp/get-pip.py "https://bootstrap.pypa.io/get-pip.py" && \
-    python3 /tmp/get-pip.py && \
-    true
-    ## TODO: rm /tmp/get-pip.py
+RUN if [ "$PYTHON_VERSION" != "" ]; then                                                \
+        wget -qO /tmp/get-pip.py "https://bootstrap.pypa.io/get-pip.py" &&              \
+        python3 /tmp/get-pip.py &&                                                      \
+        true || /tmp/get-pip.py;                                                        \
+    fi
 
 # Copy the project's requirements file to the container
 ARG REQUIREMENTS=$WORKDIR/requirements.txt
 COPY requirements.txt $REQUIREMENTS
+## TODO3?: COPY tests/_test-config.bash $WORKDIR/tests
 
 # Install the project's dependencies
-RUN pip install --verbose --no-cache-dir --requirement $REQUIREMENTS
+## OLD: RUN pip install --verbose --no-cache-dir --requirement $REQUIREMENTS
+RUN if [ "$PYTHON_VERSION" != "" ]; then                                                \
+        pip install --verbose --no-cache-dir --requirement $REQUIREMENTS;               \
+    fi
 
 # Display environment (e.g., for tracking down stupid pip problems)
 RUN printenv | sort
-#
-# Add local version of mezcla if debugging
+
+# Add local version of mezcla
 # ex: DEBUG_LEVEL=4 GIT_BRANCH=aviyan-dev local-workflows.sh
 RUN if [ "$GIT_BRANCH" != "" ]; then echo "Installing mezcla@$GIT_BRANCH"; pip install --verbose --no-cache-dir git+https://github.com/tomasohara/mezcla@$GIT_BRANCH; fi
 
@@ -109,4 +127,4 @@ RUN apt-get autoremove -y && \
 
 # Run the test, normally pytest over ./tests
 # Note: the status code (i.e., $?) determines whether docker run succeeds (e.h., OK if 0)
-ENTRYPOINT DEBUG_LEVEL=$DEBUG_LEVEL './tests/run_tests.bash'
+ENTRYPOINT DEBUG_LEVEL=$DEBUG_LEVEL TEST_REGEX="$TEST_REGEX" './tests/run_tests.bash'

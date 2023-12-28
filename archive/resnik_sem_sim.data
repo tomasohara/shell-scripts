@@ -1,0 +1,103 @@
+# Table 2. Semantic similairty by item (Resnik, forthcoming)
+#
+# Word Pair   Miller&Charles  Replication    sim  sim_edge    sim_p(c)
+#                      means        means
+# car automobile	3.92          3.9  8.0411       30      0.9962
+#
+pair          miller	repl	sim	simedge	sim_p(c)
+car-automobile	3.92	3.9	8.0411	30	0.9962
+gem-jewel	3.84	3.5	14.9286	30	1.0000
+journey-voyage	3.84	3.5	6.7537	29	0.9907
+boy-lad	3.76	3.5	8.4240	29	0.9971
+coast-shore	3.70	3.5	10.8076	29	0.9994
+asylum-madhouse	3.61	3.6	15.6656	29	1.0000
+magician-wizard	3.50	3.5	13.6656	30	0.9999
+midday-noon	3.42	3.6	12.3925	30	0.9998
+furnace-stove	3.11	2.6	1.7135	23	0.6951
+food-fruit	3.08	2.1	5.0076	27	0.9689
+bird-cock	3.05	2.2	9.3139	29	0.9984
+bird-crane	2.97	2.1	9.3139	27	0.9984
+tool-implement	2.95	3.4	6.0787	29	0.9852
+brother-monk	2.82	2.4	2.9683	24	0.8722
+crane-implement	1.68	0.3	2.9683	24	0.8722
+lad-brother	1.66	1.2	2.9355	26	0.8693
+journey-car	1.16	0.7	0.0000	0	0.0000
+monk-oracle	1.10	0.8	2.9683	24	0.8722
+food-rooster	0.89	1.1	1.0105	18	0.5036
+coast-hill	0.87	0.7	6.2344	26	0.9867
+forest-graveyard	0.84	0.6	0.0000	0	0.0000
+monk-slave	0.55	0.7	2.9683	27	0.8722
+coast-forest	0.42	0.6	0.0000	0	0.0000
+lad-wizard	0.42	0.7	2.9683	26	0.8722
+chord-smile	0.13	0.1	2.3544	20	0.8044
+glass-magician	0.11	0.1	1.0105	22	0.5036
+noon-string	0.08	0.0	0.0000	0	0.0000
+rooster-voyage	0.08	0.0	0.0000	0	0.0000
+#
+# Resnik, Philip (forthcoming), ``Semantic similarity in a Taxonomy: an
+# Information-based measure and its application to problems of ambiguity
+# in natural language'', to appear in {\em Journal of Artificial
+# Intelligence}.
+#
+# analysis:
+#
+# % perl_ do_regression.perl -fix -row_labels -inclusion_list="2 3" resnik_sem_sim.data
+# 
+# Least Squares Estimates (vs. miller):
+# 
+#                          Coefficient    S.E.(Coef)     T-Value     P-value
+# Constant                  0.260888      (0.131606)      1.98       (0.0581)
+# repl                      0.985395      (5.759465E-2)   17.1       (0.0000)
+# 
+# R Squared:                0.918424    
+# Sigma hat:                0.420509    
+# Number of cases:                28
+# Degrees of freedom:             26
+# 
+# Correlation:              0.958344
+# 
+# % perl_ do_regression.perl -fix -row_labels -inclusion_list="2 4" resnik_sem_sim.data
+# 
+# Least Squares Estimates (vs. miller):
+# 
+#                          Coefficient    S.E.(Coef)     T-Value     P-value
+# Constant                  0.957361      (0.288432)      3.32       (0.0027)
+# sim                       0.228098      (4.408051E-2)   5.17       (0.0000)
+# 
+# R Squared:                0.507354    
+# Sigma hat:                 1.03338    
+# Number of cases:                28
+# Degrees of freedom:             26
+# 
+# Correlation:              0.712288
+# 
+# % perl_ do_regression.perl -fix -row_labels -inclusion_list="2 5" resnik_sem_sim.data
+# 
+# Least Squares Estimates (vs. miller):
+# 
+#                          Coefficient    S.E.(Coef)     T-Value     P-value
+# Constant                  0.117755      (0.475380)      .248       (0.8063)
+# simedge                    8.924815E-2  (1.968701E-2)   4.53       (0.0001)
+# 
+# R Squared:                0.441476    
+# Sigma hat:                 1.10031    
+# Number of cases:                28
+# Degrees of freedom:             26
+# 
+# Correlation:              0.664437
+# 
+# %  perl_ do_regression.perl -fix -row_labels -inclusion_list="2 6" resnik_sem_sim.data
+# 
+# Least Squares Estimates (vs. miller):
+# 
+#                          Coefficient    S.E.(Coef)     T-Value     P-value
+# Constant                  0.159962      (0.464022)      .345       (0.7331)
+# sim_p(c)                   2.56955      (0.562714)      4.57       (0.0001)
+# 
+# R Squared:                0.445057    
+# Sigma hat:                 1.09678    
+# Number of cases:                28
+# Degrees of freedom:             26
+# 
+# Correlation:              0.667126
+#

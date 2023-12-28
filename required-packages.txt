@@ -10,7 +10,13 @@
 # - See requirements.txt for Python package requirements.
 #
 diffutils
+git
+jupyter-core
+kdiff3
 less
+python3-pip
+python3
+python-is-python3
 tar
 tcsh
 wget
@@ -20,12 +26,17 @@ zip
 # Optional packages
 #
 #opt# ImageMagick
-#opt# extcolors
+## OLD: #opt# extcolors
 #opt# nmap
 #opt# poppler-utils
+#opt# rcs
 #opt# shellcheck
 #opt# colout
+#opt# tesseract-ocr
+#opt# kazam
+#opt# screen
+#opt# nvtop
+## TODO: #opt# brew install act   # see https://github.com/nektos/act
 ## TODO: docker
-## TODO: https://github.com/nektos/act
 ##
-## TODO: ##opt@ xyz
+## TODO: #opt# xyz

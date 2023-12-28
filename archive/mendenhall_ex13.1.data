@@ -1,0 +1,16 @@
+# Example 13.1 p. 461 [Mendenhall & Scheaffer 73]
+#
+# A	B
+6.1	9.1
+7.1	8.2
+7.8	8.6
+6.9	6.9
+7.6	7.5
+8.2	7.9
+#
+# REF
+#
+# William Mendenhall and Richard L. Scheaffer (1973), {\em Mathematical
+# Statistics with Applications}, North Scituate, Massachusetts: Duxbury
+# Press.
+#

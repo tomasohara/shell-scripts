@@ -10,6 +10,7 @@ test_extract_matches.py: 0
 test_tpo_count_it.py: 0
 
 # Alias tests
+# TODO2: finishing tightening up the lower boundaries
 hello-world-revised.ipynb: 20.0
 trace-extensionless-shortcut-unicode.ipynb: 15
 test-cond-env-setting.ipynb: 12.5
@@ -25,19 +26,21 @@ trace-unix-general.ipynb: 5
 trace-file-manipulation.ipynb: 5
 trace-unix-alias.ipynb: 2.5
 trace-python-commands.ipynb: 2.5
-download-and-test-tomohara-aliases.ipynb: 0.0
-command-override-cp-mv.ipynb: 0.0
-alias-trace-misc-commands.ipynb: 0.0
-json-related-alias.ipynb: 0.0
-test-tomohara-aliases-access.ipynb: 0.0
+download-and-test-tomohara-aliases.ipynb: 70.0
+command-override-cp-mv.ipynb: 30.0
+alias-trace-misc-commands.ipynb: 40.0
+json-related-alias.ipynb: 60.0
+test-tomohara-aliases-access.ipynb: 40.0
 alt-simple-alias-test.ipynb: 0.0
-more-tomohara-aliases-test.ipynb: 0.0
-trace-setup-sorting-wrappers.ipynb: 0.0
-test-check-errors.ipynb: 0.0
-trace-line-words-commands.ipynb: 0.0
-alias-cd-commands.ipynb: 0.0
-tomasohara-aliases-test.ipynb: 0.0
+more-tomohara-aliases-test.ipynb: 40.0
+trace-setup-sorting-wrappers.ipynb: 25.0
+test-check-errors.ipynb: 35.0
+trace-line-words-commands.ipynb: 60.0
+alias-cd-commands.ipynb: 30.0
+tomasohara-aliases-test.ipynb: 50.0
 empty-test-file.ipynb: 0.0
 trace-linux-admin-alias-NOBATSPP.ipynb: 0.0
 sudocommentstest-NOBATSPP.ipynb: 0.0
 perl-script-NOBATSPP.ipynb: 0.0
+## TODO: testing-support-script-tests.ipynb: 75
+testing-support-script-tests.ipynb: 40

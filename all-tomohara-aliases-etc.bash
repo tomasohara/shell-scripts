@@ -1,13 +1,35 @@
 # !/bin/env bash
 #
-# Convenience script for loading all my aliase, functions, etc.
+# Convenience script for loading all my aliases, functions, etc.
 #
-# usage: TOM_BIN=/home/tom/shell-script; source $TOM_BIN/all-tomohara-aliases.bash
+# Simple Usage:
+#   export TOM_BIN=/home/tom/shell-script;
+#   source $TOM_BIN/all-tomohara-aliases.bash
 #
-# note:
+# Note:
 # - Omits tomohara-settings.bash unless SOURCE_SETTINGS=1,
 # - The env.options are TRACE_/VERBOSE_SOURCE rather than TRACE/VERBOSE in
-#   case sourcedvia a script which used the latter (see local-workflows.sh).
+#   case sourced via a script which used the latter (see local-workflows.sh).
+#
+#--------------------------------------------------------------------------------
+# Advanced usage (e.g., within scripts using aliases):
+#
+#   # Get aliases (n.b., tracing should be delayed)
+#   shopt -s expand_aliases
+#   {
+#       source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
+#       # filters shellcheck SC1090 [Can't follow non-constant source]
+#       # shellcheck disable=SC1090
+#       source "$source_dir"/all-tomohara-aliases-etc.bash
+#   }
+#   #
+#   # Set tracing (delayed so alias definitions not traced)
+#   if [ "$trace" = "1" ]; then
+#       set -o xtrace
+#   fi
+#   if [ "$verbose" = "1" ]; then
+#       set -o verbose
+#   fi
 #
 
 # Set bash regular and/or verbose tracing
@@ -26,7 +48,7 @@ if [ "${VERBOSE_SOURCE:-0}" = "1" ]; then
 fi
 
 # Source the files with definitions for aliases, etc.
-# note: normally this is down without tracing
+# note: normally this is done without tracing
 shopt -s expand_aliases
 $show_tracing && set -o xtrace
 ##
@@ -39,7 +61,7 @@ fi
 source "$source_dir/more-tomohara-aliases.bash"
 source "$source_dir/tomohara-proper-aliases.bash"
 ##
-## TEST: for testing alias tests (see tests/batspp_report.py)
+## TEST: removes aliases and functions for use in testing aliases (see tests/summary_stats.bash)
 ##
 if [ "${DIR_ALIAS_HACK:-0}" = "1" ]; then
     unalias link-symbolic link-symbolic-force link-symbolic-regular

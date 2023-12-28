@@ -1,0 +1,28 @@
+# Plausible Implausible Verb Object Max Class Object Max Class
+# (Resnik 1996)
+#
+see	friend	5.79	<entity>	method	-0.01	<method>	
+read	article	6.80	<writing>	fashion	-0.20	<activity>	
+find	label	1.10	<abstraction>	fever	0.22	<psych_feature>
+hear	story	1.89	<communication>	issue	1.89	<communication>	
+write	letter	7.26	<writing>	market	0.00	<commerce>	
+urge	daughter	1.14	<life_form>	contrast	1.86	<act>	
+warn	driver	4.73	<person>	engine	3.61	<entity>	
+judge	contest	1.30	<contest>	climate	0.28	<state>	
+teach	language	1.87	<cognition>	distance	1.86	<psych_feature>	
+show	sample	1.44	<psych_feature>	travel	0.41	<happening>	
+expect	visit	0.59	<act>	mouth	5.93	<entity>	
+answer	request	4.49	<speech_act>	tragedy	3.88	<communication>	
+recognize	author	0.50	<entity>	pocket	0.50	<entity>	
+repeat	comment	1.23	<communication>	journal	1.23	<communication>	
+understand	concept	1.52	<cognition>	session	1.51	<social_relation>	
+remember	reply	1.31	<statement>	smoke	0.20	<article_of_commerce>
+#
+# Table 2: Selectional ratings for plausible and implausuble direct objects
+#
+# Resnik, Philip (1996), ``Selectional constraints: an
+# information-theoretic model and its computational realization'', {\em
+# Cognition} 61:127-159.
+#
+# NOTE: see resnik_NP_bias.data for version of results from thesis
+#

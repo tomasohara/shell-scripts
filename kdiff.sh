@@ -62,7 +62,8 @@ fi
 
 # Make sure file2 exists, using file1 pattern unless absolute-ish
 base1="$(basename "$file1")"
-if [[ (-d "$file2") && (! "$file1" =~ ^[\/\.].*) && (! -e "$file2/$base1") ]]; then
+## OLD: if [[ (-d "$file2") && (! "$file1" =~ ^[\/\.].*) && (! -e "$file2/$base1") ]]; then
+if [[ (-d "$file2") && (! -e "$file2/$base1") ]]; then
     file2="$file2/$file1"
 fi
 

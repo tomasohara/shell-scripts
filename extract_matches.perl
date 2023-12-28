@@ -23,7 +23,7 @@ eval 'exec perl -Ssw $0 "$@"'
 BEGIN { 
     my $dir = `dirname $0`; chomp $dir; unshift(@INC, $dir);
     require 'common.perl';
-    use vars qw/$script_name $verbose/;
+    use vars qw/$utf8 $script_name $verbose/;
 }
 
 

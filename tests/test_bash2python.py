@@ -578,4 +578,7 @@ def test_23_bash_script(filename):
 
 if __name__ == '__main__':
     debug.trace_current_context()
+    # TODO2: work out better warning (e.g., FYI)
+    debug.assertion(RUN_SLOW_TESTS)
+    debug.assertion(TEST_UNSUPPORTED)
     pytest.main([__file__])
