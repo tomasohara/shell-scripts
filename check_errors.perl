@@ -39,15 +39,19 @@ use vars qw/$relaxed $strict $quiet $matching $before $after $info/;
 
 if (!defined($ARGV[0])) {
     my $options = "options = [-warnings | -info] [-context=N] [-no_astericks] [-skip_ruby_lib]";
-    $options .= " [-relaxed | -strict] [-verbose] [-quiet] [-before=N] [-after=N]";
-    my $example = "ex: $script_name whatever\n";
+    # TODO2: split options in main and misc (e.g., [-skip_ruby_lib])
+    $options .= " [-relaxed | -strict] [-verbose] [-quiet] [-before=N] [-after=N] [-matching]";
+    my $example = "ex: $script_name log-file\n";
     my $note = "Notes:\n";
     $note .= "- The default context is 1.\n";
     $note .= "- Warnings are skipped by default.\n";
     $note .= "- Use -no_astericks if input uses ***'s outside of error contexts.\n";
     $note .= "- Use -relaxed to include special cases (e.g., xyz='error').\n";
+    $note .= "- Use -matching to show the text from regex match.";
+    ## &assertion($note !~ /\n$/);
 
-    die "\nusage: $script_name [options]\n\n$options\n\n$example\n\n$note\n";
+    ## TODO2: &exit(...);
+    die("\nusage: $script_name [options]\n\n$options\n\n$example\n\n$note\n");
 }
 
 &init_var(*warning, &FALSE);		# alias for -warnings
