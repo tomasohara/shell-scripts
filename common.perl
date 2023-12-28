@@ -24,6 +24,9 @@ eval 'exec perl -Ssw $0 "$@"'
 # Tom O'Hara
 # New Mexico State University
 #
+# TODO3:
+# - Use TL_MOST_VERBOSE for &TL_VERBOSE+4; likewise for similar constructs.
+#
 # TODO:
 # - * Add gotcha's for modification (e.g., consider Python port instead)!
 # - Make changes to take advantage of Perl 6???.
@@ -48,6 +51,10 @@ eval 'exec perl -Ssw $0 "$@"'
 # Portions Copyright (c) 1997-1999, 2002-2003 Tom O'Hara
 # Portions Copyright (c) 1999-2001 Cycorp, Inc.  All rights reserved.
 #
+#--------------------------------------------------------------------------------
+# Notes:
+# - Warning: Dynamic use calls should be invoked via eval (see set_strict_mode).
+# - If not familiar with Perl, use ChatGPT-like tool to explain the code.
 #
 #------------------------------------------------------------------------
 # Function synopsis:
@@ -165,10 +172,12 @@ sub TEMP_DIR {$TEMP;};
 # set_strict_mode(enable): set Perl strict interpretation mode with diagnostics
 sub set_strict_mode {
     my($strict_mode) = $_[0];
+    ## DEBUG: print STDERR "set_strict_mode($strict_mode)\n";
     if ($strict_mode) {
-	use strict;
+	## DEBUG: print STDERR "using strict and diagnostics\n";
+	eval "use strict";
 	## TODO: no strict "refs";		# to allow for symbolic file handles
-	use diagnostics;
+	eval "use diagnostics";
     }
 }
 
@@ -242,7 +251,7 @@ sub init_common {
     &init_var_exp(*verbose, &FALSE);	# verbose output mode
     &init_var(*help, &FALSE);	        # show usage
     &init_var_exp(*strict, &FALSE);	# use strict perl type checking
-    &set_strict_mode($strict);          # note: could be set via environment so reinvoked
+    &set_strict_mode($strict);          # note: could be set via environment so reinvoked (i.e., recheck)
     #
     &init_var_exp(*unbuffered, &FALSE);	# unbuffered I/O
     &init_var_exp(*debugging_timestamps, &FALSE);   # timestamp all debug output
@@ -404,7 +413,8 @@ sub init_common {
     if ($BOM) {
 	print "\xEF\xBB\xBF\n";
     }
-
+    &debug_print(&TL_VERY_VERBOSE, "init_common() => $initialized\n");
+    
     return ($initialized);
 }
 
@@ -728,7 +738,7 @@ sub debug_on {
 #
 sub debug_out {
     my($level, $format_text, @args) = @_;
-    &debug_print(&TL_MOST_VERBOSE, "debug_out(@_)\n");
+    &debug_print(&TL_ALL, "debug_out(@_)\n");
 
     # Do sanity check to ensure printf formatting present
     # TODO: move inside trace level test to avoid too many warnings.
@@ -875,10 +885,10 @@ sub warning {
 sub assert {
     my($expression, $package, $filename, $line) = @_;
     if ($disable_assertions) {
-	&debug_print(99, "my assert(@_) {checking disabled}\n");
+	&debug_print(99, "[common]assert(@_) {checking disabled}\n");
 	return;
     }
-    &debug_print(&TL_VERBOSE+4, "my assert(@_)\n");
+    &debug_print(&TL_VERBOSE+4, "[common]assert(@_)\n");
 
     # Determine the package to use for the evaluation environment,
     # as well as the filename and line number for the assertion call.
