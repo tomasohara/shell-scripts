@@ -268,6 +268,7 @@ def merge_continuation(actual, expected):
             function_continuation = True
             break
         if re.search(r"[^\\]\\(\n?)$", actual_line):
+            ## Lorenzo: I think the string bellow was supposed to be an Fstring because {s + 1} doesn't make much sense if not
             debug.trace(T6, "Line continuation at actual line {s + 1}: {actual_line!r}")
             line_continuation = True
             break
@@ -317,7 +318,7 @@ def preprocess_batspp(contents):
         if ((line is not None) and line.endswith("\\") and (len(line) > 1) and (line[-2] != "\\") and (s < len(lines))):
             debug.trace(T6, f"joining lines {s + 1} and {s + 2}")
             lines[s] = line[:-1] + lines[s + 1]
-            for j in range(s + 1, len(lines) - 1):
+            for j in range(s + 1, len(lines) - 1): 
                 lines[j] = lines[j + 1]
             lines[-1] = None
         else:

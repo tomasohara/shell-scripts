@@ -189,6 +189,7 @@ class JupyterToBatspp(Main):
                     if line.lower() == '# setup\n':
                         is_setup = True
                     elif line.lower() in ['# continuation\n', '# continue\n', '# test']:
+                    ## Lorenzo: Is there any use for this comments or just for setup?
                         is_setup = False
 
                     # Check if line is a comment or command

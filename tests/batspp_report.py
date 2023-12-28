@@ -414,6 +414,7 @@ def main():
         is_batspp = file.endswith(BATSPP)
 
         if is_batspp:
+            ## Lorenzo Review: is there a reason im missing why this line doesn't do .replace(BATSPP, IPYNB) as the other replaces?
             BI_check = [file.replace(".batspp", ".ipynb")]
             working_testfiles += BI_check
 

@@ -287,6 +287,7 @@ alias date-central='TZ="America/Chicago" date'
 
 ## TOM-IDIOSYNCRATIC
 # em-adhoc-notes(): edit adhoc notes file using format _{dir}-notes-{host}-{date} (e.g., _bin-notes-reempl-may22.txt)
+## Lorenzo review: what's the purpose of keeping the old versions?
 ## OLD: em-adhoc-notes(): edit adhoc notes file using format _{host}-adhoc-{date} (e.g., _reempl-adhoc-notes.13may22.txt)
 ## OLD: alias em-adhoc-notes='emacs-tpo _adhoc-notes.$(TODAY).txt'
 ## OLD: alias em-adhoc-notes='emacs-tpo _${HOST_NICKNAME:misc}-adhoc-notes-$(TODAY).txt'
@@ -581,6 +582,7 @@ alias reset-prompt-dollar='reset-prompt "\$"'
 {
     # shellcheck disable=SC2139
     alias reset-prompt-default="reset-prompt '$PS_symbol'"
+    ## Lorenzo review: same code marked as OLD 3 lines above
 }
 ## TODO: alias reset-prompt-default='reset-prompt "\$PS_symbol"'
 
@@ -624,6 +626,7 @@ export PERLLIB="$HOME/perl/lib/perl5/5.16:$HOME/perl/lib/perl5/5.16/vender_perl:
 # See perlrun manpage.
 # TODO4: rename perl- to perl-usual???
 alias perl-='perl -Ssw'
+## Lorenzo review: should change this to perl-alt following TODO's
 ## TODO: function alias-perl { DURING_ALIAS=1 perl "$@"; }
 # alias-perl(): perl with DURING_ALIAS defined (n.b., avoids excess tracing; see common.perl)
 ## BAD: alias alias-perl='DURING_ALIAS=1 perl -Ssw'
@@ -968,6 +971,7 @@ export MY_GREP_OPTIONS="-n $skip_dirs -s"
 {
 function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
 function gr- () { $GREP $MY_GREP_OPTIONS "$@"; }
+## Lorenzo review: should change this to gr-alt following TODO's
 SORT_COL2="--key=2"
 # grep-unique(pattern, file, ...): count occurrence of pattern in file...
 function grep-unique () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0$" | sort -rn $SORT_COL2 -t':'; }
@@ -983,6 +987,7 @@ alias gu-='grep-unique'
 function gu-all () { grep-unique "$@" ./* | $PAGER; }
 #
 function gu- () { $GREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0"; }
+## Lorenzo review: should change this to gu-alt following TODO's
 #
 # grepl(pattern, [other_grep_args]): invokes grep over PATTERN and OTHER_GREP_ARGS and then pipes into less for PATTERN
 # NOTE: actually uses egrep
@@ -1033,9 +1038,11 @@ function findspec-all () { command find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 
 function fs () { findspec . "$@" | $EGREP -iv '(/(backup|build)/)'; } 
 function fs-ls () { fs "$@" -exec ls -l {} \; ; }
 alias fs-='findspec-all .'
+## Lorenzo review: should change this to fs-alt following TODO's
 function fs-ext () { find . -iname \*."$1" | $EGREP -iv '(/(backup|build)/)'; } 
 # TODO: extend fs-ext to allow for basename pattern (e.g., fs-ext java ImportXML)
 function fs-ls- () { fs- "$@" -exec ls -l {} \; ; }
+## Lorenzo review: should change this to fs-ls-alt following TODO's
 #
 findgrep_opts="-in"
 #
@@ -1045,6 +1052,7 @@ function findgrep-verbose () { find "$1" -iname \*"$2"\* -print -exec $GREP $fin
 function findgrep () { find $1 -iname \*"$2"\* -exec $GREP $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} /dev/null \;; }
 # TODO: archive
 function findgrep- () { find $1 -iname $2 -print -exec $GREP $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} \;; }
+## Lorenzo review: should change this to findgrep-alt following TODO's
 function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$dir" -iname "*.$ext" -exec $GREP $findgrep_opts "$@" \{\}  /dev/null \;; }
 # fgr(filename_pattern, line_pattern): $GREP through files matching FILENAME_PATTERN for LINE_PATTERN
 function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
@@ -1110,6 +1118,7 @@ function find-files-here () { find-files-there "$1" "$PWD/ls-alR.list"; }
 # following variants for sake of tab completion
 alias find-files='find-files-here'
 alias find-files-='find-files-there'
+## Lorenzo review: should change this to find-files-alt following TODO's
 # TODO: function find-files-dated () { perlgrep.perl -para -i "$@" | $EGREP -i '((:$)|('$1'))' | $PAGER_NOEXIT -p "$1"; }
 #
 # TODO: add --quiet option to dobackup.sh (and port to bash)
@@ -1180,6 +1189,7 @@ alias em-devel='em --devel'
 ## function em-debug () { em --debug-init "$@"; }
 ## function em-quick () { em --quick "$@"; }
 function em-debug () { em -- --debug-init "$@"; }
+## Lorenzo review: Im confused about the purpose of this double dashes, because otherwise the code is the same as OLD
 function em-quick () { em -- --quick "$@"; }
 
 #--------------------------------------------------------------------------------
@@ -1556,6 +1566,8 @@ function ls-relative () { $LS -d "$1" | perl -pe "s@$HOME@~@;"; }
 # - depth and filter args can be given via TAR_DEPTH and TAR_FILTER
 find_options="-xdev"
 function make-tar () {
+    # Warning: if no optional arguments are given, find and filtering will be skipped to preserve empty folders
+    #          Otherwise if optional args are present, empty dirs will be excluded from final tar
     # Check arguments
     ## OLD:
     ## local base="$1"; local dir="$2"; local depth="$3"; local filter="$4";
@@ -1583,13 +1595,18 @@ function make-tar () {
 	    fi;
 	done
     fi
+    # OLD: (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
 
     # Invoke find/tar
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
     ## OLD: (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     # shellcheck disable=SC2086
-    (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "${filter_arg[@]}" | $NICE $GTAR "c${GTAR_OPTS}T" "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+    if [ "${depth_arg}${size_arg}${filter_arg}" == "." ]; then
+        $NICE $GTAR cvfz "$base.tar.gz" "$dir" >| "$base.tar.log" 2>&1;
+    else
+        (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+    fi
     ## DUH: -L added to support tar-this-dir in directory that is symbolic link, but unfortunately
     ## that leads to symbolic links in the directory itself to be included
     ## BAD: (find -L "$dir" $find_options $depth_arg -not -type d -print | egrep -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
@@ -1604,11 +1621,13 @@ function make-tar () {
 # tar-dir(dir, depth, [filter]): create archive of DIR in ~/xfer, using subdirectories up to DEPTH, and optionally 
 # filtering files matching exlusion filter.
 #
-function tar-dir () {
+function tar-dir () { 
+    # Warning: see behaviour with optional arguments and subdirs in make-tar
+    ## TODO 2: add support for optional filtering 
     local dir="$1"; local depth="$2";
     local archive_base
     archive_base="$TEMP"/$(basename "$dir")
-    make-tar "$archive_base" "$dir" "$depth"
+    make-tar "$archive_base" "$dir" "$depth" 
 }
 ## TODO: fix indentation for tar-dir and other aliases (make sure 4 spaces used); also, make sure no tabs used as w/ tar-dir above
 ##
@@ -1621,15 +1640,19 @@ function tar-dir () {
 ##    make-tar "$archive_base" "$actual_full_dir_path" $depth
 ## }
 ##
+
+# Note: will exclude folders based on make-tar behaviour with specified depth 
 function tar-just-dir () { tar-dir "$1" 1; }
 #
 # tar-this-dir(): create tar archive into TEMP, for sud-directory tree routed
 # in current directory (using directory basename as file prefix instead of .)
 # ex: TEMP=/mnt/my-external-drive/tmp tar-this-dir
+# Note: will include empty folders in dir given the unspecified optional parameters, see make-tar
 function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")"; popd-q; }
 # test of resolving problem with tar-this-dir if dir a symbolic link from apparent parent
 # TODO: fixme
 function new-tar-this-dir () {
+    ## TODO: fix un-initialized base variable
     # example dir change: /home/tomohara/tpo-magro-p3 [=> /media/tomohara/ff3410d4-5ffc-4c01-a2ca-75244b882aa2]
     local dir
     dir=$(basename "$PWD"); 
@@ -1649,8 +1672,14 @@ function new-tar-this-dir () {
 }
 #
 # tar-this-dir-normal: creates archive of directory, excluding archive, backup, and temp subdirectories
+
+## Lorenzo: tar-this-dir-normal and tar-just-this-dir can be expressend in terms of a helper function like
+## function helper() {local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" $1 $2; popd-q; }
+## alias tar-this-dir-normal=helper "" "/(archive|backup|temp)/"
+## alias tar-just-this-dir=helper "1" ""
 function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" "" "/(archive|backup|temp)/"; popd-q; }
-#
+## TODO2: fix so tar-dir takes the filter arguments
+
 function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
 # GTAR_OPTS: usual options for aliases using gnu tar
 GTAR_OPTS=vfz
@@ -1688,7 +1717,7 @@ alias tar-just-this-dir-dated='USE_DATE=1 tar-just-this-dir'
 
 #
 # command-to-pager(command, arg1, ...): helper function for use in aliases: sends command output to $PAGER (e.g., less)
-function command-to-pager { "$@" | $PAGER; }
+function command-to-pager { "$@" | $PAGER; } 
 alias view-zip='command-to-pager unzip -v'
 alias un-zip='command-to-pager unzip'
 
@@ -1920,7 +1949,7 @@ trace file manipulation and conversions
 
 ## TODO: make obsolete
 ## OLD: function asc-it () { dobackup.sh "$1"; asc < BACKUP/"$1" >| "$1"; }
-function asc-it () { dobackup.sh "$1"; asc < backup/"$1" >| "$1"; }
+function asc-it () { dobackup.sh "$1"; asc < backup/"$1" >| "$1"; } 
 # TODO: use dos2unix under CygWin
 alias remove-cr='tr -d "\r"'
 alias perl-slurp='perl -0777'
@@ -1969,7 +1998,7 @@ alias kill-it='kill-em --pattern'
 # NOTE: see filter-dirnames added to strip directory names
 # TODO: rename as ps-mine-sans-dirs
 ## BAD: alias ps-mine-='ps-mine "$@" | filter-dirnames'
-function ps-mine- { ps-mine "$@" | filter-dirnames; }
+function ps-mine- { ps-mine "$@" | filter-dirnames; } 
 alias ps_mine='ps-mine'
 ## DUP: alias ps-mine-='ps-mine "$@" | filter-dirnames'
 alias ps-mine-all='ps-mine --all'
@@ -2042,7 +2071,12 @@ alias rename-utf8-encoded-sledgehammer='rename-files -quick -global -regex "[\x8
 #    U+10000    U+10FFFF        11110xxx        10xxxxxx        10xxxxxx        10xxxxxx;   note: F[8-F]{3}
 # rename-emoji: replace emoji characters in filenames with _'s (e.g., U+10000+ chars and U+26nn)
 # note: emoji considered synonymous with emoticon
+## OLD: alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"'
+alias rename-utf8-emoji='rename-files -quick -global -regex "[\xF0-\xFF][\x80-\xFF]{1,3}" "_"' 
+## TODO2 (handle cases like U+2728 [sparkle] w/ UTF8 0xE29CA8):
+#    alias rename-utf8-emoji-misc='rename-files -quick -global -regex "[\xE0-\xFF][\x80-\xFF]{2,3}" "_"'
 # note: check specifically for code blocks: U+26D3 [chains] is e29b93; U+1F917 [hugging face] is f09fa497
+## Lorenzo review: same as OLD above
 alias rename-emoji-old='rename-files -quick -global -regex "(\xE2[\x80-\xFF]{2})|(\xF0[\x80-\xFF]{3})" "_"'
 # rename-emoji-aux: renames eomji in filenames with ascii descriptions
 # note: if STRIP_EMOTICONS then uses REPLACEMENT_TEXT (see mezcla's convert_emoticons.py)
@@ -2637,7 +2671,9 @@ function scp-aws-down() { local host="$1"; shift; for _file in "$@"; do scp -P $
 #
 # TODO: consolidate host keys; reword hostwinds in terms of generic host not AWS
 #
+## TODO2: put this elsewhere (e.g., ~/.bashrc)
 export AWS_HOST="52.15.125.52"
+## Lorenzo review: is safe to have the explicit IP in a file?
 aws_micro_host=ec2-52-15-125-52.us-east-2.compute.amazonaws.com
 reference-variable $aws_micro_host
 alias aws-login-micro='ssh-host-login-aws $aws_micro_host'
@@ -2768,6 +2804,7 @@ function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$;
 ## TODO: use stack for old_PS_symbol maintenance??? (also allows for recursive invocation, such as with '$ $ $')
 ## TODO: rename as my-script to avoid confusion
 #-------------------------------------------------------------------------------
+## Lorenzo review: this whole section down to get-process-parents is duplicated from above
 # Misc. language related
 alias json-pp='json_pp -json_opt utf8,pretty'
 alias pp-json=json-pp
@@ -3440,3 +3477,10 @@ alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 ## OLD: startup-trace 'out tomohara-aliases.bash'
 trace 'out tomohara-aliases.bash'
 ## DEBUG: echo 'out tomohara-aliases.bash'
+
+## Lorenzo review: what's the purpose of keeping the OLD lines that only change /usr/bin to command or use alias-perl?
+## note: '## OLD" is used for three reasons:
+## 1. to facilitate manual merge,
+## 2. to highlight old approach when new changes are work-in-progress; and,
+## 3. because Tom is a packrat (i.e., cachivachero)!
+
