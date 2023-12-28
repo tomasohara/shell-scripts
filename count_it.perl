@@ -56,7 +56,7 @@ use strict "refs";			# allow string deferencing (for -occurrences support)
 use vars qw/$utf8 $i $ignore_case $i $ignore_case $foldcase $fold $preserve 
             $para $slurp $multi_per_line $one_per_line $freq_first $alpha $compact $cumulative
             $occurrences $occurrence_field $percents $multiple $nonsingletons $min2 $min_freq $trim $unaccent $pattern_file $pattern $locale $chomp/;
-use vars qw/$nonsingleton $restore $field/;
+use vars qw/$nonsingleton $restore $field $show_zeros/;
 
 # Check the command-line options
 # Each variable initialized corresponds to -var=value commandline option
@@ -80,8 +80,10 @@ use vars qw/$nonsingleton $restore $field/;
 &init_var(*multiple, $min2);		#   "
 &init_var(*nonsingleton, $multiple);	#   "
 &init_var(*nonsingletons, $nonsingleton); # omit cases that occur once
+&init_var(*show_zeros, &FALSE);         # initialize pattern's count to 0
+my($min_freq_default) = ($show_zeros ? 0 : ($nonsingletons ? 2 : 1));
 &init_var(*min_freq, 			# min frequency to show in output
-	  $nonsingletons ? 2 : 1);
+	  $min_freq_default);
 &init_var(*trim, &FALSE);		# trim whitespace in matched text
 &init_var(*unaccent, &FALSE);		# remove accent marks from input
 &init_var(*pattern_file, "");		# file with pattern (to circumvent shell UTF8 issues)
@@ -105,6 +107,8 @@ if (!defined($ARGV[0])) {
     $note .= "notes:\n\nThe patterns are regular expressions using Perl's extensions\n";
     $note .= "See manual page for details (e.g., 'man perlre')\n\n";
     $note .= "To tabulate only parts of the pattern, use parenthesis as illustrated above.\n\n";
+    ## TODO3: show misc options only if -verbose (as in sum_file.perl)
+    ## ... $note .= "- Use -verbose for more help or to show extracted data."
     $note .= "Miscellaneous options:\n";
     $note .= "-compact to treat runs of whitespace as single space\n";
     $note .= "-nonsingletons to ignore item occurring just once\n";
@@ -113,9 +117,12 @@ if (!defined($ARGV[0])) {
     $note .= "-occurrences incorporates count field (\$1 for pattern & \$2 count)\n";
     $note .= "-multi_per_line allows for multple occurrences in a line (assumed unless ^ used)\n";
     $note .= "-restore is used to simulate look-ahead (see example above).\n";
+    $note .= "-show_zeros is used to show patterns not matched.\n";
     ## TODO: add optional extended help with examples for misc. options
 
-    die "\nusage: $script_name [options] pattern file ...\n\n$options\n\n$example\n$note\n";
+    ## OLD: die "\nusage: $script_name [options] pattern file ...\n\n$options\n\n$example\n$note\n";
+    print STDERR "\nusage: $script_name [options] pattern file ...\n\n$options\n\n$example$note\n";
+    &exit();
 }
 if ($pattern eq "") {
     $pattern = $ARGV[0];
@@ -144,6 +151,13 @@ if ((&DEBUG_LEVEL > 3) && ($pattern =~ /^\^/) && ($pattern !~ /[\$\n]$/) && (! $
     &warning("You might want to specify -multi_per_line if you want \^ and/or \$ interpretted after match removal.\n");
 }
 
+# Initialize count for pattern itself (e.g., non-regex)
+# TODO2: add initialization for other patterns (e.g., -entries="red,green,blue")
+my(%count);			# assoc. list for pattern counting
+if ($show_zeros) {
+    &set_entry(\%count, $pattern, 0);
+}
+
 # Put grouping parenthesis around pattern, if none present
 # NOTE: Escaped parentheses are ignored.
 # TODO: (" $pattern " !~ /[^\\]\(.*\)[^\\]/)
@@ -168,7 +182,7 @@ $/ = 0777 if ($slurp);		# complete-file input mode
 ##     use Encode 'decode_utf8';
 ## }
 
-my(%count);			# assoc. list for pattern counting
+## OLD: my(%count);			# assoc. list for pattern counting
 my($total_count) = 0;
 #
 while (<>) {
@@ -264,7 +278,10 @@ while (<>) {
     }
 }
 &debug_print(&TL_VERBOSE, "$num patterns found\n");
-print("total occurrence count is ${total_count}\n") if ($occurrences);
+## OLD: print("total occurrence count is ${total_count}\n") if ($occurrences);
+if ($occurrences || $verbose) {
+    print("total occurrence count is ${total_count}\n");
+}
 &trace_assoc_array(\%count);
 
 print("Frequency of $pattern\n") if ($verbose);
@@ -273,7 +290,9 @@ my($cumulative_tag_count) = 0;
 foreach my $tag (&$sort_function(\%count)) {
     my($tag_count) = &get_entry(\%count, $tag, 0);
     last if ($tag_count < $min_freq);
-    if ($tag_count != 0) {
+    ## TODO3: streamline the above short circuit with below inclusion checks
+    ## OLD if ($tag_count != 0) ...
+    if (($tag_count != 0) || ($show_zeros)) {
 	$tag =~ s/\n$//;
 	if ($freq_first) {
 	    print $tag_count, "\t", $tag;
