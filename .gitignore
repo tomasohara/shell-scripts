@@ -26,7 +26,8 @@
 **/*.log
 **/*.list
 
-# Any files with leading _, except specified cases
+# Any files with leading underscores (_), except specified cases
+# Warning: files in repo like _temp-user-docker.env ignored unless overridden (e.g., git add --force)
 **/_*
 !**/*__init__.py
 # Likewise for trailing _'s (e.g., master-dir-link_)
