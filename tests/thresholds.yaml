@@ -2,6 +2,9 @@
 #
 # Note: If any test fails, the whole test suite fails, so use conservative
 # lower bounds at first.
+#
+# TODO1: revise the 0 thresholds!
+#
 
 # Python tests
 test_bash2python.py: 0
@@ -44,3 +47,7 @@ sudocommentstest-NOBATSPP.ipynb: 0.0
 perl-script-NOBATSPP.ipynb: 0.0
 ## TODO: testing-support-script-tests.ipynb: 75
 testing-support-script-tests.ipynb: 40
+## TODO2: raise git-alias threshold after temp repo permission fixed
+git-aliases-tests-1.ipynb: 0
+git-aliases-tests-2.ipynb: 0
+git-aliases-tests-3.ipynb: 0
