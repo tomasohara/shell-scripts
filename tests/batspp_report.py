@@ -240,12 +240,17 @@ def main():
             run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+        # Output excerpt from BatsPP source file
+        debug.code(5, lambda: print(gh.run(f"echo BatsPP source:; head -1000 --verbose {output_file} | cat -n")))
         # Check for common errors (e.g., command not found or insufficient permissions)
         debug.code(4, lambda: print(gh.run(f"check_errors.perl {log_file}")))
         ## TEMP: Show context of failed tests for help with diagnosis of Github actions runs (as temp files not accessible afterwards)
         if SHOW_FAILURE_CONTEXT:
             context = gh.run(f"grep -B10 '^not ok' {real_output_file}")
             print("Failure context: " + (f"{{\n{gh.indent_lines(context)}}}" if context.strip() else "n/a"))
+        # Output excerpt of BatsPP output and log file (i.e., stdout and stderr)
+        debug.code(5, lambda: print(gh.run(f"echo BatsPP output:; head -1000 --verbose {real_output_file} | cat -n")))
+        debug.code(5, lambda: print(gh.run(f"echo BatsPP log:; head -1000 --verbose {log_file} | cat -n")))
         debug.assertion(not run_output.strip())
         real_output = system.read_file(real_output_file)
         debug.trace(6, f"run_batspp() => {real_output!r}")
