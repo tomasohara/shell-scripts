@@ -32,6 +32,8 @@
 !**/*__init__.py
 # Likewise for trailing _'s (e.g., master-dir-link_)
 **/*_
+# Explicit filter
+_temp-user-docker.env
 
 # Backup file
 **/*.bak
