@@ -706,7 +706,7 @@ function alt-invoke-next-single-checkin {
     echo "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
     local OLD_GIT_MESSAGE=$GIT_MESSAGE
     # note: options: -e use readline; -i initialize readline buffer; -r backslash is not an escape
-    if [ "$GIT_NO_CONFIRM" = "0" ]; then 
+    if [ "$GIT_NO_CONFIRM" != "0" ]; then 
         read -r -e -i "$prompt" command
     else 
         echo "GIT_NO_CONFIRM set to 1, so skipping confirmation"
@@ -720,9 +720,11 @@ function alt-invoke-next-single-checkin {
     ## echo "   $command"
     eval "$command"
 
+    # Restore message
+    export GIT_MESSAGE=$OLD_GIT_MESSAGE
+
     # Start next checkin or show if no more updates to do
     git-next-checkin
-    export GIT_MESSAGE=$OLD_GIT_MESSAGE
 }
 #
 # invoke-alt-checkin(filename): run alternative template-based checkin for filename
