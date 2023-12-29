@@ -147,7 +147,6 @@ function conditional-export () {
         ## DEBUG: echo "value for env. var. $var: $(printenv "$var")"
         if [ "$(printenv "$var")" == "" ]; then
             # Ignores SC1066: Don't use $ on the left side of assignments
-            # SC2046 [Quote this to prevent word splitting], and SC2086 [Double quote to prevent globbing and word splitting].
             # shellcheck disable=SC1066,SC2046,SC2086
             export $var="$value"
         fi
@@ -820,7 +819,6 @@ function copy-readonly-spec () {
         echo "Usage: copy-readonly-spec pattern dir";
         return
     fi
-    # maldito shellcheck (SC2086: Double quote to prevent globbing)
     # shellcheck disable=SC2086
     for f in $($LS $spec); do copy-readonly "$f" "$dir"; done
 }
@@ -849,7 +847,6 @@ trace directory commands
 LS="command ls"
 core_dir_options="--all -l -t  --human-readable"
 dir_options="${core_dir_options} --no-group"
-# maldito shellcheck: SC2046 [Quote this to prevent word splitting] and SC2086 [Double quote to prevent globbing]
 # shellcheck disable=SC2046,SC2086
 {
 if [ "$OSTYPE" = "solaris" ]; then dir_options="-alt"; fi
@@ -966,7 +963,6 @@ GREP="command grep"
 ## OLD: EGREP="$GREP -E"
 EGREP="$GREP --perl-regexp"
 export MY_GREP_OPTIONS="-n $skip_dirs -s"
-# maldito shellcheck (SC2086: Double quote to prevent globbing)
 # shellcheck disable=SC2086
 {
 function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
@@ -1027,7 +1023,6 @@ alias grep-nonascii='alias-perl perlgrep.perl "[\x80-\xFF]"'
 # - specify find options in an environment variable
 # - rework in terms of Perl regex? (or use -iregex in place of -iname)
 #
-# Ignores shellcheck SC2086 [Double quote to prevent globbing] in find aliases.
 # shellcheck disable=SC2086
 {         # start shellcheck block
 ## OLD: function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pattern find-option ... "; else /usr/bin/find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 2>&1 | $GREP -v '^find: '; fi; }
@@ -1754,7 +1749,6 @@ function cached-notes-para-gr-less { cached-notes-para-gr "$@" | less -p "$1"; }
 ## ## MISC: alias sum-col2='sum_file.perl -col=2 -'
 ##
 notes_glob="*notes*.txt  *notes*.list *notes*.log"
-# maldito shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
 # shellcheck disable=SC2086
 {
 function notes-grep() { perlgrep "$@" $notes_glob; }
@@ -3407,24 +3401,17 @@ function shell-check {                  ## TOM-IDIOSYNCRATIC
     # - SC2009: Consider using pgrep instead of grepping ps output.
     # - SC2012: Use find instead of ls to better handle non-alphanumeric filenames
     # - SC2119 [Use ... "$@" if function's $1 should mean script'1 $1]
-    # - SC2119: ... references arguments, but none are ever passed
-    # - SC2120: Consider using { cmd1; cmd2; } >> file instead of individual redirects.
+    # - SC2120: foo references arguments, but none are ever passed.
+    # - SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects
     # - SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
     # - SC2181 (style): Check exit code directly with e.g. 'if mycmd;' ...
     # - SC2196 (info): egrep is non-standard
     # - SC2219 (style): Instead of 'let expr', prefer (( expr )) .
     # - SC2230: which is non-standard
-    # - TODO2: -e 'SC1090,SC1091,SC2009,SC2012,SC2129,SC2164,SC2181'
-    ## OLD: shell-check-full "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;' | perl-grep -para -v '(SC1090|SC1091|SC2009|SC2012|SC2129|SC2164|SC2181|SC2219|SC2230)';
     local strict="${STRICT_MODE:-0}"
     local exclude="SC1090,SC1091,SC2004,SC2009,SC2012,SC2119,SC2120,SC2129,SC2164,SC2181,SC2196,SC2219,SC2230"
     local exclude_args="--exclude=$exclude"
     if [ "$strict" != "0" ]; then
-        ## TEST:
-        ## # note: ignores warning about 'if [ ]; ...' (i.e., SC2212), which is as old usage 
-        ## exclude="SC2212"
-        ## TODO3: rework to use --exclude=""
-        ##    args=""; if [ -n $exclude ]; then args=--exclude='$exclude'"; fi
         exclude_args=""
     fi
     # shellcheck disable=SC2086
