@@ -26738,7 +26738,7 @@ M	tests/more-tomohara-aliases-test.ipynb
 commit 58883ea40c94467a92ef8430d09647a0260d3ab7
 Author: Aviyan Acharya <avyn.xyz@gmail.com>
 Date:   Mon Sep 18 21:29:09 2023 +0545
-    EXPERIMENTAL: Added option for G1THUB_T0KEN (-s G[I]THUB_T[O]KEN=gho_...EzM)
+  EXPERIMENTAL: Added option for  _ G _ 1 _ T _ H _ U _ B _ T _ 0 _ K _ E _ N (-s _ G _ [ _ I _ ] _ T _ H _ U _ B _ T _ [ _ O _ ] _ K _ E _ N _=gho_...EzM)
 M	local-workflows.sh
 
 commit d5a48ef91c02a75a70a210b80f6245fbb654280f
