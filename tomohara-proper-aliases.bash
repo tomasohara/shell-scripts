@@ -39,15 +39,18 @@ alias nvsmi=nvidia-smi
 # note: stderr redirected onto stdout
 function convert-emoticons-aux {
     "$@" 2>&1 | convert_emoticons.py -
-    }
+}
 
 #...............................................................................
-
 # Python stuff
+
+# plint(...): shortcut for python-lint
 simple-alias-fn plint 'PAGER=cat python-lint'
+# plint-torch(...): plint w/ torch no-member warnings ignored
 alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
 #
 # clone-repo(url): clone github repo at URL into current dir with logging
+# TODO3: move to git-related section
 function clone-repo () {
     local url repo log
     url="$1"
@@ -56,9 +59,9 @@ function clone-repo () {
     # maldito linux: -c option required for command for
     # shellcheck disable=SC2086
     if [ "$(under-linux)" = "1" ]; then
-        command script "$log"  -c "git clone '$url'"
+        command script "$log" -c "git clone '$url'"
     else
-        command script "$log"  git clone "$url"
+        command script "$log" git clone "$url"
     fi
     #
     ls -R "$repo" >> "$log"
@@ -118,9 +121,12 @@ function run-python-script {
     check-errors-excerpt "$log";
 }
 
-# test-python-script(test-script): run TEST-SCRIPT via  pytest
+# pytest stuff
+default_pytest_opts="-vv --capture=tee-sys"
+#
+# test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
-    local default_pytest_opts="-vv --capture=tee-sys"
+    ## OLD: local default_pytest_opts="-vv --capture=tee-sys"
     if [ "$1" = "" ]; then
         echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] test-python-script script"
         return
@@ -132,8 +138,15 @@ function test-python-script {
     # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "ests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
     DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@" 2>&1;
 }
-
-# color-test-failures(): show color-coded test result (yellow for xfailed and red for regular fail)
+#
+# test-python-script-method(test-name, ...): like test-python-script but for specific test
+function test-python-script-method {
+    local method="$1";
+    shift;
+    PYTEST_OPTS="-k $method $default_pytest_opts" test-python-script "$@";
+}
+#
+# color-test-failures(): show color-coded test result for pytest run (yellow for xfailed and red for regular fail)
 simple-alias-fn color-output 'colout --case-insensitive'
 function color-test-failures {
     cat "$@" | color-output "\bfailed" red | color-output "(xfail(ed)?)" yellow | color-output "\bpassed" green | color-output "xpassed" green faint;
@@ -336,8 +349,14 @@ function create-zip-from-parent {
 }
 alias zip-from-parent=create-zip-from-parent
 
-#................................................................................
+#...............................................................................
 # Linux stuff
+
+# calendar: wrapper for cal using ncal variant (n.b., to ensure highlighting)
+# options: -b: old-style formatting
+alias calendar="ncal -b"
+
+# ps-time: show processes by time via ps_sort.perl
 # shellcheck disable=SC2016
 alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
 #
