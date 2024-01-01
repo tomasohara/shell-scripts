@@ -2503,7 +2503,8 @@ alias em-tomas=ed-tomas
 # maldito shellcheck: [SC2120: ... references arguments, but none are ever passed]
 # shellcheck disable=SC2120
 ## OLD: function truncate-width { cut --characters=1-"$(calc-int "$COLUMNS - 1")" "$@"; }
-function truncate-width { cut --characters=1-"$(($COLUMNS - 1))" "$@"; }
+## OLD: function truncate-width { cut --characters=1-"$(($COLUMNS - 1))" "$@"; }
+function truncate-width { cut --characters=1-"$(($COLUMNS - 2))" "$@"; }
 
 #-------------------------------------------------------------------------------
 # XWindows stuff

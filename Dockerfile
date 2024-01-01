@@ -125,6 +125,17 @@ RUN apt-get autoremove -y && \
     true
     ## TODO4: rm -rf /var/lib/apt/lists/*
 
-# Run the test, normally pytest over ./tests
+# Enable github access
+# Note: This is not secure, but scrappycito only has access to
+# to dummy repo's like https://github.com/tomasohara/git-bash-test.
+## TODO:
+## RUN git config --global user.email "scrappycito@gmail.com" && \
+##     git config --global user.name "SCrappy Cito" && \
+##     export MY_GIT_TOKEN=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 && \
+##     git config --global url."https://api:$MY_GIT_TOKEN@github.com/".insteadOf "https://github.com/" && \
+##     git config --global url."https://ssh:$MY_GIT_TOKEN@github.com/".insteadOf "ssh://git@github.com/" && \
+##     git config --global url."https://git:$MY_GIT_TOKEN@github.com/".insteadOf "git@github.com:"
+
+## # Run the test, normally pytest over ./tests
 # Note: the status code (i.e., $?) determines whether docker run succeeds (e.h., OK if 0)
 ENTRYPOINT DEBUG_LEVEL=$DEBUG_LEVEL TEST_REGEX="$TEST_REGEX" './tests/run_tests.bash'

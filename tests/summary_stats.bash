@@ -48,6 +48,16 @@ done
 # Change into testing script directory (e.g., ~/shell-scripts/tests)
 cd "$(dirname "$0")"
 
+# TEMP: set github credentials
+# Note: This is not secure, but scrappycito only has access to
+# to dummy repo's like https://github.com/tomasohara/git-bash-test.
+git config --global user.email "scrappycito@gmail.com"
+git config --global user.name "SCrappy Cito"
+export MY_GIT_TOKEN=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
+git config --global url."https://api:$MY_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
+git config --global url."https://ssh:$MY_GIT_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
+git config --global url."https://git:$MY_GIT_TOKEN@github.com/".insteadOf "git@github.com:"
+
 # Derive name for output file
 # Note: Uses unique output subdir under ~/temp (or $BATSPP_OUTPUT).
 # Likewise, uses unique temp subdir under /tmp  (or $BATSPP_TEMP).
