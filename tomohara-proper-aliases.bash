@@ -93,6 +93,7 @@ function run-python-script {
     #
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
+    declare -g _PSL_ log out
     local out_base
     let _PSL_++;
     out_base="$script_dir/_$script_base.$(TODAY).$_PSL_";
