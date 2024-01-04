@@ -99,7 +99,7 @@ function run-python-script {
     out_base="$script_dir/_$script_base.$(TODAY).$_PSL_";
     log="$out_base.log";
     out="$out_base.out";
-    ## TEMP:
+    ## TEMP: ensure output exists for excerpt below
     touch "$out";
     ## DEBUG: trace-vars _PSL_ out_base log
     rename-with-file-date "$out_base.out" "$log";
@@ -119,6 +119,9 @@ function run-python-script {
 	fi
     }
     tail "$log" "$out" | truncate-width
+    ## TEMP: remove emtpy output file
+    if [ ! -s "$out" ]; then command rm -v "$out"; fi
+    # Show common errors in log
     check-errors-excerpt "$log";
 }
 
