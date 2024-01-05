@@ -179,6 +179,9 @@ function yaml-validate () {
     python -c "from mezcla import file_utils; print(file_utils.read_yaml('$file'))" | head -5 | truncate-width
 }
 
+# action-lint-yaml: run Github actions yaml file through actionlint
+alias action-lint-yaml='actionlint'
+
 # script-config: open dated typescript under ~/config
 function script-config {
     mkdir -p ~/config
