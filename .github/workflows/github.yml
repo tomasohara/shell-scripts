@@ -10,7 +10,8 @@ name: Github-Tests
 on: [push, pull_request]
 
 jobs:
-  build:
+
+  build-and-test-runner:
     name: Build and Run Tests
     runs-on: ${{ matrix.os }}
 
@@ -21,19 +22,9 @@ jobs:
         python-version: ["3.8", "3.9", "3.10"]
         ## TODO: 3.x [latest; -or latest, latest-1, latest-2, ...]
 
-    ## TEST:
-    ## NOTE: following is for docker images on the hub
-    ## container:
-    ##   image: shell-scripts-dev
-    ##   options: --user=root
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-
-      - name: Build docker image
-        run: |
-          docker build --tag shell-scripts-dev -f- . <Dockerfile
 
       - name: Setup Python
         uses: actions/setup-python@v3
@@ -53,6 +44,25 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+  build-and-test-docker:
+    name: Build and Run Tests via Docker
+    runs-on: [ubuntu-20.04]
+
+    ## TEST:
+    ## NOTE: following is for docker images on the hub
+    ## container:
+    ##   image: shell-scripts-dev
+    ##   options: --user=root
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Build docker image
+        run: |
+          docker build --tag shell-scripts-dev -f- . <Dockerfile
+
       - name: Run tests
         run: |
           docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+
