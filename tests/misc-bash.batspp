@@ -1,0 +1,43 @@
+# Basic tests for Bash scripts
+
+# compare-log-output.sh
+# setup
+$ log1="$TMP/_compare-log-output.$$.log1"
+$ cat > "$log1" <<END
+hex1: 0x1234
+hex2: 1234 F000100A
+hex3: sha256:99f14c4b8174ea549d7ff9050fe9d305f59153eddecfae52c56d0f0c7821e6d4
+todo-hex3: sha256:f9f14c4b8174ea549d7ff9050fe9d305f59153eddecfae52c56d0f0c7821e6df
+time1: 1 Jan 1970 12:01am
+time2: 1/01/70 12:00:01
+time3: 2023-11-26T23:23:29.0096998Z
+END
+$ log2="$TMP/_compare-log-output.$$.log2"
+$ perl -pe 's/hex/hx/; s/time/tm/;' $log1 > "$log2"
+
+# Sample output
+#  $ compare-log-output.sh --plain-diff --filter-time --filter-hex --relaxed "$log1" "$log2"
+#  1,7c1,7
+#  < hex1: <hex> 
+#  < hex2: <hex> <hex>100A 
+#  < hex3: sha256:<hex>4c4b8174ea549d7ff9050fe9d305f59153eddecfae52c56d0f0c<hex> 
+#  < todo-hex3: sha256:<hex>4c4b8174ea549d7ff9050fe9d305f59153eddecfae52c56d0f0c<hex> 
+#  < time1: 1 Jan <hex> 12:01am 
+#  < time2: <time> 
+#  < time3: <time> 
+#  ---
+#  > hx1: <hex> 
+#  > hx2: <hex> <hex>100A 
+#  > hx3: sha256:<hex>4c4b8174ea549d7ff9050fe9d305f59153eddecfae52c56d0f0c<hex> 
+#  > todo-hx3: sha256:<hex>4c4b8174ea549d7ff9050fe9d305f59153eddecfae52c56d0f0c<hex> 
+#  > tm1: 1 Jan <hex> 12:01am 
+#  > tm2: <time> 
+#  > tm3: <time>
+# TODO2: fix output after fixing script
+
+# hex filtering
+$ compare-log-output.sh --plain-diff --filter-hex --relaxed "$log1" "$log2" | count_it.perl "(<\w+>)" | extract_matches.perl "(<hex>\t6)"
+<hex>	8
+
+# time filtering
+$ compare-log-output.sh --plain-diff --filter-time "$log1" "$log2" | count_it.perl "(<\w+>)" | extract_matches.perl "<time>\t6"

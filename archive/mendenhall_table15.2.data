@@ -1,0 +1,20 @@
+# TAble 15.2 [Mendenhall & Scheaffer 73]
+#
+# A	B
+27	32
+31	29
+26	35
+25	28
+#
+# perl_ sum_file.perl -f1=1 -f2=2 -mann_whitney mendenhall_table15.2.data
+# u_i = (4 3 4 3)
+# U = 14; E(U) = 8; V(U) = 12
+# z = 1.7320508075688774
+# p = 0.041632258331775196
+#
+#------------------------------------------------------------------------
+# REF
+#
+# William Mendenhall and Richard L. Scheaffer (1973), {\em Mathematical
+# Statistics with Applications}, North Scituate, Massachusetts: Duxbury
+# Press.

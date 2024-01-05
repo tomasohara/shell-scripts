@@ -45,8 +45,9 @@ NOBATSPP = "NOBATSPP"
 ## OLD: OUTPUTPP = ".outputpp"
 OUTPUTPP = ".bats.outputpp"
 
-OUTPUT_DIR = system.getenv_text("OUTPUT_DIR", ".",
-                                "Directory for output files such as .batspp test specs")
+OUTPUT_DIR = system.getenv_text(
+    "OUTPUT_DIR", ".",
+    description="Directory for output files such as .batspp test specs")
 
 BATSPP_STORE = gh.form_path(OUTPUT_DIR, "batspp-only")
 BATS_STORE = gh.form_path(OUTPUT_DIR, "bats-only")
@@ -70,32 +71,44 @@ DEFAULT_MIN_SCORE = 50
 # with string constant definition).
 #
 
-HOME = system.getenv_text("HOME", "~",
-                          "Home directory for user")
+HOME = system.getenv_text(
+    "HOME", "~",
+    description="Home directory for user")
 DOCKER_HOME = "/home/shell-scripts"
 UNDER_DOCKER = ((HOME == DOCKER_HOME) or system.file_exists(DOCKER_HOME))
 ## TODO? UNDER_RUNNER = ("/home/runner" in HOME)
 UNDER_RUNNER = (("/home/runner" in HOME) or UNDER_DOCKER)
 DETAILED_DEBUGGING = debug.detailed_debugging()
 
-TEST_REGEX = system.getenv_value("TEST_REGEX", None,
-                                 "Regex for tests to include; ex: 'c.*' for debugging")
-SHOW_FAILURE_CONTEXT = system.getenv_bool("SHOW_FAILURE_CONTEXT", UNDER_RUNNER,
-                                          "Show context of test failures--useful with Github runner")
-SINGLE_STORE = system.getenv_bool("SINGLE_STORE", False,
-                                  f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
-CLEAN_DEFAULT = system.getenv_bool("CLEAN_OUTPUT", not DETAILED_DEBUGGING,
-                                   f"Whether to clean existing output by remove entire directories")
-TEST_DIR = system.getenv_value("TEST_DIR", None,
-                               "Directory with BatsPP test definitions")
-STRICT_EVAL = system.getenv_bool("STRICT_EVAL", False,
-                                 "Use strict evaluation model, such as without whitespace normalization")
-BATS_EVAL = system.getenv_bool("BATS_EVAL", False,
-                               "Evaluate tests via bats rather than bash")
+TEST_REGEX = system.getenv_value(
+    ## TODO2: rename to BATSPP_TEST_REGEX
+    "TEST_REGEX", None,
+    description="Regex for tests to include; ex: '^c.*' for debugging")
+SHOW_FAILURE_CONTEXT = system.getenv_bool(
+    "SHOW_FAILURE_CONTEXT", UNDER_RUNNER,
+    description="Show context of test failures--useful with Github runner")
+SINGLE_STORE = system.getenv_bool(
+    "SINGLE_STORE", False,
+    description=f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
+CLEAN_DEFAULT = system.getenv_bool(
+    "CLEAN_OUTPUT", not DETAILED_DEBUGGING,
+    description=f"Whether to clean existing output by remove entire directories")
+TEST_DIR = system.getenv_value(
+    "TEST_DIR", None,
+    description="Directory with BatsPP test definitions")
+STRICT_EVAL = system.getenv_bool(
+    "STRICT_EVAL", False,
+    description="Use strict evaluation model, such as without whitespace normalization")
+BATS_EVAL = system.getenv_bool(
+    "BATS_EVAL", False,
+    description="Evaluate tests via bats rather than bash")
+BASH_EVAL = (not BATS_EVAL)
+OMIT_SHORT_OPTIONS = system.getenv_bool(
+    "OMIT_SHORT_OPTIONS", False,
+    description="Only allow long command line options")
+ALLOW_SHORT_OPTIONS = (not OMIT_SHORT_OPTIONS)
 FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
                                "Force execution even if admin-like user")
-## Added FORCE_RUN: 2023Oct18
-BASH_EVAL = (not BATS_EVAL)
 FORCE_OPTION_DEFAULT = UNDER_DOCKER or FORCE_RUN
 
 ## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
@@ -144,7 +157,9 @@ def main():
     batspp_count = 0
 
     # 0.2) Option Parsing
-    NO_REPORTS_ARG = "no"
+    # note: --omit-reports used instead of --no-reports for sake of auto-short options
+    NO_REPORTS_ARG = "omit-reports"
+    NO_REPORTS_ALIAS_ARG = "no"
     KCOV_REPORTS_ARG = "kcov"
     TEXT_REPORTS_ARG = "txt"
     ALL_REPORTS_ARG = "all"
@@ -156,6 +171,7 @@ def main():
         description=__doc__.format(script=gh.basename(__file__)).strip("\n"),
         boolean_options=[
             (NO_REPORTS_ARG, "No reports are generated, testfiles are shown"),
+            (NO_REPORTS_ALIAS_ARG, f"Alias for --{NO_REPORTS_ARG}"),
             (KCOV_REPORTS_ARG, f"KCOV (HTML based) reports generated, stored at {KCOV_STORE}"),
             (TEXT_REPORTS_ARG, f"Textfile based reports generated, stored at {TXT_STORE}"),
             (ALL_REPORTS_ARG, "Generates report for all available testfiles (n.b., NOBATSPP testfiles ignored by default)"),
@@ -166,13 +182,15 @@ def main():
         text_options=[
             (DEFINITIONS_ARG, "Script with alias definitions to be sourced"),
         ],
-        skip_input=False,
+        skip_input=True,
         manual_input=False,
-        short_options=True,
+        auto_help=True,
+        short_options=ALLOW_SHORT_OPTIONS,
     )
     #
     debug.assertion(main_app.parsed_args)
-    NO_OPTION = main_app.get_parsed_option(NO_REPORTS_ARG)
+    NO_OPTION_ALIAS = main_app.get_parsed_option(NO_REPORTS_ALIAS_ARG)
+    NO_OPTION = main_app.get_parsed_option(NO_REPORTS_ARG, NO_OPTION_ALIAS)
     TXT_OPTION = main_app.get_parsed_option(TEXT_REPORTS_ARG)
     KCOV_OPTION = main_app.get_parsed_option(KCOV_REPORTS_ARG)
     ALL_OPTION = main_app.get_parsed_option(ALL_REPORTS_ARG)
@@ -184,6 +202,7 @@ def main():
     DEFINITIONS_SCRIPT = main_app.get_parsed_option(DEFINITIONS_ARG)
     debug.trace_expr(4, NO_OPTION, TXT_OPTION, KCOV_OPTION, FORCE_OPTION, CLEAN_OPTION, BATSPP_SWITCH_OPTION, USE_SIMPLE_BATSPP, DEFINITIONS_SCRIPT)
     RUN_BATS = (TXT_OPTION or not NO_OPTION)
+    debug.assertion(TXT_OPTION or KCOV_OPTION)
 
     # Do check for adminstrative user and exit unless --force
     is_admin = my_re.search(r"root|admin|adm", gh.run("groups"))
@@ -200,10 +219,10 @@ def main():
             gh.run(f"rm -rf {BATSPP_STORE}/*")
             gh.run(f"rm -rf {BATS_STORE}/*")
         
-        if not KCOV_OPTION:
+        if KCOV_OPTION:
             gh.run(f"rm -rf {KCOV_STORE}/*")
     
-        if not TXT_OPTION:
+        if TXT_OPTION:
             gh.run(f"rm -rf {TXT_STORE}/*")
 
     def run_batspp(input_file, output_file):
@@ -225,12 +244,17 @@ def main():
             run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+        # Output excerpt from BatsPP source file
+        debug.code(5, lambda: print(gh.run(f"echo BatsPP source:; head -1000 --verbose {output_file} | cat -n")))
         # Check for common errors (e.g., command not found or insufficient permissions)
         debug.code(4, lambda: print(gh.run(f"check_errors.perl {log_file}")))
         ## TEMP: Show context of failed tests for help with diagnosis of Github actions runs (as temp files not accessible afterwards)
         if SHOW_FAILURE_CONTEXT:
             context = gh.run(f"grep -B10 '^not ok' {real_output_file}")
             print("Failure context: " + (f"{{\n{gh.indent_lines(context)}}}" if context.strip() else "n/a"))
+        # Output excerpt of BatsPP output and log file (i.e., stdout and stderr)
+        debug.code(5, lambda: print(gh.run(f"echo BatsPP output:; head -1000 --verbose {real_output_file} | cat -n")))
+        debug.code(5, lambda: print(gh.run(f"echo BatsPP log:; head -1000 --verbose {log_file} | cat -n")))
         debug.assertion(not run_output.strip())
         real_output = system.read_file(real_output_file)
         debug.trace(6, f"run_batspp() => {real_output!r}")
@@ -258,7 +282,12 @@ def main():
     success_test_array = []
     failure_test_array = []
 
-    print(f"\n=== BATSPP REPORT GENERATOR (simple_batspp.py / BATSPP 1.5.X) ===\n")
+    batspp_version = gh.extract_match_from_text(r"version (\S+)",
+                                                gh.run("batspp --version 2> /dev/null"))
+    print(f"\n=== BATSPP REPORT GENERATOR (simple_batspp.py / BATSPP {batspp_version}) ===\n")
+    ## TEMP (tracing test for act/nektos)
+    print(f"TEST_REGEX={TEST_REGEX} DEBUG_LEVEL={system.getenv('DEBUG_LEVEL')}")
+    debug.trace_expr(1, OUTPUT_DIR, SINGLE_STORE)
 
     for file in files:
         is_ipynb = file.endswith(IPYNB)
@@ -372,6 +401,7 @@ def main():
             if KCOV_OPTION:
                 # TODO2: extend run_batspp to handle optional coverage check
                 ## OLD: bats_program = ("python3 ../simple_batspp.py" if USE_SIMPLE_BATSPP else "bats")
+                # note: kcov works best over the Bash version of the test file not batspp (i.e., BASH_EVAL=1)
                 bats_program = "bats"
                 if USE_SIMPLE_BATSPP and BASH_EVAL:
                     bats_program = ""
@@ -393,6 +423,7 @@ def main():
         is_batspp = file.endswith(BATSPP)
 
         if is_batspp:
+            ## Lorenzo Review: is there a reason im missing why this line doesn't do .replace(BATSPP, IPYNB) as the other replaces?
             BI_check = [file.replace(".batspp", ".ipynb")]
             working_testfiles += BI_check
 
@@ -404,7 +435,7 @@ def main():
     NaN = math.nan
     print(f"\n======================================================")
     print(f"SUMMARY STATISTICS:\n")
-    print(f"simple_batspp.py used: {bool(BATSPP_SWITCH_OPTION)}")
+    print(f"simple_batspp.py used: {bool(USE_SIMPLE_BATSPP)}")
     print(f"No. of IPYNB testfiles: {ipynb_count + avoid_count}")
     print(f"No. of BATSPP files (generated): {batspp_count if RUN_BATS else NaN}")
     print(f"No. of FAULTY testfiles: {faulty_count if RUN_BATS else NaN}")

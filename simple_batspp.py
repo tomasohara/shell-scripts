@@ -1,11 +1,15 @@
 #! /usr/bin/env python
 #
-# BATSPP
+# BatsPP: preprocessor for bats unit test
 #
-# This process and run custom tests using bats-core.
+# This script processes ands run custom tests using bats-core. It is based
+# on example-based testing, using the output from a command as a test:
 #
-# NOTE: It is only necessary to have installed bats-core
-#       no need for bats-assertions library.
+#   $ echo $'uno\ndos\ntres' | grep --count o
+#   2
+#
+# NOTE: It is only necessary to have installed bats-core, In particular, there
+# is no need for bats-assertions library.
 #
 # FYI: This version is a simplified version of the original BatsPP facility. It uses some shameless
 # hacks enabled via environment variables to work around quirks in the example parsing. For example,
@@ -17,6 +21,18 @@
 #     *?  and  +?             non-greedy match
 # - See https://www.rexegg.com/regex-quickstart.html for comprehensive cheatsheet.
 # - See https://regex101.com for a tool to explain regex's.
+# - See jupyter_to_batspp.py for conversion utility for Jupyter notebooks.
+# - The following directives are recognized:
+#     Directive              Comment
+#     Continuation           Additional setup code
+#     Global setup           Global setup code (e.g., alias definitions).
+#     Setup                  Setup code for the test (e.g., temp. file creation)
+#     Test [name]            Name to use for test instead of line number
+#     Wrapup                 Optional cleanup code
+# - The following environment options can be useful:
+#     MATCH_SENTINELS        Wraps tests inside #Start ... # End to facilitate pattern matching.
+#     PARA_BLOCKS            Tests are paragraphs delimited by blank lines
+#     BASH_EVAL              Use Bash for evaluation instead of bats-core
 #................................................................................
 # Tips:
 # - The parser is regex based so certain contructs confuse it.
@@ -35,11 +51,13 @@
 ##   the .bats file generation.
 ## - See if way to warn if empty actual output (versus expected) is likely command issue. such
 ##   as based on analysis of stderr. Perhaps there was a problem with aliases added to normalize output.
+## - Refine diagnostics for test parsing (e.g., a la trace_pattern_match).
 ## TODO2:
 ## - Have option to save each test in a separate bats file: a simple syntax error (e.g., wrong closing quote) can cause the entire test to fail.
 ## - Track down source of hangup's when evaluating code with a command that gets run in background:
 ##   the function test-N-actual runs OK (i.e., '$ test-N-action'), but it get stuck when accessing the
 ##   result text (e.g., '$ result=$(test-N-actual)'.
+## - Add pytest-styles directives like xfail and skip, as well as a way to flag critical tests.
 ## TODO3:
 ## - Warn if expecting command and non-comment and non-$ line encounters (e.g., Tom's funky ¢ prompt)
 ## - Stay in synh with Batspp:
@@ -87,6 +105,9 @@ expected output:
 Also you can test bash functions:
  [functions + args] => [expected]:
  fibonacci 9 => "0 1 1 2 3 5 8 13 21 34"
+
+Simple usage:
+MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 {prog} xyz.batspp > xyz.log 2>&1
 """
 
 
@@ -175,8 +196,16 @@ MERGE_CONTINUATION = system.getenv_bool("MERGE_CONTINUATION", False,
                                         "Merge function or backslash continuations in expected with actual")
 STRIP_COMMENTS = system.getenv_bool("STRIP_COMMENTS", False,
                                     "Strip comments from expected output")
+ALLOW_COMMENTS = system.getenv_bool("ALLOW_COMMENTS", False,
+                                    "Allow comments in expected output")
 NORMALIZE_WHITESPACE = system.getenv_bool("NORMALIZE_WHITESPACE", False,
                                           "Convert non-newline whitespace to space")
+IGNORE_SETUP_OUTPUT = system.getenv_bool("IGNORE_SETUP_OUTPUT", False,
+                                         "Ignore output from setup, wrapup, etc. sections")
+FILTER_SHELLCHECK = system.getenv_bool("FILTER_SHELLCHECK", False,
+                                       description="Add shellcheck warning filters")
+OLD_ACTUAL_EVAL = system.getenv_bool("OLD_ACTUAL_EVAL", False,
+                                     description="Use actual output evaluation via implicit subshell")
 # Flags
 USE_INDENT_PATTERN = system.getenv_bool("USE_INDENT_PATTERN", False,
                                         "Use old regex for indentation")
@@ -239,6 +268,7 @@ def merge_continuation(actual, expected):
             function_continuation = True
             break
         if re.search(r"[^\\]\\(\n?)$", actual_line):
+            ## Lorenzo: I think the string bellow was supposed to be an Fstring because {s + 1} doesn't make much sense if not
             debug.trace(T6, "Line continuation at actual line {s + 1}: {actual_line!r}")
             line_continuation = True
             break
@@ -288,7 +318,7 @@ def preprocess_batspp(contents):
         if ((line is not None) and line.endswith("\\") and (len(line) > 1) and (line[-2] != "\\") and (s < len(lines))):
             debug.trace(T6, f"joining lines {s + 1} and {s + 2}")
             lines[s] = line[:-1] + lines[s + 1]
-            for j in range(s + 1, len(lines) - 1):
+            for j in range(s + 1, len(lines) - 1): 
                 lines[j] = lines[j + 1]
             lines[-1] = None
         else:
@@ -337,7 +367,7 @@ class Batspp(Main):
         self.source       = self.get_parsed_argument(SOURCE, "")
         self.jupyter      = self.get_parsed_option(JUPYTER, self.jupyter)
         self.force        = self.get_parsed_option(FORCE, self.force)
-        self.verbose      = (self.has_parsed_option(VERBOSE) or system.getenv("VERBOSE"))
+        self.verbose      = self.get_parsed_option(VERBOSE, system.getenv_bool("VERBOSE"))
 
         debug.trace(T7, (f'batspp - testfile: {self.testfile}, '
                          f'output: {self.output}, '
@@ -418,6 +448,7 @@ class Batspp(Main):
     
             
         if not SKIP_BATS:
+            ## TODO2: include time out to account for hanging tests
             debug.trace(T7, f'batspp - running test {self.temp_file}')
             debug.assertion(not (BASH_EVAL and BATS_OPTIONS.strip()))
             eval_prog = ("bats" if not BASH_EVAL else "bash")
@@ -483,9 +514,21 @@ class Batspp(Main):
             if num_sourced:
                 self.bats_content += '\n'
 
-        ## OLD: self.bats_content += '\n\n'
+        # Global variables
+        if IGNORE_SETUP_OUTPUT:
+            self.bats_content += ("# Global bookkeeping variables\n" +
+                                  "test_output_ignored=0\n" +
+                                  "num_ignored_tests=0\n" +
+                                  "\n")
 
-
+        # Miscellaneous stuff
+        if FILTER_SHELLCHECK:
+            self.bats_content += ("# Code linting support\n" +
+                                  "# Selectively ignores following shellcheck warnings:\n" +
+                                  "#   SC2016: Expressions don't expand in single quotes\n" +
+                                  "#   SC2028: echo may not expand escape sequences\n" +
+                                  "\n")
+            
     # pylint: disable=no-self-use
     def __process_teardown(self):
         """Process teardown"""
@@ -552,11 +595,15 @@ class Batspp(Main):
                 '    result="ok"\n' +
                 '    eval "$id"; if [ $? -ne 0 ]; then let bad++; result="not ok"; fi\n' +
                 '    echo "$result $n $id"\n' +
+                ('    if [ "$test_output_ignored" = "1" ]; then echo test ignored; fi\n' if IGNORE_SETUP_OUTPUT else '') +
                 '    }\n'
                 )
             self.bats_content += f'tests=({" ".join(all_test_ids)}); echo "1..${{#tests[@]}}"\n'
-            self.bats_content += 'for id in ${tests[*]}; do run-test "$id"; done\n'
-            self.bats_content += f'echo "$n tests, $bad failure(s)"\n'
+            self.bats_content += 'for id in "${tests[@]}"; do run-test "$id"; done\n'
+            self.bats_content += 'echo ""\n'
+            ## TODO2: output num ignored (e.g., setup/wrapup code)
+            ignored_spec = (', $num_ignored_tests ignored' if IGNORE_SETUP_OUTPUT else '')
+            self.bats_content += f'echo "$n tests, $bad failure(s){ignored_spec}"\n'
 
 #-------------------------------------------------------------------------------
         
@@ -612,7 +659,7 @@ class CustomTestsToBats:
         """Preprocess match result FIELD"""
 
         # Remove comment indicators
-        field = my_re.sub(r'^\# (Actual|Continuation|End|Setup|Start) *\n', '', field,
+        field = my_re.sub(r'^\# (Actual|Continuation|End|Global.Setup|Setup|Start|Wrapup) *\n', '', field,
                           flags=re.MULTILINE|re.IGNORECASE)
             
         # Remove indent
@@ -648,8 +695,10 @@ class CustomTestsToBats:
         # Remove comments (n.b., needs to be done after comment indicators checked
         if STRIP_COMMENTS:
             debug.trace(T6, "FYI: stripping comments in output field")
-            field = my_re.sub(r'^\s*\#.*\n', '', field, flags=re.MULTILINE|re.IGNORECASE)
-        
+            field = my_re.sub(r'^\s*\#.*\n', '', field, flags=re.MULTILINE)
+        elif (my_re.search(r'^\s*\#.*\n', field, flags=re.MULTILINE) and not ALLOW_COMMENTS):
+            debug.trace(4, f"Error: comment in output field: {field!r}")
+            
         # Remove initial and trailing quotes
         ## OLD: field = my_re.sub(f'^(\"|\')(.*)(\"|\')$', r'\2', field)
         if not KEEP_OUTER_QUOTES:
@@ -740,7 +789,7 @@ class CustomTestsToBats:
             setup_text += (
                 f'\ttest_folder="{test_folder}"\n' +
                 f'\tmkdir --parents "$test_folder"\n' +
-                f'\tcommand cp -Rp ./. "$test_folder"\n' +
+                (f'\tcommand cp -Rp ./. "$test_folder"\n' if COPY_DIR else "") +
                 # note: warning added for sake of shellcheck
                 f'\tbuiltin cd "$test_folder" || echo Warning: Unable to "cd $test_folder"\n')
         setup_sans_prompt = my_re.sub(r'^\s*\$', '\t', setup, flags=my_re.MULTILINE)
@@ -777,6 +826,7 @@ class CustomTestsToBats:
         # Add special hooks for when '# Setup' or '# Continuation' specified
         # HACK: Updates instance state to process such indicator comments (to avoid regex complication)
         has_setup_comment = re.search("# Setup", entire, re.IGNORECASE)
+        has_wrapup_comment = re.search("# Wrapup", entire, re.IGNORECASE)
         if has_setup_comment:
             setup_function   = f'{unspaced_title}-{setup_label}'
             self._setup_funct = setup_function
@@ -797,20 +847,41 @@ class CustomTestsToBats:
         # Get actual and expected results
         # TODO3: use helper bash function to minimize boilerplate code
         # TODO1: add output normalization (similar to _preprocess_output)
-        main_body = (f"\tlocal {actual_var} {expected_var}\n" +
-                     f'\t{actual_var}="$({actual_function})"\n' +
-                     f'\t{expected_var}="$({expected_function})"\n')
+        # Note: When evaluating the function, an evaluation context is not used so that
+        # the current process state gets modified, not the implicit child process.
+        # For example, 'actual=$(test-n-actual)' => 'test-n-actual > out; actual=$(cat out)'
+        # See https://stackoverflow.com/questions/23564995/how-to-modify-a-global-variable-within-a-function-in-bash
+        main_body = f"\tlocal {actual_var} {expected_var}\n"
+        if OLD_ACTUAL_EVAL:
+            main_body += f'\t{actual_var}="$({actual_function})"\n'
+        else:
+            main_body += (
+                     f'\tout_file="{unspaced_title}.out"\n' +
+                     ## TODO: f'\tout_file="$TMP/{unspaced_title}.out"\n' +
+                     f'\t{actual_function} >| "$out_file"\n' +
+                     f'\t{actual_var}="$(cat "$out_file")"\n')
+        main_body += f'\t{expected_var}="$({expected_function})"\n'
         if NORMALIZE_WHITESPACE:
             main_body += (f'\t{actual_var}="$(normalize-whitespace \"${actual_var}\")"\n' +
                           f'\t{expected_var}="$(normalize-whitespace \"${expected_var}\")"\n')
-        
+        if IGNORE_SETUP_OUTPUT:
+            if (has_setup_comment or has_continuation_comment or has_wrapup_comment):
+                # note: setup and wrapup output ignored; however, code run above for side effects
+                # TODO2: make sure success not counted in stats
+                main_body += (f'\t{actual_var}=ignored\n' +
+                              f'\t{expected_var}=ignored\n' +
+                              '\tlet num_ignored_tests++\n' +
+                              '\ttest_output_ignored=1\n')
+            else:
+                main_body += f'\ttest_output_ignored=0\n'
+            
         ## Process debug
         debug_text = ""
         if not OMIT_TRACE:
             verbose_print = '| hexview.perl' if  self._verbose else ''
             #
             def esc(text, max_len=None):
-                """Escape text for printing with single quotes replaced with doubel
+                """Escape text for printing with single quotes replaced with double
                 Note: Uses string representation (repr), up to MAX_LEN characters;
                 intended for bash echo inside single quoted string, which precludes use of \'
                 """
@@ -825,12 +896,14 @@ class CustomTestsToBats:
             #
             # note: 'actual' here is the code, but 'expected' is the output
             debug_text = ('\techo ""\n' +
+                          ('\t# shellcheck disable=SC2016,SC2028\n' if FILTER_SHELLCHECK else '') +
                           f"\techo '========== actual: {esc(actual)} =========='\n" +   
                           f'\techo "${actual_var}"\n' +
-                          (f'\t"${actual_var}" {verbose_print}\n' if self._verbose else "") +
+                          (f'\techo "${actual_var}" {verbose_print}\n' if self._verbose else "") +
+                          ('\t# shellcheck disable=SC2016,SC2028\n' if FILTER_SHELLCHECK else '') +
                           f"\techo '========== expect: {esc(expected)} =========='\n" +
                           f'\techo "${expected_var}"\n' +
-                          (f'\t"${expected_var}" {verbose_print}\n' if self._verbose else "") +
+                          (f'\techo "${expected_var}" {verbose_print}\n' if self._verbose else "") +
                           '\techo "============================"\n')
 
         # Construct bats tests
@@ -954,14 +1027,17 @@ class CustomTestsToBats:
 
         # Add helper functions
         if NORMALIZE_WHITESPACE:
-            bats_tests += (r"""# Helper functions
-                function normalize-whitespace { 
-                   local text
-                   text=$(echo "$*" | perl -pe "s/^\s+//;  s/[ \t]+/ /g;  s/[ \t] *$//;"); 
-                   echo "$text";
-                }
-
+            ## TODO4: rework to match other code generation (e.g., not using """...""")
+            tab = "\t"
+            helper_code = (rf"""# Helper functions
+                function normalize-whitespace {{ 
+                   {tab}local text
+                   {tab}text=$(echo "$*" | perl -pe "s/^\s+//;  s/[ \t]+/ /g;  s/[ \t] *$//;"); 
+                   {tab}echo "$text";
+                }}
                 """)
+            bats_tests += my_re.sub(r"^ +", "", helper_code, flags=re.MULTILINE)
+            bats_tests += "\n"
         
         # Add global setup if using global test dir
         if GLOBAL_TEST_DIR:
@@ -970,7 +1046,7 @@ class CustomTestsToBats:
                 "# Global test directory setup\n" +
                 f'test_folder="{test_folder}"\n' +
                 f'mkdir --parents "$test_folder"\n' +
-                f'command cp -Rp ./. "$test_folder"\n' +
+                (f'command cp -Rp ./. "$test_folder"\n' if COPY_DIR else "") +
                 # note: warning added for sake of shellcheck
                 f'command cd "$test_folder" || echo Warning: Unable to "cd $test_folder"\n' +
                 "\n")
@@ -999,7 +1075,7 @@ class CustomTestsToBats:
                 sub_matches = re.findall(pattern, sub_text, flags=self._re_flags)
                 if (TRACE_MATCHING and ((len(all_matches) == 0) or debug.debugging(T6))):
                     self.trace_pattern_match(sub_text)
-                debug.trace_expr(T6, sub_text, len(sub_matches))
+                debug.trace_expr(T6, sub_text, len(sub_matches), delim="\n")
                 all_matches += sub_matches
 
         # Process each match
@@ -1011,7 +1087,7 @@ class CustomTestsToBats:
             debug.assertion(len(test) == 5, f'Incorrect number of fields, every test should be {TestFieldTypes._fields}')
             # Add global setup section directly to BATS output mostly as is (except for prompt removal)
             # pylint: disable=no-member
-            if re.search(r"^\s*# Global Setup", test.entire, flags=(re.MULTILINE | re.IGNORECASE)):
+            if my_re.search(r"^\s*# Global Setup", test.entire, flags=(re.MULTILINE | re.IGNORECASE)):
                 debug.trace_expr(T7, test.entire)
                 entire_code = my_re.sub(r"^\s*\n", "", test.entire, flags=re.MULTILINE)
                 debug.assertion(not my_re.search(r"^([^\$#])", entire_code, flags=re.MULTILINE),
@@ -1212,7 +1288,7 @@ class FunctionTests(CustomTestsToBats):
 #-------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    app = Batspp(description          = __doc__,
+    app = Batspp(description          = __doc__.format(prog=gh.basename(__file__)),
                  ## TODO: use_temp_base_dir=True,
                  positional_arguments = [(TESTFILE, 'test file path')],
                  boolean_options      = [(VERBOSE,  'show verbose debug'),

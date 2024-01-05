@@ -22,8 +22,10 @@ from mezcla import system
 # Environment options
 # Note: These are just intended for internal options, not for end users.
 #
-TEST_REGEX = system.getenv_value("TEST_REGEX", None,
-                                 "Regex for tests to include; ex: 'c.*' for debugging")
+TEST_REGEX = system.getenv_value(
+    ## TODO2: rename to PYTHON_TEST_REGEX
+    "TEST_REGEX", None,
+    "Regex for tests to include; ex: '^test_c.*' for debugging")
 
 #-------------------------------------------------------------------------------
 # Utility functions
@@ -74,6 +76,16 @@ def run_tests(thresholds):
         debug.trace_object(6, collect_result)
         total_tests = len(my_re.findall(r"<TestCaseFunction|<TestCaseClass|<Function|<Class",
                                         collect_result.stdout))
+        # Compare against alternative way to detemine number of tests
+        # ex: "=== 103 tests collected in 1.64s ==="
+        if (total_tests == 0) or debug.debugging():
+            summary_total_tests = 0
+            if my_re.search(r"(\d+) tests collected",
+                            collect_result.stdout, flags=my_re.IGNORECASE):
+                summary_total_tests = system.to_int(my_re.group(1))
+            debug.trace_expr(5, total_tests, summary_total_tests)
+            debug.assertion(total_tests == summary_total_tests)
+            total_tests = (summary_total_tests if (total_tests == 0) else total_tests)
 
         # Run tests for the test
         cmd = f"pytest {test_path}"
@@ -81,7 +93,15 @@ def run_tests(thresholds):
         debug.trace_object(6, run_result)
         failed_tests = len(my_re.findall(r"FAILED", run_result.stdout))
         debug.assertion(failed_tests <= total_tests)
-
+        # Compare against alternative way to detemine number of failures
+        # ex: "=== 12 passed, 49 skipped, 13 xfailed, 29 xpassed in 4.76s ==="
+        if debug.debugging():
+            summary_failed_tests = 0
+            if my_re.search(r"(\d+) failed", run_result.stdout, flags=my_re.IGNORECASE):
+                summary_failed_tests = system.to_int(my_re.group(1))
+            debug.trace_expr(5, failed_tests, summary_failed_tests)
+            debug.assertion(failed_tests == summary_failed_tests)
+    
         # Calculate the number of allowed failures
         # note: threshold is for success (e.g., 51 means 51% of tests passed)
         # TODO3: have sanity checks account for minor floatiing point differences
@@ -130,11 +150,14 @@ def main():
     # note: uses default of 25% succeses allowed just for sake of getting tests operational
     # under Github actions (TODO: lower to 50%).
     THRESHOLDS_FILE = "thresholds.yaml"
+    thresholds_path = gh.resolve_path(THRESHOLDS_FILE)
     thresholds = {test_file: 25.0 for test_file in gh.get_matching_files("tests/test_*.py")}
-    debug.trace_expr(5, thresholds, "default thresholds")
-    if system.file_exists(THRESHOLDS_FILE):
-        thresholds.update(load_thresholds(THRESHOLDS_FILE))
-        debug.trace_expr(5, thresholds, "final thresholds")
+    debug.trace_expr(5, thresholds, prefix="default thresholds: ")
+    if system.file_exists(thresholds_path):
+        thresholds.update(load_thresholds(thresholds_path))
+        debug.trace_expr(5, thresholds, prefix="final thresholds: ")
+    else:
+        debug.trace(2, f"Warning: unable to find {THRESHOLDS_FILE}")
     
     # Run tests and compare the results with the allowed thresholds
     run_tests(thresholds)

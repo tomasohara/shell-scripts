@@ -94,14 +94,28 @@ fi
 BATSPP_REPORT_OPTS="--txt --definitions ../all-tomohara-aliases-etc.bash"
 batspp_result=0
 
+# [Aviyan's Note]: Use a seperate test environment (user) as it may break git configuration
+# [Aviyan's Note]: If git config is broken, a simple fix is to remove ~/.gitconfig and reauthenticate
 # Likewise, uses a unique temp subdir under /tmp (or $BATSPP_TEMP).
+# TEMP: set github credentials
+# Note: This is not secure, but scrappycito only has access to
+# to dummy repo's like https://github.com/tomasohara/git-bash-test.
+git config --global user.email "scrappycito@gmail.com"
+git config --global user.name "SCrappy Cito"
+export MY_GIT_TOKEN=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
+git config --global url."https://api:$MY_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
+git config --global url."https://ssh:$MY_GIT_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
+git config --global url."https://git:$MY_GIT_TOKEN@github.com/".insteadOf "git@github.com:"
+
+# Derive name for output file
+# Note: Uses unique output subdir under ~/temp (or $BATSPP_OUTPUT).
+# Likewise, uses unique temp subdir under /tmp  (or $BATSPP_TEMP).
 timestamp=$(date '+%d%b%y-%H%M')
 TMP=${TMP:-/tmp}
 BATSPP_OUTPUT="${BATSPP_OUTPUT:-"$HOME/temp/BatsPP-$timestamp"}"
 BATSPP_TEMP="${BATSPP_TEMP:-"$TMP/BatsPP-$timestamp"}"
 BATSPP_FORCE="${BATSPP_FORCE:-1}"
-mkdir -p "$BATSPP_OUTPUT" "$BATSPP_TEMP"
-
+mkdir --parents "$BATSPP_OUTPUT" "$BATSPP_TEMP"
 echo "FYI: Using $BATSPP_OUTPUT for output and $BATSPP_TEMP for temp. files"
 echo "Force Run: $force"
 
@@ -112,8 +126,26 @@ if [ "$force" == "1" ]; then
     FORCE_RUN="$BATSPP_FORCE" OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py $BATSPP_REPORT_OPTS
     batspp_result="$?"
 else
-    OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py $BATSPP_REPORT_OPTS
+
+# Run the set of alias tests, making sure Tom's aliases are defined
+# notes: disables SC2086: Double quote to prevent globbing and word splitting.
+# BATSPP_REPORT_OPTS can be used to run coverage tests (e.g., --kcov) instead
+# of the regular report (--txt).
+# 
+    BATSPP_REPORT_OPTS=${BATSPP_REPORT_OPTS:-"--txt --definitions ../all-tomohara-aliases-etc.bash"}
+    # shellcheck disable=SC2086
+    OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py $BATSPP_REPORT_OPTS -
     batspp_result="$?"
+fi
+
+## NOTE: kcov is not critical, so it is not run as part of workflow tests
+## TODO: python3 ./kcov_result.py --list --summary --export | tee summary_stats.txt
+
+# Generate output log when -o option enabled
+if $output_log; then
+    # TODO2: less => grep???
+    ## OLD: grep -B20 "^not ok" "$(find "$BATSPP_OUTPUT" -name '*outputpp.out')" | less -p "not ok" > summary_stats.log
+    grep -B20 "^not ok" "$(find "$BATSPP_OUTPUT" -name '*outputpp.out')" /dev/null >| summary_stats.log 2>&1
 fi
 
 # NOTE: kcov is not critical, so it is not run as part of workflow tests

@@ -1,6 +1,8 @@
 # Regular workflow for Github testing (n.b., runs remote on their servers)
 #
-# note: python.xml is a misnomer, this runs all tests python and alias.
+# Note:
+# - See act.yml for the local workflow file.
+# - It also contains a bunch of tips.
 #
 
 name: Github-Tests
@@ -11,16 +13,16 @@ jobs:
   build:
     name: Build and Run Tests
     runs-on: ${{ matrix.os }}
-    
+
     strategy:
       matrix:
         os: [ubuntu-20.04]
         ## TODO: os: [ubuntu-20.04, ubuntu-latest]
-        ## TODO: python-version: ["3.8", "3.9", "3.10"]
-        python-version: ["3.9"]
+        python-version: ["3.8", "3.9", "3.10"]
+        ## TODO: 3.x [latest; -or latest, latest-1, latest-2, ...]
 
     ## TEST:
-    ## NOTE: following is for images on the hub
+    ## NOTE: following is for docker images on the hub
     ## container:
     ##   image: shell-scripts-dev
     ##   options: --user=root
@@ -31,7 +33,7 @@ jobs:
 
       - name: Build docker image
         run: |
-          docker build -t shell-scripts-dev -f- . <Dockerfile
+          docker build --tag shell-scripts-dev -f- . <Dockerfile
 
       - name: Setup Python
         uses: actions/setup-python@v3
@@ -50,15 +52,6 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt
-
-      ## OLD
-      ## - name: Run Python Tests
-      ##   run: |
-      ##     python3 ./tests/master_test.py
-      ##
-      ## - name: Run Alias Tests
-      ##   run: |
-      ##     bash ./tests/summary_stats.bash
 
       - name: Run tests
         run: |

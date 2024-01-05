@@ -22,6 +22,7 @@
 if [ "$STARTUP_TRACING" = "" ]; then STARTUP_TRACING=0; fi
 if [ "$CONSOLE_TRACING" = "" ]; then CONSOLE_TRACING=0; fi
 if [ "$VERBOSE_TRACING" = "" ]; then VERBOSE_TRACING=0; fi
+DEBUG_LEVEL=${DEBUG_LEVEL:-0}
 if [ "$TEMP" = "" ]; then TEMP="$TMP"; fi
 if [ "$TEMP" = "" ]; then TEMP=/tmp; fi
 

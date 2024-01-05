@@ -18,7 +18,10 @@ eval 'exec perl -Ssw $0 "$@"'
 
 #       $ perlgrep "\\TODO{[^}]+}[^\s%]" *.tex
 #       Unrecognized escape \T passed through before HERE mark in regex m/\T << HERE ODO {[^}]+}[^\s%]/ at /e/cartera-de-tomas/bin/perlgrep.perl line 79, <> line 1.
-#       
+#
+#
+# TODO2: convert to Python
+#
 # TODO:
 # - *** Track down missing files:
 #     ex: perl-grep -c '\x00' test_sort_json_annots.d*.19nov21.*.log

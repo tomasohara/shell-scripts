@@ -22,6 +22,11 @@ alias git-difftool-='git-difftool-plus'
 alias git-log-='git-log-plus'
 alias git-update-='git-update-plus' 
 alias git-vdiff='git-vdiff-alias '
+alias git-all-update='update-main-repos.bash'
+alias git-extract-all-versions='extract-all-git-versions.bash --human'
+alias git-files-changed=git-diff-list
+alias git-clone-alias='clone-repo'
+alias git-script-update='script-update'
 ## TODO: alias git-X-='git-X-plus'
 
 # Other misc. stuff
@@ -34,15 +39,18 @@ alias nvsmi=nvidia-smi
 # note: stderr redirected onto stdout
 function convert-emoticons-aux {
     "$@" 2>&1 | convert_emoticons.py -
-    }
+}
 
 #...............................................................................
-
 # Python stuff
+
+# plint(...): shortcut for python-lint
 simple-alias-fn plint 'PAGER=cat python-lint'
+# plint-torch(...): plint w/ torch no-member warnings ignored
 alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
 #
 # clone-repo(url): clone github repo at URL into current dir with logging
+# TODO3: move to git-related section
 function clone-repo () {
     local url repo log
     url="$1"
@@ -51,9 +59,9 @@ function clone-repo () {
     # maldito linux: -c option required for command for
     # shellcheck disable=SC2086
     if [ "$(under-linux)" = "1" ]; then
-        command script "$log"  -c "git clone '$url'"
+        command script "$log" -c "git clone '$url'"
     else
-        command script "$log"  git clone "$url"
+        command script "$log" git clone "$url"
     fi
     #
     ls -R "$repo" >> "$log"
@@ -61,10 +69,11 @@ function clone-repo () {
     ## TODO: add trace-stderr
     echo "FYI: script-based clone done (see $log)" 1>&2
 }
+# black-plain(file): run black python reformatted over FILE filtering out emoticons
 simple-alias-fn black-plain 'convert-emoticons-aux black'
 
-# run-python-script(script, args): run SCRIPT with ARGS with output to _base-#.out
-# and stderr to _base-#.log where # is value of global $_PSL_.
+# run-python-script(script, args): run SCRIPT with ARGS with output to dir/_base-#.out
+# and stderr to dir/_base-#.log where # is value of global $_PSL_.
 # The arguments are passed along unless USE_STDIN is 1.
 # note: Checks for errors afterwards. Use non-locals _PSL_, out_base and log.
 function run-python-script {
@@ -77,16 +86,20 @@ function run-python-script {
     local script_path="$1";
     shift;
     local script_args=("$@");
+    local script_dir
+    script_dir=$(dirname "$script_path");
     local script_base
-    script_base=$(basename-with-dir "$script_path" .py);
+    script_base=$(basename "$script_path" .py);
     #
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
     local out_base
     let _PSL_++;
-    out_base="$script_base.$(TODAY).$_PSL_";
+    out_base="$script_dir/_$script_base.$(TODAY).$_PSL_";
     log="$out_base.log";
     out="$out_base.out";
+    ## TEMP:
+    touch "$out";
     ## DEBUG: trace-vars _PSL_ out_base log
     rename-with-file-date "$out_base.out" "$log";
     # shellcheck disable=SC2086
@@ -95,56 +108,86 @@ function run-python-script {
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
 	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
-	    echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$out" 2> "$log";
+	    ## TODO2: echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$out" 2> "$log";
+            echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$log" 2>&1;
 	else
 	    # note: disables - with explicit arguments or if running pytest
 	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
-	    $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
+	    ## TODO2: $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
+	    $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1;
 	fi
     }
     tail "$log" "$out" | truncate-width
     check-errors-excerpt "$log";
 }
 
-# test-python-script(test-script): run TEST-SCRIPT via  pytest
+# pytest stuff
+default_pytest_opts="-vv --capture=tee-sys"
+#
+# test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
-    local default_pytest_opts="-vv --capture=tee-sys"
+    ## OLD: local default_pytest_opts="-vv --capture=tee-sys"
     if [ "$1" = "" ]; then
-        echo "Usage: [PYTEST_OPTS=["$default_pytest_opts"]] test-python-script script"
+        echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] test-python-script script"
         return
     fi
     PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
-    PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@";
+    ## OLD: PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@";
+    # note: just uses .log (i.e., ignore .out)
+    # TODO3: drop inheritance spec in summary
+    # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "ests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
+    DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@" 2>&1;
 }
-
-# color-test-failures(): show color-coded test result (yellow for xfailed and red for regular fail)
+#
+# test-python-script-method(test-name, ...): like test-python-script but for specific test
+function test-python-script-method {
+    local method="$1";
+    shift;
+    PYTEST_OPTS="-k $method $default_pytest_opts" test-python-script "$@";
+}
+#
+# color-test-failures(): show color-coded test result for pytest run (yellow for xfailed and red for regular fail)
+simple-alias-fn color-output 'colout --case-insensitive'
 function color-test-failures {
-    cat "$@" | colout "\bfailed" red | colout "xfailed" yellow | colout "\bpassed" green | colout "xpassed" green faint;
+    cat "$@" | color-output "\bfailed" red | color-output "(xfail(ed)?)" yellow | color-output "\bpassed" green | color-output "xpassed" green faint;
 }
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
-alias-fn ocr-image-old 'tesseract "$@" -'
-alias-fn ocr-image 'tesseract "$1" "$1".ocr'
+## OLD:
+## alias-fn ocr-image-old 'tesseract "$@" -'
+## alias-fn ocr-image 'tesseract "$1" "$1".ocr'
+alias-fn ocr-image-stdout 'tesseract "$@" -'
+alias-fn ocr-image 'tesseract "$1" "$1"; $PAGER "$1".txt'
 
 #...............................................................................
+# Misc. stuff (e.g., JSON, Yaml)
+# 
 
-# JSON stuff
+# json-validate(file): make sure file is valid JSON
 function json-validate () {
     local file="$1"
     python -c "import json; from mezcla import system; print(json.loads(system.read_file('$file')))" | head -5 | truncate-width
 }
 
-# Misc. stuff
+# yaml-validate(file): make suire file is valid YAML
+function yaml-validate () {
+    local file="$1"
+    python -c "from mezcla import file_utils; print(file_utils.read_yaml('$file'))" | head -5 | truncate-width
+}
+
+# script-config: open dated typescript under ~/config
 function script-config {
     mkdir -p ~/config
     script ~/config/"_config-$(T).log"
 }
 simple-alias-fn act-plain 'convert-emoticons-aux act'
 
-
 # para-len-alt(file, ...): show length of each paragraph with embedded newlines replaced with CR's to allow chaining
 # note: strips the 0-len paragraph indicator
 function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -pe 's/^0\t//;'; }
+
+# extract-text-html(filename): extract text from HTMNL in FILENAME
+simple-alias-fn extract-text-html 'python -m mezcla.html_utils'
 
 #...............................................................................
 # Bash stuff
@@ -174,7 +217,8 @@ function tabify {
 # trace-vars(var, ...): trace each VAR in command line
 # note: output format: VAR1=VAL1; ... VARn=VALn;
 function trace-vars {
-    local var value
+    ## OLD: local var value
+    local var
     for var in "$@"; do
         ## TODO3: get old eval/echo approach to work in general
         ## # shellcheck disable=SC2027,SC2046
@@ -184,7 +228,8 @@ function trace-vars {
         ## OLD:
         ## value="$(set | grep "^$var=")"
         ## echo -n "$value; "
-        echo -n "$var="$(eval echo "\${$var}")"; "
+        ## OLD: echo -n "$var="$(eval echo "\${$var}")"; "
+        echo -n "$var=$(eval echo "\${$var}"); "
         ## TODO: echo -n "$value; " 1>&2
     done
     echo
@@ -203,16 +248,25 @@ function trace-array-vars {
     echo
 }
 
-# remote-prompt([prompt="_nickname[0]"@]): set prompt to _N@ where N is first letter of host nickname
+# remote-prompt([prompt="_nickname[0]", suffix-"@']): set prompt to _N@ where N is first letter of host nickname
+# note: uses SUFFIX for @ id specified
 function remote-prompt {
     local prompt="$1"
-    if [ "$prompt" = "" ]; then prompt="_$(echo "$HOST_NICKNAME" | perl -pe 's/^(.).*/$1/;')@"; fi
+    local suffix="${2:-"@"}"
+    if [ "$prompt" = "" ]; then prompt="_$(echo "$HOST_NICKNAME" | perl -pe 's/^(.).*/$1/;')$suffix"; fi
     reset-prompt "$prompt"
 }
+alias-fn remote-prompt-root 'remote-prompt "" "#"'
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
 function pristine-bash {
     env --ignore-environment PS1='pristine $ ' bash --noprofile --norc
+}
+
+# indent-text([filename]): indent text in input by 4 spaces
+# echo "some text" | indent-text => "    some text"
+function indent-text {
+    perl -pe "s/^/    /;" "$@";
 }
 
 #...............................................................................
@@ -295,8 +349,14 @@ function create-zip-from-parent {
 }
 alias zip-from-parent=create-zip-from-parent
 
-#................................................................................
+#...............................................................................
 # Linux stuff
+
+# calendar: wrapper for cal using ncal variant (n.b., to ensure highlighting)
+# options: -b: old-style formatting
+alias calendar="ncal -b"
+
+# ps-time: show processes by time via ps_sort.perl
 # shellcheck disable=SC2016
 alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
 #
@@ -317,12 +377,29 @@ simple-alias-fn image-metadata 'identify -verbose'
 # show-sd-prompts(file): show keywords in image file for Stable Diffusion prompts
 function show-sd-prompts { image-metadata "$@" | egrep --text --ignore-case '(parameters|(negative prompt)):'; }
 
+# distro-version-info(): show various information related to distribution, including window and display managers
+# note: screenfetch sans the ascii art
+# distro-version-info-neo(): likewise using newer neofetch
+alias distro-version-info='screenfetch -n'
+alias distro-version-info-neo='neofetch --off'
+
+# detach-job: disassociate last (GUI) command from terminal (-h is for SIGHUP)
+# See https://unix.stackexchange.com/questions/484276/do-disown-h-and-nohup-work-effectively-the-same
+alias detach-job='disown -h'
+
+# screenshot-window(): take screen shot of another window in 2 seconds
+# TODO3: add option for --screen and for specifying --file
+simple-alias-fn screenshot-window 'gnome-screenshot --window --delay 2'
+
 #...............................................................................
 # Linux admin
 
+# free-memory: show available memory
 alias free-memory='free --wide --human | grep -v Swap:'
-# TODO: get this to work completely
-simple-alias-fn clear-cache 'free-memory | grep -v Admin; sysctl vm.drop_caches=1; free-memory'
+# clear-cache: clear disk cache
+# See https://linux-mm.org/Drop_Caches and https://www.linuxatemyram.com
+# TODO: get this to work completely; explain Admin filter
+simple-alias-fn clear-cache 'echo; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
 
 #...............................................................................
 # Emacs related
@@ -349,6 +426,14 @@ alias oscar="run-app OSCAR"
 # 1pass: run 1password (snap)
 alias 1pass="run-app 1password"
 
+# Docker
+function docker-cleanup {
+    pause-for-enter "Removing all docker containers, images, etc. (Press Enter to proceed or ^C to abort)"
+    docker rm -vf $(docker ps -aq)
+    docker rmi -f $(docker images -aq)
+    docker system prune --force
+}
+
 #................................................................................
 # Doubly idiosyncratic stuff (i.e., given "tomohara-proper" part of filename)
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
@@ -359,6 +444,7 @@ alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
 #
 alias kill-kdiff3='kill-it kdiff3'
 alias kill-firefox='kill-it firefox'
-alias kill-jupyter='kill-it jupyter'
+alias kill-jupyter='kill-it python.*jupyter'
 alias kill-chromiun='kill-it chromium'
 alias kill-sleep='kill_em.sh sleep'
+alias kill-hp='kill-it hp-systray'

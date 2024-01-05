@@ -202,7 +202,8 @@ export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib:$LD_LIBRARY_PATH
 ## export COLUMNS
 # NOTE: resize used to set lines below
 #
-if [ "$DOMAIN_NAME" = "" ]; then export DOMAIN_NAME=`domainname.sh`; fi
+## OLD:
+## if [ "$DOMAIN_NAME" = "" ]; then export DOMAIN_NAME=`domainname.sh`; fi
 
 ## OLD:
 ## # NMSU CS settings
@@ -1319,9 +1320,10 @@ function rtop () { rsh $1 top 50 | $PAGER; }
 # - Not applied to solaris machines due to older bash not supporting for loop.
 #
 
-if [[ ("$DOMAIN_NAME" = "cs.nmsu.edu") && ("$OSTYPE" != "solaris") ]]; then
-   conditional-source $BIN/rsh-aliases.bash
-fi
+## OLD:
+## if [[ ("$DOMAIN_NAME" = "cs.nmsu.edu") && ("$OSTYPE" != "solaris") ]]; then
+##    conditional-source $BIN/rsh-aliases.bash
+## fi
 
 alias ps-users='ps_mine.sh -a | $GREP -v root'
 ## OLD: alias ps-sort='ps_sort.perl -'
@@ -1520,12 +1522,13 @@ alias old-qd-trans-sp='qd_trans_spanish.perl -redirect -'
 #
 ## OLD: function show-unicode-code-info() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < $1; }
 
-#------------------------------------------------------------------------
-# Arabic text processing
-if [ "$DOMAIN_NAME" = "cs.nmsu.edu" ]; then
-   alias remove-arabic-diacritic='perl -pe "s/[\xF0-\xFF]//g;"'
-   export AMORPH_COMBINED=/home/grad4/tomohara/TOM/english-arabic/combined/morph
-fi
+## OLD:
+## #------------------------------------------------------------------------
+## # Arabic text processing
+## if [ "$DOMAIN_NAME" = "cs.nmsu.edu" ]; then
+##    alias remove-arabic-diacritic='perl -pe "s/[\xF0-\xFF]//g;"'
+##    export AMORPH_COMBINED=/home/grad4/tomohara/TOM/english-arabic/combined/morph
+## fi
 
 #------------------------------------------------------------------------
 # Unix aliases
@@ -1604,9 +1607,10 @@ alias kill-cmucl='kill_em.sh -p cmucl'
 ## OLD: alias kill-sleep='kill_em.sh sleep'
 ## function kill-gnome () { foreach.sh 'kill_em.sh $f' gnome magicdev panel xscreensaver cdplayer_applet  enlightenment asclock_applet ical gtcd sproingies  }
 
-# Aliases for working with Perlfect indexing system
-trace indexing commands
-conditional-source $BIN/indexing-aliases.bash
+## OLD
+## # Aliases for working with Perlfect indexing system
+## trace indexing commands
+## conditional-source $BIN/indexing-aliases.bash
 
 #-------------------------------------------------------------------------------
 # TeX stuff
@@ -1674,16 +1678,17 @@ alias cs-download-here='cs-download-dir .'
 # WordNet settings
 trace WordNet settings
 
-alias xw='xwordnet &'
-if [ "$DOMAIN_NAME" = "cs.nmsu.edu" ]; then
-   export WN15=$GL_TOOLS/WORDNET-1.5
-   export WN16=$GL_TOOLS/WORDNET-1.6
-   export WN17=$GL_TOOLS/WORDNET-1.7
-   export WN171=$GL_TOOLS/WORDNET-1.7.1
-   ## conditional-source $WN171/wn171_setenv.bash
-   ## export WN=$WN171
-   ## export WORDNET=$WN171
-fi
+## OLD:
+## alias xw='xwordnet &'
+## if [ "$DOMAIN_NAME" = "cs.nmsu.edu" ]; then
+##    export WN15=$GL_TOOLS/WORDNET-1.5
+##    export WN16=$GL_TOOLS/WORDNET-1.6
+##    export WN17=$GL_TOOLS/WORDNET-1.7
+##    export WN171=$GL_TOOLS/WORDNET-1.7.1
+##    ## conditional-source $WN171/wn171_setenv.bash
+##    ## export WN=$WN171
+##    ## export WORDNET=$WN171
+## fi
 
 # a variety of WordNet aliases
 #

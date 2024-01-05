@@ -82,18 +82,35 @@ function activation-helper {
     local command="$1"
     local env="$2"
     local conda_command="conda"
+    local alt_conda_command=""
+    ## DEBUG: trace-vars conda_command alt_conda_command
     # Note: need to use conda's alias not the script returned by which
-    ## TODO: local conda_path=$(/usr/bin/which conda 2> /dev/null)
-    local conda_path=""    
+    local conda_path=""
+    conda_path=$(/usr/bin/which conda 2> /dev/null)
     if [ "$conda_path" = "" ]; then
+        ## DEBUG: echo "Switching conda command"
         conda_command="source"
+        alt_conda_command="conda"
+    else
+        ## TODO:
+        ## conda_command=""
+        ## alt_conda_command="conda"
+        true
     fi
-    ## DEBUG: echo "Issuing: $conda_command" "$command" "$env"
+    ## DEBUG: trace-vars conda_command alt_conda_command
+    ## DEBUG:
+    echo "Issuing: $conda_command" "$command" "$env"
+    echo "Alt: $alt_conda_command" "$command" "$env"
     $conda_command "$command" "$env"
+    ## DEBUG:
+    local python_path=""
+    python_path=$(/usr/bin/which python 2> /dev/null)
+    trace-vars python_path
     ## DEBUG: echo "out activation-helper($@)"
 }
 alias conda-activate='activation-helper activate'
-alias conda-deactivate='source deactivate'
+## OLD: alias conda-deactivate='source deactivate'
+alias conda-deactivate='activation-helper deactivate'
 #
 alias add-tensorfow='conda-activate env_tensorflow_gpu'
 alias all-conda-to-pythonpath='export PYTHONPATH=$anaconda3_dir/envs/env_tensorflow_gpu/lib/python3.7/site-packages:$anaconda3_dir/lib/python3.7:$PYTHONPATH'

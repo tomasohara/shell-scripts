@@ -16,6 +16,8 @@
 ;; Tom O'Hara
 ;; Summer/Fall 1998
 ;;
+;; TODO2: convert to R
+;;
 
 ;(format t "~%SHELL=~a~%" (system "printenv SHELL"))
 ;(format t "~%HELL=~a~%" (system "printenv HELL"))

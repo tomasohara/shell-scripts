@@ -11,11 +11,13 @@
 #   root         2  0.0  0.0      0     0 ?        S    Jan02   0:00 [kthreadd]
 #
 #
+# TODO1: convert to Bash
+#
 # TODO:
 # - separate out the Graphling support into a new script just for that
 # - figure out occasional problem with graphling files not getting deleted after processed killed
 
-# Uncomemnt the following line for tracing
+# Uncomment the following line for tracing
 # set echo=1
 
 # Initialize options and variables
