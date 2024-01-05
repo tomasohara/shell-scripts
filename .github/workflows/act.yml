@@ -29,7 +29,8 @@ name: Act-Tests
 on: [push, pull_request]
 
 jobs:
-  build:
+
+  build-and-test-runner:
     name: Build and Run Tests
     runs-on: ${{ matrix.os }}
 
@@ -41,19 +42,9 @@ jobs:
         ## NOTE: only uses one version due to time to run tests locally
         python-version: ["3.9"]
 
-    ## TEST:
-    ## NOTE: following is for docker images on the hub
-    ## container:
-    ##   image: shell-scripts-dev
-    ##   options: --user=root
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-
-      - name: Build docker image
-        run: |
-          docker build --tag shell-scripts-dev -f- . <Dockerfile
 
       - name: Configure Environment
         ## TODO2: clarify why used
@@ -80,8 +71,27 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+  build-and-test-docker:
+    name: Build and Run Tests via Docker
+    runs-on: [ubuntu-20.04]
+
+    ## TEST:
+    ## NOTE: following is for docker images on the hub
+    ## container:
+    ##   image: shell-scripts-dev
+    ##   options: --user=root
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Build docker image
+        run: |
+          docker build --tag shell-scripts-dev -f- . <Dockerfile
+
       - name: Run tests
         run: |
           # Note: command format: docker run [OPTIONS] IMAGE [COMMAND] [ARG...];
           # The environment file normally has no entries (i.e., just comments).
           docker run --env-file _temp-user-docker.env --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+

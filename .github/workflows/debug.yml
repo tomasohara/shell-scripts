@@ -28,6 +28,7 @@ name: debug-Tests
 on: [push, pull_request]
 
 jobs:
+  
   build:
     name: Debug Build and Run Tests
     runs-on: ${{ matrix.os }}
@@ -39,12 +40,6 @@ jobs:
         python-version: ["3.9"]
         ## TODO: python-version: ["3.8", "3.9", "3.10"]
 
-    ## TEST:
-    ## NOTE: following is for docker images on the hub
-    ## container:
-    ##   image: shell-scripts-dev
-    ##   options: --user=root
-
     ## TEST: alternative environment spec for TEST_REGEX override
     ## See https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
     ## env:
@@ -53,10 +48,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-
-      - name: Build docker image
-        run: |
-          docker build --tag shell-scripts-dev -f- . <Dockerfile
 
       - name: Configure Environment
         ## TODO2: clarify why used
@@ -82,6 +73,24 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt
+
+  build-and-test-docker:
+    name: Build and Run Tests via Docker
+    runs-on: [ubuntu-20.04]
+
+    ## TEST:
+    ## NOTE: following is for docker images on the hub
+    ## container:
+    ##   image: shell-scripts-dev
+    ##   options: --user=root
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Build docker image
+        run: |
+          docker build --tag shell-scripts-dev -f- . <Dockerfile
 
       - name: Run tests
         run: |
