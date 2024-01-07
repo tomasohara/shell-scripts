@@ -394,8 +394,10 @@ def main():
                 txt_option_JSON["test_name"] = test_extensionless if count_total != 0 else test_extensionless + " [0/0 tests]"
                 txt_option_JSON["test_min_score"] = min_score
                 txt_option_JSON["test_success_rate"] = success_rate
-                # NEW: Updated if(successful) -> if(successful and count_total != 0)
-                if successful and count_total != 0:  
+                ## NEW: Inorder for test to be successful, it must satisfy the condition below:
+                ## min_score means threshold of test
+                ## NEW: Updated if(successful) -> if(successful and (count_total != 0 or min_score == 0))
+                if successful and (count_total != 0 or min_score == 0):  
                     success_test_array.append(txt_option_JSON)
                 else:
                     failure_test_array.append(txt_option_JSON)
