@@ -120,6 +120,7 @@ function run-python-script {
     }
     tail "$log" "$out" | truncate-width
     ## TEMP: remove emtpy output file
+    if [ "$DEBUG_LEVEL" -ge 4 ]; then ls -lt "$log" "$out"; fi
     if [ ! -s "$out" ]; then command rm -v "$out"; fi
     # Show common errors in log
     check-errors-excerpt "$log";
