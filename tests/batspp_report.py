@@ -389,11 +389,13 @@ def main():
                 total_num_successful += int(successful)
 
                 # Categorizing Tests if they are successful or not
+                # NEW: Suffix "[0/0 tests]" added to test_name if count_total == 0
                 txt_option_JSON = {}
-                txt_option_JSON["test_name"] = test_extensionless
+                txt_option_JSON["test_name"] = test_extensionless if count_total != 0 else test_extensionless + " [0/0 tests]"
                 txt_option_JSON["test_min_score"] = min_score
                 txt_option_JSON["test_success_rate"] = success_rate
-                if successful:
+                # NEW: Updated if(successful) -> if(successful and count_total != 0)
+                if successful and count_total != 0:  
                     success_test_array.append(txt_option_JSON)
                 else:
                     failure_test_array.append(txt_option_JSON)
