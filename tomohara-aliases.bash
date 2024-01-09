@@ -195,7 +195,15 @@ function simple-alias-fn {
     fi
     local alias="$1"
     local command="$2"
+    # note: 
     eval "function $alias { $command" '"$@"' "; }"
+}
+# deprecated-alias-fn: version of simple-alias-fn that issues deprecated warning
+# TODO3: seee if it can be defined via simple-alias-fn
+function deprecated-alias-fn {
+    local alias="$1"
+    local command="$2"
+    eval "function $alias { echo 'Warning: deprecated alias: $alias' 1>&2; $command" '"$@"' "; }"
 }
 #................................................................................
 # General environment settings
@@ -1000,6 +1008,10 @@ function grep-to-less () {
 alias grepl-='grep-to-less'
 function grepl () { pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
 }
+# gr-c: grep through c/c++ source and headers files
+# note: --no-messages suppresses warnings about missing files
+function gr-c () { gr --no-messages "$@" *.c *.cpp *.cxx *.h; }
+
 
 # TODO: create function for creating gr-xyz aliases
 # TODO: -or- create gr-xyz template
@@ -1017,6 +1029,7 @@ function gr-less () { gr "$@" | $PAGER; }
 # EX: echo $'L1: one\nL2: \xC3\xBE \nL3: three' | gr-nonascii => "2: L2: þ"
 ## OLD: alias grep-nonascii='perlgrep.perl "[\x80-\xFF]"'
 alias grep-nonascii='alias-perl perlgrep.perl "[\x80-\xFF]"'
+alias gr-nonascii='perlgrep.perl -n "[\x80-\xFF]"'
 
 # Searching for files
 # TODO:
@@ -1053,6 +1066,7 @@ function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$
 function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
 function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
 alias fgr-py='fgr-ext py'
+alias fgr-java='fgr-ext java'
 ## OLD: }
 #
 # prepare-find-files-here([--out-dir out_dir_spec]): produces listing(s) of files in current directory
@@ -1134,7 +1148,8 @@ alias find-files-='find-files-there'
 ## TODO: alias-fn emacs-tpo 'tpo-invoke-emacs.sh'
 function emacs-tpo { tpo-invoke-emacs.sh "$@"; }
 ## OLD: alias em=emacs-tpo
-alias-fn em tpo-invoke-emacs.sh
+## OLD: alias-fn em tpo-invoke-emacs.sh
+simple-alias-fn em tpo-invoke-emacs.sh
 # em-fn(font, [file ...]): invoke emcas with specified font
 function em-fn () { em -- -fn "$@"; }
 alias em-tags=etags
@@ -1458,9 +1473,21 @@ function diff-rev () {
         diff_program="$2"
         shift 2
     fi
+    # Note: the "right" file is with respect to reversed visual diff (i.e., the first arg)
     local right_file="$1"
     local left_file="$2"
-    if [ -d "$left_file" ]; then left_file="$left_file"/$(basename "$right_file"); fi
+    ## OLD: if [ -d "$left_file" ]; then left_file="$left_file"/$(basename "$right_file"); fi
+    if [ -d "$left_file" ]; then
+        local old_left_file="$left_file"
+        # First treat second arg as a directory to which basename of first file added
+        # ex: ~/bin/file1 ~/backup => ~/bin/file1 vs. ~/backup/file1
+        left_file="$left_file"/$(basename "$right_file");
+        # Treat second arg as directory to which entire path of first added
+        # ex: ~/bin/file1 ~/backup => ~/bin/file1 vs. ~/backup/bin/file1
+        if [ ! -e "$left_file" ]; then
+            left_file="$old_left_file/$right_file"
+        fi
+    fi
     # TODO: create helper for resolving one file relative to dir of another
     ## BAD: if [ ! -e "$left_file" ]; then left_file=$(dirname "$right_file")/"$left_file"; fi
     "$diff_program" "$left_file" "$right_file"
@@ -1989,10 +2016,15 @@ alias do-rcsdiff='do_rcsdiff.sh'
 alias dobackup='dobackup.sh'
 alias kill-em='kill_em.sh'
 alias kill-it='kill-em --pattern'
+# ps-mine: wrapper around ps_mine.sh w/ filtering (e.g., defunct)
+alias ps-mine='ps_mine.sh --filtered'
 # NOTE: see filter-dirnames added to strip directory names
 # TODO: rename as ps-mine-sans-dirs
 ## BAD: alias ps-mine-='ps-mine "$@" | filter-dirnames'
-function ps-mine- { ps-mine "$@" | filter-dirnames; } 
+## TODO3: deprecate cryptic aliases like ps-mine-
+## OLD: function ps-mine- { ps-mine "$@" | filter-dirnames; }
+function ps-mine-sans-dir { ps-mine "$@" | filter-dirnames; }
+deprecated-alias-fn ps-mine- ps-mine-sans-dir
 alias ps_mine='ps-mine'
 ## DUP: alias ps-mine-='ps-mine "$@" | filter-dirnames'
 alias ps-mine-all='ps-mine --all'
@@ -2773,6 +2805,8 @@ function ps-all () {
     ps_mine.sh --all | $EGREP -i "((^USER)|($pattern))" | $pager;
     }
 alias ps-script='ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
+# ps-sort[-xyz]: various wrappers around ps_sort.perl
+# note: the script now assume -once if DURING_ALIAS set (e.g., via alias-perl)
 alias ps-sort='alias-perl ps_sort.perl'
 ## OLD: function ps-sort-once { ps_sort.perl -num_times=1 -by=time "$@" -; }
 function ps-sort-once { alias-perl ps_sort.perl -num_times=1 -by=time "$@" -; }
