@@ -50,7 +50,7 @@ BEGIN {
 use strict;
 no strict "refs";		# to allow for old-style references to arrays (TODO: use #xyz_ref = \@array)
 use vars qw/$by $xyz $ps_options $cut_options $num_times $LINES $COLUMNS $max_count $delay $line_len $testing $justuser $USER $username/;
-use vars qw/$batch $full $once $lines $columns $alpha $time2num/;
+use vars qw/$batch $full $once $lines $columns $alpha $time2num $DURING_ALIAS/;
 
 # Check the command-line options
 # note: OSTYPE needs to be in environment for this to work (see tomohara-aliases.bash)
@@ -71,7 +71,10 @@ my($is_mac) = ($OSTYPE =~ ".*darwin.*") ? 1 : 0;
 &init_var(*ps_options, ($is_solaris ? "-efl" : $is_linux ? "auxgww" : "auxg"));
 ## OLD: &init_var(*cut_options, ($is_solaris ? "-c1-36,46-52,62-70,79-132" : "-c1-132"));
 ## OLD: &init_var(*num_times, 60);
-&init_var(*once, &FALSE);      # alias for -num_times=1
+# note: $DURING_ALIAS set via tomohara-aliases.bash
+&init_var(*DURING_ALIAS, &FALSE);  
+## OLD: &init_var(*once, &FALSE);      # alias for -num_times=1
+&init_var(*once, $DURING_ALIAS);      # alias for -num_times=1
 &init_var(*full, &FALSE);      # disable row/column truncation
 &init_var(*num_times, ($once ? 1 : 60));
 ## HACK: use lowercase lines/columns so that not trumped by environment
