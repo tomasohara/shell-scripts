@@ -134,8 +134,9 @@ if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
     # Note: Unfortunately, the environment setting is not affecting the docker
     # invocation. A workaround is to modify the 'Run tests' steps in the
     # workflow configuration file (e.g., .github/workflows/debug.yml).
+    act="${ACT_PROGRAM:-act}"    
     ## TODO2: fix environment (see tests/run_tests.bash for workaround)
-    act --verbose --env "DEBUG_LEVEL=$DEBUG_LEVEL $USER_ENV" --container-architecture linux/amd64 --pull="$ACT_PULL" --workflows ./.github/workflows/"$file" $RUN_OPTS
+    "$act" --verbose --env "DEBUG_LEVEL=$DEBUG_LEVEL $USER_ENV" --container-architecture linux/amd64 --pull="$ACT_PULL" --workflows ./.github/workflows/"$file" $RUN_OPTS
     # TODO: docker tag IMAGE-ID shell-scripts-dev
     # EX (see above): docker tag $(docker images --quiet | head -1) shell-scripts-dev
 fi
