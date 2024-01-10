@@ -340,7 +340,7 @@ def main():
     total_num_successful = 0
 
     if not RUN_BATS:
-        print(f">> SKIPPING BATSPP CHECK (-n ARGUMENT PROVIDED)\n")
+        print(f"- SKIPPING BATSPP CHECK (-n ARGUMENT PROVIDED)\n")
     else:
         for batsppfile_path in batspp_array:
             batsppfile = gh.basename(batsppfile_path)
@@ -389,9 +389,11 @@ def main():
                 total_num_successful += int(successful)
 
                 # Categorizing Tests if they are successful or not
-                # NEW: Suffix "[0/0 tests]" added to test_name if count_total == 0
+                # NEW: Added 
                 txt_option_JSON = {}
-                txt_option_JSON["test_name"] = test_extensionless if count_total != 0 else test_extensionless + " [0/0 tests]"
+                txt_option_JSON["test_name"] = test_extensionless
+                txt_option_JSON["test_count_total"] = count_total
+                txt_option_JSON["test_count_ok"] = count_ok
                 txt_option_JSON["test_min_score"] = min_score
                 txt_option_JSON["test_success_rate"] = success_rate
                 ## NEW: Inorder for test to be successful, it must satisfy the condition below:
@@ -413,7 +415,7 @@ def main():
                 gh.run(f"kcov {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
                     
                 KCOV_MESSAGE = f"KCOV REPORT PATH: {KCOV_STORE}/{test_extensionless}/"
-                print(gh.indent(KCOV_MESSAGE, indentation="  >>  ", max_width=512))
+                print(gh.indent(KCOV_MESSAGE, indentation="  -  ", max_width=512))
                 gh.run(f"kcov {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
 
         batspp_count = i - 1 
@@ -464,16 +466,15 @@ def main():
     if faulty_count == 0:
         print("n/a")
     else:
-        ## TODO3: what is the intention here (e.g., the '>>')?
         for tf in error_testfiles:
-            print(f">> {tf}")
+            print(f"- {tf}")
             
     print("\nAVOIDED TESTFILES:")
     if avoid_count == 0:
         print("n/a")
     else:
         for tf in avoid_array:
-            print(f">> {tf}")
+            print(f"- {tf}")
 
     if TXT_OPTION:
         print("\nTEST SUCCESS (--txt ENABLED):")
@@ -484,10 +485,14 @@ def main():
         def print_test_array(arr):
             """Print summary of test results in ARR"""
             for index, item in enumerate(arr):
-                name = item['test_name']
-                rate = item['test_success_rate']
-                min_score = item['test_min_score']
-                print(f"{index + 1}. {name} ({rate}%): threshold={min_score}%")
+                t_name = item['test_name']
+                t_rate = item['test_success_rate']
+                t_min_score = item['test_min_score']
+                t_count_total = item['test_count_total']
+                t_count_ok = item['test_count_ok']
+                ## OLD: Revised format includes test passed out of test found
+                # print(f"{index + 1}. {name} ({rate}%): threshold={min_score}%")
+                print(f"{index+1}. {t_name} ({t_rate}%; {t_count_ok}/{t_count_total} OK): threshold={t_min_score}%")
             if not arr:
                 print("n/a")
 
