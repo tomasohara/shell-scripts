@@ -232,6 +232,10 @@ def main():
         debug.assertion(not my_re.search(r"\s", output_file))
         real_output_file = output_file + ".out"
         log_file = output_file + ".log"
+
+        # NEW / TODO: Added resolved path for check_batspp.perl
+        check_batspp_perl_path = gh.resolve_path("../check_errors.perl")
+        
         debug.trace(5, f"run_batspp{(input_file, output_file)}")
         source_spec = (f"--source '{DEFINITIONS_SCRIPT}'" if DEFINITIONS_SCRIPT else "")
         if USE_SIMPLE_BATSPP:
@@ -247,7 +251,10 @@ def main():
         # Output excerpt from BatsPP source file
         debug.code(5, lambda: print(gh.run(f"echo BatsPP source:; head -1000 --verbose {output_file} | cat -n")))
         # Check for common errors (e.g., command not found or insufficient permissions)
-        debug.code(4, lambda: print(gh.run(f"check_errors.perl {log_file}")))
+        
+        ## OLD (Using unresolved path): debug.code(4, lambda: print(gh.run(f"check_errors.perl {log_file}")))
+        debug.code(4, lambda: print(gh.run(f"{check_batspp_perl_path} {log_file}")))
+        
         ## TEMP: Show context of failed tests for help with diagnosis of Github actions runs (as temp files not accessible afterwards)
         if SHOW_FAILURE_CONTEXT:
             context = gh.run(f"grep -B10 '^not ok' {real_output_file}")
@@ -256,9 +263,14 @@ def main():
         debug.code(5, lambda: print(gh.run(f"echo BatsPP output:; head -1000 --verbose {real_output_file} | cat -n")))
         debug.code(5, lambda: print(gh.run(f"echo BatsPP log:; head -1000 --verbose {log_file} | cat -n")))
         debug.assertion(not run_output.strip())
+        
+        ## NEW: Added num_eval_errors
         real_output = system.read_file(real_output_file)
-        debug.trace(6, f"run_batspp() => {real_output!r}")
-        return real_output
+        num_eval_errors_str = gh.run(f"{check_batspp_perl_path} -context=0 {log_file} | wc -l")
+        num_eval_errors = int(num_eval_errors_str) - 1
+        ## OLD:  debug.trace(6, f"run_batspp() => {real_output!r"}
+        debug.trace(6, f"run_batspp() //real_output// => {real_output!r}\nrun_batspp() //num_eval_errors// => {num_eval_errors!r}")
+        return real_output, num_eval_errors
 
     ## TEST (plan A until COPY_DIR=1 added above)
     ## # 0.9) Making sure input files, etc. accessible in bats directory
@@ -360,7 +372,7 @@ def main():
 
             if TXT_OPTION:
                 output_from_batspp_path = gh.form_path(BATSPP_OUTPUT_STORE, output_from_batspp)
-                bats_output = run_batspp(batsppfile_path, output_from_batspp_path)
+                bats_output, _ = run_batspp(batsppfile_path, output_from_batspp_path)
                 
                 output_lines = bats_output.splitlines()
                 output_lines_filtered = [item for item in output_lines if not item.startswith("#")]
