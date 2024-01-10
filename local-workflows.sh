@@ -129,14 +129,17 @@ fi
 if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
     file="${WORKFLOW_FILE:-act.yml}"
     echo "Running Github Actions locally w/ $file"
-    # shellcheck disable=SC2086
     ## TODO: GITHUB_TOKEN="$(gh auth token)" or set via environment
     # Note: Unfortunately, the environment setting is not affecting the docker
     # invocation. A workaround is to modify the 'Run tests' steps in the
     # workflow configuration file (e.g., .github/workflows/debug.yml).
     act="${ACT_PROGRAM:-act}"    
     ## TODO2: fix environment (see tests/run_tests.bash for workaround)
-    "$act" --verbose --env "DEBUG_LEVEL=$DEBUG_LEVEL $USER_ENV" --container-architecture linux/amd64 --pull="$ACT_PULL" --workflows ./.github/workflows/"$file" $RUN_OPTS
+    # note: ACT_JSON can be used to disable act-specific flags (e.g., to enable runner matrix)
+    json="${ACT_JSON:-""}"
+    if [ "$json" != "" ]; then misc_args+=(--eventpath ./.github/workflows/"$json"); fi;
+    # shellcheck disable=SC2086
+    "$act" --verbose --env "DEBUG_LEVEL=$DEBUG_LEVEL $USER_ENV" --container-architecture linux/amd64 --pull="$ACT_PULL" --workflows ./.github/workflows/"$file" $RUN_OPTS "${misc_args[@]}"
     # TODO: docker tag IMAGE-ID shell-scripts-dev
     # EX (see above): docker tag $(docker images --quiet | head -1) shell-scripts-dev
 fi
