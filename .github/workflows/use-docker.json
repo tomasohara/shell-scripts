@@ -1,0 +1,4 @@
+{
+    "Comment": "Configuration for use-docker event flag (see https://github.com/nektos/act#skipping-jobs)",
+    "skip-docker": false
+}
