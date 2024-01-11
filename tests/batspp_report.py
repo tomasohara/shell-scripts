@@ -263,14 +263,21 @@ def main():
         debug.code(5, lambda: print(gh.run(f"echo BatsPP output:; head -1000 --verbose {real_output_file} | cat -n")))
         debug.code(5, lambda: print(gh.run(f"echo BatsPP log:; head -1000 --verbose {log_file} | cat -n")))
         debug.assertion(not run_output.strip())
-        
-        ## NEW: Added num_eval_errors
+    
+        ## EXPERIMENTAL: num_eval_errors replaced by arr_eval_errors
         real_output = system.read_file(real_output_file)
-        num_eval_errors_str = gh.run(f"{check_batspp_perl_path} -context=0 {log_file} | wc -l")
-        num_eval_errors = int(num_eval_errors_str) - 1
-        ## OLD:  debug.trace(6, f"run_batspp() => {real_output!r"}
-        debug.trace(6, f"run_batspp() //real_output// => {real_output!r}\nrun_batspp() //num_eval_errors// => {num_eval_errors!r}")
-        return real_output, num_eval_errors
+        arr_eval_errors = (gh.run(f"{check_batspp_perl_path} -context=0 {log_file}").split("\n"))[1:]
+        debug.trace(6, f"run_batspp() //real_output// => {real_output!r}\nrun_batspp()/n//arr_eval_errors// => {arr_eval_errors!r}")
+        return real_output, arr_eval_errors
+
+        # ## NEW: Added num_eval_errors
+        # real_output = system.read_file(real_output_file)
+        # num_eval_errors_str = gh.run(f"{check_batspp_perl_path} -context=0 {log_file} | wc -l")
+        # num_eval_errors = int(num_eval_errors_str) - 1
+        # ## OLD:  debug.trace(6, f"run_batspp() => {real_output!r"}
+        # debug.trace(6, f"run_batspp() //real_output// => {real_output!r}\nrun_batspp() //num_eval_errors// => {num_eval_errors!r}")
+        # return real_output, num_eval_errors
+
 
     ## TEST (plan A until COPY_DIR=1 added above)
     ## # 0.9) Making sure input files, etc. accessible in bats directory
@@ -372,8 +379,10 @@ def main():
 
             if TXT_OPTION:
                 output_from_batspp_path = gh.form_path(BATSPP_OUTPUT_STORE, output_from_batspp)
-                bats_output, _ = run_batspp(batsppfile_path, output_from_batspp_path)
-                
+                ## NEW: Added arr_eval_errors and num_eval_errors = len(arr_eval_errors)
+                bats_output, arr_eval_errors = run_batspp(batsppfile_path, output_from_batspp_path)
+                num_eval_errors = len(arr_eval_errors)
+
                 output_lines = bats_output.splitlines()
                 output_lines_filtered = [item for item in output_lines if not item.startswith("#")]
                 debug.trace_expr(5, output_lines_filtered)
@@ -408,6 +417,7 @@ def main():
                 txt_option_JSON["test_count_ok"] = count_ok
                 txt_option_JSON["test_min_score"] = min_score
                 txt_option_JSON["test_success_rate"] = success_rate
+                txt_option_JSON["test_count_eval_error"] = num_eval_errors
                 ## NEW: Inorder for test to be successful, it must satisfy the condition below:
                 ## min_score means threshold of test
                 ## NEW: Updated if(successful) -> if(successful and (count_total != 0 or min_score == 0))
@@ -502,9 +512,10 @@ def main():
                 t_min_score = item['test_min_score']
                 t_count_total = item['test_count_total']
                 t_count_ok = item['test_count_ok']
+                t_count_eval_error = item['test_count_eval_error']
                 ## OLD: Revised format includes test passed out of test found
                 # print(f"{index + 1}. {name} ({rate}%): threshold={min_score}%")
-                print(f"{index+1}. {t_name} ({t_rate}%; {t_count_ok}/{t_count_total} OK): threshold={t_min_score}%")
+                print(f"{index+1}. {t_name} ({t_rate}%; {t_count_ok}/{t_count_total} OK): threshold={t_min_score}%; {t_count_eval_error} evaluation errors")
             if not arr:
                 print("n/a")
 
