@@ -43,3 +43,4 @@ sudocommentstest-NOBATSPP.ipynb: 0.0
 perl-script-NOBATSPP.ipynb: 0.0
 ## TEMP: Gere needs to isolate new eval-condition stuff
 testing-tips.ipynb: 25
+test-eval-condition-alias.ipynb: 25
