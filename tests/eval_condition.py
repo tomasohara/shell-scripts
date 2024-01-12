@@ -93,14 +93,16 @@ class Script(Main):
                                                          context=self.context)
         if self.verbose:
             print(f"Evaluation of condition {self.condition!r}: {eval_result}")
+            if self.context:
+                print(f"STDIN:\n{self.context['stdin']}")
         if not self.command:
             output = eval_result
 
         # Evaluate command
         if eval_result and self.command:
-            output = self.evaluator_inst.exec_command(self.command)
             if self.verbose:
-                print(f"Output of command {self.command!r}")
+                print(f"Executing command: {self.command}")
+            output = self.evaluator_inst.exec_command(self.command)
 
         # Print final output
         print(output)
