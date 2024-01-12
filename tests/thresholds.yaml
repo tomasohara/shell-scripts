@@ -41,3 +41,5 @@ empty-test-file.ipynb: 0.0
 trace-linux-admin-alias-NOBATSPP.ipynb: 0.0
 sudocommentstest-NOBATSPP.ipynb: 0.0
 perl-script-NOBATSPP.ipynb: 0.0
+## TEMP: Gere needs to isolate new eval-condition stuff
+testing-tips.ipynb: 25
