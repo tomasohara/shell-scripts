@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 #
-# note: Tana's script for running Python tests as part of workflow
+# Script for running Python tests as part of workflow. This allows for a
+# threshold for each test file so that testing is not all or nothing.
 #
-
+# TODO2: replace subprocess with gh.run
+#
 
 """Master test script for shell-scripts repo"""
 
 # Standard modules
 import math
+import os
 import subprocess
 
 # Installed modules
@@ -68,7 +71,6 @@ def run_tests(thresholds):
             continue
 
         # Collect test cases for the test
-        ## BAD: cmd = f"pytest -k {test} --collect-only"
         cmd = f"pytest --collect-only {test_path}"
         collect_result = subprocess.run(cmd, shell=True, text=True, capture_output=True, check=False)
         debug.trace_object(6, collect_result)
@@ -84,7 +86,7 @@ def run_tests(thresholds):
 
         # Calculate the number of allowed failures
         # note: threshold is for success (e.g., 51 means 51% of tests passed)
-        # TODO3: have sanity checks account for minor floatiing point differences
+        # TODO3: have sanity checks account for minor floating point differences
         required_successes = (math.ceil(total_tests * threshold / 100) if threshold else 0)
         debug.assertion(0 <= required_successes <= total_tests)
         allowed_failures = max(1 - required_successes, 0)
@@ -126,11 +128,30 @@ def main():
     """Main function"""
 
     # Load the thresholds from the YAML file, falling back to defaults for all test files
-    # in the tests directory (TODO: merge the two sources with file trumping default).
-    # note: uses default of 25% succeses allowed just for sake of getting tests operational
-    # under Github actions (TODO: lower to 50%).
+    # in the tests directory. That is, the YAML file threshold takes precedence over the default.
+    # Note: uses default of 25% successes allowed for sake of getting tests operational
+    # under Github actions (TODO2: increase to 50%).
     THRESHOLDS_FILE = "thresholds.yaml"
-    thresholds = {test_file: 25.0 for test_file in gh.get_matching_files("tests/test_*.py")}
+
+    # Find test cases to run (files of the form .../tests/test_*.py")
+    # note: The test should reside in a directory called "tests" (e.g., skipping backup/test_it.py)
+    # TODO3: replace os.path.split with system.split_path once available under main branch
+    all_test_files = gh.run("find . -name 'test_*.py'").splitlines()
+    ok_test_files = []
+    TESTS_DIR = "tests"
+    for test_file in all_test_files:
+        include = True
+        dir_name, _filename = os.path.split(test_file)
+        _parent_dir, test_dir = os.path.split(dir_name)
+        if test_dir != TESTS_DIR:
+            include = False
+            debug.trace(4, f"Skipping test file not in {TESTS_DIR} directorry: {test_dir}")
+        if include:
+            ok_test_files.append(test_file)
+
+    # Create threshold entry to serve as default for each file
+    ## OLD: thresholds = {test_file: 25.0 for test_file in gh.get_matching_files("tests/test_*.py")}
+    thresholds = {test_file: 25.0 for test_file in ok_test_files}
     debug.trace_expr(5, thresholds, "default thresholds")
     if system.file_exists(THRESHOLDS_FILE):
         thresholds.update(load_thresholds(THRESHOLDS_FILE))
