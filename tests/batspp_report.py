@@ -29,6 +29,7 @@ from mezcla import system
 msy = system
 from mezcla.main import Main
 from mezcla.my_regex import my_re
+from simple_batspp import FORCE_RUN
 
 # Constants
 TL = debug.TL
@@ -171,7 +172,7 @@ def main():
     TXT_OPTION = main_app.get_parsed_option(TEXT_REPORTS_ARG)
     KCOV_OPTION = main_app.get_parsed_option(KCOV_REPORTS_ARG)
     ALL_OPTION = main_app.get_parsed_option(ALL_REPORTS_ARG)
-    FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_DOCKER)
+    FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_DOCKER or FORCE_RUN)
     CLEAN_OPTION = main_app.get_parsed_option(CLEAN_ARG, CLEAN_DEFAULT)
     BATSPP_SWITCH_OPTION = main_app.get_parsed_option(BATSPP_SWITCH_ARG)
     USE_SIMPLE_BATSPP = (not BATSPP_SWITCH_OPTION)
