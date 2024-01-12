@@ -21,7 +21,6 @@ Sample usage:
     {script} '2+2==4' --exec "ls -l"
 """
 
-import sys
 from mezcla import debug
 from mezcla import glue_helpers as gh
 from mezcla.main import Main
@@ -37,13 +36,14 @@ class CondEval:
         """Initialize the class"""
         debug.trace_object(TL.DETAILED, self, label=f"{self.__class__.__name__} instance")
 
-    def eval_condition(self, condition):
-        """Evaluate the condition and return True or False
+    def eval_condition(self, condition, context=None):
+        """Evaluate the condition and return True or False, using optional CONTEXT dict.
         Note: Return None if exception occurred"""
         result = None
+        # pylint: disable=eval-used,bare-except
         try:
-            result = eval(condition)         # pylint: disable=eval-used
-        except:                              # pylint: disable=bare-except
+            result = eval(condition, context)         
+        except:
             system.print_exception_info("eval_condition")
         debug.trace(TL.QUITE_DETAILED, f"eval_condition({condition!r}) => {result!r}")
         return result
@@ -65,6 +65,7 @@ class Script(Main):
     command = None
     condition = None
     evaluator_inst = None
+    context = None
 
     def setup(self):
         """Check results of command line processing"""
@@ -73,8 +74,11 @@ class Script(Main):
         self.condition = self.get_parsed_option("condition", None)
         # Support stdin in condition and command
         if "stdin" in self.condition:
-            stdin = sys.stdin.read().replace("\n", " ").rstrip()
-            self.condition = self.condition.replace("stdin", "'" + stdin + "'")
+            # The input stream is assigned to a local variable, which later gets
+            # used as context for the evaluatiom. This avoid headaches trying to
+            # parse the expression, such as accounting for "stdin" as a literal
+            # in the condition, different quotes, etc.
+            self.context = { "stdin": self.read_entire_input() }
 
         # Create an instance of the condition evaluator
         self.evaluator_inst = CondEval()
@@ -85,7 +89,8 @@ class Script(Main):
         output = ""
 
         # Evaluate condition and optionally show result
-        eval_result = self.evaluator_inst.eval_condition(self.condition)
+        eval_result = self.evaluator_inst.eval_condition(self.condition,
+                                                         context=self.context)
         if self.verbose:
             print(f"Evaluation of condition {self.condition!r}: {eval_result}")
         if not self.command:
@@ -110,7 +115,8 @@ def main():
         positional_arguments=[
             ("condition", "Condition to evaluate"),
         ],
-        skip_input=True
+        skip_input=False,
+        manual_input=True
     )
     app.run()
 
