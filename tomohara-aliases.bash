@@ -2690,11 +2690,29 @@ function scp-host-down() { scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$1:
 function scp-host-up() { local host="$1"; shift; scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@" "$TPO_SSH_USER@$host:$TMP"; }
 #
 ## TOM-IDIOSYNCRATIC
-# scp-aws-up(host, file, ...): updload FILES to HOST, after making sure ~/xfer directory files writable
-function scp-aws-up() { local host="$1"; shift;
-                        ssh -p $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host" chmod u+w \~/xfer/'*';
-                        scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@"  "$TPO_SSH_USER@$host":xfer; }
-function scp-aws-down() { local host="$1"; shift; for _file in "$@"; do scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host":xfer/$_file .; done; }
+# scp-aws-up(host, file, ...): upload FILES to HOST under SSH_XFER (~/xfer)
+# scp-aws-down(...): similarly for download
+## OLD:
+## # scp-aws-up(host, file, ...): updload FILES to HOST, after making sure ~/xfer directory files writable
+## OLD:
+## function scp-aws-up() { local host="$1"; shift;
+##                         ssh -p $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host" chmod u+w \~/xfer/'*';
+##                         scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@"  "$TPO_SSH_USER@$host":xfer; }
+function scp-aws-up() {
+    local host="$1";
+    shift;
+    local xfer="${SSH_XFER:-xfer}"
+    ## OLD: ssh -p $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host" chmod u+w $xfer/'*';
+    scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@"  "$TPO_SSH_USER@$host":$xfer;
+}
+function scp-aws-down() {
+    local host="$1";
+    local xfer="${SSH_XFER:-xfer}"
+    shift;
+    for _file in "$@"; do
+        scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host":$xfer/$_file .;
+    done;
+}
 #
 # TODO: consolidate host keys; reword hostwinds in terms of generic host not AWS
 #
@@ -2728,6 +2746,7 @@ alias hw1-upload=old-hw-upload
 alias hw1-download=old-hw-download
 alias hw2-login=new-hw-login
 alias hw2-upload=new-hw-upload
+alias hw2-upload-misc='echo see http://www.tomasohara.trade/misc; SSH_XFER=misc new-hw-upload'
 alias hw2-download=new-hw-download
 
 # Set dummy default host on AWS and HostWinds so hostname always in xterm title (see set_xterm_title.bash).
