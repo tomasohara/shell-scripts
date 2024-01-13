@@ -29,6 +29,7 @@ from mezcla import system
 msy = system
 from mezcla.main import Main
 from mezcla.my_regex import my_re
+from simple_batspp import FORCE_RUN
 
 # Constants
 TL = debug.TL
@@ -77,7 +78,9 @@ HOME = system.getenv_text(
 DOCKER_HOME = "/home/shell-scripts"
 UNDER_DOCKER = ((HOME == DOCKER_HOME) or system.file_exists(DOCKER_HOME))
 UNDER_RUNNER = ("/home/runner" in HOME)
-UNDER_TESTING_VM = (UNDER_DOCKER or UNDER_RUNNER)
+UNDER_TESTING_VM = system.getenv_text(
+    "UNDER_TESTING_VM", (UNDER_DOCKER or UNDER_RUNNER),
+    description="Whether to assume running under testing VM")
 DETAILED_DEBUGGING = debug.detailed_debugging()
 
 TEST_REGEX = system.getenv_value(
@@ -191,7 +194,7 @@ def main():
     TXT_OPTION = main_app.get_parsed_option(TEXT_REPORTS_ARG)
     KCOV_OPTION = main_app.get_parsed_option(KCOV_REPORTS_ARG)
     ALL_OPTION = main_app.get_parsed_option(ALL_REPORTS_ARG)
-    FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_TESTING_VM)
+    FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_TESTING_VM or FORCE_RUN)
     CLEAN_OPTION = main_app.get_parsed_option(CLEAN_ARG, CLEAN_DEFAULT)
     BATSPP_SWITCH_OPTION = main_app.get_parsed_option(BATSPP_SWITCH_ARG)
     USE_SIMPLE_BATSPP = (not BATSPP_SWITCH_OPTION)
