@@ -17,6 +17,7 @@ import yaml
 from mezcla import debug
 from mezcla import glue_helpers as gh
 from mezcla.my_regex import my_re
+from mezcla import misc_utils
 from mezcla import system
 
 # Environment options
@@ -116,11 +117,17 @@ def run_tests(thresholds):
             continue
         module_failure = (failed_tests and (failed_tests <= allowed_failures))
         failed_percent = round_p2str(failed_tests / total_tests * 100)
+        success_percent = round_p2str(100.0 - (failed_tests / total_tests * 100))
+        debug.assertion(misc_utils.is_close(system.to_float(failed_percent) + system.to_float(success_percent), 100))
         debug.trace_expr(6, failed_tests, allowed_failures, total_tests, module_failure, required_successes)
 
         # Format message to stdout: either error, warning or FYI on test summary.
+        # note: format shows success rate to match batspp_report.py
         label = ("Error" if module_failure else "Warning" if failed_tests else "FYI")
-        print(f"{label}: {test_filename} {failed_tests} of {total_tests} tests failed ({failed_percent}%)",
+        ## OLD:
+        ## print(f"{label}: {test_filename} {failed_tests} of {total_tests} tests failed ({failed_percent}%)",
+        ##      end="")
+        print(f"{label}: {test_filename} {failed_tests} of {total_tests} tests failed: {failed_percent}%; success ({success_percent}%); threshold={threshold}%",
               end="")
         if module_failure:
             num_good = (total_tests - failed_tests)
