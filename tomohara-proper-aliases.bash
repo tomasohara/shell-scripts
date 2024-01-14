@@ -38,7 +38,7 @@ alias nvsmi=nvidia-smi
 # ex: convert-emoticons-aux black /tmp/__init__.py
 # note: stderr redirected onto stdout
 function convert-emoticons-aux {
-    "$@" 2>&1 | convert_emoticons.py -
+    "$@" 2>&1 | convert-emoticons-stdin
 }
 
 #...............................................................................
