@@ -1284,6 +1284,14 @@ function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
 function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
 ## MISC: alias hv='hexview.perl'
 
+#................................................................................
+# Output postprocessing [Input too!]
+
+# convert-emoticons(...): replace emoticons in input with description
+# EX: convert-emoticons - <<<"💬" => "[speech balloon]"
+alias convert-emoticons='convert_emoticons.py'
+alias convert-emoticons-stdin='convert-emoticons -'
+
 #-------------------------------------------------------------------------------
 trace Miscellaneous commands
 
@@ -1402,7 +1410,8 @@ function check-errors () {
     fi;
     ## OLD: (QUIET=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL CONTEXT=5 check-errors-aux ${args[@]}) 2>&1 | $PAGER;
     ## OLD: (QUIET=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | $PAGER;
-    (QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | $PAGER;
+    ## OLD: (QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | $PAGER;
+    (QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | convert-emoticons-stdin | $PAGER;
 }
 ## OLD:
 ## alias check-all-errors='check-errors -warnings'
@@ -1624,7 +1633,7 @@ function make-tar () {
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
     ## OLD: (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     # shellcheck disable=SC2086
-    if [ "${depth_arg}${size_arg}${filter_arg}" == "." ]; then
+    if [ "${depth_arg}${size_arg}${filter_arg[*]}" == "." ]; then
         $NICE $GTAR cvfz "$base.tar.gz" "$dir" >| "$base.tar.log" 2>&1;
     else
         (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
@@ -1790,9 +1799,10 @@ function notes-entry-gr-aux() {
     local glob="$1"
     shift
     ## OLD: perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" -  2>&1 | $PAGER;
-    perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" -  2>&1 | less -p "$1";
+    ## OLD: perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" -  2>&1 | less -p "$1";
+    perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | convert-emoticons-stdin | perlgrep -para -i "$@" - 2>&1 | less -p "$1";
 }
-}
+}   ## end shellcheck
 alias notes-entry-gr='notes-entry-gr-aux "$notes_glob"'
 function notes-entry-gr-less-p { notes-entry-gr "$@" | less -p "$1"; }
 alias entry-notes=notes-entry-gr
