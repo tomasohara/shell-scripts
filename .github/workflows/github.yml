@@ -12,7 +12,7 @@ on: [push, pull_request]
 jobs:
 
   build-and-test-runner:
-    name: Build and Run Tests
+    name: Build and Run Tests via Runner
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -42,7 +42,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r requirements.txt
+          pip install --verbose --requirement requirements.txt
 
       - name: Run Python Tests under Runner
         run: |
