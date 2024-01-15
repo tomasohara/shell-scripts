@@ -1289,7 +1289,7 @@ function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
 
 # convert-emoticons(...): replace emoticons in input with description
 # EX: convert-emoticons - <<<"💬" => "[speech balloon]"
-alias convert-emoticons='convert_emoticons.py'
+alias convert-emoticons='DURING_ALIAS=1 convert_emoticons.py'
 alias convert-emoticons-stdin='convert-emoticons -'
 
 #-------------------------------------------------------------------------------
@@ -2120,7 +2120,9 @@ function rename-emoji-aux {
     # ex: "LangChain_🦜⛓️_-_Zep" => "LangChain_parrot_chains_-_Zep"
     local f new_f
     for f in "$@"; do
-        new_f=$(echo "$f" | DURING_ALIAS=1 python -m mezcla.convert_emoticons - | perl -pe 's/[\[\]]/_/g; s/__+/_/g;')
+        ## TODO3: drop variation selectors (U+FE0F)
+        ## OLD: new_f=$(echo "$f" | DURING_ALIAS=1 python -m mezcla.convert_emoticons - | perl -pe 's/[\[\]]/_/g; s/__+/_/g;')
+        new_f=$(echo "$f" | convert-emoticons-stdin | perl -pe 's/[\[\]]/_/g; s/__+/_/g;')
         rename-files "$f" "$new_f" "$f"
     done
 }
