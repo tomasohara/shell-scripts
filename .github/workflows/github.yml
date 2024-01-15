@@ -13,16 +13,16 @@ jobs:
 
   build-and-test-runner:
     name: Build and Run Tests via Runner
+    ## NOTE: need to track down differences between Docker and Runner runs
+    ## TEMP: disable tests (and just run Docker version below)
+    if: ${{ false }}
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         os: [ubuntu-20.04]
         ## TODO: os: [ubuntu-20.04, ubuntu-latest]
-        ## TODO2: python-version: ["3.8", "3.9", "3.10"]
-        ## NOTE: need to track down differences between Docker and Runner runs
-        ## TEMP: disable tests (and just run Docker version below)
-        python-version: []
+        python-version: ["3.8", "3.9", "3.10"]
         ## TODO: 3.x [latest; -or latest, latest-1, latest-2, ...]
 
     steps:
