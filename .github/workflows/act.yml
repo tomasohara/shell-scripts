@@ -31,7 +31,9 @@ on: [push, pull_request]
 jobs:
 
   build-and-test-runner:
-    name: Build and Run Tests
+    name: Build and Run Tests via Runner
+    # skip during local actions testing (see https://github.com/nektos/act#skipping-jobs)
+    if: ${{ !github.event.act }}        
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -69,10 +71,12 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r requirements.txt
+          pip install --verbose --requirement requirements.txt
 
   build-and-test-docker:
     name: Build and Run Tests via Docker
+    # include unless skip-docker set (see skip-docker.json)
+    if: ${{ !github.event.skip-docker }}
     runs-on: [ubuntu-20.04]
 
     ## TEST:
