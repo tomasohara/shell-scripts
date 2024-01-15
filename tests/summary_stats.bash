@@ -51,7 +51,7 @@ cd "$(dirname "$0")"
 # TEMP: set github credentials
 # Note: This is not secure, but scrappycito only has access to
 # to dummy repo's like https://github.com/tomasohara/git-bash-test.
-if [[ ("$HOME" == "/home/shell-scripts") || ("$HOME" == "/home/runner") ]; then
+if [[ ("$HOME" == "/home/shell-scripts") || ("$HOME" == "/home/runner") ]]; then
     git config --local user.email "scrappycito@gmail.com"
     git config --local user.name "Scrappy Cito"
     export MY_GIT_TOKEN=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
