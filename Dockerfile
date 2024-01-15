@@ -125,6 +125,12 @@ RUN apt-get autoremove -y && \
     true
     ## TODO4: rm -rf /var/lib/apt/lists/*
 
+# Show disk usage when debugging
+RUN if [ "$DEBUG_LEVEL" -ge 5 ]; then                           \
+    echo "Top directories by disk usage:";                      \
+    du --block-size=1K / 2>&1 | sort -rn | head -20;         	\
+fi
+
 # Enable github access
 # Note: This is not secure, but scrappycito only has access to
 # to dummy repo's like https://github.com/tomasohara/git-bash-test.

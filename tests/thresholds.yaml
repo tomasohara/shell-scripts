@@ -2,52 +2,51 @@
 #
 # Note: If any test fails, the whole test suite fails, so use conservative
 # lower bounds at first.
-#
-# TODO1: revise the 0 thresholds!
-#
 
 # Python tests
-test_bash2python.py: 0
-test_check_errors.py: 90
-test_extract_matches.py: 0
-test_tpo_count_it.py: 0
+# note: 42.8% is typical lower bound, so most thresholds start at 40
+test_bash2python.py: 40
+test_check_errors.py: 40
+test_extract_matches.py: 40
+# note: current oddball at 21.7%
+test_tpo_count_it.py: 20
 
 # Alias tests
-# TODO2: finishing tightening up the lower boundaries
-hello-world-revised.ipynb: 20.0
-trace-extensionless-shortcut-unicode.ipynb: 15
-test-cond-env-setting.ipynb: 12.5
-dir-aliases-test-revised.ipynb: 20
-testbook-test-dir-aliases.ipynb: 10
-trace-extensionless-shortcut-V2.ipynb: 10
-hello-world-source.ipynb: 10
-test-dir-alias.ipynb: 7.5
-alias-html-test.ipynb: 7.5
-alias-calculator-commands.ipynb: 5
-alias-grep-commands.ipynb: 5
-trace-unix-general.ipynb: 5
-trace-file-manipulation.ipynb: 5
-trace-unix-alias.ipynb: 2.5
-trace-python-commands.ipynb: 2.5
-download-and-test-tomohara-aliases.ipynb: 70.0
+# note: 36% is typical lower bound, so most thresholds start at 30
+hello-world-revised.ipynb: 40.0
+trace-extensionless-shortcut-unicode.ipynb: 35
+test-cond-env-setting.ipynb: 32.5
+dir-aliases-test-revised.ipynb: 40
+testbook-test-dir-aliases.ipynb: 40
+trace-extensionless-shortcut-V2.ipynb: 40
+hello-world-source.ipynb: 40
+test-dir-alias.ipynb: 37.5
+alias-html-test.ipynb: 37.5
+alias-calculator-commands.ipynb: 35
+alias-grep-commands.ipynb: 35
+# note: current oddball at 25.0%
+trace-unix-general.ipynb: 20
+trace-file-manipulation.ipynb: 35
+trace-unix-alias.ipynb: 32.5
+trace-python-commands.ipynb: 32.5
+download-and-test-tomohara-aliases.ipynb: 30.0
 command-override-cp-mv.ipynb: 30.0
-alias-trace-misc-commands.ipynb: 40.0
-json-related-alias.ipynb: 60.0
-test-tomohara-aliases-access.ipynb: 40.0
-alt-simple-alias-test.ipynb: 0.0
-more-tomohara-aliases-test.ipynb: 40.0
-trace-setup-sorting-wrappers.ipynb: 25.0
-test-check-errors.ipynb: 35.0
-trace-line-words-commands.ipynb: 60.0
+alias-trace-misc-commands.ipynb: 30.0
+json-related-alias.ipynb: 30.0
+test-tomohara-aliases-access.ipynb: 30.0
+alt-simple-alias-test.ipynb: 30.0
+more-tomohara-aliases-test.ipynb: 30.0
+trace-setup-sorting-wrappers.ipynb: 30.0
+test-check-errors.ipynb: 30.0
+trace-line-words-commands.ipynb: 30.0
 alias-cd-commands.ipynb: 30.0
-tomasohara-aliases-test.ipynb: 50.0
-empty-test-file.ipynb: 0.0
-trace-linux-admin-alias-NOBATSPP.ipynb: 0.0
-sudocommentstest-NOBATSPP.ipynb: 0.0
-perl-script-NOBATSPP.ipynb: 0.0
-## TODO: testing-support-script-tests.ipynb: 75
+tomasohara-aliases-test.ipynb: 30.0
+empty-test-file.ipynb: 0
+trace-linux-admin-alias-NOBATSPP.ipynb: 0
+sudocommentstest-NOBATSPP.ipynb: 0
+perl-script-NOBATSPP.ipynb: 0
 testing-support-script-tests.ipynb: 40
-## TODO2: raise git-alias threshold after temp repo permission fixed
+# temporary no-threshold setting for new tests
 git-aliases-tests-1.ipynb: 0
 git-aliases-tests-2.ipynb: 0
 git-aliases-tests-3.ipynb: 0
