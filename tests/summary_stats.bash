@@ -81,7 +81,7 @@ echo "FYI: Using $BATSPP_OUTPUT for output and $BATSPP_TEMP for temp. files"
 # 
 BATSPP_REPORT_OPTS=${BATSPP_REPORT_OPTS:-"--txt --definitions ../all-tomohara-aliases-etc.bash"}
 # shellcheck disable=SC2086
-OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py $BATSPP_REPORT_OPTS -
+OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" PYTHONPATH="..:$PYTHONPATH" python3 ./batspp_report.py $BATSPP_REPORT_OPTS -
 batspp_result="$?"
 
 ## NOTE: kcov is not critical, so it is not run as part of workflow tests
