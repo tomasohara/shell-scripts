@@ -45,3 +45,8 @@ empty-test-file.ipynb: 0
 trace-linux-admin-alias-NOBATSPP.ipynb: 0
 sudocommentstest-NOBATSPP.ipynb: 0
 perl-script-NOBATSPP.ipynb: 0
+testing-support-script-tests.ipynb: 40
+# temporary no-threshold setting for new tests
+git-aliases-tests-1.ipynb: 0
+git-aliases-tests-2.ipynb: 0
+git-aliases-tests-3.ipynb: 0
