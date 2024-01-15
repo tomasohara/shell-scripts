@@ -37,6 +37,7 @@ python3 --version
 python3 "$dir"/master_test.py
 python_result="$?"
 
+# Run the alias tests and show info from show output log (-o)
 ## TODO: python3 "$dir"/batspp_report.py --text
 bash "$dir"/summary_stats.bash -o
 bash_result="$?"

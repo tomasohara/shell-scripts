@@ -1284,6 +1284,14 @@ function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
 function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
 ## MISC: alias hv='hexview.perl'
 
+#................................................................................
+# Output postprocessing [Input too!]
+
+# convert-emoticons(...): replace emoticons in input with description
+# EX: convert-emoticons - <<<"💬" => "[speech balloon]"
+alias convert-emoticons='convert_emoticons.py'
+alias convert-emoticons-stdin='convert-emoticons -'
+
 #-------------------------------------------------------------------------------
 trace Miscellaneous commands
 
@@ -1402,7 +1410,8 @@ function check-errors () {
     fi;
     ## OLD: (QUIET=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL CONTEXT=5 check-errors-aux ${args[@]}) 2>&1 | $PAGER;
     ## OLD: (QUIET=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | $PAGER;
-    (QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | $PAGER;
+    ## OLD: (QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | $PAGER;
+    (QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | convert-emoticons-stdin | $PAGER;
 }
 ## OLD:
 ## alias check-all-errors='check-errors -warnings'
@@ -1624,7 +1633,7 @@ function make-tar () {
     # TODO: make pos-tar ls optional, so that tar-in-progress is viewable
     ## OLD: (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     # shellcheck disable=SC2086
-    if [ "${depth_arg}${size_arg}${filter_arg}" == "." ]; then
+    if [ "${depth_arg}${size_arg}${filter_arg[*]}" == "." ]; then
         $NICE $GTAR cvfz "$base.tar.gz" "$dir" >| "$base.tar.log" 2>&1;
     else
         (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
@@ -1790,9 +1799,10 @@ function notes-entry-gr-aux() {
     local glob="$1"
     shift
     ## OLD: perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" -  2>&1 | $PAGER;
-    perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" -  2>&1 | less -p "$1";
+    ## OLD: perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" -  2>&1 | less -p "$1";
+    perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | convert-emoticons-stdin | perlgrep -para -i "$@" - 2>&1 | less -p "$1";
 }
-}
+}   ## end shellcheck
 alias notes-entry-gr='notes-entry-gr-aux "$notes_glob"'
 function notes-entry-gr-less-p { notes-entry-gr "$@" | less -p "$1"; }
 alias entry-notes=notes-entry-gr
@@ -2690,11 +2700,29 @@ function scp-host-down() { scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$1:
 function scp-host-up() { local host="$1"; shift; scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@" "$TPO_SSH_USER@$host:$TMP"; }
 #
 ## TOM-IDIOSYNCRATIC
-# scp-aws-up(host, file, ...): updload FILES to HOST, after making sure ~/xfer directory files writable
-function scp-aws-up() { local host="$1"; shift;
-                        ssh -p $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host" chmod u+w \~/xfer/'*';
-                        scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@"  "$TPO_SSH_USER@$host":xfer; }
-function scp-aws-down() { local host="$1"; shift; for _file in "$@"; do scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host":xfer/$_file .; done; }
+# scp-aws-up(host, file, ...): upload FILES to HOST under SSH_XFER (~/xfer)
+# scp-aws-down(...): similarly for download
+## OLD:
+## # scp-aws-up(host, file, ...): updload FILES to HOST, after making sure ~/xfer directory files writable
+## OLD:
+## function scp-aws-up() { local host="$1"; shift;
+##                         ssh -p $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host" chmod u+w \~/xfer/'*';
+##                         scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@"  "$TPO_SSH_USER@$host":xfer; }
+function scp-aws-up() {
+    local host="$1";
+    shift;
+    local xfer="${SSH_XFER:-xfer}"
+    ## OLD: ssh -p $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host" chmod u+w $xfer/'*';
+    scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@"  "$TPO_SSH_USER@$host":$xfer;
+}
+function scp-aws-down() {
+    local host="$1";
+    local xfer="${SSH_XFER:-xfer}"
+    shift;
+    for _file in "$@"; do
+        scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host":$xfer/$_file .;
+    done;
+}
 #
 # TODO: consolidate host keys; reword hostwinds in terms of generic host not AWS
 #
@@ -2728,6 +2756,7 @@ alias hw1-upload=old-hw-upload
 alias hw1-download=old-hw-download
 alias hw2-login=new-hw-login
 alias hw2-upload=new-hw-upload
+alias hw2-upload-misc='echo see http://www.tomasohara.trade/misc; SSH_XFER=misc new-hw-upload'
 alias hw2-download=new-hw-download
 
 # Set dummy default host on AWS and HostWinds so hostname always in xterm title (see set_xterm_title.bash).
