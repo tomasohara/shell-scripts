@@ -951,7 +951,7 @@ function grepl () { pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
 }
 # gr-c: grep through c/c++ source and headers files
 # note: --no-messages suppresses warnings about missing files
-function gr-c () { gr --no-messages "$@" *.c *.cpp *.cxx *.h; }
+function gr-c () { gr --no-messages "$@" ./*.c ./*.cpp ./*.cxx ./*.h; }
 
 
 # TODO: create function for creating gr-xyz aliases
@@ -1318,8 +1318,8 @@ function check-errors-aux { alias-perl check_errors.perl "$@"; }
 ## # -or-:
 ## function check-errors-aux { PERL_SWITCH_PARSING=1 check_errors.py "$@"; };
 ## OLD
-## # note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
-## ALIAS_DEBUG_LEVEL=${DEBUG_LEVEL:-2}
+# note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
+ALIAS_DEBUG_LEVEL=${DEBUG_LEVEL:-2}
 function check-errors () {
     ## NOTE: gotta dislike bash!
     local args=("$@");
@@ -1331,7 +1331,7 @@ function check-errors () {
         ## DEBUG: echo "Adding stdin"
         args+=("-");
     fi;
-    (QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | convert-emoticons-stdin | $PAGER;
+    (DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL convert-emoticons-stdin | $PAGER;
 }
 # note: with -relaxed, the pattern matching is looser (hence more errors show)
 alias check-all-errors='check-errors -relaxed'
@@ -1512,6 +1512,12 @@ function make-tar () {
     #          Otherwise if optional args are present, empty dirs will be excluded from final tar
     # Check arguments
     local base="$1"; local dir="$2";
+    if [ "$base" == "--help" ]; then
+        echo "Usage: make-tar base dir [depth [filter]]"
+        echo "Env. options: USE_DATE, TEMP, GTAR"
+        echo "note: TEMP used by tar-dir, etc."
+        return
+    fi
     ## TODO2: dispense with acrobatic arg parsing!
     local depth="${3:-${TAR_DEPTH:-""}}";
     local filter="${4:-${TAR_FILTER:-""}}"
@@ -1541,7 +1547,7 @@ function make-tar () {
     if [ "${depth_arg}${size_arg}${filter_arg[*]}" == "." ]; then
         $NICE $GTAR cvfz "$base.tar.gz" "$dir" >| "$base.tar.log" 2>&1;
     else
-        (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+        (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "${filter_arg[@]}" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     fi
     ## DUH: -L added to support tar-this-dir in directory that is symbolic link, but unfortunately
     ## that leads to symbolic links in the directory itself to be included
@@ -2009,7 +2015,12 @@ function rename-emoji-here {
     # note: ensures no spaces and then filters files by potential emoticons before slow rename-emoji step proper
     # See https://stackoverflow.com/questions/39536390/match-unicode-emoji-in-python-regex.
     rename-spaces;
-    rename-emoji $(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=1 python -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -);
+    ## OLD: rename-emoji $(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=1 python -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -);
+    local files;
+    # Note: Disables shellcheck warning SC2207: Prefer mapfile or read -a to split command output (or quote to avoid splitting).
+    # shellcheck disable=SC2207
+    files=($(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=1 python -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -));
+    rename-emoji "${files[@]}"
 }
 
 # rename-bad-dashes: replace " -" in filename with "_" and replace leadind dash with underscore
@@ -2562,14 +2573,14 @@ function scp-aws-up() {
     local host="$1";
     shift;
     local xfer="${SSH_XFER:-xfer}"
-    scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@"  "$TPO_SSH_USER@$host":$xfer;
+    scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@"  "$TPO_SSH_USER@$host":"$xfer";
 }
 function scp-aws-down() {
     local host="$1";
     local xfer="${SSH_XFER:-xfer}"
     shift;
     for _file in "$@"; do
-        scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host":$xfer/$_file .;
+        scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host":"$xfer"/"$_file" .;
     done;
 }
 #
