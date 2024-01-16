@@ -29,6 +29,7 @@ from mezcla import system
 msy = system
 from mezcla.main import Main
 from mezcla.my_regex import my_re
+from simple_batspp import FORCE_RUN
 
 # Constants
 TL = debug.TL
@@ -76,8 +77,10 @@ HOME = system.getenv_text(
     description="Home directory for user")
 DOCKER_HOME = "/home/shell-scripts"
 UNDER_DOCKER = ((HOME == DOCKER_HOME) or system.file_exists(DOCKER_HOME))
-## TODO? UNDER_RUNNER = ("/home/runner" in HOME)
-UNDER_RUNNER = (("/home/runner" in HOME) or UNDER_DOCKER)
+UNDER_RUNNER = ("/home/runner" in HOME)
+UNDER_TESTING_VM = system.getenv_text(
+    "UNDER_TESTING_VM", (UNDER_DOCKER or UNDER_RUNNER),
+    description="Whether to assume running under testing VM")
 DETAILED_DEBUGGING = debug.detailed_debugging()
 
 TEST_REGEX = system.getenv_value(
@@ -85,7 +88,7 @@ TEST_REGEX = system.getenv_value(
     "TEST_REGEX", None,
     description="Regex for tests to include; ex: '^c.*' for debugging")
 SHOW_FAILURE_CONTEXT = system.getenv_bool(
-    "SHOW_FAILURE_CONTEXT", UNDER_RUNNER,
+    "SHOW_FAILURE_CONTEXT", UNDER_TESTING_VM,
     description="Show context of test failures--useful with Github runner")
 SINGLE_STORE = system.getenv_bool(
     "SINGLE_STORE", False,
@@ -194,8 +197,7 @@ def main():
     TXT_OPTION = main_app.get_parsed_option(TEXT_REPORTS_ARG)
     KCOV_OPTION = main_app.get_parsed_option(KCOV_REPORTS_ARG)
     ALL_OPTION = main_app.get_parsed_option(ALL_REPORTS_ARG)
-    ## Old: FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_DOCKER)
-    FORCE_OPTION =main_app.get_parsed_option(FORCE_ARG, FORCE_OPTION_DEFAULT)
+    FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_TESTING_VM or FORCE_RUN)
     CLEAN_OPTION = main_app.get_parsed_option(CLEAN_ARG, CLEAN_DEFAULT)
     BATSPP_SWITCH_OPTION = main_app.get_parsed_option(BATSPP_SWITCH_ARG)
     USE_SIMPLE_BATSPP = (not BATSPP_SWITCH_OPTION)
@@ -208,7 +210,7 @@ def main():
     is_admin = my_re.search(r"root|admin|adm", gh.run("groups"))
     if is_admin:
         if not FORCE_OPTION:
-            msy.exit("Error: running under admin account requires --force option, unless under docker shell-scripts-dev image")
+            msy.exit("Error: running under admin account requires --force option, unless under testing VM (e.g., docker shell-scripts-dev image)")
         msy.print_stderr("FYI: not recommended to run under admin account")
 
     # Cleanup up previous runs

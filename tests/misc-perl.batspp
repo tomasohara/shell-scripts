@@ -44,3 +44,20 @@ median = 76; mode = 78; 95th-% = 89; 99th-% = 93
 # note: pattern matching is done so that pattern is unambiguous (e.g., contains desired answer)
 $ sum_file.perl -stdev -extended -col=2 faithful.data | extract_matches.perl "mode = (78)"
 78
+
+#...............................................................................
+# perlgrep.perl
+
+# Make sure slurp matche entire file:
+# $ seq 5
+# 1
+# 2
+# 3
+# 4
+# 5
+
+$ seq 5 | perlgrep.perl "1.*5" | wc -l | count_it.perl -show_zeros '0'
+0	1
+
+$ seq 5 | perlgrep.perl -slurp "1.*5" | wc -l | count_it.perl -show_zeros '0'
+0	0
