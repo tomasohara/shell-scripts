@@ -267,7 +267,9 @@ def main():
         ## EXPERIMENTAL: num_eval_errors replaced by arr_eval_errors
         real_output = system.read_file(real_output_file)
         arr_eval_errors = (gh.run(f"{check_batspp_perl_path} -context=0 {log_file}").split("\n"))[1:]
-        debug.trace(6, f"run_batspp() //real_output// => {real_output!r}\nrun_batspp()/n//arr_eval_errors// => {arr_eval_errors!r}")
+        debug.trace(6, f"\nrun_batspp() ##real_output## => {real_output!r}")
+        debug.trace(6, f"\nrun_batspp() ##arr_eval_errors## => {arr_eval_errors!r}")
+        debug.trace(6, f"\nrun_batspp() ##len(arr_eval_errors)## => {len(arr_eval_errors)!r}\n")                                                  
         return real_output, arr_eval_errors
 
         # ## NEW: Added num_eval_errors
