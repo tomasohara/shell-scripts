@@ -29,7 +29,7 @@ from mezcla import system
 msy = system
 from mezcla.main import Main
 from mezcla.my_regex import my_re
-from simple_batspp import FORCE_RUN
+# from simple_batspp import FORCE_RUN
 
 # Constants
 TL = debug.TL
