@@ -98,7 +98,7 @@ my($default_pattern) = (($pattern_file ne "") ? &read_file($pattern_file) : "");
 if (!defined($ARGV[0])) {
     my($options) = "options = [-i(gnore)] [-alpha] [-freq_first] [-para] [-preserve] [-foldcase]\n";
     $options    .= "          [-compact] [-min_freq=N | -nonsingletons | -min2] [-slurp] [-unaccent] [-chomp]\n";
-    $options    .= "          [-occurrences] [-cumulative] [-multi_per_line|-one_per_line] [-restore]\n";
+    $options    .= "          [-occurrences] [-cumulative] [-multi_per_line|-one_per_line] [-restore] [-show_zeros]\n";
     my($example) = "examples:\n\nls | $script_name '\\.([^\\.]+)\$'\n\n";
     $example .= "$0 '(outside\/\\S+)' omcsraw.tag\n\n";
     $example .= "perl -CIOE -Sw $script_name '(.)' - < wiki-lang-info/utf8/da  >| /tmp/da.freq\n\n";
