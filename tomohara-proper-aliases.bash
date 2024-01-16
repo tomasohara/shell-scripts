@@ -194,8 +194,8 @@ simple-alias-fn act-plain 'convert-emoticons-aux act'
 # note: strips the 0-len paragraph indicator
 function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -pe 's/^0\t//;'; }
 
-# extract-text-html(filename): extract text from HTMNL in FILENAME
-simple-alias-fn extract-text-html 'python -m mezcla.html_utils'
+# extract-text-html(filename): extract text from HTML in FILENAME
+simple-alias-fn extract-text-html 'python -m mezcla.html_utils --regular'
 
 #...............................................................................
 # Bash stuff
