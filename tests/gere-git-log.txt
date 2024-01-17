@@ -1,0 +1,56 @@
+commit 621c70257409a8635a4141ea5458a17d4e045260
+Author: Geremias Baudino <61209297+gbaudino@users.noreply.github.com>
+Date:   Fri Jan 12 04:17:36 2024 -0300
+Addition of some tests for verbose method, trying to understand how the jupyter notebook tests work and why it apparently "fails" when the result is as expected.
+M	tests/test-eval-condition-alias.ipynb
+
+commit 2aea69205702e28cc9055ae9dde5f2d3097e483f
+Author: Geremias Baudino <61209297+gbaudino@users.noreply.github.com>
+Date:   Fri Jan 12 03:59:10 2024 -0300
+First steps in a new jupyter notebook for eval-condition evaluation.
+M	tests/eval_condition.py
+A	tests/test-eval-condition-alias.ipynb
+
+commit 63704b1eaaefd73fd4091b924f27f2c995743828
+Author: Geremias Baudino <61209297+gbaudino@users.noreply.github.com>
+Date:   Fri Jan 12 03:31:26 2024 -0300
+Returning testing-tips to its original format (I use the one in main).
+M	tests/testing-tips.ipynb
+
+commit 3fb5ffcb7b44589f677241ba4b3886a2f6089cd4
+Author: Geremias Baudino <61209297+gbaudino@users.noreply.github.com>
+Date:   Fri Jan 12 03:13:27 2024 -0300
+Fixing problems in testing-tips, replacing evaluation for eval-condition
+M	tests/testing-tips.ipynb
+
+commit 080e4d00bce570c1bc79a4704ea041a957829b73
+Author: Geremias Baudino <geremiasbaudino@mi.unc.edu.ar>
+Date:   Mon Jan 8 09:59:44 2024 -0300
+Added simple test suite (incomplete)
+A	tests/tests/test_eval_condition.py
+
+commit 73756ff643c98bf34fd4a4ece3a21e71c9e393c4
+Author: Geremias Baudino <geremiasbaudino@mi.unc.edu.ar>
+Date:   Mon Jan 8 09:59:03 2024 -0300
+Added support for stdin in condition, added simple test suite (incomplete), relocated eval_condition to tests folder, deleted tests/tools folder
+A	tests/eval_condition.py
+D	tests/tools/eval_condition.py
+M	tomohara-aliases.bash
+
+commit 55763b42dace89d60ed33f493acef26602f7d0e2
+Author: Geremias Baudino <geremiasbaudino@mi.unc.edu.ar>
+Date:   Sat Dec 23 06:25:35 2023 -0300
+Functional but not complete tool. See examples of use. You want to avoid having to put --condition every time it is used.
+M	tests/testing-tips.ipynb
+R100	tests/test_tools.py	tests/tools.py
+A	tests/tools/eval_condition.py
+M	tomohara-aliases.bash
+
+commit 22f9b52cc83dec1f8b9eaf1829928328bf1063b2
+Author: Geremias Baudino <geremiasbaudino@mi.unc.edu.ar>
+Date:   Sun Dec 10 23:08:44 2023 -0300
+Addition of 3 tools to help in testing. Added some basic examples to show how it works.
+A	tests/test_tools.py
+M	tests/testing-tips.ipynb
+M	tomohara-aliases.bash
+

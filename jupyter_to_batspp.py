@@ -189,6 +189,7 @@ class JupyterToBatspp(Main):
                     if line.lower() == '# setup\n':
                         is_setup = True
                     elif line.lower() in ['# continuation\n', '# continue\n', '# test']:
+                    ## Lorenzo: Is there any use for this comments or just for setup?
                         is_setup = False
 
                     # Check if line is a comment or command
@@ -213,7 +214,8 @@ class JupyterToBatspp(Main):
             # Markdown cells are considered as comments or directives
             elif cell['cell_type'] == 'markdown':
                 for line in cell['source']:
-                    batspp_content += ensure_new_line(f'# {line} markdown')
+                    ## BAD: batspp_content += ensure_new_line(f'# {line} markdown')
+                    batspp_content += ensure_new_line(f'# [markdown]: {line!r}')
 
             # Add blank line between cells
             batspp_content += '\n'

@@ -37,6 +37,7 @@
 
 # Uncomment (or comment) the following for enabling (or disabling) tracing
 ## DEBUG: set echo=1
+if ($?DEBUG_LEVEL == 0) set DEBUG_LEVEL=0
 
 set user = `whoami`
 set verbose_mode = 0
@@ -58,7 +59,7 @@ if (("$1" == "-?") || ("$*" =~ *-h*) || ("$*" =~ *--help*)) then
     echo "- The --filtered option ignores bash csh and defunct processes."
     echo "- The optional pattern augments the filter."
     echo "- The --verbose option shows command execution and some host stats (e.g., uptime)."
-    echo "- The --trace opitons shows detailed Bash interpreter tracing."
+    echo "- The --trace option shows detailed Bash interpreter tracing."
     exit
 endif
 while ("$1" =~ -*) 
@@ -68,8 +69,10 @@ while ("$1" =~ -*)
 	set user = "$2"
 	shift
     else if ("$1" == "--filtered") then
-	# TODO: What is -csh exclusion for?
+        ## NOTE: -csh likely used for relics running csh-based scripts
+        if ($DEBUG_LEVEL >= 3) echo "FYI: filtering entries (e.g., misc. bash and csh processes)"
 	set exclude_filter = '((bash *$)|\-csh|(csh.*ps_mine.sh)|<defunct>)'
+        set exclude_filter = '(\-csh|(csh.*ps_mine.sh)|<defunct>)'
     else if (("$1" == "--verbose") || ("$1" == "-v")) then
 	set verbose_mode = 1
     else if ("$1" == "--trace") then

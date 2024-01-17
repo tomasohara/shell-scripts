@@ -1,8 +1,14 @@
-# Test to avoid regressions of old errors
+# Tests to avoid regressions of old errors
 
-# BAD
+#...............................................................................
+
+# BAD & OLD
 ## $ randomize-datafile tweet_emotions.csv 4000 > random10pct-tweet-emotions.csv
 ## /home/tomohara/anaconda3/envs/nlp-py-3-10/bin/python: No module named randomize_lines
+
+$ randomize-datafile ~/Mezcla/mezcla/tests/resources/random-10pct-tweet-emotions.tsv 10% > /tmp/random-1pct-tweet-emotions.tsv
+$ wc -l < /tmp/random-1pct-tweet-emotions.tsv
+400
 
 $ head -3 ~/Mezcla/mezcla/tests/resources/cars.csv | cut.perl -delim=',' -fields=1-5,26 -
 car_ID,symboling,CarName,fueltype,aspiration,price
@@ -14,3 +20,102 @@ car_ID,symboling,CarName,fueltype,aspiration,price
 2,3,car model two,gas,std,16500
 3,1,cat model three,gas,std,16500
 
+## DEBUG
+$ display-macros randomize-datafile
+randomize-datafile () 
+{ 
+    local file="$1";
+    local num_lines="$2";
+    if [ "$num_lines" = "" ]; then
+        num_lines=$(wc -l < "$file");
+    fi;
+    head -1 "$file";
+    tail --lines=+2 "$file" | python -m mezcla.randomize_lines | head -"$num_lines"
+}
+
+#...............................................................................
+# check_errors.perl
+
+# Bad behavior
+
+# Make sure no error
+# ex: "Can't find reverse.perl on PATH."
+$ echo ok | check-errors 2>&1 | grep -c "Can't"
+0
+
+# Good
+$ echo ok | check-errors | wc -l
+0
+
+# Make sure QUIET=0 hides file name
+# f=$TMP/_hey.list
+$ echo warning: hey > $f
+$ QUIET=0 check-errors $f | wc -l
+0
+
+# Make sure no exceptions reported
+# Sample ouput:
+#    $ check_errors.perl -strict=1
+#    Uncaught exception from user code:
+#    	
+#    	usage: check_errors.perl [options]
+#
+
+$ check_errors.perl -strict=0 2>&1 | count-it -show_zeros "caught exception from user code"
+caught exception from user code	0
+
+# note: the following uses a script in the archive as die will be changed to exit in current scripts
+$ archive/reverse.perl -strict=1 2>&1 | count-it -show_zeros "caught exception from user code"
+caught exception from user code	1
+
+
+#-------------------------------------------------------------------------------
+# Rename files
+
+# Setup
+$ base=/tmp/rename-filenames
+$ dir=/tmp/rename-filenames
+$ mkdir -p "$dir"
+$ pushd $dir
+$ for char in "—" "·" "®" "“" "”" "″" "‶" "‘" "’" "–"; do echo "$char" > $dir/_${char}_.list; done
+
+# Setup
+$ ls _*_.list 2> /dev/null > pre.list
+$ rename-special-punct > $base.log 2>&1
+
+## DEBUG:
+$ ls _*_.list
+_®_.list  _–_.list  _‘_.list  _“_.list  _″_.list
+_·_.list  _—_.list  _’_.list  _”_.list  _‶_.list
+
+# Setup
+$ ls _*_.list 2> /dev/null > post.list
+$ popd
+
+$ [ "8" -le "$(wc -l < pre.list)" ]; echo "$?"
+
+$ [ "1" -eq "$(wc -l < post.list)" ]; echo "$?"
+
+#-------------------------------------------------------------------------------
+# git aliases
+
+# make sure git-diff-list doesn't show duplicate entries
+#
+# $ git-diff-list
+# run_tests.bash
+# run_tests.bash
+# tests/run_tests.bash
+# tests/summary_stats.bash
+#
+## TODO
+$ all_diff_counts=$(git-diff-list | sort | wc -l)
+$ unique_diff_counts=$(git-diff-list | sort -u | wc -l
+$ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
+
+# TODO2: make sure zip is install
+
+## $ GIT_MESSAGE='fix VSD_CONDA_ENV reference; shell-check cleanup' git-update-commit-push startup.txt 
+## Temporarily changing working directory to root: /home/tomohara/search-diff-engine
+## issuing: zip over changed files (for later restore)
+## The program 'zip' is currently not installed. You can install it by typing:
+## sudo apt install zip

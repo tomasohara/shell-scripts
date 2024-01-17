@@ -1,7 +1,9 @@
 # Simple alias test
 
+# Define helper alias
 # Global Setup
 $ alias count-words='wc -w'
 
-$ echo abc def ght | count-words
+# Test word count
+$ echo abc def ghi | count-words
 3

@@ -26,7 +26,7 @@ function full-usage {
     echo ""
     echo "Notes:"
     echo "- default extract-dir: $export_to_expr"
-    echo "- Env. vars: {EXPORT_TO, PRETTY, QUICK_MODE, VERBOSE, TMP}"
+    echo "- Env. vars: {EXPORT_TO, NUM_REVISIONS, PRETTY, QUICK_MODE, VERBOSE, TMP}"
     echo ""
 }
 
@@ -118,17 +118,23 @@ info="$TMP/_$base.$$.info"
 
 # Get information on commits, optionally checking for additional records due to renames
 git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
+num_cases=$(wc -l < "$info")
 if [ "${QUICK_MODE:-1}" == "1" ]; then
-    num_cases=$(wc -l < "$info")
-    total_num_cases=$(git log --follow "$GIT_PATH_TO_FILE" | grep -v '^commit' | wc -l)
+    total_num_cases=$(git log --follow "$GIT_PATH_TO_FILE" | grep -c -v '^commit')
     if [ "$num_cases" != "$total_num_cases" ]; then
 	echo "Warning: Additional cases due to renames: try alt-extract-all-git-versions.bash"
     fi
 fi
 
+num_revisions="${NUM_REVISIONS:-$num_cases}"
+first_case=$(($num_cases - $num_revisions + 1))
 while read -r LINE; do
     # ex: 2021-05-09T22:27:20-05:00 d124b2a3c1de2b2c0cd834b0fa9097e871d7f141
     COUNT=$((COUNT + 1))
+    if [ $COUNT -lt $first_case ]; then
+        ## DEBUG: echo "FYI: Ignoring case $COUNT ($LINE))"
+        continue
+    fi
     COMMIT_DATE=$(echo "$LINE" | cut -d ' ' -f 1)
     # optionally, convert date into DDmmmYY-HHMM format
     version_spec="$COUNT"

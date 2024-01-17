@@ -16,21 +16,24 @@
 # - Address the TODO's below.
 #
 
+# Special cases
+# TODO: see why excluded by the rules
+# Workflow files (e.g., .github/workflows/tests.yml).
+!.github/**
+
 # Log files and listings
 # TODO: figure out how to apply to subdirs
 **/*.log
 **/*.list
 
-# Any files with leading _, except specified cases
+# Any files with leading underscores (_), except specified cases
+# Warning: files in repo like _temp-user-docker.env ignored unless overridden (e.g., git add --force)
 **/_*
 !**/*__init__.py
 # Likewise for trailing _'s (e.g., master-dir-link_)
 **/*_
-
-# Special cases
-# TODO: see why excluded by the rules
-# Workflow files (e.g., .github/workflows/tests.yml).
-!.github/**
+# Explicit filter
+_temp-user-docker.env
 
 # Backup file
 **/*.bak
@@ -50,6 +53,9 @@
 
 # (maldito) Mac
 .DS_Store
+
+# Misc. tool dirs (e.g., VS Code)
+shell-scripts
 
 #...............................................................................
 # Idiosyncratic stuff for Tom
@@ -75,6 +81,10 @@ TAGS
 .coverage
 .coverage.*
 .hypothesis**
+*-intellij
+.mypy_cache
+.vscode
+.idea
 
 # OS-specific directories
 ## TODO: re-enable

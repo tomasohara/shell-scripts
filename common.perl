@@ -24,6 +24,9 @@ eval 'exec perl -Ssw $0 "$@"'
 # Tom O'Hara
 # New Mexico State University
 #
+# TODO3:
+# - Use TL_MOST_VERBOSE for &TL_VERBOSE+4; likewise for similar constructs.
+#
 # TODO:
 # - * Add gotcha's for modification (e.g., consider Python port instead)!
 # - Make changes to take advantage of Perl 6???.
@@ -48,6 +51,10 @@ eval 'exec perl -Ssw $0 "$@"'
 # Portions Copyright (c) 1997-1999, 2002-2003 Tom O'Hara
 # Portions Copyright (c) 1999-2001 Cycorp, Inc.  All rights reserved.
 #
+#--------------------------------------------------------------------------------
+# Notes:
+# - Warning: Dynamic use calls should be invoked via eval (see set_strict_mode).
+# - If not familiar with Perl, use ChatGPT-like tool to explain the code.
 #
 #------------------------------------------------------------------------
 # Function synopsis:
@@ -74,7 +81,7 @@ eval 'exec perl -Ssw $0 "$@"'
 # init_common():	initialize this common module.
 # init_var(variable_name, initial_value)  Initializes a variable unless it is already defined.
 # intersection(list1, list2)  Returns the intersection of the two lists (passed as references).
-# iso_lower(text):	lowercase text accounting for ISO-9660 accents
+# iso_lower(text):	lowercase text accounting for ISO-9660 accents (TODO3: ISO-8859)
 # iso_remove_diacritics($text): remove diacritic marks from the text
 # issue_command(command_line, [trace_level]) Issue the specified command and ignores the result.
 # lock(*FILE):		locks the specified file for exclusive access
@@ -106,7 +113,7 @@ use vars qw/$debug_level $d $o $redirect $script_dir $script_name $TRUE $FALSE $
     $disable_commands $unix $under_WIN32 $delim $path_delim $path_var_delim $precision $verbose $help $TEMP $TMP
     $OSTYPE $OS $HOST $debugging_timestamps $disable_assertions $unbuffered $para $slurp $PATH @PATH
     $force_WIN32 $force_unix $osname $common_options $utf8 $BOM $timeout $timeout_seconds $timeout_script $wait_for_user/;
-use vars qw/$preserve_temp/;
+use vars qw/$preserve_temp $strict/;
 
 sub COMMON_OPTIONS { $common_options; }
 
@@ -162,17 +169,28 @@ sub VERBOSE_DEBUGGING { return ($debug_level >= TL_VERBOSE) };
 sub SCRIPT_DIR {$script_dir;};
 sub TEMP_DIR {$TEMP;};
 
-# Uncomment the following to help track down undeclared variables.
+# set_strict_mode(enable): set Perl strict interpretation mode with diagnostics
+sub set_strict_mode {
+    my($strict_mode) = $_[0];
+    ## DEBUG: print STDERR "set_strict_mode($strict_mode)\n";
+    if ($strict_mode) {
+	## DEBUG: print STDERR "using strict and diagnostics\n";
+	eval "use strict";
+	## TODO: no strict "refs";		# to allow for symbolic file handles
+	eval "use diagnostics";
+    }
+}
+
+# The -strict option can help track down undeclared variables.
 # Be prepared for a plethora of warnings. One that is important is
 #    'Global symbol "xyz" requires explicit package name'
 # when NOT preceded by 'Global symbol "xyz" requires explicit package name'
 # NOTE: not used since other scripts might fail with it
 # TODO: fix all client scripts to be strict as well
 #
-## use strict;
-## no strict "refs";		# to allow for symbolic file handles
-## use diagnostics;
-
+our($strict);
+# note: enable here for common.perl and later for client scripts
+&set_strict_mode(defined($strict) && $strict);
 
 # init_common()
 #
@@ -232,7 +250,8 @@ sub init_common {
     &init_var_exp(*precision, 3);	# default number of decimal places for rounding
     &init_var_exp(*verbose, &FALSE);	# verbose output mode
     &init_var(*help, &FALSE);	        # show usage
-    ## &init_var_exp(*strict, &FALSE);		# use strict perl type checking
+    &init_var_exp(*strict, &FALSE);	# use strict perl type checking
+    &set_strict_mode($strict);          # note: could be set via environment so reinvoked (i.e., recheck)
     #
     &init_var_exp(*unbuffered, &FALSE);	# unbuffered I/O
     &init_var_exp(*debugging_timestamps, &FALSE);   # timestamp all debug output
@@ -394,7 +413,8 @@ sub init_common {
     if ($BOM) {
 	print "\xEF\xBB\xBF\n";
     }
-
+    &debug_print(&TL_VERY_VERBOSE, "init_common() => $initialized\n");
+    
     return ($initialized);
 }
 
@@ -718,7 +738,7 @@ sub debug_on {
 #
 sub debug_out {
     my($level, $format_text, @args) = @_;
-    &debug_print(&TL_MOST_VERBOSE, "debug_out(@_)\n");
+    &debug_print(&TL_ALL, "debug_out(@_)\n");
 
     # Do sanity check to ensure printf formatting present
     # TODO: move inside trace level test to avoid too many warnings.
@@ -865,10 +885,10 @@ sub warning {
 sub assert {
     my($expression, $package, $filename, $line) = @_;
     if ($disable_assertions) {
-	&debug_print(99, "my assert(@_) {checking disabled}\n");
+	&debug_print(99, "[common]assert(@_) {checking disabled}\n");
 	return;
     }
-    &debug_print(&TL_VERBOSE+4, "my assert(@_)\n");
+    &debug_print(&TL_VERBOSE+4, "[common]assert(@_)\n");
 
     # Determine the package to use for the evaluation environment,
     # as well as the filename and line number for the assertion call.
@@ -1029,10 +1049,11 @@ sub blocking_stdin {
 #        &init_var(*var2, 77);  ;; $var2 => 77
 #
 # NOTE: 
-# The environment setting for the variable is checked first whenever
-# the variable hasn't been defined on the command line. In addition, the
-# environment variable can optionally be set, which faciliates passing
-# settings to sub-scripts that have similar parameters.
+# - The environment setting for the variable is checked first whenever
+#   the variable hasn't been defined on the command line. In addition, the
+#   environment variable can optionally be set, which faciliates passing
+#   settings to sub-scripts that have similar parameters.
+# - See calc_entropy.perl for an example of customizing default behavior.
 #
 # WARNING:
 # - The automatic creation of environment variables can lead to subtle problems
@@ -1046,18 +1067,30 @@ sub blocking_stdin {
 # - Make export_var false by default and require explicit usage in those scripts
 #   requiring it (e.g., those that call helper scripts with same arguments).
 # - Add option to disable environment variable usage.
+#................................................................................
+# set_init_var_export(allow): override init_var default exporting to environment
+# block_init_var_via_env(block): don't allow init_var to get defaults from environment
 #
 our($export_default) = &FALSE;
 sub set_init_var_export {
+    # note: Used so that variables are exported by default (e.g., so explicit init_var_exp not needed).
+    # TODO2: set_init_var_export => allow_init_var_exports???
     my($default) = @_;
     $export_default = $default;
 }
 #
+our($use_env_default) = &TRUE;
+sub block_init_var_via_env {
+    # note: Used so that variables are not initialized via environment
+    my($block_env_defaults) = @_;
+    $use_env_default = (! $block_env_defaults);
+}
 ## OLD: sub EXPORT {&TRUE;}
 #
 sub init_var {
     use vars qw/$var_name $var_value $export_var/;
     local(*var_name, $var_value, $export_var) = @_;
+    ## TODO: &debug_print(&TL_DETAILED + 2, "in init_var($var_name, _, _)\n");
     my($default_export_var) = $export_default;
     $export_var = $default_export_var if (!defined($export_var));
 
@@ -1065,16 +1098,24 @@ sub init_var {
     # specifier (eg, "*main::use_random_coords" => "use_random_coords").
     # TODO: Use some convention to avoid clash w/ common env vars ???
     #       Maintain the package spec ???
+    # TODO2: Make environment default explicit
     my($env_var) = *var_name;
     $env_var =~ s/^.*:://;
     ## TODO: make this optional
     $env_var = &to_upper($env_var);
     my($new_value);
 
-    if (!defined($var_name)) {
-	# Get the value of the corresponding environment variable, if set.
-	$new_value = &get_env($env_var, $var_value, &TL_VERBOSE+2);
-	$var_name = $new_value;
+    if (! defined($var_name)) {
+	if ($use_env_default) {
+	    # Get the value of the corresponding environment variable, if set.
+	    $new_value = &get_env($env_var, $var_value, &TL_VERBOSE+2);
+	    $var_name = $new_value;
+	}
+	else {
+	    # TODO3: cleanup code variable dereferencing to make more intuitive
+	    $var_name = $var_value;
+	    $new_value = $var_value;
+	}
     }
     else {
 	$new_value = $var_name;
@@ -1884,7 +1925,7 @@ sub remove_outer_quotes {
     return ($text);
 }
 
-# iso_lower(text): lowercase text accounting for ISO-9660 accents
+# iso_lower(text): lowercase text accounting for ISO-9660 accents (TODO3: ISO-8859)
 # TODO: handle the full-range of accents (not just those for Spanish)
 # BAD EX: iso_lower("AÑO") => "año"
 # EX: iso_lower("A\x{00D1}O") => "a\x{00F1}o"
@@ -1899,7 +1940,7 @@ sub iso_lower {
     return ($text);
 }
 
-# iso_upper(text): uppercase text accounting for ISO-9660 accents
+# iso_upper(text): uppercase text accounting for ISO-9660 accents (TODO3: ISO-8859)
 # TODO: handle the full-range of accents (not just those for Spanish)
 # BAD: EX: iso_upper("José") => "JOSÉ"
 # EX: iso_upper("Jos\x{00E9}") => "JOS\x{00C9}"
@@ -2278,7 +2319,7 @@ sub mean {
 
     map { $sum += $_; } @values;
     my($mean) = ($num > 0) ? ($sum / $num) : 0.0;
-    &debug_print(&TL_DETAILED, "mean(@_) => $mean\n");
+    &debug_print(&TL_VERBOSE, "mean(@_) => $mean\n");
     
     return ($mean);
 }
@@ -2298,22 +2339,25 @@ sub stdev {
     my($sum_sq_mean_diff) = 0.0;
     map { $sum_sq_mean_diff += ($_ - $mean) ** 2; } @values;
     my($stdev) = ($num > 1) ? sqrt($sum_sq_mean_diff / ($num - 1)) : 0.0;
-    &debug_print(&TL_DETAILED, "stdev(@_) => $stdev\n");
+    &debug_print(&TL_VERBOSE, "stdev(@_) => $stdev\n");
 
     return ($stdev);
 }
 
 # get_file_ddmmmyy(file): returns FILE's date in DDmmmYY format (e.g., 31mar22).
 # note: keep date in synch with tomohara-aliases.perl
-# TODO: fix me: returns current year 2022 as ddmmm71 (i.e., 1971)!
 #
 sub get_file_ddmmmyy {
     my($filename) = @_;
     &debug_print(6, "get_file_ddmmmyy($filename)\n");
 
     # Get the local time structure
-    my($atime, $mtime, $ctime, $blksize, $blocks) = stat($filename);
-    &debug_print(6, "file stat: ($atime, $mtime, $ctime, $blksize, $blocks)\n");
+    ## TODO3: use File::statl see perlfunc(1) manpage
+    ## OLD:
+    ## my($atime, $mtime, $ctime, $blksize, $blocks) = stat($filename);
+    ## &debug_print(6, "file stat: ($atime, $mtime, $ctime, $blksize, $blocks)\n");
+    my($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks) = stat($filename);
+    &debug_print(6, "file stat: ($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks)\n");
     my($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime($mtime);
     &debug_print(6, "localtime: ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst)\n");
 

@@ -17,6 +17,9 @@
 ## set -o xtrace
 ## set -o verbose
 
+# Get defaults for programs
+BROWSER=${BROWSER:-firefox}
+
 # Support for MacOS-special casing
 under_mac=0
 if [ "$(uname)" = "Darwin" ]; then under_mac=1; fi
@@ -184,7 +187,7 @@ case "$lower_file" in
 
     # HTML files and XML files
     # TODO: convert filename arguments to use file:// prefix (to distinguish from URL's)
-    *.html | *.xml) invoke firefox "$@" & ;;
+    *.html | *.xml) invoke "$BROWSER" "$@" & ;;
 
     # Text files
     *.txt | *.text) invoke emacs "$@" & ;;

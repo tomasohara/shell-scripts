@@ -40,9 +40,10 @@ append-path "$PERLLIB"
 ## OLD (see below): prepend-path "$HOME/python/Mezcla/mezcla"
 append-path "$HOME/python"
 append-path "$TOM_BIN/adhoc"
+append-path "$TOM_BIN/archive"
 append-path "$TOM_BIN/examples"
 append-path-warn "$HOME/.local/bin"
-# Put current directoy at end of path; can be overwritting with ./ prefix
+# Put current directory at end of path; can be overwritting with ./ prefix
 export PATH="$PATH:."
 
 # Note: ~/lib only used to augment existing library, not pre-empt
@@ -105,7 +106,15 @@ cond-export MNT /media/"$USER"
 ## TODO: export EDITOR="emacs -nw"
 export EDITOR="emacs"
 
+# Other default programs (e.g., for use with start.sh)
+export BROWSER="google-chrome"
+
 # Linux stuff
 if [ "$(under-linux)" = "1" ]; then
     cond-export WNSEARCHDIR /usr/share/wordnet
+fi
+if [ "$DOMAIN_NAME" = "" ]; then
+    # shellcheck disable=SC2155
+    # TODO: cond-export
+    export DOMAIN_NAME=$(domainname.sh);
 fi

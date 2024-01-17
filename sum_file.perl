@@ -27,6 +27,18 @@ eval 'exec perl -Ssw $0 "$@"'
 # the column with the dash is not being anlayzed); but if the entry is empty
 # then the corresponding entries in the other columns are still considered
 # (blanks should only occur at the end).
+#
+#-------------------------------------------------------------------------------
+# via https://www.calculatorsoup.com/calculators/statistics/percentile-calculator.php
+#
+# How to Calculate Percentile
+# Arrange n number of data points in ascending order: x1, x2, x3, ... xn
+# Calculate the rank r for the percentile p you want to find: r = (p/100) * (n - 1) + 1
+# If r is an integer then the data value at location r, xr, is the percentile p: p = xr
+# If r is not an integer, p is interpolated using ri, the integer part of r, and rf, the fractional part of r:
+# p = xri + rf * (xri+1 - xri)
+#
+#-------------------------------------------------------------------------------
 # 
 # TODO:
 # - Support R in addition to xlispstat.
@@ -37,14 +49,17 @@ eval 'exec perl -Ssw $0 "$@"'
 BEGIN { 
     my $dir = `dirname $0`; chomp $dir; unshift(@INC, $dir);
     require 'common.perl';
+    use vars qw/$TMP/;
+    require 'extra.perl';
     use vars qw/$verbose &set_init_var_export/;
+    require POSIX;
 }
 
 use strict;
 use vars qw/$fract $diff $labels $headings $f $f1 $f2 $col $col1 $col2 $fix
     $ttest $paired_ttest $paired $anova $mann_whitney $each $interactive $stats
     $stdev $keep_nonnumeric $skip_nonnumeric $cumulative $average $context $flag_index_change $show_sum $dollars $commas $delim/;
-use vars qw/$strip $args $append/;
+use vars qw/$strip $args $append $occurrence $extended/;
 
 # Check options for statistical tests
 &init_var(*args, &FALSE);       # get data from arguments (i.,e., command line)
@@ -65,17 +80,20 @@ my($any_stat_test) = ($ttest || $paired_ttest || $anova || $mann_whitney);
 &init_var(*diff, &FALSE);	# produce a difference column
 &init_var(*labels, &FALSE);	# labels occur in column 1
 &init_var(*headings, &FALSE);	# first line provides column headings 
-&init_var(*f, -1);		# alias for -f1
+&init_var(*occurrence, &FALSE); # second number gives occurence count
+my($needs_two_numbers) = ($any_stat_test || $occurrence);
+my($f1_default) = -1;
+&init_var(*f, $f1_default);	# alias for -f1
 &init_var(*f1, $f);		# 0-based field position for first column
-&init_var(*f2,		    	# 0-based field position for second column
-	  ($any_stat_test ? ($f1 + 1) : -1));
+my($f2_default) = ($needs_two_numbers ? ($f1 + 1) : -1);
+&init_var(*f2, $f2_default);   	# 0-based field position for second column
 &init_var(*col, 		# alias for -col1
-	  ($f1 > -1) ? ($f1 + 1) : (1 + $labels));
+	  ($f1 > $f1_default) ? ($f1 + 1) : (1 + $labels));
 &init_var(*col1, $col);		# main column of data
 &init_var(*col2, 		# other column of data
-	  ($f2 > -1) ? ($f2 + 1) : -1);
-$f1 = ($col1 - 1) if ($f1 == -1);
-$f2 = ($col2 - 1) if ($f2 == -1);
+	  ($f2 > $f2_default) ? ($f2 + 1) : (2 + $labels));
+$f1 = ($col1 - 1) if ($f1 == $f1_default);
+$f2 = ($col2 - 1) if ($f2 == $f2_default);
 &init_var(*fix, &FALSE);	# fix-up column spacing (eg, tabify)
 &assert($f1 > -1);
 &assert($col1 == ($f1 + 1));
@@ -106,14 +124,12 @@ $f2 = ($col2 - 1) if ($f2 == -1);
 if ($flag_index_change) {
     &assert($col2 > 0);
 }
-## OLD:
-## &init_var(*dollars, &FALSE);	# the data contain dollar signs (to be ignored)
-## &init_var(*commas, &FALSE);	# the data contain commas (to be ignored)
 &init_var(*strip, &FALSE);      # strip comma's and dollar signs
 &init_var(*dollars, $strip);	# the data contain dollar signs (to be ignored)
 &init_var(*commas, $strip);	# the data contain commas (to be ignored)
 &init_var(*delim, "\t");        # column separator
 &init_var(*append, &FALSE);     # append the difference, etc.
+&init_var(*extended, &FALSE);   # include extended statistic (median, mode, percentile)
 
 my($sum) = 0;
 my($last_index) = "";
@@ -123,21 +139,18 @@ my(@data) = ();
 my($total_num) = 0;
 
 if ( !defined($ARGV[0])) {
-    ## OLD: my($options) = "options = [-stats] [-col=N] [-fix] [-fract] [-labels] [-headings] [-ttest] [-paired_ttest] [-anova] [-mann_whitney] [-stdev] [-cumulative [-average] [-flag_index_change]] [-context] [-dollars] [-commas] [-delim=S] [-verbose] [-append]";
-    my($options) = "[-stats] [-col=N] [-fix] [-paired_ttest] [-anova] [-stdev] [-cumulative [-average] [-delim=S] [-verbose] [-append]";
+    my($options) = "[-stats] [-col=N] [-fix] [-paired_ttest] [-anova] [-stdev] [-cumulative] [-average] [-delim=S] [-verbose] [-append]";
     if ($verbose) {
-	$options .= " [-fract] [-labels] [-headings] [-ttest] [-mann_whitney] [-flag_index_change]] [-context] [-dollars] [-commas]";
+	$options .= " [-fract] [-labels] [-headings] [-ttest] [-mann_whitney] [-flag_index_change]] [-context] [-dollars] [-commas] [-extended]";
     }
-    ## OLD: my($example) = "ex: ls -s | $script_name -fix -stdev -\n\n";
     my($example) = "Examples:\n\nls -s | $script_name -fix -stdev -\n\n";
-    $example .= "sum_file.perl -headings -anova -f1=3 -f2=4 resnik_typicality.data\n\n";
+    $example .= "sum_file.perl -headings -anova -col1=3 -col2=4 archive/resnik_typicality.data\n\n";
     if ($verbose) {
-	$example .= "sum_file.perl -ttest -labels -headings -f=5 -f2=6 eval_naive_bayes_4jul.report\n\n";
-	$example .= "sum_file.perl -mann_whitney -fix=0 -f1=2 -f2=4 resnik_brown_object.data\n\n";
-	$example .= "sum_file.perl -diff -append -col1=1 -col2=2 old-test/mendenhall_ex13.1.data\n\n";
+	## OLD: $example .= "sum_file.perl -ttest -labels -headings -f=5 -f2=6 eval_naive_bayes_4jul.report\n\n";
+	$example .= "sum_file.perl -mann_whitney -fix=0 -col1=2 -col2=4 archive/resnik_brown_object.data\n\n";
+	$example .= "sum_file.perl -diff -append -col1=1 -col2=2 archive/mendenhall_ex13.1.data\n\n";
     }
 
-    ## OLD: my($note) = "NOTES:\n- Use -'s for cases with no corresponding data.\n";
     my($note) = "Notes:\n- Use -'s for cases with no corresponding data.\n";
     $note .= "- Use empty cells in case one column has more data than another.\n";
     $note .= "- The -f values are 0-based, whereas the -col values are 1-based.\n";
@@ -150,9 +163,9 @@ if ( !defined($ARGV[0])) {
 	$note .= "- Use -index to treate -col2 as index (e.g., for tracking cumulative average differences).\n";
 	$note .= "  This assumes the data is sorted by the index column.\n";
 	$note .= "- Use -dollars and -commas to ignore \$ and , respectively in the data.\n";
+	$note .= "- Use -extended for additional statistics (e.g., median, mode and percentile).\n";
     }
 
-    ## OLD: print STDERR "\nusage: $script_name [options] [- | file ...]\n\n$options\n\n$example\n$note\n";
     print STDERR "\nUsage: $script_name [options] [- | file ...]\n\n$options\n\n$example\n$note\n";
     &exit();
 }
@@ -264,8 +277,6 @@ while (<>) {
 	for ($i = $start; $i <= $#columns; $i++) {
 	    my($datum) = (&is_numeric($columns[$i]) || ($columns[$i] eq ""))
 		            ? "$columns[$i] " : "\"$columns[$i]\" ";
-		            ## OLD: ? "$columns[$i] " : "";
-	    ## OLD: $column_data[$i] = "" if (!defined($column_data[$i]));
 	    $column_data[$i] .= $datum;
 	    $num_columns_collected++;
 	}
@@ -273,15 +284,33 @@ while (<>) {
     }
 
     # Extract the first number
-    ## OLD: $total_num += 1;
     # TODO: cut down on redundant code
     my($num) = $num1;
     if (! $fract) {
 	if (&is_numeric($num)) {
-	    $count++;
-	    $sum += $num1;
-	    &debug_out(6, "num=$num1; sum=%s\n", &round($sum));
-	    push(@data, $num);
+	    ## OLD:
+	    ## $count++;
+	    ## $sum += $num1;
+	    ## &debug_out(6, "num=$num1; sum=%s\n", &round($sum));
+	    ## push(@data, $num);
+
+	    # Regular count (no occurrence field)
+	    if (! $occurrence) {
+		$count++;
+		$sum += $num1;
+		&debug_out(6, "num=$num1; sum=%s\n", &round($sum));
+		push(@data, $num);
+	    }
+	    # Factor in occurrence count
+	    else {
+		$count += $num2;
+		$sum += ($num1 * $num2);
+		&debug_out(6, "num=$num1; count=$num2 sum=%s\n", &round($sum));
+		## TODO: push(@data, [$num1] x $num2;
+		for (my $i = 0; $i < $num2; $i++) {
+		    push(@data, $num1);
+		}
+	    }
 	}
 	else {
 	    &debug_out(5, "Warning skipping non-numeric $num\n");
@@ -404,11 +433,79 @@ if ($stats == &FALSE) {
 	    print "num = 0\n";
 	}
 	else {
-	    debug_print(&TL_DETAILED, "data: @data\n");
+	    debug_print(&TL_VERBOSE, "data: @data\n");
 	    if ($verbose) {
 		print("data: @data\n");
 	    }
 	    printf "num = %d; mean = %s; stdev = %s; min = %s; max = %s; sum = %s\n", (scalar @data), &round(&mean(@data)), &round(&stdev(@data)), &round(&min_item(@data)), &round(&max_item(@data)), &round($sum);
+	    if ($extended) {
+		# Sort data
+		my(@sorted_data) = sort { $a <=> $b } @data;
+		&debug_print(5, "sorted_data: (@sorted_data)\n");
+		my($num_values) = (scalar @data);
+		my($median);
+
+		# Get median
+		my($middle_pos) = POSIX::floor($num_values / 2);
+		&debug_print(4, "num_values=$num_values middle_pos=$middle_pos\n");
+		if ($num_values % 2) {
+		    &debug_print(4, "Using unique middle\n");
+		    $median = $sorted_data[$middle_pos];
+		}
+		else {
+		    &debug_out(4, "Averaging values: %s %s\n",
+			       $sorted_data[$middle_pos - 1], $sorted_data[$middle_pos]);
+		    $median = ($sorted_data[$middle_pos] + $sorted_data[$middle_pos - 1]) / 2;
+		}
+
+		# Get mode (n.b., uses smaller value to break ties as w/ scipy.stats.mode)/
+		## OLD: my($mode) = &run_command("echo @data | count_it.perl '\\S+' | head -1 | cut -f1");
+		my(%counts);
+		foreach my $num (@sorted_data) {
+		    &incr_entry(\%counts, $num);
+		}
+		my($mode, $alt_mode, @rest) = &sorted_hash_keys_reverse_numeric(\%counts);
+		# TODO2: generalize tie breaker to more than two modes
+		if (defined($alt_mode) && ($counts{$mode} == $counts{$alt_mode}) && ($alt_mode < $mode)) {
+		    $mode = $alt_mode;
+		}
+
+		# Get 95th and 99th percentile
+		## OLD: my($perc95_pos) = POSIX::floor(0.95 * $num_values);
+		## BAD: my($perc95_pos) = &round(0.95 * $num_values, 0);
+		## OLD: my($perc95_pos) = POSIX::ceil(0.95 * ($num_values - 1));
+		## OLD: my($perc95) = $sorted_data[$perc95_pos];
+		# See https://www.calculatorsoup.com/calculators/statistics/percentile-calculator.php
+		my($perc95_pos) = (0.95 * ($num_values - 1) + 1);
+		my($perc95);
+		if ($perc95_pos == int($perc95_pos)) {
+		    $perc95 = &round($sorted_data[$perc95_pos - 1]);
+		}
+		else {
+		    my($diff) = ($sorted_data[$perc95_pos] - $sorted_data[$perc95_pos - 1]);
+		    my($fract) = ($perc95_pos - int($perc95_pos));
+		    $perc95 = &round($sorted_data[$perc95_pos - 1] + ($fract * $diff));
+		}
+		#
+		## OLD: my($perc99_pos) = POSIX::floor(0.99 * $num_values);
+		## BAD: my($perc99_pos) = &round(0.99 * $num_values, 0);
+		## OLD: my($perc99_pos) = POSIX::ceil(0.99 * ($num_values - 1));
+		## OLD: my($perc99) = $sorted_data[$perc99_pos];
+		my($perc99_pos) = (0.99 * ($num_values - 1) + 1);
+		my($perc99);
+		if ($perc99_pos == int($perc99_pos)) {
+		    $perc99 = &round($sorted_data[$perc99_pos - 1]);
+		}
+		else {
+		    my($diff) = ($sorted_data[$perc99_pos] - $sorted_data[$perc99_pos - 1]);
+		    my($fract) = ($perc99_pos - int($perc99_pos));
+		    $perc99 = &round($sorted_data[$perc99_pos - 1] + ($fract * $diff));
+		}
+		&debug_print(4, "perc95_pos=$perc95_pos perc99_pos=$perc99_pos\n");
+
+		# Output results
+		print "median = $median; mode = $mode; 95th-% = $perc95; 99th-% = $perc99\n";
+	    }
 	}
     }
 }
@@ -433,7 +530,7 @@ if ($stats) {
 #
 sub show_statistics {
     &debug_print(&TL_VERBOSE, "show_statistics(@_)\n");
-    my($temp_file) = "temp_calc_stats_$$.lisp";
+    my($temp_file) = "$TMP/temp_calc_stats_$$.lisp";
     my($lisp_code);
     my($extra) = "";
     my($init) = (&DEBUG_LEVEL < 4) ? "" : "(dribble \"temp_calc_stats_$$.log\")\n";
@@ -485,9 +582,11 @@ sub show_statistics {
 	                  $col1, $col2;
     }
     if ($anova) {
-	# By default, use version of anova from XLispStat extension.
-	# See Contributions/anova2.lsp in XLispStat directory.
-	$ENV{"USE_XLISP_EXTS"} = 1 unless (defined($ENV{"USE_XLISP_EXTS"}));
+	## OLD
+	## # By default, use version of anova from XLispStat extension.
+	## # See Contributions/anova2.lsp in XLispStat directory.
+	## $ENV{"USE_XLISP_EXTS"} = 1 unless (defined($ENV{"USE_XLISP_EXTS"}));
+	$ENV{"USE_XLISP_EXTS"} = 0 unless (defined($ENV{"USE_XLISP_EXTS"}));
     }
 
     # Output the lisp code for calculating the statistics
@@ -509,10 +608,10 @@ sub show_statistics {
 	$ENV{"XLISP_DEBUG"} = "1";
 	}
     if ($interactive) {
-	&cmd("xlispstat.sh $verbose_option $batch $non_x $in_redir $temp_file");
+	&cmd("xlispstat.bash $verbose_option $batch $non_x $in_redir $temp_file");
     }
     else {
-	my($result) = &run_command("xlispstat.sh $verbose_option $batch $non_x $in_redir $temp_file $out_redir", &TL_VERBOSE);
+	my($result) = &run_command("xlispstat.bash $verbose_option $batch $non_x $in_redir $temp_file $out_redir", &TL_VERBOSE);
 	$result =~ s/[^\000]+Copyright.*\n//; 	# drop xlisp banner
 	$result =~ s/.*xlisp_linux: can\'t connect to X server\s*\n//;
 	$result =~ s/\n>.*\n?/\n/g;		# drop command traces

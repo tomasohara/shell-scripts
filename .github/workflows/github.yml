@@ -1,6 +1,8 @@
 # Regular workflow for Github testing (n.b., runs remote on their servers)
 #
-# note: python.xml is a misnomer, this runs all tests python and alias.
+# Note:
+# - See act.yml for the local workflow file.
+# - It also contains a bunch of tips.
 #
 
 name: Github-Tests
@@ -8,30 +10,24 @@ name: Github-Tests
 on: [push, pull_request]
 
 jobs:
-  build:
-    name: Build and Run Tests
+
+  build-and-test-runner:
+    name: Build and Run Tests via Runner
+    ## NOTE: need to track down differences between Docker and Runner runs
+    ## TEMP: disable tests (and just run Docker version below)
+    if: ${{ false }}
     runs-on: ${{ matrix.os }}
-    
+
     strategy:
       matrix:
         os: [ubuntu-20.04]
         ## TODO: os: [ubuntu-20.04, ubuntu-latest]
-        ## TODO: python-version: ["3.8", "3.9", "3.10"]
-        python-version: ["3.9"]
-
-    ## TEST:
-    ## NOTE: following is for images on the hub
-    ## container:
-    ##   image: shell-scripts-dev
-    ##   options: --user=root
+        python-version: ["3.8", "3.9", "3.10"]
+        ## TODO: 3.x [latest; -or latest, latest-1, latest-2, ...]
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-
-      - name: Build docker image
-        run: |
-          docker build -t shell-scripts-dev -f- . <Dockerfile
 
       - name: Setup Python
         uses: actions/setup-python@v3
@@ -49,17 +45,31 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r requirements.txt
+          pip install --verbose --requirement requirements.txt
 
-      ## OLD
-      ## - name: Run Python Tests
-      ##   run: |
-      ##     python3 ./tests/master_test.py
-      ##
-      ## - name: Run Alias Tests
-      ##   run: |
-      ##     bash ./tests/summary_stats.bash
+      - name: Run Python Tests under Runner
+        run: |
+          PYTHONPATH="$PWD:$PWD/tests:$PYTHONPATH" ./tests/run_tests.bash
+          
+  build-and-test-docker:
+    name: Build and Run Tests via Docker
+    runs-on: [ubuntu-20.04]
+
+    ## TEST:
+    ## NOTE: following is for docker images on the hub
+    ## container:
+    ##   image: shell-scripts-dev
+    ##   options: --user=root
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Build docker image
+        run: |
+          docker build --tag shell-scripts-dev -f- . <Dockerfile
 
       - name: Run tests
         run: |
           docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+

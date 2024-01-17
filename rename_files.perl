@@ -12,6 +12,9 @@ eval 'exec perl -Ssw $0 "$@"'
 # full range of pattern matching is available, although not recommended due
 # to potential for unexpected results.
 # - With -ignore, case differences in filenames are ignored.
+# - With regex patterns, the u qualifier is ued so that character ranges not
+#   decomposed (e.g., [®] misinterpreted as [\xc2\xae]). See
+#      https://stackoverflow.com/questions/70358309/how-can-i-use-unicode-characters-in-perl-regex-substitution-command
 #
 # TODO:
 # - Add recursive option.
@@ -21,6 +24,7 @@ eval 'exec perl -Ssw $0 "$@"'
 BEGIN { 
     my $dir = $0; $dir =~ s/[^\\\/]*$//; unshift(@INC, $dir);
     require 'common.perl';
+    use vars qw/$utf8 $script_name $verbose/;
 }
 
 # Specify additional diagnostics and strict variable usage, excepting those
@@ -28,7 +32,7 @@ BEGIN {
 use strict;
 use vars qw/$q $f $regex $quick $force $test $evalre $global $i $ignore/;
 use vars qw/$t $nt $para/;
-use vars qw/$rename_old/;
+use vars qw/$rename_old $diagnose $fallback/;
 
 &init_var(*q, &FALSE);		# alias for -q
 &init_var(*quick, $q);		# quick spec: infer files from old pattern
@@ -41,6 +45,8 @@ use vars qw/$rename_old/;
 ## OLD: &init_var(*regex, &FALSE);	# allow regular expression in pattern
 &init_var(*regex, $para);	# allow regular expression in pattern
 &init_var(*evalre, &FALSE);	# run replacement through eval environment
+&init_var(*diagnose, &FALSE);	# diagnose pattern replacement issues
+&init_var(*fallback, &FALSE);	# try to recover from replacement issues
 my($nt_default) = (defined($t) ? (! $t) : &TRUE);  # abbrev. for 'not t'
 &init_var(*nt, $nt_default);    # alias for -test=0
 &init_var(*t, (! $nt));         # alias for -test
@@ -48,10 +54,11 @@ my($nt_default) = (defined($t) ? (! $t) : &TRUE);  # abbrev. for 'not t'
 &init_var(*global, &FALSE);	# global replacement
 &init_var(*rename_old, &FALSE); # rename old file as {old}.{MMDDDYY}
 
-# Refuse to process buggy -rename_old
-if ($rename_old) {
-    &debug_print(&TL_DETAILED, "Warning: The -rename_old option is not fully functional\n");
-}
+## OLD
+## # Refuse to process buggy -rename_old
+## if ($rename_old) {
+##     &debug_print(&TL_DETAILED, "Warning: The -rename_old option is not fully functional\n");
+## }
 
 ## TEST:
 # TODO: put $para support in common.perl (likewise for slurp, as in count_it.perl)
@@ -76,9 +83,22 @@ my $test_spec = ($test ? "test " : "");
 ##     $new_pattern = "";
 ## }
 
+# Special hooks for diagnosis
+# note: -diagnose only supported for -evalre
+if ($diagnose && (! $evalre)) {
+    if ($regex) {
+	&debug_print(&TL_USUAL, "FYI: -regex => -evalre to support diagnosis\n");
+	$evalre = &TRUE;
+    }
+    elsif ($global) {
+	&debug_print(&TL_USUAL, "FYI: -global => -evalre to support step-by-step diagnose\n");
+	$evalre = &TRUE;
+    }
+}
+
 # TEMP: warn about options not yet working
 if ($evalre) {
-    &debug_print(&TL_ALWAYS, "Warning: -evalre not yet working right\n")
+    &debug_print(&TL_ALWAYS, "Warning: -evalre not yet working quite right\n")
 }
 
 # Normalize the patterns
@@ -86,6 +106,11 @@ if ($evalre) {
 if ($ignore) {
     $old_pattern = &to_lower($old_pattern);
     $new_pattern = &to_lower($new_pattern);
+}
+if ($utf8) {
+    ## TODO:
+    ## $old_pattern = &decode_utf8($old_pattern);
+    ## $new_pattern = &decode_utf8($new_pattern);
 }
 
 # Support for quick spec: try all files that match the old pattern,
@@ -117,6 +142,10 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
 	&debug_print(&TL_DETAILED, "Ignoring non-existent old file ($old_file).\n"); 
 	next;
     }
+    if ($utf8) {
+	## TODO: $old_file = decode_utf8($old_file);
+    }
+    &debug_print(&TL_VERY_DETAILED, "old_file=$old_file\n");
     my $new_file = $old_file;
 
     # Apply patterns, making sure escaped unless regex desired.
@@ -131,22 +160,34 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
 	## };
 	&debug_print(&TL_VERY_VERBOSE, "evalre replacement\n");
 	## TODO: if ($global) { $new_file =~ s/$old_pattern/$new_pattern/ge; } else { $new_file =~  s/$old_pattern/$new_pattern/e; };
-	while ( $new_file =~ m/$old_pattern/ ) {
+	# note: u used so Unicode characters can be used in ranges
+	while ( $new_file =~ m/$old_pattern/u ) {
 	    ## TODO: resolve issue with replacement '-p-$1'
 	    my($replacement) = eval "$new_pattern";
+	    if ((! defined($replacement)) && $fallback) {
+		&debug_print(&TL_VERBOSE, "diagnose: using pattern as replacement\n");
+		$replacement = $new_pattern;
+	    }
 	    if (! defined($replacement)) {
 		&debug_print(&TL_ERROR, "Error: bad replacement\n");
 		last;
 	    }
+	    if ($verbose) {
+		print("Match text:  '$&'\n");
+		print("Replacement: '$replacement'\n");
+	    }
 	    &debug_print(&TL_VERBOSE, "replacement: $replacement\n");
 	    my($last_name) = $new_file;
-	    $new_file =~ s/$old_pattern/$replacement/;
+	    $new_file =~ s/$old_pattern/$replacement/u;
 	    last if ((! $global) || ($new_file eq $last_name));
+	    &debug_print(&TL_VERY_DETAILED, "new_file=$new_file\n");
 	}
      }
     elsif ($regex) {
 	&debug_print(&TL_VERY_VERBOSE, "regex replacement\n");
-	if ($global) { $new_file =~ s/$old_pattern/$new_pattern/g; } else { $new_file =~ s/$old_pattern/$new_pattern/; };
+	# note: u used so Unicode characters can be used in ranges
+	## OLD: if ($global) { $new_file =~ s/$old_pattern/$new_pattern/g; } else { $new_file =~ s/$old_pattern/$new_pattern/; };
+	if ($global) { $new_file =~ s/$old_pattern/$new_pattern/gu; } else { $new_file =~ s/$old_pattern/$new_pattern/u; };
 	## BAD: $new_file =~ s/$old_pattern/$new_pattern/;
 	## BAD (not appropriate for loop): if (&VERBOSE_DEBUGGING) { &debug_print(-1, "\$1 = $1\n"); }
     }
@@ -204,14 +245,16 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
 
 sub usage {
     my($options) = "main options = [-q | -quick] [-f | -force] [-i | -ignore] [-global] [-regex]";
-    $options .= "\nother options = [-evalre] [-t | -test] [-para]";
-    ## TODO: $options .= "\nother options = [-evalre] [-t | -test] [-para] [-rename_old]";
+    $options .= "\nother options = [-evalre] [-t | -test] [-para] [-rename_old]";
+    $options .= "\nesoteric options = [-diagnose] [-fallback] [-nt]";
     $options .= "\ncommon options = " . &COMMON_OPTIONS;
     my($example) = "Example(s):\n\n$script_name ' - Shortcut' '' *Shortcut*\n\n";
     $example .= "$0 rename-files -q -- '--' '-'\n\n";
     my($note) = "";
     $note .= "Notes:\n\n-- Use -- for first argument if dashes occur in old-pattern.\n-- By default only a single occurrence of the pattern is replaced.\n\n- The -ignore option is with respect to old vs. new comparison).\n";
-    ## TODO: $note .= "- Use -rename_old to rename existing target file with date-based suffix (e.g., fubar to fubar.22mar22).\n";
+    $note .= "- Use -rename_old to rename existing target file with date-based suffix (e.g., fubar to fubar.22mar22).\n";
+    $note .= "- Use -diagnose to diagnose -regex, -evalre, and -global.\n";
+    $note .= "- Use -fallback to recover from common errors (e.g., -evalre).\n";
 
     print STDERR "\nUsage: $script_name [options] old-pattern new-pattern [file] ...\\n\n$options\n\n$example\n$note";
 }

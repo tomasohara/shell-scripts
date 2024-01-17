@@ -39,15 +39,19 @@ use vars qw/$relaxed $strict $quiet $matching $before $after $info/;
 
 if (!defined($ARGV[0])) {
     my $options = "options = [-warnings | -info] [-context=N] [-no_astericks] [-skip_ruby_lib]";
-    $options .= " [-relaxed | -strict] [-verbose] [-quiet] [-before=N] [-after=N]";
-    my $example = "ex: $script_name whatever\n";
+    # TODO2: split options in main and misc (e.g., [-skip_ruby_lib])
+    $options .= " [-relaxed | -strict] [-verbose] [-quiet] [-before=N] [-after=N] [-matching]";
+    my $example = "ex: $script_name log-file\n";
     my $note = "Notes:\n";
     $note .= "- The default context is 1.\n";
     $note .= "- Warnings are skipped by default.\n";
     $note .= "- Use -no_astericks if input uses ***'s outside of error contexts.\n";
     $note .= "- Use -relaxed to include special cases (e.g., xyz='error').\n";
+    $note .= "- Use -matching to show the text from regex match.";
+    ## &assertion($note !~ /\n$/);
 
-    die "\nusage: $script_name [options]\n\n$options\n\n$example\n\n$note\n";
+    ## TODO2: &exit(...);
+    die("\nusage: $script_name [options]\n\n$options\n\n$example\n\n$note\n");
 }
 
 &init_var(*warning, &FALSE);		# alias for -warnings
@@ -64,7 +68,9 @@ my $asterisks = (! $no_asterisks);
 &init_var(*ruby, &FALSE);	   	# alias for -skip_ruby_lib
 &init_var(*skip_ruby_lib, $ruby);	# skip Ruby library related errors
 &init_var(*relaxed, &FALSE);            # relaxed for special cases
-&init_var(*strict, ! $relaxed);         # alias for relaxed=0 
+## OLD: &init_var(*strict, ! $relaxed);         # alias for relaxed=0
+## TODO2: use different option for strict error checking (as -strict not commonly used)
+$strict = (! $relaxed);                 # note: overrides common.perl default of 0
 &init_var(*quiet, &FALSE);              # just output errors proper (e.g., no filenames)
 &init_var(*matching, &FALSE);           # show matching text
 
@@ -80,7 +86,7 @@ while (<>) {
     &dump_line();
     chop;
     my($has_error) = &FALSE;		# whether line has error
-    my($match_info) = "";             # text span within line that matched
+    my($match_info) = "";               # text span within line that matched
 
     # Check for error log corruption
     if ($show_warnings && /$NULL/) {
@@ -101,6 +107,7 @@ while (<>) {
     elsif (## DEBUG: &debug_print(&TL_MOST_DETAILED, "here\n", 7) &&
 	   ## OLD: /^(ERROR|Error)\b/	   
 	   /^\s*(Error)\b/i
+	   || /\serror:/i
 	   ## OLD: || /command not found/i
 	   ## NOTE: maldito modules package polutes environment and man page not clear about disabling
 	   || (/command not found/i && (! /Cannot switch to Modules/))
@@ -171,9 +178,11 @@ while (<>) {
 
 	   # Python errors
 	   || /^\s*Traceback/		# stack trace
-	   || /^\s*\S+Error/		# exception (e.g., TypeError)
+	   ## OLD: || /^\s*\S+Error/		# exception (e.g., TypeError)
+	   # note: excludes exception repr's (e.g., <class 'AssertionError'>)
+	   || /(^|\s)[A-Z]\S+Error(\s|:|$)/	# exception (e.g., TypeError)
 	   || /:\s*error\s*:/i          # argparse error (e.g., main.py: error: unrecognized arguments
-	   || /^\s*FAILED\b/i              # pytest failure
+	   || /^\s*FAILED\b/i           # pytest failure
 
 	   # Cygwin errors
 	   || /\bunable to remap\b/
@@ -274,13 +283,22 @@ print "\n" if ($verbose);
 #------------------------------------------------------------------------
 
 # show_current_file_info(): display name of current file (and warning inclusion status)
+# Note: aborts if strict mode and file not found
 #
 sub show_current_file_info {
-    if (($current_file ne "") && ($quiet == &FALSE)) {
-	if ($verbose) {
-	    print "========================================================================\n";
-	    printf "Errors%s\n\n", ($skip_warnings ? "" : " and Warnings");
+    ## OLD: if (($current_file ne "") && ($quiet == &FALSE)) {
+    # Make sure file exists (or stderr)
+    if ($strict && ($current_file ne "-") && (! &file_exists($current_file)) && defined($ARGV[0])) {
+	&exit("Error: file '$current_file' not accessible.")
+    }
+    # Show current file if not stdin. Also adds divider if verbose mode.
+    if ($current_file ne "") {
+	if ($quiet == &FALSE) {
+	    if ($verbose) {
+		print "========================================================================\n";
+		printf "Errors%s\n\n", ($skip_warnings ? "" : " and Warnings");
+	    }
+	    print "$current_file\n";
 	}
-	print "$current_file\n";
     }
 }

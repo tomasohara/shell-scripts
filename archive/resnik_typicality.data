@@ -1,0 +1,64 @@
+# Table 3: Typicality ratings data on items from Trueswell et al. (1994)
+#
+# from (Resnik 1996)
+#
+verb	object	rating	assoc.	class
+eat	poultry	6.6	3.54	<entity>
+do	work	6.4	12.03	<entity>
+examine	evidence	6.3	0.78	<content>
+throw	ball	6.2	4.52	<entity>
+see	truck	6.1	5.79	<entity>
+write	letter	6.1	7.26	<writing>
+grow	crop	6.0	2.78	<object>
+break	vase	5.9	1.02	<artifact>
+describe	necklace	5.9	0.00	<necklace>
+draw	poster	5.9	0.20	<horse>
+take	money	5.6	0.02	<money>
+expect	package	5.5	5.93	<entity>
+transport	gold	5.5	8.62	<substance>
+lift	bricks	5.4	5.10	<entity>
+study	painting	5.4	0.79	<art>
+show	wallpaper	5.3	0.00	<wallpaper>
+steal	van	5.2	1.86	<object>
+request	equipment	5.1	3.72	<entity>
+scratch	sofa	4.8	1.83	<object>
+want	account	4.6	0.83	<communication>
+identify	jewelry	4.4	0.46	<decoration>
+select	recipe	4.4	0.00	<message>
+choose	computer	4.3	2.84	<entity>
+recognize	van	4.1	0.50	<entity>
+attack	power_plant	3.2	0.00	-
+love	textbook	1.9	0.00	<publication>
+capture	valley	1.8	0.00	<valley>
+#
+#------------------------------------------------------------------------
+# Resnik, Philip (1996), ``Selectional constraints: an
+# information-theoretic model and its computational realization'', {\em
+# Cognition} 61:127-159.
+#
+# John Trueswell, Michael Tanenhaus, and Susan Garnsey (1994),
+# ``Semantic influences on parsing: Use of thematic role information in
+# syntactic ambiguity resolution'', {\em Journal of Memory and
+# Language} 33:285-318.
+#
+#
+#------------------------------------------------------------------------
+# analyzing the data:
+#
+# perl_ sum_file.perl -headings -anova -f1=3 -f2=4 resnik_typicality.data
+#
+# % perl_ do_regression.perl -exclusion_list="1 2 5" resnik_typicality.data
+#
+# Least Squares Estimates (vs. rating):
+# 
+#                          Coefficient    S.E.(Coef)     T-Value     P-value
+# Constant                   4.63208      (0.282414)      16.4       (0.0000)
+# assoc.                    0.182247      (7.001441E-2)   2.60       (0.0153)
+# 
+# R Squared:                0.213232    
+# Sigma hat:                 1.11943    
+# Number of cases:                27
+# Degrees of freedom:             25
+# 
+# Correlation:              0.461771
+#
