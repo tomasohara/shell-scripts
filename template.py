@@ -24,11 +24,11 @@ Sample usage:
 # Local modules
 # TODO: def mezcla_import(name): ... components = eval(name).split(); ... import nameN-1.nameN as nameN
 from mezcla import debug
+from mezcla import glue_helpers as gh
 from mezcla.main import Main
-from mezcla import system
 from mezcla.my_regex import my_re
+from mezcla import system
 ## TODO:
-## from mezcla import glue_helpers as gh
 ## from mezcla import data_utils as du
 ##
 ## Optional:
@@ -59,6 +59,19 @@ TL = debug.TL
 TODO_FUBAR = system.getenv_bool("TODO_FUBAR", False,
                                 description="TODO:Fouled Up Beyond All Recognition processing")
 
+## TODO: Use helper class for main logic
+## class Helper:
+## 
+##     def __init__(self, ...):
+##         """Initializer: ..."""
+##         debug.trace_fmtd(TL.VERBOSE, "Helper.__init__(): self={s}", s=self)
+##         self.TODO = None
+##         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
+## 
+##     def process(self, ...):
+##         """TODO: ..."""
+##         # TODO: flesh out
+##
 
 class Script(Main):
     """Input processing class"""
@@ -106,15 +119,16 @@ class Script(Main):
     ##     debug.trace_fmtd(5, "Script.run_main_step(): self={s}", s=self)
     ##
 
-    ## TODO: def wrap_up(self):
-    ##           """Do final processing"""
-    ##           debug.trace(6, f"Script.wrap_up(); self={self}")
-    ##           # ...
+    ## TODO:
+    ## def wrap_up(self):
+    ##     """Do final processing"""
+    ##     debug.trace(6, f"Script.wrap_up(); self={self}")
+    ##     # ...
 
 def main():
     """Entry point"""
     app = Script(
-        description=__doc__.format(script=__file__),
+        description=__doc__.format(script=gh.basename(__file__)),
         # Note: skip_input controls the line-by-line processing, which is inefficient but simple to
         # understand; in contrast, manual_input controls iterator-based input (the opposite of both).
         skip_input=False,
@@ -125,7 +139,7 @@ def main():
         ## -or-: # Disable inference of --help argument
         ## auto_help=False,
         ## TODO: specify options and (required) arguments
-        boolean_options=[(TODO_ARG, "TODO-desc")],
+        boolean_options=[(TODO_ARG, "TODO-desc--currently greps for TODO")],
         ## TODO
         ## Note: FILENAME is default argument unless skip_input
         ## positional_arguments=[ALT_FILENAME], 
