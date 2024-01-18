@@ -256,6 +256,8 @@ def main():
         
         ## OLD (Using unresolved path): debug.code(4, lambda: print(gh.run(f"check_errors.perl {log_file}")))
         debug.code(4, lambda: print(gh.run(f"{check_batspp_perl_path} {log_file}")))
+
+        ## EXP: print(gh.run(f"{check_batspp_perl_path} {log_file}"))
         
         ## TEMP: Show context of failed tests for help with diagnosis of Github actions runs (as temp files not accessible afterwards)
         if SHOW_FAILURE_CONTEXT:
@@ -266,22 +268,20 @@ def main():
         debug.code(5, lambda: print(gh.run(f"echo BatsPP log:; head -1000 --verbose {log_file} | cat -n")))
         debug.assertion(not run_output.strip())
     
-        ## EXPERIMENTAL: num_eval_errors replaced by arr_eval_errors
         real_output = system.read_file(real_output_file)
-        arr_eval_errors = (gh.run(f"{check_batspp_perl_path} -context=0 {log_file}").split("\n"))[1:]
+        eval_errors = (gh.run(f"{check_batspp_perl_path} -context=0 {log_file}").split("\n"))[1:]
+        
+        print(f"\nEvaluation Errors: {len(eval_errors)}")
+        if (len(eval_errors) > 0):
+            print("\nError Details:\n")
+            for error in eval_errors:
+                print("\t"+error+"\n")
+            print("")
+        
         debug.trace(6, f"\nrun_batspp() ##real_output## => {real_output!r}")
-        debug.trace(6, f"\nrun_batspp() ##arr_eval_errors## => {arr_eval_errors!r}")
-        debug.trace(6, f"\nrun_batspp() ##len(arr_eval_errors)## => {len(arr_eval_errors)!r}\n")                                                  
-        return real_output, arr_eval_errors
-
-        # ## NEW: Added num_eval_errors
-        # real_output = system.read_file(real_output_file)
-        # num_eval_errors_str = gh.run(f"{check_batspp_perl_path} -context=0 {log_file} | wc -l")
-        # num_eval_errors = int(num_eval_errors_str) - 1
-        # ## OLD:  debug.trace(6, f"run_batspp() => {real_output!r"}
-        # debug.trace(6, f"run_batspp() //real_output// => {real_output!r}\nrun_batspp() //num_eval_errors// => {num_eval_errors!r}")
-        # return real_output, num_eval_errors
-
+        debug.trace(6, f"\nrun_batspp() ##eval_errors## => {eval_errors!r}")
+        debug.trace(6, f"\nrun_batspp() ##len(eval_errors)## => {len(eval_errors)!r}\n")                                                  
+        return real_output, eval_errors
 
     ## TEST (plan A until COPY_DIR=1 added above)
     ## # 0.9) Making sure input files, etc. accessible in bats directory
@@ -354,7 +354,11 @@ def main():
     debug.assertion(ipynb_count == len(batspp_array))
 
     # 3) Executing batspp files & storing them as bats
-    print(f"\n\n==========BATS GENERATED==========\n")
+    ## OLD: print(f"\n\n==========BATS GENERATED==========\n")
+    print("\n" + "-"*25)
+    print("BATS FILE GENERATION:")
+    print("-"*25 + "\n")
+
     # TODO3: rename i => num_test_files, total_count_ok => total_ok_tests, and total_count_total to total_num_tests
     i = 1
     total_count_ok = 0
@@ -363,7 +367,8 @@ def main():
     total_num_successful = 0
 
     if not RUN_BATS:
-        print(f"- SKIPPING BATSPP CHECK (-n ARGUMENT PROVIDED)\n")
+        ## OLD: print(f"- SKIPPING BATSPP CHECK (-n ARGUMENT PROVIDED)\n")
+        print("Skipping BATSPP Check (-n option)\n")
     else:
         for batsppfile_path in batspp_array:
             batsppfile = gh.basename(batsppfile_path)
@@ -378,14 +383,16 @@ def main():
             if not is_batspp:
                 debug.trace(4, f"Ignoring non-batspp file {batsppfile}")
                 continue
-            print(f"\nBATSPP FILE DETECTED [{i}]: {batsppfile} => {bats_from_batspp}\n")
+            print("\n"+"="*35)
+            ## OLD: print(f"BATSPP FILE DETECTED [{i}]: {batsppfile} => {bats_from_batspp}\n")
+            print(f"BATSPP File {i}: {bats_from_batspp}")
             i += 1
 
             if TXT_OPTION:
                 output_from_batspp_path = gh.form_path(BATSPP_OUTPUT_STORE, output_from_batspp)
-                ## NEW: Added arr_eval_errors and num_eval_errors = len(arr_eval_errors)
-                bats_output, arr_eval_errors = run_batspp(batsppfile_path, output_from_batspp_path)
-                num_eval_errors = len(arr_eval_errors)
+                ## OLD: run_bat
+                bats_output, eval_errors = run_batspp(batsppfile_path, output_from_batspp_path)
+                num_eval_errors = len(eval_errors)
 
                 output_lines = bats_output.splitlines()
                 output_lines_filtered = [item for item in output_lines if not item.startswith("#")]
@@ -405,16 +412,18 @@ def main():
                 min_score = system.to_float(thresholds.get(ipynb_from_batspp, DEFAULT_MIN_SCORE))
                 successful = (success_rate >= min_score)
                 debug.trace_expr(4, min_score, count_ok, count_bad, count_total, success_rate, successful)
-                SUMMARY_TEXT = f"{count_ok} out of {count_total} successful ({success_rate}%)\nSuccess: {successful}"
-                msy.write_file(f"{TXT_STORE}/{txt_from_batspp}", SUMMARY_TEXT)
-                print(f"{test_extensionless}: {SUMMARY_TEXT}")
+                ## OLD: SUMMARY_TEXT = f"{count_ok} out of {count_total} successful ({success_rate}%)\nSuccess: {successful} (threshold = {min_score}%)"
+                SUMMARY_TEXT_SUCCESS_COUNT = f"Success Score: {count_ok} out of {count_total} ({success_rate}%)"
+                SUMMARY_TEXT_SUCCESS_STATUS = f"Success Status: {successful} (Threshold: {min_score}%)"
+                msy.write_file(f"{TXT_STORE}/{txt_from_batspp}", SUMMARY_TEXT_SUCCESS_COUNT+"\n"+SUMMARY_TEXT_SUCCESS_STATUS)
+                ## OLD: print(f"{test_extensionless}: {SUMMARY_TEXT}" + "\n" + "="*35 + "\n")
+                print(f"Test Results:\n- {SUMMARY_TEXT_SUCCESS_COUNT}\n- {SUMMARY_TEXT_SUCCESS_STATUS}")
                 total_count_ok += count_ok
                 total_count_total += count_total
                 total_success_rate += success_rate
                 total_num_successful += int(successful)
 
                 # Categorizing Tests if they are successful or not
-                # NEW: Added 
                 txt_option_JSON = {}
                 txt_option_JSON["test_name"] = test_extensionless
                 txt_option_JSON["test_count_total"] = count_total
