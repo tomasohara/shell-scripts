@@ -3043,11 +3043,13 @@ function run-jupyter-notebook-posthoc() {
     local log="$1"
     echo "checking log: $log"
     # TODO: resolve problem extracting URL
-    # TEMP:
-    tail "$log"
+    # TEMP: tail "$log"
     # Show URL
+    ## OLD:
+    ## echo -n "URL: "
+    ## extract-matches 'http:\S+' "$log" | sort -u
     echo -n "URL: "
-    extract-matches 'http:\S+' "$log" | sort -u    
+    VERBOSE=1 extract-matches 'http:\S+' "$log" | sort -u
 }
 
 # run-jupyter-notebook(port=18888): run jupyter notebook on PORT
@@ -3056,13 +3058,20 @@ function run-jupyter-notebook () {
     local ip="$2"; if [ "$ip" = "" ]; then ip="127.0.0.1"; fi
     local log
     log="$TEMP/jupyter-p$port-$(TODAY).log"
+    rename-with-file-date "$log"
     # note: clears notebook token to disable authentication
-    jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
+    ## OLD: jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
+    ## TEST: jupyter notebook --ServerApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
+    ## TODO1: make sure IdentityProvider.token is right one to use (maltdito jupyter)
+    jupyter notebook --IdentityProvider.token='' --no-browser --port $port --ip $ip > "$log" 2>&1 &
     ## OLD
     ## echo "$log"
     # Let jupyter initialize
-    local delay=5
-    echo "sleeping $delay seconds for log to stabilize (maldito jupyter)"
+    ## OLD:
+    ## local delay=5
+    ## echo "sleeping $delay seconds for log to stabilize (maldito jupyter)"
+    local delay=6
+    echo "sleeping $delay seconds for jupyter to finish initializing"
     sleep $delay
     ## OLD
     ## # TODO: resolve problem extracting URL
