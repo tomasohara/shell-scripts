@@ -407,7 +407,7 @@ alias free-memory='free --wide --human | grep -v Swap:'
 # clear-cache: clear disk cache
 # See https://linux-mm.org/Drop_Caches and https://www.linuxatemyram.com
 # TODO: get this to work completely; explain Admin filter
-simple-alias-fn clear-cache 'echo; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
+simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
 
 #...............................................................................
 # Emacs related
