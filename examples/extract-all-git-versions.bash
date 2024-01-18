@@ -20,9 +20,9 @@ function full-usage {
     echo ""
     echo "Examples:"
     echo ""
-    echo "$0 README.md /tmp/README-versions"
+    echo "NUM_REVISIONS=5 $0 README.md /tmp/README-versions"
     echo ""
-    echo "PRETTY=1 VERBOSE=1 {script} Dockerfile"
+    echo "PRETTY=1 VERBOSE=1 NUM_REVISIONS=5 {script} Dockerfile"
     echo ""
     echo "Notes:"
     echo "- default extract-dir: $export_to_expr"
@@ -160,5 +160,5 @@ done <"$info"
 
 # return success code
 $verbose && echo ""
-echo "$COUNT versions stored in ${EXPORT_TO} for $GIT_PATH_TO_FILE"
+echo "$NUM_REVISIONS versions stored in ${EXPORT_TO} for $GIT_PATH_TO_FILE"
 exit 0
