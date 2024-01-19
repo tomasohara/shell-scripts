@@ -8,6 +8,7 @@
 # Warning:
 # - This should not be run under an admin-like account (e.g., root or power user), because the tests might inadvertantly delete files.
 # - It is safest to use a separate testing account with minimal permissions.
+#   *** Otherwise, bad things might happen to your good files! ***
 #
 
 # Set bash regular and/or verbose tracing
@@ -18,31 +19,31 @@ if [ "${VERBOSE:-0}" = "1" ]; then
     set -o verbose
 fi
 
-# Help Message
+# Help Message (i.e., usage)
 display_help() {
-	echo "Usage: $0 [-f]"
-	echo "	-o	Shows output log (summary_stats.log)"
-	echo "	-h	Displays this help message"
+    echo "Usage: $0 [-f]"
+    echo "    -o Shows output log (summary_stats.log)"
+    echo "    -h Displays this help message"
 }
 
 # Applying options for output log
+# TODO2: enable long arguments (see ../examples/chatgpt-get-long-options-parsing.bash)
 output_log=false
-
 while getopts "oh" option; do
-	case $option in
-		o)
-			output_log=true
-			;;
-		h)
-			display_help
-			exit 0
-			;;
-		\?)
-			echo  "Invalid option: -$OPTARG" >&2
-			display_help
-			exit 1
-			;;
-	esac
+    case $option in
+        o)
+           output_log=true
+           ;;
+        h)
+           display_help
+           exit 0
+           ;;
+        \?)
+           echo  "Invalid option: -$OPTARG" >&2
+           display_help
+           exit 1
+           ;;
+    esac
 done
 
 # Change into testing script directory (e.g., ~/shell-scripts/tests)
@@ -79,7 +80,7 @@ echo "FYI: Using $BATSPP_OUTPUT for output and $BATSPP_TEMP for temp. files"
 # BATSPP_REPORT_OPTS can be used to run coverage tests (e.g., --kcov) instead
 # of the regular report (--txt).
 # 
-BATSPP_REPORT_OPTS=${BATSPP_REPORT_OPTS:-"--txt --definitions ../all-tomohara-aliases-etc.bash"}
+BATSPP_REPORT_OPTS=${BATSPP_REPORT_OPTS:-"--txt --definitions aliases-for-testing.bash"}
 # shellcheck disable=SC2086
 OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" PYTHONPATH="..:$PYTHONPATH" python3 ./batspp_report.py $BATSPP_REPORT_OPTS -
 batspp_result="$?"
