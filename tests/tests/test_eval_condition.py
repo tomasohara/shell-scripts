@@ -16,11 +16,16 @@ from mezcla import system
 # Note: Two references are used for the module to be tested:
 #    THE_MODULE:	                global module object
 #    TestIt.script_module:              path to file
+#
+# pylint: disable=import-error, no-name-in-module
 try:
     import tests.eval_condition as THE_MODULE
 except:
-    system.print_exception_info("loading eval_condition.py")
-    THE_MODULE = None
+    try:
+        import tests.tests.eval_condition as THE_MODULE
+    except:
+        system.print_exception_info("loading eval_condition.py")
+        THE_MODULE = None
 
 class TestEvalCondition(TestWrapper):
     """Class for testcase definition"""
