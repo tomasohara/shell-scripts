@@ -3063,6 +3063,7 @@ function run-jupyter-notebook () {
     ## OLD: jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
     ## TEST: jupyter notebook --ServerApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
     ## TODO1: make sure IdentityProvider.token is right one to use (maltdito jupyter)
+    ## TODO4?: JUPYTER_TOKEN="" jupyter notebook --no-browser --port ...
     jupyter notebook --IdentityProvider.token='' --no-browser --port $port --ip $ip > "$log" 2>&1 &
     ## OLD
     ## echo "$log"
