@@ -1818,9 +1818,10 @@ function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
 # show-macros-proper([pattern]): shows names of aliases/functions matching PATTERN
 function show-macros-proper-old { show-macros "$@" | $EGREP "^\w"; }
 function show-macros-proper {
-    # ntoe: first filters by likely alias or function definititions
+    local pattern="${*:-.}"
+    # note: first filters by likely alias or function definititions
     # ex: "alias move='mv'", "setenv () {\n    export "$1"="$2"\n}"
-    show-macros "$@" | $EGREP '(^alias)|( \(\) $)' | perl -pe 's/alias (\S+)=.*/\1/;  s/^(\S+) \(\)/\1/;' | $GREP "$@" | sort;
+    show-macros "$pattern" | $EGREP '(^alias)|( \(\) $)' | perl -pe 's/alias ([^=]+)=.*/\1/;  s/^(\S+) \(\)/\1/;' | $EGREP "$pattern" | sort;
 }
 # display-macros(pattern): show definition(s) of alias or function matching pattern in name
 function display-macros {
