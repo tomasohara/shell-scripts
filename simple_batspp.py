@@ -15,6 +15,10 @@
 # hacks enabled via environment variables to work around quirks in the example parsing. For example,
 #   TEST_FILE=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 python ./simple_batspp.py tests/adhoc-tests.test
 #
+# - For the regular version of BatsPP, see
+#     https://github.com/LimaBD/batspp
+# - For the Bats[-core] testing framework for Bash, see
+#     https://github.com/bats-core/bats-core
 # - Regex cheatsheet:
 #     (?:regex)               non-capturing group
 #     (?#comment)             comment; used below for labeling regex segments
