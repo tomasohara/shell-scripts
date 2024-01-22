@@ -663,7 +663,7 @@ class CustomTestsToBats:
         """Preprocess match result FIELD"""
 
         # Remove comment indicators
-        field = my_re.sub(r'^\# (Actual|Continuation|End|Global.Setup|Setup|Start|Wrapup) *\n', '', field,
+        field = my_re.sub(r'^\s*\#\s+(Actual|Continuation|End|Global.Setup|Setup|Start|Wrapup)\s*\n', '', field,
                           flags=re.MULTILINE|re.IGNORECASE)
             
         # Remove indent
@@ -681,7 +681,8 @@ class CustomTestsToBats:
 
         # Remove comments (n.b., needs to be done after comment indicators checked)
         if STRIP_COMMENTS:
-            field = my_re.sub(r'^\s*\#.*\n', '', field, flags=re.MULTILINE|re.IGNORECASE)
+            ## OLD: field = my_re.sub(r'^\s*\#.*\n', '', field, flags=re.MULTILINE|re.IGNORECASE)
+            field = my_re.sub(r'^\s*\#.*\n', '', field, flags=re.MULTILINE)
         ## TODO2: debug.trace(T8, f"_preprocess_command({in_field!r}) ==  {field!r}")
         debug.trace(5, f"_preprocess_command({in_field!r}) == {field!r}")
         
@@ -933,7 +934,7 @@ class CustomTestsToBats:
         """Return bash function with NAME and code CONTENT, optionally for expected OUTPUT"""
         if not output:
             # Strip comments
-            content = my_re.sub(r"^\s*\#[^\n]+\n", "", content, flags=re.MULTILINE)
+            content = my_re.sub(r"^\s*\#[^\n]*\n", "", content, flags=re.MULTILINE)
             # Remove prompts
             content = my_re.sub(r"^\s*\$ ", "", content, flags=re.MULTILINE)
         # Make sure indented
@@ -1155,7 +1156,7 @@ class CommandTests(CustomTestsToBats):
 
         if USE_INDENT_PATTERN:
             patterns = [
-                fr'(?:{INDENT_PATTERN} *# Test\s*([^\n]*)\s*\n)+?', # optional test title
+                fr'(?:{INDENT_PATTERN} *# Test\s*([^\n]*)\s*\n)+?', # optional test title; non-greedy
                 fr'((?:{INDENT_PATTERN}\$\s+[^\n]+\n)*)',           # optional setup
                 fr'({INDENT_PATTERN}\$\s+[^\n]+)\n',                # command line [actual]
                 r'(.+?)\n',                                         # expected output; non-greedy
@@ -1168,7 +1169,8 @@ class CommandTests(CustomTestsToBats):
                 r'(?#setup    )((?:^ *\# *Setup\n)'        \
                               r'(?:^ *\#? *\$ +[^\n]+\n)*' \
                               r'(?:^ *\# *Actual\n))?',
-                fr'(?#actual   )((?:^ *{comment}? *\$ +[^\n]+\n)+)', # command line(s) [actual]
+                ## OLD: fr'(?#actual   )((?:^ *{comment}? *\$ +[^\n]+\n)+)', # command line(s) [actual]
+                fr'(?#actual   )((?:^ *{comment}? *[\#\$] *[^\n]*\n)+)', # command line(s) [actual]
                 r'(?#expected )(.*)',                              # expected output
                 r'(?#end      )^ *\#?\s*\n']                       # end test (blank line)
 
