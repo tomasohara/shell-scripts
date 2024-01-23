@@ -42,7 +42,7 @@ use strict;
 use vars qw/$v $i $para $slurp $context $C $A $B $n $max $show_filename $w $c $h/;
 
 # Determine values of command-line arguments
-# TODO: use expanded names for all options (e.g., -not_atching for -v)
+# TODO: use expanded names for all options (e.g., -not_matching for -v)
 &init_var(*v, &FALSE);		# grep -v option to show lines not matching
 &init_var(*i, &FALSE);		# grep -i for case insensitive matching
 &init_var(*para, &FALSE);	# paragraph input mode
@@ -58,7 +58,6 @@ my($just_count) = $c;
 &init_var(*h, &FALSE);		# grep -h option to hide filename
 &init_var(*show_filename, 	# include file name in output
 	  ((scalar @ARGV) > 2) && !$h);
-## TODO: &init_var(*c, &FALSE);		# just show count
 &init_var(*w, &FALSE);		# match word boundaries
 
 # Show usage statement if insufficient arguments
@@ -78,7 +77,6 @@ select(STDOUT); $| = 1;		    # set stdout unbuffered
 
 # Optionally set paragraph input mode
 $/ = "" if ($para);		# paragraph input mode
-## OLD: $/ = 0777 if ($slurp);		# complete-file input mode
 undef $/ if ($slurp);		# complete-file input mode
 
 # Modify the pattern to reflect word boundaries
@@ -114,7 +112,6 @@ while (<>) {
     }
     $record_num++;
     my($include) = &FALSE;
-    ## OLD: my($filespec) = ($show_filename ? "${current_file}: " : "");
 
     # See if the pattern matches the current line
     # NOTE: s qualifier treats string as single line (in case -para specified)

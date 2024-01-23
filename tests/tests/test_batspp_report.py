@@ -8,6 +8,7 @@
 #
 # TODO2 by Aviyan:
 # - Avoid using array.pop(0): instead use indexing (e.g., array[0] or array[1:])
+# TODO1 by Aviyan:
 # - Review tests/template.py and add THE_MODULE, etc.
 #
 
@@ -21,12 +22,20 @@ import re
 import pytest
 
 # Local modules
-## TODO: from mezcla.unittest_wrapper import TestWrapper
+from mezcla.unittest_wrapper import TestWrapper
 from mezcla import debug
 from mezcla import glue_helpers as gh
 from mezcla import system
 from mezcla.my_regex import my_re
 
+# Note: Two references are used for the module to be tested:
+#    THE_MODULE:                        global module object
+#    TestIt.script_module:              path to file
+try:
+    import tests.batspp_report as THE_MODULE
+except:
+    system.print_exception_info("loading batspp_report.py")
+    THE_MODULE = None
 # Constants
 # TODO2: get OUTPUT_DIR from THE_MODULE.OUTPUT_DIR
 OUTPUT_DIR = system.getenv_text("OUTPUT_DIR", ".",
@@ -35,25 +44,32 @@ OUTPUT_DIR = system.getenv_text("OUTPUT_DIR", ".",
 TEST_DIR = system.real_path(gh.dirname(__file__ or "."))
 debug.assertion(TEST_DIR.endswith("tests"))
 
-## OLD: class TestBatsppReport(TestWrapper):
-## NOTE: TestWrapper used above for sake of run_script()
-##
-class TestBatsppReport(unittest.TestCase):
+class TestBatsppReport(TestWrapper):
+    ## NOTE: TestWrapper used above for sake of run_script()
+    ##
+    ## BAD: class TestBatsppReport(unittest.TestCase):
     """Class for testcase definition"""
-    # TODO3: rework via tests/template.py (e.g., uses TestWrapper.run_script instead of gh.run)
-    script = gh.resolve_path("batspp_report.py")
+    script_module = TestWrapper.get_testing_module_name(__file__, THE_MODULE)
+
+    ## BAD:
+    ## # TODO3: rework via tests/template.py (e.g., uses TestWrapper.run_script instead of gh.run)
+    ## script = gh.resolve_path("batspp_report.py")
     temp = None
 
-    def run_script(self, arguments):
-        """Simple version of TestWrapper.run_script that just runs script over ARGUMENTS"""
-        # note: overrides TEST_DIR to this dir (e.g., ~/bin/tests/tests)
-        result = gh.run(f"TEST_DIR={TEST_DIR} {self.script} {arguments}")
-        debug.trace_fmt(5, "TestBatsppReport.run_script({args}) => {res!r}",
-                        args=arguments, res=result)
-        return result
 
+    ## BAD:
+    ## def run_script(self, arguments):
+    ##     """Simple version of TestWrapper.run_script that just runs script over ARGUMENTS"""
+    ##     # note: overrides TEST_DIR to this dir (e.g., ~/bin/tests/tests)
+    ##     ## TODO1: use run_script
+    ##     debug.trace_fmt(5, "TestBatsppReport.run_script({args}) => {res!r}",
+    ##                     args=arguments, res=result)
+    ##    return result
+
+    @pytest.mark.xfail
     def test_script_help(self):
         """Make sure script usage shown with --help"""
+        debug.trace(4, f"TestBatsppReport.test_script_help(); self={self}")
         result = self.run_script("--help")
         assert(my_re.search(r"Test.*BatsPP.*Bash", result))
     

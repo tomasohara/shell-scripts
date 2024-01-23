@@ -1,0 +1,4 @@
+{
+    "Comment": "Configuration for running-act event flag (see https://github.com/nektos/act#skipping-jobs)",
+    "act": true
+}

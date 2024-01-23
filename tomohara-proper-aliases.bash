@@ -38,7 +38,7 @@ alias nvsmi=nvidia-smi
 # ex: convert-emoticons-aux black /tmp/__init__.py
 # note: stderr redirected onto stdout
 function convert-emoticons-aux {
-    "$@" 2>&1 | convert_emoticons.py -
+    "$@" 2>&1 | convert-emoticons-stdin
 }
 
 #...............................................................................
@@ -93,12 +93,13 @@ function run-python-script {
     #
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
+    declare -g _PSL_ log out
     local out_base
     let _PSL_++;
     out_base="$script_dir/_$script_base.$(TODAY).$_PSL_";
     log="$out_base.log";
     out="$out_base.out";
-    ## TEMP:
+    ## TEMP: ensure output exists for excerpt below
     touch "$out";
     ## DEBUG: trace-vars _PSL_ out_base log
     rename-with-file-date "$out_base.out" "$log";
@@ -118,6 +119,10 @@ function run-python-script {
 	fi
     }
     tail "$log" "$out" | truncate-width
+    ## TEMP: remove emtpy output file
+    if [ "$DEBUG_LEVEL" -ge 4 ]; then ls -lt "$log" "$out"; fi
+    if [ ! -s "$out" ]; then command rm -v "$out"; fi
+    # Show common errors in log
     check-errors-excerpt "$log";
 }
 
@@ -174,6 +179,9 @@ function yaml-validate () {
     local file="$1"
     python -c "from mezcla import file_utils; print(file_utils.read_yaml('$file'))" | head -5 | truncate-width
 }
+
+# action-lint-yaml: run Github actions yaml file through actionlint
+alias action-lint-yaml='actionlint'
 
 # script-config: open dated typescript under ~/config
 function script-config {

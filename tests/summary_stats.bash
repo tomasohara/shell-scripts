@@ -51,12 +51,14 @@ cd "$(dirname "$0")"
 # TEMP: set github credentials
 # Note: This is not secure, but scrappycito only has access to
 # to dummy repo's like https://github.com/tomasohara/git-bash-test.
-git config --global user.email "scrappycito@gmail.com"
-git config --global user.name "SCrappy Cito"
-export MY_GIT_TOKEN=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
-git config --global url."https://api:$MY_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
-git config --global url."https://ssh:$MY_GIT_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
-git config --global url."https://git:$MY_GIT_TOKEN@github.com/".insteadOf "git@github.com:"
+if [[ ("$HOME" == "/home/shell-scripts") || ("$HOME" == "/home/runner") ]]; then
+    git config --local user.email "scrappycito@gmail.com"
+    git config --local user.name "Scrappy Cito"
+    export MY_GIT_TOKEN=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
+    git config --local url."https://api:$MY_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
+    git config --local url."https://ssh:$MY_GIT_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
+    git config --local url."https://git:$MY_GIT_TOKEN@github.com/".insteadOf "git@github.com:"
+fi
 
 # Derive name for output file
 # Note: Uses unique output subdir under ~/temp (or $BATSPP_OUTPUT).
@@ -79,7 +81,7 @@ echo "FYI: Using $BATSPP_OUTPUT for output and $BATSPP_TEMP for temp. files"
 # 
 BATSPP_REPORT_OPTS=${BATSPP_REPORT_OPTS:-"--txt --definitions ../all-tomohara-aliases-etc.bash"}
 # shellcheck disable=SC2086
-OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py $BATSPP_REPORT_OPTS -
+OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" PYTHONPATH="..:$PYTHONPATH" python3 ./batspp_report.py $BATSPP_REPORT_OPTS -
 batspp_result="$?"
 
 ## NOTE: kcov is not critical, so it is not run as part of workflow tests

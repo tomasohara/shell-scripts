@@ -150,27 +150,29 @@ alias less-pager="$PAGER_NOEXIT"
 #-------------------------------------------------------------------------------
 trace start of main settings
 
-# Path settings
-# TODO: define a function for removing duplicates from the PATH while
-# preserving the order
-function show-path-dir () { (echo "${1}:"; printenv $1 | perl -pe "s/:/\n/g;") | $PAGER; }
-alias show-path='show-path-dir PATH'
-function append-path () { export PATH=${PATH}:$1; }
-function prepend-path () { export PATH=$1:${PATH}; }
+## OLD
+## # Path settings
+## # TODO: define a function for removing duplicates from the PATH while
+## # preserving the order
+## function show-path-dir () { (echo "${1}:"; printenv $1 | perl -pe "s/:/\n/g;") | $PAGER; }
+## alias show-path='show-path-dir PATH'
+## function append-path () { export PATH=${PATH}:$1; }
+## function prepend-path () { export PATH=$1:${PATH}; }
 
-## OLD: export ORIGINAL_PATH=$PATH
-# TODO: develop a function for doing this
-if [ "`printenv PATH | grep $BIN:`" = "" ]; then
-   export PATH="$BIN:$PATH"
-fi
-if [ "`printenv PATH | grep $BIN/${OSTYPE}:`" = "" ]; then
-   export PATH="$BIN/${OSTYPE}:$PATH"
-fi
-# TODO: make optional & put append-path later to account for later PERLLIB changes
-append-path $PERLLIB
-# Put current directoy at end of path; can be overwritting with ./ prefix
-export PATH="$PATH:."
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib:$LD_LIBRARY_PATH
+## OLD:
+## ## OLD: export ORIGINAL_PATH=$PATH
+## # TODO: develop a function for doing this
+## if [ "`printenv PATH | grep $BIN:`" = "" ]; then
+##    export PATH="$BIN:$PATH"
+## fi
+## if [ "`printenv PATH | grep $BIN/${OSTYPE}:`" = "" ]; then
+##    export PATH="$BIN/${OSTYPE}:$PATH"
+## fi
+## # TODO: make optional & put append-path later to account for later PERLLIB changes
+## append-path $PERLLIB
+## # Put current directoy at end of path; can be overwritting with ./ prefix
+## export PATH="$PATH:."
+## export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$HOME/lib:$LD_LIBRARY_PATH
 
 ## OLD
 ## # Bash settings
@@ -591,33 +593,34 @@ function popd-q () { builtin popd "$@" >| /dev/null; }
 #
 
 
-# Command overrides for moving and copying files
-# NOTE: -p option of cp (i.e., --preserve  "preserve file attributes if possible")
-# leads to problems when copying files owner by others (although group writable)
-#    cp: preserving times for /usr/local/httpd/internal/cgi-bin/phone-list: Operation not permitted
-# - other options for cp, mv, and rm: -i interactive; and -v verbose.
-other_file_args="-v"
-if [ "$OSTYPE" = "solaris" ]; then other_file_args=""; fi
-## OLD: alias cls='clear'
-alias mv='/bin/mv -i $other_file_args'
-alias move='mv'
-alias move-force='move -f'
-# TODO: make sure symbolic links are copied as-is (ie, not dereferenced)
-alias copy="cp -ip $other_file_args"
-alias copy-force="/bin/cp -fp $other_file_args"
-alias cp="/bin/cp -i $other_file_args"
-alias rm="/bin/rm -i $other_file_args"
-alias delete="/bin/rm -i $other_file_args"
-alias del="delete"
-alias delete-force="/bin/rm -f $other_file_args"
-alias remove-force='delete-force'
-alias remove-dir-force='/bin/rm -rfv'
-alias delete-dir-force='remove-dir-force'
-#
-## function copy-readonly () { if [ "$3" != "" ]; then echo 'only two arguments please!'; else /bin/cp -ipf $1 $2; if [ -f $2 ]; then  chmod -w $2; else chmod -w $2/`basename $1`; fi; fi; }
-alias copy-readonly='copy-readonly.sh'
-#
-NICE="nice -19"
+## OLD
+## # Command overrides for moving and copying files
+## # NOTE: -p option of cp (i.e., --preserve  "preserve file attributes if possible")
+## # leads to problems when copying files owner by others (although group writable)
+## #    cp: preserving times for /usr/local/httpd/internal/cgi-bin/phone-list: Operation not permitted
+## # - other options for cp, mv, and rm: -i interactive; and -v verbose.
+## other_file_args="-v"
+## if [ "$OSTYPE" = "solaris" ]; then other_file_args=""; fi
+## ## OLD: alias cls='clear'
+## alias mv='/bin/mv -i $other_file_args'
+## alias move='mv'
+## alias move-force='move -f'
+## # TODO: make sure symbolic links are copied as-is (ie, not dereferenced)
+## alias copy="cp -ip $other_file_args"
+## alias copy-force="/bin/cp -fp $other_file_args"
+## alias cp="/bin/cp -i $other_file_args"
+## alias rm="/bin/rm -i $other_file_args"
+## alias delete="/bin/rm -i $other_file_args"
+## alias del="delete"
+## alias delete-force="/bin/rm -f $other_file_args"
+## alias remove-force='delete-force'
+## alias remove-dir-force='/bin/rm -rfv'
+## alias delete-dir-force='remove-dir-force'
+## #
+## ## function copy-readonly () { if [ "$3" != "" ]; then echo 'only two arguments please!'; else /bin/cp -ipf $1 $2; if [ -f $2 ]; then  chmod -w $2; else chmod -w $2/`basename $1`; fi; fi; }
+## alias copy-readonly='copy-readonly.sh'
+## #
+## NICE="nice -19"
 
 ## OLD:
 ## #------------------------------------------------------------------------
@@ -694,35 +697,36 @@ skip_dirs=""
 modern_grep=`grep -V 2>&1 | head -1 | perl -ne 's/^.*(\d+\.\d+)/$1/; print ($1 >= 2.4 ? 1 : 0);'`
 if [ "$modern_grep" = 1 ]; then skip_dirs="-d skip"; fi
 
-# Grep settings
-# TODO: use gr and gr_ throughout for consistency
-# TODO: use -P flag (i.e.,  --perl-regexp) w/ grep rather than egrep
-# NOTE: MY_GREP_OPTIONS used instead of GREP_OPTIONS since grep interprets latter
-export GREP=egrep
-export MY_GREP_OPTIONS="-n $skip_dirs"
-## alias gr='$GREP $skip_dirs -i -n'
-## alias gr-="'$GREP $skip_dirs -n '
-function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
-function gr- () { $GREP $MY_GREP_OPTIONS "$@"; }
-## TODO: selection sort option spec based on version of bash or sort
-## SORT_COL2="+1"
-SORT_COL2="--key=2"
-## OLD: function grep-unique () { $GREP -c $MY_GREP_OPTIONS "$@" | grep -v ":0" | sort -rn +1 -t':'; }
-## function grep-unique () { $GREP -c $MY_GREP_OPTIONS "$@" | grep -v ":0" | sort -rn --key=2 -t':'; }
-function grep-unique () { $GREP -c $MY_GREP_OPTIONS "$@" | grep -v ":0" | sort -rn $SORT_COL2 -t':'; }
-function grep-missing () { $GREP -c $MY_GREP_OPTIONS "$@" | grep ":0"; }
-alias gu='grep-unique -i'
-alias gu-='grep-unique'
-function gu-all () { grep-unique "$@" * | $PAGER; }
-alias gn='grep-missing'
-
-function gu- () { $GREP -c $MY_GREP_OPTIONS "$@" | grep -v ":0"; }
-function grepl () { $GREP -i $MY_GREP_OPTIONS "$@" | $PAGER -p$1; }
-function grepl- () { $GREP $MY_GREP_OPTIONS "$@" | $PAGER -p$1; }
-
-# gr-c: grep through c/c++ source and headers files
-# note: --no-messages suppresses warnings about missing files
-function gr-c () { gr --no-messages "$@" *.c *.cpp *.cxx *.h; }
+## OLD
+## # Grep settings
+## # TODO: use gr and gr_ throughout for consistency
+## # TODO: use -P flag (i.e.,  --perl-regexp) w/ grep rather than egrep
+## # NOTE: MY_GREP_OPTIONS used instead of GREP_OPTIONS since grep interprets latter
+## export GREP=egrep
+## export MY_GREP_OPTIONS="-n $skip_dirs"
+## ## alias gr='$GREP $skip_dirs -i -n'
+## ## alias gr-="'$GREP $skip_dirs -n '
+## function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
+## function gr- () { $GREP $MY_GREP_OPTIONS "$@"; }
+## ## TODO: selection sort option spec based on version of bash or sort
+## ## SORT_COL2="+1"
+## SORT_COL2="--key=2"
+## ## OLD: function grep-unique () { $GREP -c $MY_GREP_OPTIONS "$@" | grep -v ":0" | sort -rn +1 -t':'; }
+## ## function grep-unique () { $GREP -c $MY_GREP_OPTIONS "$@" | grep -v ":0" | sort -rn --key=2 -t':'; }
+## function grep-unique () { $GREP -c $MY_GREP_OPTIONS "$@" | grep -v ":0" | sort -rn $SORT_COL2 -t':'; }
+## function grep-missing () { $GREP -c $MY_GREP_OPTIONS "$@" | grep ":0"; }
+## alias gu='grep-unique -i'
+## alias gu-='grep-unique'
+## function gu-all () { grep-unique "$@" * | $PAGER; }
+## alias gn='grep-missing'
+## 
+## function gu- () { $GREP -c $MY_GREP_OPTIONS "$@" | grep -v ":0"; }
+## function grepl () { $GREP -i $MY_GREP_OPTIONS "$@" | $PAGER -p$1; }
+## function grepl- () { $GREP $MY_GREP_OPTIONS "$@" | $PAGER -p$1; }
+## 
+## # gr-c: grep through c/c++ source and headers files
+## # note: --no-messages suppresses warnings about missing files
+## function gr-c () { gr --no-messages "$@" *.c *.cpp *.cxx *.h; }
 
 ## function gr-tex () { gr "$@" *.tex *.sty; }
 ## function gr-tex- () { gr- "$@" *.tex *.sty; }
@@ -734,20 +738,23 @@ function gr-c () { gr --no-messages "$@" *.c *.cpp *.cxx *.h; }
 # TODO: create function for creating gr-xyz aliases
 # TODO: -or- create gr-xyz template
 ## function gr-xyz () { gr- "$@" *.xyz; }
-#
-# show-line-context(file, line-num): show 5 lines before LINE-NUM in FILE
-function show-line-context() { cat -n $1 | egrep -B5 "^\W+$2\W"; }
+## OLD:
+## #
+## # show-line-context(file, line-num): show 5 lines before LINE-NUM in FILE
+## function show-line-context() { cat -n $1 | egrep -B5 "^\W+$2\W"; }
+## 
+## # Helper function for grep-based aliases pipe into less
+## function gr-less () { gr "$@" | $PAGER; }
 
-# Helper function for grep-based aliases pipe into less
-function gr-less () { gr "$@" | $PAGER; }
+## OLD:
+## # Commonly used grepping situations
+## function gr-python () { gr "$@" ~/python/*.py; }
 
-# Commonly used grepping situations
-function gr-python () { gr "$@" ~/python/*.py; }
-
-# Other grep-related stuff
-#
-alias grep-nonascii='perlgrep.perl "[\x80-\xFF]"'
-alias gr-nonascii='perlgrep.perl -n "[\x80-\xFF]"'
+## OLD:
+## # Other grep-related stuff
+## #
+## alias grep-nonascii='perlgrep.perl "[\x80-\xFF]"'
+## alias gr-nonascii='perlgrep.perl -n "[\x80-\xFF]"'
 
 ## Old ILIT stuff (TODO remove this and other old stuff no longer used)
 ## # Aliases for ILIT OntoSem lisp sources files, lexicon and ontology
@@ -785,53 +792,54 @@ alias gr-nonascii='perlgrep.perl -n "[\x80-\xFF]"'
 function gr-bib () { perlgrep.perl -i -para "$@" *.bib; }
 function gr-biblio () { perlgrep.perl -i -para "$@" *bib*.ascii; }
 
-# Searching for files
-# TODO:
-# - specify find options in an environment variable
-# - rework in terms of Perl regex? (or use -iregex in place of -iname)
-#
-## function findspec () { find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | grep -v '^find: '; }
-## function findspec () { find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 2>&1 | grep -v '^find: '; }
-function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pattern find-option ... "; else find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 2>&1 | grep -v '^find: '; fi; }
-function findspec-all () { find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | grep -v '^find: '; }
-function fs () { findspec . "$@" | egrep -iv '(/(backup|build)/)'; } 
-function fs-ls () { fs "$@" -exec ls -l {} \; ; }
-alias fs-='findspec-all .'
-function fs-ext () { find . -iname \*.$1 | egrep -iv '(/(backup|build)/)'; } 
-# TODO: extend fs-ext to allow for basename pattern (e.g., fs-ext java ImportXML)
-function fs-ls- () { fs- "$@" -exec ls -l {} \; ; }
-alias fs-java='fs-ext java'
-#
-findgrep_opts="-in"
-#
-# NOTE: findgrep macros use $findgrep_opts dynamically (eg, user can change $findgrep_opts)
-## OLD: function findgrep-verbose () { find $1 -follow -iname \*$2\* -print -exec egrep $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} \;; }
-function findgrep-verbose () { find $1 -iname \*$2\* -print -exec egrep $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} \;; }
-## OLD: function findgrep () { find $1 -follow -iname \*$2\* -exec egrep $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} /dev/null \;; }
-# findgrep(dir, filename_pattern, line_pattern): grep through files in DIR matching FILENAME_PATTERN for LINE_PATTERN
-function findgrep () { find $1 -iname \*$2\* -exec egrep $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} /dev/null \;; }
-function findgrep- () { find $1 -iname $2 -print -exec egrep $findgrep_opts $3 $4 $5 $6 $7 $8 $9 \{\} \;; }
-## function findgrep-ext () { find "$1" -iname "*.$2" -exec egrep $findgrep_opts "$3" "$4" "$5" "$6" "$7" "$8" "$9" \{\}  /dev/null \;; }
-function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$dir" -iname "*.$ext" -exec egrep $findgrep_opts "$@" \{\}  /dev/null \;; }
-# NOTE: findgrep-foreach removed since unused
-# TODO: put other little used aliases in new do-full-setup.bash file
-## OLD: function findgrep-foreach () { find $1 -follow -iname \*$2\* -exec egrep $findgrep_opts -l $3 \{\} \; | foreach.perl "$4" -; }
-## OLD: function findgrep-foreach- () { find $1 -follow -iname \*$2\* -exec egrep $findgrep_opts -l $3 \{\} \; | foreach.perl $4 $5 $6 $7 $8 $9; }
-##
-# fgr(filename_pattern, line_pattern): grep through files matching FILENAME_PATTERN for LINE_PATTERN
-function fgr () { findgrep . "$@" | egrep -v '((/backup)|(/build))'; }
-function fgr-ext () { findgrep-ext . "$@" | egrep -v '(/(backup)|(build)/)'; }
-function fgr-java () { findgrep-ext . "java" "$@" | egrep -v '(/(backup)|(build)/)'; }
-#
-## OLD: alias prepare-find-files-here='ls -alR >| ls-alR.list 2>&1'
-## OLD: alias prepare-find-files-here="dobackup ls-alR.list fi; $NICE ls -alR >| ls-alR.list 2>&1"
-function prepare-find-files-here () { if [ -e "ls-alR.list" ]; then dobackup.sh ls-alR.list; fi; $NICE ls -alR >| ls-alR.list 2>&1; }
-## OLD: function find-files-there () { perlgrep.perl -para "$1" "$2" | egrep -i '((^\.)|('$1'))' | $PAGER_NOEXIT -p "$1"; }
-function find-files-there () { perlgrep.perl -para -i "$@" | egrep -i '((^\.)|('$1'))' | $PAGER_NOEXIT -p "$1"; }
-function find-files-here () { find-files-there "$1" "$PWD/ls-alR.list"; }
-#
-# TODO: add --quiet option to dobackup.sh (and port to bash)
-# TODO: function conditional-backup() { if [ -e "$1" ]; then dobackup.sh $1; fi; }
+## OLD
+## # Searching for files
+## # TODO:
+## # - specify find options in an environment variable
+## # - rework in terms of Perl regex? (or use -iregex in place of -iname)
+## #
+## ## function findspec () { find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | grep -v '^find: '; }
+## ## function findspec () { find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 2>&1 | grep -v '^find: '; }
+## function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pattern find-option ... "; else find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 2>&1 | grep -v '^find: '; fi; }
+## function findspec-all () { find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | grep -v '^find: '; }
+## function fs () { findspec . "$@" | egrep -iv '(/(backup|build)/)'; } 
+## function fs-ls () { fs "$@" -exec ls -l {} \; ; }
+## alias fs-='findspec-all .'
+## function fs-ext () { find . -iname \*.$1 | egrep -iv '(/(backup|build)/)'; } 
+## # TODO: extend fs-ext to allow for basename pattern (e.g., fs-ext java ImportXML)
+## function fs-ls- () { fs- "$@" -exec ls -l {} \; ; }
+## alias fs-java='fs-ext java'
+## #
+## findgrep_opts="-in"
+## #
+## # NOTE: findgrep macros use $findgrep_opts dynamically (eg, user can change $findgrep_opts)
+## ## OLD: function findgrep-verbose () { find $1 -follow -iname \*$2\* -print -exec egrep $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} \;; }
+## function findgrep-verbose () { find $1 -iname \*$2\* -print -exec egrep $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} \;; }
+## ## OLD: function findgrep () { find $1 -follow -iname \*$2\* -exec egrep $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} /dev/null \;; }
+## # findgrep(dir, filename_pattern, line_pattern): grep through files in DIR matching FILENAME_PATTERN for LINE_PATTERN
+## function findgrep () { find $1 -iname \*$2\* -exec egrep $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} /dev/null \;; }
+## function findgrep- () { find $1 -iname $2 -print -exec egrep $findgrep_opts $3 $4 $5 $6 $7 $8 $9 \{\} \;; }
+## ## function findgrep-ext () { find "$1" -iname "*.$2" -exec egrep $findgrep_opts "$3" "$4" "$5" "$6" "$7" "$8" "$9" \{\}  /dev/null \;; }
+## function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$dir" -iname "*.$ext" -exec egrep $findgrep_opts "$@" \{\}  /dev/null \;; }
+## # NOTE: findgrep-foreach removed since unused
+## # TODO: put other little used aliases in new do-full-setup.bash file
+## ## OLD: function findgrep-foreach () { find $1 -follow -iname \*$2\* -exec egrep $findgrep_opts -l $3 \{\} \; | foreach.perl "$4" -; }
+## ## OLD: function findgrep-foreach- () { find $1 -follow -iname \*$2\* -exec egrep $findgrep_opts -l $3 \{\} \; | foreach.perl $4 $5 $6 $7 $8 $9; }
+## ##
+## # fgr(filename_pattern, line_pattern): grep through files matching FILENAME_PATTERN for LINE_PATTERN
+## function fgr () { findgrep . "$@" | egrep -v '((/backup)|(/build))'; }
+## function fgr-ext () { findgrep-ext . "$@" | egrep -v '(/(backup)|(build)/)'; }
+## function fgr-java () { findgrep-ext . "java" "$@" | egrep -v '(/(backup)|(build)/)'; }
+## #
+## ## OLD: alias prepare-find-files-here='ls -alR >| ls-alR.list 2>&1'
+## ## OLD: alias prepare-find-files-here="dobackup ls-alR.list fi; $NICE ls -alR >| ls-alR.list 2>&1"
+## function prepare-find-files-here () { if [ -e "ls-alR.list" ]; then dobackup.sh ls-alR.list; fi; $NICE ls -alR >| ls-alR.list 2>&1; }
+## ## OLD: function find-files-there () { perlgrep.perl -para "$1" "$2" | egrep -i '((^\.)|('$1'))' | $PAGER_NOEXIT -p "$1"; }
+## function find-files-there () { perlgrep.perl -para -i "$@" | egrep -i '((^\.)|('$1'))' | $PAGER_NOEXIT -p "$1"; }
+## function find-files-here () { find-files-there "$1" "$PWD/ls-alR.list"; }
+## #
+## # TODO: add --quiet option to dobackup.sh (and port to bash)
+## # TODO: function conditional-backup() { if [ -e "$1" ]; then dobackup.sh $1; fi; }
 alias make-file-listing='listing="ls-aR.list"; dobackup.sh "$listing"; ls -aR >| "$listing" 2>&1'
 
 # Emacs commands
@@ -845,18 +853,19 @@ alias make-file-listing='listing="ls-aR.list"; dobackup.sh "$listing"; ls -aR >|
 ##    function em () { if [ "$1" = "" ]; then emacs- .; else emacs- "$@"; fi & }
 ## fi
 ## alias ed='em'
-alias em=tpo-invoke-emacs.sh
-function em-fn () { em -fn "$1" $2 $3 $4 $5 $6 $7 $8 $9; }
-alias em-tags=etags
-#
-alias em-misc='em-fn -misc-fixed-medium-r-normal--14-110-100-100-c-70-iso8859-1'
-alias em-nw='emacs --no-windows'
-alias em_nw='em-nw'
-function em-file () { set_xterm_title.bash "`basename $1` [`full-dirname $1`]"; em-nw "$@"; }
-## OLD: alias em-dir='em .'
-## OLD: function em-dir() { pushd "$1"; em .; popd; }
-alias em-this-dir='em .'
-alias em-devel='em --devel'
+## OLD:
+## alias em=tpo-invoke-emacs.sh
+## function em-fn () { em -fn "$1" $2 $3 $4 $5 $6 $7 $8 $9; }
+## alias em-tags=etags
+## #
+## alias em-misc='em-fn -misc-fixed-medium-r-normal--14-110-100-100-c-70-iso8859-1'
+## alias em-nw='emacs --no-windows'
+## alias em_nw='em-nw'
+## function em-file () { set_xterm_title.bash "`basename $1` [`full-dirname $1`]"; em-nw "$@"; }
+## ## OLD: alias em-dir='em .'
+## ## OLD: function em-dir() { pushd "$1"; em .; popd; }
+## alias em-this-dir='em .'
+## alias em-devel='em --devel'
 #
 ## OLD
 ## function em-debug () { em -debug-init "$@"; }
@@ -1133,18 +1142,19 @@ function lookup-lynx-bookmark () { lynx-bookmarks- | $GREP $MY_GREP_OPTIONS -A1 
 ## alias recent-tar-this-dir='make-recent-tar $TEMP/recent-`basename "$PWD"`'
 ## function sort-tar-archive() { (tar tvfz "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
 
-alias color-xterm='rxvt&'
+## OLD: alias color-xterm='rxvt&'
 
 ## function xv () { xli "$@" }
 
-alias count-it='perl- count_it.perl'
-alias count_it=count-it
-## alias count-tokens='count-it "\S+"'
-## BAD: function count-tokens () { count-it "$@" "\S+"; }
-function count-tokens () { count-it "\S+" "$@"; }
-alias perlgrep='perl- perlgrep.perl'
-function calc-stdev () { sum_file.perl -stdev "$@" -; }
-alias calc-stdev-file='calc-stdev <'
+## OLD
+## alias count-it='perl- count_it.perl'
+## alias count_it=count-it
+## ## alias count-tokens='count-it "\S+"'
+## ## BAD: function count-tokens () { count-it "$@" "\S+"; }
+## function count-tokens () { count-it "\S+" "$@"; }
+## alias perlgrep='perl- perlgrep.perl'
+## function calc-stdev () { sum_file.perl -stdev "$@" -; }
+## alias calc-stdev-file='calc-stdev <'
 
 ## OLD:
 ## alias hotbot-freq='perl- web_freq.perl -hotbot'
@@ -1161,57 +1171,60 @@ alias calc-stdev-file='calc-stdev <'
 
 #------------------------------------------------------------------------
 
-alias do-resize="resize >| $TEMP/resize.sh; conditional-source $TEMP/resize.sh"
-## do-resize
+## OLD
+## alias do-resize="resize >| $TEMP/resize.sh; conditional-source $TEMP/resize.sh"
+## ## do-resize
 
 # Displaying bash aliases and functions
 # note: $*. used in grep to handle special case of no pattern
-trace alias display
+## OLD: trace alias display
 #
 ## alias show-functions='typeset -f | perl -pe "s/^declare/\ndeclare/;"'
 
-## OLD: alias show-functions='typeset -f | perl -pe "s/^}/}\n/;"'
-alias show-functions-aux='typeset -f | perl -pe "s/^}/}\n/;"'
-## OLD: function show-macros () { pattern="$*"; if [ "$pattern" = "" ]; then pattern=.; fi; alias | gr $pattern ; show-functions | perlgrep -i -para $pattern; }
-function show-all-macros () { pattern="$*"; if [ "$pattern" = "" ]; then pattern=.; fi; alias | gr $pattern ; show-functions-aux | perlgrep -i -para $pattern; }
-function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
-# TODO: figure out how to exclude env. vars from show-variables output
-function show-variables () { set | $GREP -i '^[a-z].*='; }
+## OLD
+## ## OLD: alias show-functions='typeset -f | perl -pe "s/^}/}\n/;"'
+## alias show-functions-aux='typeset -f | perl -pe "s/^}/}\n/;"'
+## ## OLD: function show-macros () { pattern="$*"; if [ "$pattern" = "" ]; then pattern=.; fi; alias | gr $pattern ; show-functions | perlgrep -i -para $pattern; }
+## function show-all-macros () { pattern="$*"; if [ "$pattern" = "" ]; then pattern=.; fi; alias | gr $pattern ; show-functions-aux | perlgrep -i -para $pattern; }
+## function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
+## # TODO: figure out how to exclude env. vars from show-variables output
+## function show-variables () { set | $GREP -i '^[a-z].*='; }
+## 
+## function show-macros-by-word () { pattern="\b$*\b"; if [ "$pattern" = "" ]; then pattern=.; fi; alias | $GREP $pattern ; show-functions-aux | perlgrep -para $pattern; }
+## alias show-macros='show-macros'
+## alias show-aliases='alias | $PAGER'
+## ## OLD: alias show-functions='show-functions | $PAGER'
+## # TODO: see if other aliases were "recursively" defined
+## alias show-functions='show-functions-aux | $PAGER'
 
-function show-macros-by-word () { pattern="\b$*\b"; if [ "$pattern" = "" ]; then pattern=.; fi; alias | $GREP $pattern ; show-functions-aux | perlgrep -para $pattern; }
-alias show-macros='show-macros'
-alias show-aliases='alias | $PAGER'
-## OLD: alias show-functions='show-functions | $PAGER'
-# TODO: see if other aliases were "recursively" defined
-alias show-functions='show-functions-aux | $PAGER'
 
-
-# Editing and activating new settings
-#
-## alias do-setup="source $BIN/do_setup.sh"
-alias do-setup="conditional-source $HOME/.bashrc"
-alias ed-setup="em $BIN/do_setup.bash; do-setup"
-## OLD: alias ed-setup-="em-nw $BIN/do_setup.bash; do-setup"
-## OLD:
-## alias ed-setup-nw="em-nw $BIN/do_setup.bash; do-setup"
-## alias ed-full-setup="em $BIN/do_setup.sh $BIN/do_setup.bash; do-setup"
-## alias ed-full-setup-="em-nw $BIN/do_setup.sh $BIN/do_setup.bash; do-setup"
-# following for backward compatibility
-alias do_setup='do-setup'
-alias ed_setup='ed-setup'
-
+## OLD
+## # Editing and activating new settings
+## #
+## ## alias do-setup="source $BIN/do_setup.sh"
+## alias do-setup="conditional-source $HOME/.bashrc"
+## alias ed-setup="em $BIN/do_setup.bash; do-setup"
+## ## OLD: alias ed-setup-="em-nw $BIN/do_setup.bash; do-setup"
+## ## OLD:
+## ## alias ed-setup-nw="em-nw $BIN/do_setup.bash; do-setup"
+## ## alias ed-full-setup="em $BIN/do_setup.sh $BIN/do_setup.bash; do-setup"
+## ## alias ed-full-setup-="em-nw $BIN/do_setup.sh $BIN/do_setup.bash; do-setup"
+## # following for backward compatibility
+## alias do_setup='do-setup'
+## alias ed_setup='ed-setup'
 
 function summarize-mail () { $GREP -h "^((From)|(Subject)|(Date)):" $HOME/mail/In | $PAGER; }
 function summarize-mail- () { $GREP -h "^((From)|(Subject)|(Date)):" "$@" | $PAGER; }
 
-# Sorting wrappers
-#
-## OLD: alias tab-sort="sort $SORT_COL2 -t '    '"
-alias tab-sort="sort -t '       '"
-alias colon-sort="sort $SORT_COL2 -t ':'"
-alias gc-sort='colon-sort -rn $SORT_COL2'
-alias freq-sort='tab-sort -rn $SORT_COL2'
-function para-sort() { perl -00 -e '@paras=(); while (<>) {push(@paras,$_);} print join("\n", sort @paras);' $*; }
+## OLD
+## # Sorting wrappers
+## #
+## ## OLD: alias tab-sort="sort $SORT_COL2 -t '    '"
+## alias tab-sort="sort -t '       '"
+## alias colon-sort="sort $SORT_COL2 -t ':'"
+## alias gc-sort='colon-sort -rn $SORT_COL2'
+## alias freq-sort='tab-sort -rn $SORT_COL2'
+## function para-sort() { perl -00 -e '@paras=(); while (<>) {push(@paras,$_);} print join("\n", sort @paras);' $*; }
 
 # CVS stuff
 #
@@ -1272,28 +1285,30 @@ if [ "$INCLUDE_MISC_ALIASES" = "1" ]; then
     function do-rcsdiff () { do_rcsdiff.sh $* >&\! rcsdiff.list; viewfile rcsdiff.list; }
 fi
 
-# File manipulation and conversions
-trace File manipulation and conversions
-function asc-it () { dobackup.sh $1; asc < BACKUP/$1 >| $1; }
-# TODO: use dos2unix under CygWin
-alias remove-cr='tr -d "\r"'
-## OLD: alias alt-remove-cr='perl -0777 -pe "s/\r//g;"'
-alias perl-slurp='perl -0777'
-alias alt-remove-cr='perl-slurp -pe "s/\r//g;"'
-function remove-cr-and-backup () { dobackup.sh $1; remove-cr < backup/$1 >| $1; }
-alias perl-remove-cr='perl -i.bak -pn -e "s/\r//;"'
+## OLD
+## # File manipulation and conversions
+## trace File manipulation and conversions
+## function asc-it () { dobackup.sh $1; asc < BACKUP/$1 >| $1; }
+## # TODO: use dos2unix under CygWin
+## alias remove-cr='tr -d "\r"'
+## ## OLD: alias alt-remove-cr='perl -0777 -pe "s/\r//g;"'
+## alias perl-slurp='perl -0777'
+## alias alt-remove-cr='perl-slurp -pe "s/\r//g;"'
+## function remove-cr-and-backup () { dobackup.sh $1; remove-cr < backup/$1 >| $1; }
+## alias perl-remove-cr='perl -i.bak -pn -e "s/\r//;"'
 
-# Text manipulation
-alias 'intersection=intersection.perl'
-alias 'difference=intersection.perl -diff'
-alias 'line-intersection=intersection.perl -line'
-alias 'line-difference=intersection.perl -diff -line'
-## OLD: function show-line () { tail +$1 $2 | head -1; }
-function show-line () { tail --lines=+$1 $2 | head -1; }
-
-# Function for extracting pattern matches from a file
-# ex: extract-matches "genls (.*) Dog" dogs.cyc
-function old-extract-matches () { perl -ne "while (/$1/) { printf \"%s\\n\", \$1; s/$1//; }" $2; }
+## OLD:
+## # Text manipulation
+## alias 'intersection=intersection.perl'
+## alias 'difference=intersection.perl -diff'
+## alias 'line-intersection=intersection.perl -line'
+## alias 'line-difference=intersection.perl -diff -line'
+## ## OLD: function show-line () { tail +$1 $2 | head -1; }
+## function show-line () { tail --lines=+$1 $2 | head -1; }
+## 
+## # Function for extracting pattern matches from a file
+## # ex: extract-matches "genls (.*) Dog" dogs.cyc
+## function old-extract-matches () { perl -ne "while (/$1/) { printf \"%s\\n\", \$1; s/$1//; }" $2; }
 
 alias cd-env='export PERLLIB=`pwd`:${PERLLIB}; export PATH=`pwd`:${PATH};'
 function dir-env () { _dir=$1; export PERLLIB=${_dir}:${PERLLIB}; export PATH=${_dir}:${PATH}; unset _dir; }
@@ -1328,15 +1343,19 @@ function rtop () { rsh $1 top 50 | $PAGER; }
 alias ps-users='ps_mine.sh -a | $GREP -v root'
 ## OLD: alias ps-sort='ps_sort.perl -'
 
+
 #........................................................................
-# alias for counting words on individual lines thoughout a file
-# (Gotta hate csh)
-trace line wrd count, etc. commands
-function line-wc () { perl -n -e '@_ = split; printf "%d\t%s", 1 + $#_, $_;' "$@"; }
-alias line-word-len='line-wc'
-function line-len () { perl -ne 'printf "%d\t$_", length($_) - 1;' "$@"; }
-function para-len () { perl -00 -ne 'printf "%d\t$_", length($_) - 1;' "$@"; }
-alias ls-line-len='ls | line-len | sort -rn | less'
+
+
+## OLD
+## # alias for counting words on individual lines thoughout a file
+## # (Gotta hate csh)
+## trace line wrd count, etc. commands
+## function line-wc () { perl -n -e '@_ = split; printf "%d\t%s", 1 + $#_, $_;' "$@"; }
+## alias line-word-len='line-wc'
+## function line-len () { perl -ne 'printf "%d\t$_", length($_) - 1;' "$@"; }
+## function para-len () { perl -00 -ne 'printf "%d\t$_", length($_) - 1;' "$@"; }
+## alias ls-line-len='ls | line-len | sort -rn | less'
 
 alias parse-mail="perl -Ss parse_mail.perl -batch"
 
@@ -1345,16 +1364,16 @@ alias pine-read-only='pine -o'
 
 function check-class-dist () { count-it "^(\S+)\t" $1 | perl- calc_entropy.perl -; }
 
-alias fix-dir-permissions="find . -type d -exec chmod go+xs {} \;"
+## OLD: alias fix-dir-permissions="find . -type d -exec chmod go+xs {} \;"
 
-alias 2bib='bibitem2bib'
+## OLD: alias 2bib='bibitem2bib'
 
 # Postscript related processing
 trace Postscript related processing
 #
 ## function gv () { ghostview "$@" &  }
 function condensed-print () { mpage "$@" | lpr; }
-function pdf-view () { acroread "$@" & }
+## OLD: function pdf-view () { acroread "$@" & }
 function pdf-print () { acroread -toPostScript < "$1" | lpr; lpq; }
 ## alias acroprint='pdf-print'
 function ps-print () { lpr < "$1"; }
@@ -1396,35 +1415,36 @@ function ps-to-text () { base=`basename $1 .ps`; ps2ascii $1 >| $base.ascii; }
 alias alt-ps-to-text='pstext.bat'
 
 
-# TODO: generate aliases for .sh and .perl scripts automatically
-# ls *.sh *.perl | perl -pe "s/(\w+)\.\w+/alias \1='$&'/g; s/(\w+.perl)/perl- \1/g;" >| _all_alias.list
-trace extension-less shortcuts
-alias convert-termstrings='perl- convert_termstrings.perl'
-## alias do-diff='do_diff.sh'
-alias do-rcsdiff='do_rcsdiff.sh'
-alias dobackup='dobackup.sh'
-## alias hotbot-freq='hotbot_freq.sh'
-alias kill-em='kill_em.sh'
-alias ps-mine='ps_mine.sh --filtered'
-alias ps_mine='ps-mine'
-alias ps-mine-='ps-mine | filter-dirnames'
-alias ps-mine-all='ps-mine --all'
-alias rename-files='perl- rename_files.perl'
-alias rename_files='rename-files'
+## OLD:
+## # TODO: generate aliases for .sh and .perl scripts automatically
+## # ls *.sh *.perl | perl -pe "s/(\w+)\.\w+/alias \1='$&'/g; s/(\w+.perl)/perl- \1/g;" >| _all_alias.list
+## trace extension-less shortcuts
+## alias convert-termstrings='perl- convert_termstrings.perl'
+## ## alias do-diff='do_diff.sh'
+## alias do-rcsdiff='do_rcsdiff.sh'
+## alias dobackup='dobackup.sh'
+## ## alias hotbot-freq='hotbot_freq.sh'
+## alias kill-em='kill_em.sh'
+## alias ps-mine='ps_mine.sh --filtered'
+## alias ps_mine='ps-mine'
+## alias ps-mine-='ps-mine | filter-dirnames'
+## alias ps-mine-all='ps-mine --all'
+## alias rename-files='perl- rename_files.perl'
+## alias rename_files='rename-files'
 ## OLD: alias rename-spaces='rename-files -global " " "_"'
-alias testwn='perl- testwn.perl'
-alias perlgrep='perl- perlgrep.perl'
-alias foreach='perl- foreach.perl'
-
-# Statistical helpers
-alias bigrams='perl -sw $BIN/count_bigrams.perl -N=2'
-alias unigrams='perl -sw $BIN/count_bigrams.perl -N=1'
-alias word-count=unigrams
-
-# Lynx stuff
-function old-lynx-dump () { echo "$1"; lynx -width=128 -dump "$1"; }
-function lynx-dump () { echo "$1" >| $2; lynx -width=128 -dump -nolist "$1" >> $2; $PAGER $2; }
-if [ "$BAREBONES_HOST" = "1" ]; then export lynx_width=0; fi
+## alias testwn='perl- testwn.perl'
+## alias perlgrep='perl- perlgrep.perl'
+## alias foreach='perl- foreach.perl'
+##
+## # Statistical helpers
+## alias bigrams='perl -sw $BIN/count_bigrams.perl -N=2'
+## alias unigrams='perl -sw $BIN/count_bigrams.perl -N=1'
+## alias word-count=unigrams
+##
+## # Lynx stuff
+## function old-lynx-dump () { echo "$1"; lynx -width=128 -dump "$1"; }
+## function lynx-dump () { echo "$1" >| $2; lynx -width=128 -dump -nolist "$1" >> $2; $PAGER $2; }
+## if [ "$BAREBONES_HOST" = "1" ]; then export lynx_width=0; fi
 
 # Lisp stuff
 function acl-apropos() { $GREP -i "$@" $HOME/info/online-reference-works/clman.synopsis; }
@@ -1534,60 +1554,65 @@ alias old-qd-trans-sp='qd_trans_spanish.perl -redirect -'
 # Unix aliases
 trace Unix aliases
 
-## alias cyc-groups='ypcat group'
-function group-members () { ypcat group | $GREP -i $1; }
-# TODO: check if _make.log exists prior to move
-function do-make () { /bin/mv -f _make.log _old_make.log; make "$@" >| _make.log 2>&1; $PAGER _make.log; }
-## alias do-gzip='nice -19 gzip -rfv . >| ../gzip_`basename $PWD`.log 2>&1; $PAGER ../gzip_`basename $PWD`.log'
-#
-# $ man merge
-#   merge [ options ] file1 file2 file3
-#   merge  incorporates all changes that lead from file2 to file3 into file1.
-# NOTE: merge -p mod-file1 original mod-file2 >| new-file
-alias merge='echo "do-merge MODFILE1 OLDFILE MODFILE2 > NEWFILE"'
-alias do-merge='/usr/bin/merge -p'
-#
-## alias old-which='echo "note: using TYPE rather than WHICH"; /usr/bin/which'
-## OLD: alias which='/usr/bin/which'
-## alias do-which='/usr/bin/which'
-#
-# full-dirname(filename): returns full path od directory for file
-#
-function full-dirname () { local dir=`dirname $1`; case $dir in .*) dir="$PWD/$1";; esac; echo $dir; }
-# 
-function rpm-extract () { rpm2cpio $1 | cpio --extract --make-directories; }
-#
-alias dump-url='wget --recursive --relative'
-#
-alias gtime='/usr/bin/time'
+## OLD
+## ## alias cyc-groups='ypcat group'
+## function group-members () { ypcat group | $GREP -i $1; }
+## # TODO: check if _make.log exists prior to move
+## function do-make () { /bin/mv -f _make.log _old_make.log; make "$@" >| _make.log 2>&1; $PAGER _make.log; }
+## ## alias do-gzip='nice -19 gzip -rfv . >| ../gzip_`basename $PWD`.log 2>&1; $PAGER ../gzip_`basename $PWD`.log'
+## #
+## # $ man merge
+## #   merge [ options ] file1 file2 file3
+## #   merge  incorporates all changes that lead from file2 to file3 into file1.
+## # NOTE: merge -p mod-file1 original mod-file2 >| new-file
+## alias merge='echo "do-merge MODFILE1 OLDFILE MODFILE2 > NEWFILE"'
+## alias do-merge='/usr/bin/merge -p'
+## #
+## ## alias old-which='echo "note: using TYPE rather than WHICH"; /usr/bin/which'
+## ## OLD: alias which='/usr/bin/which'
+## ## alias do-which='/usr/bin/which'
+## #
+## # full-dirname(filename): returns full path od directory for file
+## #
+## function full-dirname () { local dir=`dirname $1`; case $dir in .*) dir="$PWD/$1";; esac; echo $dir; }
+## # 
+## function rpm-extract () { rpm2cpio $1 | cpio --extract --make-directories; }
+## #
+## alias dump-url='wget --recursive --relative'
+## #
+## alias gtime='/usr/bin/time'
 
 ## alias slackware-version='cat /etc/slackware-version'
 alias redhat-version="/etc/redhat-release"
-alias system-status='system_status.sh -'
-function apropos-command () { apropos $* 2>&1 | $GREP '(1)' | $PAGER; }
-function split-tokens () { perl -pe "s/\s+/\n/g;" "$@"; }
-alias tokenize='split-tokens'
-function perl-echo () { perl -e 'print "'$1'\n";'; }
-## function perl-printf () { perl -e 'printf "$1\n", @_[1..$#_];';  }
-##
-## function perl-printf () { perl -e "printf \"$1\"", qw/$2 $3 $4 $5 $6 $7 $8 $9/; }
-function perl-printf () { perl -e "printf \"$1\", $2;"; }
-##
-## TODO: get folllowing to work for 'perl-print "how now\nbrown cow\n"'
-## function perl-print () { perl -e "print $1"; -e 'print "\n";'; }
-function perl-print () { perl -e "printf \"$1\";" -e 'print "\n";'; }
-function perl-print-n () { perl -e "printf \"$1\";"; }
+## OLD: alias system-status='system_status.sh -'
 
-# Unix/Win32 networking aliases
-if [ "$OSTYPE" != "cygwin" ]; then alias ipconfig=ifconfig; fi
-alias set-display-local='export DISPLAY=localhost:0.0'
+## OLD
+## function apropos-command () { apropos $* 2>&1 | $GREP '(1)' | $PAGER; }
+## function split-tokens () { perl -pe "s/\s+/\n/g;" "$@"; }
+## alias tokenize='split-tokens'
+## function perl-echo () { perl -e 'print "'$1'\n";'; }
+## ## function perl-printf () { perl -e 'printf "$1\n", @_[1..$#_];';  }
+## ##
+## ## function perl-printf () { perl -e "printf \"$1\"", qw/$2 $3 $4 $5 $6 $7 $8 $9/; }
+## function perl-printf () { perl -e "printf \"$1\", $2;"; }
+## ##
+## ## TODO: get folllowing to work for 'perl-print "how now\nbrown cow\n"'
+## ## function perl-print () { perl -e "print $1"; -e 'print "\n";'; }
+## function perl-print () { perl -e "printf \"$1\";" -e 'print "\n";'; }
+## function perl-print-n () { perl -e "printf \"$1\";"; }
 
-# Bash aliases
-alias bash-trace-on='set -o xtrace'
-alias bash-trace-off='set - -o xtrace' ## ???
-function trace-cmd() { bash-trace-on; eval "$@"; bash-trace-off; }
-## ALT: function trace-cmd() { bash-trace-on; @_; bash-trace-off; }
-alias cmd-trace='trace-cmd'
+## OLD
+## # Unix/Win32 networking aliases
+## if [ "$OSTYPE" != "cygwin" ]; then alias ipconfig=ifconfig; fi
+## alias set-display-local='export DISPLAY=localhost:0.0'
+
+## OLD:
+## # Bash aliases
+## alias bash-trace-on='set -o xtrace'
+## alias bash-trace-off='set - -o xtrace' ## ???
+## function trace-cmd() { bash-trace-on; eval "$@"; bash-trace-off; }
+## ## ALT: function trace-cmd() { bash-trace-on; @_; bash-trace-off; }
+## alias cmd-trace='trace-cmd'
 
 ## OLD:
 ## # Compressing/uncompressing a subdirectory tree (ignoring symbolic links) 
@@ -1635,10 +1660,11 @@ function spell-tex () { do_tex.sh $1; dvi2tty -w 132 $1.dvi | perl -p -e "s/\*\n
 function spell-tex- () { dvi2tty -w 132 $1.dvi >| $1.tty; perl- spell.perl -spell_file=$1.spell $1.tty | sort | $PAGER; }
 ## OLD: export LATEX2HTML_OPTIONS='-split 4 -link 2 -address "" -info ""'
 
-# Linux stuff
-alias configure='./configure --prefix ~'
-alias pp-xml='xmllint --format'
-alias check-xml='xmllint --noout --valid'
+## OLD
+## # Linux stuff
+## alias configure='./configure --prefix ~'
+## alias pp-xml='xmllint --format'
+## alias check-xml='xmllint --noout --valid'
 
 # NMSDF/Military stuff
 function gr-army-acronym () { gr -w -i "$@" $TOMAS/military/manuals/AR310_50-army-abbreviations.txt; }

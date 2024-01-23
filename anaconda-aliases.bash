@@ -16,7 +16,7 @@
 
 # Uncomment the following line(s) for tracing:
 ## set -o xtrace
-## echo "in anaconda-aliases.bash"
+## DEBUG: echo "in anaconda-aliases.bash"
 
 # Find directory for conda
 # TODO: Use a more standard fallback location
@@ -71,6 +71,8 @@ function init-condaN {
 }
 alias init-conda3='init-condaN "$anaconda3_dir"'
 alias init-conda2='init-condaN "$anaconda2_dir"'
+# note: version that makes dir arg optional
+alias init-conda3-new='init-condaN'
 ## TODO: reference-var "$anaconda2_dir"
 echo "$anaconda2_dir" > /dev/null
 
