@@ -111,7 +111,7 @@ OMIT_SHORT_OPTIONS = system.getenv_bool(
     description="Only allow long command line options")
 ALLOW_SHORT_OPTIONS = (not OMIT_SHORT_OPTIONS)
 FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
-                               "Force execution even if admin-like user")
+    "Force execution even if admin-like user")
 FORCE_OPTION_DEFAULT = UNDER_DOCKER or FORCE_RUN
 
 ## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
@@ -247,7 +247,7 @@ def main():
             # quotation marks in output; uses single test directory; passes along --force option
             eval_log = output_file + ".eval.log"
             lenient_eval = (not STRICT_EVAL)
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} IGNORE_SETUP_OUTPUT=1 python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         # Output excerpt from BatsPP source file
@@ -307,7 +307,9 @@ def main():
 
     batspp_version = gh.extract_match_from_text(r"version (\S+)",
                                                 gh.run("batspp --version 2> /dev/null"))
-    print(f"\n=== BATSPP REPORT GENERATOR (simple_batspp.py / BATSPP {batspp_version}) ===\n")
+    print("\n" + "-"*35)
+    print(f"\nBATSPP Report Generation (simple_batspp.py 1.5.x or BATSPP {batspp_version})\n")
+    print("-"*35)
     ## TEMP (tracing test for act/nektos)
     print(f"TEST_REGEX={TEST_REGEX} DEBUG_LEVEL={system.getenv('DEBUG_LEVEL')}")
     debug.trace_expr(1, OUTPUT_DIR, SINGLE_STORE)
@@ -333,7 +335,7 @@ def main():
     # 2) Generating .batspp files from .ipynb files
     i = 1
     batspp_array = []
-    print(f"\n=== GENERATING BATSPP FILES ===\n")
+    print(f"\nGeneration of BATSPP files\n")
 
     for testfile in ipynb_array:
         is_ipynb = testfile.endswith(IPYNB)
