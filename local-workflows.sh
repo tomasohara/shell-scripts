@@ -76,19 +76,18 @@ USER_ENV="${USER_ENV:-}"
 ACT_JSON="${ACT_JSON:-""}"
 RUN_BUILD="${RUN_BUILD:-0}"
 RUN_DOCKER="${RUN_DOCKER:-0}"
-RUN_WORKFLOW="${RUN_WORKFLOW:-0}"
+RUN_WORKFLOW="${RUN_WORKFLOW:-1}"
 WORKFLOW_FILE="${WORKFLOW_FILE:-act.yml}"
 RUN_BUILD_CACHELESS="${RUN_BUILD_CACHELESS:-0}"
 # TODO3: put all env. init up here for clarity
 
 # Display script usage
 usage() {
-    echo "Usage: $0 [--help|-h] [--build|-b] [--cacheless|-c] [--docker|-d] [--workflow|-w] [--file <workflow_file>] [--json <act_json>]"
+    echo "Usage: $0 [--help|-h] [--build|-b] [--cacheless|-c] [--docker|-d] [--file <workflow_file>] [--json <act_json>]"
     echo "Options:"
     echo "  --build     (-b)    Run docker build"
     echo "  --cacheless (-c)    Run docker build by clearing build caches"
     echo "  --docker    (-d)    Run Docker directly (bypassing nektos act) (default: $RUN_DOCKER)"
-    echo "  --workflow  (-w)    Stop Github Actions workflow"
     echo "  --file      (-f)    Specify workflow file (default: $WORKFLOW_FILE)"
     echo "  --json      (-j)    Specify act JSON (default: $ACT_JSON)"
     echo "  --help      (-h)    Displays the help message and exit"
@@ -100,15 +99,15 @@ set_option(){
     case "$1" in
         --build|-b)
             RUN_BUILD=1
+            RUN_WORKFLOW=0
             ;;
         --cacheless|-c)
             RUN_BUILD_CACHELESS=1
+            RUN_WORKFLOW=0
             ;;
         --docker|-d)
             RUN_DOCKER=1
-            ;;
-        --workflow|-w)
-            RUN_WORKFLOW=1
+            RUN_WORKFLOW=0
             ;;
         --file|-f)
             if [ -n "$2" ]; then
