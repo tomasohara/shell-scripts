@@ -16,13 +16,14 @@ function full-usage {
     local script
     script="$(basename "$0")"
     echo ""
-    echo "Usage: $script [--human] [--help] git-path [extract-dir]"
+    echo "Usage: NUM_REVISIONS=N $script [--human] [--help] git-path [extract-dir]"
     echo ""
     echo "Examples:"
     echo ""
-    echo "NUM_REVISIONS=5 $0 README.md /tmp/README-versions"
+    # HACK: Uses Usage in filename so shows up in brief usage
+    echo "NUM_REVISIONS=5 $script Usage.txt /tmp/git-versions"
     echo ""
-    echo "PRETTY=1 VERBOSE=1 NUM_REVISIONS=5 {script} Dockerfile"
+    echo "PRETTY=1 VERBOSE=1 $0 Dockerfile"
     echo ""
     echo "Notes:"
     echo "- default extract-dir: $export_to_expr"
@@ -74,7 +75,7 @@ NEWLINE=$'\n'
 TWO_NEWLINES="$NEWLINE$NEWLINE"
 ## OLD: script="$(basename "$0")"
 ## OLD: USAGE="Usage: $(basename "$0") [--human] path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example(s):${NEWLINE}${NEWLINE}$0 README.md /tmp/README-versions${NEWLINE}${NEWLINE}PRETTY=1 VERBOSE=1 ${script} Dockerfile"
-USAGE=$(full-usage | grep 'Usage:')
+USAGE=$(full-usage | grep 'Usage')
 
 # check if got argument
 if [ "${GIT_PATH_TO_FILE}" == "" ]; then
