@@ -691,11 +691,13 @@ function alt-invoke-next-single-checkin {
         case "$mod_file" in *.css | *.csv | *.html | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
     fi;
     if [ "$is_text" != "" ]; then
-        # note: pauses a little so that user can update cursor before focus shifts
-        # TODO: see how to keep focus on terminal window for git update
-        local delay=5
-        echo "issuing: (sleep $delay; git-difftool-plus \"$mod_file\") &"
-        (sleep $delay; git-difftool-plus "$mod_file") &
+        if [ "$GIT_NO_CONFIRM" = "0" ]; then 
+            # note: pauses a little so that user can update cursor before focus shifts
+            # TODO: see how to keep focus on terminal window for git update
+            local delay=5
+            echo "issuing: (sleep $delay; git-difftool-plus \"$mod_file\") &"
+            (sleep $delay; git-difftool-plus "$mod_file") &
+        fi
     else
         ## TODO: summarize binary differenecs
         echo "Note: binary file so bypassing diff"
@@ -707,7 +709,7 @@ function alt-invoke-next-single-checkin {
     echo "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
     local OLD_GIT_MESSAGE=$GIT_MESSAGE
     # note: options: -e use readline; -i initialize readline buffer; -r backslash is not an escape
-    if [ "$GIT_NO_CONFIRM" != "0" ]; then 
+    if [ "$GIT_NO_CONFIRM" = "0" ]; then 
         read -r -e -i "$prompt" command
     else 
         echo "GIT_NO_CONFIRM set to 1, so skipping confirmation"
