@@ -198,6 +198,8 @@ DISABLE_ALIASES = system.getenv_bool("DISABLE_ALIASES", False,
                                       "Disable alias expansion")
 MERGE_CONTINUATION = system.getenv_bool("MERGE_CONTINUATION", False,
                                         "Merge function or backslash continuations in expected with actual")
+IGNORE_ALL_COMMENTS = system.getenv_bool("IGNORE_ALL_COMMENTS", False,
+                                         "Strip all comments from input")
 STRIP_COMMENTS = system.getenv_bool("STRIP_COMMENTS", False,
                                     "Strip comments from expected output")
 ALLOW_COMMENTS = system.getenv_bool("ALLOW_COMMENTS", False,
@@ -756,6 +758,13 @@ class CustomTestsToBats:
                         f"The expected output shouldn't have $ prompt at start of line: {expected!r}")
         (actual, expected) = self.merge_continuation(actual, expected)
 
+        # Ignore if just comments
+        if IGNORE_ALL_COMMENTS:
+            entire_sans_comments = my_re.sub(r"^\s*\#.*\n", "", entire, flags=re.MULTILINE)
+            if not entire_sans_comments.strip():
+                debug.trace(T6, f"FYI: Ignoring test that is just comments: {gh.elide(entire)!r}")
+                return "", ""
+        
         # Process title
         # Note: The test label starts with a number and includes optional user name (e.g, test-1-hello-world).
         title_prefix = f'test-{self._test_id}'
@@ -767,7 +776,7 @@ class CustomTestsToBats:
 
         # HACK: Extract setup command from entire match if '# Setup' indicator given
         # but the setup section is empty.
-        if (EXTRACT_SETUP and (not setup) and my_re.search(r"# Setup\n\$([^\n]+\n)", entire,
+        if (EXTRACT_SETUP and (not setup) and my_re.search(r"#\s*Setup\n\$([^\n]+\n)", entire,
                                                            flags=re.IGNORECASE|re.MULTILINE)):
             setup = my_re.group(1)
             debug.trace(T6, f"Using setup fallback code extracted from entire match: {setup}")
@@ -779,7 +788,7 @@ class CustomTestsToBats:
                     if setup and (not re.search(r"[;\}]\s*$", setup)):
                         setup += ";"
                     setup += ("\t" + command + "\n")
-        debug.trace(T6, f"hacked_setup={setup!r}")
+            debug.trace(T6, f"hacked_setup={setup!r}")
 
         # Process setup commands
         # Note: set COPY_DIR to copy files in current dir to temp. dir.
@@ -830,14 +839,19 @@ class CustomTestsToBats:
 
         # Add special hooks for when '# Setup' or '# Continuation' specified
         # HACK: Updates instance state to process such indicator comments (to avoid regex complication)
-        has_setup_comment = re.search("# Setup", entire, re.IGNORECASE)
-        has_wrapup_comment = re.search("# Wrapup", entire, re.IGNORECASE)
-        if has_setup_comment:
+        # note: The regex parsing isolates "# Setup" code only when '# Actual' used, which is
+        # not commonly used. (see CommandTests.__init__ for regex definition.)
+        has_setup_comment = re.search(r"#\s*Setup", entire, re.IGNORECASE)
+        has_wrapup_comment = re.search(r"#\s*Wrapup", entire, re.IGNORECASE)
+        has_continuation_comment = re.search(r"#\s*Continuation", entire, re.IGNORECASE)
+        use_setup_function = (has_setup_comment or has_continuation_comment or has_wrapup_comment or setup_text.strip())
+        if use_setup_function:
             setup_function   = f'{unspaced_title}-{setup_label}'
             self._setup_funct = setup_function
             functions_text += self._get_bash_function(setup_function, setup_text)
-        has_continuation_comment = re.search("# Continuation", entire, re.IGNORECASE)
-        use_setup_function = (has_setup_comment or has_continuation_comment)
+        ## OLD:
+        ## has_continuation_comment = re.search(r"#\s*Continuation", entire, re.IGNORECASE)
+        ## use_setup_function = (has_setup_comment or has_continuation_comment)
         setup_call = ""
         if use_setup_function:
             debug.trace(T6, f"Using separate setup function {self._setup_funct}")
@@ -880,7 +894,7 @@ class CustomTestsToBats:
             else:
                 main_body += f'\ttest_output_ignored=0\n'
             
-        ## Process debug
+        # Process debug
         debug_text = ""
         if not OMIT_TRACE:
             verbose_print = '| hexview.perl' if  self._verbose else ''
@@ -1014,10 +1028,10 @@ class CustomTestsToBats:
         in_text = text
         debug.assertion(PARA_BLOCKS)
         if MATCH_SENTINELS:
-            if not my_re.search("# Start", text):
+            if not my_re.search(r"#\s*Start", text):
                 text = "# Start\n" + text.lstrip("\n")
             ## TODO:
-            ## if not my_re.search("# End", text):
+            ## if not my_re.search("#\s*End", text):
             ##     text = text.rstrip("\n") + "\n# End\n"
         debug.trace(T8, f"normalize_block({in_text!r}) => {text!r}")
         return text
@@ -1092,12 +1106,14 @@ class CustomTestsToBats:
             debug.assertion(len(test) == 5, f'Incorrect number of fields, every test should be {TestFieldTypes._fields}')
             # Add global setup section directly to BATS output mostly as is (except for prompt removal)
             # pylint: disable=no-member
-            if my_re.search(r"^\s*# Global Setup", test.entire, flags=(re.MULTILINE | re.IGNORECASE)):
+            if my_re.search(r"^\s*#\s*Global Setup", test.entire, flags=(re.MULTILINE | re.IGNORECASE)):
                 debug.trace_expr(T7, test.entire)
                 entire_code = my_re.sub(r"^\s*\n", "", test.entire, flags=re.MULTILINE)
-                debug.assertion(not my_re.search(r"^([^\$#])", entire_code, flags=re.MULTILINE),
+                if IGNORE_SETUP_OUTPUT:
+                    entire_code = my_re.sub(r"^([^\$\#])[^\n]*\n", "", entire_code, flags=re.MULTILINE)
+                debug.assertion(not my_re.search(r"^([^\$\#])", entire_code, flags=re.MULTILINE),
                                 "Global setup should not have expected output")
-                global_setup = my_re.sub(r'^\s*\$\s*', '', test.entire, flags=re.MULTILINE)
+                global_setup = my_re.sub(r'^\s*\$\s*', '', entire_code, flags=re.MULTILINE)
                 debug.trace_expr(T6, global_setup)
                 bats_tests += global_setup + "\n"
                 continue
@@ -1106,8 +1122,9 @@ class CustomTestsToBats:
             test = self._last_process(test)
             ## OLD: bats_tests += self._convert_to_bats(test)
             test_spec, title = self._convert_to_bats(test)
-            bats_tests += test_spec
-            test_ids.append(title)
+            if test_spec:
+                bats_tests += test_spec
+                test_ids.append(title)
 
             self._test_id = self.next_id()
 
