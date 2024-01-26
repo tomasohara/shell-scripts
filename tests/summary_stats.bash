@@ -20,19 +20,24 @@ fi
 
 # Help Message
 display_help() {
-	echo "Usage: $0 [-f]"
+	echo "Usage: $0 [-file]"
 	echo "	-o	Shows output log (summary_stats.log)"
 	echo "	-h	Displays this help message"
+    echo "  -f  Force Run"
 }
 
 # Applying options for output log
 output_log=false
+force_run=0
 
-while getopts "oh" option; do
+while getopts "ohf" option; do
 	case $option in
 		o)
 			output_log=true
 			;;
+        f)
+            force_run=1
+            ;;
 		h)
 			display_help
 			exit 0
@@ -81,7 +86,8 @@ echo "FYI: Using $BATSPP_OUTPUT for output and $BATSPP_TEMP for temp. files"
 # 
 BATSPP_REPORT_OPTS=${BATSPP_REPORT_OPTS:-"--txt --definitions ../all-tomohara-aliases-etc.bash"}
 # shellcheck disable=SC2086
-OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" PYTHONPATH="..:$PYTHONPATH" python3 ./batspp_report.py $BATSPP_REPORT_OPTS -
+## OLD (Not included Force Run): OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" python3 ./batspp_report.py $BATSPP_REPORT_OPTS -
+OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" FORCE_RUN="$force_run" python3 ./batspp_report.py $BATSPP_REPORT_OPTS -
 batspp_result="$?"
 
 ## NOTE: kcov is not critical, so it is not run as part of workflow tests

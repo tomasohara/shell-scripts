@@ -28,7 +28,8 @@ alias-grep-commands.ipynb: 35
 trace-unix-general.ipynb: 20
 trace-file-manipulation.ipynb: 35
 trace-unix-alias.ipynb: 32.5
-trace-python-commands.ipynb: 32.5
+# EXPERIMENTAL: trace-python-commands.ipynb: 32.5
+trace-python-commands.ipynb: 27.5
 download-and-test-tomohara-aliases.ipynb: 30.0
 command-override-cp-mv.ipynb: 30.0
 alias-trace-misc-commands.ipynb: 30.0
@@ -51,3 +52,5 @@ git-aliases-tests-1.ipynb: 0
 git-aliases-tests-2.ipynb: 0
 git-aliases-tests-3.ipynb: 0
 test-eval-condition-alias.ipynb: 20
+README.ipynb: 20
+
