@@ -1,4 +1,4 @@
-# !/bin/env bash
+#! /bin/env bash
 #
 # Convenience script for loading all my aliases, functions, etc.
 #

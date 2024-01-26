@@ -47,10 +47,12 @@ trace-linux-admin-alias-NOBATSPP.ipynb: 0
 sudocommentstest-NOBATSPP.ipynb: 0
 perl-script-NOBATSPP.ipynb: 0
 testing-support-script-tests.ipynb: 40
-# temporary no-threshold setting for new tests
-git-aliases-tests-1.ipynb: 0
-git-aliases-tests-2.ipynb: 0
-git-aliases-tests-3.ipynb: 0
+README.ipynb: 60
+# low thresholds for work-in-progress tests
+git-aliases-tests-1.ipynb: 30
+git-aliases-tests-2.ipynb: 30
+git-aliases-tests-3.ipynb: 30
 test-eval-condition-alias.ipynb: 20
-README.ipynb: 20
-
+alias-sanity-checks.ipynb: 40
+# temporary no-threshold setting for new tests
+# n/a

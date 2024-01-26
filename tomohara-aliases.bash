@@ -951,7 +951,7 @@ function grepl () { pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
 }
 # gr-c: grep through c/c++ source and headers files
 # note: --no-messages suppresses warnings about missing files
-function gr-c () { gr --no-messages "$@" *.c *.cpp *.cxx *.h; }
+function gr-c () { gr --no-messages "$@" ./*.c ./*.cpp ./*.cxx ./*.h; }
 
 
 # TODO: create function for creating gr-xyz aliases
@@ -1318,8 +1318,8 @@ function check-errors-aux { alias-perl check_errors.perl "$@"; }
 ## # -or-:
 ## function check-errors-aux { PERL_SWITCH_PARSING=1 check_errors.py "$@"; };
 ## OLD
-## # note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
-## ALIAS_DEBUG_LEVEL=${DEBUG_LEVEL:-2}
+# note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
+ALIAS_DEBUG_LEVEL=${DEBUG_LEVEL:-2}
 function check-errors () {
     ## NOTE: gotta dislike bash!
     local args=("$@");
@@ -1331,7 +1331,7 @@ function check-errors () {
         ## DEBUG: echo "Adding stdin"
         args+=("-");
     fi;
-    (QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | convert-emoticons-stdin | $PAGER;
+    (DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL convert-emoticons-stdin | $PAGER;
 }
 # note: with -relaxed, the pattern matching is looser (hence more errors show)
 alias check-all-errors='check-errors -relaxed'
@@ -1512,6 +1512,12 @@ function make-tar () {
     #          Otherwise if optional args are present, empty dirs will be excluded from final tar
     # Check arguments
     local base="$1"; local dir="$2";
+    if [ "$base" == "--help" ]; then
+        echo "Usage: make-tar base dir [depth [filter]]"
+        echo "Env. options: USE_DATE, TEMP, GTAR"
+        echo "note: TEMP used by tar-dir, etc."
+        return
+    fi
     ## TODO2: dispense with acrobatic arg parsing!
     local depth="${3:-${TAR_DEPTH:-""}}";
     local filter="${4:-${TAR_FILTER:-""}}"
@@ -1541,7 +1547,7 @@ function make-tar () {
     if [ "${depth_arg}${size_arg}${filter_arg[*]}" == "." ]; then
         $NICE $GTAR cvfz "$base.tar.gz" "$dir" >| "$base.tar.log" 2>&1;
     else
-        (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+        (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "${filter_arg[@]}" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     fi
     ## DUH: -L added to support tar-this-dir in directory that is symbolic link, but unfortunately
     ## that leads to symbolic links in the directory itself to be included
@@ -1812,9 +1818,10 @@ function show-macros () { show-all-macros "$*" | perlgrep -v -para "^_"; }
 # show-macros-proper([pattern]): shows names of aliases/functions matching PATTERN
 function show-macros-proper-old { show-macros "$@" | $EGREP "^\w"; }
 function show-macros-proper {
-    # ntoe: first filters by likely alias or function definititions
+    local pattern="${*:-.}"
+    # note: first filters by likely alias or function definititions
     # ex: "alias move='mv'", "setenv () {\n    export "$1"="$2"\n}"
-    show-macros "$@" | $EGREP '(^alias)|( \(\) $)' | perl -pe 's/alias (\S+)=.*/\1/;  s/^(\S+) \(\)/\1/;' | $GREP "$@" | sort;
+    show-macros "$pattern" | $EGREP '(^alias)|( \(\) $)' | perl -pe 's/alias ([^=]+)=.*/\1/;  s/^(\S+) \(\)/\1/;' | $EGREP "$pattern" | sort;
 }
 # display-macros(pattern): show definition(s) of alias or function matching pattern in name
 function display-macros {
@@ -2009,7 +2016,12 @@ function rename-emoji-here {
     # note: ensures no spaces and then filters files by potential emoticons before slow rename-emoji step proper
     # See https://stackoverflow.com/questions/39536390/match-unicode-emoji-in-python-regex.
     rename-spaces;
-    rename-emoji $(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=1 python -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -);
+    ## OLD: rename-emoji $(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=1 python -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -);
+    local files;
+    # Note: Disables shellcheck warning SC2207: Prefer mapfile or read -a to split command output (or quote to avoid splitting).
+    # shellcheck disable=SC2207
+    files=($(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=1 python -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -));
+    rename-emoji "${files[@]}"
 }
 
 # rename-bad-dashes: replace " -" in filename with "_" and replace leadind dash with underscore
@@ -2114,6 +2126,7 @@ function rename-with-file-date() {
         elif [[ ("$IGNORE_ALL" = "1") && ("$f" =~ [0-9]{2}[a-z]{3,4}[0-9]{2}) ]]; then
             [ $verbose = 1 ] && echo "Ignoring file with timestamp affix: $f"
         elif [ -e "$f" ]; then
+            ## TODO2: use same format as $(T)--lowercase as in $(get-free-filename ... $(date ... | downcase-stdin; ))
            new_f=$(get-free-filename "$f.$(date --reference="$f" '+%d%b%y')" ".")
            ## DEBUG: echo
            eval "$move_command" "$f" "$new_f";
@@ -2562,14 +2575,14 @@ function scp-aws-up() {
     local host="$1";
     shift;
     local xfer="${SSH_XFER:-xfer}"
-    scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@"  "$TPO_SSH_USER@$host":$xfer;
+    scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@"  "$TPO_SSH_USER@$host":"$xfer";
 }
 function scp-aws-down() {
     local host="$1";
     local xfer="${SSH_XFER:-xfer}"
     shift;
     for _file in "$@"; do
-        scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host":$xfer/$_file .;
+        scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$host":"$xfer"/"$_file" .;
     done;
 }
 #
@@ -3032,11 +3045,13 @@ function run-jupyter-notebook-posthoc() {
     local log="$1"
     echo "checking log: $log"
     # TODO: resolve problem extracting URL
-    # TEMP:
-    tail "$log"
+    # TEMP: tail "$log"
     # Show URL
+    ## OLD:
+    ## echo -n "URL: "
+    ## extract-matches 'http:\S+' "$log" | sort -u
     echo -n "URL: "
-    extract-matches 'http:\S+' "$log" | sort -u    
+    VERBOSE=1 extract-matches 'http:\S+' "$log" | sort -u
 }
 
 # run-jupyter-notebook(port=18888): run jupyter notebook on PORT
@@ -3045,13 +3060,21 @@ function run-jupyter-notebook () {
     local ip="$2"; if [ "$ip" = "" ]; then ip="127.0.0.1"; fi
     local log
     log="$TEMP/jupyter-p$port-$(TODAY).log"
+    rename-with-file-date "$log"
     # note: clears notebook token to disable authentication
-    jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
+    ## OLD: jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
+    ## TEST: jupyter notebook --ServerApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
+    ## TODO1: make sure IdentityProvider.token is right one to use (maltdito jupyter)
+    ## TODO4?: JUPYTER_TOKEN="" jupyter notebook --no-browser --port ...
+    jupyter notebook --IdentityProvider.token='' --no-browser --port $port --ip $ip > "$log" 2>&1 &
     ## OLD
     ## echo "$log"
     # Let jupyter initialize
-    local delay=5
-    echo "sleeping $delay seconds for log to stabilize (maldito jupyter)"
+    ## OLD:
+    ## local delay=5
+    ## echo "sleeping $delay seconds for log to stabilize (maldito jupyter)"
+    local delay=6
+    echo "sleeping $delay seconds for jupyter to finish initializing"
     sleep $delay
     ## OLD
     ## # TODO: resolve problem extracting URL
