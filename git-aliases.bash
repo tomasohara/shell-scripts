@@ -691,7 +691,9 @@ function alt-invoke-next-single-checkin {
         case "$mod_file" in *.css | *.csv | *.html | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
     fi;
     if [ "$is_text" != "" ]; then
-        if [ "$GIT_NO_CONFIRM" = "0" ]; then 
+        if [ "$GIT_NO_CONFIRM" = "1" ]; then
+            echo "GIT_NO_CONFIRM enabled, so skipping difftool (e.g., for visual diff)"
+        else
             # note: pauses a little so that user can update cursor before focus shifts
             # TODO: see how to keep focus on terminal window for git update
             local delay=5
@@ -709,12 +711,12 @@ function alt-invoke-next-single-checkin {
     echo "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
     local OLD_GIT_MESSAGE=$GIT_MESSAGE
     # note: options: -e use readline; -i initialize readline buffer; -r backslash is not an escape
-    if [ "$GIT_NO_CONFIRM" = "0" ]; then 
-        read -r -e -i "$prompt" command
-    else 
-        echo "GIT_NO_CONFIRM set to 1, so skipping confirmation"
+    if [ "$GIT_NO_CONFIRM" = "1" ]; then 
+        echo "GIT_NO_CONFIRM set to 1, so skipping git-update-commit-push confirmation"
         export GIT_MESSAGE=${GIT_TEST_MESSAGE:-"default"}
         command="git-update-commit-push \"$mod_file\""
+    else 
+        read -r -e -i "$prompt" command
     fi
     # Evaluate the user's checkin command
     # TODO: rework using a safer approach with reading checking comment and issuing git-update-commit-push directly
