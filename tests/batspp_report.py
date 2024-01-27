@@ -277,7 +277,7 @@ def main():
         trace_excerpt(output_file)
         trace_excerpt(log_file, level=4)
         # Check for common errors (e.g., command not found or insufficient permissions)
-        ## EXP: print(gh.run(f"{check_errors_script} {log_file}"))
+        print(gh.run(f"{check_errors_script} {log_file}"))
         
         ## TEMP: Show context of failed tests for help with diagnosis of Github actions runs (as temp files not accessible afterwards)
         if SHOW_FAILURE_CONTEXT:
@@ -288,15 +288,19 @@ def main():
         trace_excerpt(real_output_file)
         trace_excerpt(eval_log)
         debug.assertion(not run_output.strip())
-    
+
+        # The return result is the Bats evaluation output and list of errors from log file
+        # note: The errors are also output here.
+        ## TODO2: include BatsPP log errors if not in eval log errors
         real_output = system.read_file(real_output_file)
-        eval_errors = (gh.run(f"{check_errors_path} -context=0 {log_file}").split("\n"))[1:]
-        
+        eval_errors = (gh.run(f"{check_errors_script} -context=0 {eval_log}").split("\n"))[1:]
+        #
         print(f"\nEvaluation Errors: {len(eval_errors)}")
         if (len(eval_errors) > 0):
             print("\nError Details:\n")
             for error in eval_errors:
-                print("\t"+error+"\n")
+                ## BAD: print("\t"+error+"\n")
+                print(f"\t{error}")
             print("")
         
         debug.trace(6, f"\nrun_batspp() ##real_output## => {real_output!r}")
