@@ -95,6 +95,9 @@ TEST_REGEX = system.getenv_value(
 TRACE_EXCERPT_SIZE = system.getenv_int(
     "TRACE_EXCERPT_SIZE", 1000,
     description="Number of lines traced with trace_excerpt")
+TRACE_EXCERPT_LEVEL = system.getenv_int(
+    "TRACE_EXCERPT_LEVEL", TL.VERBOSE,
+    description="Tracing level for trace_excerpt")
 SHOW_FAILURE_CONTEXT = system.getenv_bool(
     "SHOW_FAILURE_CONTEXT", UNDER_TESTING_VM,
     description="Show context of test failures--useful with Github runner")
@@ -240,11 +243,12 @@ def main():
         """Outputs the first NUM_LINES in FILENAME if at debugging trace LEVEL
         Note: that output goes to stdout not stderr (unlike debug.trace)"""
         if level is None:
-            level = TL.VERBOSE
+            level = TRACE_EXCERPT_LEVEL
         if num_lines is None:
             num_lines = TRACE_EXCERPT_SIZE
         if debug.debugging(level):
             print(gh.run(f"echo BatsPP source:; head -{num_lines} --verbose {filename} | cat -n"))
+        print(gh.run(f"echo BatsPP source:; head -{num_lines} --verbose {filename} | cat -n"))
         return
             
     def run_batspp(input_file, output_file):
