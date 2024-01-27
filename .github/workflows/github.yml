@@ -71,5 +71,7 @@ jobs:
 
       - name: Run tests
         run: |
-          docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
-
+          ## OLD: docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+          # Note: command format: docker run [OPTIONS] IMAGE [COMMAND] [ARG...];
+          # The environment file normally has no entries (i.e., just comments).
+          docker run --env-file _temp-user-docker.env --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
