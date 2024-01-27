@@ -773,6 +773,8 @@ class CustomTestsToBats:
         else:
             title = title_prefix
         unspaced_title = my_re.sub(r'\s+', '-', title)
+        # note: remove special punctuation (TODO3: retain for comments)
+        unspaced_title = my_re.sub(r"([^ a-z0-9_-])", "_", unspaced_title)
 
         # HACK: Extract setup command from entire match if '# Setup' indicator given
         # but the setup section is empty.
@@ -931,7 +933,7 @@ class CustomTestsToBats:
             misc_code = (
                 f'\t# actual {{ {actual!r} }} => "${actual_var}"\n' +
                 f'\t# expect {{ {expected!r} }} => "${expected_var}"\n')
-        test_header = (f'@test "{title}"' if not BASH_EVAL else f'function {title}')
+        test_header = (f'@test "{unspaced_title}"' if not BASH_EVAL else f'function {unspaced_title}')
         result = (f'{test_header} {{\n' +
                   (f'{setup_text}' if not use_setup_function else setup_call) +
                   f'{main_body}' +
