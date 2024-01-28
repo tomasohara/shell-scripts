@@ -602,6 +602,7 @@ function git-vdiff-alias {
 #
 function git-diff-list-template {
     # TODO: use unique tempfile (e.g., mktemp)
+    ## TODO2: diff_list_file=$(get-temp-log-name "diff")
     echo "diff_list_file=\$TMP/_git-diff.\$\$.list"
     # ex: "diff --git a/tomohara-aliases.bash b/tomohara-aliases.bash" => "tomohara-aliases.bash:
     # TODO: ex: "diff --cc mezcla/data_utils.py" => "mezcla/data_utils.py"
@@ -609,7 +610,7 @@ function git-diff-list-template {
 }
 function git-diff-list {
     local diff_list_file
-    # TODO: use unique tempfile (e.g., mktemp)
+    ## TODO2: local diff_list_script=$(get-temp-log-name "diff")
     local diff_list_script="$TMP/_git-diff-list.$$.bash"
     git-diff-list-template >| "$diff_list_script"
     source "$diff_list_script"
