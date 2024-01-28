@@ -247,8 +247,8 @@ def main():
         if num_lines is None:
             num_lines = TRACE_EXCERPT_SIZE
         if debug.debugging(level):
-            print(gh.run(f"echo BatsPP source:; head -{num_lines} --verbose {filename} | cat -n"))
-        print(gh.run(f"echo BatsPP source:; head -{num_lines} --verbose {filename} | cat -n"))
+            _dir, filename_proper = system.split_path(filename)
+            print(gh.run(f"echo {filename_proper} excerpt:; head -{num_lines} --verbose {filename} | cat -n"))
         return
             
     def run_batspp(input_file, output_file):
