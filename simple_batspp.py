@@ -804,7 +804,10 @@ class CustomTestsToBats:
             test_folder = gh.form_path(TEMP_DIR, "global-test-dir")
         else:
             test_subdir = unspaced_title
-            test_folder = gh.form_path(TEMP_DIR, test_subdir)
+            ## TODO1: test_folder = gh.form_path(TEMP_DIR, test_subdir)
+            ## NOTE: The above is leading to odd errors after running a dozen or so tests files
+            ##    '/bin/sh: 1: cannot open /dev/null: No such file'
+            test_folder = gh.form_path(".", test_subdir)
             setup_text += (
                 f'\ttest_folder="{test_folder}"\n' +
                 f'\tmkdir --parents "$test_folder"\n' +
