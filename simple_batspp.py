@@ -67,6 +67,7 @@
 ## - Stay in synh with Batspp:
 ##   https://github.com/LimaBD/batspp/tree/main/tests/cases
 ## - Use gh.form_path consistently (n.b., someday this might run under Window).
+## - Weed out Unix-specific file path usages (e.g., f'\tcommand cp -Rp ./. "$test_folder"\n').
 ## TODO4:
 ## - Integrate features from similar utilities:
 ##   https://pypi.org/project/docshtest/
@@ -799,7 +800,9 @@ class CustomTestsToBats:
         ## OLD: gh.full_mkdir(test_folder)
         self.num_tests += 1
         setup_text = ""
-        if not GLOBAL_TEST_DIR:
+        if GLOBAL_TEST_DIR:
+            test_folder = gh.form_path(TEMP_DIR, "global-test-dir")
+        else:
             test_subdir = unspaced_title
             test_folder = gh.form_path(TEMP_DIR, test_subdir)
             setup_text += (
@@ -876,12 +879,13 @@ class CustomTestsToBats:
         if OLD_ACTUAL_EVAL:
             main_body += f'\t{actual_var}="$({actual_function})"\n'
         else:
+            out_file = gh.form_path(test_folder, f"{unspaced_title}.out")
             main_body += (
-                     f'\tout_file="{unspaced_title}.out"\n' +
-                     ## TODO: f'\tout_file="$TMP/{unspaced_title}.out"\n' +
-                     f'\t{actual_function} >| "$out_file"\n' +
-                     f'\t{actual_var}="$(cat "$out_file")"\n')
-        main_body += f'\t{expected_var}="$({expected_function})"\n'
+                f'\tout_file="{out_file}"\n' +
+                f'\ttouch "$out_file"\n' +
+                f'\t{actual_function} >> "$out_file"\n' +
+                f'\t{actual_var}="$(cat "$out_file")"\n')
+            main_body += f'\t{expected_var}="$({expected_function})"\n'
         if NORMALIZE_WHITESPACE:
             main_body += (f'\t{actual_var}="$(normalize-whitespace \"${actual_var}\")"\n' +
                           f'\t{expected_var}="$(normalize-whitespace \"${expected_var}\")"\n')
