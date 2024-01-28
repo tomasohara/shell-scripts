@@ -50,6 +50,9 @@ FUBAR_TEST = r"""
     ## TODO: $ alias fubar='let num_fu++; echo num_fu="$(eval echo "\${num_fu}")"'
     $ alias fubar='let num_fu++'
     
+    # Setup
+    $ num_fu=1
+    
     # Test fu
     ## TODO: $ fubar
     ## TEST: 
@@ -83,9 +86,12 @@ class TestIt(TestWrapper):
         debug.trace(4, f"TestIt.test_data_file(); self={self}")
 
         system.write_file(self.temp_file, FUBAR_TEST)
-        output = self.run_script(options="", env_options="TEST_FILE=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1",
-                                 data_file=self.temp_file)
-        self.do_assert("2 tests, 0 failure(s)" in output)
+        output = self.run_script(
+            options=f"--output {self.temp_file}.batspp",
+            env_options="TEST_FILE=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1",
+            data_file=self.temp_file)
+        # note: The setup is counted as a no-op test (i.e., ignored)
+        self.do_assert("3 tests, 0 failure(s), 1 ignored" in output)
         return
 
     @pytest.mark.xfail                   # TODO: remove xfail

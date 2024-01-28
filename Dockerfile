@@ -137,7 +137,7 @@ fi
 ## TODO:
 ## RUN git config --global user.email "scrappycito@gmail.com" && \
 ##     git config --global user.name "SCrappy Cito" && \
-##     export MY_GIT_TOKEN=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 && \
+##     export MY_GIT_TOKEN=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 && \
 ##     git config --global url."https://api:$MY_GIT_TOKEN@github.com/".insteadOf "https://github.com/" && \
 ##     git config --global url."https://ssh:$MY_GIT_TOKEN@github.com/".insteadOf "ssh://git@github.com/" && \
 ##     git config --global url."https://git:$MY_GIT_TOKEN@github.com/".insteadOf "git@github.com:"

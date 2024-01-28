@@ -48,7 +48,7 @@ $ sum_file.perl -stdev -extended -col=2 faithful.data | extract_matches.perl "mo
 #...............................................................................
 # perlgrep.perl
 
-# Make sure slurp matche entire file:
+# Make sure slurp matches entire file:
 # $ seq 5
 # 1
 # 2
@@ -61,3 +61,20 @@ $ seq 5 | perlgrep.perl "1.*5" | wc -l | count_it.perl -show_zeros '0'
 
 $ seq 5 | perlgrep.perl -slurp "1.*5" | wc -l | count_it.perl -show_zeros '0'
 0	0
+
+#...............................................................................
+# html_utils.py
+
+# Setup
+$ base="$TMP/tomasohara-trade"
+$ curl www.tomasohara.trade > "$base.html"
+$ html_utils.py --regular "$base.html"
+
+# Check content extracted
+
+$ count-it -show_zeros 'Thomas' "$base.html.list"
+Thomas	0
+
+$ count-it -show_zeros 'Tom' "$base.html.list"
+# TODO: encode-digits (i.e., 3 => N)
+Tom	3

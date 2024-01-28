@@ -21,7 +21,7 @@ sudo apt-get install $(grep -v ^# required-packages.txt)
 The default installation just covers the common packages used by most scripts. Some scripts here and in the mezcla require additional packages. In addition, some packages require post-installation steps. These can be installed as follows:
 
 ```
-# Install Mezcal with optional packages, and get optional ones for shell-scripts
+# Install Mezcla with optional packages, and get optional ones for shell-scripts
 cd
 git clone https://github.com/tomasohara/mezcla
 pip install --verbose $(perl -pe 's/^#opt#\s*//;' mezcla/requirements.txt | grep -v '^#')

@@ -194,8 +194,8 @@ simple-alias-fn act-plain 'convert-emoticons-aux act'
 # note: strips the 0-len paragraph indicator
 function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -pe 's/^0\t//;'; }
 
-# extract-text-html(filename): extract text from HTMNL in FILENAME
-simple-alias-fn extract-text-html 'python -m mezcla.html_utils'
+# extract-text-html(filename): extract text from HTML in FILENAME
+simple-alias-fn extract-text-html 'python -m mezcla.html_utils --regular'
 
 #...............................................................................
 # Bash stuff
@@ -407,7 +407,7 @@ alias free-memory='free --wide --human | grep -v Swap:'
 # clear-cache: clear disk cache
 # See https://linux-mm.org/Drop_Caches and https://www.linuxatemyram.com
 # TODO: get this to work completely; explain Admin filter
-simple-alias-fn clear-cache 'echo; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
+simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
 
 #...............................................................................
 # Emacs related
