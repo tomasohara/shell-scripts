@@ -39,6 +39,7 @@ python_result="$?"
 
 # Run the alias tests and show info from show output log (-o)
 ## TODO: python3 "$dir"/batspp_report.py --text
+## TODO2: run via su (or sudo) with a non-root account!
 bash "$dir"/summary_stats.bash -o
 bash_result="$?"
 
