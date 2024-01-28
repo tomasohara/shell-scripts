@@ -73,6 +73,10 @@ jobs:
         run: |
           pip install --verbose --requirement requirements.txt
 
+      - name: Run Python Tests under Runner
+        run: |
+          PYTHONPATH="$PWD:$PWD/tests:$PYTHONPATH" ./tests/run_tests.bash
+          
   build-and-test-docker:
     name: Build and Run Tests via Docker
     # include unless skip-docker set (see skip-docker.json)
