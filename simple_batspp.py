@@ -882,8 +882,7 @@ class CustomTestsToBats:
             out_file = gh.form_path(test_folder, f"{unspaced_title}.out")
             main_body += (
                 f'\tout_file="{out_file}"\n' +
-                f'\ttouch "$out_file"\n' +
-                f'\t{actual_function} >> "$out_file"\n' +
+                f'\t{actual_function} >| "$out_file"\n' +
                 f'\t{actual_var}="$(cat "$out_file")"\n')
             main_body += f'\t{expected_var}="$({expected_function})"\n'
         if NORMALIZE_WHITESPACE:
