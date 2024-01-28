@@ -101,6 +101,9 @@ TRACE_EXCERPT_LEVEL = system.getenv_int(
 SHOW_FAILURE_CONTEXT = system.getenv_bool(
     "SHOW_FAILURE_CONTEXT", UNDER_TESTING_VM,
     description="Show context of test failures--useful with Github runner")
+STOP_ON_FAILURE = system.getenv_bool(
+    "STOP_ON_FAILURE", False,
+    description="Stop when failure encountered")
 SINGLE_STORE = system.getenv_bool(
     "SINGLE_STORE", False,
     description=f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
@@ -247,8 +250,8 @@ def main():
         if num_lines is None:
             num_lines = TRACE_EXCERPT_SIZE
         if debug.debugging(level):
-            print(gh.run(f"echo BatsPP source:; head -{num_lines} --verbose {filename} | cat -n"))
-        print(gh.run(f"echo BatsPP source:; head -{num_lines} --verbose {filename} | cat -n"))
+            _dir, filename_proper = system.split_path(filename)
+            print(gh.run(f"echo {filename_proper} excerpt:; head -{num_lines} --verbose {filename} | cat -n"))
         return
             
     def run_batspp(input_file, output_file):
@@ -473,6 +476,9 @@ def main():
                     success_test_array.append(txt_option_JSON)
                 else:
                     failure_test_array.append(txt_option_JSON)
+                    if STOP_ON_FAILURE:
+                        debug.trace(5, "FYI: stopping because failure encountered")
+                        break
 
             if KCOV_OPTION:
                 # TODO2: extend run_batspp to handle optional coverage check

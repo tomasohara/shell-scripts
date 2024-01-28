@@ -804,7 +804,10 @@ class CustomTestsToBats:
             test_folder = gh.form_path(TEMP_DIR, "global-test-dir")
         else:
             test_subdir = unspaced_title
-            test_folder = gh.form_path(TEMP_DIR, test_subdir)
+            ## TODO1: test_folder = gh.form_path(TEMP_DIR, test_subdir)
+            ## NOTE: The above is leading to odd errors after running a dozen or so tests files
+            ##    '/bin/sh: 1: cannot open /dev/null: No such file'
+            test_folder = gh.form_path(".", test_subdir)
             setup_text += (
                 f'\ttest_folder="{test_folder}"\n' +
                 f'\tmkdir --parents "$test_folder"\n' +
@@ -882,8 +885,7 @@ class CustomTestsToBats:
             out_file = gh.form_path(test_folder, f"{unspaced_title}.out")
             main_body += (
                 f'\tout_file="{out_file}"\n' +
-                f'\ttouch "$out_file"\n' +
-                f'\t{actual_function} >> "$out_file"\n' +
+                f'\t{actual_function} >| "$out_file"\n' +
                 f'\t{actual_var}="$(cat "$out_file")"\n')
             main_body += f'\t{expected_var}="$({expected_function})"\n'
         if NORMALIZE_WHITESPACE:
