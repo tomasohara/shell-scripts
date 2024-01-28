@@ -55,7 +55,8 @@ cd "$(dirname "$0")"
 if [[ ("$HOME" == "/home/shell-scripts") || ("$HOME" == "/home/runner") ]]; then
     git config --local user.email "scrappycito@gmail.com"
     git config --local user.name "Scrappy Cito"
-    export MY_GIT_TOKEN=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
+    ## OLD: export MY_GIT_TOKEN=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
+    export MY_GIT_TOKEN=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
     git config --local url."https://api:$MY_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
     git config --local url."https://ssh:$MY_GIT_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
     git config --local url."https://git:$MY_GIT_TOKEN@github.com/".insteadOf "git@github.com:"
