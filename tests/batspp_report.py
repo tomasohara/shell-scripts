@@ -522,15 +522,15 @@ def main():
         def print_test_array(arr):
             """Print summary of test results in ARR"""
             for index, item in enumerate(arr):
-                t_name = item['test_name']
-                t_rate = item['test_success_rate']
-                t_min_score = item['test_min_score']
-                t_count_total = item['test_count_total']
-                t_count_ok = item['test_count_ok']
-                t_count_eval_error = item['test_count_eval_error']
+                test_name = item['test_name']
+                rate = item['test_success_rate']
+                min_score = item['test_min_score']
+                count_total = item['test_count_total']
+                count_ok = item['test_count_ok']
+                count_eval_error = item['test_count_eval_error']
                 ## OLD: Revised format includes test passed out of test found
                 # print(f"{index + 1}. {name} ({rate}%): threshold={min_score}%")
-                print(f"{index+1}. {t_name} ({t_rate}%; {t_count_ok}/{t_count_total} OK): threshold={t_min_score}%; {t_count_eval_error} evaluation errors")
+                print(f"{index+1}. {test_name} ({rate}%; {count_ok}/{count_total} OK): threshold={min_score}%; {count_eval_error} evaluation errors")
             if not arr:
                 print("n/a")
 
