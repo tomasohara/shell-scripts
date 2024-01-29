@@ -47,3 +47,23 @@ $    command popd
 $ fi
 1
 
+#...............................................................................
+# jupyter aliases
+
+# Make sure no existing jupyter processes
+0 ps-mine jupyter | wc -l
+0
+
+# The notbooke uses port 8888 by default (unless busy)
+$ run-jupyter-notebook 2>&1 | grep htpp
+URL: http://127.0.0.1:8888/tree
+
+## TODO: make sure no warnings from perl
+## NOTE: there seems to be some interaction between BASH_ENV and perl.sh
+## (used in run-jupyter-notebook alias).
+## $ BASH_ENV="$PWD/aliases-for-testing.bash" run-jupyter-notebook
+## [1] 3122261
+## sleeping 6 seconds for jupyter to finish initializing
+## checking log: /home/tomohara/temp/jupyter-p8888-28jan24.log
+## URL: Unrecognized switch: -o  (-h will show valid options).
+
