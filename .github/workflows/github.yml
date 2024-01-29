@@ -28,6 +28,8 @@ jobs:
 
     steps:
       - name: Checkout Repository
+        ## TODO2: use checkout@v4
+        ## See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-versioned-actions
         uses: actions/checkout@v3
 
       - name: Setup Python
