@@ -12,8 +12,9 @@
 
 ## DEBUG:
 ## echo "in "${BASH_SOURCE[0]}""
-## echo '$0 "$@":' "$0" "$@"
+## echo "$0 '$*':" "$0" "$@"
 ## echo "DEBUG_LEVEL=$DEBUG_LEVEL"
 ## echo "DURING_ALIAS=$DURING_ALIAS"
+## echo "perl: $(which perl)"
 
 perl "$@"
