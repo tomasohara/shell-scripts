@@ -11,7 +11,6 @@
 #    export TEST_REGEX="tips|README"    # run tests with tips or README in file
 #
 export DEBUG_LEVEL=5
-export TEST_REGEX="tips|entropy|testing-support-script-tests|eval-condition|sanity"
 # HACK: settings for testing BatsPP archive creation
 export UNDER_DOCKER=1
 export ARCHIVE_OUTPUT=1
