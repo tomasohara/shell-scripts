@@ -96,5 +96,11 @@ if $output_log; then
     grep -B20 "^not ok" "$(find "$BATSPP_OUTPUT" -name '*outputpp.out')" /dev/null >| summary_stats.log 2>&1
 fi
 
+# Optionally under docker, create archive of BatsPP output dir
+if [[ ("${UNDER_DOCKER:-0}" == "1") && ("${ARCHIVE_OUTPUT:-0}" = "1") ]]; then
+    tar_base="/home/shell-scripts/_batspp-output"
+    tar cvfz "$tar_base.tar.gz" "$BATSPP_OUTPUT" >| "$tar_base.tar.log" 2>&1
+fi
+
 # *** Note: the result needs to be that of alias tests (i.e., batspp_report.py)
 exit "$batspp_result"
