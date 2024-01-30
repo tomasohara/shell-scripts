@@ -97,9 +97,23 @@ if $output_log; then
 fi
 
 # Optionally under docker, create archive of BatsPP output dir
-if [[ ("${UNDER_DOCKER:-0}" == "1") && ("${ARCHIVE_OUTPUT:-0}" = "1") ]]; then
-    tar_base="/home/shell-scripts/_batspp-output"
-    tar cvfz "$tar_base.tar.gz" "$BATSPP_OUTPUT" >| "$tar_base.tar.log" 2>&1
+# TODO: define helper functions to faciliate this (n.b., gotta hate Bash)
+#
+UNDER_RUNNER_DEFAULT=0; if [ "$GITHUB_ACTIONS" == "true" ]; then UNDER_RUNNER_DEFAULT=1; fi
+UNDER_RUNNER="${UNDER_RUNNER:-$UNDER_RUNNER_DEFAULT}"
+UNDER_DOCKER_DEFAULT=0; if [[ (("$USER" == root) && ("$RUNNER_USER" == root)) ]]; then UNDER_DOCKER_DEFAULT=1; fi
+UNDER_DOCKER="${UNDER_DOCKER:-$UNDER_DOCKER_DEFAULT}"
+#
+if [[ ($UNDER_RUNNER == "1") && ($UNDER_DOCKER == "1") ]]; then echo "Warning: unexpectedly runner&docker in $0"; fi
+#
+if [[ ("$UNDER_DOCKER" == "1") && ("${ARCHIVE_OUTPUT:-0}" == "1") ]]; then
+    docker_host_dir="/home/shell-scripts"
+    if [ -e "$docker_host_dir" ]; then
+        tar_base="/home/shell-scripts/_batspp-output"
+        tar cvfz "$tar_base.tar.gz" "$BATSPP_OUTPUT" >| "$tar_base.tar.log" 2>&1
+    else
+        echo "Error: can't xfer BatsPP archive because no host dir ($docker_host_dir)"
+    fi
 fi
 
 # *** Note: the result needs to be that of alias tests (i.e., batspp_report.py)
