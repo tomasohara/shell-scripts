@@ -9,6 +9,7 @@
 #   debian-based Linux distributions.
 # - See requirements.txt for Python package requirements.
 #
+ansifilter
 diffutils
 git
 jupyter-core
