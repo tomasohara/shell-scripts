@@ -686,10 +686,10 @@ function alt-invoke-next-single-checkin {
     # TODO: position cursor at start of ... (instead of pause)
     local is_text
     ## TODO: fix problem identifying scripts with UTF-8 as text (e.g., common.perl reported as data by file command)
-    is_text=$(file "$mod_file" | grep -i ':.*text')
+    is_text=$(file "$mod_file" | egrep -i ':.*(text|JSON|UTF-8)')
     ## HACK: add special case exceptions
     if [ "$is_text" = "" ]; then
-        case "$mod_file" in *.css | *.csv | *.html | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
+        case "$mod_file" in *.css | *.csv | *.html | *.ipynb | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
     fi;
     if [ "$is_text" != "" ]; then
         if [ "$GIT_NO_CONFIRM" = "1" ]; then
