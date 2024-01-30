@@ -807,8 +807,9 @@ function git-alias-usage () {
     echo "Get changes from repository (set PRESERVE_GIT_STASH=1 to keep timestamps)":
     echo "    git-update-plus"
     echo ""
-    echo "To add regular files via git-add (n.b., ignored if matches .gitignore):"
+    echo "To add regular files to repo (via git-add):"
     echo "    GIT_MESSAGE='initial version' git-update-commit-push file..."
+    echo "Note: use GIT_FORCE=1 ... if file matches .gitignore patterns"
     echo ""
     echo "To check in specified changes:"
     echo "    GIT_MESSAGE='...' git-update-commit-push file..."
