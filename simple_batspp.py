@@ -67,6 +67,7 @@
 ## - Stay in synh with Batspp:
 ##   https://github.com/LimaBD/batspp/tree/main/tests/cases
 ## - Use gh.form_path consistently (n.b., someday this might run under Window).
+## - Weed out Unix-specific file path usages (e.g., f'\tcommand cp -Rp ./. "$test_folder"\n').
 ## TODO4:
 ## - Integrate features from similar utilities:
 ##   https://pypi.org/project/docshtest/
@@ -773,6 +774,8 @@ class CustomTestsToBats:
         else:
             title = title_prefix
         unspaced_title = my_re.sub(r'\s+', '-', title)
+        # note: remove special punctuation (TODO3: retain for comments)
+        unspaced_title = my_re.sub(r"([^ a-z0-9_-])", "_", unspaced_title)
 
         # HACK: Extract setup command from entire match if '# Setup' indicator given
         # but the setup section is empty.
@@ -797,9 +800,14 @@ class CustomTestsToBats:
         ## OLD: gh.full_mkdir(test_folder)
         self.num_tests += 1
         setup_text = ""
-        if not GLOBAL_TEST_DIR:
+        if GLOBAL_TEST_DIR:
+            test_folder = gh.form_path(TEMP_DIR, "global-test-dir")
+        else:
             test_subdir = unspaced_title
-            test_folder = gh.form_path(TEMP_DIR, test_subdir)
+            ## TODO1: test_folder = gh.form_path(TEMP_DIR, test_subdir)
+            ## NOTE: The above is leading to odd errors after running a dozen or so tests files
+            ##    '/bin/sh: 1: cannot open /dev/null: No such file'
+            test_folder = gh.form_path(".", test_subdir)
             setup_text += (
                 f'\ttest_folder="{test_folder}"\n' +
                 f'\tmkdir --parents "$test_folder"\n' +
@@ -874,12 +882,12 @@ class CustomTestsToBats:
         if OLD_ACTUAL_EVAL:
             main_body += f'\t{actual_var}="$({actual_function})"\n'
         else:
+            out_file = gh.form_path(test_folder, f"{unspaced_title}.out")
             main_body += (
-                     f'\tout_file="{unspaced_title}.out"\n' +
-                     ## TODO: f'\tout_file="$TMP/{unspaced_title}.out"\n' +
-                     f'\t{actual_function} >| "$out_file"\n' +
-                     f'\t{actual_var}="$(cat "$out_file")"\n')
-        main_body += f'\t{expected_var}="$({expected_function})"\n'
+                f'\tout_file="{out_file}"\n' +
+                f'\t{actual_function} >| "$out_file"\n' +
+                f'\t{actual_var}="$(cat "$out_file")"\n')
+            main_body += f'\t{expected_var}="$({expected_function})"\n'
         if NORMALIZE_WHITESPACE:
             main_body += (f'\t{actual_var}="$(normalize-whitespace \"${actual_var}\")"\n' +
                           f'\t{expected_var}="$(normalize-whitespace \"${expected_var}\")"\n')
@@ -931,7 +939,7 @@ class CustomTestsToBats:
             misc_code = (
                 f'\t# actual {{ {actual!r} }} => "${actual_var}"\n' +
                 f'\t# expect {{ {expected!r} }} => "${expected_var}"\n')
-        test_header = (f'@test "{title}"' if not BASH_EVAL else f'function {title}')
+        test_header = (f'@test "{unspaced_title}"' if not BASH_EVAL else f'function {unspaced_title}')
         result = (f'{test_header} {{\n' +
                   (f'{setup_text}' if not use_setup_function else setup_call) +
                   f'{main_body}' +

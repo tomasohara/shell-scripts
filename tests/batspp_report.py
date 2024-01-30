@@ -29,7 +29,12 @@ from mezcla import system
 msy = system
 from mezcla.main import Main
 from mezcla.my_regex import my_re
-# from simple_batspp import FORCE_RUN
+try:
+    from simple_batspp import FORCE_RUN
+except:
+    system.print_exception_info("simple_batspp.FORCE_RUN")
+    parent_dir = system.real_path(".")
+    system.exit(f"Error: make sure PYTHONPATH includes parent dir:\n\t{parent_dir}")
 
 # Constants
 TL = debug.TL
@@ -87,9 +92,18 @@ TEST_REGEX = system.getenv_value(
     ## TODO2: rename to BATSPP_TEST_REGEX
     "TEST_REGEX", None,
     description="Regex for tests to include; ex: '^c.*' for debugging")
+TRACE_EXCERPT_SIZE = system.getenv_int(
+    "TRACE_EXCERPT_SIZE", 1000,
+    description="Number of lines traced with trace_excerpt")
+TRACE_EXCERPT_LEVEL = system.getenv_int(
+    "TRACE_EXCERPT_LEVEL", TL.VERBOSE,
+    description="Tracing level for trace_excerpt")
 SHOW_FAILURE_CONTEXT = system.getenv_bool(
     "SHOW_FAILURE_CONTEXT", UNDER_TESTING_VM,
     description="Show context of test failures--useful with Github runner")
+STOP_ON_FAILURE = system.getenv_bool(
+    "STOP_ON_FAILURE", False,
+    description="Stop when failure encountered")
 SINGLE_STORE = system.getenv_bool(
     "SINGLE_STORE", False,
     description=f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
@@ -110,8 +124,9 @@ OMIT_SHORT_OPTIONS = system.getenv_bool(
     "OMIT_SHORT_OPTIONS", False,
     description="Only allow long command line options")
 ALLOW_SHORT_OPTIONS = (not OMIT_SHORT_OPTIONS)
-FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
-    "Force execution even if admin-like user")
+## BAD:
+## FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
+##     "Force execution even if admin-like user")
 FORCE_OPTION_DEFAULT = UNDER_DOCKER or FORCE_RUN
 
 ## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
@@ -227,6 +242,18 @@ def main():
         if TXT_OPTION:
             gh.run(f"rm -rf {TXT_STORE}/*")
 
+    def trace_excerpt(filename, level=None, num_lines=None):
+        """Outputs the first NUM_LINES in FILENAME if at debugging trace LEVEL
+        Note: that output goes to stdout not stderr (unlike debug.trace)"""
+        if level is None:
+            level = TRACE_EXCERPT_LEVEL
+        if num_lines is None:
+            num_lines = TRACE_EXCERPT_SIZE
+        if debug.debugging(level):
+            _dir, filename_proper = system.split_path(filename)
+            print(gh.run(f"echo {filename_proper} excerpt:; head -{num_lines} --verbose {filename} | cat -n"))
+        return
+            
     def run_batspp(input_file, output_file):
         """Run BatsPP over INPUT_FILE to produce OUTPUT_FILE"""
         # Note: for convenience, output is written to disk and returned by the function
@@ -236,7 +263,7 @@ def main():
         log_file = output_file + ".log"
 
         # NEW / TODO: Added resolved path for check_batspp.perl
-        check_batspp_perl_path = gh.resolve_path("../check_errors.perl")
+        check_errors_script = gh.resolve_path("../check_errors.perl")
         
         debug.trace(5, f"run_batspp{(input_file, output_file)}")
         source_spec = (f"--source '{DEFINITIONS_SCRIPT}'" if DEFINITIONS_SCRIPT else "")
@@ -250,32 +277,37 @@ def main():
             run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} IGNORE_SETUP_OUTPUT=1 python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
-        # Output excerpt from BatsPP source file
-        debug.code(5, lambda: print(gh.run(f"echo BatsPP source:; head -1000 --verbose {output_file} | cat -n")))
+        # Output excerpts from BatsPP source file, Bats output file and conversion log file.
+        # The corresponding extensions follow: .batspp, .bats.outputpp, and .bats.outputpp.log
+        # note: BatsPP now output above
+        ## OLD: trace_excerpt(input_file, level=6)
+        trace_excerpt(output_file)
+        trace_excerpt(log_file, level=4)
         # Check for common errors (e.g., command not found or insufficient permissions)
-        
-        ## OLD (Using unresolved path): debug.code(4, lambda: print(gh.run(f"check_errors.perl {log_file}")))
-        debug.code(4, lambda: print(gh.run(f"{check_batspp_perl_path} {log_file}")))
-
-        ## EXP: print(gh.run(f"{check_batspp_perl_path} {log_file}"))
+        print(gh.run(f"{check_errors_script} {log_file}"))
         
         ## TEMP: Show context of failed tests for help with diagnosis of Github actions runs (as temp files not accessible afterwards)
         if SHOW_FAILURE_CONTEXT:
             context = gh.run(f"grep -B10 '^not ok' {real_output_file}")
             print("Failure context: " + (f"{{\n{gh.indent_lines(context)}}}" if context.strip() else "n/a"))
         # Output excerpt of BatsPP output and log file (i.e., stdout and stderr)
-        debug.code(5, lambda: print(gh.run(f"echo BatsPP output:; head -1000 --verbose {real_output_file} | cat -n")))
-        debug.code(5, lambda: print(gh.run(f"echo BatsPP log:; head -1000 --verbose {log_file} | cat -n")))
+        # The corresponding extensions follow: .bats.outputpp.out, and .bats.outputpp.eval.log.
+        trace_excerpt(real_output_file)
+        trace_excerpt(eval_log)
         debug.assertion(not run_output.strip())
-    
+
+        # The return result is the Bats evaluation output and list of errors from log file
+        # note: The errors are also output here.
+        ## TODO2: include BatsPP log errors if not in eval log errors
         real_output = system.read_file(real_output_file)
-        eval_errors = (gh.run(f"{check_batspp_perl_path} -context=0 {log_file}").split("\n"))[1:]
-        
+        eval_errors = (gh.run(f"{check_errors_script} -context=0 {eval_log}").split("\n"))[1:]
+        #
         print(f"\nEvaluation Errors: {len(eval_errors)}")
         if (len(eval_errors) > 0):
             print("\nError Details:\n")
             for error in eval_errors:
-                print("\t"+error+"\n")
+                ## BAD: print("\t"+error+"\n")
+                print(f"\t{error}")
             print("")
         
         debug.trace(6, f"\nrun_batspp() ##real_output## => {real_output!r}")
@@ -349,6 +381,10 @@ def main():
             extra_args = ("--add-annots" if DETAILED_DEBUGGING else "")
             gh.run(f"python3 ../jupyter_to_batspp.py {extra_args} --output {batspp_from_ipynb} {testfile} 2> {log_file}")
             debug.call(4, gh.run, f"check_errors.perl {log_file}", **{"output": True})
+            # note: trace jupyter-to-batspp conversion and log; only if "quite detailed" (6) tracing
+            # The corresponding extensions follow: .batspp, .batspp.log
+            trace_excerpt(batspp_from_ipynb, level=6)
+            trace_excerpt(log_file, level=6)
             batspp_array.append(batspp_from_ipynb)
             i += 1
     ipynb_count = i - 1
@@ -440,6 +476,9 @@ def main():
                     success_test_array.append(txt_option_JSON)
                 else:
                     failure_test_array.append(txt_option_JSON)
+                    if STOP_ON_FAILURE:
+                        debug.trace(5, "FYI: stopping because failure encountered")
+                        break
 
             if KCOV_OPTION:
                 # TODO2: extend run_batspp to handle optional coverage check
