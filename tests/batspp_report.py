@@ -80,12 +80,15 @@ DEFAULT_MIN_SCORE = 50
 HOME = system.getenv_text(
     "HOME", "~",
     description="Home directory for user")
+GITHUB_ACTIONS = system.getenv_bool(
+    "GITHUB_ACTIONS", False,
+    description="Running under GitHub actions")
 DOCKER_HOME = "/home/shell-scripts"
 UNDER_DOCKER = ((HOME == DOCKER_HOME) or system.file_exists(DOCKER_HOME))
-UNDER_RUNNER = ("/home/runner" in HOME)
+UNDER_RUNNER = (("/home/runner" in HOME) or GITHUB_ACTIONS)
 UNDER_TESTING_VM = system.getenv_text(
     "UNDER_TESTING_VM", (UNDER_DOCKER or UNDER_RUNNER),
-    description="Whether to assume running under testing VM")
+    description="Whether to assume running under testing VM--docker or Github runner")
 DETAILED_DEBUGGING = debug.detailed_debugging()
 
 TEST_REGEX = system.getenv_value(
@@ -127,7 +130,7 @@ ALLOW_SHORT_OPTIONS = (not OMIT_SHORT_OPTIONS)
 ## BAD:
 ## FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
 ##     "Force execution even if admin-like user")
-FORCE_OPTION_DEFAULT = UNDER_DOCKER or FORCE_RUN
+FORCE_OPTION_DEFAULT = UNDER_TESTING_VM or FORCE_RUN
 
 ## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
 if SINGLE_STORE:
