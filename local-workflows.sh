@@ -145,8 +145,7 @@ done
 # Trace out main environment overrides
 #   CLONE_REPO, AUTO_REQS, RUN_BUILD, BUILD_OPTS, RUN_WORKFLOW, RUN_OPTS, WORKFLOW_FILE
 if [ "$DEBUG_LEVEL" -ge 4 ]; then
-    echo "in $0 $*"
-    echo "timestamp: $(date)"
+    echo "in $0 $* [$(date)]"
     src_dir=$(dirname "${BASH_SOURCE[0]}")
     source "${TOM_BIN:-"$src_dir"}/all-tomohara-aliases-etc.bash"
     trace-vars IMAGE_NAME ACT_PULL LOCAL_REPO_DIR DEBUG_LEVEL GIT_BRANCH BUILD_OPTS USER_ENV
@@ -233,6 +232,5 @@ fi
 
 # End processing
 if [ "$DEBUG_LEVEL" -ge 4 ]; then
-    echo "out $0"
-    echo "timestamp: $(date)"
+    echo "out $0 [$(date)]"
 fi
