@@ -313,7 +313,7 @@ function git-move-to-dir {    # Move files to specified directory
     for file in "$@"; do
         invoke-git-command mv "$file" "$dir"
         # TODO2: cut down on extraneous confirmations
-        git-commit-and-push "$file" "$dir/$file"
+        git-commit-and-push "$dir/$file"
     done
 }
 
