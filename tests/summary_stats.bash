@@ -125,7 +125,7 @@ if [ "${SCP_OUTPUT:-0}" == "1" ]; then
     tar cvfz "$tar_base.tar.gz" "$BATSPP_OUTPUT" >| "$tar_base.tar.log" 2>&1
     remote_spec="ubuntu@ec2-54-191-214-184.us-west-2.compute.amazonaws.com:xfer"
     echo "scp'ing $tar_base.tar.gz to $remote_spec"
-    scp -P 22 -i "scrappycito.pem" -o StrictHostKeyChecking=no "$tar_base.tar.gz" 
+    scp -P 22 -i "scrappycito.pem" -o StrictHostKeyChecking=no "$tar_base.tar.gz" $remote_spec
 fi
 
 # *** Note: the result needs to be that of alias tests (i.e., batspp_report.py)
