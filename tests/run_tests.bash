@@ -20,6 +20,11 @@ if [ "${VERBOSE:-0}" = "1" ]; then
 fi
 dir=$(dirname "${BASH_SOURCE[0]}")
 
+# Make sure directory and parent directory on PATH and PYTHONPATH
+# TODO3: find out why not being done under Github runner (docker OK)
+export PATH="$PATH:$dir:$dir/.."
+export PYTHONPATH="$PYTHONPATH:$dir:$dir/.."
+
 # Optionally source temporary settings script
 temp_script="$dir/_temp_test_settings.bash"
 if [ -e "$temp_script" ]; then
