@@ -123,6 +123,10 @@ if [ "${SCP_OUTPUT:-0}" == "1" ]; then
     mmddyyhhmm=$(date '+%d%b%y-%H%M')
     tar_base="/tmp/_batspp-output-$mmddyyhhmm"
     tar cvfz "$tar_base.tar.gz" "$BATSPP_OUTPUT" >| "$tar_base.tar.log" 2>&1
+    #
+    # TEMP: work around stupid git problem with permissions update to .pem file
+    chmod --changes o-rw "scrappycito.pem"
+    #
     remote_spec="ubuntu@ec2-54-191-214-184.us-west-2.compute.amazonaws.com:xfer"
     echo "scp'ing $tar_base.tar.gz to $remote_spec"
     scp -P 22 -i "scrappycito.pem" -o StrictHostKeyChecking=no "$tar_base.tar.gz" $remote_spec
