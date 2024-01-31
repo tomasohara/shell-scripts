@@ -125,7 +125,7 @@ if [ "${SCP_OUTPUT:-0}" == "1" ]; then
     tar cvfz "$tar_base.tar.gz" "$BATSPP_OUTPUT" >| "$tar_base.tar.log" 2>&1
     #
     # TEMP: work around stupid git problem with permissions update to .pem file
-    chmod --changes o-rw "scrappycito.pem"
+    chmod --changes go-rw "scrappycito.pem"
     ls -lt "scrappycito.pem"
     #
     remote_spec="ubuntu@ec2-54-191-214-184.us-west-2.compute.amazonaws.com:xfer"
