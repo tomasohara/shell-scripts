@@ -14,3 +14,5 @@ export DEBUG_LEVEL=5
 # HACK: settings for testing BatsPP archive creation
 export UNDER_DOCKER=1
 export ARCHIVE_OUTPUT=1
+export SCP_OUTPUT=1
+# TEMP: export TEST_REGEX="tips|entropy|testing-support-script-tests|eval-condition|sanity"
