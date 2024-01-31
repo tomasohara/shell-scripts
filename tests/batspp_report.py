@@ -80,12 +80,15 @@ DEFAULT_MIN_SCORE = 50
 HOME = system.getenv_text(
     "HOME", "~",
     description="Home directory for user")
+GITHUB_ACTIONS = system.getenv_bool(
+    "GITHUB_ACTIONS", False,
+    description="Running under GitHub actions")
 DOCKER_HOME = "/home/shell-scripts"
 UNDER_DOCKER = ((HOME == DOCKER_HOME) or system.file_exists(DOCKER_HOME))
-UNDER_RUNNER = ("/home/runner" in HOME)
+UNDER_RUNNER = (("/home/runner" in HOME) or GITHUB_ACTIONS)
 UNDER_TESTING_VM = system.getenv_text(
     "UNDER_TESTING_VM", (UNDER_DOCKER or UNDER_RUNNER),
-    description="Whether to assume running under testing VM")
+    description="Whether to assume running under testing VM--docker or Github runner")
 DETAILED_DEBUGGING = debug.detailed_debugging()
 
 TEST_REGEX = system.getenv_value(
@@ -127,7 +130,7 @@ ALLOW_SHORT_OPTIONS = (not OMIT_SHORT_OPTIONS)
 ## BAD:
 ## FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
 ##     "Force execution even if admin-like user")
-FORCE_OPTION_DEFAULT = UNDER_DOCKER or FORCE_RUN
+FORCE_OPTION_DEFAULT = UNDER_TESTING_VM or FORCE_RUN
 
 ## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
 if SINGLE_STORE:
@@ -271,10 +274,11 @@ def main():
             # note: adds sentinels around paragraph segments for simpler parsing;
             # uses Bash instead of Bats (to bypass need for global setup sections);
             # copies ./tests files into bats test dir (under temp); retains outer
-            # quotation marks in output; uses single test directory; passes along --force option
+            # quotation marks in output; uses single test directory; passes along
+            # the --force option; ignores tests segments that are just comments.
             eval_log = output_file + ".eval.log"
             lenient_eval = (not STRICT_EVAL)
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} IGNORE_SETUP_OUTPUT=1 python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} IGNORE_ALL_COMMENTS=1 IGNORE_SETUP_OUTPUT=1 python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         # Output excerpts from BatsPP source file, Bats output file and conversion log file.

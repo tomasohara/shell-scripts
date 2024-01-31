@@ -105,6 +105,7 @@ VERBOSE      = 'verbose'
 ADD_ANNOTS   = 'add-annots'
 STDOUT       = 'stdout'
 JUST_CODE    = 'just-code'
+REGULAR_OPT  = 'regular'
 AUTO_OUTPUT  = 'auto-output'
 
 # Other constants
@@ -133,7 +134,9 @@ class JupyterToBatspp(Main):
         # Check the command-line options
         # TODO2: make the defaults more intuitive (e.g., for auto_output and verbose)
         self.jupyter_file = self.get_parsed_argument(JUPYTER_FILE, self.jupyter_file)
-        self.just_code    = self.get_parsed_argument(JUST_CODE, self.just_code)
+        regular = self.get_parsed_argument(JUST_CODE, True)
+        self.just_code    = self.get_parsed_argument(REGULAR_OPT, self.just_code)
+        debug.assertion(not (regular and self.just_code))
         self.add_annots   = self.get_parsed_option(ADD_ANNOTS, self.add_annots)
         self.auto_output  = self.get_parsed_option(AUTO_OUTPUT, False)
         if self.auto_output:
@@ -261,6 +264,7 @@ def main():
         boolean_options      = [(VERBOSE,      'Show verbose debug'),
                                 (ADD_ANNOTS,   'Add annotations about current cells, etc.'),
                                 (JUST_CODE,    'Omit output cells'),
+                                (REGULAR_OPT,  'Regular mode--code and output)'),
                                 (AUTO_OUTPUT, f'Automatically save with .{BATSPP_EXTENSION}'),
                                 (STDOUT,      f'Print to standard output (default unless --{OUTPUT})')],
         manual_input         = True)

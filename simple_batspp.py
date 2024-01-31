@@ -200,7 +200,7 @@ DISABLE_ALIASES = system.getenv_bool("DISABLE_ALIASES", False,
 MERGE_CONTINUATION = system.getenv_bool("MERGE_CONTINUATION", False,
                                         "Merge function or backslash continuations in expected with actual")
 IGNORE_ALL_COMMENTS = system.getenv_bool("IGNORE_ALL_COMMENTS", False,
-                                         "Strip all comments from input")
+                                         "Strip all comments from input--blocks without commands or output")
 STRIP_COMMENTS = system.getenv_bool("STRIP_COMMENTS", False,
                                     "Strip comments from expected output")
 ALLOW_COMMENTS = system.getenv_bool("ALLOW_COMMENTS", False,
@@ -684,7 +684,6 @@ class CustomTestsToBats:
 
         # Remove comments (n.b., needs to be done after comment indicators checked)
         if STRIP_COMMENTS:
-            ## OLD: field = my_re.sub(r'^\s*\#.*\n', '', field, flags=re.MULTILINE|re.IGNORECASE)
             field = my_re.sub(r'^\s*\#.*\n', '', field, flags=re.MULTILINE)
         ## TODO2: debug.trace(T8, f"_preprocess_command({in_field!r}) ==  {field!r}")
         debug.trace(5, f"_preprocess_command({in_field!r}) == {field!r}")
@@ -888,9 +887,13 @@ class CustomTestsToBats:
                 f'\t{actual_function} >| "$out_file"\n' +
                 f'\t{actual_var}="$(cat "$out_file")"\n')
             main_body += f'\t{expected_var}="$({expected_function})"\n'
+        ## TODO3: just normalize actual at runtime as expected can be done ahead of time
         if NORMALIZE_WHITESPACE:
             main_body += (f'\t{actual_var}="$(normalize-whitespace \"${actual_var}\")"\n' +
                           f'\t{expected_var}="$(normalize-whitespace \"${expected_var}\")"\n')
+        if STRIP_COMMENTS:
+            main_body += (f'\t{actual_var}="$(strip-comments \"${actual_var}\")"\n' +
+                          f'\t{expected_var}="$(strip-comments \"${expected_var}\")"\n')
         if IGNORE_SETUP_OUTPUT:
             if (has_setup_comment or has_continuation_comment or has_wrapup_comment):
                 # note: setup and wrapup output ignored; however, code run above for side effects
@@ -1065,6 +1068,18 @@ class CustomTestsToBats:
                 """)
             bats_tests += my_re.sub(r"^ +", "", helper_code, flags=re.MULTILINE)
             bats_tests += "\n"
+        if STRIP_COMMENTS:
+            tab = "\t"
+            helper_code = (rf"""# Helper functions
+                function strip-comments {{ 
+                   {tab}local text
+                   {tab}text=$(echo "$*" | perl -pe "s/^\s*\#.*\n//;"); 
+                   {tab}echo "$text";
+                }}
+                """)
+            bats_tests += my_re.sub(r"^ +", "", helper_code, flags=re.MULTILINE)
+            bats_tests += "\n"
+           
         
         # Add global setup if using global test dir
         if GLOBAL_TEST_DIR:

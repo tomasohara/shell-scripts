@@ -313,7 +313,7 @@ function git-move-to-dir {    # Move files to specified directory
     for file in "$@"; do
         invoke-git-command mv "$file" "$dir"
         # TODO2: cut down on extraneous confirmations
-        git-commit-and-push "$file" "$dir/$file"
+        git-commit-and-push "$dir/$file"
     done
 }
 
@@ -686,10 +686,10 @@ function alt-invoke-next-single-checkin {
     # TODO: position cursor at start of ... (instead of pause)
     local is_text
     ## TODO: fix problem identifying scripts with UTF-8 as text (e.g., common.perl reported as data by file command)
-    is_text=$(file "$mod_file" | grep -i ':.*text')
+    is_text=$(file "$mod_file" | egrep -i ':.*(text|JSON|UTF-8)')
     ## HACK: add special case exceptions
     if [ "$is_text" = "" ]; then
-        case "$mod_file" in *.css | *.csv | *.html | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
+        case "$mod_file" in *.css | *.csv | *.html | *.ipynb | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
     fi;
     if [ "$is_text" != "" ]; then
         if [ "$GIT_NO_CONFIRM" = "1" ]; then
@@ -807,8 +807,9 @@ function git-alias-usage () {
     echo "Get changes from repository (set PRESERVE_GIT_STASH=1 to keep timestamps)":
     echo "    git-update-plus"
     echo ""
-    echo "To add regular files via git-add (n.b., ignored if matches .gitignore):"
+    echo "To add regular files to repo (via git-add):"
     echo "    GIT_MESSAGE='initial version' git-update-commit-push file..."
+    echo "Note: use GIT_FORCE=1 ... if file matches .gitignore patterns"
     echo ""
     echo "To check in specified changes:"
     echo "    GIT_MESSAGE='...' git-update-commit-push file..."

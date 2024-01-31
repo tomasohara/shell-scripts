@@ -9,17 +9,21 @@
 #   debian-based Linux distributions.
 # - See requirements.txt for Python package requirements.
 #
+ansifilter
 diffutils
 git
 jupyter-core
 kdiff3
 less
+lynx
+perl
 python3-pip
 python3
 python-is-python3
 tar
 tcsh
 wget
+xmllint
 zip
 #
 #................................................................................
