@@ -96,7 +96,7 @@ if $output_log; then
     grep -B20 "^not ok" "$(find "$BATSPP_OUTPUT" -name '*outputpp.out')" /dev/null >| summary_stats.log 2>&1
 fi
 
-# Optionally under docker, create archive of BatsPP output dir
+# Optionally, create archive of BatsPP output dir and transfer to another host.
 # TODO: define helper functions to faciliate this (n.b., gotta hate Bash)
 #
 UNDER_RUNNER_DEFAULT=0; if [ "$GITHUB_ACTIONS" == "true" ]; then UNDER_RUNNER_DEFAULT=1; fi
@@ -106,6 +106,7 @@ UNDER_DOCKER="${UNDER_DOCKER:-$UNDER_DOCKER_DEFAULT}"
 #
 if [[ ($UNDER_RUNNER == "1") && ($UNDER_DOCKER == "1") ]]; then echo "Warning: unexpectedly runner&docker in $0"; fi
 #
+# Optionally, copy output to docker host
 if [[ ("$UNDER_DOCKER" == "1") && ("${ARCHIVE_OUTPUT:-0}" == "1") ]]; then
     docker_host_dir="/home/shell-scripts"
     if [ -e "$docker_host_dir" ]; then
@@ -114,6 +115,17 @@ if [[ ("$UNDER_DOCKER" == "1") && ("${ARCHIVE_OUTPUT:-0}" == "1") ]]; then
     else
         echo "Error: can't xfer BatsPP archive because no host dir ($docker_host_dir)"
     fi
+fi
+#
+# Optionally, copy output to ScrappyCito host using secure copy
+# Note: This is unsecure, but the SSH key and the host aren't used in production.
+if [ "${SCP_OUTPUT:-0}" == "1" ]; then
+    mmddyyhhmm=$(date '+%d%b%y-%H%M')
+    tar_base="/tmp/_batspp-output-$mmddyyhhmm"
+    tar cvfz "$tar_base.tar.gz" "$BATSPP_OUTPUT" >| "$tar_base.tar.log" 2>&1
+    remote_spec="ubuntu@ec2-54-191-214-184.us-west-2.compute.amazonaws.com:xfer"
+    echo "scp'ing $tar_base.tar.gz to $remote_spec"
+    scp -P 22 -i "scrappycito.pem" -o StrictHostKeyChecking=no "$tar_base.tar.gz" 
 fi
 
 # *** Note: the result needs to be that of alias tests (i.e., batspp_report.py)
