@@ -594,8 +594,10 @@ alias perl-='perl -Ssw'
 ## Lorenzo review: should change this to perl-alt following TODO's
 ## TODO: function alias-perl { DURING_ALIAS=1 perl "$@"; }
 # alias-perl(): perl with DURING_ALIAS defined (n.b., avoids excess tracing; see common.perl)
-## BAD: alias alias-perl='DURING_ALIAS=1 perl -Ssw'
-alias alias-perl='DURING_ALIAS=1 perl.sh -Ssw'
+## NOTE: using perl.sh in alias leads to problems under Github workflows
+## BAD:
+alias alias-perl='DURING_ALIAS=1 perl -Ssw'
+## TODO: alias alias-perl='DURING_ALIAS=1 perl.sh -Ssw'
 ## TODO?
 ## function alias-perl {
 ##    DURING_ALIAS=1 env perl --Sw "eval $*";
