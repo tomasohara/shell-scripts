@@ -22,8 +22,10 @@ dir=$(dirname "${BASH_SOURCE[0]}")
 
 # Make sure directory and parent directory on PATH and PYTHONPATH
 # TODO3: find out why not being done under Github runner (docker OK)
-export PATH="$PATH:$dir:$dir/.."
-export PYTHONPATH="$PYTHONPATH:$dir:$dir/.."
+script_dir="$(realpath "$dir/..")"
+test_dir="$(realpath "$dir")"
+export PATH="$PATH:$script_dir:$test_dir"
+export PYTHONPATH="$PYTHONPATH:$script_dir:$test_dir"
 
 # Optionally source temporary settings script
 temp_script="$dir/_temp_test_settings.bash"
