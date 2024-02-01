@@ -59,7 +59,7 @@ cd "$(dirname "$0")"
 #    {/home/shell-scripts, /home/runner, /home/testuser}
 ## OLD: if [[ ("$HOME" == "/home/shell-scripts") || ("$HOME" == "/home/runner") ]]; then
 ## TODO2: if [[ $HOME =~ /home/(shell-scripts|runner|testuser) ]]; then
-if [[ ! $HOME =~ /home/(shell-scripts|runner) ]]; then
+if [[ ! $PWD =~ /home/(shell-scripts|runner)/.* ]]; then
     echo "FYI: using default ~/.gitconfig"  
 elif [ "${USE_SSH_AUTH:-1}" == "1" ]; then
     echo "FYI: using SSH for git authentication"
