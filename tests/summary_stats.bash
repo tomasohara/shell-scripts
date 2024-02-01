@@ -50,16 +50,31 @@ done
 cd "$(dirname "$0")"
 
 # TEMP: set github credentials
-# Note: This is not secure, but scrappycito only has access to
-# to dummy repo's like https://github.com/tomasohara/git-bash-test.
-if [[ ("$HOME" == "/home/shell-scripts") || ("$HOME" == "/home/runner") ]]; then
-    git config --local user.email "scrappycito@gmail.com"
-    git config --local user.name "Scrappy Cito"
+# Note:
+# - This is not secure, but scrappycito only has access it is own repos. For example,
+#     https://github.com/scrappycito/git-bash-test.
+# - The HOME directory is checked instead of USER because Github and docker use root.
+#    {/home/shell-scripts, /home/runner, /home/testuser}
+## OLD: if [[ ("$HOME" == "/home/shell-scripts") || ("$HOME" == "/home/runner") ]]; then
+## TODO2: if [[ $HOME =~ /home/(shell-scripts|runner|testuser) ]]; then
+if [[ $HOME =~ /home/(shell-scripts|runner) ]]; then
+    echo "FYI: modifying ~/.gitconfig and ~/.git-credentials"
+    
+    # Set user ID
+    git config --global user.email "scrappycito@gmail.com"
+    git config --global user.name "Scrappy Cito"
+
+    # Overide specific usages to use token
     ## OLD: export MY_GIT_TOKEN=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
     export MY_GIT_TOKEN=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
-    git config --local url."https://api:$MY_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
-    git config --local url."https://ssh:$MY_GIT_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
-    git config --local url."https://git:$MY_GIT_TOKEN@github.com/".insteadOf "git@github.com:"
+    git config --global url."https://api:$MY_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
+    git config --global url."https://ssh:$MY_GIT_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
+    git config --global url."https://git:$MY_GIT_TOKEN@github.com/".insteadOf "git@github.com:"
+
+    # Eanble credentials store (i..e, cached in file)
+    git config --global credential.helper "store"
+    ## TODO: git config --file ~/.git-credentials "$MY_GIT_TOKEN"
+    echo "https://scrappycito:$MY_GIT_TOKEN@github.com" > ~/.git-credentials
 fi
 
 # Derive name for output file
