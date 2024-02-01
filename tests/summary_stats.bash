@@ -49,28 +49,39 @@ done
 # Change into testing script directory (e.g., ~/shell-scripts/tests)
 cd "$(dirname "$0")"
 
-# TEMP: set github credentials
+# Set github credentials, either via SSH or via ~/.git-credentials
 # Note:
 # - This is not secure, but scrappycito only has access it is own repos. For example,
 #     https://github.com/scrappycito/git-bash-test.
+# - For SSH, the public sssh key needs to be associated with the repo git GitHub settings
+# - For ~/.git-credentials, the key must be saved as plaintext in the file.
 # - The HOME directory is checked instead of USER because Github and docker use root.
 #    {/home/shell-scripts, /home/runner, /home/testuser}
 ## OLD: if [[ ("$HOME" == "/home/shell-scripts") || ("$HOME" == "/home/runner") ]]; then
 ## TODO2: if [[ $HOME =~ /home/(shell-scripts|runner|testuser) ]]; then
-if [[ $HOME =~ /home/(shell-scripts|runner) ]]; then
+if [[ ! $HOME =~ /home/(shell-scripts|runner) ]]; then
+    echo "FYI: using default ~/.gitconfig"  
+elif [ "${USE_SSH_AUTH:-1}" == "1" ]; then
+    echo "FYI: using SSH for git authentication"
+    eval "$(ssh-agent -s)"
+    chmod --changes go-rw "scrappycito.pem"
+    ssh-add scrappycito.pem
+    # note: this only works for git-bash-test repo (intended VM or docker runner)
+    git remote set-url origin "git@github.com:scrappycito/git-bash-test.git"
+else
     echo "FYI: modifying ~/.gitconfig and ~/.git-credentials"
-    
+        
     # Set user ID
     git config --global user.email "scrappycito@gmail.com"
     git config --global user.name "Scrappy Cito"
-
+    
     # Overide specific usages to use token
     ## OLD: export MY_GIT_TOKEN=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
     export MY_GIT_TOKEN=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
     git config --global url."https://api:$MY_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
     git config --global url."https://ssh:$MY_GIT_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
     git config --global url."https://git:$MY_GIT_TOKEN@github.com/".insteadOf "git@github.com:"
-
+    
     # Eanble credentials store (i..e, cached in file)
     git config --global credential.helper "store"
     ## TODO: git config --file ~/.git-credentials "$MY_GIT_TOKEN"
