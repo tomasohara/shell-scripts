@@ -59,19 +59,30 @@ cd "$(dirname "$0")"
 #    {/home/shell-scripts, /home/runner, /home/testuser}
 ## OLD: if [[ ("$HOME" == "/home/shell-scripts") || ("$HOME" == "/home/runner") ]]; then
 ## TODO2: if [[ $HOME =~ /home/(shell-scripts|runner|testuser) ]]; then
+#
+# note: copies to /tmp so that permissions can be changed without affecting repo
+ssh_key_file="scrappycito.pem"
+ssh_key_path="$TMP/$ssh_key_file"
+cp -ivf "scrappycito.pem" "$ssh_key_path"
+chmod --changes go-rw "$ssh_key_path"
+#
 if [[ ! $PWD =~ /home/(shell-scripts|runner)/.* ]]; then
     echo "FYI: using default ~/.gitconfig"  
 elif [ "${USE_SSH_AUTH:-1}" == "1" ]; then
     echo "FYI: using SSH for git authentication"
+    # Set user ID (TODO: add common section for user ID)
+    git config --global user.email "scrappycito@gmail.com"
+    git config --global user.name "Scrappy Cito"
+    ## TEST: git config --global url."https://git@github.com/"..insteadOf "https://github.com/"
+    # Enable SSH with git
     eval "$(ssh-agent -s)"
-    chmod --changes go-rw "scrappycito.pem"
-    ssh-add scrappycito.pem
-    # note: this only works for git-bash-test repo (intended VM or docker runner)
-    git remote set-url origin "git@github.com:scrappycito/git-bash-test.git"
+    ssh-add "$ssh_key_file"
+    # note: this only works for git-bash-test repo (intended for just VM or docker runner)
+    ## TEST: git remote set-url origin "git@github.com:scrappycito/git-bash-test.git"
 else
     echo "FYI: modifying ~/.gitconfig and ~/.git-credentials"
         
-    # Set user ID
+    # Set user ID (NOTE: uses global so applicable to other repos; see git-aliases-tests-1, etc.)
     git config --global user.email "scrappycito@gmail.com"
     git config --global user.name "Scrappy Cito"
     
@@ -91,12 +102,18 @@ fi
 # Derive name for output file
 # Note: Uses unique output subdir under ~/temp (or $BATSPP_OUTPUT).
 # Likewise, uses unique temp subdir under /tmp  (or $BATSPP_TEMP).
+# Also, as used here, "temp" is long-term temporary storage and "tmp" shorterm.
 timestamp=$(date '+%d%b%y-%H%M')
 TMP=${TMP:-/tmp}
 BATSPP_OUTPUT="${BATSPP_OUTPUT:-"$HOME/temp/BatsPP-$timestamp"}"
 BATSPP_TEMP="${BATSPP_TEMP:-"$TMP/BatsPP-$timestamp"}"
 mkdir --parents "$BATSPP_OUTPUT" "$BATSPP_TEMP"
 echo "FYI: Using $BATSPP_OUTPUT for output and $BATSPP_TEMP for temp. files"
+# note: with REMAP_TMP=1 /tmp gets remapped to $TMP/BatsPP-$timestamp
+BATSPP_TMP="$TMP"
+if [ "${REMAP_TMP:-0}" = "1" ]; then
+    BATSPP_TMP="$BATSPP_TEMP"
+fi
 
 ## TEMP: Enable flag for deleting aliases in order to force fail some tests
 ## NOTE: this enables a bunch of alias removals in all-tomohara-aliases-etc.bas
@@ -109,7 +126,7 @@ echo "FYI: Using $BATSPP_OUTPUT for output and $BATSPP_TEMP for temp. files"
 # 
 BATSPP_REPORT_OPTS=${BATSPP_REPORT_OPTS:-"--txt --definitions aliases-for-testing.bash"}
 # shellcheck disable=SC2086
-OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" PYTHONPATH="..:$PYTHONPATH" python3 ./batspp_report.py $BATSPP_REPORT_OPTS -
+OUTPUT_DIR="$BATSPP_OUTPUT" TEMP_BASE="$BATSPP_TEMP" TMP="$BATSPP_TMP" PYTHONPATH="..:$PYTHONPATH" python3 ./batspp_report.py $BATSPP_REPORT_OPTS -
 batspp_result="$?"
 
 ## NOTE: kcov is not critical, so it is not run as part of workflow tests
@@ -117,9 +134,8 @@ batspp_result="$?"
 
 # Generate output log when -o option enabled
 if $output_log; then
-    # TODO2: less => grep???
-    ## OLD: grep -B20 "^not ok" "$(find "$BATSPP_OUTPUT" -name '*outputpp.out')" | less -p "not ok" > summary_stats.log
-    grep -B20 "^not ok" "$(find "$BATSPP_OUTPUT" -name '*outputpp.out')" /dev/null >| summary_stats.log 2>&1
+    # note: paragraph mode use to get entire context (n.b., tests should encode newlines)
+    perlgrep.perl -para "^not ok" "$(find "$BATSPP_OUTPUT" -name '*outputpp.out')" /dev/null >| summary_stats.log 2>&1
 fi
 
 # Optionally, create archive of BatsPP output dir and transfer to another host.
@@ -137,7 +153,7 @@ if [[ ("$UNDER_DOCKER" == "1") && ("${ARCHIVE_OUTPUT:-0}" == "1") ]]; then
     docker_host_dir="/home/shell-scripts"
     if [ -e "$docker_host_dir" ]; then
         tar_base="/home/shell-scripts/_batspp-output"
-        tar cvfz "$tar_base.tar.gz" "$BATSPP_OUTPUT" >| "$tar_base.tar.log" 2>&1
+        tar cvfz "$tar_base.tar.gz" "$BATSPP_OUTPUT" "$BATSPP_TEMP" >| "$tar_base.tar.log" 2>&1
     else
         echo "Error: can't xfer BatsPP archive because no host dir ($docker_host_dir)"
     fi
@@ -150,13 +166,9 @@ if [ "${SCP_OUTPUT:-0}" == "1" ]; then
     tar_base="/tmp/_batspp-output-$mmddyyhhmm"
     tar cvfz "$tar_base.tar.gz" "$BATSPP_OUTPUT" >| "$tar_base.tar.log" 2>&1
     #
-    # TEMP: work around stupid git problem with permissions update to .pem file
-    chmod --changes go-rw "scrappycito.pem"
-    ls -lt "scrappycito.pem"
-    #
     remote_spec="ubuntu@ec2-54-191-214-184.us-west-2.compute.amazonaws.com:xfer"
     echo "scp'ing $tar_base.tar.gz to $remote_spec"
-    scp -P 22 -i "scrappycito.pem" -o StrictHostKeyChecking=no "$tar_base.tar.gz" $remote_spec
+    scp -P 22 -i "$ssh_key_file" -o StrictHostKeyChecking=no "$tar_base.tar.gz" $remote_spec
 fi
 
 # *** Note: the result needs to be that of alias tests (i.e., batspp_report.py)
