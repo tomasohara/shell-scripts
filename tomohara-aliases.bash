@@ -2992,6 +2992,10 @@ alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -
 # TODO: add -v (the xargs usage seems to block it)
 alias python-uninstall-setup='cat installed-files.list | xargs command rm -vi; alias-perl rename_files.perl -regex ^ un installed-files.list'
 
+# alias-python: python invocation for using in aliases
+# note: avoids excess tracing; see debug.py and main.py
+alias alias-python='DURING_ALIAS=1 python'
+
 # ipython(): overrides ipython command to set xterm title and to add git repo base directory to python path
 function ipython() { 
     local ipython
