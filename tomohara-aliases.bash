@@ -2994,7 +2994,7 @@ alias python-uninstall-setup='cat installed-files.list | xargs command rm -vi; a
 
 # alias-python: python invocation for using in aliases
 # note: avoids excess tracing; see debug.py and main.py
-alias alias-python='DURING_ALIAS=1 python'
+alias alias-python='DURING_ALIAS=1 python3'
 
 # ipython(): overrides ipython command to set xterm title and to add git repo base directory to python path
 function ipython() { 
