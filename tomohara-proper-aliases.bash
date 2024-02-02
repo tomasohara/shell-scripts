@@ -161,8 +161,11 @@ function color-test-failures {
 ## OLD:
 ## alias-fn ocr-image-old 'tesseract "$@" -'
 ## alias-fn ocr-image 'tesseract "$1" "$1".ocr'
-alias-fn ocr-image-stdout 'tesseract "$@" -'
-alias-fn ocr-image 'tesseract "$1" "$1"; $PAGER "$1".txt'
+# shellcheck disable=SC2016
+{
+    alias-fn ocr-image-stdout 'tesseract "$@" -'
+    alias-fn ocr-image 'tesseract "$1" "$1"; $PAGER "$1".txt'
+}
 
 #...............................................................................
 # Misc. stuff (e.g., JSON, Yaml)
@@ -171,13 +174,13 @@ alias-fn ocr-image 'tesseract "$1" "$1"; $PAGER "$1".txt'
 # json-validate(file): make sure file is valid JSON
 function json-validate () {
     local file="$1"
-    $PYTHON -c "import json; from mezcla import system; print(json.loads(system.read_file('$file')))" | head -5 | truncate-width
+    alias-python -c "import json; from mezcla import system; print(json.loads(system.read_file('$file')))" | head -5 | truncate-width
 }
 
 # yaml-validate(file): make suire file is valid YAML
 function yaml-validate () {
     local file="$1"
-    $PYTHON -c "from mezcla import file_utils; print(file_utils.read_yaml('$file'))" | head -5 | truncate-width
+    alias-python -c "from mezcla import file_utils; print(file_utils.read_yaml('$file'))" | head -5 | truncate-width
 }
 
 # action-lint-yaml: run Github actions yaml file through actionlint
@@ -195,7 +198,8 @@ simple-alias-fn act-plain 'convert-emoticons-aux act'
 function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -pe 's/^0\t//;'; }
 
 # extract-text-html(filename): extract text from HTML in FILENAME
-simple-alias-fn extract-text-html '$PYTHON -m mezcla.html_utils --regular'
+# shellcheck disable=SC2016
+simple-alias-fn extract-text-html 'alias-python -m mezcla.html_utils --regular'
 
 #...............................................................................
 # Bash stuff
@@ -212,7 +216,7 @@ function shell-check-last-snippet {
 function shell-check-stdin {
     ## DEBUG: echo "in shell-check-stdin: args='$*'"
     echo "Enter snippet lines and then ^D"
-    $PYTHON -c 'import sys; sys.stdin.read()' | shell-check -
+    alias-python -c 'import sys; sys.stdin.read()' | shell-check -
     # shellcheck disable=SC2181
     if [ "$?" -eq 0 ]; then echo "shellcheck OK"; fi
 }
@@ -437,9 +441,12 @@ alias 1pass="run-app 1password"
 # Docker
 function docker-cleanup {
     pause-for-enter "Removing all docker containers, images, etc. (Press Enter to proceed or ^C to abort)"
-    docker rm -vf $(docker ps -aq)
-    docker rmi -f $(docker images -aq)
-    docker system prune --force
+    # shellcheck disable=SC2046
+    {
+        docker rm -vf $(docker ps -aq)
+        docker rmi -f $(docker images -aq)
+        docker system prune --force
+    }
 }
 
 #................................................................................
