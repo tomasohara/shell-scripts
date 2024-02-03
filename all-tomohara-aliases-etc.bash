@@ -60,6 +60,7 @@ if [ "${SOURCE_SETTINGS:-0}" = "1" ]; then
 fi
 source "$source_dir/more-tomohara-aliases.bash"
 source "$source_dir/tomohara-proper-aliases.bash"
+source "$source_dir/test-aliases.bash"
 ##
 ## TEST: removes aliases and functions for use in testing aliases (see tests/summary_stats.bash)
 ##
