@@ -28,6 +28,11 @@ from mezcla import system
 
 # Constants
 TL = debug.TL
+EXEC_OPT = "exec"
+EVAL_OPT = "eval"
+EQUALS_OPT = "equals"
+NOT_EQUALS_OPT = "not-equals"
+CONDITION_ARG = "condition"
 
 class CondEval:
     """Class to evaluate conditions and execute commands"""
@@ -66,12 +71,20 @@ class Script(Main):
     condition = None
     evaluator_inst = None
     context = None
+    equals_value = None
+    not_equals_value = None
+    do_eval = None
 
     def setup(self):
         """Check results of command line processing"""
         # Get the condition and command (if provided)
-        self.command = self.get_parsed_option("exec", None)
-        self.condition = self.get_parsed_option("condition", None)
+        self.command = self.get_parsed_option(EXEC_OPT)
+        self.equals_value = self.get_parsed_option(EQUALS_OPT)
+        self.not_equals_value = self.get_parsed_option(NOT_EQUALS_OPT)
+        has_value_test = (self.equals_value or self.not_equals_value)
+        self.do_eval = self.get_parsed_option(EVAL_OPT, not has_value_test)
+        debug.assertion(not (self.equals_value and self.not_equals_value))
+        self.condition = self.get_parsed_option(CONDITION_ARG)
         # Support stdin in condition and command
         if "stdin" in self.condition:
             # The input stream is assigned to a local variable, which later gets
@@ -82,24 +95,34 @@ class Script(Main):
 
         # Create an instance of the condition evaluator
         self.evaluator_inst = CondEval()
-        debug.trace_current_context(level=TL.QUITE_VERBOSE)
+        debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
     def run_main_step(self):
         """Run the main step of the script"""
         output = ""
 
         # Evaluate condition and optionally show result
-        eval_result = self.evaluator_inst.eval_condition(self.condition,
-                                                         context=self.context)
-        if self.verbose:
-            print(f"Evaluation of condition {self.condition!r}: {eval_result}")
-            if self.context:
-                print(f"STDIN:\n{self.context['stdin']}")
-        if not self.command:
-            output = eval_result
+        eval_result = None
+        if self.equals_value:
+            output = (self.condition == self.equals_value)
+            if self.verbose:
+                print(f"Whether condition {self.condition!r} equals {self.equals_value!r}: {output}")
+        elif self.not_equals_value:
+            output = (self.condition != self.equals_value)
+            if self.verbose:
+                print(f"Whether condition {self.condition!r} doesn't equals {self.equals_value!r}: {output}")
+        else:
+            eval_result = self.evaluator_inst.eval_condition(self.condition,
+                                                             context=self.context)
+            if self.verbose:
+                print(f"Evaluation of condition {self.condition!r}: {eval_result}")
+                if self.context:
+                    print(f"STDIN:\n{self.context['stdin']}")
+            if not self.command:
+                output = eval_result
 
         # Evaluate command
-        if eval_result and self.command:
+        if self.command and eval_result:
             if self.verbose:
                 print(f"Executing command: {self.command}")
             output = self.evaluator_inst.exec_command(self.command)
@@ -112,10 +135,13 @@ def main():
     app = Script(
         description=__doc__.format(script=gh.basename(__file__)),
         text_options=[
-            ("exec", "Command to execute if the condition is True"),
+            (EVAL_OPT, "Whether to evaluate the condition"),
+            (EXEC_OPT, "Command to execute if the condition is True"),
+            (EQUALS_OPT, "Whether condition equals given expression"),
+            (NOT_EQUALS_OPT, "Whether condition doesn't equal given expression"),
         ],
         positional_arguments=[
-            ("condition", "Condition to evaluate"),
+            (CONDITION_ARG, "Condition to evaluate"),
         ],
         skip_input=False,
         manual_input=True

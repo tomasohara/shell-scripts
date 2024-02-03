@@ -95,6 +95,7 @@
 # - Document file tests (e.g., -e fubar.txt).
 # - BASH_SOURCE usage for when source'd
 #     src_dir=$(dirname "${BASH_SOURCE[0]}")
+# - value=${value@L}                    # make lowercase
 #
 
 # Uncomment following line(s) for tracing:
