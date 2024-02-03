@@ -9,9 +9,14 @@
 #
 batspp
 click
-mezcla>=1.3.9.4
-numpy
+mezcla>=1.3.9.8
 pipreqs
+#...............................................................................
+# Redundant specification of some dependencies due to Git workflow quirk,
+# such as with mezcla.
+#
+importlib_metadata
+numpy
 pytest
 pyyaml
 six

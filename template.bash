@@ -95,15 +95,18 @@
 # - Document file tests (e.g., -e fubar.txt).
 # - BASH_SOURCE usage for when source'd
 #     src_dir=$(dirname "${BASH_SOURCE[0]}")
+# - value=${value@L}                    # make lowercase
 #
 
 # Uncomment following line(s) for tracing:
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
-#  
+#
+## DEBUG:
+## echo "in ${BASH_SOURCE[0]}"
 ## echo "$@"
-## set -o xtrace
-## DEBUG: set -o verbose
+## DETAILED: set -o xtrace
+## VERBOSE: set -o verbose
 #
 # Set bash regular and/or verbose tracing
 if [ "${TRACE:-0}" = "1" ]; then
@@ -158,7 +161,7 @@ while [ "$moreoptions" = "1" ]; do
     elif [[ ("$1" = "--") || ("$1" = "-") ]]; then
         break
     else
-        echo "ERROR: Unknown option: $1";
+        echo "Error: Unknown option: $1";
         exit
     fi
     shift;

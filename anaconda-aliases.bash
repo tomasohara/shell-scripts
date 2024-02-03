@@ -1,3 +1,4 @@
+#! /bin/env bash
 # Anaconda support based on conda installation
 #
 # usage example:
@@ -42,14 +43,16 @@ function add-conda-env-to-xterm-title {
 anaconda3_dir="$HOME/anaconda3"
 anaconda2_dir="$HOME/anaconda2"
 # init-condaN([- | dir]): initialize anaconda using specified dir (or ~/anaconda3)
-## OLD: function init-condaN() {
 function init-condaN {
     local anaconda_dir="$1"
     ## DEBUG: echo "in init-condaN $1*"
     if [ "$anaconda_dir" = "" ]; then echo "Usage: init-condaN anaconda-dir"; return; fi
     if [ "$anaconda_dir" = "-" ]; then anaconda_dir="$anaconda3_dir"; fi
-    # Note: assignment separates so that $? preserved
-    #     https://unix.stackexchange.com/questions/506352/bash-what-does-masking-return-values-mean
+    # start: >>> conda initialize >>>
+    #        !! Contents within this block are managed by 'conda init' !!
+    # Note: assignment separated so that $? preserved:
+    #     local x; x="$(...)"; if [ $? -eq 0 ]; ...
+    # See https://unix.stackexchange.com/questions/506352/bash-what-does-masking-return-values-mean
     local conda_setup
     conda_setup="$("$anaconda_dir"'/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
     if [ $? -eq 0 ]; then
@@ -60,6 +63,7 @@ function init-condaN {
         fi
         prepend-path "$anaconda_dir/bin"
     fi
+    # end:   <<< conda initialize <<<
 
     # Restore Bash prompt and put conda environment in xterm title instead
     add-conda-env-to-xterm-title
@@ -108,6 +112,7 @@ function activation-helper {
     local python_path=""
     python_path=$(/usr/bin/which python 2> /dev/null)
     trace-vars python_path
+    reference-variable "$python_path"
     ## DEBUG: echo "out activation-helper($@)"
 }
 alias conda-activate='activation-helper activate'
@@ -177,9 +182,8 @@ function conda-deactivate-env {
 }
 
 # older Miniconda3-based initializaion
-# <<< conda initialize <<<
-# !! Contents within this block are managed by 'conda init' !!
-## OLD: function old-init-conda () {
+#   # >>> conda initialize >>>
+#   # !! Contents within this block are managed by 'conda init' !!
 function old-init-conda {
     local base="$ANACONDA_HOME"
     local conda_setup
@@ -196,6 +200,7 @@ function old-init-conda {
     # Restore Bash prompt and put conda environment in xterm title instead
     add-conda-env-to-xterm-title
 }
+#   # <<< conda initialize <<<
 
 # conda-create-env(name, [python_version=3.9]): create Python3 environment for Python 3.9 by default
 # TODO: determine the version, make sure ipython gets installed

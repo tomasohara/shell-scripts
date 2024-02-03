@@ -64,6 +64,8 @@
 #   SC2016 [Expressions don't expand in single, use double]
 #   SC2086 [Double quote to prevent globbing and word splitting]
 #
+# - By the way, "maldito" is Spanish for "damn", which is a mild expletive in English.
+#
 #................................................................................
 # Examples:
 # TODO2: show the corresponding alias; also move git-mv example later to this section)
@@ -102,6 +104,10 @@
 # - ** TODO: diagnose problem with git checkin for simple_batspp.py [Fri 15 Jul 22].
 # - * Get a git guru to critique (e.g., how to make more standard)!
 # - Add an option for verbose tracing (and for quiet mode).
+# - Simplify environment-based variable initializations using "${ENV:-default}" approach.
+#
+# TODO2:
+# - Fix detection of .ipynb files as binary (e.g., via specical case exception).
 #
 
 ## DEBUG: echo "in ${BASH_SOURCE[0]}"
@@ -180,7 +186,7 @@ function git-alias-review-log {
 # - If PRESERVE_GIT_STASH is 1, then timestamps are preserved.
 # - If GIT_NO_CONFIRM is 1, pause for enter does not pause
 # - Requires GIT_FORCE of 1 if there are changed files (to avoid inadvertant conflict).
-## Lorenzo review: should [Lorenzo-TODO1: ???]
+# - TODO2: decompose this monster of a function!
 function git-update-plus {
     local git_user="n/a"
     local git_token="n/a"
@@ -307,10 +313,7 @@ function git-move-to-dir {    # Move files to specified directory
     for file in "$@"; do
         invoke-git-command mv "$file" "$dir"
         # TODO2: cut down on extraneous confirmations
-        git-commit-and-push "$file" "$dir/$file"
-        ## OLD:
-        ## # do same as git-revert-file-alias
-        ## invoke-git-command reset HEAD "$file"
+        git-commit-and-push "$dir/$file"
     done
 }
 
@@ -333,29 +336,33 @@ function set-global-credentials {
    fi
 }
 
-# git-commit-and-push(file, ...): commits FILE... to local repo, which is then
+# git-add-commit-push(file, ...): commits FILE... to local repo, which is then
 # pushed to global repo
 # note:
 # - [deprecated] gets user credentials from ./_my-git-credentials-etc.bash.list
 # - also does an implicit add unless GIT_SKIP_ADD (TODO3: rename to git-add-commit-and-push?)
 # TODO: add message argument
-function git-commit-and-push {
+function git-add-commit-push {
     local file_spec="$*"
     local log
     log=$(get-temp-log-name "commit")
     #
     # TODO: rework so that message passed as argument (to avoid stale messages from environment)
-    ## Lorenzo review: shouldn't this be as simple as using "local message = ${1:-"$GIT_MESSAGE"}"; Tom: Yes
-    ## TODO2: fix old Bash usage to Lorenzo's suggesition
-    local message="$GIT_MESSAGE"; 
+    local message="${GIT_MESSAGE:-...}"
     if [ "$message" = "..." ]; then 
-        echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
+        echo "Error: '...' or '' not allowed for commit message"
+        echo "This avoids to avoid cut-n-paste error (e.g., [G]IT_MESSAGE-typo)"
         return 1
     fi
-    if [ "$message" = "" ]; then
-        echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE-typo error)"
-        return 1
-    fi
+    ## OLD:
+    ## if [ "$message" = "..." ]; then 
+    ##     echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
+    ##     return 1
+    ## fi
+    ## if [ "$message" = "" ]; then
+    ##     echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE-typo error)"
+    ##     return 1
+    ## fi
     #
     local git_user="n/a"
     local git_token="n/a"
@@ -368,11 +375,8 @@ function git-commit-and-push {
     if [ "$file_spec" = "" ]; then
         echo "Warning: *** No file specified (cuidado!)"
     elif [ "${GIT_SKIP_ADD:-0}" = "1" ]; then
-        ## Lorenzo review: The name of the function is confusing as it doesn't indicate it does "git add", just commit and push
-        ## NOTE: [Lorenzo-TODO2: ???]
         echo "skipping: git add $*"
     else
-        ## OLD: echo "issuing: git add \"$*\""
         echo "issuing: git add" "$@"
         git-add-plus "$@" >> "$log"
     fi
@@ -399,14 +403,15 @@ EOF
     # Sanity check
     git-alias-review-log "$log"
 }
+#
+# note: following for backward compatibility
+simple-alias-fn git-commit-and-push git-add-commit-push
 
 
 # git-update-commit-push(file, ...): updates local repo and then commits FILE... to global repo
-# OLD: gets user credentials from ./_my-git-settings.bash
 # TODO: skip commit if problem with update
 function git-update-commit-push {
     # DEBUG: set -o xtrace
-    ## OLD: git-update-plus
     git-update-force
     if [ $? -ne 0 ]; then
         echo "Warning: consider canceling given possible update error (status=$?)"
@@ -427,7 +432,7 @@ function invoke-git-command {
     log=$(get-temp-log-name "$command")
     echo "issuing: git $command $*"
     git "$command" "$@" >| "$log" 2>&1
-    ## OLD: less
+    ## PREVIOUS: less
     ## NOTE: unfortunately, less clears the screen
     ## TODO: less --quit-if-one-screen "$log"
     cat "$log"
@@ -486,12 +491,9 @@ function git-reset-file {
     # Isolate old versions
     mkdir -p _git-trash >| "$log";
     echo "issuing: cp -vpf $* _git-trash";
-    ## Lorenzo review: if there's already a file with this name in _git-trash, it'll ask the user for confirmation
-    ## maybe timestamping the file inside it will solve the problem
-    ## NOTE: switching to 'command cp' is a simpler fix due to potential for multiple files;
-    ## This should be OK because reset's are not that common.
-    ## TODO2: use 'command cp' to avoid confirmation
-    cp -vpf "$@" _git-trash >> "$log";
+    # Note: Uses  'command cp' to avoid confirmation when same file already in trash.
+    # This is a design decision since resets aren't common (e.g., vs. timestamping trash files).
+    command cp -vpf "$@" _git-trash >> "$log";
 
     # Forget state
     echo "issuing: git reset HEAD $*";
@@ -518,8 +520,9 @@ function git-reset-file {
     git-alias-review-log "$log"
 }
 #
-## Lorenzo review: having a git-revert alias that uses git reset --hard sounds like a mistake waiting to happen if you're not familiar with what it actually does (TODO4)
-## NOTE: git-reset-file --hard would produce a warning and confirmation; it is current disabled.
+# Note: git-reset-file is a soft reset: a hard reset would only done explcitly via
+# --hard and moreover would lead to a warning requiring confirmation.
+# (In addition, the support for --hard is currently disabled.)
 alias git-revert-file-alias='git-reset-file' 
 ## TODO: alias git-reset-hard-alias='git-reset-file --hard'
 
@@ -538,10 +541,9 @@ function git-restore-file-helper {
     # Isolate old versions
     mkdir -p _git-trash >| "$log";
     echo "issuing: cp -vpf $* _git-trash";
-    ## Lorenzo review: if there's already a file with this name in _git-trash, it'll ask the user for confirmation
-    ## maybe timestamping the file inside it will solve the problem (TODO2)
-    ## TODO2: use 'command cp' to avoid confirmation; see comments above in git-reset-file
-    cp -vpf "$@" _git-trash >> "$log";
+    # Note: Uses  'command cp' to avoid confirmation when same file already in trash.
+    # This is a design decision since restores aren't common (e.g., vs. timestamping trash files).
+    command cp -vpf "$@" _git-trash >> "$log";
 
     # Restore working tree files
     echo "issuing: git restore $option $*";
@@ -600,6 +602,7 @@ function git-vdiff-alias {
 #
 function git-diff-list-template {
     # TODO: use unique tempfile (e.g., mktemp)
+    ## TODO2: diff_list_file=$(get-temp-log-name "diff")
     echo "diff_list_file=\$TMP/_git-diff.\$\$.list"
     # ex: "diff --git a/tomohara-aliases.bash b/tomohara-aliases.bash" => "tomohara-aliases.bash:
     # TODO: ex: "diff --cc mezcla/data_utils.py" => "mezcla/data_utils.py"
@@ -607,11 +610,10 @@ function git-diff-list-template {
 }
 function git-diff-list {
     local diff_list_file
-    # TODO: use unique tempfile (e.g., mktemp)
+    ## TODO2: local diff_list_script=$(get-temp-log-name "diff")
     local diff_list_script="$TMP/_git-diff-list.$$.bash"
     git-diff-list-template >| "$diff_list_script"
     source "$diff_list_script"
-    ## OLD: cat "$diff_list_file"
 
     # Change path to absolute and drop current directory
     # note: in case of sibling directories the root is shown via a variable
@@ -684,17 +686,21 @@ function alt-invoke-next-single-checkin {
     # TODO: position cursor at start of ... (instead of pause)
     local is_text
     ## TODO: fix problem identifying scripts with UTF-8 as text (e.g., common.perl reported as data by file command)
-    is_text=$(file "$mod_file" | grep -i ':.*text')
+    is_text=$(file "$mod_file" | egrep -i ':.*(text|JSON|UTF-8)')
     ## HACK: add special case exceptions
     if [ "$is_text" = "" ]; then
-        case "$mod_file" in *.css | *.csv | *.html | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
+        case "$mod_file" in *.css | *.csv | *.html | *.ipynb | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
     fi;
     if [ "$is_text" != "" ]; then
-        # note: pauses a little so that user can update cursor before focus shifts
-        # TODO: see how to keep focus on terminal window for git update
-        local delay=5
-        echo "issuing: (sleep $delay; git-difftool-plus \"$mod_file\") &"
-        (sleep $delay; git-difftool-plus "$mod_file") &
+        if [ "$GIT_NO_CONFIRM" = "1" ]; then
+            echo "GIT_NO_CONFIRM enabled, so skipping difftool (e.g., for visual diff)"
+        else
+            # note: pauses a little so that user can update cursor before focus shifts
+            # TODO: see how to keep focus on terminal window for git update
+            local delay=5
+            echo "issuing: (sleep $delay; git-difftool-plus \"$mod_file\") &"
+            (sleep $delay; git-difftool-plus "$mod_file") &
+        fi
     else
         ## TODO: summarize binary differenecs
         echo "Note: binary file so bypassing diff"
@@ -706,12 +712,12 @@ function alt-invoke-next-single-checkin {
     echo "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
     local OLD_GIT_MESSAGE=$GIT_MESSAGE
     # note: options: -e use readline; -i initialize readline buffer; -r backslash is not an escape
-    if [ "$GIT_NO_CONFIRM" != "0" ]; then 
-        read -r -e -i "$prompt" command
-    else 
-        echo "GIT_NO_CONFIRM set to 1, so skipping confirmation"
+    if [ "$GIT_NO_CONFIRM" = "1" ]; then 
+        echo "GIT_NO_CONFIRM set to 1, so skipping git-update-commit-push confirmation"
         export GIT_MESSAGE=${GIT_TEST_MESSAGE:-"default"}
         command="git-update-commit-push \"$mod_file\""
+    else 
+        read -r -e -i "$prompt" command
     fi
     # Evaluate the user's checkin command
     # TODO: rework using a safer approach with reading checking comment and issuing git-update-commit-push directly
@@ -752,8 +758,6 @@ function git-checkout-branch {
         echo "usage: git-checkout-branch [--help | branch]"
         echo "note: available branches:"
         # TODO: get maldito git to cooperate better (e.g., plain text option)!
-        ## Lorenzo review: what is "maldito" supposed to be? as in "maldito git", "maldito shellcheck", etc
-        ## Note: Spanish for "damn", which is a mild expletive in English
         # shellcheck disable=SC2016
         PAGER="" git branch --all | extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
         return
@@ -770,16 +774,20 @@ function git-checkout-branch {
 simple-alias-fn git-branch-checkout  git-checkout-branch 
 
 # git-branch-alias(): return current branch for repo
-## Lorenzo review: name could be more descriptive of what it does, like 'git-current-branch' (TODO2)
-function git-branch-alias {
+function git-current-branch {
     local git_branch
     git_branch="$(git status | extract_matches.perl "On branch (\S+)")"
     echo "$git_branch"
 }
+alias git-branch-alias='git-current-branch'
 
 # git-conflicts-alias(): show conflicts in the local git repo
 function git-conflicts-alias {
-    git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {};
+    ## TODO3: get ls-tree to show output relative to current subdirectory
+    local restore_dir="$PWD"
+    git-cd-root-alias
+    git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {};
+    cd "$restore_dir"
 }
 
 #-------------------------------------------------------------------------------
@@ -796,15 +804,12 @@ function git-alias-usage () {
     echo "   _git-CMD-MMDDYY-HHMM-tmp.log      # ex: _git-status-03jul22-1105-HTV.log"
     echo ""
     # note: 'clear's -x option doesn't clobber history (to work around a disruptive Linux change that fell through maldito Q&A cracks!)'
-    ## OLD:
-    ## echo "To update aliases:"
-    ## echo "   source \$TOM_BIN/git-aliases.bash; clear -x; git-alias-usage"
-    ## echo ""
     echo "Get changes from repository (set PRESERVE_GIT_STASH=1 to keep timestamps)":
     echo "    git-update-plus"
     echo ""
-    echo "To add regular files via git-add (n.b., ignored if matches .gitignore):"
+    echo "To add regular files to repo (via git-add):"
     echo "    GIT_MESSAGE='initial version' git-update-commit-push file..."
+    echo "Note: use GIT_FORCE=1 ... if file matches .gitignore patterns"
     echo ""
     echo "To check in specified changes:"
     echo "    GIT_MESSAGE='...' git-update-commit-push file..."
@@ -825,10 +830,6 @@ function git-alias-usage () {
     # TODO2: rework git-update-force via dry-run git-update with conflict check
     echo '    git-cd-root-alias; tar-this-dir-dated; git-update-force; git-next-checkin'
     echo '    # -or-: git-cd-root-alias; git-update-verified; git-conflicts-alias; git-next-checkin'
-    ## OLD:
-    ## echo '    # alt: grep "^<<<<< " $(git-diff-list) /dev/null'
-    ## # TODO: xargs -I{} 'grep "^<<<<< {} | head -5' $(git-list-text-files)
-    ## OLD: echo "    # alt: (git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {})"
     echo '    git-next-checkin                      # repeat, as needed'
 
     ## TODO: echo '* invoke git-cd-root-alias automatically!'
@@ -862,15 +863,11 @@ function git-misc-alias-usage() {
     echo "    git mergetool"
     echo ""
     echo "To move or rename (cuidado):"
-    ## OLD:
-    ## echo "   git mv --verbose old-file new-file"
-    ## echo "   GIT_MESSAGE='renamed' GIT_SKIP_ADD=1 git-update-commit-push old-file new-file"
     echo "    GIT_MESSAGE='renamed' git-rename-file OLD NEW-file"
     echo "    GIT_MESSAGE='moved' git-move-to-dir DIR file1 file2"
     echo ""
     echo "To delete files (mucho cuidado):"
     echo "   git rm old-file"
-    ## OLD: echo "   GIT_MESSAGE='deleted' GIT_SKIP_ADD=1 git-update-commit-push old-file"
     echo "   GIT_MESSAGE='deleted' git-update-commit-push old-file"
     echo ""
     echo "To check in all tracked with changed:"
@@ -879,7 +876,9 @@ function git-misc-alias-usage() {
     echo "    git-checkin-all-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
     echo ""
     echo "Source code grepping:"
-    echo "   (git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
+    echo ## OLD: "   (git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
+    ## TODO3: get ls-tree to show output relative to current subdirectory
+    echo "   (git-cd-root-alias; git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
     echo ""
     echo "Odds and ends:"
     echo '   head $(git-root-alias)/config'

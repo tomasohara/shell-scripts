@@ -171,13 +171,13 @@ alias-fn ocr-image 'tesseract "$1" "$1"; $PAGER "$1".txt'
 # json-validate(file): make sure file is valid JSON
 function json-validate () {
     local file="$1"
-    python -c "import json; from mezcla import system; print(json.loads(system.read_file('$file')))" | head -5 | truncate-width
+    $PYTHON -c "import json; from mezcla import system; print(json.loads(system.read_file('$file')))" | head -5 | truncate-width
 }
 
 # yaml-validate(file): make suire file is valid YAML
 function yaml-validate () {
     local file="$1"
-    python -c "from mezcla import file_utils; print(file_utils.read_yaml('$file'))" | head -5 | truncate-width
+    $PYTHON -c "from mezcla import file_utils; print(file_utils.read_yaml('$file'))" | head -5 | truncate-width
 }
 
 # action-lint-yaml: run Github actions yaml file through actionlint
@@ -194,8 +194,8 @@ simple-alias-fn act-plain 'convert-emoticons-aux act'
 # note: strips the 0-len paragraph indicator
 function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -pe 's/^0\t//;'; }
 
-# extract-text-html(filename): extract text from HTMNL in FILENAME
-simple-alias-fn extract-text-html 'python -m mezcla.html_utils'
+# extract-text-html(filename): extract text from HTML in FILENAME
+simple-alias-fn extract-text-html '$PYTHON -m mezcla.html_utils --regular'
 
 #...............................................................................
 # Bash stuff
@@ -212,7 +212,7 @@ function shell-check-last-snippet {
 function shell-check-stdin {
     ## DEBUG: echo "in shell-check-stdin: args='$*'"
     echo "Enter snippet lines and then ^D"
-    python -c 'import sys; sys.stdin.read()' | shell-check -
+    $PYTHON -c 'import sys; sys.stdin.read()' | shell-check -
     # shellcheck disable=SC2181
     if [ "$?" -eq 0 ]; then echo "shellcheck OK"; fi
 }
@@ -407,7 +407,7 @@ alias free-memory='free --wide --human | grep -v Swap:'
 # clear-cache: clear disk cache
 # See https://linux-mm.org/Drop_Caches and https://www.linuxatemyram.com
 # TODO: get this to work completely; explain Admin filter
-simple-alias-fn clear-cache 'echo; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
+simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
 
 #...............................................................................
 # Emacs related

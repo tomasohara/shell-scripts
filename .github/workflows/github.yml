@@ -13,9 +13,10 @@ jobs:
 
   build-and-test-runner:
     name: Build and Run Tests via Runner
-    ## NOTE: need to track down differences between Docker and Runner runs
-    ## TEMP: disable tests (and just run Docker version below)
-    if: ${{ false }}
+    ## OLD:
+    ## ## NOTE: need to track down differences between Docker and Runner runs
+    ## ## TEMP: disable tests (and just run Docker version below)
+    ## if: ${{ false }}
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -27,6 +28,8 @@ jobs:
 
     steps:
       - name: Checkout Repository
+        ## TODO2: use checkout@v4
+        ## See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-versioned-actions
         uses: actions/checkout@v3
 
       - name: Setup Python
@@ -71,5 +74,7 @@ jobs:
 
       - name: Run tests
         run: |
-          docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
-
+          ## OLD: docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+          # Note: command format: docker run [OPTIONS] IMAGE [COMMAND] [ARG...];
+          # The environment file normally has no entries (i.e., just comments).
+          docker run --env-file _temp-user-docker.env --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev

@@ -72,12 +72,80 @@ GIT_BRANCH="${GIT_BRANCH:-}"
 BUILD_OPTS="${BUILD_OPTS:-}"
 RUN_OPTS="${RUN_OPTS:-}"
 USER_ENV="${USER_ENV:-}"
+## Added environment variables for the option exposure
+ACT_JSON="${ACT_JSON:-""}"
+RUN_BUILD="${RUN_BUILD:-0}"
+RUN_DOCKER="${RUN_DOCKER:-0}"
+RUN_WORKFLOW="${RUN_WORKFLOW:-1}"
+WORKFLOW_FILE="${WORKFLOW_FILE:-act.yml}"
+RUN_BUILD_CACHELESS="${RUN_BUILD_CACHELESS:-0}"
 # TODO3: put all env. init up here for clarity
-#
+
+# Display script usage
+usage() {
+    echo "Usage: $0 [--help|-h] [--build|-b] [--cacheless|-c] [--docker|-d] [--file <workflow_file>] [--json <act_json>]"
+    echo "Options:"
+    echo "  --build     (-b)    Run docker build"
+    echo "  --cacheless (-c)    Run docker build by clearing build caches"
+    echo "  --docker    (-d)    Run Docker directly (bypassing nektos act) (default: $RUN_DOCKER)"
+    echo "  --file      (-f)    Specify workflow file (default: $WORKFLOW_FILE)"
+    echo "  --json      (-j)    Specify act JSON (default: $ACT_JSON)"
+    echo "  --help      (-h)    Displays the help message and exit"
+    exit 1
+}
+
+# Function for set_option and implementing it
+set_option(){
+    case "$1" in
+        --build|-b)
+            RUN_BUILD=1
+            RUN_WORKFLOW=0
+            ;;
+        --cacheless|-c)
+            RUN_BUILD_CACHELESS=1
+            RUN_WORKFLOW=0
+            ;;
+        --docker|-d)
+            RUN_DOCKER=1
+            RUN_WORKFLOW=0
+            ;;
+        --file|-f)
+            if [ -n "$2" ]; then
+                WORKFLOW_FILE="$2"
+                shift
+            else
+                echo "Error: Missing argument for --file"
+                exit 1
+            fi
+            ;;
+        --json|-j)
+            if [ -n "$2" ]; then
+                ACT_JSON="$2"
+                shift
+            else
+                echo "Error: Missing argument for --json"
+                exit 1
+            fi
+            ;;
+        --help|-h)
+            usage
+            ;;
+        *)
+            echo "Error: Unknown option: $1"
+            usage
+            ;;
+    esac
+}
+
+while [[ $# -gt 0 ]]; do
+    set_option "$1"
+    shift
+done
+
 # Trace out main environment overrides
 #   CLONE_REPO, AUTO_REQS, RUN_BUILD, BUILD_OPTS, RUN_WORKFLOW, RUN_OPTS, WORKFLOW_FILE
 if [ "$DEBUG_LEVEL" -ge 4 ]; then
-    echo "in $0 $*"
+    echo "in $0 $* [$(date)]"
     src_dir=$(dirname "${BASH_SOURCE[0]}")
     source "${TOM_BIN:-"$src_dir"}/all-tomohara-aliases-etc.bash"
     trace-vars IMAGE_NAME ACT_PULL LOCAL_REPO_DIR DEBUG_LEVEL GIT_BRANCH BUILD_OPTS USER_ENV
@@ -115,7 +183,7 @@ if [ "${AUTO_REQS:-0}" = "1" ]; then
 fi
 
 # Build the Docker image
-if [ "${RUN_BUILD:-0}" = "1" ]; then
+if [ "${RUN_BUILD}" = "1" ]; then
     echo "Building Docker image: $IMAGE_NAME"
     # note: maldito docker doesn't support --env for build, just run
     # Also, --build-arg misleading: see
@@ -124,19 +192,28 @@ if [ "${RUN_BUILD:-0}" = "1" ]; then
     docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --tag "$IMAGE_NAME" .
 fi
 
+# Build the Docker image cacheless (using --no-cache option)
+if [ "${RUN_BUILD_CACHELESS}" = "1" ]; then
+    echo "Building Docker image (no-cache): $IMAGE_NAME"
+    docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --no-cache -t "$IMAGE_NAME" .
+fi
+
+
 # Run the Github Actions workflow locally
 # TODO1: get this to retain image (to allow for post-mortem review)
-if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
-    file="${WORKFLOW_FILE:-act.yml}"
+if [ "${RUN_WORKFLOW}" = "1" ]; then
+    file="${WORKFLOW_FILE}"
     echo "Running Github Actions locally w/ $file"
     ## TODO: GITHUB_TOKEN="$(gh auth token)" or set via environment
     # Note: Unfortunately, the environment setting is not affecting the docker
     # invocation. A workaround is to modify the 'Run tests' steps in the
     # workflow configuration file (e.g., .github/workflows/debug.yml).
+    
     act="${ACT_PROGRAM:-act}"    
+    
     ## TODO2: fix environment (see tests/run_tests.bash for workaround)
     # note: ACT_JSON can be used to disable act-specific flags (e.g., to enable runner matrix)
-    json="${ACT_JSON:-""}"
+    json="${ACT_JSON}"
     if [ "$json" != "" ]; then misc_args+=(--eventpath ./.github/workflows/"$json"); fi;
     # shellcheck disable=SC2086
     "$act" --verbose --env "DEBUG_LEVEL=$DEBUG_LEVEL $USER_ENV" --container-architecture linux/amd64 --pull="$ACT_PULL" --workflows ./.github/workflows/"$file" $RUN_OPTS "${misc_args[@]}"
@@ -145,7 +222,7 @@ if [ "${RUN_WORKFLOW:-1}" = "1" ]; then
 fi
 
 # Run via docker directly
-if [ "${RUN_DOCKER:-0}" = "1" ]; then
+if [ "${RUN_DOCKER}" = "1" ]; then
     echo "Running Tests via Docker"
     # Convert VAR1=val1 VAR2=val2 ... to "--env VAR1=val1 --env VAR2=val2 ..."
     user_env_spec=$(echo " $USER_ENV" | perl -pe 's/ (\w+=)/ --env $1/g;')
@@ -155,5 +232,5 @@ fi
 
 # End processing
 if [ "$DEBUG_LEVEL" -ge 4 ]; then
-    echo "out $0"
+    echo "out $0 [$(date)]"
 fi

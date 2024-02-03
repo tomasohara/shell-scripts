@@ -29,7 +29,12 @@ from mezcla import system
 msy = system
 from mezcla.main import Main
 from mezcla.my_regex import my_re
-from simple_batspp import FORCE_RUN
+try:
+    from simple_batspp import FORCE_RUN
+except:
+    system.print_exception_info("simple_batspp.FORCE_RUN")
+    parent_dir = system.real_path(".")
+    system.exit(f"Error: make sure PYTHONPATH includes parent dir:\n\t{parent_dir}")
 
 # Constants
 TL = debug.TL
@@ -75,21 +80,33 @@ DEFAULT_MIN_SCORE = 50
 HOME = system.getenv_text(
     "HOME", "~",
     description="Home directory for user")
+GITHUB_ACTIONS = system.getenv_bool(
+    "GITHUB_ACTIONS", False,
+    description="Running under GitHub actions")
 DOCKER_HOME = "/home/shell-scripts"
 UNDER_DOCKER = ((HOME == DOCKER_HOME) or system.file_exists(DOCKER_HOME))
-UNDER_RUNNER = ("/home/runner" in HOME)
+UNDER_RUNNER = (("/home/runner" in HOME) or GITHUB_ACTIONS)
 UNDER_TESTING_VM = system.getenv_text(
     "UNDER_TESTING_VM", (UNDER_DOCKER or UNDER_RUNNER),
-    description="Whether to assume running under testing VM")
+    description="Whether to assume running under testing VM--docker or Github runner")
 DETAILED_DEBUGGING = debug.detailed_debugging()
 
 TEST_REGEX = system.getenv_value(
     ## TODO2: rename to BATSPP_TEST_REGEX
     "TEST_REGEX", None,
     description="Regex for tests to include; ex: '^c.*' for debugging")
+TRACE_EXCERPT_SIZE = system.getenv_int(
+    "TRACE_EXCERPT_SIZE", 1000,
+    description="Number of lines traced with trace_excerpt")
+TRACE_EXCERPT_LEVEL = system.getenv_int(
+    "TRACE_EXCERPT_LEVEL", TL.VERBOSE,
+    description="Tracing level for trace_excerpt")
 SHOW_FAILURE_CONTEXT = system.getenv_bool(
     "SHOW_FAILURE_CONTEXT", UNDER_TESTING_VM,
     description="Show context of test failures--useful with Github runner")
+STOP_ON_FAILURE = system.getenv_bool(
+    "STOP_ON_FAILURE", False,
+    description="Stop when failure encountered")
 SINGLE_STORE = system.getenv_bool(
     "SINGLE_STORE", False,
     description=f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
@@ -110,6 +127,10 @@ OMIT_SHORT_OPTIONS = system.getenv_bool(
     "OMIT_SHORT_OPTIONS", False,
     description="Only allow long command line options")
 ALLOW_SHORT_OPTIONS = (not OMIT_SHORT_OPTIONS)
+## BAD:
+## FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
+##     "Force execution even if admin-like user")
+FORCE_OPTION_DEFAULT = UNDER_TESTING_VM or FORCE_RUN
 
 ## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
 if SINGLE_STORE:
@@ -224,6 +245,18 @@ def main():
         if TXT_OPTION:
             gh.run(f"rm -rf {TXT_STORE}/*")
 
+    def trace_excerpt(filename, level=None, num_lines=None):
+        """Outputs the first NUM_LINES in FILENAME if at debugging trace LEVEL
+        Note: that output goes to stdout not stderr (unlike debug.trace)"""
+        if level is None:
+            level = TRACE_EXCERPT_LEVEL
+        if num_lines is None:
+            num_lines = TRACE_EXCERPT_SIZE
+        if debug.debugging(level):
+            _dir, filename_proper = system.split_path(filename)
+            print(gh.run(f"echo {filename_proper} excerpt:; head -{num_lines} --verbose {filename} | cat -n"))
+        return
+            
     def run_batspp(input_file, output_file):
         """Run BatsPP over INPUT_FILE to produce OUTPUT_FILE"""
         # Note: for convenience, output is written to disk and returned by the function
@@ -231,33 +264,60 @@ def main():
         debug.assertion(not my_re.search(r"\s", output_file))
         real_output_file = output_file + ".out"
         log_file = output_file + ".log"
+
+        # NEW / TODO: Added resolved path for check_batspp.perl
+        check_errors_script = gh.resolve_path("../check_errors.perl")
+        
         debug.trace(5, f"run_batspp{(input_file, output_file)}")
         source_spec = (f"--source '{DEFINITIONS_SCRIPT}'" if DEFINITIONS_SCRIPT else "")
         if USE_SIMPLE_BATSPP:
             # note: adds sentinels around paragraph segments for simpler parsing;
             # uses Bash instead of Bats (to bypass need for global setup sections);
             # copies ./tests files into bats test dir (under temp); retains outer
-            # quotation marks in output; uses single test directory; passes along --force option
+            # quotation marks in output; uses single test directory; passes along
+            # the --force option; ignores tests segments that are just comments.
             eval_log = output_file + ".eval.log"
             lenient_eval = (not STRICT_EVAL)
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} IGNORE_ALL_COMMENTS=1 IGNORE_SETUP_OUTPUT=1 python3 ../simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
-        # Output excerpt from BatsPP source file
-        debug.code(5, lambda: print(gh.run(f"echo BatsPP source:; head -1000 --verbose {output_file} | cat -n")))
+        # Output excerpts from BatsPP source file, Bats output file and conversion log file.
+        # The corresponding extensions follow: .batspp, .bats.outputpp, and .bats.outputpp.log
+        # note: BatsPP now output above
+        ## OLD: trace_excerpt(input_file, level=6)
+        trace_excerpt(output_file)
+        trace_excerpt(log_file, level=4)
         # Check for common errors (e.g., command not found or insufficient permissions)
-        debug.code(4, lambda: print(gh.run(f"check_errors.perl {log_file}")))
+        print(gh.run(f"{check_errors_script} {log_file}"))
+        
         ## TEMP: Show context of failed tests for help with diagnosis of Github actions runs (as temp files not accessible afterwards)
         if SHOW_FAILURE_CONTEXT:
             context = gh.run(f"grep -B10 '^not ok' {real_output_file}")
             print("Failure context: " + (f"{{\n{gh.indent_lines(context)}}}" if context.strip() else "n/a"))
         # Output excerpt of BatsPP output and log file (i.e., stdout and stderr)
-        debug.code(5, lambda: print(gh.run(f"echo BatsPP output:; head -1000 --verbose {real_output_file} | cat -n")))
-        debug.code(5, lambda: print(gh.run(f"echo BatsPP log:; head -1000 --verbose {log_file} | cat -n")))
+        # The corresponding extensions follow: .bats.outputpp.out, and .bats.outputpp.eval.log.
+        trace_excerpt(real_output_file)
+        trace_excerpt(eval_log)
         debug.assertion(not run_output.strip())
+
+        # The return result is the Bats evaluation output and list of errors from log file
+        # note: The errors are also output here.
+        ## TODO2: include BatsPP log errors if not in eval log errors
         real_output = system.read_file(real_output_file)
-        debug.trace(6, f"run_batspp() => {real_output!r}")
-        return real_output
+        eval_errors = (gh.run(f"{check_errors_script} -context=0 {eval_log}").split("\n"))[1:]
+        #
+        print(f"\nEvaluation Errors: {len(eval_errors)}")
+        if (len(eval_errors) > 0):
+            print("\nError Details:\n")
+            for error in eval_errors:
+                ## BAD: print("\t"+error+"\n")
+                print(f"\t{error}")
+            print("")
+        
+        debug.trace(6, f"\nrun_batspp() ##real_output## => {real_output!r}")
+        debug.trace(6, f"\nrun_batspp() ##eval_errors## => {eval_errors!r}")
+        debug.trace(6, f"\nrun_batspp() ##len(eval_errors)## => {len(eval_errors)!r}\n")                                                  
+        return real_output, eval_errors
 
     ## TEST (plan A until COPY_DIR=1 added above)
     ## # 0.9) Making sure input files, etc. accessible in bats directory
@@ -283,7 +343,9 @@ def main():
 
     batspp_version = gh.extract_match_from_text(r"version (\S+)",
                                                 gh.run("batspp --version 2> /dev/null"))
-    print(f"\n=== BATSPP REPORT GENERATOR (simple_batspp.py / BATSPP {batspp_version}) ===\n")
+    print("\n" + "-"*35)
+    print(f"\nBATSPP Report Generation (simple_batspp.py 1.5.x or BATSPP {batspp_version})\n")
+    print("-"*35)
     ## TEMP (tracing test for act/nektos)
     print(f"TEST_REGEX={TEST_REGEX} DEBUG_LEVEL={system.getenv('DEBUG_LEVEL')}")
     debug.trace_expr(1, OUTPUT_DIR, SINGLE_STORE)
@@ -309,7 +371,7 @@ def main():
     # 2) Generating .batspp files from .ipynb files
     i = 1
     batspp_array = []
-    print(f"\n=== GENERATING BATSPP FILES ===\n")
+    print(f"\nGeneration of BATSPP files\n")
 
     for testfile in ipynb_array:
         is_ipynb = testfile.endswith(IPYNB)
@@ -323,6 +385,10 @@ def main():
             extra_args = ("--add-annots" if DETAILED_DEBUGGING else "")
             gh.run(f"python3 ../jupyter_to_batspp.py {extra_args} --output {batspp_from_ipynb} {testfile} 2> {log_file}")
             debug.call(4, gh.run, f"check_errors.perl {log_file}", **{"output": True})
+            # note: trace jupyter-to-batspp conversion and log; only if "quite detailed" (6) tracing
+            # The corresponding extensions follow: .batspp, .batspp.log
+            trace_excerpt(batspp_from_ipynb, level=6)
+            trace_excerpt(log_file, level=6)
             batspp_array.append(batspp_from_ipynb)
             i += 1
     ipynb_count = i - 1
@@ -330,7 +396,11 @@ def main():
     debug.assertion(ipynb_count == len(batspp_array))
 
     # 3) Executing batspp files & storing them as bats
-    print(f"\n\n==========BATS GENERATED==========\n")
+    ## OLD: print(f"\n\n==========BATS GENERATED==========\n")
+    print("\n" + "-"*25)
+    print("BATS FILE GENERATION:")
+    print("-"*25 + "\n")
+
     # TODO3: rename i => num_test_files, total_count_ok => total_ok_tests, and total_count_total to total_num_tests
     i = 1
     total_count_ok = 0
@@ -339,7 +409,8 @@ def main():
     total_num_successful = 0
 
     if not RUN_BATS:
-        print(f">> SKIPPING BATSPP CHECK (-n ARGUMENT PROVIDED)\n")
+        ## OLD: print(f"- SKIPPING BATSPP CHECK (-n ARGUMENT PROVIDED)\n")
+        print("Skipping BATSPP Check (-n option)\n")
     else:
         for batsppfile_path in batspp_array:
             batsppfile = gh.basename(batsppfile_path)
@@ -354,13 +425,17 @@ def main():
             if not is_batspp:
                 debug.trace(4, f"Ignoring non-batspp file {batsppfile}")
                 continue
-            print(f"\nBATSPP FILE DETECTED [{i}]: {batsppfile} => {bats_from_batspp}\n")
+            print("\n"+"="*35)
+            ## OLD: print(f"BATSPP FILE DETECTED [{i}]: {batsppfile} => {bats_from_batspp}\n")
+            print(f"BATSPP File {i}: {bats_from_batspp}")
             i += 1
 
             if TXT_OPTION:
                 output_from_batspp_path = gh.form_path(BATSPP_OUTPUT_STORE, output_from_batspp)
-                bats_output = run_batspp(batsppfile_path, output_from_batspp_path)
-                
+                ## OLD: run_bat
+                bats_output, eval_errors = run_batspp(batsppfile_path, output_from_batspp_path)
+                num_eval_errors = len(eval_errors)
+
                 output_lines = bats_output.splitlines()
                 output_lines_filtered = [item for item in output_lines if not item.startswith("#")]
                 debug.trace_expr(5, output_lines_filtered)
@@ -379,9 +454,12 @@ def main():
                 min_score = system.to_float(thresholds.get(ipynb_from_batspp, DEFAULT_MIN_SCORE))
                 successful = (success_rate >= min_score)
                 debug.trace_expr(4, min_score, count_ok, count_bad, count_total, success_rate, successful)
-                SUMMARY_TEXT = f"{count_ok} out of {count_total} successful ({success_rate}%)\nSuccess: {successful}"
-                msy.write_file(f"{TXT_STORE}/{txt_from_batspp}", SUMMARY_TEXT)
-                print(f"{test_extensionless}: {SUMMARY_TEXT}")
+                ## OLD: SUMMARY_TEXT = f"{count_ok} out of {count_total} successful ({success_rate}%)\nSuccess: {successful} (threshold = {min_score}%)"
+                SUMMARY_TEXT_SUCCESS_COUNT = f"Success Score: {count_ok} out of {count_total} ({success_rate}%)"
+                SUMMARY_TEXT_SUCCESS_STATUS = f"Success Status: {successful} (Threshold: {min_score}%)"
+                msy.write_file(f"{TXT_STORE}/{txt_from_batspp}", SUMMARY_TEXT_SUCCESS_COUNT+"\n"+SUMMARY_TEXT_SUCCESS_STATUS)
+                ## OLD: print(f"{test_extensionless}: {SUMMARY_TEXT}" + "\n" + "="*35 + "\n")
+                print(f"Test Results:\n- {SUMMARY_TEXT_SUCCESS_COUNT}\n- {SUMMARY_TEXT_SUCCESS_STATUS}")
                 total_count_ok += count_ok
                 total_count_total += count_total
                 total_success_rate += success_rate
@@ -390,12 +468,21 @@ def main():
                 # Categorizing Tests if they are successful or not
                 txt_option_JSON = {}
                 txt_option_JSON["test_name"] = test_extensionless
+                txt_option_JSON["test_count_total"] = count_total
+                txt_option_JSON["test_count_ok"] = count_ok
                 txt_option_JSON["test_min_score"] = min_score
                 txt_option_JSON["test_success_rate"] = success_rate
-                if successful:
+                txt_option_JSON["test_count_eval_error"] = num_eval_errors
+                ## NEW: Inorder for test to be successful, it must satisfy the condition below:
+                ## min_score means threshold of test
+                ## NEW: Updated if(successful) -> if(successful and (count_total != 0 or min_score == 0))
+                if successful and (count_total != 0 or min_score == 0):  
                     success_test_array.append(txt_option_JSON)
                 else:
                     failure_test_array.append(txt_option_JSON)
+                    if STOP_ON_FAILURE:
+                        debug.trace(5, "FYI: stopping because failure encountered")
+                        break
 
             if KCOV_OPTION:
                 # TODO2: extend run_batspp to handle optional coverage check
@@ -408,7 +495,7 @@ def main():
                 gh.run(f"kcov {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
                     
                 KCOV_MESSAGE = f"KCOV REPORT PATH: {KCOV_STORE}/{test_extensionless}/"
-                print(gh.indent(KCOV_MESSAGE, indentation="  >>  ", max_width=512))
+                print(gh.indent(KCOV_MESSAGE, indentation="  -  ", max_width=512))
                 gh.run(f"kcov {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
 
         batspp_count = i - 1 
@@ -459,16 +546,15 @@ def main():
     if faulty_count == 0:
         print("n/a")
     else:
-        ## TODO3: what is the intention here (e.g., the '>>')?
         for tf in error_testfiles:
-            print(f">> {tf}")
+            print(f"- {tf}")
             
     print("\nAVOIDED TESTFILES:")
     if avoid_count == 0:
         print("n/a")
     else:
         for tf in avoid_array:
-            print(f">> {tf}")
+            print(f"- {tf}")
 
     if TXT_OPTION:
         print("\nTEST SUCCESS (--txt ENABLED):")
@@ -479,10 +565,15 @@ def main():
         def print_test_array(arr):
             """Print summary of test results in ARR"""
             for index, item in enumerate(arr):
-                name = item['test_name']
-                rate = item['test_success_rate']
-                min_score = item['test_min_score']
-                print(f"{index + 1}. {name} ({rate}%): threshold={min_score}%")
+                t_name = item['test_name']
+                t_rate = item['test_success_rate']
+                t_min_score = item['test_min_score']
+                t_count_total = item['test_count_total']
+                t_count_ok = item['test_count_ok']
+                t_count_eval_error = item['test_count_eval_error']
+                ## OLD: Revised format includes test passed out of test found
+                # print(f"{index + 1}. {name} ({rate}%): threshold={min_score}%")
+                print(f"{index+1}. {t_name} ({t_rate}%; {t_count_ok}/{t_count_total} OK): threshold={t_min_score}%; {t_count_eval_error} evaluation errors")
             if not arr:
                 print("n/a")
 

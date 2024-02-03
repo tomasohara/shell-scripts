@@ -41,7 +41,7 @@ _temp-user-docker.env
 
 # Old or archived files
 **/old
-**/archive
+## OLD: **/archive
 
 # Output or log-file directories
 **/log-files
