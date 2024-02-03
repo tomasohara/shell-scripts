@@ -245,6 +245,11 @@ def main():
         if TXT_OPTION:
             gh.run(f"rm -rf {TXT_STORE}/*")
 
+    # Resolve path for check_batspp.perl
+    ## TODO3: add a class and put this in __init__
+    check_errors_script = gh.resolve_path("../check_errors.perl")
+    check_errors_command = f"DEBUG_LEVEL=0 {check_errors_script}"
+        
     def trace_excerpt(filename, level=None, num_lines=None):
         """Outputs the first NUM_LINES in FILENAME if at debugging trace LEVEL
         Note: that output goes to stdout not stderr (unlike debug.trace)"""
@@ -265,9 +270,6 @@ def main():
         real_output_file = output_file + ".out"
         log_file = output_file + ".log"
 
-        # NEW / TODO: Added resolved path for check_batspp.perl
-        check_errors_script = gh.resolve_path("../check_errors.perl")
-        
         debug.trace(5, f"run_batspp{(input_file, output_file)}")
         source_spec = (f"--source '{DEFINITIONS_SCRIPT}'" if DEFINITIONS_SCRIPT else "")
         if USE_SIMPLE_BATSPP:
@@ -288,7 +290,7 @@ def main():
         trace_excerpt(output_file)
         trace_excerpt(log_file, level=4)
         # Check for common errors (e.g., command not found or insufficient permissions)
-        print(gh.run(f"{check_errors_script} {log_file}"))
+        print(gh.run(f"{check_errors_command} {log_file}"))
         
         ## TEMP: Show context of failed tests for help with diagnosis of Github actions runs (as temp files not accessible afterwards)
         if SHOW_FAILURE_CONTEXT:
@@ -304,7 +306,7 @@ def main():
         # note: The errors are also output here.
         ## TODO2: include BatsPP log errors if not in eval log errors
         real_output = system.read_file(real_output_file)
-        eval_errors = (gh.run(f"{check_errors_script} -context=0 {eval_log}").split("\n"))[1:]
+        eval_errors = (gh.run(f"{check_errors_command} -context=0 {eval_log}").split("\n"))[1:]
         #
         print(f"\nEvaluation Errors: {len(eval_errors)}")
         if (len(eval_errors) > 0):
@@ -384,7 +386,7 @@ def main():
             ## OLD: gh.run(f"python3 ../jupyter_to_batspp.py {testfile} --output {batspp_from_ipynb} 2> {log_file}")
             extra_args = ("--add-annots" if DETAILED_DEBUGGING else "")
             gh.run(f"python3 ../jupyter_to_batspp.py {extra_args} --output {batspp_from_ipynb} {testfile} 2> {log_file}")
-            debug.call(4, gh.run, f"check_errors.perl {log_file}", **{"output": True})
+            debug.call(4, gh.run, f"{check_errors_command} {log_file}", **{"output": True})
             # note: trace jupyter-to-batspp conversion and log; only if "quite detailed" (6) tracing
             # The corresponding extensions follow: .batspp, .batspp.log
             trace_excerpt(batspp_from_ipynb, level=6)
@@ -538,9 +540,9 @@ def main():
         micro_success_rate = total_count_ok / total_count_total * 100
     print(f"Total no. files OK w/ threshold: {total_num_successful}")
     print(f"Average no. files OK w/ threshold: {round3(avg_successful)}%")
-    print(f"Macro success score: {round3(macro_success_rate)}% ({round3(total_success_rate)}/{batspp_count * 100})")
+    print(f"Macro success score: {round3(macro_success_rate)}% ({round3(total_success_rate/100)}/{batspp_count})")
     print(f"Micro success score: {round3(micro_success_rate)}% ({total_count_ok}/{total_count_total})")
-    print("    where successful based on threshold, macro is mean of individual scores, and micro is global metric")
+    print("    where successful based on threshold, macro is mean of individual scores, and micro is a preferred global metric")
 
     print(f"\nFAULTY TESTFILES:")
     if faulty_count == 0:
