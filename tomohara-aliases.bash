@@ -602,6 +602,11 @@ alias alias-perl='DURING_ALIAS=1 perl -Ssw'
 ## function alias-perl {
 ##    DURING_ALIAS=1 env perl --Sw "eval $*";
 ## }
+#
+# alias-python: python invocation for using in aliases
+# note: avoids excess tracing; see debug.py and main.py
+alias alias-python='DURING_ALIAS=1 python3'
+#
 export MANPATH="$HOME/perl/share/man/man1:$MANPATH"
 append-path "$HOME/perl/bin"
 # Note: TIME is used for changing output format, so TIME_CMD used instead.
@@ -2021,7 +2026,7 @@ function rename-emoji-here {
     local files;
     # Note: Disables shellcheck warning SC2207: Prefer mapfile or read -a to split command output (or quote to avoid splitting).
     # shellcheck disable=SC2207
-    files=($(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=1 $PYTHON -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -));
+    files=($(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=1 alias-python -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -));
     rename-emoji "${files[@]}"
 }
 
@@ -2977,24 +2982,25 @@ function run-python-lint-batched () {
 # python-import-path(module): find path for package directory of MODULE
 # Note: this checks output via module initialization output shown with python -v
 # ex: /usr/local/misc/programs/anaconda3/lib/python3.8/site-packages/sklearn/__pycache__/__init__.cpython-38.pyc matches /usr/local/misc/programs/anaconda3/lib/python3.8/site-packages/sklearn/__init__.py
-function python-import-path-all() { local module="$1"; $PYTHON -u -v -c "import $module" 2>&1; }
+function python-import-path-all() { local module="$1"; alias-python -u -v -c "import $module" 2>&1; }
 function python-import-path-full() { local module="$1"; python-import-path-all "$@" | alias-perl extract_matches.perl "((matches (.*\W${module}[^/]*[/\.][^/]*))|ModuleNotFoundError)"; }
 function python-import-path() { python-import-path-full "$@" | head -1; }
 
 #
 ## note: gotta hate python!
-function python-module-version-full { local module="$1"; $PYTHON -c "import $module; print([v for v in [getattr($module, a, '') for a in '__VERSION__ VERSION __version__ version'.split()] if v][0])"; }
+function python-module-version-full { local module="$1"; alias-python -c "import $module; print([v for v in [getattr($module, a, '') for a in '__VERSION__ VERSION __version__ version'.split()] if v][0])"; }
 # TODO: check-error if no value returned
 function python-module-version { python-module-version-full "$@" 2> /dev/null; }
-function python-package-members() { local package="$1"; $PYTHON -c "import $package; print(dir($package));"; }
+function python-package-members() { local package="$1"; alias-python -c "import $package; print(dir($package));"; }
 #
-alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  $PYTHON setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
+alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  alias-python setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
 # TODO: add -v (the xargs usage seems to block it)
 alias python-uninstall-setup='cat installed-files.list | xargs command rm -vi; alias-perl rename_files.perl -regex ^ un installed-files.list'
 
-# alias-python: python invocation for using in aliases
-# note: avoids excess tracing; see debug.py and main.py
-alias alias-python='DURING_ALIAS=1 python3'
+## OLD:
+## # alias-python: python invocation for using in aliases
+## # note: avoids excess tracing; see debug.py and main.py
+## alias alias-python='DURING_ALIAS=1 python3'
 
 # ipython(): overrides ipython command to set xterm title and to add git repo base directory to python path
 function ipython() { 
@@ -3019,7 +3025,7 @@ function python-trace {
 
 # py-diff(dir): check for difference in python scripts versus those in target
 # TODO: specify options before the pattern (or modify do_diff.sh to allow after)
-## OL:D function py-diff () { do_diff.sh '*.py *.mako' "$@" 2>&1 | $PAGER; }
+## OLD: function py-diff () { do_diff.sh '*.py *.mako' "$@" 2>&1 | $PAGER; }
 function py-diff () { do_diff.bash --no-glob '*.py *.mako' "$@" 2>&1 | $PAGER; }
 
 ## OLD
@@ -3031,7 +3037,7 @@ function py-diff () { do_diff.bash --no-glob '*.py *.mako' "$@" 2>&1 | $PAGER; }
 ##    prepend-path "$kivy_dir:$kivy_dir/Python27:$kivy_dir/tools:$kivy_dir/Python27/Scripts:$kivy_dir/gstreamer/bin:$kivy_dir/MinGW/bin:$kivy_dir/SDL2/bin"
 ## }
 
-alias elide-data='$PYTHON -m transpose_data --elide'
+alias elide-data='alias-python -m transpose_data --elide'
 alias kill-python="kill_em.sh --filter 'ipython|emacs' python"
 alias kill-python-all="kill_em.sh python"
 ## TODO
@@ -3101,7 +3107,7 @@ alias jupyter-notebook-open=jupyter-notebook-redir-open
 # extract-text(document-file): extracts text from structured document file (e.g., Word or PDF)
 # note: to avoid hardcoded 'python -m mezcla.extract_document_text' invovation uses awkward which-based approach
 ## TODO: figure out way for python to pull script from path (as with perl -S)
-function extract-text() { $PYTHON "$(which extract_document_text.py)" "$@"; }
+function extract-text() { alias-python "$(which extract_document_text.py)" "$@"; }
 alias xtract-text='extract-text'
 
 # test-script(script): run unit test for script (i.e., tests/test_script)
@@ -3134,11 +3140,11 @@ function randomize-datafile() {
     local num_lines="$2"
     if [[ $num_lines =~ % ]]; then
         num_lines=${num_lines//%/}
-        $PYTHON -m mezcla.randomize_lines --header --percent "$num_lines" "$file"
+        alias-python -m mezcla.randomize_lines --header --percent "$num_lines" "$file"
     else
         if [ "$num_lines" = "" ]; then num_lines=$(wc -l < "$file"); fi
         head -1 "$file"
-        tail --lines=+2 "$file" | $PYTHON -m mezcla.randomize_lines - | head -"$num_lines"
+        tail --lines=+2 "$file" | alias-python -m mezcla.randomize_lines - | head -"$num_lines"
     fi
 }
 
@@ -3175,7 +3181,7 @@ function filter-random() {
     if [ "$include_header" = "1" ]; then opts="$opts --include-header"; fi
     # maldito shellcheck (SC2086: Double quote to prevent globbing)
     # shellcheck disable=SC2086
-    $type "$file" | $PYTHON -m filter_random "$opts" --ratio "$ratio" - > "$result" 2> "$result.log"
+    $type "$file" | alias-python -m filter_random "$opts" --ratio "$ratio" - > "$result" 2> "$result.log"
 
     # Compress result if original compressed
     if [ "$compressed" = "1" ]; then 
