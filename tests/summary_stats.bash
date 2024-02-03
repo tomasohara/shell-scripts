@@ -12,6 +12,7 @@
 #
 
 # Set bash regular and/or verbose tracing
+DEBUG_LEVEL=${DEBUG_LEVEL:-0}
 if [ "${TRACE:-0}" = "1" ]; then
     set -o xtrace
 fi
@@ -47,7 +48,8 @@ while getopts "oh" option; do
 done
 
 # Change into testing script directory (e.g., ~/shell-scripts/tests)
-cd "$(dirname "$0")"
+script_dir="$(realpath "$(dirname "$0")")"
+cd "$script_dir"
 
 # Set github credentials, either via SSH or via ~/.git-credentials
 # Note:
@@ -61,25 +63,37 @@ cd "$(dirname "$0")"
 ## TODO2: if [[ $HOME =~ /home/(shell-scripts|runner|testuser) ]]; then
 #
 # note: copies to /tmp so that permissions can be changed without affecting repo
+TMP="${TMP:-/tmp}"
 ssh_key_file="scrappycito.pem"
 ssh_key_path="$TMP/$ssh_key_file"
-cp -ivf "scrappycito.pem" "$ssh_key_path"
+cp -vf "${script_dir}/$ssh_key_file" "$ssh_key_path"
 chmod --changes go-rw "$ssh_key_path"
 #
-if [[ ! $PWD =~ /home/(shell-scripts|runner)/.* ]]; then
-    echo "FYI: using default ~/.gitconfig"  
-elif [ "${USE_SSH_AUTH:-1}" == "1" ]; then
+## OLD:
+## if [[ ! $PWD =~ /home/(shell-scripts|runner)/.* ]]; then
+##    echo "FYI: using default ~/.gitconfig"
+## elif [ "${USE_SSH_AUTH:-1}" == "1" ]; then
+if [ "${USE_SSH_AUTH:-0}" == "1" ]; then
     echo "FYI: using SSH for git authentication"
-    # Set user ID (TODO: add common section for user ID)
-    git config --global user.email "scrappycito@gmail.com"
-    git config --global user.name "Scrappy Cito"
+    if [ "${USE_GIT_CONFIG:-0}" == "1" ]; then
+        export GIT_CONFIG_GLOBAL="$script_dir"/gitconfig.txt
+        if [ "$DEBUG_LEVEL" -ge 4 ]; then
+            echo "git config: {"
+            GIT_CONFIG="$GIT_CONFIG_GLOBAL" git config --list | perl -pe 's/^/    /;'
+            echo "}"
+        fi
+    else
+        # Set user ID (TODO: add common section for user ID)
+        git config --global user.email "scrappycito@gmail.com"
+        git config --global user.name "Scrappy Cito"
+    fi
     ## TEST: git config --global url."https://git@github.com/"..insteadOf "https://github.com/"
     # Enable SSH with git
     eval "$(ssh-agent -s)"
-    ssh-add "$ssh_key_file"
+    ssh-add "$ssh_key_path"
     # note: this only works for git-bash-test repo (intended for just VM or docker runner)
     ## TEST: git remote set-url origin "git@github.com:scrappycito/git-bash-test.git"
-else
+elif [ "${MODIFY_GIT_CONFIG:-0}" == "1" ]; then
     echo "FYI: modifying ~/.gitconfig and ~/.git-credentials"
         
     # Set user ID (NOTE: uses global so applicable to other repos; see git-aliases-tests-1, etc.)
@@ -97,6 +111,8 @@ else
     git config --global credential.helper "store"
     ## TODO: git config --file ~/.git-credentials "$MY_GIT_TOKEN"
     echo "https://scrappycito:$MY_GIT_TOKEN@github.com" > ~/.git-credentials
+else
+    echo "FYI: using default ~/.gitconfig"
 fi
 
 # Derive name for output file
