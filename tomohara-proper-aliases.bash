@@ -211,7 +211,8 @@ function shell-check-last-snippet {
 function shell-check-stdin {
     ## DEBUG: echo "in shell-check-stdin: args='$*'"
     echo "Enter snippet lines and then ^D"
-    alias-python -c 'import sys; sys.stdin.read()' | shell-check -
+    ## OLD: alias-python -c 'import sys; sys.stdin.read()' | shell-check -
+    shell-check -
     # shellcheck disable=SC2181
     if [ "$?" -eq 0 ]; then echo "shellcheck OK"; fi
 }
