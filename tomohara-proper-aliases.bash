@@ -131,13 +131,11 @@ default_pytest_opts="-vv --capture=tee-sys"
 #
 # test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
-    ## OLD: local default_pytest_opts="-vv --capture=tee-sys"
     if [ "$1" = "" ]; then
         echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] test-python-script script"
         return
     fi
     PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
-    ## OLD: PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@";
     # note: just uses .log (i.e., ignore .out)
     # TODO3: drop inheritance spec in summary
     # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "ests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
@@ -158,9 +156,6 @@ function color-test-failures {
 }
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
-## OLD:
-## alias-fn ocr-image-old 'tesseract "$@" -'
-## alias-fn ocr-image 'tesseract "$1" "$1".ocr'
 # shellcheck disable=SC2016
 {
     alias-fn ocr-image-stdout 'tesseract "$@" -'
@@ -229,7 +224,6 @@ function tabify {
 # trace-vars(var, ...): trace each VAR in command line
 # note: output format: VAR1=VAL1; ... VARn=VALn;
 function trace-vars {
-    ## OLD: local var value
     local var
     for var in "$@"; do
         ## TODO3: get old eval/echo approach to work in general
@@ -237,10 +231,6 @@ function trace-vars {
         ## echo -n "$var="$(eval echo "\$$var")"; "
         ## TODO: value="$(eval "echo \$$var")"
         ## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
-        ## OLD:
-        ## value="$(set | grep "^$var=")"
-        ## echo -n "$value; "
-        ## OLD: echo -n "$var="$(eval echo "\${$var}")"; "
         echo -n "$var=$(eval echo "\${$var}"); "
         ## TODO: echo -n "$value; " 1>&2
     done
@@ -254,7 +244,6 @@ function trace-array-vars {
     for var in "$@"; do
         # note: ignores SC1087 (error): Use braces when expanding arrays
         # shellcheck disable=SC2027,SC2046,SC1087
-        ## OLD: echo -n "$var="$(eval echo "\${$var[@]}")"; "
         echo -n "$var=("$(eval echo "\${$var[@]}")"); "
     done
     echo
@@ -401,7 +390,8 @@ alias detach-job='disown -h'
 
 # screenshot-window(): take screen shot of another window in 2 seconds
 # TODO3: add option for --screen and for specifying --file
-simple-alias-fn screenshot-window 'gnome-screenshot --window --delay 2'
+# shellcheck disable=SC2016
+simple-alias-fn screenshot-window 'gnome-screenshot --window --delay ${SCREENSHOT_DELAY:-3}'
 
 #...............................................................................
 # Linux admin
@@ -439,6 +429,7 @@ alias oscar="run-app OSCAR"
 alias 1pass="run-app 1password"
 
 # Docker
+# shellcheck disable=SC2046
 function docker-cleanup {
     pause-for-enter "Removing all docker containers, images, etc. (Press Enter to proceed or ^C to abort)"
     # shellcheck disable=SC2046
