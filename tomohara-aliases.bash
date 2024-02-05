@@ -279,11 +279,7 @@ function downcase-text { echo "$@" | downcase-stdin; }
 function todays-date { date '+%d%b%y' | downcase-stdin; }
 # todays-date-mmmYY(): date in format mmmYY (e.g., sep20)
 function todays-date-mmmYY { todays-date | perl -pe 's/^\d\d//;'; }
-## OLD
-## todays_date=$(todays-date)
-## MISC:
-## # Convenience alias and bash variable for better tab-completion
-## OLD
+# hoy: alternative to todays-date
 alias hoy=todays-date
 hoy=$(todays-date)
 # Note: version so Spanish not used in note files
@@ -377,22 +373,6 @@ trace 'in tomohara-aliases.bash'
 
 # # HACK: load in older tpo-setup.bash
 # conditional-source $TOM_BIN/tpo-setup.bash
-
-## OLD
-## 
-## # Ensure OSTYPE environment variable for script usage
-## if [ "$(printenv OSTYPE)" = "" ]; then
-##     export OSTYPE="$OSTYPE";
-## fi
-## 
-## # Fixup for Linux OSTYPE setting (likewise for solaris)
-## # TODO: use ${OSTYPE/[0-9]*/}
-## # TODO: use OSTYPE_BRIEF instead of trumping environment
-## case "$OSTYPE" in linux-*) export OSTYPE=linux; esac
-## case "$OSTYPE" in solaris*) 
-##      export OSTYPE=solaris; 
-##      alias printenv='printenv.sh'
-## esac
 
 # under-macos() => boolean: whether running under maldito macintosh
 # EX: (under-macos; wc -l /vmlinuz 2> /dev/null) =/=> $'0\n1'
@@ -570,11 +550,6 @@ alias rehash='hash -l'
 # reset CDPATH to just current directory
 export CDPATH=.
 
-## OLD
-## # Just use $ for Bash prompt
-## # NOTE: cd override puts directory name in xterm title
-##
-
 # flag for turning off GNOME, which can be flakey at times
 # See xterm.sh (e.g., gnome-terminal).
 export USE_GNOME=1
@@ -738,11 +713,6 @@ alias move-force='move -f'
 CP="command cp -ip $other_file_args"
 reference-variable "$CP"
 alias copy='$CP'
-## OLD
-## alias copy-force='/bin/cp -fp $other_file_args'
-## alias cp='/bin/cp -i $other_file_args'
-## alias rm='/bin/rm -i $other_file_args'
-## alias delete='/bin/rm -i $other_file_args'
 alias del="delete"
 alias copy-force='command cp -fp $other_file_args'
 alias cp='command cp -i $other_file_args'
@@ -760,17 +730,12 @@ alias enable-forced-deletions='force_echo=""'
 }
 disable-forced-deletions
 #
-## OLD
-## alias delete-force='$force_echo /bin/rm -f $other_file_args'
 alias delete-force='$force_echo command rm -f $other_file_args'
 #
 alias remove-force='delete-force'
 # TODO: make sure that rellowing only applied to directories
 alias remove-dir='command rm -rvi'
 alias delete-dir='remove-dir'
-## OLD
-## alias remove-dir-force='/bin/rm -rfv'
-## alias delete-dir-force='remove-dir-force'
 alias remove-dir-force='$force_echo command rm -rfv'
 alias delete-dir-force='remove-dir-force'
 #
@@ -932,8 +897,6 @@ function grep-unique () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0$" | sor
 # TODO: archive
 function grep-missing () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP ":0"; }
 alias gu='grep-unique -i'
-## OLD
-## alias gru='gu'
 alias gu-='grep-unique'
 # gu-all: run gu over all files in current dir
 # TODO: archive
@@ -1133,8 +1096,10 @@ alias em-dir=em-file
 alias em-this-dir='em .'
 alias em-devel='em --devel'
 #
+# em-debug: run emacs with debugger trapping errors (--debug-init)
+# em-quick: run emacs without init files and omit splash screen (--quick)
+# note: double dashes seprate tpo-invoke-emacs.sh args from emacs
 function em-debug () { em -- --debug-init "$@"; }
-## Lorenzo review: Im confused about the purpose of this double dashes, because otherwise the code is the same as OLD
 function em-quick () { em -- --quick "$@"; }
 
 #--------------------------------------------------------------------------------
@@ -1545,7 +1510,6 @@ function make-tar () {
 	    fi;
 	done
     fi
-    # OLD: (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
 
     # Invoke find/tar
@@ -1691,12 +1655,6 @@ alias para-gr='para-grep -i -n'
 function cached-notes-para-gr { para-gr "$@" _master-note-info.list | $PAGER; }
 # TODO: work out better name
 function cached-notes-para-gr-less { cached-notes-para-gr "$@" | less -p "$1"; }
-##
-## OLD
-## # EX: echo $'1\n2\n3\n4\n5' | calc-stdev => "num = 5; mean = 3.000; stdev = 1.581; min = 1.000; max = 5.000; sum = 15.000"
-## function calc-stdev () { sum_file.perl -stdev "$@" -; }
-## ## MISC: alias calc-stdev-file='calc-stdev <'
-## ## MISC: alias sum-col2='sum_file.perl -col=2 -'
 ##
 notes_glob="*notes*.txt  *notes*.list *notes*.log"
 # shellcheck disable=SC2086
@@ -2151,10 +2109,9 @@ alias bigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=2'
 alias unigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=1'
 alias word-count=unigrams
 
+# calc-stdev: calculate stdard deviation iv sum_file.perl using -col=1 by default
 # EX: echo $'1\n2\n3\n4\n5' | calc-stdev => "num = 5; mean = 3.000; stdev = 1.581; min = 1.000; max = 5.000; sum = 15.000"
 function calc-stdev () { sum_file.perl -stdev "$@" -; }
-## MISC: alias calc-stdev-file='calc-stdev <'
-## MISC: alias sum-col2='sum_file.perl -col=2 -'
 
 # Lynx stuff
 # lynx-dump-stdout(option, ...): Run lynx with textual output to stdout
@@ -2639,11 +2596,6 @@ if [[ ("$DEFAULT_HOST" = "") && (($HOSTNAME =~ ip-*) || ($HOSTNAME =~ cvps*)) ]]
 # Other host-related stuff
 # TODO: make generic (e.g., by making nickname optional)
 
-## OLD
-## function gr-juju-notes () { grepl "$@" /c/work/juju/*notes* $JJDATA/*notes*; }
-## function gr-juju-notes-archive () { MY_GREP_OPTIONS="" grepl "$@" /c/work/juju/_note-archive.list; }
-## alias gr-juju-archive-notes=gr-juju-notes-archive
-
 alias uname-node='uname -n'
 alias pwd-host-info='pwd; echo "${HOST_NICKNAME:-n/a}"; uname-node'
 
@@ -2652,25 +2604,6 @@ alias pwd-host-info='pwd; echo "${HOST_NICKNAME:-n/a}"; uname-node'
 ## conditional-export SANDBOX ~/python/tohara
 ## conditional-export MISC_TRACING_LEVEL 4
 ## alias restart-screen='screen-startup.sh >| $TEMP/screen-startup.$$.log 2>&1'
-
-## OLD
-## #-------------------------------------------------------------------------------
-## 
-## # MRJob stuff (python-based map-reduce)
-## #
-## # show-job-tracker([port=40001]): enable tunneling for job tracker on temp EC2 host
-## # and then invoke firefox for link using corresponding port
-## # note: ssh options: -f background; -n redirect stdin; -N no command; -T disable pseudo-tty; -L port forwarding specification
-## job_tracker_port=40001
-## function show-job-tracker() {
-##     local port="$1"
-##     if [ "$port" == "" ]; then port=$job_tracker_port; fi
-##     # Maldito shellcheck [SC2029: Note that, unescaped, this expands on the client side]
-##     # shellcheck disable=SC2029
-##     ssh -fnNT -i "$TPO_SSH_KEY" -L$port:localhost:$port "$TPO_SSH_USER@$mrjob_ec2_host"
-##     firefox http://localhost:$port/jobtracker.jsp &
-## }
-## alias kill-job-trackers=' kill_em.sh -p L$job_tracker_port'
 
 #-------------------------------------------------------------------------------
 # Misc. language related
@@ -3025,17 +2958,7 @@ function python-trace {
 
 # py-diff(dir): check for difference in python scripts versus those in target
 # TODO: specify options before the pattern (or modify do_diff.sh to allow after)
-## OLD: function py-diff () { do_diff.sh '*.py *.mako' "$@" 2>&1 | $PAGER; }
 function py-diff () { do_diff.bash --no-glob '*.py *.mako' "$@" 2>&1 | $PAGER; }
-
-## OLD
-## # kivy-win32-env(): enables environment variabless for Kivy under cyggwin, using win32 python
-## function kivy-win32-env {
-##    export PYTHONPATH='c:/cartera-de-tomas/python;c:/Program-Misc/python/kivy-1-9-0/kivy27'
-##    kivy_dir="/c/Program-Misc/python/kivy-1-9-0"
-##    python_dir="$kivy_dir/Python27"
-##    prepend-path "$kivy_dir:$kivy_dir/Python27:$kivy_dir/tools:$kivy_dir/Python27/Scripts:$kivy_dir/gstreamer/bin:$kivy_dir/MinGW/bin:$kivy_dir/SDL2/bin"
-## }
 
 alias elide-data='alias-python -m transpose_data --elide'
 alias kill-python="kill_em.sh --filter 'ipython|emacs' python"
@@ -3058,9 +2981,6 @@ function run-jupyter-notebook-posthoc() {
     # TODO: resolve problem extracting URL
     # TEMP: tail "$log"
     # Show URL
-    ## OLD:
-    ## echo -n "URL: "
-    ## extract-matches 'http:\S+' "$log" | sort -u
     echo -n "URL: "
     VERBOSE=1 extract-matches 'http:\S+' "$log" | sort -u
 }
@@ -3073,27 +2993,14 @@ function run-jupyter-notebook () {
     log="$TEMP/jupyter-p$port-$(TODAY).log"
     rename-with-file-date "$log"
     # note: clears notebook token to disable authentication
-    ## OLD: jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
     ## TEST: jupyter notebook --ServerApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
     ## TODO1: make sure IdentityProvider.token is right one to use (maltdito jupyter)
     ## TODO4?: JUPYTER_TOKEN="" jupyter notebook --no-browser --port ...
     jupyter notebook --IdentityProvider.token='' --no-browser --port $port --ip $ip > "$log" 2>&1 &
-    ## OLD
-    ## echo "$log"
     # Let jupyter initialize
-    ## OLD:
-    ## local delay=5
-    ## echo "sleeping $delay seconds for log to stabilize (maldito jupyter)"
     local delay=6
     echo "sleeping $delay seconds for jupyter to finish initializing"
     sleep $delay
-    ## OLD
-    ## # TODO: resolve problem extracting URL
-    ## # TEMP:
-    ## tail "$log"
-    ## # Show URL
-    ## echo -n "URL: "
-    ## extract-matches 'http:\S+' "$log" | sort -u    
     run-jupyter-notebook-posthoc "$log"
 }
 alias jupyter-notebook-redir=run-jupyter-notebook
@@ -3252,7 +3159,11 @@ alias run-epiphany-browser='invoke-browser epiphany-browser'
 #-------------------------------------------------------------------------------
 # NVidia GPU
 
-alias nvidia-smi-loop='nvidia-smi --loop=1'
+# nvidia-smi-loop([secs=1]): run nvidia-smi with SECS looping
+function nvidia-smi-loop {
+    local secs="${1:-1}";
+    nvidia-smi --loop="$secs";
+    }
 alias nvidia-loop=nvidia-smi-loop
 
 # Multilingual
@@ -3266,21 +3177,6 @@ alias nvidia-loop=nvidia-smi-loop
 alias emacs-qd-trans-sp='pushd ${MULTILINGUAL_DIR:-"$TOM_DIR/multilingual"}; ./emacs-qd-trans-sp.sh; popd'
 alias em-trans-sp=emacs-qd-trans-sp
 alias ed-trans-sp=em-trans-sp
-
-#-------------------------------------------------------------------------------
-# Music related
-
-## OLD
-## function make-lilypond-png () {
-##     local file="$1"
-##     local base
-##     base=$(basename "$file" .ly)
-##     # note follpwing doesn't work as lilypond puts temporary files in current dir
-##     ## TODO: local base=$(dirname "$file")/$(basename "$file" .ly)
-##     lilypond_dir="/c/Program-Misc/music/lilypond"
-##     PATH="$lilypond_dir/usr/bin:$PATH" lilypond --png --verbose "$file" >| "$base.png" 2>| "$base.log"
-##     tail -5 "$base.log"
-## }
 
 #-------------------------------------------------------------------------------
 # WordNet related
