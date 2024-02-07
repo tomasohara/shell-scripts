@@ -109,13 +109,14 @@ function run-python-script {
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
 	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
-	    ## TODO2: echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$out" 2> "$log";
-            echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$log" 2>&1;
+	    ## TODO2:
+            echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$out" 2> "$log";
+            ## OLD: echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$log" 2>&1;
 	else
 	    # note: disables - with explicit arguments or if running pytest
 	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
-	    ## TODO2: $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
-	    $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1;
+	    ## OLD: $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1
+	    $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
 	fi
     }
     tail "$log" "$out" | truncate-width
@@ -305,6 +306,11 @@ function rename-last-snapshot {
 #
 # fix-transcript-timestamp(): put text on same line in YouTube transcripts
 alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
+function youtube-transcript {
+    local url="$1"
+    local file="$2"
+    alias-python -m mezcla.examples.youtube_transcript "$url" > "$file"
+}
 
 #...............................................................................
 # System stuff
