@@ -304,8 +304,9 @@ function rename-last-snapshot {
 #................................................................................
 # Media related
 #
-# fix-transcript-timestamp(): put text on same line in YouTube transcripts
+# fix-transcript-timestamp(file): put text on same line in YouTube transcripts in FILE
 alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
+# youtube-transcript(url, file): download YoutTube transcript at URL to FILE
 function youtube-transcript {
     local url="$1"
     local file="$2"
