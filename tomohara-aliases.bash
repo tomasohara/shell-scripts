@@ -571,7 +571,7 @@ alias perl-='perl -Ssw'
 # alias-perl(): perl with DURING_ALIAS defined (n.b., avoids excess tracing; see common.perl)
 ## NOTE: using perl.sh in alias leads to problems under Github workflows
 ## BAD:
-alias alias-perl='DURING_ALIAS=1 perl -Ssw'
+alias alias-perl='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
 ## TODO: alias alias-perl='DURING_ALIAS=1 perl.sh -Ssw'
 ## TODO?
 ## function alias-perl {
@@ -580,7 +580,7 @@ alias alias-perl='DURING_ALIAS=1 perl -Ssw'
 #
 # alias-python: python invocation for using in aliases
 # note: avoids excess tracing; see debug.py and main.py
-alias alias-python='DURING_ALIAS=1 python3'
+alias alias-python='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
 #
 export MANPATH="$HOME/perl/share/man/man1:$MANPATH"
 append-path "$HOME/perl/bin"
@@ -1187,7 +1187,8 @@ function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
 
 # convert-emoticons(...): replace emoticons in input with description
 # EX: convert-emoticons - <<<"💬" => "[speech balloon]"
-alias convert-emoticons='DURING_ALIAS=1 convert_emoticons.py'
+## OLD: alias convert-emoticons='DURING_ALIAS=1 convert_emoticons.py'
+alias convert-emoticons='alias-python "$(which convert_emoticons.py)"'
 alias convert-emoticons-stdin='convert-emoticons -'
 
 #-------------------------------------------------------------------------------
@@ -1291,7 +1292,7 @@ function check-errors-aux { alias-perl check_errors.perl "$@"; }
 ## function check-errors-aux { PERL_SWITCH_PARSING=1 check_errors.py "$@"; };
 ## OLD
 # note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
-ALIAS_DEBUG_LEVEL=${DEBUG_LEVEL:-2}
+ALIAS_DEBUG_LEVEL=${ALIAS_DEBUG_LEVEL:-${DEBUG_LEVEL:-2}}
 function check-errors () {
     ## NOTE: gotta dislike bash!
     local args=("$@");
@@ -1746,9 +1747,11 @@ function run-app {
     fi
     "$path" "$@" >> "$log" 2>&1 &
     ## TODO: make sure command invoked OK and then put into background
-    sleep-for 5 "waiting for $log"
+    ## OLD: sleep-for 5 "waiting for $log"
+    local delay=5
+    sleep-for "$delay" "waiting ${delay}s for $log"
     check-errors-excerpt "$log"
-    }
+}
 alias foxit='run-app /opt/foxitsoftware/foxitreader/FoxitReader'
 alias gimp='run-app gimp'
 
@@ -1792,6 +1795,7 @@ function show-macros-proper {
 function display-macros {
     show-macros "$@" | perlgrep -para ^"(alias )?""$*";
 }
+alias show-macros-specific=display-macros
 #
 # show-variables(): show defined variables
 # TODO: figure out how to exclude env. vars from show-variables output
@@ -1892,12 +1896,13 @@ deprecated-alias-fn ps-mine- ps-mine-sans-dir
 alias ps_mine='ps-mine'
 ## DUP: alias ps-mine-='ps-mine "$@" | filter-dirnames'
 alias ps-mine-all='ps-mine --all'
-alias old-rename-files='perl- rename_files.perl'
+## OLD: alias old-rename-files='perl- rename_files.perl'
 alias rename-files='alias-perl rename_files.perl'
 alias rename_files='rename-files'
-alias testwn='perl- testwn.perl'
-alias perlgrep='perl- perlgrep.perl'
-alias foreach='perl- foreach.perl'
+## OLD: alias testwn='perl- testwn.perl'
+## BAD: alias perlgrep='perl- perlgrep.perl'
+## OLD: alias foreach='perl- foreach.perl'
+alias foreach='alias-perl foreach.perl'
 
 #--------------------------------------------------------------------------------
 # Adhoc aliases for renaming aliases
