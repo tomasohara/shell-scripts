@@ -1082,6 +1082,7 @@ class CustomTestsToBats:
            
         
         # Add global setup if using global test dir
+        ## TODO2: add glob for dirs to copy to avoid recursive one
         if GLOBAL_TEST_DIR:
             test_folder = gh.form_path(TEMP_DIR, "global-test-dir")
             bats_tests += (
@@ -1089,6 +1090,7 @@ class CustomTestsToBats:
                 f'test_folder="{test_folder}"\n' +
                 f'mkdir --parents "$test_folder"\n' +
                 (f'command cp -Rp ./. "$test_folder"\n' if COPY_DIR else "") +
+                (f'command chmod -R ugo+w "$test_folder"\n' if COPY_DIR else "") +
                 # note: warning added for sake of shellcheck
                 f'command cd "$test_folder" || echo Warning: Unable to "cd $test_folder"\n' +
                 "\n")
