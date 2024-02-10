@@ -279,11 +279,7 @@ function downcase-text { echo "$@" | downcase-stdin; }
 function todays-date { date '+%d%b%y' | downcase-stdin; }
 # todays-date-mmmYY(): date in format mmmYY (e.g., sep20)
 function todays-date-mmmYY { todays-date | perl -pe 's/^\d\d//;'; }
-## OLD
-## todays_date=$(todays-date)
-## MISC:
-## # Convenience alias and bash variable for better tab-completion
-## OLD
+# hoy: alternative to todays-date
 alias hoy=todays-date
 hoy=$(todays-date)
 # Note: version so Spanish not used in note files
@@ -377,22 +373,6 @@ trace 'in tomohara-aliases.bash'
 
 # # HACK: load in older tpo-setup.bash
 # conditional-source $TOM_BIN/tpo-setup.bash
-
-## OLD
-## 
-## # Ensure OSTYPE environment variable for script usage
-## if [ "$(printenv OSTYPE)" = "" ]; then
-##     export OSTYPE="$OSTYPE";
-## fi
-## 
-## # Fixup for Linux OSTYPE setting (likewise for solaris)
-## # TODO: use ${OSTYPE/[0-9]*/}
-## # TODO: use OSTYPE_BRIEF instead of trumping environment
-## case "$OSTYPE" in linux-*) export OSTYPE=linux; esac
-## case "$OSTYPE" in solaris*) 
-##      export OSTYPE=solaris; 
-##      alias printenv='printenv.sh'
-## esac
 
 # under-macos() => boolean: whether running under maldito macintosh
 # EX: (under-macos; wc -l /vmlinuz 2> /dev/null) =/=> $'0\n1'
@@ -570,11 +550,6 @@ alias rehash='hash -l'
 # reset CDPATH to just current directory
 export CDPATH=.
 
-## OLD
-## # Just use $ for Bash prompt
-## # NOTE: cd override puts directory name in xterm title
-##
-
 # flag for turning off GNOME, which can be flakey at times
 # See xterm.sh (e.g., gnome-terminal).
 export USE_GNOME=1
@@ -596,12 +571,17 @@ alias perl-='perl -Ssw'
 # alias-perl(): perl with DURING_ALIAS defined (n.b., avoids excess tracing; see common.perl)
 ## NOTE: using perl.sh in alias leads to problems under Github workflows
 ## BAD:
-alias alias-perl='DURING_ALIAS=1 perl -Ssw'
+alias alias-perl='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
 ## TODO: alias alias-perl='DURING_ALIAS=1 perl.sh -Ssw'
 ## TODO?
 ## function alias-perl {
 ##    DURING_ALIAS=1 env perl --Sw "eval $*";
 ## }
+#
+# alias-python: python invocation for using in aliases
+# note: avoids excess tracing; see debug.py and main.py
+alias alias-python='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
+#
 export MANPATH="$HOME/perl/share/man/man1:$MANPATH"
 append-path "$HOME/perl/bin"
 # Note: TIME is used for changing output format, so TIME_CMD used instead.
@@ -733,11 +713,6 @@ alias move-force='move -f'
 CP="command cp -ip $other_file_args"
 reference-variable "$CP"
 alias copy='$CP'
-## OLD
-## alias copy-force='/bin/cp -fp $other_file_args'
-## alias cp='/bin/cp -i $other_file_args'
-## alias rm='/bin/rm -i $other_file_args'
-## alias delete='/bin/rm -i $other_file_args'
 alias del="delete"
 alias copy-force='command cp -fp $other_file_args'
 alias cp='command cp -i $other_file_args'
@@ -755,17 +730,12 @@ alias enable-forced-deletions='force_echo=""'
 }
 disable-forced-deletions
 #
-## OLD
-## alias delete-force='$force_echo /bin/rm -f $other_file_args'
 alias delete-force='$force_echo command rm -f $other_file_args'
 #
 alias remove-force='delete-force'
 # TODO: make sure that rellowing only applied to directories
 alias remove-dir='command rm -rvi'
 alias delete-dir='remove-dir'
-## OLD
-## alias remove-dir-force='/bin/rm -rfv'
-## alias delete-dir-force='remove-dir-force'
 alias remove-dir-force='$force_echo command rm -rfv'
 alias delete-dir-force='remove-dir-force'
 #
@@ -927,8 +897,6 @@ function grep-unique () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0$" | sor
 # TODO: archive
 function grep-missing () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP ":0"; }
 alias gu='grep-unique -i'
-## OLD
-## alias gru='gu'
 alias gu-='grep-unique'
 # gu-all: run gu over all files in current dir
 # TODO: archive
@@ -1128,8 +1096,10 @@ alias em-dir=em-file
 alias em-this-dir='em .'
 alias em-devel='em --devel'
 #
+# em-debug: run emacs with debugger trapping errors (--debug-init)
+# em-quick: run emacs without init files and omit splash screen (--quick)
+# note: double dashes seprate tpo-invoke-emacs.sh args from emacs
 function em-debug () { em -- --debug-init "$@"; }
-## Lorenzo review: Im confused about the purpose of this double dashes, because otherwise the code is the same as OLD
 function em-quick () { em -- --quick "$@"; }
 
 #--------------------------------------------------------------------------------
@@ -1217,7 +1187,8 @@ function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
 
 # convert-emoticons(...): replace emoticons in input with description
 # EX: convert-emoticons - <<<"💬" => "[speech balloon]"
-alias convert-emoticons='DURING_ALIAS=1 convert_emoticons.py'
+## OLD: alias convert-emoticons='DURING_ALIAS=1 convert_emoticons.py'
+alias convert-emoticons='alias-python "$(which convert_emoticons.py)"'
 alias convert-emoticons-stdin='convert-emoticons -'
 
 #-------------------------------------------------------------------------------
@@ -1321,7 +1292,7 @@ function check-errors-aux { alias-perl check_errors.perl "$@"; }
 ## function check-errors-aux { PERL_SWITCH_PARSING=1 check_errors.py "$@"; };
 ## OLD
 # note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
-ALIAS_DEBUG_LEVEL=${DEBUG_LEVEL:-2}
+ALIAS_DEBUG_LEVEL=${ALIAS_DEBUG_LEVEL:-${DEBUG_LEVEL:-2}}
 function check-errors () {
     ## NOTE: gotta dislike bash!
     local args=("$@");
@@ -1540,7 +1511,6 @@ function make-tar () {
 	    fi;
 	done
     fi
-    # OLD: (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "$filter_arg" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
 
     # Invoke find/tar
@@ -1687,12 +1657,6 @@ function cached-notes-para-gr { para-gr "$@" _master-note-info.list | $PAGER; }
 # TODO: work out better name
 function cached-notes-para-gr-less { cached-notes-para-gr "$@" | less -p "$1"; }
 ##
-## OLD
-## # EX: echo $'1\n2\n3\n4\n5' | calc-stdev => "num = 5; mean = 3.000; stdev = 1.581; min = 1.000; max = 5.000; sum = 15.000"
-## function calc-stdev () { sum_file.perl -stdev "$@" -; }
-## ## MISC: alias calc-stdev-file='calc-stdev <'
-## ## MISC: alias sum-col2='sum_file.perl -col=2 -'
-##
 notes_glob="*notes*.txt  *notes*.list *notes*.log"
 # shellcheck disable=SC2086
 {
@@ -1783,9 +1747,11 @@ function run-app {
     fi
     "$path" "$@" >> "$log" 2>&1 &
     ## TODO: make sure command invoked OK and then put into background
-    sleep-for 5 "waiting for $log"
+    ## OLD: sleep-for 5 "waiting for $log"
+    local delay=5
+    sleep-for "$delay" "waiting ${delay}s for $log"
     check-errors-excerpt "$log"
-    }
+}
 alias foxit='run-app /opt/foxitsoftware/foxitreader/FoxitReader'
 alias gimp='run-app gimp'
 
@@ -1829,6 +1795,7 @@ function show-macros-proper {
 function display-macros {
     show-macros "$@" | perlgrep -para ^"(alias )?""$*";
 }
+alias show-macros-specific=display-macros
 #
 # show-variables(): show defined variables
 # TODO: figure out how to exclude env. vars from show-variables output
@@ -1929,12 +1896,13 @@ deprecated-alias-fn ps-mine- ps-mine-sans-dir
 alias ps_mine='ps-mine'
 ## DUP: alias ps-mine-='ps-mine "$@" | filter-dirnames'
 alias ps-mine-all='ps-mine --all'
-alias old-rename-files='perl- rename_files.perl'
+## OLD: alias old-rename-files='perl- rename_files.perl'
 alias rename-files='alias-perl rename_files.perl'
 alias rename_files='rename-files'
-alias testwn='perl- testwn.perl'
-alias perlgrep='perl- perlgrep.perl'
-alias foreach='perl- foreach.perl'
+## OLD: alias testwn='perl- testwn.perl'
+## BAD: alias perlgrep='perl- perlgrep.perl'
+## OLD: alias foreach='perl- foreach.perl'
+alias foreach='alias-perl foreach.perl'
 
 #--------------------------------------------------------------------------------
 # Adhoc aliases for renaming aliases
@@ -2021,7 +1989,7 @@ function rename-emoji-here {
     local files;
     # Note: Disables shellcheck warning SC2207: Prefer mapfile or read -a to split command output (or quote to avoid splitting).
     # shellcheck disable=SC2207
-    files=($(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=1 $PYTHON -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -));
+    files=($(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=1 alias-python -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -));
     rename-emoji "${files[@]}"
 }
 
@@ -2146,10 +2114,9 @@ alias bigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=2'
 alias unigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=1'
 alias word-count=unigrams
 
+# calc-stdev: calculate stdard deviation iv sum_file.perl using -col=1 by default
 # EX: echo $'1\n2\n3\n4\n5' | calc-stdev => "num = 5; mean = 3.000; stdev = 1.581; min = 1.000; max = 5.000; sum = 15.000"
 function calc-stdev () { sum_file.perl -stdev "$@" -; }
-## MISC: alias calc-stdev-file='calc-stdev <'
-## MISC: alias sum-col2='sum_file.perl -col=2 -'
 
 # Lynx stuff
 # lynx-dump-stdout(option, ...): Run lynx with textual output to stdout
@@ -2634,11 +2601,6 @@ if [[ ("$DEFAULT_HOST" = "") && (($HOSTNAME =~ ip-*) || ($HOSTNAME =~ cvps*)) ]]
 # Other host-related stuff
 # TODO: make generic (e.g., by making nickname optional)
 
-## OLD
-## function gr-juju-notes () { grepl "$@" /c/work/juju/*notes* $JJDATA/*notes*; }
-## function gr-juju-notes-archive () { MY_GREP_OPTIONS="" grepl "$@" /c/work/juju/_note-archive.list; }
-## alias gr-juju-archive-notes=gr-juju-notes-archive
-
 alias uname-node='uname -n'
 alias pwd-host-info='pwd; echo "${HOST_NICKNAME:-n/a}"; uname-node'
 
@@ -2647,25 +2609,6 @@ alias pwd-host-info='pwd; echo "${HOST_NICKNAME:-n/a}"; uname-node'
 ## conditional-export SANDBOX ~/python/tohara
 ## conditional-export MISC_TRACING_LEVEL 4
 ## alias restart-screen='screen-startup.sh >| $TEMP/screen-startup.$$.log 2>&1'
-
-## OLD
-## #-------------------------------------------------------------------------------
-## 
-## # MRJob stuff (python-based map-reduce)
-## #
-## # show-job-tracker([port=40001]): enable tunneling for job tracker on temp EC2 host
-## # and then invoke firefox for link using corresponding port
-## # note: ssh options: -f background; -n redirect stdin; -N no command; -T disable pseudo-tty; -L port forwarding specification
-## job_tracker_port=40001
-## function show-job-tracker() {
-##     local port="$1"
-##     if [ "$port" == "" ]; then port=$job_tracker_port; fi
-##     # Maldito shellcheck [SC2029: Note that, unescaped, this expands on the client side]
-##     # shellcheck disable=SC2029
-##     ssh -fnNT -i "$TPO_SSH_KEY" -L$port:localhost:$port "$TPO_SSH_USER@$mrjob_ec2_host"
-##     firefox http://localhost:$port/jobtracker.jsp &
-## }
-## alias kill-job-trackers=' kill_em.sh -p L$job_tracker_port'
 
 #-------------------------------------------------------------------------------
 # Misc. language related
@@ -2977,20 +2920,25 @@ function run-python-lint-batched () {
 # python-import-path(module): find path for package directory of MODULE
 # Note: this checks output via module initialization output shown with python -v
 # ex: /usr/local/misc/programs/anaconda3/lib/python3.8/site-packages/sklearn/__pycache__/__init__.cpython-38.pyc matches /usr/local/misc/programs/anaconda3/lib/python3.8/site-packages/sklearn/__init__.py
-function python-import-path-all() { local module="$1"; $PYTHON -u -v -c "import $module" 2>&1; }
+function python-import-path-all() { local module="$1"; alias-python -u -v -c "import $module" 2>&1; }
 function python-import-path-full() { local module="$1"; python-import-path-all "$@" | alias-perl extract_matches.perl "((matches (.*\W${module}[^/]*[/\.][^/]*))|ModuleNotFoundError)"; }
 function python-import-path() { python-import-path-full "$@" | head -1; }
 
 #
 ## note: gotta hate python!
-function python-module-version-full { local module="$1"; $PYTHON -c "import $module; print([v for v in [getattr($module, a, '') for a in '__VERSION__ VERSION __version__ version'.split()] if v][0])"; }
+function python-module-version-full { local module="$1"; alias-python -c "import $module; print([v for v in [getattr($module, a, '') for a in '__VERSION__ VERSION __version__ version'.split()] if v][0])"; }
 # TODO: check-error if no value returned
 function python-module-version { python-module-version-full "$@" 2> /dev/null; }
-function python-package-members() { local package="$1"; $PYTHON -c "import $package; print(dir($package));"; }
+function python-package-members() { local package="$1"; alias-python -c "import $package; print(dir($package));"; }
 #
-alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  $PYTHON setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
+alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  alias-python setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
 # TODO: add -v (the xargs usage seems to block it)
 alias python-uninstall-setup='cat installed-files.list | xargs command rm -vi; alias-perl rename_files.perl -regex ^ un installed-files.list'
+
+## OLD:
+## # alias-python: python invocation for using in aliases
+## # note: avoids excess tracing; see debug.py and main.py
+## alias alias-python='DURING_ALIAS=1 python3'
 
 # ipython(): overrides ipython command to set xterm title and to add git repo base directory to python path
 function ipython() { 
@@ -3015,19 +2963,9 @@ function python-trace {
 
 # py-diff(dir): check for difference in python scripts versus those in target
 # TODO: specify options before the pattern (or modify do_diff.sh to allow after)
-## OL:D function py-diff () { do_diff.sh '*.py *.mako' "$@" 2>&1 | $PAGER; }
 function py-diff () { do_diff.bash --no-glob '*.py *.mako' "$@" 2>&1 | $PAGER; }
 
-## OLD
-## # kivy-win32-env(): enables environment variabless for Kivy under cyggwin, using win32 python
-## function kivy-win32-env {
-##    export PYTHONPATH='c:/cartera-de-tomas/python;c:/Program-Misc/python/kivy-1-9-0/kivy27'
-##    kivy_dir="/c/Program-Misc/python/kivy-1-9-0"
-##    python_dir="$kivy_dir/Python27"
-##    prepend-path "$kivy_dir:$kivy_dir/Python27:$kivy_dir/tools:$kivy_dir/Python27/Scripts:$kivy_dir/gstreamer/bin:$kivy_dir/MinGW/bin:$kivy_dir/SDL2/bin"
-## }
-
-alias elide-data='$PYTHON -m transpose_data --elide'
+alias elide-data='alias-python -m transpose_data --elide'
 alias kill-python="kill_em.sh --filter 'ipython|emacs' python"
 alias kill-python-all="kill_em.sh python"
 ## TODO
@@ -3048,9 +2986,6 @@ function run-jupyter-notebook-posthoc() {
     # TODO: resolve problem extracting URL
     # TEMP: tail "$log"
     # Show URL
-    ## OLD:
-    ## echo -n "URL: "
-    ## extract-matches 'http:\S+' "$log" | sort -u
     echo -n "URL: "
     VERBOSE=1 extract-matches 'http:\S+' "$log" | sort -u
 }
@@ -3063,27 +2998,14 @@ function run-jupyter-notebook () {
     log="$TEMP/jupyter-p$port-$(TODAY).log"
     rename-with-file-date "$log"
     # note: clears notebook token to disable authentication
-    ## OLD: jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
     ## TEST: jupyter notebook --ServerApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
     ## TODO1: make sure IdentityProvider.token is right one to use (maltdito jupyter)
     ## TODO4?: JUPYTER_TOKEN="" jupyter notebook --no-browser --port ...
     jupyter notebook --IdentityProvider.token='' --no-browser --port $port --ip $ip > "$log" 2>&1 &
-    ## OLD
-    ## echo "$log"
     # Let jupyter initialize
-    ## OLD:
-    ## local delay=5
-    ## echo "sleeping $delay seconds for log to stabilize (maldito jupyter)"
     local delay=6
     echo "sleeping $delay seconds for jupyter to finish initializing"
     sleep $delay
-    ## OLD
-    ## # TODO: resolve problem extracting URL
-    ## # TEMP:
-    ## tail "$log"
-    ## # Show URL
-    ## echo -n "URL: "
-    ## extract-matches 'http:\S+' "$log" | sort -u    
     run-jupyter-notebook-posthoc "$log"
 }
 alias jupyter-notebook-redir=run-jupyter-notebook
@@ -3097,7 +3019,7 @@ alias jupyter-notebook-open=jupyter-notebook-redir-open
 # extract-text(document-file): extracts text from structured document file (e.g., Word or PDF)
 # note: to avoid hardcoded 'python -m mezcla.extract_document_text' invovation uses awkward which-based approach
 ## TODO: figure out way for python to pull script from path (as with perl -S)
-function extract-text() { $PYTHON "$(which extract_document_text.py)" "$@"; }
+function extract-text() { alias-python "$(which extract_document_text.py)" "$@"; }
 alias xtract-text='extract-text'
 
 # test-script(script): run unit test for script (i.e., tests/test_script)
@@ -3130,11 +3052,11 @@ function randomize-datafile() {
     local num_lines="$2"
     if [[ $num_lines =~ % ]]; then
         num_lines=${num_lines//%/}
-        $PYTHON -m mezcla.randomize_lines --header --percent "$num_lines" "$file"
+        alias-python -m mezcla.randomize_lines --header --percent "$num_lines" "$file"
     else
         if [ "$num_lines" = "" ]; then num_lines=$(wc -l < "$file"); fi
         head -1 "$file"
-        tail --lines=+2 "$file" | $PYTHON -m mezcla.randomize_lines - | head -"$num_lines"
+        tail --lines=+2 "$file" | alias-python -m mezcla.randomize_lines - | head -"$num_lines"
     fi
 }
 
@@ -3171,7 +3093,7 @@ function filter-random() {
     if [ "$include_header" = "1" ]; then opts="$opts --include-header"; fi
     # maldito shellcheck (SC2086: Double quote to prevent globbing)
     # shellcheck disable=SC2086
-    $type "$file" | $PYTHON -m filter_random "$opts" --ratio "$ratio" - > "$result" 2> "$result.log"
+    $type "$file" | alias-python -m filter_random "$opts" --ratio "$ratio" - > "$result" 2> "$result.log"
 
     # Compress result if original compressed
     if [ "$compressed" = "1" ]; then 
@@ -3242,7 +3164,11 @@ alias run-epiphany-browser='invoke-browser epiphany-browser'
 #-------------------------------------------------------------------------------
 # NVidia GPU
 
-alias nvidia-smi-loop='nvidia-smi --loop=1'
+# nvidia-smi-loop([secs=1]): run nvidia-smi with SECS looping
+function nvidia-smi-loop {
+    local secs="${1:-1}";
+    nvidia-smi --loop="$secs";
+    }
 alias nvidia-loop=nvidia-smi-loop
 
 # Multilingual
@@ -3256,21 +3182,6 @@ alias nvidia-loop=nvidia-smi-loop
 alias emacs-qd-trans-sp='pushd ${MULTILINGUAL_DIR:-"$TOM_DIR/multilingual"}; ./emacs-qd-trans-sp.sh; popd'
 alias em-trans-sp=emacs-qd-trans-sp
 alias ed-trans-sp=em-trans-sp
-
-#-------------------------------------------------------------------------------
-# Music related
-
-## OLD
-## function make-lilypond-png () {
-##     local file="$1"
-##     local base
-##     base=$(basename "$file" .ly)
-##     # note follpwing doesn't work as lilypond puts temporary files in current dir
-##     ## TODO: local base=$(dirname "$file")/$(basename "$file" .ly)
-##     lilypond_dir="/c/Program-Misc/music/lilypond"
-##     PATH="$lilypond_dir/usr/bin:$PATH" lilypond --png --verbose "$file" >| "$base.png" 2>| "$base.log"
-##     tail -5 "$base.log"
-## }
 
 #-------------------------------------------------------------------------------
 # WordNet related

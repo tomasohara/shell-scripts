@@ -30,10 +30,15 @@ fi
 # add-conda-env-to-xterm-title(): puts conda prompt modifier in xterm title
 # along with python version (e.g., "...; Py3.6:(old_tensorflow)")
 # note: also resets prompt to '$ ' (following change by conda scripts)
+# See set_xterm_title.bash for underyling support (e.g., XTERM_TITLE_SUFFIX).
 function add-conda-env-to-xterm-title {
     ## DEBUG: echo "in add-conda-env-to-xterm-title"
     export XTERM_TITLE_SUFFIX
     XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d+.\d+)'):$CONDA_PROMPT_MODIFIER"
+    ## Note: temp check for odd repeated version spec (e.g., "Py3.10; Py3.10")
+    if [[ $XTERM_TITLE_SUFFIX =~ Py[0-9]\.[0-9].*Py[0-9]\.[0-9] ]]; then
+        echo "Warning: unexptected python spec in w/ xterm title suffix ($XTERM_TITLE_SUFFIX)"
+    fi
 
     reset-prompt
     set-title-to-current-dir

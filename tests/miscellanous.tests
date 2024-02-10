@@ -67,3 +67,15 @@ URL: http://127.0.0.1:8888/tree
 ## checking log: /home/tomohara/temp/jupyter-p8888-28jan24.log
 ## URL: Unrecognized switch: -o  (-h will show valid options).
 
+#...............................................................................
+# Python script running
+
+# Make sure run-python-script increments the log number
+
+$ echo "" | run-python-script template.py - 2>&1 | count-it -show_zeros '1.log' "./_template.$(T).1.log"
+1.log	1
+
+$ echo "" | run-python-script template.py - 2>&1 | count-it -show_zeros '2.log' "./_template.$(T).2.log"
+2.log	1
+
+

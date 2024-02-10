@@ -52,14 +52,14 @@ WORKDIR $WORKDIR
 
 # Install necessary dependencies and tools
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget tar ca-certificates && \
+    apt-get install -y --no-install-recommends ca-certificates kdiff3 less tar tcsh time wget zip && \
     true
     ## TODO4: rm -rf /var/lib/apt/lists/*
 
 # Install other stuff
 # note: this is to support logging into the images for debugging issues
 # TODO3: get to work
-RUN if [ "$DEBUG_LEVEL" -ge 4 ]; then apt-get install --yes emacs kdiff3 less tcsh zip || true; fi
+RUN if [ "$DEBUG_LEVEL" -ge 4 ]; then apt-get install --yes emacs || true; fi
 
 # Set the Python version to install
 # Note: The workflow yaml files only handle version for VM runner (e.g., via matrix support)
