@@ -58,7 +58,10 @@ exec wish "$0" -- ${1+"$@"}
 
 # Load in common functions, mainly for debugging (e.g., DebugOut)
 # TODO: use $0 to derive script dir
-catch {source ~/bin/common.tcl}
+## OLD: catch {source ~/bin/common.tcl}
+set script_dir [file dirname [info script]]
+set common_tcl_path [file join $script_dir common.tcl]
+catch {source $common_tcl_path}
 # Initialize the debugging state (eg, open trace file)
 catch {InitDebugging}
 
