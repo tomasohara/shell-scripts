@@ -1337,7 +1337,8 @@ function check-errors-excerpt () {
 
 # Note: various aliases for doing diff-based comparisons
 #
-function tkdiff () { wish -f "$TOM_BIN"/tkdiff.tcl "$@" & }
+## OLD: function tkdiff () { wish -f "$TOM_BIN"/tkdiff.tcl "$@" & }
+function tkdiff () { wish -f "$TOM_BIN"/archive/tkdiff.tcl "$@" & }
 alias rdiff='rev_vdiff.sh'
 alias tkdiff-='tkdiff -noopt'
 #
