@@ -129,11 +129,15 @@ class TestIt(TestWrapper):
     def test_data_file(self):
         """Makes sure dummy-test converted as expected"""
         debug.trace(4, f"TestIt.test_data_file(); self={self}")
+        # Check regular BatsPP output
         output = self.run_script(options="--stdout", data_file=self.data_file)
         assert not(my_re.search(r"cell_type|outputs|source|metadata", output))
         assert not(my_re.search(r"[\[\{\}\]]", output))
         assert my_re.search(r"^dummy$", output.strip(), flags=my_re.MULTILINE)
         assert my_re.search(r"^\$ date$", output.strip(), flags=my_re.MULTILINE)
+        # Check output with just code
+        output = self.run_script(options="--stdout --justcode", data_file=self.data_file)
+        assert not my_re.search(r"^dummy$", output.strip(), flags=my_re.MULTILINE)
         return
 
 #------------------------------------------------------------------------

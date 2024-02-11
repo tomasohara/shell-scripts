@@ -16,6 +16,7 @@ jupyter-core
 kdiff3
 less
 lynx
+openssh
 perl
 python3-pip
 python3

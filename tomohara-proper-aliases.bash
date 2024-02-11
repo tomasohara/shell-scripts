@@ -99,8 +99,9 @@ function run-python-script {
     out_base="$script_dir/_$script_base.$(TODAY).$_PSL_";
     log="$out_base.log";
     out="$out_base.out";
-    ## TEMP: ensure output exists for excerpt below
-    touch "$out";
+    ## OLD:
+    ## ## TEMP: ensure output exists for excerpt below
+    ## touch "$out";
     ## DEBUG: trace-vars _PSL_ out_base log
     rename-with-file-date "$out_base.out" "$log";
     # shellcheck disable=SC2086
@@ -109,13 +110,14 @@ function run-python-script {
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
 	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
-	    ## TODO2: echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$out" 2> "$log";
-            echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$log" 2>&1;
+	    ## TODO2:
+            echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$out" 2> "$log";
+            ## OLD: echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$log" 2>&1;
 	else
 	    # note: disables - with explicit arguments or if running pytest
 	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
-	    ## TODO2: $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
-	    $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1;
+	    ## OLD: $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1
+	    $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
 	fi
     }
     tail "$log" "$out" | truncate-width
@@ -131,13 +133,11 @@ default_pytest_opts="-vv --capture=tee-sys"
 #
 # test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
-    ## OLD: local default_pytest_opts="-vv --capture=tee-sys"
     if [ "$1" = "" ]; then
         echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] test-python-script script"
         return
     fi
     PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
-    ## OLD: PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@";
     # note: just uses .log (i.e., ignore .out)
     # TODO3: drop inheritance spec in summary
     # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "ests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
@@ -158,11 +158,11 @@ function color-test-failures {
 }
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
-## OLD:
-## alias-fn ocr-image-old 'tesseract "$@" -'
-## alias-fn ocr-image 'tesseract "$1" "$1".ocr'
-alias-fn ocr-image-stdout 'tesseract "$@" -'
-alias-fn ocr-image 'tesseract "$1" "$1"; $PAGER "$1".txt'
+# shellcheck disable=SC2016
+{
+    alias-fn ocr-image-stdout 'tesseract "$@" -'
+    alias-fn ocr-image 'tesseract "$1" "$1"; $PAGER "$1".txt'
+}
 
 #...............................................................................
 # Misc. stuff (e.g., JSON, Yaml)
@@ -171,13 +171,13 @@ alias-fn ocr-image 'tesseract "$1" "$1"; $PAGER "$1".txt'
 # json-validate(file): make sure file is valid JSON
 function json-validate () {
     local file="$1"
-    $PYTHON -c "import json; from mezcla import system; print(json.loads(system.read_file('$file')))" | head -5 | truncate-width
+    alias-python -c "import json; from mezcla import system; print(json.loads(system.read_file('$file')))" | head -5 | truncate-width
 }
 
 # yaml-validate(file): make suire file is valid YAML
 function yaml-validate () {
     local file="$1"
-    $PYTHON -c "from mezcla import file_utils; print(file_utils.read_yaml('$file'))" | head -5 | truncate-width
+    alias-python -c "from mezcla import file_utils; print(file_utils.read_yaml('$file'))" | head -5 | truncate-width
 }
 
 # action-lint-yaml: run Github actions yaml file through actionlint
@@ -195,7 +195,8 @@ simple-alias-fn act-plain 'convert-emoticons-aux act'
 function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -pe 's/^0\t//;'; }
 
 # extract-text-html(filename): extract text from HTML in FILENAME
-simple-alias-fn extract-text-html '$PYTHON -m mezcla.html_utils --regular'
+# shellcheck disable=SC2016
+simple-alias-fn extract-text-html 'alias-python -m mezcla.html_utils --regular'
 
 #...............................................................................
 # Bash stuff
@@ -212,7 +213,8 @@ function shell-check-last-snippet {
 function shell-check-stdin {
     ## DEBUG: echo "in shell-check-stdin: args='$*'"
     echo "Enter snippet lines and then ^D"
-    $PYTHON -c 'import sys; sys.stdin.read()' | shell-check -
+    ## OLD: alias-python -c 'import sys; sys.stdin.read()' | shell-check -
+    shell-check -
     # shellcheck disable=SC2181
     if [ "$?" -eq 0 ]; then echo "shellcheck OK"; fi
 }
@@ -225,7 +227,6 @@ function tabify {
 # trace-vars(var, ...): trace each VAR in command line
 # note: output format: VAR1=VAL1; ... VARn=VALn;
 function trace-vars {
-    ## OLD: local var value
     local var
     for var in "$@"; do
         ## TODO3: get old eval/echo approach to work in general
@@ -233,10 +234,6 @@ function trace-vars {
         ## echo -n "$var="$(eval echo "\$$var")"; "
         ## TODO: value="$(eval "echo \$$var")"
         ## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
-        ## OLD:
-        ## value="$(set | grep "^$var=")"
-        ## echo -n "$value; "
-        ## OLD: echo -n "$var="$(eval echo "\${$var}")"; "
         echo -n "$var=$(eval echo "\${$var}"); "
         ## TODO: echo -n "$value; " 1>&2
     done
@@ -250,7 +247,6 @@ function trace-array-vars {
     for var in "$@"; do
         # note: ignores SC1087 (error): Use braces when expanding arrays
         # shellcheck disable=SC2027,SC2046,SC1087
-        ## OLD: echo -n "$var="$(eval echo "\${$var[@]}")"; "
         echo -n "$var=("$(eval echo "\${$var[@]}")"); "
     done
     echo
@@ -309,8 +305,14 @@ function rename-last-snapshot {
 #................................................................................
 # Media related
 #
-# fix-transcript-timestamp(): put text on same line in YouTube transcripts
+# fix-transcript-timestamp(file): put text on same line in YouTube transcripts in FILE
 alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
+# youtube-transcript(url, file): download YoutTube transcript at URL to FILE
+function youtube-transcript {
+    local url="$1"
+    local file="$2"
+    alias-python -m mezcla.examples.youtube_transcript "$url" > "$file"
+}
 
 #...............................................................................
 # System stuff
@@ -397,7 +399,8 @@ alias detach-job='disown -h'
 
 # screenshot-window(): take screen shot of another window in 2 seconds
 # TODO3: add option for --screen and for specifying --file
-simple-alias-fn screenshot-window 'gnome-screenshot --window --delay 2'
+# shellcheck disable=SC2016
+simple-alias-fn screenshot-window 'gnome-screenshot --window --delay ${SCREENSHOT_DELAY:-3}'
 
 #...............................................................................
 # Linux admin
@@ -435,11 +438,15 @@ alias oscar="run-app OSCAR"
 alias 1pass="run-app 1password"
 
 # Docker
+# shellcheck disable=SC2046
 function docker-cleanup {
     pause-for-enter "Removing all docker containers, images, etc. (Press Enter to proceed or ^C to abort)"
-    docker rm -vf $(docker ps -aq)
-    docker rmi -f $(docker images -aq)
-    docker system prune --force
+    # shellcheck disable=SC2046
+    {
+        docker rm -vf $(docker ps -aq)
+        docker rmi -f $(docker images -aq)
+        docker system prune --force
+    }
 }
 
 #................................................................................
