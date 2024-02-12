@@ -1520,7 +1520,7 @@ function make-tar () {
     if [ "${depth_arg}${size_arg}${filter_arg[*]}" == "." ]; then
         $NICE $GTAR cvfz "$base.tar.gz" "$dir" >| "$base.tar.log" 2>&1;
     else
-        (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "${filter_arg[@]}" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+        (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $EGREP -i "${filter_arg[@]}" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     fi
     ## DUH: -L added to support tar-this-dir in directory that is symbolic link, but unfortunately
     ## that leads to symbolic links in the directory itself to be included
