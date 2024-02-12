@@ -34,7 +34,11 @@ fi
 function add-conda-env-to-xterm-title {
     ## DEBUG: echo "in add-conda-env-to-xterm-title"
     export XTERM_TITLE_SUFFIX
-    XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d+.\d+)'):$CONDA_PROMPT_MODIFIER"
+    ## OLD: XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d+.\d+)'):$CONDA_PROMPT_MODIFIER"
+    XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d+.\d+)')"
+    if [ "$CONDA_PROMPT_MODIFIER" != "" ]; then
+        XTERM_TITLE_SUFFIX="$XTERM_TITLE_SUFFIX:$CONDA_PROMPT_MODIFIER"
+    fi
     ## Note: temp check for odd repeated version spec (e.g., "Py3.10; Py3.10")
     if [[ $XTERM_TITLE_SUFFIX =~ Py[0-9]\.[0-9].*Py[0-9]\.[0-9] ]]; then
         echo "Warning: unexptected python spec in w/ xterm title suffix ($XTERM_TITLE_SUFFIX)"
