@@ -217,17 +217,30 @@ fi
 # OLD: (("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER"))
 # TODO: just use LOGNAME test???
 if [[ ((("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER")) || ("$LOGNAME" != "$USER")) ]]; then
-    ## DEBUG: echo "adding user"
+    ## DEBUG: echo "adding (ssh) user"
     full="$full; user=$USER"
     icon="$icon; user=$USER"
 fi
-# Add suffix from XTERM_TITLE_SUFFIX env. var.:
+
+# Add suffix from XTERM_TITLE_SUFFIX env. var. (e.g., "...; Py3.10")
 if [ "$XTERM_TITLE_SUFFIX" != "" ]; then
     full="$full; $XTERM_TITLE_SUFFIX"
     icon="$icon; $XTERM_TITLE_SUFFIX"
+    ## Note: temp check for odd repeated version spec (e.g., "Py3.10; Py3.10")
+    if [[ $XTERM_TITLE_SUFFIX =~ Py[0-9]\.[0-9].*Py[0-9]\.[0-9] ]]; then
+        echo "Warning: unexptected python spec in w/ xterm title suffix ($XTERM_TITLE_SUFFIX)"
+    fi
 fi
 
-# If SCRIPT_PID set, add this at start
+# If a SSH connection is active, add host to end (e.g., "...; host=tpo-jugador")
+if [ "$SSH_CONNECTION" != "" ]; then
+    ## DEBUG: echo "adding (ssh) host"
+    host="$(uname -n)"
+    full="$full; host=$host"
+    icon="$icon; host=$host"
+fi
+
+# If SCRIPT_PID set, add this at start (e.g., "script:27843 ...")
 #
 if [ "$SCRIPT_PID" != "" ]; then
     full="script:$SCRIPT_PID $full"
