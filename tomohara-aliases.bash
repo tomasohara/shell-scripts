@@ -1597,11 +1597,16 @@ function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basen
 
 function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
 # GTAR_OPTS: usual options for aliases using gnu tar
-GTAR_OPTS=vfz
+## OLD: GTAR_OPTS=vfz
+GTAR_OPTS=""
 ## TODO2: GTAR_USUAL="$GTAR GTAR_OPTS"
 function set-tar-bzip2 () { GTAR_OPTS="vfj"; }
-function unset-tar-bzip2 () { GTAR_OPTS="vfz"; }
+## OLD: function unset-tar-bzip2 () { GTAR_OPTS="vfz"; }
+function unset-tar-bzip2 () { reset-tar-opts; }
+function set-tar-xz () { GTAR_OPTS="vfJ"; }
+function reset-tar-opts { GTAR_OPTS="vfz"; }
 function make-recent-tar () { (find . -type f -mtime -"$2" | $GTAR "c${GTAR_OPTS}T" "$1" -; ) 2>&1 | $PAGER; ls-relative "$1"; }
+reset-tar-opts
 #
 # " (for Emacs)
 # NOTE: above quote needed to correct for Emacs color coding
@@ -3168,8 +3173,11 @@ alias run-epiphany-browser='invoke-browser epiphany-browser'
 # nvidia-smi-loop([secs=1]): run nvidia-smi with SECS looping
 function nvidia-smi-loop {
     local secs="${1:-1}";
-    nvidia-smi --loop="$secs";
-    }
+    local ms
+    ms=$(calc "$secs * 1000")
+    ## OLD: nvidia-smi --loop="$secs";
+    nvidia-smi --loop-ms="$ms";
+}
 alias nvidia-loop=nvidia-smi-loop
 
 # Multilingual
