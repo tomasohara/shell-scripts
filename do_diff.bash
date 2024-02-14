@@ -213,7 +213,7 @@ for file in $pattern; do
     fi
     # Derive base name for file, including relative directory (e.g., in case pattern specifies subdirectory)
     base=$(basename "$file")
-    base_proper="$base"
+    ## OLD: base_proper="$base"
     dir=$(dirname "$file")
     if [ "$dir" != "." ]; then
         base="$dir/$base"
@@ -265,7 +265,8 @@ for file in $pattern; do
         if [ $num_lines -gt 0 ]; then
             relative_diff=$(( $num_diffs * 100 / $num_lines ))
         fi
-        echo "${relative_diff}% differences for $base_proper"
+        ## OLD: echo "${relative_diff}% differences for $base_proper"
+        echo "${relative_diff}% differences for $base"
     fi
 
     # Show the actual file differences
