@@ -19,14 +19,24 @@
 ## set echo=1
 
 # Complain if the command-line is wrong
+## TODO2: add --verbose
+set allow_relative_backup = 0
+set rel_backup_arg = "--rel-backup"
 if ("$1" == "") then
-    echo "Format: dobackup file_spec ..."
+    set script = `basename "$0"`
+    echo "Format: dobackup [$rel_backup_arg] file_spec ..."
     echo ""
     echo "example:"
     echo ""
     echo "$0 *.perl"
     echo ""
+    echo "$script $rel_backup_arg main.py tests/test_main.py"
+    echo ""
     exit
+endif
+if ("$1" == "--rel-backup") then
+    set allow_relative_backup = 1
+    shift
 endif
 
 # Make sure that the backup directory exists
@@ -45,25 +55,35 @@ endif
 # TODO: handle files with embedded spaces (e.g., for chmod processing)
 while ("$1" != "")
     set fil = "$1"
+    set dir = "."
+    set backup_dir = "./backup"
+    if ("$allow_relative_backup" == "1") then
+        set dir = `dirname "$1"`
+        set backup_dir = "$dir/backup"
+        mkdir -p "$backup_dir"
+    endif
+    
     if (! -d "$fil") then
 	# Output current file to backup (TODO: only do in verbose mode)
 	## TODO: set basefil = "`basename ""$fil""`"
 	set basefil = `basename "$fil"`
-	if (-e "$basefil") then
-	    echo "Backing up '$fil' to './backup/$basefil'"
+	if (-e "$dir/$basefil") then
+	    echo "Backing up '$fil' to '$backup_dir/$basefil'"
+        else
+            echo "Warning: not backing up '$fil' to '$backup_dir/$basefil'; try $rel_backup_arg"
 	endif
 
 	# Make existing version of backup file writable
-	## OLD: echo "Backing up '$fil' to './backup/$basefil'"
-	## OLD: if (-e "./backup/$basefil") chmod u+w "./backup/$basefil"
-	if (-e "./backup/$basefil") then
-	    chmod u+w "./backup/$basefil"
+	## OLD: echo "Backing up '$fil' to '$backup_dir/$basefil'"
+	## OLD: if (-e "$backup_dir/$basefil") chmod u+w "$backup_dir/$basefil"
+	if (-e "$backup_dir/$basefil") then
+	    chmod u+w "$backup_dir/$basefil"
 	endif
 
 	# Copy the file and remove write access
 	# TODO: just issue error message if file doesn't exist (i.e., don't run cp and chmod commands)
-	cp -p "$fil" ./backup
-	chmod ugo-w "./backup/$basefil"
+	cp -p "$fil" "$backup_dir"
+	chmod ugo-w "$backup_dir/$basefil"
     endif
     shift
 end
