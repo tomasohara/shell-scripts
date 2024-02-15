@@ -311,7 +311,8 @@ alias todays-update='update-today-vars'
 # TODO: figure out way to do without quotes (e.g., to avoid SC2086: Double quote to prevent globbing ...)
 function reference-variable { true; }
 ## OLD: reference-variable "$hoy, $T"
-reference-variable $hoy, $T
+## BAD: reference-variable $hoy, $T
+reference-variable "$hoy $T"
 
 # Alias creation helper(s)
 # Note: does no-op so that status set to 0 for sake of tests/test_tomohara-aliases.bash setup
