@@ -310,9 +310,8 @@ alias todays-update='update-today-vars'
 # usage: reference-variable "$var1, ..."
 # TODO: figure out way to do without quotes (e.g., to avoid SC2086: Double quote to prevent globbing ...)
 function reference-variable { true; }
-## OLD:
-reference-variable "$hoy, $T"
-## TODO: reference-variable $hoy, $T
+## OLD: reference-variable "$hoy, $T"
+reference-variable $hoy, $T
 
 # Alias creation helper(s)
 # Note: does no-op so that status set to 0 for sake of tests/test_tomohara-aliases.bash setup
@@ -1101,6 +1100,8 @@ alias em-devel='em --devel'
 # note: double dashes seprate tpo-invoke-emacs.sh args from emacs
 function em-debug () { em -- --debug-init "$@"; }
 function em-quick () { em -- --quick "$@"; }
+# em-wide: invoke emacs with extra-wide window (e.g., for UHD monitor viewing two files)
+function em-wide { em -- -geometry 288x50 -eval "(split-window-right)" "$@"; }
 
 #--------------------------------------------------------------------------------
 # Simple TODO-list maintenance commands
@@ -1187,7 +1188,6 @@ function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
 
 # convert-emoticons(...): replace emoticons in input with description
 # EX: convert-emoticons - <<<"💬" => "[speech balloon]"
-## OLD: alias convert-emoticons='DURING_ALIAS=1 convert_emoticons.py'
 alias convert-emoticons='alias-python "$(which convert_emoticons.py)"'
 alias convert-emoticons-stdin='convert-emoticons -'
 
@@ -1290,7 +1290,6 @@ function byte-usage () { output_file="usage.bytes.list"; backup-file $output_fil
 function check-errors-aux { alias-perl check_errors.perl "$@"; }
 ## # -or-:
 ## function check-errors-aux { PERL_SWITCH_PARSING=1 check_errors.py "$@"; };
-## OLD
 # note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
 ALIAS_DEBUG_LEVEL=${ALIAS_DEBUG_LEVEL:-${DEBUG_LEVEL:-2}}
 function check-errors () {
@@ -1337,7 +1336,6 @@ function check-errors-excerpt () {
 
 # Note: various aliases for doing diff-based comparisons
 #
-## OLD: function tkdiff () { wish -f "$TOM_BIN"/tkdiff.tcl "$@" & }
 function tkdiff () { wish -f "$TOM_BIN"/archive/tkdiff.tcl "$@" & }
 alias rdiff='rev_vdiff.sh'
 alias tkdiff-='tkdiff -noopt'
@@ -1394,16 +1392,24 @@ alias diff-log-output='compare-log-output.sh'
 alias vdiff-rev=kdiff-rev
 
 # most-recent-backup(file): returns most recent backup for FILE in ./backup, accounting for revisions (e.g., extract_matches.perl.~4~)
+# ntoe: now uses backup dir relative to file if a path
 function most-recent-backup {
     if [ "$1" = "" ]; then
         echo "usage: most-recent-backup filename"
         echo "use BACKUP_DIR=dir ... to override use of ./backup"
         return
     fi
+    ## TODO4: file => file_basename
     local file="$1";
     local dir="$BACKUP_DIR"; if [ "$dir" = "" ]; then dir=./backup; fi
+    local file_dir
+    file_dir="$(dirname "$file")"
+    if [ "." != "$file_dir" ]; then
+        file="$(basename "$file")"
+        dir="$file_dir/$dir"
+    fi
     ## TODO: rework to avoid false positives
-    $LS -t $dir/* $dir/.* | $EGREP "/$file(~|.~*)?" | head -1;
+    $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~*)?" | head -1;
 }
 # TODO: test for dot-files:
 #   touch backup .fubar.~666~; most-recent-backup .fubar => .fubar
@@ -1597,11 +1603,9 @@ function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basen
 
 function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
 # GTAR_OPTS: usual options for aliases using gnu tar
-## OLD: GTAR_OPTS=vfz
 GTAR_OPTS=""
 ## TODO2: GTAR_USUAL="$GTAR GTAR_OPTS"
 function set-tar-bzip2 () { GTAR_OPTS="vfj"; }
-## OLD: function unset-tar-bzip2 () { GTAR_OPTS="vfz"; }
 function unset-tar-bzip2 () { reset-tar-opts; }
 function set-tar-xz () { GTAR_OPTS="vfJ"; }
 function reset-tar-opts { GTAR_OPTS="vfz"; }
@@ -1753,7 +1757,6 @@ function run-app {
     fi
     "$path" "$@" >> "$log" 2>&1 &
     ## TODO: make sure command invoked OK and then put into background
-    ## OLD: sleep-for 5 "waiting for $log"
     local delay=5
     sleep-for "$delay" "waiting ${delay}s for $log"
     check-errors-excerpt "$log"
@@ -1902,12 +1905,8 @@ deprecated-alias-fn ps-mine- ps-mine-sans-dir
 alias ps_mine='ps-mine'
 ## DUP: alias ps-mine-='ps-mine "$@" | filter-dirnames'
 alias ps-mine-all='ps-mine --all'
-## OLD: alias old-rename-files='perl- rename_files.perl'
 alias rename-files='alias-perl rename_files.perl'
 alias rename_files='rename-files'
-## OLD: alias testwn='perl- testwn.perl'
-## BAD: alias perlgrep='perl- perlgrep.perl'
-## OLD: alias foreach='perl- foreach.perl'
 alias foreach='alias-perl foreach.perl'
 
 #--------------------------------------------------------------------------------
@@ -2941,11 +2940,6 @@ alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -
 # TODO: add -v (the xargs usage seems to block it)
 alias python-uninstall-setup='cat installed-files.list | xargs command rm -vi; alias-perl rename_files.perl -regex ^ un installed-files.list'
 
-## OLD:
-## # alias-python: python invocation for using in aliases
-## # note: avoids excess tracing; see debug.py and main.py
-## alias alias-python='DURING_ALIAS=1 python3'
-
 # ipython(): overrides ipython command to set xterm title and to add git repo base directory to python path
 function ipython() { 
     local ipython
@@ -3175,7 +3169,6 @@ function nvidia-smi-loop {
     local secs="${1:-1}";
     local ms
     ms=$(calc "$secs * 1000")
-    ## OLD: nvidia-smi --loop="$secs";
     nvidia-smi --loop-ms="$ms";
 }
 alias nvidia-loop=nvidia-smi-loop
