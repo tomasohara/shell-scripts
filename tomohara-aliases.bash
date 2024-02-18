@@ -1102,6 +1102,7 @@ alias em-devel='em --devel'
 function em-debug () { em -- --debug-init "$@"; }
 function em-quick () { em -- --quick "$@"; }
 # em-wide: invoke emacs with extra-wide window (e.g., for UHD monitor viewing two files)
+# TODO2: fix order of files so first on left
 function em-wide { em -- -geometry 288x50 -eval "(split-window-right)" "$@"; }
 
 #--------------------------------------------------------------------------------
