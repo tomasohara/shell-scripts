@@ -72,6 +72,9 @@
 ## - Integrate features from similar utilities:
 ##   https://pypi.org/project/docshtest/
 ##   https://github.com/lehmannro/assert.sh
+## - Model comment directives after Python's doctest:
+##   https://docs.python.org/3/library/doctest.html#doctest-directives
+## - Likewise, use compatible output conventions like ... and <BLANKLINE>.
 ## TODO:
 ## - extend usage guide or docstring.
 ## - Add some directives in the test or script comments:
