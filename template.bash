@@ -35,9 +35,9 @@
 # TODO:
 #  - variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
 #     note: EXPR is C style;
-#         Format                    Example
+#         Format                    Example(s)
 #         let EXPR                  let i++
-#         let VAR=(EXPR)            let max_mem=(4 * 1024)
+#         let VAR=(EXPR)            let max_mem=(4 * 1024);    let delay+=5
 #   - comparison operators:
 #         -[eg|ne|lt|le|gt|ge]      if [ $num -eq 3 ]; then echo "tres"; fi
 #   - array variables
