@@ -74,8 +74,9 @@ if [ -e "$HOME/mezcla-tom" ]; then add-python-path "$HOME/mezcla-tom"; fi
 export GRADIO_SERVER_NAME=0.0.0.0
 #
 # Mezcla stuff
-cond-export BRIEF_USAGE 1           # running w/o args shows usage line
-cond-export TRACE_INVOCATION 1      # trace script invocation argv
+cond-export BRIEF_USAGE 1               # running w/o args shows usage line
+cond-export TRACE_INVOCATION 1          # trace script invocation argv
+cond-export DISABLE_RECURSIVE_DELETE 1  # don't allow rm -r during cleanup
 
 # Enable timestamp preservation during git-update alias operations (n.b., stash pop quirk)
 cond-export PRESERVE_GIT_STASH 1
