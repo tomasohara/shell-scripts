@@ -137,10 +137,17 @@ while [[ "$1" =~ ^- ]]; do
     elif [ "$1" == "--quiet" ]; then
         quiet="1"
         verbose_mode="0"
+    elif [ "$1" == "--no-quiet" ]; then
+        quiet="0"
+        ## TODO3?: verbose_mode="1"
     elif [ "$1" == "--verbose" ]; then
         verbose_mode="1"
+    elif [ "$1" == "--no-verbose" ]; then
+        verbose_mode="0"
     elif [[ ("$1" == "--nopattern") || ("$1" == "--no-pattern") ]]; then
         nopattern="1"
+        ## TODO3: reduce redundant flags
+        no_glob="1"
     elif [ "$1" == "--no-glob" ]; then
         no_glob="1"
     elif [ "$1" == "--match-dot-files" ]; then
@@ -201,14 +208,23 @@ if [ ! -d "$master" ]; then
 fi
 
 # Note: nopattern flag only used for producing output labels
+## TODO3: clarify intention
 if [ "$nopattern" == "0" ]; then
     echo "checking files in pattern $pattern"
 fi
 #
+count=0
 # shellcheck disable=SC2086
 for file in $pattern; do
+    # Add line divider
+    if [[ ("$verbose_mode" == "1") && ($count -ge 0) ]]; then
+        echo "------------------------------------------------------------------------"
+    fi
+    let count++
+
+    # Resolve path for other file
     if [[ "$file" =~ \$ ]]; then
-        echo "Warning: Ignoring file with $ in name"
+        echo "Warning: Ignoring file '$file' with $ in name"
         continue
     fi
     # Derive base name for file, including relative directory (e.g., in case pattern specifies subdirectory)
@@ -219,10 +235,10 @@ for file in $pattern; do
         base="$dir/$base"
     fi
     other_file="$master"
-
+    #
     if [ -d "$file" ]; then
         # TODO: have option to recursively do diff's
-        echo "Ignoring subdirectory $file"
+        echo "Warning: Ignoring subdirectory '$file'"
         continue
     fi
     if [ -d "$other_file" ]; then
@@ -230,6 +246,10 @@ for file in $pattern; do
     fi
     if [ "$quiet" == "0" ]; then
         echo "$file vs. $other_file"
+    fi
+    if [ ! -e "$other_file" ]; then
+        echo "Warning: missing other file: '$other_file'"
+        continue
     fi
 
     # Show the timestamps if the files differ, unless in brief mode.
@@ -271,14 +291,18 @@ for file in $pattern; do
 
     # Show the actual file differences
     cat "$TMP/do_diff.$$"
-    
-    # Add line divider
-    if [ "$verbose_mode" == "1" ]; then
-        echo "------------------------------------------------------------------------"
-    fi
+
+    ## OLD:
+    ## # Add line divider
+    ## if [ "$verbose_mode" == "1" ]; then
+    ##     echo "------------------------------------------------------------------------"
+    ## fi
 
     # Add space divider
-    if [ "$quiet" == "0" ]; then
+    ## TEMP: for consistency with continue'd cases above omits space if verbose, becuase
+    ## the divider provides separation.
+    ## OLD: if [ "$quiet" == "0" ]; then
+    if [[ ("$quiet" == "0") && ("$verbose_mode" != "1") ]]; then
         echo ""
     fi
 done
