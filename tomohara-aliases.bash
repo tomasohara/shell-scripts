@@ -2756,8 +2756,9 @@ function script {
     ## DEBUG: echo "script: 3. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
     
     # Get rid of lingering 'script' in xterm title
-    ## DEBUG: echo "Restoring xterm title: full=$save_full save=$save_icon"
-    set-xterm-title "$save_full" "$save_icon"
+    # note: --simple avoids adding info from environment
+    ## DEBUG: echo "Restoring xterm title: full='$save_full' save='$save_icon'"
+    set-xterm-title --simple "$save_full" "$save_icon"
 }
 }
 # TODO: put this in a separate file
