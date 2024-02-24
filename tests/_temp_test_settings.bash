@@ -26,9 +26,10 @@
 ## export SCP_OUTPUT=0                # don't copy results to server via scp
 ## export USE_SSH_AUTH=0              # use ssh w/ scrappycito.pem for git updates
 
-# Override settings if under tetsing VM
-# note: most settings off so user can override when running locally,
+# Override settings if under testing VM
+# Note: 1 .most settings off so user can override when running locally,
 # but, it is awkward to do so for docker or Github runner jobs.
+# 2. For other Github Actions env. vars, see https://www.theserverside.com/blog/Coffee-Talk-Java-News-Stories-and-Opinions/environment-variables-full-list-github-actions
 if [ "$DEPLOYMENT_BASEPATH" == "/opt/runner" ]; then
     export ARCHIVE_OUTPUT=1
     export USE_SSH_AUTH=1
