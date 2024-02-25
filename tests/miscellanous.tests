@@ -78,4 +78,16 @@ $ echo "" | run-python-script template.py - 2>&1 | count-it -show_zeros '1.log' 
 $ echo "" | run-python-script template.py - 2>&1 | count-it -show_zeros '2.log' "./_template.$(T).2.log"
 2.log	1
 
-
+#-------------------------------------------------------------------------------
+# TODO3: address problem with PS_symbol under emacs term when started from
+# bash terminal with script active
+#
+#  $:$ em
+#  =>
+#  M-xterm
+#  =>
+#  $:$ echo "'$PS_symbol'"
+#  '$:$'
+#  $:$ printenv | grep -i pid
+#  SYSTEMD_EXEC_PID=6225
+#  SCRIPT_PID=89097
