@@ -137,11 +137,17 @@ function test-python-script {
         echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] test-python-script script"
         return
     fi
+    # Extract test script
+    local test_script="$1"
+    shift
+    ## TODO2; if [[ ! $test_script =~ /\btest_/ ]]; then
+    if [[ ! $test_script =~ [^a-z0-9]test_ ]]; then
+        test_script="tests/test_$test_script"
+    fi
     PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
-    # note: just uses .log (i.e., ignore .out)
     # TODO3: drop inheritance spec in summary
-    # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "ests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
-    DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@" 2>&1;
+    # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "tests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
+    DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$test_script" "$@" 2>&1;
 }
 #
 # test-python-script-method(test-name, ...): like test-python-script but for specific test
@@ -152,9 +158,13 @@ function test-python-script-method {
 }
 #
 # color-test-failures(): show color-coded test result for pytest run (yellow for xfailed and red for regular fail)
+# color-test-results: likewise with green for passed and faint green xpassed
 simple-alias-fn color-output 'colout --case-insensitive'
 function color-test-failures {
-    cat "$@" | color-output "\bfailed" red | color-output "(xfail(ed)?)" yellow | color-output "\bpassed" green | color-output "xpassed" green faint;
+    cat "$@" | color-output "\bfailed" red | color-output "(xfaile?d?)" yellow;
+}
+function color-test-results {
+    cat "$@" | color-output "\bfailed" red | color-output "(xfaile?d?)" yellow | color-output "\bpassed" green | color-output "xpassed" green faint;
 }
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
