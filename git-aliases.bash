@@ -882,7 +882,7 @@ function git-misc-alias-usage() {
     echo "    git-checkin-all-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
     echo ""
     echo "Source code grepping:"
-    echo ## OLD: "   (git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
+    ## OLD: echo ## OLD: "   (git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
     ## TODO3: get ls-tree to show output relative to current subdirectory
     echo "   (git-cd-root-alias; git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
     echo ""
