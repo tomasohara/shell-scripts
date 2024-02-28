@@ -396,6 +396,9 @@ function sleep-for {
 simple-alias-fn image-metadata 'identify -verbose'
 # show-sd-prompts(file): show keywords in image file for Stable Diffusion prompts
 function show-sd-prompts { image-metadata "$@" | egrep --text --ignore-case '(parameters|(negative prompt)):'; }
+# sd-style(image): make note that IMAGE has given style
+simple-alias-fn sd-note 'todo style: '
+simple-alias-fn sd-grotesque 'sd-note grotesque'
 
 # distro-version-info(): show various information related to distribution, including window and display managers
 # note: screenfetch sans the ascii art
