@@ -2129,6 +2129,12 @@ sub round {
     return ($result);
 }
 
+# round3(number): rounds NUMBER to 3 decimal places
+sub round3 {
+    my($number) = @_;
+    return (&round($number, 3));
+}
+
 # round_all(list, [decimal places])
 #
 # Rounds all the numbers to the specified number of decimal places.
