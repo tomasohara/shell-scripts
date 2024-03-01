@@ -75,6 +75,9 @@ if [ "$verbose" = "1" ]; then
     set -o verbose
 fi
 
+# TEMP: adhoc fixup for crontab usage
+append-path "$source_dir"
+
 # TODO: Do whatever
 # NOTE: This evolved from a scriptlet in a notes file (hence the {'s)
 ## {{
@@ -103,25 +106,11 @@ fi
    export BACKUP_DIR="$ROOT_BACKUP_DIR/backup/$HOSTNAME"
    mkdir -p "$BACKUP_DIR"
    df -h "$BACKUP_DIR"
-   ## OLD:
-   ## trace_log="$BACKUP_DIR/_make-${BASE_DIR}-incremental-backup-$(TODAY).log"
-   ## touch "$trace_log"
-   ## ls -l "$trace_log"
    ## OLD: script "$trace_log"
        ## maldito mac: (current directory not preserved)
        cd "$SOURCE_DIR"
 
-       ## OLD: max_days_old=31
-       ## -or-: max_days_old=92;   -or-: max_days_old=366; 
-       ## -or-: max_days_old=$(calc-int "5 * 365.25");
-       ## -or-: max_days_old=36525                     ## (i.e., 100 years--no limit)
-       ## OLD: max_size_chars=$(calc-int "5 * 1024**2")
-       ## -or-: max_size_chars=131072       -or-: max_size_chars=1048577
-       ## -or-: max_size_chars=1000000000   -or-: max_size_chars=1099511627776  ## (i.e., 1TB--effectively no limit)
-       ## TODO: max_days_old=$(calc-int "5 * 365.25"); max_size_chars=$(calc-int "10**9")
-       ## OLD: max_days_old=$(calc-int "3 * 365.25/12");
        max_days_old=${MAX_DAYS_OLD:-30}
-       ## OLD: max_size_chars=$(calc-int "5 * 1024**2")   # 3 mos and 5 mb
        max_size_chars=${MAX_SIZE_CHARS:-1048576}
        max_size_with_suffix="$(echo "$max_size_chars" | apply-numeric-suffixes | downcase-stdin)"b
        if (( (max_days_old >= 36000) && (max_size_chars >= 1000000000000) )); then
@@ -134,9 +123,8 @@ fi
        basename="$basename-$(TODAY)"
        echo "basename: $basename"
        #
-       ## OLD: $NICE find * .[a-z0-9]* ...
-       ## OLD: gtar
-       TAR="command tar"
+       ## OLD: TAR="command tar"
+       TAR="tar"
 
        # maldito shellcheck (SC2086: Double quote to prevent globbing)
        # shellcheck disable=SC2086
