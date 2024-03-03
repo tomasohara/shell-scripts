@@ -91,3 +91,9 @@ $ echo "" | run-python-script template.py - 2>&1 | count-it -show_zeros '2.log' 
 #  $:$ printenv | grep -i pid
 #  SYSTEMD_EXEC_PID=6225
 #  SCRIPT_PID=89097
+
+#-------------------------------------------------------------------------------
+# TODO: add regression test
+
+## $ calc "2500 * 0.03"
+## Subroutine round3 redefined at /home/tomohara/bin/perlcalc.perl line 62.
