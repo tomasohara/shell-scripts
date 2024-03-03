@@ -59,7 +59,7 @@ sub round_num {
 #
 sub round1 { &round_num($_[0], 1); }
 sub round2 { &round_num($_[0], 2); }
-sub round3 { &round_num($_[0], 2); }
+## OLD: sub round3 { &round_num($_[0], 2); }
 sub round6 { &round_num($_[0], 6); }
 
 # ceil(number): number rounded to nearest integer
