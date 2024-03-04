@@ -106,6 +106,10 @@
 # - Add an option for verbose tracing (and for quiet mode).
 # - Simplify environment-based variable initializations using "${ENV:-default}" approach.
 #
+# TODO1:
+# - Filter miscellaneous output from git command execution (e.g., "enumerating objects"
+#   from git-update-commit-push), such as by just showing 'issuing' output.
+#
 # TODO2:
 # - Fix detection of .ipynb files as binary (e.g., via specical case exception).
 #
@@ -598,7 +602,12 @@ function git-vdiff-alias {
     }
 
 # Produce listing of changed files
-# note: used in check-in templates, so level of indirection involved
+# note:
+# - Used in check-in templates, so level of indirection involved
+# - Uses following one-line from ChatGPT
+#     git diff --name-only | awk -F'/' '{ print NF-1 "\t" $0 }' | sort --key=1 --numeric-sort | cut -f2-
+#   where -F'/' sets the field separator to /; awk splits line and prints the depth (i.e., #/'s - 1) plus line;
+#   it then sorts the output and removes the depth count.
 #
 function git-diff-list-template {
     # TODO: use unique tempfile (e.g., mktemp)
@@ -606,7 +615,8 @@ function git-diff-list-template {
     echo "diff_list_file=\$TMP/_git-diff.\$\$.list"
     # ex: "diff --git a/tomohara-aliases.bash b/tomohara-aliases.bash" => "tomohara-aliases.bash:
     # TODO: ex: "diff --cc mezcla/data_utils.py" => "mezcla/data_utils.py"
-    echo "git diff 2>&1 | extract_matches.perl '^diff.* b/(.*)' >| \$diff_list_file"
+    ## OLD: echo "git diff 2>&1 | extract_matches.perl '^diff.* b/(.*)' >| \$diff_list_file"
+    echo "git diff --name-only | awk -F'/' '{ print NF-1 \"\t\" \$0 }' | sort --key=1 --numeric-sort | cut -f2- >| \$diff_list_file"
 }
 function git-diff-list {
     local diff_list_file
