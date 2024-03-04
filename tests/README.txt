@@ -7,6 +7,13 @@ Adhoc tests
   -- Problematic as current directory might be different.
   -- See Tom's changes to dir-aliases-test-revised.ipynb (circa 17 Jul 23).
 
+TODO1:
+- Make sure any work-in-progress test issues Assert(False).
+
+TODO2:
+- Make sure all python tests follow mezcla template (e.g., THE_MODULE; see mezcla/tests/template.py)
+- Use self.run_script instead of gh.run.
+
 TIPS:
 - ** A drawback with Jupyter based tests is that the output might be generated
   to reflecting the current alias but not capturing the tester's intention.
