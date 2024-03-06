@@ -2410,6 +2410,7 @@ alias apt-search='sudo apt-cache search'
 alias apt-installed='sudo apt list --installed'
 alias apt-uninstall='sudo apt-get remove'
 alias dpkg-install='sudo dpkg --install '
+alias dpkg-extract='dpkg-deb --extract --verbose'
 # TODO: disable if on remote host???
 alias restart-network='sudo ifdown eth0; sudo ifup eth0'
 alias hibernate-system='sudo systemctl hibernate'
