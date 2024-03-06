@@ -89,6 +89,14 @@ alias init-conda3-new='init-condaN'
 ## TODO: reference-var "$anaconda2_dir"
 echo "$anaconda2_dir" > /dev/null
 
+# show-python-path(): display current path for python binary to stderr
+function trace-python-path {
+    local python_path=""
+    python_path=$(/usr/bin/which python 2> /dev/null)
+    trace-vars python_path
+    reference-variable "$python_path"
+}
+
 # Work around for intermittent problems w/ 'conda activate' requiring 'source activate' instead.
 # activation-helper is to handle deactivate as well
 ## OLD: function activation-helper () {
@@ -118,10 +126,12 @@ function activation-helper {
     echo "Alt: $alt_conda_command" "$command" "$env"
     $conda_command "$command" "$env"
     ## DEBUG:
-    local python_path=""
-    python_path=$(/usr/bin/which python 2> /dev/null)
-    trace-vars python_path
-    reference-variable "$python_path"
+    trace-python-path
+    ## OLD:
+    ## local python_path=""
+    ## python_path=$(/usr/bin/which python 2> /dev/null)
+    ## trace-vars python_path
+    ## reference-variable "$python_path"
     ## DEBUG: echo "out activation-helper($@)"
 }
 alias conda-activate='activation-helper activate'
@@ -165,6 +175,7 @@ function conda-activate-env {
     conda-activate "$env"
     add-conda-env-to-xterm-title;
 }
+# conda-activate-env-hack(name): invokes conda-activate-env with hack enabled
 function conda-activate-env-hack { conda-activate-env "$1" "1"; }
 #
 # conda-activate-env-like(env): switch from current anaconda environment to ENV
@@ -183,6 +194,8 @@ function conda-activate-env-like {
         export PATH="$bin_dir:$PATH";
     fi
     add-conda-env-to-xterm-title
+    ## DEBUG:
+    trace-python-path
 }
 #
 function conda-deactivate-env {
