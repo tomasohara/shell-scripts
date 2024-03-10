@@ -93,3 +93,6 @@ win32
 mac-os
 # note: darwin21.1.0 => mac-os
 darwin21.1.0
+
+# cache (safetensors)
+**.safetensors
