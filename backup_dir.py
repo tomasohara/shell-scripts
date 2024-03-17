@@ -35,6 +35,9 @@ BACKUP_DIR = system.getenv_text("BACKUP_DIR", HOME_DIR,
 LOG_DIR = system.getenv_text("LOG_DIR", ".",
                              "Directory for log files")
 DRY_RUN = system.getenv_bool("DRY_RUN", False, "Dry run mode")
+PASSWORD_DEFAULT = system.getenv_value(
+    "PASSWORD_DEFAULT", None,
+    description="Default for password to avoid prompt: be careful when debugging/logging")
 
 def create_backup_folder(source):
     """Try to create the backup folder if it doesn't exist"""
@@ -215,7 +218,8 @@ def deactivate_prompts(ctx, _, value):
     "--password",
     prompt=True,
     hide_input=True,
-    default="",
+    ## OLD: default="",
+    default=(PASSWORD_DEFAULT or ""),
     confirmation_prompt=True,
     help="Blank for no encryption",
 )
