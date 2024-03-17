@@ -93,6 +93,7 @@
 # - *** Indent [maldito] shell-check blocks.
 # - ** Add macros to provide cribsheet on usage!
 # - *** Purge way-old stuff (e.g., lynx related)!
+# - *** Use check_usage for usage statements.
 # - ** Add option to move alias not to put files in subdirectory of target directory. That is, the move command aborts rather than doing following: 'move sub-dir target-dir' ==> target-dir/sub-dir/sub-dir).
 # - ** Minimize overriding commands like 'cd' and 'script' to avoid confusion.
 # - ** Likewise non-standard usages for variables like 'PS1' (e.g., via 'PS_symbol').
@@ -543,6 +544,20 @@ alias reset-prompt-dollar='reset-prompt "\$"'
 # rehash(): reset locations for programs
 alias rehash='hash -l' 
 
+#
+# check_usage(arg, help): shows HELP if ARG --help or empty, setting status true (0) if displayed
+# sample: check_usage "$1" $'usage: munge filename\nexample: munge /etc/password' && return
+function check_usage {
+    local expected_arg="$1"
+    local usage_text="$2"
+    if [[ ("$expected_arg" == "--help") || ("$expected_arg" == "") ]]; then
+        echo "$usage_text"
+        true
+    else
+        false
+    fi
+}
+
 #-------------------------------------------------------------------------------
 # More misc stuff
 ## TOM-IDIOSYNCRATIC
@@ -992,6 +1007,8 @@ function prepare-find-files-here () {
     fi
     if [ "$1" != "" ]; then
         echo "Error: No arguments accepted; did you mean find-files-here?"
+        echo "Usage: $0 [--out-dir dir]"
+        echo "ex: cd /; $0 --out-dir ~/temp/fs-index"
         return
     fi
     # Note:: uses -a to include dot files
@@ -1494,9 +1511,9 @@ function make-tar () {
     #          Otherwise if optional args are present, empty dirs will be excluded from final tar
     # Check arguments
     local base="$1"; local dir="$2";
-    if [ "$base" == "--help" ]; then
+    if [[ ("$base" == "--help") ||("$base" == "") ]]; then
         echo "Usage: make-tar base dir [depth [filter]]"
-        echo "Env. options: USE_DATE, TEMP, GTAR"
+        echo "Env. options: USE_DATE, TEMP, GTAR, MAX_SIZE, TAR_DEPTH, TAR_FILTER"
         echo "note: TEMP used by tar-dir, etc."
         return
     fi
@@ -1542,9 +1559,10 @@ function make-tar () {
 # TODO: handle filenames with embedded spaces
 #
 # tar-dir(dir, depth, [filter]): create archive of DIR in ~/xfer, using subdirectories up to DEPTH, and optionally 
-# filtering files matching exlusion filter.
+# filtering files matching exclusion filter.
 #
-function tar-dir () { 
+function tar-dir () {
+    check_usage "$1" "usage: tar-dir dir [depth]note: see tar-dir for more" && return
     # Warning: see behaviour with optional arguments and subdirs in make-tar
     ## TODO 2: add support for optional filtering 
     local dir="$1"; local depth="$2";
@@ -1650,8 +1668,10 @@ alias color-xterm='rxvt&'
 
 alias count-it='alias-perl count_it.perl'
 alias count_it=count-it
+# count-tokens: count occurrences of space-delimited tokens in input
 function count-tokens () { count-it "\S+" "$@"; }
-# TODO: rework via chomp
+# count-line-text: count occurences of lines excluding newline or return
+# TODO: rework via chomp; TODO2: fix stupid problems viewing under MacOS
 function count-line-text () { count-it '^([^\n\r]*)[\n\r]*$' "$@"; }
 alias extract-matches='alias-perl extract_matches.perl'
 # EX: echo $'1 one\n2 two\n3' | perlgrep 'o\w' => "1 one"
@@ -2462,6 +2482,7 @@ function sudo-admin () {
     base="$prefix$(todays-date).log"
     sudo chmod ugo-w "$prefix"*.log* 2> /dev/null
     local script_log
+    # TODO: (get-free-filename "$base" "." "log")???
     script_log=$(get-free-filename "$base")
     # note: maldito mac: need to special case
     local script_options="--flush"
