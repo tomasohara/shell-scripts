@@ -135,6 +135,7 @@ default_pytest_opts="-vv --capture=tee-sys"
 function test-python-script {
     if [ "$1" = "" ]; then
         echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] test-python-script script"
+        echo "Note: When debugging you might need to use --runxfail and -s to see full error info"
         return
     fi
     # Extract test script
@@ -228,6 +229,9 @@ function shell-check-stdin {
     # shellcheck disable=SC2181
     if [ "$?" -eq 0 ]; then echo "shellcheck OK"; fi
 }
+#
+# shell-check-loose(): run shellcheck with relaxed rules
+simple-alias-fn shell-check-loose 'shellcheck --exclude="SC2046,SC2086,"'
 
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
@@ -271,6 +275,8 @@ function remote-prompt {
     reset-prompt "$prompt"
 }
 alias-fn remote-prompt-root 'remote-prompt "" "#"'
+# TODO2: put alias aliases in separate file to minimize clutter (e.g., to be enabled upon temorary memory lapse)
+alias root-prompt-remote=remote-prompt-root
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
 function pristine-bash {
@@ -309,7 +315,16 @@ function rename-last-snapshot {
     # TODO: have options to use latest file (regardless of name) 
     # shellcheck disable=SC2010
     last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
-    move "$last_file" "$new_name"               
+    move "$last_file" "$new_name"
+
+    # Optionally preview result
+    # TODO3: add getenv_value helper a la mezcla that gets env. value as well as
+    # sets a description.
+    if [ "${RENAME_SNAPSHOT_PREVIEW:-0}" = "1" ]; then
+        pause-for-enter "About to preview $new_name"
+        # TODO2: just preview for a few seconda
+        start "$new_name"
+    fi
 }
 
 #................................................................................
