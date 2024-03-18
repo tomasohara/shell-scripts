@@ -97,3 +97,38 @@ $ echo "" | run-python-script template.py - 2>&1 | count-it -show_zeros '2.log' 
 
 ## $ calc "2500 * 0.03"
 ## Subroutine round3 redefined at /home/tomohara/bin/perlcalc.perl line 62.
+
+#-------------------------------------------------------------------------------
+## TODO2: look into tweaking less-based aliases to trap stderr
+
+## NOTE: apprently no output
+## $ ps-sort | less
+## [blank screen]
+##
+## NOTE: stderr output being missed above
+##
+## $ ps-sort 2>&1 | less | cat | head -3
+## 
+## usage: ps_sort.perl [options]
+
+#-------------------------------------------------------------------------------
+## TODO4: fix usage for prepare-find-files-there
+
+## $ prepare-find-files-there 
+## mkdir: cannot create directory ‘’: No such file or directory
+## Error: No arguments accepted; did you mean find-files-here?
+## Usage: bash [--out-dir dir]
+## ex: cd /; bash --out-dir ~/temp/fs-index
+
+#-------------------------------------------------------------------------------
+## TODO2: add shell-check as part of tests
+
+## $ shell-check tomohara-aliases.bash
+## 
+## In tomohara-aliases.bash line 2470:
+##     scrip3t_log=$(get-free-filename "$base")
+##     ^---------^ SC2034 (warning): scrip3t_log appears unused. Verify use (or export if used externally).
+## 
+## For more information:
+##   https://www.shellcheck.net/wiki/SC2034 -- scrip3t_log appears unused. Verif...
+##
