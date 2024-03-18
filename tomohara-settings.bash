@@ -95,6 +95,8 @@ export LESSBINFMT="*u<%02X>"
 cond-export SKIP_DEFAULT_BASHRC 1
 # Don't enable tab completion (n.b., due to slow init)
 cond-export SKIP_TAB_COMPLETION 1
+# Invoke image viewer after renaming snapshots
+cond-export RENAME_SNAPSHOT_PREVIEW 1
 
 # Get idiosyncratic aliases
 conditional-source "$TOM_BIN/tomohara-proper-aliases.bash"
