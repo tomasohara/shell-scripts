@@ -573,8 +573,15 @@ function git-diff-plus {
     # ex: --- "a/.github/act.yml" => "--- a: .github/act.yml"
     ## TODO? (account for subdirectories 'a' or 'b'):
     ## git diff "$@" | perl -pe 's@^(diff|\-\-\-|\+\+\+) (?!.*[ab]/.*)([ab])/@\1\2 \3: @;' >| "$log";
-    local files=("$@")
-    git diff "${files[@]}" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >| "$log";
+    ## Note: uses git-diff-list[-template] so file order reflects subdir embedding level
+    ## OLD: git diff "${files[@]}" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >| "$log";
+    local OLDIFS=$IFS                   # save inter-field separator
+    echo "" > "$log"
+    for f in $(git-diff-list); do
+        git diff "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log"
+    done
+    IFS=$OLDIFS                         # restore inter-field separator
+    #
     less -p '^diff' "$log";
     ## TODO: less --quit-if-one-screen --pattern='^diff' "$log";
 }
@@ -616,6 +623,8 @@ function git-diff-list-template {
     # ex: "diff --git a/tomohara-aliases.bash b/tomohara-aliases.bash" => "tomohara-aliases.bash:
     # TODO: ex: "diff --cc mezcla/data_utils.py" => "mezcla/data_utils.py"
     ## OLD: echo "git diff 2>&1 | extract_matches.perl '^diff.* b/(.*)' >| \$diff_list_file"
+    ## TODO3: rework to avoid shellcheck warning [SC2028 (info): echo may not expand escape sequences. Use printf.]
+    # shellcheck disable=SC2028
     echo "git diff --name-only | awk -F'/' '{ print NF-1 \"\t\" \$0 }' | sort --key=1 --numeric-sort | cut -f2- >| \$diff_list_file"
 }
 function git-diff-list {
