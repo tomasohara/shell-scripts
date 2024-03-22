@@ -1562,7 +1562,7 @@ function make-tar () {
 # filtering files matching exclusion filter.
 #
 function tar-dir () {
-    check_usage "$1" "usage: tar-dir dir [depth]note: see tar-dir for more" && return
+    check_usage "$1" $'usage: tar-dir dir [depth]\nnote: see make-tar for more"' && return
     # Warning: see behaviour with optional arguments and subdirs in make-tar
     ## TODO 2: add support for optional filtering 
     local dir="$1"; local depth="$2";
