@@ -158,6 +158,11 @@ function test-python-script-method {
     PYTEST_OPTS="-k $method $default_pytest_opts" test-python-script "$@";
 }
 #
+# test-python-script-strict(test-script): run TEST-SCRIPT via pytest with xfail ignored
+function test-python-script-strict {
+    PYTEST_OPTS="--runxfail $default_pytest_opts" test-python-script "$@";
+}
+#
 # color-test-failures(): show color-coded test result for pytest run (yellow for xfailed and red for regular fail)
 # color-test-results: likewise with green for passed and faint green xpassed
 simple-alias-fn color-output 'colout --case-insensitive'
