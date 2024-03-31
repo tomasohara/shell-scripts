@@ -775,7 +775,7 @@ alias git-tar-repo=tar-this-dir-dated
 alias git-tar-repo-proper='TAR_FILTER="\.git\b" tar-this-dir-dated'
 #
 # TODO2: add some type of confirmation
-alias git-checkin-new="GIT_MESSAGE='initial version' git-update-commit-push"
+alias git-checkin-new-alias="GIT_MESSAGE='initial version' git-update-commit-push"
 
 # TODO:
 # NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
