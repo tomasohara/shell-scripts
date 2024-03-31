@@ -93,6 +93,7 @@
 # - *** Indent [maldito] shell-check blocks.
 # - ** Add macros to provide cribsheet on usage!
 # - *** Purge way-old stuff (e.g., lynx related)!
+# - *** Use check_usage for usage statements.
 # - ** Add option to move alias not to put files in subdirectory of target directory. That is, the move command aborts rather than doing following: 'move sub-dir target-dir' ==> target-dir/sub-dir/sub-dir).
 # - ** Minimize overriding commands like 'cd' and 'script' to avoid confusion.
 # - ** Likewise non-standard usages for variables like 'PS1' (e.g., via 'PS_symbol').
@@ -310,9 +311,9 @@ alias todays-update='update-today-vars'
 # usage: reference-variable "$var1, ..."
 # TODO: figure out way to do without quotes (e.g., to avoid SC2086: Double quote to prevent globbing ...)
 function reference-variable { true; }
-## OLD:
-reference-variable "$hoy, $T"
-## TODO: reference-variable $hoy, $T
+## OLD: reference-variable "$hoy, $T"
+## BAD: reference-variable $hoy, $T
+reference-variable "$hoy $T"
 
 # Alias creation helper(s)
 # Note: does no-op so that status set to 0 for sake of tests/test_tomohara-aliases.bash setup
@@ -542,6 +543,20 @@ alias reset-prompt-dollar='reset-prompt "\$"'
 
 # rehash(): reset locations for programs
 alias rehash='hash -l' 
+
+#
+# check_usage(arg, help): shows HELP if ARG --help or empty, setting status true (0) if displayed
+# sample: check_usage "$1" $'usage: munge filename\nexample: munge /etc/password' && return
+function check_usage {
+    local expected_arg="$1"
+    local usage_text="$2"
+    if [[ ("$expected_arg" == "--help") || ("$expected_arg" == "") ]]; then
+        echo "$usage_text"
+        true
+    else
+        false
+    fi
+}
 
 #-------------------------------------------------------------------------------
 # More misc stuff
@@ -992,6 +1007,8 @@ function prepare-find-files-here () {
     fi
     if [ "$1" != "" ]; then
         echo "Error: No arguments accepted; did you mean find-files-here?"
+        echo "Usage: $0 [--out-dir dir]"
+        echo "ex: cd /; $0 --out-dir ~/temp/fs-index"
         return
     fi
     # Note:: uses -a to include dot files
@@ -1101,6 +1118,9 @@ alias em-devel='em --devel'
 # note: double dashes seprate tpo-invoke-emacs.sh args from emacs
 function em-debug () { em -- --debug-init "$@"; }
 function em-quick () { em -- --quick "$@"; }
+# em-wide: invoke emacs with extra-wide window (e.g., for UHD monitor viewing two files)
+# TODO2: fix order of files so first on left
+function em-wide { em -- -geometry 288x50 -eval "(split-window-right)" "$@"; }
 
 #--------------------------------------------------------------------------------
 # Simple TODO-list maintenance commands
@@ -1187,7 +1207,6 @@ function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
 
 # convert-emoticons(...): replace emoticons in input with description
 # EX: convert-emoticons - <<<"💬" => "[speech balloon]"
-## OLD: alias convert-emoticons='DURING_ALIAS=1 convert_emoticons.py'
 alias convert-emoticons='alias-python "$(which convert_emoticons.py)"'
 alias convert-emoticons-stdin='convert-emoticons -'
 
@@ -1290,7 +1309,6 @@ function byte-usage () { output_file="usage.bytes.list"; backup-file $output_fil
 function check-errors-aux { alias-perl check_errors.perl "$@"; }
 ## # -or-:
 ## function check-errors-aux { PERL_SWITCH_PARSING=1 check_errors.py "$@"; };
-## OLD
 # note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
 ALIAS_DEBUG_LEVEL=${ALIAS_DEBUG_LEVEL:-${DEBUG_LEVEL:-2}}
 function check-errors () {
@@ -1337,7 +1355,7 @@ function check-errors-excerpt () {
 
 # Note: various aliases for doing diff-based comparisons
 #
-function tkdiff () { wish -f "$TOM_BIN"/tkdiff.tcl "$@" & }
+function tkdiff () { wish -f "$TOM_BIN"/archive/tkdiff.tcl "$@" & }
 alias rdiff='rev_vdiff.sh'
 alias tkdiff-='tkdiff -noopt'
 #
@@ -1393,16 +1411,24 @@ alias diff-log-output='compare-log-output.sh'
 alias vdiff-rev=kdiff-rev
 
 # most-recent-backup(file): returns most recent backup for FILE in ./backup, accounting for revisions (e.g., extract_matches.perl.~4~)
+# ntoe: now uses backup dir relative to file if a path
 function most-recent-backup {
     if [ "$1" = "" ]; then
         echo "usage: most-recent-backup filename"
         echo "use BACKUP_DIR=dir ... to override use of ./backup"
         return
     fi
+    ## TODO4: file => file_basename
     local file="$1";
     local dir="$BACKUP_DIR"; if [ "$dir" = "" ]; then dir=./backup; fi
+    local file_dir
+    file_dir="$(dirname "$file")"
+    if [ "." != "$file_dir" ]; then
+        file="$(basename "$file")"
+        dir="$file_dir/$dir"
+    fi
     ## TODO: rework to avoid false positives
-    $LS -t $dir/* $dir/.* | $EGREP "/$file(~|.~*)?" | head -1;
+    $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~*)?" | head -1;
 }
 # TODO: test for dot-files:
 #   touch backup .fubar.~666~; most-recent-backup .fubar => .fubar
@@ -1485,9 +1511,9 @@ function make-tar () {
     #          Otherwise if optional args are present, empty dirs will be excluded from final tar
     # Check arguments
     local base="$1"; local dir="$2";
-    if [ "$base" == "--help" ]; then
+    if [[ ("$base" == "--help") ||("$base" == "") ]]; then
         echo "Usage: make-tar base dir [depth [filter]]"
-        echo "Env. options: USE_DATE, TEMP, GTAR"
+        echo "Env. options: USE_DATE, TEMP, GTAR, MAX_SIZE, TAR_DEPTH, TAR_FILTER"
         echo "note: TEMP used by tar-dir, etc."
         return
     fi
@@ -1519,7 +1545,7 @@ function make-tar () {
     if [ "${depth_arg}${size_arg}${filter_arg[*]}" == "." ]; then
         $NICE $GTAR cvfz "$base.tar.gz" "$dir" >| "$base.tar.log" 2>&1;
     else
-        (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $GREP -i "${filter_arg[@]}" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
+        (find "$dir" $find_options $depth_arg $size_arg -not -type d -print | $EGREP -i "${filter_arg[@]}" | $NICE $GTAR cvfTz "$base.tar.gz" -) >| "$base.tar.log" 2>&1;
     fi
     ## DUH: -L added to support tar-this-dir in directory that is symbolic link, but unfortunately
     ## that leads to symbolic links in the directory itself to be included
@@ -1533,9 +1559,10 @@ function make-tar () {
 # TODO: handle filenames with embedded spaces
 #
 # tar-dir(dir, depth, [filter]): create archive of DIR in ~/xfer, using subdirectories up to DEPTH, and optionally 
-# filtering files matching exlusion filter.
+# filtering files matching exclusion filter.
 #
-function tar-dir () { 
+function tar-dir () {
+    check_usage "$1" $'usage: tar-dir dir [depth]\nnote: see make-tar for more"' && return
     # Warning: see behaviour with optional arguments and subdirs in make-tar
     ## TODO 2: add support for optional filtering 
     local dir="$1"; local depth="$2";
@@ -1596,11 +1623,14 @@ function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basen
 
 function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
 # GTAR_OPTS: usual options for aliases using gnu tar
-GTAR_OPTS=vfz
+GTAR_OPTS=""
 ## TODO2: GTAR_USUAL="$GTAR GTAR_OPTS"
 function set-tar-bzip2 () { GTAR_OPTS="vfj"; }
-function unset-tar-bzip2 () { GTAR_OPTS="vfz"; }
+function unset-tar-bzip2 () { reset-tar-opts; }
+function set-tar-xz () { GTAR_OPTS="vfJ"; }
+function reset-tar-opts { GTAR_OPTS="vfz"; }
 function make-recent-tar () { (find . -type f -mtime -"$2" | $GTAR "c${GTAR_OPTS}T" "$1" -; ) 2>&1 | $PAGER; ls-relative "$1"; }
+reset-tar-opts
 #
 # " (for Emacs)
 # NOTE: above quote needed to correct for Emacs color coding
@@ -1638,8 +1668,10 @@ alias color-xterm='rxvt&'
 
 alias count-it='alias-perl count_it.perl'
 alias count_it=count-it
+# count-tokens: count occurrences of space-delimited tokens in input
 function count-tokens () { count-it "\S+" "$@"; }
-# TODO: rework via chomp
+# count-line-text: count occurences of lines excluding newline or return
+# TODO: rework via chomp; TODO2: fix stupid problems viewing under MacOS
 function count-line-text () { count-it '^([^\n\r]*)[\n\r]*$' "$@"; }
 alias extract-matches='alias-perl extract_matches.perl'
 # EX: echo $'1 one\n2 two\n3' | perlgrep 'o\w' => "1 one"
@@ -1747,7 +1779,6 @@ function run-app {
     fi
     "$path" "$@" >> "$log" 2>&1 &
     ## TODO: make sure command invoked OK and then put into background
-    ## OLD: sleep-for 5 "waiting for $log"
     local delay=5
     sleep-for "$delay" "waiting ${delay}s for $log"
     check-errors-excerpt "$log"
@@ -1896,12 +1927,8 @@ deprecated-alias-fn ps-mine- ps-mine-sans-dir
 alias ps_mine='ps-mine'
 ## DUP: alias ps-mine-='ps-mine "$@" | filter-dirnames'
 alias ps-mine-all='ps-mine --all'
-## OLD: alias old-rename-files='perl- rename_files.perl'
 alias rename-files='alias-perl rename_files.perl'
 alias rename_files='rename-files'
-## OLD: alias testwn='perl- testwn.perl'
-## BAD: alias perlgrep='perl- perlgrep.perl'
-## OLD: alias foreach='perl- foreach.perl'
 alias foreach='alias-perl foreach.perl'
 
 #--------------------------------------------------------------------------------
@@ -2403,6 +2430,7 @@ alias apt-search='sudo apt-cache search'
 alias apt-installed='sudo apt list --installed'
 alias apt-uninstall='sudo apt-get remove'
 alias dpkg-install='sudo dpkg --install '
+alias dpkg-extract='dpkg-deb --extract --verbose'
 # TODO: disable if on remote host???
 alias restart-network='sudo ifdown eth0; sudo ifup eth0'
 alias hibernate-system='sudo systemctl hibernate'
@@ -2454,6 +2482,7 @@ function sudo-admin () {
     base="$prefix$(todays-date).log"
     sudo chmod ugo-w "$prefix"*.log* 2> /dev/null
     local script_log
+    # TODO: (get-free-filename "$base" "." "log")???
     script_log=$(get-free-filename "$base")
     # note: maldito mac: need to special case
     local script_options="--flush"
@@ -2749,8 +2778,9 @@ function script {
     ## DEBUG: echo "script: 3. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
     
     # Get rid of lingering 'script' in xterm title
-    ## DEBUG: echo "Restoring xterm title: full=$save_full save=$save_icon"
-    set-xterm-title "$save_full" "$save_icon"
+    # note: --simple avoids adding info from environment
+    ## DEBUG: echo "Restoring xterm title: full='$save_full' save='$save_icon'"
+    set-xterm-title --simple "$save_full" "$save_icon"
 }
 }
 # TODO: put this in a separate file
@@ -2934,11 +2964,6 @@ function python-package-members() { local package="$1"; alias-python -c "import 
 alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  alias-python setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
 # TODO: add -v (the xargs usage seems to block it)
 alias python-uninstall-setup='cat installed-files.list | xargs command rm -vi; alias-perl rename_files.perl -regex ^ un installed-files.list'
-
-## OLD:
-## # alias-python: python invocation for using in aliases
-## # note: avoids excess tracing; see debug.py and main.py
-## alias alias-python='DURING_ALIAS=1 python3'
 
 # ipython(): overrides ipython command to set xterm title and to add git repo base directory to python path
 function ipython() { 
@@ -3167,8 +3192,10 @@ alias run-epiphany-browser='invoke-browser epiphany-browser'
 # nvidia-smi-loop([secs=1]): run nvidia-smi with SECS looping
 function nvidia-smi-loop {
     local secs="${1:-1}";
-    nvidia-smi --loop="$secs";
-    }
+    local ms
+    ms=$(calc "$secs * 1000")
+    nvidia-smi --loop-ms="$ms";
+}
 alias nvidia-loop=nvidia-smi-loop
 
 # Multilingual

@@ -8,6 +8,9 @@
 
 """Tests for tpo_count_it.py module"""
 
+## TODO1: add standard mezcla test support (e.g., THE_MODULE; see mezcla/tests/template.py)
+## TODO2: use self.run_script instead of gh.run
+## TODO1: make sure WORK-IN-PROGRESS issue Assert(False)
 
 # Standart packages
 import unittest

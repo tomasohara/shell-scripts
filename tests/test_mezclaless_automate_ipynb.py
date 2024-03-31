@@ -1,3 +1,5 @@
+## TODO1: add standard header (e.g., based on mezcla/tests/template.py)
+
 import os
 import subprocess
 import automate_ipynb
@@ -13,6 +15,7 @@ def test_url_generation():
 
 def test_automation():
     app = automate_ipynb_indev.AutomateIPYNB()
+    debug.assertion(USE_FIREFOX)
     with patch("selenium.webdriver.Firefox") as mock_firefox:
         mock_driver = Mock(spec=webdriver.Firefox)
         mock_firefox.return_value = mock_driver

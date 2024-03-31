@@ -106,6 +106,10 @@
 # - Add an option for verbose tracing (and for quiet mode).
 # - Simplify environment-based variable initializations using "${ENV:-default}" approach.
 #
+# TODO1:
+# - Filter miscellaneous output from git command execution (e.g., "enumerating objects"
+#   from git-update-commit-push), such as by just showing 'issuing' output.
+#
 # TODO2:
 # - Fix detection of .ipynb files as binary (e.g., via specical case exception).
 #
@@ -569,8 +573,15 @@ function git-diff-plus {
     # ex: --- "a/.github/act.yml" => "--- a: .github/act.yml"
     ## TODO? (account for subdirectories 'a' or 'b'):
     ## git diff "$@" | perl -pe 's@^(diff|\-\-\-|\+\+\+) (?!.*[ab]/.*)([ab])/@\1\2 \3: @;' >| "$log";
-    local files=("$@")
-    git diff "${files[@]}" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >| "$log";
+    ## Note: uses git-diff-list[-template] so file order reflects subdir embedding level
+    ## OLD: git diff "${files[@]}" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >| "$log";
+    local OLDIFS=$IFS                   # save inter-field separator
+    echo "" > "$log"
+    for f in $(git-diff-list); do
+        git diff "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log"
+    done
+    IFS=$OLDIFS                         # restore inter-field separator
+    #
     less -p '^diff' "$log";
     ## TODO: less --quit-if-one-screen --pattern='^diff' "$log";
 }
@@ -598,7 +609,12 @@ function git-vdiff-alias {
     }
 
 # Produce listing of changed files
-# note: used in check-in templates, so level of indirection involved
+# note:
+# - Used in check-in templates, so level of indirection involved
+# - Uses following one-line from ChatGPT
+#     git diff --name-only | awk -F'/' '{ print NF-1 "\t" $0 }' | sort --key=1 --numeric-sort | cut -f2-
+#   where -F'/' sets the field separator to /; awk splits line and prints the depth (i.e., #/'s - 1) plus line;
+#   it then sorts the output and removes the depth count.
 #
 function git-diff-list-template {
     # TODO: use unique tempfile (e.g., mktemp)
@@ -606,7 +622,10 @@ function git-diff-list-template {
     echo "diff_list_file=\$TMP/_git-diff.\$\$.list"
     # ex: "diff --git a/tomohara-aliases.bash b/tomohara-aliases.bash" => "tomohara-aliases.bash:
     # TODO: ex: "diff --cc mezcla/data_utils.py" => "mezcla/data_utils.py"
-    echo "git diff 2>&1 | extract_matches.perl '^diff.* b/(.*)' >| \$diff_list_file"
+    ## OLD: echo "git diff 2>&1 | extract_matches.perl '^diff.* b/(.*)' >| \$diff_list_file"
+    ## TODO3: rework to avoid shellcheck warning [SC2028 (info): echo may not expand escape sequences. Use printf.]
+    # shellcheck disable=SC2028
+    echo "git diff --name-only | awk -F'/' '{ print NF-1 \"\t\" \$0 }' | sort --key=1 --numeric-sort | cut -f2- >| \$diff_list_file"
 }
 function git-diff-list {
     local diff_list_file
@@ -749,6 +768,15 @@ simple-alias-fn git-refresh-aliases 'git-alias-refresh'
 simple-alias-fn git-next-checkin 'invoke-alt-checkin'      # uses alt-invoke-next-single-checkin
 simple-alias-fn git-extract-all-versions 'extract-all-git-versions.bash'
 ## TEST: hide tracing output alias git-next-checkin='invoke-alt-checkin 2> /dev/null'
+# git-tar-repo(): create tar archive of entire repo
+alias git-tar-repo=tar-this-dir-dated
+# git-tar-repo-proper(): create tar archive of repo excluding .git
+# note: this is to create backup before updating repo (in case of conflicts)
+alias git-tar-repo-proper='TAR_FILTER="\.git\b" tar-this-dir-dated'
+#
+# TODO2: add some type of confirmation
+alias git-checkin-new-alias="GIT_MESSAGE='initial version' git-update-commit-push"
+
 # TODO:
 # NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
 function git-checkout-branch {
@@ -828,7 +856,7 @@ function git-alias-usage () {
     echo ''
     echo 'Usual check-in process:'
     # TODO2: rework git-update-force via dry-run git-update with conflict check
-    echo '    git-cd-root-alias; tar-this-dir-dated; git-update-force; git-next-checkin'
+    echo '    git-cd-root-alias; git-tar-repo-proper; git-update-force; git-next-checkin'
     echo '    # -or-: git-cd-root-alias; git-update-verified; git-conflicts-alias; git-next-checkin'
     echo '    git-next-checkin                      # repeat, as needed'
 
@@ -876,7 +904,7 @@ function git-misc-alias-usage() {
     echo "    git-checkin-all-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
     echo ""
     echo "Source code grepping:"
-    echo ## OLD: "   (git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
+    ## OLD: echo ## OLD: "   (git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
     ## TODO3: get ls-tree to show output relative to current subdirectory
     echo "   (git-cd-root-alias; git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
     echo ""

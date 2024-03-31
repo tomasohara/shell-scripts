@@ -1,6 +1,9 @@
 #! /usr/bin/env python
 #
 # Tests for extract_matches.py module
+#
+
+## TODO1: make sure WORK-IN-PROGRESS issue Assert(False)
 
 
 """Tests for extract_matches.py module"""

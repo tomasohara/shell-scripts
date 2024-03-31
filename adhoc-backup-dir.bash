@@ -75,6 +75,9 @@ if [ "$verbose" = "1" ]; then
     set -o verbose
 fi
 
+# TEMP: adhoc fixup for crontab usage
+append-path "$source_dir"
+
 # TODO: Do whatever
 # NOTE: This evolved from a scriptlet in a notes file (hence the {'s)
 ## {{
@@ -87,11 +90,14 @@ fi
    export BASE_DIR
    BASE_DIR=$(basename "$PWD")
    if [ "$BASE_DIR" = "/" ]; then
-      # note: uses "fs-root" for label if / and retricts to same file system
-      export BASE_DIR=fs-root;
-      export MISC_FIND_OPTIONS="-xdev"
-      ## TODO2: exclude adhoc files and directories
-      ## export EXCLUDE_REGEX = "(/proc/|/swapfile/|/tmp/)"
+       # note: uses "fs-root" for label if / and retricts to same file system
+       export BASE_DIR=fs-root;
+       export MISC_FIND_OPTIONS="-xdev"
+       ## TODO2: exclude adhoc files and directories
+       EXCLUDE_REGEX="${EXCLUDE_REGEX:-"(/proc/|/swapfile/|/tmp/)"}"
+   else
+       # note: no-op exclusion filter
+       EXCLUDE_REGEX="${EXCLUDE_REGEX:-"($^)"}"       
    fi
    export SOURCE_DIR="$PWD"
    ## TODO: pre-select based on existence (i.e., prioritized check)
@@ -103,30 +109,16 @@ fi
    export BACKUP_DIR="$ROOT_BACKUP_DIR/backup/$HOSTNAME"
    mkdir -p "$BACKUP_DIR"
    df -h "$BACKUP_DIR"
-   ## OLD:
-   ## trace_log="$BACKUP_DIR/_make-${BASE_DIR}-incremental-backup-$(TODAY).log"
-   ## touch "$trace_log"
-   ## ls -l "$trace_log"
    ## OLD: script "$trace_log"
        ## maldito mac: (current directory not preserved)
        cd "$SOURCE_DIR"
 
-       ## OLD: max_days_old=31
-       ## -or-: max_days_old=92;   -or-: max_days_old=366; 
-       ## -or-: max_days_old=$(calc-int "5 * 365.25");
-       ## -or-: max_days_old=36525                     ## (i.e., 100 years--no limit)
-       ## OLD: max_size_chars=$(calc-int "5 * 1024**2")
-       ## -or-: max_size_chars=131072       -or-: max_size_chars=1048577
-       ## -or-: max_size_chars=1000000000   -or-: max_size_chars=1099511627776  ## (i.e., 1TB--effectively no limit)
-       ## TODO: max_days_old=$(calc-int "5 * 365.25"); max_size_chars=$(calc-int "10**9")
-       ## OLD: max_days_old=$(calc-int "3 * 365.25/12");
        max_days_old=${MAX_DAYS_OLD:-30}
-       ## OLD: max_size_chars=$(calc-int "5 * 1024**2")   # 3 mos and 5 mb
        max_size_chars=${MAX_SIZE_CHARS:-1048576}
        max_size_with_suffix="$(echo "$max_size_chars" | apply-numeric-suffixes | downcase-stdin)"b
-       if (( (max_days_old >= 36000) && (max_size_chars >= 1000000000000) )); then
+       if (( (max_days_old >= 36000) && (max_size_chars >= 1000000000000) )); then  # 100+ years 1+ tb
            basename="${BACKUP_DIR}/full-$HOSTNAME-$BASE_DIR"
-       elif (( (max_days_old >= 1800) && (max_size_chars >= 1000000000) )); then
+       elif (( (max_days_old >= 1800) && (max_size_chars >= 1000000000) )); then    # 5+ years 1+ gb
            basename="${BACKUP_DIR}/fullish-$HOSTNAME-$BASE_DIR"
        else
            basename="${BACKUP_DIR}/incr-$HOSTNAME-$BASE_DIR-${max_days_old}days-max${max_size_with_suffix}"
@@ -134,14 +126,13 @@ fi
        basename="$basename-$(TODAY)"
        echo "basename: $basename"
        #
-       ## OLD: $NICE find * .[a-z0-9]* ...
-       ## OLD: gtar
-       TAR="command tar"
+       ## OLD: TAR="command tar"
+       TAR="tar"
 
        # maldito shellcheck (SC2086: Double quote to prevent globbing)
        # shellcheck disable=SC2086
        rename-with-file-date "$basename.tar.log" 
-       $NICE find ./* ./.[^.]* $MISC_FIND_OPTIONS -type f -mtime "-$max_days_old" -size "-${max_size_chars}c" | $NICE $TAR cvfzT "$basename.tar.gz" - > "$basename.tar.log" 2>&1
+       $NICE find ./* ./.[^.]* $MISC_FIND_OPTIONS -type f -mtime "-$max_days_old" -size "-${max_size_chars}c" | $EGREP -v "EXCLUDE_REGEX" | $NICE $TAR cvfzT "$basename.tar.gz" - > "$basename.tar.log" 2>&1
        dir "$basename"* | cat
        ##
        check-errors-excerpt "$basename.tar.log" | head

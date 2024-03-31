@@ -11,6 +11,12 @@
 # - The patterns are glob-like with the extension that **/GLOB
 #   matches the glob pattern in any subdirectory.
 # - See 'man gitignore' for details.
+# - * Use check-ignore to test patterns:
+#     $ git check-ignore --non-matching --verbose _fubar.txt
+#     .gitignore:31:**/_*	_fubar.txt
+#     $ git check-ignore --non-matching --verbose fubar.txt
+#     ::	fubar.txt
+#  which uses format <file>:<line>:<pattern> (n.b., '::' indicates no match).
 #
 # TODO:
 # - Address the TODO's below.
@@ -20,6 +26,8 @@
 # TODO: see why excluded by the rules
 # Workflow files (e.g., .github/workflows/tests.yml).
 !.github/**
+!tests/_temp-user-docker.env
+!tests/_temp_test_settings.bash
 
 # Log files and listings
 # TODO: figure out how to apply to subdirs
@@ -32,8 +40,6 @@
 !**/*__init__.py
 # Likewise for trailing _'s (e.g., master-dir-link_)
 **/*_
-# Explicit filter
-_temp-user-docker.env
 
 # Backup file
 **/*.bak

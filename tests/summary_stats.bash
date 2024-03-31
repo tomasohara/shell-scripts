@@ -180,7 +180,7 @@ fi
 if [ "${SCP_OUTPUT:-0}" == "1" ]; then
     mmddyyhhmm=$(date '+%d%b%y-%H%M')
     tar_base="/tmp/_batspp-output-$mmddyyhhmm"
-    tar cvfz "$tar_base.tar.gz" "$BATSPP_OUTPUT" >| "$tar_base.tar.log" 2>&1
+    tar cvfz "$tar_base.tar.gz" "$BATSPP_OUTPUT" "$BATSPP_TEMP" >| "$tar_base.tar.log" 2>&1
     #
     remote_spec="ubuntu@ec2-54-191-214-184.us-west-2.compute.amazonaws.com:xfer"
     echo "scp'ing $tar_base.tar.gz to $remote_spec"
