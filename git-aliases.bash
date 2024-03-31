@@ -773,6 +773,9 @@ alias git-tar-repo=tar-this-dir-dated
 # git-tar-repo-proper(): create tar archive of repo excluding .git
 # note: this is to create backup before updating repo (in case of conflicts)
 alias git-tar-repo-proper='TAR_FILTER="\.git\b" tar-this-dir-dated'
+#
+# TODO2: add some type of confirmation
+alias git-checkin-new="GIT_MESSAGE='initial version' git-update-commit-push"
 
 # TODO:
 # NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
