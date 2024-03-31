@@ -132,3 +132,35 @@ $ echo "" | run-python-script template.py - 2>&1 | count-it -show_zeros '2.log' 
 ## For more information:
 ##   https://www.shellcheck.net/wiki/SC2034 -- scrip3t_log appears unused. Verif...
 ##
+
+#...............................................................................
+## TODO3: account for misc. setup for new hosts
+
+## $ script-update 
+## Script started, file is _update-30mar24.log
+## bash: make-git-update.bash: command not found
+## Script done, file is _update-30mar24.log
+## 
+## $ pwd-host-info 
+## /home/ubuntu/bin
+## n/a
+## ip-10-0-9-217
+##
+##----------
+## 
+## $ which make-git-update.bash
+## /home/tomohara/bin/adhoc/make-git-update.bash
+## 
+## $ pwd-host-info 
+## /home/tomohara/tom-mezcla/examples
+## reempl
+## tpo-reemplazo
+##
+##----------
+##
+## note: workaound for Tom
+##
+## $ all-tomohara-settings
+## Warning: append-path non-existent: /home/ubuntu/.local/bin
+## realpath: /home/ubuntu/Mezcla/mezcla/..: No such file or directory
+##
