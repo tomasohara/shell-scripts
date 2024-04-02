@@ -1915,6 +1915,8 @@ alias convert-termstrings='perl- convert_termstrings.perl'
 alias do-rcsdiff='do_rcsdiff.sh'
 alias dobackup='dobackup.sh'
 alias kill-em='kill_em.sh'
+## OLD: alias kill-em='kill_em.sh'
+alias kill-em='kill_em.bash'
 alias kill-it='kill-em --pattern'
 # ps-mine: wrapper around ps_mine.sh w/ filtering (e.g., defunct)
 alias ps-mine='ps_mine.sh --filtered'
