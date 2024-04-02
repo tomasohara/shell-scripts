@@ -167,6 +167,7 @@ function get-temp-log-name {
     log_file=$(mktemp "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log")
     ## TEMP: rename existing temp file (MaxOs quirk?)
     if [ -s "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log" ]; then
+        echo "FYI: applying get-temp-log-name workaround"
         rename-with-file-date "$log_file"
         touch "$log_file"
     fi
