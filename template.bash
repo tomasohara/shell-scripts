@@ -12,7 +12,7 @@
 #     if [[ $var =~ pattern ]]; then STMT; fi       note: requires Bash 3.0+
 #        where pattern is unquoted egrep regex (n.b., use .*.ext not *.ext)
 #     if (( ARITH_EXPR )); then STMT; fi
-#     if [ -s "file" ]; then ...; fi
+#     if [ -s "file" ]; then ...; fi    where -s is non-empty test (see below)
 #     case EXPR in PATTERN_a) STMT_a;; PATTERN_b) STMT_b;; ... esac
 #     for name [in words ...]; do commands; done
 #     for (( expr1 ; expr2 ; expr3 )) ; do commands ; done
