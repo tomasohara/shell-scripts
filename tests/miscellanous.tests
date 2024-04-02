@@ -8,6 +8,9 @@
 ## 239      [/Users/tohara/mezcla/debug.py] unloaded at 2023-04-06 08:31:32.036632; elapsed=4.613s
 
 
+#-------------------------------------------------------------------------------
+# git-related aliases
+
 ## TODO:
 ## resolve silly intermittent problem with aliases in git-aliases.bash
 ##
@@ -15,6 +18,24 @@
 ## ...
 ## bash: git-next-checkin: command not found
 ##
+
+## TODO: add test to avoid regresssion of temp-log issue
+## $ git-diff- *git*bash 2>&1 | cat
+## bash: ./log-files/_git-diff-02apr24-1643-suR.log: cannot overwrite existing file
+## diff --git a: git-aliases.bash b: git-aliases.bash
+## index 6cbcefe9..7ac0fa52 100755
+## --- a: git-aliases.bash
+## +++ b: git-aliases.bash
+## @@ -576,7 +576,8 @@ function git-diff-plus {
+##      ## Note: uses git-diff-list[-template] so file order reflects subdir embedding level
+##      ## OLD: git diff "${files[@]}" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >| "$log";
+##      local OLDIFS=$IFS                   # save inter-field separator
+## -    echo "" > "$log"
+## +    ## BAD: echo "" > "$log"
+## +    echo "" >> "$log"
+##      for f in $(git-diff-list); do
+##          git diff "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log"
+##      done
 
 #...............................................................................
 ## TODO:
@@ -164,3 +185,4 @@ $ echo "" | run-python-script template.py - 2>&1 | count-it -show_zeros '2.log' 
 ## Warning: append-path non-existent: /home/ubuntu/.local/bin
 ## realpath: /home/ubuntu/Mezcla/mezcla/..: No such file or directory
 ##
+
