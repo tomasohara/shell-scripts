@@ -110,9 +110,6 @@
 # - Filter miscellaneous output from git command execution (e.g., "enumerating objects"
 #   from git-update-commit-push), such as by just showing 'issuing' output.
 #
-# TODO2:
-# - Fix detection of .ipynb files as binary (e.g., via specical case exception).
-#
 
 ## DEBUG: echo "in ${BASH_SOURCE[0]}"
 
@@ -165,7 +162,15 @@ function get-temp-log-name {
     mkdir --parents "$LOG_DIR"
     now_mmddyyhhmm=$(date '+%d%b%y-%H%M' | downcase-stdin-alias);
     # TODO: use integral suffix (not hex)
-    mktemp "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log"
+    ## OLD: mktemp "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log"
+    local log_file
+    log_file=$(mktemp "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log")
+    ## TEMP: rename existing temp file (MaxOs quirk?)
+    if [ -s "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log" ]; then
+        rename-with-file-date "$log_file"
+        touch "$log_file"
+    fi
+    echo "$log_file"
 }
 
 # git-alias-review-log(file): review log FILE checking for common errors
