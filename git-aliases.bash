@@ -155,7 +155,7 @@ function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 check_errors.perl -context=5
 #................................................................................
 
 # get-temp-log-name([label=temp]: Return unique file name of the form _git-LABEL-MMDDYY-HHMM-NNN.log
-#
+# note: the temp file gets created
 #
 function get-temp-log-name {
     local label=${1:-temp}
@@ -435,7 +435,7 @@ function invoke-git-command {
     local log
     log=$(get-temp-log-name "$command")
     echo "issuing: git $command $*"
-    git "$command" "$@" >| "$log" 2>&1
+    git "$command" "$@" >> "$log" 2>&1
     ## PREVIOUS: less
     ## NOTE: unfortunately, less clears the screen
     ## TODO: less --quit-if-one-screen "$log"
@@ -463,7 +463,7 @@ function git-add-plus {
     log=$(get-temp-log-name "add");
     local options=""
     if [ "$GIT_FORCE" = "1" ]; then options="--force"; fi
-    git add $options "$@" >| "$log" 2>&1;
+    git add $options "$@" >> "$log" 2>&1;
 
     # Sanity check
     git-alias-review-log "$log"
@@ -493,7 +493,7 @@ function git-reset-file {
     fi
 
     # Isolate old versions
-    mkdir -p _git-trash >| "$log";
+    mkdir -p _git-trash >> "$log";
     echo "issuing: cp -vpf $* _git-trash";
     # Note: Uses  'command cp' to avoid confirmation when same file already in trash.
     # This is a design decision since resets aren't common (e.g., vs. timestamping trash files).
@@ -543,7 +543,7 @@ function git-restore-file-helper {
     fi
 
     # Isolate old versions
-    mkdir -p _git-trash >| "$log";
+    mkdir -p _git-trash >> "$log";
     echo "issuing: cp -vpf $* _git-trash";
     # Note: Uses  'command cp' to avoid confirmation when same file already in trash.
     # This is a design decision since restores aren't common (e.g., vs. timestamping trash files).
@@ -576,7 +576,8 @@ function git-diff-plus {
     ## Note: uses git-diff-list[-template] so file order reflects subdir embedding level
     ## OLD: git diff "${files[@]}" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >| "$log";
     local OLDIFS=$IFS                   # save inter-field separator
-    echo "" > "$log"
+    ## BAD: echo "" > "$log"
+    echo "" >> "$log"
     for f in $(git-diff-list); do
         git diff "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log"
     done
