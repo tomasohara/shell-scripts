@@ -169,7 +169,7 @@ function test-python-script-method-strict {
     ## TODO2: default_pytest_opts="--runxfail" test-python-script-method "$@";
     local method="$1";
     shift;
-    PYTEST_OPTS="--runxfail $default_pytest_opts" test-python-script "$@";
+    PYTEST_OPTS="--runxfail -k $method $default_pytest_opts" test-python-script "$@";
 }
 #
 # color-test-failures(): show color-coded test result for pytest run (yellow for xfailed and red for regular fail)
