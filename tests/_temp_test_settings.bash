@@ -6,7 +6,7 @@
 #
 # Warning:
 # - *** It is ok to check-in change in temporary changes for testing Github
-#   actions on your branch. Hoever, make sure no temporary changes are pushed
+#   actions on your branch. However, make sure no temporary changes are pushed
 #   to main (e.g., SCP_OUTPUT=1 or any use of TEST_REGEX).
 #
 # Example settings:
@@ -26,9 +26,10 @@
 ## export SCP_OUTPUT=0                # don't copy results to server via scp
 ## export USE_SSH_AUTH=0              # use ssh w/ scrappycito.pem for git updates
 
-# Override settings if under tetsing VM
-# note: most settings off so user can override when running locally,
+# Override settings if under testing VM
+# Note: 1. Most settings off so user can override when running locally,
 # but, it is awkward to do so for docker or Github runner jobs.
+# 2. For other Github Actions env. vars, see https://www.theserverside.com/blog/Coffee-Talk-Java-News-Stories-and-Opinions/environment-variables-full-list-github-actions
 if [ "$DEPLOYMENT_BASEPATH" == "/opt/runner" ]; then
     export ARCHIVE_OUTPUT=1
     export USE_SSH_AUTH=1

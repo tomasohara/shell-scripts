@@ -96,7 +96,7 @@
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #  
-## BASIC: echo "in $0: args=$@"
+## BASIC: echo "in $0: args=$*" 1>&2
 ## HACK: echo "BATCH_MODE=$BATCH_MODE"
 ## USUAL: set -o xtrace
 ## DEBUG: set -o verbose
@@ -113,6 +113,7 @@ save_title=1
 print_full=0
 print_icon=0
 show_usage=0
+simple_mode=0
 debug=0
 ## DEBUG: debug=1
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
@@ -125,6 +126,8 @@ while [ "$moreoptions" = "1" ]; do
         debug=1
     elif [ "$1" = "--restore" ]; then
         restore_title=1
+    elif [ "$1" = "--simple" ]; then
+        simple_mode=1
     elif [ "$1" = "--no-save" ]; then
         save_title=0
     elif [ "$1" = "--save" ]; then
@@ -152,12 +155,13 @@ fi
 if [ "$show_usage" = "1" ]; then
     script=$(basename "$0")
     ## TODO: echo "Usage: [--trace] [--restore | --save] [--print-[full|icon]] [--help] $0 title [icon-title]"
-    echo "Usage: [--trace] [--restore] [--[no]-save] [--print-[full|icon]] [--help] $0 title [icon-title]"
+    echo "Usage: [--trace] [--restore] [--[no-]save] [--print-[full|icon]] [--basic] [--help] $0 title [icon-title]"
     echo ""
     echo "Notes:"
     ## TODO: echo "- -save makes a copy of current title (under $TMP)."
     echo "- Use --no-save to block automatic --save"
-    echo "- -restore uses previously saved title and icon (see function script in tomohara-aliases.bash)."
+    echo "- --restore uses previously saved title and icon (see function script in tomohara-aliases.bash)."
+    echo "- --simple avoids adding info from environment (e.g., XTERM_TITLE_SUFFIX & USER)."
     echo ""
     echo "Examples:"
     echo ""
@@ -183,67 +187,83 @@ icon="$2"
 if [ "$icon" = "" ]; then icon=$full; fi
 ## OLD: if [ "$TERM" = "screen" ]; then full="SCREEN: $full"; icon="SCREEN: $icon"; fi
 if [[ "$TERM" =~ screen ]]; then full="SCREEN: $full"; icon="SCREEN: $icon"; fi
-## echo full="$full"
-## echo icon="$icon"
+## DEBUG:
+## echo full="$full" 1>&2
+## echo icon="$icon" 1>&2
 
 #...............................................................................
 # A bunch of adhoc stuff changes to the window title
 
-# Make sure hostname set and see if optional default host indicated
-if [ "$HOST" = "" ]; then
-    HOST="$HOSTNAME"
-    ## OLD: if [ "$HOST" = "" ]; then HOST=`uname -n`; fi
-    if [ "$HOST" = "" ]; then HOST=$(uname -n); fi
-fi
-if [ "$DEFAULT_HOST" = "" ]; then
-    ## OLD: if [ -e $HOME/.default_host ]; then DEFAULT_HOST=`cat $HOME/.default_host`; fi
-    if [ -e "$HOME/.default_host" ]; then DEFAULT_HOST=$(cat "$HOME/.default_host"); fi
-fi
+if [ "$simple_mode" == 0 ]; then
 
-# If default host indicated and not the current host, add name as prefix
-# note: n/a used for DEFAULT_HOST to force this (see tohara-aliases.bash).
-if [  "$DEFAULT_HOST" != "" ]; then
-    if [ "$HOST" != "$DEFAULT_HOST" ]; then
-        # Add a nickname for the host from environment (e.g., set in ~/.bash_profile).
-        if [ "$HOST_NICKNAME" != "" ]; then HOST="$HOST ($HOST_NICKNAME)"; fi
-
-        # Make the settings for the xerm title
-        full="$HOST: $full"
-        icon="$HOST: $icon"
+    # Make sure hostname set and see if optional default host indicated
+    if [ "$HOST" = "" ]; then
+        HOST="$HOSTNAME"
+        if [ "$HOST" = "" ]; then HOST=$(uname -n); fi
     fi
-fi
-
-# If sudo being used, add current user name to end (e.g., "...; user=root")
-# OLD: (("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER"))
-# TODO: just use LOGNAME test???
-if [[ ((("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER")) || ("$LOGNAME" != "$USER")) ]]; then
-    ## DEBUG: echo "adding user"
-    full="$full; user=$USER"
-    icon="$icon; user=$USER"
-fi
-# Add suffix from XTERM_TITLE_SUFFIX env. var.:
-if [ "$XTERM_TITLE_SUFFIX" != "" ]; then
-    full="$full; $XTERM_TITLE_SUFFIX"
-    icon="$icon; $XTERM_TITLE_SUFFIX"
-fi
-
-# If SCRIPT_PID set, add this at start
-#
-if [ "$SCRIPT_PID" != "" ]; then
-    full="script:$SCRIPT_PID $full"
-    icon="script:$SCRIPT_PID $icon"
+    if [ "$DEFAULT_HOST" = "" ]; then
+        if [ -e "$HOME/.default_host" ]; then DEFAULT_HOST=$(cat "$HOME/.default_host"); fi
+    fi
+    
+    # If default host indicated and not the current host, add name as prefix
+    # note: n/a used for DEFAULT_HOST to force this (see tohara-aliases.bash).
+    if [  "$DEFAULT_HOST" != "" ]; then
+        if [ "$HOST" != "$DEFAULT_HOST" ]; then
+            # Add a nickname for the host from environment (e.g., set in ~/.bash_profile).
+            if [ "$HOST_NICKNAME" != "" ]; then HOST="$HOST ($HOST_NICKNAME)"; fi
+    
+            # Make the settings for the xerm title
+            full="$HOST: $full"
+            icon="$HOST: $icon"
+        fi
+    fi
+    
+    # If sudo being used, add current user name to end (e.g., "...; user=root")
+    # OLD: (("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER"))
+    # TODO: just use LOGNAME test???
+    if [[ ((("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER")) || ("$LOGNAME" != "$USER")) ]]; then
+        ## DEBUG: echo "adding (ssh) user" 1>&2
+        full="$full; user=$USER"
+        icon="$icon; user=$USER"
+    fi
+    
+    # Add suffix from XTERM_TITLE_SUFFIX env. var. (e.g., "...; Py3.10")
+    if [ "$XTERM_TITLE_SUFFIX" != "" ]; then
+        full="$full; $XTERM_TITLE_SUFFIX"
+        icon="$icon; $XTERM_TITLE_SUFFIX"
+        ## Note: temp check for odd repeated version spec (e.g., "Py3.10; Py3.10")
+        if [[ $XTERM_TITLE_SUFFIX =~ Py[0-9]\.[0-9].*Py[0-9]\.[0-9] ]]; then
+            echo "Warning: unexptected python spec in w/ xterm title suffix ($XTERM_TITLE_SUFFIX)"
+        fi
+    fi
+    
+    # If a SSH connection is active, add host to end (e.g., "...; host=tpo-jugador")
+    if [ "$SSH_CONNECTION" != "" ]; then
+        ## DEBUG: echo "adding (ssh) host"
+        host="$(uname -n)"
+        full="$full; host=$host"
+        icon="$icon; host=$host"
+    fi
+    
+    # If SCRIPT_PID set, add this at start (e.g., "script:27843 ...")
+    #
+    if [ "$SCRIPT_PID" != "" ]; then
+        full="script:$SCRIPT_PID $full"
+        icon="script:$SCRIPT_PID $icon"
+    fi
+    
 fi
 
 # Show derived titles
 if [ "$debug" = "1" ]; then
-    echo "new titles: full='$full'; icon='$icon'"
+    echo "new titles: full='$full'; icon='$icon'" 1>&2
 fi
 
 #================================================================================
 # Be careful when modifying remainder of script.
 
 if [ "$save_title" = "1" ]; then
-    if [ "$debug" = "1" ]; then echo "Updating title cache (${restore_base}*)"; fi
+    if [ "$debug" = "1" ]; then echo "Updating title cache (${restore_base}*)" 1>&2; fi
     echo "$full" >| "${restore_base}.full.list"
     echo "$icon" >| "${restore_base}.icon.list"
 fi
@@ -251,6 +271,7 @@ if [ "$restore_title" = "1" ]; then
     ## DEBUG: echo "Restoring from title cache (${restore_base}*)";
     full=$(cat "${restore_base}.full.list")
     icon=$(cat "${restore_base}.icon.list")
+    if [ "$debug" = "1" ]; then echo "restored: full='$full'; icon='$icon'" 1>&2; fi
 fi
 if [ "$print_full" = "1" ]; then
     echo "$full"
@@ -260,13 +281,13 @@ if [ "$print_icon" = "1" ]; then
     echo "$icon"
     exit
 fi
+
 # If prompt prefix set, include that at very start.
 # Note: excludes special dollar signs: small (﹩) U+FE69, full-width (＄) U+FF04, or heavy dollar sign (💲) U+1F4B2, where regular ($) is U+0024
 # TODO: just add that full version (i.e., not minimized)
 #
 declare PS_symbol
 if [ "$PS_symbol" != "" ]; then
-    ## BAD: if [[ ! ($PS_symbol =~ [$﹩＄💲]) ]]; then
     if [[ ($PS_symbol =~ ^.*[﹩＄💲].*$) ]]; then
         ## DEBUG:
         echo "Omitting special dollar-sign PS_symbol ($PS_symbol) from title"

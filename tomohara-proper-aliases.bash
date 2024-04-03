@@ -135,13 +135,20 @@ default_pytest_opts="-vv --capture=tee-sys"
 function test-python-script {
     if [ "$1" = "" ]; then
         echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] test-python-script script"
+        echo "Note: When debugging you might need to use --runxfail and -s to see full error info"
         return
     fi
+    # Extract test script
+    local test_script="$1"
+    shift
+    ## TODO2; if [[ ! $test_script =~ /\btest_/ ]]; then
+    if [[ ! $test_script =~ [^a-z0-9]test_ ]]; then
+        test_script="tests/test_$test_script"
+    fi
     PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
-    # note: just uses .log (i.e., ignore .out)
     # TODO3: drop inheritance spec in summary
-    # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "ests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
-    DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$@" 2>&1;
+    # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "tests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
+    DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$test_script" "$@" 2>&1;
 }
 #
 # test-python-script-method(test-name, ...): like test-python-script but for specific test
@@ -151,10 +158,27 @@ function test-python-script-method {
     PYTEST_OPTS="-k $method $default_pytest_opts" test-python-script "$@";
 }
 #
+# test-python-script-strict(test-script): run TEST-SCRIPT via pytest with xfail ignored
+function test-python-script-strict {
+    PYTEST_OPTS="--runxfail $default_pytest_opts" test-python-script "$@";
+}
+#
+# test-python-script-method-strict: likewise for just a method
+function test-python-script-method-strict {
+    ## TODO2: default_pytest_opts="--runxfail" test-python-script-method "$@";
+    local method="$1";
+    shift;
+    PYTEST_OPTS="--runxfail $default_pytest_opts" test-python-script "$@";
+}
+#
 # color-test-failures(): show color-coded test result for pytest run (yellow for xfailed and red for regular fail)
+# color-test-results: likewise with green for passed and faint green xpassed
 simple-alias-fn color-output 'colout --case-insensitive'
 function color-test-failures {
-    cat "$@" | color-output "\bfailed" red | color-output "(xfail(ed)?)" yellow | color-output "\bpassed" green | color-output "xpassed" green faint;
+    cat "$@" | color-output "\bfailed" red | color-output "(xfaile?d?)" yellow;
+}
+function color-test-results {
+    cat "$@" | color-output "\bfailed" red | color-output "(xfaile?d?)" yellow | color-output "\bpassed" green | color-output "xpassed" green faint;
 }
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
@@ -218,6 +242,9 @@ function shell-check-stdin {
     # shellcheck disable=SC2181
     if [ "$?" -eq 0 ]; then echo "shellcheck OK"; fi
 }
+#
+# shell-check-loose(): run shellcheck with relaxed rules
+simple-alias-fn shell-check-loose 'shellcheck --exclude="SC2046,SC2086,"'
 
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
@@ -261,6 +288,8 @@ function remote-prompt {
     reset-prompt "$prompt"
 }
 alias-fn remote-prompt-root 'remote-prompt "" "#"'
+# TODO2: put alias aliases in separate file to minimize clutter (e.g., to be enabled upon temorary memory lapse)
+alias root-prompt-remote=remote-prompt-root
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
 function pristine-bash {
@@ -299,7 +328,16 @@ function rename-last-snapshot {
     # TODO: have options to use latest file (regardless of name) 
     # shellcheck disable=SC2010
     last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
-    move "$last_file" "$new_name"               
+    move "$last_file" "$new_name"
+
+    # Optionally preview result
+    # TODO3: add getenv_value helper a la mezcla that gets env. value as well as
+    # sets a description.
+    if [ "${RENAME_SNAPSHOT_PREVIEW:-0}" = "1" ]; then
+        pause-for-enter "About to preview $new_name"
+        # TODO2: just preview for a few seconda
+        start "$new_name"
+    fi
 }
 
 #................................................................................
@@ -386,6 +424,9 @@ function sleep-for {
 simple-alias-fn image-metadata 'identify -verbose'
 # show-sd-prompts(file): show keywords in image file for Stable Diffusion prompts
 function show-sd-prompts { image-metadata "$@" | egrep --text --ignore-case '(parameters|(negative prompt)):'; }
+# sd-style(image): make note that IMAGE has given style
+simple-alias-fn sd-note 'todo style: '
+simple-alias-fn sd-grotesque 'sd-note grotesque'
 
 # distro-version-info(): show various information related to distribution, including window and display managers
 # note: screenfetch sans the ascii art

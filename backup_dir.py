@@ -35,6 +35,9 @@ BACKUP_DIR = system.getenv_text("BACKUP_DIR", HOME_DIR,
 LOG_DIR = system.getenv_text("LOG_DIR", ".",
                              "Directory for log files")
 DRY_RUN = system.getenv_bool("DRY_RUN", False, "Dry run mode")
+PASSWORD_DEFAULT = system.getenv_value(
+    "PASSWORD_DEFAULT", None,
+    description="Default for password to avoid prompt: be careful when debugging/logging")
 
 def create_backup_folder(source):
     """Try to create the backup folder if it doesn't exist"""
@@ -147,7 +150,8 @@ def sort_files(walkdir, days, size):
 
 def create_tar(basename, lista):
     """Creates a simple 7z file and writes files on it"""
-    debug.trace(4, f"create_tar({basename}, {lista}")
+    debug.trace(5, f"create_tar({basename}, _)")
+    debug.trace_expr(6, lista)
     logging.info("Starts creating tar.gz file")
     if DRY_RUN:
         system.print_stderr("Dry run, no archive will be created")
@@ -171,7 +175,6 @@ def create_tar(basename, lista):
 def create_encrypted_tar(password, basename):
     """Creates a GPG encrypted tar.gz file"""
     debug.trace(4, f"create_encrypted_7z(********, _)")
-    debug.trace_expr(5, lista)
     logging.info("Starts creating encrypted tar.gz file")
     os.system(
         f"gpg --batch --yes --passphrase {password} --symmetric {basename}.tar.gz"
@@ -183,7 +186,7 @@ def create_encrypted_tar(password, basename):
 def create_encrypted_7z(password, basename, lista):
     """Creates a encrypted 7z file and writes files on it"""
     debug.trace(4, f"create_encrypted_7z(********, {basename}, _)")
-    debug.trace_expr(5, lista)
+    debug.trace_expr(6, lista)
     logging.info("Starts creating encrypted 7z file")
     import py7zr                         # pylint: disable=import-outside-toplevel
     with py7zr.SevenZipFile(basename + ".7z", "w", password=password) as archive:
@@ -215,7 +218,8 @@ def deactivate_prompts(ctx, _, value):
     "--password",
     prompt=True,
     hide_input=True,
-    default="",
+    ## OLD: default="",
+    default=(PASSWORD_DEFAULT or ""),
     confirmation_prompt=True,
     help="Blank for no encryption",
 )
@@ -261,6 +265,7 @@ def main(password, source, full, days, size, gpg, dry_run): # pylint: disable=to
 
     basename = backup_derive(source, days, size)
     lista = sort_files(source, days, size)
+    debug.trace_expr(5, lista, max_len=8192)
     logging.info("Testing password")
     if password:
         if gpg:

@@ -211,6 +211,7 @@ sub init_common {
     $initialized = &FALSE if (!defined($initialized));
     # Set debugging level to either $d, DEBUG_LEVEL evironment variable or 3 (the default)
     # Note: environment check ignored if DURING_ALIAS set (see tomohara-aliases.bash)
+    # TODO2: make the debug level initialization more intuitive wrt alias usage
     my($env_debug_level) = undef;
     my($env_during_alias) = $ENV{DURING_ALIAS};
     ## DEBUG: print STDERR "\$ENV{DURING_ALIAS}=$env_during_alias\n";
@@ -2127,6 +2128,12 @@ sub round {
     my($result) = sprintf($format, $number);
     &debug_print(&TL_ALL, "round($number, [$places]) => $result\n");
     return ($result);
+}
+
+# round3(number): rounds NUMBER to 3 decimal places
+sub round3 {
+    my($number) = @_;
+    return (&round($number, 3));
 }
 
 # round_all(list, [decimal places])

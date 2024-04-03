@@ -2,6 +2,8 @@
 #
 # Tests for check_errors.py module
 
+## TODO1: add standard mezcla test support (e.g., THE_MODULE; see mezcla/tests/template.py)
+## TODO2: use self.run_script instead of gh.run
 
 """Tests for check_errors.py module"""
 

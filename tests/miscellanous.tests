@@ -78,4 +78,89 @@ $ echo "" | run-python-script template.py - 2>&1 | count-it -show_zeros '1.log' 
 $ echo "" | run-python-script template.py - 2>&1 | count-it -show_zeros '2.log' "./_template.$(T).2.log"
 2.log	1
 
+#-------------------------------------------------------------------------------
+# TODO3: address problem with PS_symbol under emacs term when started from
+# bash terminal with script active
+#
+#  $:$ em
+#  =>
+#  M-xterm
+#  =>
+#  $:$ echo "'$PS_symbol'"
+#  '$:$'
+#  $:$ printenv | grep -i pid
+#  SYSTEMD_EXEC_PID=6225
+#  SCRIPT_PID=89097
 
+#-------------------------------------------------------------------------------
+# TODO: add regression test
+
+## $ calc "2500 * 0.03"
+## Subroutine round3 redefined at /home/tomohara/bin/perlcalc.perl line 62.
+
+#-------------------------------------------------------------------------------
+## TODO2: look into tweaking less-based aliases to trap stderr
+
+## NOTE: apprently no output
+## $ ps-sort | less
+## [blank screen]
+##
+## NOTE: stderr output being missed above
+##
+## $ ps-sort 2>&1 | less | cat | head -3
+## 
+## usage: ps_sort.perl [options]
+
+#-------------------------------------------------------------------------------
+## TODO4: fix usage for prepare-find-files-there
+
+## $ prepare-find-files-there 
+## mkdir: cannot create directory ‘’: No such file or directory
+## Error: No arguments accepted; did you mean find-files-here?
+## Usage: bash [--out-dir dir]
+## ex: cd /; bash --out-dir ~/temp/fs-index
+
+#-------------------------------------------------------------------------------
+## TODO2: add shell-check as part of tests
+
+## $ shell-check tomohara-aliases.bash
+## 
+## In tomohara-aliases.bash line 2470:
+##     scrip3t_log=$(get-free-filename "$base")
+##     ^---------^ SC2034 (warning): scrip3t_log appears unused. Verify use (or export if used externally).
+## 
+## For more information:
+##   https://www.shellcheck.net/wiki/SC2034 -- scrip3t_log appears unused. Verif...
+##
+
+#...............................................................................
+## TODO3: account for misc. setup for new hosts
+
+## $ script-update 
+## Script started, file is _update-30mar24.log
+## bash: make-git-update.bash: command not found
+## Script done, file is _update-30mar24.log
+## 
+## $ pwd-host-info 
+## /home/ubuntu/bin
+## n/a
+## ip-10-0-9-217
+##
+##----------
+## 
+## $ which make-git-update.bash
+## /home/tomohara/bin/adhoc/make-git-update.bash
+## 
+## $ pwd-host-info 
+## /home/tomohara/tom-mezcla/examples
+## reempl
+## tpo-reemplazo
+##
+##----------
+##
+## note: workaound for Tom
+##
+## $ all-tomohara-settings
+## Warning: append-path non-existent: /home/ubuntu/.local/bin
+## realpath: /home/ubuntu/Mezcla/mezcla/..: No such file or directory
+##
