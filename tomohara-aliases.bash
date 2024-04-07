@@ -375,19 +375,47 @@ trace 'in tomohara-aliases.bash'
 # # HACK: load in older tpo-setup.bash
 # conditional-source $TOM_BIN/tpo-setup.bash
 
-# under-macos() => boolean: whether running under maldito macintosh
+## OLD:
+## # under-macos() => boolean: whether running under maldito macintosh
+## # EX: (under-macos; wc -l /vmlinuz 2> /dev/null) =/=> $'0\n1'
+## function under-macos {
+##     local under_mac=0
+##     if [[ "$OSTYPE" =~ darwin.* ]]; then under_mac=1; fi
+##     ## TODO: return $under_mac
+##     echo "$under_mac"
+## }
+## function under-linux {
+##     local under_linux=0
+##     if [[ "$OSTYPE" =~ linux.* ]]; then under_linux=1; fi
+##     ## TODO: return $under_linux
+##     echo "$under_linux"
+## }
+##
+# under-os(regex, [quiet=0]): Whether REGEX matches $OSTYPE
+# note: outputs boolean code and also sets status code
+function under-os {
+    local rexeg="$1"
+    local quiet="$2"
+    local under_os=0
+    if [[ "$OSTYPE" =~ $regex ]]; then under_os=1; fi
+    if [ "$quiet" != "1" ]; then
+        echo "$under_os"
+    fi
+    [ "$under_os" != 0 ]
+    return $?
+    }
+# under-macos([quiet]) => boolean: whether running under maldito macintosh
 # EX: (under-macos; wc -l /vmlinuz 2> /dev/null) =/=> $'0\n1'
+# example; under-macros 1 && echo "good luck"
 function under-macos {
-    local under_mac=0
-    if [[ "$OSTYPE" =~ darwin.* ]]; then under_mac=1; fi
-    ## TODO: return $under_mac
-    echo "$under_mac"
+    under-os ".*darwin.*" "$@"
+    return $?
 }
+# under-linux([quiet]) => boolean: whether under favorite son OS
+# example; under-linux 1 && echo "good job"
 function under-linux {
-    local under_linux=0
-    if [[ "$OSTYPE" =~ linux.* ]]; then under_linux=1; fi
-    ## TODO: return $under_linux
-    echo "$under_linux"
+    under-os ".*linux.*" "$@"
+    return $?
 }
 
 # Settings for less command 
@@ -1949,7 +1977,7 @@ function rename-special-punct {
     # strip unicode punctuation, ignoring shellcheck warnings like SC1112 [This is a unicode quote]
     # shellcheck disable=SC1111,SC1112,SC2206,SC2116
     {
-        local unicode_punct="—·®“”″‶‘’–"
+        local unicode_punct="—·®“”″‶‘’– "
         ## TODO:
         ## local unicode_filenames=(*[$unicode_punct]*)
         ## if [ ${#unicode_filenames[@]} -eq 0 ]; then
@@ -1957,10 +1985,11 @@ function rename-special-punct {
             ## DEBUG: echo "No files with following unicode punctuation: $unicode_punct"
             return
         fi
-        # note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) U+2014 (—)
+        # note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) U+2014 (—) U+202f ( )
+        # note: U+202f is narrow no-break space
         ## TODO: rename-files -q -global -rename_old -regex "_*[—·®“”″‶‘’–]" "_";   # note: all unicode
         local char;
-        for char in "—" "·" "®" "“" "”" "″" "‶" "‘" "’" "–"; do        # note: all unicode
+        for char in "—" "·" "®" "“" "”" "″" "‶" "‘" "’" "–" " "; do        # note: all unicode
             rename-files -global -rename_old "$char" "_" ./*$char*
             ## TODO?: rename-files -global -rename_old "$char" "_" "${unicode_filenames[@]}"
         done;
@@ -2788,7 +2817,7 @@ function script {
 # TODO: put this in a separate file
 function script-update {
     local command_indicator=""
-    ## TODO: under-linux && command_indicator="-c"
+    ## TODO: under-linux 1 && command_indicator="-c"
     if [ "$(under-linux)" = "1" ]; then
         command_indicator="-c"
     fi
