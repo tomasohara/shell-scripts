@@ -94,6 +94,7 @@ function run-python-script {
     #
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
+    # TODO3: rework to avoid problem with _PSL_ not being updated (or at least detect the error)!
     declare -g _PSL_ log out
     local out_base
     let _PSL_++;
@@ -404,8 +405,10 @@ alias zip-from-parent=create-zip-from-parent
 # calendar: wrapper for cal using ncal variant (n.b., to ensure highlighting)
 # options: -b: old-style formatting
 alias calendar="ncal -b"
+## HACK (can't find ncal via homebrew):
+under-macos && alias calendar="ncal"
 
-# ps-time: show processes by time via ps_sort.perl
+# Ps-time: show processes by time via ps_sort.perl
 # shellcheck disable=SC2016
 alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
 #
