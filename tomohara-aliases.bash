@@ -394,7 +394,7 @@ trace 'in tomohara-aliases.bash'
 # under-os(regex, [quiet=0]): Whether REGEX matches $OSTYPE
 # note: outputs boolean code and also sets status code
 function under-os {
-    local rexeg="$1"
+    local regex="$1"
     local quiet="$2"
     local under_os=0
     if [[ "$OSTYPE" =~ $regex ]]; then under_os=1; fi
