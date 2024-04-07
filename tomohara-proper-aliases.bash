@@ -406,7 +406,7 @@ alias zip-from-parent=create-zip-from-parent
 # options: -b: old-style formatting
 alias calendar="ncal -b"
 ## HACK (can't find ncal via homebrew):
-under-macos && alias calendar="ncal"
+under-macos 1 && alias calendar="cal"
 
 # Ps-time: show processes by time via ps_sort.perl
 # shellcheck disable=SC2016
