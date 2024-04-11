@@ -1974,6 +1974,10 @@ function rename-special-punct {
     # strip ascii punctuation
     # TODO: rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_";
     rename-files -q -global -rename_old -regex "_*[&\!\*?\(\)\[\]\,]" "_";
+
+    # Rename leading dash with underscore (n.b., problem for ls command)
+    rename-files - _ -*
+    
     # strip unicode punctuation, ignoring shellcheck warnings like SC1112 [This is a unicode quote]
     # shellcheck disable=SC1111,SC1112,SC2206,SC2116
     {
