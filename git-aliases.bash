@@ -583,7 +583,8 @@ function git-diff-plus {
     ## OLD: git diff "${files[@]}" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >| "$log";
     local OLDIFS=$IFS                   # save inter-field separator
     ## BAD: echo "" > "$log"
-    echo "" >> "$log"
+    ## BAD2: echo "" >> "$log"
+    echo "" >| "$log"
     for f in $(git-diff-list); do
         git diff "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log"
     done
