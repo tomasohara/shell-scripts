@@ -44,7 +44,8 @@ force=0
 # Parse command-line arguments
 ignore="-i" # ignore-case flag
 script_name=$(basename "$0")
-egrep="egrep"
+## OLD: egrep="egrep"
+egrep="grep --extended-regexp"
 if [ -z "$1" ]; then
   echo ""
   echo "Usage: $0 options [process_name]"
