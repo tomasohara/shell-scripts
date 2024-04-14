@@ -26,7 +26,8 @@
 # 2. It is advised to setup a password for the notebook, and provide the password through JUPYTER_PASSWORD environment variable
 
 # Usage Example (run from shell-scripts/tests/):
-# zavee@pop-os:~/shell-scripts/tests$ JUPYTER_PASSWORD="password" python3 automate_ipynb --include hello-world-basic.ipynb
+# ricekiller@pop-os:~/shell-scripts/tests$ JUPYTER_PASSWORD="password" python3 automate_ipynb --include hello-world-basic.ipynb
+
 """
 Automates Jupyter Notebook testing using Selenium Webdriver
 """
@@ -34,6 +35,7 @@ Automates Jupyter Notebook testing using Selenium Webdriver
 # Standard modules
 import time
 import random
+import subprocess
 
 # Installed modules
 from selenium import webdriver
@@ -63,6 +65,8 @@ JUPYTER_EXTENSION = ".ipynb"
 NOBATSPP = "NOBATSPP"
 IPYNB_HELLO_WORLD_BASIC = "hello-world-basic.ipynb"
 COMMAND_RUN_JUPYTER = "jupyter nbclassic --no-browser"
+COMMAND_IS_JUPYTER_RUNNING = "jupyter nbclassic list"
+CURRENT_PATH = gh.real_path(".")
 debug.assertion(TESTFILE_URL.endswith("/"))
 
 ## Constant II (Elements for Selenium Webdriver)
@@ -120,6 +124,22 @@ IMPLICIT_WAIT = system.getenv_float("IMPLICIT_WAIT", SELENIUM_IMPLICIT_WAIT,
 FORCE_SET_BASH_KERNEL = system.getenv_bool("FORCE_SET_BASH_KERNEL", False,
                             description="Force sets Bash kernel when reruning each testfile (Default: False)")
 
+## TODO: Force run Jupyter from the root "shell-scripts" directory
+if FORCE_RUN_JUPYTER:
+    ## Check if Jupyter Notebook is running in the background
+    is_jupyter_running = gh.run(COMMAND_IS_JUPYTER_RUNNING)
+    jupyter_instances = is_jupyter_running.split("\n")[1:]
+    if len(jupyter_instances) > 0:
+        print("Jupyter is running")
+    else:
+        print("Jupyter is NOT running")
+        run_jupyter_path = gh.dirname(CURRENT_PATH)
+        try:
+            subprocess.run(COMMAND_RUN_JUPYTER, cwd=run_jupyter_path, shell=True)
+        except Exception as e:
+            print (f"Error: {e}")
+        ## CHECKPOINT ## 
+
 class AutomateNotebook:
     """Consists of functions for the automation of testfiles (.ipynb)"""
 
@@ -136,11 +156,11 @@ class AutomateNotebook:
         self.driver = webdriver.Firefox() if USE_FIREFOX else webdriver.Chrome()
 
     ## OLD: WebDriver object is not callable    
-    def wrapup(self):
-        """Process end of input"""
-        if self.driver:
-            self.driver(quit)
-            self.driver = None
+    # def wrapup(self):
+    #     """Process end of input"""
+    #     if self.driver:
+    #         self.driver(quit)
+    #         self.driver = None
             
     def return_ipynb_url_array(self):
         """Returns a list of URLs of IPYNB test files based on filtering conditions."""
@@ -171,12 +191,11 @@ class AutomateNotebook:
         ipynb_urls = [TESTFILE_URL + file for file in ipynb_files_filtered]
 
         # Print the URLs for debugging
-        print(f"IPYNB files selected for automation (RANDOMIZE_TESTS:{RANDOMIZE_TESTS})\n")
+        print(f"IPYNB files selected for automation (RANDOMIZE_TESTS: {RANDOMIZE_TESTS})\n")
         for url in ipynb_urls:
             print(url)
 
         return ipynb_urls
-
 
     def find_element(self, how, elem_id):
         """Finds ELEM_ID in DOM using HOW (e.g., By.ID)"""
@@ -290,11 +309,6 @@ class AutomateNotebook:
                 driver.quit()
 
     def do_it(self):
-
-        ## TODO: Force run jupyter from root "shell-scripts" directory
-        if FORCE_RUN_JUPYTER:
-            time.sleep(1)
-            gh.run(COMMAND_RUN_JUPYTER)
 
         filename = self.OPT_INCLUDE_TESTFILE
         ## OLD: test_files = [filename] if (filename != "-") else self.return_ipynb_url_array()
