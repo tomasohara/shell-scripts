@@ -84,6 +84,7 @@ function run-python-script {
         return
     fi
     # Check args
+    # note: "tests" might be specified for script (e.g., test-python-script tests)
     local script_path="$1";
     shift;
     local script_args=("$@");
@@ -144,7 +145,10 @@ function test-python-script {
     local test_script="$1"
     shift
     ## TODO2; if [[ ! $test_script =~ /\btest_/ ]]; then
-    if [[ ! $test_script =~ [^a-z0-9]test_ ]]; then
+    # note: specifying "tests" for script handled indirectly
+    if [ "$test_script" == "tests" ]; then
+        true;
+    elif [[ ! $test_script =~ [^a-z0-9]test_ ]]; then
         test_script="tests/test_$test_script"
     fi
     PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
