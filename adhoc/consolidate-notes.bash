@@ -133,12 +133,11 @@ find_global_options="${FIND_GLOBAL_OPTIONS:-}"
 # shellcheck disable=SC2086
 if [ "${ALL_TEXT:-0}" = "1" ]; then
     # TODO: rework so that pattern-type options specified individially (e.g., LOG_FILES, ADHOC_NOTES, etc)
-    find $find_command_options "${SRC_DIR:-.}" $find_global_options \(  -iname '*.txt' -o -iname '*.text' \) 2> "$new_base.files.log" | egrep -iv '/(backup|old|temp)/' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
+    find $find_command_options "${SRC_DIR:-.}" $find_global_options \(  -iname '*.txt' -o -iname '*.text' \) 2> "$new_base.files.log" | $EGREP -iv '/(backup|old|temp)/' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
 else
     # Note: Filters log files starting with _ unless adhoc in the name (e.g., /home/tohara/config/_consolidate-experiment-notes-05apr23.log).
     # This uses the perl-style zero-width negative lookahead regex.
-    ## OLD: find "${SRC_DIR:-.}" \( -iname '*adhoc*[0-9][0-9]*.txt*' -o -iname '*adhoc*[0-9][0-9]*.log*' -o -iname '*-notes*.txt' -o -iname '*-notes*.list' -o -iname '*-notes*.log' \) 2> "$new_base.files.log" | egrep -iv '/(backup|old|temp)/' | egrep -iv '/_[^\/]+(?!adhoc)[^\/]+.log' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
-    find $find_command_options "${SRC_DIR:-.}" $find_global_options \( -iname '*adhoc*[0-9][0-9]*.txt' -o -iname '*adhoc*[0-9][0-9]*.list' -o -iname '*adhoc*[0-9][0-9]*.log' -o -iname '*-notes*.txt' -o -iname '*-notes*.list' -o -iname '*-notes*.log' \) 2> "$new_base.files.log" | egrep -iv '/(backup|old|temp)/' | egrep -iv '/_[^\/]+(?!adhoc)[^\/]+.log' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
+    find $find_command_options "${SRC_DIR:-.}" $find_global_options \( -iname '*adhoc*[0-9][0-9]*.txt' -o -iname '*adhoc*[0-9][0-9]*.list' -o -iname '*adhoc*[0-9][0-9]*.log' -o -iname '*-notes*.txt' -o -iname '*-notes*.list' -o -iname '*-notes*.log' \) 2> "$new_base.files.log" | $EGREP -iv '/(backup|old|temp)/' | $EGREP -iv '/_[^\/]+(?!adhoc)[^\/]+.log' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
 fi
 ## TODO: if [ -z "$new_base.files.list" ]; then
 if [ "$(wc -l < "$new_base.files.list")" = "0" ]; then
@@ -158,7 +157,6 @@ chmod ugo-w $new_base*;
 
 # Rename existing master note files
 # TODO: exclude cases already with timestamps
-## OLD: rename-with-file-date "$base.files.list" "$base.list" "$base.log" "$base.files.log"
 rename-with-file-date "$base.files.list" "$base.files.log" "$base.list" "$base.list.log" 
 ## TODO: rename-with-file-date "$base"*[a-z]
 
@@ -166,4 +164,4 @@ rename-with-file-date "$base.files.list" "$base.files.log" "$base.list" "$base.l
 # TODO1: fix following
 #    "_master-note-info.list.06apr23.log" already exists! not mv'ing "_new-_master-note-info.list.06apr23.log" "_master-note-info.list.06apr23.log"
 # shellcheck disable=SC2046
-rename-files "$new_base" "$base" $(ls "$new_base"* | egrep -v "\d{2}\w+\d{2}")
+rename-files "$new_base" "$base" $(ls "$new_base"* | $EGREP -v "\d{2}\w+\d{2}")
