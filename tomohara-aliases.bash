@@ -2118,7 +2118,7 @@ function move-versioned-files-alt {
     local version_regex="[0-9][0-9][a-z][a-z][a-z]*[0-9][0-9]"
     move ./*$version_regex* old
     local false_positives
-    false_positives="$(ls old/*$version_regex* 2>&1 | grep -v 'No such file' | egrep "(adhoc)|(.txt$)")"
+    false_positives="$(ls old/*$version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|(.txt$)")"
     if [ "$false_positives" != "" ]; then
         echo "Warning: potential misplaced files"
         echo "    $false_positives"
