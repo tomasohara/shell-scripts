@@ -218,7 +218,7 @@ function git-update-plus {
     # - The stash-pop causes the timestamps to be changed. The workaround to this quirk
     # - backups and restore the modified files via zip (for subdirs and symbolic links).
     local changed_files
-    changed_files="$(git-diff-list)"
+    changed_files="$(git-diff-list "$@")"
     local restore_dir=""
     if [ "$changed_files" != "" ]; then
 
@@ -575,7 +575,10 @@ alias git-restore-both-alias="git-restore-file-helper --both"
 # git-revert-commit(commit): effectively undoes COMMIT(s) by issuing new commits
 alias git-revert-commit-alias='git-command revert'
 
-# git-diff-plus: show repo diff
+# git-diff-plus([files-etc]: show repo diff
+# Note:
+# - Normalizes the listing such as by changing a/<path> to a: <path> and likwise for b.
+# - The optional FILES-ETC are passed along to git-diff command.
 function git-diff-plus {
     local log;
     log=$(get-temp-log-name "diff");
@@ -590,7 +593,7 @@ function git-diff-plus {
     ## BAD: echo "" > "$log"
     ## BAD2: echo "" >> "$log"
     echo "" >| "$log"
-    for f in $(git-diff-list); do
+    for f in $(git-diff-list "$@"); do
         git diff "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log"
     done
     IFS=$OLDIFS                         # restore inter-field separator
@@ -621,13 +624,15 @@ function git-vdiff-alias {
     git-difftool-plus "$@" &
     }
 
-# Produce listing of changed files
+# Produce listing of changed files, optionally restricted to subset of specified files
+#
 # note:
 # - Used in check-in templates, so level of indirection involved
 # - Uses following one-line from ChatGPT
 #     git diff --name-only | awk -F'/' '{ print NF-1 "\t" $0 }' | sort --key=1 --numeric-sort | cut -f2-
 #   where -F'/' sets the field separator to /; awk splits line and prints the depth (i.e., #/'s - 1) plus line;
 #   it then sorts the output and removes the depth count.
+# - Additional arguments passed along to git-diff (e.g., specific filenames or commits)
 #
 function git-diff-list-template {
     # TODO: use unique tempfile (e.g., mktemp)
@@ -641,13 +646,14 @@ function git-diff-list-template {
     ## BAD:
     ## echo "git diff --name-only | awk -F'/' '{ print NF-1 \"\t\" \$0 }' | sort --key=1 --numeric-sort | cut -f2- >| \$diff_list_file"
     # note: sometime duplicate entries are produced, so uniq used
-    echo "git diff --name-only | awk -F'/' '{ print NF-1 \"\t\" \$0 }' | sort --key=1 --numeric-sort | cut -f2- | uniq >| \$diff_list_file"
+    # TODO2: handle filenames with spaces
+    echo "git diff --name-only" "$@" "| awk -F'/' '{ print NF-1 \"\t\" \$0 }' | sort --key=1 --numeric-sort | cut -f2- | uniq >| \$diff_list_file"
 }
 function git-diff-list {
     local diff_list_file
     ## TODO2: local diff_list_script=$(get-temp-log-name "diff")
     local diff_list_script="$TMP/_git-diff-list.$$.bash"
-    git-diff-list-template >| "$diff_list_script"
+    git-diff-list-template "$@" >| "$diff_list_script"
     source "$diff_list_script"
 
     # Change path to absolute and drop current directory
