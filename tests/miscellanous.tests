@@ -186,3 +186,6 @@ $ echo "" | run-python-script template.py - 2>&1 | count-it -show_zeros '2.log' 
 ## realpath: /home/ubuntu/Mezcla/mezcla/..: No such file or directory
 ##
 
+#................................................................................
+## TODO2: add better support for Tom adhoc stuff
+## ex: paths differences due to tomohara-settings.bash
