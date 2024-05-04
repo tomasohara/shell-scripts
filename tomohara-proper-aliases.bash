@@ -28,6 +28,7 @@ alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human'
 alias git-files-changed=git-diff-list
 alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
+function git-repo-url { extract-matches 'url\s*=\s*(\S+)' $(git-root-alias)/.git/config; }
 ## TODO: alias git-X-='git-X-plus'
 
 # Other misc. stuff
