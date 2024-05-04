@@ -48,8 +48,7 @@ if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     echo ""
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."
-    ## TODO: add more notes
-    ## echo ""
+    echo "- By default only includes text files with 'notes' in name, along with adhoc filters."
     echo ""
     exit
 fi
