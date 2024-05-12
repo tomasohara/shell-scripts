@@ -119,3 +119,24 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## issuing: zip over changed files (for later restore)
 ## The program 'zip' is currently not installed. You can install it by typing:
 ## sudo apt install zip
+
+#-------------------------------------------------------------------------------
+# Make sure shell-check-stdin doesn't return false positive
+#
+## $ shell-check-stdin 
+## Enter snippet lines and then ^D
+## {
+##    delete-dir --force my_vectordb
+##    DEBUG_LEVEL=4 TORCH_DEVICE=cpu _chroma_quickstart.py >| "_chroma_quickstart.cpu.$(T).log" 2>&1
+##    delete-dir --force my_vectordb
+##    DEBUG_LEVEL=4 TORCH_DEVICE=cuda _chroma_quickstart.py >| "_chroma_quickstart.cuda.$(T).log" 2>&1
+##    grep -i elapsed _chroma_quickstart.{cpu,cuda}.$(T).log
+## }
+## 
+## In - line 6:
+##    grep -i elapsed _chroma_quickstart.{cpu,cuda}.$(T).log
+##                                                  ^--^ SC2046 (warning): Quote this to prevent word splitting.
+## 
+## For more information:
+##   https://www.shellcheck.net/wiki/SC2046 -- Quote this to prevent word splitt...
+## shellcheck OK
