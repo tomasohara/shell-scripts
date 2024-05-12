@@ -70,8 +70,8 @@
 #      -n string                    whether string is non-empty
 #      -z string                    whether string is empty
 #  - here-documents
-#      <<<END ... END               multiple line using ...
-#      <<<"text"                    single line using TEXT
+#      <<END ... END                multiple line using ... (i.e., "here docs")
+#      <<<"text"                    single line using TEXT (i.e., "here string")
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
