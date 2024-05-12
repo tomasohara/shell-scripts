@@ -660,6 +660,8 @@ if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-
 #
 alias reset-xterm-title='set-xterm-window "$HOSTNAME $PWD"'
 # alt-xterm-title([prefix=alt]): change xterm title to PREFIX DIR-BASENAME [PWD]
+# Warning: this doesn't modify the prompt symbol (e.g. $PS_symbol). For that,
+# use the new reset-prompt-label in tomohara-proper-aliases.bash.
 function alt-xterm-title() { 
     local dir
     local prefix="$1"
