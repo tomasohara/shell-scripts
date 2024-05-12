@@ -297,6 +297,28 @@ function remote-prompt {
 alias-fn remote-prompt-root 'remote-prompt "" "#"'
 # TODO2: put alias aliases in separate file to minimize clutter (e.g., to be enabled upon temorary memory lapse)
 alias root-prompt-remote=remote-prompt-root
+#
+# reset-prompt-label(label): reset part of prompt priot to $, #, etc. with text
+# For example, if PS_symbol is 'clone $' and label "alt-clone", the result would
+# set PS_symbol to 'alt-clone $'
+# note: Issues warning if $PS_symbol not set to avoid messing with PS1, etc.
+function reset-prompt-label {
+    local label="$1"
+    local old_label=""
+    local old_symbol="$"
+    if [ "$PS_symbol" = "" ]; then
+        echo "Warning: reset-prompt-label assumes PS_symbol usage" 1>&2
+    fi
+    if [[ $PS_symbol =~ ^[\W+]$ ]]; then
+        # TODO3: avoid duplication of regex
+        # NOTE: ideally should be like @vals = $(get_matches(regex))
+        old_label=$(perl -pe 's/^([\w\s]+)(.*\W)$/$1/;')
+        old_symbol=$(perl -pe 's/^([\w\s]+)(.*\W)$/$2/;')
+    fi
+    reset-prompt "$label $old_symbol"
+}
+# reset-prompt-label-here(): sets prompt label to dir basename with existing PS_symbol proper (e.g., "alt $" => "bin $")
+alias-fn reset-prompt-label-here 'reset-prompt-label "$(basename $PWD)"'
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
 function pristine-bash {
