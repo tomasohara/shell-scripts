@@ -22,7 +22,7 @@
 #
 if [[ ("$1" = "") || ("$1" == "--help") ]]; then
     script=$(basename "$0")
-    base=$(basename "$script" sh)
+    base=$(basename "$script" .sh)
     echo ""
     echo "Usage: $script [--trace] [--help] [--] [num-times] [pause-time]"
     echo ""
