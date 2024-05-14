@@ -41,12 +41,12 @@
 #   - comparison operators:
 #         -[eg|ne|lt|le|gt|ge]      if [ $num -eq 3 ]; then echo "tres"; fi
 #   - array variables
-#         list=(v1 value2 ... vN)   initialize
-#         ${#list[@]}               number of elements (i.e., length)
-#         ${list[1]}                second element
-#         ${list[*]}                all elements
-#         "${list[@]}"              likewise all but individually quoted (a la "$@")
-#         list+=(value)             append value
+#         arr=(v1 value2 ... vN)    initialize
+#         ${#arr[@]}                number of elements (i.e., length)
+#         ${arr[1]}                 second element
+#         ${arr[*]}                 all elements
+#         "${arr[@]}"               likewise all but individually quoted (a la "$@")
+#         arr+=(value)              append value
 #   - conditional expression (a la C ternary operator (test ? true-result : false-result)
 #     note: approximation via https://stackoverflow.com/questions/3953645/ternary-operator-in-bash
 #         $([ test ] && echo "true-result" || echo "false-result")
