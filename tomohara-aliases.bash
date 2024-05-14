@@ -1019,6 +1019,8 @@ function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$
 function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
 function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
 alias fgr-py='fgr-ext py'
+alias fgr-jupyter='fgr-ext ipynb'
+alias fgr-py-etc='fgr-py; fgr-jupyter'
 alias fgr-java='fgr-ext java'
 #
 # prepare-find-files-here([--out-dir out_dir_spec]): produces listing(s) of files in current directory
