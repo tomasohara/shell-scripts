@@ -79,7 +79,7 @@ nopattern="0"
 verbose_mode="1"
 match_dot_files="0"
 no_glob="0"
-dir=""
+base_dir=""
 
 # Show usage statement if insufficient arguments given
 if [ -z "$2" ]; then
@@ -99,7 +99,7 @@ if [ -z "$2" ]; then
     ## OLD:
     ## # shellcheck disable=SC2016
     ## echo '(for f in system.py main.py debug.py; do' "$script" '$f ~/mezcla-clone; done) 2>&1 | less'
-    echo "find . -type d -exec \"$script\" --dir {} --verbose '*' ~/repo-main \; > _main-diff.log 2>&1"
+    echo "find . -type d -exec \"$script\" --dir {} --verbose '*' ~/repo-main/{} \; > _main-diff.log 2>&1"
     echo ""
     
     echo ""
@@ -145,7 +145,7 @@ while [[ "$1" =~ ^- ]]; do
         diff_options="$diff_options $2"
         shift
     elif [ "$1" == "--dir" ]; then
-        dir="$2"
+        base_dir="$2"
         shift
     elif [ "$1" == "--side-by-side" ]; then
         width=$((2 * ${COLUMNS:-132}))
@@ -231,11 +231,11 @@ fi
 
 # Optionally, change the directory
 #
-if [ "$dir" != "" ]; then
+if [ "$base_dir" != "" ]; then
     if [ "$verbose_mode" == "1" ]; then
-        echo in dir "$dir":
+        echo in dir "$base_dir":
     fi
-    cd "$dir"
+    cd "$base_dir"
 fi
 
 # Do the actual diff
@@ -285,7 +285,8 @@ for file in $pattern; do
         log_file="${TMP:-/tmp}/_do_diff.$$.log"
         "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" >| "$log_file"
         status=$?
-        perl -pe 's/Files (.*) and (.*) differ/Differences: $1 $2/;' < "$log_file"
+        ## OLD: perl -pe 's/Files (.*) and (.*) differ/Differences: $1 $2/;' < "$log_file"
+        perl -e "\$bd='$base_dir';" -pe 's@Files (.*) and (.*) differ@Differences: $bd$d/$1 $2@;' < "$log_file"
 
         # Show file info with time and size if there are differences
         if [ "$status" != "0" ]; then
