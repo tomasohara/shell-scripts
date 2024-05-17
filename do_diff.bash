@@ -79,7 +79,7 @@ nopattern="0"
 verbose_mode="1"
 match_dot_files="0"
 no_glob="0"
-base_dir=""
+base_dir="."
 
 # Show usage statement if insufficient arguments given
 if [ -z "$2" ]; then
@@ -231,7 +231,7 @@ fi
 
 # Optionally, change the directory
 #
-if [ "$base_dir" != "" ]; then
+if [ "$base_dir" != "." ]; then
     if [ "$verbose_mode" == "1" ]; then
         echo in dir "$base_dir":
     fi
@@ -270,7 +270,7 @@ for file in $pattern; do
         other_file="$master/$base"
     fi
     if [ "$quiet" == "0" ]; then
-        echo "$file vs. $other_file"
+        echo "$base_dir/$file vs. $other_file"
     fi
     if [ ! -e "$other_file" ]; then
         echo "Warning: missing other file: '$other_file'"
