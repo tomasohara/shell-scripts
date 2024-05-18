@@ -61,6 +61,8 @@
 #     !?string[?]                   find last command with string
 #  - local variable declaration     note: space-separated not comma; simplified
 #      local var1[=val1] [var2[=val2] ...]
+#  - global variable declaration
+#      declare -g variable
 #  - common file tests
 #      -s file                      non-empty file (n.b., nothing like csh's -z)
 #      -e file                      file exists
