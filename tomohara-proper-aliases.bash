@@ -28,7 +28,7 @@ alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human'
 alias git-files-changed=git-diff-list
 alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
-function git-repo-url { extract-matches 'url\s*=\s*(\S+)' $(git-root-alias)/.git/config; }
+function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
 ## TODO: alias git-X-='git-X-plus'
 
 # Other misc. stuff
@@ -81,7 +81,7 @@ simple-alias-fn black-plain 'convert-emoticons-aux black'
 function run-python-script {
     ## DEBUG: trace-vars _PSL_ out_base log
     if [ "$1" = "" ]; then
-        echo "Usage: [USE_STDIN=B] run-python-script script arg ..."
+        echo "Usage: [USE_STDIN=B] [PROFILE_SCRIPT=B] run-python-script script arg ..."
         return
     fi
     # Check args
@@ -99,8 +99,13 @@ function run-python-script {
     # TODO3: rework to avoid problem with _PSL_ not being updated (or at least detect the error)!
     declare -g _PSL_ log out
     local out_base
+    local module_spec=""
     let _PSL_++;
     out_base="$script_dir/_$script_base.$(TODAY).$_PSL_";
+    if [ "$PROFILE_SCRIPT" == "1" ]; then
+       out_base="$out_base.profile"
+       module_spec="-m cProfile -o $out_base.data"
+    fi
     log="$out_base.log";
     out="$out_base.out";
     ## OLD:
@@ -108,22 +113,26 @@ function run-python-script {
     ## touch "$out";
     ## DEBUG: trace-vars _PSL_ out_base log
     rename-with-file-date "$out_base.out" "$log";
-    # shellcheck disable=SC2086
+    ## OLD: # shellcheck disable=SC2086
     local python_arg="-"
     # shellcheck disable=SC2086
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
 	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
 	    ## TODO2:
-            echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$out" 2> "$log";
+            echo "${script_args[*]}" | $PYTHON $module_spec "$script_path" $python_arg > "$out" 2> "$log";
             ## OLD: echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$log" 2>&1;
 	else
 	    # note: disables - with explicit arguments or if running pytest
 	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
 	    ## OLD: $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1
-	    $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
+	    ## OLD: $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
+	    $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
 	fi
     }
+    if [ "$PROFILE_SCRIPT" == "1" ]; then
+       alias-python -m mezcla.format_profile "$out_base.data" > "$out_base.list"
+    fi
     tail "$log" "$out" | truncate-width
     ## TEMP: remove emtpy output file
     if [ "$DEBUG_LEVEL" -ge 4 ]; then ls -lt "$log" "$out"; fi
@@ -298,26 +307,33 @@ alias-fn remote-prompt-root 'remote-prompt "" "#"'
 # TODO2: put alias aliases in separate file to minimize clutter (e.g., to be enabled upon temorary memory lapse)
 alias root-prompt-remote=remote-prompt-root
 #
-# reset-prompt-label(label): reset part of prompt priot to $, #, etc. with text
+# reset-prompt-label(label): reset part of prompt prior to $, #, etc. with text
 # For example, if PS_symbol is 'clone $' and label "alt-clone", the result would
 # set PS_symbol to 'alt-clone $'
 # note: Issues warning if $PS_symbol not set to avoid messing with PS1, etc.
 function reset-prompt-label {
     local label="$1"
-    local old_label=""
+    ## OLD: local old_label=""
     local old_symbol="$"
-    if [ "$PS_symbol" = "" ]; then
+    declare -g PS_symbol                # global declaration
+    if [ "$PS_symbol" == "" ]; then
         echo "Warning: reset-prompt-label assumes PS_symbol usage" 1>&2
     fi
-    if [[ $PS_symbol =~ ^[\W+]$ ]]; then
+    ## TODO2: if [[ $PS_symbol =~ ^[\w\s+][\W+]$ ]]; then
+    if [[ $PS_symbol =~ [^A-Za-z0-9\ _-]$ ]]; then
         # TODO3: avoid duplication of regex
         # NOTE: ideally should be like @vals = $(get_matches(regex))
-        old_label=$(perl -pe 's/^([\w\s]+)(.*\W)$/$1/;')
-        old_symbol=$(perl -pe 's/^([\w\s]+)(.*\W)$/$2/;')
+        ## OLD: old_label=$(echo "$PS_symbol" | perl -pe 's/^([\w\s]+)(.*\W)$/$1/;')
+        old_symbol=$(echo "$PS_symbol" | perl -pe 's/^([\w\s]+)(.*\W)$/$2/;')
+        ## OLD: trace-vars old_old_label old_symbol
+        ## DEBUG: trace-vars old_symbol
+    else
+        echo "FYI: PS_symbol w/o trailing symbol: '$PS_symbol'" 1>&2
     fi
     reset-prompt "$label $old_symbol"
 }
 # reset-prompt-label-here(): sets prompt label to dir basename with existing PS_symbol proper (e.g., "alt $" => "bin $")
+# shellcheck disable=SC2016
 alias-fn reset-prompt-label-here 'reset-prompt-label "$(basename $PWD)"'
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
