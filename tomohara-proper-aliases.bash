@@ -81,7 +81,8 @@ simple-alias-fn black-plain 'convert-emoticons-aux black'
 function run-python-script {
     ## DEBUG: trace-vars _PSL_ out_base log
     if [ "$1" = "" ]; then
-        echo "Usage: [USE_STDIN=B] [PROFILE_SCRIPT=B] run-python-script script arg ..."
+        echo "Usage: [USE_STDIN=B] [PROFILE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] run-python-script script arg ..."
+        echo "note: PYTHON_DEBUG_LEVEL uses 4 by default (unles regular DEBUG_LEVEL)"
         return
     fi
     # Check args
@@ -93,6 +94,11 @@ function run-python-script {
     script_dir=$(dirname "$script_path");
     local script_base
     script_base=$(basename "$script_path" .py);
+    # TODO: find shortcut for min
+    PYTHON_DEBUG_LEVEL=4
+    if [ "${DEBUG_LEVEL:-0}" -gt $PYTHON_DEBUG_LEVEL ]; then
+        PYTHON_DEBUG_LEVEL="$DEBUG_LEVEL"
+    fi  
     #
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
@@ -108,26 +114,19 @@ function run-python-script {
     fi
     log="$out_base.log";
     out="$out_base.out";
-    ## OLD:
-    ## ## TEMP: ensure output exists for excerpt below
     ## touch "$out";
     ## DEBUG: trace-vars _PSL_ out_base log
-    rename-with-file-date "$out_base.out" "$log";
-    ## OLD: # shellcheck disable=SC2086
     local python_arg="-"
     # shellcheck disable=SC2086
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
 	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
 	    ## TODO2:
-            echo "${script_args[*]}" | $PYTHON $module_spec "$script_path" $python_arg > "$out" 2> "$log";
-            ## OLD: echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$log" 2>&1;
+            echo "${script_args[*]}" | DEBUG_LEVEL=$PYTHON_DEBUG_LEVEL $PYTHON $module_spec "$script_path" $python_arg > "$out" 2> "$log";
 	else
 	    # note: disables - with explicit arguments or if running pytest
 	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
-	    ## OLD: $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1
-	    ## OLD: $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
-	    $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
+	     DEBUG_LEVEL=$PYTHON_DEBUG_LEVEL $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
 	fi
     }
     if [ "$PROFILE_SCRIPT" == "1" ]; then
@@ -148,7 +147,8 @@ default_pytest_opts="-vv --capture=tee-sys"
 function test-python-script {
     if [ "$1" = "" ]; then
         echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] test-python-script script"
-        echo "Note: When debugging you might need to use --runxfail and -s to see full error info"
+        echo "Note: When debugging you might need to use --runxfail and -s to see full error info."
+        echo "The debugging level defaults to 5 (unlike run-python-script)."
         return
     fi
     # Extract test script
@@ -164,7 +164,7 @@ function test-python-script {
     PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
     # TODO3: drop inheritance spec in summary
     # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "tests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
-    DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$test_script" "$@" 2>&1;
+    PYTHON_DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$test_script" "$@" 2>&1;
 }
 #
 # test-python-script-method(test-name, ...): like test-python-script but for specific test
