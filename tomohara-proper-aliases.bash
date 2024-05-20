@@ -48,8 +48,13 @@ function convert-emoticons-aux {
 
 # plint(...): shortcut for python-lint
 simple-alias-fn plint 'PAGER=cat python-lint'
-# plint-torch(...): plint w/ torch no-member warnings ignored
+# shellcheck disable=SC2016
+{
+# plint-torch(...): pylint w/ torch no-member warnings ignored
 alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
+# plint-tester-testee(filename): run pylint over test file and tested file
+alias-fn plint-tester-testee 'plint "$1" tests/test_"$1"'
+}
 #
 # clone-repo(url): clone github repo at URL into current dir with logging
 # TODO3: move to git-related section
@@ -154,12 +159,14 @@ function test-python-script {
     # Extract test script
     local test_script="$1"
     shift
-    ## TODO2; if [[ ! $test_script =~ /\btest_/ ]]; then
-    # note: specifying "tests" for script handled indirectly
-    if [ "$test_script" == "tests" ]; then
-        true;
-    elif [[ ! $test_script =~ [^a-z0-9]test_ ]]; then
+    # note: specifying "tests" for script handled indirectly;
+    # this also handles cases like "tests/misc_tests.py" without associated module.
+    if [ -e "tests/test_$test_script" ]; then
         test_script="tests/test_$test_script"
+    elif [ -e "$test_script" ]; then
+        true;
+    else
+        error "Warning: cannnot resolve test for _$test_script" 1>&2
     fi
     PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
     # TODO3: drop inheritance spec in summary
