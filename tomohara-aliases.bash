@@ -2160,10 +2160,14 @@ function rename-with-file-date() {
             [ $verbose = 1 ] && echo "Ignoring file with timestamp suffix: $f"
         elif [[ ("$IGNORE_ALL" = "1") && ("$f" =~ [0-9]{2}[a-z]{3,4}[0-9]{2}) ]]; then
             [ $verbose = 1 ] && echo "Ignoring file with timestamp affix: $f"
-        elif [ -e "$f" ]; then
+        elif [ -e "$f" ]; then              # regular file exists
             ## TODO2: use same format as $(T)--lowercase as in $(get-free-filename ... $(date ... | downcase-stdin; ))
            new_f=$(get-free-filename "$f.$(date --reference="$f" '+%d%b%y')" ".")
            ## DEBUG: echo
+           eval "$move_command" "$f" "$new_f";
+        elif [ -L "$f" ]; then              # symbolic link exists
+           # note: gets mod time via 'stat -c %y'
+           new_f=$(get-free-filename "$f.$(date --date="$(stat -c %y "$f")" '+%d%b%y')" ".")
            eval "$move_command" "$f" "$new_f";
         else
            ## TODO2: [ $verbose ] && echo "FYI: no '$f'"
