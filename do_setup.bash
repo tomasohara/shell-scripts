@@ -37,6 +37,9 @@
 #    if  that  file exists.
 #    ...
 #
+# TODO2:
+# - Run shell check over anything worth keeping.
+#
 # TODO:
 # - *** Merge this script into tomohara-aliases.bash (to minimize number of scripts for setup such as .bashrc, that one, and this one).
 # - ** In meantime. finish conditioning little-used stuff on INCLUDE_MISC_ALIASES, as follows:
@@ -1627,8 +1630,8 @@ alias redhat-version="/etc/redhat-release"
 alias old-count-exts='ls | count-it "\.[^.]*\w" | sort $SORT_COL2 -rn | $PAGER'
 function count-exts () { ls | count-it '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
 
-alias kill-netscape='kill_em.sh -p netscape; /bin/rm -v -f $HOME/.netscape/lock'
-alias kill-cmucl='kill_em.sh -p cmucl'
+## OLD: alias kill-netscape='kill_em.sh -p netscape; /bin/rm -v -f $HOME/.netscape/lock'
+## OLD: alias kill-cmucl='kill_em.sh -p cmucl'
 ## OLD: alias kill-sleep='kill_em.sh sleep'
 ## function kill-gnome () { foreach.sh 'kill_em.sh $f' gnome magicdev panel xscreensaver cdplayer_applet  enlightenment asclock_applet ical gtcd sproingies  }
 
@@ -1725,6 +1728,9 @@ if [ "$wn" = "" ]; then export wn=$WNHOME/bin/$OSTYPE/wn; fi
 #    -g   Display gloss
 #    -o   Display synset offset
 #    -s   Display sense numbers in synsets
+# ntote: ignores SC2086: Double quote to prevent globbing and word splitting.
+# shellcheck disable=SC2086
+{
 ## export wn_options="-g -s -o"
 export wn_options="-g -s"
 ## alias wn=$wn
@@ -1737,8 +1743,15 @@ function wn-n () { "$wn" "$*" -synsn $wn_options | $PAGER_CHOPPED; }
 function wn-n-opt () { "$wn" "$@" -synsn $wn_options | $PAGER_CHOPPED; }
 function wn-full () { "$wn" "$*" -hypen -hypev -synsa -synsr $wn_options | $PAGER_CHOPPED; }
 function wn-full- () { "$wn" "$*" -treen -treev -synsa -synsr $wn_options | $PAGER_CHOPPED; }
+}
 
-function wn-index-gr () { $GREP -i -h "$2" $3 $4 $5 $6 $7 $8 $9 "$WNSEARCHDIR/index.$1"; }
+## OLD: function wn-index-gr () { $GREP -i -h "$2" $3 $4 $5 $6 $7 $8 $9 "$WNSEARCHDIR/index.$1"; }
+# wn-index-gr(pos, pattern, ...): search through WordNet index of given part of speech
+function wn-index-gr () {
+    local pos="$1"
+    shift
+    $GREP -i -h "$@" "$WNSEARCHDIR/index.$pos"
+}
 alias wn-n-gr='wn-index-gr noun'
 alias wn-v-gr='wn-index-gr verb'
 alias wn-adj-gr='wn-index-gr adj'
