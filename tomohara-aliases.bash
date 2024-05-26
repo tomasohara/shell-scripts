@@ -1946,7 +1946,7 @@ trace extension-less shortcuts
 alias convert-termstrings='perl- convert_termstrings.perl'
 alias do-rcsdiff='do_rcsdiff.sh'
 alias dobackup='dobackup.sh'
-alias kill-em='kill_em.sh'
+## OLD: alias kill-em='kill_em.sh'
 ## OLD: alias kill-em='kill_em.sh'
 alias kill-em='kill_em.bash'
 alias kill-it='kill-em --pattern'
@@ -2391,7 +2391,7 @@ alias ununcompress-this-dir='uncompress-dir $PWD'
 function count-exts () { $LS | count-it '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
 function count-exts-all { (count-exts | cat; $LS | count-it '^[^.]+(\.*)$') | sort $SORT_COL2 -rn | $PAGER; }
 
-alias kill-iceweasel='kill_em.sh iceweasel'
+alias kill-iceweasel='kill-em iceweasel'
 
 # cmd-output(cmd, ...): show output for cmd to _{cmd}-$(TODAY).log (with spaces
 # replaced by underscores)
@@ -3034,8 +3034,8 @@ function python-trace {
 function py-diff () { do_diff.bash --no-glob '*.py *.mako' "$@" 2>&1 | $PAGER; }
 
 alias elide-data='alias-python -m transpose_data --elide'
-alias kill-python="kill_em.sh --filter 'ipython|emacs' python"
-alias kill-python-all="kill_em.sh python"
+alias kill-python="kill-em --filter 'ipython|emacs' python"
+alias kill-python-all="kill-em python"
 ## TODO
 ## function which-program {
 ##     local program="$1"
@@ -3311,9 +3311,9 @@ function shell-check {                  ## TOM-IDIOSYNCRATIC
 #-------------------------------------------------------------------------------
 # System administration
 # TODO: do for ???
-alias kill-software-updater='kill_em.sh --force --all --pattern "(software-properties|gnome-software|update-manager|update-notifier)"'
+alias kill-software-updater='kill-em --force --all --pattern "(software-properties|gnome-software|update-manager|update-notifier)"'
 alias update-software='command update-manager'
-alias kill-clam-antivirus='kill_em.sh --all -p clamd'
+alias kill-clam-antivirus='kill-em --all -p clamd'
 
 #........................................................................
 # Miscellaneous local environment helpers
