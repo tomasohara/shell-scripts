@@ -575,7 +575,7 @@ def main():
                 t_count_eval_error = item['test_count_eval_error']
                 ## OLD: Revised format includes test passed out of test found
                 # print(f"{index + 1}. {name} ({rate}%): threshold={min_score}%")
-                print(f"{index+1}. {t_name} ({t_rate}%; {t_count_ok}/{t_count_total} OK): threshold={t_min_score}%; {t_count_eval_error} evaluation errors")
+                print(f"{index+1}. {t_name} ({t_rate}%; {t_count_ok}/{t_count_total} OK): threshold={min_score}%; {t_count_eval_error} evaluation errors")
             if not arr:
                 print("n/a")
 
