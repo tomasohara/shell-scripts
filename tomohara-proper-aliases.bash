@@ -100,7 +100,7 @@ function run-python-script {
     local script_base
     script_base=$(basename "$script_path" .py);
     # TODO: find shortcut for min
-    PYTHON_DEBUG_LEVEL=4
+    PYTHON_DEBUG_LEVEL="${PYTHON_DEBUG_LEVEL:-4}"
     if [ "${DEBUG_LEVEL:-0}" -gt $PYTHON_DEBUG_LEVEL ]; then
         PYTHON_DEBUG_LEVEL="$DEBUG_LEVEL"
     fi  
