@@ -100,9 +100,9 @@ function run-python-script {
     local script_base
     script_base=$(basename "$script_path" .py);
     # TODO: find shortcut for min
-    PYTHON_DEBUG_LEVEL="${PYTHON_DEBUG_LEVEL:-4}"
-    if [ "${DEBUG_LEVEL:-0}" -gt $PYTHON_DEBUG_LEVEL ]; then
-        PYTHON_DEBUG_LEVEL="$DEBUG_LEVEL"
+    local python_debug_level="${PYTHON_DEBUG_LEVEL:-4}"
+    if [ "${DEBUG_LEVEL:-0}" -gt $python_debug_level ]; then
+        python_debug_level="$DEBUG_LEVEL"
     fi  
     #
     # Run script and check for errors
@@ -127,11 +127,11 @@ function run-python-script {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
 	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
 	    ## TODO2:
-            echo "${script_args[*]}" | DEBUG_LEVEL=$PYTHON_DEBUG_LEVEL $PYTHON $module_spec "$script_path" $python_arg > "$out" 2> "$log";
+            echo "${script_args[*]}" | DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" $python_arg > "$out" 2> "$log";
 	else
 	    # note: disables - with explicit arguments or if running pytest
 	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
-	     DEBUG_LEVEL=$PYTHON_DEBUG_LEVEL $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
+	     DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
 	fi
     }
     if [ "$PROFILE_SCRIPT" == "1" ]; then
