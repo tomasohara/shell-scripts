@@ -105,6 +105,7 @@
 # - * Get a git guru to critique (e.g., how to make more standard)!
 # - Add an option for verbose tracing (and for quiet mode).
 # - Simplify environment-based variable initializations using "${ENV:-default}" approach.
+# - Remove extraneous semicolons at end of commands.
 #
 # TODO1:
 # - Filter miscellaneous output from git command execution (e.g., "enumerating objects"
@@ -167,10 +168,9 @@ function get-temp-log-name {
     mkdir --parents "$LOG_DIR"
     now_mmddyyhhmm=$(date '+%d%b%y-%H%M' | downcase-stdin-alias);
     # TODO: use integral suffix (not hex)
-    ## OLD: mktemp "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log"
     local log_file
     log_file=$(mktemp "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log")
-    ## TEMP: rename existing temp file (MaxOs quirk?)
+    ## TEMP: rename existing temp file (MacOs quirk?)
     if [ -s "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log" ]; then
         echo "FYI: applying get-temp-log-name workaround"
         rename-with-file-date "$log_file"
@@ -243,8 +243,8 @@ function git-update-plus {
             # Create zip (-v for verbose & -y for symlinks)
             command rm -f _stash.zip
             echo "issuing: zip over changed files (for later restore)"
-            echo "git-diff-list | zip -v -y -@ _stash.zip" >> "$log"
-            git-diff-list | zip -v -y -@ _stash.zip >> "$log"
+            echo "git-diff-list | zip -v -y -@ _stash.zip" >> "$log" 2>&1
+            git-diff-list | zip -v -y -@ _stash.zip >> "$log" 2>&1
         else
             # note: zip options: -y retain links; -v verbose
             echo "Not zipping changes because PRESERVE_GIT_STASH not 1"
@@ -255,14 +255,14 @@ function git-update-plus {
 
     # Do the stash[-push]/pull/stash-pop
     echo "issuing: git stash"
-    git stash >> "$log"
+    git stash >> "$log" 2>&1
     echo "issuing: git pull --all"
-    git pull --all >> "$log"
+    git pull --all >> "$log" 2>&1
     if [ $? -ne 0 ]; then
         echo "Warning: problem with pull (status=$?)"
     fi
     echo "issuing: git stash pop"
-    git stash pop >> "$log"
+    git stash pop >> "$log" 2>&1
 
     # Optionally restore timestamps for changed files
     if [ "$changed_files" != "" ]; then
@@ -270,7 +270,7 @@ function git-update-plus {
             echo "issuing: unzip over _stash.zip (to restore timestamps)"
             # note: unzip options: -o overwrite; -v verbose:
             echo "unzip -v -o _stash.zip" >> "$log"
-            unzip -v -o _stash.zip >> "$log"
+            unzip -v -o _stash.zip >> "$log" 2>&1
             
             # Restore working directory
             if [ "$restore_dir" != "" ]; then
@@ -369,15 +369,6 @@ function git-add-commit-push {
         echo "This avoids to avoid cut-n-paste error (e.g., [G]IT_MESSAGE-typo)"
         return 1
     fi
-    ## OLD:
-    ## if [ "$message" = "..." ]; then 
-    ##     echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
-    ##     return 1
-    ## fi
-    ## if [ "$message" = "" ]; then
-    ##     echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE-typo error)"
-    ##     return 1
-    ## fi
     #
     local git_user="n/a"
     local git_token="n/a"
@@ -393,25 +384,25 @@ function git-add-commit-push {
         echo "skipping: git add $*"
     else
         echo "issuing: git add" "$@"
-        git-add-plus "$@" >> "$log"
+        git-add-plus "$@" >> "$log" 2>&1
     fi
 
     # Push the changes after showing synopsis and getting user confirmation
     echo ""
     pause-for-enter "About to commit $file_spec (with message '$message')"
     echo "issuing: git commit -m '$message'"
-    git commit -m "$message" >> "$log"
+    git commit -m "$message" >> "$log" 2>&1
     perl -pe 's/^/    /;' "$log"
     pause-for-enter 'About to push: review commit log above!'
     #
     echo "issuing: git push --verbose"
     if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
-       git push --verbose <<EOF >> "$log"
+       git push --verbose <<EOF >> "$log" 2>&1
 $git_user
 $git_token
 EOF
     else
-       git push --verbose >> "$log"
+       git push --verbose >> "$log" 2>&1
     fi
     echo >> "$log"
 
@@ -504,22 +495,22 @@ function git-reset-file {
     fi
 
     # Isolate old versions
-    mkdir -p _git-trash >> "$log";
+    mkdir -p _git-trash >> "$log" 2>&1;
     echo "issuing: cp -vpf $* _git-trash";
     # Note: Uses  'command cp' to avoid confirmation when same file already in trash.
     # This is a design decision since resets aren't common (e.g., vs. timestamping trash files).
-    command cp -vpf "$@" _git-trash >> "$log";
+    command cp -vpf "$@" _git-trash >> "$log" 2>&1;
 
     # Forget state
     echo "issuing: git reset HEAD $*";
-    git reset HEAD "$@" >> "$log";
-    ## TODO: git reset HEAD $reset_options "$@" >> "$log";
+    git reset HEAD "$@" >> "$log" 2>&1;
+    ## TODO: git reset HEAD $reset_options "$@" >> "$log" 2>&1;
     ## NOTE: leads to "Cannot do hard reset with paths" error
     
     # Re-checkout
     # TODO: add option for 'git checkout HEAD -- ...'???
     echo "issuing: git checkout -- $*";
-    git checkout -- "$@" >> "$log";
+    git checkout -- "$@" >> "$log" 2>&1;
 
     # Issue warning if stash non-empty
     echo "issuing: git stash list"
@@ -554,16 +545,16 @@ function git-restore-file-helper {
     fi
 
     # Isolate old versions
-    mkdir -p _git-trash >> "$log";
+    mkdir -p _git-trash >> "$log" 2>&1;
     echo "issuing: cp -vpf $* _git-trash";
     # Note: Uses  'command cp' to avoid confirmation when same file already in trash.
     # This is a design decision since restores aren't common (e.g., vs. timestamping trash files).
-    command cp -vpf "$@" _git-trash >> "$log";
+    command cp -vpf "$@" _git-trash >> "$log" 2>&1;
 
     # Restore working tree files
     echo "issuing: git restore $option $*";
     # shellcheck disable=SC2086
-    git restore $option "$@" >> "$log";
+    git restore $option "$@" >> "$log" 2>&1;
     
     # Sanity check
     git-alias-review-log "$log"
@@ -588,13 +579,10 @@ function git-diff-plus {
     ## TODO? (account for subdirectories 'a' or 'b'):
     ## git diff "$@" | perl -pe 's@^(diff|\-\-\-|\+\+\+) (?!.*[ab]/.*)([ab])/@\1\2 \3: @;' >| "$log";
     ## Note: uses git-diff-list[-template] so file order reflects subdir embedding level
-    ## OLD: git diff "${files[@]}" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >| "$log";
     local OLDIFS=$IFS                   # save inter-field separator
-    ## BAD: echo "" > "$log"
-    ## BAD2: echo "" >> "$log"
     echo "" >| "$log"
     for f in $(git-diff-list "$@"); do
-        git diff "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log"
+        git diff "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log" 2>&1
     done
     IFS=$OLDIFS                         # restore inter-field separator
     #
@@ -640,7 +628,6 @@ function git-diff-list-template {
     echo "diff_list_file=\$TMP/_git-diff.\$\$.list"
     # ex: "diff --git a/tomohara-aliases.bash b/tomohara-aliases.bash" => "tomohara-aliases.bash:
     # TODO: ex: "diff --cc mezcla/data_utils.py" => "mezcla/data_utils.py"
-    ## OLD: echo "git diff 2>&1 | extract_matches.perl '^diff.* b/(.*)' >| \$diff_list_file"
     ## TODO3: rework to avoid shellcheck warning [SC2028 (info): echo may not expand escape sequences. Use printf.]
     # shellcheck disable=SC2028
     ## BAD:
@@ -926,7 +913,6 @@ function git-misc-alias-usage() {
     echo "    git-checkin-all-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
     echo ""
     echo "Source code grepping:"
-    ## OLD: echo ## OLD: "   (git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
     ## TODO3: get ls-tree to show output relative to current subdirectory
     echo "   (git-cd-root-alias; git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
     echo ""
