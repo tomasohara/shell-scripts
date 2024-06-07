@@ -399,6 +399,11 @@ function rename-last-snapshot {
 alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
 # youtube-transcript(url, file): download YoutTube transcript at URL to FILE
 function youtube-transcript {
+    if [[ ("$1" == "") || ("$1" == "--help") ]]; then
+        ## TODO3: add alias for showing condensed mezcla script usage notes
+        alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;'
+        return
+    fi
     local url="$1"
     local file="$2"
     alias-python -m mezcla.examples.youtube_transcript "$url" > "$file"
