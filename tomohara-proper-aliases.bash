@@ -57,7 +57,7 @@ alias-fn plint-tester-testee 'plint "$1" tests/test_"$1"'
 }
 #
 # clone-repo(url): clone github repo at URL into current dir with logging
-# TODO3: move to git-related section
+# TODO2: move to git-related section (better yet into git-aliases.bash)
 function clone-repo () {
     local url repo log
     url="$1"
@@ -72,6 +72,7 @@ function clone-repo () {
     fi
     #
     ls -R "$repo" >> "$log"
+    check-errors-excerpt "$log"
     ## Note: outputs warning that script now done (to avoid user closing the window assuming script active)
     ## TODO: add trace-stderr
     echo "FYI: script-based clone done (see $log)" 1>&2
@@ -166,12 +167,12 @@ function test-python-script {
     elif [ -e "$test_script" ]; then
         true;
     else
-        error "Warning: cannnot resolve test for _$test_script" 1>&2
+        echo "Warning: cannnot resolve test for _$test_script" 1>&2
     fi
-    PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
+    local pytest_opts="${PYTEST_OPTS:-"$default_pytest_opts"}"
     # TODO3: drop inheritance spec in summary
     # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "tests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
-    PYTHON_DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$test_script" "$@" 2>&1;
+    PYTHON_DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $pytest_opts" run-python-script "$test_script" "$@" 2>&1;
 }
 #
 # test-python-script-method(test-name, ...): like test-python-script but for specific test
