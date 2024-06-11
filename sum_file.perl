@@ -17,9 +17,10 @@ eval 'exec perl -Ssw $0 "$@"'
 # - add tests to ensure working as expected for given datafiles
 # - add mode and percentiles to -stats option output
 # - ** Add mode to -stdev option.
+# - Warn that support for f1 and f2 might be dropped.
 #
 # EXAMPLEs: 
-# $ sum_file.perl -f=2 /home/graphling/DATA/BNC/test-bnc-common-wordform.freq
+# $ sum_file.perl -col=3 /home/graphling/DATA/BNC/test-bnc-common-wordform.freq
 # 88770678.000
 #
 # NOTE: The handling of missing values is probably unintuitive: if a dash
@@ -59,7 +60,7 @@ use strict;
 use vars qw/$fract $diff $labels $headings $f $f1 $f2 $col $col1 $col2 $fix
     $ttest $paired_ttest $paired $anova $mann_whitney $each $interactive $stats
     $stdev $keep_nonnumeric $skip_nonnumeric $cumulative $average $context $flag_index_change $show_sum $dollars $commas $delim/;
-use vars qw/$strip $args $append $occurrence $extended/;
+use vars qw/$strip $args $append $occurrence $extended $regression/;
 
 # Check options for statistical tests
 &init_var(*args, &FALSE);       # get data from arguments (i.,e., command line)
@@ -70,8 +71,9 @@ if ($args) {
 &init_var(*paired, &FALSE); 	# alias for -paired_ttest
 &init_var(*paired_ttest, $paired); # perform paired t-test analys
 &init_var(*anova, &FALSE);	# perform ANOVA analysis of the data
+&init_var(*regression, &FALSE);	# calc. least squares estimate for correlation
 &init_var(*mann_whitney, &FALSE); # perform mann-whitney test for independence
-my($any_stat_test) = ($ttest || $paired_ttest || $anova || $mann_whitney);
+my($any_stat_test) = ($ttest || $paired_ttest || $anova || $mann_whitney || $regression);
 
 # Check basic command-line options
 ## &init_var(*f, &FALSE);
@@ -87,11 +89,16 @@ my($f1_default) = -1;
 &init_var(*f1, $f);		# 0-based field position for first column
 my($f2_default) = ($needs_two_numbers ? ($f1 + 1) : -1);
 &init_var(*f2, $f2_default);   	# 0-based field position for second column
+my($col1_default) = (($f1 > $f1_default) ? ($f1 + 1) : (1 + $labels));
 &init_var(*col, 		# alias for -col1
-	  ($f1 > $f1_default) ? ($f1 + 1) : (1 + $labels));
+	  $col1_default);
 &init_var(*col1, $col);		# main column of data
+## OLD:
+## &init_var(*col2, 		# other column of data
+##           ($f2 > $f2_default) ? ($f2 + 1) : (2 + $labels));
+my($col2_default) = ($needs_two_numbers ? ($col1 + 1) : -1);
 &init_var(*col2, 		# other column of data
-	  ($f2 > $f2_default) ? ($f2 + 1) : (2 + $labels));
+	  $col2_default);
 $f1 = ($col1 - 1) if ($f1 == $f1_default);
 $f2 = ($col2 - 1) if ($f2 == $f2_default);
 &init_var(*fix, &FALSE);	# fix-up column spacing (eg, tabify)
@@ -141,7 +148,7 @@ my($total_num) = 0;
 if ( !defined($ARGV[0])) {
     my($options) = "[-stats] [-col=N] [-fix] [-paired_ttest] [-anova] [-stdev] [-cumulative] [-average] [-delim=S] [-verbose] [-append]";
     if ($verbose) {
-	$options .= " [-fract] [-labels] [-headings] [-ttest] [-mann_whitney] [-flag_index_change]] [-context] [-dollars] [-commas] [-extended]";
+	$options .= " [-fract] [-labels] [-headings] [-ttest] [-mann_whitney] [-flag_index_change]] [-context] [-dollars] [-commas] [-extended] [-regression]";
     }
     my($example) = "Examples:\n\nls -s | $script_name -fix -stdev -\n\n";
     $example .= "sum_file.perl -headings -anova -col1=3 -col2=4 archive/resnik_typicality.data\n\n";
@@ -153,8 +160,9 @@ if ( !defined($ARGV[0])) {
 
     my($note) = "Notes:\n- Use -'s for cases with no corresponding data.\n";
     $note .= "- Use empty cells in case one column has more data than another.\n";
-    $note .= "- The -f values are 0-based, whereas the -col values are 1-based.\n";
+    $note .= "- The (deprecated) -f values are 0-based, whereas the -col values are 1-based.\n";
     $note .= "- Use -fix if data not strictly tab-delimited (i.e., just whitespace delimited).\n";
+    $note .= "- col2 is (col1+1) for statistics (or optional occurrence count)\n";
     $note .= "- Use -verbose for more help or to show extracted data.\n";
     if ($verbose) {
 	$note .= "- Use -diff to show difference of column 2 versus column 1.\n";
@@ -232,7 +240,7 @@ while (<>) {
     }
 
     # Select the specified column
-    my(@columns) = split(/\t/, $_);
+    my(@columns) = split(/$delim/, $_);
     # HACK: make sure tables or spaces, etc. don't end up in column data
     # TODO: try to simply split process
     for (my $i = 0; $i <= $#columns; $i++) {
@@ -530,10 +538,12 @@ if ($stats) {
 #
 sub show_statistics {
     &debug_print(&TL_VERBOSE, "show_statistics(@_)\n");
-    my($temp_file) = "$TMP/temp_calc_stats_$$.lisp";
+    my($temp_base) = "$TMP/temp_calc_stats_$$";
+    my($temp_file) = "$temp_base.lisp";
+    my($temp_log) = "$temp_base.log";
     my($lisp_code);
     my($extra) = "";
-    my($init) = (&DEBUG_LEVEL < 4) ? "" : "(dribble \"temp_calc_stats_$$.log\")\n";
+    my($init) = (&DEBUG_LEVEL < 4) ? "" : "(dribble \"$temp_log\")\n";
     my($omit_summary) = (($each || $any_stat_test) && (! $verbose));
     my($summary) = "";
     if (! $omit_summary) {
@@ -579,6 +589,10 @@ sub show_statistics {
     }
     if ($mann_whitney) {
 	$extra .= sprintf "(do-mann-whitney-test col%d col%d)\n\n", 
+	                  $col1, $col2;
+    }
+    if ($regression) {
+	$extra .= sprintf "(perform-regression col%d col%d)\n\n", 
 	                  $col1, $col2;
     }
     if ($anova) {
@@ -631,7 +645,7 @@ sub show_statistics {
     # Cleanup things
     if (&DEBUG_LEVEL < 5) {
 	unlink $temp_file;
-	unlink "temp_calc_stats_$$.log"
+	unlink $temp_log;
     }
 
     return;
