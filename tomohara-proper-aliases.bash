@@ -87,22 +87,32 @@ simple-alias-fn black-plain 'convert-emoticons-aux black'
 function run-python-script {
     ## DEBUG: trace-vars _PSL_ out_base log
     if [ "$1" = "" ]; then
-        echo "Usage: [USE_STDIN=B] [PROFILE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] run-python-script script arg ..."
-        echo "note: PYTHON_DEBUG_LEVEL uses 4 by default (unles regular DEBUG_LEVEL)"
+        echo "Usage: [USE_STDIN=B] [PROFILE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] run-python-script script arg ..."
+        echo "note:"
+        echo "- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL)"
+        echo "- PYTHON_OUT_DIR is script dir unless a full path"
         return
     fi
     # Check args
     # note: "tests" might be specified for script (e.g., test-python-script tests)
-    local script_path="$1";
-    shift;
-    local script_args=("$@");
+    local script_path="$1"
+    if [ ! -e "$script_path" ]; then
+        script_path="$(which "$script_path")"
+    fi
+    shift
+    local script_args=("$@")
     local script_dir
-    script_dir=$(dirname "$script_path");
+    script_dir="$(dirname "$script_path")"
     local script_base
-    script_base=$(basename "$script_path" .py);
+    local default_out_dir="$script_dir"
+    if [[ $default_out_dir =~ ^/.* ]]; then
+        default_out_dir="."
+    fi
+    local out_dir="${PYTHON_OUT_DIR:-"$default_out_dir"}"
+    script_base="$(basename "$script_path" .py)"
     # TODO: find shortcut for min
     local python_debug_level="${PYTHON_DEBUG_LEVEL:-4}"
-    if [ "${DEBUG_LEVEL:-0}" -gt $python_debug_level ]; then
+    if [ "${DEBUG_LEVEL:-0}" -gt "$python_debug_level" ]; then
         python_debug_level="$DEBUG_LEVEL"
     fi  
     #
@@ -112,15 +122,14 @@ function run-python-script {
     declare -g _PSL_ log out
     local out_base
     local module_spec=""
-    let _PSL_++;
-    out_base="$script_dir/_$script_base.$(TODAY).$_PSL_";
+    let _PSL_++
+    out_base="$out_dir/_$script_base.$(TODAY).$_PSL_"
     if [ "$PROFILE_SCRIPT" == "1" ]; then
        out_base="$out_base.profile"
        module_spec="-m cProfile -o $out_base.data"
     fi
-    log="$out_base.log";
-    out="$out_base.out";
-    ## touch "$out";
+    log="$out_base.log"
+    out="$out_base.out"
     ## DEBUG: trace-vars _PSL_ out_base log
     local python_arg="-"
     # shellcheck disable=SC2086
@@ -128,11 +137,11 @@ function run-python-script {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
 	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
 	    ## TODO2:
-            echo "${script_args[*]}" | DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" $python_arg > "$out" 2> "$log";
+            echo "${script_args[*]}" | DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" $python_arg > "$out" 2> "$log"
 	else
 	    # note: disables - with explicit arguments or if running pytest
 	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
-	     DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
+	     DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log"
 	fi
     }
     if [ "$PROFILE_SCRIPT" == "1" ]; then
@@ -140,10 +149,14 @@ function run-python-script {
     fi
     tail "$log" "$out" | truncate-width
     ## TEMP: remove emtpy output file
-    if [ "$DEBUG_LEVEL" -ge 4 ]; then ls -lt "$log" "$out"; fi
-    if [ ! -s "$out" ]; then command rm -v "$out"; fi
+    if [ "$DEBUG_LEVEL" -ge 4 ]; then
+        ls -lt "$log" "$out"
+    fi
+    if [ ! -s "$out" ]; then
+        command rm -v "$out"
+    fi
     # Show common errors in log
-    check-errors-excerpt "$log";
+    check-errors-excerpt "$log"
 }
 
 # pytest stuff
