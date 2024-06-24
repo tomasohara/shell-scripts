@@ -999,7 +999,8 @@ function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pat
 function findspec-all () { command find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | $GREP -v '^find: '; }
 function fs () { findspec . "$@" | $EGREP -iv '(/(backup|build)/)'; } 
 function fs-ls () { fs "$@" -exec ls -l {} \; ; }
-alias fs-='findspec-all .'
+## OLD: alias fs-='findspec-all .'
+simple-alias-fn fs- 'findspec-all .'
 ## Lorenzo review: should change this to fs-alt following TODO's
 function fs-ext () { find . -iname \*."$1" | $EGREP -iv '(/(backup|build)/)'; } 
 # TODO: extend fs-ext to allow for basename pattern (e.g., fs-ext java ImportXML)
@@ -1021,7 +1022,7 @@ function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
 function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
 alias fgr-py='fgr-ext py'
 alias fgr-jupyter='fgr-ext ipynb'
-alias fgr-py-etc='fgr-py; fgr-jupyter'
+function fgr-py-etc () { fgr-py "$@"; fgr-jupyter "$@"; }
 alias fgr-java='fgr-ext java'
 #
 # prepare-find-files-here([--out-dir out_dir_spec]): produces listing(s) of files in current directory
