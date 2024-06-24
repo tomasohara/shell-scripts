@@ -434,7 +434,7 @@ if ($stats == &FALSE) {
     }
     
     # Show count, mean, standard deviation, min and max
-    # Note; -stdev is perl-based on -stats xlipstat
+    # Note: -stdev is perl-based but -stats xlispstat
     if ($stdev) {
 	if ((scalar @data) == 0) {
 	    &warning("No data found for -stdev: use -fix?\n");
