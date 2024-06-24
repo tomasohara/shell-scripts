@@ -3,7 +3,7 @@
 # Extracts all versions of a file under git.
 #
 # Note:
-# - Akternative version that accounts for renamed files.
+# - Alternative version that accounts for renamed files.
 # - based on https://stackoverflow.com/questions/12850030/git-getting-all-previous-version-of-a-specific-file-folder
 # - shell check
 #   SC2016 (info): Expressions don't expand in single quotes
@@ -29,14 +29,15 @@ function full-usage {
     echo ""
     echo "Examples:"
     echo ""
-    echo "$0 README.md /tmp/README-versions"
+    # HACK: Uses Usage in filename so shows up in brief usage
+    echo "NUM_REVISIONS=5 $script --human Usage.txt /tmp/git-versions"
     echo ""
     echo "PRETTY=1 VERBOSE=1 {script} Dockerfile"
     echo ""
     echo "Notes:"
     echo "- default extract-dir: $export_to_expr"
     echo "- Env. vars: {EXPORT_TO, PRETTY, VERBOSE, TMP}"
-    echo "- Experimental ones: {MAX_NUM, ALLOW_RENAMES}"
+    echo "- Experimental ones: {NUM_REVISIONS, ALLOW_RENAMES}"
     echo ""
 }
 
@@ -87,7 +88,7 @@ NEWLINE=$'\n'
 TWO_NEWLINES="$NEWLINE$NEWLINE"
 ## OLD: script="$(basename "$0")"
 ## OLD: USAGE="Usage: $(basename "$0") [--human] path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example(s):${NEWLINE}${NEWLINE}$0 README.md /tmp/README-versions${NEWLINE}${NEWLINE}PRETTY=1 VERBOSE=1 ${script} Dockerfile"
-USAGE=$(full-usage | grep 'Usage:')
+USAGE=$(full-usage | grep 'Usage')
 
 # check if got argument
 if [ "${GIT_PATH_TO_FILE}" == "" ]; then
@@ -143,12 +144,12 @@ else
     $debug && echo "ALT_PATHS=(${ALT_PATHS[*]})"
 fi
 TOTAL_NUM=$(wc -l < "$info")
-MAX_NUM=${MAX_NUM:-$TOTAL_NUM}
+NUM_REVISIONS=${NUM_REVISIONS:-$TOTAL_NUM}
 
 while read -r LINE; do
     # ex: 2021-05-09T22:27:20-05:00 d124b2a3c1de2b2c0cd834b0fa9097e871d7f141
     COUNT=$((COUNT + 1))
-    if [ "$COUNT" -gt "$MAX_NUM" ]; then
+    if [ "$COUNT" -gt "$NUM_REVISIONS" ]; then
 	break
     fi
     $debug && echo "LINE$COUNT: $LINE"
