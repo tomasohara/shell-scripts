@@ -10,3 +10,4 @@ Things to do
       ...
       }
 - prune temporary scripts (e.g., it.perl)
+- P2: clarify when all-tomohara-settings needed
