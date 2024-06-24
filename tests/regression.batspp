@@ -150,3 +150,15 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## drwxr-xr-x 2 root     4.0K Jun  8 16:05 /tmp/set-xterm-title-root
 ## drwxrwxr-x 2 tomohara 4.0K Jun  8 15:03 /tmp/set-xterm-title-tomohara
 ## drwxrwxr-x 2 testuser 4.0K Jun  1 17:55 /tmp/set-xterm-title-testuser
+
+#...............................................................................
+# Fix alt-extract-all-git-versions.bash
+#
+
+## $ NUM_REVISIONS=5 alt-git-extract-all-versions alt-extract-all-git-versions.bash
+## Trying main path alt-extract-all-git-versions.bash for version v13
+## /home/tomohara/temp/tmp/all_versions_exported/alt-extract-all-git-versions.bash.v13-13Apr24
+## Trying main path alt-extract-all-git-versions.bash for version v12
+## fatal: Not a valid object name 49d1dfc9c25e959ead5d861dde183baa115f2542:alt-extract-all-git-versions.bash
+## Trying alternative path 
+## Error: unable to resolve commit 49d1dfc9c25e959ead5d861dde183baa115f2542
