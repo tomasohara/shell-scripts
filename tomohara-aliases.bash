@@ -2088,6 +2088,7 @@ function move-versioned-files {
         echo "usage: [ENV] move-versioned-files 'brace_pattern' dir"
         echo "    where ENV = [READONLY=1]"
         ## TODO: echo "    where ENV = [MOVE=command] ...        use 'mv -v' to move read
+        echo "note: try move-versioned-files-alt"
         return
     fi
     local ext_pattern="$1"
@@ -2117,6 +2118,7 @@ alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,pn
 alias move-adhoc-files='move-log-files; move-output-files'
 alias move-old-files='move-versioned-files "*" old'
 # move-versioned-files-alt: alternative version for moving all files with DDMMMDD-style timestamp into ./old
+# note: incldues sanity check for misplaced files (e.g., adhoc notes or .txt)
 # shellcheck disable=SC2010,SC2086
 {
 function move-versioned-files-alt {
