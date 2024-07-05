@@ -535,6 +535,7 @@ function reset-under-emacs {
     unset UNDER_EMACS SCRIPT_PID
     all-tomohara-settings
 }
+simple-alias-fn emacs-wide-horizontal 'tpo-invoke-emacs.sh -geometry 288x50 -eval "(split-window-right)"'
 
 #................................................................................
 # Media stuff
