@@ -49,6 +49,7 @@ if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."
     echo "- By default only includes text files with 'notes' in name, along with adhoc filters."
+    echo "- Env vars: ALL_TEXT, SRC_DIR, TRACE, VERBOSE, FIND_COMMAND_OPTIONS, FIND_GLOBAL_OPTIONS."
     echo ""
     exit
 fi
