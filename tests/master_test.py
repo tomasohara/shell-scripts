@@ -24,19 +24,19 @@ from mezcla import system
 # Environment options
 # Note: These are just intended for internal options, not for end users.
 #
-TEST_REGEX = system.getenv_value(
+MYPY_TEST_REGEX = system.getenv_value(
     ## TODO2: rename to PYTHON_TEST_REGEX
     "TEST_REGEX", None,
     "Regex for tests to include; ex: '^test_c.*' for debugging")
-CONFIG_FILE = system.getenv_text(
+MYPY_CONFIG_FILE = system.getenv_text(
     "MYPY_CONFIG_FILE", "../pyproject.toml", description="config file for mypy "
 )
-TEST_PATH = system.getenv_text(
+MYPY_TEST_PATH = system.getenv_text(
     "MYPY_TEST_PATH",
-    gh.form_path(__file__, ".."),
+    gh.form_path(gh.dirname(__file__), ".."),
     description="directory to test with mypy",
 )
-OUTPUT_PATH = system.getenv_text(
+MYPY_OUTPUT_PATH = system.getenv_text(
     "MYPY_OUTPUT_PATH", "mypy_reports", description="directory to save mypy reports in"
 )
 MYPY_WEIGHT = system.getenv_float(
@@ -71,15 +71,15 @@ def round_p2str(num):
 
 def run_mypy(thresholds: dict[str,float]) -> int:
     """Run mypy and return the number of failures"""
-    config = f" --config-file {CONFIG_FILE}" if gh.file_exists(CONFIG_FILE) else ""
+    config = f" --config-file {MYPY_CONFIG_FILE}" if gh.file_exists(MYPY_CONFIG_FILE) else ""
     cmd = (
-        f"python -m mypy {TEST_PATH}{config} --xml-report {OUTPUT_PATH} --check-untyped-defs"
+        f"python -m mypy {MYPY_TEST_PATH}{config} --xml-report {MYPY_OUTPUT_PATH} --check-untyped-defs"
     )
     subprocess.run(cmd, shell=True, check=False, capture_output=True)
     failed = 0
     
     # Read and parse xml report file
-    report_file = gh.form_path(OUTPUT_PATH, "index.xml")
+    report_file = gh.form_path(MYPY_OUTPUT_PATH, "index.xml")
     if not system.file_exists(report_file):
         debug.trace(4, f"{report_file} not found, skipping mypy checks")
     else:
@@ -117,8 +117,8 @@ def run_tests(thresholds: dict[str,float]) -> int:
         if not my_re.search(r"^test_.*\.py$", gh.basename(test_filename)):
             debug.trace(5, f"Ignoring non-python test: {test_filename}")
             include = False
-        elif TEST_REGEX and not my_re.search(rf"{TEST_REGEX}", test_filename):
-            debug.trace(5, f"Filtering test {test_filename} not matching TEST_REGEX ({TEST_REGEX})")
+        elif MYPY_TEST_REGEX and not my_re.search(rf"{MYPY_TEST_REGEX}", test_filename):
+            debug.trace(5, f"Filtering test {test_filename} not matching TEST_REGEX ({MYPY_TEST_REGEX})")
             include = False
         if not include:
             continue
