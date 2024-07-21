@@ -43,7 +43,7 @@ PYTEST_TEST_REGEX = system.getenv_value(
 )
 MYPY_CONFIG_FILE = system.getenv_text(
     "MYPY_CONFIG_FILE",
-    gh.form_path(gh.dirname(__file__), "..", "..", "pyproject.toml"),
+    gh.form_path(gh.dirname(__file__), "..", "mypy.ini"),
     description="config file for mypy ",
 )
 MYPY_TEST_PATH = system.getenv_text(
