@@ -9,6 +9,7 @@
 # Standard modules
 import math
 import subprocess
+import os
 
 # Installed modules
 import yaml
@@ -18,23 +19,40 @@ from mezcla import debug
 from mezcla import glue_helpers as gh
 from mezcla.my_regex import my_re
 from mezcla import xml_utils
+
 ## TODO3: from mezcla import misc_utils
 from mezcla import system
 
 # Environment options
 # Note: These are just intended for internal options, not for end users.
 #
+THRESHOLDS_FILE = system.getenv_text(
+    "THRESHOLDS_FILE",
+    "thresholds.yaml",
+    description="thresholds file for master_test.py",
+)
 MYPY_TEST_REGEX = system.getenv_value(
-    ## TODO2: rename to PYTHON_TEST_REGEX
-    "TEST_REGEX", None,
-    "Regex for tests to include; ex: '^test_c.*' for debugging")
+    "MYPY_TEST_REGEX",
+    None,
+    "Regex for source files to test typing on; ex: '^test_c.*' for debugging",
+)
+PYTEST_TEST_REGEX = system.getenv_value(
+    "PYTEST_TEST_REGEX",
+    None,
+    "Regex for tests to include; ex: '^test_c.*' for debugging",
+)
 MYPY_CONFIG_FILE = system.getenv_text(
-    "MYPY_CONFIG_FILE", "../pyproject.toml", description="config file for mypy "
+    "MYPY_CONFIG_FILE",
+    gh.form_path(gh.dirname(__file__), "..", "..", "pyproject.toml"),
+    description="config file for mypy ",
 )
 MYPY_TEST_PATH = system.getenv_text(
     "MYPY_TEST_PATH",
-    gh.form_path(gh.dirname(__file__), ".."),
-    description="directory to test with mypy",
+    f"{os.sep}".join(gh.dirname(__file__).split(os.sep)[:-1]),
+    description="directory with source files for mypy test",
+)
+PYTEST_TEST_PATH = system.getenv_text(
+    "PYTEST_TEST_PATH", gh.dirname(__file__), description="directory with pytest tests"
 )
 MYPY_OUTPUT_PATH = system.getenv_text(
     "MYPY_OUTPUT_PATH", "mypy_reports", description="directory to save mypy reports in"
@@ -45,8 +63,10 @@ MYPY_WEIGHT = system.getenv_float(
 PYTEST_WEIGHT = system.getenv_float(
     "PYTEST_WEIGHT", 1.0, description="final weight for pytest tests"
 )
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Utility functions
+
 
 def load_thresholds(filename):
     """Load test failure thresholds from a YAML file."""
@@ -66,46 +86,60 @@ def round_p2str(num):
     # EX: round_p2str(1.6) => "1.60"
     return system.round_as_str(num, 2)
 
-#-------------------------------------------------------------------------------
+
+# -------------------------------------------------------------------------------
 # Main code
 
-def run_mypy(thresholds: dict[str,float]) -> int:
+
+def run_mypy(thresholds: dict[str, float]) -> int:
     """Run mypy and return the number of failures"""
-    config = f" --config-file {MYPY_CONFIG_FILE}" if gh.file_exists(MYPY_CONFIG_FILE) else ""
-    cmd = (
-        f"python -m mypy {MYPY_TEST_PATH}{config} --xml-report {MYPY_OUTPUT_PATH} --check-untyped-defs"
+    config = (
+        f" --config-file {MYPY_CONFIG_FILE}" if gh.file_exists(MYPY_CONFIG_FILE) else ""
     )
-    subprocess.run(cmd, shell=True, check=False, capture_output=True)
+    cmd = f"python -m mypy {MYPY_TEST_PATH}{config} --xml-report {MYPY_OUTPUT_PATH} --check-untyped-defs"
+    subprocess.run(cmd, shell=True, check=False)
     failed = 0
-    
+
     # Read and parse xml report file
     report_file = gh.form_path(MYPY_OUTPUT_PATH, "index.xml")
     if not system.file_exists(report_file):
         debug.trace(4, f"{report_file} not found, skipping mypy checks")
     else:
         xml_report = xml_utils.parse_xml(system.read_file(report_file))
-    
+
         for filename, threshold in thresholds.items():
             debug.trace_expr(4, filename, threshold)
-            if my_re.search(r"^mezcla\/(.*__.*).+\.py$", filename):
-                debug.trace(4, f"skipping module: {filename}")
+            file_path = gh.resolve_path(filename)
+
+            # Exclude certain test files (e.g., files outside of the mezcla module)
+            include = True
+            if not my_re.search(rf"^mezcla{os.sep}(.*__.*).+\.py$", filename):
+                debug.trace(4, f"mypy: skipping module {filename}")
+                include = False
+            elif MYPY_TEST_REGEX and not my_re.search(rf"{MYPY_TEST_REGEX}", file_path):
+                debug.trace(5, f"Filtering test {file_path} not matching TEST_REGEX ({MYPY_TEST_REGEX})",)
+                include = False
+            if not include:
                 continue
             # find current module name in report
             results = xml_report.find(f"./file[@name='{filename}']")
-    
+
             # calculate imprecise percentage and compare to threshold
             any_hints = int(results.get("any"))
             imprecise_hints = int(results.get("imprecise"))
             total_hints = int(results.get("total"))
             impreciseness = ((any_hints + imprecise_hints) / total_hints) * 100
             debug.assertion(impreciseness <= threshold)
-            debug.trace(5, f"{filename}, threshold: {threshold}, impreciseness: {impreciseness}")
+            debug.trace(
+                5, f"{filename}, threshold: {threshold}, impreciseness: {impreciseness}"
+            )
             if impreciseness > threshold:
                 failed += 1
 
     return failed
 
-def run_tests(thresholds: dict[str,float]) -> int:
+
+def run_tests(thresholds: dict[str, float]) -> int:
     """Run tests and compare the results with the allowed thresholds"""
     failed = 0
     for test_filename, threshold in thresholds.items():
@@ -117,8 +151,8 @@ def run_tests(thresholds: dict[str,float]) -> int:
         if not my_re.search(r"^test_.*\.py$", gh.basename(test_filename)):
             debug.trace(5, f"Ignoring non-python test: {test_filename}")
             include = False
-        elif MYPY_TEST_REGEX and not my_re.search(rf"{MYPY_TEST_REGEX}", test_filename):
-            debug.trace(5, f"Filtering test {test_filename} not matching TEST_REGEX ({MYPY_TEST_REGEX})")
+        elif PYTEST_TEST_REGEX and not my_re.search(rf"{PYTEST_TEST_REGEX}", test_filename):
+            debug.trace(5, f"Filtering test {test_filename} not matching TEST_REGEX ({PYTEST_TEST_REGEX})",)
             include = False
         if not include:
             continue
@@ -127,29 +161,32 @@ def run_tests(thresholds: dict[str,float]) -> int:
         ## BAD: cmd = f"pytest -k {test} --collect-only"
         cmd = f"pytest --collect-only {test_path}"
         collect_result = subprocess.run(
-            cmd, shell=True, text=True, 
-            capture_output=True,
-            check=False
-            )
+            cmd, shell=True, text=True, capture_output=True, check=False
+        )
         debug.trace_object(6, collect_result)
-        total_tests = len(my_re.findall(r"<TestCaseFunction|<TestCaseClass|<Function|<Class",
-                                        collect_result.stdout))
+        total_tests = len(
+            my_re.findall(
+                r"<TestCaseFunction|<TestCaseClass|<Function|<Class",
+                collect_result.stdout,
+            )
+        )
         # Compare against alternative way to detemine number of tests
         # ex: "=== 103 tests collected in 1.64s ==="
         if (total_tests == 0) or debug.debugging():
             summary_total_tests = 0
-            if my_re.search(r"(\d+) tests collected",
-                            collect_result.stdout, flags=my_re.IGNORECASE):
+            if my_re.search(
+                r"(\d+) tests collected", collect_result.stdout, flags=my_re.IGNORECASE
+            ):
                 summary_total_tests = system.to_int(my_re.group(1))
             debug.trace_expr(5, total_tests, summary_total_tests)
             debug.assertion(total_tests == summary_total_tests)
-            total_tests = (summary_total_tests if (total_tests == 0) else total_tests)
+            total_tests = summary_total_tests if (total_tests == 0) else total_tests
 
         # Run tests for the test
         cmd = f"pytest {test_path}"
-        run_result = subprocess.run(cmd, shell=True, text=True,
-                                    capture_output=True,
-                                    check=False)
+        run_result = subprocess.run(
+            cmd, shell=True, text=True, capture_output=True, check=False
+        )
         debug.trace_object(6, run_result)
         failed_tests = len(my_re.findall(r"FAILED", run_result.stdout))
         debug.assertion(failed_tests <= total_tests)
@@ -161,11 +198,13 @@ def run_tests(thresholds: dict[str,float]) -> int:
                 summary_failed_tests = system.to_int(my_re.group(1))
             debug.trace_expr(5, failed_tests, summary_failed_tests)
             debug.assertion(failed_tests == summary_failed_tests)
-    
+
         # Calculate the number of allowed failures
         # note: threshold is for success (e.g., 51 means 51% of tests passed)
         # TODO3: have sanity checks account for minor floatiing point differences
-        required_successes = (math.ceil(total_tests * threshold / 100) if threshold else 0)
+        required_successes = (
+            math.ceil(total_tests * threshold / 100) if threshold else 0
+        )
         debug.assertion(0 <= required_successes <= total_tests)
         allowed_failures = max(1 - required_successes, 0)
 
@@ -174,30 +213,41 @@ def run_tests(thresholds: dict[str,float]) -> int:
             print(f"Warning: No tests were found for test {test_path}.")
             debug.trace_expr(5, collect_result.stdout, collect_result.stderr)
             continue
-        module_failure = (failed_tests and (failed_tests <= allowed_failures))
+        module_failure = failed_tests and (failed_tests <= allowed_failures)
         failed_percent = round_p2str(failed_tests / total_tests * 100)
         success_percent = round_p2str(100.0 - (failed_tests / total_tests * 100))
         ## TODO3: debug.assertion(misc_utils.is_close(system.to_float(failed_percent) + system.to_float(success_percent), 100))
         debug.trace_expr(
-            6, failed_tests, allowed_failures, total_tests, module_failure, required_successes
-            )
+            6,
+            failed_tests,
+            allowed_failures,
+            total_tests,
+            module_failure,
+            required_successes,
+        )
 
         # Format message to stdout: either error, warning or FYI on test summary.
         # note: format shows success rate to match batspp_report.py
-        label = ("Error" if module_failure else "Warning" if failed_tests else "FYI")
+        label = "Error" if module_failure else "Warning" if failed_tests else "FYI"
         ## OLD:
         ## print(f"{label}: {test_filename} {failed_tests} of {total_tests} tests failed ({failed_percent}%)",
         ##      end="")
         print(
             f"{label}: {test_filename} {failed_tests} of {total_tests} tests failed: {failed_percent}%; success ({success_percent}%); threshold={threshold}%",
-              end="")
+            end="",
+        )
         if module_failure:
             num_good = total_tests - failed_tests
             short = required_successes - num_good
             debug.assertion(0 <= required_successes <= total_tests)
             debug.assertion(0 <= short <= (total_tests - failed_tests) <= total_tests)
-            print((f": {short} short of the {required_successes} required successes" +
-                   f" (i.e., {round_p2str(threshold)}+%)"), end="")
+            print(
+                (
+                    f": {short} short of the {required_successes} required successes"
+                    + f" (i.e., {round_p2str(threshold)}+%)"
+                ),
+                end="",
+            )
             failed += 1
         print(".")
     return failed
@@ -205,7 +255,8 @@ def run_tests(thresholds: dict[str,float]) -> int:
     # Return amount of failed modules
 
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
+
 
 def main():
     """Main function"""
@@ -214,19 +265,19 @@ def main():
     # in the tests directory (TODO: merge the two sources with file trumping default).
     # note: uses default of 25% succeses allowed just for sake of getting tests operational
     # under Github actions (TODO: lower to 50%).
-    THRESHOLDS_FILE = "thresholds.yaml"
+    global THRESHOLDS_FILE
     thresholds_path = gh.resolve_path(THRESHOLDS_FILE)
     mypy_thresholds = {
-        module: 40.0 for module in gh.get_matching_files("mezcla/*.py")
+        module: 40.0 for module in gh.get_matching_files(f"{MYPY_TEST_PATH}/*.py")
     }
     test_thresholds = {
-        test_file: 25.0 for test_file in gh.get_matching_files("mezcla/tests/test_*.py")
-        }
+        test_file: 25.0 for test_file in gh.get_matching_files(f"{PYTEST_TEST_PATH}/*.py")
+    }
     # note: thresholds = mypy_thresholds | test_thresholds for python 3.9+
     default_thresholds = {**mypy_thresholds, **test_thresholds}
     debug.trace_expr(5, default_thresholds, prefix="default thresholds: ")
     if system.file_exists(thresholds_path):
-        new_thresholds: dict[str,float] = load_thresholds(thresholds_path)
+        new_thresholds: dict[str, float] = load_thresholds(thresholds_path)
         for filename, threshold in new_thresholds.items():
             if my_re.search(r"^.*(test).*", filename):
                 test_thresholds[filename] = threshold
@@ -236,12 +287,13 @@ def main():
                 debug.trace(4, f"ignoring threshold for file {filename}")
     else:
         debug.trace(2, f"Warning: unable to find {thresholds_path}")
-    debug.trace_expr(5, {**mypy_thresholds, **test_thresholds}, prefix="final thresholds")
-    
+    debug.trace_expr(
+        5, {**mypy_thresholds, **test_thresholds}, prefix="final thresholds"
+    )
 
     # Run tests and compare the results with the allowed thresholds
-    mypy_failures = run_mypy(mypy_thresholds)
     test_failures = run_tests(test_thresholds)
+    mypy_failures = run_mypy(mypy_thresholds)
     test_failures = 0
     failed = (mypy_failures * MYPY_WEIGHT) + (test_failures * PYTEST_WEIGHT)
 
