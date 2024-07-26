@@ -17,8 +17,10 @@ import yaml
 # Local modules
 from mezcla import debug
 from mezcla import glue_helpers as gh
-from mezcla.my_regex import my_re
+from mezcla.glue_helpers import default_subtrace_level, TEMP_BASE, TEMP_FILE, PRESERVE_TEMP_FILE
+from mezcla.my_regex import my_re 
 from mezcla import xml_utils
+from mezcla import tpo_common as tpo
 
 ## TODO3: from mezcla import misc_utils
 from mezcla import system
@@ -85,6 +87,47 @@ def round_p2str(num):
     # EX: round_p2str(1.678) => "1.68"
     # EX: round_p2str(1.6) => "1.60"
     return system.round_as_str(num, 2)
+
+def run(command, trace_level=4, subtrace_level=None, **namespace):
+    """Wrapper around subprocess.run
+    Invokes COMMAND via system shell, using TRACE_LEVEL for debugging output, returning result. The command can use format-style templates, resolved from caller's namespace. The optional SUBTRACE_LEVEL sets tracing for invoked commands (default is same as TRACE_LEVEL); this works around problem with stderr not being separated, which can be a problem when tracing unit tests.
+   Notes:
+   - The result includes stderr, so direct if not desired (see issue):
+         run("ls /tmp/fubar 2> /dev/null")
+   - This is only intended for running simple commands. It would be better to create a subprocess for any complex interactions.
+   - This function doesn't work fully under Win32. Tabs are not preserved, so redirect stdout to a file if needed.
+   - If TEMP_FILE or TEMP_BASE defined, these are modified to be unique to avoid conflicts across processeses.
+    - If OUTPUT, the result will be printed.
+   """
+    debug.assertion(isinstance(trace_level, int))
+    debug.trace(6, f"run({command}, tl={trace_level}, sub_tr={subtrace_level}")
+    # Keep track of current debug level setting
+    debug_level_env = os.getenv("DEBUG_LEVEL")
+    if subtrace_level is None:
+        subtrace_level = default_subtrace_level
+    if subtrace_level != trace_level:
+        system.setenv("DEBUG_LEVEL", str(subtrace_level))
+    save_temp_base = TEMP_BASE
+    if TEMP_BASE:
+         system.setenv("TEMP_BASE", TEMP_BASE + "_subprocess_")
+    save_temp_file = TEMP_FILE
+    if TEMP_FILE and (PRESERVE_TEMP_FILE is not True):
+        system.setenv("TEMP_FILE", TEMP_FILE + "_subprocess_")
+    # Expand the command template
+    # TODO: make this optional
+    command_line = command
+    if my_re.search("{.*}", command):
+        command_line = tpo.format(command_line, indirect_caller=True, ignore_exception=False, **namespace)
+    debug.trace(6 , "issuing: %s" % command_line)
+    # Run the command
+    result = str(subprocess.run(command_line))
+    # Restore debug level setting in environment
+    system.setenv("DEBUG_LEVEL", debug_level_env or "")
+    system.setenv("TEMP_BASE", save_temp_base or "")
+    if save_temp_file and (PRESERVE_TEMP_FILE is not True):
+        system.setenv("TEMP_FILE", save_temp_file or "")
+    debug.trace(7, "run(_) => {\n%s\n}" % gh.indent_lines(result))
+    return result
 
 
 # -------------------------------------------------------------------------------
