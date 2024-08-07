@@ -446,7 +446,9 @@ function invoke-git-command {
 }
 # TODO: git-command => git-command-alias
 alias git-command='invoke-git-command'
+## TODO3: git-push-plus => git-push-alias (as simple wrapper)
 alias git-push-plus='invoke-git-command push'
+alias git-pull-alias='invoke-git-command pull'
 
 # Misc git commands (redirected to log file)
 # NOTE: commands with much output like git-log invoke less
