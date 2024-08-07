@@ -1467,17 +1467,18 @@ function most-recent-backup {
 # TODO: test for dot-files:
 #   touch backup .fubar.~666~; most-recent-backup .fubar => .fubar
 #
-# diff-backup(file): compare FILE vs. most recent backup
+# diff-backup(diff_command, file, [diff_arg ...]): compare FILE vs. most recent backup, using DIFF_PROGRAM and optional DIFF_ARGs
 # TODO: fix handling of dot files
 function diff-backup-helper {
     local diff="$1"; local file="$2";
+    shift 2;
     local backup_file
     backup_file="$(most-recent-backup "$file")"
     if [ "$backup_file" = "" ]; then
         echo "Error: no backup for '$file'"
     else 
-        echo "Issuing: '$diff' '$backup_file' '$file'"
-        "$diff" "$backup_file" "$file";
+        echo "Issuing: '$diff' "$@" '$backup_file' '$file'"
+        "$diff" "$@" "$backup_file" "$file";
     fi
 }
 ## TODO:
@@ -2414,7 +2415,8 @@ function cmd-output () {
 function cmd-usage () {
     local command="$*"
     local usage_file
-    usage_file="_$(echo "$command" | tr ' ' '_')-usage.list"
+    ## OLD: usage_file="_$(echo "$command" | tr ' ' '_')-usage.list"
+    usage_file="_$(echo "$command" | tr ' ' '-')-usage.list"
     $command --help  2>&1 | ansifilter > "$usage_file"
     $PAGER_NOEXIT "$usage_file"
 }
