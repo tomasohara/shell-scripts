@@ -117,8 +117,8 @@ function invoke () {
     # disable shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2086
     "$program" $program_arg "$file" >> "$log_file" 2>&1
-    if [ $? ]; then
-        echo "Problem running '$program':"
+    if [ $? -ne 0 ]; then
+        echo "Problem running '$program' (status=$?):"
         tail --verbose "$log_file"
     fi
     }
@@ -195,8 +195,8 @@ case "$lower_file" in
     # TODO: convert filename arguments to use file:// prefix (to distinguish from URL's)
     *.html | *.xml) invoke "$BROWSER" "$@" & ;;
 
-    # Text files
-    *.txt | *.text) invoke emacs "$@" & ;;
+    # Text files and dot files
+    *.txt | *.text | .*) invoke emacs "$@" & ;;
 
     # Windows XPS printer
     *.oxps | *.xps) invoke mupdf "$@" & ;;
@@ -206,14 +206,15 @@ case "$lower_file" in
     ## *.abc | *.pdq) echo hey; emacs "$@"
     ## BAD: *.xyz)
     ##		   echo hey2; emacs "$@" & ;;
-    
-    # Default processing
-    *)
+
+    # Invoke default program for unknown extension
+    *.*) 
        echo ""
-       ## OLD
-       ## echo "*** Warning: Unknown extension in $1; using Emacs"
-       ## invoke emacs "$@" & ;;
        echo "*** Warning: Unknown extension in $1; using $default_program"
        invoke "$default_program" "$@" & ;;
-
+    
+    # Invoke extension-less file as if program
+    *)
+       invoke "$@" & ;;
+    
 esac
