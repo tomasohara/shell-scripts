@@ -41,6 +41,8 @@ while [ "$more_options" = "1" ]; do
 	for_editting=1;
     elif [ "$1" = "--open" ]; then
 	for_editting=1;
+    elif [ "$1" = "--under-mac" ]; then
+	under_mac=1;
     elif [ "$1" = "--not-mac" ]; then
 	under_mac=0;
     elif [ "$1" = "--verbose" ]; then
@@ -115,6 +117,10 @@ function invoke () {
     # disable shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2086
     "$program" $program_arg "$file" >> "$log_file" 2>&1
+    if [ $? ]; then
+        echo "Problem running '$program':"
+        tail --verbose "$log_file"
+    fi
     }
 
 #...............................................................................
