@@ -18,7 +18,7 @@ import yaml
 from mezcla import debug
 from mezcla import glue_helpers as gh
 from mezcla.glue_helpers import default_subtrace_level, TEMP_BASE, TEMP_FILE, PRESERVE_TEMP_FILE
-from mezcla.my_regex import my_re 
+from mezcla.my_regex import my_re
 from mezcla import xml_utils
 from mezcla import tpo_common as tpo
 
@@ -45,16 +45,16 @@ PYTEST_TEST_REGEX = system.getenv_value(
 )
 MYPY_CONFIG_FILE = system.getenv_text(
     "MYPY_CONFIG_FILE",
-    gh.form_path(gh.dirname(__file__), "..", "mypy.ini"),
+    gh.form_path(gh.dirname(__file__), "mypy.ini"),
     description="config file for mypy ",
 )
 MYPY_TEST_PATH = system.getenv_text(
     "MYPY_TEST_PATH",
-    f"{os.sep}".join(gh.dirname(__file__).split(os.sep)[:-1]),
+    gh.dirname(__file__),
     description="directory with source files for mypy test",
 )
 PYTEST_TEST_PATH = system.getenv_text(
-    "PYTEST_TEST_PATH", gh.dirname(__file__), description="directory with pytest tests"
+    "PYTEST_TEST_PATH", gh.form_path(gh.dirname(__file__), "tests"), description="directory with pytest tests"
 )
 MYPY_OUTPUT_PATH = system.getenv_text(
     "MYPY_OUTPUT_PATH", "mypy_reports", description="directory to save mypy reports in"
@@ -88,7 +88,7 @@ def round_p2str(num):
     # EX: round_p2str(1.6) => "1.60"
     return system.round_as_str(num, 2)
 
-def run(command, trace_level=4, subtrace_level=None, **namespace):
+def run(command, trace_level=4, subtrace_level=None, **namespace) -> str :
     """Wrapper around subprocess.run
     Invokes COMMAND via system shell, using TRACE_LEVEL for debugging output, returning result. The command can use format-style templates, resolved from caller's namespace. The optional SUBTRACE_LEVEL sets tracing for invoked commands (default is same as TRACE_LEVEL); this works around problem with stderr not being separated, which can be a problem when tracing unit tests.
    Notes:
@@ -109,7 +109,7 @@ def run(command, trace_level=4, subtrace_level=None, **namespace):
         system.setenv("DEBUG_LEVEL", str(subtrace_level))
     save_temp_base = TEMP_BASE
     if TEMP_BASE:
-         system.setenv("TEMP_BASE", TEMP_BASE + "_subprocess_")
+        system.setenv("TEMP_BASE", TEMP_BASE + "_subprocess_")
     save_temp_file = TEMP_FILE
     if TEMP_FILE and (PRESERVE_TEMP_FILE is not True):
         system.setenv("TEMP_FILE", TEMP_FILE + "_subprocess_")
@@ -118,9 +118,9 @@ def run(command, trace_level=4, subtrace_level=None, **namespace):
     command_line = command
     if my_re.search("{.*}", command):
         command_line = tpo.format(command_line, indirect_caller=True, ignore_exception=False, **namespace)
-    debug.trace(6 , "issuing: %s" % command_line)
+    debug.trace(6 , f"issuing: {command_line}")
     # Run the command
-    result = str(subprocess.run(command_line))
+    result = str(subprocess.run(command_line, check=False, shell=True))
     # Restore debug level setting in environment
     system.setenv("DEBUG_LEVEL", debug_level_env or "")
     system.setenv("TEMP_BASE", save_temp_base or "")
@@ -140,7 +140,7 @@ def run_mypy(thresholds: dict[str, float]) -> int:
         f" --config-file {MYPY_CONFIG_FILE}" if gh.file_exists(MYPY_CONFIG_FILE) else ""
     )
     cmd = f"python -m mypy {MYPY_TEST_PATH}{config} --xml-report {MYPY_OUTPUT_PATH} --check-untyped-defs"
-    subprocess.run(cmd, shell=True, check=False)
+    run(cmd, shell=True, check=False)
     failed = 0
 
     # Read and parse xml report file
@@ -203,14 +203,14 @@ def run_tests(thresholds: dict[str, float]) -> int:
         # Collect test cases for the test
         ## BAD: cmd = f"pytest -k {test} --collect-only"
         cmd = f"pytest --collect-only {test_path}"
-        collect_result = subprocess.run(
+        collect_result = run(
             cmd, shell=True, text=True, capture_output=True, check=False
         )
         debug.trace_object(6, collect_result)
         total_tests = len(
             my_re.findall(
                 r"<TestCaseFunction|<TestCaseClass|<Function|<Class",
-                collect_result.stdout,
+                collect_result,
             )
         )
         # Compare against alternative way to detemine number of tests
@@ -218,7 +218,7 @@ def run_tests(thresholds: dict[str, float]) -> int:
         if (total_tests == 0) or debug.debugging():
             summary_total_tests = 0
             if my_re.search(
-                r"(\d+) tests collected", collect_result.stdout, flags=my_re.IGNORECASE
+                r"(\d+) tests collected", collect_result, flags=my_re.IGNORECASE
             ):
                 summary_total_tests = system.to_int(my_re.group(1))
             debug.trace_expr(5, total_tests, summary_total_tests)
@@ -227,17 +227,15 @@ def run_tests(thresholds: dict[str, float]) -> int:
 
         # Run tests for the test
         cmd = f"pytest {test_path}"
-        run_result = subprocess.run(
-            cmd, shell=True, text=True, capture_output=True, check=False
-        )
+        run_result = run(cmd)
         debug.trace_object(6, run_result)
-        failed_tests = len(my_re.findall(r"FAILED", run_result.stdout))
+        failed_tests = len(my_re.findall(r"FAILED", run_result))
         debug.assertion(failed_tests <= total_tests)
         # Compare against alternative way to detemine number of failures
         # ex: "=== 12 passed, 49 skipped, 13 xfailed, 29 xpassed in 4.76s ==="
         if debug.debugging():
             summary_failed_tests = 0
-            if my_re.search(r"(\d+) failed", run_result.stdout, flags=my_re.IGNORECASE):
+            if my_re.search(r"(\d+) failed", run_result, flags=my_re.IGNORECASE):
                 summary_failed_tests = system.to_int(my_re.group(1))
             debug.trace_expr(5, failed_tests, summary_failed_tests)
             debug.assertion(failed_tests == summary_failed_tests)
@@ -254,7 +252,7 @@ def run_tests(thresholds: dict[str, float]) -> int:
         # Check if the number of failed tests exceeds the allowed threshold
         if total_tests == 0:
             print(f"Warning: No tests were found for test {test_path}.")
-            debug.trace_expr(5, collect_result.stdout, collect_result.stderr)
+            debug.trace_expr(5, collect_result, collect_result)
             continue
         module_failure = failed_tests and (failed_tests <= allowed_failures)
         failed_percent = round_p2str(failed_tests / total_tests * 100)
@@ -308,7 +306,6 @@ def main():
     # in the tests directory (TODO: merge the two sources with file trumping default).
     # note: uses default of 25% succeses allowed just for sake of getting tests operational
     # under Github actions (TODO: lower to 50%).
-    global THRESHOLDS_FILE
     thresholds_path = gh.resolve_path(THRESHOLDS_FILE)
     mypy_thresholds = {
         module: 40.0 for module in gh.get_matching_files(f"{MYPY_TEST_PATH}/*.py")
