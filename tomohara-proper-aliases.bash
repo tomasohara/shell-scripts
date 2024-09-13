@@ -83,7 +83,7 @@ simple-alias-fn black-plain 'convert-emoticons-aux black'
 # run-python-script(script, args): run SCRIPT with ARGS with output to dir/_base-#.out
 # and stderr to dir/_base-#.log where # is value of global $_PSL_.
 # The arguments are passed along unless USE_STDIN is 1.
-# note: Checks for errors afterwards. Use non-locals _PSL_, out_base and log.
+# note: Checks for errors afterwards. Uses non-locals _PSL_, out_base and log.
 function run-python-script {
     ## DEBUG: trace-vars _PSL_ out_base log
     if [ "$1" = "" ]; then
@@ -119,8 +119,10 @@ function run-python-script {
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
     # TODO3: rework to avoid problem with _PSL_ not being updated (or at least detect the error)!
-    declare -g _PSL_ log out
-    local out_base
+    ## OLD:
+    ## declare -g _PSL_ log out
+    ## local out_base
+    declare -g _PSL_ log out out_base
     local module_spec=""
     let _PSL_++
     out_base="$out_dir/_$script_base.$(TODAY).$_PSL_"
