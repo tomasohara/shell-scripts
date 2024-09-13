@@ -3095,6 +3095,7 @@ alias jupyter-notebook-open=jupyter-notebook-redir-open
 ## TODO: figure out way for python to pull script from path (as with perl -S)
 function extract-text() { alias-python "$(which extract_document_text.py)" "$@"; }
 alias xtract-text='extract-text'
+alias extract-text-html='html_utils.py --regular'
 
 # test-script(script): run unit test for script (i.e., tests/test_script)
 # and outputs to file given by tests/_test-<script_basename>.<date>.log.
