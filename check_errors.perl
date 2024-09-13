@@ -183,6 +183,7 @@ while (<>) {
 	   || /(^|\s)[A-Z]\S+Error(\s|:|$)/	# exception (e.g., TypeError)
 	   || /:\s*error\s*:/i          # argparse error (e.g., main.py: error: unrecognized arguments
 	   || /^\s*FAILED\b/i           # pytest failure
+	   || /\|\s*(ERROR|CRITICAL)\s*\|/       # loguru (e.g., "| ERROR | ...")
 
 	   # Cygwin errors
 	   || /\bunable to remap\b/
