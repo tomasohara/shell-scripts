@@ -56,7 +56,7 @@
 #     Preferred for arithmetic: see https://wiki.bash-hackers.org/commands/builtin/let.
 #   - early return
 #      return                       just inside functions
-#      exit                         early script termination; avoid in functions or if script sourced
+#      -or- exit                    early script termination; *** avoid in functions or if script sourced ***
 #   - history mechanism
 #     !?string[?]                   find last command with string
 #  - local variable declaration     note: space-separated not comma; simplified
