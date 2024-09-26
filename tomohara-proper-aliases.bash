@@ -87,7 +87,7 @@ simple-alias-fn black-plain 'convert-emoticons-aux black'
 function run-python-script {
     ## DEBUG: trace-vars _PSL_ out_base log
     if [ "$1" = "" ]; then
-        echo "Usage: [USE_STDIN=B] [PROFILE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] run-python-script script arg ..."
+        echo "Usage: [USE_STDIN=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] run-python-script script arg ..."
         echo "note:"
         echo "- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL)"
         echo "- PYTHON_OUT_DIR is script dir unless a full path"
@@ -129,6 +129,11 @@ function run-python-script {
     if [ "$PROFILE_SCRIPT" == "1" ]; then
        out_base="$out_base.profile"
        module_spec="-m cProfile -o $out_base.data"
+    fi
+    log="$out_base.log"
+    if [ "$TRACE_SCRIPT" == "1" ]; then
+       out_base="$out_base.trace"
+       module_spec="-m trace --trace"
     fi
     log="$out_base.log"
     out="$out_base.out"
