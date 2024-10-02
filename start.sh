@@ -104,11 +104,12 @@ function invoke () {
     log_file="$log_dir/$(basename "$program")-$(basename "$file")-$today.log"
     local program_arg=""
     if [ ! -e "$log_file" ]; then touch "$log_file"; fi
-    if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" \"$file\" >> \"$log_file\" 2>&1"; fi
+    ## OLD: if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" \"$file\" >> \"$log_file\" 2>&1"; fi
     if [[ (! -e "$program") && ("$program" != "open") ]]; then
 	if [ "$under_mac" = "1" ]; then
-	    ## OLD: program="open -a '$program'"
-	    ## TODO: program_arg="-a '$program'"
+            if [[ ! ("$program" =~ .*\.app) ]]; then
+                program="$program.app"
+            fi
 	    program_arg="-a $program"
 	    program="open"
 	fi
@@ -116,7 +117,10 @@ function invoke () {
     ## OLD: "$program" "$file" >> "$log_file" 2>&1
     # disable shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2086
-    "$program" $program_arg "$file" >> "$log_file" 2>&1
+    {
+        if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" $program_arg \"$file\" >> \"$log_file\" 2>&1"; fi
+        "$program" $program_arg "$file" >> "$log_file" 2>&1
+    }
     if [ $? -ne 0 ]; then
         echo "Problem running '$program' (status=$?):"
         tail --verbose "$log_file"
@@ -207,6 +211,10 @@ case "$lower_file" in
     ## BAD: *.xyz)
     ##		   echo hey2; emacs "$@" & ;;
 
+    # Invoke MacOs-style app as if program (e.g., Safari.app)
+    *.app)
+       invoke "$@" & ;;
+    
     # Invoke default program for unknown extension
     *.*) 
        echo ""
