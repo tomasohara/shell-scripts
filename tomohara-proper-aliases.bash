@@ -130,7 +130,6 @@ function run-python-script {
        out_base="$out_base.profile"
        module_spec="-m cProfile -o $out_base.data"
     fi
-    log="$out_base.log"
     if [ "$TRACE_SCRIPT" == "1" ]; then
        out_base="$out_base.trace"
        module_spec="-m trace --trace"
