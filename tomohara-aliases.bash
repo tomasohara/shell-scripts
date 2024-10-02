@@ -1020,8 +1020,11 @@ function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$
 # fgr(filename_pattern, line_pattern): $GREP through files matching FILENAME_PATTERN for LINE_PATTERN
 function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
 function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
-alias fgr-py='fgr-ext py'
-alias fgr-jupyter='fgr-ext ipynb'
+## OLD
+## alias fgr-py='fgr-ext py'
+## alias fgr-jupyter='fgr-ext ipynb'
+simple-alias-fn fgr-py 'fgr-ext py'
+simple-alias-fn fgr-jupyter 'fgr-ext ipynb'
 function fgr-py-etc () { fgr-py "$@"; fgr-jupyter "$@"; }
 alias fgr-java='fgr-ext java'
 #
