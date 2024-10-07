@@ -847,6 +847,7 @@ function git-toggle-push {
     else
         GIT_SKIP_PUSH=1
     fi
+    echo "GIT_SKIP_PUSH=$GIT_SKIP_PUSH"
 }
 
 #-------------------------------------------------------------------------------
