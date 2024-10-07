@@ -60,8 +60,10 @@
 #      GIT_MESSAGE               message for update (TODO: rework to use optional arg)
 #   GIT_NO_CONFIRM               omit confirmation (used is automated tests(
 #   GIT_FORCE                    force an operation (e.g., git add ignored file)
+#   GIT_LOG_DIR                  where to put command logs (e.g, log-files)
 #   GIT_SKIP_ADD                 skip implicit 'git add' in git-add-commit-push
 #   GIT_SKIP_PUSH                skip 'git push' after commit
+#   GIT_TEST_MESSAGE             commit message if GIT_NO_CONFIRM used
 #
 # - maldito shellcheck:
 #   SC2002 [Useless cat. Consider 'cmd < file | ..' or 'cmd file | ..' instead]
