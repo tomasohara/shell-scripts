@@ -58,6 +58,10 @@
 #   UNSAFE_GIT_CREDENTIALS       use old-style credentials file
 #   -- internal
 #      GIT_MESSAGE               message for update (TODO: rework to use optional arg)
+#   GIT_NO_CONFIRM               omit confirmation (used is automated tests(
+#   GIT_FORCE                    force an operation (e.g., git add ignored file)
+#   GIT_SKIP_ADD                 skip implicit 'git add' in git-add-commit-push
+#   GIT_SKIP_PUSH                skip 'git push' after commit
 #
 # - maldito shellcheck:
 #   SC2002 [Useless cat. Consider 'cmd < file | ..' or 'cmd file | ..' instead]
@@ -395,14 +399,18 @@ function git-add-commit-push {
     perl -pe 's/^/    /;' "$log"
     pause-for-enter 'About to push: review commit log above!'
     #
-    echo "issuing: git push --verbose"
-    if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
-       git push --verbose <<EOF >> "$log" 2>&1
+    if [ "${GIT_SKIP_PUSH:-0}" == "1" ]; then
+        echo "Skipping push (due to GIT_SKIP_PUSH)"
+    else    
+        echo "issuing: git push --verbose"
+        if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
+           git push --verbose <<EOF >> "$log" 2>&1
 $git_user
 $git_token
 EOF
-    else
-       git push --verbose >> "$log" 2>&1
+        else
+           git push --verbose >> "$log" 2>&1
+        fi
     fi
     echo >> "$log"
 
@@ -827,6 +835,16 @@ function git-conflicts-alias {
     git-cd-root-alias
     git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {};
     cd "$restore_dir"
+}
+
+# git-toggle-push(): toggle automatic push in git-add-commit-push
+function git-toggle-push {
+    # TODO: GIT_SKIP_PUSH=$((1 - GIT_SKIP_PUSH))
+    if [ "${GIT_SKIP_PUSH:-0}" == "1" ]; then
+        GIT_SKIP_PUSH=0
+    else
+        GIT_SKIP_PUSH=1
+    fi
 }
 
 #-------------------------------------------------------------------------------
