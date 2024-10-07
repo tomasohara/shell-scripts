@@ -397,11 +397,11 @@ function git-add-commit-push {
     echo "issuing: git commit -m '$message'"
     git commit -m "$message" >> "$log" 2>&1
     perl -pe 's/^/    /;' "$log"
-    pause-for-enter 'About to push: review commit log above!'
     #
     if [ "${GIT_SKIP_PUSH:-0}" == "1" ]; then
         echo "Skipping push (due to GIT_SKIP_PUSH)"
     else    
+        pause-for-enter 'About to push: review commit log above!'
         echo "issuing: git push --verbose"
         if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
            git push --verbose <<EOF >> "$log" 2>&1
