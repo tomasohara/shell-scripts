@@ -22,8 +22,8 @@
 #
 # - [Deprecated] Credentials can be taken from project specific file (_my-git-credentials-etc.bash.list)
 #
-#     git_user=username
-#     git_token=personal_access_token
+#     GIT_USER=username
+#     GIT_TOKEN=personal_access_token
 #
 #     *** Warning: This is not secure, and should be avoided in multi-user environments. ***
 #
@@ -58,6 +58,9 @@
 #   UNSAFE_GIT_CREDENTIALS       use old-style credentials file
 #   -- internal
 #      GIT_MESSAGE               message for update (TODO: rework to use optional arg)
+#   -- obsolete
+#      GIT_USER                  user ID for authentication
+#      GIT_TOKEN                 user token from Github
 #   GIT_NO_CONFIRM               omit confirmation (used is automated tests(
 #   GIT_FORCE                    force an operation (e.g., git add ignored file)
 #   GIT_LOG_DIR                  where to put command logs (e.g, log-files)
@@ -209,11 +212,12 @@ function git-alias-review-log {
 # - Requires GIT_FORCE of 1 if there are changed files (to avoid inadvertant conflict).
 # - TODO2: decompose this monster of a function!
 function git-update-plus {
-    local git_user="n/a"
-    local git_token="n/a"
+    ## OLD:
+    ## local GIT_USER="n/a"
+    ## local GIT_TOKEN="n/a"
     if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
        set-global-credentials
-       echo "git_user: $git_user;  git_token: $git_token"
+       echo "GIT_USER: $GIT_USER;  GIT_TOKEN: $GIT_TOKEN"
     fi
     #
     local log
@@ -348,7 +352,7 @@ function set-global-credentials {
     else
         echo "Warning: use deprecated credentials file sourcing"
         for dir in . ~; do
-            if [[ ($git_user = "") && (-e "$dir/$credentials_file") ]]; then
+            if [[ ($GIT_USER = "") && (-e "$dir/$credentials_file") ]]; then
                 echo "Sourcing credentials ($dir/$credentials_file)"
                 source "$dir/$credentials_file"
                 break
@@ -376,11 +380,12 @@ function git-add-commit-push {
         return 1
     fi
     #
-    local git_user="n/a"
-    local git_token="n/a"
+    ## OLD:
+    ## local GIT_USER="n/a"
+    ## local GIT_TOKEN="n/a"
     if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
        set-global-credentials
-       echo "git_user: $git_user;  git_token: $git_token"
+       echo "GIT_USER: $GIT_USER;  GIT_TOKEN: $GIT_TOKEN"
     fi
     #
     local dir
@@ -407,8 +412,8 @@ function git-add-commit-push {
         echo "issuing: git push --verbose"
         if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
            git push --verbose <<EOF >> "$log" 2>&1
-$git_user
-$git_token
+$GIT_USER
+$GIT_TOKEN
 EOF
         else
            git push --verbose >> "$log" 2>&1
@@ -767,7 +772,7 @@ function alt-invoke-next-single-checkin {
     eval "$command"
 
     # Restore message
-    export GIT_MESSAGE=$OLD_GIT_MESSAGE
+    export GIT_MESSAGE="$OLD_GIT_MESSAGE"
 
     # Start next checkin or show if no more updates to do
     git-next-checkin
