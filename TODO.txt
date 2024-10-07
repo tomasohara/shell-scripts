@@ -9,6 +9,7 @@ Things to do
       my($level) = @_;
       ...
       }
-- prune temporary scripts (e.g., it.perl)
-- P2: clarify when all-tomohara-settings needed
-- P3: document environment variable usage in main scripts
+- Prune temporary scripts (e.g., it.perl).
+- P2: Clarify when all-tomohara-settings needed.
+- P3: Document environment variable usage in main scripts.
+- P4: Modernize Bash expressions in scripts (e.g., [ $x = $y ] => [ $x == $y ]).
