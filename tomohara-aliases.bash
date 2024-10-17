@@ -2729,6 +2729,7 @@ alias ps-time=ps-sort-time
 alias ps-sort-mem='ps-sort-once -by=mem '
 alias ps-mem=ps-sort-mem
 alias ps-sort-help='alias-perl ps_sort.perl'
+alias ps-sort-cpu='ps-sort-once -by=cpu '
 
 # get-process-parent(pid): return parent process-id for PID
 # ¢ ps al | egrep "(PID|$$)"
