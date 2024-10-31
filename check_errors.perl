@@ -48,7 +48,6 @@ if (!defined($ARGV[0])) {
     $note .= "- Use -no_astericks if input uses ***'s outside of error contexts.\n";
     $note .= "- Use -relaxed to include special cases (e.g., xyz='error').\n";
     $note .= "- Use -matching to show the text from regex match.";
-    ## &assertion($note !~ /\n$/);
 
     ## TODO2: &exit(...);
     die("\nusage: $script_name [options]\n\n$options\n\n$example\n\n$note\n");
@@ -68,7 +67,6 @@ my $asterisks = (! $no_asterisks);
 &init_var(*ruby, &FALSE);	   	# alias for -skip_ruby_lib
 &init_var(*skip_ruby_lib, $ruby);	# skip Ruby library related errors
 &init_var(*relaxed, &FALSE);            # relaxed for special cases
-## OLD: &init_var(*strict, ! $relaxed);         # alias for relaxed=0
 ## TODO2: use different option for strict error checking (as -strict not commonly used)
 $strict = (! $relaxed);                 # note: overrides common.perl default of 0
 &init_var(*quiet, &FALSE);              # just output errors proper (e.g., no filenames)
@@ -105,11 +103,9 @@ while (<>) {
     # NOTE: It can be easier to add special-case rules rather than devise a general regex;
     # ex: 'error' occuring within a line even at word boundaries can be too broad.
     elsif (## DEBUG: &debug_print(&TL_MOST_DETAILED, "here\n", 7) &&
-	   ## OLD: /^(ERROR|Error)\b/	   
 	   /^\s*(Error)\b/i
 	   || /\serror:/i
-	   ## OLD: || /command not found/i
-	   ## NOTE: maldito modules package polutes environment and man page not clear about disabling
+	   ## NOTE: maldito modules package pollutes environment and man page not clear about disabling
 	   || (/command not found/i && (! /Cannot switch to Modules/))
 	   || /No space/
 	   || /Segmentation fault/
@@ -136,7 +132,6 @@ while (<>) {
 	   || /Variable name must contain/
 	   || /unexpected EOF/
 	   || /unexpected end of file/
-	   ## OLD: || /command not found/
 	   || /^\s*sh: /
            || /\[Errno \d+\]/
 	   || /Operation not permitted/
@@ -178,9 +173,10 @@ while (<>) {
 
 	   # Python errors
 	   || /^\s*Traceback/		# stack trace
-	   ## OLD: || /^\s*\S+Error/		# exception (e.g., TypeError)
 	   # note: excludes exception repr's (e.g., <class 'AssertionError'>)
-	   || /(^|\s)[A-Z]\S+Error(\s|:|$)/	# exception (e.g., TypeError)
+	   ## OLD: || /(^|\s)[A-Z]\S+Error(\s|:|$)/	# exception (e.g., TypeError)
+	   || (/(^|\s)[A-Z]\S+Error(\s|:|$)/	# exception (e.g., TypeError)
+	       && ($relaxed || ! /BrokenPipeError|SillyPythonException/))
 	   || /:\s*error\s*:/i          # argparse error (e.g., main.py: error: unrecognized arguments
 	   || /^\s*FAILED\b/i           # pytest failure
 	   || /\|\s*(ERROR|CRITICAL)\s*\|/       # loguru (e.g., "| ERROR | ...")
@@ -287,7 +283,6 @@ print "\n" if ($verbose);
 # Note: aborts if strict mode and file not found
 #
 sub show_current_file_info {
-    ## OLD: if (($current_file ne "") && ($quiet == &FALSE)) {
     # Make sure file exists (or stderr)
     if ($strict && ($current_file ne "-") && (! &file_exists($current_file)) && defined($ARGV[0])) {
 	&exit("Error: file '$current_file' not accessible.")
