@@ -1480,7 +1480,7 @@ function diff-backup-helper {
     if [ "$backup_file" = "" ]; then
         echo "Error: no backup for '$file'"
     else 
-        echo "Issuing: '$diff' "$@" '$backup_file' '$file'"
+        echo "Issuing: '$diff' ""$*"" '$backup_file' '$file'"
         "$diff" "$@" "$backup_file" "$file";
     fi
 }
@@ -2121,19 +2121,29 @@ alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
 alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
 alias move-adhoc-files='move-log-files; move-output-files'
 alias move-old-files='move-versioned-files "*" old'
+#
 # move-versioned-files-alt: alternative version for moving all files with DDMMMDD-style timestamp into ./old
+# Also include MM-DD-YYYY.
 # note: incldues sanity check for misplaced files (e.g., adhoc notes or .txt)
 # shellcheck disable=SC2010,SC2086
 {
 function move-versioned-files-alt {
     mkdir -p old;
-    local version_regex="[0-9][0-9][a-z][a-z][a-z]*[0-9][0-9]"
-    move ./*$version_regex* old
+    # note: regex is treated as a glob during move proper
+    # TODO3: handle special case ddMMMMyy (e.g., 11sept01)
+    local version_regex="[0-9][0-9][a-z][a-z][a-z][a-z]*[0-9][0-9]"
+    local alt_version_regex="[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]"
+    if [ "${STRICT:-0}" == "1" ]; then
+        version_regex="[^0-9]${version_regex}[^0-9]"
+        alt_version_regex="[^0-9]${alt_version_regex}[^0-9]"
+    fi
+    move --no-clobber ./*$version_regex* ./*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
     local false_positives
-    false_positives="$(ls old/*$version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|(.txt$)")"
+    false_positives="$(ls old/*$version_regex*  old/*$alt_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|(.txt$)")"
     if [ "$false_positives" != "" ]; then
-        echo "Warning: potential misplaced files"
+        echo "Warning: potential misplaced files (e.g., .txt ext or adhoc affix)"
         echo "    $false_positives"
+        echo "Use STRICT=1 ... for more precise matching."
     fi
     }
 }
