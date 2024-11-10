@@ -2130,8 +2130,7 @@ alias move-old-files='move-versioned-files "*" old'
 function move-versioned-files-alt {
     mkdir -p old;
     # note: regex is treated as a glob during move proper
-    # TODO3: handle special case ddMMMMyy (e.g., 11sept01)
-    local version_regex="[0-9][0-9][a-z][a-z][a-z][a-z]*[0-9][0-9]"
+    local version_regex="[0-9][0-9][a-z][a-z][a-z][0-9][0-9]"
     local alt_version_regex="[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]"
     if [ "${STRICT:-0}" == "1" ]; then
         version_regex="[^0-9]${version_regex}[^0-9]"
