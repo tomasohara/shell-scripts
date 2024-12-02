@@ -267,7 +267,7 @@ function git-update-plus {
     echo "issuing: git stash"
     git stash >> "$log" 2>&1
     echo "issuing: git pull --all"
-    git pull --all >> "$log" 2>&1
+    git pull --all --verbose >> "$log" 2>&1
     if [ $? -ne 0 ]; then
         echo "Warning: problem with pull (status=$?)"
     fi
@@ -807,6 +807,8 @@ alias git-checkin-new-alias="GIT_MESSAGE='initial version' git-update-commit-pus
 # NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
 function git-checkout-branch {
     local branch="$1"
+    local log
+    log=$(realpath "$(get-temp-log-name 'update')")
     # TODO2: define helper function for usage
     if [[ ("$branch" = "") || ("$branch" == "--help") ]]; then
         echo "usage: git-checkout-branch [--help | branch]"
@@ -819,11 +821,20 @@ function git-checkout-branch {
     local branch_ref
     branch_ref=$(git branch --all | grep -c "$branch")
     if [ "$branch_ref" -gt 0 ]; then
+        # Do the stash[-push]/checkout/stash-pop
+        # TODO: use 'git switch'
+        echo "issuing: git stash"
+        git stash >> "$log" 2>&1
         # note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
-        git-command checkout "$branch" --;
+        git-command checkout "$branch" --  >> "$log" 2>&1
+        echo "issuing: git stash pop"
+        git stash pop >> "$log" 2>&1
     else
         echo "Error: unknown branch '$branch'"
     fi;
+
+    # Show end of log
+    git-alias-review-log "$log"
 }
 simple-alias-fn git-branch-checkout  git-checkout-branch 
 
