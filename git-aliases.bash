@@ -266,7 +266,7 @@ function git-update-plus {
     # Do the stash[-push]/pull/stash-pop
     echo "issuing: git stash"
     git stash >> "$log" 2>&1
-    echo "issuing: git pull --all"
+    echo "issuing: git pull --all --verbose"
     git pull --all --verbose >> "$log" 2>&1
     if [ $? -ne 0 ]; then
         echo "Warning: problem with pull (status=$?)"
