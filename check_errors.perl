@@ -177,6 +177,7 @@ while (<>) {
 	   ## OLD: || /(^|\s)[A-Z]\S+Error(\s|:|$)/	# exception (e.g., TypeError)
 	   || (/(^|\s)[A-Z]\S+Error(\s|:|$)/	# exception (e.g., TypeError)
 	       && ($relaxed || ! /BrokenPipeError|SillyPythonException/))
+	   || (/^\S+\.\S+Error:/)       # package specific (e.g., azure.ServiceRequestError)
 	   || /:\s*error\s*:/i          # argparse error (e.g., main.py: error: unrecognized arguments
 	   || /^\s*FAILED\b/i           # pytest failure
 	   || /\|\s*(ERROR|CRITICAL)\s*\|/       # loguru (e.g., "| ERROR | ...")
