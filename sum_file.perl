@@ -465,6 +465,7 @@ if ($stats == &FALSE) {
 			       $sorted_data[$middle_pos - 1], $sorted_data[$middle_pos]);
 		    $median = ($sorted_data[$middle_pos] + $sorted_data[$middle_pos - 1]) / 2;
 		}
+		$median = &round($median);
 
 		# Get mode (n.b., uses smaller value to break ties as w/ scipy.stats.mode)/
 		## OLD: my($mode) = &run_command("echo @data | count_it.perl '\\S+' | head -1 | cut -f1");
@@ -477,6 +478,7 @@ if ($stats == &FALSE) {
 		if (defined($alt_mode) && ($counts{$mode} == $counts{$alt_mode}) && ($alt_mode < $mode)) {
 		    $mode = $alt_mode;
 		}
+		$mode = &round($mode);
 
 		# Get 95th and 99th percentile
 		## OLD: my($perc95_pos) = POSIX::floor(0.95 * $num_values);
