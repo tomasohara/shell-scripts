@@ -35,6 +35,7 @@ delay="${DELAY:-5}"
 TMP="${TMP:-/tmp}"
 USER="${USER:-user}"
 DEBUG="${DEBUG:-0}"
+BOTTOM_SPACE="${BOTTOM_SPACE:-2}"                   # extra space at bottom
 if [ "$file" == "" ]; then
     script=$(basename "$0")
     echo "Usage: '$script' file [delay=5]"
@@ -51,40 +52,61 @@ if [ "$file" == "" ]; then
 fi
 
 # Initialize
-# note: Lines per pages includes header and line at bottom (for prompt)
 start=1                                 # Start from first line
 LINES=$(tput lines)                     # Get terminal height
-COLUMNS=$(tput columns)                 # Likewise width
-## TODO: let lines-=1
-let LINES-=2
+COLUMNS=$(tput cols)                    # Likewise for width
+let LINES-=2                            # Account for header and prompt
+let LINES-=$BOTTOM_SPACE
 if [ "$DEBUG" == "1" ]; then
     let LINES-=1
 fi
-
 page=0
 total_lines=$(wc -l < "$file")
-num_pages=$((((total_lines + lines - 1) / lines) + 1))
+num_pages=$((((total_lines + LINES - 1) / LINES) + 1))
 
 # Do the scrolling
 extra=0
 while [ "$start" -lt "$total_lines" ]; do
     let page+=1
+    last_start="$start"
+    
     # Clear screen preserving scrollback
     clear -x
-    if [ "$DEBUG" == "1" ]; then
-        echo "start=$start total_lines=$total_lines lines=$line columns=$COLUMNS extra=$extra"
-    fi
+
     # Display current page
-    page_file="$TMP/$USER-page-$$.list"
-    echo "Page $page/$num_pages of $file"
-    cat --number "$file" | tail --lines=+"$start" |  head --lines="$LINES" >| "$page_file"
-    cat "$page_file"
+    echo "# Page $page/$num_pages of $file"
+    
+    # Get current page content with original line numbers
+    page_text=$(nl -ba -w4 -s' ' "$file" | tail --lines=+"$start" | head --lines="$LINES")
+    
+    # Calculate wrapped lines
+    wrapped_lines=0
+    while IFS= read -r line; do
+        # Add 1 for the base line
+        let wrapped_lines+=1
+        # Add any additional wrapped lines (accounting for the line number prefix)
+        line_length=${#line}
+        if [ "$line_length" -gt "$COLUMNS" ]; then
+            additional_wraps=$(((line_length + COLUMNS - 1) / COLUMNS - 1))
+            let wrapped_lines+=additional_wraps
+        fi
+    done <<< "$page_text"
+    
+    # Update start position accounting for wrapped lines
+    effective_lines=$((LINES - (wrapped_lines - LINES)))
+    if [ "$effective_lines" -lt 1 ]; then
+        effective_lines=1
+    fi
+    start=$((start + effective_lines))
+    extra=$((LINES - effective_lines))
+    
+    # Display the page with original line numbers
+    # skip overlap space at end
+    echo "$page_text" | head -"$effective_lines"
 
-    # Check for word wrap
-    num_chars=$(wc -c < "$page_file")
-    extra_lines=$(((num_chars + 1) / columns))
-
-    # Update start and pause
-    start=$((start + LINES - extra_lines))
+    # Pause for effect
+    if [ "$DEBUG" == "1" ]; then
+        echo "# start=$last_start total_lines=$total_lines lines=$LINES columns=$COLUMNS extra=$extra effective=$effective_lines"
+    fi
     sleep "$delay"
 done
