@@ -64,7 +64,8 @@ fi
 ## OLD: prepend-path "$HOME/python/Mezcla/mezcla"
 ## OLD: add-python-path "$HOME/python/Mezcla/mezcla"
 add-python-path "$HOME/Mezcla/mezcla"
-append-path "$HOME/mezcla-tom/examples:$HOME/python/examples:$TOM_BIN/bruno"
+## OLD: append-path "$HOME/mezcla-tom/examples:$HOME/python/examples:$TOM_BIN/bruno"
+append-path "$HOME/Mezcla/mezcla/examples"
 #
 # HACK: make sure ~/mezcla-tom used if available
 if [ -e "$HOME/mezcla-tom" ]; then add-python-path "$HOME/mezcla-tom"; fi
