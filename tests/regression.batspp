@@ -162,3 +162,13 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## fatal: Not a valid object name 49d1dfc9c25e959ead5d861dde183baa115f2542:alt-extract-all-git-versions.bash
 ## Trying alternative path 
 ## Error: unable to resolve commit 49d1dfc9c25e959ead5d861dde183baa115f2542
+
+#-------------------------------------------------------------------------------
+# fix git-conflicts-alias
+
+## $ git-conflicts-alias 
+## grep: mezcla: Is a directory
+##               ^^^^^^^^^^^^^^
+## $ pwd-host-info 
+## /home/tomohara/bin
+## jug
