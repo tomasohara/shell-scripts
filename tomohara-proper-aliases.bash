@@ -428,6 +428,14 @@ function youtube-transcript {
     local file="$2"
     alias-python -m mezcla.examples.youtube_transcript "$url" > "$file"
 }
+# youtube-transcript-alt(): workaround for silly bash problem:
+#    $ youtube-transcript 'https://www.youtube.com/watch?v=gcgMyRfE8a4&t=247s'
+#    bash: : No such file or directory
+function youtube-transcript-alt {
+    local url="$1"
+    local file="$2"
+    python3 $(which youtube_transcript.py) "$url" > "$file"
+}
 
 #...............................................................................
 # System stuff
