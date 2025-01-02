@@ -34,8 +34,8 @@ TMP="${TMP:-/tmp}"
 USER="${USER:-user}"
 DEBUG="${DEBUG:-0}"
 MARGIN="${MARGIN:-2}"                   # Margin lines for readability
+script=$(basename "$0")
 if [ "$file" == "" ]; then
-    script=$(basename "$0")
     echo "Usage: '$script' file [delay=5]"
     echo ""
     echo "Examples:"
@@ -49,23 +49,32 @@ if [ "$file" == "" ]; then
     exit
 fi
 
+# Send stdin to an external file
+if [ "$file" == "-" ]; then
+    base=$(basename "$0" .bash)
+    file="$TMP/$base-$USER-$$.list"
+    cat > "$file"
+fi
+
 # Initialize
 start=1                                 # Start from first line
 LINES=$(tput lines)                     # Get terminal height
 MAX_LINES=$((LINES - 2 * MARGIN))       # Max lines to show
 COLUMNS=$(tput cols)                    # Likewise for width
+MAX_LINE_LENGTH=$((MAX_LINES * COLUMNS))
 if [ "$DEBUG" == "1" ]; then
     let MAX_LINES-=2
 fi
 page=0
 total_lines=$(wc -l < "$file")
-num_pages=$((((total_lines + MAX_LINES - 1) / MAX_LINES) + 1))
+num_pages=$(( (total_lines + MAX_LINES - 1) / MAX_LINES ))
 loop_count=0
 
 # Do the scrolling
-while [ "$start" -lt "$total_lines" ]; do
+while [ "$start" -le "$total_lines" ]; do
     let page+=1
     last_start="$start"
+    warning=""
 
     # Sanity check
     let loop_count+=1
@@ -93,19 +102,24 @@ while [ "$start" -lt "$total_lines" ]; do
     while IFS= read -r line; do
         let display_lines+=1
         line_length=${#line}
+        if [ "$line_length" -ge "$MAX_LINE_LENGTH" ]; then
+            warning="*too-long*"
+            echo "Warning: line $start too long ($line_length)"
+        fi
         if [ "$line_length" -gt "$COLUMNS" ]; then
-            let display_lines+=$((line_length / COLUMNS))
+            # note: Use ceiling division for wrapped lines
+            let display_lines+=$(((line_length + COLUMNS - 1) / COLUMNS - 1))
         fi
     done <<< "$page_text"
     
     # Calculate how many source lines we can show
     effective_lines=$display_lines
     if [ "$effective_lines" -gt "$MAX_LINES" ]; then
+        
         # If wrapped content exceeds page, reduce lines shown
-        let effective_lines=$MAX_LINES
+        effective_lines=$MAX_LINES
     fi
-    let effective_lines-=$MARGIN
-    if [ "$effective_lines" -lt 0 ]; then
+    if [ "$effective_lines" -lt 1 ]; then
         effective_lines=1
     fi
     
@@ -117,7 +131,7 @@ while [ "$start" -lt "$total_lines" ]; do
     
     # Debug output
     if [ "$DEBUG" == "1" ]; then
-        echo "# s=$last_start t=$total_lines rows=$MAX_LINES max_rows=$MAX_LINES cols=$COLUMNS display=$display_lines effective=$effective_lines margin=$MARGIN"
+        echo "# str=$last_start tot=$total_lines row=$MAX_LINES mxr=$MAX_LINES col=$COLUMNS dsp=$display_lines eff=$effective_lines mrg=$MARGIN wrn=$warning"
     fi
     
     sleep "$delay"
