@@ -25,6 +25,8 @@
 # You can modify the sleep duration (currently 5 seconds) by changing the number in the sleep 5 command if you want it faster or slower.
 # Would you like me to explain how it works or modify any part of it?
 #
+# TODO2:
+# - Rework to allow for better error recovery with long lines.
 #
 
 # Get CLI args
@@ -34,6 +36,7 @@ TMP="${TMP:-/tmp}"
 USER="${USER:-user}"
 DEBUG="${DEBUG:-0}"
 MARGIN="${MARGIN:-2}"                   # Margin lines for readability
+RESTART="${RESTART:-0}"                 # Restart paging if line too long
 script=$(basename "$0")
 if [ "$file" == "" ]; then
     echo "Usage: '$script' file [delay=5]"
@@ -45,7 +48,9 @@ if [ "$file" == "" ]; then
     echo "$0 \$TMP/all-notes 1"
     echo ""
     echo "Note:"
-    echo "- Uses DELAY to override pause seconds"
+    echo "- Uses DELAY to override pause seconds."
+    echo "- The MARGIN gives top and bottom spacing."
+    echo "- Use RESTART to force next line at top if current too long."
     exit
 fi
 
@@ -75,6 +80,7 @@ while [ "$start" -le "$total_lines" ]; do
     let page+=1
     last_start="$start"
     warning=""
+    too_long=0
 
     # Sanity check
     let loop_count+=1
@@ -90,6 +96,7 @@ while [ "$start" -le "$total_lines" ]; do
     done
     
     # Display current page
+    max_line_length=$MAX_LINE_LENGTH
     if [ "$DEBUG" == "1" ]; then
         echo "# Page $page/$num_pages of $file"
     fi
@@ -102,14 +109,21 @@ while [ "$start" -le "$total_lines" ]; do
     while IFS= read -r line; do
         let display_lines+=1
         line_length=${#line}
-        if [ "$line_length" -ge "$MAX_LINE_LENGTH" ]; then
+        if [ "$line_length" -ge "$max_line_length" ]; then
             warning="*too-long*"
-            echo "Warning: line $start too long ($line_length)"
+            echo "Warning: line $((start + display_lines)) too long ($line_length)"
+            too_long=1
+
+            # Abort displayed-lines check if next line will be new start
+            if [ "$RESTART" == 1 ]; then
+                break
+            fi
         fi
         if [ "$line_length" -gt "$COLUMNS" ]; then
             # note: Use ceiling division for wrapped lines
             let display_lines+=$(((line_length + COLUMNS - 1) / COLUMNS - 1))
         fi
+        let max_line_length-=$((line_length))
     done <<< "$page_text"
     
     # Calculate how many source lines we can show
@@ -119,9 +133,18 @@ while [ "$start" -le "$total_lines" ]; do
         # If wrapped content exceeds page, reduce lines shown
         effective_lines=$MAX_LINES
     fi
-    if [ "$effective_lines" -lt 1 ]; then
+    if [[ (("$effective_lines" -lt 1) ||
+           (("$too_long" == 1) && ("$RESTART" == 1))) ]]; then
         effective_lines=1
     fi
+
+    ## TEST:
+    ## # TEMP: just advance by one line if debugging and line too long
+    ## # TODO: work out closer advancement amount (i.e., not overly conservative)
+    ## if [[ ($too_long == 1) && ($DEBUG == 1) ]]; then
+    ##     effective_lines=1
+
+    ## fi
     
     # Display the content
     echo "$page_text" | head -n "$effective_lines"
