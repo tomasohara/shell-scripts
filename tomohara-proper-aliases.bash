@@ -53,7 +53,15 @@ simple-alias-fn plint 'PAGER=cat python-lint'
 # plint-torch(...): pylint w/ torch no-member warnings ignored
 alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
 # plint-tester-testee(filename): run pylint over test file and tested file
-alias-fn plint-tester-testee 'plint "$1" tests/test_"$1"'
+## OLD: alias-fn plint-tester-testee 'plint "$1" tests/test_"$1"'
+function plint-tester-testee {
+    local script="$1"
+    local test_script="tests/test_$script"
+    plint "$script" "$test_script"
+    if [ "${TEST:-0}" == "1" ]; then
+        test-python-script "$test_script"
+    fi
+    }
 }
 #
 # clone-repo(url): clone github repo at URL into current dir with logging
@@ -419,9 +427,13 @@ function rename-last-snapshot {
 alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
 # youtube-transcript(url, file): download YoutTube transcript at URL to FILE
 function youtube-transcript {
-    if [[ ("$1" == "") || ("$1" == "--help") ]]; then
+    if [[ ("$2" == "") || ("$1" == "--help") ]]; then
+        echo "Usage: youtube-transcript-alt url file" 1>&2
+        echo "" 1>&2
+        echo "Note: More details follow:"  1>&2
+        echo "" 1>&2
         ## TODO3: add alias for showing condensed mezcla script usage notes
-        alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;'
+        alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;' 1>&2
         return
     fi
     local url="$1"
@@ -431,10 +443,18 @@ function youtube-transcript {
 # youtube-transcript-alt(): workaround for silly bash problem:
 #    $ youtube-transcript 'https://www.youtube.com/watch?v=gcgMyRfE8a4&t=247s'
 #    bash: : No such file or directory
+# TODO: check for &'s in URL and issue warning
+# DUH: The "$file" redirection was causing problems (Thanks, Grok!)
+# TODO2: check for other aliases with similar issues
 function youtube-transcript-alt {
     local url="$1"
     local file="$2"
-    python3 $(which youtube_transcript.py) "$url" > "$file"
+    if [ "$file" == "" ]; then
+        echo "Usage: youtube-transcript-alt url file" 1>&2
+        echo "See youtube-transcript --help for details"  1>&2
+        return
+    fi
+    python3 "$(which youtube_transcript.py)" "$url" > "$file"
 }
 
 #...............................................................................
