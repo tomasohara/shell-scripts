@@ -41,6 +41,8 @@ while [ "$more_options" = "1" ]; do
 	for_editting=1;
     elif [ "$1" = "--open" ]; then
 	for_editting=1;
+    elif [ "$1" = "--under-mac" ]; then
+	under_mac=1;
     elif [ "$1" = "--not-mac" ]; then
 	under_mac=0;
     elif [ "$1" = "--verbose" ]; then
@@ -102,11 +104,12 @@ function invoke () {
     log_file="$log_dir/$(basename "$program")-$(basename "$file")-$today.log"
     local program_arg=""
     if [ ! -e "$log_file" ]; then touch "$log_file"; fi
-    if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" \"$file\" >> \"$log_file\" 2>&1"; fi
+    ## OLD: if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" \"$file\" >> \"$log_file\" 2>&1"; fi
     if [[ (! -e "$program") && ("$program" != "open") ]]; then
 	if [ "$under_mac" = "1" ]; then
-	    ## OLD: program="open -a '$program'"
-	    ## TODO: program_arg="-a '$program'"
+            if [[ ! ("$program" =~ .*\.app) ]]; then
+                program="$program.app"
+            fi
 	    program_arg="-a $program"
 	    program="open"
 	fi
@@ -114,7 +117,14 @@ function invoke () {
     ## OLD: "$program" "$file" >> "$log_file" 2>&1
     # disable shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2086
-    "$program" $program_arg "$file" >> "$log_file" 2>&1
+    {
+        if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" $program_arg \"$file\" >> \"$log_file\" 2>&1"; fi
+        "$program" $program_arg "$file" >> "$log_file" 2>&1
+    }
+    if [ $? -ne 0 ]; then
+        echo "Problem running '$program' (status=$?):"
+        tail --verbose "$log_file"
+    fi
     }
 
 #...............................................................................
@@ -189,8 +199,8 @@ case "$lower_file" in
     # TODO: convert filename arguments to use file:// prefix (to distinguish from URL's)
     *.html | *.xml) invoke "$BROWSER" "$@" & ;;
 
-    # Text files
-    *.txt | *.text) invoke emacs "$@" & ;;
+    # Text files and dot files
+    *.txt | *.text | .*) invoke emacs "$@" & ;;
 
     # Windows XPS printer
     *.oxps | *.xps) invoke mupdf "$@" & ;;
@@ -200,14 +210,19 @@ case "$lower_file" in
     ## *.abc | *.pdq) echo hey; emacs "$@"
     ## BAD: *.xyz)
     ##		   echo hey2; emacs "$@" & ;;
+
+    # Invoke MacOs-style app as if program (e.g., Safari.app)
+    *.app)
+       invoke "$@" & ;;
     
-    # Default processing
-    *)
+    # Invoke default program for unknown extension
+    *.*) 
        echo ""
-       ## OLD
-       ## echo "*** Warning: Unknown extension in $1; using Emacs"
-       ## invoke emacs "$@" & ;;
        echo "*** Warning: Unknown extension in $1; using $default_program"
        invoke "$default_program" "$@" & ;;
-
+    
+    # Invoke extension-less file as if program
+    *)
+       invoke "$@" & ;;
+    
 esac

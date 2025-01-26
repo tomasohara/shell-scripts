@@ -375,19 +375,47 @@ trace 'in tomohara-aliases.bash'
 # # HACK: load in older tpo-setup.bash
 # conditional-source $TOM_BIN/tpo-setup.bash
 
-# under-macos() => boolean: whether running under maldito macintosh
+## OLD:
+## # under-macos() => boolean: whether running under maldito macintosh
+## # EX: (under-macos; wc -l /vmlinuz 2> /dev/null) =/=> $'0\n1'
+## function under-macos {
+##     local under_mac=0
+##     if [[ "$OSTYPE" =~ darwin.* ]]; then under_mac=1; fi
+##     ## TODO: return $under_mac
+##     echo "$under_mac"
+## }
+## function under-linux {
+##     local under_linux=0
+##     if [[ "$OSTYPE" =~ linux.* ]]; then under_linux=1; fi
+##     ## TODO: return $under_linux
+##     echo "$under_linux"
+## }
+##
+# under-os(regex, [quiet=0]): Whether REGEX matches $OSTYPE
+# note: outputs boolean code and also sets status code
+function under-os {
+    local regex="$1"
+    local quiet="$2"
+    local under_os=0
+    if [[ "$OSTYPE" =~ $regex ]]; then under_os=1; fi
+    if [ "$quiet" != "1" ]; then
+        echo "$under_os"
+    fi
+    [ "$under_os" != 0 ]
+    return $?
+    }
+# under-macos([quiet]) => boolean: whether running under maldito macintosh
 # EX: (under-macos; wc -l /vmlinuz 2> /dev/null) =/=> $'0\n1'
+# example; under-macros 1 && echo "good luck"
 function under-macos {
-    local under_mac=0
-    if [[ "$OSTYPE" =~ darwin.* ]]; then under_mac=1; fi
-    ## TODO: return $under_mac
-    echo "$under_mac"
+    under-os ".*darwin.*" "$@"
+    return $?
 }
+# under-linux([quiet]) => boolean: whether under favorite son OS
+# example; under-linux 1 && echo "good job"
 function under-linux {
-    local under_linux=0
-    if [[ "$OSTYPE" =~ linux.* ]]; then under_linux=1; fi
-    ## TODO: return $under_linux
-    echo "$under_linux"
+    under-os ".*linux.*" "$@"
+    return $?
 }
 
 # Settings for less command 
@@ -632,6 +660,8 @@ if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-
 #
 alias reset-xterm-title='set-xterm-window "$HOSTNAME $PWD"'
 # alt-xterm-title([prefix=alt]): change xterm title to PREFIX DIR-BASENAME [PWD]
+# Warning: this doesn't modify the prompt symbol (e.g. $PS_symbol). For that,
+# use the new reset-prompt-label in tomohara-proper-aliases.bash.
 function alt-xterm-title() { 
     local dir
     local prefix="$1"
@@ -859,6 +889,7 @@ alias ls-R='$LS -R >| ls-R.list; wc -l ls-R.list'
 alias ln-symbolic='ln --symbolic --verbose'
 alias link-symbolic=ln-symbolic
 alias link-symbolic-safe='ln-symbolic --no-target-directory --no-dereference'
+alias ln-symbolic-safe=link-symbolic-safe
 alias link-symbolic-regular='ln-symbolic'
 alias ln-symbolic-force='ln-symbolic --force'
 alias link-symbolic-force=ln-symbolic-force
@@ -968,7 +999,8 @@ function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pat
 function findspec-all () { command find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | $GREP -v '^find: '; }
 function fs () { findspec . "$@" | $EGREP -iv '(/(backup|build)/)'; } 
 function fs-ls () { fs "$@" -exec ls -l {} \; ; }
-alias fs-='findspec-all .'
+## OLD: alias fs-='findspec-all .'
+simple-alias-fn fs- 'findspec-all .'
 ## Lorenzo review: should change this to fs-alt following TODO's
 function fs-ext () { find . -iname \*."$1" | $EGREP -iv '(/(backup|build)/)'; } 
 # TODO: extend fs-ext to allow for basename pattern (e.g., fs-ext java ImportXML)
@@ -988,7 +1020,12 @@ function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$
 # fgr(filename_pattern, line_pattern): $GREP through files matching FILENAME_PATTERN for LINE_PATTERN
 function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
 function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
-alias fgr-py='fgr-ext py'
+## OLD
+## alias fgr-py='fgr-ext py'
+## alias fgr-jupyter='fgr-ext ipynb'
+simple-alias-fn fgr-py 'fgr-ext py'
+simple-alias-fn fgr-jupyter 'fgr-ext ipynb'
+function fgr-py-etc () { fgr-py "$@"; fgr-jupyter "$@"; }
 alias fgr-java='fgr-ext java'
 #
 # prepare-find-files-here([--out-dir out_dir_spec]): produces listing(s) of files in current directory
@@ -1433,17 +1470,18 @@ function most-recent-backup {
 # TODO: test for dot-files:
 #   touch backup .fubar.~666~; most-recent-backup .fubar => .fubar
 #
-# diff-backup(file): compare FILE vs. most recent backup
+# diff-backup(diff_command, file, [diff_arg ...]): compare FILE vs. most recent backup, using DIFF_PROGRAM and optional DIFF_ARGs
 # TODO: fix handling of dot files
 function diff-backup-helper {
     local diff="$1"; local file="$2";
+    shift 2;
     local backup_file
     backup_file="$(most-recent-backup "$file")"
     if [ "$backup_file" = "" ]; then
         echo "Error: no backup for '$file'"
     else 
-        echo "Issuing: '$diff' '$backup_file' '$file'"
-        "$diff" "$backup_file" "$file";
+        echo "Issuing: '$diff' ""$*"" '$backup_file' '$file'"
+        "$diff" "$@" "$backup_file" "$file";
     fi
 }
 ## TODO:
@@ -1914,7 +1952,9 @@ trace extension-less shortcuts
 alias convert-termstrings='perl- convert_termstrings.perl'
 alias do-rcsdiff='do_rcsdiff.sh'
 alias dobackup='dobackup.sh'
-alias kill-em='kill_em.sh'
+## OLD: alias kill-em='kill_em.sh'
+## OLD: alias kill-em='kill_em.sh'
+alias kill-em='kill_em.bash'
 alias kill-it='kill-em --pattern'
 # ps-mine: wrapper around ps_mine.sh w/ filtering (e.g., defunct)
 alias ps-mine='ps_mine.sh --filtered'
@@ -1944,10 +1984,14 @@ function rename-special-punct {
     # strip ascii punctuation
     # TODO: rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_";
     rename-files -q -global -rename_old -regex "_*[&\!\*?\(\)\[\]\,]" "_";
+
+    # Rename leading dash with underscore (n.b., problem for ls command)
+    rename-files - _ -*
+    
     # strip unicode punctuation, ignoring shellcheck warnings like SC1112 [This is a unicode quote]
     # shellcheck disable=SC1111,SC1112,SC2206,SC2116
     {
-        local unicode_punct="—·®“”″‶‘’–"
+        local unicode_punct="—·®“”″‶‘’– "
         ## TODO:
         ## local unicode_filenames=(*[$unicode_punct]*)
         ## if [ ${#unicode_filenames[@]} -eq 0 ]; then
@@ -1955,10 +1999,11 @@ function rename-special-punct {
             ## DEBUG: echo "No files with following unicode punctuation: $unicode_punct"
             return
         fi
-        # note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) U+2014 (—)
+        # note: unicode chars: U+0183 (·) U+174 (®) U+8220 (“) U+8221 (”) U+8243 (″) U+8246 (‶) U+8211 (–) U+8216 (‘) U+8217 (’) U+2014 (—) U+202f ( )
+        # note: U+202f is narrow no-break space
         ## TODO: rename-files -q -global -rename_old -regex "_*[—·®“”″‶‘’–]" "_";   # note: all unicode
         local char;
-        for char in "—" "·" "®" "“" "”" "″" "‶" "‘" "’" "–"; do        # note: all unicode
+        for char in "—" "·" "®" "“" "”" "″" "‶" "‘" "’" "–" " "; do        # note: all unicode
             rename-files -global -rename_old "$char" "_" ./*$char*
             ## TODO?: rename-files -global -rename_old "$char" "_" "${unicode_filenames[@]}"
         done;
@@ -2047,6 +2092,7 @@ function move-versioned-files {
         echo "usage: [ENV] move-versioned-files 'brace_pattern' dir"
         echo "    where ENV = [READONLY=1]"
         ## TODO: echo "    where ENV = [MOVE=command] ...        use 'mv -v' to move read
+        echo "note: try move-versioned-files-alt"
         return
     fi
     local ext_pattern="$1"
@@ -2075,18 +2121,28 @@ alias move-log-files='move-versioned-files "{log,debug}" "log-files"'
 alias move-output-files='move-versioned-files "{csv,html,json,list,out,output,png,report,tsv,xml}" "output-files"'
 alias move-adhoc-files='move-log-files; move-output-files'
 alias move-old-files='move-versioned-files "*" old'
+#
 # move-versioned-files-alt: alternative version for moving all files with DDMMMDD-style timestamp into ./old
+# Also include MM-DD-YYYY.
+# note: incldues sanity check for misplaced files (e.g., adhoc notes or .txt)
 # shellcheck disable=SC2010,SC2086
 {
 function move-versioned-files-alt {
     mkdir -p old;
-    local version_regex="[0-9][0-9][a-z][a-z][a-z]*[0-9][0-9]"
-    move ./*$version_regex* old
+    # note: regex is treated as a glob during move proper
+    local version_regex="[0-9][0-9][a-z][a-z][a-z][0-9][0-9]"
+    local alt_version_regex="[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]"
+    if [ "${STRICT:-0}" == "1" ]; then
+        version_regex="[^0-9]${version_regex}[^0-9]"
+        alt_version_regex="[^0-9]${alt_version_regex}[^0-9]"
+    fi
+    move --no-clobber ./*$version_regex* ./*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
     local false_positives
-    false_positives="$(ls old/*$version_regex* 2>&1 | grep -v 'No such file' | egrep "(adhoc)|(.txt$)")"
+    false_positives="$(ls old/*$version_regex*  old/*$alt_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|(.txt$)")"
     if [ "$false_positives" != "" ]; then
-        echo "Warning: potential misplaced files"
+        echo "Warning: potential misplaced files (e.g., .txt ext or adhoc affix)"
         echo "    $false_positives"
+        echo "Use STRICT=1 ... for more precise matching."
     fi
     }
 }
@@ -2121,10 +2177,14 @@ function rename-with-file-date() {
             [ $verbose = 1 ] && echo "Ignoring file with timestamp suffix: $f"
         elif [[ ("$IGNORE_ALL" = "1") && ("$f" =~ [0-9]{2}[a-z]{3,4}[0-9]{2}) ]]; then
             [ $verbose = 1 ] && echo "Ignoring file with timestamp affix: $f"
-        elif [ -e "$f" ]; then
+        elif [ -e "$f" ]; then              # regular file exists
             ## TODO2: use same format as $(T)--lowercase as in $(get-free-filename ... $(date ... | downcase-stdin; ))
            new_f=$(get-free-filename "$f.$(date --reference="$f" '+%d%b%y')" ".")
            ## DEBUG: echo
+           eval "$move_command" "$f" "$new_f";
+        elif [ -L "$f" ]; then              # symbolic link exists
+           # note: gets mod time via 'stat -c %y'
+           new_f=$(get-free-filename "$f.$(date --date="$(stat -c %y "$f")" '+%d%b%y')" ".")
            eval "$move_command" "$f" "$new_f";
         else
            ## TODO2: [ $verbose ] && echo "FYI: no '$f'"
@@ -2348,7 +2408,7 @@ alias ununcompress-this-dir='uncompress-dir $PWD'
 function count-exts () { $LS | count-it '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
 function count-exts-all { (count-exts | cat; $LS | count-it '^[^.]+(\.*)$') | sort $SORT_COL2 -rn | $PAGER; }
 
-alias kill-iceweasel='kill_em.sh iceweasel'
+alias kill-iceweasel='kill-em iceweasel'
 
 # cmd-output(cmd, ...): show output for cmd to _{cmd}-$(TODAY).log (with spaces
 # replaced by underscores)
@@ -2367,7 +2427,8 @@ function cmd-output () {
 function cmd-usage () {
     local command="$*"
     local usage_file
-    usage_file="_$(echo "$command" | tr ' ' '_')-usage.list"
+    ## OLD: usage_file="_$(echo "$command" | tr ' ' '_')-usage.list"
+    usage_file="_$(echo "$command" | tr ' ' '-')-usage.list"
     $command --help  2>&1 | ansifilter > "$usage_file"
     $PAGER_NOEXIT "$usage_file"
 }
@@ -2677,6 +2738,7 @@ alias ps-time=ps-sort-time
 alias ps-sort-mem='ps-sort-once -by=mem '
 alias ps-mem=ps-sort-mem
 alias ps-sort-help='alias-perl ps_sort.perl'
+alias ps-sort-cpu='ps-sort-once -by=cpu '
 
 # get-process-parent(pid): return parent process-id for PID
 # ¢ ps al | egrep "(PID|$$)"
@@ -2786,7 +2848,7 @@ function script {
 # TODO: put this in a separate file
 function script-update {
     local command_indicator=""
-    ## TODO: under-linux && command_indicator="-c"
+    ## TODO: under-linux 1 && command_indicator="-c"
     if [ "$(under-linux)" = "1" ]; then
         command_indicator="-c"
     fi
@@ -2991,8 +3053,8 @@ function python-trace {
 function py-diff () { do_diff.bash --no-glob '*.py *.mako' "$@" 2>&1 | $PAGER; }
 
 alias elide-data='alias-python -m transpose_data --elide'
-alias kill-python="kill_em.sh --filter 'ipython|emacs' python"
-alias kill-python-all="kill_em.sh python"
+alias kill-python="kill-em --filter 'ipython|emacs' python"
+alias kill-python-all="kill-em python"
 ## TODO
 ## function which-program {
 ##     local program="$1"
@@ -3046,6 +3108,7 @@ alias jupyter-notebook-open=jupyter-notebook-redir-open
 ## TODO: figure out way for python to pull script from path (as with perl -S)
 function extract-text() { alias-python "$(which extract_document_text.py)" "$@"; }
 alias xtract-text='extract-text'
+alias extract-text-html='html_utils.py --regular'
 
 # test-script(script): run unit test for script (i.e., tests/test_script)
 # and outputs to file given by tests/_test-<script_basename>.<date>.log.
@@ -3268,9 +3331,9 @@ function shell-check {                  ## TOM-IDIOSYNCRATIC
 #-------------------------------------------------------------------------------
 # System administration
 # TODO: do for ???
-alias kill-software-updater='kill_em.sh --force --all --pattern "(software-properties|gnome-software|update-manager|update-notifier)"'
+alias kill-software-updater='kill-em --force --all --pattern "(software-properties|gnome-software|update-manager|update-notifier)"'
 alias update-software='command update-manager'
-alias kill-clam-antivirus='kill_em.sh --all -p clamd'
+alias kill-clam-antivirus='kill-em --all -p clamd'
 
 #........................................................................
 # Miscellaneous local environment helpers

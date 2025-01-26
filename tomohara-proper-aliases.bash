@@ -24,9 +24,11 @@ alias git-update-='git-update-plus'
 alias git-vdiff='git-vdiff-alias '
 alias git-all-update='update-main-repos.bash'
 alias git-extract-all-versions='extract-all-git-versions.bash --human'
+alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human'
 alias git-files-changed=git-diff-list
 alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
+function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
 ## TODO: alias git-X-='git-X-plus'
 
 # Other misc. stuff
@@ -46,11 +48,24 @@ function convert-emoticons-aux {
 
 # plint(...): shortcut for python-lint
 simple-alias-fn plint 'PAGER=cat python-lint'
-# plint-torch(...): plint w/ torch no-member warnings ignored
+# shellcheck disable=SC2016
+{
+# plint-torch(...): pylint w/ torch no-member warnings ignored
 alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
+# plint-tester-testee(filename): run pylint over test file and tested file
+## OLD: alias-fn plint-tester-testee 'plint "$1" tests/test_"$1"'
+function plint-tester-testee {
+    local script="$1"
+    local test_script="tests/test_$script"
+    plint "$script" "$test_script"
+    if [ "${TEST:-0}" == "1" ]; then
+        test-python-script "$test_script"
+    fi
+    }
+}
 #
 # clone-repo(url): clone github repo at URL into current dir with logging
-# TODO3: move to git-related section
+# TODO2: move to git-related section (better yet into git-aliases.bash)
 function clone-repo () {
     local url repo log
     url="$1"
@@ -65,6 +80,7 @@ function clone-repo () {
     fi
     #
     ls -R "$repo" >> "$log"
+    check-errors-excerpt "$log"
     ## Note: outputs warning that script now done (to avoid user closing the window assuming script active)
     ## TODO: add trace-stderr
     echo "FYI: script-based clone done (see $log)" 1>&2
@@ -75,57 +91,86 @@ simple-alias-fn black-plain 'convert-emoticons-aux black'
 # run-python-script(script, args): run SCRIPT with ARGS with output to dir/_base-#.out
 # and stderr to dir/_base-#.log where # is value of global $_PSL_.
 # The arguments are passed along unless USE_STDIN is 1.
-# note: Checks for errors afterwards. Use non-locals _PSL_, out_base and log.
+# note: Checks for errors afterwards. Uses non-locals _PSL_, out_base and log.
 function run-python-script {
     ## DEBUG: trace-vars _PSL_ out_base log
     if [ "$1" = "" ]; then
-        echo "Usage: [USE_STDIN=B] run-python-script script arg ..."
+        echo "Usage: [USE_STDIN=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] run-python-script script arg ..."
+        echo "note:"
+        echo "- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL)"
+        echo "- PYTHON_OUT_DIR is script dir unless a full path"
         return
     fi
     # Check args
-    local script_path="$1";
-    shift;
-    local script_args=("$@");
+    # note: "tests" might be specified for script (e.g., test-python-script tests)
+    local script_path="$1"
+    if [ ! -e "$script_path" ]; then
+        script_path="$(which "$script_path")"
+    fi
+    shift
+    local script_args=("$@")
     local script_dir
-    script_dir=$(dirname "$script_path");
+    script_dir="$(dirname "$script_path")"
     local script_base
-    script_base=$(basename "$script_path" .py);
+    local default_out_dir="$script_dir"
+    if [[ $default_out_dir =~ ^/.* ]]; then
+        default_out_dir="."
+    fi
+    local out_dir="${PYTHON_OUT_DIR:-"$default_out_dir"}"
+    script_base="$(basename "$script_path" .py)"
+    # TODO: find shortcut for min
+    local python_debug_level="${PYTHON_DEBUG_LEVEL:-4}"
+    if [ "${DEBUG_LEVEL:-0}" -gt "$python_debug_level" ]; then
+        python_debug_level="$DEBUG_LEVEL"
+    fi  
     #
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
-    declare -g _PSL_ log out
-    local out_base
-    let _PSL_++;
-    out_base="$script_dir/_$script_base.$(TODAY).$_PSL_";
-    log="$out_base.log";
-    out="$out_base.out";
+    # TODO3: rework to avoid problem with _PSL_ not being updated (or at least detect the error)!
     ## OLD:
-    ## ## TEMP: ensure output exists for excerpt below
-    ## touch "$out";
+    ## declare -g _PSL_ log out
+    ## local out_base
+    declare -g _PSL_ log out out_base
+    local module_spec=""
+    let _PSL_++
+    out_base="$out_dir/_$script_base.$(TODAY).$_PSL_"
+    if [ "$PROFILE_SCRIPT" == "1" ]; then
+       out_base="$out_base.profile"
+       module_spec="-m cProfile -o $out_base.data"
+    fi
+    if [ "$TRACE_SCRIPT" == "1" ]; then
+       out_base="$out_base.trace"
+       module_spec="-m trace --trace"
+    fi
+    log="$out_base.log"
+    out="$out_base.out"
     ## DEBUG: trace-vars _PSL_ out_base log
-    rename-with-file-date "$out_base.out" "$log";
-    # shellcheck disable=SC2086
     local python_arg="-"
     # shellcheck disable=SC2086
     {
 	if [ "${USE_STDIN:-0}" = "1" ]; then
 	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
 	    ## TODO2:
-            echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$out" 2> "$log";
-            ## OLD: echo "${script_args[*]}" | $PYTHON "$script_path" $python_arg > "$log" 2>&1;
+            echo "${script_args[*]}" | DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" $python_arg > "$out" 2> "$log"
 	else
 	    # note: disables - with explicit arguments or if running pytest
 	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
-	    ## OLD: $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1
-	    $PYTHON "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log";
+	     DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log"
 	fi
     }
+    if [ "$PROFILE_SCRIPT" == "1" ]; then
+       alias-python -m mezcla.format_profile "$out_base.data" > "$out_base.list"
+    fi
     tail "$log" "$out" | truncate-width
     ## TEMP: remove emtpy output file
-    if [ "$DEBUG_LEVEL" -ge 4 ]; then ls -lt "$log" "$out"; fi
-    if [ ! -s "$out" ]; then command rm -v "$out"; fi
+    if [ "$DEBUG_LEVEL" -ge 4 ]; then
+        ls -lt "$log" "$out"
+    fi
+    if [ ! -s "$out" ]; then
+        command rm -v "$out"
+    fi
     # Show common errors in log
-    check-errors-excerpt "$log";
+    check-errors-excerpt "$log"
 }
 
 # pytest stuff
@@ -135,20 +180,26 @@ default_pytest_opts="-vv --capture=tee-sys"
 function test-python-script {
     if [ "$1" = "" ]; then
         echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] test-python-script script"
-        echo "Note: When debugging you might need to use --runxfail and -s to see full error info"
+        echo "Note: When debugging you might need to use --runxfail and -s to see full error info."
+        echo "The debugging level defaults to 5 (unlike run-python-script)."
         return
     fi
     # Extract test script
     local test_script="$1"
     shift
-    ## TODO2; if [[ ! $test_script =~ /\btest_/ ]]; then
-    if [[ ! $test_script =~ [^a-z0-9]test_ ]]; then
+    # note: specifying "tests" for script handled indirectly;
+    # this also handles cases like "tests/misc_tests.py" without associated module.
+    if [ -e "tests/test_$test_script" ]; then
         test_script="tests/test_$test_script"
+    elif [ -e "$test_script" ]; then
+        true;
+    else
+        echo "Warning: cannnot resolve test for _$test_script" 1>&2
     fi
-    PYTEST_OPTS="${PYTEST_OPTS:-"$default_pytest_opts"}"
+    local pytest_opts="${PYTEST_OPTS:-"$default_pytest_opts"}"
     # TODO3: drop inheritance spec in summary
     # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "tests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
-    DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $PYTEST_OPTS" run-python-script "$test_script" "$@" 2>&1;
+    PYTHON_DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $pytest_opts" run-python-script "$test_script" "$@" 2>&1;
 }
 #
 # test-python-script-method(test-name, ...): like test-python-script but for specific test
@@ -168,7 +219,7 @@ function test-python-script-method-strict {
     ## TODO2: default_pytest_opts="--runxfail" test-python-script-method "$@";
     local method="$1";
     shift;
-    PYTEST_OPTS="--runxfail $default_pytest_opts" test-python-script "$@";
+    PYTEST_OPTS="--runxfail -k $method $default_pytest_opts" test-python-script "$@";
 }
 #
 # color-test-failures(): show color-coded test result for pytest run (yellow for xfailed and red for regular fail)
@@ -290,6 +341,35 @@ function remote-prompt {
 alias-fn remote-prompt-root 'remote-prompt "" "#"'
 # TODO2: put alias aliases in separate file to minimize clutter (e.g., to be enabled upon temorary memory lapse)
 alias root-prompt-remote=remote-prompt-root
+#
+# reset-prompt-label(label): reset part of prompt prior to $, #, etc. with text
+# For example, if PS_symbol is 'clone $' and label "alt-clone", the result would
+# set PS_symbol to 'alt-clone $'
+# note: Issues warning if $PS_symbol not set to avoid messing with PS1, etc.
+function reset-prompt-label {
+    local label="$1"
+    ## OLD: local old_label=""
+    local old_symbol="$"
+    declare -g PS_symbol                # global declaration
+    if [ "$PS_symbol" == "" ]; then
+        echo "Warning: reset-prompt-label assumes PS_symbol usage" 1>&2
+    fi
+    ## TODO2: if [[ $PS_symbol =~ ^[\w\s+][\W+]$ ]]; then
+    if [[ $PS_symbol =~ [^A-Za-z0-9\ _-]$ ]]; then
+        # TODO3: avoid duplication of regex
+        # NOTE: ideally should be like @vals = $(get_matches(regex))
+        ## OLD: old_label=$(echo "$PS_symbol" | perl -pe 's/^([\w\s]+)(.*\W)$/$1/;')
+        old_symbol=$(echo "$PS_symbol" | perl -pe 's/^([\w\s]+)(.*\W)$/$2/;')
+        ## OLD: trace-vars old_old_label old_symbol
+        ## DEBUG: trace-vars old_symbol
+    else
+        echo "FYI: PS_symbol w/o trailing symbol: '$PS_symbol'" 1>&2
+    fi
+    reset-prompt "$label $old_symbol"
+}
+# reset-prompt-label-here(): sets prompt label to dir basename with existing PS_symbol proper (e.g., "alt $" => "bin $")
+# shellcheck disable=SC2016
+alias-fn reset-prompt-label-here 'reset-prompt-label "$(basename $PWD)"'
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
 function pristine-bash {
@@ -347,9 +427,34 @@ function rename-last-snapshot {
 alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
 # youtube-transcript(url, file): download YoutTube transcript at URL to FILE
 function youtube-transcript {
+    if [[ ("$2" == "") || ("$1" == "--help") ]]; then
+        echo "Usage: youtube-transcript-alt url file" 1>&2
+        echo "" 1>&2
+        echo "Note: More details follow:"  1>&2
+        echo "" 1>&2
+        ## TODO3: add alias for showing condensed mezcla script usage notes
+        alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;' 1>&2
+        return
+    fi
     local url="$1"
     local file="$2"
     alias-python -m mezcla.examples.youtube_transcript "$url" > "$file"
+}
+# youtube-transcript-alt(): workaround for silly bash problem:
+#    $ youtube-transcript 'https://www.youtube.com/watch?v=gcgMyRfE8a4&t=247s'
+#    bash: : No such file or directory
+# TODO: check for &'s in URL and issue warning
+# DUH: The "$file" redirection was causing problems (Thanks, Grok!)
+# TODO2: check for other aliases with similar issues
+function youtube-transcript-alt {
+    local url="$1"
+    local file="$2"
+    if [ "$file" == "" ]; then
+        echo "Usage: youtube-transcript-alt url file" 1>&2
+        echo "See youtube-transcript --help for details"  1>&2
+        return
+    fi
+    python3 "$(which youtube_transcript.py)" "$url" > "$file"
 }
 
 #...............................................................................
@@ -403,8 +508,10 @@ alias zip-from-parent=create-zip-from-parent
 # calendar: wrapper for cal using ncal variant (n.b., to ensure highlighting)
 # options: -b: old-style formatting
 alias calendar="ncal -b"
+## HACK (can't find ncal via homebrew):
+under-macos 1 && alias calendar="cal"
 
-# ps-time: show processes by time via ps_sort.perl
+# Ps-time: show processes by time via ps_sort.perl
 # shellcheck disable=SC2016
 alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
 #
@@ -462,6 +569,7 @@ function reset-under-emacs {
     unset UNDER_EMACS SCRIPT_PID
     all-tomohara-settings
 }
+simple-alias-fn emacs-wide-horizontal 'tpo-invoke-emacs.sh -geometry 288x50 -eval "(split-window-right)"'
 
 #................................................................................
 # Media stuff
@@ -498,9 +606,11 @@ alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
 alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
 #
+# note: kill-em targets process name, and kill-it uses pattern (hence riskier)
 alias kill-kdiff3='kill-it kdiff3'
 alias kill-firefox='kill-it firefox'
 alias kill-jupyter='kill-it python.*jupyter'
 alias kill-chromiun='kill-it chromium'
-alias kill-sleep='kill_em.sh sleep'
+## OLD: alias kill-sleep='kill_em.sh sleep'
+alias kill-sleep='kill-em sleep'
 alias kill-hp='kill-it hp-systray'

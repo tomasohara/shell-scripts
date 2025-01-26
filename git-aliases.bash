@@ -22,8 +22,8 @@
 #
 # - [Deprecated] Credentials can be taken from project specific file (_my-git-credentials-etc.bash.list)
 #
-#     git_user=username
-#     git_token=personal_access_token
+#     GIT_USER=username
+#     GIT_TOKEN=personal_access_token
 #
 #     *** Warning: This is not secure, and should be avoided in multi-user environments. ***
 #
@@ -58,6 +58,15 @@
 #   UNSAFE_GIT_CREDENTIALS       use old-style credentials file
 #   -- internal
 #      GIT_MESSAGE               message for update (TODO: rework to use optional arg)
+#   -- obsolete
+#      GIT_USER                  user ID for authentication
+#      GIT_TOKEN                 user token from Github
+#   GIT_NO_CONFIRM               omit confirmation (used is automated tests(
+#   GIT_FORCE                    force an operation (e.g., git add ignored file)
+#   GIT_LOG_DIR                  where to put command logs (e.g, log-files)
+#   GIT_SKIP_ADD                 skip implicit 'git add' in git-add-commit-push
+#   GIT_SKIP_PUSH                skip 'git push' after commit
+#   GIT_TEST_MESSAGE             commit message if GIT_NO_CONFIRM used
 #
 # - maldito shellcheck:
 #   SC2002 [Useless cat. Consider 'cmd < file | ..' or 'cmd file | ..' instead]
@@ -105,16 +114,19 @@
 # - * Get a git guru to critique (e.g., how to make more standard)!
 # - Add an option for verbose tracing (and for quiet mode).
 # - Simplify environment-based variable initializations using "${ENV:-default}" approach.
+# - Remove extraneous semicolons at end of commands.
 #
 # TODO1:
 # - Filter miscellaneous output from git command execution (e.g., "enumerating objects"
 #   from git-update-commit-push), such as by just showing 'issuing' output.
 #
-# TODO2:
-# - Fix detection of .ipynb files as binary (e.g., via specical case exception).
-#
 
 ## DEBUG: echo "in ${BASH_SOURCE[0]}"
+
+#................................................................................
+# Constans
+
+egrep="grep --extended-regexp"
 
 #................................................................................
 # Aliases
@@ -155,7 +167,7 @@ function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 check_errors.perl -context=5
 #................................................................................
 
 # get-temp-log-name([label=temp]: Return unique file name of the form _git-LABEL-MMDDYY-HHMM-NNN.log
-#
+# note: the temp file gets created
 #
 function get-temp-log-name {
     local label=${1:-temp}
@@ -165,7 +177,15 @@ function get-temp-log-name {
     mkdir --parents "$LOG_DIR"
     now_mmddyyhhmm=$(date '+%d%b%y-%H%M' | downcase-stdin-alias);
     # TODO: use integral suffix (not hex)
-    mktemp "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log"
+    local log_file
+    log_file=$(mktemp "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log")
+    ## TEMP: rename existing temp file (MacOs quirk?)
+    if [ -s "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log" ]; then
+        echo "FYI: applying get-temp-log-name workaround"
+        rename-with-file-date "$log_file"
+        touch "$log_file"
+    fi
+    echo "$log_file"
 }
 
 # git-alias-review-log(file): review log FILE checking for common errors
@@ -192,11 +212,12 @@ function git-alias-review-log {
 # - Requires GIT_FORCE of 1 if there are changed files (to avoid inadvertant conflict).
 # - TODO2: decompose this monster of a function!
 function git-update-plus {
-    local git_user="n/a"
-    local git_token="n/a"
+    ## OLD:
+    ## local GIT_USER="n/a"
+    ## local GIT_TOKEN="n/a"
     if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
        set-global-credentials
-       echo "git_user: $git_user;  git_token: $git_token"
+       echo "GIT_USER: $GIT_USER;  GIT_TOKEN: $GIT_TOKEN"
     fi
     #
     local log
@@ -207,7 +228,7 @@ function git-update-plus {
     # - The stash-pop causes the timestamps to be changed. The workaround to this quirk
     # - backups and restore the modified files via zip (for subdirs and symbolic links).
     local changed_files
-    changed_files="$(git-diff-list)"
+    changed_files="$(git-diff-list "$@")"
     local restore_dir=""
     if [ "$changed_files" != "" ]; then
 
@@ -232,8 +253,8 @@ function git-update-plus {
             # Create zip (-v for verbose & -y for symlinks)
             command rm -f _stash.zip
             echo "issuing: zip over changed files (for later restore)"
-            echo "git-diff-list | zip -v -y -@ _stash.zip" >> "$log"
-            git-diff-list | zip -v -y -@ _stash.zip >> "$log"
+            echo "git-diff-list | zip -v -y -@ _stash.zip" >> "$log" 2>&1
+            git-diff-list | zip -v -y -@ _stash.zip >> "$log" 2>&1
         else
             # note: zip options: -y retain links; -v verbose
             echo "Not zipping changes because PRESERVE_GIT_STASH not 1"
@@ -244,14 +265,14 @@ function git-update-plus {
 
     # Do the stash[-push]/pull/stash-pop
     echo "issuing: git stash"
-    git stash >> "$log"
-    echo "issuing: git pull --all"
-    git pull --all >> "$log"
+    git stash >> "$log" 2>&1
+    echo "issuing: git pull --all --verbose"
+    git pull --all --verbose >> "$log" 2>&1
     if [ $? -ne 0 ]; then
         echo "Warning: problem with pull (status=$?)"
     fi
     echo "issuing: git stash pop"
-    git stash pop >> "$log"
+    git stash pop >> "$log" 2>&1
 
     # Optionally restore timestamps for changed files
     if [ "$changed_files" != "" ]; then
@@ -259,7 +280,7 @@ function git-update-plus {
             echo "issuing: unzip over _stash.zip (to restore timestamps)"
             # note: unzip options: -o overwrite; -v verbose:
             echo "unzip -v -o _stash.zip" >> "$log"
-            unzip -v -o _stash.zip >> "$log"
+            unzip -v -o _stash.zip >> "$log" 2>&1
             
             # Restore working directory
             if [ "$restore_dir" != "" ]; then
@@ -331,7 +352,7 @@ function set-global-credentials {
     else
         echo "Warning: use deprecated credentials file sourcing"
         for dir in . ~; do
-            if [[ ($git_user = "") && (-e "$dir/$credentials_file") ]]; then
+            if [[ ($GIT_USER = "") && (-e "$dir/$credentials_file") ]]; then
                 echo "Sourcing credentials ($dir/$credentials_file)"
                 source "$dir/$credentials_file"
                 break
@@ -358,21 +379,13 @@ function git-add-commit-push {
         echo "This avoids to avoid cut-n-paste error (e.g., [G]IT_MESSAGE-typo)"
         return 1
     fi
-    ## OLD:
-    ## if [ "$message" = "..." ]; then 
-    ##     echo "Error: '...' not allowed for commit message (to avoid cut-n-paste error)"
-    ##     return 1
-    ## fi
-    ## if [ "$message" = "" ]; then
-    ##     echo "Error: '' not allowed for commit message (to avoid [G]IT_MESSAGE-typo error)"
-    ##     return 1
-    ## fi
     #
-    local git_user="n/a"
-    local git_token="n/a"
+    ## OLD:
+    ## local GIT_USER="n/a"
+    ## local GIT_TOKEN="n/a"
     if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
        set-global-credentials
-       echo "git_user: $git_user;  git_token: $git_token"
+       echo "GIT_USER: $GIT_USER;  GIT_TOKEN: $GIT_TOKEN"
     fi
     #
     local dir
@@ -382,25 +395,29 @@ function git-add-commit-push {
         echo "skipping: git add $*"
     else
         echo "issuing: git add" "$@"
-        git-add-plus "$@" >> "$log"
+        git-add-plus "$@" >> "$log" 2>&1
     fi
 
     # Push the changes after showing synopsis and getting user confirmation
     echo ""
     pause-for-enter "About to commit $file_spec (with message '$message')"
     echo "issuing: git commit -m '$message'"
-    git commit -m "$message" >> "$log"
+    git commit -m "$message" >> "$log" 2>&1
     perl -pe 's/^/    /;' "$log"
-    pause-for-enter 'About to push: review commit log above!'
     #
-    echo "issuing: git push --verbose"
-    if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
-       git push --verbose <<EOF >> "$log"
-$git_user
-$git_token
+    if [ "${GIT_SKIP_PUSH:-0}" == "1" ]; then
+        echo "Skipping push (due to GIT_SKIP_PUSH)"
+    else    
+        pause-for-enter 'About to push: review commit log above!'
+        echo "issuing: git push --verbose"
+        if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
+           git push --verbose <<EOF >> "$log" 2>&1
+$GIT_USER
+$GIT_TOKEN
 EOF
-    else
-       git push --verbose >> "$log"
+        else
+           git push --verbose >> "$log" 2>&1
+        fi
     fi
     echo >> "$log"
 
@@ -435,7 +452,7 @@ function invoke-git-command {
     local log
     log=$(get-temp-log-name "$command")
     echo "issuing: git $command $*"
-    git "$command" "$@" >| "$log" 2>&1
+    git "$command" "$@" >> "$log" 2>&1
     ## PREVIOUS: less
     ## NOTE: unfortunately, less clears the screen
     ## TODO: less --quit-if-one-screen "$log"
@@ -444,7 +461,9 @@ function invoke-git-command {
 }
 # TODO: git-command => git-command-alias
 alias git-command='invoke-git-command'
+## TODO3: git-push-plus => git-push-alias (as simple wrapper)
 alias git-push-plus='invoke-git-command push'
+alias git-pull-alias='invoke-git-command pull'
 
 # Misc git commands (redirected to log file)
 # NOTE: commands with much output like git-log invoke less
@@ -463,7 +482,7 @@ function git-add-plus {
     log=$(get-temp-log-name "add");
     local options=""
     if [ "$GIT_FORCE" = "1" ]; then options="--force"; fi
-    git add $options "$@" >| "$log" 2>&1;
+    git add $options "$@" >> "$log" 2>&1;
 
     # Sanity check
     git-alias-review-log "$log"
@@ -493,22 +512,22 @@ function git-reset-file {
     fi
 
     # Isolate old versions
-    mkdir -p _git-trash >| "$log";
+    mkdir -p _git-trash >> "$log" 2>&1;
     echo "issuing: cp -vpf $* _git-trash";
     # Note: Uses  'command cp' to avoid confirmation when same file already in trash.
     # This is a design decision since resets aren't common (e.g., vs. timestamping trash files).
-    command cp -vpf "$@" _git-trash >> "$log";
+    command cp -vpf "$@" _git-trash >> "$log" 2>&1;
 
     # Forget state
     echo "issuing: git reset HEAD $*";
-    git reset HEAD "$@" >> "$log";
-    ## TODO: git reset HEAD $reset_options "$@" >> "$log";
+    git reset HEAD "$@" >> "$log" 2>&1;
+    ## TODO: git reset HEAD $reset_options "$@" >> "$log" 2>&1;
     ## NOTE: leads to "Cannot do hard reset with paths" error
     
     # Re-checkout
     # TODO: add option for 'git checkout HEAD -- ...'???
     echo "issuing: git checkout -- $*";
-    git checkout -- "$@" >> "$log";
+    git checkout -- "$@" >> "$log" 2>&1;
 
     # Issue warning if stash non-empty
     echo "issuing: git stash list"
@@ -543,16 +562,16 @@ function git-restore-file-helper {
     fi
 
     # Isolate old versions
-    mkdir -p _git-trash >| "$log";
+    mkdir -p _git-trash >> "$log" 2>&1;
     echo "issuing: cp -vpf $* _git-trash";
     # Note: Uses  'command cp' to avoid confirmation when same file already in trash.
     # This is a design decision since restores aren't common (e.g., vs. timestamping trash files).
-    command cp -vpf "$@" _git-trash >> "$log";
+    command cp -vpf "$@" _git-trash >> "$log" 2>&1;
 
     # Restore working tree files
     echo "issuing: git restore $option $*";
     # shellcheck disable=SC2086
-    git restore $option "$@" >> "$log";
+    git restore $option "$@" >> "$log" 2>&1;
     
     # Sanity check
     git-alias-review-log "$log"
@@ -564,7 +583,10 @@ alias git-restore-both-alias="git-restore-file-helper --both"
 # git-revert-commit(commit): effectively undoes COMMIT(s) by issuing new commits
 alias git-revert-commit-alias='git-command revert'
 
-# git-diff-plus: show repo diff
+# git-diff-plus([files-etc]: show repo diff
+# Note:
+# - Normalizes the listing such as by changing a/<path> to a: <path> and likwise for b.
+# - The optional FILES-ETC are passed along to git-diff command.
 function git-diff-plus {
     local log;
     log=$(get-temp-log-name "diff");
@@ -574,11 +596,10 @@ function git-diff-plus {
     ## TODO? (account for subdirectories 'a' or 'b'):
     ## git diff "$@" | perl -pe 's@^(diff|\-\-\-|\+\+\+) (?!.*[ab]/.*)([ab])/@\1\2 \3: @;' >| "$log";
     ## Note: uses git-diff-list[-template] so file order reflects subdir embedding level
-    ## OLD: git diff "${files[@]}" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >| "$log";
     local OLDIFS=$IFS                   # save inter-field separator
-    echo "" > "$log"
-    for f in $(git-diff-list); do
-        git diff "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log"
+    echo "" >| "$log"
+    for f in $(git-diff-list "$@"); do
+        git diff "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log" 2>&1
     done
     IFS=$OLDIFS                         # restore inter-field separator
     #
@@ -608,13 +629,15 @@ function git-vdiff-alias {
     git-difftool-plus "$@" &
     }
 
-# Produce listing of changed files
+# Produce listing of changed files, optionally restricted to subset of specified files
+#
 # note:
 # - Used in check-in templates, so level of indirection involved
 # - Uses following one-line from ChatGPT
 #     git diff --name-only | awk -F'/' '{ print NF-1 "\t" $0 }' | sort --key=1 --numeric-sort | cut -f2-
 #   where -F'/' sets the field separator to /; awk splits line and prints the depth (i.e., #/'s - 1) plus line;
 #   it then sorts the output and removes the depth count.
+# - Additional arguments passed along to git-diff (e.g., specific filenames or commits)
 #
 function git-diff-list-template {
     # TODO: use unique tempfile (e.g., mktemp)
@@ -622,16 +645,19 @@ function git-diff-list-template {
     echo "diff_list_file=\$TMP/_git-diff.\$\$.list"
     # ex: "diff --git a/tomohara-aliases.bash b/tomohara-aliases.bash" => "tomohara-aliases.bash:
     # TODO: ex: "diff --cc mezcla/data_utils.py" => "mezcla/data_utils.py"
-    ## OLD: echo "git diff 2>&1 | extract_matches.perl '^diff.* b/(.*)' >| \$diff_list_file"
     ## TODO3: rework to avoid shellcheck warning [SC2028 (info): echo may not expand escape sequences. Use printf.]
     # shellcheck disable=SC2028
-    echo "git diff --name-only | awk -F'/' '{ print NF-1 \"\t\" \$0 }' | sort --key=1 --numeric-sort | cut -f2- >| \$diff_list_file"
+    ## BAD:
+    ## echo "git diff --name-only | awk -F'/' '{ print NF-1 \"\t\" \$0 }' | sort --key=1 --numeric-sort | cut -f2- >| \$diff_list_file"
+    # note: sometime duplicate entries are produced, so uniq used
+    # TODO2: handle filenames with spaces
+    echo "git diff --name-only" "$@" "| awk -F'/' '{ print NF-1 \"\t\" \$0 }' | sort --key=1 --numeric-sort | cut -f2- | uniq >| \$diff_list_file"
 }
 function git-diff-list {
     local diff_list_file
     ## TODO2: local diff_list_script=$(get-temp-log-name "diff")
     local diff_list_script="$TMP/_git-diff-list.$$.bash"
-    git-diff-list-template >| "$diff_list_script"
+    git-diff-list-template "$@" >| "$diff_list_script"
     source "$diff_list_script"
 
     # Change path to absolute and drop current directory
@@ -705,7 +731,7 @@ function alt-invoke-next-single-checkin {
     # TODO: position cursor at start of ... (instead of pause)
     local is_text
     ## TODO: fix problem identifying scripts with UTF-8 as text (e.g., common.perl reported as data by file command)
-    is_text=$(file "$mod_file" | egrep -i ':.*(text|JSON|UTF-8)')
+    is_text=$(file "$mod_file" | $egrep -i ':.*(text|JSON|UTF-8)')
     ## HACK: add special case exceptions
     if [ "$is_text" = "" ]; then
         case "$mod_file" in *.css | *.csv | *.html | *.ipynb | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
@@ -746,7 +772,7 @@ function alt-invoke-next-single-checkin {
     eval "$command"
 
     # Restore message
-    export GIT_MESSAGE=$OLD_GIT_MESSAGE
+    export GIT_MESSAGE="$OLD_GIT_MESSAGE"
 
     # Start next checkin or show if no more updates to do
     git-next-checkin
@@ -781,6 +807,8 @@ alias git-checkin-new-alias="GIT_MESSAGE='initial version' git-update-commit-pus
 # NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
 function git-checkout-branch {
     local branch="$1"
+    local log
+    log=$(realpath "$(get-temp-log-name 'update')")
     # TODO2: define helper function for usage
     if [[ ("$branch" = "") || ("$branch" == "--help") ]]; then
         echo "usage: git-checkout-branch [--help | branch]"
@@ -793,11 +821,20 @@ function git-checkout-branch {
     local branch_ref
     branch_ref=$(git branch --all | grep -c "$branch")
     if [ "$branch_ref" -gt 0 ]; then
+        # Do the stash[-push]/checkout/stash-pop
+        # TODO: use 'git switch'
+        echo "issuing: git stash"
+        git stash >> "$log" 2>&1
         # note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
-        git-command checkout "$branch" --;
+        git-command checkout "$branch" --  >> "$log" 2>&1
+        echo "issuing: git stash pop"
+        git stash pop >> "$log" 2>&1
     else
         echo "Error: unknown branch '$branch'"
     fi;
+
+    # Show end of log
+    git-alias-review-log "$log"
 }
 simple-alias-fn git-branch-checkout  git-checkout-branch 
 
@@ -816,6 +853,17 @@ function git-conflicts-alias {
     git-cd-root-alias
     git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {};
     cd "$restore_dir"
+}
+
+# git-toggle-push(): toggle automatic push in git-add-commit-push
+function git-toggle-push {
+    # TODO: GIT_SKIP_PUSH=$((1 - GIT_SKIP_PUSH))
+    if [ "${GIT_SKIP_PUSH:-0}" == "1" ]; then
+        GIT_SKIP_PUSH=0
+    else
+        GIT_SKIP_PUSH=1
+    fi
+    echo "GIT_SKIP_PUSH=$GIT_SKIP_PUSH"
 }
 
 #-------------------------------------------------------------------------------
@@ -904,7 +952,6 @@ function git-misc-alias-usage() {
     echo "    git-checkin-all-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
     echo ""
     echo "Source code grepping:"
-    ## OLD: echo ## OLD: "   (git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
     ## TODO3: get ls-tree to show output relative to current subdirectory
     echo "   (git-cd-root-alias; git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
     echo ""

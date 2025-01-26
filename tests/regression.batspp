@@ -119,3 +119,56 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## issuing: zip over changed files (for later restore)
 ## The program 'zip' is currently not installed. You can install it by typing:
 ## sudo apt install zip
+
+#-------------------------------------------------------------------------------
+# Make sure shell-check-stdin doesn't return false positive
+#
+## $ shell-check-stdin 
+## Enter snippet lines and then ^D
+## {
+##    delete-dir --force my_vectordb
+##    DEBUG_LEVEL=4 TORCH_DEVICE=cpu _chroma_quickstart.py >| "_chroma_quickstart.cpu.$(T).log" 2>&1
+##    delete-dir --force my_vectordb
+##    DEBUG_LEVEL=4 TORCH_DEVICE=cuda _chroma_quickstart.py >| "_chroma_quickstart.cuda.$(T).log" 2>&1
+##    grep -i elapsed _chroma_quickstart.{cpu,cuda}.$(T).log
+## }
+## 
+## In - line 6:
+##    grep -i elapsed _chroma_quickstart.{cpu,cuda}.$(T).log
+##                                                  ^--^ SC2046 (warning): Quote this to prevent word splitting.
+## 
+## For more information:
+##   https://www.shellcheck.net/wiki/SC2046 -- Quote this to prevent word splitt...
+## shellcheck OK
+
+#-------------------------------------------------------------------------------
+# Make sure set_xterm_title.bash uses user-specific temp dir:
+# interittent bug with "/tmp/set-xterm-title-" being used.
+#
+## $ dir -d /tmp/set-xterm-title-*
+## drwxrwxr-x 2 tomohara 4.0K Jun  9 04:00 /tmp/set-xterm-title-
+## drwxr-xr-x 2 root     4.0K Jun  8 16:05 /tmp/set-xterm-title-root
+## drwxrwxr-x 2 tomohara 4.0K Jun  8 15:03 /tmp/set-xterm-title-tomohara
+## drwxrwxr-x 2 testuser 4.0K Jun  1 17:55 /tmp/set-xterm-title-testuser
+
+#...............................................................................
+# Fix alt-extract-all-git-versions.bash
+#
+
+## $ NUM_REVISIONS=5 alt-git-extract-all-versions alt-extract-all-git-versions.bash
+## Trying main path alt-extract-all-git-versions.bash for version v13
+## /home/tomohara/temp/tmp/all_versions_exported/alt-extract-all-git-versions.bash.v13-13Apr24
+## Trying main path alt-extract-all-git-versions.bash for version v12
+## fatal: Not a valid object name 49d1dfc9c25e959ead5d861dde183baa115f2542:alt-extract-all-git-versions.bash
+## Trying alternative path 
+## Error: unable to resolve commit 49d1dfc9c25e959ead5d861dde183baa115f2542
+
+#-------------------------------------------------------------------------------
+# fix git-conflicts-alias
+
+## $ git-conflicts-alias 
+## grep: mezcla: Is a directory
+##               ^^^^^^^^^^^^^^
+## $ pwd-host-info 
+## /home/tomohara/bin
+## jug

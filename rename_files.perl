@@ -30,7 +30,7 @@ BEGIN {
 # Specify additional diagnostics and strict variable usage, excepting those
 # for command-line arguments (see init_var's in &init).
 use strict;
-use vars qw/$q $f $regex $quick $force $test $evalre $global $i $ignore/;
+use vars qw/$q $f $regex $quick $force $test $evalre_old $evalre $global $i $ignore/;
 use vars qw/$t $nt $para/;
 use vars qw/$rename_old $diagnose $fallback/;
 
@@ -45,6 +45,7 @@ use vars qw/$rename_old $diagnose $fallback/;
 ## OLD: &init_var(*regex, &FALSE);	# allow regular expression in pattern
 &init_var(*regex, $para);	# allow regular expression in pattern
 &init_var(*evalre, &FALSE);	# run replacement through eval environment
+&init_var(*evalre_old, &FALSE);	# take 1 on -evalre
 &init_var(*diagnose, &FALSE);	# diagnose pattern replacement issues
 &init_var(*fallback, &FALSE);	# try to recover from replacement issues
 my($nt_default) = (defined($t) ? (! $t) : &TRUE);  # abbrev. for 'not t'
@@ -97,8 +98,8 @@ if ($diagnose && (! $evalre)) {
 }
 
 # TEMP: warn about options not yet working
-if ($evalre) {
-    &debug_print(&TL_ALWAYS, "Warning: -evalre not yet working quite right\n")
+if ($evalre_old) {
+    &debug_print(&TL_ALWAYS, "Warning: -evalre_old still not yet working quite right\n")
 }
 
 # Normalize the patterns
@@ -163,7 +164,22 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
 	# note: u used so Unicode characters can be used in ranges
 	while ( $new_file =~ m/$old_pattern/u ) {
 	    ## TODO: resolve issue with replacement '-p-$1'
-	    my($replacement) = eval "$new_pattern";
+	    ## OLD: my($replacement) = eval "$new_pattern";
+	    my($replacement) = "";
+
+	    # Code worked out during aborted session with Gemini
+	    if ($evalre_old) {
+		$replacement = eval "$new_pattern";
+	    }
+	    else {
+		$replacement = $new_pattern;
+		for (my $i = 1; $i <= $#-; $i++) {
+		    my($value) = eval "\$$i";
+		    &debug_print(&TL_VERBOSE, "\$$i = $value\n");
+		    $replacement =~ s/\$$i/$value/g;
+		}
+	    }
+	    
 	    if ((! defined($replacement)) && $fallback) {
 		&debug_print(&TL_VERBOSE, "diagnose: using pattern as replacement\n");
 		$replacement = $new_pattern;
@@ -182,7 +198,7 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
 	    last if ((! $global) || ($new_file eq $last_name));
 	    &debug_print(&TL_VERY_DETAILED, "new_file=$new_file\n");
 	}
-     }
+    }
     elsif ($regex) {
 	&debug_print(&TL_VERY_VERBOSE, "regex replacement\n");
 	# note: u used so Unicode characters can be used in ranges

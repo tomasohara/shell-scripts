@@ -54,8 +54,8 @@ Notes:
   & for multi-line output (assumes @)
   * for all of the above
 - Other special indicators:
-  < entire line translation
-  > english translation
+  < entire line translation (i.e., to English)
+  > english translation (i.e., to Spanish)
   ! run shell command (with aliases enabled)
 END_MISC_NOTES
 
@@ -233,9 +233,7 @@ while (<>) {
 	my($env_spec) = "SHOW_ELAPSED=1 FROM=$from TO=$to";
 	my($save_trace_level) = &DEBUG_LEVEL;
 	&debug_on(3);
-	## OLD:
-        ## print(&run_command_over("$env_spec machine_translation.py 2>| $log", 
-        ##                         "$text\n", 3));
+        ## TODO3: rework so stdin redirection comes before stderr
         print(&to_utf8(&run_command_over("$env_spec machine_translation.py 2>| $log", 
 					 "$text\n", 3)));
 	print("\n\n");

@@ -36,6 +36,10 @@ verbose=false
 if [ "${VERBOSE:-0}" = "1" ]; then
     verbose=true
 fi
+debug=false
+if [ "${DEBUG:-0}" = "1" ]; then
+    debug=true
+fi
 if [ "${TRACE:-0}" = "1" ]; then
     set -o xtrace
     $verbose && set -o verbose
@@ -49,9 +53,9 @@ TMP=${TMP:-/tmp}
 export_to_expr='$TMP/all_versions_exported'
 # note: see https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
 # shellcheck disable=SC2116
-## DEBUG: echo "export_to_expr=$export_to_expr"
+$debug && echo "export_to_expr=$export_to_expr"
 DEFAULT_EXPORT_TO="$(eval echo "$export_to_expr")"
-## DEBUG: echo "DEFAULT_EXPORT_TO=$DEFAULT_EXPORT_TO"
+$debug && echo "DEFAULT_EXPORT_TO=$DEFAULT_EXPORT_TO"
 pretty=false
 if [ "${PRETTY:-0}" = "1" ]; then pretty=true; fi
 
@@ -121,7 +125,8 @@ info="$TMP/_$base.$$.info"
 git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
 num_cases=$(wc -l < "$info")
 if [ "${QUICK_MODE:-1}" == "1" ]; then
-    total_num_cases=$(git log --follow "$GIT_PATH_TO_FILE" | grep -c -v '^commit')
+    ## OLD: total_num_cases=$(git log --follow "$GIT_PATH_TO_FILE" | grep -c -v '^commit')
+    total_num_cases=$(git --no-pager log --follow "$GIT_PATH_TO_FILE" | grep -c -v '^commit')
     if [ "$num_cases" != "$total_num_cases" ]; then
 	echo "Warning: Additional cases due to renames: try alt-extract-all-git-versions.bash"
     fi
@@ -133,7 +138,7 @@ while read -r LINE; do
     # ex: 2021-05-09T22:27:20-05:00 d124b2a3c1de2b2c0cd834b0fa9097e871d7f141
     COUNT=$((COUNT + 1))
     if [ $COUNT -lt $first_case ]; then
-        ## DEBUG: echo "FYI: Ignoring case $COUNT ($LINE))"
+        $debug && echo "FYI: Ignoring case $COUNT ($LINE))"
         continue
     fi
     COMMIT_DATE=$(echo "$LINE" | cut -d ' ' -f 1)
@@ -147,7 +152,7 @@ while read -r LINE; do
 	version_spec="v$COUNT"
     fi
     COMMIT_SHA=$(echo "$LINE" | cut -d ' ' -f 2)
-    ## DEBUG: echo "COUNT=$COUNT LINE=$LINE COMMIT_DATE=$COMMIT_DATE COMMIT_SHA=$COMMIT_SHA"
+    $debug && echo "COUNT=$COUNT LINE=$LINE COMMIT_DATE=$COMMIT_DATE COMMIT_SHA=$COMMIT_SHA"
     ## OLD: $verbose && printf '.'
     ## OLD: output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.$COUNT.$COMMIT_DATE"
     output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.${version_spec}-${date_spec}"

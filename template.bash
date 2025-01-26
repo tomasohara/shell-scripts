@@ -12,7 +12,7 @@
 #     if [[ $var =~ pattern ]]; then STMT; fi       note: requires Bash 3.0+
 #        where pattern is unquoted egrep regex (n.b., use .*.ext not *.ext)
 #     if (( ARITH_EXPR )); then STMT; fi
-#     if [ -s "file" ]; then ...; fi
+#     if [ -s "file" ]; then ...; fi    where -s is non-empty test (see below)
 #     case EXPR in PATTERN_a) STMT_a;; PATTERN_b) STMT_b;; ... esac
 #     for name [in words ...]; do commands; done
 #     for (( expr1 ; expr2 ; expr3 )) ; do commands ; done
@@ -41,12 +41,12 @@
 #   - comparison operators:
 #         -[eg|ne|lt|le|gt|ge]      if [ $num -eq 3 ]; then echo "tres"; fi
 #   - array variables
-#         list=(v1 value2 ... vN)   initialize
-#         ${#list[@]}               number of elements (i.e., length)
-#         ${list[1]}                second element
-#         ${list[*]}                all elements
-#         "${list[@]}"              likewise all but individually quoted (a la "$@")
-#         list+=(value)             append value
+#         arr=(v1 value2 ... vN)    initialize
+#         ${#arr[@]}                number of elements (i.e., length)
+#         ${arr[1]}                 second element
+#         ${arr[*]}                 all elements
+#         "${arr[@]}"               likewise all but individually quoted (a la "$@")
+#         arr+=(value)              append value
 #   - conditional expression (a la C ternary operator (test ? true-result : false-result)
 #     note: approximation via https://stackoverflow.com/questions/3953645/ternary-operator-in-bash
 #         $([ test ] && echo "true-result" || echo "false-result")
@@ -56,11 +56,13 @@
 #     Preferred for arithmetic: see https://wiki.bash-hackers.org/commands/builtin/let.
 #   - early return
 #      return                       just inside functions
-#      exit                         early script termination; avoid in functions or if script sourced
+#      -or- exit                    early script termination; *** avoid in functions or if script sourced ***
 #   - history mechanism
 #     !?string[?]                   find last command with string
 #  - local variable declaration     note: space-separated not comma; simplified
 #      local var1[=val1] [var2[=val2] ...]
+#  - global variable declaration
+#      declare -g variable
 #  - common file tests
 #      -s file                      non-empty file (n.b., nothing like csh's -z)
 #      -e file                      file exists
@@ -70,8 +72,10 @@
 #      -n string                    whether string is non-empty
 #      -z string                    whether string is empty
 #  - here-documents
-#      <<<END ... END               multiple line using ...
-#      <<<"text"                    single line using TEXT
+#      <<END ... END                multiple line using ... (i.e., "here docs")
+#      <<<"text"                    single line using TEXT (i.e., "here string")
+#  - sequence expression
+#      {n..m}                       echo "digits:" {0..9}; echo "letters: " {a..z}
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
