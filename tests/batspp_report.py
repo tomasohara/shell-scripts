@@ -131,6 +131,9 @@ ALLOW_SHORT_OPTIONS = (not OMIT_SHORT_OPTIONS)
 ## FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
 ##     "Force execution even if admin-like user")
 FORCE_OPTION_DEFAULT = UNDER_TESTING_VM or FORCE_RUN
+KCOV_DEFAULT = system.getenv_bool(
+    "KCOV_DEFAULT", False,
+    description="Run kcov[erage] by default")
 
 ## NOTE: the code needs to be thoroughly revamped (e.g., currently puts .batspp in same place as .bats)
 if SINGLE_STORE:
@@ -213,7 +216,8 @@ def main():
     NO_OPTION_ALIAS = main_app.get_parsed_option(NO_REPORTS_ALIAS_ARG)
     NO_OPTION = main_app.get_parsed_option(NO_REPORTS_ARG, NO_OPTION_ALIAS)
     TXT_OPTION = main_app.get_parsed_option(TEXT_REPORTS_ARG)
-    KCOV_OPTION = main_app.get_parsed_option(KCOV_REPORTS_ARG)
+    ## OLD: KCOV_OPTION = main_app.get_parsed_option(KCOV_REPORTS_ARG)
+    KCOV_OPTION = main_app.get_parsed_option(KCOV_REPORTS_ARG, KCOV_DEFAULT)
     ALL_OPTION = main_app.get_parsed_option(ALL_REPORTS_ARG)
     FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_TESTING_VM or FORCE_RUN)
     CLEAN_OPTION = main_app.get_parsed_option(CLEAN_ARG, CLEAN_DEFAULT)
