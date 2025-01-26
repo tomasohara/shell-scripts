@@ -80,6 +80,7 @@ verbose_mode="1"
 match_dot_files="0"
 no_glob="0"
 base_dir="."
+recursive="0"
 
 # Show usage statement if insufficient arguments given
 if [ -z "$2" ]; then
@@ -145,6 +146,7 @@ while [[ "$1" =~ ^- ]]; do
         diff_options="$diff_options $2"
         shift
     elif [ "$1" == "--dir" ]; then
+        recursive="1"
         base_dir="$2"
         shift
     elif [ "$1" == "--side-by-side" ]; then
@@ -242,11 +244,17 @@ fi
 count=0
 # shellcheck disable=SC2086
 for file in $pattern; do
-    # Add line divider
-    if [[ ("$verbose_mode" == "1") && ($count -ge 0) ]]; then
-        echo "------------------------------------------------------------------------"
+    ## OLD: 
+    ## # Add line divider
+    ## if [[ ("$verbose_mode" == "1") && ($count -ge 0) ]]; then
+    ##     echo "------------------------------------------------------------------------"
+    ## fi
+    ## let count++
+
+    # Ignore unresolved pattern file (e.g., '*')
+    if [ ! -e "$file" ]; then
+        continue
     fi
-    let count++
 
     # Resolve path for other file
     if [[ "$file" =~ \$ ]]; then
@@ -262,19 +270,24 @@ for file in $pattern; do
     other_file="$master"
     #
     if [ -d "$file" ]; then
-        # TODO: have option to recursively do diff's
-        echo "Warning: Ignoring subdirectory '$file'"
+        if [ "$recursive" == "0" ]; then
+            echo "Warning: Ignoring subdirectory '$file'"
+        fi
         continue
     fi
     if [ -d "$other_file" ]; then
         other_file="$master/$base"
     fi
-    if [ "$quiet" == "0" ]; then
-        echo "$base_dir/$file vs. $other_file"
-    fi
-    if [ ! -e "$other_file" ]; then
-        echo "Warning: missing other file: '$other_file'"
-        continue
+    # note: recursive omits some verbose output to cut down on clutter
+    # example: the file-vs-other line is omitted
+    if [ "$recursive" == "0" ]; then
+        if [ "$quiet" == "0" ]; then
+            echo "$base_dir/$file vs. $other_file"
+        fi
+        if [ ! -e "$other_file" ]; then
+            echo "Warning: missing other file: '$other_file'"
+            continue
+        fi
     fi
 
     # Show the timestamps if the files differ, unless in brief mode.
@@ -291,11 +304,24 @@ for file in $pattern; do
         # Show file info with time and size if there are differences
         if [ "$status" != "0" ]; then
             files_differ=true
-            ls -l "$file"
-            ls -l "$other_file"
+            ## OLD:
+            ## ls -l "$file"
+            ## ls -l "$other_file"
         fi
     fi
         
+    # Add line divider and update output count
+    # note: avoids extraneous dashes with recursive diff
+    if [[ $files_differ && ($count -gt 0) ]]; then
+        let count++
+        if [ "$verbose_mode" == "1" ]; then
+            echo "------------------------------------------------------------------------"
+            count=0
+        fi
+        ls -l "$file"
+        ls -l "$other_file"
+    fi
+    
     # Perform the actual diff
     log_file="$TMP/do_diff.$$"
     "$diff_cmd" $space_options $diff_options "$file" "$other_file" > "$log_file" 2>&1
