@@ -212,9 +212,6 @@ function git-alias-review-log {
 # - Requires GIT_FORCE of 1 if there are changed files (to avoid inadvertant conflict).
 # - TODO2: decompose this monster of a function!
 function git-update-plus {
-    ## OLD:
-    ## local GIT_USER="n/a"
-    ## local GIT_TOKEN="n/a"
     if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
        set-global-credentials
        echo "GIT_USER: $GIT_USER;  GIT_TOKEN: $GIT_TOKEN"
@@ -380,9 +377,6 @@ function git-add-commit-push {
         return 1
     fi
     #
-    ## OLD:
-    ## local GIT_USER="n/a"
-    ## local GIT_TOKEN="n/a"
     if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
        set-global-credentials
        echo "GIT_USER: $GIT_USER;  GIT_TOKEN: $GIT_TOKEN"
