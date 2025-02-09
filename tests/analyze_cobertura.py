@@ -10,7 +10,6 @@ Sample usage:
 # Standard modules
 import xml.etree.ElementTree as ET
 from collections import defaultdict
-import os
 
 # Local modules
 from mezcla import debug
@@ -33,18 +32,34 @@ class CoverageHelper:
         self.coverage_dir = coverage_dir
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
+    ## OLD: Use of os module
+    # def find_cobertura_reports(self):
+    #     """Find all Cobertura XML reports in the coverage directory."""
+    #     ## TODO: Find mezcla alternative for os.walk
+    #     pattern = my_re.compile(COBERTURA_XML_REGEX)
+    #     # reports = []
+    #     # for root, _, files in os.walk(self.coverage_dir):
+    #     #     for file in files:
+    #     #         filepath = gh.form_path(root, file)
+    #     #         if pattern.match(filepath):
+    #     #             reports.append(filepath)
+    #     # return reports
+        
     def find_cobertura_reports(self):
         """Find all Cobertura XML reports in the coverage directory."""
         reports = []
         pattern = my_re.compile(COBERTURA_XML_REGEX)
-        
-        ## TODO: Find mezcla alternative for os.walk
-        for root, _, files in os.walk(self.coverage_dir):
-            for file in files:
-                filepath = gh.form_path(root, file)
-                if pattern.match(filepath):
+
+        def scan_directory(directory):
+            for entry in gh.get_directory_listing(directory):
+                filepath = gh.form_path(directory, entry)
+                if gh.is_directory(filepath):
+                    scan_directory(filepath)
+                elif filepath.endswith(".xml") and pattern.match(filepath):  # If XML file matches regex
                     reports.append(filepath)
-        return reports
+
+        scan_directory(self.coverage_dir)
+        return sorted(reports)
 
     def parse_cobertura(self, cobertura_xml):
         """Parse Cobertura XML and extract coverage per script."""
