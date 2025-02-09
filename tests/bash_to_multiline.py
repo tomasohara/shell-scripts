@@ -145,9 +145,14 @@ class MultilineHelper:
         """Transform bash script content"""
         try:
             lines = gh.read_lines(self.input_path)
-            processed_lines = []
-            block_level = 0
+        except (FileNotFoundError, PermissionError, IOError) as e:
+            print(f"File error: {e}", file=system.print_stderr)
+            return 1
 
+        processed_lines = []
+        block_level = 0
+
+        try:
             for line in lines:
                 analyzed = self._analyze_line(line)
                 if analyzed.line_type == LineType.BLOCK_START:
@@ -178,18 +183,22 @@ class MultilineHelper:
                     processed_lines.append(transformed)
                 else:
                     processed_lines.append(line)
-
-            if self.output_path:
-                gh.write_lines(self.output_path, processed_lines)  # Pass the list of lines directly
-                print(f"Transformed bash script written to {self.output_path}")
-            else:
-                for line in processed_lines:  # Print each line individually
-                    print(line, end='')
-            return 0
-
-        except Exception as e:
-            print(f"Error processing bash file {self.input_path}: {str(e)}", file=system.print_stderr)
+        except (AttributeError, TypeError, KeyError) as e:
+            print(f"Processing error: {e}", file=system.print_stderr)
             return 1
+
+        if self.output_path:
+            try:
+                gh.write_lines(self.output_path, processed_lines)
+                print(f"Transformed bash script written to {self.output_path}")
+            except (PermissionError, IOError) as e:
+                print(f"File write error: {e}", file=system.print_stderr)
+                return 1
+        else:
+            for line in processed_lines:
+                print(line, end='')
+
+        return 0
 
 class Line:
     """Class representing a line in a bash script"""
