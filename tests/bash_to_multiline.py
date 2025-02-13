@@ -80,21 +80,32 @@ class MultilineHelper:
 
     def _transform_alias(self, line: str) -> str:
         """Convert alias to multiline function"""
-        match = my_re.match(r'''^alias\s+([a-zA-Z0-9_-]+)\s*=\s*(?:['"]?(.*)['"]?)$''', line.strip())
+        match = my_re.match(r'''^alias\s+([a-zA-Z0-9_-]+)\s*=\s*['"](.*)['"]$''', line.strip())
         if not match:
             return line
         alias_name, command_part = match.groups()
+
+        # Properly handle command substitution by ensuring quotes are preserved
+        # and command is properly terminated
+        command_part = command_part.strip()
+        if '"$(' in command_part and command_part.endswith(')'):
+            # Ensure the closing quote for command substitution is preserved
+            command_part = command_part.rstrip('"')
+            command_part += '"'
+
         return f'function {alias_name} {{\n    {command_part}\n}}\n'
 
     def _transform_singleline(self, line: str) -> str:
         """Convert single-line function to multiline format"""
+        
         match = my_re.match(r'''(?:function\s+)?([a-zA-Z0-9_-]+)\s*\(\)\s*\{(.*)\}$''', line.strip())
         if not match:
             return line
         func_name, body = match.groups()
         parts = self._split_commands(body)
-        indented_body = '\n    '.join(parts)
-        return f"function {func_name}() {{\n    {indented_body}\n}}\n"
+        indented_body = '\n    '.join(part.strip() for part in parts if part.strip())
+
+        return f"function {func_name}() {{\n    {indented_body}\n}}"
 
     def _split_commands(self, command_string: str) -> List[str]:
         """Split commands while preserving quotes and nested structures"""
@@ -104,6 +115,7 @@ class MultilineHelper:
         quote_char = None
         escaped = False
         brace_level = paren_level = 0
+        in_command_subst = False
 
         for char in command_string:
             if escaped:
@@ -122,16 +134,22 @@ class MultilineHelper:
                     in_quotes = False
                     quote_char = None
             elif not in_quotes:
-                if char == '{':
+                if char == '$' and len(command_string) > len(current) and command_string[len(current) + 1] == '(':
+                    in_command_subst = True
+                elif char == '(':
+                    if not in_command_subst:
+                        paren_level += 1
+                elif char == ')':
+                    if in_command_subst:
+                        in_command_subst = False
+                    else:
+                        paren_level -= 1
+                elif char == '{':
                     brace_level += 1
                 elif char == '}':
                     brace_level -= 1
-                elif char == '(':
-                    paren_level += 1
-                elif char == ')':
-                    paren_level -= 1
 
-            if char == ';' and not in_quotes and brace_level == 0 and paren_level == 0:
+            if char == ';' and not in_quotes and not in_command_subst and brace_level == 0 and paren_level == 0:
                 parts.append(''.join(current).strip())
                 current = []
             else:
