@@ -1,64 +1,106 @@
-import re
+#! /usr/bin/env python
+
+"""
+Script to extract function definitions and aliases from a Bash script.
+
+Sample usage:
+   {script} --bash-script=script.bash
+"""
+
+# Standard modules
 import json
+import re
 
-def is_comment(line):
-    """Detects if a line is a comment."""
-    line = line.strip()
-    return line.startswith("#")
+# Local modules
+from mezcla import debug
+from mezcla import glue_helpers as gh
+from mezcla.main import Main
+from mezcla.my_regex import my_re
+from mezcla import system
 
-def extract_functions_aliases(script_path, output_json):
-    """Extracts function definitions and aliases from a Bash script, ignoring commented-out lines, and saves to JSON."""
-    with open(script_path, "r") as f:
-        script_content = f.readlines()
+# Constants
+BASH_SCRIPT = "bash-script"
+TL = debug.TL
 
-    function_ranges = {}
-    aliases = []
-    function_name = None
-    start_line = None
+class BashFunctionAliasExtractor:
+    """Helper class for extracting function definitions and aliases from a Bash script."""
+    
+    def __init__(self, script_path):
+        """Initializer: sets up the Bash script path."""
+        debug.trace(TL.VERBOSE, f"BashFunctionAliasExtractor.__init__(): self={self}")
+        self.script_path = script_path
+        debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
+    
+    def is_comment(self, line):
+        """Detects if a line is a comment."""
+        return line.strip().startswith("#")
+    
+    def extract_functions_aliases(self):
+        """Extracts function definitions and aliases from the script."""        
+        script_content = gh.read_lines(self.script_path)
+        
+        function_ranges = {}
+        aliases = []
+        function_name = None
+        start_line = None
 
-    # Define the regex for detecting function declarations (ignores comments)
-    # FUNC_REGEX = re.compile(r"^(?!\s*#)(?:function\s+)?([a-zA-Z_][a-zA-Z0-9_]*)\s*\(\)\s*\{")
-    FUNC_REGEX = re.compile(r"function\s+([\w-]+)\s*(\(\))?\s*\{")
+        FUNC_REGEX = re.compile(r"function\s+([\w-]+)\s*(\(\))?\s*\{")
+        ALIAS_REGEX = re.compile(r"^alias\s+([a-zA-Z0-9_]+)=")
 
-    # Iterate through each line in the script
-    for i, line in enumerate(script_content, 1):
-        line = line.strip()  # Remove leading/trailing spaces
+        for i, line in enumerate(script_content, 1):
+            line = line.strip()
 
-        # Skip commented-out lines
-        if is_comment(line):
-            continue
+            if self.is_comment(line):
+                continue
 
-        # Match function definitions using regex
-        func_match = FUNC_REGEX.match(line)
-        if func_match:
-            if function_name:
-                function_ranges[function_name]["end"] = i - 1  # Previous function ends here
-            function_name = func_match.group(1)
-            start_line = i
-            function_ranges[function_name] = {"start": start_line, "end": None}
+            func_match = FUNC_REGEX.match(line)
+            if func_match:
+                if function_name:
+                    function_ranges[function_name]["end"] = i - 1
+                function_name = func_match.group(1)
+                start_line = i
+                function_ranges[function_name] = {"start": start_line, "end": None}
 
-        # Match alias declarations
-        alias_match = re.match(r"^alias\s+([a-zA-Z0-9_]+)=", line)
-        if alias_match:
-            aliases.append(alias_match.group(1))
+            alias_match = ALIAS_REGEX.match(line)
+            if alias_match:
+                aliases.append(alias_match.group(1))
 
-    # Set end for the last function
-    if function_name:
-        function_ranges[function_name]["end"] = len(script_content)
+        if function_name:
+            function_ranges[function_name]["end"] = len(script_content)
+        
+        return {"functions": function_ranges, "aliases": aliases}
 
-    # Prepare data for JSON
-    data = {
-        "functions": function_ranges,
-        "aliases": aliases
-    }
+class BashExtractorScript(Main):
+    """Main script class for Bash function/alias extraction."""
+    
+    def setup(self):
+        """Initialize command-line options and helper instance."""
+        debug.trace(TL.VERBOSE, f"Script.setup(): self={self}")
+        self.script_path = self.get_parsed_option(BASH_SCRIPT)
+        self.helper = BashFunctionAliasExtractor(self.script_path)
+        debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
+    
+    def run_main_step(self):
+        """Main processing step."""
+        debug.trace(5, f"Script.run_main_step(): self={self}")
+        extracted_data = self.helper.extract_functions_aliases()
+        print(json.dumps(extracted_data, indent=4))
 
-    # Save to JSON file
-    with open(output_json, "w") as f:
-        json.dump(data, f, indent=4)
+def main():
+    """Entry point."""
+    app = BashExtractorScript(
+        description=__doc__.format(script=gh.basename(__file__)),
+        skip_input=True,
+        manual_input=True,
+        auto_help=True,
+        text_options=[
+            (BASH_SCRIPT, "Path to Bash script file")
+        ]
+    )
+    app.run()
 
-    print(f"✅ Extracted functions and aliases saved to: {output_json}")
-
-# Example usage
-bash_script = "../tomo.bash"
-output_json = "extracted_functions.json"
-extract_functions_aliases(bash_script, output_json)
+if __name__ == "__main__":
+    debug.trace_current_context(level=TL.QUITE_VERBOSE)
+    debug.trace(5, f"module __doc__: {__doc__}")
+    debug.assertion("TODO:" not in __doc__)
+    main()
