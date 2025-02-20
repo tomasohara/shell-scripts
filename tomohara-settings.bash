@@ -102,6 +102,9 @@ cond-export RENAME_SNAPSHOT_PREVIEW 1
 # Get idiosyncratic aliases
 conditional-source "$TOM_BIN/tomohara-proper-aliases.bash"
 
+# xterm window support
+cond-export XTERM_SHOW_PID 1
+
 # User-specific mount directory
 cond-export MNT /media/"$USER"
 
