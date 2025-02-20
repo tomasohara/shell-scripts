@@ -15,7 +15,9 @@ pipreqs
 # Redundant specification of some dependencies due to Git workflow quirk,
 # such as with mezcla. (Also, some are just optional for mezcla.)
 #
+# note: post-install for bash_kernel: python -m bash_kernel.install
 bash_kernel
+#
 importlib_metadata
 ipython
 jupyter
