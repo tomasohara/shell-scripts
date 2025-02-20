@@ -80,18 +80,16 @@ class MultilineHelper:
 
     def _transform_alias(self, line: str) -> str:
         """Convert alias to multiline function"""
-        match = my_re.match(r'''^alias\s+([a-zA-Z0-9_-]+)\s*=\s*['"](.*)['"]$''', line.strip())
+        match = my_re.match(r"^alias\s+([a-zA-Z0-9_-]+)\s*=\s*['\"]?(.*?)['\"]?$", line.strip())
         if not match:
             return line
+        
         alias_name, command_part = match.groups()
-
-        # Properly handle command substitution by ensuring quotes are preserved
-        # and command is properly terminated
         command_part = command_part.strip()
+
+        # Properly handle command substitution when using "$(...)" notation
         if '"$(' in command_part and command_part.endswith(')'):
-            # Ensure the closing quote for command substitution is preserved
-            command_part = command_part.rstrip('"')
-            command_part += '"'
+            command_part = command_part.rstrip('"') + '"'
 
         return f'function {alias_name} {{\n    {command_part}\n}}\n'
 
