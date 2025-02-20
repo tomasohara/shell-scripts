@@ -67,6 +67,7 @@
 #   GIT_SKIP_ADD                 skip implicit 'git add' in git-add-commit-push
 #   GIT_SKIP_PUSH                skip 'git push' after commit
 #   GIT_TEST_MESSAGE             commit message if GIT_NO_CONFIRM used
+#   GIT_AUTO_NEXT                automatically proceed with next checkin
 #
 # - maldito shellcheck:
 #   SC2002 [Useless cat. Consider 'cmd < file | ..' or 'cmd file | ..' instead]
@@ -238,6 +239,7 @@ function git-update-plus {
         fi
             
         if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
+            ## TODO3: rename to GIT_PRESERVE_STASH??? (i.e., GIT_ prefix not affix)
             # Make sure root active for relative path names in zip file
             local root_dir
             root_dir="$(git-root-alias)"
@@ -769,7 +771,9 @@ function alt-invoke-next-single-checkin {
     export GIT_MESSAGE="$OLD_GIT_MESSAGE"
 
     # Start next checkin or show if no more updates to do
-    git-next-checkin
+    if [ "${GIT_AUTO_NEXT:-1}" == "1" ]; then
+        git-next-checkin
+    fi
 }
 #
 # invoke-alt-checkin(filename): run alternative template-based checkin for filename
@@ -940,10 +944,15 @@ function git-misc-alias-usage() {
     echo "   git rm old-file"
     echo "   GIT_MESSAGE='deleted' git-update-commit-push old-file"
     echo ""
-    echo "To check in all tracked with changed:"
-    echo "    git-checkin-multiple-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
-    echo "A lazy-man's alternative, only recommended for single-user repos:"
-    echo "    git-checkin-all-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
+    echo "To check in all tracked files with changes (examinar primero):"
+    echo "   GIT_MESSAGE='...' git-update-commit-push \$(git-files-changed)"
+    ## OLD:
+    ## echo "    git-checkin-multiple-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
+    ## echo "A lazy-man's alternative, only recommended for single-user repos:"
+    ## echo "    git-checkin-all-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
+    echo ""
+    echo "Environment variables:"
+    echo "   GIT_AUTO_NEXT GIT_FORCE GIT_LOG_DIR GIT_MESSAGE GIT_NO_CONFIRM GIT_SKIP_ADD GIT_SKIP_PUSH GIT_TEST_MESSAGE GIT_TOKEN GIT_USER PRESERVE_GIT_STASH"
     echo ""
     echo "Source code grepping:"
     ## TODO3: get ls-tree to show output relative to current subdirectory
