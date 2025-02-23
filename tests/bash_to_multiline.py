@@ -80,19 +80,21 @@ class MultilineHelper:
 
     def _transform_alias(self, line: str) -> str:
         """Convert alias to multiline function"""
-        match = my_re.match(r"^alias\s+([a-zA-Z0-9_-]+)\s*=\s*['\"]?(.*?)['\"]?$", line.strip())
+        
+        match = my_re.match(r'^alias\s+([a-zA-Z0-9_-]+)\s*=\s*[\'"](.*?)[\'"]\s*$', line.strip())
         if not match:
             return line
         
         alias_name, command_part = match.groups()
-        command_part = command_part.strip()
-
-        # Properly handle command substitution when using "$(...)" notation
-        if '"$(' in command_part and command_part.endswith(')'):
-            command_part = command_part.rstrip('"') + '"'
+        
+        ## OLD: Issues with conversion (bash: /home/ricekiller/tomProject/shell-scripts/x.bash: line 2939: syntax error near unexpected token `fi')
+        # command_part = command_part.strip()
+        ## Properly handle command substitution when using "$(...)" notation
+        # if '"$(' in command_part and command_part.endswith(')'):
+        #     command_part = command_part.rstrip('"') + '"'
 
         return f'function {alias_name} {{\n    {command_part}\n}}\n'
-
+    
     def _transform_singleline(self, line: str) -> str:
         """Convert single-line function to multiline format"""
         
