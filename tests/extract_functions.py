@@ -4,7 +4,7 @@
 Script to extract function definitions and aliases from a Bash script.
 
 Sample usage:
-   {script} --bash-script=script.bash
+   {script} --input script.bash [--output output.json]
 """
 
 # Standard modules
@@ -19,7 +19,8 @@ from mezcla.my_regex import my_re
 from mezcla import system
 
 # Constants
-BASH_SCRIPT = "bash-script"
+INPUT_ARG = "input"
+OUTPUT_ARG = "output"
 TL = debug.TL
 
 class BashFunctionAliasExtractor:
@@ -44,8 +45,13 @@ class BashFunctionAliasExtractor:
         function_name = None
         start_line = None
 
+        # Regex for function definitions
         FUNC_REGEX = re.compile(r"function\s+([\w-]+)\s*(\(\))?\s*\{")
-        ALIAS_REGEX = re.compile(r"^alias\s+([a-zA-Z0-9_]+)=")
+        
+        # Regex for alias definitions
+        ALIAS_REGEX_SINGLE_QUOTE = re.compile(r"^alias\s+([a-zA-Z0-9_]+)='([^']*)'")
+        ALIAS_REGEX_DOUBLE_QUOTE = re.compile(r'^alias\s+([a-zA-Z0-9_]+)="([^"]*)"')
+        ALIAS_REGEX_NO_QUOTE = re.compile(r"^alias\s+([a-zA-Z0-9_]+)=([^\s]*)")
 
         for i, line in enumerate(script_content, 1):
             line = line.strip()
@@ -53,6 +59,7 @@ class BashFunctionAliasExtractor:
             if self.is_comment(line):
                 continue
 
+            # Check for function definitions
             func_match = FUNC_REGEX.match(line)
             if func_match:
                 if function_name:
@@ -61,9 +68,23 @@ class BashFunctionAliasExtractor:
                 start_line = i
                 function_ranges[function_name] = {"start": start_line, "end": None}
 
-            alias_match = ALIAS_REGEX.match(line)
-            if alias_match:
-                aliases.append(alias_match.group(1))
+            # Check for alias definitions
+            alias_match_single = ALIAS_REGEX_SINGLE_QUOTE.match(line)
+            alias_match_double = ALIAS_REGEX_DOUBLE_QUOTE.match(line)
+            alias_match_no_quote = ALIAS_REGEX_NO_QUOTE.match(line)
+
+            if alias_match_single:
+                alias_name = alias_match_single.group(1)
+                alias_def = alias_match_single.group(2)
+                aliases.append({"name": alias_name, "definition": alias_def})
+            elif alias_match_double:
+                alias_name = alias_match_double.group(1)
+                alias_def = alias_match_double.group(2)
+                aliases.append({"name": alias_name, "definition": alias_def})
+            elif alias_match_no_quote:
+                alias_name = alias_match_no_quote.group(1)
+                alias_def = alias_match_no_quote.group(2)
+                aliases.append({"name": alias_name, "definition": alias_def})
 
         if function_name:
             function_ranges[function_name]["end"] = len(script_content)
@@ -76,7 +97,8 @@ class BashExtractorScript(Main):
     def setup(self):
         """Initialize command-line options and helper instance."""
         debug.trace(TL.VERBOSE, f"Script.setup(): self={self}")
-        self.script_path = self.get_parsed_option(BASH_SCRIPT)
+        self.script_path = self.get_parsed_option(INPUT_ARG)
+        self.output_path = self.get_parsed_option(OUTPUT_ARG)
         self.helper = BashFunctionAliasExtractor(self.script_path)
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
     
@@ -84,7 +106,18 @@ class BashExtractorScript(Main):
         """Main processing step."""
         debug.trace(5, f"Script.run_main_step(): self={self}")
         extracted_data = self.helper.extract_functions_aliases()
-        print(json.dumps(extracted_data, indent=4))
+        
+        # Print to stdout if no output file is specified
+        if not self.output_path:
+            print(json.dumps(extracted_data, indent=4))
+        else:
+            # Write to the specified output file
+            try:
+                with open(self.output_path, "w") as f:
+                    json.dump(extracted_data, f, indent=4)
+                print(f"Extracted data written to {self.output_path}")
+            except IOError as e:
+                system.print_stderr(f"Error writing to {self.output_path}: {e}")
 
 def main():
     """Entry point."""
@@ -94,7 +127,8 @@ def main():
         manual_input=True,
         auto_help=True,
         text_options=[
-            (BASH_SCRIPT, "Path to Bash script file")
+            (INPUT_ARG, "Path to Bash script file"),
+            (OUTPUT_ARG, "Path to output JSON file (optional)")
         ]
     )
     app.run()
