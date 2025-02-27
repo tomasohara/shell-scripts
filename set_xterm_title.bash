@@ -241,7 +241,7 @@ if [ "$simple_mode" == 0 ]; then
         icon="$icon; $XTERM_TITLE_SUFFIX"
         ## Note: temp check for odd repeated version spec (e.g., "Py3.10; Py3.10")
         if [[ $XTERM_TITLE_SUFFIX =~ Py[0-9]\.[0-9].*Py[0-9]\.[0-9] ]]; then
-            echo "Warning: unexptected python spec in w/ xterm title suffix ($XTERM_TITLE_SUFFIX)"
+            echo "Warning: unexpected python spec in w/ xterm title suffix ($XTERM_TITLE_SUFFIX)"
         fi
     fi
     
@@ -266,7 +266,12 @@ if [ "$simple_mode" == 0 ]; then
         full="$full; pid:$PPID"
         icon="$icon; pid:$PPID"
     fi
-    
+
+    # Add debugging suffix
+    if [ "$debug" = "1" ]; then
+        full="$full; debug"
+        icon="$icon; debug"
+    fi
 fi
 
 # Show derived titles
