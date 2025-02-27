@@ -30,6 +30,25 @@ alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
 function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
 ## TODO: alias git-X-='git-X-plus'
+#
+# Github
+alias git-hide='git update-index --skip-worktree'
+alias git-unhide='git update-index --no-skip-worktree'
+alias git-hidden='git ls-files -v | grep -v ^H'
+alias git-status-sans-tom="git-status | egrep -v '(^|[-_/.])tom([-_/.]|$)'"
+alias git-status-tom=git-status-sans-tom
+# TODO: work out better alias name
+alias git-stat=git-status-sans-tom
+# TODO: better name (e.g., git-diff-name-only-main?) and/or decompose git-name-diff-branch?
+alias git-name-diff-main='git diff --name-only main..HEAD | cat'
+#
+# git-rename-revert(file, ...): renames FILE with data and then reverts
+# note: uses touch to avoid extraneous error message
+# TODO2: move into git-aliases.bash
+function git-rename-revert {
+    rename-with-file-date "$@" && touch "$@";
+    git-revert-file-alias "$@";
+}
 
 # Other misc. stuff
 alias nvidia-batched='batch-nvidia-smi.sh'
