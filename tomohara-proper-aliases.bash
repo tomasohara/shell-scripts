@@ -96,7 +96,7 @@ function run-python-script {
     ## DEBUG: trace-vars _PSL_ out_base log
     if [ "$1" = "" ]; then
         echo "Usage: [ENV-OPTIONS] run-python-script script arg ..."
-        echo "   ENV-OPTIONS: [USE_STDIN=B] [USE_STDOUT=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p]"
+        echo "   ENV-OPTIONS: [USE_STDIN=B] [USE_STDOUT=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] [KEEP_EMPTY_OUT=b]"
         echo "note:"
         echo "- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL)"
         echo "- PYTHON_OUT_DIR is script dir unless a full path"
@@ -134,6 +134,7 @@ function run-python-script {
     declare -g _PSL_ log out out_base
     local module_spec=""
     let _PSL_++
+    # TODO3: add OUT_BASE to override default
     out_base="$out_dir/_$script_base.$(TODAY).$_PSL_"
     if [ "$PROFILE_SCRIPT" == "1" ]; then
        out_base="$out_base.profile"
@@ -176,12 +177,20 @@ function run-python-script {
     if [ "$DEBUG_LEVEL" -ge 4 ]; then
         ls -lt "$log" "$out"
     fi
-    if [[ (-e "$out") && (! -s "$out") ]]; then
-        command rm -v "$out"
+    # note: omitting empty-output pruning useful for background job (e.g., "run-python-script ... &")
+    if [ "${KEEP_EMPTY_OUT:-0}" == "0" ]; then
+        if [[ (-e "$out") && (! -s "$out") ]]; then
+            command rm -v "$out"
+        fi
     fi
     ## OLD:
     ## # Show common errors in log
     ## check-errors-excerpt "$log"
+}
+# run-python-script-reset(): reset variables used in run-python-script
+function run-python-script-reset {
+    declare -g _PSL_
+    _PSL_=0
 }
 
 # pytest stuff
@@ -315,6 +324,7 @@ function tabify {
 }
 # trace-vars(var, ...): trace each VAR in command line
 # note: output format: VAR1=VAL1; ... VARn=VALn;
+# TODO2: fix bug with trailing whitespace being ignored
 function trace-vars {
     local var
     for var in "$@"; do
@@ -491,15 +501,21 @@ function get-host-nickname {
 function create-zip {
     local dir="$1"
     shift
-    if [ "$dir" = "" ]; then
+    if [[ ("$dir" == "") || ("$dir" == --help) ]]; then
+        ## TODO4: $* =~ --help
         echo "Usage create-zip [dirname]"
-        echo "ex: create-zip /mnt/resmed"
+        echo "ex: [ENCRYPT=b] create-zip /mnt/resmed"
         return
+    fi
+    local extra_args=()
+    if [ "${ENCRYPT:-0}" == "1" ]; then
+        extra_args+=("-e")
     fi
     local archive
     archive="$TEMP/$(basename "$dir").zip"
-    echo "issuing: zip -r -u \"$archive\" \"$dir\""
-    zip -r -u "$archive" "$dir";
+    echo "issuing: zip -r -u ${extra_args[*]} \"$archive\" \"$dir\""
+    # options: -r recursive; -u update
+    zip -r -u "${extra_args[@]}" "$archive" "$dir";
 }
 #
 # create-zip-dir(dir=pwd): create zip of DIR in context of parent
