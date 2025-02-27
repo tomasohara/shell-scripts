@@ -20,6 +20,8 @@
 #
 # Warning:
 # - *** Changes need to be synchronized in 3 places: Dockerfile, local-workflow.sh, and .github/workflows/*.yml!
+# - Python scripts should be invoked with python3 due to quirk with distribution archive
+#   lacking plain python executable (unlike anaconda).
 #
 
 
@@ -98,7 +100,7 @@ COPY requirements.txt $REQUIREMENTS
 
 # Install the project's dependencies
 RUN if [ "$PYTHON_VERSION" != "" ]; then                                                \
-        pip install --verbose --no-cache-dir --requirement $REQUIREMENTS;               \
+        pip3 install --verbose --no-cache-dir --requirement $REQUIREMENTS;               \
     fi
 
 # Display environment (e.g., for tracking down stupid pip problems)
@@ -106,7 +108,7 @@ RUN printenv | sort
 
 # Add local version of mezcla
 # ex: DEBUG_LEVEL=4 GIT_BRANCH=aviyan-dev local-workflows.sh
-RUN if [ "$GIT_BRANCH" != "" ]; then echo "Installing mezcla@$GIT_BRANCH"; pip install --verbose --no-cache-dir git+https://github.com/tomasohara/mezcla@$GIT_BRANCH; fi
+RUN if [ "$GIT_BRANCH" != "" ]; then echo "Installing mezcla@$GIT_BRANCH"; pip3 install --verbose --no-cache-dir git+https://github.com/tomasohara/mezcla@$GIT_BRANCH; fi
 
 # Clean up unnecessary files
 RUN apt-get autoremove -y && \
