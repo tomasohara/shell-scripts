@@ -8,6 +8,7 @@
 # NOTE: This depends on Tom usual aliases (see all-tomohara-aliases-etc.bash).
 #
 # TODO: reproduce alias definitions from tomohara-aliases.bash here so independent
+# TODO3: document environment variables: CONDA_PROMPT_MODIFIER, XTERM_TITLE_SUFFIX, etc.
 #
 #------------------------------------------------------------------------
 # Copyright (c) 2020 Thomas P. O'Hara
@@ -36,12 +37,17 @@ function add-conda-env-to-xterm-title {
     export XTERM_TITLE_SUFFIX
     ## OLD: XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d+.\d+)'):$CONDA_PROMPT_MODIFIER"
     XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d+.\d+)')"
+    declare CONDA_PROMPT_MODIFIER
+    # note: removes extraneous trailing spaces
+    if [[ $CONDA_PROMPT_MODIFIER =~ \ *$ ]]; then
+        CONDA_PROMPT_MODIFIER="$(echo "$CONDA_PROMPT_MODIFIER" | perl -pe 's/ *$//;')"
+    fi
     if [ "$CONDA_PROMPT_MODIFIER" != "" ]; then
         XTERM_TITLE_SUFFIX="$XTERM_TITLE_SUFFIX:$CONDA_PROMPT_MODIFIER"
     fi
     ## Note: temp check for odd repeated version spec (e.g., "Py3.10; Py3.10")
     if [[ $XTERM_TITLE_SUFFIX =~ Py[0-9]\.[0-9].*Py[0-9]\.[0-9] ]]; then
-        echo "Warning: unexptected python spec in w/ xterm title suffix ($XTERM_TITLE_SUFFIX)"
+        echo "Warning: unexpected python spec in w/ xterm title suffix ($XTERM_TITLE_SUFFIX)"
     fi
 
     reset-prompt
