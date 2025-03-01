@@ -96,7 +96,7 @@ function run-python-script {
     ## DEBUG: trace-vars _PSL_ out_base log
     if [ "$1" = "" ]; then
         echo "Usage: [ENV-OPTIONS] run-python-script script arg ..."
-        echo "   ENV-OPTIONS: [USE_STDIN=B] [USE_STDOUT=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] [KEEP_EMPTY_OUT=b]"
+        echo "   ENV-OPTIONS: [USE_STDIN=B] [USE_STDOUT=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] [KEEP_EMPTY_OUT=b] [PYTHON=path]"
         echo "note:"
         echo "- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL)"
         echo "- PYTHON_OUT_DIR is script dir unless a full path"
@@ -199,7 +199,7 @@ default_pytest_opts="-vv --capture=tee-sys"
 # test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
     if [ "$1" = "" ]; then
-        echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] test-python-script script"
+        echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] [PYTEST=path] test-python-script script"
         echo "Note: When debugging you might need to use --runxfail and -s to see full error info."
         echo "The debugging level defaults to 5 (unlike run-python-script)."
         return
@@ -219,7 +219,7 @@ function test-python-script {
     local pytest_opts="${PYTEST_OPTS:-"$default_pytest_opts"}"
     # TODO3: drop inheritance spec in summary
     # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "tests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
-    PYTHON_DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $pytest_opts" run-python-script "$test_script" "$@" 2>&1;
+    PYTHON_DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="$PYTEST $pytest_opts" run-python-script "$test_script" "$@" 2>&1;
 }
 #
 # test-python-script-method(test-name, ...): like test-python-script but for specific test
