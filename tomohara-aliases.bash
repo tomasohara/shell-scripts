@@ -2881,11 +2881,13 @@ function pause-for-enter () {
 
 #-------------------------------------------------------------------------------
 # Python related
-## *** Python stufff ***
+## *** Python stuff ***
 
 export PYTHON_CMD="$TIME_CMD python3 -u"
 export PYTHON="$NICE $PYTHON_CMD"
 export PYTHONPATH="$HOME/python:$PYTHONPATH"
+cond-export PYTEST_CMD "$TIME_CMD pytest"
+cond-export PYTEST "$NICE $PYTEST_CMD"
 #
 # add-python-path(pkg-dir): add PKG-DIR to PATH and PARENT to PYTHONPATH
 ## HACK: make sure Mezcla/mezcla resolves before python/mezcla
