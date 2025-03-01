@@ -12,17 +12,24 @@
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #  
 ## echo "$@"
-## set -o xtrace
-## DEBUG: set -o verbose
+
+# Set bash regular and/or verbose tracing
+if [ "${TRACE:-0}" = "1" ]; then
+    set -o xtrace
+fi
+if [ "${VERBOSE:-0}" = "1" ]; then
+    set -o verbose
+fi
 
 # Show usage statement
 # TODO: convert into a function that get invoked with $1 is empty or --help
 # in $@.
 # NOTE: See sync-loop.sh for an example.
 #
+script=$(basename "$0")
+base=$(basename "$script" .sh)
+#
 if [[ ("$1" = "") || ("$1" == "--help") ]]; then
-    script=$(basename "$0")
-    base=$(basename "$script" .sh)
     echo ""
     echo "Usage: $script [--trace] [--help] [--] [num-times] [pause-time]"
     echo ""
@@ -31,12 +38,7 @@ if [[ ("$1" = "") || ("$1" == "--help") ]]; then
     echo "  batch-nvidia-smi.sh 90 10 > \$TMP/batch-nvidia-smi-\$(T).log &"
     echo ""
     echo "- Advanced (every min for one day to log for today; calculations broken down):"
-    echo "  date_yyyy_mm_dd_hhmm=\"$(date '+%Y-%m-%d_%H%M')\""
-    echo "  log_file=\"\$TMP/$base-\$date_yyyy_mm_dd_hhmm.log\""
-    echo "  let one_day_in_secs=(24 * 3600)"
-    echo "  let delay_time=60"
-    echo "  let num_times=(one_day_in_secs / delay_time)"
-    echo "  $script \$num_times \$delay_time > \$log_file &"
+    echo "  ADVANCED_USAGE=1 $script -"
     # TODO: rework calculation using bc or perlcalc.perl???
     # alt 1: echo "  num_times=\$(echo \"\$one_day_in_secs * 1.0 / \$delay_time)" | bc -l"
     # alt 2: echo "  num_times=\$(echo \"round(\$one_day_in_secs * 1.0 / \$delay_time)\" | perlcalc.perl -integer)"
@@ -50,6 +52,20 @@ if [[ ("$1" = "") || ("$1" == "--help") ]]; then
     echo "- Both examples assumes the script name doesn't require quoting."
     echo "- Use n/a for num-times to indicate indefinite."
     echo ""
+    exit
+fi
+
+# Check for pre-canned usages
+if [ "${ADVANCED_USAGE:-0}" == "1" ]; then
+    date_yyyy_mm_dd_hhmm="$(date '+%Y-%m-%d_%H%M')"
+    log_file="$TMP/$base-$date_yyyy_mm_dd_hhmm.log"
+    let one_day_in_secs=(24 * 3600)
+    let delay_time=60
+    let num_times=(one_day_in_secs / delay_time)
+    echo $'Invoking script\t'
+    echo "    $script $num_times $delay_time"
+    $script $num_times $delay_time > $log_file &
+    echo "See $log_file"
     exit
 fi
 
@@ -72,7 +88,7 @@ while [ "$moreoptions" = "1" ]; do
 	set -o xtrace
     elif [ "$1" = "--fubar" ]; then
 	echo "fubar"
-    elif [ "$1" = "--" ]; then
+    elif [[ ("$1" = "--") || ("$1" = "-") ]; then
 	break
     else
 	echo "ERROR: Unknown option: $1";
