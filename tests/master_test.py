@@ -81,6 +81,7 @@ def run_tests(thresholds):
                                         collect_result.stdout))
         # Compare against alternative way to detemine number of tests
         # ex: "=== 103 tests collected in 1.64s ==="
+        # TODO2: make alternative method the default
         if (total_tests == 0) or debug.debugging():
             summary_total_tests = 0
             if my_re.search(r"(\d+) tests collected",
@@ -98,6 +99,7 @@ def run_tests(thresholds):
         debug.assertion(failed_tests <= total_tests)
         # Compare against alternative way to detemine number of failures
         # ex: "=== 12 passed, 49 skipped, 13 xfailed, 29 xpassed in 4.76s ==="
+        # TODO2: make alternative method the default
         if debug.debugging():
             summary_failed_tests = 0
             if my_re.search(r"(\d+) failed", run_result.stdout, flags=my_re.IGNORECASE):

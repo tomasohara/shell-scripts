@@ -134,8 +134,8 @@ class JupyterToBatspp(Main):
         # Check the command-line options
         # TODO2: make the defaults more intuitive (e.g., for auto_output and verbose)
         self.jupyter_file = self.get_parsed_argument(JUPYTER_FILE, self.jupyter_file)
-        self.just_code    = self.get_parsed_argument(JUST_CODE, self.just_code)
-        regular = self.get_parsed_argument(REGULAR_OPT, not self.just_code)
+        self.just_code    = self.get_parsed_option(JUST_CODE, self.just_code)
+        regular = self.get_parsed_option(REGULAR_OPT, not self.just_code)
         debug.assertion(not (regular and self.just_code))
         self.add_annots   = self.get_parsed_option(ADD_ANNOTS, self.add_annots)
         self.auto_output  = self.get_parsed_option(AUTO_OUTPUT, False)
@@ -144,8 +144,8 @@ class JupyterToBatspp(Main):
             extension = (SH_EXTENSION if self.just_code else BATSPP_EXTENSION)
             self.output = my_re.sub(fr'\.{JUPYTER_EXTENSION}', f'.{extension}',
                                     self.jupyter_file)
-        self.output       = self.get_parsed_argument(OUTPUT, self.output)
-        self.stdout       = self.get_parsed_argument(STDOUT, not self.output)        
+        self.output       = self.get_parsed_option(OUTPUT, self.output)
+        self.stdout       = self.get_parsed_option(STDOUT, not self.output)        
         self.verbose      = self.get_parsed_option(VERBOSE, not self.stdout)
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
@@ -157,8 +157,8 @@ class JupyterToBatspp(Main):
         # TODO: add explicit error handling
         jupyter_content = system.read_file(self.jupyter_file)
         debug.trace_expr(5, jupyter_content)
-        debug.assertion(jupyter_content != '',
-                        f'Error: {self.jupyter_file} not found or is empty')
+        debug.assertion(jupyter_content,
+                        f'Error: {self.jupyter_file!r} not found or is empty')
         is_jupyter_notebook = (self.jupyter_file.endswith(JUPYTER_EXTENSION) or
                                '"cells":' in jupyter_content)
         debug.assertion(is_jupyter_notebook,

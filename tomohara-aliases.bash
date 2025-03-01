@@ -1409,10 +1409,15 @@ alias vdiff='kdiff'
 # diff(): run diff command w/ --ignore-all-space (-w) and --ignore-space-change (-b)
 # maldito shellcheck: SC2034: diff_options appears unused. Verify it or export it.
 # shellcheck disable=SC2034
-{
+
+## OLD: Workaround with curly brackets not supported by conv_2_multiline.py
+# {
+# diff_options="--ignore-space-change --ignore-blank-lines"
+# alias diff='command diff $diff_options'
+# }
 diff_options="--ignore-space-change --ignore-blank-lines"
 alias diff='command diff $diff_options'
-}
+
 alias diff-default='command diff'
 alias diff-ignore-spacing='diff --ignore-all-space'
 #
@@ -1978,7 +1983,9 @@ alias foreach='alias-perl foreach.perl'
 # rename-spaces: replace spaces in filenames of current dir with underscores
 alias-fn rename-spaces 'rename-files -q -global -rename_old " " "_"'
 # TODO2: handle smart quotes
-alias rename-quotes='rename-files -q -global -rename_old "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
+## EXPERIMENTAL (Commented for conv_2_multiline): alias rename-quotes='rename-files -q -global -rename_old "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
+alias rename-quotes='rename-files -q -global -rename_old "\"" ""'  
+
 # rename-special-punct: replace runs of any troublesome punctuation in filename w/ _
 function rename-special-punct {
     # strip ascii punctuation
