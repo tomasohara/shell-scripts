@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /usr/bin/env bash
 #
 # compare-log-output.sh: compare trace output listings ignoring differences
 # due to timestamps
@@ -8,10 +8,13 @@
 # - Allow for case-sensitive regex's.
 #
 
-# Uncomment the line(s) below for tracing (verbose shows command before and after, xtrace just shows it after):
-#
-## set -o xtrace
-## DEBUG: set -o verbose
+# Set bash regular and/or verbose tracing
+if [ "${TRACE:-0}" = "1" ]; then
+    set -o xtrace
+fi
+if [ "${VERBOSE:-0}" = "1" ]; then
+    set -o verbose
+fi
 
 # Parse command-line arguments
 diff=kdiff.sh
@@ -26,6 +29,7 @@ ignore_hex1='(0x[0-9A-Fa-f]+)'
 ignore_hex2='(\b([0-9A-Fa-f]{4})|([0-9A-Fa-f]{8})\b)'
 ignore_hex3='(\b[0-9][0-9A-Fa-f]+[A-Fa-f][0-9A-Fa-f]+[0-9]\b)'
 ignore_user=''
+strip_ignore="0"
 # - timestamps (e.g., "1 Jan 1970 12:01am" and "1/01/70 12:00:01")
 timestamp_regex1="(\\S+\\s*\\S+\\s*\\d{4} \\d{1,2}:\\d{2}:\\d{2} *[ap]m )"
 timestamp_regex2="(\\d{1,2}\\/\\d{2}\\/\\d{2} \\d{1,2}:\\d{2}:\\d{2})"
@@ -81,6 +85,8 @@ while [ "$moreoptions" = "1" ]; do
 	    ignore_user="$2";
         fi
 	shift
+    elif [ "$1" = "--strip-ignore" ]; then
+        strip_ignore="1"
     else
 	if [ "$1" != "--help" ]; then
 	    echo "unknown option: $1";
@@ -101,7 +107,7 @@ if [ "$show_usage" = "1" ]; then
     echo "Usage: $script_name [options] file1 file2-or-dir"
     echo ""
     echo "    options: [--ignore perl-regex] [--include-ptrs | --include-time | --[no-]filter-hex] [--plain-diff] [--diff program]"
-    echo "    misc-options: [--relaxed] [--[no]-filter-time] [--include-hex] [--reset-ignore] [--trace] [--verbose]"
+    echo "    misc-options: [--relaxed] [--[no]-filter-time] [--include-hex] [--reset-ignore] [--strip-ignore] [--trace] [--verbose]"
     echo ""
     echo "Examples:"
     echo ""
@@ -121,6 +127,7 @@ if [ "$show_usage" = "1" ]; then
     echo "- The --include-xyz options are deprecated: include refers to filtering not output."
     echo "- The --relaxed option include regex's that tend to overgenerate."
     if [ "$verbose_output" = "1" ]; then
+        echo "- The --strip-ignore removes <user> placeholders via --ignore"
         echo "- Timestamp regex's (doubly escaped for interpolation):"
         echo "  $timestamp_regex1"
         echo "  $timestamp_regex2"
@@ -181,6 +188,9 @@ fi
 if [ "$ignore_user" != "" ]; then
     ## OLD: perl -i.bak1 -pe "s@($ignore)@@gi;" "$TMP/$base1" "$TMP/$base2"
     perl -i.bak-ign1 -pe "s@($ignore_user)@<user>@gi;" "$TMP/$base1" "$TMP/$base2"
+    if [ "$strip_ignore" == "1" ]; then
+        perl -i.bak-ign2 -pe "s@^\s*(<user>\s*)+\s*@@;" "$TMP/$base1" "$TMP/$base2"
+    fi
 fi
 
 # Collapse whitespace
