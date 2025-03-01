@@ -72,7 +72,8 @@ if [ -e "$HOME/mezcla-tom" ]; then add-python-path "$HOME/mezcla-tom"; fi
 #
 # Make sure gradio apps accessible in local net
 # See https://superuser.com/questions/949428/whats-the-difference-between-127-0-0-1-and-0-0-0-0.
-export GRADIO_SERVER_NAME=0.0.0.0
+## OLD: export GRADIO_SERVER_NAME=0.0.0.0
+export GRADIO_SERVER_NAME="$HOSTNAME.local"
 #
 # Mezcla stuff
 cond-export BRIEF_USAGE 1               # running w/o args shows usage line
