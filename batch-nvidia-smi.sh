@@ -32,7 +32,7 @@ if [[ ("$1" = "") || ("$1" == "--help") ]]; then
     echo ""
     echo "- Advanced (every min for one day to log for today; calculations broken down):"
     echo "  date_yyyy_mm_dd_hhmm=\"$(date '+%Y-%m-%d_%H%M')\""
-    echo "  log_file=\"$base-\$date_yyyy_mm_dd_hhmm.log\""
+    echo "  log_file=\"\$TMP/$base-\$date_yyyy_mm_dd_hhmm.log\""
     echo "  let one_day_in_secs=(24 * 3600)"
     echo "  let delay_time=60"
     echo "  let num_times=(one_day_in_secs / delay_time)"

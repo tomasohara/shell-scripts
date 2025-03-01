@@ -114,7 +114,8 @@ simple-alias-fn black-plain 'convert-emoticons-aux black'
 function run-python-script {
     ## DEBUG: trace-vars _PSL_ out_base log
     if [ "$1" = "" ]; then
-        echo "Usage: [USE_STDIN=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] run-python-script script arg ..."
+        echo "Usage: [ENV-OPTIONS] run-python-script script arg ..."
+        echo "   ENV-OPTIONS: [USE_STDIN=B] [USE_STDOUT=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] [KEEP_EMPTY_OUT=b] [PYTHON=path]"
         echo "note:"
         echo "- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL)"
         echo "- PYTHON_OUT_DIR is script dir unless a full path"
@@ -152,6 +153,7 @@ function run-python-script {
     declare -g _PSL_ log out out_base
     local module_spec=""
     let _PSL_++
+    # TODO3: add OUT_BASE to override default
     out_base="$out_dir/_$script_base.$(TODAY).$_PSL_"
     if [ "$PROFILE_SCRIPT" == "1" ]; then
        out_base="$out_base.profile"
@@ -167,29 +169,47 @@ function run-python-script {
     local python_arg="-"
     # shellcheck disable=SC2086
     {
-	if [ "${USE_STDIN:-0}" = "1" ]; then
+	if [ "${USE_STDIN:-0}" == "1" ]; then
 	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
 	    ## TODO2:
             echo "${script_args[*]}" | DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" $python_arg > "$out" 2> "$log"
 	else
 	    # note: disables - with explicit arguments or if running pytest
 	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
-	     DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log"
+            if [ "${USE_STDOUT:-1}" == "1" ]; then
+	        DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log"
+            else
+                # TODO3: extend to handle special case with USE_STDIN
+	        DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1
+                touch "$out"
+            fi
 	fi
     }
+    # Finalize code profiling
     if [ "$PROFILE_SCRIPT" == "1" ]; then
        alias-python -m mezcla.format_profile "$out_base.data" > "$out_base.list"
     fi
+    # Show output and sample of errors, along with file size info
     tail "$log" "$out" | truncate-width
-    ## TEMP: remove emtpy output file
+    check-errors-excerpt "$log" "$out"
+    ## TEMP: remove emtpy output file (TODO3: streamline -e/-s tests below)
     if [ "$DEBUG_LEVEL" -ge 4 ]; then
         ls -lt "$log" "$out"
     fi
-    if [ ! -s "$out" ]; then
-        command rm -v "$out"
+    # note: omitting empty-output pruning useful for background job (e.g., "run-python-script ... &")
+    if [ "${KEEP_EMPTY_OUT:-0}" == "0" ]; then
+        if [[ (-e "$out") && (! -s "$out") ]]; then
+            command rm -v "$out"
+        fi
     fi
-    # Show common errors in log
-    check-errors-excerpt "$log"
+    ## OLD:
+    ## # Show common errors in log
+    ## check-errors-excerpt "$log"
+}
+# run-python-script-reset(): reset variables used in run-python-script
+function run-python-script-reset {
+    declare -g _PSL_
+    _PSL_=0
 }
 
 # pytest stuff
@@ -198,7 +218,7 @@ default_pytest_opts="-vv --capture=tee-sys"
 # test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
     if [ "$1" = "" ]; then
-        echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] test-python-script script"
+        echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] [PYTEST=path] test-python-script script"
         echo "Note: When debugging you might need to use --runxfail and -s to see full error info."
         echo "The debugging level defaults to 5 (unlike run-python-script)."
         return
@@ -218,7 +238,7 @@ function test-python-script {
     local pytest_opts="${PYTEST_OPTS:-"$default_pytest_opts"}"
     # TODO3: drop inheritance spec in summary
     # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "tests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
-    PYTHON_DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="pytest $pytest_opts" run-python-script "$test_script" "$@" 2>&1;
+    PYTHON_DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="$PYTEST $pytest_opts" run-python-script "$test_script" "$@" 2>&1;
 }
 #
 # test-python-script-method(test-name, ...): like test-python-script but for specific test
@@ -323,6 +343,7 @@ function tabify {
 }
 # trace-vars(var, ...): trace each VAR in command line
 # note: output format: VAR1=VAL1; ... VARn=VALn;
+# TODO2: fix bug with trailing whitespace being ignored
 function trace-vars {
     local var
     for var in "$@"; do
@@ -499,15 +520,21 @@ function get-host-nickname {
 function create-zip {
     local dir="$1"
     shift
-    if [ "$dir" = "" ]; then
+    if [[ ("$dir" == "") || ("$dir" == --help) ]]; then
+        ## TODO4: $* =~ --help
         echo "Usage create-zip [dirname]"
-        echo "ex: create-zip /mnt/resmed"
+        echo "ex: [ENCRYPT=b] create-zip /mnt/resmed"
         return
+    fi
+    local extra_args=()
+    if [ "${ENCRYPT:-0}" == "1" ]; then
+        extra_args+=("-e")
     fi
     local archive
     archive="$TEMP/$(basename "$dir").zip"
-    echo "issuing: zip -r -u \"$archive\" \"$dir\""
-    zip -r -u "$archive" "$dir";
+    echo "issuing: zip -r -u ${extra_args[*]} \"$archive\" \"$dir\""
+    # options: -r recursive; -u update
+    zip -r -u "${extra_args[@]}" "$archive" "$dir";
 }
 #
 # create-zip-dir(dir=pwd): create zip of DIR in context of parent

@@ -148,6 +148,7 @@ while [[ "$1" =~ ^- ]]; do
     elif [ "$1" == "--dir" ]; then
         recursive="1"
         base_dir="$2"
+        quiet="1"
         shift
     elif [ "$1" == "--side-by-side" ]; then
         width=$((2 * ${COLUMNS:-132}))
@@ -241,6 +242,7 @@ if [ "$base_dir" != "." ]; then
 fi
 
 # Do the actual diff
+log_file="${TMP:-/tmp}/_do_diff.$$.log"
 count=0
 # shellcheck disable=SC2086
 for file in $pattern; do
@@ -279,15 +281,15 @@ for file in $pattern; do
         other_file="$master/$base"
     fi
     # note: recursive omits some verbose output to cut down on clutter
-    # example: the file-vs-other line is omitted
-    if [ "$recursive" == "0" ]; then
+    # example: the file-vs-other line is omitted; --dir sets --quiet
+    if [ "$quiet" == "0" ]; then
+        echo "$base_dir/$file vs. $other_file"
+    fi
+    if [ ! -e "$other_file" ]; then
         if [ "$quiet" == "0" ]; then
-            echo "$base_dir/$file vs. $other_file"
-        fi
-        if [ ! -e "$other_file" ]; then
             echo "Warning: missing other file: '$other_file'"
-            continue
         fi
+        continue
     fi
 
     # Show the timestamps if the files differ, unless in brief mode.
@@ -295,7 +297,6 @@ for file in $pattern; do
     # grepping (e.g., `do_diff.sh ... | grep '^Differences:'`).
     files_differ=false
     if [ "$brief" == "0" ]; then
-        log_file="${TMP:-/tmp}/_do_diff.$$.log"
         "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" >| "$log_file"
         status=$?
         ## OLD: perl -pe 's/Files (.*) and (.*) differ/Differences: $1 $2/;' < "$log_file"
@@ -323,14 +324,16 @@ for file in $pattern; do
     fi
     
     # Perform the actual diff
-    log_file="$TMP/do_diff.$$"
     "$diff_cmd" $space_options $diff_options "$file" "$other_file" > "$log_file" 2>&1
     
     # Show relative difference percent
     ## TODO?: if [[ "$brief" == "0") && $files_differ ]]; then
     if [ "$brief" == "0" ] && $files_differ; then
-        num_lines1=$(wc -l < "$file")
-        num_lines2=$(wc -l < "$other_file" || echo "0")
+        ## OLD:
+        ## num_lines1=$(wc -l < "$file")
+        ## num_lines2=$(wc -l < "$other_file" || echo "0")
+        num_lines1=$(cat "$file" | wc -l)
+        num_lines2=$(cat "$other_file" | wc -l)
         num_lines=$(( $num_lines1 + $num_lines2 ))
         num_diffs=$(wc -l < "$log_file")
         relative_diff=-1
@@ -341,7 +344,7 @@ for file in $pattern; do
     fi
 
     # Show the actual file differences
-    cat "$TMP/do_diff.$$"
+    cat "$log_file"
 
     # Add space divider
     ## TEMP: for consistency with continue'd cases above omits space if verbose, becuase

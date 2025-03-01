@@ -2,6 +2,8 @@
 #
 # note: Tana's script for running Python tests as part of workflow
 #
+# TODO2: reconcile with version in mezcla
+#
 
 
 """Master test script for shell-scripts repo"""
@@ -44,7 +46,7 @@ def load_thresholds(filename):
 
 
 def round_p2str(num):
-    """Round NUM using precision of 3"""
+    """Round NUM using precision of 2"""
     # EX: round_p2str(1.678) => "1.68"
     # EX: round_p2str(1.6) => "1.60"
     return system.round_as_str(num, 2)

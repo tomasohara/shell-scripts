@@ -89,7 +89,8 @@ function git-blame-plus {
     local file="$1"
     local log
     local base
-    base="$(remove-extension "$file")"
+    ## OLD: base="$(remove-extension "$file")"
+    base="$(basename "$(remove-extension "$file")")"
     log="$TMP/$base.$(T).blame.list"
     ## BAD: git blame "$file" > "$log"
     git blame "$file" > "$log" 2>&1
