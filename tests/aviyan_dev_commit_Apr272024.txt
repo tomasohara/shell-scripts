@@ -1,0 +1,73 @@
+SQUASH #1: Refined test notebooks: Used rename-file-with-date, removed trash_dir, and eliminated force mv operations (see aviyan_dev_commit_Apr272024)
+
+commit 2fe7f17eb7b47d204effe4d4346d65cf711b358c
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Fri Apr 26 14:12:46 2024 +0545
+
+    Modified show-python-path command to check if the output consists of more than 1 line (Cell 15) & path to mezcla (Cell 16); Used conditional-echo commands for python-lint, python-import-path tests, python-module-version (Cell 17, 18, 24, 26, 27, 28); Test for url-path uses path to tests/batspp_report.py (Cell 61); Commented final instance of trash_dir use (Cell 65)
+
+commit 9db8e7b2b176827ba7ac392ae8c8fc1de00ae589
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Tue Apr 23 19:54:39 2024 +0545
+
+    Uncommented tests for count_bigrams.perl (Cell 38-40); Added test for rename-with-file-date (Cell 36); Updated the comment for do_rcsdiff [Permission Denied)] (Cell 18)
+
+commit d6c55d72382b8dbcf9f7c23dfa68087cc99592cc
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Tue Apr 23 19:54:08 2024 +0545
+
+    Uncommented the cell for testing hist alias; Updated the regex for pattern matching of timestamps (Cell 9); Redefined the test for perlgrep command using 'conditional-echo' (Cell 23)
+
+commit 6ed3548125e3280b2a1307bd0c6018b856119fd1
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Apr 17 20:12:52 2024 +0545
+
+    Modified the setup of temp_dir and removed instance of trash_dir; Commented mv -f to trash_dir at the end of test
+
+commit d0aea27cf3049343abea0d7546cc946d37d486e1
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Apr 17 20:07:38 2024 +0545
+
+    Added testuser alias in Global Setup (trace-setup-sorting-wrappers); Rework with temp_dir to use rename-with-file-date; Commented ln-symbolic command as the link with same name exists (For demonstration)
+
+commit 43d82292f8c0ee6b4f81e5622d034b688dee789b
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Apr 17 20:07:03 2024 +0545
+
+    Rework with temp_dir to use rename-with-file-date; Added testuserpath to replace /home/USER -> USER_PATH/; Commented all instance of trash_dir and mv -f to trash_dir
+
+commit 0fc8a73b3f9a897958df0b5111405de0451fff76
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Tue Apr 16 08:02:27 2024 +0545
+
+    Rework with temp_dir to use rename-with-file-date [CELL_5]; Added tests for cd-real-dir [CELL_11]; Added testuserpath alias to replace /home/USER -> USER_PATH/ [CELL_4]; Added pwd with testuser to show the working of cd-like commands [C10-C12]
+
+commit 3e46e5281c1a33c4de4989f6753e59183e8948a4
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Sun Apr 14 12:38:40 2024 +0545
+
+    [WIP] Use of rename-with-file-date to create temporary testing directories; Commented  implementation to avoid the use of mv -f
+
+commit 3a9a130cbd243f939880c5a40d99c57b204619cf
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Apr 3 20:59:11 2024 +0545
+
+    Rerun the test after installing csh and lynx; Commented cells using scripts from archive
+
+==================================================
+
+SQUASH #2: Refined automate_notebook.py for automation of execution of notebooks; Removed WIP and experimental builds of automate_notebook.py
+
+commit 9cdbbb2ebe4b8dd745cc088d01562c5503cc3694
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Apr 3 20:43:29 2024 +0545
+
+    Renamed automate_ipynb.py => automate_notebook.py; Toggled FORCE_RUN_JUPYTER to False; Replaced wrapup() with driver.quit() [Webdriver object is not callable]; --first option selects the first N testfiles in alphabetical order; Added termination of script for invalid credentials; Added constant: SELENIUM_SLEEP to pause driver until all the cells are executed
+
+commit f1a96878ccac594d1dc86ccd439772879436a0eb
+Author: Aviyan Acharya <avyn.xyz@gmail.com>
+Date:   Wed Apr 3 20:41:14 2024 +0545
+
+    Removed old/experimental builds for automate_ipynb.py
+
+==================================================

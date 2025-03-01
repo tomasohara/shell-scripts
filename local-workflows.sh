@@ -115,7 +115,7 @@ set_option(){
                 shift
             else
                 echo "Error: Missing argument for --file"
-                exit 1
+                usage
             fi
             ;;
         --json|-j)
@@ -124,7 +124,7 @@ set_option(){
                 shift
             else
                 echo "Error: Missing argument for --json"
-                exit 1
+                usage
             fi
             ;;
         --help|-h)
@@ -182,20 +182,34 @@ if [ "${AUTO_REQS:-0}" = "1" ]; then
     pipreqs --print "$LOCAL_REPO_DIR" > "$REQUIREMENTS"
 fi
 
-# Build the Docker image
-if [ "${RUN_BUILD}" = "1" ]; then
-    echo "Building Docker image: $IMAGE_NAME"
-    # note: maldito docker doesn't support --env for build, just run
-    # Also, --build-arg misleading: see
-    #    https://stackoverflow.com/questions/42297387/docker-build-with-build-arg-with-multiple-arguments
-    # shellcheck disable=SC2086
-    docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --tag "$IMAGE_NAME" .
-fi
 
-# Build the Docker image cacheless (using --no-cache option)
-if [ "${RUN_BUILD_CACHELESS}" = "1" ]; then
-    echo "Building Docker image (no-cache): $IMAGE_NAME"
-    docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --no-cache -t "$IMAGE_NAME" .
+## OLD: Use of seperate options for RUN_BUILD and RUN_BUILD_CACHELESS
+# # Build the Docker image
+# if [ "${RUN_BUILD}" = "1" ]; then
+#     echo "Building Docker image: $IMAGE_NAME"
+#     # note: maldito docker doesn't support --env for build, just run
+#     # Also, --build-arg misleading: see
+#     #    https://stackoverflow.com/questions/42297387/docker-build-with-build-arg-with-multiple-arguments
+#     # shellcheck disable=SC2086
+#     docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --tag "$IMAGE_NAME" .
+# fi
+
+# # Build the Docker image cacheless (using --no-cache option)
+# if [ "${RUN_BUILD_CACHELESS}" = "1" ]; then
+#     echo "Building Docker image (no-cache): $IMAGE_NAME"
+#     docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --no-cache -t "$IMAGE_NAME" .
+# fi
+
+if [ "${RUN_BUILD}" = "1" ] || [ "${RUN_BUILD_CACHELESS}" = "1" ]; then
+    echo "Building Docker Image: $IMAGE_NAME"
+    cache_option="--tag" 
+    
+    if [ "${RUN_BUILD_CACHELESS}" = "1" ]; then
+        echo "  (cacheless option enabled)"
+        cache_option="--no-cache -t"
+    fi
+
+    docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS ${cache_option} "$IMAGE_NAME" .
 fi
 
 
