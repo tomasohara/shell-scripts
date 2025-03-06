@@ -4,12 +4,14 @@
 Script to extract function definitions and aliases from a Bash script.
 
 Sample usage:
-   {script} --input script.bash [--output output.json]
+   {script} input_script.bash
+   cat input_script.bash | {script} > output.json
 """
 
 # Standard modules
 import json
 import re
+import sys
 
 # Local modules
 from mezcla import debug
@@ -19,17 +21,15 @@ from mezcla.my_regex import my_re
 from mezcla import system
 
 # Constants
-INPUT_ARG = "input"
-OUTPUT_ARG = "output"
 TL = debug.TL
 
 class BashFunctionAliasExtractor:
     """Helper class for extracting function definitions and aliases from a Bash script."""
     
-    def __init__(self, script_path):
-        """Initializer: sets up the Bash script path."""
+    def __init__(self, script_content):
+        """Initializer: sets up the Bash script content."""
         debug.trace(TL.VERBOSE, f"BashFunctionAliasExtractor.__init__(): self={self}")
-        self.script_path = script_path
+        self.script_content = script_content
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
     
     def is_comment(self, line):
@@ -38,8 +38,6 @@ class BashFunctionAliasExtractor:
     
     def extract_functions_aliases(self):
         """Extracts function definitions and aliases from the script."""        
-        script_content = gh.read_lines(self.script_path)
-        
         function_ranges = {}
         aliases = []
         function_name = None
@@ -53,7 +51,7 @@ class BashFunctionAliasExtractor:
         ALIAS_REGEX_DOUBLE_QUOTE = re.compile(r'^alias\s+([a-zA-Z0-9_]+)="([^"]*)"')
         ALIAS_REGEX_NO_QUOTE = re.compile(r"^alias\s+([a-zA-Z0-9_]+)=([^\s]*)")
 
-        for i, line in enumerate(script_content, 1):
+        for i, line in enumerate(self.script_content, 1):
             line = line.strip()
 
             if self.is_comment(line):
@@ -87,49 +85,42 @@ class BashFunctionAliasExtractor:
                 aliases.append({"name": alias_name, "definition": alias_def})
 
         if function_name:
-            function_ranges[function_name]["end"] = len(script_content)
+            function_ranges[function_name]["end"] = len(self.script_content)
         
         return {"functions": function_ranges, "aliases": aliases}
 
 class BashExtractorScript(Main):
     """Main script class for Bash function/alias extraction."""
     
-    def setup(self):
-        """Initialize command-line options and helper instance."""
-        debug.trace(TL.VERBOSE, f"Script.setup(): self={self}")
-        self.script_path = self.get_parsed_option(INPUT_ARG)
-        self.output_path = self.get_parsed_option(OUTPUT_ARG)
-        self.helper = BashFunctionAliasExtractor(self.script_path)
-        debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
+    def process_line(self, line):
+        """Process each line from the input - we'll accumulate all lines."""
+        if not hasattr(self, 'script_lines'):
+            self.script_lines = []
+        self.script_lines.append(line)
     
-    def run_main_step(self):
-        """Main processing step."""
-        debug.trace(5, f"Script.run_main_step(): self={self}")
-        extracted_data = self.helper.extract_functions_aliases()
+    def wrap_up(self):
+        """Process all accumulated lines once input is complete."""
+        debug.trace(TL.VERBOSE, f"BashExtractorScript.wrap_up(): Analyzing {len(getattr(self, 'script_lines', []))} lines")
         
-        # Print to stdout if no output file is specified
-        if not self.output_path:
-            print(json.dumps(extracted_data, indent=4))
-        else:
-            # Write to the specified output file
-            try:
-                with open(self.output_path, "w") as f:
-                    json.dump(extracted_data, f, indent=4)
-                print(f"Extracted data written to {self.output_path}")
-            except IOError as e:
-                system.print_stderr(f"Error writing to {self.output_path}: {e}")
+        # Check if we have any lines to process
+        if not hasattr(self, 'script_lines') or not self.script_lines:
+            system.print_stderr("No input received. Please provide a Bash script.")
+            return
+            
+        # Process the collected script
+        helper = BashFunctionAliasExtractor(self.script_lines)
+        extracted_data = helper.extract_functions_aliases()
+        
+        # Output the result in JSON format
+        print(json.dumps(extracted_data, indent=4))
 
 def main():
     """Entry point."""
     app = BashExtractorScript(
         description=__doc__.format(script=gh.basename(__file__)),
-        skip_input=True,
-        manual_input=True,
-        auto_help=True,
-        text_options=[
-            (INPUT_ARG, "Path to Bash script file"),
-            (OUTPUT_ARG, "Path to output JSON file (optional)")
-        ]
+        skip_input=False,
+        manual_input=False,
+        auto_help=True
     )
     app.run()
 
