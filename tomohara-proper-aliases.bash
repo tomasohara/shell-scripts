@@ -69,8 +69,8 @@ function convert-emoticons-aux {
 simple-alias-fn plint 'PAGER=cat python-lint'
 # shellcheck disable=SC2016
 {
-# plint-torch(...): pylint w/ torch no-member warnings ignored
-alias-fn plint-torch 'plint "$@" | grep -v "torch.*no-member"'
+# plint-torch(...): pylint w/ torch no-member warnings, etc. ignored
+alias-fn plint-torch 'plint "$@" | egrep -v "torch.*(no-member|no-name-in-module)"'
 # plint-tester-testee(filename): run pylint over test file and tested file
 ## OLD: alias-fn plint-tester-testee 'plint "$1" tests/test_"$1"'
 function plint-tester-testee {
