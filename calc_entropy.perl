@@ -122,6 +122,7 @@ if ($normalize && $simple) {
     &debug_print(&TL_DETAILED, "Re-invoking with normalized/simple data\n");
     my($data) = ((defined($ARGV[0]) && ($ARGV[0] ne "-")) ? "@ARGV" : join("\n", <STDIN>));
     my($normalized_data) = &run_command_over("normalize.perl - <", $data);
+    &debug_print(&TL_DETAILED, "\t$normalized_data\n");
     printf "%s\n", &run_command_over("$0 -simple -normalize=0 - <", $normalized_data);
     &exit();
 }
