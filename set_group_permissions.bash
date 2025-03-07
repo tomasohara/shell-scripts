@@ -7,6 +7,14 @@
 # - Based on Grok3 revision to old bash snippet.
 #
 
+# Set bash regular and/or verbose tracing
+if [ "${TRACE:-0}" = "1" ]; then
+    set -o xtrace
+fi
+if [ "${VERBOSE:-0}" = "1" ]; then
+    set -o verbose
+fi
+
 # Show usage
 if [ "$1" = "" ]; then
     script=$(basename "$0")
@@ -33,14 +41,19 @@ fi
 dir="$1"
 group="${2:-operator}"
 
-# Set directory to provided DIR or current working directory if not specified
-dir="${DIR:-$PWD}"
+#...............................................................................
+
+function todays-date { 
+    date '+%d%b%y'
+}
+
+#...............................................................................
 
 # Create a safe directory label by replacing all slashes with underscores
 dir_label="${dir//\//_}"
 
 # Use TEMP env var or default to /tmp, include timestamp in log name
-log="${TMP:-/tmp}/_add-sticky-${dir_label}-$(T).log"
+log="${TMP:-/tmp}/_add-sticky-${dir_label}-$(todays-date).log"
 
 # Clear log file
 echo "" > "$log"
@@ -53,7 +66,7 @@ chown -R --changes "$effective_user" "$dir" >> "$log" 2>&1
 chgrp -R --changes "$group" "$dir" >> "$log" 2>&1
 
 # Set base permissions (read/write for group)
-chmod -R --changes g+rw "$dir" >> "$log" 2>&1
+chmod -R --changes g+rwx "$dir" >> "$log" 2>&1
 
 # Set execute/search for directories and apply sticky bit
 find "$dir" -type d -exec chmod --changes g+s,g+x {} \; >> "$log" 2>&1
