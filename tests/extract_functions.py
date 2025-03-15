@@ -11,13 +11,11 @@ Sample usage:
 # Standard modules
 import json
 import re
-import sys
 
 # Local modules
 from mezcla import debug
 from mezcla import glue_helpers as gh
 from mezcla.main import Main
-from mezcla.my_regex import my_re
 from mezcla import system
 
 # Constants
@@ -92,18 +90,21 @@ class BashFunctionAliasExtractor:
 class BashExtractorScript(Main):
     """Main script class for Bash function/alias extraction."""
     
+    def __init__(self, **kwargs):
+        """Initializer: sets up the script lines."""
+        super().__init__(**kwargs)
+        self.script_lines = []
+    
     def process_line(self, line):
         """Process each line from the input - we'll accumulate all lines."""
-        if not hasattr(self, 'script_lines'):
-            self.script_lines = []
         self.script_lines.append(line)
     
     def wrap_up(self):
         """Process all accumulated lines once input is complete."""
-        debug.trace(TL.VERBOSE, f"BashExtractorScript.wrap_up(): Analyzing {len(getattr(self, 'script_lines', []))} lines")
+        debug.trace(TL.VERBOSE, f"BashExtractorScript.wrap_up(): Analyzing {len(self.script_lines)} lines")
         
         # Check if we have any lines to process
-        if not hasattr(self, 'script_lines') or not self.script_lines:
+        if not self.script_lines:
             system.print_stderr("No input received. Please provide a Bash script.")
             return
             
