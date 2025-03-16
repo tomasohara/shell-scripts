@@ -5,12 +5,14 @@ Script to extract function definitions and aliases from a Bash script.
 
 Sample usage:
    {script} input_script.bash
-   cat input_script.bash | {script} > output.json
+   cat input_script.bash | {script} > output.txt
+   {script} --json input_script.bash > output.json
 """
 
 # Standard modules
 import json
 import re
+import datetime
 
 # Local modules
 from mezcla import debug
@@ -20,6 +22,7 @@ from mezcla import system
 
 # Constants
 TL = debug.TL
+JSON_OUTPUT_OPT = "json"
 
 class BashFunctionAliasExtractor:
     """Helper class for extracting function definitions and aliases from a Bash script."""
@@ -72,15 +75,15 @@ class BashFunctionAliasExtractor:
             if alias_match_single:
                 alias_name = alias_match_single.group(1)
                 alias_def = alias_match_single.group(2)
-                aliases.append({"name": alias_name, "definition": alias_def})
+                aliases.append({"name": alias_name, "definition": alias_def, "line": i})
             elif alias_match_double:
                 alias_name = alias_match_double.group(1)
                 alias_def = alias_match_double.group(2)
-                aliases.append({"name": alias_name, "definition": alias_def})
+                aliases.append({"name": alias_name, "definition": alias_def, "line": i})
             elif alias_match_no_quote:
                 alias_name = alias_match_no_quote.group(1)
                 alias_def = alias_match_no_quote.group(2)
-                aliases.append({"name": alias_name, "definition": alias_def})
+                aliases.append({"name": alias_name, "definition": alias_def, "line": i})
 
         if function_name:
             function_ranges[function_name]["end"] = len(self.script_content)
@@ -90,10 +93,18 @@ class BashFunctionAliasExtractor:
 class BashExtractorScript(Main):
     """Main script class for Bash function/alias extraction."""
     
-    def __init__(self, **kwargs):
-        """Initializer: sets up the script lines."""
-        super().__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        """Initialize script class"""
+        super().__init__(*args, **kwargs)
+        self.json_output = False
         self.script_lines = []
+        self.input_file = "stdin"
+        self.process_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    def setup(self):
+        """Check results of command line processing"""
+        debug.trace(TL.VERBOSE, f"Script.setup(): self={self}")
+        self.json_output = self.get_parsed_option(JSON_OUTPUT_OPT, self.json_output)
     
     def process_line(self, line):
         """Process each line from the input - we'll accumulate all lines."""
@@ -112,8 +123,71 @@ class BashExtractorScript(Main):
         helper = BashFunctionAliasExtractor(self.script_lines)
         extracted_data = helper.extract_functions_aliases()
         
-        # Output the result in JSON format
-        print(json.dumps(extracted_data, indent=4))
+        # Add metadata to the extracted data
+        metadata = {
+            "input_file": self.input_file,
+            "process_date": self.process_date
+        }
+        
+        # Output based on format selection
+        if self.json_output:
+            # Add metadata to JSON output
+            extracted_data["metadata"] = metadata
+            print(json.dumps(extracted_data, indent=4))
+        else:
+            # Output in tabulated format with metadata header
+            self.print_simple_table_output(extracted_data, metadata)
+    
+    def print_simple_table_output(self, data, metadata):
+        """Print the extracted data in a simple console table format."""
+        # Print metadata header
+        print("\nextract_bash_macros.py")
+        print("=" * 50)
+        print(f"Input File: {metadata['input_file']}")
+        print(f"Timestamp: {metadata['process_date']}")
+        print("=" * 50)
+        
+        # Define column headers
+        function_headers = ["Function Name", "Start Line", "End Line"]
+        alias_headers = ["Alias Name", "Definition", "Line"]
+        
+        # Format functions table
+        function_rows = []
+        for func_name, line_info in data["functions"].items():
+            function_rows.append([func_name, str(line_info["start"]), str(line_info["end"])])
+        
+        # Format aliases table
+        alias_rows = []
+        for alias in data["aliases"]:
+            alias_rows.append([alias["name"], alias["definition"], str(alias["line"])])
+        
+        # Print functions table
+        print("\nFUNCTIONS:")
+        self._print_table(function_headers, function_rows)
+        
+        # Print aliases table
+        print("\nALIASES:")
+        self._print_table(alias_headers, alias_rows)
+    
+    def _print_table(self, headers, rows):
+        """Helper method to print a simple ASCII table."""
+        if not rows:
+            print("  No data available")
+            return
+            
+        col_widths = [len(h) for h in headers]
+        for row in rows:
+            for i, cell in enumerate(row):
+                col_widths[i] = max(col_widths[i], len(cell))
+        
+        fmt = '  '.join('{{:{}}}'.format(w) for w in col_widths)
+        
+        print(fmt.format(*headers))
+        print('-' * (sum(col_widths) + 2 * (len(headers) - 1)))
+        
+        # Print the rows
+        for row in rows:
+            print(fmt.format(*row))
 
 def main():
     """Entry point."""
@@ -121,7 +195,10 @@ def main():
         description=__doc__.format(script=gh.basename(__file__)),
         skip_input=False,
         manual_input=False,
-        auto_help=True
+        auto_help=True,
+        boolean_options=[
+            (JSON_OUTPUT_OPT, "Print JSON output instead of tabulated output")
+        ]
     )
     app.run()
 
