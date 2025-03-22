@@ -23,7 +23,6 @@ diff=kdiff.sh
 # - 1. hexadecimal with prefix (e.g., "0x1234")
 # - 2. "" of size 4 or 8 (e.g., "1234" or "F000100A")
 # - 3. "" with leading & trailing digits (e.g., "[sha256:]99f14c4b8174ea549d7ff9050fe9d305f59153eddecfae52c56d0f0c7821e6d4")
-## OLD: ignore='((0x)?[0-9A-Fa-f]{7,16})'
 ## TODO3: allow arbitrary hex strings not startingand ending with digits
 ignore_hex1='(0x[0-9A-Fa-f]+)'
 ignore_hex2='(\b([0-9A-Fa-f]{4})|([0-9A-Fa-f]{8})\b)'
@@ -168,7 +167,6 @@ cp "$file2" "$TMP/$base2.orig"
 # - Make this timestamp removal optional.
 # NOTE: Backslashes used above to avoid shell interpretation (during string interpolation).
 if [ "$filter_time" = "1" ]; then
-    ## OLD: perl -i.bak0 -pe "s/$timestamp_regex1//ig; s/$timestamp_regex2//ig;" "$TMP/$base1" "$TMP/$base2"
     perl -i.bak-ts1 -pe "s/$timestamp_regex1/<time>/ig;" "$TMP/$base1" "$TMP/$base2"
     perl -i.bak-ts2 -pe "s/$timestamp_regex2/<time>/ig;" "$TMP/$base1" "$TMP/$base2"
     perl -i.bak-ts3 -pe "s/$timestamp_regex3/<time>/ig;" "$TMP/$base1" "$TMP/$base2"
@@ -184,9 +182,7 @@ if [ "$filter_hex" = "1" ]; then
 fi
 
 # Strip out user-specified patterns
-## OLD: # Note: include hex address stripping
 if [ "$ignore_user" != "" ]; then
-    ## OLD: perl -i.bak1 -pe "s@($ignore)@@gi;" "$TMP/$base1" "$TMP/$base2"
     perl -i.bak-ign1 -pe "s@($ignore_user)@<user>@gi;" "$TMP/$base1" "$TMP/$base2"
     if [ "$strip_ignore" == "1" ]; then
         perl -i.bak-ign2 -pe "s@^\s*(<user>\s*)+\s*@@;" "$TMP/$base1" "$TMP/$base2"
@@ -195,7 +191,6 @@ fi
 
 # Collapse whitespace
 if [ "$retain_whitespace" = "0" ]; then
-   ## OLD: perl -i.bak2 -pe "s/\s+/ /g; s/$/\n/;" "$TMP/$base1" "$TMP/$base2"
    perl -i.bak-ws1 -pe "s/\s+/ /g; s/$/\n/;" "$TMP/$base1" "$TMP/$base2"
 fi
 
