@@ -1,4 +1,4 @@
-#! /bin/env bash
+#! /usr/bin/env bash
 #
 # Loads aliases to be tested via the BatsPP infrastructure, along
 # with convenience aliases for the tests. This works by loading

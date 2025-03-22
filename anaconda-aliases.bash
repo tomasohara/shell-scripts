@@ -1,4 +1,4 @@
-#! /bin/env bash
+#! /usr/bin/env bash
 # Anaconda support based on conda installation
 #
 # usage example:
