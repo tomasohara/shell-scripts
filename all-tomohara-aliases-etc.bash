@@ -1,10 +1,10 @@
-#! /bin/env bash
+#! /usr/bin/env bash
 #
 # Convenience script for loading all my aliases, functions, etc.
 #
-# Simple Usages:
+# Simple Usages (see advanced below for use in scripts):
 #   export TOM_BIN=/home/tom/shell-script;
-#   source $TOM_BIN/all-tomohara-aliases.bash
+#   source $TOM_BIN/all-tomohara-aliases-etc.bash
 #
 #   SOURCE_SETTINGS=1 source "$HOME/bin/all-tomohara-aliases-etc.bash"
 #
