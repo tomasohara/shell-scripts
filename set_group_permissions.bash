@@ -21,18 +21,18 @@ if [ "$1" = "" ]; then
     ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--TODO] [--trace] [--help] [--] dir [group=operator]"
+    echo "Usage: $0 [--trace] [--help] [--] dir [group=operator]"
     echo ""
     echo "Examples:"
     echo ""
-    ## TODO: example 1
-    echo "sudo $0 /usr/local/misc/programs/"
+    echo "CHOWN=1 sudo $0 /usr/local/misc/programs/"
     echo ""
-    ## TODO: example 2
     echo "$script ~/programs/bash/shell-scripts-devel"
     echo ""
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."
+    echo "- Use CHOWN=1 to change ownership (e.g., sudo user)."
+    echo "- Use FORCE=1 to bypass restrictions (e.g., chown of /home/... dir)."
     ## TODO: add more notes
     ## echo ""
     echo ""
@@ -62,7 +62,14 @@ echo "" > "$log"
 effective_user="${SUDO_USER:-$USER}"
 
 # Set ownership and group with verbose output
-chown -R --changes "$effective_user" "$dir" >> "$log" 2>&1
+if [ "${CHOWN:-1}" == "1" ]; then
+    if [[ ("$dir" =~ /home) && ("${FORCE:-0}" == "0")  ]]; then
+        echo "Error: use FORCE to change ownership of dir under /home"
+        exit
+    else
+        chown -R --changes "$effective_user" "$dir" >> "$log" 2>&1
+    fi
+fi
 chgrp -R --changes "$group" "$dir" >> "$log" 2>&1
 
 # Set base permissions (read/write for group)
