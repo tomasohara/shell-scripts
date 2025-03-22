@@ -2430,12 +2430,13 @@ function cmd-output () {
 }
 
 # cmd-usage(command): output usage for command to _command.list (with spaces
-# replaced by underscores)
+# and file path chars replaced by underscores)
 function cmd-usage () {
     local command="$*"
     local usage_file
     ## OLD: usage_file="_$(echo "$command" | tr ' ' '_')-usage.list"
-    usage_file="_$(echo "$command" | tr ' ' '-')-usage.list"
+    ## OLD: usage_file="_$(echo "$command" | tr ' ' '-')-usage.list"
+    usage_file="_$(echo "$command" | perl -pe 's@[/ .]@_@g; s/_+/_/g;')-usage.list"
     $command --help  2>&1 | ansifilter > "$usage_file"
     $PAGER_NOEXIT "$usage_file"
 }
