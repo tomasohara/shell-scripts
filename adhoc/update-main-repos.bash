@@ -21,7 +21,7 @@ if [ "$1" == "--help" ]; then
     echo "    OTHER_REPOS=fu $0"
     exit
 fi
-if [ "$1" == "" ]; then
+if [ "$1" != "" ]; then
     repos+=("$@")
 fi
 
