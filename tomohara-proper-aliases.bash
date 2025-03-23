@@ -261,7 +261,132 @@ function test-python-script-method-strict {
     shift;
     PYTEST_OPTS="--runxfail -k $method $default_pytest_opts" test-python-script "$@";
 }
+
+# disable-python-warnings(): Ignore warning due to Pydantic quirks
+## TODO:PYTHONWARNINGS="ignore:::pydantic"
+# Note: Format is PYTHONWARNINGS="action:message:category:module:lineno";
+# but, have to use the Sledge hammer approach due to Pydantic module organization.
+function disable-python-warnings {
+    ## OLD: export PYTHONWARNINGS="ignore::UserWarning"
+    ## TODO: export PYTHONWARNINGS="ignore::UserWarning,ignore::LangChainDeprecationWarning"
+    ## NOTE: maldito langchain makes life difficult
+    ##    isinstance(LangChainDeprecationWarning, UserWarning) => False
+    export PYTHONWARNINGS="ignore"
+}
+ 
+# pip-freeze(): save pip freeze in _pip-freeze-{env_spec}-ddMMMyy.log
+function pip-freeze {
+    # TODO2: rework via cmd-output
+    local env_spec=""
+    local env_name
+    # ex: /Users/eafqe/python/.venv-nlp-py-12/bin/python => venv-nlp-py-12
+    env_name="$(which python | extract-matches "([^\.\/]+)\/bin\/python")"
+    if [ "$env_name" != "" ]; then
+        env_spec="-$env_name"
+    fi
+    local freeze_file
+    freeze_file="_pip-freeze${env_spec}-$(T).log"
+    rename-with-file-date "$freeze_file"
+    pip freeze > "$freeze_file"
+    echo "$freeze_file"
+}
+ 
+#-------------------------------------------------------------------------------
+# Jupyter notebook stuff
+ 
+# export-notebook(file, out): export file[.ipynb] to OUT (or $TEMP/_file[.py])
+# With env. PRETTY=1, the result is pretty printed for readability
+function export-notebook {
+    local notebook="$1"
+    local out_path="$2"
+    local pretty="${PRETTY:-0}"
+    local relative="${RELATIVE:-0}"
+    local tmp="${TMP:-/tmp}"
+    if [ "$relative" == "1" ]; then
+        # use temp subdir based on notebook dir (e.g., /tmp/notebooks/indexing/pim)
+        tmp="$TMP/$(dirname "$notebook")"
+    fi
+    mkdir -p "$tmp"
+    if [ "$out_path" == "" ]; then
+        # put exported script in temp dir
+                out_path="$tmp/$(basename "$notebook" .ipynb).py";
+    fi
+    rename-with-file-date "$out_path"
+    jupyter nbconvert "$notebook" --to script --stdout > "$out_path"
+ 
+    # Account for indentation
+    perl -i.bak -0777 -pe 's/\n\n( +)/\n$1#\n$1/g;' "$out_path"
+   
+    # Prettty print
+    if [ "$pretty" != "0" ]; then
+                # Make sure run_cell_magic are split across lines for sake of diff
+                # ex: "get_ipython().run_cell_magic('time', 'x += 1\ny += 2\n'...)" => "... 'x += 1\n" \\<newline>\ny += 2\n \\<newline>'...)"
+                ## BAD: perl -i.bak -pe 's/(run_cell_magic.*)[^\\]\n/\1\\\n \\/g;' "$out_path"
+        perl -i.bak -pe 'while (/^get_ipython.*\\n/) { s/^(get_ipython.*)\\n/\1 \\\\\n/g; }' "$out_path"
+    fi
+    wc "$out_path"
+}
+function export-notebook-temp { TMP=_temp export-notebook "$@"; }
+ 
+ 
+# run-notebook(jupyter-notebook): runs notebook in batch mode
 #
+IPYTHON=(command ipython --no-confirm-exit --ipython-dir="$TMP/ipython")
+#
+function run-notebook {
+    local file="$1"
+    local base
+    base="$(basename "$file" .ipynb)"
+    export-notebook "$file"
+    rename-with-file-date "$base"*
+    "${IPYTHON[@]}" "$TMP/$base.py" > "$base.out" 2> "$base.log"
+    check-errors-excerpt "$base.log"
+    head "$base.out"
+}
+ 
+ 
+# export-all-notebooks([dir=.], [temp_dir=_temp]): convert all Jupyter notebooks under DIR into Python script under TEMP_DIR
+function export-all-notebooks {
+    local dir="${1:-.}"
+    local temp="${2:-_temp}"
+    mkdir -p "$temp";
+    for f in "$dir"/*.ipynb; do
+        TMP="$temp" export-notebook "$f";
+    done
+}
+ 
+# compare-exported-notebooks(notebook): compares Python export of current notebook vs. last one saveg
+function compare-exported-notebooks {
+    local file="$1"
+    local base
+    base="$(basename "$file" .ipynb)"
+    ## OLD: local python_path="_temp/$base.py"
+    local temp_dir
+    temp_dir="$(dirname "$base.py")/_temp"
+    mkdir -p "$temp_dir"
+    local python_path="$temp_dir/$base.py"
+    PRETTY=1 export-notebook "$1" "$python_path"
+    local last
+    # note: old version gets timstamp added (e.g., my_notebook.py.08Apr24
+    # shellcheck disable=SC2010
+    last="$(ls -t "$python_path".* | grep -v .bak | head -1)"
+    compare-notebook-scripts --ignore '^# In.*:' "$last" "$python_path"
+}
+ 
+# compare-notebook-scripts(export1, export2): Compares EXPORT1 and EXPORT2 of Noteboooks
+# passes arguments to compare-log-output.sh (q.v.)
+function compare-notebook-scripts {
+    compare-log-output.sh --ignore '^# In.*:' "$@"
+}
+ 
+# run-jupyter-notebook-pristine(port): invoke jupter notenook w/o startup config
+alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$TMP/ipython" run-jupyter-notebook'
+ 
+ 
+
+#...............................................................................
+# Python utiities
+
 # color-test-failures(): show color-coded test result for pytest run (yellow for xfailed and red for regular fail)
 # color-test-results: likewise with green for passed and faint green xpassed
 simple-alias-fn color-output 'colout --case-insensitive'
@@ -313,8 +438,40 @@ function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -p
 # shellcheck disable=SC2016
 simple-alias-fn extract-text-html 'alias-python -m mezcla.html_utils --regular'
 
+# MS Office conversions
+function excel-to-csv {
+    local file="$1"
+    local base;
+    base="$(remove-extension "$file")";
+    python -c "import pandas as pd; df = pd.read_excel('$file', dtype=str); df.to_csv('$base.csv', index=False, encoding='utf-8-sig');";
+}
+ 
+# Github/ssh stuff
+# ssh-cache: activate ssh agent and add user's private key
+function ssh-cache {
+    # note: ignores SC2046 (warning): Quote this to prevent word splitting
+    # shellcheck disable=2046
+    eval $(ssh-agent)
+    ## OLD: ssh-add "$HOME/.ssh/id_$USER"
+    local one_month=$((60 * 60 * 24 * 31))
+    ssh-add -t "$one_month" "$HOME/.ssh/id_$USER"
+}
+alias ssh-access=ssh-cache
+ 
+alias consolidate-notes-here="consolidate-notes.bash --"
+ 
+# copy-relative(path, dir): copy file at PATH to DIR/PATH
+function copy-relative {
+    local path="$1";
+    local dir="$2";
+    copy "$path" "$dir/$path";
+}
+
 #...............................................................................
 # Bash stuff
+
+# bashrc(): [re-]source .bashrc
+alias bashrc='source ~/.bashrc'
 
 # shell-check-last-snippet(notes-file): extract last Bash snippet from notes
 # file and run through shellcheck
