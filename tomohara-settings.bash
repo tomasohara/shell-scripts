@@ -51,7 +51,9 @@ export PATH="$PATH:."
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib:$HOME/lib/$OSTYPE_BRIEF"
 
 # Setup pythonpath to include .. for sake of testing
-export PYTHONPATH="$PYTHONPATH:.."
+## OLD: export PYTHONPATH="$PYTHONPATH:.."
+# note: '.' & '..' put at end to avoid unexpected conflicts with scripts like common.py
+export PYTHONPATH="src:$PYTHONPATH:.:.."
 
 # Define HOST_NICKNAME from ~/.host-nickname if unset or the default
 if [[ ("$HOST_NICKNAME" = "") || ("$HOST_NICKNAME" = "tpo-host") ]]; then
