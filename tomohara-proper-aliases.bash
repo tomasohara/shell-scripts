@@ -115,7 +115,7 @@ function run-python-script {
     ## DEBUG: trace-vars _PSL_ out_base log
     if [ "$1" = "" ]; then
         echo "Usage: [ENV-OPTIONS] run-python-script script arg ..."
-        echo "   ENV-OPTIONS: [USE_STDIN=B] [USE_STDOUT=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] [KEEP_EMPTY_OUT=b] [PYTHON=path] [-PYTHON_RUN_LABEL=str]"
+        echo "   ENV-OPTIONS: [USE_STDIN=B] [USE_STDOUT=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] [KEEP_EMPTY_OUT=b] [PYTHON=path] [PYTHON_RUN_LABEL=str]"
         echo "note:"
         echo "- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL)"
         echo "- PYTHON_OUT_DIR is script dir unless a full path"
@@ -155,7 +155,8 @@ function run-python-script {
     let _PSL_++
     # TODO3: add OUT_BASE to override default
     local run_label="${PYTHON_RUN_LABEL:-"run"}"
-    out_base="$out_dir/_$script_base.$(TODAY).$run_label$_PSL_"
+    run_label=$(echo "$run_label" | perl -pe 'chomp; s/([^\.])$/\1\./;')
+    out_base="$out_dir/_$script_base.$(TODAY).$run_label.$_PSL_"
     if [ "$PROFILE_SCRIPT" == "1" ]; then
        out_base="$out_base.profile"
        module_spec="-m cProfile -o $out_base.data"
