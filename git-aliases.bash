@@ -310,7 +310,7 @@ function git-update-force {
 #
 function git-update-verified {
     local changed
-    changed=$(git-diff-list)
+    changed="$(git-diff-list)"
     if [ "$changed" != "" ]; then
         echo "Current changes: $changed"
         pause-for-enter "Proceed with update even though potential for conflict? (Enter for Y otherwise ^C)"
@@ -591,13 +591,16 @@ function git-diff-plus {
     # ex: --- "a/.github/act.yml" => "--- a: .github/act.yml"
     ## TODO? (account for subdirectories 'a' or 'b'):
     ## git diff "$@" | perl -pe 's@^(diff|\-\-\-|\+\+\+) (?!.*[ab]/.*)([ab])/@\1\2 \3: @;' >| "$log";
-    ## Note: uses git-diff-list[-template] so file order reflects subdir embedding level
-    local OLDIFS=$IFS                   # save inter-field separator
+    ## Note:
+    ## - Uses git-diff-list[-template] so file order reflects subdir embedding level.
+    ## - The 'diff -- file' format is used in case of spaces or other special characters.
+    local OLDIFS="$IFS"                 # save inter-field separator
+    IFS=$'\n'
     echo "" >| "$log"
     for f in $(git-diff-list "$@"); do
-        git diff "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log" 2>&1
+        git diff -- "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log" 2>&1
     done
-    IFS=$OLDIFS                         # restore inter-field separator
+    IFS="$OLDIFS"                       # restore inter-field separator
     #
     less -p '^diff' "$log";
     ## TODO: less --quit-if-one-screen --pattern='^diff' "$log";
@@ -708,7 +711,7 @@ function alt-invoke-next-single-checkin {
     # If unspecified, determine file to check in, based on next modified file
     local mod_file="$1"
     if [ "$mod_file" = "" ]; then
-        mod_file=$(git-diff-list | head -1);
+        mod_file="$(git-diff-list | head -1)";
         if [ "$mod_file" = "" ]; then
             echo "Warning: unable to infer modified file. Perhaps,"
             echo "    Tha-tha-that's all folks"'!'
@@ -896,7 +899,7 @@ function git-alias-usage () {
     echo ""
     echo "Check-in specific file:"
     local next_mod_file
-    next_mod_file=$(git-diff-list 2> /dev/null | head -1)
+    next_mod_file="$(git-diff-list 2> /dev/null | head -1)"
     if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
     echo '    git-next-checkin "'${next_mod_file}'"'
     echo ''
