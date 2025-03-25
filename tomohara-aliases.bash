@@ -2438,7 +2438,7 @@ function cmd-usage () {
     ## OLD: usage_file="_$(echo "$command" | tr ' ' '-')-usage.list"
     usage_file="_$(echo "$command" | perl -pe 's@[/ .]@_@g; s/_+/_/g;')-usage.list"
     $command --help  2>&1 | ansifilter > "$usage_file"
-    $PAGER_NOEXIT "$usage_file"
+    if [ $? -eq 0 ]; then $PAGER_NOEXIT "$usage_file"; fi
 }
 ## TODO:
 ## function cmd-usage () {
