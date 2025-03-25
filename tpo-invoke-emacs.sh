@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 # 
 # Invokes Emacs with current directory unless files specified on command
 # line and using ~/.emacs.tpo instead of ~/.emacs (for when using shared
@@ -15,7 +15,7 @@
 #   SC2090: [Quotes/backslashes in this variable will not be respected.]
 #
 #-------------------------------------------------------------------------------
-# Note: Based on following alias/functions definition (see tohara-aliases.bash)
+# Note: Based on following alias/functions definition:
 #
 # emacs_options="--geometry 80x50"
 # if [ -e "~/.emacs.tpo" ]; then
@@ -30,6 +30,10 @@
 #     function em () { if [ "$1" = "" ]; then emacs $emacs_options .; else emacs $emacs_options "$@"; fi & }
 #     alias emacs-tpo=em
 # fi
+#
+#-------------------------------------------------------------------------------
+#
+# TODO3: only disassociate the new emacs job (see disown below); ex: via setsid
 #
 
 # Uncomment following line(s) for tracing:
@@ -200,12 +204,14 @@ if [ "$in_background" = "1" ]; then
         ## OLD: nohup "$emacs" $emacs_options $(realpath "${args[*]}") >> $TEMP/nohup.log 2>&1 &
         # shellcheck disable=SC2090
 	nohup "$emacs" "${emacs_options[@]}" "${args[*]}" >> $TEMP/nohup.log 2>&1 &
+        disown
     else
         ## DEBUG: echo "regular background (i.e., non-nohup)"
         ## DEBUG: echo "issuing: $emacs "${emacs_options[@]}" ${args[*]} &"
 	## DEBUG: set -o xtrace
 	## DEBUG: echo "${args[@]}"
         "$emacs" "${emacs_options[@]}" "${args[@]}" &
+        disown
     fi
 else
     ## DEBUG: echo "in foreground"
