@@ -113,10 +113,10 @@
 ## VERBOSE: set -o verbose
 #
 # Set bash regular and/or verbose tracing
-if [ "${TRACE:-0}" = "1" ]; then
+if [ "${TRACE:-0}" == "1" ]; then
     set -o xtrace
 fi
-if [ "${VERBOSE:-0}" = "1" ]; then
+if [ "${VERBOSE:-0}" == "1" ]; then
     set -o verbose
 fi
 
@@ -125,10 +125,10 @@ fi
 # in $@.
 # NOTE: See sync-loop.sh for an example.
 #
-if [ "$1" = "" ]; then
+if [ "$1" == "" ]; then
     script=$(basename "$0")
     ## TODO: remove following which is only meant for when ./template.bash run
-    if [ "$script" = "template.bash" ]; then echo "Warning: not intended for standalone usage"; fi;
+    if [ "$script" == "template.bash" ]; then echo "Warning: not intended for standalone usage"; fi;
     ## TODO: if [ $script ~= *\ * ]; then script='"'$script'"; fi
     ## TODO: base=$(basename "$0" .bash)
     echo ""
@@ -155,14 +155,14 @@ fi
 # TODO: set getopt-type utility
 #
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
-while [ "$moreoptions" = "1" ]; do
+while [ "$moreoptions" == "1" ]; do
     # TODO : add real options
-    if [ "$1" = "--trace" ]; then
+    if [ "$1" == "--trace" ]; then
         set -o xtrace
-    elif [ "$1" = "--TODO-fubar" ]; then
+    elif [ "$1" == "--TODO-fubar" ]; then
         ## TODO: implement
         echo "TODO-fubar"
-    elif [[ ("$1" = "--") || ("$1" = "-") ]]; then
+    elif [[ ("$1" == "--") || ("$1" == "-") ]]; then
         break
     else
         echo "Error: Unknown option: $1";
