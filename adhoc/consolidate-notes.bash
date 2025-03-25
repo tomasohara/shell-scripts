@@ -32,13 +32,13 @@ echo "$0 $*"
 # in $@.
 # NOTE: See sync-loop.sh for an example.
 #
-if [[ ("$1" = "") || ("$1" = "--help") ]]; then
+if [[ ("$1" == "") || ("$1" == "--help") ]]; then
     script=$(basename "$0")
     ## TODO: if [ $script ~= *\ * ]; then script='"'$script'"; fi
     ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--TODO] [--trace] [--help] [--]"
+    echo "Usage: $0 [--trace] [--help] [--]"
     echo ""
     echo "Examples:"
     echo ""
@@ -49,7 +49,7 @@ if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."
     echo "- By default only includes text files with 'notes' in name, along with adhoc filters."
-    echo "- Env vars: ALL_TEXT, SRC_DIR, TRACE, VERBOSE, FIND_COMMAND_OPTIONS, FIND_GLOBAL_OPTIONS."
+    echo "- Env vars: ALL_TEXT, CRONTAB, SRC_DIR, TRACE, VERBOSE, FIND_COMMAND_OPTIONS, FIND_GLOBAL_OPTIONS."
     echo ""
     exit
 fi
@@ -59,13 +59,14 @@ fi
 #
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 trace=0
-while [ "$moreoptions" = "1" ]; do
-    # TODO : add real options
-    if [ "$1" = "--trace" ]; then
+while [ "$moreoptions" == "1" ]; do
+    if [ "$1" == "--trace" ]; then
 	trace=1
-    elif [ "$1" = "--fubar" ]; then
-	echo "fubar"
-    elif [[ ("$1" = "--") || ("$1" = "-") ]]; then
+    elif [ "${CRONTAB:-0}" == "1" ]; then
+        # TEMP: ignore options if invoked via crontab (requires env option)
+        echo "Warning: ignoring options ($*)"
+	break
+    elif [[ ("$1" == "--") || ("$1" == "-") ]]; then
 	break
     else
 	echo "ERROR: Unknown option: $1";
@@ -91,10 +92,10 @@ done
 # Enable tracing
 # note: done after alias files sourced to avoid exxtraenous tracing
 # TODO2: make note of TRACE and other env. var usage
-if [[ ("$trace" = "1") || ("${TRACE:-0}" = "1") ]]; then
+if [[ ("$trace" == "1") || ("${TRACE:-0}" == "1") ]]; then
     set -o xtrace
 fi
-if [ "${VERBOSE:-0}" = "1" ]; then
+if [ "${VERBOSE:-0}" == "1" ]; then
     set -o verbose
 fi
 
@@ -131,7 +132,7 @@ fi
 find_command_options="${FIND_COMMAND_OPTIONS:-}"
 find_global_options="${FIND_GLOBAL_OPTIONS:-}"
 # shellcheck disable=SC2086
-if [ "${ALL_TEXT:-0}" = "1" ]; then
+if [ "${ALL_TEXT:-0}" == "1" ]; then
     # TODO: rework so that pattern-type options specified individially (e.g., LOG_FILES, ADHOC_NOTES, etc)
     find $find_command_options "${SRC_DIR:-.}" $find_global_options \(  -iname '*.txt' -o -iname '*.text' \) 2> "$new_base.files.log" | $EGREP -iv '/(backup|old|temp)/' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
 else
@@ -140,7 +141,7 @@ else
     find $find_command_options "${SRC_DIR:-.}" $find_global_options \( -iname '*adhoc*[0-9][0-9]*.txt' -o -iname '*adhoc*[0-9][0-9]*.list' -o -iname '*adhoc*[0-9][0-9]*.log' -o -iname '*-notes*.txt' -o -iname '*-notes*.list' -o -iname '*-notes*.log' \) 2> "$new_base.files.log" | $EGREP -iv '/(backup|old|temp)/' | $EGREP -iv '/_[^\/]+(?!adhoc)[^\/]+.log' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
 fi
 ## TODO: if [ -z "$new_base.files.list" ]; then
-if [ "$(wc -l < "$new_base.files.list")" = "0" ]; then
+if [ "$(wc -l < "$new_base.files.list")" == "0" ]; then
     echo "Error: problem finding note files to merge" 1>&2
     exit
 fi
