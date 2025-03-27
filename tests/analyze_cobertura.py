@@ -8,6 +8,7 @@ Sample usage:
 """
 
 # Standard modules
+import re
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 
@@ -48,7 +49,7 @@ class CoverageHelper:
     def find_cobertura_reports(self):
         """Find all Cobertura XML reports in the coverage directory."""
         reports = []
-        pattern = my_re.compile(COBERTURA_XML_REGEX)
+        pattern = re.compile(COBERTURA_XML_REGEX)
 
         def scan_directory(directory):
             for entry in gh.get_directory_listing(directory):
