@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 #
 # Run nvidia-smi in background N times with a delay of N seconds each.
 #
@@ -59,9 +59,9 @@ fi
 if [[ "${ADVANCED_USAGE:-0}" == "1" ]]; then
     date_yyyy_mm_dd_hhmm="$(date '+%Y-%m-%d_%H%M')"
     log_file="$TMP/$base-$date_yyyy_mm_dd_hhmm.log"
-    let one_day_in_secs=(24 * 3600)
-    let delay_time=60
-    let num_times=(one_day_in_secs / delay_time)
+    one_day_in_secs=$((24 * 3600))
+    delay_time=60
+    num_times=$((one_day_in_secs / delay_time))
     echo $'Invoking script\t'
     echo "    $script $num_times $delay_time"
     $script $num_times $delay_time > "$log_file" 2>&1 &
