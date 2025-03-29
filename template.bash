@@ -76,6 +76,8 @@
 #      <<<"text"                    single line using TEXT (i.e., "here string")
 #  - sequence expression
 #      {n..m}                       echo "digits:" {0..9}; echo "letters: " {a..z}
+#  - advanced redirection
+#      &>                           same as ... > ... 2>&1 
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
@@ -113,10 +115,10 @@
 ## VERBOSE: set -o verbose
 #
 # Set bash regular and/or verbose tracing
-if [ "${TRACE:-0}" == "1" ]; then
+if [[ "${TRACE:-0}" == "1" ]]; then
     set -o xtrace
 fi
-if [ "${VERBOSE:-0}" == "1" ]; then
+if [[ "${VERBOSE:-0}" == "1" ]]; then
     set -o verbose
 fi
 
@@ -125,11 +127,11 @@ fi
 # in $@.
 # NOTE: See sync-loop.sh for an example.
 #
-if [ "$1" == "" ]; then
+if [[ "$1" == "" ]]; then
     script=$(basename "$0")
     ## TODO: remove following which is only meant for when ./template.bash run
-    if [ "$script" == "template.bash" ]; then echo "Warning: not intended for standalone usage"; fi;
-    ## TODO: if [ $script ~= *\ * ]; then script='"'$script'"; fi
+    if [[ "$script" == "template.bash" ]]; then echo "Warning: not intended for standalone usage"; fi;
+    ## TODO: if [[ $script ~= *\ * ]]; then script='"'$script'"; fi
     ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
@@ -155,14 +157,15 @@ fi
 # TODO: set getopt-type utility
 #
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
-while [ "$moreoptions" == "1" ]; do
+while [[ "$moreoptions" == "1" ]]; do
     # TODO : add real options
-    if [ "$1" == "--trace" ]; then
+    if [[ "$1" == "--trace" ]]; then
         set -o xtrace
-    elif [ "$1" == "--TODO-fubar" ]; then
+    elif [[ "$1" == "--TODO-fubar" ]]; then
         ## TODO: implement
         echo "TODO-fubar"
     elif [[ ("$1" == "--") || ("$1" == "-") ]]; then
+        shift
         break
     else
         echo "Error: Unknown option: $1";
@@ -171,5 +174,7 @@ while [ "$moreoptions" == "1" ]; do
     shift;
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 done
+# TODO: add positional arg assignment (delete if not planned)
+## todo_arg1="$1"
 
 # TODO: Do whatever
