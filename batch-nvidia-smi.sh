@@ -14,10 +14,10 @@
 ## echo "$@"
 
 # Set bash regular and/or verbose tracing
-if [ "${TRACE:-0}" = "1" ]; then
+if [[ "${TRACE:-0}" == "1" ]]; then
     set -o xtrace
 fi
-if [ "${VERBOSE:-0}" = "1" ]; then
+if [[ "${VERBOSE:-0}" == "1" ]]; then
     set -o verbose
 fi
 
@@ -29,7 +29,7 @@ fi
 script=$(basename "$0")
 base=$(basename "$script" .sh)
 #
-if [[ ("$1" = "") || ("$1" == "--help") ]]; then
+if [[ ("$1" == "") || ("$1" == "--help") ]]; then
     echo ""
     echo "Usage: $script [--trace] [--help] [--] [num-times] [pause-time]"
     echo ""
@@ -56,7 +56,7 @@ if [[ ("$1" = "") || ("$1" == "--help") ]]; then
 fi
 
 # Check for pre-canned usages
-if [ "${ADVANCED_USAGE:-0}" == "1" ]; then
+if [[ "${ADVANCED_USAGE:-0}" == "1" ]]; then
     date_yyyy_mm_dd_hhmm="$(date '+%Y-%m-%d_%H%M')"
     log_file="$TMP/$base-$date_yyyy_mm_dd_hhmm.log"
     let one_day_in_secs=(24 * 3600)
@@ -64,14 +64,14 @@ if [ "${ADVANCED_USAGE:-0}" == "1" ]; then
     let num_times=(one_day_in_secs / delay_time)
     echo $'Invoking script\t'
     echo "    $script $num_times $delay_time"
-    $script $num_times $delay_time > $log_file &
+    $script $num_times $delay_time > "$log_file" 2>&1 &
     echo "See $log_file"
     exit
 fi
 
 # Make sure the utility exists
 utility=nvidia-smi
-if [ "" = "$(which "$utility")" ]; then
+if [[ "" == "$(which "$utility")" ]]; then
     echo "Error: utility $utility not found"
     exit
 fi
@@ -82,14 +82,13 @@ fi
 n=120
 s=0.5
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
-while [ "$moreoptions" = "1" ]; do
+while [[ "$moreoptions" == "1" ]]; do
     # TODO : add real options
-    if [ "$1" = "--trace" ]; then
+    if [[ "$1" == "--trace" ]]; then
 	set -o xtrace
-    elif [ "$1" = "--fubar" ]; then
-	echo "fubar"
-    elif [[ ("$1" = "--") || ("$1" = "-") ]; then
-	break
+    elif [[ ("$1" == "--") || ("$1" == "-") ]]; then
+        shift
+        break
     else
 	echo "ERROR: Unknown option: $1";
 	exit
@@ -98,12 +97,12 @@ while [ "$moreoptions" = "1" ]; do
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 done
 #
-if [ "$1" != "" ]; then n="$1"; fi
-if [ "$2" != "" ]; then s="$2"; fi
+if [[ "$1" != "" ]]; then n="$1"; fi
+if [[ "$2" != "" ]]; then s="$2"; fi
 
 # Use max-int if - (i.e., 2^64)
-## TODO: if [ "$n" = "n/a" ]; then n=18446744073709551616; fi
-if [ "$n" = "n/a" ]; then n=1000000; fi
+## TODO: if [[ "$n" == "n/a" ]]; then n=18446744073709551616; fi
+if [[ "$n" == "n/a" ]]; then n=1000000; fi
 
 for (( i=0; i<n; i++ )); do
     "$utility"
