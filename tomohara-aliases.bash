@@ -1276,7 +1276,7 @@ function comma-ize-number () { perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\
 # Notes:
 # - K, M, G and T based on powers of 1024.
 # - If $once non-zero, then the substitution is only applied one-time per line.
-# - The number must be preceded by a word boundary and followed by whitespace.
+# - The number must be occur at a word boundary.
 # This was added in support of the usage function (e.g., numeric subdirectory names).
 # TODO:
 # - Convert to Perl script to avoid awkward bash command line construction.
@@ -1285,12 +1285,14 @@ function comma-ize-number () { perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\
 # EX: echo "1024 1572864 1073741824" | apply-numeric-suffixes 1 => 1K 1572864 1073741824
 function apply-numeric-suffixes () {
     local just_once="$1"
-    local g="g";
-    if [ "$just_once" = "1" ]; then g=""; fi
-    # TODO: make only sure the first number is converted if just-once applies
-    # NOTE: 3 args to sprintf: coefficient, KMGT suffix, and post-context
-    ## DEBUG; perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = log($1)/log(1024);  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  print STDERR ("s=$suffixes p=$pow nn=$new_num l=$suffix\n"); sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
-    perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\b)@$pow = int(log($1)/log(1024));  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
+    ## OLD:
+    ## local g="g";
+    ## if [ "$just_once" = "1" ]; then g=""; fi
+    ## # TODO: make only sure the first number is converted if just-once applies
+    ## # NOTE: 3 args to sprintf: coefficient, KMGT suffix, and post-context
+    ## ## DEBUG; perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = log($1)/log(1024);  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  print STDERR ("s=$suffixes p=$pow nn=$new_num l=$suffix\n"); sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
+    ## perl -pe '$suffixes="_KMGTPE";  s@\b(\d{4,18})(\b)@$pow = int(log($1)/log(1024));  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
+    cat | alias-python -c "from mezcla.misc_utils import apply_numeric_suffixes_stdin as apply; apply(just_once=bool($just_once))"
 }
 #
 # apply-usage-numeric-suffixes(): factors in 1k blocksize before applying numeric suffixes
@@ -2383,7 +2385,7 @@ alias bash-trace-off='set - -o xtrace'
 function trace-cmd() {
     (
         ## TODO: warn about need for extra quotes
-        ## if [[ "$*" =~ " " ]; then echo  "FYI: Make sure command doubly-quoted to trace-cmd""
+        ## if [[ "$*" =~ " " ]]; then echo  "FYI: Make sure command doubly-quoted to trace-cmd"; fi
         echo "start: $(date)";
         bash-trace-on; 
         eval "$*"; 
@@ -3069,7 +3071,7 @@ alias kill-python-all="kill-em python"
 ## function which-program {
 ##     local program="$1"
 ##     result=$(which "$programe")
-##     if [[ ("$result" == "") || ("$verbsr ]; then result="$result;$(whereis "$program"); fi
+##     if [[ ("$result" == "") || ("$verbose" == "1") ]]; then result="$result;$(whereis "$program"); fi
 ##     if ...
 ##     }
 ## alias which-python='which-program python'
