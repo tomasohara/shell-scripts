@@ -52,6 +52,7 @@ function git-rename-revert {
 
 # Other misc. stuff
 alias nvidia-batched='batch-nvidia-smi.sh'
+alias nvidia-batched-advanced='ADVANCED_USAGE=1 nvidia-batched -'
 alias nvidia-top='nvtop'
 alias nvsmi=nvidia-smi
 
@@ -155,7 +156,8 @@ function run-python-script {
     let _PSL_++
     # TODO3: add OUT_BASE to override default
     local run_label="${PYTHON_RUN_LABEL:-"run"}"
-    run_label=$(echo "$run_label" | perl -pe 'chomp; s/([^\.])$/\1\./;')
+    ## OLD: run_label=$(echo "$run_label" | perl -pe 'chomp; s/([^\.])$/\1\./;')
+    run_label=$(echo "$run_label" | perl -pe 'chomp; s/\.$//;')
     out_base="$out_dir/_$script_base.$(TODAY).$run_label.$_PSL_"
     if [ "$PROFILE_SCRIPT" == "1" ]; then
        out_base="$out_base.profile"
