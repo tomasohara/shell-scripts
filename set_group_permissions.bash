@@ -25,9 +25,9 @@ if [ "$1" = "" ]; then
     echo ""
     echo "Examples:"
     echo ""
-    echo "CHOWN=1 sudo $0 /usr/local/misc/programs/"
+    echo "CHOWN=1 $0 /usr/local/misc/programs/"
     echo ""
-    echo "$script ~/programs/bash/shell-scripts-devel"
+    echo "sudo $script ~/programs/bash/shell-scripts-devel"
     echo ""
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."
@@ -84,5 +84,5 @@ setfacl -R -m d:g::rwX "$dir" >> "$log" 2>&1
 
 # Show results
 echo "Permission changes log: $log"
-wc "$log"
+wc -l "$log"
 tail "$log"
