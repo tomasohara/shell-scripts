@@ -151,7 +151,7 @@ function run-python-script {
     ## OLD:
     ## declare -g _PSL_ log out
     ## local out_base
-    declare -g _PSL_ log out out_base
+    declare -g _PSL_ log out out_base PYTHON
     local module_spec=""
     let _PSL_++
     # TODO3: add OUT_BASE to override default
@@ -684,7 +684,7 @@ function create-zip {
     if [[ ("$dir" == "") || ("$dir" == --help) ]]; then
         ## TODO4: $* =~ --help
         echo "Usage create-zip [dirname]"
-        echo "ex: [ENCRYPT=b] create-zip /mnt/resmed"
+        echo "ex: [ENCRYPT=b] [TEMP=d] create-zip /mnt/resmed"
         return
     fi
     local extra_args=()
@@ -692,7 +692,7 @@ function create-zip {
         extra_args+=("-e")
     fi
     local archive
-    archive="$TEMP/$(basename "$dir").zip"
+    archive="${TEMP:-/tmp}/$(basename "$dir").zip"
     echo "issuing: zip -r -u ${extra_args[*]} \"$archive\" \"$dir\""
     # options: -r recursive; -u update
     zip -r -u "${extra_args[@]}" "$archive" "$dir";
@@ -777,6 +777,14 @@ function reset-under-emacs {
     all-tomohara-settings
 }
 simple-alias-fn emacs-wide-horizontal 'tpo-invoke-emacs.sh -geometry 288x50 -eval "(split-window-right)"'
+
+# df-h(dir=[.], ...): show DIR disk free in human readable format
+function df-h {
+    local dirs=("$@")
+    ## TODO3: local dirs=("${@:-.}")
+    if [[ "${#dirs[@]}" == 0 ]]; then dirs=(.); fi
+    df -h "${dirs[@]}"
+}
 
 #................................................................................
 # Media stuff
