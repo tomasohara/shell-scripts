@@ -77,7 +77,7 @@
 #  - sequence expression
 #      {n..m}                       echo "digits:" {0..9}; echo "letters: " {a..z}
 #  - advanced redirection
-#      &>                           same as ... > ... 2>&1 
+#      &>                           same as `> ... 2>&1` 
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
