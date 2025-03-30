@@ -54,7 +54,7 @@ fi
 mkdir -p ~/config ~/temp
 log=~/config/_update-all-repos-$(T).log
 temp_log=~/temp/_update-all-repos-$(T).temp.log
-rename-with-file-date "$log" "$temp_log"
+rename-with-file-date "$log" "$temp_log" &> /dev/null
 ## TODO4: resolve problem w/ $* leading to 'histappend'
 ## DEBUG: echo "${BASH_SOURCE[0]} $*" | tee "$log"
 echo "in $0: $(date)" >> "$log"
