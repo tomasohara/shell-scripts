@@ -42,7 +42,6 @@ to extract test coverage information using a multi-stage pipeline.
    - `tests/analyze_cobertura.py` → Uses `kcov-output` for deeper insights
 
 ### **Execution Notes**
-- **A & B execute in parallel.**
 - **C starts only after A & B complete.**
 - **D depends on the output from C.**
 
@@ -51,11 +50,8 @@ This ensures efficient processing while maintaining dependencies between steps.
 
 # Standard modules
 import os
-import sys
+import datetime
 import json
-
-# Installed modules
-import concurrent.futures
 
 # Local modules
 from mezcla import debug
@@ -83,7 +79,6 @@ INTERMEDIATE_OUTPUT_ARG = "intermediate-output"
 ALT_RESULT_ARG = "alt-result"
 OUTPUT_ARG = "output" 
 SKIP_ARG = "skip"
-PARALLEL_ARG = "parallel"
 DRY_RUN_ARG = "dry-run"
 SIMPLE_BATSPP_ARG = "simple-batspp"
 
@@ -95,6 +90,7 @@ DEFAULT_TIMEOUT = 300  # 5 minutes timeout for commands
 KCOV_INCLUDE_PATTERN = os.environ.get("KCOV_INCLUDE_PATTERN", "")
 BATSPP_PATH = os.environ.get("BATSPP_PATH", "batspp")
 JUPYTER_TO_BATSPP_PATH = os.environ.get("JUPYTER_TO_BATSPP_PATH", "jupyter_to_batspp.py")
+# JSON_OUTPUT = system.env_options
 
 ## Helper Script
 class AnalyzeTestCoverageHelper:
@@ -105,7 +101,7 @@ class AnalyzeTestCoverageHelper:
         debug.trace(TL.VERBOSE, f"AnalyzeTestCoverageHelper.__init__(): self={self}")
         self.bash_source_path = bash_source_path
         self.notebook_path = notebook_path
-        self.temp_dir = intermediate_output_dir or system.TEMP_DIR
+        self.temp_dir = system.TEMP_DIR + f'_{datetime.datetime.now().strftime("%y%m%d%H%M%S")}'
         self.dry_run = dry_run
         
         # Create temp directory if it doesn't exist
@@ -119,40 +115,12 @@ class AnalyzeTestCoverageHelper:
             
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
-    def _run_command(self, description, command, input_path, output_path=None, command_template=None):
-        """Generic method to run a command with standardized tracing and output handling
+    ## Pipeline Steps for Bash Source 
+    def _convert_bash_to_multiline(self, bash_source_path):
+        debug.trace(TL.VERBOSE, f"Converting to multiline format {bash_source_path}")
         
-        Args:
-            description: Description of the operation being performed
-            command: The command name/script to run
-            input_path: Path to the input file
-            output_path: Path for the output (if None, will be generated)
-            command_template: Optional custom template for the command (default: "{command} {input_path} > {output_path}")
-        
-        Returns:
-            The path to the output file
-        """
-        debug.trace(TL.VERBOSE, f"{description} {input_path}")
-        
-        # If output_path not provided, generate it based on input_path
-        if not output_path:
-            filename = gh.basename(input_path, extension=True)
-            base, ext = gh.splitext(filename)
-            # Default suffix based on operation
-            operation_name = description.lower().split()[0]
-            suffix = f"_{operation_name}"
-            output_path = f"{self.temp_dir}/{base}{suffix}{ext}"
-        
-        # Use default command template if none provided
-        if not command_template:
-            command_template = "{command} {input_path} > {output_path}"
-            
-        # Format the command string
-        full_command = command_template.format(
-            command=command,
-            input_path=input_path,
-            output_path=output_path
-        )
+        output_path = f"{self.temp_dir}/{gh.basename(bash_source_path, extension='.bash')}_multiline.bash"
+        full_command = f"python tests/bash_to_multiline.py {bash_source_path} > {output_path}"
         
         debug.trace(TL.VERBOSE, f"Running command: {full_command}")
         
@@ -162,142 +130,179 @@ class AnalyzeTestCoverageHelper:
         
         result = gh.run(full_command, timeout=DEFAULT_TIMEOUT)
         
-        # Check if output file exists
-        if output_path and not os.path.exists(output_path) and ">" in full_command:
+        if not os.path.exists(output_path):
             debug.warning(f"Expected output file not created: {output_path}")
             
         return output_path
 
-    ## Pipeline Steps for Bash Source 
-    def _convert_bash_to_multiline(self, bash_source_path):
-        """Convert Bash script to multiline format"""
-        return self._run_command(
-            description="Converting to multiline format",
-            command="python tests/bash_to_multiline.py",
-            input_path=bash_source_path,
-            output_path=f"{self.temp_dir}/{gh.basename(bash_source_path, extension=True)}_multiline.bash"
-        )
-
     def _extract_bash_macros(self, bash_source_path):
         """Extract macros from the Bash script"""
-        return self._run_command(
-            description="Extracting macros from",
-            command="python tests/extract_bash_macros.py",
-            input_path=bash_source_path,
-            output_path=f"{self.temp_dir}/{gh.basename(bash_source_path, extension=True)}_macros.json",
-            command_template="{command} {input_path} --json > {output_path}"
-        )
+        debug.trace(TL.VERBOSE, f"Extracting macros from {bash_source_path}")
+        
+        output_path = f"{self.temp_dir}/{gh.basename(bash_source_path, extension='.bash')}_macros.json"
+        full_command = f"python tests/extract_bash_macros.py {bash_source_path} --json > {output_path}"
+        
+        debug.trace(TL.VERBOSE, f"Running command: {full_command}")
+        
+        if self.dry_run:
+            debug.trace(TL.BASIC, f"[DRY RUN] Would execute: {full_command}")
+            return output_path
+        
+        result = gh.run(full_command, timeout=DEFAULT_TIMEOUT)
+        
+        if not os.path.exists(output_path):
+            debug.warning(f"Expected output file not created: {output_path}")
+            
+        return output_path
 
     ## Pipeline Steps for Jupyter Notebook
     def _convert_notebook_to_batspp(self, notebook_path, use_simple_batspp=False):
         """Convert Jupyter Notebook to batspp format"""
+        debug.trace(TL.VERBOSE, f"Converting to batspp format {notebook_path}")
+        
         command = "python simple_batspp.py" if use_simple_batspp else f"python {JUPYTER_TO_BATSPP_PATH}"
-        return self._run_command(
-            description="Converting to batspp format",
-            command=command,
-            input_path=notebook_path,
-            output_path=f"{self.temp_dir}/{gh.basename(notebook_path, extension=True)}.batspp"
-        )
+        output_path = f"{self.temp_dir}/{gh.basename(notebook_path, extension='.ipynb')}.batspp"
+        full_command = f"{command} {notebook_path} > {output_path}"
+        
+        debug.trace(TL.VERBOSE, f"Running command: {full_command}")
+        
+        if self.dry_run:
+            debug.trace(TL.BASIC, f"[DRY RUN] Would execute: {full_command}")
+            return output_path
+        
+        result = gh.run(full_command, timeout=DEFAULT_TIMEOUT)
+        
+        if not os.path.exists(output_path):
+            debug.warning(f"Expected output file not created: {output_path}")
+            
+        return output_path
     
     def _convert_batspp_to_bats(self, batspp_path, bash_source_path, use_simple_batspp=False):
         """Convert batspp script to standard Bats format"""
-        command = "python simple_batspp.py" if use_simple_batspp else BATSPP_PATH
+        debug.trace(TL.VERBOSE, f"Converting to Bats format {batspp_path}")
         
-        return self._run_command(
-            description="Converting to Bats format",
-            command=command,
-            input_path=batspp_path,
-            output_path=f"{self.temp_dir}/{gh.basename(batspp_path, extension=True)}.bats",
-            command_template="{command} {input_path} --source {bash_source_path} > {output_path}".format(
-                command="{command}",
-                input_path="{input_path}",
-                bash_source_path=bash_source_path,
-                output_path="{output_path}"
-            )
-        )
+        command = "python simple_batspp.py" if use_simple_batspp else BATSPP_PATH
+        output_path = f"{self.temp_dir}/{gh.basename(batspp_path, extension='.batspp')}.bats"
+        full_command = f"{command} {batspp_path} --source {bash_source_path} --save {output_path}"
+        
+        debug.trace(TL.VERBOSE, f"Running command: {full_command}")
+        
+        if self.dry_run:
+            debug.trace(TL.BASIC, f"[DRY RUN] Would execute: {full_command}")
+            return output_path
+        
+        result = gh.run(full_command, timeout=DEFAULT_TIMEOUT)
+        
+        if not os.path.exists(output_path):
+            debug.warning(f"Expected output file not created: {output_path}")
+            
+        return output_path
 
     def _generate_kcov_output(self, bats_path, bash_source_path):
         """Generate kcov output from Bats tests"""
-        filename = gh.basename(bats_path, extension=True)
-        output_path = f"{self.kcov_output_dir}/{filename}"
+        debug.trace(TL.VERBOSE, f"Generating kcov output from {bats_path}")
+        
+        filename = gh.basename(bats_path, extension='.bats')
+        output_path = f"{self.kcov_output_dir}/{filename}"        
         
         # Create output directory if it doesn't exist
-        if not os.path.exists(output_path) and not self.dry_run:
-            os.makedirs(output_path)
+        if not os.path.exists(self.kcov_output_dir) and not self.dry_run:
+            os.makedirs(self.kcov_output_dir)
             
         include_pattern = KCOV_INCLUDE_PATTERN or bash_source_path
+        full_command = f"kcov {output_path} bats {bats_path}"
+
+        debug.trace(TL.VERBOSE, f"Running command: {full_command}")
         
-        return self._run_command(
-            description="Generating kcov output from",
-            command="kcov",
-            input_path=bats_path,
-            output_path=output_path,
-            command_template="{command} --include-pattern={include_pattern} {output_path} {input_path}".format(
-                command="{command}",
-                include_pattern=include_pattern,
-                output_path="{output_path}",
-                input_path="{input_path}"
-            )
-        )
+        if self.dry_run:
+            debug.trace(TL.BASIC, f"[DRY RUN] Would execute: {full_command}")
+            return output_path
+        
+        result = gh.run(full_command, timeout=DEFAULT_TIMEOUT)
+        
+        if not os.path.exists(output_path):
+            debug.trace(5, f"Expected output directory not created: {output_path}")
+            
+        return output_path
     
     def _extract_cobertura_coverage(self, kcov_output_path):
         """Convert kcov output to Cobertura format"""
-        cobertura_path = f"{kcov_output_path}/cobertura.xml"
+        debug.trace(TL.VERBOSE, f"Extracting Cobertura coverage from {kcov_output_path}")
+        
+        cobertura_path = f"{kcov_output_path}/bats/cobertura.xml"
         if not os.path.exists(cobertura_path) and not self.dry_run:
-            debug.warning(f"Cobertura file not found at {cobertura_path}")
-            cobertura_path = f"{kcov_output_path}/coverage.xml"  # Fallback
+            debug.trace(5, f"Cobertura file not found at {cobertura_path}")
+            cobertura_path = f"{kcov_output_path}/bats/coverage.xml"  # Fallback
             
-        return self._run_command(
-            description="Extracting Cobertura coverage from",
-            command="python tests/cobertura_to_json.py",
-            input_path=cobertura_path,
-            output_path=f"{self.temp_dir}/{gh.basename(kcov_output_path)}_cobertura.json"
-        )
+        output_path = f"{self.temp_dir}/{gh.basename(kcov_output_path)}_cobertura.json"
+        full_command = f"python tests/cobertura_to_json.py --input {cobertura_path} --output {output_path}"
+        
+        debug.trace(TL.VERBOSE, f"Running command: {full_command}")
+        
+        if self.dry_run:
+            debug.trace(TL.BASIC, f"[DRY RUN] Would execute: {full_command}")
+            return output_path
+        
+        result = gh.run(full_command, timeout=DEFAULT_TIMEOUT)
+        
+        if not os.path.exists(output_path):
+            debug.warning(f"Expected output file not created: {output_path}")
+            
+        return output_path
     
     ## Pipeline Steps for Function Coverage
     def _generate_function_coverage(self, cobertura_path, macros_path, json_output=False):
         """Generate function-level coverage report"""
+        debug.trace(TL.VERBOSE, f"Generating function coverage from {cobertura_path}")
+        
         output_suffix = "_function_coverage.json" if json_output else "_function_coverage.txt"
-        output_path = f"{self.temp_dir}/{gh.basename(cobertura_path, extension=True)}{output_suffix}"
+        output_path = f"{self.temp_dir}/{gh.basename(cobertura_path, extension='.json')}{output_suffix}"
         
-        command_template = "{command} {input_path} {macros_path}"
+        command = f"python tests/compute_function_coverage.py --cobertura {cobertura_path} --functions {macros_path}"
         if json_output:
-            command_template += " --json"
-            
-        command_template += " > {output_path}"
+            command += " --json"
         
-        return self._run_command(
-            description="Generating function coverage from",
-            command="python tests/compute_function_coverage.py",
-            input_path=cobertura_path,
-            output_path=output_path,
-            command_template=command_template.format(
-                command="{command}",
-                input_path="{input_path}",
-                macros_path=macros_path,
-                output_path="{output_path}"
-            )
-        )
+        full_command = f"{command} > {output_path}"
+        
+        debug.trace(TL.VERBOSE, f"Running command: {full_command}")
+        
+        if self.dry_run:
+            debug.trace(TL.BASIC, f"[DRY RUN] Would execute: {full_command}")
+            return output_path
+        
+        result = gh.run(full_command, timeout=DEFAULT_TIMEOUT)
+        
+        if not os.path.exists(output_path):
+            debug.warning(f"Expected output file not created: {output_path}")
+            
+        return output_path
     
     def _generate_alternative_function_coverage(self, kcov_output_path):
         """Generate alternative function coverage report"""
-        output_path = f"{self.temp_dir}/{gh.basename(kcov_output_path)}_alt_coverage.txt"
+        debug.trace(TL.VERBOSE, f"Generating alternative function coverage from {kcov_output_path}")
         
-        return self._run_command(
-            description="Generating alternative function coverage from",
-            command="python tests/analyze_cobertura.py",
-            input_path=kcov_output_path,
-            output_path=output_path,
-            command_template="{command} {input_path} > {output_path}"
-        )
+        output_path = f"{self.temp_dir}/{gh.basename(kcov_output_path)}_alt_coverage.txt"
+        full_command = f"python tests/analyze_cobertura.py {kcov_output_path} > {output_path}"
+        
+        debug.trace(TL.VERBOSE, f"Running command: {full_command}")
+        
+        if self.dry_run:
+            debug.trace(TL.BASIC, f"[DRY RUN] Would execute: {full_command}")
+            return output_path
+        
+        result = gh.run(full_command, timeout=DEFAULT_TIMEOUT)
+        
+        if not os.path.exists(output_path):
+            debug.warning(f"Expected output file not created: {output_path}")
+            
+        return output_path
 
-    def run_pipeline(self, alternate_result=False, skip_steps=None, use_parallel=False, use_simple_batspp=False):
+    def run_pipeline(self, alternate_result=False, skip_steps=None, use_simple_batspp=False):
         """Run the entire pipeline for test coverage extraction.
         
         Args:
             alternate_result: Whether to generate alternative function coverage
             skip_steps: List of step names to skip (e.g. ["bash", "notebook"])
-            use_parallel: Whether to run bash and notebook processing in parallel
             use_simple_batspp: Whether to use simple_batspp.py instead of batspp
             
         Returns:
@@ -307,69 +312,51 @@ class AnalyzeTestCoverageHelper:
         skip_steps = skip_steps or []
         results = {}
 
-        # Define step functions
-        def process_bash():
-            if "bash" in skip_steps:
-                debug.trace(TL.BASIC, "Skipping bash processing")
-                return None, None
-                
+        # Process bash
+        if "bash" not in skip_steps:
             multiline_bash = self._convert_bash_to_multiline(self.bash_source_path)
             bash_macros = self._extract_bash_macros(self.bash_source_path)
-            return multiline_bash, bash_macros
+        else:
+            debug.trace(TL.BASIC, "Skipping bash processing")
+            multiline_bash = None
+            bash_macros = None
             
-        def process_notebook(multiline_bash):
-            if "notebook" in skip_steps:
-                debug.trace(TL.BASIC, "Skipping notebook processing")
-                return None, None
-                
+        # Process notebook
+        if "notebook" not in skip_steps:
             batspp_script = self._convert_notebook_to_batspp(self.notebook_path, use_simple_batspp)
             bats_script = self._convert_batspp_to_bats(batspp_script, multiline_bash, use_simple_batspp)
-            return batspp_script, bats_script
+        else:
+            debug.trace(TL.BASIC, "Skipping notebook processing")
+            batspp_script = None
+            bats_script = None
             
-        def process_coverage(bats_script, multiline_bash):
-            if "coverage" in skip_steps:
-                debug.trace(TL.BASIC, "Skipping coverage generation")
-                return None
-                
-            return self._generate_kcov_output(bats_script, multiline_bash)
+        # Process coverage
+        if "coverage" not in skip_steps:
+            kcov_output = self._generate_kcov_output(bats_script, multiline_bash)
+        else:
+            debug.trace(TL.BASIC, "Skipping coverage generation")
+            kcov_output = None
             
-        def process_cobertura(kcov_output):
-            if "cobertura" in skip_steps:
-                debug.trace(TL.BASIC, "Skipping cobertura extraction")
-                return None
-                
-            return self._extract_cobertura_coverage(kcov_output)
+        # Process cobertura
+        if "cobertura" not in skip_steps:
+            cobertura_coverage = self._extract_cobertura_coverage(kcov_output)
+        else:
+            debug.trace(TL.BASIC, "Skipping cobertura extraction")
+            cobertura_coverage = None
             
-        def process_function_coverage(cobertura_coverage, bash_macros):
-            if "function" in skip_steps:
-                debug.trace(TL.BASIC, "Skipping function coverage generation")
-                return None, None
-                
-            alt_coverage = None
+        # Process function coverage
+        if "function" not in skip_steps:
+            func_coverage = self._generate_function_coverage(cobertura_coverage, bash_macros, json_output=False)
+            
+            # Generate alternative function coverage if requested
             if alternate_result and kcov_output:
                 alt_coverage = self._generate_alternative_function_coverage(kcov_output)
-                
-            func_coverage = self._generate_function_coverage(cobertura_coverage, bash_macros, json_output=True)       
-            return func_coverage, alt_coverage
-
-        # Execute pipeline
-        if use_parallel:
-            # Run bash and notebook processing in parallel
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                bash_future = executor.submit(process_bash)
-                multiline_bash, bash_macros = bash_future.result()
-                
-                notebook_future = executor.submit(lambda: process_notebook(multiline_bash))
-                batspp_script, bats_script = notebook_future.result()
+            else:
+                alt_coverage = None
         else:
-            # Sequential processing
-            multiline_bash, bash_macros = process_bash()
-            batspp_script, bats_script = process_notebook(multiline_bash)
-            
-        # These steps must be sequential
-        kcov_output = process_coverage(bats_script, multiline_bash)
-        cobertura_coverage = process_cobertura(kcov_output)
-        func_coverage, alt_coverage = process_function_coverage(cobertura_coverage, bash_macros)
+            debug.trace(TL.BASIC, "Skipping function coverage generation")
+            func_coverage = None
+            alt_coverage = None
         
         # Collect results
         results = {
@@ -403,7 +390,6 @@ class AnalyzeTestCoverageScript(Main):
         self.alt_result = self.get_parsed_option(ALT_RESULT_ARG, False)
         self.output = self.get_parsed_option(OUTPUT_ARG, None)
         self.skip = self.get_parsed_option(SKIP_ARG, "").split(",")
-        self.parallel = self.get_parsed_option(PARALLEL_ARG, False)
         self.dry_run = self.get_parsed_option(DRY_RUN_ARG, False)
         self.simple_batspp = self.get_parsed_option(SIMPLE_BATSPP_ARG, False)
         
@@ -441,7 +427,6 @@ class AnalyzeTestCoverageScript(Main):
         results = self.helper.run_pipeline(
             alternate_result=self.alt_result,
             skip_steps=self.skip,
-            use_parallel=self.parallel,
             use_simple_batspp=self.simple_batspp
         )
         
@@ -452,13 +437,12 @@ class AnalyzeTestCoverageScript(Main):
         else:
             # Print the function coverage results to stdout
             if results["function_coverage"] and os.path.exists(results["function_coverage"]):
-                with open(results["function_coverage"], 'r') as f:
-                    print(f.read())
+                print(system.read_file(results["function_coverage"]))
             elif results["alt_function_coverage"] and os.path.exists(results["alt_function_coverage"]):
-                with open(results["alt_function_coverage"], 'r') as f:
-                    print(f.read())
+                print(system.read_file(results["alt_function_coverage"]))
             else:
                 print(json.dumps(results, indent=2))
+
 
 ## Main
 def main():
@@ -473,7 +457,6 @@ def main():
         ],
         boolean_options=[
             (ALT_RESULT_ARG, "Generate alternative function coverage"),
-            (PARALLEL_ARG, "Run bash and notebook processing in parallel"),
             (DRY_RUN_ARG, "Print commands without executing them"),
             (SIMPLE_BATSPP_ARG, "Use simple_batspp.py instead of batspp")
         ],
@@ -489,7 +472,7 @@ def main():
     app.run_main_app()
 
     # Ensure no unprocessed TODO placeholders remain
-    debug.assertion(not any(my_re.search(r"^TODO_", m, my_re.IGNORECASE) for m in dir(app)))
+    # debug.assertion(not any(my_re.search(r"^TODO_", m, my_re) for m in dir(app)))
 
 if __name__ == '__main__':
     debug.trace_current_context(level=TL.QUITE_VERBOSE)
