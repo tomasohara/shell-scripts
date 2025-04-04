@@ -49,7 +49,6 @@ This ensures efficient processing while maintaining dependencies between steps.
 """
 
 # Standard modules
-import os
 import sys
 import datetime
 import json
@@ -59,16 +58,9 @@ from mezcla import debug
 from mezcla import glue_helpers as gh
 from mezcla.main import Main
 from mezcla import system
-
-## Helper modules
-# import bash_to_multiline as bash2multiline
-# import extract_bash_macros as extract_macros
-# import jupyter_to_batspp as jupyter2batspp
-# import compute_function_coverage
-# import analyze_cobertura 
+from mezcla import file_utils as fu
 
 # TODO: Use resolved paths for individual working scripts
-
 debug.trace(5, f"global __doc__: {__doc__}")
 debug.assertion(__doc__)
 
@@ -83,7 +75,6 @@ SKIP_ARG = "skip"
 DRY_RUN_ARG = "dry-run"
 SIMPLE_BATSPP_ARG = "simple-batspp"
 
-
 # Constants
 TL = debug.TL
 DEFAULT_TIMEOUT = 300  # 5 minutes timeout for commands
@@ -92,7 +83,7 @@ DEFAULT_TIMEOUT = 300  # 5 minutes timeout for commands
 KCOV_INCLUDE_PATTERN = system.getenv_text("KCOV_INCLUDE_PATTERN", "", description="Pattern for kcov --include")
 BATSPP_PATH = system.getenv_text("BATSPP_PATH", "~/.local/bin/batspp", description="Path to batspp library")
 JUPYTER_TO_BATSPP_PATH = system.getenv_text("JUPYTER_TO_BATSPP_PATH", "jupyter_to_batspp.py", description="Path to jupyter_to_batspp.py")
-JSON_OUTPUT_ENABLE = system.getenv_bool("JSON_OUTPUT_ENABLE", False, description="Enable JSON output for function coverage")
+JSON_OUTPUT = system.getenv_bool("JSON_OUTPUT", False, description="Enable JSON output for function coverage")
 KCOV_OUTPUT_DIR = system.getenv_text("KCOV_OUTPUT_DIR", "kcov-output", description="Directory for kcov output")
 RESULT_SORT_ORDER = system.getenv_text("SORT_ORDER", "coverage", description="Sort order for function coverage results (coverage/total_lines/covered_lines)")
 
@@ -106,35 +97,35 @@ class AnalyzeTestCoverageHelper:
         self.bash_source_path = bash_source_path
         self.notebook_path = notebook_path
         self.intermediate_output_dir = intermediate_output_dir
-        self.temp_dir = intermediate_output_dir or os.path.join(system.TEMP_DIR, f'tmp_{datetime.datetime.now().strftime("%y%m%d%H%M%S")}')
+        self.temp_dir = intermediate_output_dir or gh.form_path(system.TEMP_DIR, f'tmp_{datetime.datetime.now().strftime("%y%m%d%H%M%S")}')
         self.dry_run = dry_run
-        
+
         # Create temp directory if it doesn't exist
         if not system.file_exists(self.temp_dir):
             debug.trace(TL.VERBOSE, f"Creating temp directory: {self.temp_dir}")
-            os.makedirs(self.temp_dir, exist_ok=True)
-            
+            gh.full_mkdir(self.temp_dir)
+
         # Create kcov output directory
-        self.kcov_output_dir = os.path.join(self.temp_dir, "kcov-output")
+        self.kcov_output_dir = gh.form_path(self.temp_dir, "kcov-output")
         if not system.file_exists(self.kcov_output_dir):
             debug.trace(TL.VERBOSE, f"Creating kcov output directory: {self.kcov_output_dir}")
-            os.makedirs(self.kcov_output_dir, exist_ok=True)
+            gh.full_mkdir(self.kcov_output_dir)
             
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
     def _ensure_dir_exists(self, filepath):
         """Ensure directory for the given file path exists"""
-        directory = os.path.dirname(filepath)
+        directory = gh.dir_path(filepath)
         if directory and not system.file_exists(directory):
             debug.trace(TL.VERBOSE, f"Creating directory: {directory}")
-            os.makedirs(directory, exist_ok=True)
+            gh.full_mkdir(directory)
         return filepath
 
     ## Pipeline Steps for Bash Source 
     def _convert_bash_to_multiline(self, bash_source_path):
         debug.trace(TL.VERBOSE, f"Converting to multiline format {bash_source_path}")
         
-        output_path = os.path.join(self.temp_dir, f"{gh.basename(bash_source_path, extension='.bash')}_multiline.bash")
+        output_path = gh.form_path(self.temp_dir, f"{gh.basename(bash_source_path, extension='.bash')}_multiline.bash")
         self._ensure_dir_exists(output_path)
         full_command = f"python tests/bash_to_multiline.py {bash_source_path} > {output_path}"
         
@@ -155,7 +146,7 @@ class AnalyzeTestCoverageHelper:
         """Extract macros from the Bash script"""
         debug.trace(TL.VERBOSE, f"Extracting macros from {bash_source_path}")
         
-        output_path = os.path.join(self.temp_dir, f"{gh.basename(bash_source_path, extension='.bash')}_macros.json")
+        output_path = gh.form_path(self.temp_dir, f"{gh.basename(bash_source_path, extension='.bash')}_macros.json")
         self._ensure_dir_exists(output_path)
         full_command = f"python tests/extract_bash_macros.py {bash_source_path} --json > {output_path}"
         
@@ -178,7 +169,7 @@ class AnalyzeTestCoverageHelper:
         debug.trace(TL.VERBOSE, f"Converting to batspp format {notebook_path}")
         
         command = "python simple_batspp.py" if use_simple_batspp else f"python {JUPYTER_TO_BATSPP_PATH}"
-        output_path = os.path.join(self.temp_dir, f"{gh.basename(notebook_path, extension='.ipynb')}.batspp")
+        output_path = gh.form_path(self.temp_dir, f"{gh.basename(notebook_path, extension='.ipynb')}.batspp")
         self._ensure_dir_exists(output_path)
         full_command = f"{command} {notebook_path} > {output_path}"
         
@@ -200,7 +191,7 @@ class AnalyzeTestCoverageHelper:
         debug.trace(TL.VERBOSE, f"Converting to Bats format {batspp_path}")
         
         command = "python simple_batspp.py" if use_simple_batspp else BATSPP_PATH
-        output_path = os.path.join(self.temp_dir, f"{gh.basename(batspp_path, extension='.batspp')}.bats")
+        output_path = gh.form_path(self.temp_dir, f"{gh.basename(batspp_path, extension='.batspp')}.bats")
         self._ensure_dir_exists(output_path)
         full_command = f"{command} {batspp_path} --source {bash_source_path} --save {output_path}"
         
@@ -234,7 +225,7 @@ class AnalyzeTestCoverageHelper:
         debug.trace(TL.VERBOSE, f"Generating kcov output from {bats_path}")
         
         filename = gh.basename(bats_path, extension='.bats')
-        output_path = os.path.join(self.kcov_output_dir, filename)        
+        output_path = gh.form_path(self.kcov_output_dir, filename)        
         self._ensure_dir_exists(output_path)
         
         # Store include_pattern but use it in the command
@@ -250,7 +241,7 @@ class AnalyzeTestCoverageHelper:
         if not system.file_exists(bats_path):
             debug.trace_exception(4, f"Input file not found: {bats_path}")
             # Create minimal output directory structure
-            os.makedirs(os.path.join(output_path, "bats"), exist_ok=True)
+            gh.full_mkdir(gh.form_path(output_path, "bats"))
             return output_path
         
         gh.run(full_command, timeout=DEFAULT_TIMEOUT)
@@ -258,7 +249,7 @@ class AnalyzeTestCoverageHelper:
         if not system.file_exists(output_path):
             debug.trace(5, f"Expected output directory not created: {output_path}")
             # Create minimal output directory structure
-            os.makedirs(os.path.join(output_path, "bats"), exist_ok=True)
+            gh.full_mkdir(gh.form_path(output_path, "bats"))
             
         return output_path
     
@@ -266,8 +257,8 @@ class AnalyzeTestCoverageHelper:
         """Convert kcov output to Cobertura format"""
         debug.trace(TL.VERBOSE, f"Extracting Cobertura coverage from {kcov_output_path}")
         
-        cobertura_path = os.path.join(kcov_output_path, "bats", "cobertura.xml")
-        fallback_cobertura_path = os.path.join(kcov_output_path, "bats", "coverage.xml")
+        cobertura_path = gh.form_path(kcov_output_path, "bats", "cobertura.xml")
+        fallback_cobertura_path = gh.form_path(kcov_output_path, "bats", "coverage.xml")
         
         if not system.file_exists(cobertura_path) and not self.dry_run:
             debug.trace(5, f"Cobertura file not found at {cobertura_path}")
@@ -280,7 +271,7 @@ class AnalyzeTestCoverageHelper:
                 with open(cobertura_path, 'w', encoding='utf-8') as f:
                     f.write('<?xml version="1.0" ?><coverage></coverage>')
             
-        output_path = os.path.join(self.temp_dir, f"{gh.basename(kcov_output_path)}_cobertura.json")
+        output_path = gh.form_path(self.temp_dir, f"{gh.basename(kcov_output_path)}_cobertura.json")
         self._ensure_dir_exists(output_path)
         full_command = f"python tests/cobertura_to_json.py --input {cobertura_path} --output {output_path}"
         
@@ -306,7 +297,7 @@ class AnalyzeTestCoverageHelper:
         debug.trace(TL.VERBOSE, f"Generating function coverage from {cobertura_path}")
         
         output_suffix = "_function_coverage.json" if json_output else "_function_coverage.txt"
-        output_path = os.path.join(self.temp_dir, f"{gh.basename(cobertura_path, extension='.json')}{output_suffix}")
+        output_path = gh.form_path(self.temp_dir, f"{gh.basename(cobertura_path, extension='.json')}{output_suffix}")
         self._ensure_dir_exists(output_path)
         
         command = f"python tests/compute_function_coverage.py --cobertura {cobertura_path} --functions {macros_path} --sort {RESULT_SORT_ORDER}"
@@ -345,13 +336,16 @@ class AnalyzeTestCoverageHelper:
         return output_path
     
     ## TODO: Rework with the file not exist logic to "make more sense"
-    def _generate_alternative_function_coverage(self, kcov_output_path):
+    def _generate_alternative_function_coverage(self, kcov_output_path, json_output=False):
         """Generate alternative function coverage report"""
         debug.trace(TL.VERBOSE, f"Generating alternative function coverage from {kcov_output_path}")
         
-        output_path = os.path.join(self.temp_dir, f"{gh.basename(kcov_output_path)}_alt_coverage.txt")
+        output_suffix = "_alt_coverage.json" if json_output else "_alt_coverage.txt"
+        output_path = gh.form_path(self.temp_dir, f"{gh.basename(kcov_output_path)}{output_suffix}")
         self._ensure_dir_exists(output_path)
-        full_command = f"python tests/analyze_cobertura.py --coverage-dir {kcov_output_path} > {output_path}"
+        
+        json_flag = "--json" if json_output else ""
+        full_command = f"python tests/analyze_cobertura.py --coverage-dir {kcov_output_path} {json_flag} > {output_path}"
         
         debug.trace(TL.VERBOSE, f"Running command: {full_command}")
         
@@ -361,15 +355,24 @@ class AnalyzeTestCoverageHelper:
         
         if not system.file_exists(kcov_output_path):
             debug.trace_exception(4, f"Input directory not found: {kcov_output_path}")
-            system.write_file(output_path, f"kcov_output_dir not found: {kcov_output_path}")
+            # Create empty output file with appropriate format
+            with open(output_path, 'w', encoding='utf-8') as f:
+                if json_output:
+                    f.write('{"error": "kcov_output_dir not found", "path": "' + kcov_output_path + '"}')
+                else:
+                    f.write(f"kcov_output_dir not found: {kcov_output_path}")
             return output_path
         
         gh.run(full_command, timeout=DEFAULT_TIMEOUT)
         
         if not system.file_exists(output_path):
             debug.trace_exception(5, f"Expected output file not created: {output_path}")
-            # Create empty output file
-            system.write_file(output_path, f"output_path not found: {output_path}")
+            # Create empty output file with appropriate format
+            with open(output_path, 'w', encoding='utf-8') as f:
+                if json_output:
+                    f.write('{"error": "output_path not found", "path": "' + output_path + '"}')
+                else:
+                    f.write(f"output_path not found: {output_path}")
             
         return output_path
 
@@ -421,11 +424,11 @@ class AnalyzeTestCoverageHelper:
             
         # Process function coverage
         if "function" not in skip_steps:
-            func_coverage = self._generate_function_coverage(cobertura_coverage, bash_macros, json_output=JSON_OUTPUT_ENABLE)
+            func_coverage = self._generate_function_coverage(cobertura_coverage, bash_macros, json_output=JSON_OUTPUT)
             
             # Always generate alternative function coverage
             if kcov_output:
-                alt_coverage = self._generate_alternative_function_coverage(kcov_output)
+                alt_coverage = self._generate_alternative_function_coverage(kcov_output, json_output=JSON_OUTPUT)
             else:
                 alt_coverage = None
         else:
@@ -502,7 +505,7 @@ class AnalyzeTestCoverageScript(Main):
         
         # If intermediate output directory is specified, ensure it exists
         if self.intermediate_output and not system.file_exists(self.intermediate_output):
-            os.makedirs(self.intermediate_output, exist_ok=True)
+            gh.full_mkdir(self.intermediate_output)
         
         # Initialize helper
         self.helper = AnalyzeTestCoverageHelper(
@@ -533,12 +536,15 @@ class AnalyzeTestCoverageScript(Main):
         
         # Output results
         if self.output:
-            directory = os.path.dirname(self.output)
+            directory = gh.dir_path(self.output)
             if directory and not system.file_exists(directory):
-                os.makedirs(directory, exist_ok=True)
-                
-            with open(self.output, 'w', encoding='utf-8') as f:
-                json.dump(results, f, indent=2)
+                gh.full_mkdir(directory)
+
+            ## OLD: Before the use of mezcla.file_utils                
+            # with open(self.output, 'w', encoding='utf-8') as f:
+            #     json.dump(results, f, indent=2)
+            fu.write_json(self.output, results)
+
         else:
             # Check if we should show alternative results (--alt-result or --alt)
             use_alt = self.alt_result or self.alt
@@ -549,8 +555,8 @@ class AnalyzeTestCoverageScript(Main):
             elif results["function_coverage"] and system.file_exists(results["function_coverage"]):
                 print(system.read_file(results["function_coverage"]))
             else:
-                print(json.dumps(results, indent=2))
-                
+                print(results)
+
     def run(self):
         """Main execution method"""
         # First, parse arguments and initialize everything
@@ -564,8 +570,8 @@ def main():
     """Entry point for the script."""
     app = AnalyzeTestCoverageScript(
         description=__doc__.format(script=gh.basename(__file__)),
-        skip_input=True,        # Skip line-by-line processing for this application
-        manual_input=False,     # No manual input needed
+        skip_input=True,
+        manual_input=False,
         positional_arguments=[
             (BASH_SOURCE_ARG, "Path to the Bash script to analyze"),
             (NOTEBOOK_ARG, "Path to the Jupyter notebook to analyze")

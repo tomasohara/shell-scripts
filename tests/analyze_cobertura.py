@@ -5,10 +5,12 @@ Coverage analysis script for processing Cobertura XML reports and calculating te
 
 Sample usage:
    {script} --coverage-dir=tests/kcov-output
+   {script} --coverage-dir=tests/kcov-output --json
 """
 
 # Standard modules
 import re
+import json
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 
@@ -22,6 +24,7 @@ from mezcla import system
 # Constants
 TL = debug.TL
 COVERAGE_DIR = "coverage-dir"
+JSON_OUTPUT = "json"
 COBERTURA_XML_REGEX = r".*/cobertura\.xml$"
 
 class CoverageHelper:
@@ -32,19 +35,6 @@ class CoverageHelper:
         debug.trace(TL.VERBOSE, f"CoverageHelper.__init__(): self={self}")
         self.coverage_dir = coverage_dir
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
-
-    ## OLD: Use of os module
-    # def find_cobertura_reports(self):
-    #     """Find all Cobertura XML reports in the coverage directory."""
-    #     ## TODO: Find mezcla alternative for os.walk
-    #     pattern = my_re.compile(COBERTURA_XML_REGEX)
-    #     # reports = []
-    #     # for root, _, files in os.walk(self.coverage_dir):
-    #     #     for file in files:
-    #     #         filepath = gh.form_path(root, file)
-    #     #         if pattern.match(filepath):
-    #     #             reports.append(filepath)
-    #     # return reports
         
     def find_cobertura_reports(self):
         """Find all Cobertura XML reports in the coverage directory."""
@@ -96,7 +86,7 @@ class CoverageHelper:
 
         final_results = {}
         for script, data in all_coverage.items():
-            avg_coverage = sum(data['rates']) / len(data['rates'])
+            avg_coverage = sum(data['rates']) / len(data['rates']) if data['rates'] else 0
             final_results[script] = {
                 'coverage': avg_coverage,
                 'total_lines': data['total_lines'],
@@ -108,11 +98,13 @@ class CoverageHelper:
 class AnalyzeCobertura(Main):
     """Coverage analysis script class"""
     coverage_dir = gh.resolve_path("tests/kcov-output")
+    use_json = False
 
     def setup(self):
         """Check results of command line processing"""
         debug.trace(TL.VERBOSE, f"Script.setup(): self={self}")
         self.coverage_dir = self.get_parsed_option(COVERAGE_DIR, self.coverage_dir)
+        self.use_json = self.get_parsed_option(JSON_OUTPUT, self.use_json)
         self.helper = CoverageHelper(self.coverage_dir)
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
@@ -124,15 +116,12 @@ class AnalyzeCobertura(Main):
                                 key=lambda x: x[1]['coverage'], 
                                 reverse=True)
 
-        print("\nDetailed Coverage Summary (Aggregated):")
-        print("-" * 120)
-        print(f"{'#':<4} {'Script':<40} {'Extension':<10} {'Coverage':>10} {'Covered Lines':>15} {'Total Lines':>15}")
-        print("-" * 120)
-
+        # Calculate macro and micro scores
         macro_scores = []
         total_covered_lines = 0
         total_lines = 0
 
+        detailed_results = []
         for idx, (script, data) in enumerate(sorted_results, start=1):
             extension = script.split('.')[-1] if '.' in script else 'N/A'
             coverage_pct = data['coverage'] * 100
@@ -142,16 +131,51 @@ class AnalyzeCobertura(Main):
             macro_scores.append(coverage_pct)
             total_covered_lines += covered
             total_lines += total
-
-            print(f"{idx:<4} {gh.elide(script, 35):<40} {extension:<10} {coverage_pct:>9.1f}% {covered:>15d} {total:>15d}")
+            
+            detailed_results.append({
+                "index": idx,
+                "script": script,
+                "extension": extension,
+                "coverage_percentage": coverage_pct,
+                "covered_lines": covered,
+                "total_lines": total
+            })
 
         # Compute Macro and Micro Scores
         macro_score = sum(macro_scores) / len(macro_scores) if macro_scores else 0
         micro_score = (total_covered_lines / total_lines) * 100 if total_lines > 0 else 0
-
-        print("-" * 120)
-        print(f"{'Macro Score':<56} {macro_score:>9.1f}%")
-        print(f"{'Micro Score':<56} {micro_score:>9.1f}% {total_covered_lines:>15d} {total_lines:>15d}")
+        
+        # Output results based on format preference
+        if self.use_json:
+            # JSON output format
+            output = {
+                "detailed_coverage": detailed_results,
+                "summary": {
+                    "macro_score": macro_score,
+                    "micro_score": micro_score,
+                    "total_covered_lines": total_covered_lines,
+                    "total_lines": total_lines
+                }
+            }
+            print(json.dumps(output, indent=2))
+        else:
+            # Standard text output format
+            print("\nDetailed Coverage Summary (Aggregated):")
+            print("-" * 120)
+            print(f"{'#':<4} {'Script':<40} {'Extension':<10} {'Coverage':>10} {'Covered Lines':>15} {'Total Lines':>15}")
+            print("-" * 120)
+            
+            for idx, (script, data) in enumerate(sorted_results, start=1):
+                extension = script.split('.')[-1] if '.' in script else 'N/A'
+                coverage_pct = data['coverage'] * 100
+                covered = data['covered_lines']
+                total = data['total_lines']
+                
+                print(f"{idx:<4} {gh.elide(script, 35):<40} {extension:<10} {coverage_pct:>9.1f}% {covered:>15d} {total:>15d}")
+            
+            print("-" * 120)
+            print(f"{'Macro Score':<56} {macro_score:>9.1f}%")
+            print(f"{'Micro Score':<56} {micro_score:>9.1f}% {total_covered_lines:>15d} {total_lines:>15d}")
 
 def main():
     """Entry point"""
@@ -160,7 +184,13 @@ def main():
         skip_input=True,
         manual_input=True,
         auto_help=True,
-        text_options=[(COVERAGE_DIR, "Directory containing coverage reports")])
+        text_options=[
+            (COVERAGE_DIR, "Directory containing coverage reports")
+        ],
+        boolean_options=[
+            (JSON_OUTPUT, "Output results in JSON format")
+        ]
+        )
     app.run()
 
 if __name__ == '__main__':
