@@ -24,6 +24,17 @@ from mezcla import system
 TL = debug.TL
 JSON_OUTPUT_OPT = "json"
 
+# Environment variables
+EXTRACT_FUNCTIONS_ONLY = system.getenv_bool(
+    "EXTRACT_FUNCTIONS_ONLY", False, description="Extract functions only"
+)
+EXTRACT_ALIASES_ONLY = system.getenv_bool(
+    "EXTRACT_ALIASES_ONLY", False, description="Extract aliases only"
+)
+EXTRACT_METADATA_ONLY = system.getenv_bool(
+    "EXTRACT_METADATA_ONLY", False, description="Extract metadata only"
+)
+
 class BashFunctionAliasExtractor:
     """Helper class for extracting function definitions and aliases from a Bash script."""
     
@@ -113,62 +124,65 @@ class BashExtractorScript(Main):
     def wrap_up(self):
         """Process all accumulated lines once input is complete."""
         debug.trace(TL.VERBOSE, f"BashExtractorScript.wrap_up(): Analyzing {len(self.script_lines)} lines")
-        
-        # Check if we have any lines to process
+
         if not self.script_lines:
             system.print_stderr("No input received. Please provide a Bash script.")
             return
-            
-        # Process the collected script
+
         helper = BashFunctionAliasExtractor(self.script_lines)
         extracted_data = helper.extract_functions_aliases()
-        
-        # Add metadata to the extracted data
+
+        # Apply environment filters
+        result = {}
+        if EXTRACT_FUNCTIONS_ONLY:
+            result["functions"] = extracted_data.get("functions", {})
+        elif EXTRACT_ALIASES_ONLY:
+            result["aliases"] = extracted_data.get("aliases", {})
+        elif EXTRACT_METADATA_ONLY:
+            result = {}
+        else:
+            result = extracted_data
+
         metadata = {
             "input_file": self.input_file,
-            "process_date": self.process_date
+            "process_date": self.process_date,
         }
-        
-        # Output based on format selection
+
         if self.json_output:
-            # Add metadata to JSON output
-            extracted_data["metadata"] = metadata
-            print(json.dumps(extracted_data, indent=4))
+            result["metadata"] = metadata
+            print(json.dumps(result, indent=4))
         else:
-            # Output in tabulated format with metadata header
-            self.print_simple_table_output(extracted_data, metadata)
-    
+            self.print_simple_table_output(result, metadata)
+
     def print_simple_table_output(self, data, metadata):
         """Print the extracted data in a simple console table format."""
-        # Print metadata header
         print("\nextract_bash_macros.py")
         print("=" * 50)
         print(f"Input File: {metadata['input_file']}")
         print(f"Timestamp: {metadata['process_date']}")
         print("=" * 50)
-        
-        # Define column headers
-        function_headers = ["Function Name", "Start Line", "End Line"]
-        alias_headers = ["Alias Name", "Definition", "Line"]
-        
-        # Format functions table
-        function_rows = []
-        for func_name, line_info in data["functions"].items():
-            function_rows.append([func_name, str(line_info["start"]), str(line_info["end"])])
-        
-        # Format aliases table
-        alias_rows = []
-        for alias in data["aliases"]:
-            alias_rows.append([alias["name"], alias["definition"], str(alias["line"])])
-        
-        # Print functions table
-        print("\nFUNCTIONS:")
-        self._print_table(function_headers, function_rows)
-        
-        # Print aliases table
-        print("\nALIASES:")
-        self._print_table(alias_headers, alias_rows)
-    
+
+        if "functions" in data:
+            print("\nFUNCTIONS:")
+            function_headers = ["Function Name", "Start Line", "End Line"]
+            function_rows = [
+                [fname, str(info["start"]), str(info["end"])]
+                for fname, info in data["functions"].items()
+            ]
+            self._print_table(function_headers, function_rows)
+
+        if "aliases" in data:
+            print("\nALIASES:")
+            alias_headers = ["Alias Name", "Definition", "Line"]
+            alias_rows = [
+                [alias["name"], alias["definition"], str(alias["line"])]
+                for alias in data["aliases"]
+            ]
+            self._print_table(alias_headers, alias_rows)
+
+        if "functions" not in data and "aliases" not in data:
+            print("\nNo functions or aliases extracted.")
+ 
     def _print_table(self, headers, rows):
         """Helper method to print a simple ASCII table."""
         if not rows:
