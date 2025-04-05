@@ -4,49 +4,32 @@
 Test Coverage Extraction Pipeline
 
 This script processes a Bash script (`script.bash`) and a Jupyter Notebook (`file.ipynb`)
-to extract test coverage information using a multi-stage pipeline.
+to extract test coverage through a staged pipeline.
 
-### **Pipeline Overview**
+### Pipeline Overview
 
-#### **A. Processing `script.bash`**
-(Converts Bash script into a structured, testable format)
-1. **Convert to multiline format**  
-   - `tests/bash_to_multiline.py` → Generates `multiline.bash`
-2. **Extract macros from Bash script**  
-   - `tests/extract_bash_macros.py` → Generates `multiline_macro.json`
-3. **(Optional) Additional Bash processing**
+A. Bash Script Processing
+1. Convert to multiline format (`bash_to_multiline.py`)
+2. Extract macros (`extract_bash_macros.py`)
 
-#### **B. Processing `file.ipynb` (Parallel to A)**
-(Converts Jupyter Notebook into a testable batspp script)
-1. **Convert Notebook to batspp format**  
-   - `jupyter_to_batspp` → Converts `file.ipynb` → `file.batspp`
-2. **(Alternative) Convert directly to Bats**  
-   - `batspp / simple_batspp.py` → Converts `file.ipynb` → `file.bats`
-3. **Convert `file.batspp` to standard Bats format**  
-   - `batspp / simple_batspp.py` → Converts `file.batspp` → `file.bats`
-4. **Merge sources and generate final Bats file**  
-   - `batspp (with source)` → Uses `multiline.bash`, `file.batspp` → Produces `file.bats`
-5. **Run tests and collect coverage data**  
-   - `kcov` → Runs tests in `file.bats` and generates `kcov-output/file/*`
+B. Notebook Processing
+1. Convert to `file.batspp` (via `jupyter_to_batspp`)
+2. Convert `batspp` to standard Bats format
+3. Merge with Bash sources to create `file.bats`
+4. Run tests with `kcov` → `kcov-output/file/*`
 
-#### **C. Generate Cobertura Report (Sequential Step)**
-(Converts kcov coverage output into Cobertura JSON format)
-6. **Convert kcov output to Cobertura format**  
-   - `tests/cobertura_to_json` → Converts `kcov-output/file/bats/cobertura.xml` → `cobertura.json`
+C. Cobertura Report Generation
+5. Convert kcov XML → JSON (`cobertura_to_json`)
 
-#### **D. Generate Final Reports (Sequential Step)**
-(Processes coverage data and generates summary reports)
-7. **Compute function-level coverage**  
-   - `tests/compute_function_coverage.py` → Analyzes `cobertura.json` and `multiline_macro.json`, providing function coverage rankings
-8. **Perform additional coverage analysis**  
-   - `tests/analyze_cobertura.py` → Uses `kcov-output` for deeper insights
+D. Final Analysis
+6. Compute function-level coverage (`compute_function_coverage.py`)
+7. Additional analysis (`analyze_cobertura.py`)
 
-### **Execution Notes**
-- **C starts only after A & B complete.**
-- **D depends on the output from C.**
-
-This ensures efficient processing while maintaining dependencies between steps.
+Note:
+- Step C depends on A & B.
+- Step D depends on C.
 """
+
 
 # Standard modules
 import sys
@@ -585,7 +568,7 @@ def main():
         text_options=[
             (INTERMEDIATE_OUTPUT_ARG, "Directory for intermediate output files"),
             (OUTPUT_ARG, "Path to output JSON results file"),
-            (SKIP_ARG, "Comma-separated list of steps to skip (bash,notebook,coverage,cobertura,function)")
+            (SKIP_ARG, "Comma-separated list of steps to skip (bash, notebook, coverage, cobertura, function)")
         ]
     )
     app.run()
