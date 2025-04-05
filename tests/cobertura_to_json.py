@@ -101,9 +101,14 @@ class CoverageHelper:
 
 class AnalyzeCoverage(Main):
     """Coverage analysis script class"""
-    input_path = ""
-    output_path = None
-    report_output = False
+    
+    def __init__(self, *args, **kwargs):
+        """Initialize instance attributes"""
+        self.helper = None
+        self.input_path = ""
+        self.output_path = None
+        self.report_output = False
+        super().__init__(*args, **kwargs)
 
     def setup(self):
         """Check results of command line processing"""
