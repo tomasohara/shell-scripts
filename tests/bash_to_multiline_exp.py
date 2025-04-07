@@ -32,30 +32,30 @@ debug.assertion(__doc__)
 # Constants for switches
 PRINT_STATS = "print-stats"
 PRESERVE_ALIASES = "preserve-aliases"
-PRESERVE_COMMENTS = "preserve-comments"
-PRESERVE_SINGLE_LINE_FUNCTIONS = "preserve-single-line-functions"
+NO_COMMENTS = "no-comments"
+PRESERVE_SINGLE_LINE_FUNCTIONS = "preserve-single-line"
 VERBOSE_MODE = "verbose"
-FUNCTION_KEYWORD = "function-keyword"
+REMOVE_FUNCTION_KEYWORD = "remove-function-keyword"
 REMOVE_EMPTY_BLOCKS = "remove-empty-blocks"
 
 # Constants
 TL = debug.TL
 
-# Environment options
+# Environment options with new defaults
 PRESERVE_COMMENTS_ENV = system.getenv_bool(
     "PRESERVE_COMMENTS", True,
     description="Preserve comments in converted functions")
 PRESERVE_SINGLE_LINE_FUNCTIONS_ENV = system.getenv_bool(
-    "PRESERVE_SINGLE_LINE_FUNCTIONS", True,
+    "PRESERVE_SINGLE_LINE_FUNCTIONS", False,
     description="Preserve single-line functions in their original format")
 PRESERVE_ALIASES_ENV = system.getenv_bool(
-    "PRESERVE_ALIASES", True,
+    "PRESERVE_ALIASES", False,
     description="Preserve aliases in their original format")
 REMOVE_EMPTY_BLOCKS_ENV = system.getenv_bool(
     "REMOVE_EMPTY_BLOCKS", True,
     description="Remove empty blocks in converted functions")
-USE_FUNCTION_KEYWORD = system.getenv_bool(
-    "USE_FUNCTION_KEYWORD", False,
+USE_FUNCTION_KEYWORD_ENV = system.getenv_bool(
+    "USE_FUNCTION_KEYWORD", True,
     description="Use 'function' keyword in converted functions")
 
 class BashFunction:
@@ -143,6 +143,9 @@ class MultilineParser:
         self.open_brace_pattern = re.compile(r'^\s*{\s*(?:#.*)?$')
         self.close_brace_pattern = re.compile(r'^\s*}\s*(?:#.*)?$')
         
+        # Regex pattern for shebang
+        self.shebang_pattern = re.compile(r'^#!')
+        
         self.functions = []
         self.aliases = []
         self.line_count = 0
@@ -155,6 +158,10 @@ class MultilineParser:
         self.all_lines = []
         
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
+    
+    def is_shebang(self, line):
+        """Check if a line is a shebang"""
+        return self.shebang_pattern.match(line) is not None
     
     def parse_line(self, line):
         """Parse a single line to identify functions and aliases"""
@@ -270,7 +277,7 @@ class BashToMultilineScript(Main):
         self.preserve_comments = PRESERVE_COMMENTS_ENV
         self.preserve_single_line_functions = PRESERVE_SINGLE_LINE_FUNCTIONS_ENV
         self.verbose = False
-        self.function_keyword = USE_FUNCTION_KEYWORD
+        self.use_function_keyword = USE_FUNCTION_KEYWORD_ENV
         self.remove_empty_blocks = REMOVE_EMPTY_BLOCKS_ENV
         # Initialize attributes for processing
         self.lines_to_replace = {}
@@ -284,26 +291,25 @@ class BashToMultilineScript(Main):
         """Check results of command line processing"""
         debug.trace(TL.VERBOSE, f"Script.setup(): self={self}")
         
-        # Use environment variables as defaults, but allow command-line args to override
+        # Use toggleable options with proper defaults
         self.print_stats = self.get_parsed_option(PRINT_STATS, self.print_stats)
         self.preserve_aliases = self.get_parsed_option(PRESERVE_ALIASES, self.preserve_aliases)
-        self.preserve_comments = not self.get_parsed_option("no-comments", not self.preserve_comments)
+        self.preserve_comments = not self.get_parsed_option(NO_COMMENTS, not self.preserve_comments)
         self.preserve_single_line_functions = self.get_parsed_option(PRESERVE_SINGLE_LINE_FUNCTIONS, self.preserve_single_line_functions)
-        self.preserve_single_line_functions = self.get_parsed_option("preserve-single-line", self.preserve_single_line_functions)
         self.verbose = self.get_parsed_option(VERBOSE_MODE, self.verbose)
-        self.function_keyword = not self.get_parsed_option("no-function-kw", not self.function_keyword)
-        self.remove_empty_blocks = not self.get_parsed_option("no-empty-blocks", not self.remove_empty_blocks)
+        self.use_function_keyword = not self.get_parsed_option(REMOVE_FUNCTION_KEYWORD, not self.use_function_keyword)
+        self.remove_empty_blocks = self.get_parsed_option(REMOVE_EMPTY_BLOCKS, self.remove_empty_blocks)
         
         # Log the effective settings
         debug.trace(3, f"Effective settings: preserve_aliases={self.preserve_aliases}, "
                     f"preserve_comments={self.preserve_comments}, "
                     f"preserve_single_line_functions={self.preserve_single_line_functions}, "
-                    f"function_keyword={self.function_keyword}, "
+                    f"use_function_keyword={self.use_function_keyword}, "
                     f"remove_empty_blocks={self.remove_empty_blocks}")
         
         # Initialize parser with all relevant settings
         self.parser = MultilineParser(
-            use_function_keyword=self.function_keyword,
+            use_function_keyword=self.use_function_keyword,
             preserve_comments=self.preserve_comments,
             preserve_single_line_functions=self.preserve_single_line_functions
         )
@@ -388,8 +394,11 @@ class BashToMultilineScript(Main):
                     debug.trace(3, f"Skipping line {line_num} (part of empty block)")
                 continue
             
+            # Always preserve shebang lines, even if we're removing comments
+            is_shebang = self.parser.is_shebang(line)
+            
             # Process line for conversion or output as-is
-            if line_num in self.lines_to_replace:
+            if line_num in self.lines_to_replace and not is_shebang:
                 # Get the function or alias to convert
                 converted = False
                 
@@ -436,15 +445,11 @@ def main():
         boolean_options=[
             (PRINT_STATS, "Print statistics about conversions"),
             (PRESERVE_ALIASES, f"Keep aliases instead of converting them (default: {PRESERVE_ALIASES_ENV})"),
-            (PRESERVE_COMMENTS, f"Preserve comments in converted functions (default: {PRESERVE_COMMENTS_ENV})"),
-            ("no-comments", f"Don't preserve comments in converted functions"),
+            (NO_COMMENTS, f"Remove comments from converted functions (default: {not PRESERVE_COMMENTS_ENV})"),
             (PRESERVE_SINGLE_LINE_FUNCTIONS, f"Keep single-line functions instead of converting them (default: {PRESERVE_SINGLE_LINE_FUNCTIONS_ENV})"),
-            ("preserve-single-line", f"Alias for preserve-single-line-functions"),
             (VERBOSE_MODE, "Show verbose output during processing"),
-            (FUNCTION_KEYWORD, f"Use 'function' keyword in converted functions (default: {USE_FUNCTION_KEYWORD})"),
-            ("no-function-kw", f"Don't use 'function' keyword in converted functions"),
-            (REMOVE_EMPTY_BLOCKS, f"Remove blocks that only contain comments or whitespace (default: {REMOVE_EMPTY_BLOCKS_ENV})"),
-            ("no-empty-blocks", f"Don't remove empty blocks")
+            (REMOVE_FUNCTION_KEYWORD, f"Don't use 'function' keyword in converted functions (default: {not USE_FUNCTION_KEYWORD_ENV})"),
+            (REMOVE_EMPTY_BLOCKS, f"Remove blocks that only contain comments or whitespace (default: {REMOVE_EMPTY_BLOCKS_ENV})")
         ]
     )
     app.run()
