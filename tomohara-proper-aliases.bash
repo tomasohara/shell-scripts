@@ -297,7 +297,7 @@ function pip-freeze {
 #-------------------------------------------------------------------------------
 # Jupyter notebook stuff
  
-# export-notebook(file, out): export file[.ipynb] to OUT (or $TEMP/_file[.py])
+# export-notebook(file, out): export file[.ipynb] to OUT (or $TMP/_file[.py])
 # With env. PRETTY=1, the result is pretty printed for readability
 function export-notebook {
     local notebook="$1"
@@ -312,39 +312,49 @@ function export-notebook {
     mkdir -p "$tmp"
     if [ "$out_path" == "" ]; then
         # put exported script in temp dir
-                out_path="$tmp/$(basename "$notebook" .ipynb).py";
+        out_path="$tmp/$(basename "$notebook" .ipynb).py";
     fi
-    rename-with-file-date "$out_path"
+    rename-with-file-date "$out_path" "$out_path".pylint
     jupyter nbconvert "$notebook" --to script --stdout > "$out_path"
+    if [[ "${RUN_PYLINT:-0}" == "1" ]]; then
+        python-lint "$out_path" > "$out_path".pylint
+        $EGREP -v 'get_ipython|missing-module-docstring' "$out_path".pylint
+    fi
  
     # Account for indentation
     perl -i.bak -0777 -pe 's/\n\n( +)/\n$1#\n$1/g;' "$out_path"
    
-    # Prettty print
+    # Pretty print
     if [ "$pretty" != "0" ]; then
-                # Make sure run_cell_magic are split across lines for sake of diff
-                # ex: "get_ipython().run_cell_magic('time', 'x += 1\ny += 2\n'...)" => "... 'x += 1\n" \\<newline>\ny += 2\n \\<newline>'...)"
-                ## BAD: perl -i.bak -pe 's/(run_cell_magic.*)[^\\]\n/\1\\\n \\/g;' "$out_path"
+        # Make sure run_cell_magic are split across lines for sake of diff
+        # ex: "get_ipython().run_cell_magic('time', 'x += 1\ny += 2\n'...)" => "... 'x += 1\n" \\<newline>\ny += 2\n \\<newline>'...)"
+        ## BAD: perl -i.bak -pe 's/(run_cell_magic.*)[^\\]\n/\1\\\n \\/g;' "$out_path"
         perl -i.bak -pe 'while (/^get_ipython.*\\n/) { s/^(get_ipython.*)\\n/\1 \\\\\n/g; }' "$out_path"
     fi
+
+    # Make read-only and show line count, etc.
+    chmod -w "$out_path"
     wc "$out_path"
 }
 function export-notebook-temp { TMP=_temp export-notebook "$@"; }
  
  
-# run-notebook(jupyter-notebook): runs notebook in batch mode
+# run-notebook(jupyter-notebook): runs notebook in batch mode. The script is exported
+# to $TMP/basename.py and the output.log is placed in ./basename.out/.log.
 #
-IPYTHON=(command ipython --no-confirm-exit --ipython-dir="$TMP/ipython")
+IPYTHON_TMP="$TMP/ipython"
+IPYTHON=(command ipython --no-confirm-exit --simple-prompt --ipython-dir="$IPYTHON_TMP")
 #
 function run-notebook {
     local file="$1"
     local base
     base="$(basename "$file" .ipynb)"
+    rename-with-file-date "$TMP/$base.py" "$base".{out,log}
     export-notebook "$file"
-    rename-with-file-date "$base"*
-    "${IPYTHON[@]}" "$TMP/$base.py" > "$base.out" 2> "$base.log"
+    ## OLD: rename-with-file-date "$base"*
+    ("${IPYTHON[@]}" "$TMP/$base.py" | ansifilter) > "$base.out" 2> "$base.log"
     check-errors-excerpt "$base.log"
-    head "$base.out"
+    head "$base.out" "$base.log"
 }
  
  
@@ -358,10 +368,17 @@ function export-all-notebooks {
     done
 }
  
-# compare-exported-notebooks(notebook): compares Python export of current notebook vs. last one saveg
+# compare-exported-notebooks(notebook): compares Python export of current notebook vs. last one saved
 function compare-exported-notebooks {
     local file="$1"
     local base
+    if [[ ! ("$file" =~ .ipynb) ]]; then
+        echo "usage: compare-exported-notebooks notebook.ipynb"
+        echo "note:"
+        echo "- Exports notebook to python and compares against most recent"
+        echo "- Use compare-notebook-scripts to compare .py version"
+        return
+    fi
     base="$(basename "$file" .ipynb)"
     ## OLD: local python_path="_temp/$base.py"
     local temp_dir
@@ -383,7 +400,8 @@ function compare-notebook-scripts {
 }
  
 # run-jupyter-notebook-pristine(port): invoke jupter notenook w/o startup config
-alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$TMP/ipython" run-jupyter-notebook'
+## OLD: alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$TMP/ipython" run-jupyter-notebook'
+alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$IPYTHON_TMP" run-jupyter-notebook'
  
  
 
@@ -780,9 +798,10 @@ simple-alias-fn emacs-wide-horizontal 'tpo-invoke-emacs.sh -geometry 288x50 -eva
 
 # df-h(dir=[.], ...): show DIR disk free in human readable format
 function df-h {
-    local dirs=("$@")
-    ## TODO3: local dirs=("${@:-.}")
-    if [[ "${#dirs[@]}" == 0 ]]; then dirs=(.); fi
+    ## OLD:
+    ## local dirs=("$@")
+    ## if [[ "${#dirs[@]}" == 0 ]]; then dirs=(.); fi
+    local dirs=("${@:-.}")
     df -h "${dirs[@]}"
 }
 
