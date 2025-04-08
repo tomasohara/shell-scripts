@@ -11,12 +11,13 @@
 ## DEBUG: set -o verbose
 
 # Show usage if requested
+show_summary="${SHOW_SUMMARY:-1}"
 repos=()
 if [ "$1" == "--help" ]; then
     script=$(basename "$0")
     # TODO2: make repos an argument and drop ~/bin, etc.
     echo "usage: [env] $script [--help] [repo ...]"
-    echo '    env: OTHER_REPOS="..."'
+    echo '    env: OTHER_REPOS="..." SKIP_SUMMARY=B'
     echo "example(s):"
     echo "    OTHER_REPOS=fu $0"
     exit
@@ -69,10 +70,23 @@ if [ ${#repos[@]} -eq 0 ]; then
     repos=(~/bin ~/mezcla ~/visual-diff ~/programs/bash/tom-shell-scripts ~/programs/python/tom-mezcla)
 fi
 for dir in "${repos[@]}"; do
+    # Make repo dir active
     echo "repo: $dir" | tee --append "$log"
     command cd "$dir"
+
+    # Update, check for errors, and show summary stats
     git-update-plus 2>&1 | grep -v "No stash entries found" >| "$temp_log"
     check-errors-excerpt "$temp_log"
+    if [[ "$show_summary" == "1" ]]; then
+        (grep "files changed" "$temp_log" || echo "No changes") | perl -pe 's/^/\t/;'
+    fi
+
+    # Add to master log
     cat "$temp_log" >> "$log"
     python -c 'print("-" * 80);' >> "$log"
 done
+
+# Mention log location
+if [[ "$show_summary" == "1" ]]; then
+    echo "For details, see $log"
+fi
