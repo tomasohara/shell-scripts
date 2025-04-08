@@ -2168,6 +2168,11 @@ function rename-with-file-date() {
     local f new_f
     local verbose=0
     local move_command="move"
+    if [[ ("$1" == "") || ("$1" == "--help") ]]; then
+        echo "Usage: [ENV] rename-with-file-date [--help|--verbose] file ..."
+        echo "    where ENV = [IGNORE_ALL=1] [DRY_RUN=1]"
+        return
+    fi
     if [ "$1" = "--copy" ]; then
         ## TODO: move_command="copy"
         move_command="command cp --interactive --verbose --preserve"
@@ -2177,27 +2182,31 @@ function rename-with-file-date() {
         verbose=1
         shift
     fi
+    if [[ "$DRY_RUN" == "1" ]]; then
+        move_command="echo todo: $move_command"
+    fi    
     for f in "$@"; do
         ## DEBUG: echo "f=$f"
         # ex1: usage.list.23Aug23
         # ex2: Mezcla-9jan22.tar.gz
-        # note:  
+        # note: timestamp "component" uses periods around the potential date (e.g., Mezcla-9jan22.tar.gz)
+        # whereas an "affix" is just substring (e.g., my12abc34file)
         if [[ ("$f" =~ \.[0-9]{2}[a-z]{3,4}[0-9]{2}.*$) ]]; then
-            [ $verbose = 1 ] && echo "Ignoring file with timestamp suffix: $f"
+            [ $verbose = 1 ] && echo "Ignoring file with timestamp component: $f"
         elif [[ ("$IGNORE_ALL" = "1") && ("$f" =~ [0-9]{2}[a-z]{3,4}[0-9]{2}) ]]; then
             [ $verbose = 1 ] && echo "Ignoring file with timestamp affix: $f"
         elif [ -e "$f" ]; then              # regular file exists
             ## TODO2: use same format as $(T)--lowercase as in $(get-free-filename ... $(date ... | downcase-stdin; ))
-           new_f=$(get-free-filename "$f.$(date --reference="$f" '+%d%b%y')" ".")
-           ## DEBUG: echo
-           eval "$move_command" "$f" "$new_f";
+            new_f=$(get-free-filename "$f.$(date --reference="$f" '+%d%b%y')" ".")
+            ## DEBUG: echo
+            eval "$move_command" "$f" "$new_f";
         elif [ -L "$f" ]; then              # symbolic link exists
-           # note: gets mod time via 'stat -c %y'
-           new_f=$(get-free-filename "$f.$(date --date="$(stat -c %y "$f")" '+%d%b%y')" ".")
-           eval "$move_command" "$f" "$new_f";
+            # note: gets mod time via 'stat -c %y'
+            new_f=$(get-free-filename "$f.$(date --date="$(stat -c %y "$f")" '+%d%b%y')" ".")
+            eval "$move_command" "$f" "$new_f";
         else
-           ## TODO2: [ $verbose ] && echo "FYI: no '$f'"
-           [ $verbose = 1 ] && echo "FYI: no '$f'"
+            ## TODO2: [ $verbose ] && echo "FYI: no '$f'"
+            [ $verbose = 1 ] && echo "FYI: no '$f'"
         fi
     done;
     ## DEBUG: set - -o xtrace
@@ -3267,9 +3276,11 @@ alias run-epiphany-browser='invoke-browser epiphany-browser'
 # nvidia-smi-loop([secs=1]): run nvidia-smi with SECS looping
 function nvidia-smi-loop {
     local secs="${1:-1}";
-    local ms
-    ms=$(calc "$secs * 1000")
-    nvidia-smi --loop-ms="$ms";
+    ## OLD:
+    ## local ms
+    ## ms=$(calc "$secs * 1000")
+    ## nvidia-smi --loop-ms="$ms";
+    nvidia-smi --loop="$secs";
 }
 alias nvidia-loop=nvidia-smi-loop
 
