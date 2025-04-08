@@ -222,7 +222,13 @@ for (my $i = 0; $i <= $#ARGV; $i++) {
     # Move target to target.{today}
     # note: get_file_ddmmmyy returns current year 2022 as 1971!
     if ((-e $new_file) && $rename_old) {
-	my($old_file_dated) = $new_file . "." . &get_file_ddmmmyy($new_file);
+	my($old_file_dated_base) = $new_file . "." . &get_file_ddmmmyy($new_file);
+	my($old_file_dated) = $old_file_dated_base;
+	my($unique_num) = 0;
+	while (-e $old_file_dated) {
+	    $unique_num++;
+	    $old_file_dated = "$old_file_dated_base-$unique_num";
+	}
 	&debug_print(&TL_BASIC, "${test_spec}renaming existing target \"$new_file\" as \"$old_file_dated\"\n");
 	if (! $test) {
 	    rename $new_file, $old_file_dated;
