@@ -47,6 +47,7 @@
 #         ${arr[*]}                 all elements
 #         "${arr[@]}"               likewise all but individually quoted (a la "$@")
 #         arr+=(value)              append value
+#         "${arr:-default}"         default value; local dirs=("${@:-.}")
 #   - conditional expression (a la C ternary operator (test ? true-result : false-result)
 #     note: approximation via https://stackoverflow.com/questions/3953645/ternary-operator-in-bash
 #         $([ test ] && echo "true-result" || echo "false-result")
