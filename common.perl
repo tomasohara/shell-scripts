@@ -2369,9 +2369,9 @@ sub get_file_ddmmmyy {
     &debug_print(6, "localtime: ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst)\n");
 
     # Format it as ddMMMyy (e.g., 29mar22)
-    my(@months) = ( "jan", "feb", "mar", "apr", "may", "nun",
+    my(@months) = ( "jan", "feb", "mar", "apr", "may", "jun",
 		    "jul", "aug", "sep", "oct", "nov", "dec" );
-    my($ddmmmyy) = sprintf "%02d%s%02d", $mday, $months[$mon], $year;
+    my($ddmmmyy) = sprintf "%02d%s%02d", $mday, $months[$mon], (($year + 1900) % 100);
     &debug_print(5, "get_file_ddmmmyy($filename) => $ddmmmyy\n");
 
     return ($ddmmmyy);
