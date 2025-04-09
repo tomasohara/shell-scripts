@@ -99,6 +99,7 @@ ARG REQUIREMENTS=$WORKDIR/requirements.txt
 COPY requirements.txt $REQUIREMENTS
 
 # Install the project's dependencies
+## TODO3: install wheel and other optional packages used by pip
 RUN if [ "$PYTHON_VERSION" != "" ]; then                                                \
         pip3 install --verbose --no-cache-dir --requirement $REQUIREMENTS;               \
     fi
