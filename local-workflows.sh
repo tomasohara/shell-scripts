@@ -174,7 +174,8 @@ if [ "${CLONE_REPO:-0}" = "1" ]; then
 fi
 
 # Optionally, generate pip requirements file
-# Note: normally uses ./requirements.txt (n.b., avoid extraneous modules in one off scripts)
+# Note: normally uses ./requirements.txt (n.b., avoids extraneous modules in one off scripts);
+# also, pipreqs no longer installed by default due to Docker issue.
 export REQUIREMENTS="$LOCAL_REPO_DIR/requirements.txt"
 if [ "${AUTO_REQS:-0}" = "1" ]; then
     export REQUIREMENTS="$PWD/requirements.auto"
