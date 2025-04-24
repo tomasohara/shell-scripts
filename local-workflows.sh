@@ -4,17 +4,15 @@
 #    https://github.com/nektos/act
 # It builds a Docker image and runs a Github Actions workflow locally.
 #
-# It also has support for using directly via docker. This includes
+# It also supports running the actions directly via docker. This includes
 # building the image and running via docker, done separately to support
-# inspection.
-# optio clones a GitHub repository, generates a pip requirements file,
-# builds a Docker image, and runs a Github Actions workflow locally.
+# inspection of the image.
 #
 # Note:
 # - There are some old options such as for cloning repository and
 #   generating requirements.
 # - When running under a Mac M1 the architecture needs to be specified to x64_64 (amd).
-#   This is a no-op otherwise (e.g., under Linux) as x64_64 is used by defauly.
+#   This is a no-op otherwise (e.g., under Linux) as x64_64 is used by default.
 # - Selective shellcheck whitelisting:
 #   SC2086: Double quote to prevent globbing and word splitting
 #
@@ -22,7 +20,7 @@
 # - *** Changes need to be synchronized in 3 places: Dockerfile, local-workflow.sh, and .github/workflow/*.yml!
 #
 # TODO:
-# - Use environment file to simplify passing pass environment variables:
+# - Use an environment/config file to simplify passing environment variables:
 #   See https://docs.docker.com/engine/reference/commandline/run
 #   and act man page (https://github.com/nektos/act/blob/master/cmd/root.go).
 #
