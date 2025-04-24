@@ -622,8 +622,10 @@ alias alias-perl='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
 ## }
 #
 # alias-python: python invocation for using in aliases
-# note: avoids excess tracing; see debug.py and main.py
-alias alias-python='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
+# note: avoids excess tracing; see debug.py and main.py;
+# uses function to allow ALIAS_DEBUG_LEVEL override.
+## OLD: alias alias-python='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
+simple-alias-fn alias-python 'DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
 #
 export MANPATH="$HOME/perl/share/man/man1:$MANPATH"
 append-path "$HOME/perl/bin"
@@ -914,7 +916,7 @@ trace grep commands
 skip_dirs=""
 if [[ $(grep --version) =~ Copyright.*2[0-9][0-9][0-9] ]]; then skip_dirs="-d skip"; fi
 
-# Grep settings
+# Grep settings and aliases: too many to count!
 # TODO: use gr and gr_ throughout for consistency
 # TODO: use -P flag (i.e.,  --perl-regexp) w/ grep rather than egrep
 # Notes:
@@ -923,19 +925,24 @@ if [[ $(grep --version) =~ Copyright.*2[0-9][0-9][0-9] ]]; then skip_dirs="-d sk
 #   -d skip  skip directories (i.e., don't treat as files)
 #   -s       suppress error messages (e.g., unreadable files)
 #   -E       extended regex support (i.e., old egrep)
-# - /bin/grep used to avoid alias and to allow for use with exec
-# - egrep is normally used unless the pattern will never use extended regex's
+# - 'command grep' used to avoid alias and to allow for use with exec
+# - egrep is normally used in other aliases instead of grep, unless the pattern will never use extended regex's
 ## TODO: quiet-unalias grep
 ## TODO: add alias for resolving grep binary with fallback to "command grep"
 GREP="command grep"
-## NOTE: -E is --extended-regexp
+alias egrep="$EGREP --color=auto"
+## OLD: NOTE: -E is --extended-regexp
 EGREP="$GREP --perl-regexp"
+# egrep(): issues grep with --perl-regexp
+alias egrep="$EGREP --color=auto"
+# MY_GREP_OPTIONS: options for use with grep aliases
 export MY_GREP_OPTIONS="-n $skip_dirs -s"
 # shellcheck disable=SC2086
 {
 function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
 function gr- () { $GREP $MY_GREP_OPTIONS "$@"; }
 ## Lorenzo review: should change this to gr-alt following TODO's
+##
 SORT_COL2="--key=2"
 # grep-unique(pattern, file, ...): count occurrence of pattern in file...
 function grep-unique () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0$" | sort -rn $SORT_COL2 -t':'; }
@@ -1284,7 +1291,7 @@ function comma-ize-number () { perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\
 # EX: echo "1024 1572864 1073741824" | apply-numeric-suffixes => 1K 1.5M 1G
 # EX: echo "1024 1572864 1073741824" | apply-numeric-suffixes 1 => 1K 1572864 1073741824
 function apply-numeric-suffixes () {
-    local just_once="$1"
+    local just_once="${1:-0}"
     ## OLD:
     ## local g="g";
     ## if [ "$just_once" = "1" ]; then g=""; fi
