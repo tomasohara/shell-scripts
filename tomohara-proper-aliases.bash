@@ -278,22 +278,32 @@ function disable-python-warnings {
 }
  
 # pip-freeze(): save pip freeze in _pip-freeze-{env_spec}-ddMMMyy.log
+## note: the ghost of python 2 lives on [WTH?!]
 function pip-freeze {
     # TODO2: rework via cmd-output
     local env_spec=""
     local env_name
     # ex: /Users/eafqe/python/.venv-nlp-py-12/bin/python => venv-nlp-py-12
-    env_name="$(which python | extract-matches "([^\.\/]+)\/bin\/python")"
+    env_name="$(which python3 | extract-matches "([^\.\/]+)\/bin\/python")"
     if [ "$env_name" != "" ]; then
         env_spec="-$env_name"
     fi
     local freeze_file
     freeze_file="_pip-freeze${env_spec}-$(T).log"
     rename-with-file-date "$freeze_file"
-    pip freeze > "$freeze_file"
+    pip3 freeze > "$freeze_file"
     echo "$freeze_file"
 }
- 
+
+# venv-activate([dir=venv]): activate VENV and add python to xterm
+function venv-activate {
+    local dir="${1:-venv}"
+    source "$dir/bin/activate"
+    add-conda-env-to-xterm-title
+    which python3
+    python3 --version
+}
+
 #-------------------------------------------------------------------------------
 # Jupyter notebook stuff
  
@@ -412,10 +422,10 @@ alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$IPYTHON_TMP" run
 # color-test-results: likewise with green for passed and faint green xpassed
 simple-alias-fn color-output 'colout --case-insensitive'
 function color-test-failures {
-    cat "$@" | color-output "\bfailed" red | color-output "(xfaile?d?)" yellow;
+    cat "$@" | color-output "\b(failed|error)" red | color-output "(xfaile?d?)" yellow;
 }
 function color-test-results {
-    cat "$@" | color-output "\bfailed" red | color-output "(xfaile?d?)" yellow | color-output "\bpassed" green | color-output "xpassed" green faint;
+    cat "$@" | color-output "\b(failed|error)" red | color-output "(xfaile?d?)" yellow | color-output "\bpassed" green | color-output "xpassed" green faint;
 }
 
 # ocr-image(image-filename): run image through optical character recognition (OCD)
@@ -506,10 +516,9 @@ function shell-check-last-snippet {
 function shell-check-stdin {
     ## DEBUG: echo "in shell-check-stdin: args='$*'"
     echo "Enter snippet lines and then ^D"
-    ## OLD: alias-python -c 'import sys; sys.stdin.read()' | shell-check -
     shell-check -
     # shellcheck disable=SC2181
-    if [ "$?" -eq 0 ]; then echo "shellcheck OK"; fi
+    [[ $? -eq 0 ]] && echo "shellcheck OK"
 }
 #
 # shell-check-loose(): run shellcheck with relaxed rules
@@ -647,7 +656,7 @@ alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
 # youtube-transcript(url, file): download YoutTube transcript at URL to FILE
 function youtube-transcript {
     if [[ ("$2" == "") || ("$1" == "--help") ]]; then
-        echo "Usage: youtube-transcript-alt url file" 1>&2
+        echo "Usage: youtube-transcript url file" 1>&2
         echo "" 1>&2
         echo "Note: More details follow:"  1>&2
         echo "" 1>&2
@@ -662,18 +671,23 @@ function youtube-transcript {
 # youtube-transcript-alt(): workaround for silly bash problem:
 #    $ youtube-transcript 'https://www.youtube.com/watch?v=gcgMyRfE8a4&t=247s'
 #    bash: : No such file or directory
+# This also allows for stdout instead of requiring a file.
 # TODO: check for &'s in URL and issue warning
 # DUH: The "$file" redirection was causing problems (Thanks, Grok!)
 # TODO2: check for other aliases with similar issues
 function youtube-transcript-alt {
     local url="$1"
     local file="$2"
-    if [ "$file" == "" ]; then
-        echo "Usage: youtube-transcript-alt url file" 1>&2
+    if [[ ("$file" == "") || ("$1" == "--help") ]]; then
+        echo "Usage: youtube-transcript-alt url [file | -]" 1>&2
         echo "See youtube-transcript --help for details"  1>&2
         return
     fi
-    python3 "$(which youtube_transcript.py)" "$url" > "$file"
+    if [[ "$file" == "-" ]]; then
+        alias-python "$(which youtube_transcript.py)" "$url"
+    else
+        alias-python "$(which youtube_transcript.py)" "$url" > "$file"
+    fi
 }
 
 #...............................................................................
