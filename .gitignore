@@ -43,7 +43,7 @@
 
 # Backup file
 **/*.bak
-**/backup/
+**/backup
 
 # Old or archived files
 **/old
