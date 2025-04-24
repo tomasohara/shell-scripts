@@ -68,6 +68,7 @@
 #   GIT_SKIP_PUSH                skip 'git push' after commit
 #   GIT_TEST_MESSAGE             commit message if GIT_NO_CONFIRM used
 #   GIT_AUTO_NEXT                automatically proceed with next checkin
+#   PAGER                        less (or more)
 #
 # - maldito shellcheck:
 #   SC2002 [Useless cat. Consider 'cmd < file | ..' or 'cmd file | ..' instead]
@@ -404,7 +405,7 @@ function git-add-commit-push {
     if [ "${GIT_SKIP_PUSH:-0}" == "1" ]; then
         echo "Skipping push (due to GIT_SKIP_PUSH)"
     else    
-        pause-for-enter 'About to push: review commit log above!'
+        pause-for-enter 'FYI: About to push, so review commit log above.'
         echo "issuing: git push --verbose"
         if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
            git push --verbose <<EOF >> "$log" 2>&1
@@ -799,7 +800,10 @@ simple-alias-fn git-extract-all-versions 'extract-all-git-versions.bash'
 alias git-tar-repo=tar-this-dir-dated
 # git-tar-repo-proper(): create tar archive of repo excluding .git
 # note: this is to create backup before updating repo (in case of conflicts)
-alias git-tar-repo-proper='TAR_FILTER="\.git\b" tar-this-dir-dated'
+## OLD: alias git-tar-repo-proper='TAR_FILTER="\.git\b" tar-this-dir-dated'
+function git-tar-repo-proper {
+    (echo "FYI: Omitting .git from backup"; TAR_FILTER="\.git\b" tar-this-dir-dated) 2>&1 | less;
+}
 #
 # TODO2: add some type of confirmation
 alias git-checkin-new-alias="GIT_MESSAGE='initial version' git-update-commit-push"
