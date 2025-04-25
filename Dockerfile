@@ -77,13 +77,22 @@ ARG PYTHON_VERSION=3.11.4
 ## TEST: ARG PYTHON_TAG="117929"
 ARG PYTHON_TAG="5199054971"
 #
-RUN if [ "$PYTHON_VERSION" != "" ]; then                                                \
-       wget -qO /tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-${PYTHON_TAG}/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz" && \
-       mkdir -p /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 &&                    \
-       tar -xzf /tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz                    \
-           -C /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 --strip-components=1 && \
-       echo TODO: rm /tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz;              \
-    fi
+## TODO2:
+## RUN if [ "$PYTHON_VERSION" != "" ]; then                                                \
+##        wget -qO /tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-${PYTHON_TAG}/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz" && \
+##        mkdir -p /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 &&                    \
+##        tar -xzf /tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz                    \
+##            -C /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 --strip-components=1 && \
+##        echo TODO: rm /tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz;              \
+##     fi
+##
+## TEMP:
+RUN wget -qO "/tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz" "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-${PYTHON_TAG}/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz"
+RUN mkdir -p "/opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64"
+RUN tar -xzf "/tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz" -C "/opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64" --strip-components=1
+RUN echo TODO: rm "/tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz";
+##
+## TODO2: add variable for basenames, /opt dir, /tmp dir, etc.
 
 # Set environment variables to use the installed Python version as the default
 ENV PATH="/opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64/bin:$WORKDIR:$WORKDIR/tests:${PATH}"
