@@ -311,8 +311,6 @@ alias todays-update='update-today-vars'
 # usage: reference-variable "$var1, ..."
 # TODO: figure out way to do without quotes (e.g., to avoid SC2086: Double quote to prevent globbing ...)
 function reference-variable { true; }
-## OLD: reference-variable "$hoy, $T"
-## BAD: reference-variable $hoy, $T
 reference-variable "$hoy $T"
 
 # Alias creation helper(s)
@@ -375,22 +373,6 @@ trace 'in tomohara-aliases.bash'
 # # HACK: load in older tpo-setup.bash
 # conditional-source $TOM_BIN/tpo-setup.bash
 
-## OLD:
-## # under-macos() => boolean: whether running under maldito macintosh
-## # EX: (under-macos; wc -l /vmlinuz 2> /dev/null) =/=> $'0\n1'
-## function under-macos {
-##     local under_mac=0
-##     if [[ "$OSTYPE" =~ darwin.* ]]; then under_mac=1; fi
-##     ## TODO: return $under_mac
-##     echo "$under_mac"
-## }
-## function under-linux {
-##     local under_linux=0
-##     if [[ "$OSTYPE" =~ linux.* ]]; then under_linux=1; fi
-##     ## TODO: return $under_linux
-##     echo "$under_linux"
-## }
-##
 # under-os(regex, [quiet=0]): Whether REGEX matches $OSTYPE
 # note: outputs boolean code and also sets status code
 function under-os {
@@ -625,6 +607,7 @@ alias alias-perl='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
 # note: avoids excess tracing; see debug.py and main.py;
 # uses function to allow ALIAS_DEBUG_LEVEL override.
 ## OLD: alias alias-python='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
+# shellcheck disable=SC2016
 simple-alias-fn alias-python 'DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
 #
 export MANPATH="$HOME/perl/share/man/man1:$MANPATH"
@@ -930,11 +913,13 @@ if [[ $(grep --version) =~ Copyright.*2[0-9][0-9][0-9] ]]; then skip_dirs="-d sk
 ## TODO: quiet-unalias grep
 ## TODO: add alias for resolving grep binary with fallback to "command grep"
 GREP="command grep"
-alias egrep="$EGREP --color=auto"
+## OLD: alias egrep="$EGREP --color=auto"
+simple-alias-fn egrep "$EGREP --color=auto"
 ## OLD: NOTE: -E is --extended-regexp
 EGREP="$GREP --perl-regexp"
 # egrep(): issues grep with --perl-regexp
-alias egrep="$EGREP --color=auto"
+## OLD: alias egrep="$EGREP --color=auto"
+simple-alias-fn egrep "$EGREP --color=auto"
 # MY_GREP_OPTIONS: options for use with grep aliases
 export MY_GREP_OPTIONS="-n $skip_dirs -s"
 # shellcheck disable=SC2086
@@ -1006,7 +991,6 @@ function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pat
 function findspec-all () { command find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | $GREP -v '^find: '; }
 function fs () { findspec . "$@" | $EGREP -iv '(/(backup|build)/)'; } 
 function fs-ls () { fs "$@" -exec ls -l {} \; ; }
-## OLD: alias fs-='findspec-all .'
 simple-alias-fn fs- 'findspec-all .'
 ## Lorenzo review: should change this to fs-alt following TODO's
 function fs-ext () { find . -iname \*."$1" | $EGREP -iv '(/(backup|build)/)'; } 
@@ -1416,17 +1400,18 @@ alias vdiff='kdiff'
 # TODO: maintain table with alias changes over time (e.g., diff- => diff-default)
 #
 # diff(): run diff command w/ --ignore-all-space (-w) and --ignore-space-change (-b)
+#
+## OLD: Workaround with curly brackets not supported by conv_2_multiline.py,
+## which was added for alias/function coverage testing.
+## {
+## diff_options="--ignore-space-change --ignore-blank-lines"
+## alias diff='command diff $diff_options'
+## }
+diff_options="--ignore-space-change --ignore-blank-lines"
 # maldito shellcheck: SC2034: diff_options appears unused. Verify it or export it.
 # shellcheck disable=SC2034
-
-## OLD: Workaround with curly brackets not supported by conv_2_multiline.py
-# {
-# diff_options="--ignore-space-change --ignore-blank-lines"
-# alias diff='command diff $diff_options'
-# }
-diff_options="--ignore-space-change --ignore-blank-lines"
 alias diff='command diff $diff_options'
-
+#
 alias diff-default='command diff'
 alias diff-ignore-spacing='diff --ignore-all-space'
 #
@@ -1566,7 +1551,8 @@ function make-tar () {
     if [[ ("$base" == "--help") ||("$base" == "") ]]; then
         echo "Usage: make-tar base dir [depth [filter]]"
         echo "Env. options: USE_DATE, TEMP, GTAR, MAX_SIZE, TAR_DEPTH, TAR_FILTER"
-        echo "note: TEMP used by tar-dir, etc."
+        echo "note: TEMP used by tar-dir, etc.; Also see [un]set-tar-bzip2 and [un]set-tar-xz"
+        echo "(or try GTAR_OPTS='vfJ' [... tor-browser-linux-x86_64-14.5.tar.xz])."
         return
     fi
     ## TODO2: dispense with acrobatic arg parsing!
@@ -1753,11 +1739,40 @@ function para-notes-gr-less-p { para-notes-gr "$@" | less -p "$1"; }
 # notes-entry-gr(): treat text with -----'s as single unit for searching
 # notes-entry-gr-aux(glob, pattern): search for PATTERN in GLOB
 function notes-entry-gr-aux() {
+    if [[ "${HEURISTIC_NOTE_GREP:-0}" == "1" ]]; then
+        heuristic-notes-entry-gr-aux "$@";
+        return
+    fi
     local glob="$1"
     shift
-    perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | convert-emoticons-stdin | perlgrep -para -i "$@" - 2>&1 | less -p "$1";
+    ## OLD: perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | convert-emoticons-stdin | perlgrep -para -i "$@" - 2>&1 | less -p "$1";
+    perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" - 2>&1 | convert-emoticons-stdin | less -p "$1";
+}
+# heuristic-notes-entry-gr-aux(glob, regex): filters by terms in regex prior to notes-entry-gr-aux
+# note: used with multiple operators over large notes files (abc.*pdq.*xyz)
+function heuristic-notes-entry-gr-aux() {
+    local note_files="$1"
+    shift
+    local regex="$*"
+    # Filter by search terms joined by regex operators
+    local temp_base="/tmp/_heuristic-notes-entry-gr-aux"
+    local term_num=0
+    # note: preprocesses to make Perl "paragraphs" be based on dash-line headers
+    perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $note_files >| "$temp_base.$term_num"
+    note_files="$temp_base.$term_num"
+    for term in $(echo "$regex" | perl -pe 's/(\.\*)/ /g;'); do
+        let term_num++
+        perlgrep -para -i "$term" $note_files >| "$temp_base.$term_num"
+        note_files="$temp_base.$term_num"
+    done
+    # Apply overall regex
+    perlgrep -para -i "$regex" $note_files 2>&1 | convert-emoticons-stdin | less -p "$regex";
+    ## TEST: for sake of less pattern highlighting', converts newlines to returns
+    ## perlgrep -para -i "$regex" $note_files 2>&1 | convert-emoticons-stdin | perl -pe 's/\n(.)/\r$1/g;' | less -p "$regex";
+    
 }
 }   ## end shellcheck
+##
 alias notes-entry-gr='notes-entry-gr-aux "$notes_glob"'
 function notes-entry-gr-less-p { notes-entry-gr "$@" | less -p "$1"; }
 alias entry-notes=notes-entry-gr
@@ -1992,8 +2007,13 @@ alias foreach='alias-perl foreach.perl'
 # rename-spaces: replace spaces in filenames of current dir with underscores
 alias-fn rename-spaces 'rename-files -q -global -rename_old " " "_"'
 # TODO2: handle smart quotes
+## OLD:
 ## EXPERIMENTAL (Commented for conv_2_multiline): alias rename-quotes='rename-files -q -global -rename_old "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
-alias rename-quotes='rename-files -q -global -rename_old "\"" ""'  
+## OLD: alias rename-quotes='rename-files -q -global -rename_old "\"" ""'
+function rename-quotes {
+    rename-files -q -global -rename_old "\"" "_";
+    rename-files -q -global -rename_old "'" "_";
+}
 
 # rename-special-punct: replace runs of any troublesome punctuation in filename w/ _
 function rename-special-punct {
@@ -2759,12 +2779,20 @@ alias ps-script='ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
 # note: the script now assume -once if DURING_ALIAS set (e.g., via alias-perl)
 alias ps-sort='alias-perl ps_sort.perl'
 function ps-sort-once { alias-perl ps_sort.perl -num_times=1 -by=time "$@" -; }
-alias ps-sort-time='ps-sort-once -by=time'
-alias ps-time=ps-sort-time
-alias ps-sort-mem='ps-sort-once -by=mem '
-alias ps-mem=ps-sort-mem
-alias ps-sort-help='alias-perl ps_sort.perl'
-alias ps-sort-cpu='ps-sort-once -by=cpu '
+## OLD:
+## alias ps-sort-time='ps-sort-once -by=time'
+## alias ps-time=ps-sort-time
+## alias ps-sort-mem='ps-sort-once -by=mem '
+## alias ps-mem=ps-sort-mem
+## alias ps-sort-help='alias-perl ps_sort.perl'
+## alias ps-sort-cpu='ps-sort-once -by=cpu '
+##
+simple-alias-fn ps-sort-time 'ps-sort-once -by=time'
+simple-alias-fn ps-time ps-sort-time
+simple-alias-fn ps-sort-mem 'ps-sort-once -by=mem'
+simple-alias-fn ps-mem ps-sort-mem
+simple-alias-fn ps-sort-help 'simple-alias-fn-perl ps_sort.perl'
+simple-alias-fn ps-sort-cpu 'ps-sort-once -by=cpu'
 
 # get-process-parent(pid): return parent process-id for PID
 # ¢ ps al | egrep "(PID|$$)"
