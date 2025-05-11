@@ -13,7 +13,7 @@
 #
 # TODO1:
 # - Use --verbose to determine the level of detail for the usage
-#   (see calc_entropy.pelr for an example.)
+#   (see calc_entropy.perl for an example.)
 #
 # TODO:
 # - Reconcile with do_rcsdiff.sh (at least keep in synch put perhaps combine).
@@ -50,16 +50,13 @@
 # entirely of blank lines.
 #
 
-# Uncomment following line(s) for tracing:
+# Set bash regular and/or verbose tracing
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #
-## DEBUG:
-## echo "$@"
-## set -o xtrace
-## DETAILED: set -o verbose
-#
-# Set bash regular and/or verbose tracing
+if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+    echo "$0 $@"
+fi
 if [ "${TRACE:-0}" = "1" ]; then
     set -o xtrace
 fi
@@ -95,7 +92,7 @@ if [ -z "$2" ]; then
     echo ""
     echo "$0 --ignore-spacing '*.[ch]*' MASTER-DIR"
     echo ""
-    echo "$script '.py' .. >| _python_diff.list 2>&1"
+    echo "$script '.py' .. > _python_diff.list 2>&1"
     echo ""
     ## OLD:
     ## # shellcheck disable=SC2016
@@ -104,10 +101,10 @@ if [ -z "$2" ]; then
     echo ""
     
     echo ""
-    ## OLD: echo "$script" '--match-dot-files ".*bash* .*emacs*" .. >| _bash-emacs-diff.list 2>&1'
-    echo "$script" '--match-dot-files ".*bash*" .. >| _bash-diff.list 2>&1'
+    ## OLD: echo "$script" '--match-dot-files ".*bash* .*emacs*" .. > _bash-emacs-diff.list 2>&1'
+    echo "$script" '--match-dot-files ".*bash*" .. > _bash-diff.list 2>&1'
     echo ""
-    echo "$script --ignore-spacing --diff-options '--context=1' '*.rb' vm-torre >| vm-torre.diff 2>&1"
+    echo "$script --ignore-spacing --diff-options '--context=1' '*.rb' vm-torre > vm-torre.diff 2>&1"
     echo ""
     echo "$script --no-glob '*.py *.mako' ~/xfer"
     echo ""
@@ -267,7 +264,8 @@ for file in $pattern; do
     base=$(basename "$file")
     dir=$(dirname "$file")
     if [ "$dir" != "." ]; then
-        base="$dir/$base"
+        ## OLD: base="$dir/$base"
+        base="$(dirname $dir)/$base"
     fi
     other_file="$master"
     #
@@ -277,7 +275,20 @@ for file in $pattern; do
         fi
         continue
     fi
+    # Use fallback based on whether pattern/file specifies path
+    # Note: similar to diff-rev alias
+    # ex: "bin/tests/README.ipynb" => "tests/README.ipynb"
     if [ -d "$other_file" ]; then
+        if [ -e "$other_file/$file" ]; then
+            # Retains directory in "pattern"
+            # TODO: assert $nopattern
+            other_file="$other_file/$file"
+        else
+            # Ignores directory in "pattern"
+            other_file="$master/$base"
+        fi
+    fi
+    if [ ! -e "$other_file" ]; then
         other_file="$master/$base"
     fi
     # note: recursive omits some verbose output to cut down on clutter
@@ -297,7 +308,7 @@ for file in $pattern; do
     # grepping (e.g., `do_diff.sh ... | grep '^Differences:'`).
     files_differ=false
     if [ "$brief" == "0" ]; then
-        "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" >| "$log_file"
+        "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" > "$log_file"
         status=$?
         ## OLD: perl -pe 's/Files (.*) and (.*) differ/Differences: $1 $2/;' < "$log_file"
         perl -e "\$bd='$base_dir';" -pe 's@Files (.*) and (.*) differ@Differences: $bd$d/$1 $2@;' < "$log_file"
@@ -340,7 +351,8 @@ for file in $pattern; do
         if [ $num_lines -gt 0 ]; then
             relative_diff=$(( $num_diffs * 100 / $num_lines ))
         fi
-        echo "${relative_diff}% differences for $base"
+        ## OLD: echo "${relative_diff}% differences for $base"
+        echo "${relative_diff}% differences for $base_dir/$file"
     fi
 
     # Show the actual file differences
