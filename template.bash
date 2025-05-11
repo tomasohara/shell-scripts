@@ -78,7 +78,11 @@
 #  - sequence expression
 #      {n..m}                       echo "digits:" {0..9}; echo "letters: " {a..z}
 #  - advanced redirection
-#      &>                           same as `> ... 2>&1` 
+#      &>                           same as `> ... 2>&1`
+#  - common or useful bash arguments
+#     -i -c                         run command as if interactive invocation
+#     shopt -s expand_aliases       for alias support in scripts
+#     TODO3: flesh out
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
@@ -105,17 +109,13 @@
 # - value=${value@L}                    # make lowercase
 #
 
-# Uncomment following line(s) for tracing:
+# Set bash regular and/or verbose tracing
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #
-## DEBUG:
-## echo "in ${BASH_SOURCE[0]}"
-## echo "$@"
-## DETAILED: set -o xtrace
-## VERBOSE: set -o verbose
-#
-# Set bash regular and/or verbose tracing
+if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+    echo "$0 $@"
+fi
 if [[ "${TRACE:-0}" == "1" ]]; then
     set -o xtrace
 fi
