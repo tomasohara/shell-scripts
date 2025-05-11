@@ -17,6 +17,20 @@
 ## set -o xtrace
 ## set -o verbose
 
+# Set bash regular and/or verbose tracing
+# - xtrace shows arg expansion (and often is sufficient)
+# - verbose shows source commands as is (but usually is superfluous w/ xtrace)
+#
+if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+    echo "$0 $@"
+fi
+if [[ "${TRACE:-0}" == "1" ]]; then
+    set -o xtrace
+fi
+if [[ "${VERBOSE:-0}" == "1" ]]; then
+    set -o verbose
+fi
+
 # Get defaults for programs
 BROWSER=${BROWSER:-firefox}
 
