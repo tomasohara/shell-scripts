@@ -139,10 +139,11 @@ if (!defined($ARGV[0])) {
     }
     $options .= "\nother options = " . &COMMON_OPTIONS;
     my($example) = "examples:\n\n$0 -\n\n";
-    $example .= "$script_name -by=mem -\n\n";
+    ## OLD: $example .= "$script_name -by=mem -\n\n";
     $example .= "$script_name -justuser -\n\n";
     $example .= "$script_name -username=cpuhog -\n\n";
     $example .= "LINES=1000 $script_name -num_times=1 -by=time - | less\n\n";
+    $example .= "COLUMNS=132 $script_name -num_times=1 -by=mem - | head\n\n";
     $example .= "$script_name -once -full -by=command -\n\n";
 
     my($note) = "";
@@ -268,7 +269,8 @@ for ($t = 1; $t <= $num_times; $t++) {
 	print "update $t of $num_times\n";
 	&debug_out(&TL_DETAILED, "%s\n", &get_time());
     }
-    printf "%s\n", substr($header, 0, $line_len);
+    ## OLD: printf "%s\n", substr($header, 0, $line_len);
+    printf "%s\n", &elide(substr($header, 0, $line_len));	
     my $count = 0;
     foreach my $index (sort by_xyz @line_index) {
 	printf "%s\n",  substr($line[$line_index[$index]], 0, $line_len);
@@ -421,4 +423,19 @@ sub set_stdin_blocking {
 	       $flags, $result);
 
     return;
+}
+
+# elide(text, [max_len=$line_len]): clip TEXT at MAX_LEX, inclduing elipsis
+# EX: elide("abcdefghi", 6) => "abc..."
+sub elide {
+    my($text, $max_len) = @_;
+    if (! defined($max_len)) {
+	$max_len = $line_len;
+    }
+    if (length($text) > $max_len) {
+	$text = substr($text, 0, $line_len);
+    }
+
+    &debug_print(&TL_VERBOSE, "elide(@_) => $text\n");
+    return ($text);
 }
