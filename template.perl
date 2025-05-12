@@ -19,7 +19,7 @@ BEGIN {
 my($show_help) = $help;
 
 # Specify additional diagnostics and strict variable usage, excepting those
-# for command-line arguments (see init_var's in &init).
+# for command-line arguments (see init_var's below).
 use strict;
 ## use vars qw/$fu $bar/;
 ## TODO:
