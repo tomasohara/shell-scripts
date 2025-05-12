@@ -275,7 +275,8 @@ for file in $pattern; do
         fi
         continue
     fi
-    # Use fallback based on whether pattern/file specifies path
+    # Use fallbacks based on whether pattern/file specifies path not resolvable
+    # directly via master directory.
     # Note: similar to diff-rev alias
     # ex: "bin/tests/README.ipynb" => "tests/README.ipynb"
     if [ -d "$other_file" ]; then
