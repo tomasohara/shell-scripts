@@ -35,7 +35,7 @@ if (!defined($ARGV[0])) {
 # TODO: add MULTILING_DIR environment variable
 ## OLD: &init_var(*multiling_dir, "c:/tom/MultiLingual");
 &init_var(*HOME, "~");
-&init_var(*multiling_dir, "$HOME/MultiLingual");
+&init_var(*multiling_dir, "$HOME/multilingual");
 &init_var(*LATIN_DIR, $multiling_dir . "/Latin");
 my($wine_prefix) = ($unix ? "wine " : "");
 &init_var(*latin_lookup, "${wine_prefix}$LATIN_DIR/Latin-Words.exe");
