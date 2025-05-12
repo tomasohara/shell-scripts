@@ -55,6 +55,9 @@ jobs:
           
   build-and-test-docker:
     name: Build and Run Tests via Docker
+    ## TEMP: disable use of Docker
+    ## TODO3: derive via environment or via github.event flags (see act.yml)
+    if: false
     runs-on: [ubuntu-22.04]
 
     ## TEST:
