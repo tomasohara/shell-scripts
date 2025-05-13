@@ -789,6 +789,9 @@ alias detach-job='disown -h'
 # shellcheck disable=SC2016
 simple-alias-fn screenshot-window 'gnome-screenshot --window --delay ${SCREENSHOT_DELAY:-3}'
 
+# show-window-list(): show window title, etc.
+alias show-window-list='wmctrl -l'
+
 #...............................................................................
 # Linux admin
 
