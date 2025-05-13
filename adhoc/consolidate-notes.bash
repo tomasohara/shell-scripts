@@ -17,6 +17,7 @@
 
 ## DEBUG:
 echo "$0 $*"
+which python3
 
 # Uncomment following line(s) for tracing:
 # - xtrace shows arg expansion (and often is sufficient)
