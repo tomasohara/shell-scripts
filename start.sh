@@ -189,44 +189,44 @@ fi
     
 #
 case "$lower_file" in
-    # PDF and posscript files
-    *.pdf | *.ps) invoke "$pdf_program" "$@" & ;;
+    # PDF and postscript files
+    *.pdf* | *.ps*) invoke "$pdf_program" "$@" & ;;
 
     # Image files
     # note: uses viewer that Files invokes, such as eog [the "eye of GNOME"] for images
-    *.gif | *.ico | *.jpeg | *.jpg | *.png | .svg | *.xcf) invoke "$image_program"  "$@" & ;;
+    *.gif* | *.ico* | *.jpeg* | *.jpg* | *.png* | *.svg* | *.xcf*) invoke "$image_program"  "$@" & ;;
 
     # Video files
-    *.mov | *.mp4) invoke vlc "$@" & ;;
+    *.mov* | *.mp*4) invoke vlc "$@" & ;;
 
     # Audio files
-    *.mp3 | *.wav) invoke vlc "$@" & ;;
+    *.mp*3 | *.wav*) invoke vlc "$@" & ;;
     
     # MS Office and LibreOffice files: word processor files, spreadsheets, etc.
     # warning: this only works well for MS-specific extension (.
     # if other applications are associated (e.g,. TextEdit for .rtf), then need to invoke via specific office program [maldito mac/microsoft].
     # note: MacOs has awkware sequence via [Finder > GetInfo > OpenWith/ChangeAll] to change the default. See
     #    https://www.macworld.com/article/672511/how-to-change-default-apps-on-mac.html
-    *.doc | *.docx | *.pptx | *.odp | *.odt | *.odg | *.rtf | *.xls | *.xlsx | *.csv) invoke "$office_program" "$@" & ;;
+    *.doc* | *.docx* | *.pptx* | *.odp* | *.odt* | *.odg* | *.rtf* | *.xls* | *.xlsx* | *.csv*) invoke "$office_program" "$@" & ;;
 
     # HTML files and XML files
     # TODO: convert filename arguments to use file:// prefix (to distinguish from URL's)
-    *.html | *.xml) invoke "$BROWSER" "$@" & ;;
+    *.html* | *.xml*) invoke "$BROWSER" "$@" & ;;
 
     # Text files and dot files
-    *.txt | *.text | .*) invoke emacs "$@" & ;;
+    *.txt* | *.text* | .*) invoke emacs "$@" & ;;
 
     # Windows XPS printer
-    *.oxps | *.xps) invoke mupdf "$@" & ;;
+    *.oxps* | *.xps*) invoke mupdf "$@" & ;;
     
     ## TEST:
     ## This illustrates what happens when ';;' not used at end of case
-    ## *.abc | *.pdq) echo hey; emacs "$@"
-    ## BAD: *.xyz)
+    ## *.abc* | *.pdq*) echo hey; emacs "$@"
+    ## BAD: *.xyz*)
     ##		   echo hey2; emacs "$@" & ;;
 
     # Invoke MacOs-style app as if program (e.g., Safari.app)
-    *.app)
+    *.app*)
        invoke "$@" & ;;
     
     # Invoke default program for unknown extension
