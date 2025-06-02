@@ -172,3 +172,23 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## $ pwd-host-info 
 ## /home/tomohara/bin
 ## jug
+
+#-------------------------------------------------------------------------------
+# fix git-next-checkin
+#
+# note: "git diff --numstat filename" => git diff --numstat -- filename"
+#
+
+## $ git-next-checkin 
+## Note: binary file so bypassing diff
+## fatal: ambiguous argument '_typos.toml': unknown revision or path not in the working tree.
+## Use '--' to separate paths from revisions, like this:
+## 'git <command> [<revision>...] -- [<file>...]'
+## TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation.
+## GIT_MESSAGE="..." git-update-commit-push "_typos.toml"
+## ^C
+## 
+## $ git-files-changed 
+## _typos.toml
+## library/train_util.py
+## tests/test_train_textual_inversion.py
