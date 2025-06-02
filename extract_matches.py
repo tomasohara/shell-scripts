@@ -96,19 +96,27 @@ class ExtractMatches(Main):
         self.replacement = self.get_parsed_option(REPLACEMENT, "")
         self.restore = self.get_parsed_option(RESTORE, "")
         self.paragraph_mode = self.get_parsed_option(PARA, False)
+        ## OLD: Lack of proper support for --mutli_line_match
+        # self.file_input_mode = (self.get_parsed_option(SLURP, False) or 
+        #                       self.get_parsed_option(FILE, False))
+        
+        ## OLD: self.file_input_mode is always false as multi_line_mode is False by default 
+        ## NEW: self.multi_line_match moved before self.file_input_mode
+        self.multi_line_match = self.get_parsed_option(MULTI_LINE_MATCH, False)
         self.file_input_mode = (self.get_parsed_option(SLURP, False) or 
-                              self.get_parsed_option(FILE, False))
+                  self.get_parsed_option(FILE, False) or
+                  self.multi_line_match)
         self.fields = self.get_parsed_option(FIELDS, 1)
         self.one_per_line = (self.get_parsed_option(ONE_PER_LINE, False) or 
                            self.get_parsed_option(SINGLE, False))
         # OLD: self.multi_per_line = self.get_parsed_option(MULTI_PER_LINE, False)
         self.multi_per_line = not self.one_per_line
-        self.max_count = self.get_parsed_option(MAX_COUNT, 
-                                              system.MAX_INT if self.multi_per_line else 1)
+        self.max_count = self.get_parsed_option(
+            MAX_COUNT, 
+            self.fields if self.fields > 0 else (system.MAX_INT if self.multi_per_line else 1))        
         self.ignore_case = self.get_parsed_option(IGNORE, False)
         self.preserve = self.get_parsed_option(PRESERVE, False)
         self.chomp = self.get_parsed_option(CHOMP, False)
-        self.multi_line_match = self.get_parsed_option(MULTI_LINE_MATCH, False)
         self.utf8_mode = self.get_parsed_option(UTF8, False)
         self.locale_mode = self.get_parsed_option(LOCALE, False)
         self.total_matched = 0
@@ -132,6 +140,13 @@ class ExtractMatches(Main):
         fix_replacement = not self.replacement
         if fix_replacement:
             self.replacement = "$1"
+
+        if auto_pattern:
+            if self.fields > 1:
+                self.pattern = r"\t".join([r"(\S+)" for _ in range(self.fields)])
+            else:
+                self.pattern = r"(.*)"
+
         for i in range(2, self.fields + 1):
             if fix_replacement:
                 self.replacement += "\t" + f"${i}"
@@ -153,8 +168,6 @@ class ExtractMatches(Main):
         ## New: Includes the fix for file handling
         # if self.paragraph_mode or self.file_input_mode
 
-
-
     def process_line(self, line):
         """Process each line of the input stream"""
         line = system.to_utf8(line)
@@ -165,6 +178,10 @@ class ExtractMatches(Main):
 
         count = 0
         flags = my_re.IGNORECASE if self.ignore_case else 0
+        ## NEW: Possible solution for --multi_line_match option
+        if self.multi_line_match:
+            flags |= my_re.MULTILINE | my_re.DOTALL
+        
         while match := my_re.search(self.pattern, line, flags=flags):
             matching_text = match.group(0)
             debug.trace(debug.QUITE_DETAILED, f"\nmatching text: '{matching_text}'")
@@ -177,6 +194,7 @@ class ExtractMatches(Main):
                     debug_output += f"{i} = None; "
             debug.trace(debug.QUITE_DETAILED, debug_output)
 
+            # OLD: No need of postmatch
             postmatch = line[match.end():]
             if self.restore:
                 try:
