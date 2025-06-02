@@ -19,10 +19,11 @@
 #   # Get aliases (n.b., tracing should be delayed)
 #   shopt -s expand_aliases
 #   {
-#       source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
+#       alias_script="all-tomohara-aliases-etc.bash"
+#       source_dir="$(dirname "$(which "$alias_script")")"
 #       # filters shellcheck SC1090 [Can't follow non-constant source]
 #       # shellcheck disable=SC1090
-#       source "$source_dir"/all-tomohara-aliases-etc.bash
+#       source "$source_dir/$alias_script"
 #   }
 #   #
 #   # Set tracing (delayed so alias definitions not traced)
