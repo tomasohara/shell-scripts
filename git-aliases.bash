@@ -122,6 +122,11 @@
 # - Filter miscellaneous output from git command execution (e.g., "enumerating objects"
 #   from git-update-commit-push), such as by just showing 'issuing' output.
 #
+# TODO2:
+# - Make sure -- used throughout to separate filenames from revision specs:
+#     Use '--' to separate paths from revisions, like this:
+#     'git <command> [<revision>...] -- [<file>...]'
+#
 
 ## DEBUG: echo "in ${BASH_SOURCE[0]}"
 
@@ -749,7 +754,8 @@ function alt-invoke-next-single-checkin {
     else
         ## TODO: summarize binary differenecs
         echo "Note: binary file so bypassing diff"
-        git diff --numstat "$mod_file" | head
+        ## OLD: git diff --numstat "$mod_file" | head
+        git diff --numstat -- "$mod_file" | head
         true
     fi
     local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
