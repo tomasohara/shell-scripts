@@ -56,15 +56,16 @@ if [[ ("$1" == "") || ("$1" == "--help") ]]; then
 fi
 
 # Check for pre-canned usages
+# note: uses recursive invocation
 if [[ "${ADVANCED_USAGE:-0}" == "1" ]]; then
     date_yyyy_mm_dd_hhmm="$(date '+%Y-%m-%d_%H%M')"
     log_file="$TMP/$base-$date_yyyy_mm_dd_hhmm.log"
     one_day_in_secs=$((24 * 3600))
     delay_time=60
     num_times=$((one_day_in_secs / delay_time))
-    echo $'Invoking script\t'
+    echo $'Invoking script (every minute for one day):\t'
     echo "    $script $num_times $delay_time"
-    $script $num_times $delay_time > "$log_file" 2>&1 &
+    ADVANCED_USAGE=0 $script $num_times $delay_time > "$log_file" 2>&1 &
     echo "See $log_file"
     exit
 fi
