@@ -97,8 +97,9 @@ if [ -z "$2" ]; then
     ## OLD:
     ## # shellcheck disable=SC2016
     ## echo '(for f in system.py main.py debug.py; do' "$script" '$f ~/mezcla-clone; done) 2>&1 | less'
-    echo "find . -type d -exec \"$script\" --dir {} --verbose '*' ~/repo-main/{} \; > _main-diff.log 2>&1"
+    echo "find . -type d -exec \"$script\" --dir {} --verbose '*' ~/repo-main/{} \; > _main-diff-all.log 2>&1"
     echo ""
+    echo "git ls-tree -r --name-only HEAD | xargs -I '{}' $script --no-pattern '{}' ~/repo-main/'{}' > _main-diff-tracked.log 2>&1"
     
     echo ""
     ## OLD: echo "$script" '--match-dot-files ".*bash* .*emacs*" .. > _bash-emacs-diff.list 2>&1'
