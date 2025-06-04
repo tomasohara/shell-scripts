@@ -13,8 +13,6 @@
 # - Check for looping due to empty patterns (e.g., '(.*)').
 # - Only apply s qualifier when -para or -slurp specified.
 #
-
-
 """
 Script for extracting text in a file matching a particuar pattern
 
@@ -31,7 +29,6 @@ With - for pattern, it defaults to tab-delimited fields (e.g., via --fields=N).\
 use {match.group(N)} in --replacement as pointer to N match group.
 """
 
-
 # Standard packages
 # TODO: replace re by the local implementation my_re
 ## OLD: import re
@@ -40,7 +37,6 @@ use {match.group(N)} in --replacement as pointer to N match group.
 from mezcla.main import Main
 from mezcla import debug
 from mezcla import system
-from mezcla import misc_utils
 from mezcla.my_regex import my_re
 
 # Command-line labels constants
@@ -97,31 +93,33 @@ class ExtractMatches(Main):
         self.restore = self.get_parsed_option(RESTORE, "")
         self.paragraph_mode = self.get_parsed_option(PARA, False)
         ## OLD: Lack of proper support for --mutli_line_match
-        # self.file_input_mode = (self.get_parsed_option(SLURP, False) or 
+        # self.file_input_mode = (self.get_parsed_option(SLURP, False) or
         #                       self.get_parsed_option(FILE, False))
-        
-        ## OLD: self.file_input_mode is always false as multi_line_mode is False by default 
+
+        ## OLD: self.file_input_mode is always false as multi_line_mode is False by default
         ## NEW: self.multi_line_match moved before self.file_input_mode
         self.multi_line_match = self.get_parsed_option(MULTI_LINE_MATCH, False)
-        self.file_input_mode = (self.get_parsed_option(SLURP, False) or 
-                  self.get_parsed_option(FILE, False) or
-                  self.multi_line_match)
-        self.fields = self.get_parsed_option(FIELDS, 1)
-        self.one_per_line = (self.get_parsed_option(ONE_PER_LINE, False) or 
-                           self.get_parsed_option(SINGLE, False))
+        self.file_input_mode = (self.get_parsed_option(SLURP, False)
+                                or self.get_parsed_option(FILE, False)
+                                or self.multi_line_match)
+        self.fields = self.get_parsed_option(FIELDS, 0)
+        self.one_per_line = self.get_parsed_option(
+            ONE_PER_LINE, False) or self.get_parsed_option(SINGLE, False)
         # OLD: self.multi_per_line = self.get_parsed_option(MULTI_PER_LINE, False)
-        self.multi_per_line = not self.one_per_line
+        self.multi_per_line = self.get_parsed_option(MULTI_PER_LINE, True)
         self.max_count = self.get_parsed_option(
-            MAX_COUNT, 
-            self.fields if self.fields > 0 else (system.MAX_INT if self.multi_per_line else 1))        
+            MAX_COUNT,
+            self.fields if self.fields > 0 else
+            (system.MAX_INT if self.multi_per_line else 1),
+        )
         self.ignore_case = self.get_parsed_option(IGNORE, False)
         self.preserve = self.get_parsed_option(PRESERVE, False)
         self.chomp = self.get_parsed_option(CHOMP, False)
         self.utf8_mode = self.get_parsed_option(UTF8, False)
         self.locale_mode = self.get_parsed_option(LOCALE, False)
         self.total_matched = 0
-        self.verbose_mode = self.get_parsed_option('verbose', 0)        
-        
+        self.verbose_mode = self.get_parsed_option("verbose", 0)
+
         if not self.preserve:
             debug.trace(debug.DETAILED, f"Note: --{PRESERVE} not implemented")
 
@@ -143,12 +141,13 @@ class ExtractMatches(Main):
 
         if auto_pattern:
             if self.fields > 1:
-                self.pattern = r"\t".join([r"(\S+)" for _ in range(self.fields)])
+                self.pattern = r"\t".join(
+                    [r"(\S+)" for _ in range(self.fields)])
             else:
                 self.pattern = r"(.*)"
 
         for i in range(2, self.fields + 1):
-            if fix_replacement:
+            if fix_replacement and auto_pattern:  # Add auto_pattern condition
                 self.replacement += "\t" + f"${i}"
             if auto_pattern:
                 self.pattern += "\t(\\S+)"
@@ -164,13 +163,14 @@ class ExtractMatches(Main):
             f"pattern={self.pattern}; replacement={self.replacement}; restore={self.restore}",
         )
         debug.trace_object(5, self, label="Script instance")
-    
+
         ## New: Includes the fix for file handling
         # if self.paragraph_mode or self.file_input_mode
 
     def process_line(self, line):
         """Process each line of the input stream"""
-        line = system.to_utf8(line)
+        if self.utf8_mode:
+            line = system.to_utf8(line)
 
         if self.chomp:
             line = system.chomp(line)
@@ -181,10 +181,11 @@ class ExtractMatches(Main):
         ## NEW: Possible solution for --multi_line_match option
         if self.multi_line_match:
             flags |= my_re.MULTILINE | my_re.DOTALL
-        
+
         while match := my_re.search(self.pattern, line, flags=flags):
             matching_text = match.group(0)
-            debug.trace(debug.QUITE_DETAILED, f"\nmatching text: '{matching_text}'")
+            debug.trace(debug.QUITE_DETAILED,
+                        f"\nmatching text: '{matching_text}'")
 
             debug_output = ""
             for i in range(len(match.groups()) + 1):
@@ -200,11 +201,14 @@ class ExtractMatches(Main):
                 try:
                     restore_text = self.restore
                     for i in range(len(match.groups()), 0, -1):
-                        restore_text = restore_text.replace(f'${i}', match.group(i))
-                    debug.trace(debug.DETAILED, f"restoring {restore_text} to line")
+                        restore_text = restore_text.replace(
+                            f"${i}", match.group(i))
+                    debug.trace(debug.DETAILED,
+                                f"restoring {restore_text} to line")
                     line = restore_text + postmatch
-                except Exception as e:
-                    debug.trace(debug.DETAILED, f"Error in restore evaluation: {e}")
+                except (AttributeError, IndexError, TypeError) as e:
+                    debug.trace(debug.DETAILED,
+                                f"Error in restore evaluation: {e}")
                     line = postmatch
             else:
                 line = postmatch
@@ -212,20 +216,36 @@ class ExtractMatches(Main):
             if self.replacement:
                 replacement_text = self.replacement
                 for i in range(len(match.groups()), 0, -1):
-                    replacement_text = replacement_text.replace(f'${i}', match.group(i))
+                    replacement_text = replacement_text.replace(
+                        f"${i}", match.group(i))
             else:
                 replacement_text = match.group(0)
 
-            print(replacement_text)
+            if self.utf8_mode:
+                try:
+                    # Ensure output is properly encoded as UTF-8
+                    if isinstance(replacement_text, str):
+                        replacement_text.encode(
+                            "utf-8")  # Validate UTF-8 compatibility
+                    print(replacement_text, flush=True)
+                except UnicodeEncodeError as e:
+                    debug.trace(debug.DETAILED, f"UTF-8 encoding error: {e}")
+                    # Fall back to repr() for non-UTF-8 characters
+                    print(repr(replacement_text), flush=True)
+            else:
+                print(replacement_text)
 
             count += 1
             if count >= self.max_count:
                 break
 
         if count == 0:
-            single_line_input = not (self.paragraph_mode or self.file_input_mode)
+            single_line_input = not (self.paragraph_mode
+                                     or self.file_input_mode)
             line_display = line if single_line_input else f"{{ {line} }}"
-            debug.trace(debug.QUITE_VERBOSE, f"line not matched: {line_display}")
+            debug.trace(debug.QUITE_VERBOSE,
+                        f"line not matched: {line_display}")
+
 
 if __name__ == "__main__":
     app = ExtractMatches(
@@ -241,6 +261,7 @@ if __name__ == "__main__":
             (IGNORE, "ignore case"),
             (PRESERVE, "preserve case (when -i in effect)"),
             (CHOMP, "strip newline at end"),
+            (UTF8, "support for unicode characters"),
         ],
         positional_arguments=[(PATTERN, "regex pattern to check for")],
         int_options=[
