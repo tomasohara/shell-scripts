@@ -102,16 +102,11 @@ class ExtractMatches(Main):
         self.file_input_mode = (self.get_parsed_option(SLURP, False)
                                 or self.get_parsed_option(FILE, False)
                                 or self.multi_line_match)
-        self.fields = self.get_parsed_option(FIELDS, 0)
+        self.fields = self.get_parsed_option(FIELDS, 1)
         self.one_per_line = self.get_parsed_option(
             ONE_PER_LINE, False) or self.get_parsed_option(SINGLE, False)
         # OLD: self.multi_per_line = self.get_parsed_option(MULTI_PER_LINE, False)
         self.multi_per_line = self.get_parsed_option(MULTI_PER_LINE, True)
-        self.max_count = self.get_parsed_option(
-            MAX_COUNT,
-            self.fields if self.fields > 0 else
-            (system.MAX_INT if self.multi_per_line else 1),
-        )
         self.ignore_case = self.get_parsed_option(IGNORE, False)
         self.preserve = self.get_parsed_option(PRESERVE, False)
         self.chomp = self.get_parsed_option(CHOMP, False)
@@ -120,44 +115,43 @@ class ExtractMatches(Main):
         self.total_matched = 0
         self.verbose_mode = self.get_parsed_option("verbose", 0)
 
+        
         if not self.preserve:
             debug.trace(debug.DETAILED, f"Note: --{PRESERVE} not implemented")
 
         auto_pattern = False  # automatically derive pattern (for tab-delimited fields)
         if self.pattern == "-":
             auto_pattern = True
-            self.pattern = "(\\S+)" if self.fields > 1 else "(.*)"
+            if self.fields > 1:
+                # Multi-field: tab-separated pattern
+                self.pattern = r"\t".join([r"(\S+)" for _ in range(self.fields)])
+                if not self.replacement:
+                    self.replacement = "\t".join([f"${i}" for i in range(1, self.fields + 1)])
+            else:
+                # Single field: match entire line or single word
+                self.pattern = r"(.*)"  # or r"(\S+)" depending on desired behavior        
+        
+        # Only use fields for max_count when user explicitly sets a very high field count
+        # or when using auto-pattern mode
+        self.max_count = self.get_parsed_option(MAX_COUNT, (system.MAX_SIZE if self.multi_per_line else 1))
+        
+        ## NEW: Added pattern safety check
+        if my_re.match(r"\(.*\*\)", self.pattern):
+            raise ValueError("Pattern may cause infinite loop: pattern matches everything.")
+
 
         # Enforce a single pattern per line when beginning-of-line pattern (^) used
         if my_re.search(r"^\^.*|.*\$$", self.pattern):
             self.max_count = 1
         debug.trace(debug.QUITE_DETAILED, f"max_count={self.max_count}")
-
-        # For multiple-field patterns, generate a replacement with tab separated fillers
-        # note: this assumes that replacement is same as "{match.group(1)}" default
-        fix_replacement = not self.replacement
-        if fix_replacement:
-            self.replacement = "$1"
-
-        if auto_pattern:
-            if self.fields > 1:
-                self.pattern = r"\t".join(
-                    [r"(\S+)" for _ in range(self.fields)])
-            else:
-                self.pattern = r"(.*)"
-
-        for i in range(2, self.fields + 1):
-            if fix_replacement and auto_pattern:  # Add auto_pattern condition
-                self.replacement += "\t" + f"${i}"
-            if auto_pattern:
-                self.pattern += "\t(\\S+)"
-
+        
         # Put grouping parenthesis around pattern, if none present
         # NOTE: Escaped parentheses are ignored.
         ## OLD: if not my_re.search(r"^\(|[^\\]\(.*[^\\]\)", self.pattern):
         if not my_re.search(r"\(.*\)", self.pattern):
             self.pattern = "(" + self.pattern + ")"
 
+        debug.trace(debug.DETAILED, f"auto_pattern={auto_pattern} pattern={self.pattern} fields={self.fields}, replacement='{self.replacement}', max_count={self.max_count}")
         debug.trace(
             debug.QUITE_DETAILED,
             f"pattern={self.pattern}; replacement={self.replacement}; restore={self.restore}",
@@ -213,20 +207,34 @@ class ExtractMatches(Main):
             else:
                 line = postmatch
 
+            if not self.replacement:
+                # Count unescaped opening parentheses in the pattern
+                unescaped_parens = my_re.findall(r'(?<!\\)\(', self.pattern)
+                num_groups = len(unescaped_parens)
+                
+                if num_groups > 1:
+                    # If --fields was explicitly set, generate tab-separated replacement
+                    # If --fields wasn't set (defaults to 1), just use first group
+                    if self.get_parsed_option(FIELDS, None) is not None and self.fields > 1:
+                        self.replacement = "\t".join([f"${i}" for i in range(1, num_groups + 1)])
+                    else:
+                        self.replacement = "$1"  # Default to first group only
+                    debug.trace(debug.DETAILED, f"Generated default replacement: '{self.replacement}'")
+            
+            # CREATE THE REPLACEMENT TEXT (THIS IS MISSING!)
             if self.replacement:
                 replacement_text = self.replacement
                 for i in range(len(match.groups()), 0, -1):
-                    replacement_text = replacement_text.replace(
-                        f"${i}", match.group(i))
+                    replacement_text = replacement_text.replace(f"${i}", match.group(i))
             else:
                 replacement_text = match.group(0)
 
+            # Now the UTF-8 handling can use replacement_text
             if self.utf8_mode:
                 try:
                     # Ensure output is properly encoded as UTF-8
                     if isinstance(replacement_text, str):
-                        replacement_text.encode(
-                            "utf-8")  # Validate UTF-8 compatibility
+                        replacement_text.encode("utf-8")  # Validate UTF-8 compatibility
                     print(replacement_text, flush=True)
                 except UnicodeEncodeError as e:
                     debug.trace(debug.DETAILED, f"UTF-8 encoding error: {e}")
@@ -234,7 +242,6 @@ class ExtractMatches(Main):
                     print(repr(replacement_text), flush=True)
             else:
                 print(replacement_text)
-
             count += 1
             if count >= self.max_count:
                 break

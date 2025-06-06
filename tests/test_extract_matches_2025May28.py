@@ -81,17 +81,6 @@ class TestExtractMatches(TestWrapper):
         result = gh.run(command)
         self.assertEqual(result, output_string)
 
-    ## TODO: Add fixes for auto pattern ("-")
-    # @pytest.mark.xfail
-    # def test_auto_pattern(self):
-    #     """Tests if auto pattern '-' works as expected"""
-    #     debug.trace(4, f"TestExtractMatches.test_auto_pattern(); self={self}")
-    #     input_string = 'acl.sh add_arrows.sh add_frequencies.perl adhoc-rainbow-test.sh ai-cat-guesser.perl all_script_alias.sh alt-randomize-lines.perl'
-    #     expected_result = gh.run(f'echo "{input_string}" | tr " " "\n"')
-    #     command = f'echo "{input_string}" | {SCRIPT} "-"'
-    #     result = gh.run(command)
-    #     self.assertEqual(result, expected_result)
-
     @pytest.mark.xfail
     def test_no_matches(self):
         """Tests if test works for no matches"""
@@ -109,6 +98,55 @@ class TestExtractMatches(TestWrapper):
         command = f"echo \"{input_string}\" | {SCRIPT} --replacement='animal:$2\tquantity:$1' '(\d+) (\w+)'"
         result = gh.run(command)
         self.assertEqual(result, expected_result)
+    
+    @pytest.mark.xfail
+    def test_option_fields(self):
+        """Tests if fields option works as expected"""
+        debug.trace(4, f"TestExtractMatches.test_option_fields(); self={self}")
+        input_string = "13 dog, 45 cat, 1 whale, 34 cows"
+        expected_result = '13\tdog\n45\tcat\n1\twhale\n34\tcows'
+        command = f"echo \"{input_string}\" | {SCRIPT} --fields=2 '(\\d+)\\s+(\\w+)'"
+        result = gh.run(command)
+        self.assertEqual(result, expected_result)
+    
+    @pytest.mark.xfail
+    def test_option_fields_autopattern(self):
+        """Tests if fields option works as expected with autopattern enabled"""
+        debug.trace(4, f"TestExtractMatches.test_option_fields_autopattern(); self={self}")
+        input_string = "apple\tred\nbanana\tyellow"
+        command = f"echo \"{input_string}\" | {SCRIPT} --fields=2 '-'"
+        result = gh.run(command)
+        self.assertEqual(result, input_string)
+    
+    @pytest.mark.xfail
+    def test_option_fields_autopattern_infinite_loop(self):
+        """Tests if fields option throws exception for autopattern under fields=1"""
+        debug.trace(4, f"TestExtractMatches.test_option_fields_autopattern_infinite_loop(); self={self}")
+        input_string = "apple\tred\nbanana\tyellow"
+        error_msg = "ValueError: Pattern may cause infinite loop: pattern matches everything."
+        command = f"echo \"{input_string}\" | {SCRIPT} --fields=1 '-'"
+        result = gh.run(command)
+        self.assertIn(error_msg, result)
+    
+    @pytest.mark.xfail
+    def test_option_ignore(self):
+        """Tests if ignore option works as expected"""
+        debug.trace(4, f"TestExtractMatches.test_option_ignore(); self={self}")
+        input_string = "Hello WORLD test"
+        expected_output = "WORLD"
+        command = f"echo \"{input_string}\" | {SCRIPT} --i 'w(\w+)'"
+        result = gh.run(command)
+        self.assertEqual(expected_output, result)
+    
+    @pytest.mark.xfail
+    def test_option_chomp(self):
+        """Tests if chomp option works as expected"""
+        debug.trace(4, f"TestExtractMatches.test_option_chomp(); self={self}")
+        input_string = "Hello WORLD test"
+        expected_output = "WORLD"
+        command = f"echo \"{input_string}\" | {SCRIPT} --i 'w(\w+)'"
+        result = gh.run(command)
+        self.assertEqual(expected_output, result)
     
 #------------------------------------------------------------------------
 
