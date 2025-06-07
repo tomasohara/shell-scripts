@@ -133,16 +133,29 @@ class ExtractMatches(Main):
         
         # Only use fields for max_count when user explicitly sets a very high field count
         # or when using auto-pattern mode
-        self.max_count = self.get_parsed_option(MAX_COUNT, (system.MAX_SIZE if self.multi_per_line else 1))
+        # Check if user provided max_count explicitly
+        if self.get_parsed_option(MAX_COUNT, None) is not None:
+            self.max_count = self.get_parsed_option(MAX_COUNT)
+        elif self.one_per_line:
+            self.max_count = 1
+        else:
+            self.max_count = system.MAX_SIZE if self.multi_per_line else 1        
         
-        ## NEW: Added pattern safety check
         if my_re.match(r"\(.*\*\)", self.pattern):
             raise ValueError("Pattern may cause infinite loop: pattern matches everything.")
 
 
+        ## Enforce a single pattern per line when beginning-of-line pattern (^) used
+        # if my_re.search(r"^\^.*|.*\$$", self.pattern):
+        #     self.max_count = 1
         # Enforce a single pattern per line when beginning-of-line pattern (^) used
-        if my_re.search(r"^\^.*|.*\$$", self.pattern):
+        # At the beginning of setup(), before the max_count calculation:
+        user_specified_max_count = self.get_parsed_option(MAX_COUNT) is not None
+
+        # Then later, change the override logic to:
+        if my_re.search(r"^\^.*|.*\$$", self.pattern) and not user_specified_max_count:
             self.max_count = 1
+
         debug.trace(debug.QUITE_DETAILED, f"max_count={self.max_count}")
         
         # Put grouping parenthesis around pattern, if none present

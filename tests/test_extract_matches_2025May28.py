@@ -148,6 +148,74 @@ class TestExtractMatches(TestWrapper):
         result = gh.run(command)
         self.assertEqual(expected_output, result)
     
+    @pytest.mark.xfail
+    def test_option_one_per_line(self):
+        """Tests if one_per_line option works as expected"""
+        debug.trace(4, f"TestExtractMatches.test_option_one_per_line(); self={self}")
+        input_string = "cat dog bird cat mouse"
+        expected_output = "cat"
+        command = f"echo \"{input_string}\" | {SCRIPT} --one_per_line '(cat)'"
+        result = gh.run(command)
+        self.assertEqual(expected_output, result)
+
+    @pytest.mark.xfail
+    def test_option_multi_per_line(self):
+        """Tests if multi_per_line option works as expected"""
+        debug.trace(4, f"TestExtractMatches.test_option_multi_per_line(); self={self}")
+        input_string = "cat dog bird cat mouse"
+        expected_output = "cat\ncat"
+        command = f"echo \"{input_string}\" | {SCRIPT} --multi_per_line '(cat)'"
+        result = gh.run(command)
+        self.assertEqual(expected_output, result)
+
+    @pytest.mark.xfail
+    def test_option_multi_line_match(self):
+        """Tests if multi_line_match option works as expected"""
+        debug.trace(4, f"TestExtractMatches.test_multi_line_matchr(); self={self}")
+        input_string = "start\nmiddle\nend pattern here\nmore"
+        expected_output = "start\nmiddle\nend pattern"
+        command = f"echo \"{input_string}\" | {SCRIPT} --multi_line_match 'start.*pattern'"
+        result = gh.run(command)
+        self.assertEqual(expected_output, result)
+
+
+    @pytest.mark.xfail
+    def test_option_restore(self):
+        """Tests if restore option works as expected"""
+        debug.trace(4, f"TestExtractMatches.test_option_restore(); self={self}")
+        input_string = "a1 b2 c3 d4"
+        expected_output = "a\nb\nc\nd"
+        command = f"echo \"{input_string}\" | {SCRIPT} --restore='[$2]' '([a-z])([0-9])'"
+        result = gh.run(command)
+        self.assertEqual(expected_output, result)
+
+    @pytest.mark.xfail
+    def test_option_preserve(self):
+        """Tests if preserve option works as expected"""
+        debug.trace(4, f"TestExtractMatches.test_option_restore(); self={self}")
+        input_string = "Hello WORLD Test"
+        expected_output = "WORLD"
+        command = f"echo \"{input_string}\" | {SCRIPT} --i --preserve 'w(\w+)'"
+        result = gh.run(command)
+        self.assertEqual(expected_output, result)
+
+    @pytest.mark.xfail
+    def test_option_para(self):
+        """Tests if para option works as expected"""
+        debug.trace(4, f"TestExtractMatches.test_option_para(); self={self}")
+        input_string = "line1\npattern1\n\nline2\npattern2\n\n"
+        expected_output = "pattern1\npattern2"
+        command = f"printf \"{input_string}\" | {SCRIPT} --para '(pattern\d)'"
+        result = gh.run(command)
+        self.assertEqual(expected_output, result)
+
+    @pytest.mark.xfail
+    def test_option_verbose(self):
+        """Tests if verbose option works as expected"""
+        debug.trace(4, f"TestExtractMatches.test_option_para(); self={self}")
+        ## TODO: Work in progress for --verbose option
+        assert False
+
 #------------------------------------------------------------------------
 
 if __name__ == '__main__':
