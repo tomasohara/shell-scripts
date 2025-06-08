@@ -645,6 +645,7 @@ function git-vdiff-alias {
 # - Additional arguments passed along to git-diff (e.g., specific filenames or commits)
 #
 function git-diff-list-template {
+    declare -g diff_list_file
     # TODO: use unique tempfile (e.g., mktemp)
     ## TODO2: diff_list_file=$(get-temp-log-name "diff")
     echo "diff_list_file=\$TMP/_git-diff.\$\$.list"
@@ -659,7 +660,7 @@ function git-diff-list-template {
     echo "git diff --name-only" "$@" "| awk -F'/' '{ print NF-1 \"\t\" \$0 }' | sort --key=1 --numeric-sort | cut -f2- | uniq >| \$diff_list_file"
 }
 function git-diff-list {
-    local diff_list_file
+    declare -g diff_list_file
     ## TODO2: local diff_list_script=$(get-temp-log-name "diff")
     local diff_list_script="$TMP/_git-diff-list.$$.bash"
     git-diff-list-template "$@" >| "$diff_list_script"
@@ -673,8 +674,9 @@ function git-diff-list {
     root=$(git-root-alias)
     local pwd
     pwd=$(realpath ".")
+    # note: Uses case insenstive matching for sake of Windows
     # shellcheck disable=SC2002
-    cat "$diff_list_file" | perl -pe "s@^@$root/@;" | perl -pe "s@^$pwd/?@@;" | perl -pe "s@^$root/?@\\\$\(git-root-alias\)/@;"
+    cat "$diff_list_file" | perl -pe "s@^@$root/@i;" | perl -pe "s@^$pwd/?@@i;" | perl -pe "s@^$root/?@\\\$\(git-root-alias\)/@i;"
 }
 
 # Output templates for doing checkin of modified files
@@ -792,7 +794,16 @@ function invoke-alt-checkin { alt-invoke-next-single-checkin "$1"; }
 # Various miscellaneous aliases
 alias git-template=git-alias-usage
 alias git-template-misc=git-misc-alias-usage
-alias git-root-alias='git rev-parse --show-toplevel'
+## OLD: alias git-root-alias='git rev-parse --show-toplevel'
+function git-root-alias {
+    local root
+    root=$(git rev-parse --show-toplevel)
+    # Under Windows, convert c:/xyz => /c/xyz, etc.
+    if [[ $OS =~ Windows.* ]]; then
+        root=$(echo "$root" | perl -pe 's@([a-z]):@/\1@i;')
+    fi
+    echo $root
+}
 alias git-cd-root-alias='cd $(git-root-alias)'
 alias git-invoke-next-single-checkin=invoke-next-single-checkin
 # NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
