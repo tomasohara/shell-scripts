@@ -36,13 +36,19 @@
 # TODO3: only disassociate the new emacs job (see disown below); ex: via setsid
 #
 
-# Uncomment following line(s) for tracing:
+# Set bash regular and/or verbose tracing
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
-#  
-## echo "$@"
-## set -o xtrace
-## DEBUG: set -o verbose
+#
+if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+    echo "$0 $*"
+fi
+if [[ "${TRACE:-0}" == "1" ]]; then
+    set -o xtrace
+fi
+if [[ "${VERBOSE:-0}" == "1" ]]; then
+    set -o verbose
+fi
 
 # Show usage statement
 #
@@ -63,17 +69,12 @@ fi
 # Setup Emacs options (50 rows, 80 columns, and use background process)
 # Note: Emacs sets EMACS env. var in terminal session, so EMACS_PROGRAM used instead
 # Aside: in general longer names preferred to minimize conflicts as with DEBUG vs. DEBUG_LEVEL.
-## OLD: emacs_options="--geometry 80x50"
 use_nohup="0"
 ## TODO: emacs_options="${EMACS_OPTIONS:-}"
-## OLD: emacs_options=""
 emacs_options=()
 in_background="1"
-## OLD: emacs="emacs"
-## BAD: emacs="${EMACS:-emacs}"
 emacs="${EMACS_PROGRAM:-emacs}"
 if [ "${EMACS_FONT:-""}" != "" ]; then
-    ## OLD: emacs_options="$emacs_options -fn '$EMACS_FONT'"
     emacs_options+=("-fn" "$EMACS_FONT")
 fi
 
@@ -117,11 +118,9 @@ while [ "$moreoptions" = "1" ]; do
     elif [ "$1" = "--skip-nohup" ]; then
         use_nohup="0"
     elif [[ ("$1" = "-q") || ("$1" = "--quick") ]]; then
-        ## OLD: emacs_options="$emacs_options -q";
         emacs_options+=("-q")
         quick=1
     elif [ "$1" = "--options" ]; then
-        ## OLD: emacs_options="$emacs_options $2";
         emacs_options+=("$2");
         shift;
     elif [ "$1" = "--" ]; then
@@ -141,14 +140,12 @@ done
 if [ "$DISPLAY" = "" ]; then
     ## DEBUG: 
     echo "no DISPLAY setting, so adding --no-windows and setting in_background"
-    ## OLD: emacs_options="$emacs_options --no-windows"
     emacs_options+=("--no-windows")
     in_background="0"
 fi
 
 # Use ~/.emacs.tpo (in place of ~/.emacs) if available
 if [[ ($quick = "0") && (-e "$HOME/.emacs.tpo") ]]; then
-     ## OLD: emacs_options="$emacs_options -l $HOME/.emacs.tpo"
      emacs_options+=("-l" "$HOME/.emacs.tpo")
 fi
 
@@ -162,7 +159,6 @@ function resolve-path() {
 }
 
 # Reset bash flags
-## OLD: export BASHRC_PROCESSED=0 PROFILE_PROCESSED=0
 export BASHRC_PROCESSED=0 PROFILE_PROCESSED=0 SCRIPT_PID=""
 
 ## TODO: resolve <space> in emacs options
@@ -193,28 +189,26 @@ if [ "$in_background" = "1" ]; then
     fi
     #
     if [ "$use_nohup" = "1" ]; then
-        ## BAD: nohup emacs $emacs_options "$@" >> $TEMP/nohup.log 2>&1 &
-        ## OLD: nohup emacs $emacs_options $(realpath "$@" 2> /dev/null) >> $TEMP/nohup.log 2>&1 &
         # note: adds current directory so emacs starts in it rather than home (note< stupid nohup quirk
         # TODO: simplify awkward Bash constructions to similate csh 'unshift .'!
-        ## OLD: nohup emacs $emacs_options $(realpath "${args[*]}") >> $TEMP/nohup.log 2>&1 &
-        ## OLD2: $nohup emacs $emacs_options $(realpath "${args[*]}") >> $TEMP/nohup.log 2>&1 &
-        ## DEBUG: echo "background w/ nohup"
-        ## DEBUG: echo "issuing: $emacs "${emacs_options[@]}" '$(realpath ${args[*]})' \>\> $TEMP/nohup.log 2>&1 &"
-        ## OLD: nohup "$emacs" $emacs_options $(realpath "${args[*]}") >> $TEMP/nohup.log 2>&1 &
+        ## DEBUG:
+        ## echo "background w/ nohup"
+        ## echo "issuing: $emacs "${emacs_options[@]}" '$(realpath ${args[*]})' \>\> $TEMP/nohup.log 2>&1 &"
         # shellcheck disable=SC2090
-	nohup "$emacs" "${emacs_options[@]}" "${args[*]}" >> $TEMP/nohup.log 2>&1 &
+	nohup "$emacs" "${emacs_options[@]}" "${args[*]}" >> "$TEMP/nohup.log" 2>&1 &
         disown
     else
-        ## DEBUG: echo "regular background (i.e., non-nohup)"
-        ## DEBUG: echo "issuing: $emacs "${emacs_options[@]}" ${args[*]} &"
-	## DEBUG: set -o xtrace
-	## DEBUG: echo "${args[@]}"
+        ## DEBUG:
+        ## echo "regular background (i.e., non-nohup)"
+        ## echo "issuing: $emacs "${emacs_options[@]}" ${args[*]} &"
+	## set -o xtrace
+	## echo "${args[@]}"
         "$emacs" "${emacs_options[@]}" "${args[@]}" &
         disown
     fi
 else
-    ## DEBUG: echo "in foreground"
-    ## DEBUG: echo "issuing: $emacs "${emacs_options[@]}" ${args[*]}"
+    ## DEBUG:
+    ## echo "in foreground"
+    ## echo "issuing: $emacs "${emacs_options[@]}" ${args[*]}"
     "$emacs" "${emacs_options[@]}" "$@"
 fi
