@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python3
 
 """Tests for extract-matches.py module"""
 
@@ -34,13 +34,23 @@ class TestExtractMatches(TestWrapper):
     script_module = TestWrapper.get_testing_module_name(__file__, SCRIPT)
     use_temp_base_dir = True
 
+    def helper_run_command(self, input_string="hello world 12345", regex_pattern=r"\w+", options=""):
+        """Helper function for execution of commands"""
+        debug.trace(4, f"TestExtractMatches.helper_run_command(); self={self}")
+        command = f'echo "{input_string}" | {SCRIPT} {options} \'{regex_pattern}\''
+        return gh.run(command)
+    
     @pytest.mark.xfail
     def test_simple_word_match(self):
         """Tests if simple word matching works as expected"""
         debug.trace(4, f"TestExtractMatches.test_simple_word_match(); self={self}")
         test_string = "hello world 12345"
-        command = f"echo \"{test_string}\" | {SCRIPT} '\w+'"
-        result = gh.run(command)
+        # command = f"echo \"{test_string}\" | {SCRIPT} '\w+'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=test_string,
+            regex_pattern=r"\w+"
+        )
         self.assertEqual(test_string.replace(" ", "\n"), result)
     
     @pytest.mark.xfail
@@ -48,17 +58,26 @@ class TestExtractMatches(TestWrapper):
         """Tests if --multi_per_line option works as expected"""
         debug.trace(4, f"TestExtractMatches.test_option_multi_per_line(); self={self}")
         test_string = "hello world 12345"
-        command = f"echo \"{test_string}\" | {SCRIPT} --multi_per_line '\w+'"
-        result = gh.run(command)
-        self.assertEqual(test_string.replace(" ", "\n"), result)
+        result = self.helper_run_command(
+            input_string=test_string,
+            regex_pattern=r"\w+",
+            options="--multi_per_line"
+        )
+        expected_result = "hello\nworld\n12345"
+        self.assertEqual(expected_result, result)
 
     @pytest.mark.xfail
     def test_option_max_count(self):
         """Tests if --max_count option works as expected"""
         debug.trace(4, f"TestExtractMatches.test_option_max_count(); self={self}")
         test_string = "1 2 3 4 5"
-        command = f"echo \"{test_string}\" | {SCRIPT} --max_count=3 '(\d+)'"
-        result = gh.run(command)
+        # command = f"echo \"{test_string}\" | {SCRIPT} --max_count=3 '(\\d+)'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=test_string,
+            regex_pattern="(\\d+)",
+            options="--max_count=3"
+        )
         self.assertEqual("1\n2\n3", result)
 
     @pytest.mark.xfail
@@ -67,7 +86,7 @@ class TestExtractMatches(TestWrapper):
         debug.trace(4, f"TestExtractMatches.test_option_file(); self={self}")
         contents = "Hello 123 Content 45 Python"
         temp_file = gh.create_temp_file(contents)
-        command = f"{SCRIPT} --file '(\d+)' {temp_file}"
+        command = f"{SCRIPT} --file '(\\d+)' {temp_file}"
         result = gh.run(command)
         self.assertEqual(result, "123\n45")
     
@@ -84,9 +103,13 @@ class TestExtractMatches(TestWrapper):
     @pytest.mark.xfail
     def test_no_matches(self):
         """Tests if test works for no matches"""
-        debug.trace(4, f"TestExtractMatches.test_auto_pattern(); self={self}")
-        command = f'echo "no match" | ./extract_matches.py \'(apple)\''
-        result = gh.run(command)
+        debug.trace(4, f"TestExtractMatches.test_no_matches(); self={self}")
+        # command = f'echo "no match" | ./extract_matches.py \'(apple)\''
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string="no match",
+            regex_pattern="(apple)"
+        )
         self.assertEqual(result, '')
 
     @pytest.mark.xfail
@@ -95,8 +118,13 @@ class TestExtractMatches(TestWrapper):
         debug.trace(4, f"TestExtractMatches.test_option_replacement(); self={self}")
         input_string = "13 dog, 45 cat, 1 whale, 34 cows"
         expected_result = 'animal:dog\tquantity:13\nanimal:cat\tquantity:45\nanimal:whale\tquantity:1\nanimal:cows\tquantity:34'
-        command = f"echo \"{input_string}\" | {SCRIPT} --replacement='animal:$2\tquantity:$1' '(\d+) (\w+)'"
-        result = gh.run(command)
+        # command = f"echo \"{input_string}\" | {SCRIPT} --replacement='animal:$2\tquantity:$1' '(\\d+) (\\w+)'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=input_string,
+            regex_pattern="(\\d+) (\\w+)",
+            options="--replacement='animal:$2\tquantity:$1'"
+        )
         self.assertEqual(result, expected_result)
     
     @pytest.mark.xfail
@@ -105,8 +133,13 @@ class TestExtractMatches(TestWrapper):
         debug.trace(4, f"TestExtractMatches.test_option_fields(); self={self}")
         input_string = "13 dog, 45 cat, 1 whale, 34 cows"
         expected_result = '13\tdog\n45\tcat\n1\twhale\n34\tcows'
-        command = f"echo \"{input_string}\" | {SCRIPT} --fields=2 '(\\d+)\\s+(\\w+)'"
-        result = gh.run(command)
+        # command = f"echo \"{input_string}\" | {SCRIPT} --fields=2 '(\\d+)\\s+(\\w+)'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=input_string,
+            regex_pattern="(\\d+)\\s+(\\w+)",
+            options="--fields=2"
+        )
         self.assertEqual(result, expected_result)
     
     @pytest.mark.xfail
@@ -114,8 +147,13 @@ class TestExtractMatches(TestWrapper):
         """Tests if fields option works as expected with autopattern enabled"""
         debug.trace(4, f"TestExtractMatches.test_option_fields_autopattern(); self={self}")
         input_string = "apple\tred\nbanana\tyellow"
-        command = f"echo \"{input_string}\" | {SCRIPT} --fields=2 '-'"
-        result = gh.run(command)
+        # command = f"echo \"{input_string}\" | {SCRIPT} --fields=2 '-'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=input_string,
+            regex_pattern="-",
+            options="--fields=2"
+        )
         self.assertEqual(result, input_string)
     
     @pytest.mark.xfail
@@ -124,8 +162,13 @@ class TestExtractMatches(TestWrapper):
         debug.trace(4, f"TestExtractMatches.test_option_fields_autopattern_infinite_loop(); self={self}")
         input_string = "apple\tred\nbanana\tyellow"
         error_msg = "ValueError: Pattern may cause infinite loop: pattern matches everything."
-        command = f"echo \"{input_string}\" | {SCRIPT} --fields=1 '-'"
-        result = gh.run(command)
+        # command = f"echo \"{input_string}\" | {SCRIPT} --fields=1 '-'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=input_string,
+            regex_pattern="-",
+            options="--fields=1"
+        )
         self.assertIn(error_msg, result)
     
     @pytest.mark.xfail
@@ -134,8 +177,13 @@ class TestExtractMatches(TestWrapper):
         debug.trace(4, f"TestExtractMatches.test_option_ignore(); self={self}")
         input_string = "Hello WORLD test"
         expected_output = "WORLD"
-        command = f"echo \"{input_string}\" | {SCRIPT} --i 'w(\w+)'"
-        result = gh.run(command)
+        # command = f"echo \"{input_string}\" | {SCRIPT} --i 'w(\\w+)'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=input_string,
+            regex_pattern="w(\\w+)",
+            options="--i"
+        )
         self.assertEqual(expected_output, result)
     
     @pytest.mark.xfail
@@ -144,8 +192,13 @@ class TestExtractMatches(TestWrapper):
         debug.trace(4, f"TestExtractMatches.test_option_chomp(); self={self}")
         input_string = "Hello WORLD test"
         expected_output = "WORLD"
-        command = f"echo \"{input_string}\" | {SCRIPT} --i 'w(\w+)'"
-        result = gh.run(command)
+        # command = f"echo \"{input_string}\" | {SCRIPT} --i 'w(\\w+)'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=input_string,
+            regex_pattern="w(\\w+)",
+            options="--i"
+        )
         self.assertEqual(expected_output, result)
     
     @pytest.mark.xfail
@@ -154,30 +207,44 @@ class TestExtractMatches(TestWrapper):
         debug.trace(4, f"TestExtractMatches.test_option_one_per_line(); self={self}")
         input_string = "cat dog bird cat mouse"
         expected_output = "cat"
-        command = f"echo \"{input_string}\" | {SCRIPT} --one_per_line '(cat)'"
-        result = gh.run(command)
+        # command = f"echo \"{input_string}\" | {SCRIPT} --one_per_line '(cat)'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=input_string,
+            regex_pattern="(cat)",
+            options="--one_per_line"
+        )
         self.assertEqual(expected_output, result)
 
     @pytest.mark.xfail
-    def test_option_multi_per_line(self):
+    def test_option_multi_per_line_duplicate(self):
         """Tests if multi_per_line option works as expected"""
-        debug.trace(4, f"TestExtractMatches.test_option_multi_per_line(); self={self}")
+        debug.trace(4, f"TestExtractMatches.test_option_multi_per_line_duplicate(); self={self}")
         input_string = "cat dog bird cat mouse"
         expected_output = "cat\ncat"
-        command = f"echo \"{input_string}\" | {SCRIPT} --multi_per_line '(cat)'"
-        result = gh.run(command)
+        # command = f"echo \"{input_string}\" | {SCRIPT} --multi_per_line '(cat)'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=input_string,
+            regex_pattern="(cat)",
+            options="--multi_per_line"
+        )
         self.assertEqual(expected_output, result)
 
     @pytest.mark.xfail
     def test_option_multi_line_match(self):
         """Tests if multi_line_match option works as expected"""
-        debug.trace(4, f"TestExtractMatches.test_multi_line_matchr(); self={self}")
+        debug.trace(4, f"TestExtractMatches.test_multi_line_match(); self={self}")
         input_string = "start\nmiddle\nend pattern here\nmore"
         expected_output = "start\nmiddle\nend pattern"
-        command = f"echo \"{input_string}\" | {SCRIPT} --multi_line_match 'start.*pattern'"
-        result = gh.run(command)
+        # command = f"echo \"{input_string}\" | {SCRIPT} --multi_line_match 'start.*pattern'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=input_string,
+            regex_pattern="start.*pattern",
+            options="--multi_line_match"
+        )
         self.assertEqual(expected_output, result)
-
 
     @pytest.mark.xfail
     def test_option_restore(self):
@@ -185,18 +252,28 @@ class TestExtractMatches(TestWrapper):
         debug.trace(4, f"TestExtractMatches.test_option_restore(); self={self}")
         input_string = "a1 b2 c3 d4"
         expected_output = "a\nb\nc\nd"
-        command = f"echo \"{input_string}\" | {SCRIPT} --restore='[$2]' '([a-z])([0-9])'"
-        result = gh.run(command)
+        # command = f"echo \"{input_string}\" | {SCRIPT} --restore='[$2]' '([a-z])([0-9])'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=input_string,
+            regex_pattern="([a-z])([0-9])",
+            options="--restore='[$2]'"
+        )
         self.assertEqual(expected_output, result)
 
     @pytest.mark.xfail
     def test_option_preserve(self):
         """Tests if preserve option works as expected"""
-        debug.trace(4, f"TestExtractMatches.test_option_restore(); self={self}")
+        debug.trace(4, f"TestExtractMatches.test_option_preserve(); self={self}")
         input_string = "Hello WORLD Test"
         expected_output = "WORLD"
-        command = f"echo \"{input_string}\" | {SCRIPT} --i --preserve 'w(\w+)'"
-        result = gh.run(command)
+        # command = f"echo \"{input_string}\" | {SCRIPT} --i --preserve 'w(\\w+)'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=input_string,
+            regex_pattern="w(\\w+)",
+            options="--i --preserve"
+        )
         self.assertEqual(expected_output, result)
 
     @pytest.mark.xfail
@@ -205,14 +282,19 @@ class TestExtractMatches(TestWrapper):
         debug.trace(4, f"TestExtractMatches.test_option_para(); self={self}")
         input_string = "line1\npattern1\n\nline2\npattern2\n\n"
         expected_output = "pattern1\npattern2"
-        command = f"printf \"{input_string}\" | {SCRIPT} --para '(pattern\d)'"
-        result = gh.run(command)
+        # command = f"printf \"{input_string}\" | {SCRIPT} --para '(pattern\\d)'"
+        # result = gh.run(command)
+        result = self.helper_run_command(
+            input_string=input_string,
+            regex_pattern="(pattern\\d)",
+            options="--para"
+        )
         self.assertEqual(expected_output, result)
 
     @pytest.mark.xfail
     def test_option_verbose(self):
         """Tests if verbose option works as expected"""
-        debug.trace(4, f"TestExtractMatches.test_option_para(); self={self}")
+        debug.trace(4, f"TestExtractMatches.test_option_verbose(); self={self}")
         ## TODO: Work in progress for --verbose option
         assert False
 
