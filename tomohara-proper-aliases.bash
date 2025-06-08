@@ -522,7 +522,7 @@ function shell-check-stdin {
 }
 #
 # shell-check-loose(): run shellcheck with relaxed rules
-simple-alias-fn shell-check-loose 'shellcheck --exclude="SC2046,SC2086,"'
+simple-alias-fn shell-check-loose 'shellcheck --exclude="SC2046,SC2086"'
 
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
