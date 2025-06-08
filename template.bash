@@ -114,7 +114,7 @@
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #
 if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
-    echo "$0 $@"
+    echo "$0 $*"
 fi
 if [[ "${TRACE:-0}" == "1" ]]; then
     set -o xtrace
