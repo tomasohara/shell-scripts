@@ -2,10 +2,11 @@
 #
 # Convenience script for loading all my aliases, functions, etc.
 #
-# Simple Usages (see advanced below for use in scripts):
+# Simple Usage (see advanced below for use in scripts):
 #   export TOM_BIN=/home/tom/shell-script;
 #   source $TOM_BIN/all-tomohara-aliases-etc.bash
 #
+# Tom's typical usage (n.b., idiosyncratic settings):
 #   SOURCE_SETTINGS=1 source "$HOME/bin/all-tomohara-aliases-etc.bash"
 #
 # Note:
@@ -13,7 +14,7 @@
 # - The env.options are TRACE_/VERBOSE_SOURCE rather than TRACE/VERBOSE in
 #   case sourced via a script which used the latter (see local-workflows.sh).
 #
-#--------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Advanced usage (e.g., within scripts using aliases):
 #
 #   # Get aliases (n.b., tracing should be delayed)
