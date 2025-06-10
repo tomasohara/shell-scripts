@@ -58,7 +58,9 @@ jobs:
           
   build-and-test-docker:
     name: Build and Run Tests via Docker
-    runs-on: [ubuntu-20.04]
+    ## OLD: 20.04 reached EOL on May 2025
+    # runs-on: [ubuntu-20.04]
+    runs-on: [ubuntu-22.04]
 
     ## TEST:
     ## NOTE: following is for docker images on the hub
