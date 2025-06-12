@@ -42,7 +42,9 @@
 # entirely of blank lines.
 #
 
-# set echo = 1
+if ($?TRACE) then
+    if ("$TRACE" == "1") set echo = 1
+endif
 set pattern = ""
 set master = "master"
 set diff_options = ""
@@ -68,19 +70,19 @@ if ("$2" == "") then
     echo ""
     echo "$0 --ignore-spacing '*.[ch]*' MASTER-DIR"
     echo ""
-    echo "$script '.py' .. >| _python_diff.list 2>&1"
+    echo "$script '.py' .. > _python_diff.list 2>&1"
     echo ""
     echo '(for f in master_delta_extraction.py main.py delta_posting_extraction.py tpo_common.py; do' $script '$f $SANDBOX; done) 2>&1 | less'
     echo ""
     ## OLD
-    ## echo "$script .perl" '$SCRIPT_DIR >| _perl_diff.list 2>&1'
+    ## echo "$script .perl" '$SCRIPT_DIR > _perl_diff.list 2>&1'
     ## echo ""
-    ## OLD: cho "$script" '--match-dot-files ".*bash*" dot-file-archive >| _bash-dot-file-diff.list 2>&1'
-    echo "$script" '--match-dot-files ".*bash* .*emacs*" .. >| _bash-emacs-diff.list 2>&1'
+    ## OLD: cho "$script" '--match-dot-files ".*bash*" dot-file-archive > _bash-dot-file-diff.list 2>&1'
+    echo "$script" '--match-dot-files ".*bash* .*emacs*" .. > _bash-emacs-diff.list 2>&1'
     echo ""
     ## echo "$script --diff diff.sh ./Parser/prune.lisp ../new-Full_Analyzer"
     ## echo ""
-    echo "$script --ignore-spacing --diff-options '--context=1' '*.rb' vm-torre >| vm-torre.diff 2>&1"
+    echo "$script --ignore-spacing --diff-options '--context=1' '*.rb' vm-torre > vm-torre.diff 2>&1"
     echo ""
     echo "$script --no-glob '*.py *.mako' ~/xfer"
     echo ""
@@ -140,8 +142,10 @@ while ("$1" =~ -*)
 end
 
 # Warn that do_diff.bash should be used
+# See https://stackoverflow.com/questions/13720246/redirect-stderr-to-stdout-in-c-shell
 if ($quiet == 0) then
-    echo "Warning: superceded by do_diff.bash" 1>&2
+    ## BAD: echo "Warning: superceded by do_diff.bash" 1>&2
+    echo "Warning: superceded by do_diff.bash" >& /dev/stderr
 endif
 
 # Get pattern from first argument

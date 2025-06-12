@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /usr/bin/env bash
 #
 # compare-log-output.sh: compare trace output listings ignoring differences
 # due to timestamps
@@ -8,10 +8,13 @@
 # - Allow for case-sensitive regex's.
 #
 
-# Uncomment the line(s) below for tracing (verbose shows command before and after, xtrace just shows it after):
-#
-## set -o xtrace
-## DEBUG: set -o verbose
+# Set bash regular and/or verbose tracing
+if [ "${TRACE:-0}" = "1" ]; then
+    set -o xtrace
+fi
+if [ "${VERBOSE:-0}" = "1" ]; then
+    set -o verbose
+fi
 
 # Parse command-line arguments
 diff=kdiff.sh
@@ -20,12 +23,12 @@ diff=kdiff.sh
 # - 1. hexadecimal with prefix (e.g., "0x1234")
 # - 2. "" of size 4 or 8 (e.g., "1234" or "F000100A")
 # - 3. "" with leading & trailing digits (e.g., "[sha256:]99f14c4b8174ea549d7ff9050fe9d305f59153eddecfae52c56d0f0c7821e6d4")
-## OLD: ignore='((0x)?[0-9A-Fa-f]{7,16})'
 ## TODO3: allow arbitrary hex strings not startingand ending with digits
 ignore_hex1='(0x[0-9A-Fa-f]+)'
 ignore_hex2='(\b([0-9A-Fa-f]{4})|([0-9A-Fa-f]{8})\b)'
 ignore_hex3='(\b[0-9][0-9A-Fa-f]+[A-Fa-f][0-9A-Fa-f]+[0-9]\b)'
 ignore_user=''
+strip_ignore="0"
 # - timestamps (e.g., "1 Jan 1970 12:01am" and "1/01/70 12:00:01")
 timestamp_regex1="(\\S+\\s*\\S+\\s*\\d{4} \\d{1,2}:\\d{2}:\\d{2} *[ap]m )"
 timestamp_regex2="(\\d{1,2}\\/\\d{2}\\/\\d{2} \\d{1,2}:\\d{2}:\\d{2})"
@@ -81,6 +84,8 @@ while [ "$moreoptions" = "1" ]; do
 	    ignore_user="$2";
         fi
 	shift
+    elif [ "$1" = "--strip-ignore" ]; then
+        strip_ignore="1"
     else
 	if [ "$1" != "--help" ]; then
 	    echo "unknown option: $1";
@@ -101,7 +106,7 @@ if [ "$show_usage" = "1" ]; then
     echo "Usage: $script_name [options] file1 file2-or-dir"
     echo ""
     echo "    options: [--ignore perl-regex] [--include-ptrs | --include-time | --[no-]filter-hex] [--plain-diff] [--diff program]"
-    echo "    misc-options: [--relaxed] [--[no]-filter-time] [--include-hex] [--reset-ignore] [--trace] [--verbose]"
+    echo "    misc-options: [--relaxed] [--[no]-filter-time] [--include-hex] [--reset-ignore] [--strip-ignore] [--trace] [--verbose]"
     echo ""
     echo "Examples:"
     echo ""
@@ -121,6 +126,7 @@ if [ "$show_usage" = "1" ]; then
     echo "- The --include-xyz options are deprecated: include refers to filtering not output."
     echo "- The --relaxed option include regex's that tend to overgenerate."
     if [ "$verbose_output" = "1" ]; then
+        echo "- The --strip-ignore removes <user> placeholders via --ignore"
         echo "- Timestamp regex's (doubly escaped for interpolation):"
         echo "  $timestamp_regex1"
         echo "  $timestamp_regex2"
@@ -161,7 +167,6 @@ cp "$file2" "$TMP/$base2.orig"
 # - Make this timestamp removal optional.
 # NOTE: Backslashes used above to avoid shell interpretation (during string interpolation).
 if [ "$filter_time" = "1" ]; then
-    ## OLD: perl -i.bak0 -pe "s/$timestamp_regex1//ig; s/$timestamp_regex2//ig;" "$TMP/$base1" "$TMP/$base2"
     perl -i.bak-ts1 -pe "s/$timestamp_regex1/<time>/ig;" "$TMP/$base1" "$TMP/$base2"
     perl -i.bak-ts2 -pe "s/$timestamp_regex2/<time>/ig;" "$TMP/$base1" "$TMP/$base2"
     perl -i.bak-ts3 -pe "s/$timestamp_regex3/<time>/ig;" "$TMP/$base1" "$TMP/$base2"
@@ -177,15 +182,15 @@ if [ "$filter_hex" = "1" ]; then
 fi
 
 # Strip out user-specified patterns
-## OLD: # Note: include hex address stripping
 if [ "$ignore_user" != "" ]; then
-    ## OLD: perl -i.bak1 -pe "s@($ignore)@@gi;" "$TMP/$base1" "$TMP/$base2"
     perl -i.bak-ign1 -pe "s@($ignore_user)@<user>@gi;" "$TMP/$base1" "$TMP/$base2"
+    if [ "$strip_ignore" == "1" ]; then
+        perl -i.bak-ign2 -pe "s@^\s*(<user>\s*)+\s*@@;" "$TMP/$base1" "$TMP/$base2"
+    fi
 fi
 
 # Collapse whitespace
 if [ "$retain_whitespace" = "0" ]; then
-   ## OLD: perl -i.bak2 -pe "s/\s+/ /g; s/$/\n/;" "$TMP/$base1" "$TMP/$base2"
    perl -i.bak-ws1 -pe "s/\s+/ /g; s/$/\n/;" "$TMP/$base1" "$TMP/$base2"
 fi
 

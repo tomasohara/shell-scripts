@@ -4,7 +4,7 @@
 # Sets the xterm title bar to the string given on the command line.
 # The first argument gives the full title and the second the iconified title.
 #
-# NOTES:
+# Notes:
 # - Includes hostname in title if not default host (from environment or file).
 # - Assumes DEFAULT_HOST environment variable specifies the default HOST
 #   in full format (eg., dime-box.cyc.com) or specified in ~/.default-host.
@@ -21,8 +21,16 @@
 #   go first. That is, put changes before the '=====...===' line,
 # - HACK: Output not done if $BATCH_MODE or $UNDER_EMACS is 1 (but still goes through motions).
 #
-# EXAMPLE:
-# - set_xterm_title.bash "/c/cartera-de-tomas/ILIT" "ILIT"
+# Environment usage (e.g., defined in tomohara-aliases.bash):
+#   DEFAULT_HOST: usual hostname (omitted from title)
+#   PS_symbol: symbol used in bash prompt
+#   SCRIPT_PID: process for script
+#   SUDO_USER: user running sudo (for use in title)
+#   XTERM_SHOW_PID: put PID in xterm title
+#   XTERM_TITLE_SUFFIX: suffix for title
+#
+# Example:
+# - set_xterm_title.bash "$HOME/vsd-text-categorization" "vsd-textcat"
 #
 # TODO:
 # - Document environment variable usage:
@@ -233,7 +241,7 @@ if [ "$simple_mode" == 0 ]; then
         icon="$icon; $XTERM_TITLE_SUFFIX"
         ## Note: temp check for odd repeated version spec (e.g., "Py3.10; Py3.10")
         if [[ $XTERM_TITLE_SUFFIX =~ Py[0-9]\.[0-9].*Py[0-9]\.[0-9] ]]; then
-            echo "Warning: unexptected python spec in w/ xterm title suffix ($XTERM_TITLE_SUFFIX)"
+            echo "Warning: unexpected python spec in w/ xterm title suffix ($XTERM_TITLE_SUFFIX)"
         fi
     fi
     
@@ -252,6 +260,18 @@ if [ "$simple_mode" == 0 ]; then
         icon="script:$SCRIPT_PID $icon"
     fi
     
+    # If XTERM_SHOW_PID: set, add PID at end (e.g., "; pid 27843")
+    #
+    if [ "${XTERM_SHOW_PID:-0}" == "1" ]; then
+        full="$full; pid:$PPID"
+        icon="$icon; pid:$PPID"
+    fi
+
+    # Add debugging suffix
+    if [ "$debug" = "1" ]; then
+        full="$full; debug"
+        icon="$icon; debug"
+    fi
 fi
 
 # Show derived titles

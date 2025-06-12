@@ -72,7 +72,8 @@ while ("$1" =~ -*)
         ## NOTE: -csh likely used for relics running csh-based scripts
         if ($DEBUG_LEVEL >= 3) echo "FYI: filtering entries (e.g., misc. bash and csh processes)"
 	set exclude_filter = '((bash *$)|\-csh|(csh.*ps_mine.sh)|<defunct>)'
-        set exclude_filter = '(\-csh|(csh.*ps_mine.sh)|<defunct>)'
+        ## OLD: set exclude_filter = '(\-csh|(csh.*ps_mine.sh)|<defunct>)'
+        set exclude_filter = '([-]csh|(csh.*ps_mine.sh)|<defunct>)'
     else if (("$1" == "--verbose") || ("$1" == "-v")) then
 	set verbose_mode = 1
     else if ("$1" == "--trace") then
@@ -105,16 +106,20 @@ set ps_command = "ps auxww"
 ## TODO: break down into grep_command and grep_options (see HACK below)
 set grep_command = "grep '^$user'"
 set sort_command = "sort --key=3 --key=4 -rn"
+set egrep="egrep"
 if ($OSTYPE == solaris) then
     set ps_command = "ps -ef"
     set grep_command = "egrep -i '^ +$user'"
     set sort_command = "sort --key=3 -rn"
+## TODO?: else if ($OSTYPE == linux) then
+else
+    set egrep="grep --extended-regexp"
 endif
     
 
 # Show optional status
 if ($verbose_mode) then
-    echo "Issuing: $ps_command | $grep_command | egrep -v '$exclude_filter' | egrep '$include_filter' | $sort_command"
+    echo "Issuing: $ps_command | $grep_command | $egrep -v '$exclude_filter' | $egrep '$include_filter' | $sort_command"
 endif
 
 # Display header
@@ -126,11 +131,11 @@ set ps_output = /tmp/ps_$$.list
 $ps_command | tail --line=+2 > $ps_output
 if ($OSTYPE == solaris) then
     # TODO: fix stupid problem with grep under Solaris ("No match" reported but OK interactively issuing same command)
-    grep "^ *$user" $ps_output | egrep -v "$exclude_filter" | egrep "$include_filter" | grep -v "$ps_command" | $sort_command
+    grep "^ *$user" $ps_output | $egrep -v "$exclude_filter" | $egrep "$include_filter" | grep -v "$ps_command" | $sort_command
     ## grep "^ *$user" $ps_output | $sort_command
 else
     ## HACK
-    grep "^$user" $ps_output | egrep -i -v "$exclude_filter" | egrep -i "$include_filter" | grep -i -v "$ps_command" | $sort_command
+    grep "^$user" $ps_output | $egrep -i -v "$exclude_filter" | $egrep -i "$include_filter" | grep -i -v "$ps_command" | $sort_command
 endif
 
 # Cleanup

@@ -10,12 +10,17 @@
 batspp
 click
 mezcla>=1.3.9.8
-pipreqs
+## NOTE: pipreqs disabled due to problem with Docker build. It is only
+## used in local-workflows.sh and normally not invoked.
+## OLD: pipreqs
+## TODO: wheel (avoids similar build related issues)
 #...............................................................................
 # Redundant specification of some dependencies due to Git workflow quirk,
 # such as with mezcla. (Also, some are just optional for mezcla.)
 #
+# note: post-install for bash_kernel: python -m bash_kernel.install
 bash_kernel
+#
 importlib_metadata
 ipython
 jupyter

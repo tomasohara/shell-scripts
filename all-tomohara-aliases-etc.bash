@@ -1,26 +1,30 @@
-#! /bin/env bash
+#! /usr/bin/env bash
 #
 # Convenience script for loading all my aliases, functions, etc.
 #
-# Simple Usage:
+# Simple Usage (see advanced below for use in scripts):
 #   export TOM_BIN=/home/tom/shell-script;
-#   source $TOM_BIN/all-tomohara-aliases.bash
+#   source $TOM_BIN/all-tomohara-aliases-etc.bash
+#
+# Tom's typical usage (n.b., idiosyncratic settings):
+#   SOURCE_SETTINGS=1 source "$HOME/bin/all-tomohara-aliases-etc.bash"
 #
 # Note:
 # - Omits tomohara-settings.bash unless SOURCE_SETTINGS=1,
 # - The env.options are TRACE_/VERBOSE_SOURCE rather than TRACE/VERBOSE in
 #   case sourced via a script which used the latter (see local-workflows.sh).
 #
-#--------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # Advanced usage (e.g., within scripts using aliases):
 #
 #   # Get aliases (n.b., tracing should be delayed)
 #   shopt -s expand_aliases
 #   {
-#       source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
+#       alias_script="all-tomohara-aliases-etc.bash"
+#       source_dir="$(dirname "$(which "$alias_script")")"
 #       # filters shellcheck SC1090 [Can't follow non-constant source]
 #       # shellcheck disable=SC1090
-#       source "$source_dir"/all-tomohara-aliases-etc.bash
+#       source "$source_dir/$alias_script"
 #   }
 #   #
 #   # Set tracing (delayed so alias definitions not traced)

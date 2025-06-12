@@ -14,6 +14,10 @@ TODO2:
 - Make sure all python tests follow mezcla template (e.g., THE_MODULE; see mezcla/tests/template.py)
 - Use self.run_script instead of gh.run.
 
+TODO3:
+- Use generative AI to produce new tests following tests/README.ipynb:
+  each test has two parts: 1) command output; and 2) validation output.
+
 TIPS:
 - ** A drawback with Jupyter based tests is that the output might be generated
   to reflecting the current alias but not capturing the tester's intention.

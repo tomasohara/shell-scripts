@@ -67,6 +67,7 @@ my($show_offset) = (! $no_offset);
 my($show_hex) = (! $no_hex);
 &init_var(*ptrace, (&DEBUG_LEVEL >= 7));        # trace steps with letters
 
+## TODO1: use auto-help
 my($show_help) = $help;
 
 # Show a usage statement if no arguments given.

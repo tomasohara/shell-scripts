@@ -32,6 +32,8 @@ if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     echo ""
     echo "Notes:"
     echo "- By default, included files mopdified within 30 days and no larger than 1mb."
+    echo "- Default backup directory is \$ROOT_BACKUP_DIR/backup/$HOSTNAME".
+    echo "- Other env. options: EXCLUDE_REGEX, MAX_DAYS_OLD, MAX_SIZE_CHARS, SOURCE_DIR, TARGET_DIR."
     echo "- The -- option is to use default options and to avoid usage statement."
     echo ""
     exit

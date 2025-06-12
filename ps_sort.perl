@@ -50,11 +50,15 @@ BEGIN {
 use strict;
 no strict "refs";		# to allow for old-style references to arrays (TODO: use #xyz_ref = \@array)
 use vars qw/$by $xyz $ps_options $cut_options $num_times $LINES $COLUMNS $max_count $delay $line_len $testing $justuser $USER $username/;
-use vars qw/$batch $full $once $lines $columns $alpha $time2num $DURING_ALIAS/;
+use vars qw/$batch $full $once $lines $columns $alpha $time2num $DURING_ALIAS $time $mem/;
 
 # Check the command-line options
 # note: OSTYPE needs to be in environment for this to work (see tomohara-aliases.bash)
-&init_var(*by, "cpu");
+## OLD: &init_var(*by, "cpu");
+&init_var(*mem, &FALSE);
+&init_var(*time, &FALSE);
+my($by_default) = ($time ? "time" : ($mem ? "mem" : "cpu"));
+&init_var(*by, $by_default);
 &init_var(*OSTYPE, "???");
 ## TEST:
 ## $OSTYPE = "n/a" if ($OSTYPE = "???");
@@ -113,6 +117,10 @@ local(*uid) = *user;
 &debug_out(&TL_VERBOSE, "\$#uid = %d\n", $#uid);
 
 ## TEMP: &debug_print(&TL_VERBOSE, "is_solaris=$is_solaris is_linux=$is_linux is_mac=$is_mac\n");
+if ($is_mac and ($by eq "time")) {
+    &debug_out(&TL_DETAILED, "Forcing -time2num under Mac");
+    $time2num = &TRUE;
+}
 
 # Show a usage statement if no arguments given
 # NOTE: By convention - is used when no arguments are required
@@ -131,10 +139,11 @@ if (!defined($ARGV[0])) {
     }
     $options .= "\nother options = " . &COMMON_OPTIONS;
     my($example) = "examples:\n\n$0 -\n\n";
-    $example .= "$script_name -by=mem -\n\n";
+    ## OLD: $example .= "$script_name -by=mem -\n\n";
     $example .= "$script_name -justuser -\n\n";
     $example .= "$script_name -username=cpuhog -\n\n";
     $example .= "LINES=1000 $script_name -num_times=1 -by=time - | less\n\n";
+    $example .= "COLUMNS=132 $script_name -num_times=1 -by=mem - | head\n\n";
     $example .= "$script_name -once -full -by=command -\n\n";
 
     my($note) = "";
@@ -219,7 +228,7 @@ for ($t = 1; $t <= $num_times; $t++) {
 		    my($sec) = $5;
 		    my($fract) = defined($6) ? $6 : 0;
 		    $time[$i] = ($hour * 3600 + $min * 60 + $sec + $fract);
-		    &debug_print(5, "Converted time to seconds $time[$i]\n");
+		    &debug_print(5, "Converted time $& to seconds $time[$i]\n");
 		}
 		else {
 		    &debug_print(5, "Warning: unable to parse time field: $time[$i]\n");
@@ -260,7 +269,8 @@ for ($t = 1; $t <= $num_times; $t++) {
 	print "update $t of $num_times\n";
 	&debug_out(&TL_DETAILED, "%s\n", &get_time());
     }
-    printf "%s\n", substr($header, 0, $line_len);
+    ## OLD: printf "%s\n", substr($header, 0, $line_len);
+    printf "%s\n", &elide(substr($header, 0, $line_len));	
     my $count = 0;
     foreach my $index (sort by_xyz @line_index) {
 	printf "%s\n",  substr($line[$line_index[$index]], 0, $line_len);
@@ -301,6 +311,7 @@ sub by_xyz {
     # Treat time value into decimal
     # NOTE: conditional on it being a known time field
     if (($by =~ /time/) && ($value_a =~ /:/) && ($value_b =~ /:/)) {
+	# TODO: drop extra decimal places
 	$value_a =~ tr/:/./;
 	$value_b =~ tr/:/./;
 	&assert(($value_a !~ /:/) && ($value_b !~ /:/));
@@ -412,4 +423,19 @@ sub set_stdin_blocking {
 	       $flags, $result);
 
     return;
+}
+
+# elide(text, [max_len=$line_len]): clip TEXT at MAX_LEX, inclduing elipsis
+# EX: elide("abcdefghi", 6) => "abc..."
+sub elide {
+    my($text, $max_len) = @_;
+    if (! defined($max_len)) {
+	$max_len = $line_len;
+    }
+    if (length($text) > $max_len) {
+	$text = substr($text, 0, $line_len);
+    }
+
+    &debug_print(&TL_VERBOSE, "elide(@_) => $text\n");
+    return ($text);
 }

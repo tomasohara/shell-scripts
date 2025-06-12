@@ -51,7 +51,9 @@ export PATH="$PATH:."
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib:$HOME/lib/$OSTYPE_BRIEF"
 
 # Setup pythonpath to include .. for sake of testing
-export PYTHONPATH="$PYTHONPATH:.."
+## OLD: export PYTHONPATH="$PYTHONPATH:.."
+# note: '.' & '..' put at end to avoid unexpected conflicts with scripts like common.py
+export PYTHONPATH="src:$PYTHONPATH:.:.."
 
 # Define HOST_NICKNAME from ~/.host-nickname if unset or the default
 if [[ ("$HOST_NICKNAME" = "") || ("$HOST_NICKNAME" = "tpo-host") ]]; then
@@ -64,19 +66,22 @@ fi
 ## OLD: prepend-path "$HOME/python/Mezcla/mezcla"
 ## OLD: add-python-path "$HOME/python/Mezcla/mezcla"
 add-python-path "$HOME/Mezcla/mezcla"
-append-path "$HOME/mezcla-tom/examples:$HOME/python/examples:$TOM_BIN/bruno"
+## OLD: append-path "$HOME/mezcla-tom/examples:$HOME/python/examples:$TOM_BIN/bruno"
+append-path "$HOME/Mezcla/mezcla/examples"
 #
 # HACK: make sure ~/mezcla-tom used if available
 if [ -e "$HOME/mezcla-tom" ]; then add-python-path "$HOME/mezcla-tom"; fi
 #
 # Make sure gradio apps accessible in local net
 # See https://superuser.com/questions/949428/whats-the-difference-between-127-0-0-1-and-0-0-0-0.
-export GRADIO_SERVER_NAME=0.0.0.0
+## OLD: export GRADIO_SERVER_NAME=0.0.0.0
+export GRADIO_SERVER_NAME="$HOSTNAME.local"
 #
 # Mezcla stuff
 cond-export BRIEF_USAGE 1               # running w/o args shows usage line
 cond-export TRACE_INVOCATION 1          # trace script invocation argv
 cond-export DISABLE_RECURSIVE_DELETE 1  # don't allow rm -r during cleanup
+cond-export SKIP_EXPECTED_ERRORS 1      # skip pytests known to fail (e.g., to filter error messages from check-errors)
 
 # Enable timestamp preservation during git-update alias operations (n.b., stash pop quirk)
 cond-export PRESERVE_GIT_STASH 1
@@ -100,6 +105,9 @@ cond-export RENAME_SNAPSHOT_PREVIEW 1
 
 # Get idiosyncratic aliases
 conditional-source "$TOM_BIN/tomohara-proper-aliases.bash"
+
+# xterm window support
+cond-export XTERM_SHOW_PID 1
 
 # User-specific mount directory
 cond-export MNT /media/"$USER"

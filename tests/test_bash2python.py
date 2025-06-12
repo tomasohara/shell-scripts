@@ -538,7 +538,7 @@ def do_test_external_script(bash_filename, python_filename=None, diff_program=No
 
 
 def do_test_directory(dir_path, config_file=None):
-    """Run test with each mnaually converted file in PATH, using optional CONFIG_FILE
+    """Run test with each manually converted file in PATH, using optional CONFIG_FILE
     For each .py file, the corresponding .bash file is the input. 
     In addition, CONFIG_FILE can be used to override the default threshold for comparison
     """

@@ -378,3 +378,24 @@
     (format t "z = ~a~%" z)
     (format t "p = ~a~%" p)
     ))
+
+;; perform-regression: calculate r^2 using Least squares estimates
+;;
+;; Example:
+;; > (perform-regression (list 2 4 6) (list 1 2 5))
+;;   
+;;   Least Squares Estimates:
+;;   
+;;   Constant                  -1.33333      (1.24722)
+;;   Variable 0                 1.00000      (0.288675)
+;;   
+;;   R Squared:                0.923077    
+;;   Sigma hat:                0.816497    
+;;   Number of cases:                 3
+;;   Degrees of freedom:              1
+;;   
+
+(defun perform-regression (data1 data2)
+   "Run regression analysis over DATA1 and DATA2"
+   (let ((model (regression-model data1 data2)))
+      model))

@@ -17,6 +17,20 @@
 ## set -o xtrace
 ## set -o verbose
 
+# Set bash regular and/or verbose tracing
+# - xtrace shows arg expansion (and often is sufficient)
+# - verbose shows source commands as is (but usually is superfluous w/ xtrace)
+#
+if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+    echo "$0 $@"
+fi
+if [[ "${TRACE:-0}" == "1" ]]; then
+    set -o xtrace
+fi
+if [[ "${VERBOSE:-0}" == "1" ]]; then
+    set -o verbose
+fi
+
 # Get defaults for programs
 BROWSER=${BROWSER:-firefox}
 
@@ -41,6 +55,8 @@ while [ "$more_options" = "1" ]; do
 	for_editting=1;
     elif [ "$1" = "--open" ]; then
 	for_editting=1;
+    elif [ "$1" = "--under-mac" ]; then
+	under_mac=1;
     elif [ "$1" = "--not-mac" ]; then
 	under_mac=0;
     elif [ "$1" = "--verbose" ]; then
@@ -102,11 +118,12 @@ function invoke () {
     log_file="$log_dir/$(basename "$program")-$(basename "$file")-$today.log"
     local program_arg=""
     if [ ! -e "$log_file" ]; then touch "$log_file"; fi
-    if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" \"$file\" >> \"$log_file\" 2>&1"; fi
+    ## OLD: if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" \"$file\" >> \"$log_file\" 2>&1"; fi
     if [[ (! -e "$program") && ("$program" != "open") ]]; then
 	if [ "$under_mac" = "1" ]; then
-	    ## OLD: program="open -a '$program'"
-	    ## TODO: program_arg="-a '$program'"
+            if [[ ! ("$program" =~ .*\.app) ]]; then
+                program="$program.app"
+            fi
 	    program_arg="-a $program"
 	    program="open"
 	fi
@@ -114,7 +131,14 @@ function invoke () {
     ## OLD: "$program" "$file" >> "$log_file" 2>&1
     # disable shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2086
-    "$program" $program_arg "$file" >> "$log_file" 2>&1
+    {
+        if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" $program_arg \"$file\" >> \"$log_file\" 2>&1"; fi
+        "$program" $program_arg "$file" >> "$log_file" 2>&1
+    }
+    if [ $? -ne 0 ]; then
+        echo "Problem running '$program' (status=$?):"
+        tail --verbose "$log_file"
+    fi
     }
 
 #...............................................................................
@@ -165,49 +189,54 @@ fi
     
 #
 case "$lower_file" in
-    # PDF and posscript files
-    *.pdf | *.ps) invoke "$pdf_program" "$@" & ;;
+    # PDF and postscript files
+    *.pdf* | *.ps*) invoke "$pdf_program" "$@" & ;;
 
     # Image files
     # note: uses viewer that Files invokes, such as eog [the "eye of GNOME"] for images
-    *.gif | *.ico | *.jpeg | *.jpg | *.png | .svg | *.xcf) invoke "$image_program"  "$@" & ;;
+    *.gif* | *.ico* | *.jpeg* | *.jpg* | *.png* | *.svg* | *.xcf*) invoke "$image_program"  "$@" & ;;
 
     # Video files
-    *.mov | *.mp4) invoke vlc "$@" & ;;
+    *.mov* | *.mp*4) invoke vlc "$@" & ;;
 
     # Audio files
-    *.mp3 | *.wav) invoke vlc "$@" & ;;
+    *.mp*3 | *.wav*) invoke vlc "$@" & ;;
     
     # MS Office and LibreOffice files: word processor files, spreadsheets, etc.
     # warning: this only works well for MS-specific extension (.
     # if other applications are associated (e.g,. TextEdit for .rtf), then need to invoke via specific office program [maldito mac/microsoft].
     # note: MacOs has awkware sequence via [Finder > GetInfo > OpenWith/ChangeAll] to change the default. See
     #    https://www.macworld.com/article/672511/how-to-change-default-apps-on-mac.html
-    *.doc | *.docx | *.pptx | *.odp | *.odt | *.odg | *.rtf | *.xls | *.xlsx | *.csv) invoke "$office_program" "$@" & ;;
+    *.doc* | *.docx* | *.pptx* | *.odp* | *.odt* | *.odg* | *.rtf* | *.xls* | *.xlsx* | *.csv*) invoke "$office_program" "$@" & ;;
 
     # HTML files and XML files
     # TODO: convert filename arguments to use file:// prefix (to distinguish from URL's)
-    *.html | *.xml) invoke "$BROWSER" "$@" & ;;
+    *.html* | *.xml*) invoke "$BROWSER" "$@" & ;;
 
-    # Text files
-    *.txt | *.text) invoke emacs "$@" & ;;
+    # Text files and dot files
+    *.txt* | *.text* | .*) invoke emacs "$@" & ;;
 
     # Windows XPS printer
-    *.oxps | *.xps) invoke mupdf "$@" & ;;
+    *.oxps* | *.xps*) invoke mupdf "$@" & ;;
     
     ## TEST:
     ## This illustrates what happens when ';;' not used at end of case
-    ## *.abc | *.pdq) echo hey; emacs "$@"
-    ## BAD: *.xyz)
+    ## *.abc* | *.pdq*) echo hey; emacs "$@"
+    ## BAD: *.xyz*)
     ##		   echo hey2; emacs "$@" & ;;
+
+    # Invoke MacOs-style app as if program (e.g., Safari.app)
+    *.app*)
+       invoke "$@" & ;;
     
-    # Default processing
-    *)
+    # Invoke default program for unknown extension
+    *.*) 
        echo ""
-       ## OLD
-       ## echo "*** Warning: Unknown extension in $1; using Emacs"
-       ## invoke emacs "$@" & ;;
        echo "*** Warning: Unknown extension in $1; using $default_program"
        invoke "$default_program" "$@" & ;;
-
+    
+    # Invoke extension-less file as if program
+    *)
+       invoke "$@" & ;;
+    
 esac

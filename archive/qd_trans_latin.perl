@@ -10,23 +10,38 @@ eval 'exec perl -Ssw $0 "$@"'
 # the Latin lookup program (words.exe) developed by William Whitaker.
 #
 
-require 'common.perl';
+## OLD: require 'common.perl';
+
+BEGIN { 
+    my $dir = $0; $dir =~ s/[^\\\/]*$//; unshift(@INC, $dir);
+    require 'common.perl';
+    use vars qw/$unix/;
+}
+
+# Specify additional diagnostics and strict variable usage, excepting those
+# for command-line arguments (see init_var's below).
+use strict;
+use vars qw/$by_sentence $HOME $multiling_dir $LATIN_DIR $latin_lookup/;
+
 
 if (!defined($ARGV[0])) {
-    $options = "options = [-by_sentence] [-LATIN_DIR=dir] [-latin_lookup=program]";
-    $example = "ex: echo 'affirmo' | $script_name -\n";
+    my($options) = "options = [-by_sentence] [-LATIN_DIR=dir] [-latin_lookup=program]";
+    my($example) = "ex: echo 'affirmo' | $script_name -\n";
 
     die "\nusage: $script_name [options]\n\n$options\n\n$example\n\n";
 }
 
 &init_var(*by_sentence, &FALSE);
 # TODO: add MULTILING_DIR environment variable
-&init_var(*multiling_dir, "c:/tom/MultiLingual");
+## OLD: &init_var(*multiling_dir, "c:/tom/MultiLingual");
+&init_var(*HOME, "~");
+&init_var(*multiling_dir, "$HOME/multilingual");
 &init_var(*LATIN_DIR, $multiling_dir . "/Latin");
-&init_var(*latin_lookup, "$LATIN_DIR/Latin-Words.exe");
+my($wine_prefix) = ($unix ? "wine " : "");
+&init_var(*latin_lookup, "${wine_prefix}$LATIN_DIR/Latin-Words.exe");
 
 # Preprocess the text prior to translation
-$text = "";
+my($text) = "";
 while (<>) {
     &dump_line();
     chop;
@@ -47,18 +62,20 @@ $text .= "\n";			# blank line to signal end
 my($temp_source) = "/tmp/temp_$$.text";
 &write_file($temp_source, $text);
 chdir $LATIN_DIR;
-$trans = &run_command("${latin_lookup} < $temp_source");
+my($trans) = &run_command("${latin_lookup} < $temp_source");
 
 # Pretty print the results (sort-of)
 $trans =~ s/^[^\000>]+=>/=>/;	# remove the header
-$word = "";
-$last_word = "";
-$word_trans = "";
-$word_syntax = "";
-$root_and_ending = "";
+our($word) = "";
+our($last_word) = "";
+our($word_trans) = "";
+our($word_syntax) = "";
+our($root_and_ending) = "";
 foreach $_ (split(/\n/, $trans)) {
     &dump_line();
     s/\r//;
+    my($new_root_and_ending) = "";
+    my($syntax_info) = "";
     if (/^(\S+).*===.*UNKNOWN/) {
 	$new_root_and_ending = $1;
 	if ($word_trans ne "") {
@@ -107,12 +124,12 @@ unlink $temp_source unless (&DEBUGGING);
 # output_entry(): print the word-translation entry
 #
 sub output_entry {
-    &debug_out(5, "output_entry(@_)\n");
+    &debug_print(5, "output_entry(@_)\n");
 
     $word_trans =~ s/  */ /g;
     $word_syntax =~ s/  */ /g;
     $word_syntax =~ s/;$//;
-    $word_form = ($word eq $last_word) ? "" : $word;
+    my($word_form) = ($word eq $last_word) ? "" : $word;
     printf "%s\t%s", $word_form, $word_trans;
     if ($word_syntax ne "") {
 	printf " [%s: %s]", $root_and_ending, $word_syntax;

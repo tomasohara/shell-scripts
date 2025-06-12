@@ -11,6 +11,10 @@
 #   SC2049: =~ is for regex. Use == for globs.
 #   SC2086: Double quote to prevent globbing and word splitting.
 #
+# TODO1:
+# - Use --verbose to determine the level of detail for the usage
+#   (see calc_entropy.perl for an example.)
+#
 # TODO:
 # - Reconcile with do_rcsdiff.sh (at least keep in synch put perhaps combine).
 # - add sample input and output comments
@@ -46,15 +50,13 @@
 # entirely of blank lines.
 #
 
-# Uncomment following line(s) for tracing:
+# Set bash regular and/or verbose tracing
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
-#  
-## echo "$@"
-## set -o xtrace
-## DEBUG: set -o verbose
 #
-# Set bash regular and/or verbose tracing
+if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+    echo "$0 $@"
+fi
 if [ "${TRACE:-0}" = "1" ]; then
     set -o xtrace
 fi
@@ -74,6 +76,8 @@ nopattern="0"
 verbose_mode="1"
 match_dot_files="0"
 no_glob="0"
+base_dir="."
+recursive="0"
 
 # Show usage statement if insufficient arguments given
 if [ -z "$2" ]; then
@@ -82,20 +86,26 @@ if [ -z "$2" ]; then
     echo "Usage: $script [option] {--all | pattern} master_dir"
     echo ""
     echo "   options: [--check-space-changes | --ignore-spacing] [--brief] [--quiet] [--verbose] [--diff cmd] [--diff-options text] [--match-dot-files]"
-    echo "   other options: [-side-by-side] [--ignore-all-space] [--no-pattern] [--no-glob] [--kdiff] [--trace]"
+    echo "   other options: [-side-by-side] [--ignore-all-space] [--no-pattern] [--no-glob] [--kdiff] [--trace] [--dir dir]"
     echo ""
     echo "Examples:"
     echo ""
     echo "$0 --ignore-spacing '*.[ch]*' MASTER-DIR"
     echo ""
-    echo "$script '.py' .. >| _python_diff.list 2>&1"
+    echo "$script '.py' .. > _python_diff.list 2>&1"
     echo ""
-    # shellcheck disable=SC2016
-    echo '(for f in system.py main.py debug.py; do' "$script" '$f ~/mezcla-clone; done) 2>&1 | less'
+    ## OLD:
+    ## # shellcheck disable=SC2016
+    ## echo '(for f in system.py main.py debug.py; do' "$script" '$f ~/mezcla-clone; done) 2>&1 | less'
+    echo "find . -type d -exec \"$script\" --dir {} --verbose '*' ~/repo-main/{} \; > _main-diff-all.log 2>&1"
     echo ""
-    echo "$script" '--match-dot-files ".*bash* .*emacs*" .. >| _bash-emacs-diff.list 2>&1'
+    echo "git ls-tree -r --name-only HEAD | xargs -I '{}' $script --no-pattern '{}' ~/repo-main/'{}' > _main-diff-tracked.log 2>&1"
+    
     echo ""
-    echo "$script --ignore-spacing --diff-options '--context=1' '*.rb' vm-torre >| vm-torre.diff 2>&1"
+    ## OLD: echo "$script" '--match-dot-files ".*bash* .*emacs*" .. > _bash-emacs-diff.list 2>&1'
+    echo "$script" '--match-dot-files ".*bash*" .. > _bash-diff.list 2>&1'
+    echo ""
+    echo "$script --ignore-spacing --diff-options '--context=1' '*.rb' vm-torre > vm-torre.diff 2>&1"
     echo ""
     echo "$script --no-glob '*.py *.mako' ~/xfer"
     echo ""
@@ -104,11 +114,13 @@ if [ -z "$2" ]; then
     echo "   'py' => '*py*' but '.py' => '*.py' (not '*.py*')"
     echo "- Use --match-dot-files, to ensure that . matches Unix dot files (e.g., .bashrc)"
     # TODO: interchange .bash and emacs here and in example above
-    echo "   '.emacs' => '.emacs*' (not '*.emacs*')"
+    ## OLD: echo "   '.emacs' => '.emacs*' (not '*.emacs*')"
+    echo "   '.git' => '.git*' (not '*.git*')"
     echo "- The --no-pattern option treats pattern as a file (and likewise for master_dir)"
     echo "- Changes due to whitespace are ignored by default (i.e., --ignore-space-change, and --ignore-blank-lines [diff -wB])."
     echo "- Specify --ignore-all-space [diff -a] to ignore spacing even within tokens"
     echo "- Use --check-space-changes to check for any changes in whitespace"
+    echo "- The --dir option is useful with find to achieve recursive diff (see example above)"
     echo ""
     exit
 fi
@@ -130,6 +142,11 @@ while [[ "$1" =~ ^- ]]; do
         shift
     elif [ "$1" == "--diff-options" ]; then
         diff_options="$diff_options $2"
+        shift
+    elif [ "$1" == "--dir" ]; then
+        recursive="1"
+        base_dir="$2"
+        quiet="1"
         shift
     elif [ "$1" == "--side-by-side" ]; then
         width=$((2 * ${COLUMNS:-132}))
@@ -212,15 +229,32 @@ fi
 if [ "$nopattern" == "0" ]; then
     echo "checking files in pattern $pattern"
 fi
+
+# Optionally, change the directory
 #
+if [ "$base_dir" != "." ]; then
+    if [ "$verbose_mode" == "1" ]; then
+        echo in dir "$base_dir":
+    fi
+    cd "$base_dir"
+fi
+
+# Do the actual diff
+log_file="${TMP:-/tmp}/_do_diff.$$.log"
 count=0
 # shellcheck disable=SC2086
 for file in $pattern; do
-    # Add line divider
-    if [[ ("$verbose_mode" == "1") && ($count -ge 0) ]]; then
-        echo "------------------------------------------------------------------------"
+    ## OLD: 
+    ## # Add line divider
+    ## if [[ ("$verbose_mode" == "1") && ($count -ge 0) ]]; then
+    ##     echo "------------------------------------------------------------------------"
+    ## fi
+    ## let count++
+
+    # Ignore unresolved pattern file (e.g., '*')
+    if [ ! -e "$file" ]; then
+        continue
     fi
-    let count++
 
     # Resolve path for other file
     if [[ "$file" =~ \$ ]]; then
@@ -229,26 +263,45 @@ for file in $pattern; do
     fi
     # Derive base name for file, including relative directory (e.g., in case pattern specifies subdirectory)
     base=$(basename "$file")
-    ## OLD: base_proper="$base"
     dir=$(dirname "$file")
     if [ "$dir" != "." ]; then
-        base="$dir/$base"
+        ## OLD: base="$dir/$base"
+        base="$(dirname $dir)/$base"
     fi
     other_file="$master"
     #
     if [ -d "$file" ]; then
-        # TODO: have option to recursively do diff's
-        echo "Warning: Ignoring subdirectory '$file'"
+        if [ "$recursive" == "0" ]; then
+            echo "Warning: Ignoring subdirectory '$file'"
+        fi
         continue
     fi
+    # Use fallbacks based on whether pattern/file specifies path not resolvable
+    # directly via master directory.
+    # Note: similar to diff-rev alias
+    # ex: "bin/tests/README.ipynb" => "tests/README.ipynb"
     if [ -d "$other_file" ]; then
-        other_file="$master/$base"
-    fi
-    if [ "$quiet" == "0" ]; then
-        echo "$file vs. $other_file"
+        if [ -e "$other_file/$file" ]; then
+            # Retains directory in "pattern"
+            # TODO: assert $nopattern
+            other_file="$other_file/$file"
+        else
+            # Ignores directory in "pattern"
+            other_file="$master/$base"
+        fi
     fi
     if [ ! -e "$other_file" ]; then
-        echo "Warning: missing other file: '$other_file'"
+        other_file="$master/$base"
+    fi
+    # note: recursive omits some verbose output to cut down on clutter
+    # example: the file-vs-other line is omitted; --dir sets --quiet
+    if [ "$quiet" == "0" ]; then
+        echo "$base_dir/$file vs. $other_file"
+    fi
+    if [ ! -e "$other_file" ]; then
+        if [ "$quiet" == "0" ]; then
+            echo "Warning: missing other file: '$other_file'"
+        fi
         continue
     fi
 
@@ -257,46 +310,55 @@ for file in $pattern; do
     # grepping (e.g., `do_diff.sh ... | grep '^Differences:'`).
     files_differ=false
     if [ "$brief" == "0" ]; then
-        log_file="${TMP:-/tmp}/_do_diff.$$.log"
-        "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" >| "$log_file"
+        "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" > "$log_file"
         status=$?
-        perl -pe 's/Files (.*) and (.*) differ/Differences: $1 $2/;' < "$log_file"
+        ## OLD: perl -pe 's/Files (.*) and (.*) differ/Differences: $1 $2/;' < "$log_file"
+        perl -e "\$bd='$base_dir';" -pe 's@Files (.*) and (.*) differ@Differences: $bd$d/$1 $2@;' < "$log_file"
 
         # Show file info with time and size if there are differences
         if [ "$status" != "0" ]; then
             files_differ=true
-            ls -l "$file"
-            ls -l "$other_file"
+            ## OLD:
+            ## ls -l "$file"
+            ## ls -l "$other_file"
         fi
     fi
         
+    # Add line divider and update output count
+    # note: avoids extraneous dashes with recursive diff
+    if [[ $files_differ && ($count -gt 0) ]]; then
+        let count++
+        if [ "$verbose_mode" == "1" ]; then
+            echo "------------------------------------------------------------------------"
+            count=0
+        fi
+        ls -l "$file"
+        ls -l "$other_file"
+    fi
+    
     # Perform the actual diff
-    log_file="$TMP/do_diff.$$"
     "$diff_cmd" $space_options $diff_options "$file" "$other_file" > "$log_file" 2>&1
     
     # Show relative difference percent
     ## TODO?: if [[ "$brief" == "0") && $files_differ ]]; then
     if [ "$brief" == "0" ] && $files_differ; then
-        num_lines1=$(wc -l < "$file")
-        num_lines2=$(wc -l < "$other_file" || echo "0")
+        ## OLD:
+        ## num_lines1=$(wc -l < "$file")
+        ## num_lines2=$(wc -l < "$other_file" || echo "0")
+        num_lines1=$(cat "$file" | wc -l)
+        num_lines2=$(cat "$other_file" | wc -l)
         num_lines=$(( $num_lines1 + $num_lines2 ))
         num_diffs=$(wc -l < "$log_file")
         relative_diff=-1
         if [ $num_lines -gt 0 ]; then
             relative_diff=$(( $num_diffs * 100 / $num_lines ))
         fi
-        ## OLD: echo "${relative_diff}% differences for $base_proper"
-        echo "${relative_diff}% differences for $base"
+        ## OLD: echo "${relative_diff}% differences for $base"
+        echo "${relative_diff}% differences for $base_dir/$file"
     fi
 
     # Show the actual file differences
-    cat "$TMP/do_diff.$$"
-
-    ## OLD:
-    ## # Add line divider
-    ## if [ "$verbose_mode" == "1" ]; then
-    ##     echo "------------------------------------------------------------------------"
-    ## fi
+    cat "$log_file"
 
     # Add space divider
     ## TEMP: for consistency with continue'd cases above omits space if verbose, becuase

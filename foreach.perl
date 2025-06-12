@@ -68,6 +68,7 @@ my($loop_count) = defined($to) ? ($to - $from + 1) : defined($count) ? $count : 
 &init_var(*count, $loop_count);		# number of times for loop
 &init_var(*step, 1);		# loop increment
 &init_var(*init_vars, "");	# user variables initialized on command line (e.g., foreach.perl -myvar=77 -init_vars="myvar" ...)
+&init_var(*test, &FALSE);       # dry run (e.g., test of arg expansion)
 
 # Reference all of the user init-vars
 foreach my $var (&tokenize($init_vars)) {
@@ -235,10 +236,14 @@ foreach $f (@ARGV) {
     # varables (eg, $f for current file)
     # TODO: fix error handling when command has embedded quotes (double, single or back)
     $command_line =~ s/&([dbBfFhn])/\$$1/g;
-    &debug_out(&TL_VERBOSE, "issuing: %s\n", $command_line);
-    if ($trace) {
-	printf STDERR "issuing: %s\n", eval "\"$command_line\"";
-	}
+    my($prefix) = ($test ? "test " : "");
+    &debug_out(&TL_VERBOSE, "${prefix}issuing: %s\n", $command_line);
+    if ($trace | $test) {
+	printf STDERR "${prefix}issuing: %s\n", eval "\"$command_line\"";
+    }
+    if ($test) {
+	next;
+    }
     eval("issue_command(\"$command_line\", &TL_DETAILED);");
     if ($pause) {
 	&cmd("sleep $pause");

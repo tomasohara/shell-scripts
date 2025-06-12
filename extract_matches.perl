@@ -40,12 +40,12 @@ if (! defined($nostrict)) {
 ##
 use vars qw/$replacement $restore $para $file $fields $one_per_line
     $max_count $i $locale $single $preserve $slurp/;
-use vars qw/$multi_per_line $multi_line_match/;
+use vars qw/$multi_per_line $multi_line_match $sep/;
 
 # Process the command-line options
 if (!defined($ARGV[0])) {
     my($options) = "options = [-replacement=perl_template] [-fields=N] [-para] [-file] [-restore] [-max_count=n] [-one_per_line|-single] [-locale] [-i] [-preserve]";
-    $options .= " [-multi_per_line]";
+    $options .= " [-multi_per_line] [-sep=T]";
     my($example) = "examples:\n\nls -l | $0 \"\\.([^\\.]+\$)\"\n\n";
     $example .= "echo '(trace' `$script_name \"^\\(defun (\\S+)\" init.lisp` ')'\n\n";
     $example .= "$script_name -replacement='\$1-\$2-method' '^\\(def-instance-method \\((\\S+) (\\S+)' /home/tom/cycl/subloop-class-example.lisp\n\n";
@@ -77,6 +77,7 @@ if (!defined($ARGV[0])) {
 &debug_print(&TL_DETAILED, "Note: -preserve not implemented\n") if ($preserve);
 &init_var(*locale, &FALSE);		# use locale information
 &init_var(*multi_line_match, &FALSE);   # use m qualifier for multi-line matching
+&init_var(*sep, "\t");                   # field separatpr
 my($single_line_input) = (! ($para || $slurp));
 my($ignore_case) = $i;
 my($auto_pattern) = &FALSE;		# automatically derive pattern (for tab-delimited fields)
@@ -115,8 +116,11 @@ my($i);
 my($fix_replacement) = ($replacement eq "");
 $replacement = "\$1" if $fix_replacement;
 for ($i = 2; $i <= $fields; $i++) {
-    $replacement .= "\t\$$i" if ($fix_replacement);
-    $pattern .= "\t(\\S+)" if ($auto_pattern);
+    ## OLD:
+    ## $replacement .= "\t\$$i" if ($fix_replacement);
+    ## $pattern .= "\t(\\S+)" if ($auto_pattern);
+    $replacement .= "$sep\$$i" if ($fix_replacement);
+    $pattern .= "$sep(\\S+)" if ($auto_pattern);
 }
 
 # Put grouping parenthesis around pattern, if none present

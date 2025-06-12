@@ -3,7 +3,7 @@
 # Extracts all versions of a file under git.
 #
 # Note:
-# - Akternative version that accounts for renamed files.
+# - Alternative version that accounts for renamed files.
 # - based on https://stackoverflow.com/questions/12850030/git-getting-all-previous-version-of-a-specific-file-folder
 # - shell check
 #   SC2016 (info): Expressions don't expand in single quotes
@@ -29,14 +29,15 @@ function full-usage {
     echo ""
     echo "Examples:"
     echo ""
-    echo "$0 README.md /tmp/README-versions"
+    # HACK: Uses Usage in filename so shows up in brief usage
+    echo "NUM_REVISIONS=5 $script --human Usage.txt /tmp/git-versions"
     echo ""
     echo "PRETTY=1 VERBOSE=1 {script} Dockerfile"
     echo ""
     echo "Notes:"
     echo "- default extract-dir: $export_to_expr"
     echo "- Env. vars: {EXPORT_TO, PRETTY, VERBOSE, TMP}"
-    echo "- Experimental ones: {MAX_NUM, ALLOW_RENAMES}"
+    echo "- Experimental ones: {NUM_REVISIONS, ALLOW_RENAMES}"
     echo ""
 }
 
@@ -44,6 +45,10 @@ function full-usage {
 verbose=false
 if [ "${VERBOSE:-0}" = "1" ]; then
     verbose=true
+fi
+debug=false
+if [ "${DEBUG:-0}" = "1" ]; then
+    debug=true
 fi
 if [ "${TRACE:-0}" = "1" ]; then
     set -o xtrace
@@ -83,7 +88,7 @@ NEWLINE=$'\n'
 TWO_NEWLINES="$NEWLINE$NEWLINE"
 ## OLD: script="$(basename "$0")"
 ## OLD: USAGE="Usage: $(basename "$0") [--human] path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example(s):${NEWLINE}${NEWLINE}$0 README.md /tmp/README-versions${NEWLINE}${NEWLINE}PRETTY=1 VERBOSE=1 ${script} Dockerfile"
-USAGE=$(full-usage | grep 'Usage:')
+USAGE=$(full-usage | grep 'Usage')
 
 # check if got argument
 if [ "${GIT_PATH_TO_FILE}" == "" ]; then
@@ -136,18 +141,18 @@ else
     # "R100	.github/workflows/python.yml	.github/workflows/github.yml"
     git log --name-status --follow "$GIT_PATH_TO_FILE" | grep ^R > "$info.renames"
     ALT_PATHS=$(cut -f2 -d $'\t' "$info.renames")
-    ## DEBUG: echo "ALT_PATHS=(${ALT_PATHS[*]})"
+    $debug && echo "ALT_PATHS=(${ALT_PATHS[*]})"
 fi
 TOTAL_NUM=$(wc -l < "$info")
-MAX_NUM=${MAX_NUM:-$TOTAL_NUM}
+NUM_REVISIONS=${NUM_REVISIONS:-$TOTAL_NUM}
 
 while read -r LINE; do
     # ex: 2021-05-09T22:27:20-05:00 d124b2a3c1de2b2c0cd834b0fa9097e871d7f141
     COUNT=$((COUNT + 1))
-    if [ "$COUNT" -gt "$MAX_NUM" ]; then
+    if [ "$COUNT" -gt "$NUM_REVISIONS" ]; then
 	break
     fi
-    ## DEBUG: echo "LINE$COUNT: $LINE"
+    $debug && echo "LINE$COUNT: $LINE"
     COMMIT_DATE=$(echo "$LINE" | cut -d ' ' -f 1)
     # optionally, convert date into DDmmmYY-HHMM format
     version_spec="$COUNT"
@@ -163,7 +168,7 @@ while read -r LINE; do
 	version_spec="v$VERSION_NUM"
     fi
     COMMIT_SHA=$(echo "$LINE" | cut -d ' ' -f 2)
-    ## DEBUG: echo "COUNT=$COUNT LINE=$LINE COMMIT_DATE=$COMMIT_DATE COMMIT_SHA=$COMMIT_SHA"
+    $debug && echo "COUNT=$COUNT LINE=$LINE COMMIT_DATE=$COMMIT_DATE COMMIT_SHA=$COMMIT_SHA"
     ## OLD: $verbose && printf '.'
     ## OLD: output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.$COUNT.$COMMIT_DATE"
     output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.${version_spec}-${date_spec}"

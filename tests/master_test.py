@@ -2,6 +2,8 @@
 #
 # note: Tana's script for running Python tests as part of workflow
 #
+# TODO2: reconcile with version in mezcla
+#
 
 
 """Master test script for shell-scripts repo"""
@@ -44,7 +46,7 @@ def load_thresholds(filename):
 
 
 def round_p2str(num):
-    """Round NUM using precision of 3"""
+    """Round NUM using precision of 2"""
     # EX: round_p2str(1.678) => "1.68"
     # EX: round_p2str(1.6) => "1.60"
     return system.round_as_str(num, 2)
@@ -79,6 +81,7 @@ def run_tests(thresholds):
                                         collect_result.stdout))
         # Compare against alternative way to detemine number of tests
         # ex: "=== 103 tests collected in 1.64s ==="
+        # TODO2: make alternative method the default
         if (total_tests == 0) or debug.debugging():
             summary_total_tests = 0
             if my_re.search(r"(\d+) tests collected",
@@ -96,6 +99,7 @@ def run_tests(thresholds):
         debug.assertion(failed_tests <= total_tests)
         # Compare against alternative way to detemine number of failures
         # ex: "=== 12 passed, 49 skipped, 13 xfailed, 29 xpassed in 4.76s ==="
+        # TODO2: make alternative method the default
         if debug.debugging():
             summary_failed_tests = 0
             if my_re.search(r"(\d+) failed", run_result.stdout, flags=my_re.IGNORECASE):

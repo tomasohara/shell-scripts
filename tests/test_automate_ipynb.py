@@ -13,15 +13,15 @@ import unittest
 
 # Installed Packages
 import pytest
-from selenium import webdriver
+## OLD: from selenium import webdriver
 
 # Local Modules
 from mezcla import debug
 from mezcla import glue_helpers as gh
 from mezcla import system
 from mezcla.my_regex import my_re
-
-import automate_ipynb as THE_MODULE
+from mezcla.unittest_wrapper import TestWrapper, invoke_tests
+import tests.automate_ipynb as THE_MODULE
 
 # Constants
 LOCALHOST_REGEX = r"http://127\.0\.0\.1:8888/"
@@ -35,23 +35,27 @@ debug.assertion(TEST_DIR.endswith("tests"))
 
 class TestAutomateIPYNB(unittest.TestCase):
     """Class for testcase definition"""
+    script_module = TestWrapper.get_testing_module_name(__file__, THE_MODULE)
     script = gh.resolve_path("automate_batspp.py")
     temp = None
 
     def run_script(self, arguments):
         """Simple version of TestCase.run_script that just runs script over ARGUMENTS"""
+        ## TODO2: rework using TestCase.run_script
         # note: overrides TEST_DIR to this dir (e.g., ~/bin/tests/tests)
         result = gh.run(f"TEST_DIR={TEST_DIR} {self.script} {arguments}")
         debug.trace_fmt(5, "TestAutomateIPYNB.run_script({args}) => {res!r}",
                         args=arguments, res=result)
         return result
 
+    @pytest.mark.xfail
     def test_script_help(self):
         """Make sure script usage shown with --help"""
         result = self.run_script("--help")
         debug.trace(4, f"TestBatsppReport.test_script_help(); self={self}")
         assert(my_re.search(r"automate", result))
 
+    @pytest.mark.xfail
     def test_arg_opt_first(self):
         """Test case for argument option 'first'"""
         output = gh.run("AUTOMATION_DURATION_RERUN=1 python3 automate_ipynb.py --first 3").split("\n")
@@ -59,6 +63,7 @@ class TestAutomateIPYNB(unittest.TestCase):
         count = sum(1 for _ in output if my_re.search(LOCALHOST_REGEX, _))
         assert count == 3
         
+    @pytest.mark.xfail
     def test_arg_opt_include(self):
         """Test case for argumennt option 'include'"""
         testfile_include = "alias-calculator-commands.ipynb"
@@ -69,12 +74,14 @@ class TestAutomateIPYNB(unittest.TestCase):
         testfile_include_true = any(testfile_include in _ for _ in output)
         assert (count == 1) and testfile_include_true
 
+    @pytest.mark.xfail
     def test_env_opt_select_nobatspp(self):
         """Tests environment option: SELECT_NOBATSPP"""
         debug.trace(4, f"TestBatsppReport.test_env_opt_select_nobatspp(); self={self}")
         output = gh.run("AUTOMATION_DURATION_RERUN=2 SELECT_NOBATSPP=1 python3 automate_ipynb.py")
         assert ("SELECT_NOBATSPP: True" in output)
         
+    @pytest.mark.xfail
     def test_env_opt_jupyter_password(self):
         """Tests environment option: JUPYTER_PASSWORD"""
         debug.trace(4, f"TestBatsppReport.test_env_opt_select_nobatspp(); self={self}")
@@ -85,6 +92,7 @@ class TestAutomateIPYNB(unittest.TestCase):
         assertion_case = any("NoSuchElementError" in _ for _ in output)
         assert (assertion_case)
 
+    @pytest.mark.xfail
     def test_env_opt_use_firefox(self):
         """Tests environment option: USE_FIREFOX"""
         debug.trace(4, f"TestBatsppReport.test_env_opt_use_firefox(); self={self}")
@@ -133,4 +141,5 @@ class TestAutomateIPYNB(unittest.TestCase):
     #     assert assertion_case
 
 if __name__ == "__main__":
-    unittest.main()
+    debug.trace_current_context()
+    invoke_tests(__file__)

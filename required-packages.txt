@@ -45,3 +45,4 @@ zip
 ## TODO: docker
 ##
 ## TODO: #opt# xyz
+#opt# kcov                        # see https://github.com/SimonKagstrom/kcov

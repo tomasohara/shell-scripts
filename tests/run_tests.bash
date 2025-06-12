@@ -28,6 +28,7 @@ export PATH="$PATH:$script_dir:$test_dir"
 export PYTHONPATH="$PYTHONPATH:$script_dir:$test_dir"
 
 # Optionally source temporary settings script
+# Note: workaround for adhoc environment settings (see local-workflow.sh)
 temp_script="$dir/_temp_test_settings.bash"
 if [ -e "$temp_script" ]; then
     env_before=$(printenv)

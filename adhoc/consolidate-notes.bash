@@ -17,6 +17,7 @@
 
 ## DEBUG:
 echo "$0 $*"
+which python3
 
 # Uncomment following line(s) for tracing:
 # - xtrace shows arg expansion (and often is sufficient)
@@ -32,13 +33,13 @@ echo "$0 $*"
 # in $@.
 # NOTE: See sync-loop.sh for an example.
 #
-if [[ ("$1" = "") || ("$1" = "--help") ]]; then
+if [[ ("$1" == "") || ("$1" == "--help") ]]; then
     script=$(basename "$0")
     ## TODO: if [ $script ~= *\ * ]; then script='"'$script'"; fi
     ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--TODO] [--trace] [--help] [--]"
+    echo "Usage: $0 [--trace] [--help] [--]"
     echo ""
     echo "Examples:"
     echo ""
@@ -48,8 +49,8 @@ if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     echo ""
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."
-    ## TODO: add more notes
-    ## echo ""
+    echo "- By default only includes text files with 'notes' in name, along with adhoc filters."
+    echo "- Env vars: ALL_TEXT, CRONTAB, SRC_DIR, TRACE, VERBOSE, FIND_COMMAND_OPTIONS, FIND_GLOBAL_OPTIONS."
     echo ""
     exit
 fi
@@ -59,13 +60,14 @@ fi
 #
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 trace=0
-while [ "$moreoptions" = "1" ]; do
-    # TODO : add real options
-    if [ "$1" = "--trace" ]; then
+while [ "$moreoptions" == "1" ]; do
+    if [ "$1" == "--trace" ]; then
 	trace=1
-    elif [ "$1" = "--fubar" ]; then
-	echo "fubar"
-    elif [[ ("$1" = "--") || ("$1" = "-") ]]; then
+    elif [ "${CRONTAB:-0}" == "1" ]; then
+        # TEMP: ignore options if invoked via crontab (requires env option)
+        echo "Warning: ignoring options ($*)"
+	break
+    elif [[ ("$1" == "--") || ("$1" == "-") ]]; then
 	break
     else
 	echo "ERROR: Unknown option: $1";
@@ -91,10 +93,10 @@ done
 # Enable tracing
 # note: done after alias files sourced to avoid exxtraenous tracing
 # TODO2: make note of TRACE and other env. var usage
-if [[ ("$trace" = "1") || ("${TRACE:-0}" = "1") ]]; then
+if [[ ("$trace" == "1") || ("${TRACE:-0}" == "1") ]]; then
     set -o xtrace
 fi
-if [ "${VERBOSE:-0}" = "1" ]; then
+if [ "${VERBOSE:-0}" == "1" ]; then
     set -o verbose
 fi
 
@@ -131,17 +133,16 @@ fi
 find_command_options="${FIND_COMMAND_OPTIONS:-}"
 find_global_options="${FIND_GLOBAL_OPTIONS:-}"
 # shellcheck disable=SC2086
-if [ "${ALL_TEXT:-0}" = "1" ]; then
+if [ "${ALL_TEXT:-0}" == "1" ]; then
     # TODO: rework so that pattern-type options specified individially (e.g., LOG_FILES, ADHOC_NOTES, etc)
-    find $find_command_options "${SRC_DIR:-.}" $find_global_options \(  -iname '*.txt' -o -iname '*.text' \) 2> "$new_base.files.log" | egrep -iv '/(backup|old|temp)/' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
+    find $find_command_options "${SRC_DIR:-.}" $find_global_options \(  -iname '*.txt' -o -iname '*.text' \) 2> "$new_base.files.log" | $EGREP -iv '/(backup|old|temp)/' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
 else
     # Note: Filters log files starting with _ unless adhoc in the name (e.g., /home/tohara/config/_consolidate-experiment-notes-05apr23.log).
     # This uses the perl-style zero-width negative lookahead regex.
-    ## OLD: find "${SRC_DIR:-.}" \( -iname '*adhoc*[0-9][0-9]*.txt*' -o -iname '*adhoc*[0-9][0-9]*.log*' -o -iname '*-notes*.txt' -o -iname '*-notes*.list' -o -iname '*-notes*.log' \) 2> "$new_base.files.log" | egrep -iv '/(backup|old|temp)/' | egrep -iv '/_[^\/]+(?!adhoc)[^\/]+.log' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
-    find $find_command_options "${SRC_DIR:-.}" $find_global_options \( -iname '*adhoc*[0-9][0-9]*.txt' -o -iname '*adhoc*[0-9][0-9]*.list' -o -iname '*adhoc*[0-9][0-9]*.log' -o -iname '*-notes*.txt' -o -iname '*-notes*.list' -o -iname '*-notes*.log' \) 2> "$new_base.files.log" | egrep -iv '/(backup|old|temp)/' | egrep -iv '/_[^\/]+(?!adhoc)[^\/]+.log' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
+    find $find_command_options "${SRC_DIR:-.}" $find_global_options \( -iname '*adhoc*[0-9][0-9]*.txt' -o -iname '*adhoc*[0-9][0-9]*.list' -o -iname '*adhoc*[0-9][0-9]*.log' -o -iname '*-notes*.txt' -o -iname '*-notes*.list' -o -iname '*-notes*.log' \) 2> "$new_base.files.log" | $EGREP -iv '/(backup|old|temp)/' | $EGREP -iv '/_[^\/]+(?!adhoc)[^\/]+.log' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
 fi
 ## TODO: if [ -z "$new_base.files.list" ]; then
-if [ "$(wc -l < "$new_base.files.list")" = "0" ]; then
+if [ "$(wc -l < "$new_base.files.list")" == "0" ]; then
     echo "Error: problem finding note files to merge" 1>&2
     exit
 fi
@@ -158,7 +159,6 @@ chmod ugo-w $new_base*;
 
 # Rename existing master note files
 # TODO: exclude cases already with timestamps
-## OLD: rename-with-file-date "$base.files.list" "$base.list" "$base.log" "$base.files.log"
 rename-with-file-date "$base.files.list" "$base.files.log" "$base.list" "$base.list.log" 
 ## TODO: rename-with-file-date "$base"*[a-z]
 
@@ -166,4 +166,4 @@ rename-with-file-date "$base.files.list" "$base.files.log" "$base.list" "$base.l
 # TODO1: fix following
 #    "_master-note-info.list.06apr23.log" already exists! not mv'ing "_new-_master-note-info.list.06apr23.log" "_master-note-info.list.06apr23.log"
 # shellcheck disable=SC2046
-rename-files "$new_base" "$base" $(ls "$new_base"* | egrep -v "\d{2}\w+\d{2}")
+rename-files "$new_base" "$base" $(ls "$new_base"* | $EGREP -v "\d{2}\w+\d{2}")

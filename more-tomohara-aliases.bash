@@ -3,6 +3,9 @@
 #
 # Note: OBSOLETE and besides TOM-IDIOSYNCRATIC
 #
+# TODO3: Move into tomohara-proper-aliases.bash.
+# TODO2: * See if other macros have errors like the old git-blame-plus one (pre-2025) not outputting stderr to the log. This was compounded by pager (i.e., effectively making "cannot overwrite existing file" hidden, unless cmd-trace used).
+#
 
 function derive-ngram-frequency() {
     file="$1"
@@ -85,9 +88,12 @@ function remove-extension { echo "$1" | perl -pe 'chomp; s/\.[^\.]+$/$1\n/;'; }
 function git-blame-plus { 
     local file="$1"
     local log
+    local base
+    ## OLD: base="$(remove-extension "$file")"
+    base="$(basename "$(remove-extension "$file")")"
     log="$TMP/$base.$(T).blame.list"
-    base="$(remove-extension "$file")"
-    git blame "$file" > "$log"
+    ## BAD: git blame "$file" > "$log"
+    git blame "$file" > "$log" 2>&1
     $PAGER "$log"
 }
 # bluetooth-indicator(): pull up Ubuntu system tray item for bluetooth

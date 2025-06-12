@@ -4,17 +4,15 @@
 #    https://github.com/nektos/act
 # It builds a Docker image and runs a Github Actions workflow locally.
 #
-# It also has support for using directly via docker. This includes
+# It also supports running the actions directly via docker. This includes
 # building the image and running via docker, done separately to support
-# inspection.
-# optio clones a GitHub repository, generates a pip requirements file,
-# builds a Docker image, and runs a Github Actions workflow locally.
+# inspection of the image.
 #
 # Note:
 # - There are some old options such as for cloning repository and
 #   generating requirements.
 # - When running under a Mac M1 the architecture needs to be specified to x64_64 (amd).
-#   This is a no-op otherwise (e.g., under Linux) as x64_64 is used by defauly.
+#   This is a no-op otherwise (e.g., under Linux) as x64_64 is used by default.
 # - Selective shellcheck whitelisting:
 #   SC2086: Double quote to prevent globbing and word splitting
 #
@@ -22,7 +20,7 @@
 # - *** Changes need to be synchronized in 3 places: Dockerfile, local-workflow.sh, and .github/workflow/*.yml!
 #
 # TODO:
-# - Use environment file to simplify passing pass environment variables:
+# - Use an environment/config file to simplify passing environment variables:
 #   See https://docs.docker.com/engine/reference/commandline/run
 #   and act man page (https://github.com/nektos/act/blob/master/cmd/root.go).
 #
@@ -39,9 +37,8 @@
 # $ docker images
 # ...
 # shell-scripts-dev      latest      e5423ec78b75   7 hours ago   1.76GB
-# 
 #
-
+#
 
 # Helpers
 #
@@ -53,6 +50,16 @@ function to_bool {
     else
 	echo "false";
     fi;
+}
+#
+# trace-vars(var, ...): trace each VAR in command line
+# note: output format: VAR1=VAL1; ... VARn=VALn;
+function trace-vars {
+    local var
+    for var in "$@"; do
+        echo -n "$var=$(eval echo "\${$var}"); "
+    done
+    echo
 }
 
 # Variables
@@ -80,6 +87,14 @@ RUN_WORKFLOW="${RUN_WORKFLOW:-1}"
 WORKFLOW_FILE="${WORKFLOW_FILE:-act.yml}"
 RUN_BUILD_CACHELESS="${RUN_BUILD_CACHELESS:-0}"
 # TODO3: put all env. init up here for clarity
+#   CLONE_REPO, AUTO_REQS, etc.
+if [ "$DEBUG_LEVEL" -ge 4 ]; then
+    echo "in $0 $* [$(date)]"
+    ## OLD: source "${TOM_BIN:-/home/tomohara/bin}/all-tomohara-aliases-etc.bash"
+    echo "Before argument parsing:"
+    trace-vars IMAGE_NAME ACT_PULL LOCAL_REPO_DIR DEBUG_LEVEL GIT_BRANCH BUILD_OPTS USER_ENV
+    trace-vars ACT_JSON RUN_BUILD RUN_DOCKER RUN_WORKFLOW WORKFLOW_FILE RUN_BUILD_CACHELESS
+fi
 
 # Display script usage
 usage() {
@@ -143,12 +158,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Trace out main environment overrides
-#   CLONE_REPO, AUTO_REQS, RUN_BUILD, BUILD_OPTS, RUN_WORKFLOW, RUN_OPTS, WORKFLOW_FILE
 if [ "$DEBUG_LEVEL" -ge 4 ]; then
-    echo "in $0 $* [$(date)]"
-    src_dir=$(dirname "${BASH_SOURCE[0]}")
-    source "${TOM_BIN:-"$src_dir"}/all-tomohara-aliases-etc.bash"
+    echo "After argument parsing:"
     trace-vars IMAGE_NAME ACT_PULL LOCAL_REPO_DIR DEBUG_LEVEL GIT_BRANCH BUILD_OPTS USER_ENV
+    trace-vars ACT_JSON RUN_BUILD RUN_DOCKER RUN_WORKFLOW WORKFLOW_FILE RUN_BUILD_CACHELESS
 fi
 
 # Set bash regular and/or verbose tracing
@@ -164,6 +177,18 @@ fi
 src_dir=$(dirname "${BASH_SOURCE[0]}")
 command cd "$src_dir"
 
+# Do sanity checks for potential problems
+## TODO1: fix bug with image selection blocking progress (set default and disable interactive mode)
+##   choose the default image you want to use with act
+if [[ ("$RUN_WORKFLOW" == "1") && (! -e ~/.actrc) ]]; then
+    echo "Error: run act to configure default image in ~/.actrc"
+    exit
+fi
+if [ "" = "$(groups | grep docker)" ]; then
+    echo "Error: you need to be in the docker group to use act (or docker)"
+    exit
+fi
+
 # Optionally clone the GitHub repository into temp. dir
 # note: normally skipped as local workflows intended for testing before checkin
 if [ "${CLONE_REPO:-0}" = "1" ]; then
@@ -174,7 +199,8 @@ if [ "${CLONE_REPO:-0}" = "1" ]; then
 fi
 
 # Optionally, generate pip requirements file
-# Note: normally uses ./requirements.txt (n.b., avoid extraneous modules in one off scripts)
+# Note: normally uses ./requirements.txt (n.b., avoids extraneous modules in one off scripts);
+# also, pipreqs no longer installed by default due to Docker issue.
 export REQUIREMENTS="$LOCAL_REPO_DIR/requirements.txt"
 if [ "${AUTO_REQS:-0}" = "1" ]; then
     export REQUIREMENTS="$PWD/requirements.auto"
@@ -182,51 +208,37 @@ if [ "${AUTO_REQS:-0}" = "1" ]; then
     pipreqs --print "$LOCAL_REPO_DIR" > "$REQUIREMENTS"
 fi
 
-
-## OLD: Use of seperate options for RUN_BUILD and RUN_BUILD_CACHELESS
-# # Build the Docker image
-# if [ "${RUN_BUILD}" = "1" ]; then
-#     echo "Building Docker image: $IMAGE_NAME"
-#     # note: maldito docker doesn't support --env for build, just run
-#     # Also, --build-arg misleading: see
-#     #    https://stackoverflow.com/questions/42297387/docker-build-with-build-arg-with-multiple-arguments
-#     # shellcheck disable=SC2086
-#     docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --tag "$IMAGE_NAME" .
-# fi
-
-# # Build the Docker image cacheless (using --no-cache option)
-# if [ "${RUN_BUILD_CACHELESS}" = "1" ]; then
-#     echo "Building Docker image (no-cache): $IMAGE_NAME"
-#     docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS --no-cache -t "$IMAGE_NAME" .
-# fi
-
+# Build the Docker image
 if [ "${RUN_BUILD}" = "1" ] || [ "${RUN_BUILD_CACHELESS}" = "1" ]; then
     echo "Building Docker Image: $IMAGE_NAME"
-    cache_option="--tag" 
-    
+    cache_option="--tag"
+    # note: maldito docker doesn't support --env for build, just run
+    # Also, --build-arg misleading: see
+    #    https://stackoverflow.com/questions/42297387/docker-build-with-build-arg-with-multiple-arguments
     if [ "${RUN_BUILD_CACHELESS}" = "1" ]; then
         echo "  (cacheless option enabled)"
         cache_option="--no-cache -t"
     fi
-
+    #
+    # shellcheck disable=SC2086
     docker build --build-arg "GIT_BRANCH=$GIT_BRANCH" --platform linux/x86_64 $BUILD_OPTS ${cache_option} "$IMAGE_NAME" .
 fi
 
-
 # Run the Github Actions workflow locally
 # TODO1: get this to retain image (to allow for post-mortem review)
-if [ "${RUN_WORKFLOW}" = "1" ]; then
-    file="${WORKFLOW_FILE}"
-    echo "Running Github Actions locally w/ $file"
+if [[ "$RUN_WORKFLOW" == "1" ]]; then
+    act="${ACT_PROGRAM:-act}"
+    file="$WORKFLOW_FILE"
+    echo "Running Github Actions locally via $act w/ $file"
+
     ## TODO: GITHUB_TOKEN="$(gh auth token)" or set via environment
     # Note: Unfortunately, the environment setting is not affecting the docker
     # invocation. A workaround is to modify the 'Run tests' steps in the
     # workflow configuration file (e.g., .github/workflows/debug.yml).
-    
-    act="${ACT_PROGRAM:-act}"    
-    
-    ## TODO2: fix environment (see tests/run_tests.bash for workaround)
+    ## TODO2: fix environment (see tests/run_tests.bash for workaround
+    ## via temporary settings script)
     # note: ACT_JSON can be used to disable act-specific flags (e.g., to enable runner matrix)
+    misc_args=()
     json="${ACT_JSON}"
     if [ "$json" != "" ]; then misc_args+=(--eventpath ./.github/workflows/"$json"); fi;
     # shellcheck disable=SC2086
@@ -236,7 +248,7 @@ if [ "${RUN_WORKFLOW}" = "1" ]; then
 fi
 
 # Run via docker directly
-if [ "${RUN_DOCKER}" = "1" ]; then
+if [[ "$RUN_DOCKER" == "1" ]]; then
     echo "Running Tests via Docker"
     # Convert VAR1=val1 VAR2=val2 ... to "--env VAR1=val1 --env VAR2=val2 ..."
     user_env_spec=$(echo " $USER_ENV" | perl -pe 's/ (\w+=)/ --env $1/g;')

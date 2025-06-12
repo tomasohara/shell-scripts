@@ -21,7 +21,7 @@ function full-usage {
     echo "Examples:"
     echo ""
     # HACK: Uses Usage in filename so shows up in brief usage
-    echo "NUM_REVISIONS=5 $script Usage.txt /tmp/git-versions"
+    echo "NUM_REVISIONS=5 $script --human Usage.txt /tmp/git-versions"
     echo ""
     echo "PRETTY=1 VERBOSE=1 $0 Dockerfile"
     echo ""

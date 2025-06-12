@@ -12,7 +12,7 @@
 #     if [[ $var =~ pattern ]]; then STMT; fi       note: requires Bash 3.0+
 #        where pattern is unquoted egrep regex (n.b., use .*.ext not *.ext)
 #     if (( ARITH_EXPR )); then STMT; fi
-#     if [ -s "file" ]; then ...; fi
+#     if [ -s "file" ]; then ...; fi    where -s is non-empty test (see below)
 #     case EXPR in PATTERN_a) STMT_a;; PATTERN_b) STMT_b;; ... esac
 #     for name [in words ...]; do commands; done
 #     for (( expr1 ; expr2 ; expr3 )) ; do commands ; done
@@ -41,12 +41,13 @@
 #   - comparison operators:
 #         -[eg|ne|lt|le|gt|ge]      if [ $num -eq 3 ]; then echo "tres"; fi
 #   - array variables
-#         list=(v1 value2 ... vN)   initialize
-#         ${#list[@]}               number of elements (i.e., length)
-#         ${list[1]}                second element
-#         ${list[*]}                all elements
-#         "${list[@]}"              likewise all but individually quoted (a la "$@")
-#         list+=(value)             append value
+#         arr=(v1 value2 ... vN)    initialize
+#         ${#arr[@]}                number of elements (i.e., length)
+#         ${arr[1]}                 second element
+#         ${arr[*]}                 all elements
+#         "${arr[@]}"               likewise all but individually quoted (a la "$@")
+#         arr+=(value)              append value
+#         "${arr:-default}"         default value; local dirs=("${@:-.}")
 #   - conditional expression (a la C ternary operator (test ? true-result : false-result)
 #     note: approximation via https://stackoverflow.com/questions/3953645/ternary-operator-in-bash
 #         $([ test ] && echo "true-result" || echo "false-result")
@@ -56,11 +57,13 @@
 #     Preferred for arithmetic: see https://wiki.bash-hackers.org/commands/builtin/let.
 #   - early return
 #      return                       just inside functions
-#      exit                         early script termination; avoid in functions or if script sourced
+#      -or- exit                    early script termination; *** avoid in functions or if script sourced ***
 #   - history mechanism
 #     !?string[?]                   find last command with string
 #  - local variable declaration     note: space-separated not comma; simplified
 #      local var1[=val1] [var2[=val2] ...]
+#  - global variable declaration
+#      declare -g variable
 #  - common file tests
 #      -s file                      non-empty file (n.b., nothing like csh's -z)
 #      -e file                      file exists
@@ -70,8 +73,16 @@
 #      -n string                    whether string is non-empty
 #      -z string                    whether string is empty
 #  - here-documents
-#      <<<END ... END               multiple line using ...
-#      <<<"text"                    single line using TEXT
+#      <<END ... END                multiple line using ... (i.e., "here docs")
+#      <<<"text"                    single line using TEXT (i.e., "here string")
+#  - sequence expression
+#      {n..m}                       echo "digits:" {0..9}; echo "letters: " {a..z}
+#  - advanced redirection
+#      &>                           same as `> ... 2>&1`
+#  - common or useful bash arguments
+#     -i -c                         run command as if interactive invocation
+#     shopt -s expand_aliases       for alias support in scripts
+#     TODO3: flesh out
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
@@ -98,21 +109,17 @@
 # - value=${value@L}                    # make lowercase
 #
 
-# Uncomment following line(s) for tracing:
+# Set bash regular and/or verbose tracing
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #
-## DEBUG:
-## echo "in ${BASH_SOURCE[0]}"
-## echo "$@"
-## DETAILED: set -o xtrace
-## VERBOSE: set -o verbose
-#
-# Set bash regular and/or verbose tracing
-if [ "${TRACE:-0}" = "1" ]; then
+if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+    echo "$0 $*"
+fi
+if [[ "${TRACE:-0}" == "1" ]]; then
     set -o xtrace
 fi
-if [ "${VERBOSE:-0}" = "1" ]; then
+if [[ "${VERBOSE:-0}" == "1" ]]; then
     set -o verbose
 fi
 
@@ -121,11 +128,11 @@ fi
 # in $@.
 # NOTE: See sync-loop.sh for an example.
 #
-if [ "$1" = "" ]; then
+if [[ "$1" == "" ]]; then
     script=$(basename "$0")
     ## TODO: remove following which is only meant for when ./template.bash run
-    if [ "$script" = "template.bash" ]; then echo "Warning: not intended for standalone usage"; fi;
-    ## TODO: if [ $script ~= *\ * ]; then script='"'$script'"; fi
+    if [[ "$script" == "template.bash" ]]; then echo "Warning: not intended for standalone usage"; fi;
+    ## TODO: if [[ $script ~= *\ * ]]; then script='"'$script'"; fi
     ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
@@ -151,14 +158,15 @@ fi
 # TODO: set getopt-type utility
 #
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
-while [ "$moreoptions" = "1" ]; do
+while [[ "$moreoptions" == "1" ]]; do
     # TODO : add real options
-    if [ "$1" = "--trace" ]; then
+    if [[ "$1" == "--trace" ]]; then
         set -o xtrace
-    elif [ "$1" = "--TODO-fubar" ]; then
+    elif [[ "$1" == "--TODO-fubar" ]]; then
         ## TODO: implement
         echo "TODO-fubar"
-    elif [[ ("$1" = "--") || ("$1" = "-") ]]; then
+    elif [[ ("$1" == "--") || ("$1" == "-") ]]; then
+        shift
         break
     else
         echo "Error: Unknown option: $1";
@@ -167,5 +175,7 @@ while [ "$moreoptions" = "1" ]; do
     shift;
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 done
+# TODO: add positional arg assignment (delete if not planned)
+## todo_arg1="$1"
 
 # TODO: Do whatever

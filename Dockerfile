@@ -20,13 +20,16 @@
 #
 # Warning:
 # - *** Changes need to be synchronized in 3 places: Dockerfile, local-workflow.sh, and .github/workflows/*.yml!
+# - Python scripts should be invoked with python3 due to quirk with distribution archive
+#   lacking plain python executable (unlike anaconda).
 #
 
 
 # Use the GitHub Actions runner image with Ubuntu
-# NOTE: Uses older 20.04 both for stability and for convenience in pre-installed Python downloads (see below).
 # See https://github.com/catthehacker/docker_images
-FROM catthehacker/ubuntu:act-20.04
+## OLD: FROM catthehacker/ubuntu:act-20.04
+ARG UBUNTU_VERSION="22.04"
+FROM catthehacker/ubuntu:act-${UBUNTU_VERSION}
 
 # Set default debug level (n.b., use docker build --build-arg "arg1=v1" to override)
 # Also optionally set the regex of tests to run.
@@ -74,13 +77,22 @@ ARG PYTHON_VERSION=3.11.4
 ## TEST: ARG PYTHON_TAG="117929"
 ARG PYTHON_TAG="5199054971"
 #
-RUN if [ "$PYTHON_VERSION" != "" ]; then                                                \
-       wget -qO /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-${PYTHON_TAG}/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz" && \
-       mkdir -p /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 &&                    \
-       tar -xzf /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz                    \
-           -C /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 --strip-components=1 && \
-       echo TODO: rm /tmp/python-${PYTHON_VERSION}-linux-20.04-x64.tar.gz;              \
-    fi
+## TODO2:
+## RUN if [ "$PYTHON_VERSION" != "" ]; then                                                \
+##        wget -qO /tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-${PYTHON_TAG}/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz" && \
+##        mkdir -p /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 &&                    \
+##        tar -xzf /tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz                    \
+##            -C /opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64 --strip-components=1 && \
+##        echo TODO: rm /tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz;              \
+##     fi
+##
+## TEMP:
+RUN wget -qO "/tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz" "https://github.com/actions/python-versions/releases/download/${PYTHON_VERSION}-${PYTHON_TAG}/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz"
+RUN mkdir -p "/opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64"
+RUN tar -xzf "/tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz" -C "/opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64" --strip-components=1
+RUN echo TODO: rm "/tmp/python-${PYTHON_VERSION}-linux-${UBUNTU_VERSION}-x64.tar.gz";
+##
+## TODO2: add variable for basenames, /opt dir, /tmp dir, etc.
 
 # Set environment variables to use the installed Python version as the default
 ENV PATH="/opt/hostedtoolcache/Python/${PYTHON_VERSION}/x64/bin:$WORKDIR:$WORKDIR/tests:${PATH}"
@@ -97,8 +109,9 @@ ARG REQUIREMENTS=$WORKDIR/requirements.txt
 COPY requirements.txt $REQUIREMENTS
 
 # Install the project's dependencies
+## TODO3: install wheel and other optional packages used by pip
 RUN if [ "$PYTHON_VERSION" != "" ]; then                                                \
-        pip install --verbose --no-cache-dir --requirement $REQUIREMENTS;               \
+        pip3 install --verbose --no-cache-dir --requirement $REQUIREMENTS;               \
     fi
 
 # Display environment (e.g., for tracking down stupid pip problems)
@@ -106,7 +119,7 @@ RUN printenv | sort
 
 # Add local version of mezcla
 # ex: DEBUG_LEVEL=4 GIT_BRANCH=aviyan-dev local-workflows.sh
-RUN if [ "$GIT_BRANCH" != "" ]; then echo "Installing mezcla@$GIT_BRANCH"; pip install --verbose --no-cache-dir git+https://github.com/tomasohara/mezcla@$GIT_BRANCH; fi
+RUN if [ "$GIT_BRANCH" != "" ]; then echo "Installing mezcla@$GIT_BRANCH"; pip3 install --verbose --no-cache-dir git+https://github.com/tomasohara/mezcla@$GIT_BRANCH; fi
 
 # Clean up unnecessary files
 RUN apt-get autoremove -y && \

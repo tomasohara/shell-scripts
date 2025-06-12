@@ -372,9 +372,9 @@ class Batspp(Main):
         """Process arguments"""
 
         # Check the command-line options
-        self.testfile     = self.get_parsed_argument(TESTFILE, "")
-        self.output       = self.get_parsed_argument(OUTPUT, "")
-        self.source       = self.get_parsed_argument(SOURCE, "")
+        self.testfile     = self.get_parsed_argument(TESTFILE, self.testfile)
+        self.output       = self.get_parsed_argument(OUTPUT, self.output)
+        self.source       = self.get_parsed_argument(SOURCE, self.source)
         self.jupyter      = self.get_parsed_option(JUPYTER, self.jupyter)
         self.force        = self.get_parsed_option(FORCE, self.force)
         self.verbose      = self.get_parsed_option(VERBOSE, system.getenv_bool("VERBOSE"))

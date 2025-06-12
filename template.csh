@@ -9,9 +9,13 @@
 ## - Add brief meta-commment comment (e.g., "## comments are meta comments for version control, etc.").
 #
 
-# Uncomment (or comment) the following for enabling (or disabling) tracing
-## echo "$*"
-## set echo=1
+# Set csh tracing (TODO3: simplify test)
+if ($?TRACE) then
+    if ("$TRACE" == "1") then
+        echo "$*"
+        set echo = 1
+    ebdif
+endif
 
 # Parse command-line arguments
 ## TODO: Revise with respect to more current scripts (e.g., start.sh).

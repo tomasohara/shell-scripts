@@ -1,9 +1,9 @@
-#! /bin/env bash
+#! /usr/bin/env bash
 #
 # Loads aliases to be tested via the BatsPP infrastructure, along
 # with convenience aliases for the tests. This works by loading
 # the master alias file (e.g., all-tomohara-aliases-etc.bash),
-# and then adds addition aliases or functions.
+# and then defines additional aliases or functions.
 #
 # Simple Usage:
 #   export TOM_BIN=/home/joe/shell-scripts;
@@ -26,29 +26,28 @@
 #...............................................................................
 # Initialization
 
-## TODO3:
-## ## NOTE: xtrace support cuases problems when used as via BASH_ENV
-## ## to ensure loaded instead of ~/.bashrc for use with Jupyter notenooks
-##
-## # Set bash regular and/or verbose tracing
-## # note: tracing off by default unless active for current shell
-## was_tracing=false
-## if [ "1" = "$(set -o | grep -v '^xtrace.*on')" ]; then 
-##     was_tracing=true
-## fi
-## show_tracing="$was_tracing"
-## if [ "${TRACE_SOURCE:-0}" = "1" ]; then
-##     show_tracing=true
-##     set -o xtrace
-## fi
-## if [ "${VERBOSE_SOURCE:-0}" = "1" ]; then
-##     set -o verbose
-## fi
-## 
-## # Source the files with definitions for aliases, etc.
-## # note: normally this is done without tracing
-## shopt -s expand_aliases
-## $show_tracing && set -o xtrace
+## NOTE: xtrace support cuases problems when used as via BASH_ENV
+## to ensure loaded instead of ~/.bashrc for use with Jupyter notenooks
+
+# Set bash regular and/or verbose tracing
+# note: tracing off by default unless active for current shell
+was_tracing=false
+if [ "1" = "$(set -o | grep -v '^xtrace.*on')" ]; then 
+    was_tracing=true
+fi
+show_tracing="$was_tracing"
+if [ "${TRACE_SOURCE:-0}" = "1" ]; then
+    show_tracing=true
+    set -o xtrace
+fi
+if [ "${VERBOSE_SOURCE:-0}" = "1" ]; then
+    set -o verbose
+fi
+
+# Source the files with definitions for aliases, etc.
+# note: normally this is done without tracing
+shopt -s expand_aliases
+$show_tracing && set -o xtrace
 
 #-------------------------------------------------------------------------------
 # Load macros to be tested
@@ -78,9 +77,7 @@ source "$this_source_dir/../all-tomohara-aliases-etc.bash"
 #-------------------------------------------------------------------------------
 # Cleanup
 
-## TODO3:
-## ## NOTE: see note about xtrace above
-## # Re-enable tracing if enabled at start
-## $was_tracing || set - -o xtrace
+# Disable tracing unless enabled prior to invocation
+$was_tracing || set - -o xtrace
 
 ## DEBUG: echo "out ${BASH_SOURCE[*]}"
