@@ -364,31 +364,46 @@ def main():
             if has_error:
                 # Print before context lines
                 for ctx_num, ctx_line in before_context:
-                    print(f"{ctx_num:8} {ctx_line}")
-
+                    ## OLD: Parity with Perl version to match output
+                    # print(f"{ctx_num:8} {ctx_line}")
+                    print(f"{ctx_num:<8} {ctx_line}")
+                    
                 # Print error line with >>> <<<
-                print(f"{line_num:8} >>>{line}<<<")
+                # print(f"{line_num:8} >>> {line} <<<")
+                print(f"{line_num:<4} >>> {line} <<<")
+
                 if matching:
                     print(match_info)
 
-                # Print after-context lines
+                ## OLD: Redundant code, messed with -warnings output
+                ## Print after-context lines
                 for k in range(1, after + 1):
                     if i + k < n_lines:
                         next_num, next_line = lines[i + k]
-                        print(f"{next_num:8} {next_line}")
+                        print(f"{next_num:<8} {next_line}")
+                    else:
+                        break
 
-                # Update before_context with after lines for future context
+                # Skip the after-context lines we just printed
+                i += min(after, n_lines - i - 1)
+                
+                # if after >= 1 and i + 1 < n_lines:
+                #     next_num, next_line = lines[i + 1]
+                #     print(f"{next_num:<8} {next_line}")
+                #     i += 1                        
+                
+                # DO NOT repopulate before_context with after-lines (Perl does not do this)
                 before_context = []
-                for k in range(1, after + 1):
-                    if i + k < n_lines:
-                        next_num, next_line = lines[i + k]
-                        before_context.append((next_num, next_line))
+                ## OLD: Redundant code, messed with -warnings output
+                # for k in range(1, after + 1):
+                #     if i + k < n_lines:
+                #         next_num, next_line = lines[i + k]
+                #         before_context.append((next_num, next_line))
             else:
                 # Add current line to before context
                 before_context.append((line_num, line))
                 if len(before_context) > before:
                     before_context.pop(0)
-
             i += 1
 
         if file_obj is not sys.stdin:
