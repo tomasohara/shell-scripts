@@ -9,6 +9,9 @@
 # Tom's typical usage (n.b., idiosyncratic settings):
 #   SOURCE_SETTINGS=1 source "$HOME/bin/all-tomohara-aliases-etc.bash"
 #
+# Debugging usage:
+#   TRACE_SOURCE=1 VERBOSE_SOURCE=1 source ~/bin/all-tomohara-aliases-etc.bash > ~/bin/all-tomohara-aliases-etc.debug.log 2>&1
+#
 # Note:
 # - Omits tomohara-settings.bash unless SOURCE_SETTINGS=1,
 # - The env.options are TRACE_/VERBOSE_SOURCE rather than TRACE/VERBOSE in
