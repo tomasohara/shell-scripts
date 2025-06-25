@@ -20,6 +20,10 @@
 #...............................................................................
 # Notes:
 #
+# - Aliases names git-xyz-plus add funcitonality to the underlying command,
+#   such as to supply default arguments (e.g., --name-status for log).
+# - Those named git-xyz-alias are just thin wrappers around the command,
+#   such as to save output to file (e.g., _git-status-ddMMyy-hhmm-hex.log).
 # - [Deprecated] Credentials can be taken from project specific file (_my-git-credentials-etc.bash.list)
 #
 #     GIT_USER=username
@@ -464,7 +468,8 @@ function invoke-git-command {
 # TODO: git-command => git-command-alias
 alias git-command='invoke-git-command'
 ## TODO3: git-push-plus => git-push-alias (as simple wrapper)
-alias git-push-plus='invoke-git-command push'
+## OLD: alias git-push-plus='invoke-git-command push'
+alias git-push-alias='invoke-git-command push'
 alias git-pull-alias='invoke-git-command pull'
 
 # Misc git commands (redirected to log file)
