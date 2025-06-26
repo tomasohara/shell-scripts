@@ -102,6 +102,9 @@ cond-export SKIP_DEFAULT_BASHRC 1
 cond-export SKIP_TAB_COMPLETION 1
 # Invoke image viewer after renaming snapshots
 cond-export RENAME_SNAPSHOT_PREVIEW 1
+# Get rid of (mostly) nitpicking shellcheck warnings
+# See shell-check function comments for synopsis.
+cond-export SHELL_CHECK_EXCLUDE "SC1090,SC1091,SC2004,SC2009,SC2012,SC2119,SC2120,SC2129,SC2155,SC2164,SC2181,SC2196,SC2219,SC2230"
 
 # Get idiosyncratic aliases
 conditional-source "$TOM_BIN/tomohara-proper-aliases.bash"
@@ -111,6 +114,10 @@ cond-export XTERM_SHOW_PID 1
 
 # User-specific mount directory
 cond-export MNT /media/"$USER"
+
+# Use native KDE open dialogs (e.g., for recent files feature)
+# TODO2: put in user-specific settings (e.g., ~/.local/sell-scripts-settings.bash)
+cond-export GTK_USE_PORTAL 1
 
 # Emacs stuff
 # use emacs with crontab
