@@ -88,7 +88,7 @@ def run_tests(thresholds):
                             collect_result.stdout, flags=my_re.IGNORECASE):
                 summary_total_tests = system.to_int(my_re.group(1))
             debug.trace_expr(5, total_tests, summary_total_tests)
-            debug.assertion(total_tests == summary_total_tests)
+            debug.assertion(total_tests == summary_total_tests, level=5)
             total_tests = (summary_total_tests if (total_tests == 0) else total_tests)
 
         # Run tests for the test
