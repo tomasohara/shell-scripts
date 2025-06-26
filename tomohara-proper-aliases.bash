@@ -10,7 +10,8 @@
 #   SC2016 (info): Expressions don't expand in single quotes
 #   SC2027 (warning): The surrounding quotes actually unquote this.
 #   SC2046: Quote this to prevent word splitting
-#   SC2086: Double quote to prevent globbing)
+#   SC2068: Double quote array expansions to avoid re-splitting elements
+#   SC2086: Double quote to prevent globbing
 #   SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?.
 #
 
@@ -29,7 +30,10 @@ alias git-files-changed=git-diff-list
 alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
 function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
+alias git-push='git-push-alias'
 ## TODO: alias git-X-='git-X-plus'
+## -or- TODO: alias git-X-alias='invoke-git-command pull'
+
 #
 # Github
 alias git-hide='git update-index --skip-worktree'
@@ -517,12 +521,17 @@ function shell-check-stdin {
     ## DEBUG: echo "in shell-check-stdin: args='$*'"
     echo "Enter snippet lines and then ^D"
     shell-check -
-    # shellcheck disable=SC2181
+    ## OLD: # shellcheck disable=SC2181
     [[ $? -eq 0 ]] && echo "shellcheck OK"
 }
 #
 # shell-check-loose(): run shellcheck with relaxed rules
-simple-alias-fn shell-check-loose 'shellcheck --exclude="SC2046,SC2086"'
+## OLD: simple-alias-fn shell-check-loose 'shellcheck --exclude="SC2046,SC2086"'
+cond-export LOOSE_SHELL_CHECK_EXCLUDE "SC2046,SC2068,SC2086"
+simple-alias-fn shell-check-loose 'shellcheck --exclude="$LOOSE_SHELL_CHECK_EXCLUDE"'
+function shell-check-stdin-loose {
+    SHELL_CHECK_EXCLUDE="$LOOSE_SHELL_CHECK_EXCLUDE,$SHELL_CHECK_EXCLUDE" shell-check-stdin "$@"
+}
 
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
@@ -595,9 +604,15 @@ function reset-prompt-label {
     fi
     reset-prompt "$label $old_symbol"
 }
-# reset-prompt-label-here(): sets prompt label to dir basename with existing PS_symbol proper (e.g., "alt $" => "bin $")
+# reset-prompt-here(): sets prompt label to dir basename with existing PS_symbol proper (e.g., "alt $" => "bin $")
 # shellcheck disable=SC2016
-alias-fn reset-prompt-label-here 'reset-prompt-label "$(basename $PWD)"'
+alias-fn reset-prompt-here 'reset-prompt-label "$(basename $PWD)"'
+# reset-prompt-alt/NOTES/...(): resets prompt label to affix
+for label in alt NOTES; do 
+    eval "alias reset-prompt-$label=\"reset-prompt-label $label\""
+done
+## TODO4: rename alt-xterm-title to alt-xterm-title-old)
+alias alt-xterm-title-new='reset-prompt-label alt'
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
 function pristine-bash {
@@ -653,6 +668,7 @@ function rename-last-snapshot {
 #
 # fix-transcript-timestamp(file): put text on same line in YouTube transcripts in FILE
 alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
+alias youtube-transcript-fix=fix-transcript-timestamp
 # youtube-transcript(url, file): download YoutTube transcript at URL to FILE
 function youtube-transcript {
     if [[ ("$2" == "") || ("$1" == "--help") ]]; then
