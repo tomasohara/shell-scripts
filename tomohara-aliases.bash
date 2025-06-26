@@ -127,6 +127,7 @@
 # - Make sections more apparent and easier to grep (e.g., use Xyz settings (or Xyz Stuff, along
 #   with section dividers).
 # - Replace '/bin/cmd ...' with 'command cmd ...' in aliases.
+# - Check for undeclared local variables in functions.
 #
 
 # For debugging: Uncomment the following line(s)
@@ -460,6 +461,28 @@ alias prepend-path=prepend-path-force
 # TODO: rework append-/prepend-path and python variants via generic helper
 function append-python-path () { export PYTHONPATH=${PYTHONPATH}:"$1"; }
 function prepend-python-path () { export PYTHONPATH="$1":${PYTHONPATH}; }
+
+# is-true(env_var, default): returns true iff env_var set to true-like value
+# usage: local verbose=$(is-true "VERBOSE"); ... $verbose && echo "step n"
+function is-true {
+    # Get the environment variable name
+    local env_name="$1"
+    
+    # Get the value of that environment variable (default to "false")
+    local value=$(eval echo "\${$env_name:-false}")
+    
+    # Convert to lowercase for easier checking
+    value=$(echo "$value" | tr '[:upper:]' '[:lower:]')
+    
+    # Check if it's a false-like value
+    local result=true
+    case "$value" in
+        0|f|false|no|off|"")
+            result=false
+            ;;
+    esac
+    echo $result
+}
 
 #-------------------------------------------------------------------------------
 # Bash stuff (settings, etc.)
@@ -955,7 +978,8 @@ function grep-to-less () {
     fi
 }
 alias grepl-='grep-to-less'
-function grepl () { pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
+## OLD: function grepl () { pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
+function grepl () { local pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
 }
 # gr-c: grep through c/c++ source and headers files
 # note: --no-messages suppresses warnings about missing files
@@ -1025,7 +1049,7 @@ alias fgr-java='fgr-ext java'
 # which is required for find-files-here as explained below.)
 # Notes: Also puts listing proper in ls-aR.list (i.e., just list of files).
 # TODO: create external script and have alias call the script
-# Ignores SC2068: Double quote array expansions
+# Ignores SC2068 [Double quote array expansions to avoid re-splitting elements]
 function prepare-find-files-here () {
     local dir="."
     if [ "$1" = "--out-dir" ]; then
@@ -1173,11 +1197,14 @@ function view-todo () {
     perl -SSw reverse.perl "$HOME/organizer/todo_list.text" | $PAGER_CHOPPED $search_arg; 
 }
 }
-# maldito shellcheck: SC2119 [Use ... "$@" if function's $1 should mean script'1 $1]
+# maldito shellcheck: SC2119 [Use ... "$@" if function's $1 should mean script's $1]
 # and SC2181 [Check exit code directly]
 # shellcheck disable=SC2119,SC2181
 {
-function add-todo () { echo "$@" $'\t'"$(date)" >> "$HOME/organizer/todo_list.text"; if [ "$?" = "0" ]; then view-todo; fi; }
+    ## OLD: function add-todo () { echo "$@" $'\t'"$(date)" >> "$HOME/organizer/todo_list.text"; if [ "$?" = "0" ]; then view-todo; fi; }
+    function add-todo {
+        echo "$@" $'\t'"$(date)" >> "$HOME/organizer/todo_list.text" &&  view-todo;
+    }
 }
 #
 function todo-one-week () { add-todo "[within 1 week] " "$@"; }
@@ -1302,9 +1329,6 @@ function number-columns-comma () { head -1 "$1" | perl -pe 's/,/\t/g;' | number-
 # alias type='cat'  # interferes with type command
 alias reverse='tac'
 function backup-file () { local file="$1"; if [ -e "$file" ]; then dobackup.sh "$file"; fi; }
-## TODO: output header (e.g., "num-blocks<TAB>dir    # note: blocksize is 1k")
-# usage(): Shows usage for current directory with block size converted to bytes with
-#
 # default_assignment(value1, value2): return VALUE1 if defined else VALUE2
 # TODO: echo $([ $1 ] && echo $1 || echo $2)
 # See https://unix.stackexchange.com/questions/126706/bashs-conditional-operator-and-assignment.
@@ -1313,6 +1337,9 @@ function default_assignment {
     if [ "$result" = "" ]; then result="$2"; fi
     echo "$result"
 }
+#
+## TODO: output header (e.g., "num-blocks<TAB>dir    # note: blocksize is 1k")
+# usage(): Shows usage for current directory with block size converted to bytes with
 #
 function usage {
     ## TODO: output_file=(("$1"||"usage.list"));
@@ -1372,12 +1399,14 @@ function check-errors-excerpt () {
     cat "$head"
     check-errors -before=1 -after=2 "$@" | tail | truncate-width >| "$tail";
     diff "$head" "$tail" >| /dev/null
+    local result="$?"
     
     # Show tail unless same as head
     # note: disables SC2181 [Check exit code directly]
     # shellcheck disable=SC2181
-    if [ $? != 0 ]; then
-        echo "\$?=$?"
+    ## OLD: if [ $? != 0 ]; then
+    if [[ $result != 0 ]]; then
+        echo "\$?=$result"
         cat "$tail";
     fi
 }
@@ -1872,10 +1901,10 @@ alias show-functions-aux='typeset -f | perl -pe "s/^}/}\n/;"'
 # show-all-macros(pattern): show aliases or functions matching PATTERN, including definition
 # TODO: allow for specifying word-boundary matching
 function show-all-macros () {
-    pattern="$*";
+    local pattern="$*";
     if [ "$pattern" = "" ]; then pattern=.; fi;
     alias | $GREP -i "$pattern" | perl -ne 'print("$_\n");';
-    show-functions-aux | perlgrep -i -para $pattern;
+    show-functions-aux | perlgrep -i -para "$pattern";
 }
 
 # show-macros([pattern]): like show-all-macros, excluding leading _ in name
@@ -2330,7 +2359,13 @@ function kdiff-merge() {
 }
 #
 quiet-unalias which
-function which { command which "$@" 2> /dev/null; }
+## OLD: function which { command which "$@" 2> /dev/null; }
+# Disables shellchecks SC2317 [Command appears to be unreachable]
+# TODO3: see why it is complaining
+function which {
+    # shellcheck disable=SC2317
+    command which "$@" 2> /dev/null;
+}
 #
 # absolute-path(filename): returns actual full path for filename
 function absolute-path { realpath "$1"; }
@@ -2553,19 +2588,19 @@ alias restart-service='sudo systemctl restart'
 alias map-ports='nmap -Pn'
 
 # get-free-filename(base, [sep=""], [ext=""]): get filename starting with BASE that is not used.
-# Notes: 1. If <base> exists <base><sep><N> checked until the filename not used (for N in 2, 3, ... ).
+# Notes: 1. If <base> exists <base><sep><N> checked until the filename not used (for N in 1, 2, ... ).
 # 2. See sudo-admin for sample usage; also see rename-with-file-date.
 # 3. If Ext specified, it is added after the numeric part (n.b., including sep). It is used
 # to ensure that the filename ends with a specific extension instead of a number.
 # EX: get-free-filename("really-unique-filename", ".") => "really-unique-filename"
 # EX: get-free-filename("/boot/initrd", ".", "img") => "/boot/initrd.1.img"
-# TODO: start counting L at 0 so that first affix using 1 not 2
 #
 function get-free-filename() {
     local base="$1"
     local sep="$2"
     local ext="$3"
-    local L=1
+    ## OLD: local L=1
+    local L=0
     local filename="$base"
     if [ "$ext" != "" ]; then filename="$filename$sep$ext"; fi
     ## DEBUG: local -p
@@ -2722,7 +2757,12 @@ alias hw1-upload=old-hw-upload
 alias hw1-download=old-hw-download
 alias hw2-login=new-hw-login
 alias hw2-upload=new-hw-upload
-alias hw2-upload-misc='echo see http://www.tomasohara.trade/misc; SSH_XFER=misc new-hw-upload'
+HW2_MISC="http://www.tomasohara.trade/misc"
+alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=misc new-hw-upload'
+function hw2-upload-misc-single {
+    hw2-upload-misc "$@"
+    echo see "$HW2_MISC/$(basename "$1")"
+}
 alias hw2-download=new-hw-download
 
 # Set dummy default host on AWS and HostWinds so hostname always in xterm title (see set_xterm_title.bash).
@@ -3020,10 +3060,11 @@ function python-lint-full() {
 #   ex: Your code has been rated at 7.43/10 ...
 #   ex: No config file found ...
 # - the following has two regex: *modify the first* to add more conditions to ignore; the second is just for the extraneous pylint output
+# TODO4: refine (e.g., drop unnecessary-pass)
 function python-lint-work() { python-lint-full "$@" 2>&1 | $EGREP -v '\((bad-continuation|bad-option-value|fixme|invalid-name|locally-disabled|too-few-public-methods|too-many-\S+|trailing-whitespace|star-args|unnecessary-pass)\)' | $EGREP -v '^(([A-Z]:[0-9]+)|(Your code has been rated)|(No config file found)|(PYLINTHOME is now)|(\-\-\-\-\-))' | $PAGER; }
 # TODO: rename as python-lint-tpo for clarity (and make python-lint as alias for it)
 # note: R0801 is for duplicate lines across source files (no mnemonic)
-function python-lint() { python-lint-work --disable=R0801 "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-f-string|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|missing-final-newline|no-self-use|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
+function python-lint() { python-lint-work --disable=R0801 "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-f-string|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|no-self-use|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
 
 # run-python-lint-batched([file_spec="*.py"]: Run python-lint in batch mode over
 # files in FILE_SPEC, placing results in pylint/<today>.
@@ -3365,17 +3406,21 @@ function shell-check {                  ## TOM-IDIOSYNCRATIC
     # - SC2119 [Use ... "$@" if function's $1 should mean script'1 $1]
     # - SC2120: foo references arguments, but none are ever passed.
     # - SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects
+    # - SC2155 (warning): Declare and assign separately to avoid masking return values
     # - SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
     # - SC2181 (style): Check exit code directly with e.g. 'if mycmd;' ...
     # - SC2196 (info): egrep is non-standard
     # - SC2219 (style): Instead of 'let expr', prefer (( expr )) .
     # - SC2230: which is non-standard
     local strict="${STRICT_MODE:-0}"
-    local exclude="SC1090,SC1091,SC2004,SC2009,SC2012,SC2119,SC2120,SC2129,SC2164,SC2181,SC2196,SC2219,SC2230"
+    ## OLD: local exclude="SC1090,SC1091,SC2004,SC2009,SC2012,SC2119,SC2120,SC2129,SC2155,SC2164,SC2181,SC2196,SC2219,SC2230"
+    local exclude="${SHELL_CHECK_EXCLUDE:-SC1090,SC1091,SC2004,SC2009,SC2012,SC2119,SC2120,SC2129,SC2155,SC2164,SC2181,SC2196,SC2219,SC2230}"
     local exclude_args="--exclude=$exclude"
     if [ "$strict" != "0" ]; then
         exclude_args=""
     fi
+    local verbose=$(is-true "VERBOSE");
+    $verbose && echo "Exclusions: $exclude"
     # shellcheck disable=SC2086
     shell-check-full $exclude_args "$@" | perl -0777 -pe 's/\n\s+(Did you mean:)/\n$1/g;';
 }
