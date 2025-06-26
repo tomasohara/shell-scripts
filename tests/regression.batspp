@@ -146,7 +146,9 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 # interittent bug with "/tmp/set-xterm-title-" being used.
 #
 ## $ dir -d /tmp/set-xterm-title-*
+## [BAD]
 ## drwxrwxr-x 2 tomohara 4.0K Jun  9 04:00 /tmp/set-xterm-title-
+## [OK]
 ## drwxr-xr-x 2 root     4.0K Jun  8 16:05 /tmp/set-xterm-title-root
 ## drwxrwxr-x 2 tomohara 4.0K Jun  8 15:03 /tmp/set-xterm-title-tomohara
 ## drwxrwxr-x 2 testuser 4.0K Jun  1 17:55 /tmp/set-xterm-title-testuser
@@ -155,6 +157,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 # Fix alt-extract-all-git-versions.bash
 #
 
+## BAD:
 ## $ NUM_REVISIONS=5 alt-git-extract-all-versions alt-extract-all-git-versions.bash
 ## Trying main path alt-extract-all-git-versions.bash for version v13
 ## /home/tomohara/temp/tmp/all_versions_exported/alt-extract-all-git-versions.bash.v13-13Apr24
@@ -166,6 +169,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 #-------------------------------------------------------------------------------
 # fix git-conflicts-alias
 
+## BAD:
 ## $ git-conflicts-alias 
 ## grep: mezcla: Is a directory
 ##               ^^^^^^^^^^^^^^
@@ -179,6 +183,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 # note: "git diff --numstat filename" => git diff --numstat -- filename"
 #
 
+## BAD:
 ## $ git-next-checkin 
 ## Note: binary file so bypassing diff
 ## fatal: ambiguous argument '_typos.toml': unknown revision or path not in the working tree.
@@ -192,3 +197,63 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## _typos.toml
 ## library/train_util.py
 ## tests/test_train_textual_inversion.py
+
+## -----------------------------------------------------------------------------
+
+## Make sure usage only changes the size field (nothing in filename)
+##
+## $ usage
+## #
+## 286.667G        ./backup/tpo-servidor/jul-1.976K
+##        ^ OK                                    ^ BAD
+
+##------------------------------------------------------------------------------
+
+## Make sure git-hidden works in non-repo dir (e.g., build)
+##
+## [BAD]
+## $ pwd
+## /home/tomohara/temp/tpo-OSCAR-code-temp/build
+##
+## $ git-hidden 
+##
+## [OK]
+## $ cd ..
+## $ git-hidden 
+## S oscar/tests/sessiontests.cpp
+
+##------------------------------------------------------------------------------
+
+## TODO: fix readonly issues with ~/xfer dir
+## BAD:
+## $ vivo-upload _master-note-info.list
+## scp: xfer/_master-note-info.list: Permission denied
+
+##------------------------------------------------------------------------------
+
+## TODO1: trap silly alias edits [somehow]
+##
+## BAD:
+## $ script-update 
+## Script started, output log file is '_update-20jun25.log'.
+## /home/tomohara/bin/adhoc/make-git-update.bash 
+## /home/tomohara/bin/adhoc/../tomohara-proper-aliases.bash: eval: line 605: unexpected EOF while looking for matching `''
+## ...
+
+##------------------------------------------------------------------------------
+##
+## TODO: fix usage numeric suffixes to just apply once
+## NOTE: redundant with TODO item above
+##
+## BAD:
+## $ echo $"4096\tmy-file-4096" | apply-usage-numeric-suffixes
+## 4K\tmy-file-4K
+##
+
+##------------------------------------------------------------------------------
+
+## TODO: check for convert_emoticons.py edge cases
+## $ echo "▶️_" | convert_emoticons.py --verbose -
+## /home/tomohara/Mezcla/mezcla/convert_emoticons.py --verbose -
+## Processing entire input
+## [black right-pointing triangle]️_
