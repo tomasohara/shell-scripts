@@ -570,12 +570,12 @@ alias reset-prompt-dollar='reset-prompt "\$"'
 {
     # shellcheck disable=SC2139
     alias reset-prompt-default="reset-prompt '$PS_symbol'"
-    ## Lorenzo review: same code marked as OLD 3 lines above
 }
 ## TODO: alias reset-prompt-default='reset-prompt "\$PS_symbol"'
 
 # rehash(): reset locations for programs
-alias rehash='hash -l' 
+## BAD: alias rehash='hash -l' 
+alias rehash='hash -r; hash -l' 
 
 #
 # check_usage(arg, help): shows HELP if ARG --help or empty, setting status true (0) if displayed
@@ -1718,7 +1718,7 @@ alias recent-tar-this-dir='make-recent-tar $TEMP/recent-$(basename "$PWD")'
 function sort-tar-archive() { ($GTAR "t${GTAR_OPTS}" "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
 #
 # TODO: tar-this-dir-there???
-# ex: ¢ TEMP=/mnt/wd6tbp2vfat/backup/tpo-servidor tar-this-dir
+# ex: $ TEMP=/mnt/wd6tbp2vfat/backup/tpo-servidor tar-this-dir
 #
 alias tar-this-dir-dated='USE_DATE=1 tar-this-dir'
 alias tar-just-this-dir-dated='USE_DATE=1 tar-just-this-dir'
@@ -2492,11 +2492,17 @@ alias kill-iceweasel='kill-em iceweasel'
 
 # cmd-output(cmd, ...): show output for cmd to _{cmd}-$(TODAY).log (with spaces
 # replaced by underscores)
+# note: subsequent files for the same date use ...-$(TODAY).N.log (for N=1, ...)
 #
 function cmd-output () {
     local command="$*"
-    local output_file
-    output_file="_$(echo "$command" | tr ' ' '_')-$(TODAY).list"
+    local output_base, output_bfile
+    ## OLD:
+    ## local output_file
+    ## output_file="_$(echo "$command" | tr ' ' '_')-$(TODAY).list"
+    ## TEST: rename-with-file-date "$output_file"
+    output_base="_$(echo "$command" | tr ' ' '_')-$(TODAY)"
+    output_file="$(get-free-filename "$output_base" . list)"
     ## TODO3?: use separate invocations for aliases than for other commands
     ($command || eval "$command") 2>&1 | ansifilter > "$output_file"
     $PAGER_NOEXIT "$output_file"
@@ -2835,7 +2841,7 @@ simple-alias-fn ps-sort-help 'simple-alias-fn-perl ps_sort.perl'
 simple-alias-fn ps-sort-cpu 'ps-sort-once -by=cpu'
 
 # get-process-parent(pid): return parent process-id for PID
-# ¢ ps al | egrep "(PID|$$)"
+# $ ps al | egrep "(PID|$$)"
 # F   UID   PID  PPID PRI  NI    VSZ   RSS WCHAN  STAT TTY        TIME COMMAND
 # 0  1000  3723  3840  20   0  25136  7724 wait   Ss   pts/51     0:01 bash
 # 4  1000 25056  3723  20   0  28920  1612 -      R+   pts/51     0:00 ps al
@@ -2849,44 +2855,6 @@ function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$;
 ## HACK: set envionment for sake of set_xterm_title.bash (TODO check PPID for this)
 ## TODO: use stack for old_PS_symbol maintenance??? (also allows for recursive invocation, such as with '$ $ $')
 ## TODO: rename as my-script to avoid confusion
-#-------------------------------------------------------------------------------
-## Lorenzo review: this whole section down to get-process-parents is duplicated from above
-# Misc. language related
-alias json-pp='json_pp -json_opt utf8,pretty'
-alias pp-json=json-pp
-# note: canonical sorts the keys of hashes (utf8 avoids warning and pretty might be the default)
-alias pp-json-sorted='json_pp -json_opt utf8,pretty,canonical'
-
-#-------------------------------------------------------------------------------
-# Hostwinds related
-# cvps6185033409: old Ubuntu 12.04.02 i866
-export HOSTWINDS_HOST=23.254.204.34
-# hwsrv-592788.hostwindsdns.com: Ubuntu 16.04.02 x64
-export NEW_HOSTWINDS_HOST=142.11.227.157
-
-#-------------------------------------------------------------------------------
-# General unix
-#
-# ps-all(pattern): show processes from all users matching PATTERN (or . in which case piped to less)
-# TODO: have option to restrict to current user
-function ps-all () { 
-    local pattern="$1";
-    local pager=cat;
-    if [ "$pattern" = "" ]; then 
-        pattern="."; 
-        pager=$PAGER
-    fi;
-    ps_mine.sh --all | $EGREP -i "((^USER)|($pattern))" | $pager;
-}
-
-# get-process-parent(pid): return parent process-id for PID
-# ¢ ps al | egrep "(PID|$$)"
-# F   UID   PID  PPID PRI  NI    VSZ   RSS WCHAN  STAT TTY        TIME COMMAND
-# 0  1000  3723  3840  20   0  25136  7724 wait   Ss   pts/51     0:01 bash
-# 4  1000 25056  3723  20   0  28920  1612 -      R+   pts/51     0:00 ps al
-# 0  1000 25057  3723  20   0  14228  1024 pipe_w S+   pts/51     0:00 grep -E --color=auto (PID|372
-# 
-function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$; fi; ps al | perl -Ssw extract_matches.perl "^\d+\s+\d+\s+$pid\s+(\d+)"; }
 
 # Make sure script appends rather than overwrites.
 # In addition, set SCRIPT_PID, so that set_xterm_title.bash can indicate within script.
