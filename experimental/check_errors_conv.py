@@ -45,10 +45,10 @@ import re
 script_dir = os.path.dirname(os.path.abspath(__file__))
 if script_dir not in sys.path:
     sys.path.insert(0, script_dir)
-try:
-    import common  # Assumes common.py exists in the same directory
-except ImportError:
-    pass
+# try:
+#     import common  # Assumes common.py exists in the same directory
+# except ImportError:
+#     pass
 
 ## BEHAVIOR:
 # - Ensures any 'common' library is available as in Perl.
@@ -81,6 +81,12 @@ verbose = False
 TRUE = True
 FALSE = False
 NULL = '\0'
+show_warnings = True
+show_informative = False
+asterisks = True
+current_file = ""
+before_context = []
+non_option_args = []
 ## BEHAVIOR:
 # - All Perl global variables are preserved as module-level Python variables.
 # - Initialized to Perl defaults; will be overridden by CLI parsing.
@@ -94,9 +100,11 @@ NULL = '\0'
 # Manual CLI/ARGV option parsing and variable dependency logic handled in &init.
 ## PYTHON:
 def parse_options(argv):
+    """Parse command-line options and set global flags."""
     global warning, warnings, skip_warnings, context, no_asterisks, skip_ruby_lib, ruby
     global relaxed, strict, quiet, matching, before, after, info, verbose
-    non_option_args = []
+    global show_warnings, show_informative, asterisks
+    non_opts = []
     idx = 1
     while idx < len(argv):
         arg = argv[idx]
@@ -143,11 +151,10 @@ def parse_options(argv):
             print(f"Unknown option: {arg}", file=sys.stderr)
             print_usage_and_exit(code=1)
         else:
-            non_option_args.append(arg)
+            non_opts.append(arg)
         idx += 1
 
     # Initialize derived variables
-    global show_warnings, show_informative, asterisks
     show_warnings = True  # Default: show warnings unless explicitly disabled
     show_informative = info
     asterisks = not no_asterisks
@@ -155,10 +162,11 @@ def parse_options(argv):
     # Handle warning logic - by default warnings should be shown
     if skip_warnings:
         show_warnings = False
-    
-    return non_option_args
+
+    return non_opts
 
 def print_usage_and_exit(code=0):
+    """Print usage and exit."""
     script_name = os.path.basename(sys.argv[0])
     options = "options = [-warnings | -info] [-context=N] [-no_astericks] [-skip_ruby_lib]"
     options += " [-relaxed | -strict] [-verbose] [-quiet] [-before=N] [-after=N] [-matching]"
@@ -185,13 +193,16 @@ def print_usage_and_exit(code=0):
 # if (!defined($ARGV[0])) { die(usage) }
 ## PYTHON:
 def file_exists(filename):
+    """Return True if the file exists."""
     return os.path.isfile(filename)
 
 def exit_with_message(msg):
+    """Print error message and exit with code 1."""
     print(msg, file=sys.stderr)
     sys.exit(1)
 
 def show_current_file_info():
+    """Show info for current file being processed."""
     if (strict and current_file != "-" and not file_exists(current_file) and current_file != ""):
         exit_with_message(f"Error: file '{current_file}' not accessible.")
     if current_file != "":
@@ -212,10 +223,11 @@ def show_current_file_info():
 # my($after_lines) = 0; while (<>) { ... }
 ## PYTHON:
 def dump_line():
-    # Placeholder for any future context or debug printing.
+    """Placeholder for any future context or debug printing."""
     pass
 
 def debug_print(level, message):
+    """Debug print if verbose and level below threshold."""
     if verbose and level <= TL_MOST_DETAILED:
         print("[DEBUG]", message, file=sys.stderr)
 
@@ -223,6 +235,7 @@ TL_MOST_DETAILED = 3
 TL_DETAILED = 2
 
 def re_search(pattern, string, flags=0):
+    """Regex search helper."""
     return re.search(pattern, string, flags)
 
 # Error patterns compiled - this is the key fix
@@ -235,7 +248,8 @@ _error_patterns = [
     (re.compile(r'socket has failed to (bind|listen)'), "E2"),
 ]
 
-def line_matches_known_error(line, relaxed):
+def line_matches_known_error(line, _relaxed):
+    """Return (True, match_info) if line is a known error."""
     for regex, label in _error_patterns:
         if regex.pattern == r'command not found':
             if regex.search(line) and not re.search(r'Cannot switch to Modules', line):
@@ -246,7 +260,7 @@ def line_matches_known_error(line, relaxed):
             m = regex.search(line)
             if m:
                 blacklist = re.compile(r'BrokenPipeError|SillyPythonException')
-                if relaxed or not blacklist.search(line):
+                if _relaxed or not blacklist.search(line):
                     return TRUE, f"{label} [{m.group(0)}]"
             continue
         m = regex.search(line)
@@ -266,9 +280,10 @@ def line_matches_known_error(line, relaxed):
 # while (<>) { ... }
 ## PYTHON:
 def main():
+    """Main function to process files and scan for errors/warnings."""
     global current_file, before_context
     files = non_option_args if non_option_args else ["-"]
-    for file_idx, fname in enumerate(files):
+    for fname in files:
         if fname == "-":
             file_obj = sys.stdin
             current_file = ""
@@ -276,7 +291,7 @@ def main():
             current_file = fname
             try:
                 file_obj = open(current_file, encoding='utf-8', errors='replace')
-            except Exception as e:
+            except (OSError, IOError) as e:
                 exit_with_message(f"Error: could not open file '{current_file}': {e}")
 
         show_current_file_info()
@@ -285,7 +300,7 @@ def main():
         # Read all lines into memory to handle context properly
         try:
             lines = [(i + 1, line.rstrip('\r\n')) for i, line in enumerate(file_obj)]
-        except Exception as e:
+        except (OSError, IOError) as e:
             exit_with_message(f"Error reading file '{current_file}': {e}")
         
         n_lines = len(lines)
@@ -370,14 +385,12 @@ def main():
                     print(f"{ctx_num:<8} {ctx_line}")
                     
                 # Print error line with >>> <<<
-                # print(f"{line_num:8} >>> {line} <<<")
                 print(f"{line_num:<4} >>> {line} <<<")
 
                 if matching:
                     print(match_info)
 
-                ## OLD: Redundant code, messed with -warnings output
-                ## Print after-context lines
+                # Print after-context lines
                 for k in range(1, after + 1):
                     if i + k < n_lines:
                         next_num, next_line = lines[i + k]
@@ -387,19 +400,7 @@ def main():
 
                 # Skip the after-context lines we just printed
                 i += min(after, n_lines - i - 1)
-                
-                # if after >= 1 and i + 1 < n_lines:
-                #     next_num, next_line = lines[i + 1]
-                #     print(f"{next_num:<8} {next_line}")
-                #     i += 1                        
-                
-                # DO NOT repopulate before_context with after-lines (Perl does not do this)
                 before_context = []
-                ## OLD: Redundant code, messed with -warnings output
-                # for k in range(1, after + 1):
-                #     if i + k < n_lines:
-                #         next_num, next_line = lines[i + k]
-                #         before_context.append((next_num, next_line))
             else:
                 # Add current line to before context
                 # Print line if within after-context region
@@ -437,8 +438,6 @@ if __name__ == "__main__":
         print_usage_and_exit()
     
     # Set defaults for before/after context
-    # Type Error for Python3 if not set properly
-    # TypeError: '>' not supported between instances of 'int' and 'NoneType'
     if before is None:
         before = 3
     if after is None:
