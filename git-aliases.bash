@@ -590,6 +590,18 @@ alias git-restore-both-alias="git-restore-file-helper --both"
 # git-revert-commit(commit): effectively undoes COMMIT(s) by issuing new commits
 alias git-revert-commit-alias='git-command revert'
 
+# escape-at-sign(text): escape @ in stdin with \ for use in regexes
+# note: rare except for certain node repos (e.g., n8n)
+# ex: echo "@n8n" | escape-at-sign => "\\@n8n"
+function escape-at-sign {
+    perl -pe 's/@/\\@/g;';
+}
+# unescape-at-sign(text): un-escape \@ in stdin after used of escaped regex input
+# ex: echo "\\@n8n" | unescape-at-sign => "@n8n"
+function unescape-at-sign {
+    perl -pe 's/\\@/@/g;';
+}
+
 # git-diff-plus([files-etc]: show repo diff
 # Note:
 # - Normalizes the listing such as by changing a/<path> to a: <path> and likwise for b.
@@ -609,7 +621,11 @@ function git-diff-plus {
     IFS=$'\n'
     echo "" >| "$log"
     for f in $(git-diff-list "$@"); do
-        git diff -- "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log" 2>&1
+        ## OLD: git diff -- "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log" 2>&1
+        ## TODO:
+        ## local f_escape
+        ## f_escape="$(echo "$f" | perl -pe 's/@/\\@/g;')"
+        git diff -- "$f" | escape-at-sign | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@$1$2 $3: @g) {}' | unescape-at-sign >> "$log" 2>&1
     done
     IFS="$OLDIFS"                       # restore inter-field separator
     #
@@ -676,12 +692,20 @@ function git-diff-list {
     # (e.g., "/home/tomohara/python/Mezcla/README.md" => "$(git-root-alias)/README.md"
     # TODO3: simplying regex fixup's; use relative path (e.g., "../README.md")
     local root
-    root=$(git-root-alias)
+    root="$(git-root-alias)"
     local pwd
-    pwd=$(realpath ".")
+    ## OLD:
+    pwd="$(realpath ".")"
+    ## TODO: pwd="$(realpath --relative-to="$root" ".")"
     # note: Uses case insenstive matching for sake of Windows
     # shellcheck disable=SC2002
-    cat "$diff_list_file" | perl -pe "s@^@$root/@i;" | perl -pe "s@^$pwd/?@@i;" | perl -pe "s@^$root/?@\\\$\(git-root-alias\)/@i;"
+    ## OLD: cat "$diff_list_file" | escape-at-sign | perl -pe "s@^@$root/@i;" | perl -pe "s@^$pwd/?@@i;" | perl -pe "s@^$root/?@\\\$\(git-root-alias\)/@i;"
+    local pwd_esc git_root_esc;
+    pwd_esc="$(echo -n "$pwd" | escape-at-sign)"
+    ## TODO2:
+    root_esc="$(git-root-alias | escape-at-sign)"
+    cat "$diff_list_file" | escape-at-sign | perl -pe "s@^@$root_esc/@i;" | perl -pe "s@^${pwd_esc}/?@@i;" | unescape-at-sign;
+    ## TEST: cat "$diff_list_file" | escape-at-sign | perl -pe "s@^@$root/@i;" | perl -pe "s@^$pwd_esc/?@@i;" | perl -pe "s@^$root_esc/?@\\\$\(git-root-alias\)/@i;" | unescape-at-sign;
 }
 
 # Output templates for doing checkin of modified files
@@ -805,7 +829,8 @@ function git-root-alias {
     root=$(git rev-parse --show-toplevel)
     # Under Windows, convert c:/xyz => /c/xyz, etc.
     if [[ $OS =~ Windows.* ]]; then
-        root=$(echo "$root" | perl -pe 's@([a-z]):@/\1@i;')
+        ## OLD" root=$(echo "$root" | perl -pe 's@([a-z]):@/\1@i;')
+        root=$(echo -n "$root" | escape-at-sign | perl -pe 's@([a-z]):@/$1@i;' | unescape-at-sign)
     fi
     echo $root
 }
