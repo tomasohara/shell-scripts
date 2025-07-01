@@ -257,3 +257,15 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## /home/tomohara/Mezcla/mezcla/convert_emoticons.py --verbose -
 ## Processing entire input
 ## [black right-pointing triangle]️_
+
+##------------------------------------------------------------------------------
+
+## TODO: make sure git aliases handle filenames with @'s
+## 
+## $ git-files-changed 
+## Array found where operator expected at -e line 1, near "s@^/home/tomohara/temp/n8n-temp/packages/@n8n/nodes-langchain/?@@i"
+## syntax error at -e line 1, near "s@^/home/tomohara/temp/n8n-temp/packages/@n8n/nodes-langchain/?@@i"
+## Execution of -e aborted due to compilation errors.
+##
+## $ pwd
+## /home/tomohara/temp/n8n-temp/packages/@n8n/nodes-langchain
