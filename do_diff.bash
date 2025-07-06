@@ -54,7 +54,8 @@
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #
-if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+debug_level="${DEBUG_LEVEL:-0}"
+if [ "$debug_level" -ge 4 ]; then
     echo "$0 $@"
 fi
 if [ "${TRACE:-0}" = "1" ]; then
@@ -368,3 +369,8 @@ for file in $pattern; do
         echo ""
     fi
 done
+
+# Cleanup
+if [[ $debug_level -lt 6 ]]; then
+    rm "$log_file"
+fi
