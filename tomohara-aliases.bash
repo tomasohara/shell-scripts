@@ -775,12 +775,20 @@ alias rm='command rm -i $other_file_args'
 alias delete='command rm -i $other_file_args'
 # shellcheck disable=SC2034
 {
-force_echo=""
-newline_tab=$'\n\t'
-# TODO1: fix newline/tab support
-alias disable-forced-deletions='force_echo="echo Warning: run enable-forced-deletions or issue:$newline_tab"'
-alias enable-forced-deletions='force_echo=""'
+    force_echo=""
+    newline_tab=$'\n\t'
+    # TODO1: fix newline/tab support
+    ## OLD: alias disable-forced-deletions='force_echo="echo Warning: run enable-forced-deletions or issue:$newline_tab"'
+    # disable-forced-deletions-aux(): shows deletion command on separate line
+    # note: for use in $force_echo prefix to delete-force aliases
+    function disable-forced-deletions-aux {
+        echo "Warning: run enable-forced-deletions or issue:"
+        echo -n $'\t'
+        echo "$@"
+    }
 }
+alias disable-forced-deletions='force_echo="disable-forced-deletions-aux"'
+alias enable-forced-deletions='force_echo=""'
 disable-forced-deletions
 #
 alias delete-force='$force_echo command rm -f $other_file_args'
@@ -2496,7 +2504,7 @@ alias kill-iceweasel='kill-em iceweasel'
 #
 function cmd-output () {
     local command="$*"
-    local output_base, output_bfile
+    local output_base, output_file
     ## OLD:
     ## local output_file
     ## output_file="_$(echo "$command" | tr ' ' '_')-$(TODAY).list"
@@ -3438,4 +3446,3 @@ trace 'out tomohara-aliases.bash'
 ## 1. to facilitate manual merge,
 ## 2. to highlight old approach when new changes are work-in-progress; and,
 ## 3. because Tom is a packrat (i.e., cachivachero)!
-
