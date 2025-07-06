@@ -185,7 +185,8 @@ fi
 if [ "$ignore_user" != "" ]; then
     perl -i.bak-ign1 -pe "s@($ignore_user)@<user>@gi;" "$TMP/$base1" "$TMP/$base2"
     if [ "$strip_ignore" == "1" ]; then
-        perl -i.bak-ign2 -pe "s@^\s*(<user>\s*)+\s*@@;" "$TMP/$base1" "$TMP/$base2"
+        ## OLD: perl -i.bak-ign2 -pe "s@^\s*(<user>\s*)+\s*@ @g;" "$TMP/$base1" "$TMP/$base2"
+        perl -i.bak-ign2 -pe "s@<user>@ @g;" "$TMP/$base1" "$TMP/$base2"
     fi
 fi
 
