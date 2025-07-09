@@ -1,25 +1,21 @@
-#! /usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-#
-# Script to find and analyze duplicate alias definitions in Bash scripts.
-# This helps identify potential conflicts and redundant definitions that can
-# cause unexpected behavior in shell environments.
-#
-
 """
 Find duplicate alias definitions in bash scripts or configuration files.
 
 Sample usage:
-   {script} ~/.bashrc
-   {script} --json ~/tom-shell-scripts/*.bash
-   cat aliases.sh | {script} --stdin
-   {script} --verbose --summary test_aliases.sh
+   python3 {script} ~/shell-scripts
+   python3 {script} ~/shell-scripts --check-definitions
+   python3 {script} ~/shell-scripts --exclude /path/to/exclude
+   python3 {script} ~/.bashrc --verbose
+   python3 {script} ~/shell-scripts --json
 """
 
 # Standard modules
-from collections import defaultdict
 import json
+import os
 import re
+from collections import defaultdict
 
 # Local modules
 from mezcla import debug
@@ -28,230 +24,296 @@ from mezcla.main import Main
 from mezcla.my_regex import my_re
 from mezcla import system
 
+debug.trace(5, f"global __doc__: {__doc__}")
+debug.assertion(__doc__)
+
 # Constants for switches
+CHECK_DEFINITIONS = "check-definitions"
+EXCLUDE_PATH = "exclude"
 JSON_OUTPUT = "json"
-VERBOSE_MODE = "verbose"
-SUMMARY_ONLY = "summary"
-USE_STDIN = "stdin"
-INCLUDE_COMMENTS = "include-comments"
 
 # Constants
 TL = debug.TL
 
 # Environment options
-ALIAS_DEBUG_LEVEL = system.getenv_int(
-    "ALIAS_DEBUG_LEVEL", 0,
-    description="Debug level for alias duplicate detection")
-IGNORE_QUOTED_ALIASES = system.getenv_bool(
-    "IGNORE_QUOTED_ALIASES", False,
-    description="Ignore aliases with quotes in their names")
+ALIAS_VERBOSE = system.getenv_bool(
+    "ALIAS_VERBOSE", False,
+    description="Enable verbose alias processing")
 
-class AliasDuplicateFinder:
-    """Helper class for finding duplicate alias definitions."""
+class AliasFinder:
+    """Helper class for finding duplicate alias definitions"""
     
-    def __init__(self, include_comments=False):
-        """Initializer: sets up alias detection patterns."""
-        debug.trace(TL.VERBOSE, f"AliasDuplicateFinder.__init__(): self={self}")
-        self.include_comments = include_comments
-        # Pattern to match alias definitions (handles various formats)
-        self.alias_pattern = re.compile(
-            r'^\s*alias\s+([^=\s]+)\s*=\s*(.*)$',
-            re.MULTILINE
-        )
-        debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
+    def __init__(self, verbose=False):
+        self.alias_pattern = re.compile(r'^\s*alias\s+([^=\s]+)\s*=\s*(.*)$', my_re.MULTILINE)
+        self.verbose = verbose
+        self.shell_extensions = ['.sh', '.bash', '.zsh', '.csh', '.fish']
+        self.shell_configs = ['.bashrc', '.bash_profile', '.zshrc', '.profile', 
+                             'bashrc', 'bash_profile', 'zshrc', 'profile']
     
-    def is_comment_line(self, line):
-        """Check if line is a comment."""
-        return line.strip().startswith("#")
+    def log(self, message):
+        """Print debug message if verbose"""
+        if self.verbose:
+            debug.trace(4, f"AliasFinder: {message}")
     
-    def extract_aliases_from_content(self, content, source_name="stdin"):
-        """Extract all alias definitions from content."""
-        debug.trace(TL.DETAILED, f"Extracting aliases from {source_name}")
+    def find_shell_files(self, path, exclude_paths=None):
+        """Find all shell script files, excluding specified paths"""
+        exclude_paths = exclude_paths or []
+        path = os.path.expanduser(path)
+        exclude_paths = [os.path.expanduser(p) for p in exclude_paths]
+        
+        self.log(f"Searching in: {path}")
+        
+        if not os.path.exists(path):
+            return []
+        
+        if os.path.isfile(path):
+            return [path] if not self._is_excluded(path, exclude_paths) else []
+        
+        shell_files = []
+        for root, dirs, files in os.walk(path):
+            if self._is_excluded(root, exclude_paths):
+                continue
+            
+            # Skip excluded directories
+            dirs[:] = [d for d in dirs if not self._is_excluded(os.path.join(root, d), exclude_paths)]
+            
+            for file in files:
+                file_path = os.path.join(root, file)
+                
+                if self._is_excluded(file_path, exclude_paths):
+                    continue
+                
+                if self._is_shell_file(file):
+                    shell_files.append(file_path)
+                    self.log(f"Found: {file_path}")
+        
+        return shell_files
+    
+    def _is_excluded(self, path, exclude_paths):
+        """Check if path should be excluded"""
+        if not exclude_paths:
+            return False
+        
+        path = os.path.abspath(path)
+        for excluded in exclude_paths:
+            excluded = os.path.abspath(excluded)
+            if path == excluded or path.startswith(excluded + os.sep):
+                return True
+        return False
+    
+    def _is_shell_file(self, filename):
+        """Check if file is a shell script"""
+        return (any(filename.endswith(ext) for ext in self.shell_extensions) or
+                filename in self.shell_configs or
+                filename.startswith('.bash'))
+    
+    def extract_aliases(self, file_path):
+        """Extract aliases from a single file"""
         aliases = []
         
-        if isinstance(content, str):
-            lines = content.splitlines()
-        else:
-            lines = content
+        try:
+            lines = system.read_lines(file_path)
             
-        for line_num, line in enumerate(lines, 1):
-            # Skip comments unless requested
-            if self.is_comment_line(line) and not self.include_comments:
-                continue
-                
-            match = self.alias_pattern.match(line)
-            if match:
-                alias_name = match.group(1).strip()
-                alias_value = match.group(2).strip()
-                
-                # Skip quoted aliases if configured
-                if IGNORE_QUOTED_ALIASES and (alias_name.startswith('"') or alias_name.startswith("'")):
-                    debug.trace(TL.DETAILED, f"Skipping quoted alias: {alias_name}")
-                    continue
+            for line_num, line in enumerate(lines, 1):
+                match = self.alias_pattern.match(line)
+                if match:
+                    aliases.append({
+                        'name': match.group(1).strip(),
+                        'definition': match.group(2).strip(),
+                        'file': file_path,
+                        'line': line_num,
+                        'actual_line': line.strip()
+                    })
                     
-                aliases.append({
-                    'name': alias_name,
-                    'value': alias_value,
-                    'line': line_num,
-                    'source': source_name
-                })
-                debug.trace(TL.VERBOSE, f"Found alias '{alias_name}' at line {line_num}")
-                
+        except (FileNotFoundError, IOError) as e:
+            debug.trace(3, f"Could not read {file_path}: {e}")
+        except UnicodeDecodeError as e:
+            debug.trace(3, f"Could not decode {file_path}: {e}")
+        
+        self.log(f"Found {len(aliases)} aliases in {file_path}")
         return aliases
+
     
-    def find_duplicates(self, all_aliases):
-        """Group aliases by name and return duplicates."""
-        alias_groups = defaultdict(list)
+    def find_duplicates(self, files, check_definitions=False):
+        """Find duplicate aliases across files"""
+        all_aliases = []
+        for file_path in files:
+            all_aliases.extend(self.extract_aliases(file_path))
         
+        self.log(f"Total aliases found: {len(all_aliases)}")
+        
+        # Group by alias name
+        name_groups = defaultdict(list)
         for alias in all_aliases:
-            alias_groups[alias['name']].append(alias)
-            
-        # Return only groups with duplicates
-        duplicates = {
-            name: definitions 
-            for name, definitions in alias_groups.items() 
-            if len(definitions) > 1
-        }
+            name_groups[alias['name']].append(alias)
         
-        debug.trace(TL.USUAL, f"Found {len(duplicates)} duplicate aliases")
+        # Find duplicates
+        duplicates = {k: v for k, v in name_groups.items() if len(v) > 1}
+        
+        if check_definitions:
+            # Only show duplicates with different definitions
+            filtered_duplicates = {}
+            for name, aliases in duplicates.items():
+                definitions = set(alias['definition'] for alias in aliases)
+                if len(definitions) > 1:  # Multiple different definitions
+                    filtered_duplicates[name] = aliases
+            duplicates = filtered_duplicates
+        
         return duplicates
 
-class DuplicateAliasScript(Main):
-    """Input processing class for duplicate alias detection"""
+class ExtractDuplicateAliases(Main):
+    """Alias duplicate finder script"""
     
-    # Class-level member variables for arguments
+    check_definitions = False
+    path = ""
+    exclude_paths = []
     json_output = False
-    verbose_mode = False
-    summary_only = False
-    use_stdin = False
-    include_comments = False
-    collected_lines = []
-    finder = None
     
     def setup(self):
-        """Check results of command line processing"""
-        debug.trace(TL.VERBOSE, f"DuplicateAliasScript.setup(): self={self}")
+        """Process command line arguments"""
+        debug.trace(TL.VERBOSE, f"Script.setup(): self={self}")
         
-        # Extract argument values
+        self.check_definitions = self.get_parsed_option(CHECK_DEFINITIONS, self.check_definitions)
         self.json_output = self.get_parsed_option(JSON_OUTPUT, self.json_output)
-        self.verbose_mode = self.get_parsed_option(VERBOSE_MODE, self.verbose_mode)
-        self.summary_only = self.get_parsed_option(SUMMARY_ONLY, self.summary_only)
-        self.use_stdin = self.get_parsed_option(USE_STDIN, self.use_stdin)
-        self.include_comments = self.get_parsed_option(INCLUDE_COMMENTS, self.include_comments)
         
-        # Initialize helper
-        self.finder = AliasDuplicateFinder(include_comments=self.include_comments)
+        # Handle exclude paths (can be specified multiple times)
+        exclude_option = self.get_parsed_option(EXCLUDE_PATH, [])
+        if isinstance(exclude_option, str):
+            self.exclude_paths = [exclude_option]
+        elif isinstance(exclude_option, list):
+            self.exclude_paths = exclude_option
+        else:
+            self.exclude_paths = []
         
-        # Set debug level if verbose
-        if self.verbose_mode:
-            debug.set_level(TL.USUAL)
-            
+        # Get the path argument
+        self.path = self.get_parsed_argument("path", ".")
+        
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
     
-    def process_line(self, line):
-        """Processes current line from input"""
-        debug.trace_fmtd(TL.QUITE_DETAILED, "DuplicateAliasScript.process_line({l})", l=line)
-        self.collected_lines.append(line)
-    
-    def wrap_up(self):
-        """Do final processing"""
-        debug.trace(6, f"DuplicateAliasScript.wrap_up(); self={self}")
-        
-        all_aliases = []
-        
-        # Process stdin if we have collected lines
-        if self.collected_lines:
-            aliases = self.finder.extract_aliases_from_content(
-                self.collected_lines, 
-                source_name="stdin"
-            )
-            all_aliases.extend(aliases)
-        
-        # Process files if provided
-        if hasattr(self, 'filename') and self.filename:
-            try:
-                with open(self.filename, 'r', encoding='utf-8', errors='ignore') as f:
-                    content = f.readlines()
-                aliases = self.finder.extract_aliases_from_content(
-                    content,
-                    source_name=self.filename
-                )
-                all_aliases.extend(aliases)
-            except IOError as e:
-                system.print_stderr(f"Error reading {self.filename}: {e}")
-                
-        # Find duplicates
-        duplicates = self.finder.find_duplicates(all_aliases)
-        
-        # Output results
-        if not duplicates:
-            print("No duplicate aliases found!")
+    def print_readable_output(self, result):
+        """Print results in clean readable format"""
+        if result["status"] == "error":
+            print(f"Error: {result['message']}")
             return
-            
-        if self.json_output:
-            self._output_json(duplicates)
-        elif self.summary_only:
-            self._output_summary(duplicates)
+        
+        print("Duplicate Alias Analysis")
+        print("=" * 50)
+        print(f"Path analyzed: {result['path']}")
+        print(f"Files analyzed: {result['total_files']}")
+        
+        if self.exclude_paths:
+            print(f"Excluded paths: {', '.join(self.exclude_paths)}")
+        
+        if self.check_definitions:
+            print("Mode: Only showing aliases with different definitions")
         else:
-            self._output_detailed(duplicates)
-    
-    def _output_json(self, duplicates):
-        """Output results in JSON format."""
-        print(json.dumps(duplicates, indent=2))
-    
-    def _output_summary(self, duplicates):
-        """Output summary of duplicates."""
-        print(f"Found {len(duplicates)} duplicate aliases:")
-        for alias_name in sorted(duplicates.keys()):
-            count = len(duplicates[alias_name])
-            print(f"  {alias_name}: {count} definitions")
-    
-    def _output_detailed(self, duplicates):
-        """Output detailed report of duplicates."""
-        print("=== DUPLICATE ALIAS REPORT ===")
-        print(f"Total duplicate aliases found: {len(duplicates)}")
+            print("Mode: Showing all duplicate alias names")
+        
         print()
         
-        for alias_name in sorted(duplicates.keys()):
-            definitions = duplicates[alias_name]
-            print(f"Alias: {alias_name}")
-            print(f"Found {len(definitions)} definitions:")
+        if not result['duplicates']:
+            print("No duplicate aliases found.")
+            return
+        
+        print(f"Found {result['unique_duplicates']} unique duplicate aliases:")
+        print()
+        
+        for duplicate in result['duplicates']:
+            print(f"Alias: {duplicate['alias']} ({duplicate['occurrences']} occurrences)")
+            print("-" * 40)
             
-            for defn in definitions:
-                print(f"  {defn['source']}:{defn['line']}")
-                print(f"    Value: {defn['value']}")
-                
-                # Check if values differ
-                if self.verbose_mode:
-                    values = [d['value'] for d in definitions]
-                    if len(set(values)) > 1:
-                        print("    *** WARNING: Different values detected! ***")
-            print()
+            for location in duplicate['locations']:
+                print(f"  File: {location['file']}")
+                print(f"  Line {location['line_number']}: {location['line_content']}")
+                print(f"  Definition: {location['definition']}")
+                print()
+    
+    def run_main_step(self):
+        """Main processing step"""
+        debug.trace(5, f"Script.run_main_step(): self={self}")
+        
+        # Create finder
+        finder = AliasFinder(verbose=self.verbose)
+        
+        # Find shell files
+        shell_files = finder.find_shell_files(self.path, self.exclude_paths)
+        
+        if not shell_files:
+            result = {
+                "status": "error",
+                "message": f"No shell scripts found in {self.path}",
+                "path": self.path,
+                "files_analyzed": [],
+                "duplicates": []
+            }
+            
+            if self.json_output:
+                print(json.dumps(result, indent=2))
+            else:
+                self.print_readable_output(result)
+            return
+        
+        # Find duplicates
+        duplicates = finder.find_duplicates(shell_files, self.check_definitions)
+        
+        # Format results
+        duplicate_list = []
+        for name, aliases in duplicates.items():
+            duplicate_entry = {
+                "alias": name,
+                "occurrences": len(aliases),
+                "locations": []
+            }
+            
+            for alias in aliases:
+                location = {
+                    "file": alias['file'],
+                    "line_number": alias['line'],
+                    "line_content": alias['actual_line'],
+                    "definition": alias['definition']
+                }
+                duplicate_entry["locations"].append(location)
+            
+            duplicate_list.append(duplicate_entry)
+        
+        # Sort by occurrences (descending)
+        duplicate_list.sort(key=lambda x: x['occurrences'], reverse=True)
+        
+        result = {
+            "status": "success",
+            "path": self.path,
+            "files_analyzed": shell_files,
+            "total_files": len(shell_files),
+            "unique_duplicates": len(duplicates),
+            "check_definitions": self.check_definitions,
+            "duplicates": duplicate_list
+        }
+        
+        if self.json_output:
+            print(json.dumps(result, indent=2))
+        else:
+            self.print_readable_output(result)
 
 def main():
     """Entry point"""
-    app = DuplicateAliasScript(
+    app = ExtractDuplicateAliases(
         description=__doc__.format(script=gh.basename(__file__)),
-        skip_input=False,
-        manual_input=False,
+        skip_input=True,
+        manual_input=True,
         auto_help=True,
         boolean_options=[
+            (CHECK_DEFINITIONS, "Only show aliases with different definitions"),
             (JSON_OUTPUT, "Output results in JSON format"),
-            (VERBOSE_MODE, "Enable verbose output with additional warnings"),
-            (SUMMARY_ONLY, "Show only summary of duplicate counts"),
-            (USE_STDIN, "Read from standard input"),
-            (INCLUDE_COMMENTS, "Include commented alias definitions")
-        ])
+        ],
+        text_options=[
+            (EXCLUDE_PATH, "Paths to exclude (can be specified multiple times)"),
+        ],
+        positional_arguments=["path"],
+        float_options=None
+    )
     app.run()
-    
-    # Ensure no TODO variables remain
-    debug.assertion(not any(my_re.search(r"^TODO_", m, my_re.IGNORECASE)
-                            for m in dir(app)))
-
-#-------------------------------------------------------------------------------
 
 if __name__ == '__main__':
     debug.trace_current_context(level=TL.QUITE_VERBOSE)
     debug.trace(5, f"module __doc__: {__doc__}")
-    debug.assertion("TODO:" not in __doc__)
     main()
