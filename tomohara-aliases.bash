@@ -2501,6 +2501,7 @@ alias kill-iceweasel='kill-em iceweasel'
 # cmd-output(cmd, ...): show output for cmd to _{cmd}-$(TODAY).log (with spaces
 # replaced by underscores)
 # note: subsequent files for the same date use ...-$(TODAY).N.log (for N=1, ...)
+# now: also replaces other characters like / and \W excluding dash.
 #
 function cmd-output () {
     local command="$*"
@@ -2509,7 +2510,8 @@ function cmd-output () {
     ## local output_file
     ## output_file="_$(echo "$command" | tr ' ' '_')-$(TODAY).list"
     ## TEST: rename-with-file-date "$output_file"
-    output_base="_$(echo "$command" | tr ' ' '_')-$(TODAY)"
+    ## OLD: output_base="_$(echo "$command" | tr ' ' '_')-$(TODAY)"
+    output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')-$(TODAY)"
     output_file="$(get-free-filename "$output_base" . list)"
     ## TODO3?: use separate invocations for aliases than for other commands
     ($command || eval "$command") 2>&1 | ansifilter > "$output_file"
