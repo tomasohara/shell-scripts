@@ -81,6 +81,10 @@ alias-fn plint-torch 'plint "$@" | egrep -v "torch.*(no-member|no-name-in-module
 function plint-tester-testee {
     local script="$1"
     local test_script="tests/test_$script"
+    if [ "${VERBOSE:-0}" == "1" ]; then
+        echo "$script"
+        echo "$test_script"
+    fi
     plint "$script" "$test_script"
     if [ "${TEST:-0}" == "1" ]; then
         test-python-script "$test_script"
