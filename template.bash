@@ -83,6 +83,10 @@
 #     -i -c                         run command as if interactive invocation
 #     shopt -s expand_aliases       for alias support in scripts
 #     TODO3: flesh out
+#  - simple boolean env. testing    note: used throughout repo for convenience
+#     [ "${ENV_VAR:-0}" == "1" ]    [ "${VERBOSE:-0}" == "1" ]
+#  - general boolean env. testing   uses new function in tomohara-aliases.bash
+#     local var=$(is-true "VAR");   local verbose=$(is-true "VERBOSE");
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
