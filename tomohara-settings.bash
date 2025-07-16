@@ -127,6 +127,9 @@ export EDITOR="emacs"
 # Other default programs (e.g., for use with start.sh)
 export BROWSER="google-chrome"
 
+# Perl stuff
+cond-export PERL_RANDOM_SEED 122949823   # 7 millionth prime
+
 # Linux stuff
 if [ "$(under-linux)" = "1" ]; then
     cond-export WNSEARCHDIR /usr/share/wordnet
