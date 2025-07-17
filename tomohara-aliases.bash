@@ -2678,7 +2678,7 @@ function fix-sudoer-home-permission () {
 # check-html(filename): check HTML in filename
 alias check-html='check-xml --html'
 # check-html-vnu(filename): likewise check HTML using Validator.nu [Nu Html Checker]
-alias check-html-vnu='vny'
+alias check-html-vnu='vnu'
 ## TODO: archive (see check_html_javascript.py)
 function check-html-java-script () {
   local file="$1"
