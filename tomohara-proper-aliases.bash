@@ -428,7 +428,12 @@ alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$IPYTHON_TMP" run
 
 # color-test-failures(): show color-coded test result for pytest run (yellow for xfailed and red for regular fail)
 # color-test-results: likewise with green for passed and faint green xpassed
-simple-alias-fn color-output 'colout --case-insensitive'
+## OLD: simple-alias-fn color-output 'colout --case-insensitive'
+function color-output {
+    # note: in python 3.12: colout issues a bunch of SyntaxWarnings
+    ## TEST: colout --case-insensitive "$@" 2>&1 | grep -v 'SyntaxWarning: invalid escape sequence';
+    PYTHONWARNINGS="ignore::SyntaxWarning" colout --case-insensitive "$@" 2>&1 | grep -v 'SyntaxWarning: invalid escape sequence';
+}
 function color-test-failures {
     cat "$@" | color-output "\b(failed|error)" red | color-output "(xfaile?d?)" yellow;
 }
