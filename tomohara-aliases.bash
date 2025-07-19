@@ -1590,6 +1590,7 @@ function make-tar () {
         echo "Env. options: USE_DATE, TEMP, GTAR, MAX_SIZE, TAR_DEPTH, TAR_FILTER"
         echo "note: TEMP used by tar-dir, etc.; Also see [un]set-tar-bzip2 and [un]set-tar-xz"
         echo "(or try GTAR_OPTS='vfJ' [... tor-browser-linux-x86_64-14.5.tar.xz])."
+        echo "ex: TEMP='$BACKUP_DIR' tar-this-dir-dated"
         return
     fi
     ## TODO2: dispense with acrobatic arg parsing!
@@ -2505,7 +2506,8 @@ alias kill-iceweasel='kill-em iceweasel'
 #
 function cmd-output () {
     local command="$*"
-    local output_base, output_file
+    ## BAD: local output_base, output_file
+    local output_base output_file
     ## OLD:
     ## local output_file
     ## output_file="_$(echo "$command" | tr ' ' '_')-$(TODAY).list"
@@ -2949,7 +2951,14 @@ function ansi-filter {
 #    https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
 function pause-for-enter () {
     local message="$1"
-    if [ "$message" = "" ]; then message="Press enter to continue"; fi
+    local verbose=$(is-true "VERBOSE")
+    local press_enter="Press enter to continue"
+    if [ "$message" = "" ]; then
+        message="$press_enter";
+    elif $verbose; then
+        local newline_tab=$'\n\t'
+        message="${message}${newline_tab}${press_enter}"
+    fi
     # note: with -p for prompt and -r makes backslash not an escape [avoids shellcheck warning]
     read -r -p "$message "
 }
@@ -3099,6 +3108,9 @@ function python-import-path() { python-import-path-full "$@" | head -1; }
 function python-module-version-full { local module="$1"; alias-python -c "import $module; print([v for v in [getattr($module, a, '') for a in '__VERSION__ VERSION __version__ version'.split()] if v][0])"; }
 # TODO: check-error if no value returned
 function python-module-version { python-module-version-full "$@" 2> /dev/null; }
+function python-module-version-alt {
+    python -c "from mezcla.system import get_module_version; print(get_module_version('$1'));"
+}
 function python-package-members() { local package="$1"; alias-python -c "import $package; print(dir($package));"; }
 #
 alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  alias-python setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
