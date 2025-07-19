@@ -2953,9 +2953,10 @@ function pause-for-enter () {
     local message="$1"
     local verbose=$(is-true "VERBOSE")
     local press_enter="Press enter to continue"
-    if [ "$message" = "" ]; then
-        message="$press_enter";
-    elif $verbose; then
+    if [[ "$message" == "" ]]; then
+        message="Waiting for confirmation";
+    fi
+    if $verbose; then
         local newline_tab=$'\n\t'
         message="${message}${newline_tab}${press_enter}"
     fi
