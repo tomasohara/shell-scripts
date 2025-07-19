@@ -1,3 +1,4 @@
+#! /usr/bin/env perl
 # *-*-perl-*-*
 eval 'exec perl -Ssw $0 "$@"'
     if 0;
