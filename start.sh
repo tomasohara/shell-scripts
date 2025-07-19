@@ -168,7 +168,10 @@ lower_file=$(echo "$file" | perl -pe 's/(.*)/\L$1/;')
 # Change invoked program if different for editing than for viewing
 office_program="libreoffice"
 pdf_program="evince"
-image_program="eog"
+## OLD: image_program="eog"
+## NOTE: eog is anachronistic so trying KDE-ish gwenview; install as follows
+##   sudo apt install gwenview
+image_program="gwenview"
 default_program="emacs"
 # TODO: doc_program="libreoffice"
 if [ "$for_editting" = "1" ]; then
