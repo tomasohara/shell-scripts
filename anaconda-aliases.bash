@@ -193,10 +193,13 @@ function conda-activate-env-like {
     local env_name="$1"
     # note: regex groups                        1 222       3333333333  
     #                                            /.../_ENV_/bin/python
-    local bin_dir
-    bin_dir=$(which python | perl -pe "s@^((.*)/[^/]+/bin/python$)@\2/$env_name/bin@;")
+    local bin_dir="$ANACONDA_HOME/envs/$env_name/bin"
     if [ ! -e "$bin_dir" ]; then
-        echo "Error: unable to resolve anaconda bin dir from current path"
+        bin_dir=$(which python | perl -pe "s@^((.*)/[^/]+/bin/python$)@\2/$env_name/bin@;")
+    fi
+    #
+    if [ ! -e "$bin_dir" ]; then
+        echo "Error: unable to resolve anaconda bin dir"
     else
         echo "Warning: only prepending PATH w/ $bin_dir (e.g., no CONDA_ env updates)"
         export PATH="$bin_dir:$PATH";
