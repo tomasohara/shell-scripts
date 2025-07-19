@@ -142,10 +142,10 @@ egrep="grep --extended-regexp"
 #................................................................................
 # Aliases
 
-# pause-for-enter(): print message and wait for user to press enter
+# git-pause-for-enter(): print message and wait for user to press enter
 # TODO: extend to press-any-key; see
 #    https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
-function pause-for-enter () {
+function git-pause-for-enter () {
     local message="$1"
     ## TODO2: add "enter or ^C" to user message
     if [ "$message" = "" ]; then message="Press enter to continue"; fi
@@ -323,7 +323,7 @@ function git-update-verified {
     changed="$(git-diff-list)"
     if [ "$changed" != "" ]; then
         echo "Current changes: $changed"
-        pause-for-enter "Proceed with update even though potential for conflict? (Enter for Y otherwise ^C)"
+        git-pause-for-enter "Proceed with update even though potential for conflict? (Enter for Y otherwise ^C)"
     fi
     git-update-force
 }
@@ -406,7 +406,7 @@ function git-add-commit-push {
 
     # Push the changes after showing synopsis and getting user confirmation
     echo ""
-    pause-for-enter "About to commit $file_spec (with message '$message')"
+    git-pause-for-enter "About to commit $file_spec (with message '$message')"
     echo "issuing: git commit -m '$message'"
     git commit -m "$message" >> "$log" 2>&1
     perl -pe 's/^/    /;' "$log"
@@ -414,7 +414,7 @@ function git-add-commit-push {
     if [ "${GIT_SKIP_PUSH:-0}" == "1" ]; then
         echo "Skipping push (due to GIT_SKIP_PUSH)"
     else    
-        pause-for-enter 'FYI: About to push, so review commit log above.'
+        git-pause-for-enter 'FYI: About to push, so review commit log above.'
         echo "issuing: git push --verbose"
         if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
            git push --verbose <<EOF >> "$log" 2>&1
@@ -511,7 +511,7 @@ function git-reset-file {
     ## if [ "$1" = "--hard" ]; then
     ##     reset_options="$1";
     ##     shift
-    ##     pause-for-enter $'Warning: reset --hard changes the both index and working tree!\nPress enter to proceed'
+    ##     git-pause-for-enter $'Warning: reset --hard changes the both index and working tree!\nPress enter to proceed'
     ## fi
     if [ "$*" = "" ]; then
         echo "Error: need to specify a file"
