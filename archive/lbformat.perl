@@ -1,4 +1,4 @@
-# *-*-perl-*-*
+#! /usr/bin/env -S perl -sw
 eval 'exec perl -Ssw $0 "$@"'
     if 0;
 #!/usr/local/bin/perl -- # -*- Perl -*- Force Emacs perl-mode

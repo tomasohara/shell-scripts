@@ -1,4 +1,4 @@
-# *-*-perl-*-*
+#! /usr/bin/env -S perl -sw
 eval 'exec perl -Ssw $0 "$@"'
     if 0;
 # Module for implementing a client/server protocol. This is based on the 
