@@ -269,3 +269,25 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ##
 ## $ pwd
 ## /home/tomohara/temp/n8n-temp/packages/@n8n/nodes-langchain
+
+##------------------------------------------------------------------------------
+
+## TODO: make sure no gratitous usage entries (e.g., xyz.perl whatver)
+##
+## $ ./perlcalc.perl -help
+## 
+## usage: perlcalc.perl [options]
+## 
+## options = [-init=expr] [-fmt=printf-format-spec] [-integer | -precision=N] [-args | -]
+## 
+## examples:
+## 
+## perlcalc.perl whatever
+## perlcalc.perl -precision=6 '1/10e6'
+
+##------------------------------------------------------------------------------
+
+## TODO: make sure no temporary scripts in repo
+##
+## $ git-log- _debug-prep_brill.perl | grep -c commit
+## 3
