@@ -481,6 +481,7 @@ function git-log-plus { invoke-git-command log --name-status "$@" | less --quit-
 alias git-log-diff-plus='invoke-git-command log --patch'
 alias git-log-follow='git-log-plus --follow'
 alias git-blame-alias='invoke-git-command blame'
+alias git-rm-alias='invoke-git-command rm'
 
 # git-add-plus: add filename(s) to repository
 # note: if GIT_FORCE is 1 then --force added (e.g., to override .gitignore)
@@ -995,8 +996,9 @@ function git-misc-alias-usage() {
     echo "    GIT_MESSAGE='moved' git-move-to-dir DIR file1 file2"
     echo ""
     echo "To delete files (mucho cuidado):"
-    echo "   git rm old-file"
-    echo "   GIT_MESSAGE='deleted' git-update-commit-push old-file"
+    # note: Bypasses 'git add' in git-update-commit-push (TODO3: customize alias for this).
+    # See https://stackoverflow.com/questions/37279654/when-should-i-use-rm-git-rm-git-rm-cached-git-add.
+    echo '   old="TODO..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" GIT_SKIP_ADD=1 git-update-commit-push "$old"'
     echo ""
     echo "To check in all tracked files with changes (examinar primero):"
     echo "   GIT_MESSAGE='...' git-update-commit-push \$(git-files-changed)"
