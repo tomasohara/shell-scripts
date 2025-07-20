@@ -135,9 +135,10 @@
 ## DEBUG: echo "in ${BASH_SOURCE[0]}"
 
 #................................................................................
-# Constans
+# Constants
 
 egrep="grep --extended-regexp"
+PERL="perl -Ssw"     # S: find in path; s: enable switches; w: show warnings
 
 #................................................................................
 # Aliases
@@ -171,9 +172,8 @@ function quiet-unalias-alias {
     unalias "$@" 2> /dev/null || true;
 }
 
-
 # HACK: wrapper around check_errors.perl w/ new QUIET option
-function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 check_errors.perl -context=5 "$@") 2>&1; }
+function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 $PERL check_errors.perl -context=5 "$@") 2>&1; }
 
 #................................................................................
 
@@ -867,7 +867,7 @@ function git-checkout-branch {
         echo "note: available branches:"
         # TODO: get maldito git to cooperate better (e.g., plain text option)!
         # shellcheck disable=SC2016
-        PAGER="" git branch --all | extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
+        PAGER="" git branch --all | $PERL extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
         return
     fi
     local branch_ref
@@ -893,7 +893,7 @@ simple-alias-fn git-branch-checkout  git-checkout-branch
 # git-branch-alias(): return current branch for repo
 function git-current-branch {
     local git_branch
-    git_branch="$(git status | extract_matches.perl "On branch (\S+)")"
+    git_branch="$(git status | $PERL extract_matches.perl "On branch (\S+)")"
     echo "$git_branch"
 }
 alias git-branch-alias='git-current-branch'
