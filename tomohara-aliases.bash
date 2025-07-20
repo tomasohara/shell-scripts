@@ -414,12 +414,12 @@ function under-linux {
 # to override on command line
 #     -+<option>    ex: -+F
 #     
-export LESS="-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"
+cond-export LESS "-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"
 # Disables full-screen repaints under minimal-installation hosts (e.g., Beowolf nodes)
 if [ "$BAREBONES_HOST" = "1" ]; then export LESS="-cIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"; fi
-export PAGER=less
-export PAGER_CHOPPED="less -S"
-export PAGER_NOEXIT="less -+F"
+cond-export PAGER less
+cond-export PAGER_CHOPPED "less -S"
+cond-export PAGER_NOEXIT "less -+F"
 function zless () { zcat "$@" | $PAGER; }
 # 
 # zhead(file, head-opts)
@@ -433,7 +433,7 @@ alias less-clipped='$PAGER_NOEXIT -S'
 alias less-tail='$PAGER_NOEXIT +G'
 alias less-tail-clipped='$PAGER_NOEXIT +G -S'
 alias ltc=less-tail-clipped
-export ZPAGER=zless
+cond-export ZPAGER zless
 
 #-------------------------------------------------------------------------------
 trace start of main settings
@@ -490,8 +490,7 @@ function is-true {
 # FIGNORE: A colon-separated list of suffixes to ignore when performing filename completion ("tab completion")
 export FIGNORE=".o:.fasl:.fas:.lib"
 ## TEST: export FIGNORE=".o:.fasl:.fas:.lib:.log"
-## TODO: figure out how to exlcude .log for executable-tab-expansion (e.g., first position)
-export FIGNORE=".o:.fasl:.fas:.lib"
+## TODO: figure out how to exclude .log for executable-tab-expansion (e.g., first position)
 set -o noclobber
 #
 # case-insensitive file glob
@@ -600,10 +599,10 @@ export CDPATH=.
 
 # flag for turning off GNOME, which can be flakey at times
 # See xterm.sh (e.g., gnome-terminal).
-export USE_GNOME=1
+cond-export USE_GNOME 1
 
 # General Settings for my scripts
-export PRECISION=3
+cond-export PRECISION 3
 alias debug-on='export DEBUG_LEVEL=3'
 if [ "$PERLLIB" = "" ]; then PERLLIB="."; else PERLLIB="$PERLLIB:."; fi
 # NOTE: perl uses architecture-specific subdirectories under PERLLIB
@@ -640,11 +639,11 @@ append-path "$HOME/perl/bin"
 # used at Convera).
 ## BAD: export TIME_CMD="command time"
 # note: command is a binary under MacOs but just a shell builtin under Linux
-export TIME_CMD="command time"
+cond-export TIME_CMD "command time"
 if [ "$(which "command" 2> /dev/null)" == "" ]; then
     export TIME_CMD=/usr/bin/time
 fi
-export PERL="$NICE $TIME_CMD perl -Ssw"
+cond-export PERL "$NICE $TIME_CMD perl -Ssw"
 
 # Terminal window title
 alias set-xterm-title='set_xterm_title.bash'
@@ -819,7 +818,7 @@ function copy-readonly-to-dir () {
     for f in "$@"; do copy-readonly "$f" "$dir"; done
 }
 #
-export NICE="nice -19"
+cond-export NICE "nice -19"
 ## DUPLICATE: export TIME_CMD="/usr/bin/time"
 
 alias fix-dir-permissions="find . -type d -exec chmod go+xs {} \;"
@@ -952,7 +951,7 @@ EGREP="$GREP --perl-regexp"
 ## OLD: alias egrep="$EGREP --color=auto"
 simple-alias-fn egrep "$EGREP --color=auto"
 # MY_GREP_OPTIONS: options for use with grep aliases
-export MY_GREP_OPTIONS="-n $skip_dirs -s"
+cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
 # shellcheck disable=SC2086
 {
 function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
@@ -2968,9 +2967,9 @@ function pause-for-enter () {
 # Python related
 ## *** Python stuff ***
 
-export PYTHON_CMD="$TIME_CMD python3 -u"
-export PYTHON="$NICE $PYTHON_CMD"
-export PYTHONPATH="$HOME/python:$PYTHONPATH"
+cond-export PYTHON_CMD "$TIME_CMD python3 -u"
+cond-export PYTHON "$NICE $PYTHON_CMD"
+cond-export PYTHONPATH "$HOME/python:$PYTHONPATH"
 cond-export PYTEST_CMD "$TIME_CMD pytest"
 cond-export PYTEST "$NICE $PYTEST_CMD"
 #
