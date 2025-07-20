@@ -42,7 +42,8 @@
 # Set bash regular and/or verbose tracing
 # note: tracing off by default unless active for current shell
 was_tracing=false
-if [ "1" = "$(set -o | grep -v '^xtrace.*on')" ]; then 
+## OLD: if [ "1" = "$(set -o | grep -v '^xtrace.*on')" ]; then
+if [[ "" != "$(set -o | grep 'xtrace.*on')" ]]; then 
    was_tracing=true
 fi
 show_tracing="$was_tracing"
@@ -60,7 +61,13 @@ shopt -s expand_aliases
 $show_tracing && set -o xtrace
 ##
 source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
-export TOM_BIN="$source_dir"
+export TOM_BIN="${TOM_BIN:-"$source_dir"}"
+if [ "$TOM_BIN" != "$source_dir" ]; then
+    echo "FYI: TOM_BIN different from all-tomohara-aliases-etc.bash source dir:"
+    echo "    $TOM_BIN"
+    echo "    $source_dir"
+    source_dir="$TOM_BIN"
+fi
 source "$source_dir/tomohara-aliases.bash"
 if [ "${SOURCE_SETTINGS:-0}" = "1" ]; then
     source "$source_dir/tomohara-settings.bash"
