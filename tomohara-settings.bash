@@ -22,9 +22,10 @@ fi
 OSTYPE_BRIEF="$OSTYPE"
 case "$OSTYPE_BRIEF" in
     linux*) export OSTYPE_BRIEF=linux; ;;
+    cygwin*) export OSTYPE_BRIEF=cygwin; ;;
     solaris*) export OSTYPE_BRIEF=solaris;  alias printenv='printenv.sh' ;;
     darwin*) export OSTYPE_BRIEF=mac-os;  ;;
-    *) echo "Warning: unknown OS type"; ;;
+    *) echo "Warning: unknown OS type ($OSTYPE)"; ;;
 esac
 
 # Add directories to path: ./bin, ./bin/<OS>
@@ -131,8 +132,11 @@ export BROWSER="google-chrome"
 cond-export PERL_RANDOM_SEED 122949823   # 7 millionth prime
 
 # Linux stuff
+## OLD:
 if [ "$(under-linux)" = "1" ]; then
     cond-export WNSEARCHDIR /usr/share/wordnet
+elif [ "$(under-cygwin)" = "1" ]; then
+    cond-export WNSEARCHDIR /lib/wnres/dict
 fi
 if [ "$DOMAIN_NAME" = "" ]; then
     # shellcheck disable=SC2155
