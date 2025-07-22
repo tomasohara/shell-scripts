@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 #
 # translation of do_diff.sh into bash via ChatGPT and manual revision
 #
