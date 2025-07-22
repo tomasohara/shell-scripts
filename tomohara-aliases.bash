@@ -85,6 +85,10 @@
 #    -- SC2139: This expands when defined, not when used. Consider escaping.
 #    -- SC2206: Quote to prevent word splitting/globbing
 #    -- SC2116: Useless echo?
+# - Globally ignores the following:
+#    -- SC1001: Can't follow non-constant source
+#    -- SC1091: Not following: ... was not specified as input (see shellcheck -x)
+#    shellcheck disable=SC1001,SC1091
 #
 # TODO:
 # - ***** Put work-specific stuff in separate file!"
@@ -421,7 +425,8 @@ function under-cygwin {
 cond-export LESS "-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"
 # Disables full-screen repaints under minimal-installation hosts (e.g., Beowolf nodes)
 if [ "$BAREBONES_HOST" = "1" ]; then export LESS="-cIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"; fi
-cond-export PAGER less
+## OLD: cond-export PAGER less
+export PAGER="${PAGER:-less}"
 cond-export PAGER_CHOPPED "less -S"
 cond-export PAGER_NOEXIT "less -+F"
 function zless () { zcat "$@" | $PAGER; }
@@ -473,7 +478,8 @@ function is-true {
     local env_name="$1"
     
     # Get the value of that environment variable (default to "false")
-    local value=$(eval echo "\${$env_name:-false}")
+    local value=
+    value=$(eval echo "\${$env_name:-false}")
     
     # Convert to lowercase for easier checking
     value=$(echo "$value" | tr '[:upper:]' '[:lower:]')
@@ -1802,7 +1808,8 @@ function heuristic-notes-entry-gr-aux() {
     perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $note_files >| "$temp_base.$term_num"
     note_files="$temp_base.$term_num"
     for term in $(echo "$regex" | perl -pe 's/(\.\*)/ /g;'); do
-        let term_num++
+        ## OLD: let term_num++
+        (( term_num++ ))
         perlgrep -para -i "$term" $note_files >| "$temp_base.$term_num"
         note_files="$temp_base.$term_num"
     done
@@ -3179,10 +3186,10 @@ function run-jupyter-notebook () {
     log="$TEMP/jupyter-p$port-$(TODAY).log"
     rename-with-file-date "$log"
     # note: clears notebook token to disable authentication
-    ## TEST: jupyter notebook --ServerApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
+    ## TEST: jupyter notebook --ServerApp.token='' --no-browser --port "$port" --ip "$ip" >> "$log" 2>&1 &
     ## TODO1: make sure IdentityProvider.token is right one to use (maltdito jupyter)
     ## TODO4?: JUPYTER_TOKEN="" jupyter notebook --no-browser --port ...
-    jupyter notebook --IdentityProvider.token='' --no-browser --port $port --ip $ip > "$log" 2>&1 &
+    jupyter notebook --IdentityProvider.token='' --no-browser --port "$port" --ip "$ip" > "$log" 2>&1 &
     # Let jupyter initialize
     local delay=6
     echo "sleeping $delay seconds for jupyter to finish initializing"
