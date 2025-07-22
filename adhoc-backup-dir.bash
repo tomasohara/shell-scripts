@@ -16,9 +16,15 @@
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #  
-## echo "$@"
-## set -o xtrace
-## DEBUG: set -o verbose
+if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+    echo "$0 $*"
+fi
+if [[ "${TRACE:-0}" == "1" ]]; then
+    set -o xtrace
+fi
+if [[ "${VERBOSE:-0}" == "1" ]]; then
+    set -o verbose
+fi
 
 # Show usage statement
 # TODO: convert into a function that get invoked when $1 is empty or --help
@@ -149,6 +155,7 @@ append-path "$source_dir"
 
    ok=0;
    if $INTERACTIVE; then
+       ## TODO2: create temp script for part 2 and source that
        prompt="script '$trace_log'";
        read -r -e -i "$prompt" command;
        echo "cut-n-paste second snippet";
@@ -175,7 +182,6 @@ append-path "$source_dir"
        basename="$basename-$(TODAY)";
        echo "basename: $basename";
        #
-       ## OLD: TAR="command tar"
        TAR="${TAR:-"tar"}";
        #
        # NOTE: Filters /System/Volume to avoid spurious errors (e.g., "Cannot stat")
@@ -193,13 +199,13 @@ append-path "$source_dir"
        ($NICE find "${subdirs[@]}" $MISC_FIND_OPTIONS -type f -mtime "-$max_days_old" -size "-${max_size_chars}c" | $EGREP -v '(^./System/Volume)' | $EGREP -v "EXCLUDE_REGEX" | $NICE $TAR cvfzT "$basename.tar.gz" -) > "$basename.tar.log" 2>&1;
        ok=$?;
        dir "$basename"* | cat;
-       ##
+       #
        check-errors-excerpt "$basename.tar.log" | head;
      }
 
    if $INTERACTIVE; then
        [ $ok == 0 ] && exit;    # exit out of script command
-       ##
+       #
        check-errors-excerpt "$trace_log" | head;
    fi
 }                   ## ** don't cut-n-paste here **
