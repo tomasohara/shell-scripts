@@ -16,6 +16,9 @@
 # - Omits tomohara-settings.bash unless SOURCE_SETTINGS=1,
 # - The env.options are TRACE_/VERBOSE_SOURCE rather than TRACE/VERBOSE in
 #   case sourced via a script which used the latter (see local-workflows.sh).
+# - Ignoring following shellcheck warnings:
+#   SC1091: Not following: ... was not specified as input (see shellcheck -x).
+#   shellcheck disable=SC1091
 #
 #-------------------------------------------------------------------------------
 # Advanced usage (e.g., within scripts using aliases):
@@ -60,8 +63,9 @@ fi
 shopt -s expand_aliases
 $show_tracing && set -o xtrace
 ##
-source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
-export TOM_BIN="${TOM_BIN:-"$source_dir"}"
+source_dir="$(realpath "$(dirname "${BASH_SOURCE[0]:-$0}")")"
+export TOM_BIN
+TOM_BIN="$(realpath "${TOM_BIN:-"$source_dir"}")"
 if [ "$TOM_BIN" != "$source_dir" ]; then
     echo "FYI: TOM_BIN different from all-tomohara-aliases-etc.bash source dir:"
     echo "    $TOM_BIN"
