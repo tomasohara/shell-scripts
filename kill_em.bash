@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 #
 # translation of kill_em.sh into bash via ChatGPT and manual revision
 #

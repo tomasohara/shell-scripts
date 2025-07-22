@@ -1,5 +1,4 @@
 #! /usr/bin/env bash
-#! /bin/bash
 #
 # Sets the xterm title bar to the string given on the command line.
 # The first argument gives the full title and the second the iconified title.

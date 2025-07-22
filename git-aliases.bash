@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 #
 # Aliases for Git source control (see https://git-scm.com). For the most part, these
 # composite operations such as git-update-commit-push. In some cases, the aliases are

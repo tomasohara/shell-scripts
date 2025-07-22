@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 #
 # start.sh: invokes document-specific program based on file argument (e.g., okular for pdf files). This is analogous to the Windows start command.
 #

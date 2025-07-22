@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 #
 # This script uses GitHub local actions via act:
 #    https://github.com/nektos/act
