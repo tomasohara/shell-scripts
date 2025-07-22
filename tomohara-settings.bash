@@ -96,6 +96,7 @@ shopt -s nocaseglob
 export LESSCHARSET=utf-8
 # Also have it display binary characters  as underline instead of reverse video (i.e., standout)
 export LESSBINFMT="*u<%02X>"
+export SHELL="/bin/bash"
 
 # Don't enable default .bashrc settings
 cond-export SKIP_DEFAULT_BASHRC 1
