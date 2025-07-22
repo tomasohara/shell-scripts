@@ -54,7 +54,7 @@ $show_tracing && set -o xtrace
 
 # note: $source_dir used elsewhere so $this_source_dir used here
 ## DEBUG: echo "in ${BASH_SOURCE[*]}"
-this_source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
+this_source_dir="$(realpath "$(dirname "${BASH_SOURCE[0]:-$0}")")"
 ## DEBUG: trace-vars this_source_dir
 source "$this_source_dir/../all-tomohara-aliases-etc.bash"
 ## DEBUG: startup-trace "post-init: aliases-for-testing.bash"
