@@ -101,7 +101,8 @@ function clone-repo () {
     log="_clone-$repo-$(T).log"
     # maldito linux: -c option required for command for
     # shellcheck disable=SC2086
-    if [ "$(under-linux)" = "1" ]; then
+    ## OLD: if [ "$(under-linux)" = "1" ]; then
+    if [[ ("$(under-linux)" == "1") || ("$(under-cygwin)" == "1") ]]; then
         command script "$log" -c "git clone '$url'"
     else
         command script "$log" git clone "$url"
@@ -115,6 +116,8 @@ function clone-repo () {
 }
 # black-plain(file): run black python reformatted over FILE filtering out emoticons
 simple-alias-fn black-plain 'convert-emoticons-aux black'
+alias batspp-simple=simple_batspp.py
+alias batspp-prep=jupyter_to_batspp.py
 
 # run-python-script(script, args): run SCRIPT with ARGS with output to dir/_base-#.out
 # and stderr to dir/_base-#.log where # is value of global $_PSL_.
