@@ -10,6 +10,7 @@
 # - See requirements.txt for Python package requirements.
 #
 ansifilter
+batspp
 diffutils
 git
 jupyter-core
