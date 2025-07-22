@@ -400,6 +400,10 @@ function under-linux {
     under-os ".*linux.*" "$@"
     return $?
 }
+function under-cygwin {
+    under-os ".*cygwin.*" "$@"
+    return $?
+}
 
 # Settings for less command 
 # LESS="-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"
