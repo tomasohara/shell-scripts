@@ -182,7 +182,7 @@ function create-backup-script () {
     if [ "$1" != "" ]; then script="$1"; fi
 
     # Create backup script
-    echo "#! /bin/bash" >| "$script";
+    echo "#! /usr/bin/env bash" >| "$script";
     echo 'echo "start: $(date)"' >> "$script"; 
 
     echo '# Make sure backup aliases defined (e.g., in case backup-aliases.sh not already sourced).'
