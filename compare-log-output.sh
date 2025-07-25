@@ -40,6 +40,7 @@ filter_hex=1
 relaxed_filtering=0
 retain_whitespace=0
 show_usage=0
+brief_usage=0
 verbose_output=0
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 while [ "$moreoptions" = "1" ]; do
@@ -87,20 +88,23 @@ while [ "$moreoptions" = "1" ]; do
     elif [ "$1" = "--strip-ignore" ]; then
         strip_ignore="1"
     else
-	if [ "$1" != "--help" ]; then
-	    echo "unknown option: $1";
-	fi
 	show_usage=1
+	if [ "$1" != "--help" ]; then
+	    echo "Error: unknown option: $1";
+            brief_usage=1
+	fi
     fi
     shift 1;
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 done
 #
 
-if [ "$1" = "" ]; then
+if [[ ("$2" == "") && ("$show_usage" == "0") ]]; then
+    echo "Error: missing filename argument(s)"
     show_usage=1
+    brief_usage=1
 fi
-if [ "$show_usage" = "1" ]; then
+if [[ "$show_usage" == "1" ]]; then
     script_name=$(basename "$0")
     echo ""
     echo "Usage: $script_name [options] file1 file2-or-dir"
@@ -108,36 +112,38 @@ if [ "$show_usage" = "1" ]; then
     echo "    options: [--ignore perl-regex] [--include-ptrs | --include-time | --[no-]filter-hex] [--plain-diff] [--diff program]"
     echo "    misc-options: [--relaxed] [--[no]-filter-time] [--include-hex] [--reset-ignore] [--strip-ignore] [--trace] [--verbose]"
     echo ""
-    echo "Examples:"
-    echo ""
-    echo "$script_name --ignore '^\d+:\d+:\d+,\d+' jboss-init-1.log  jboss-init-2.log"
-    echo ""
-    echo "$script_name --ignore '^\s*<job_id>.*' city_easternshore_md.xml ../craigslist_20160609_usa100/"
-    echo ""
-    echo "Notes:"
-    echo "- The regex pattern matching is not case sensitive (i.g., case ignored)."
-    echo "- Timestamps are removed prior to comparison unless --include-time ."
-    echo "- Hex addresses are removed as with '--ignore [0-9A-Fa-f]{7,16}'."
-    echo "- Additional filter pattern can be specified via --ignore".
-    echo "- The pattern for ignore is a perl regex."
-    echo "- Use --reset-ignore to ignore the default patterns (deprecated)."
-    echo "- The --include-ptrs option is alias for --include-hex."
-    echo "- kdiff is default diff program (see kdiff.sh)."
-    echo "- The --include-xyz options are deprecated: include refers to filtering not output."
-    echo "- The --relaxed option include regex's that tend to overgenerate."
-    if [ "$verbose_output" = "1" ]; then
-        echo "- The --strip-ignore removes <user> placeholders via --ignore"
-        echo "- Timestamp regex's (doubly escaped for interpolation):"
-        echo "  $timestamp_regex1"
-        echo "  $timestamp_regex2"
-        echo "  $timestamp_regex3"
-        echo "- Hexadecimal regex (not escaped):"
-        echo "  $ignore_hex1"
-        echo "- Relaxed hexadecimal regex's (not escaped):"
-        echo "  $ignore_hex2"
-        echo "  $ignore_hex3"
-    else
-        echo "- Use --verbose for detailed help"
+    if [[ "$brief_usage" == "0" ]]; then
+        echo "Examples:"
+        echo ""
+        echo "$script_name --ignore '^\d+:\d+:\d+,\d+' jboss-init-1.log  jboss-init-2.log"
+        echo ""
+        echo "$script_name --ignore '^\s*<job_id>.*' city_easternshore_md.xml ../craigslist_20160609_usa100/"
+        echo ""
+        echo "Notes:"
+        echo "- The regex pattern matching is not case sensitive (i.g., case ignored)."
+        echo "- Timestamps are removed prior to comparison unless --include-time ."
+        echo "- Hex addresses are removed as with '--ignore [0-9A-Fa-f]{7,16}'."
+        echo "- Additional filter pattern can be specified via --ignore".
+        echo "- The pattern for ignore is a perl regex."
+        echo "- Use --reset-ignore to ignore the default patterns (deprecated)."
+        echo "- The --include-ptrs option is alias for --include-hex."
+        echo "- kdiff is default diff program (see kdiff.sh)."
+        echo "- The --include-xyz options are deprecated: include refers to filtering not output."
+        echo "- The --relaxed option include regex's that tend to overgenerate."
+        if [ "$verbose_output" = "1" ]; then
+            echo "- The --strip-ignore removes <user> placeholders via --ignore"
+            echo "- Timestamp regex's (doubly escaped for interpolation):"
+            echo "  $timestamp_regex1"
+            echo "  $timestamp_regex2"
+            echo "  $timestamp_regex3"
+            echo "- Hexadecimal regex (not escaped):"
+            echo "  $ignore_hex1"
+            echo "- Relaxed hexadecimal regex's (not escaped):"
+            echo "  $ignore_hex2"
+            echo "  $ignore_hex3"
+        else
+            echo "- Use --verbose for detailed help"
+        fi
     fi
     exit
 fi
