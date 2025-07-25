@@ -820,6 +820,11 @@ simple-alias-fn screenshot-window 'gnome-screenshot --window --delay ${SCREENSHO
 # show-window-list(): show window title, etc.
 alias show-window-list='wmctrl -l'
 
+# curl-save(url): download URL and save in file with similar name
+# note: --location enables redirections
+# TODO3: strip URL args
+alias curl-save='curl --location --remote-name'
+
 #...............................................................................
 # Linux admin
 
