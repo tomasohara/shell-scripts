@@ -429,6 +429,10 @@ if [ "$BAREBONES_HOST" = "1" ]; then export LESS="-cIX-P--Less-- ?f%f:(stdin). ?
 export PAGER="${PAGER:-less}"
 cond-export PAGER_CHOPPED "less -S"
 cond-export PAGER_NOEXIT "less -+F"
+# less-pattern(pattern, ...): invoke less with PATTERN (and other args) unless empty
+function less-pattern {
+    if [ "$1" ]; then less -p "$@"; else less; fi
+}
 function zless () { zcat "$@" | $PAGER; }
 # 
 # zhead(file, head-opts)
@@ -1772,7 +1776,7 @@ alias para-gr='para-grep -i -n'
 ## TODO: make a pass to ensure aliases have unique leading prefix, as well as being easy to remember (n.b., ease of tab completion vs. recall)
 function cached-notes-para-gr { para-gr "$@" _master-note-info.list | $PAGER; }
 # TODO: work out better name
-function cached-notes-para-gr-less { cached-notes-para-gr "$@" | less -p "$1"; }
+function cached-notes-para-gr-less { cached-notes-para-gr "$@" | less-pattern "$1"; }
 ##
 notes_glob="*notes*.txt  *notes*.list *notes*.log"
 # shellcheck disable=SC2086
@@ -1782,21 +1786,29 @@ function notes-grep() { perlgrep "$@" $notes_glob; }
 # aliases for grepping through notes files and archiving non-note log files 
 function para-notes-gr { perlgrep -para -i "$@" $notes_glob 2>&1 | $GREP -v "Can't open \*notes\*" | $PAGER; }
 # TODO: use xyz-grl in analogy with grepl alias (n.b., uses $PAGER)
-function para-notes-gr-less-p { para-notes-gr "$@" | less -p "$1"; }
+function para-notes-gr-less-p { para-notes-gr "$@" | less-pattern "$1"; }
 # notes-entry-gr(): treat text with -----'s as single unit for searching
 # notes-entry-gr-aux(glob, pattern): search for PATTERN in GLOB
 function notes-entry-gr-aux() {
+    if [[ "$2" == "" ]]; then
+        echo "Usage: [HEURISTIC_NOTE_GREP=B] notes-entry-gr-aux file_glob pattern"
+        echo ""
+        return
+    fi
     if [[ "${HEURISTIC_NOTE_GREP:-0}" == "1" ]]; then
         heuristic-notes-entry-gr-aux "$@";
         return
     fi
     local glob="$1"
     shift
-    ## OLD: perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | convert-emoticons-stdin | perlgrep -para -i "$@" - 2>&1 | less -p "$1";
-    perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" - 2>&1 | convert-emoticons-stdin | less -p "$1";
+    ## OLD: perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | convert-emoticons-stdin | perlgrep -para -i "$@" - 2>&1 | less-pattern "$1";
+    # note: convert consecutive newlines within dashed lines to <ln><sp><ln> so inside Perl "paragraph"
+    perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" - 2>&1 | convert-emoticons-stdin | less-pattern "$1";
 }
-# heuristic-notes-entry-gr-aux(glob, regex): filters by terms in regex prior to notes-entry-gr-aux
-# note: used with multiple operators over large notes files (abc.*pdq.*xyz)
+# heuristic-notes-entry-gr-aux(glob, regex): filters by terms in regex prior to notes-entry-gr-aux,
+# converting highlighting regex into alternative rather than sequence (e.g., "dog.*cat" => "dog|cat").
+# note: used with multiple operators over large notes files (abc.*pdq.*xyz) and also allows
+# for AND-style entry matching.
 function heuristic-notes-entry-gr-aux() {
     local note_files="$1"
     shift
@@ -1813,19 +1825,20 @@ function heuristic-notes-entry-gr-aux() {
         perlgrep -para -i "$term" $note_files >| "$temp_base.$term_num"
         note_files="$temp_base.$term_num"
     done
-    # Apply overall regex
-    perlgrep -para -i "$regex" $note_files 2>&1 | convert-emoticons-stdin | less -p "$regex";
+    # Apply overall regex with | used for alternatives
+    regex=$(echo "$regex" | perl -pe "s/ |(\.\*)/\|/g;")
+    perlgrep -para -i "$regex" $note_files 2>&1 | convert-emoticons-stdin | less-pattern "$regex";
     ## TEST: for sake of less pattern highlighting', converts newlines to returns
-    ## perlgrep -para -i "$regex" $note_files 2>&1 | convert-emoticons-stdin | perl -pe 's/\n(.)/\r$1/g;' | less -p "$regex";
+    ## perlgrep -para -i "$regex" $note_files 2>&1 | convert-emoticons-stdin | perl -pe 's/\n(.)/\r$1/g;' | less-pattern "$regex";
     
 }
 }   ## end shellcheck
 ##
 alias notes-entry-gr='notes-entry-gr-aux "$notes_glob"'
-function notes-entry-gr-less-p { notes-entry-gr "$@" | less -p "$1"; }
+function notes-entry-gr-less-p { notes-entry-gr "$@" 2>&1 | less-pattern "$1"; }
 alias entry-notes=notes-entry-gr
 alias cached-entry-gr='notes-entry-gr-aux _master-note-info.list'
-function cached-entry-gr-less-p { cached-entry-gr "$@" | less -p "$1"; }
+function cached-entry-gr-less-p { cached-entry-gr "$@" 2>&1 | less-pattern "$1"; }
 # TODO: * work good scheme for shortcut aliases (e.g. both memorable and easily tab-completable)!
 alias grepl-entry=cached-entry-gr-less-p
 alias grepl-entry-here=entry-notes
