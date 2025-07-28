@@ -14,7 +14,7 @@ if ($?TRACE) then
     if ("$TRACE" == "1") then
         echo "$*"
         set echo = 1
-    ebdif
+    endif
 endif
 
 # Parse command-line arguments
@@ -22,7 +22,9 @@ endif
 if ("$1" == "") then
     set script_name = `basename $0`
     ## TODO: remove following which is only meant for when ./template.csh run
-    if ("$script_name" == "template.csh") echo "Warning: not intended for standalone usage"
+    if ("$script_name" == "template.csh") then
+        echo "Warning: not intended for standalone usage"
+    endif
     ## set log_name = `echo "$script_name" | perl -pe "s/.sh/.log/;"`
     echo ""
     echo "usage: `basename $0` [options]"
@@ -49,6 +51,6 @@ end
 # TODO: Do whatever
 echo whatever
 
-#E TODO: Cleanup things
+## TODO: Cleanup things
 ## if ($?DEBUG_LEVEL == 0) set DEBUG_LEVEL=0
 ## if ($DEBUG_LEVEL < 5) rm $aux_base*
