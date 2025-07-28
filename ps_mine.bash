@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-## BAD: #! /bin/bash -f
 #
 # ps_mine.sh: show processes belonging to a particular user
 # note: the processes are shown sorted by CPU and then by memory
@@ -26,7 +25,7 @@
 # ps -auxwww 
 # ...
 #    warning: `-' deprecated; use `ps auxwww', not `ps -auxwww'
-# - Converted from csh version by POE Assistant.
+# - Converted from csh version by POE Assistant (GPT-4o?).
 #
 # TODO:
 # - Have option to duplicate headers at end.
@@ -35,7 +34,15 @@
 #
 
 # Uncomment (or comment) the following for enabling (or disabling) tracing
-## DEBUG: set -x
+if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+    echo "$0 $*"
+fi
+if [[ "${TRACE:-0}" == "1" ]]; then
+    set -o xtrace
+fi
+if [[ "${VERBOSE:-0}" == "1" ]]; then
+    set -o verbose
+fi
 if [[ -z "${DEBUG_LEVEL}" ]]; then DEBUG_LEVEL=0; fi
 
 user=$(whoami)
@@ -136,6 +143,7 @@ $ps_command | head -1
 
 # Display the processes sorted by CPU usage
 # NOTE: ps output first written to an output file so that grep and sort commands not listed
+TMP="${TMP:-/tmp}"
 ps_output="/tmp/ps_$$.list"
 $ps_command | tail -n +2 > "$ps_output"
 
@@ -148,7 +156,6 @@ else
 fi
 
 # Cleanup
-rm "$ps_output"
-
-## TODO: delete
-## dummy change for git
+if [[ $DEBUG_LEVEL -lt 4 ]]; then
+    rm "$ps_output"
+fi
