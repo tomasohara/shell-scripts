@@ -1343,7 +1343,7 @@ function rtop () { rsh $1 top 50 | $PAGER; }
 ##    conditional-source $BIN/rsh-aliases.bash
 ## fi
 
-alias ps-users='ps_mine.sh -a | $GREP -v root'
+## OLD: alias ps-users='ps_mine.sh -a | $GREP -v root'
 ## OLD: alias ps-sort='ps_sort.perl -'
 
 
