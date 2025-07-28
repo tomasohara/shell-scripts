@@ -2047,12 +2047,15 @@ alias dobackup='dobackup.sh'
 alias kill-em='kill_em.bash'
 alias kill-it='kill-em --pattern'
 # ps-mine: wrapper around ps_mine.sh w/ filtering (e.g., defunct)
-alias ps-mine='ps_mine.sh --filtered'
+alias ps-mine='ps_mine.bash --filtered'
 # NOTE: see filter-dirnames added to strip directory names
 # TODO: rename as ps-mine-sans-dirs
 ## BAD: alias ps-mine-='ps-mine "$@" | filter-dirnames'
 ## TODO3: deprecate cryptic aliases like ps-mine-
+# ps-mine-sans-dir(): run ps-mine and string directories
 function ps-mine-sans-dir { ps-mine "$@" | filter-dirnames; }
+# ps-users(): exclude root user from ps-mine
+function ps-users { ps_mine.sh -a | $GREP -v ^root; }
 deprecated-alias-fn ps-mine- ps-mine-sans-dir
 alias ps_mine='ps-mine'
 ## DUP: alias ps-mine-='ps-mine "$@" | filter-dirnames'
