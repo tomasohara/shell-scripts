@@ -82,12 +82,29 @@ alias-fn plint-torch 'plint "$@" | egrep -v "torch.*(no-member|no-name-in-module
 function plint-tester-testee {
     local script="$1"
     local test_script="tests/test_$script"
+    if [ "$1" == "" ]; then
+        ## TODO: local func="${BASH_SOURCE[0]:-func}"
+        ## DEBUG: echo "${BASH_SOURCE[@]}"
+        local func=plint-tester-testee
+        echo "Usage: [PYLINT=prog] [TEST=B] $func script"
+        echo "ex: TEST=1 PYLINT=python-lint-work $func cut.py"
+        return
+    fi
     if [ "${VERBOSE:-0}" == "1" ]; then
         echo "$script"
         echo "$test_script"
     fi
-    plint "$script" "$test_script"
+    local pylint_result
+    local pylint="${PYLINT:-python-lint}"
+    pylint_result=$($pylint "$script" "$test_script")
+    echo "$pylint_result"
     if [ "${TEST:-0}" == "1" ]; then
+        # check for specific error ignoring module line  (e.g., *...* Module mezcla.cut)
+        # ex: "cut.py:10:0: C0301: Line too long (103/100) (line-too-long)"
+        if [[ $pylint_result =~ [0-9]:[0-9] ]]; then
+            local newline_tab=$'\n\t'
+            pause-for-enter "pylint issues;${newline_tab}proceed?"
+        fi
         test-python-script "$test_script"
     fi
     }
@@ -539,8 +556,9 @@ function shell-check-stdin {
 }
 #
 # shell-check-loose(): run shellcheck with relaxed rules
-## OLD: simple-alias-fn shell-check-loose 'shellcheck --exclude="SC2046,SC2086"'
+# shell-check-stdin-loose(): likewsie over stdin
 cond-export LOOSE_SHELL_CHECK_EXCLUDE "SC2046,SC2068,SC2086"
+# shellcheck disable=SC2016
 simple-alias-fn shell-check-loose 'shellcheck --exclude="$LOOSE_SHELL_CHECK_EXCLUDE"'
 function shell-check-stdin-loose {
     SHELL_CHECK_EXCLUDE="$LOOSE_SHELL_CHECK_EXCLUDE,$SHELL_CHECK_EXCLUDE" shell-check-stdin "$@"
