@@ -1501,12 +1501,12 @@ alias vdiff-rev=kdiff-rev
 function most-recent-backup {
     if [ "$1" = "" ]; then
         echo "usage: most-recent-backup filename"
-        echo "use BACKUP_DIR=dir ... to override use of ./backup"
+        echo "use BACKUP_SUBDIR=dir ... to override use of ./backup"
         return
     fi
     ## TODO4: file => file_basename
     local file="$1";
-    local dir="$BACKUP_DIR"; if [ "$dir" = "" ]; then dir=./backup; fi
+    local dir="$BACKUP_SUBDIR"; if [ "$dir" = "" ]; then dir=./backup; fi
     local file_dir
     file_dir="$(dirname "$file")"
     if [ "." != "$file_dir" ]; then
