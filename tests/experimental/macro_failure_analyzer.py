@@ -1,13 +1,20 @@
 #!/usr/bin/env python3
-#
-# SCRIPT_NAME: macro_failure_analyzer.py
-# MISSION: Analyze BATS test logs to find macros most correlated with failures.
-# VERSION: 1.3
-# PATCH NOTES:
-# - Made log path handling robust. Script now correctly searches for '*.out'
-#   files when given a directory path, preventing command protocol errors.
-# - CORRECTED SENSORY FLAW: Removed 'check=True' from run_command.
-#
+# -*- coding: utf-8 -*-
+
+## TODO: Mezcla-fy the script with template.py
+
+"""
+Macro Failure Analyzer
+
+Analyzes BATS test logs to identify macros most correlated with test failures.
+The script examines test output files (*.out) to determine failure rates for each macro.
+
+Features:
+- Automatically detects macros using show-macros-proper
+- Handles both direct file paths and directory scanning
+- Calculates failure rates and presents ranked results
+- Supports both interactive and non-interactive command execution
+"""
 
 import subprocess
 import glob
@@ -16,11 +23,18 @@ import os
 import argparse
 
 def run_interactive_command(command_to_run):
-    # ... (no changes to this function)
+    """Execute a command in an interactive bash shell with environment setup.
+    
+    Args:
+        command_to_run (str): The command to execute
+        
+    Returns:
+        str: The command output or empty string on failure
+    """
     try:
         full_command_string = (
-            f'export PATH="$HOME/shell-scripts:$PATH"; '
-            f'source ~/.bashrc &>/dev/null; '
+            'export PATH="$HOME/shell-scripts:$PATH"; '
+            'source ~/.bashrc &>/dev/null; '
             f'{command_to_run}'
         )
         result = subprocess.run(
@@ -28,26 +42,37 @@ def run_interactive_command(command_to_run):
             capture_output=True, text=True, check=True, timeout=20
         )
         return result.stdout.strip()
-    except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as e:
-        print(f"Interactive command failed with stderr:\n{e.stderr}")
+    except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as exc:
+        print(f"Interactive command failed with stderr:\n{exc.stderr}")
         return ""
 
 def run_command(command_to_run):
-    # ... (no changes to this function)
+    """Execute a command directly with modified PATH environment.
+    
+    Args:
+        command_to_run (str): The command to execute
+        
+    Returns:
+        str: The command output or empty string on failure
+    """
     try:
         env = os.environ.copy()
         env['PATH'] = f"{os.path.expanduser('~')}/shell-scripts:{env['PATH']}"
         result = subprocess.run(
             command_to_run,
-            shell=True, capture_output=True, text=True, timeout=20, env=env
+            shell=True, capture_output=True, text=True, timeout=20, env=env,
+            check=False  # Explicitly set check=False to handle errors manually
         )
         return result.stdout.strip()
-    except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as e:
+    except subprocess.TimeoutExpired:
         return ""
 
 def analyze_failures(log_pattern):
     """
-    Implements the failure analysis heuristic with robust path handling.
+    Analyze test logs to find macros with highest failure correlation.
+    
+    Args:
+        log_pattern (str): Path pattern or directory for log files
     """
     print("--- Running Failure Analysis Heuristic (v1.3) ---")
     
@@ -61,12 +86,10 @@ def analyze_failures(log_pattern):
         return
     print(f"Found {len(macros)} macros/functions to analyze.")
 
-    # --- PATHING LOGIC UPGRADE ---
-    # The operative now checks if the provided path is a directory.
-    # If so, it intelligently appends the standard log file pattern.
+    # Path handling logic
     expanded_path = os.path.expanduser(log_pattern)
     if os.path.isdir(expanded_path):
-        print(f"INFO: Target path is a directory. Searching for '*.out' files within.")
+        print("INFO: Target path is a directory. Searching for '*.out' files within.")
         log_pattern = os.path.join(expanded_path, '*.out')
 
     log_files = glob.glob(os.path.expanduser(log_pattern))
@@ -78,7 +101,7 @@ def analyze_failures(log_pattern):
 
     print("Analyzing log snippets for macro presence (non-interactive mode)...")
     for macro in macros:
-        perlgrep_cmd = fr"perlgrep.perl -para '{macro}' {' '.join(log_files)}"
+        perlgrep_cmd = rf"perlgrep.perl -para '{macro}' {' '.join(log_files)}"
         snippets_output = run_command(perlgrep_cmd)
 
         if not snippets_output:
@@ -112,8 +135,9 @@ def analyze_failures(log_pattern):
 
 
 if __name__ == "__main__":
-    # ... (no changes to the parser itself)
-    parser = argparse.ArgumentParser(description="Analyzes BATS test logs to find macros most correlated with failures.")
+    parser = argparse.ArgumentParser(
+        description="Analyzes BATS test logs to find macros most correlated with failures."
+    )
     parser.add_argument(
         'log_files',
         nargs='?',

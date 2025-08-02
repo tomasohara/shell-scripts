@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-#
+
+"""Automate the test execution and failure analysis pipeline (experimental)"""
+## TODO: Mezcla-fy the script with template.py
+
 # SCRIPT_NAME: run_diagnostics.py
 # MISSION: Automate the test execution and failure analysis pipeline.
 # VERSION: 1.2
@@ -11,6 +14,7 @@
 # - Paths are now constructed relative to this file, not the current
 #   working directory, ensuring robust execution from any location.
 #
+import sys
 
 # Local Framework Modules
 try:
@@ -20,7 +24,7 @@ try:
 except ImportError:
     # Cannot use system.exit if system module itself failed to import.
     print("CRITICAL: 'mezcla' framework not found. Ensure PYTHONPATH is correctly configured.")
-    exit(1)
+    sys.exit(1)
 
 # --- SELF-AWARENESS UPGRADE ---
 # Determine the absolute directory where this script resides.
