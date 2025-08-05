@@ -97,6 +97,7 @@ function plint-tester-testee {
     local pylint_result
     local pylint="${PYLINT:-python-lint}"
     pylint_result=$($pylint "$script" "$test_script")
+    local pylint_status=$?
     echo "$pylint_result"
     if [ "${TEST:-0}" == "1" ]; then
         # check for specific error ignoring module line  (e.g., *...* Module mezcla.cut)
@@ -107,7 +108,8 @@ function plint-tester-testee {
         fi
         test-python-script "$test_script"
     fi
-    }
+    return "$pylint_status"
+}
 }
 #
 # clone-repo(url): clone github repo at URL into current dir with logging
