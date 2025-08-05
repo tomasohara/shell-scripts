@@ -3082,10 +3082,17 @@ function python-lint-work() { python-lint-full "$@" 2>&1 | $EGREP -v '\((bad-con
 # TODO: rename as python-lint-tpo for clarity (and make python-lint as alias for it)
 # note: R0801 is for duplicate lines across source files (no mnemonic)
 function python-lint() { python-lint-work --disable=R0801 "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-f-string|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|no-self-use|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
+# python-lint-filtered(file, ...): uses additional PYLINT_FILTER with python-lint over FILE ...
+# note: added for run-python-lint-batched over mako-generated scripts
+function python-lint-filtered {
+    local user_filter="${PYLINT_FILTER:-"$^"}"
+    python-lint "$@" | $EGREP -v "$user_filter" | $PAGER;
+}
 
 # run-python-lint-batched([file_spec="*.py"]: Run python-lint in batch mode over
 # files in FILE_SPEC, placing results in pylint/<today>.
 #
+# get-python-lint-dir(): get output dir to use for pylint
 function get-python-lint-dir () {
     local python_version_major
     python_version_major=$(pylint --version 2>&1 | extract_matches.perl "Python (\d)")
@@ -3117,7 +3124,7 @@ function run-python-lint-batched () {
          local d
          d=$(dirname "$f")
          if [[ $f =~ / ]]; then pre="$(basename "$d")-"; fi
-         DEBUG_LEVEL=5 python-lint "$f" >| "$out_dir/$pre$b".log 2>&1
+         DEBUG_LEVEL=5 python-lint-filtered "$f" >| "$out_dir/$pre$b".log 2>&1
          head "$out_dir/$pre$b".log
      done) >| "$out_dir/summary.log"
     less -p '^\** Module' "$out_dir/summary.log";
