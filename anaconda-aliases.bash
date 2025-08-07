@@ -102,7 +102,7 @@ echo "$anaconda2_dir" > /dev/null
 # show-python-path(): display current path for python binary to stderr
 function trace-python-path {
     local python_path=""
-    python_path=$(command $python 2> /dev/null)
+    python_path=$(command which $python 2> /dev/null)
     trace-vars python_path
     reference-variable "$python_path"
 }
