@@ -425,7 +425,6 @@ function under-cygwin {
 cond-export LESS "-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"
 # Disables full-screen repaints under minimal-installation hosts (e.g., Beowolf nodes)
 if [ "$BAREBONES_HOST" = "1" ]; then export LESS="-cIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"; fi
-## OLD: cond-export PAGER less
 export PAGER="${PAGER:-less}"
 cond-export PAGER_CHOPPED "less -S"
 cond-export PAGER_NOEXIT "less -+F"
@@ -643,7 +642,6 @@ simple-alias-fn alias-perl 'DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -
 # alias-python: python invocation for using in aliases
 # note: avoids excess tracing; see debug.py and main.py;
 # uses function to allow ALIAS_DEBUG_LEVEL override.
-## OLD: alias alias-python='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
 # shellcheck disable=SC2016
 simple-alias-fn alias-python 'DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
 #
@@ -792,7 +790,6 @@ alias delete='command rm -i $other_file_args'
     force_echo=""
     newline_tab=$'\n\t'
     # TODO1: fix newline/tab support
-    ## OLD: alias disable-forced-deletions='force_echo="echo Warning: run enable-forced-deletions or issue:$newline_tab"'
     # disable-forced-deletions-aux(): shows deletion command on separate line
     # note: for use in $force_echo prefix to delete-force aliases
     function disable-forced-deletions-aux {
@@ -958,12 +955,9 @@ if [[ $(grep --version) =~ Copyright.*2[0-9][0-9][0-9] ]]; then skip_dirs="-d sk
 ## TODO: quiet-unalias grep
 ## TODO: add alias for resolving grep binary with fallback to "command grep"
 GREP="command grep"
-## OLD: alias egrep="$EGREP --color=auto"
 simple-alias-fn egrep "$EGREP --color=auto"
-## OLD: NOTE: -E is --extended-regexp
 EGREP="$GREP --perl-regexp"
 # egrep(): issues grep with --perl-regexp
-## OLD: alias egrep="$EGREP --color=auto"
 simple-alias-fn egrep "$EGREP --color=auto"
 # MY_GREP_OPTIONS: options for use with grep aliases
 cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
@@ -1000,7 +994,6 @@ function grep-to-less () {
     fi
 }
 alias grepl-='grep-to-less'
-## OLD: function grepl () { pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
 function grepl () { local pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
 }
 # gr-c: grep through c/c++ source and headers files
@@ -1057,9 +1050,6 @@ function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$
 # fgr(filename_pattern, line_pattern): $GREP through files matching FILENAME_PATTERN for LINE_PATTERN
 function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
 function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
-## OLD
-## alias fgr-py='fgr-ext py'
-## alias fgr-jupyter='fgr-ext ipynb'
 simple-alias-fn fgr-py 'fgr-ext py'
 simple-alias-fn fgr-jupyter 'fgr-ext ipynb'
 function fgr-py-etc () { fgr-py "$@"; fgr-jupyter "$@"; }
@@ -1223,7 +1213,6 @@ function view-todo () {
 # and SC2181 [Check exit code directly]
 # shellcheck disable=SC2119,SC2181
 {
-    ## OLD: function add-todo () { echo "$@" $'\t'"$(date)" >> "$HOME/organizer/todo_list.text"; if [ "$?" = "0" ]; then view-todo; fi; }
     function add-todo {
         echo "$@" $'\t'"$(date)" >> "$HOME/organizer/todo_list.text" &&  view-todo;
     }
@@ -1325,13 +1314,6 @@ function comma-ize-number () { perl -pe 'while (/\d\d\d\d/) { s/(\d)(\d\d\d)([^\
 # EX: echo "1024 1572864 1073741824" | apply-numeric-suffixes 1 => 1K 1572864 1073741824
 function apply-numeric-suffixes () {
     local just_once="${1:-0}"
-    ## OLD:
-    ## local g="g";
-    ## if [ "$just_once" = "1" ]; then g=""; fi
-    ## # TODO: make only sure the first number is converted if just-once applies
-    ## # NOTE: 3 args to sprintf: coefficient, KMGT suffix, and post-context
-    ## ## DEBUG; perl -pe '$suffixes="_KMGT";  s@\b(\d{4,15})(\s)@$pow = log($1)/log(1024);  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  print STDERR ("s=$suffixes p=$pow nn=$new_num l=$suffix\n"); sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
-    ## perl -pe '$suffixes="_KMGTPE";  s@\b(\d{4,18})(\b)@$pow = int(log($1)/log(1024));  $new_num=($1/1024**$pow);  $suffix=substr($suffixes, $pow, 1);  sprintf("%.3g%s%s", $new_num, $suffix, $2)@e'"$g;"
     cat | alias-python -c "from mezcla.misc_utils import apply_numeric_suffixes_stdin as apply; apply(just_once=bool($just_once))"
 }
 #
@@ -1426,7 +1408,6 @@ function check-errors-excerpt () {
     # Show tail unless same as head
     # note: disables SC2181 [Check exit code directly]
     # shellcheck disable=SC2181
-    ## OLD: if [ $? != 0 ]; then
     if [[ $result != 0 ]]; then
         echo "\$?=$result"
         cat "$tail";
@@ -1452,12 +1433,6 @@ alias vdiff='kdiff'
 #
 # diff(): run diff command w/ --ignore-all-space (-w) and --ignore-space-change (-b)
 #
-## OLD: Workaround with curly brackets not supported by conv_2_multiline.py,
-## which was added for alias/function coverage testing.
-## {
-## diff_options="--ignore-space-change --ignore-blank-lines"
-## alias diff='command diff $diff_options'
-## }
 diff_options="--ignore-space-change --ignore-blank-lines"
 # maldito shellcheck: SC2034: diff_options appears unused. Verify it or export it.
 # shellcheck disable=SC2034
@@ -1802,7 +1777,6 @@ function notes-entry-gr-aux() {
     fi
     local glob="$1"
     shift
-    ## OLD: perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | convert-emoticons-stdin | perlgrep -para -i "$@" - 2>&1 | less-pattern "$1";
     # note: convert consecutive newlines within dashed lines to <ln><sp><ln> so inside Perl "paragraph"
     perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" - 2>&1 | convert-emoticons-stdin | less-pattern "$1";
 }
@@ -1821,7 +1795,6 @@ function heuristic-notes-entry-gr-aux() {
     perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $note_files >| "$temp_base.$term_num"
     note_files="$temp_base.$term_num"
     for term in $(echo "$regex" | perl -pe 's/(\.\*)/ /g;'); do
-        ## OLD: let term_num++
         (( term_num++ ))
         perlgrep -para -i "$term" $note_files >| "$temp_base.$term_num"
         note_files="$temp_base.$term_num"
@@ -2043,8 +2016,6 @@ trace extension-less shortcuts
 alias convert-termstrings='perl- convert_termstrings.perl'
 alias do-rcsdiff='do_rcsdiff.sh'
 alias dobackup='dobackup.sh'
-## OLD: alias kill-em='kill_em.sh'
-## OLD: alias kill-em='kill_em.sh'
 alias kill-em='kill_em.bash'
 alias kill-it='kill-em --pattern'
 # ps-mine: wrapper around ps_mine.sh w/ filtering (e.g., defunct)
@@ -2072,9 +2043,6 @@ alias foreach='alias-perl foreach.perl'
 # rename-spaces: replace spaces in filenames of current dir with underscores
 alias-fn rename-spaces 'rename-files -q -global -rename_old " " "_"'
 # TODO2: handle smart quotes
-## OLD:
-## EXPERIMENTAL (Commented for conv_2_multiline): alias rename-quotes='rename-files -q -global -rename_old "'"'"'" ""'   # where "'"'"'" is concatenated double quote, single quote, and double quote
-## OLD: alias rename-quotes='rename-files -q -global -rename_old "\"" ""'
 function rename-quotes {
     rename-files -q -global -rename_old "\"" "_";
     rename-files -q -global -rename_old "'" "_";
@@ -2395,7 +2363,6 @@ function kdiff-merge() {
 }
 #
 quiet-unalias which
-## OLD: function which { command which "$@" 2> /dev/null; }
 # Disables shellchecks SC2317 [Command appears to be unreachable]
 # TODO3: see why it is complaining
 function which {
@@ -2535,11 +2502,6 @@ function cmd-output () {
     local command="$*"
     ## BAD: local output_base, output_file
     local output_base output_file
-    ## OLD:
-    ## local output_file
-    ## output_file="_$(echo "$command" | tr ' ' '_')-$(TODAY).list"
-    ## TEST: rename-with-file-date "$output_file"
-    ## OLD: output_base="_$(echo "$command" | tr ' ' '_')-$(TODAY)"
     output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')-$(TODAY)"
     output_file="$(get-free-filename "$output_base" . list)"
     ## TODO3?: use separate invocations for aliases than for other commands
@@ -2552,8 +2514,6 @@ function cmd-output () {
 function cmd-usage () {
     local command="$*"
     local usage_file
-    ## OLD: usage_file="_$(echo "$command" | tr ' ' '_')-usage.list"
-    ## OLD: usage_file="_$(echo "$command" | tr ' ' '-')-usage.list"
     usage_file="_$(echo "$command" | perl -pe 's@[/ .]@_@g; s/_+/_/g;')-usage.list"
     $command --help  2>&1 | ansifilter > "$usage_file"
     if [ $? -eq 0 ]; then $PAGER_NOEXIT "$usage_file"; fi
@@ -2644,7 +2604,6 @@ function get-free-filename() {
     local base="$1"
     local sep="$2"
     local ext="$3"
-    ## OLD: local L=1
     local L=0
     local filename="$base"
     if [ "$ext" != "" ]; then filename="$filename$sep$ext"; fi
@@ -2867,14 +2826,6 @@ alias ps-script='ps-all "\\bscript\\b" | $GREP -v "(gnome-session)"'
 # note: the script now assume -once if DURING_ALIAS set (e.g., via alias-perl)
 alias ps-sort='alias-perl ps_sort.perl'
 function ps-sort-once { alias-perl ps_sort.perl -num_times=1 -by=time "$@" -; }
-## OLD:
-## alias ps-sort-time='ps-sort-once -by=time'
-## alias ps-time=ps-sort-time
-## alias ps-sort-mem='ps-sort-once -by=mem '
-## alias ps-mem=ps-sort-mem
-## alias ps-sort-help='alias-perl ps_sort.perl'
-## alias ps-sort-cpu='ps-sort-once -by=cpu '
-##
 simple-alias-fn ps-sort-time 'ps-sort-once -by=time'
 simple-alias-fn ps-time ps-sort-time
 simple-alias-fn ps-sort-mem 'ps-sort-once -by=mem'
@@ -3380,10 +3331,6 @@ alias run-epiphany-browser='invoke-browser epiphany-browser'
 # nvidia-smi-loop([secs=1]): run nvidia-smi with SECS looping
 function nvidia-smi-loop {
     local secs="${1:-1}";
-    ## OLD:
-    ## local ms
-    ## ms=$(calc "$secs * 1000")
-    ## nvidia-smi --loop-ms="$ms";
     nvidia-smi --loop="$secs";
 }
 alias nvidia-loop=nvidia-smi-loop
@@ -3441,7 +3388,6 @@ function shell-check {                  ## TOM-IDIOSYNCRATIC
     # - SC2219 (style): Instead of 'let expr', prefer (( expr )) .
     # - SC2230: which is non-standard
     local strict="${STRICT_MODE:-0}"
-    ## OLD: local exclude="SC1090,SC1091,SC2004,SC2009,SC2012,SC2119,SC2120,SC2129,SC2155,SC2164,SC2181,SC2196,SC2219,SC2230"
     local exclude="${SHELL_CHECK_EXCLUDE:-SC1090,SC1091,SC2004,SC2009,SC2012,SC2119,SC2120,SC2129,SC2155,SC2164,SC2181,SC2196,SC2219,SC2230}"
     local exclude_args="--exclude=$exclude"
     if [ "$strict" != "0" ]; then
