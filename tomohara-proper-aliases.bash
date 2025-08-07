@@ -801,7 +801,7 @@ under-macos 1 && alias calendar="cal"
 
 # Ps-time: show processes by time via ps_sort.perl
 # shellcheck disable=SC2016
-alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
+alias-fn ps-time 'LINES=1000 COLUMNS=256 alias-perl ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
 #
 # screen-reattach: restart GNU screen session
 # options: -d -RR: reattach a session and if necessary detach or create it
