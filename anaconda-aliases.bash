@@ -27,7 +27,8 @@ perl="perl -Ssw"
 # TODO: Use a more standard fallback location
 if [ "$ANACONDA_HOME" == "" ]; then
     export ANACONDA_HOME
-    ANACONDA_HOME=$(realpath "$(dirname "$(which conda)" 2> /dev/null)"/../)
+    ## TODO3: rework to check for missing conda prior to path derivation
+    ANACONDA_HOME=$(realpath "$(dirname "$(which conda)" 2> /dev/null )"/../)
     if [[ ("$ANACONDA_HOME" = "") || ("$ANACONDA_HOME" = "/home") ]]; then
         export ANACONDA_HOME=/usr/local/misc/programs/anaconda3
     fi
