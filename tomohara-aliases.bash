@@ -632,12 +632,13 @@ alias perl-='perl -Ssw'
 # alias-perl(): perl with DURING_ALIAS defined (n.b., avoids excess tracing; see common.perl)
 ## NOTE: using perl.sh in alias leads to problems under Github workflows
 ## BAD:
-alias alias-perl='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
+## OLD: alias alias-perl='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
 ## TODO: alias alias-perl='DURING_ALIAS=1 perl.sh -Ssw'
 ## TODO?
 ## function alias-perl {
 ##    DURING_ALIAS=1 env perl --Sw "eval $*";
 ## }
+simple-alias-fn alias-perl 'DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
 #
 # alias-python: python invocation for using in aliases
 # note: avoids excess tracing; see debug.py and main.py;
@@ -657,7 +658,7 @@ cond-export TIME_CMD "command time"
 if [ "$(which "command" 2> /dev/null)" == "" ]; then
     export TIME_CMD=/usr/bin/time
 fi
-cond-export PERL "$NICE $TIME_CMD perl -Ssw"
+cond-export PERL "$NICE $TIME_CMD alias-perl"
 
 # Terminal window title
 alias set-xterm-title='set_xterm_title.bash'
@@ -1022,7 +1023,7 @@ function gr-less () { gr "$@" | $PAGER; }
 #
 # EX: echo $'L1: one\nL2: \xC3\xBE \nL3: three' | gr-nonascii => "2: L2: þ"
 alias grep-nonascii='alias-perl perlgrep.perl "[\x80-\xFF]"'
-alias gr-nonascii='perlgrep.perl -n "[\x80-\xFF]"'
+alias gr-nonascii='alias-perl perlgrep.perl -n "[\x80-\xFF]"'
 
 # Searching for files
 # TODO:
@@ -1119,13 +1120,13 @@ alias prepare-find-files-there='prepare-find-files-here --out-dir'
 # Note: Perl paragraph-mode search first matches files along with the containing
 # subdirectory, and then line-mode search filters out non-matching files.
 #
-function find-files-there () { perlgrep.perl -para -i "$@" | $EGREP -i '((:$)|('"$1"'))' | $PAGER_NOEXIT -p "$1"; }
+function find-files-there () { alias-perl perlgrep.perl -para -i "$@" | $EGREP -i '((:$)|('"$1"'))' | $PAGER_NOEXIT -p "$1"; }
 function find-files-here () { find-files-there "$1" "$PWD/ls-alR.list"; }
 # following variants for sake of tab completion
 alias find-files='find-files-here'
 alias find-files-='find-files-there'
 ## Lorenzo review: should change this to find-files-alt following TODO's
-# TODO: function find-files-dated () { perlgrep.perl -para -i "$@" | $EGREP -i '((:$)|('$1'))' | $PAGER_NOEXIT -p "$1"; }
+# TODO: function find-files-dated () { alias-perl perlgrep.perl -para -i "$@" | $EGREP -i '((:$)|('$1'))' | $PAGER_NOEXIT -p "$1"; }
 #
 # TODO: add --quiet option to dobackup.sh (and port to bash)
 # TODO: function conditional-backup() { if [ -e backup/"$1" ]; then dobackup.sh "$1"; fi; }
@@ -1215,7 +1216,7 @@ function view-todo () {
     if [ "$1" != "" ]; then search_arg="-p $1"; fi
     # note: quotes not put around search arg (as per SC2086) to avoid interpretation as file
     # shellcheck disable=SC2086
-    perl -SSw reverse.perl "$HOME/organizer/todo_list.text" | $PAGER_CHOPPED $search_arg; 
+    alias-perl reverse.perl "$HOME/organizer/todo_list.text" | $PAGER_CHOPPED $search_arg; 
 }
 }
 # maldito shellcheck: SC2119 [Use ... "$@" if function's $1 should mean script's $1]
@@ -1847,7 +1848,7 @@ alias grepl-entry-here=entry-notes
 
 # TODO: use .list instead of .log in note files to minimize need for such an awkward move alias/function (n.b., .log files more common due to script usage than .list)
 #
-function prep-brill() { prep_brill.perl "$1" > "$1".pp; }
+function prep-brill() { alias-perl prep_brill.perl "$1" > "$1".pp; }
 
 # Specialized file viewers
 # TODO: put image viewer here
@@ -2312,7 +2313,7 @@ alias word-count=unigrams
 
 # calc-stdev: calculate stdard deviation iv sum_file.perl using -col=1 by default
 # EX: echo $'1\n2\n3\n4\n5' | calc-stdev => "num = 5; mean = 3.000; stdev = 1.581; min = 1.000; max = 5.000; sum = 15.000"
-function calc-stdev () { sum_file.perl -stdev "$@" -; }
+function calc-stdev () { alias-perl sum_file.perl -stdev "$@" -; }
 
 # Lynx stuff
 # lynx-dump-stdout(option, ...): Run lynx with textual output to stdout
@@ -2712,7 +2713,7 @@ function check-html-java-script () {
   local file="$1"
   local base
   base="$(basename "$file" .html)"
-  extract_subfile.perl -include_start=0 -include_end=0 '<script type=\"text/javascript\">' '</script>' "$file" >| "$TEMP/$base.js"
+  alias-perl extract_subfile.perl -include_start=0 -include_end=0 '<script type=\"text/javascript\">' '</script>' "$file" >| "$TEMP/$base.js"
   jsl -process "$TEMP/$base.js"
 }
 
@@ -2878,7 +2879,7 @@ simple-alias-fn ps-sort-time 'ps-sort-once -by=time'
 simple-alias-fn ps-time ps-sort-time
 simple-alias-fn ps-sort-mem 'ps-sort-once -by=mem'
 simple-alias-fn ps-mem ps-sort-mem
-simple-alias-fn ps-sort-help 'simple-alias-fn-perl ps_sort.perl'
+simple-alias-fn ps-sort-help 'alias-perl ps_sort.perl'
 simple-alias-fn ps-sort-cpu 'ps-sort-once -by=cpu'
 
 # get-process-parent(pid): return parent process-id for PID
@@ -2888,7 +2889,7 @@ simple-alias-fn ps-sort-cpu 'ps-sort-once -by=cpu'
 # 4  1000 25056  3723  20   0  28920  1612 -      R+   pts/51     0:00 ps al
 # 0  1000 25057  3723  20   0  14228  1024 pipe_w S+   pts/51     0:00 grep -E --color=auto (PID|372
 # 
-function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$; fi; ps al | perl -Ssw extract_matches.perl "^\d+\s+\d+\s+$pid\s+(\d+)"; }
+function get-process-parent() { local pid="$1"; if [ "$pid" = "" ]; then pid=$$; fi; ps al | alias-perl extract_matches.perl "^\d+\s+\d+\s+$pid\s+(\d+)"; }
 
 # Make sure script appends rather than overwrites.
 # In addition, set SCRIPT_PID, so that set_xterm_title.bash can indicate within script.
@@ -3095,7 +3096,7 @@ function python-lint-filtered {
 # get-python-lint-dir(): get output dir to use for pylint
 function get-python-lint-dir () {
     local python_version_major
-    python_version_major=$(pylint --version 2>&1 | extract_matches.perl "Python (\d)")
+    python_version_major=$(pylint --version 2>&1 | alias-perl extract_matches.perl "Python (\d)")
     local affix="py${python_version_major}"
     local out_dir
     out_dir="_pylint/$(todays-date)-$affix"
