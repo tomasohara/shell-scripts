@@ -3139,7 +3139,9 @@ alias kill-python-all="kill-em python"
 ##     if ...
 ##     }
 ## alias which-python='which-program python'
-alias which-python='which python'
+## OLD: alias which-python='which python'
+alias which-python='which python3'
+alias python-version='python3 --version'
 
 # run-jupyter-notebook-posthoc(): try to show log info previously not shown via run-jupyter-notebook
 # TODO: enable multiple-versions backups
