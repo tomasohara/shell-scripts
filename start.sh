@@ -210,7 +210,7 @@ case "$lower_file" in
     # if other applications are associated (e.g,. TextEdit for .rtf), then need to invoke via specific office program [maldito mac/microsoft].
     # note: MacOs has awkware sequence via [Finder > GetInfo > OpenWith/ChangeAll] to change the default. See
     #    https://www.macworld.com/article/672511/how-to-change-default-apps-on-mac.html
-    *.doc* | *.docx* | *.pptx* | *.odp* | *.odt* | *.odg* | *.rtf* | *.xls* | *.xlsx* | *.csv*) invoke "$office_program" "$@" & ;;
+    *.doc* | *.docx* | *.pptx* | *.odp* | *.odt* | *.odg* | *.rtf* | *.xls* | *.xlsx* | *.ods* | *.csv*) invoke "$office_program" "$@" & ;;
 
     # HTML files and XML files
     # TODO: convert filename arguments to use file:// prefix (to distinguish from URL's)
