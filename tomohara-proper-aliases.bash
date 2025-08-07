@@ -78,7 +78,6 @@ simple-alias-fn plint 'PAGER=cat python-lint'
 # plint-torch(...): pylint w/ torch no-member warnings, etc. ignored
 alias-fn plint-torch 'plint "$@" | egrep -v "torch.*(no-member|no-name-in-module)"'
 # plint-tester-testee(filename): run pylint over test file and tested file
-## OLD: alias-fn plint-tester-testee 'plint "$1" tests/test_"$1"'
 function plint-tester-testee {
     local script="$1"
     local test_script="tests/test_$script"
@@ -121,7 +120,6 @@ function clone-repo () {
     log="_clone-$repo-$(T).log"
     # maldito linux: -c option required for command for
     # shellcheck disable=SC2086
-    ## OLD: if [ "$(under-linux)" = "1" ]; then
     if [[ ("$(under-linux)" == "1") || ("$(under-cygwin)" == "1") ]]; then
         command script "$log" -c "git clone '$url'"
     else
@@ -179,15 +177,11 @@ function run-python-script {
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
     # TODO3: rework to avoid problem with _PSL_ not being updated (or at least detect the error)!
-    ## OLD:
-    ## declare -g _PSL_ log out
-    ## local out_base
     declare -g _PSL_ log out out_base PYTHON
     local module_spec=""
     let _PSL_++
     # TODO3: add OUT_BASE to override default
     local run_label="${PYTHON_RUN_LABEL:-"run"}"
-    ## OLD: run_label=$(echo "$run_label" | perl -pe 'chomp; s/([^\.])$/\1\./;')
     run_label=$(echo "$run_label" | perl -pe 'chomp; s/\.$//;')
     out_base="$out_dir/_$script_base.$(TODAY).$run_label.$_PSL_"
     if [ "$PROFILE_SCRIPT" == "1" ]; then
@@ -237,9 +231,6 @@ function run-python-script {
             command rm -v "$out"
         fi
     fi
-    ## OLD:
-    ## # Show common errors in log
-    ## check-errors-excerpt "$log"
 }
 # run-python-script-reset(): reset variables used in run-python-script
 function run-python-script-reset {
@@ -301,7 +292,6 @@ function test-python-script-method-strict {
 # Note: Format is PYTHONWARNINGS="action:message:category:module:lineno";
 # but, have to use the Sledge hammer approach due to Pydantic module organization.
 function disable-python-warnings {
-    ## OLD: export PYTHONWARNINGS="ignore::UserWarning"
     ## TODO: export PYTHONWARNINGS="ignore::UserWarning,ignore::LangChainDeprecationWarning"
     ## NOTE: maldito langchain makes life difficult
     ##    isinstance(LangChainDeprecationWarning, UserWarning) => False
@@ -369,7 +359,6 @@ function export-notebook {
     if [ "$pretty" != "0" ]; then
         # Make sure run_cell_magic are split across lines for sake of diff
         # ex: "get_ipython().run_cell_magic('time', 'x += 1\ny += 2\n'...)" => "... 'x += 1\n" \\<newline>\ny += 2\n \\<newline>'...)"
-        ## BAD: perl -i.bak -pe 's/(run_cell_magic.*)[^\\]\n/\1\\\n \\/g;' "$out_path"
         perl -i.bak -pe 'while (/^get_ipython.*\\n/) { s/^(get_ipython.*)\\n/\1 \\\\\n/g; }' "$out_path"
     fi
 
@@ -392,7 +381,6 @@ function run-notebook {
     base="$(basename "$file" .ipynb)"
     rename-with-file-date "$TMP/$base.py" "$base".{out,log}
     export-notebook "$file"
-    ## OLD: rename-with-file-date "$base"*
     ("${IPYTHON[@]}" "$TMP/$base.py" | ansifilter) > "$base.out" 2> "$base.log"
     check-errors-excerpt "$base.log"
     head "$base.out" "$base.log"
@@ -421,7 +409,6 @@ function compare-exported-notebooks {
         return
     fi
     base="$(basename "$file" .ipynb)"
-    ## OLD: local python_path="_temp/$base.py"
     local temp_dir
     temp_dir="$(dirname "$base.py")/_temp"
     mkdir -p "$temp_dir"
@@ -441,7 +428,6 @@ function compare-notebook-scripts {
 }
  
 # run-jupyter-notebook-pristine(port): invoke jupter notenook w/o startup config
-## OLD: alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$TMP/ipython" run-jupyter-notebook'
 alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$IPYTHON_TMP" run-jupyter-notebook'
  
  
@@ -451,7 +437,6 @@ alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$IPYTHON_TMP" run
 
 # color-test-failures(): show color-coded test result for pytest run (yellow for xfailed and red for regular fail)
 # color-test-results: likewise with green for passed and faint green xpassed
-## OLD: simple-alias-fn color-output 'colout --case-insensitive'
 function color-output {
     # note: in python 3.12: colout issues a bunch of SyntaxWarnings
     ## TEST: colout --case-insensitive "$@" 2>&1 | grep -v 'SyntaxWarning: invalid escape sequence';
@@ -519,7 +504,6 @@ function ssh-cache {
     # note: ignores SC2046 (warning): Quote this to prevent word splitting
     # shellcheck disable=2046
     eval $(ssh-agent)
-    ## OLD: ssh-add "$HOME/.ssh/id_$USER"
     local one_month=$((60 * 60 * 24 * 31))
     ssh-add -t "$one_month" "$HOME/.ssh/id_$USER"
 }
@@ -553,7 +537,6 @@ function shell-check-stdin {
     ## DEBUG: echo "in shell-check-stdin: args='$*'"
     echo "Enter snippet lines and then ^D"
     shell-check -
-    ## OLD: # shellcheck disable=SC2181
     [[ $? -eq 0 ]] && echo "shellcheck OK"
 }
 #
@@ -618,7 +601,6 @@ alias root-prompt-remote=remote-prompt-root
 # note: Issues warning if $PS_symbol not set to avoid messing with PS1, etc.
 function reset-prompt-label {
     local label="$1"
-    ## OLD: local old_label=""
     local old_symbol="$"
     declare -g PS_symbol                # global declaration
     if [ "$PS_symbol" == "" ]; then
@@ -628,9 +610,7 @@ function reset-prompt-label {
     if [[ $PS_symbol =~ [^A-Za-z0-9\ _-]$ ]]; then
         # TODO3: avoid duplication of regex
         # NOTE: ideally should be like @vals = $(get_matches(regex))
-        ## OLD: old_label=$(echo "$PS_symbol" | perl -pe 's/^([\w\s]+)(.*\W)$/$1/;')
         old_symbol=$(echo "$PS_symbol" | perl -pe 's/^([\w\s]+)(.*\W)$/$2/;')
-        ## OLD: trace-vars old_old_label old_symbol
         ## DEBUG: trace-vars old_symbol
     else
         echo "FYI: PS_symbol w/o trailing symbol: '$PS_symbol'" 1>&2
@@ -869,9 +849,6 @@ simple-alias-fn emacs-wide-horizontal 'tpo-invoke-emacs.sh -geometry 288x50 -eva
 
 # df-h(dir=[.], ...): show DIR disk free in human readable format
 function df-h {
-    ## OLD:
-    ## local dirs=("$@")
-    ## if [[ "${#dirs[@]}" == 0 ]]; then dirs=(.); fi
     local dirs=("${@:-.}")
     df -h "${dirs[@]}"
 }
@@ -916,6 +893,5 @@ alias kill-kdiff3='kill-it kdiff3'
 alias kill-firefox='kill-it firefox'
 alias kill-jupyter='kill-it python.*jupyter'
 alias kill-chromiun='kill-it chromium'
-## OLD: alias kill-sleep='kill_em.sh sleep'
 alias kill-sleep='kill-em sleep'
 alias kill-hp='kill-it hp-systray'
