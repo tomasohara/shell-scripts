@@ -194,9 +194,15 @@ append-path "$source_dir"
        trace-array-vars subdirs;
        
        # Do the backup proper
+       # note: extracts file list first and then creates archive (e.g., for better error recovery)
+       # TODO3: remove if no errors are the tar log includes the file list
        rename-with-file-date "$basename.tar.log";
+       ## OLD: ($NICE find "${subdirs[@]}" $MISC_FIND_OPTIONS -type f -mtime "-$max_days_old" -size "-${max_size_chars}c" | $EGREP -v '(^./System/Volume)' | $EGREP -v "EXCLUDE_REGEX" | $NICE $TAR cvfzT "$basename.tar.gz" -) > "$basename.tar.log" 2>&1;
        # shellcheck disable=SC2086
-       ($NICE find "${subdirs[@]}" $MISC_FIND_OPTIONS -type f -mtime "-$max_days_old" -size "-${max_size_chars}c" | $EGREP -v '(^./System/Volume)' | $EGREP -v "EXCLUDE_REGEX" | $NICE $TAR cvfzT "$basename.tar.gz" -) > "$basename.tar.log" 2>&1;
+       {
+           ($NICE find "${subdirs[@]}" $MISC_FIND_OPTIONS -type f -mtime "-$max_days_old" -size "-${max_size_chars}c" | $EGREP -v '(^./System/Volume)' | $EGREP -v "EXCLUDE_REGEX") > "$basename.file.list" 2> "$basename.file.log";
+           ($NICE $TAR cvfzT "$basename.tar.gz" "$basename.file.list") > "$basename.tar.log" 2>&1;
+       }
        ok=$?;
        dir "$basename"* | cat;
        #
