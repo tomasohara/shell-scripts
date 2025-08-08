@@ -995,6 +995,7 @@ function grep-to-less () {
 }
 alias grepl-='grep-to-less'
 function grepl () { local pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
+function grepl-mako-py { grepl "$@" *.py *.mako; }
 }
 # gr-c: grep through c/c++ source and headers files
 # note: --no-messages suppresses warnings about missing files
