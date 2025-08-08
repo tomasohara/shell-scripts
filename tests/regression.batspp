@@ -294,8 +294,8 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 
 ##------------------------------------------------------------------------------
 
-## Problem running mezcla under hostwinds due to env issue (e.g., when running
-## under root).
+## Problem running mezcla under hostwinds due to dependencies issue
+## (e.g., when running under root).
 ##
 ## $ mezcla
 ## Traceback (most recent call last):
@@ -307,7 +307,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ##     import six
 ## ModuleNotFoundError: No module named 'six'
 ##
-## OK under AWS:
+## OK as regular user:
 ##
 ## $ mezcla
 ## /home/tomohara/mezcla-tom/mezcla
