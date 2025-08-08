@@ -291,3 +291,29 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ##
 ## $ git-log- _debug-prep_brill.perl | grep -c commit
 ## 3
+
+##------------------------------------------------------------------------------
+
+## Problem running mezcla under hostwinds due to env issue (e.g., when running
+## under root).
+##
+## $ mezcla
+## Traceback (most recent call last):
+##   File "/root/mezcla-tom/mezcla", line 14, in <module>
+##     from mezcla import debug
+##   File "/home/tomohara/python/Mezcla/mezcla/__init__.py", line 51, in <module>
+##     from mezcla import debug
+##   File "/home/tomohara/python/Mezcla/mezcla/debug.py", line 81, in <module>
+##     import six
+## ModuleNotFoundError: No module named 'six'
+##
+## OK under AWS:
+##
+## $ mezcla
+## /home/tomohara/mezcla-tom/mezcla
+## Version: 1.4.0.4
+## Install path: /home/tomohara/python/Mezcla/mezcla
+##
+
+$ mezcla 2>&1 | grep Version | perl -pe 's/[0-9]+/N/g;'
+Version: N.N.N.N
