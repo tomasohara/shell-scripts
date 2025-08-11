@@ -637,6 +637,7 @@ alias perl-='perl -Ssw'
 ## function alias-perl {
 ##    DURING_ALIAS=1 env perl --Sw "eval $*";
 ## }
+# shellcheck disable=SC2016
 simple-alias-fn alias-perl 'DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
 #
 # alias-python: python invocation for using in aliases
@@ -995,6 +996,8 @@ function grep-to-less () {
 }
 alias grepl-='grep-to-less'
 function grepl () { local pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
+# grepl-mako-py(pattern): check for pattern in files via grepl (i.e., to less)
+# shellcheck disable=SC2035
 function grepl-mako-py { grepl "$@" *.py *.mako; }
 }
 # gr-c: grep through c/c++ source and headers files
@@ -3013,12 +3016,21 @@ alias delete-compiled-python-files-force='delete-compiled-python-files-aux -vf'
 #   ner_eval/ner_detokenize.py:11:45: C0326: Exactly one space required after comma
 #   parser.add_argument('--output_file', type=str,  help='')
 #                                      ^ (bad-whitespace)
-
 function python-lint-full() { 
     local root
-    root=$(hg root 2> /dev/null);
-    ## TODO: --persistent=n (to avoid caching)
+    ## NOTE: mercurial root check now optional
+    root="."
+    if [[ "${CHECK_MERCURIAL:-0}" == "1" ]]; then
+        root="$root:$(hg root 2> /dev/null)";
+    fi
+    ## TODO: --persistent=n (to avoid caching); record pylint status ($?)
     PYTHONPATH="$root:.:$PYTHONPATH" $NICE pylint "$@" | perl -00 -ne 'while (/(\n\S+:\s*\d+[^\n]+)\n( +)/) { s/(\n\S+:\s*\d+[^\n]+)\n( +)/$1\r$2/mg; } print("$_");' 2>&1 | $PAGER;
+    ## TODO3:
+    ## local pylint_out="$TMP/_pylint-$$.out"
+    ## PYTHONPATH="$root:$PYTHONPATH" $NICE pylint "$@" >| "$pylint_out"
+    ## perl -00 -ne 'while (/(\n\S+:\s*\d+[^\n]+)\n( +)/) { s/(\n\S+:\s*\d+[^\n]+)\n( +)/$1\r$2/mg; } print("$_");' "$pylint_out" 2>&1 | $PAGER;
+    ## funciton check-python-lint-status { ... if [[ $pylint_result =~ [0-9]:[0-9] ]] ...}; 
+    ## check-python-lint-status "$pylint_out"
     ## TODO1: explain and fix the above while loop (e.g., line-continuation support)!
 }
 # Notes:
@@ -3196,20 +3208,22 @@ alias extract-text-html='html_utils.py --regular'
 ## TOM-IDIOSYNCRATIC
 ## OBSOLETE: use test-python-script instead
 #
-function test-script () {
-    local base
-    base=$(basename "$1" .py)
-    local date
-    date=$(todays-date)
-    # note: uses both Mercurial root and . (in case not in repository)
-    local root
-    root=$(hg root)
-    # maldito shellcheck (SC2086: Double quote to prevent globbing)
-    # shellcheck disable=SC2086
-    PYTHONPATH="$root:.:$SANDBOX/tests:$PYTHONPATH" $NICE $PYTHON tests/"test_$base.py" --verbose >| tests/"_test_$base.$date.log" 2>&1;
-    less-tail tests/"_test_$base.$date.log";
-}
-#
+## OLD:
+## function test-script () {
+##     local base
+##     base=$(basename "$1" .py)
+##     local date
+##     date=$(todays-date)
+##     # note: uses both Mercurial root and . (in case not in repository)
+##     local root
+##     root=$(hg root)
+##     # maldito shellcheck (SC2086: Double quote to prevent globbing)
+##     # shellcheck disable=SC2086
+##     PYTHONPATH="$root:.:$SANDBOX/tests:$PYTHONPATH" $NICE $PYTHON tests/"test_$base.py" --verbose >| tests/"_test_$base.$date.log" 2>&1;
+##     less-tail tests/"_test_$base.$date.log";
+## }
+## #
+function test-script { test-python-script "$@"; }
 alias test-script-debug='ALLOW_SUBCOMMAND_TRACING=1 DEBUG_LEVEL=5 MISC_TRACING_LEVEL=5 test-script'
 
 # randomize-datafile(file, [num|percent]): randomize datafile optionally pruned to NUM lines (or percent), preserving header line
