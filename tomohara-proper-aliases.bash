@@ -98,6 +98,7 @@ function plint-tester-testee {
     pylint_result=$($pylint "$script" "$test_script")
     local pylint_status=$?
     echo "$pylint_result"
+    ## DEBUG: echo "pylint_status=$pylint_status"
     if [ "${TEST:-0}" == "1" ]; then
         # check for specific error ignoring module line  (e.g., *...* Module mezcla.cut)
         # ex: "cut.py:10:0: C0301: Line too long (103/100) (line-too-long)"
