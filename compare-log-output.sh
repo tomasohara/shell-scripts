@@ -154,6 +154,7 @@ file2="$2"
 if [ -d "$file2" ]; then
     file2="$file2"/$(basename "$file1")
 fi
+## TODO1: make sure files exist (e.g., so kdiff not invoked with dummy change)
 base1="_1_"$(basename "$file1")
 base2="_2_"$(basename "$file2")
 
