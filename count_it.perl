@@ -147,7 +147,7 @@ if ($locale) {
 }
 
 # Sanity checks for whether -one-per-line option might be needed
-if ((! $one_per_line) && (! $has_line_anchor) && ($pattern =~ /[^\][\^\$]/)) {
+if ((! $one_per_line) && (! $has_line_anchor) && ($pattern =~ /[^\\\\][\^\$]/)) {
     &warning("Anchors currently start or end line: consider -one_per_line\n");
 }
 # NOTE: checks against pattern need to occur prior to modification (e.g., paren addition)
