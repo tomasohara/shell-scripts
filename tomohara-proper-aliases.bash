@@ -719,6 +719,13 @@ function youtube-transcript-alt {
         alias-python "$(which youtube_transcript.py)" "$url" > "$file"
     fi
 }
+# yt-transcript(url, basename): download YouTube video transcript at URL and save to BASENAME-ddMMMyy.list
+# TODO3: add helper alias 
+function yt-transcript {
+    local filename="$2-youtube-$(T).list"
+    youtube-transcript "$1" "$filename"
+    echo $'See\n\t'"$filename"
+}
 
 #...............................................................................
 # System stuff
