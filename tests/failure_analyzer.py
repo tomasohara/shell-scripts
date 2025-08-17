@@ -3,47 +3,50 @@
 #
 # failure_analyzer.py: Analyzes BATS++ test failures to identify suspect commands.
 #
-# v16-unified: Handles cross-platform differences in test/function naming (e.g., test-1 vs test_1)
+# v18-addon.7: Fixes pylint style issues.
 #
-## TODO: Replace standard I/O operations with mezcla methods
+## TODO: Create test_failure_analyzer.py to test the new heuristic logic.
 
 """
 Analyzes BATS++ test failures to identify and rank suspect commands.
 
-Parses a directory of test results (*.outputpp.out), finds all 'not ok'
-tests, and correlates them with the commands that were executed. It then
-aggregates this data to produce a summary of the most frequent failures.
+This script offers two modes of analysis:
+1. Default Mode: Identifies failing test code blocks.
+2. Heuristic Mode (--heuristic): Estimates the failure probability for each Bash macro/function
+   and lists the files where failures occur directly in the console output.
 
 Sample usage:
-   {script} /path/to/test/results/directory --json-filename report.json
-   {script} --results-dir /path/to/test/results/directory
+   # Original analysis (blames code blocks) -> outputs failure_analyzer_report.json
+   {script} /path/to/results
+
+   # New heuristic analysis (blames macros) -> outputs failure_analyzer_heuristic.json
+   {script} /path/to/results --heuristic
 """
 
 # Standard modules
 import json
-import sys
 from collections import defaultdict
 from pathlib import Path
 
-# Installed modules
-try:
-    from tabulate import tabulate
-except ImportError:
-    # The Main class will print a more user-friendly error and exit.
-    print("Error: The 'tabulate' library is required. Please run 'pip install tabulate'.", file=sys.stderr)
-    sys.exit(1)
-
-
 # Local modules
+from mezcla import system
 from mezcla import debug
 from mezcla import glue_helpers as gh
 from mezcla.main import Main
 from mezcla.my_regex import my_re
 
+# Installed modules
+try:
+    from tabulate import tabulate
+except ImportError:
+    system.exit("Error: The 'tabulate' library is required. Please run 'pip install tabulate'.", status_code=1)
+
+
 # Constants for switches omitting leading dashes
 RESULTS_DIR = "results-dir"
 JSON_FILENAME = "json-filename"
 DIAGNOSTIC_MODE = "diagnostic"
+HEURISTIC_MODE = "heuristic"
 
 # Constants
 TL = debug.TL
@@ -52,38 +55,44 @@ TL = debug.TL
 class Script(Main):
     """
     Input processing and failure analysis class.
-    This script operates in a single run, not on line-by-line input,
-    so the main logic resides in run_main_step().
     """
     # Class-level member variables for arguments
     results_dir = "."
-    json_filename = "failure_report.json"
+    json_filename = None
     diagnostic_mode = False
+    heuristic_mode = False
 
     def setup(self):
         """Check results of command line processing and initialize members."""
         debug.trace(TL.VERBOSE, f"Script.setup(): self={self}")
-        
+
         self.results_dir = self._get_results_directory()
-        self.json_filename = self.get_parsed_option(JSON_FILENAME, self.json_filename)
         self.diagnostic_mode = self.get_parsed_option(DIAGNOSTIC_MODE, self.diagnostic_mode)
-        
+        self.heuristic_mode = self.get_parsed_option(HEURISTIC_MODE, self.heuristic_mode)
+
+        user_provided_filename = self.get_parsed_option(JSON_FILENAME, None)
+        if user_provided_filename:
+            self.json_filename = user_provided_filename
+        elif self.heuristic_mode:
+            self.json_filename = "failure_analyzer_heuristic.json"
+        else:
+            self.json_filename = "failure_analyzer_report.json"
+
         if self.results_dir is None:
             debug.trace(TL.ERROR, "Results directory is None after parsing, defaulting to '.'")
-            print("Warning: Could not determine results directory from arguments, using current directory.", 
-                  file=sys.stderr)
+            system.print_error("Warning: Could not determine results directory from arguments, using current directory.")
             self.results_dir = "."
 
-        self.results_dir = self._normalize_path(self.results_dir)
+        self.results_dir, err_code = self._normalize_path(self.results_dir)
+        if err_code != 0:
+            # system.exit is called within _normalize_path on error
+            return
+
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
     def _get_results_directory(self):
-        """
-        Safely extract results directory from either positional or named arguments.
-        This handles the cross-platform compatibility issue between WSL and Cygwin.
-        """
+        """Safely extract results directory from either positional or named arguments."""
         results_dir = self.get_parsed_option(RESULTS_DIR, None)
-        
         if results_dir is None and hasattr(self, 'parsed_args') and isinstance(self.parsed_args, dict):
             if self.parsed_args.get('results-dir') and self.parsed_args['results-dir'] != '-':
                 results_dir = self.parsed_args['results-dir']
@@ -92,78 +101,83 @@ class Script(Main):
                     results_dir = self.parsed_args['_'][0]
                 else:
                     results_dir = self.parsed_args['_']
-
         if results_dir is None:
-            debug.trace(TL.WARNING, "No results directory specified via arguments, defaulting to '.'")
             results_dir = "."
-        
         return results_dir
 
-    def _normalize_path(self, path_str: str) -> str:
-        """
-        Normalize path for cross-platform compatibility and validate existence.
-        """
+    def _normalize_path(self, path_str: str) -> tuple[str, int]:
+        """Normalize path for cross-platform compatibility and validate existence."""
+        # FIX: C0321 (multiple-statements)
         if not path_str:
             path_str = "."
-        try:
-            path_obj = Path(path_str).resolve()
-        except (OSError, RuntimeError) as e:
-            debug.trace(TL.WARNING, f"Could not resolve path {path_str}, using as-is. Error: {e}")
-            path_obj = Path(path_str)
 
-        if not path_obj.exists():
-            print(f"Error: Directory '{path_obj}' does not exist.", file=sys.stderr)
-            sys.exit(1)
-        elif not path_obj.is_dir():
-            print(f"Error: Path '{path_obj}' is not a directory.", file=sys.stderr)
-            sys.exit(1)
-        
-        return str(path_obj)
+        # MODIFIED: Using system.absolute_path instead of Path.resolve()
+        abs_path = system.absolute_path(path_str)
+
+        # MODIFIED: Using system.file_exists and system.is_directory
+        if not system.file_exists(abs_path):
+            system.exit(f"Error: Directory '{abs_path}' does not exist.", status_code=1)
+            return abs_path, 1
+        # FIX: R1705 (no-else-return)
+        if not system.is_directory(abs_path):
+            system.exit(f"Error: Path '{abs_path}' is not a directory.", status_code=1)
+            return abs_path, 1
+
+        return abs_path, 0
+
+    def _find_output_files(self, root_dir: str) -> list[Path]:
+        """Find all BATS++ output files (*.outputpp.out)."""
+        # KEPT: pathlib is retained here as system.py does not have a recursive glob (`rglob`).
+        # This is the most robust way to find all relevant files in subdirectories.
+        root_path = Path(root_dir)
+        return sorted(list(root_path.rglob('*.outputpp.out')))
+
+    def _write_json_report(self, report_data: list, is_heuristic: bool):
+        """Writes the analysis data to a JSON file."""
+        print(f"\nWriting full report to {self.json_filename}...")
+
+        if not is_heuristic:
+            output_data = []
+            for i, (command, data) in enumerate(report_data, 1):
+                output_data.append({
+                    "rank": i, "impact_score": data['impact'], "failure_count": data['count'],
+                    "affected_files": len(data['sources']), "source_files": sorted(list(data['sources'])),
+                    "suspect_command": command
+                })
+        else:
+            output_data = report_data
+
+        try:
+            # MODIFIED: Using our own write_file wrapper could be an option,
+            # but direct json.dump is standard and efficient. Sticking with this for now.
+            with open(self.json_filename, 'w', encoding='utf-8') as f:
+                json.dump(output_data, f, indent=2)
+            print("JSON report generated successfully.")
+        except IOError as e:
+            system.exit(f"Error: Could not write JSON report to {self.json_filename}: {e}", status_code=1)
 
     def _find_failed_tests(self, output_file_path: Path) -> list[str]:
-        """
-        Parses a .outputpp.out file for "not ok ..." lines.
-        This regex is now more flexible to handle different BATS output formats.
-        """
-        failed_tests = []
-        # This pattern matches "not ok", the test number, an optional hyphen, and captures the rest.
+        """Parses a .outputpp.out file for "not ok ..." lines."""
         pattern = r"^\s*not ok\s+\d+\s+-?\s*(.+)$"
-        
         try:
-            with open(output_file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                content = f.read()
-            
+            content = output_file_path.read_text(encoding='utf-8', errors='ignore')
             matches = my_re.findall(pattern, content, my_re.MULTILINE)
-            if matches:
-                # Clean up whitespace and remove potential BATS comments
-                failed_tests.extend([m.strip().split('#')[0].strip() for m in matches])
-            
-            if not failed_tests:
-                debug.trace(TL.DETAILED, f"No 'not ok' lines found in {output_file_path.name}")
-
+            # FIX: R1718 (consider-using-set-comprehension)
+            return list({m.strip().split('#')[0].strip() for m in matches}) if matches else []
         except (IOError, UnicodeDecodeError) as e:
             debug.trace(TL.ERROR, f"Error reading file {output_file_path}: {e}")
-        
-        return list(set(failed_tests))
+            return []
 
     def _extract_from_generated_script(self, script_path: Path, test_name: str) -> str | None:
-        """
-        Extracts suspect command from the generated script.
-        This now handles function names like 'test-1-actual' or 'test_1_actual'.
-        """
+        """Extracts suspect command from the generated script."""
+        # KEPT: Using Path object's .exists() method is clean as script_path is already a Path object.
+        # FIX: C0321 (multiple-statements)
         if not script_path.exists():
             return None
-        
-        in_target_function = False
-        function_body_lines = []
-        
-        # Sanitize test_name for regex. BATS often replaces spaces with underscores.
+        in_target_function, function_body_lines = False, []
         sanitized_test_name = my_re.escape(test_name.replace(' ', '_'))
-        
-        # Match either '-' or '_' as the separator before 'actual'.
         start_pattern = rf"^\s*(?:function\s+)?{sanitized_test_name}[-_]actual\s*\(\)\s*{{?"
         end_pattern = r"^\s*}}?\s*$"
-
         try:
             with open(script_path, 'r', encoding='utf-8', errors='ignore') as f:
                 for line in f:
@@ -173,114 +187,150 @@ class Script(Main):
                         function_body_lines.append(line)
                     elif my_re.search(start_pattern, line):
                         in_target_function = True
-        
-            if not in_target_function:
-                debug.trace(TL.WARNING, 
-                          f"Could not find function start for '{test_name}' using pattern: {start_pattern}")
-                return None
-
-            cleaned_lines = [
-                line.strip() for line in function_body_lines
-                if line.strip() and not line.strip().startswith(('#', 'true', '}'))
-            ]
+            cleaned_lines = [l.strip() for l in function_body_lines if l.strip() and not l.strip().startswith(('#', 'true', '}'))]
             return "\n".join(cleaned_lines) if cleaned_lines else None
-            
         except (IOError, UnicodeDecodeError) as e:
             debug.trace(TL.WARNING, f"Failed to process {script_path}: {str(e)}")
             return None
 
-    def _find_output_files(self, root_path: Path) -> list[Path]:
-        """Find all BATS++ output files (*.outputpp.out)."""
-        return sorted(list(root_path.rglob('*.outputpp.out')))
-
     def _analyze_test_run(self) -> list:
-        """Orchestrates analysis, tagging each failure with its source file."""
+        """Orchestrates the original analysis, blaming test blocks."""
         aggregated_failures = defaultdict(lambda: {'sources': set(), 'count': 0})
-        root_path = Path(self.results_dir)
-
-        print("--- Audit Trail: Processing Failure Logs ---")
-        output_files = self._find_output_files(root_path)
-        
+        print("--- Audit Trail: Processing Failure Logs (Original Mode) ---")
+        output_files = self._find_output_files(self.results_dir)
         if not output_files:
             print(f"No output files (*.outputpp.out) found in directory: {self.results_dir}")
             return []
-
         for output_file in output_files:
             failed_tests = self._find_failed_tests(output_file)
             if not failed_tests:
                 continue
-
-            # Construct source/generated filenames robustly
+            # KEPT: .name and .with_name are convenient methods on the Path object.
             base_name = output_file.name.replace('.outputpp.out', '')
             source_filename = f"{base_name}.batspp"
             generated_script_path = output_file.with_name(f"{base_name}.outputpp")
-            
             print(f"  -> Analyzing {len(failed_tests)} failure(s) in: {source_filename}")
-
             for test_name in failed_tests:
                 suspect = self._extract_from_generated_script(generated_script_path, test_name)
                 if suspect:
                     aggregated_failures[suspect]['sources'].add(source_filename)
                     aggregated_failures[suspect]['count'] += 1
-                else:
-                    debug.trace(TL.WARNING, 
-                               f"NOTICE: Could not extract suspect for '{test_name}' from {generated_script_path.name}")
-        
-        print("-" * 42)
-
+        print("-" * 54)
         if not aggregated_failures:
             return []
-
         for data in aggregated_failures.values():
             data['impact'] = data['count'] * len(data['sources'])
+        return sorted(aggregated_failures.items(), key=lambda item: item[1]['impact'], reverse=True)
 
-        sorted_failures = sorted(
-            aggregated_failures.items(),
-            key=lambda item: item[1]['impact'],
-            reverse=True
-        )
-        return sorted_failures
-
-    def _write_json_report(self, sorted_failures: list):
-        """Writes the complete, attributed failure data to a JSON file."""
-        print(f"\nWriting full report to {self.json_filename}...")
-        report_data = []
-        for i, (command, data) in enumerate(sorted_failures, 1):
-            report_data.append({
-                "rank": i,
-                "impact_score": data['impact'],
-                "failure_count": data['count'],
-                "affected_files": len(data['sources']),
-                "source_files": sorted(list(data['sources'])),
-                "suspect_command": command
-            })
+    def _analyze_macro_failures(self) -> list:
+        """
+        Estimates which macros/functions are failing the most and in which files.
+        """
+        print("--- Running Macro Failure Heuristic Analysis ---")
         try:
-            with open(self.json_filename, 'w', encoding='utf-8') as f:
-                json.dump(report_data, f, indent=2)
-            print("JSON report generated successfully.")
-        except IOError as e:
-            print(f"Error: Could not write JSON report to {self.json_filename}: {e}")
+            raw_macros_output = gh.run("bash -c -i 'show-macros-proper'").splitlines()
+        except SystemError as e:
+            system.exit(f"Error: Could not execute 'show-macros-proper'. Is it in your PATH? Details: {e}", status_code=1)
+
+        macros = set()
+        for line in raw_macros_output:
+            clean_line = my_re.sub(r'^\s*function\s+', '', line.strip())
+            clean_line = my_re.sub(r'\s*\(\)\s*$', '', clean_line).strip()
+            if clean_line and my_re.match(r'^[a-zA-Z0-9_:-]+$', clean_line):
+                macros.add(clean_line)
+
+        if not macros:
+            system.exit("Error: 'show-macros-proper' returned no valid macros after sanitization.", status_code=1)
+
+        debug.trace(TL.DETAILED, f"Sanitized macro list contains {len(macros)} items. Example: {list(macros)[:5]}")
+
+        macro_stats = defaultdict(lambda: {'total': 0, 'bad': 0, 'bad_files': set()})
+
+        output_files = self._find_output_files(self.results_dir)
+        if not output_files:
+            print(f"No output files (*.outputpp.out) found in directory: {self.results_dir}")
+            return []
+
+        for output_file in output_files:
+            # KEPT: .name is a convenient attribute of the Path object.
+            base_name = output_file.name.replace('.outputpp.out', '')
+            source_filename = f"{base_name}.batspp"
+            try:
+                content = output_file.read_text(encoding='utf-8', errors='ignore')
+                snippets = my_re.split(r'\n(?:# Toplevel|={10,})\n', content)
+
+                for snippet in snippets:
+                    if not snippet.strip() or not snippet.strip().startswith(('ok', 'not ok')):
+                        continue
+
+                    is_bad_snippet = snippet.strip().startswith("not ok")
+
+                    for macro in macros:
+                        if my_re.search(rf'\b{my_re.escape(macro)}\b', snippet):
+                            macro_stats[macro]['total'] += 1
+                            if is_bad_snippet:
+                                macro_stats[macro]['bad'] += 1
+                                macro_stats[macro]['bad_files'].add(source_filename)
+            except IOError as e:
+                debug.trace(TL.ERROR, f"Could not read {output_file}: {e}")
+
+        results = []
+        for macro, stats in macro_stats.items():
+            if stats['total'] > 0:
+                pct_bad = (stats['bad'] / stats['total']) * 100
+                results.append({
+                    "macro": macro,
+                    "bad": stats['bad'],
+                    "total": stats['total'],
+                    "pct_bad": pct_bad,
+                    "failing_in_files": sorted(list(stats['bad_files']))
+                })
+
+        return sorted(results, key=lambda x: (x['pct_bad'], x['bad']), reverse=True)
 
     def run_main_step(self):
-        """Main processing step for the script."""
-        version = "v16-unified"
+        """
+        Main processing step for the script.
+        """
+        version = "v18-addon.7"
         print(f"Executing {version} analysis on target directory: {self.results_dir}\n")
-        
-        sorted_failures = self._analyze_test_run()
 
-        if not sorted_failures:
-            print("\nAnalysis complete. No actionable failures were extracted.")
-            return
+        if self.heuristic_mode:
+            sorted_macro_failures = self._analyze_macro_failures()
+            if not sorted_macro_failures:
+                print("\nAnalysis complete. No macro usage was found in test outputs.")
+                return
+            self._write_json_report(sorted_macro_failures, is_heuristic=True)
 
-        self._write_json_report(sorted_failures)
+            print("\n--- Top 20 Suspect Macros/Functions (Sorted by Failure Rate) ---")
+            headers = ['Rank', 'Macro/Function', 'Failure Rate', 'Bad Hits', 'Total Uses', 'Failing In']
+            table_data = []
+            for i, data in enumerate(sorted_macro_failures[:20], 1):
+                rate_str = f"{data['pct_bad']:.1f}%"
 
-        print("\n--- Top 20 Failure Summary (Sorted by Impact) ---")
-        headers = ['Rank', 'Impact', 'Count', 'Files', 'Suspect Command(s)']
-        table_data = []
-        for i, (command, data) in enumerate(sorted_failures[:20], 1):
-            table_data.append([i, data['impact'], data['count'], len(data['sources']), command])
-    
-        print(tabulate(table_data, headers=headers, tablefmt="grid", maxcolwidths=[None, None, None, None, 70]))
+                failing_files = data['failing_in_files']
+                files_str = ""
+                if failing_files:
+                    files_to_show = failing_files[:3]
+                    files_str = "\n".join(files_to_show)
+                    if len(failing_files) > 3:
+                        files_str += f"\n(...and {len(failing_files) - 3} more)"
+
+                table_data.append([i, data['macro'], rate_str, data['bad'], data['total'], files_str])
+
+            print(tabulate(table_data, headers=headers, tablefmt="fancy_grid", maxcolwidths=[None, None, None, None, None, 45]))
+        else:
+            sorted_failures = self._analyze_test_run()
+            if not sorted_failures:
+                print("\nAnalysis complete. No actionable failures were extracted.")
+                return
+            self._write_json_report(sorted_failures, is_heuristic=False)
+            print("\n--- Top 20 Failure Summary (Sorted by Impact) ---")
+            headers = ['Rank', 'Impact', 'Count', 'Files', 'Suspect Command(s)']
+            table_data = []
+            for i, (command, data) in enumerate(sorted_failures[:20], 1):
+                table_data.append([i, data['impact'], data['count'], len(data['sources']), command])
+            print(tabulate(table_data, headers=headers, tablefmt="fancy_grid", maxcolwidths=[None, None, None, None, 70]))
 
 def main():
     """Entry point"""
@@ -288,10 +338,13 @@ def main():
         description=__doc__.format(script=gh.basename(__file__)),
         manual_input=True,
         auto_help=True,
-        boolean_options=[(DIAGNOSTIC_MODE, "Enable diagnostic mode to analyze file content")],
+        boolean_options=[
+            (DIAGNOSTIC_MODE, "Enable diagnostic mode to analyze file content"),
+            (HEURISTIC_MODE, "Use Tom's macro failure heuristic instead of the default analysis")
+        ],
         text_options=[
             (RESULTS_DIR, "Path to the test results directory"),
-            (JSON_FILENAME, "Output filename for the JSON report")
+            (JSON_FILENAME, "Output filename for the JSON report (overrides defaults)")
         ],
         positional_options=[(RESULTS_DIR, "Path to the test results directory")]
     )
