@@ -1583,7 +1583,7 @@ function make-tar () {
         echo "Env. options: USE_DATE, TEMP, GTAR, MAX_SIZE, TAR_DEPTH, TAR_FILTER"
         echo "note: TEMP used by tar-dir, etc.; Also see [un]set-tar-bzip2 and [un]set-tar-xz"
         echo "(or try GTAR_OPTS='vfJ' [... tor-browser-linux-x86_64-14.5.tar.xz])."
-        echo "ex: TEMP='$BACKUP_DIR' tar-this-dir-dated"
+        echo $'example:\n\t'"TEMP='$BACKUP_DIR' tar-this-dir-dated"
         return
     fi
     ## TODO2: dispense with acrobatic arg parsing!
