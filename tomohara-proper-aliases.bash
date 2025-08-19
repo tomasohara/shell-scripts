@@ -19,6 +19,8 @@
 # TODO: automate the derivation of the following (e.g., drop 'plus' or 'alias' suffix)
 alias git-add-='git-add-plus'
 alias git-diff-='git-diff-plus'
+## TEMP:
+alias git-diff='git-diff-plus'
 alias git-difftool-='git-difftool-plus'
 alias git-log-='git-log-plus'
 alias git-update-='git-update-plus' 
