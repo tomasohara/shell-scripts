@@ -964,41 +964,41 @@ simple-alias-fn egrep "$EGREP --color=auto"
 cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
 # shellcheck disable=SC2086
 {
-function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
-function gr- () { $GREP $MY_GREP_OPTIONS "$@"; }
-## Lorenzo review: should change this to gr-alt following TODO's
-##
-SORT_COL2="--key=2"
-# grep-unique(pattern, file, ...): count occurrence of pattern in file...
-function grep-unique () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0$" | sort -rn $SORT_COL2 -t':'; }
-# grep-missing(pattern, file, ...): show files without pattern 
-# TODO: archive
-function grep-missing () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP ":0"; }
-alias gu='grep-unique -i'
-alias gu-='grep-unique'
-# gu-all: run gu over all files in current dir
-# TODO: archive
-function gu-all () { grep-unique "$@" ./* | $PAGER; }
-#
-function gu- () { $GREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0"; }
-## Lorenzo review: should change this to gu-alt following TODO's
-#
-# grepl(pattern, [other_grep_args]): invokes grep over PATTERN and OTHER_GREP_ARGS and then pipes into less for PATTERN
-# NOTE: actually uses egrep
-# TODO: use more general way to ensure pattern given last while readily extractable for less -p usage
-function grep-to-less () {
-    # TODO: fix warning about possible discrepency between grep regex and less, such as when ^ used (e.g., with multiple files in grep output)
-    if [[ ($1 =~ ^[^]) && ($# -gt 2) ]]; then
-        echo "Error: ^ will be intrepretted differently by less (e.g., due to multiple files)" 1>&2
-    else
-        $EGREP $MY_GREP_OPTIONS "$@" | $PAGER_NOEXIT -p"$1";
-    fi
-}
-alias grepl-='grep-to-less'
-function grepl () { local pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
-# grepl-mako-py(pattern): check for pattern in files via grepl (i.e., to less)
-# shellcheck disable=SC2035
-function grepl-mako-py { grepl "$@" *.py *.mako; }
+  function gr () { $GREP $MY_GREP_OPTIONS -i "$@"; }
+  function gr- () { $GREP $MY_GREP_OPTIONS "$@"; }
+  ## Lorenzo review: should change this to gr-alt following TODO's
+  ##
+  SORT_COL2="--key=2"
+  # grep-unique(pattern, file, ...): count occurrence of pattern in file...
+  function grep-unique () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0$" | sort -rn $SORT_COL2 -t':'; }
+  # grep-missing(pattern, file, ...): show files without pattern 
+  # TODO: archive
+  function grep-missing () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP ":0"; }
+  alias gu='grep-unique -i'
+  alias gu-='grep-unique'
+  # gu-all: run gu over all files in current dir
+  # TODO: archive
+  function gu-all () { grep-unique "$@" ./* | $PAGER; }
+  #
+  function gu- () { $GREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0"; }
+  ## Lorenzo review: should change this to gu-alt following TODO's
+  #
+  # grepl(pattern, [other_grep_args]): invokes grep over PATTERN and OTHER_GREP_ARGS and then pipes into less for PATTERN
+  # NOTE: actually uses egrep
+  # TODO: use more general way to ensure pattern given last while readily extractable for less -p usage
+  function grep-to-less () {
+      # TODO: fix warning about possible discrepency between grep regex and less, such as when ^ used (e.g., with multiple files in grep output)
+      if [[ ($1 =~ ^[^]) && ($# -gt 2) ]]; then
+          echo "Error: ^ will be intrepretted differently by less (e.g., due to multiple files)" 1>&2
+      else
+          $EGREP $MY_GREP_OPTIONS "$@" | $PAGER_NOEXIT -p"$1";
+      fi
+  }
+  alias grepl-='grep-to-less'
+  function grepl () { local pattern="$1"; shift; grep-to-less "$pattern" -i "$@"; }
+  # grepl-mako-py(pattern): check for pattern in files via grepl (i.e., to less)
+  # shellcheck disable=SC2035
+  function grepl-mako-py { grepl "$@" *.py *.mako tests/*.py; }
 }
 # gr-c: grep through c/c++ source and headers files
 # note: --no-messages suppresses warnings about missing files
