@@ -37,7 +37,7 @@ if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     ## TODO: if [ $script ~= *\ * ]; then script='"'$script'"; fi
     ## TODO: base=$(basename "$0" .bash)
     echo ""
-    echo "Usage: $script [--trace] [--help] [-- | -]"
+    echo "Usage: $script [--trace] [--help] [dir | -- | -]"
     echo ""
     echo "Examples:"
     echo ""
@@ -45,7 +45,7 @@ if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     echo ""
     echo "INTERACTIVE=1 BACKUP_DRIVE=~/usb/sd512 MAX_DAYS_OLD=\$((3*365/12)) MAX_SIZE_CHARS=\$((5 * 1024**2)) $script --"
     echo ""
-    echo "BACKUP_DRIVE=/tmp BACKUP_DIR="" $script =--"
+    echo "BACKUP_DRIVE=/tmp BACKUP_DIR="" MAX_DAYS_OLD=3653 MAX_SIZE_CHARS=\$((10**9)) $script /"
     echo ""
     echo "Notes:"
     echo "- By default, included files mopdified within 30 days and no larger than 1mb."
@@ -65,6 +65,7 @@ fi
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 trace=0
 verbose=0
+dir="$PWD"
 while [ "$moreoptions" = "1" ]; do
     if [ "$1" = "--trace" ]; then
         trace=1
@@ -79,6 +80,11 @@ while [ "$moreoptions" = "1" ]; do
     shift;
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 done
+#
+if [[ ! ($1 =~ ^-.*) ]]; then
+    ## TODO2: assert "$TARGET_DIR" == ""
+    dir="$1"
+fi
 
 # TODO: create helper with this
 # Get aliases (n.b., tracing should be delayed)
@@ -101,15 +107,18 @@ fi
 append-path "$source_dir"
 
 # Do the backup
-# NOTE: This evolved from a scriptlet in a notes file (hence the extraneous {'s)
+# NOTE: This evolved from a scriptlet in a notes file (hence the extraneous {'s).
+# The exports are needed in case a typescript is generated (as in interactive mode).
 {
     ## pre-init: export BACKUP_DRIVE="/mnt/micro-sd-1tb" MAX_DAYS_OLD=$((10 * 366)) MAX_SIZE_CHARS=$((10**9))
     ## *** cut-n-paste twice: 1) after optional cd and 3) after script ***
               ## TODO: cd /    ## for system backup;       export SUBDIRS="home tpo"
    {  ## * cut-n-paste #1
-     TARGET_DIR=${TARGET_DIR:-""}
+     TARGET_DIR=${TARGET_DIR:-"$dir"}
      if [ -n "$TARGET_DIR" ]; then
          cd "$TARGET_DIR"
+         # note: export target in case of typescript generated below
+         export TARGET_DIR
      fi
      export MISC_FIND_OPTIONS="";
      export BASE_DIR;
@@ -141,7 +150,7 @@ append-path "$source_dir"
      fi
      mkdir -p "$BACKUP_DIR";
 
-     # Make miscellaneous settings in case typescript used interactively
+     # Make miscellaneous settings in case typescript used (i.e., interactive)
      export SOURCE_DIR="${SOURCE_DIR:-"$PWD"}";
      export INTERACTIVE;
      INTERACTIVE="$(is-true "INTERACTIVE")";
@@ -179,9 +188,9 @@ append-path "$source_dir"
        ## -or-: MAX_SIZE_CHARS=131072 ## (128k)   -or-: MAX_SIZE_CHARS=1048577  -or-: MAX_SIZE_CHARS=1000000000 ## (1gb)
        trace-vars max_days_old max_size_chars | apply-numeric-suffixes;
        max_size_with_suffix=$(echo "$max_size_chars" | apply-numeric-suffixes);
-       if (( (max_days_old >= 36000) && (max_size_chars >= 1000000000000) )); then
+       if (( (max_days_old >= 360*100) && (max_size_chars >= 10**12) )); then
            basename="${BACKUP_DIR}/full-$HOSTNAME-$BASE_DIR";
-       elif (( (max_days_old >= 1800) && (max_size_chars >= 1000000000) )); then
+       elif (( (max_days_old >= 360*5) && (max_size_chars >= 10**9) )); then
            basename="${BACKUP_DIR}/fullish-$HOSTNAME-$BASE_DIR";
        else
            basename="${BACKUP_DIR}/incr-$HOSTNAME-$BASE_DIR-${max_days_old}days-max${max_size_with_suffix}";
