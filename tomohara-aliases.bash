@@ -1347,13 +1347,14 @@ function default_assignment {
 }
 #
 ## TODO: output header (e.g., "num-blocks<TAB>dir    # note: blocksize is 1k")
-# usage(): Shows usage for current directory with block size converted to bytes with
+# usage([output_file=usage.list]): Shows usage for current directory with block size converted to bytes with
 #
 function usage {
     ## TODO: output_file=(("$1"||"usage.list"));
+    local output_file
     output_file=$(default_assignment "$1" "usage.list")
     rename-with-file-date "$output_file";
-    $NICE du --block-size=1K --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| "$output_file" 2>&1;
+    $NICE du --block-size=1K --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes > "$output_file" 2>&1;
     $PAGER "$output_file";
 }
 function usage-alt {
@@ -1365,7 +1366,16 @@ function usage-alt {
     usage "$output_file"
 }
 
-function byte-usage () { output_file="usage.bytes.list"; backup-file $output_file; $NICE du --bytes --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1; $PAGER $output_file; }
+# byte-usage([output_file=usage.byes.list]): show "apparent size" usage of directory files in bytes
+# 
+## BAD:function byte-usage () { output_file="usage.bytes.list"; backup-file $output_file; $NICE du --bytes --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1; $PAGER $output_file; }
+function byte-usage () {
+    local output_file
+    output_file=$(default_assignment "$1" "usage.bytes.list")
+    rename-with-file-date "$output_file";
+    $NICE du --bytes --one-file-system 2>&1 | $NICE sort -rn | apply-numeric-suffixes 1 > "$output_file" 2>&1;
+    $PAGER "$output_file";
+}
 ## TODO: function usage () { du --one-file-system --human-readable 2>&1 | sort -rn >| usage.list 2>&1; $PAGER usage.list; }
 
 # check-errors(LOG-FILE): in check for known errors in LOG-FILE...
