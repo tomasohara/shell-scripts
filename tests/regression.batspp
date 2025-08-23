@@ -121,7 +121,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## sudo apt install zip
 
 #-------------------------------------------------------------------------------
-# Make sure shell-check-stdin doesn't return false positive
+# TODO3: Make sure shell-check-stdin doesn't return false positive
 #
 ## $ shell-check-stdin 
 ## Enter snippet lines and then ^D
@@ -142,7 +142,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## shellcheck OK
 
 #-------------------------------------------------------------------------------
-# Make sure set_xterm_title.bash uses user-specific temp dir:
+# TODO4: Make sure set_xterm_title.bash uses user-specific temp dir:
 # interittent bug with "/tmp/set-xterm-title-" being used.
 #
 ## $ dir -d /tmp/set-xterm-title-*
@@ -167,7 +167,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## Error: unable to resolve commit 49d1dfc9c25e959ead5d861dde183baa115f2542
 
 #-------------------------------------------------------------------------------
-# fix git-conflicts-alias
+# TODO2: fix git-conflicts-alias
 
 ## BAD:
 ## $ git-conflicts-alias 
@@ -178,7 +178,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## jug
 
 #-------------------------------------------------------------------------------
-# fix git-next-checkin
+# TODO2: fix git-next-checkin
 #
 # note: "git diff --numstat filename" => git diff --numstat -- filename"
 #
@@ -200,7 +200,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 
 ## -----------------------------------------------------------------------------
 
-## Make sure usage only changes the size field (nothing in filename)
+## TODO3: Make sure usage only changes the size field (nothing in filename)
 ##
 ## $ usage
 ## #
@@ -209,7 +209,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 
 ##------------------------------------------------------------------------------
 
-## Make sure git-hidden works in non-repo dir (e.g., build)
+## TODO2: Make sure git-hidden works in non-repo dir (e.g., build)
 ##
 ## [BAD]
 ## $ pwd
@@ -294,7 +294,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 
 ##------------------------------------------------------------------------------
 
-## Problem running mezcla under hostwinds due to dependencies issue
+## TODO2: Problem running mezcla under hostwinds due to dependencies issue
 ## (e.g., when running under root).
 ##
 ## $ mezcla
@@ -317,3 +317,23 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 
 $ mezcla 2>&1 | grep Version | perl -pe 's/[0-9]+/N/g;'
 Version: N.N.N.N
+
+##------------------------------------------------------------------------------
+
+## TODO3: Problem with alt-extract-all-git-versions.bash
+## $ git-extract-all-versions ./mezcla/tests/resources/test.arpa
+## Warning: Additional cases due to renames: try alt-extract-all-git-versions.bash
+## /home/tomohara/temp/tmp/all_versions_exported/test.arpa.v1-13Dec23
+## 
+##  versions stored in /home/tomohara/temp/tmp/all_versions_exported for ./mezcla/tests/resources/test.arpa
+## 
+## $ alt-git-extract-all-versions ./mezcla/tests/resources/test.arpa
+## Trying main path mezcla/tests/resources/test.arpa for version v2
+## /home/tomohara/temp/tmp/all_versions_exported/test.arpa.v2-13Dec23
+## Trying main path mezcla/tests/resources/test.arpa for version v1
+## fatal: Not a valid object name 186208f3f131789a27a4207538da47a9fa617edc:mezcla/tests/resources/test.arpa
+## Trying alternative path 
+## Error: unable to resolve commit 186208f3f131789a27a4207538da47a9fa617edc
+## /home/tomohara/temp/tmp/all_versions_exported/test.arpa.v1-03Feb23
+## 
+## 2 versions stored in /home/tomohara/temp/tmp/all_versions_exported for ./mezcla/tests/resources/test.arpa
