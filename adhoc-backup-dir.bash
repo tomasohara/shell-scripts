@@ -31,12 +31,13 @@ fi
 # in $@.
 # NOTE: See sync-loop.sh for an example.
 #
+DEFAULT_EXCLUDE_REGEX="(/proc/|/swapfile/|/tmp/)"
 if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     script=$(basename "$0")
     ## TODO: if [ $script ~= *\ * ]; then script='"'$script'"; fi
     ## TODO: base=$(basename "$0" .bash)
     echo ""
-    echo "Usage: $0 [--trace] [--help] [-- | -]"
+    echo "Usage: $script [--trace] [--help] [-- | -]"
     echo ""
     echo "Examples:"
     echo ""
@@ -44,11 +45,16 @@ if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     echo ""
     echo "INTERACTIVE=1 BACKUP_DRIVE=~/usb/sd512 MAX_DAYS_OLD=\$((3*365/12)) MAX_SIZE_CHARS=\$((5 * 1024**2)) $script --"
     echo ""
+    echo "BACKUP_DRIVE=/tmp BACKUP_DIR="" $script =--"
+    echo ""
     echo "Notes:"
     echo "- By default, included files mopdified within 30 days and no larger than 1mb."
     echo "- Default backup directory is \$BACKUP_DRIVE/backup/$HOSTNAME".
     echo "- Using INTERACTIVE=1 to enable more sanity checks (n.b., work in progress)."
-    echo "- Other env. options: BACKUP_DIR, EXCLUDE_REGEX, MAX_DAYS_OLD, MAX_SIZE_CHARS, SOURCE_DIR, TARGET_DIR."
+    echo "- Use EXCLUDE_REGEX to filter files or directories (from find output)."
+    echo "- For backups from /, the default exclusion regex follows:"
+    echo "  $DEFAULT_EXCLUDE_REGEX"
+    echo "- Other env. options: BACKUP_DIR, MAX_DAYS_OLD, MAX_SIZE_CHARS, SOURCE_DIR, TARGET_DIR."
     echo "- The -- option is to use default options and to avoid usage statement."
     echo ""
     exit
@@ -113,7 +119,8 @@ append-path "$source_dir"
          export BASE_DIR=fs-root;
          export MISC_FIND_OPTIONS="-xdev";
          ## TODO2: exclude adhoc files and directories
-         EXCLUDE_REGEX="${EXCLUDE_REGEX:-"(/proc/|/swapfile/|/tmp/)"}";
+         ## OLD: EXCLUDE_REGEX="${EXCLUDE_REGEX:-"(/proc/|/swapfile/|/tmp/)"}";
+         EXCLUDE_REGEX="${EXCLUDE_REGEX:-"$DEFAULT_EXCLUDE_REGEX"}";
      else
          # note: no-op exclusion filter
          EXCLUDE_REGEX="${EXCLUDE_REGEX:-"($^)"}";
@@ -196,7 +203,7 @@ append-path "$source_dir"
        # Do the backup proper
        # note: extracts file list first and then creates archive (e.g., for better error recovery)
        # TODO3: remove if no errors are the tar log includes the file list
-       rename-with-file-date "$basename.tar.log";
+       rename-with-file-date "$basename.tar.log" "$basename.file.list" "$basename.file.log";
        ## OLD: ($NICE find "${subdirs[@]}" $MISC_FIND_OPTIONS -type f -mtime "-$max_days_old" -size "-${max_size_chars}c" | $EGREP -v '(^./System/Volume)' | $EGREP -v "EXCLUDE_REGEX" | $NICE $TAR cvfzT "$basename.tar.gz" -) > "$basename.tar.log" 2>&1;
        # shellcheck disable=SC2086
        {
