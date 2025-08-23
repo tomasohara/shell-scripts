@@ -2637,7 +2637,8 @@ function get-free-filename() {
 # by accident
 # TOM-IDIOSYNCRATIC
 function sudo-admin () {
-    local prefix="_config."
+    ## OLD: local prefix="_config."
+    local prefix="_admin-config."
     local base
     base="$prefix$(todays-date).log"
     sudo chmod ugo-w "$prefix"*.log* 2> /dev/null
