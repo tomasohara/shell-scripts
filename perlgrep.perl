@@ -115,7 +115,13 @@ while (<>) {
 
     # See if the pattern matches the current line
     # NOTE: s qualifier treats string as single line (in case -para specified)
-    if (($i && /$pattern/is) || (/$pattern/s)) {
+    # and, with m qualifier ^ and $ match multiple lines (not just overall start or end).
+    # TODO2: rework; also, see if qualifies can be specified via variable)
+    if ($para && ($i && /$pattern/ism) || (/$pattern/sm)) {
+	$include = (! $v);
+	$after_context = ($include ? ($A + 1) : 0);
+    }
+    elsif (($i && /$pattern/is) || (/$pattern/s)) {
 	$include = (! $v);
 	$after_context = ($include ? ($A + 1) : 0);
     }
