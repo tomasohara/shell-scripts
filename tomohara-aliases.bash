@@ -1544,14 +1544,15 @@ function signature () {
     echo "$filename:"
     cat "$filename"
 }
-alias cell-signature='signature cell'
-alias home-signature='signature home'
-alias po-signature='signature po'
-alias tpo-signature='signature tpo'
-alias tpo-scrappycito-signature='signature tpo-scrappycito'
-alias scrappycito-signature='signature scrappycito'
-alias farm-signature='signature farm'
-alias circulo-signature='signature circulo'
+## OLD:
+## alias cell-signature='signature cell'
+## alias home-signature='signature home'
+## alias po-signature='signature po'
+## alias tpo-signature='signature tpo'
+## alias tpo-scrappycito-signature='signature tpo-scrappycito'
+## alias scrappycito-signature='signature scrappycito'
+## alias farm-signature='signature farm'
+## alias circulo-signature='signature circulo'
 # TODO: automatically derive aliases for ~/info/*.signature*
 
 #-------------------------------------------------------------------------------
