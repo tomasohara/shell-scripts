@@ -337,3 +337,14 @@ Version: N.N.N.N
 ## /home/tomohara/temp/tmp/all_versions_exported/test.arpa.v1-03Feb23
 ## 
 ## 2 versions stored in /home/tomohara/temp/tmp/all_versions_exported for ./mezcla/tests/resources/test.arpa
+
+##------------------------------------------------------------------------------
+
+## TODO3: fix git-hide
+## $ git-hide libgfortran.so.4
+## fatal: Unable to mark file libgfortran.so.4
+##
+## $ pwd-host-info 
+## /home/tomohara/visual-diff
+## ec2-micro
+## ip-172-31-37-185
