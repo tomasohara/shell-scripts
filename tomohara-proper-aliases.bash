@@ -145,7 +145,7 @@ alias batspp-prep=jupyter_to_batspp.py
 # The arguments are passed along unless USE_STDIN is 1.
 # note: Checks for errors afterwards. Uses non-locals _PSL_, out_base and log.
 function run-python-script {
-    ## DEBUG: trace-vars _PSL_ out_base log
+    ## DEBUG: trace-vars _PSL_ out base log
     if [ "$1" = "" ]; then
         echo "Usage: [ENV-OPTIONS] run-python-script script arg ..."
         echo "   ENV-OPTIONS: [USE_STDIN=B] [USE_STDOUT=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] [KEEP_EMPTY_OUT=b] [PYTHON=path] [PYTHON_RUN_LABEL=str]"
@@ -180,13 +180,13 @@ function run-python-script {
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
     # TODO3: rework to avoid problem with _PSL_ not being updated (or at least detect the error)!
-    declare -g _PSL_ log out out_base PYTHON
+    declare -g _PSL_ log out PYTHON      # global declaration
     local module_spec=""
     let _PSL_++
     # TODO3: add OUT_BASE to override default
     local run_label="${PYTHON_RUN_LABEL:-"run"}"
     run_label=$(echo "$run_label" | perl -pe 'chomp; s/\.$//;')
-    out_base="$out_dir/_$script_base.$(TODAY).$run_label.$_PSL_"
+    local out_base="$out_dir/_$script_base.$(TODAY).$run_label.$_PSL_"
     if [ "$PROFILE_SCRIPT" == "1" ]; then
        out_base="$out_base.profile"
        module_spec="-m cProfile -o $out_base.data"
@@ -195,9 +195,11 @@ function run-python-script {
        out_base="$out_base.trace"
        module_spec="-m trace --trace"
     fi
+    base="$out_base"
+    reference-variable $base
     log="$out_base.log"
     out="$out_base.out"
-    ## DEBUG: trace-vars _PSL_ out_base log
+    ## DEBUG: trace-vars _PSL_ base out log
     local python_arg="-"
     # shellcheck disable=SC2086
     {
@@ -742,6 +744,20 @@ function get-host-nickname {
         nickname="tpo-host"
     fi
     echo "$nickname"
+}
+
+#...............................................................................
+# Signatures
+
+# derive-signatures(): Generate aliases for signatures from files like ~/info/.home-signature
+# example: for ~/info/.po-signature, generate 'alias po-signature="signature po"'
+function derive-signatures() {
+    local f prefix  
+    for f in "$HOME/info/".*signature; do
+        prefix="$(echo "$f" | perl -pe 's/^.*\.(.*)-signature/$1/;')"
+        # shellcheck disable=2046
+        eval "alias $prefix-signature='signature $prefix'"
+    done
 }
 
 #...............................................................................
