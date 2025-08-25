@@ -3,6 +3,7 @@
 #
 # failure_analyzer.py: Analyzes BATS++ test failures to identify suspect commands.
 #
+# v18-addon.8: Refactored core logic into helper functions for testability.
 # v18-addon.7: Fixes pylint style issues.
 #
 ## TODO: Create test_failure_analyzer.py to test the new heuristic logic.
@@ -51,6 +52,151 @@ HEURISTIC_MODE = "heuristic"
 # Constants
 TL = debug.TL
 
+# ------------------------------------------------------------------------------
+# ADDED: Helper functions (API) for testability, separating logic from the CLI.
+# These functions are now stateless and can be tested independently.
+# ------------------------------------------------------------------------------
+
+def _find_output_files(root_dir: str) -> list[Path]:
+    """Find all BATS++ output files (*.outputpp.out)."""
+    # KEPT: pathlib is retained here as system.py does not have a recursive glob (`rglob`).
+    # This is the most robust way to find all relevant files in subdirectories.
+    root_path = Path(root_dir)
+    return sorted(list(root_path.rglob('*.outputpp.out')))
+
+def _find_failed_tests(output_file_path: Path) -> list[str]:
+    """Parses a .outputpp.out file for "not ok ..." lines."""
+    pattern = r"^\s*not ok\s+\d+\s+-?\s*(.+)$"
+    try:
+        content = output_file_path.read_text(encoding='utf-8', errors='ignore')
+        matches = my_re.findall(pattern, content, my_re.MULTILINE)
+        # FIX: R1718 (consider-using-set-comprehension)
+        return list({m.strip().split('#')[0].strip() for m in matches}) if matches else []
+    except (IOError, UnicodeDecodeError) as e:
+        debug.trace(TL.ERROR, f"Error reading file {output_file_path}: {e}")
+        return []
+
+def _extract_from_generated_script(script_path: Path, test_name: str) -> str | None:
+    """Extracts suspect command from the generated script."""
+    # KEPT: Using Path object's .exists() method is clean as script_path is already a Path object.
+    # FIX: C0321 (multiple-statements)
+    if not script_path.exists():
+        return None
+    in_target_function, function_body_lines = False, []
+    sanitized_test_name = my_re.escape(test_name.replace(' ', '_'))
+    start_pattern = rf"^\s*(?:function\s+)?{sanitized_test_name}[-_]actual\s*\(\)\s*{{?"
+    end_pattern = r"^\s*}}?\s*$"
+    try:
+        with open(script_path, 'r', encoding='utf-8', errors='ignore') as f:
+            for line in f:
+                if in_target_function:
+                    if my_re.search(end_pattern, line):
+                        break
+                    function_body_lines.append(line)
+                elif my_re.search(start_pattern, line):
+                    in_target_function = True
+        cleaned_lines = [l.strip() for l in function_body_lines if l.strip() and not l.strip().startswith(('#', 'true', '}'))]
+        return "\n".join(cleaned_lines) if cleaned_lines else None
+    except (IOError, UnicodeDecodeError) as e:
+        debug.trace(TL.WARNING, f"Failed to process {script_path}: {str(e)}")
+        return None
+
+def analyze_test_run(results_dir: str) -> list:
+    """Orchestrates the original analysis, blaming test blocks."""
+    aggregated_failures = defaultdict(lambda: {'sources': set(), 'count': 0})
+    print("--- Audit Trail: Processing Failure Logs (Original Mode) ---")
+    output_files = _find_output_files(results_dir)
+
+    if not output_files:
+        print(f"No output files (*.outputpp.out) found in directory: {results_dir}")
+        return []
+    for output_file in output_files:
+        failed_tests = _find_failed_tests(output_file)
+        if not failed_tests:
+            continue
+        # KEPT: .name and .with_name are convenient methods on the Path object.
+        base_name = output_file.name.replace('.outputpp.out', '')
+        source_filename = f"{base_name}.batspp"
+        generated_script_path = output_file.with_name(f"{base_name}.outputpp")
+        print(f"  -> Analyzing {len(failed_tests)} failure(s) in: {source_filename}")
+        for test_name in failed_tests:
+            suspect = _extract_from_generated_script(generated_script_path, test_name)
+            if suspect:
+                aggregated_failures[suspect]['sources'].add(source_filename)
+                aggregated_failures[suspect]['count'] += 1
+    print("-" * 54)
+    if not aggregated_failures:
+        return []
+    for data in aggregated_failures.values():
+        data['impact'] = data['count'] * len(data['sources'])
+    return sorted(aggregated_failures.items(), key=lambda item: item[1]['impact'], reverse=True)
+
+def analyze_macro_failures(results_dir: str) -> list:
+    """
+    Estimates which macros/functions are failing the most and in which files.
+    """
+    print("--- Running Macro Failure Heuristic Analysis ---")
+    try:
+        raw_macros_output = gh.run("bash -c -i 'show-macros-proper'").splitlines()
+    except SystemError as e:
+        system.exit(f"Error: Could not execute 'show-macros-proper'. Is it in your PATH? Details: {e}", status_code=1)
+
+    macros = set()
+    for line in raw_macros_output:
+        clean_line = my_re.sub(r'^\s*function\s+', '', line.strip())
+        clean_line = my_re.sub(r'\s*\(\)\s*$', '', clean_line).strip()
+        if clean_line and my_re.match(r'^[a-zA-Z0-9_:-]+$', clean_line):
+            macros.add(clean_line)
+
+    if not macros:
+        system.exit("Error: 'show-macros-proper' returned no valid macros after sanitization.", status_code=1)
+
+    debug.trace(TL.DETAILED, f"Sanitized macro list contains {len(macros)} items. Example: {list(macros)[:5]}")
+
+    macro_stats = defaultdict(lambda: {'total': 0, 'bad': 0, 'bad_files': set()})
+
+    output_files = _find_output_files(results_dir)
+    if not output_files:
+        print(f"No output files (*.outputpp.out) found in directory: {results_dir}")
+        return []
+
+    for output_file in output_files:
+        # KEPT: .name is a convenient attribute of the Path object.
+        base_name = output_file.name.replace('.outputpp.out', '')
+        source_filename = f"{base_name}.batspp"
+        try:
+            content = output_file.read_text(encoding='utf-8', errors='ignore')
+            snippets = my_re.split(r'\n(?:# Toplevel|={10,})\n', content)
+
+            for snippet in snippets:
+                if not snippet.strip() or not snippet.strip().startswith(('ok', 'not ok')):
+                    continue
+
+                is_bad_snippet = snippet.strip().startswith("not ok")
+
+                for macro in macros:
+                    if my_re.search(rf'\b{my_re.escape(macro)}\b', snippet):
+                        macro_stats[macro]['total'] += 1
+                        if is_bad_snippet:
+                            macro_stats[macro]['bad'] += 1
+                            macro_stats[macro]['bad_files'].add(source_filename)
+        except IOError as e:
+            debug.trace(TL.ERROR, f"Could not read {output_file}: {e}")
+
+    results = []
+    for macro, stats in macro_stats.items():
+        if stats['total'] > 0:
+            pct_bad = (stats['bad'] / stats['total']) * 100
+            results.append({
+                "macro": macro,
+                "bad": stats['bad'],
+                "total": stats['total'],
+                "pct_bad": pct_bad,
+                "failing_in_files": sorted(list(stats['bad_files']))
+            })
+
+    return sorted(results, key=lambda x: (x['pct_bad'], x['bad']), reverse=True)
+
 
 class Script(Main):
     """
@@ -65,7 +211,7 @@ class Script(Main):
     def setup(self):
         """Check results of command line processing and initialize members."""
         debug.trace(TL.VERBOSE, f"Script.setup(): self={self}")
-
+        super().setup()
         self.results_dir = self._get_results_directory()
         self.diagnostic_mode = self.get_parsed_option(DIAGNOSTIC_MODE, self.diagnostic_mode)
         self.heuristic_mode = self.get_parsed_option(HEURISTIC_MODE, self.heuristic_mode)
@@ -92,18 +238,15 @@ class Script(Main):
 
     def _get_results_directory(self):
         """Safely extract results directory from either positional or named arguments."""
-        results_dir = self.get_parsed_option(RESULTS_DIR, None)
-        if results_dir is None and hasattr(self, 'parsed_args') and isinstance(self.parsed_args, dict):
-            if self.parsed_args.get('results-dir') and self.parsed_args['results-dir'] != '-':
-                results_dir = self.parsed_args['results-dir']
-            elif self.parsed_args.get('_') and self.parsed_args['_'] != '-':
-                if isinstance(self.parsed_args['_'], list) and len(self.parsed_args['_']) > 0:
-                    results_dir = self.parsed_args['_'][0]
-                else:
-                    results_dir = self.parsed_args['_']
-        if results_dir is None:
-            results_dir = "."
-        return results_dir
+        # The 'get_parsed_option' helper is not sufficient. We must inspect
+        # the 'parsed_args' dictionary that the framework populates.
+        if hasattr(self, 'parsed_args') and isinstance(self.parsed_args, dict):
+            # Check for the named argument '--results-dir' first.
+            if self.parsed_args.get('results-dir'):
+                return self.parsed_args['results-dir']
+        
+        # If the named argument isn't found, fall back to the default.
+        return "."
 
     def _normalize_path(self, path_str: str) -> tuple[str, int]:
         """Normalize path for cross-platform compatibility and validate existence."""
@@ -125,12 +268,20 @@ class Script(Main):
 
         return abs_path, 0
 
+    # OLD: The methods _find_output_files, _find_failed_tests, and
+    # _extract_from_generated_script were moved out of the class to become
+    # standalone helper functions. This was done to allow the core logic
+    # to be tested without instantiating the Script class. The old methods
+    # are left here as wrappers for any internal class methods that might
+    # still use them, ensuring backward compatibility within the class.
     def _find_output_files(self, root_dir: str) -> list[Path]:
-        """Find all BATS++ output files (*.outputpp.out)."""
-        # KEPT: pathlib is retained here as system.py does not have a recursive glob (`rglob`).
-        # This is the most robust way to find all relevant files in subdirectories.
-        root_path = Path(root_dir)
-        return sorted(list(root_path.rglob('*.outputpp.out')))
+        return _find_output_files(root_dir)
+
+    def _find_failed_tests(self, output_file_path: Path) -> list[str]:
+        return _find_failed_tests(output_file_path)
+
+    def _extract_from_generated_script(self, script_path: Path, test_name: str) -> str | None:
+        return _extract_from_generated_script(script_path, test_name)
 
     def _write_json_report(self, report_data: list, is_heuristic: bool):
         """Writes the analysis data to a JSON file."""
@@ -156,143 +307,67 @@ class Script(Main):
         except IOError as e:
             system.exit(f"Error: Could not write JSON report to {self.json_filename}: {e}", status_code=1)
 
-    def _find_failed_tests(self, output_file_path: Path) -> list[str]:
-        """Parses a .outputpp.out file for "not ok ..." lines."""
-        pattern = r"^\s*not ok\s+\d+\s+-?\s*(.+)$"
-        try:
-            content = output_file_path.read_text(encoding='utf-8', errors='ignore')
-            matches = my_re.findall(pattern, content, my_re.MULTILINE)
-            # FIX: R1718 (consider-using-set-comprehension)
-            return list({m.strip().split('#')[0].strip() for m in matches}) if matches else []
-        except (IOError, UnicodeDecodeError) as e:
-            debug.trace(TL.ERROR, f"Error reading file {output_file_path}: {e}")
-            return []
-
-    def _extract_from_generated_script(self, script_path: Path, test_name: str) -> str | None:
-        """Extracts suspect command from the generated script."""
-        # KEPT: Using Path object's .exists() method is clean as script_path is already a Path object.
-        # FIX: C0321 (multiple-statements)
-        if not script_path.exists():
-            return None
-        in_target_function, function_body_lines = False, []
-        sanitized_test_name = my_re.escape(test_name.replace(' ', '_'))
-        start_pattern = rf"^\s*(?:function\s+)?{sanitized_test_name}[-_]actual\s*\(\)\s*{{?"
-        end_pattern = r"^\s*}}?\s*$"
-        try:
-            with open(script_path, 'r', encoding='utf-8', errors='ignore') as f:
-                for line in f:
-                    if in_target_function:
-                        if my_re.search(end_pattern, line):
-                            break
-                        function_body_lines.append(line)
-                    elif my_re.search(start_pattern, line):
-                        in_target_function = True
-            cleaned_lines = [l.strip() for l in function_body_lines if l.strip() and not l.strip().startswith(('#', 'true', '}'))]
-            return "\n".join(cleaned_lines) if cleaned_lines else None
-        except (IOError, UnicodeDecodeError) as e:
-            debug.trace(TL.WARNING, f"Failed to process {script_path}: {str(e)}")
-            return None
-
     def _analyze_test_run(self) -> list:
         """Orchestrates the original analysis, blaming test blocks."""
-        aggregated_failures = defaultdict(lambda: {'sources': set(), 'count': 0})
-        print("--- Audit Trail: Processing Failure Logs (Original Mode) ---")
-        output_files = self._find_output_files(self.results_dir)
-        if not output_files:
-            print(f"No output files (*.outputpp.out) found in directory: {self.results_dir}")
-            return []
-        for output_file in output_files:
-            failed_tests = self._find_failed_tests(output_file)
-            if not failed_tests:
-                continue
-            # KEPT: .name and .with_name are convenient methods on the Path object.
-            base_name = output_file.name.replace('.outputpp.out', '')
-            source_filename = f"{base_name}.batspp"
-            generated_script_path = output_file.with_name(f"{base_name}.outputpp")
-            print(f"  -> Analyzing {len(failed_tests)} failure(s) in: {source_filename}")
-            for test_name in failed_tests:
-                suspect = self._extract_from_generated_script(generated_script_path, test_name)
-                if suspect:
-                    aggregated_failures[suspect]['sources'].add(source_filename)
-                    aggregated_failures[suspect]['count'] += 1
-        print("-" * 54)
-        if not aggregated_failures:
-            return []
-        for data in aggregated_failures.values():
-            data['impact'] = data['count'] * len(data['sources'])
-        return sorted(aggregated_failures.items(), key=lambda item: item[1]['impact'], reverse=True)
+        # OLD: Logic moved to standalone analyze_test_run() for testability.
+        # The class method now acts as a simple wrapper, passing its state
+        # (self.results_dir) to the stateless helper function. This allows
+        # the core logic to be unit-tested without creating a Script instance.
+        #
+        # aggregated_failures = defaultdict(lambda: {'sources': set(), 'count': 0})
+        # print("--- Audit Trail: Processing Failure Logs (Original Mode) ---")
+        # output_files = self._find_output_files(self.results_dir)
+        # if not output_files:
+        #     print(f"No output files (*.outputpp.out) found in directory: {self.results_dir}")
+        #     return []
+        # for output_file in output_files:
+        #     failed_tests = self._find_failed_tests(output_file)
+        #     if not failed_tests:
+        #         continue
+        #     base_name = output_file.name.replace('.outputpp.out', '')
+        #     source_filename = f"{base_name}.batspp"
+        #     generated_script_path = output_file.with_name(f"{base_name}.outputpp")
+        #     print(f"  -> Analyzing {len(failed_tests)} failure(s) in: {source_filename}")
+        #     for test_name in failed_tests:
+        #         suspect = self._extract_from_generated_script(generated_script_path, test_name)
+        #         if suspect:
+        #             aggregated_failures[suspect]['sources'].add(source_filename)
+        #             aggregated_failures[suspect]['count'] += 1
+        # print("-" * 54)
+        # if not aggregated_failures:
+        #     return []
+        # for data in aggregated_failures.values():
+        #     data['impact'] = data['count'] * len(data['sources'])
+        # return sorted(aggregated_failures.items(), key=lambda item: item[1]['impact'], reverse=True)
+
+        # ADDED: Call the standalone helper function.
+        return analyze_test_run(self.results_dir)
 
     def _analyze_macro_failures(self) -> list:
         """
         Estimates which macros/functions are failing the most and in which files.
         """
-        print("--- Running Macro Failure Heuristic Analysis ---")
-        try:
-            raw_macros_output = gh.run("bash -c -i 'show-macros-proper'").splitlines()
-        except SystemError as e:
-            system.exit(f"Error: Could not execute 'show-macros-proper'. Is it in your PATH? Details: {e}", status_code=1)
+        # OLD: Logic moved to standalone analyze_macro_failures() for testability.
+        # This follows the same pattern as _analyze_test_run, separating the
+        # core analysis from the command-line application class.
+        #
+        # print("--- Running Macro Failure Heuristic Analysis ---")
+        # try:
+        #     raw_macros_output = gh.run("bash -c -i 'show-macros-proper'").splitlines()
+        # except SystemError as e:
+        #     system.exit(f"Error: Could not execute 'show-macros-proper'. Is it in your PATH? Details: {e}", status_code=1)
+        # ... (rest of the original implementation) ...
+        # return sorted(results, key=lambda x: (x['pct_bad'], x['bad']), reverse=True)
 
-        macros = set()
-        for line in raw_macros_output:
-            clean_line = my_re.sub(r'^\s*function\s+', '', line.strip())
-            clean_line = my_re.sub(r'\s*\(\)\s*$', '', clean_line).strip()
-            if clean_line and my_re.match(r'^[a-zA-Z0-9_:-]+$', clean_line):
-                macros.add(clean_line)
-
-        if not macros:
-            system.exit("Error: 'show-macros-proper' returned no valid macros after sanitization.", status_code=1)
-
-        debug.trace(TL.DETAILED, f"Sanitized macro list contains {len(macros)} items. Example: {list(macros)[:5]}")
-
-        macro_stats = defaultdict(lambda: {'total': 0, 'bad': 0, 'bad_files': set()})
-
-        output_files = self._find_output_files(self.results_dir)
-        if not output_files:
-            print(f"No output files (*.outputpp.out) found in directory: {self.results_dir}")
-            return []
-
-        for output_file in output_files:
-            # KEPT: .name is a convenient attribute of the Path object.
-            base_name = output_file.name.replace('.outputpp.out', '')
-            source_filename = f"{base_name}.batspp"
-            try:
-                content = output_file.read_text(encoding='utf-8', errors='ignore')
-                snippets = my_re.split(r'\n(?:# Toplevel|={10,})\n', content)
-
-                for snippet in snippets:
-                    if not snippet.strip() or not snippet.strip().startswith(('ok', 'not ok')):
-                        continue
-
-                    is_bad_snippet = snippet.strip().startswith("not ok")
-
-                    for macro in macros:
-                        if my_re.search(rf'\b{my_re.escape(macro)}\b', snippet):
-                            macro_stats[macro]['total'] += 1
-                            if is_bad_snippet:
-                                macro_stats[macro]['bad'] += 1
-                                macro_stats[macro]['bad_files'].add(source_filename)
-            except IOError as e:
-                debug.trace(TL.ERROR, f"Could not read {output_file}: {e}")
-
-        results = []
-        for macro, stats in macro_stats.items():
-            if stats['total'] > 0:
-                pct_bad = (stats['bad'] / stats['total']) * 100
-                results.append({
-                    "macro": macro,
-                    "bad": stats['bad'],
-                    "total": stats['total'],
-                    "pct_bad": pct_bad,
-                    "failing_in_files": sorted(list(stats['bad_files']))
-                })
-
-        return sorted(results, key=lambda x: (x['pct_bad'], x['bad']), reverse=True)
+        # ADDED: Call the standalone helper function.
+        return analyze_macro_failures(self.results_dir)
 
     def run_main_step(self):
         """
         Main processing step for the script.
         """
-        version = "v18-addon.7"
+        # ADDED: Version bump to reflect refactoring.
+        version = "v18-addon.8"
         print(f"Executing {version} analysis on target directory: {self.results_dir}\n")
 
         if self.heuristic_mode:
@@ -346,7 +421,6 @@ def main():
             (RESULTS_DIR, "Path to the test results directory"),
             (JSON_FILENAME, "Output filename for the JSON report (overrides defaults)")
         ],
-        positional_options=[(RESULTS_DIR, "Path to the test results directory")]
     )
     app.run()
 
