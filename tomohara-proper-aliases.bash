@@ -759,6 +759,8 @@ function derive-signatures() {
         eval "alias $prefix-signature='signature $prefix'"
     done
 }
+#
+derive-signatures
 
 #...............................................................................
 # Archive related
