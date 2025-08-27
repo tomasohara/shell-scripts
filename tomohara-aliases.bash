@@ -1875,7 +1875,8 @@ function pdf-to-ascii () {
         # shellcheck disable=SC2046,SC2086
         cmd.sh --time-out 30 pdftotext $options "$file" "$target";
     else
-        if [ "$verbose" = "1" ]; then echo "skipping existing $target"; fi
+        ## OLD: if [ "$verbose" = "1" ]; then echo "skipping existing $target"; fi
+        echo "FYI: skipping existing $target"
     fi
     $LS -lt "$target"
 }
@@ -2727,6 +2728,7 @@ function ssh-host-login-aws () {
 function scp-host-down() { scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$TPO_SSH_USER@$1:$TMP/$2" .; }
 # TODO: rework in terms of id_rsa-tomohara-keypair (as used on others hosts)
 ## TOM-IDIOSYNCRATIC
+## TODO2: restore xterm prompt
 # scp-host-up(host, file, ...): upload FILES to HOST
 function scp-host-up() { local host="$1"; shift; scp -P $SSH_PORT -i "$TPO_SSH_KEY" "$@" "$TPO_SSH_USER@$host:$TMP"; }
 #
