@@ -754,6 +754,10 @@ function get-host-nickname {
 function derive-signatures() {
     local f prefix  
     for f in "$HOME/info/".*signature; do
+        if [[ ! -e "$f" ]]; then
+            echo "Warning: No signature found in $HOME/info"
+            break
+        fi
         prefix="$(echo "$f" | perl -pe 's/^.*\.(.*)-signature/$1/;')"
         # shellcheck disable=2046
         eval "alias $prefix-signature='signature $prefix'"
