@@ -196,7 +196,7 @@ function run-python-script {
        module_spec="-m trace --trace"
     fi
     base="$out_base"
-    reference-variable $base
+    reference-variable "$base"
     log="$out_base.log"
     out="$out_base.out"
     ## DEBUG: trace-vars _PSL_ base out log
@@ -752,7 +752,7 @@ function get-host-nickname {
 # derive-signatures(): Generate aliases for signatures from files like ~/info/.home-signature
 # example: for ~/info/.po-signature, generate 'alias po-signature="signature po"'
 function derive-signatures() {
-    local f prefix  
+    local f prefix
     for f in "$HOME/info/".*signature; do
         if [[ ! -e "$f" ]]; then
             echo "Warning: No signature found in $HOME/info"
@@ -764,7 +764,9 @@ function derive-signatures() {
     done
 }
 #
-derive-signatures
+if [[ -e "$HOME/info" ]]; then
+    derive-signatures
+fi
 
 #...............................................................................
 # Archive related
