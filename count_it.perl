@@ -128,6 +128,7 @@ if (!defined($ARGV[0])) {
 if ($pattern eq "") {
     $pattern = $ARGV[0];
     shift @ARGV;
+    &debug_print(&TL_VERBOSE, "pattern=$pattern\n");
 }
 
 # See if regex has line achor (^ or $)
