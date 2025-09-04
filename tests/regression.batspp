@@ -348,3 +348,13 @@ Version: N.N.N.N
 ## /home/tomohara/visual-diff
 ## ec2-micro
 ## ip-172-31-37-185
+
+##-----------------------------------------------------------------------------
+
+## TODO3: fix path during remote logins
+## $ jug-login
+## ...
+## Welcome to Ubuntu 22.04.3 LTS (GNU/Linux 6.5.0-44-generic x86_64)
+## ...
+## Last login: Wed Sep  3 22:52:01 2025 from 192.168.86.95
+## set_xterm_title.bash: command not found
