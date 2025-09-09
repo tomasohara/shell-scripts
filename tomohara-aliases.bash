@@ -2068,7 +2068,7 @@ function rename-quotes {
 function rename-special-punct {
     # strip ascii punctuation
     # TODO: rename-files -q -global -regex "_*[&\!\*?\(\)\[\]]" "_";
-    rename-files -q -global -rename_old -regex "_*[&\!\*?\(\)\[\]\,]" "_";
+    rename-files -q -global -rename_old -regex "_*[&\!\*?\(\)\[\]\,\;\:]" "_";
 
     # Rename leading dash with underscore (n.b., problem for ls command)
     rename-files - _ -*
@@ -2766,22 +2766,30 @@ alias ssh-aws=aws-login
 alias aws-upload=aws-upload-micro
 alias aws-download=aws-download-micro
 #
-alias hw-login='ssh-host-login-aws $HOSTWINDS_HOST'
-alias hw-upload='scp-aws-up $HOSTWINDS_HOST'
-alias hw-download='scp-aws-down $HOSTWINDS_HOST'
-alias new-hw-login='ssh-host-login-aws $NEW_HOSTWINDS_HOST'
-alias new-hw-upload='scp-aws-up $NEW_HOSTWINDS_HOST'
-alias new-hw-download='scp-aws-down $NEW_HOSTWINDS_HOST'
+## OLD:
+## alias hw-login='ssh-host-login-aws $HOSTWINDS_HOST'
+## alias hw-upload='scp-aws-up $HOSTWINDS_HOST'
+## alias hw-download='scp-aws-down $HOSTWINDS_HOST'
+## alias new-hw-login='ssh-host-login-aws $NEW_HOSTWINDS_HOST'
+## alias new-hw-upload='scp-aws-up $NEW_HOSTWINDS_HOST'
+## alias new-hw-download='scp-aws-down $NEW_HOSTWINDS_HOST'
+## #
+## alias old-hw-login=hw-login
+## alias old-hw-upload=hw-upload
+## alias old-hw-download=hw-download
+## #
+## alias hw1-login=old-hw-login
+## alias hw1-upload=old-hw-upload
+## alias hw1-download=old-hw-download
+## alias hw2-login=new-hw-login
+## alias hw2-upload=new-hw-upload
+alias hw1-login='ssh-host-login-aws $HOSTWINDS_HOST'
+alias hw1-upload='scp-aws-up $HOSTWINDS_HOST'
+alias hw1-download='scp-aws-down $HOSTWINDS_HOST'
+alias hw2-login='ssh-host-login-aws $NEW_HOSTWINDS_HOST'
+alias hw2-upload='scp-aws-up $NEW_HOSTWINDS_HOST'
+alias hw2-download='scp-aws-down $NEW_HOSTWINDS_HOST'
 #
-alias old-hw-login=hw-login
-alias old-hw-upload=hw-upload
-alias old-hw-download=hw-download
-#
-alias hw1-login=old-hw-login
-alias hw1-upload=old-hw-upload
-alias hw1-download=old-hw-download
-alias hw2-login=new-hw-login
-alias hw2-upload=new-hw-upload
 HW2_MISC="http://www.tomasohara.trade/misc"
 alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=misc new-hw-upload'
 function hw2-upload-misc-single {
