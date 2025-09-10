@@ -3,6 +3,7 @@
 #
 # failure_analyzer.py: Analyzes BATS++ test failures to identify suspect commands.
 #
+# v18-addon.16: Refactored to use a main helper function (API) for testability.
 # v18-addon.15: Correctly implemented recursive file search using system.read_directory.
 # v18-addon.14: Switched to mezcla.system for all file and directory I/O operations.
 # v18-addon.13: Encapsulated console reporting into a dedicated method for clarity.
@@ -55,19 +56,17 @@ HEURISTIC_MODE = "heuristic"
 TL = debug.TL
 
 # ------------------------------------------------------------------------------
-# Helper functions (API) for testability, separating logic from the CLI.
+# Core Logic and Reporting Helpers (The "API" for testability)
 # ------------------------------------------------------------------------------
 
 def _find_output_files(root_dir: str) -> list[str]:
     """Find all BATS++ output files (*.outputpp.out) recursively."""
-    ## ADDON: Implemented manual recursive search since system.read_directory is non-recursive.
     matched_files = []
     dirs_to_visit = [root_dir]
 
     while dirs_to_visit:
         current_dir = dirs_to_visit.pop()
         try:
-            # system.read_directory returns just names, not full paths
             for name in system.read_directory(current_dir):
                 full_path = os.path.join(current_dir, name)
                 if system.is_directory(full_path):
@@ -203,6 +202,53 @@ def analyze_macro_failures(results_dir: str) -> list:
             })
     return sorted(results, key=lambda x: (x['bad'], x['pct_bad']), reverse=True)
 
+def write_json_report(report_data: list, json_filename: str, is_heuristic: bool):
+    """Writes the analysis data to a JSON file."""
+    print(f"\nWriting full report to {json_filename}...")
+
+    if not is_heuristic:
+        output_data = [
+            {
+                "rank": i, "impact_score": data['impact'], "failure_count": data['count'],
+                "affected_files": len(data['sources']), "source_files": sorted(list(data['sources'])),
+                "suspect_command": command
+            }
+            for i, (command, data) in enumerate(report_data, 1)
+        ]
+    else:
+        output_data = report_data
+
+    try:
+        json_string = json.dumps(output_data, indent=2)
+        system.write_file(json_filename, json_string)
+        print("JSON report generated successfully.")
+    except IOError as e:
+        system.exit(f"Error: Could not write JSON report to {json_filename}: {e}", status_code=1)
+
+def print_summary_table(report_data: list, is_heuristic: bool):
+    """Prints the formatted summary table to the console."""
+    if is_heuristic:
+        print("\n--- Top 20 Suspect Macros/Functions (Sorted by Failure Count) ---")
+        headers = ['Rank', 'Macro/Function', 'Bad Hits', 'Total Uses', 'Failure Rate', 'Failing In']
+        table_data = []
+        for i, data in enumerate(report_data[:20], 1):
+            rate_str = f"{data['pct_bad']:.1f}%"
+            failing_files = data['failing_in_files']
+            files_str = ""
+            if failing_files:
+                files_to_show = failing_files[:3]
+                files_str = "\n".join(files_to_show)
+                if len(failing_files) > 3:
+                    files_str += f"\n(...and {len(failing_files) - 3} more)"
+            table_data.append([i, data['macro'], data['bad'], data['total'], rate_str, files_str])
+        print(tabulate(table_data, headers=headers, tablefmt="fancy_grid", maxcolwidths=[None, None, None, None, None, 45]))
+    else:
+        print("\n--- Top 20 Failure Summary (Sorted by Impact) ---")
+        headers = ['Rank', 'Impact', 'Count', 'Files', 'Suspect Command(s)']
+        table_data = []
+        for i, (command, data) in enumerate(report_data[:20], 1):
+            table_data.append([i, data['impact'], data['count'], len(data['sources']), command])
+        print(tabulate(table_data, headers=headers, tablefmt="fancy_grid", maxcolwidths=[None, None, None, None, 70]))
 
 class FailureAnalyzer:
     """Helper class for running the core failure analysis logic."""
@@ -220,6 +266,40 @@ class FailureAnalyzer:
             return analyze_macro_failures(self.results_dir)
         return analyze_test_run(self.results_dir)
 
+def run_failure_analysis(results_dir: str, is_heuristic: bool, json_filename: str | None = None, show_table: bool = True) -> list:
+    """
+    Main orchestration function. This is the primary "API" for analysis.
+    It runs the analysis, writes the report, and prints the summary.
+    """
+    # --- FIX: Make default report path relative to the results directory ---
+    if json_filename is None:
+        default_name = "failure_analyzer_heuristic.json" if is_heuristic else "failure_analyzer_report.json"
+        json_filename = os.path.join(results_dir, default_name)
+    # ----------------------------------------------------------------------
+
+    analyzer = FailureAnalyzer(
+        results_dir=results_dir,
+        is_heuristic=is_heuristic
+    )
+    
+    report_data = analyzer.analyze()
+
+    if not report_data:
+        if is_heuristic:
+            print("\nAnalysis complete. No macro usage was found in test outputs.")
+        else:
+            print("\nAnalysis complete. No actionable failures were extracted.")
+        return []
+
+    write_json_report(report_data, json_filename, is_heuristic)
+    if show_table:
+        print_summary_table(report_data, is_heuristic)
+    
+    return report_data
+
+# ------------------------------------------------------------------------------
+# Command-Line Interface (CLI) Wrapper
+# ------------------------------------------------------------------------------
 
 class Script(Main):
     """
@@ -244,87 +324,24 @@ class Script(Main):
 
         self.diagnostic_mode = self.get_parsed_option(DIAGNOSTIC_MODE, self.diagnostic_mode)
         self.heuristic_mode = self.get_parsed_option(HEURISTIC_MODE, self.heuristic_mode)
-
-        user_provided_filename = self.get_parsed_option(JSON_FILENAME, None)
-        if user_provided_filename:
-            self.json_filename = user_provided_filename
-        elif self.heuristic_mode:
-            self.json_filename = "failure_analyzer_heuristic.json"
-        else:
-            self.json_filename = "failure_analyzer_report.json"
+        self.json_filename = self.get_parsed_option(JSON_FILENAME, None)
 
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
-    def _write_json_report(self, report_data: list):
-        """Writes the analysis data to a JSON file."""
-        print(f"\nWriting full report to {self.json_filename}...")
-
-        if not self.heuristic_mode:
-            output_data = [
-                {
-                    "rank": i, "impact_score": data['impact'], "failure_count": data['count'],
-                    "affected_files": len(data['sources']), "source_files": sorted(list(data['sources'])),
-                    "suspect_command": command
-                }
-                for i, (command, data) in enumerate(report_data, 1)
-            ]
-        else:
-            output_data = report_data
-
-        try:
-            json_string = json.dumps(output_data, indent=2)
-            system.write_file(self.json_filename, json_string)
-            print("JSON report generated successfully.")
-        except IOError as e:
-            system.exit(f"Error: Could not write JSON report to {self.json_filename}: {e}", status_code=1)
-
-    def _print_summary_table(self, report_data: list):
-        """Prints the formatted summary table to the console."""
-        if self.heuristic_mode:
-            print("\n--- Top 20 Suspect Macros/Functions (Sorted by Failure Count) ---")
-            headers = ['Rank', 'Macro/Function', 'Bad Hits', 'Total Uses', 'Failure Rate', 'Failing In']
-            table_data = []
-            for i, data in enumerate(report_data[:20], 1):
-                rate_str = f"{data['pct_bad']:.1f}%"
-                failing_files = data['failing_in_files']
-                files_str = ""
-                if failing_files:
-                    files_to_show = failing_files[:3]
-                    files_str = "\n".join(files_to_show)
-                    if len(failing_files) > 3:
-                        files_str += f"\n(...and {len(failing_files) - 3} more)"
-                table_data.append([i, data['macro'], data['bad'], data['total'], rate_str, files_str])
-            print(tabulate(table_data, headers=headers, tablefmt="fancy_grid", maxcolwidths=[None, None, None, None, None, 45]))
-        else:
-            print("\n--- Top 20 Failure Summary (Sorted by Impact) ---")
-            headers = ['Rank', 'Impact', 'Count', 'Files', 'Suspect Command(s)']
-            table_data = []
-            for i, (command, data) in enumerate(report_data[:20], 1):
-                table_data.append([i, data['impact'], data['count'], len(data['sources']), command])
-            print(tabulate(table_data, headers=headers, tablefmt="fancy_grid", maxcolwidths=[None, None, None, None, 70]))
-
     def run_main_step(self):
         """
-        Main processing step for the script.
+        Main processing step for the script. Wraps the core analysis function.
         """
-        version = "v18-addon.15"
+        version = "v18-addon.16"
         print(f"Executing {version} analysis on target directory: {self.results_dir}\n")
 
-        analyzer = FailureAnalyzer(
+        # The Script class now acts as a thin wrapper, calling the testable API function.
+        run_failure_analysis(
             results_dir=self.results_dir,
-            is_heuristic=self.heuristic_mode
+            is_heuristic=self.heuristic_mode,
+            json_filename=self.json_filename,
+            show_table=True
         )
-        report_data = analyzer.analyze()
-
-        if not report_data:
-            if self.heuristic_mode:
-                print("\nAnalysis complete. No macro usage was found in test outputs.")
-            else:
-                print("\nAnalysis complete. No actionable failures were extracted.")
-            return
-
-        self._write_json_report(report_data)
-        self._print_summary_table(report_data)
 
 def main():
     """Entry point"""
