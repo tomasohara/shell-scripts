@@ -43,9 +43,10 @@ if [[ ("$1" = "") || ("$1" = "--help") ]]; then
     echo ""
     echo "$0 --"
     echo ""
-    echo "INTERACTIVE=1 BACKUP_DRIVE=~/usb/sd512 MAX_DAYS_OLD=\$((3*365/12)) MAX_SIZE_CHARS=\$((5 * 1024**2)) $script --"
+    echo "INTERACTIVE=1 BACKUP_DRIVE=~/usb/sd512 MAX_DAYS_OLD=\$((3*365/12)) MAX_SIZE_CHARS=\$((5 * 1024**2)) $script /"
     echo ""
-    echo "BACKUP_DRIVE=/tmp BACKUP_DIR="" MAX_DAYS_OLD=3653 MAX_SIZE_CHARS=\$((10**9)) $script /"
+    echo "cd /etc"
+    echo "BACKUP_DRIVE=/tmp BACKUP_DIR="" MAX_DAYS_OLD=3653 MAX_SIZE_CHARS=\$((1024**3)) $script --"
     echo ""
     echo "Notes:"
     echo "- By default, included files mopdified within 30 days and no larger than 1mb."
@@ -105,6 +106,9 @@ fi
 
 # TEMP: adhoc fixup for crontab usage
 append-path "$source_dir"
+
+# Get start time in seconds with nanoseconds
+start_time=$(date +%s.%N)  
 
 # Do the backup
 # NOTE: This evolved from a scriptlet in a notes file (hence the extraneous {'s).
@@ -207,16 +211,16 @@ append-path "$source_dir"
           # this redundantly includes . for files at top-level
           readarray -t subdirs < <(find . -maxdepth 1 -type d | $EGREP -v 'tmp');
        fi
+       trace-vars TARGET_DIR EXCLUDE_REGEX MISC_FIND_OPTIONS;
        trace-array-vars subdirs;
        
        # Do the backup proper
        # note: extracts file list first and then creates archive (e.g., for better error recovery)
        # TODO3: remove if no errors are the tar log includes the file list
        rename-with-file-date "$basename.tar.log" "$basename.file.list" "$basename.file.log";
-       ## OLD: ($NICE find "${subdirs[@]}" $MISC_FIND_OPTIONS -type f -mtime "-$max_days_old" -size "-${max_size_chars}c" | $EGREP -v '(^./System/Volume)' | $EGREP -v "EXCLUDE_REGEX" | $NICE $TAR cvfzT "$basename.tar.gz" -) > "$basename.tar.log" 2>&1;
        # shellcheck disable=SC2086
        {
-           ($NICE find "${subdirs[@]}" $MISC_FIND_OPTIONS -type f -mtime "-$max_days_old" -size "-${max_size_chars}c" | $EGREP -v '(^./System/Volume)' | $EGREP -v "EXCLUDE_REGEX") > "$basename.file.list" 2> "$basename.file.log";
+           ($NICE find "${subdirs[@]}" $MISC_FIND_OPTIONS -type f -mtime "-$max_days_old" -size "-${max_size_chars}c" | $EGREP -v '(^./System/Volume)' | $EGREP -v "$EXCLUDE_REGEX") > "$basename.file.list" 2> "$basename.file.log";
            ($NICE $TAR cvfzT "$basename.tar.gz" "$basename.file.list") > "$basename.tar.log" 2>&1;
        }
        ok=$?;
@@ -231,3 +235,8 @@ append-path "$source_dir"
        check-errors-excerpt "$trace_log" | head;
    fi
 }                   ## ** don't cut-n-paste here **
+
+# Show elapsed time
+end_time=$(date +%s.%N)
+elapsed=$(perlcalc.perl "round3($end_time - $start_time)")
+echo "elapsed: ${elapsed}s"
