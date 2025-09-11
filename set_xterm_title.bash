@@ -111,7 +111,6 @@
 # Show usage if no arguments or --help
 # TODO: put argument processing in loop (see template.bash)
 ## NOTE: Uses /tmp as the files accumlate a lot over time
-## OLD: restore_base="$TMP/_set_xterm_title.$USER.$PPID"
 restore_dir="/tmp/set-xterm-title-$USER"
 mkdir --parents "$restore_dir"
 restore_base="$restore_dir/$PPID"
@@ -127,6 +126,8 @@ moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 while [ "$moreoptions" = "1" ]; do
     if [ "$1" = "--trace" ]; then
         set -o xtrace
+    elif [ "$1" = "--verbose" ]; then
+        set -o verbose
     elif [ "$1" = "--help" ]; then
         show_usage=1
     elif [ "$1" = "--debug" ]; then
@@ -179,7 +180,6 @@ if [ "$show_usage" = "1" ]; then
     #     $script     "$(basename $PWD)"        "[$PWD]"
     # EX: set_xterm_title.bash "Documents" "[/home/tomohara/Documents]"
     # TODO: See if clearer way to do this quoting.
-    ## OLD: echo "$script" '"'"$(basename $PWD)"'"'  '"'"[$PWD]"'"'
     echo "$script" \"\$\(basename \$PWD\)\"  \"\$PWD\"
     echo ""
     echo "$script 'ssh tunnel for mysql'"
@@ -192,7 +192,6 @@ fi
 full="$1"
 icon="$2"
 if [ "$icon" = "" ]; then icon=$full; fi
-## OLD: if [ "$TERM" = "screen" ]; then full="SCREEN: $full"; icon="SCREEN: $icon"; fi
 if [[ "$TERM" =~ screen ]]; then full="SCREEN: $full"; icon="SCREEN: $icon"; fi
 ## DEBUG:
 ## echo full="$full" 1>&2
@@ -226,7 +225,6 @@ if [ "$simple_mode" == 0 ]; then
     fi
     
     # If sudo being used, add current user name to end (e.g., "...; user=root")
-    # OLD: (("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER"))
     # TODO: just use LOGNAME test???
     if [[ ((("$SUDO_USER" != "") && ("$SUDO_USER" != "$USER")) || ("$LOGNAME" != "$USER")) ]]; then
         ## DEBUG: echo "adding (ssh) user" 1>&2
@@ -344,18 +342,12 @@ elif [ "$TERM" = "cygwin" ]; then
 # Otherwise set Window and minimized title to '<args>'
 else
     ## DEBUG: echo default host case
-    ## OLD: echo "]0;$*";
     ## echo in else clause
     # TODO: use example based on http://tldp.org/HOWTO/Xterm-Title-4.html#ss4.3
     #    PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD}\007"'
     #       where \033 is the character code for ESC, and \007 for BEL.
     # NOTE: via https://www.gnu.org/software/bash/manual/bash.html:
     #    PROMPT_COMMAND [is] interpreted as a command to execute before printing the primary prompt ($PS1).
-    ## OLD: echo "]1;$icon";
-    ## OLD: echo "]2;$full";
     echo -n "]1;$icon";
     echo -n "]2;$full";
 fi
-
-## TODO: delete
-## dummy change for git
