@@ -358,3 +358,18 @@ Version: N.N.N.N
 ## ...
 ## Last login: Wed Sep  3 22:52:01 2025 from 192.168.86.95
 ## set_xterm_title.bash: command not found
+
+##------------------------------------------------------------------------------
+
+## TODO3: fix intermittent problem with set_xterm_title.bash not updating terminal window title
+##
+## bad:
+## cd ~/technical
+## set_xterm_title.bash fubar
+## $ show-window-list | grep -c fubar
+## 0
+##
+## ok:
+## $ set_xterm_title.bash fubar-set_xterm_title
+## $ show-window-list | grep fubar
+## 0x052cf344  0 tpo-jugador alt $ fubar-set_xterm_title; Py3.11; pid:365159
