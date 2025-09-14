@@ -3,10 +3,11 @@
 #
 # failure_analyzer.py: Analyzes BATS++ test failures to identify suspect commands.
 #
-# v18-addon.20: Added check=True to gh.run to ensure it fails on non-zero exit codes.
-# v18-addon.19: Broadened exception handling for gh.run to catch any subprocess failure.
-# v18-addon.18: REMOVED '-i' flag from gh.run to prevent interactive shell from overwriting PATH.
-# v18-addon.17: Refactored to fully align with the 'mezcla' two-class template.
+# v18-addon.24: Restored `bash -i` to create an interactive shell, which correctly loads the user's environment and functions.
+# v18-addon.23: Export EGREP=egrep to satisfy dependencies in user's shell function. (Reverted)
+# v18-addon.22: Force non-interactive shell to source ~/.bashrc to load user-defined functions. (Reverted)
+# v18-addon.21: Addressed Pylint feedback: C0321 (multiple-statements) and W0718 (broad-exception-caught).
+# v18-addon.18: REMOVED '-i' flag from gh.run to prevent interactive shell from overwriting PATH. (Mistake)
 #
 ## TODO: Create test_failure_analyzer.py to test the new heuristic logic.
 
@@ -19,16 +20,17 @@ This script offers two modes of analysis:
    and lists the files where failures occur directly in the console output.
 
 Sample usage:
-   # Original analysis (blames code blocks) -> outputs failure_analyzer_report.json
-   {script} /path/to/results
+    # Original analysis (blames code blocks) -> outputs failure_analyzer_report.json
+    {script} /path/to/results
 
-   # New heuristic analysis (blames macros) -> outputs failure_analyzer_heuristic.json
-   {script} /path/to/results --heuristic
+    # New heuristic analysis (blames macros) -> outputs failure_analyzer_heuristic.json
+    {script} /path/to/results --heuristic
 """
 
 # Standard modules
 import json
 import os
+import subprocess
 from collections import defaultdict
 from pathlib import Path
 
@@ -121,7 +123,8 @@ class FailureAnalyzer:
         pattern = r"^\s*not ok\s+\d+\s+-?\s*(.+)$"
         try:
             content = system.read_file(output_file_path, errors='ignore')
-            if not content: return []
+            if not content:
+                return []
             matches = my_re.findall(pattern, content, my_re.MULTILINE)
             return list({m.strip().split('#')[0].strip() for m in matches}) if matches else []
         except IOError as e:
@@ -130,14 +133,17 @@ class FailureAnalyzer:
 
     def _extract_from_generated_script(self, script_path: str, test_name: str) -> str | None:
         """Extracts suspect command from the generated script."""
-        if not system.file_exists(script_path): return None
+        if not system.file_exists(script_path):
+            return None
         try:
             content = system.read_file(script_path, errors='ignore')
-            if not content: return None
+            if not content:
+                return None
             sanitized_test_name = my_re.escape(test_name.replace(' ', '_'))
             pattern = rf"^\s*(?:function\s+)?{sanitized_test_name}[-_]actual\s*\(\)\s*{{((?:.|\n)*?)^\s*}}?\s*$"
             match = my_re.search(pattern, content, my_re.MULTILINE)
-            if not match: return None
+            if not match:
+                return None
             function_body = match.group(1)
             cleaned_lines = [l.strip() for l in function_body.splitlines() if l.strip() and not l.strip().startswith(('#', 'true', '}'))]
             return "\n".join(cleaned_lines) if cleaned_lines else None
@@ -156,18 +162,20 @@ class FailureAnalyzer:
         for output_file_str in output_files:
             output_file = Path(output_file_str)
             failed_tests = self._find_failed_tests(output_file_str)
-            if not failed_tests: continue
+            if not failed_tests:
+                continue
             base_name = output_file.name.replace('.outputpp.out', '')
             source_filename = f"{base_name}.batspp"
             generated_script_path = str(output_file.with_name(f"{base_name}.outputpp"))
-            print(f"  -> Analyzing {len(failed_tests)} failure(s) in: {source_filename}")
+            print(f"   -> Analyzing {len(failed_tests)} failure(s) in: {source_filename}")
             for test_name in failed_tests:
                 suspect = self._extract_from_generated_script(generated_script_path, test_name)
                 if suspect:
                     aggregated_failures[suspect]['sources'].add(source_filename)
                     aggregated_failures[suspect]['count'] += 1
         print("-" * 54)
-        if not aggregated_failures: return []
+        if not aggregated_failures:
+            return []
         for data in aggregated_failures.values():
             data['impact'] = data['count'] * len(data['sources'])
         return sorted(aggregated_failures.items(), key=lambda item: item[1]['impact'], reverse=True)
@@ -176,14 +184,26 @@ class FailureAnalyzer:
         """Estimates which macros/functions are failing the most."""
         print("--- Running Macro Failure Heuristic Analysis ---")
         try:
-            # CRITICAL FIX: Added check=True to force an exception on non-zero exit codes.
-            raw_macros_output = gh.run("bash -c 'show-macros-proper'", check=True).splitlines()
-        except Exception as e:
+            # CORE FIX: Restored the '-i' flag to force an interactive shell.
+            # This ensures ~/.bashrc is fully sourced, defining functions and variables.
+            raw_macros_output = gh.run("bash -c -i 'show-macros-proper'", check=True).splitlines()
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
             system.exit(f"Error: Could not execute 'show-macros-proper'. Is it in your PATH? Details: {e}", status_code=1)
 
-        macros = {my_re.sub(r'\s*\(\)\s*$', '', my_re.sub(r'^\s*function\s+', '', l.strip())).strip() for l in raw_macros_output if l.strip() and my_re.match(r'^[a-zA-Z0-9_:-]+$', my_re.sub(r'\s*\(\)\s*$', '', my_re.sub(r'^\s*function\s+', '', l.strip())).strip())}
+        macros = set()
+        for line in raw_macros_output:
+            stripped_line = line.strip()
+            if not stripped_line:
+                continue
+
+            sanitized = my_re.sub(r'\s*\(\)\s*$', '', my_re.sub(r'^\s*function\s+', '', stripped_line)).strip()
+            # Use the more permissive regex that allows for '.' in names.
+            if my_re.match(r'^[a-zA-Z0-9_.:-]+$', sanitized):
+                macros.add(sanitized)
+
         if not macros:
             system.exit("Error: 'show-macros-proper' returned no valid macros after sanitization.", status_code=1)
+
         debug.trace(TL.DETAILED, f"Sanitized macro list contains {len(macros)} items. Example: {list(macros)[:5]}")
         macro_stats = defaultdict(lambda: {'total': 0, 'bad': 0, 'bad_files': set()})
         output_files = self._find_output_files()
@@ -196,10 +216,12 @@ class FailureAnalyzer:
             source_filename = f"{base_name}.batspp"
             try:
                 content = system.read_file(output_file_str, errors='ignore')
-                if not content: continue
+                if not content:
+                    continue
                 snippets = my_re.split(r'\n(?:# Toplevel|={10,})\n', content)
                 for snippet in snippets:
-                    if not snippet.strip() or not snippet.strip().startswith(('ok', 'not ok')): continue
+                    if not snippet.strip() or not snippet.strip().startswith(('ok', 'not ok')):
+                        continue
                     is_bad_snippet = snippet.strip().startswith("not ok")
                     for macro in macros:
                         if my_re.search(rf'\b{my_re.escape(macro)}\b', snippet):
@@ -243,7 +265,8 @@ class FailureAnalyzer:
                 if failing_files:
                     files_to_show = failing_files[:3]
                     files_str = "\n".join(files_to_show)
-                    if len(failing_files) > 3: files_str += f"\n(...and {len(failing_files) - 3} more)"
+                    if len(failing_files) > 3:
+                        files_str += f"\n(...and {len(failing_files) - 3} more)"
                 table_data.append([i, data['macro'], data['bad'], data['total'], rate_str, files_str])
             print(tabulate(table_data, headers=headers, tablefmt="fancy_grid", maxcolwidths=[None, None, None, None, None, 45]))
         else:
@@ -274,7 +297,6 @@ class Script(Main):
         super().setup()
 
         path_str = self.get_parsed_option(RESULTS_DIR, ".")
-        # Use abspath to handle relative paths from CLI subprocesses correctly.
         abs_path_str = os.path.abspath(path_str)
 
         if not system.file_exists(abs_path_str):
@@ -293,17 +315,15 @@ class Script(Main):
         """
         Main processing step. Instantiates and runs the FailureAnalyzer.
         """
-        version = "v18-addon.20"
+        version = "v18-addon.24"
         print(f"Executing {version} analysis on target directory: {self.results_dir}\n")
 
-        # Instantiate the main logic class with parameters from the CLI.
         analyzer = FailureAnalyzer(
             results_dir=self.results_dir,
             is_heuristic=self.heuristic_mode,
             json_filename=self.json_filename
         )
         
-        # Run the full analysis process.
         analyzer.run()
 
 def main():
