@@ -114,6 +114,11 @@ function plint-tester-testee {
 }
 }
 #
+## TODO3: simple-alias-fn plint-tester-testee-strict 'PYTEST_OPTS="$default_pytest_opts --runxfail"'
+function plint-tester-testee-strict {
+    PYTEST_OPTS="--runxfail $default_pytest_opts" plint-tester-testee "$@";
+}
+#
 # clone-repo(url): clone github repo at URL into current dir with logging
 # TODO2: move to git-related section (better yet into git-aliases.bash)
 function clone-repo () {
@@ -244,12 +249,12 @@ function run-python-script-reset {
 }
 
 # pytest stuff
-default_pytest_opts="-vv --capture=tee-sys"
+default_pytest_opts=(-vv --capture=tee-sys)
 #
 # test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
     if [ "$1" = "" ]; then
-        echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] [PYTEST=path] test-python-script script"
+        echo "Usage: [PYTEST_OPTS=[\"${default_pytest_opts[*]}\"]] [PYTEST_DEBUG_LEVEL=N] [PYTEST=path] test-python-script script"
         echo "Note: When debugging you might need to use --runxfail and -s to see full error info."
         echo "The debugging level defaults to 5 (unlike run-python-script)."
         return
@@ -266,7 +271,7 @@ function test-python-script {
     else
         echo "Warning: cannnot resolve test for _$test_script" 1>&2
     fi
-    local pytest_opts="${PYTEST_OPTS:-"$default_pytest_opts"}"
+    local pytest_opts="${PYTEST_OPTS:-"${default_pytest_opts[*]}"}"
     # TODO3: drop inheritance spec in summary
     # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "tests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
     PYTHON_DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="$PYTEST $pytest_opts" run-python-script "$test_script" "$@" 2>&1;
@@ -276,12 +281,12 @@ function test-python-script {
 function test-python-script-method {
     local method="$1";
     shift;
-    PYTEST_OPTS="-k $method $default_pytest_opts" test-python-script "$@";
+    PYTEST_OPTS="-k $method ${default_pytest_opts[*]}" test-python-script "$@";
 }
 #
 # test-python-script-strict(test-script): run TEST-SCRIPT via pytest with xfail ignored
 function test-python-script-strict {
-    PYTEST_OPTS="--runxfail $default_pytest_opts" test-python-script "$@";
+    PYTEST_OPTS="--runxfail ${default_pytest_opts[*]}" test-python-script "$@";
 }
 #
 # test-python-script-method-strict: likewise for just a method
@@ -289,7 +294,7 @@ function test-python-script-method-strict {
     ## TODO2: default_pytest_opts="--runxfail" test-python-script-method "$@";
     local method="$1";
     shift;
-    PYTEST_OPTS="--runxfail -k $method $default_pytest_opts" test-python-script "$@";
+    PYTEST_OPTS="--runxfail -k $method ${default_pytest_opts[*]}" test-python-script "$@";
 }
 
 # disable-python-warnings(): Ignore warning due to Pydantic quirks
