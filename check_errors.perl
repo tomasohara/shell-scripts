@@ -189,6 +189,7 @@ while (<>) {
 	   # Miscellaneous errors
 	   || /wn: invalid search/
 	   || /socket has failed to (bind|listen)/
+	   || /unexpected error/i
 	   ) {
 	$has_error = &TRUE;
 	$match_info = "E2 [$&]";
