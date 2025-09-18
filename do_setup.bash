@@ -792,8 +792,8 @@ if [ "$modern_grep" = 1 ]; then skip_dirs="-d skip"; fi
 ## function gr-h () { gr "$@" *.h; }
 ## function gr-h- () { gr- "$@" *.h; }
 
-function gr-bib () { perlgrep.perl -i -para "$@" *.bib; }
-function gr-biblio () { perlgrep.perl -i -para "$@" *bib*.ascii; }
+function gr-bib () { perl- perlgrep.perl -i -para "$@" *.bib; }
+function gr-biblio () { perl- perlgrep.perl -i -para "$@" *bib*.ascii; }
 
 ## OLD
 ## # Searching for files
@@ -1239,6 +1239,7 @@ function summarize-mail- () { $GREP -h "^((From)|(Subject)|(Date)):" "$@" | $PAG
 #  -b   ignore changes in amount of white space
 #  -B   ignore changes that just insert or delete blank lines
 if [ "$INCLUDE_MISC_ALIASES" = "1" ]; then
+    ## TODO2: remove cvs aliases already!
     trace CVS stuff
     #
     function cvs- () { cvs "$@" >| /tmp/cvs_.$$ 2>&1; $PAGER /tmp/cvs_.$$; }
@@ -1253,10 +1254,10 @@ if [ "$INCLUDE_MISC_ALIASES" = "1" ]; then
     alias cvs-update='cvs-filtered "^cvs update" update -d'
     alias cvs-update-latest='cvs-filtered "^cvs update" update -A'
     alias cvs-examine='cvs-filtered "^cvs update" -n update -d'
-    alias cvs-modified='cvs- status | $GREP Modified | extract_matches.perl "File: (\S+)" | echoize'
+    alias cvs-modified='cvs- status | $GREP Modified | perl- extract_matches.perl "File: (\S+)" | echoize'
     alias cvs-modules='cvs checkout -c'
     alias cvs-annotate='cvs- annotate'
-    alias cvs-extract-all='extract_all_versions.perl -cvs'
+    alias cvs-extract-all='perl- extract_all_versions.perl -cvs'
     #
     # cvs-update-all: performs 'cvs update' grepping for conflicts and changes
     #
@@ -1272,6 +1273,7 @@ fi
 
 # RCS stuff
 if [ "$INCLUDE_MISC_ALIASES" = "1" ]; then
+    ## TODO2: remove rcs aliases already!
     # alias get 'co'
     function get () { co -M "$@"; }
     function get-read-only () { co -p "$@"; }
@@ -1343,7 +1345,7 @@ function rtop () { rsh $1 top 50 | $PAGER; }
 ##    conditional-source $BIN/rsh-aliases.bash
 ## fi
 
-alias ps-users='ps_mine.sh -a | $GREP -v root'
+## OLD: alias ps-users='ps_mine.sh -a | $GREP -v root'
 ## OLD: alias ps-sort='ps_sort.perl -'
 
 
@@ -1529,17 +1531,17 @@ alias spanish='spanish-lookup'
 alias sp=spanish
 ## TODO: reword sp- to sp-loose
 alias sp-=spanish-
-alias pp-spanish='pp_spanish_entry.perl'
+alias pp-spanish='perl- pp_spanish_entry.perl'
 ## TODO: reword sp-pp- to sp-pp-aux
 function sp-pp- () { sp $@ | pp-spanish; }
 function sp-pp-loose () { sp- $@ | pp-spanish; }
 function sp-pp () { sp-pp- $1 >| $1.pp; $PAGER $1.pp; }
 
-function spanish-trans-phrase () { phrase=$1; shift; echo "$phrase" | $multiling_dir/Spanish/qd_trans_spanish.perl "$@" -; }
+function spanish-trans-phrase () { phrase=$1; shift; echo "$phrase" | perl- $multiling_dir/Spanish/qd_trans_spanish.perl "$@" -; }
 alias trans-spanish-phrase='spanish-trans-phrase'
-alias trans-sp='qd_trans_spanish.perl -maxlen=256 -redirect -'
+alias trans-sp='perl- qd_trans_spanish.perl -maxlen=256 -redirect -'
 alias qd-trans-sp='trans-sp'
-alias old-qd-trans-sp='qd_trans_spanish.perl -redirect -'
+alias old-qd-trans-sp='perl- qd_trans_spanish.perl -redirect -'
 
 # Unicode support
 #

@@ -1,4 +1,4 @@
-# *-*-perl-*-*
+#! /usr/bin/env -S perl -sw
 eval 'exec perl -Ssw $0 "$@"'
     if 0;
 # win32.perl: module for interfacing w/ the Win32 module

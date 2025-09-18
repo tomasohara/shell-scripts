@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 #
 # Aliases for Git source control (see https://git-scm.com). For the most part, these
 # composite operations such as git-update-commit-push. In some cases, the aliases are
@@ -20,6 +20,10 @@
 #...............................................................................
 # Notes:
 #
+# - Aliases names git-xyz-plus add funcitonality to the underlying command,
+#   such as to supply default arguments (e.g., --name-status for log).
+# - Those named git-xyz-alias are just thin wrappers around the command,
+#   such as to save output to file (e.g., _git-status-ddMMyy-hhmm-hex.log).
 # - [Deprecated] Credentials can be taken from project specific file (_my-git-credentials-etc.bash.list)
 #
 #     GIT_USER=username
@@ -131,17 +135,18 @@
 ## DEBUG: echo "in ${BASH_SOURCE[0]}"
 
 #................................................................................
-# Constans
+# Constants
 
 egrep="grep --extended-regexp"
+PERL="perl -Ssw"     # S: find in path; s: enable switches; w: show warnings
 
 #................................................................................
 # Aliases
 
-# pause-for-enter(): print message and wait for user to press enter
+# git-pause-for-enter(): print message and wait for user to press enter
 # TODO: extend to press-any-key; see
 #    https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
-function pause-for-enter () {
+function git-pause-for-enter () {
     local message="$1"
     ## TODO2: add "enter or ^C" to user message
     if [ "$message" = "" ]; then message="Press enter to continue"; fi
@@ -167,9 +172,8 @@ function quiet-unalias-alias {
     unalias "$@" 2> /dev/null || true;
 }
 
-
 # HACK: wrapper around check_errors.perl w/ new QUIET option
-function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 check_errors.perl -context=5 "$@") 2>&1; }
+function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 $PERL check_errors.perl -context=5 "$@") 2>&1; }
 
 #................................................................................
 
@@ -319,7 +323,7 @@ function git-update-verified {
     changed="$(git-diff-list)"
     if [ "$changed" != "" ]; then
         echo "Current changes: $changed"
-        pause-for-enter "Proceed with update even though potential for conflict? (Enter for Y otherwise ^C)"
+        git-pause-for-enter "Proceed with update even though potential for conflict? (Enter for Y otherwise ^C)"
     fi
     git-update-force
 }
@@ -402,7 +406,7 @@ function git-add-commit-push {
 
     # Push the changes after showing synopsis and getting user confirmation
     echo ""
-    pause-for-enter "About to commit $file_spec (with message '$message')"
+    git-pause-for-enter "About to commit $file_spec (with message '$message')"
     echo "issuing: git commit -m '$message'"
     git commit -m "$message" >> "$log" 2>&1
     perl -pe 's/^/    /;' "$log"
@@ -410,7 +414,7 @@ function git-add-commit-push {
     if [ "${GIT_SKIP_PUSH:-0}" == "1" ]; then
         echo "Skipping push (due to GIT_SKIP_PUSH)"
     else    
-        pause-for-enter 'FYI: About to push, so review commit log above.'
+        git-pause-for-enter 'FYI: About to push, so review commit log above.'
         echo "issuing: git push --verbose"
         if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
            git push --verbose <<EOF >> "$log" 2>&1
@@ -464,7 +468,8 @@ function invoke-git-command {
 # TODO: git-command => git-command-alias
 alias git-command='invoke-git-command'
 ## TODO3: git-push-plus => git-push-alias (as simple wrapper)
-alias git-push-plus='invoke-git-command push'
+## OLD: alias git-push-plus='invoke-git-command push'
+alias git-push-alias='invoke-git-command push'
 alias git-pull-alias='invoke-git-command pull'
 
 # Misc git commands (redirected to log file)
@@ -476,6 +481,7 @@ function git-log-plus { invoke-git-command log --name-status "$@" | less --quit-
 alias git-log-diff-plus='invoke-git-command log --patch'
 alias git-log-follow='git-log-plus --follow'
 alias git-blame-alias='invoke-git-command blame'
+alias git-rm-alias='invoke-git-command rm'
 
 # git-add-plus: add filename(s) to repository
 # note: if GIT_FORCE is 1 then --force added (e.g., to override .gitignore)
@@ -506,7 +512,7 @@ function git-reset-file {
     ## if [ "$1" = "--hard" ]; then
     ##     reset_options="$1";
     ##     shift
-    ##     pause-for-enter $'Warning: reset --hard changes the both index and working tree!\nPress enter to proceed'
+    ##     git-pause-for-enter $'Warning: reset --hard changes the both index and working tree!\nPress enter to proceed'
     ## fi
     if [ "$*" = "" ]; then
         echo "Error: need to specify a file"
@@ -585,6 +591,18 @@ alias git-restore-both-alias="git-restore-file-helper --both"
 # git-revert-commit(commit): effectively undoes COMMIT(s) by issuing new commits
 alias git-revert-commit-alias='git-command revert'
 
+# escape-at-sign(text): escape @ in stdin with \ for use in regexes
+# note: rare except for certain node repos (e.g., n8n)
+# ex: echo "@n8n" | escape-at-sign => "\\@n8n"
+function escape-at-sign {
+    perl -pe 's/@/\\@/g;';
+}
+# unescape-at-sign(text): un-escape \@ in stdin after used of escaped regex input
+# ex: echo "\\@n8n" | unescape-at-sign => "@n8n"
+function unescape-at-sign {
+    perl -pe 's/\\@/@/g;';
+}
+
 # git-diff-plus([files-etc]: show repo diff
 # Note:
 # - Normalizes the listing such as by changing a/<path> to a: <path> and likwise for b.
@@ -604,7 +622,11 @@ function git-diff-plus {
     IFS=$'\n'
     echo "" >| "$log"
     for f in $(git-diff-list "$@"); do
-        git diff -- "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log" 2>&1
+        ## OLD: git diff -- "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log" 2>&1
+        ## TODO:
+        ## local f_escape
+        ## f_escape="$(echo "$f" | perl -pe 's/@/\\@/g;')"
+        git diff -- "$f" | escape-at-sign | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@$1$2 $3: @g) {}' | unescape-at-sign >> "$log" 2>&1
     done
     IFS="$OLDIFS"                       # restore inter-field separator
     #
@@ -671,12 +693,20 @@ function git-diff-list {
     # (e.g., "/home/tomohara/python/Mezcla/README.md" => "$(git-root-alias)/README.md"
     # TODO3: simplying regex fixup's; use relative path (e.g., "../README.md")
     local root
-    root=$(git-root-alias)
+    root="$(git-root-alias)"
     local pwd
-    pwd=$(realpath ".")
+    ## OLD:
+    pwd="$(realpath ".")"
+    ## TODO: pwd="$(realpath --relative-to="$root" ".")"
     # note: Uses case insenstive matching for sake of Windows
     # shellcheck disable=SC2002
-    cat "$diff_list_file" | perl -pe "s@^@$root/@i;" | perl -pe "s@^$pwd/?@@i;" | perl -pe "s@^$root/?@\\\$\(git-root-alias\)/@i;"
+    ## OLD: cat "$diff_list_file" | escape-at-sign | perl -pe "s@^@$root/@i;" | perl -pe "s@^$pwd/?@@i;" | perl -pe "s@^$root/?@\\\$\(git-root-alias\)/@i;"
+    local pwd_esc git_root_esc;
+    pwd_esc="$(echo -n "$pwd" | escape-at-sign)"
+    ## TODO2:
+    root_esc="$(git-root-alias | escape-at-sign)"
+    cat "$diff_list_file" | escape-at-sign | perl -pe "s@^@$root_esc/@i;" | perl -pe "s@^${pwd_esc}/?@@i;" | unescape-at-sign;
+    ## TEST: cat "$diff_list_file" | escape-at-sign | perl -pe "s@^@$root/@i;" | perl -pe "s@^$pwd_esc/?@@i;" | perl -pe "s@^$root_esc/?@\\\$\(git-root-alias\)/@i;" | unescape-at-sign;
 }
 
 # Output templates for doing checkin of modified files
@@ -800,7 +830,8 @@ function git-root-alias {
     root=$(git rev-parse --show-toplevel)
     # Under Windows, convert c:/xyz => /c/xyz, etc.
     if [[ $OS =~ Windows.* ]]; then
-        root=$(echo "$root" | perl -pe 's@([a-z]):@/\1@i;')
+        ## OLD" root=$(echo "$root" | perl -pe 's@([a-z]):@/\1@i;')
+        root=$(echo -n "$root" | escape-at-sign | perl -pe 's@([a-z]):@/$1@i;' | unescape-at-sign)
     fi
     echo $root
 }
@@ -837,7 +868,7 @@ function git-checkout-branch {
         echo "note: available branches:"
         # TODO: get maldito git to cooperate better (e.g., plain text option)!
         # shellcheck disable=SC2016
-        PAGER="" git branch --all | extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
+        PAGER="" git branch --all | $PERL extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
         return
     fi
     local branch_ref
@@ -863,7 +894,7 @@ simple-alias-fn git-branch-checkout  git-checkout-branch
 # git-branch-alias(): return current branch for repo
 function git-current-branch {
     local git_branch
-    git_branch="$(git status | extract_matches.perl "On branch (\S+)")"
+    git_branch="$(git status | $PERL extract_matches.perl "On branch (\S+)")"
     echo "$git_branch"
 }
 alias git-branch-alias='git-current-branch'
@@ -965,8 +996,9 @@ function git-misc-alias-usage() {
     echo "    GIT_MESSAGE='moved' git-move-to-dir DIR file1 file2"
     echo ""
     echo "To delete files (mucho cuidado):"
-    echo "   git rm old-file"
-    echo "   GIT_MESSAGE='deleted' git-update-commit-push old-file"
+    # note: Bypasses 'git add' in git-update-commit-push (TODO3: customize alias for this).
+    # See https://stackoverflow.com/questions/37279654/when-should-i-use-rm-git-rm-git-rm-cached-git-add.
+    echo '   old="TODO..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" GIT_SKIP_ADD=1 git-update-commit-push "$old"'
     echo ""
     echo "To check in all tracked files with changes (examinar primero):"
     echo "   GIT_MESSAGE='...' git-update-commit-push \$(git-files-changed)"

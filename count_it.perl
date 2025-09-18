@@ -1,3 +1,4 @@
+#! /usr/bin/env -S perl -sw
 # *-*-perl-*-*
 eval 'exec perl -Ssw $0 "$@"'
     if 0;
@@ -127,13 +128,15 @@ if (!defined($ARGV[0])) {
 if ($pattern eq "") {
     $pattern = $ARGV[0];
     shift @ARGV;
+    &debug_print(&TL_VERBOSE, "pattern=$pattern\n");
 }
 
 # See if regex has line achor (^ or $)
 ## TODO: exclude \$ at end of string (e.g., "100\$")
 ## TODO: add unit test: (echo "12 34 56 78" | count_it.perl '\d{2}' | wc -l) =>  4
+## TODO2: allow for line archor within grouping parenthesis
 my($has_line_anchor) = ((index($pattern, "^") == 0) 
-			|| (rindex($pattern, "\$") == length($pattern))); 
+			|| (rindex($pattern, "\$") == length($pattern)));
 &init_var(*one_per_line, $has_line_anchor); # only count one instance of the pattern per line
 &init_var(*multi_per_line, ! $one_per_line);	# count multiple instance of the pattern per line (even when ^ and $ are specified)
 &assertion(! ($one_per_line && $multi_per_line));
@@ -144,7 +147,10 @@ if ($locale) {
     eval "use locale;'"
 }
 
-# Sanity check for whether one-per-line option might be needed
+# Sanity checks for whether -one-per-line option might be needed
+if ((! $one_per_line) && (! $has_line_anchor) && ($pattern =~ /[^\\\\][\^\$]/)) {
+    &warning("Anchors currently start or end line: consider -one_per_line\n");
+}
 # NOTE: checks against pattern need to occur prior to modification (e.g., paren addition)
 # TODO: handle multiple patterns per line (e.g., set line break to null); likewise check for multiple end-of-line matching
 if ((&DEBUG_LEVEL > 3) && ($pattern =~ /^\^/) && ($pattern !~ /[\$\n]$/) && (! $multi_per_line)) {

@@ -20,12 +20,18 @@
 ## set -o xtrace
 ## DEBUG: echo "in anaconda-aliases.bash"
 
+python="python3"
+perl="perl -Ssw"
+
 # Find directory for conda
 # TODO: Use a more standard fallback location
-export ANACONDA_HOME
-ANACONDA_HOME=$(realpath "$(dirname "$(which conda)" 2> /dev/null)"/../)
-if [ "$ANACONDA_HOME" = "" ]; then
-    export ANACONDA_HOME=/usr/local/misc/programs/anaconda3
+if [ "$ANACONDA_HOME" == "" ]; then
+    export ANACONDA_HOME
+    ## TODO3: rework to check for missing conda prior to path derivation
+    ANACONDA_HOME=$(realpath "$(dirname "$(which conda)" 2> /dev/null )"/../)
+    if [[ ("$ANACONDA_HOME" = "") || ("$ANACONDA_HOME" = "/home") ]]; then
+        export ANACONDA_HOME=/usr/local/misc/programs/anaconda3
+    fi
 fi
 
 # add-conda-env-to-xterm-title(): puts conda prompt modifier in xterm title
@@ -35,8 +41,7 @@ fi
 function add-conda-env-to-xterm-title {
     ## DEBUG: echo "in add-conda-env-to-xterm-title"
     export XTERM_TITLE_SUFFIX
-    ## OLD: XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d+.\d+)'):$CONDA_PROMPT_MODIFIER"
-    XTERM_TITLE_SUFFIX="Py$(python --version 2>&1 | extract_matches.perl -i 'python (\d+.\d+)')"
+    XTERM_TITLE_SUFFIX="Py$($python --version 2>&1 | $perl extract_matches.perl -i 'python (\d+.\d+)')"
     declare CONDA_PROMPT_MODIFIER
     # note: removes extraneous trailing spaces
     if [[ $CONDA_PROMPT_MODIFIER =~ \ *$ ]]; then
@@ -98,14 +103,13 @@ echo "$anaconda2_dir" > /dev/null
 # show-python-path(): display current path for python binary to stderr
 function trace-python-path {
     local python_path=""
-    python_path=$(/usr/bin/which python 2> /dev/null)
+    python_path=$(command which $python 2> /dev/null)
     trace-vars python_path
     reference-variable "$python_path"
 }
 
 # Work around for intermittent problems w/ 'conda activate' requiring 'source activate' instead.
 # activation-helper is to handle deactivate as well
-## OLD: function activation-helper () {
 function activation-helper {
     ## DEBUG: echo "in activation-helper($@)"
     local command="$1"
@@ -133,15 +137,9 @@ function activation-helper {
     $conda_command "$command" "$env"
     ## DEBUG:
     trace-python-path
-    ## OLD:
-    ## local python_path=""
-    ## python_path=$(/usr/bin/which python 2> /dev/null)
-    ## trace-vars python_path
-    ## reference-variable "$python_path"
     ## DEBUG: echo "out activation-helper($@)"
 }
 alias conda-activate='activation-helper activate'
-## OLD: alias conda-deactivate='source deactivate'
 alias conda-deactivate='activation-helper deactivate'
 #
 alias add-tensorfow='conda-activate env_tensorflow_gpu'
@@ -157,7 +155,7 @@ function conda-list-env-hack-aux { ls ~/.conda/envs "${ANACONDA_HOME}"/envs 2> /
 function conda-list-env-hack { conda-list-env-hack-aux | echoize; }
 #
 alias conda-env-list='conda env list'
-alias conda-env-name='conda env list | extract_matches.perl "^(\S+ )  " | echoize'
+alias conda-env-name='conda env list | $perl extract_matches.perl "^(\S+ )  " | echoize'
 
 # conda-activate-env(name, [use_hack=0]): Activate NAME or show list of environment if empty or "-"
 # Note: 'conda env list' is slow, so USE_HACK resorts to 'ls ~/.conda/envs'
@@ -191,10 +189,13 @@ function conda-activate-env-like {
     local env_name="$1"
     # note: regex groups                        1 222       3333333333  
     #                                            /.../_ENV_/bin/python
-    local bin_dir
-    bin_dir=$(which python | perl -pe "s@^((.*)/[^/]+/bin/python$)@\2/$env_name/bin@;")
+    local bin_dir="$ANACONDA_HOME/envs/$env_name/bin"
     if [ ! -e "$bin_dir" ]; then
-        echo "Error: unable to resolve anaconda bin dir from current path"
+        bin_dir=$(which $python | perl -pe "s@^((.*)/[^/]+/bin/$python$)@\2/$env_name/bin@;")
+    fi
+    #
+    if [ ! -e "$bin_dir" ]; then
+        echo "Error: unable to resolve anaconda bin dir"
     else
         echo "Warning: only prepending PATH w/ $bin_dir (e.g., no CONDA_ env updates)"
         export PATH="$bin_dir:$PATH";
@@ -232,7 +233,6 @@ function old-init-conda {
 
 # conda-create-env(name, [python_version=3.9]): create Python3 environment for Python 3.9 by default
 # TODO: determine the version, make sure ipython gets installed
-## OLD: function conda-create-env () {
 function conda-create-env {
     if [ "$1" = "" ]; then
         echo "usage: conda-create-env name [python_version=3.9]"

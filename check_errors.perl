@@ -1,3 +1,4 @@
+#! /usr/bin/env -S perl -sw
 # *-*-perl-*-*
 eval 'exec perl -Ssw $0 "$@"'
     if 0;
@@ -188,6 +189,7 @@ while (<>) {
 	   # Miscellaneous errors
 	   || /wn: invalid search/
 	   || /socket has failed to (bind|listen)/
+	   || /unexpected error/i
 	   ) {
 	$has_error = &TRUE;
 	$match_info = "E2 [$&]";

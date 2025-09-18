@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 #
 # kdiff.sh: Invokes kdiff3 over the files making sure unix paths resolved to windows
 # if under Cygwin.

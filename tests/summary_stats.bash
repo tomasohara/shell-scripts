@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 #
 # summary_stats.bash works in the following manner:
 # 1) ./batspp_report.py -k (regenerates all KCOV dirs and output in HTML)

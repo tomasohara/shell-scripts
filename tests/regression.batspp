@@ -121,7 +121,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## sudo apt install zip
 
 #-------------------------------------------------------------------------------
-# Make sure shell-check-stdin doesn't return false positive
+# TODO3: Make sure shell-check-stdin doesn't return false positive
 #
 ## $ shell-check-stdin 
 ## Enter snippet lines and then ^D
@@ -142,11 +142,13 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## shellcheck OK
 
 #-------------------------------------------------------------------------------
-# Make sure set_xterm_title.bash uses user-specific temp dir:
+# TODO4: Make sure set_xterm_title.bash uses user-specific temp dir:
 # interittent bug with "/tmp/set-xterm-title-" being used.
 #
 ## $ dir -d /tmp/set-xterm-title-*
+## [BAD]
 ## drwxrwxr-x 2 tomohara 4.0K Jun  9 04:00 /tmp/set-xterm-title-
+## [OK]
 ## drwxr-xr-x 2 root     4.0K Jun  8 16:05 /tmp/set-xterm-title-root
 ## drwxrwxr-x 2 tomohara 4.0K Jun  8 15:03 /tmp/set-xterm-title-tomohara
 ## drwxrwxr-x 2 testuser 4.0K Jun  1 17:55 /tmp/set-xterm-title-testuser
@@ -155,6 +157,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 # Fix alt-extract-all-git-versions.bash
 #
 
+## BAD:
 ## $ NUM_REVISIONS=5 alt-git-extract-all-versions alt-extract-all-git-versions.bash
 ## Trying main path alt-extract-all-git-versions.bash for version v13
 ## /home/tomohara/temp/tmp/all_versions_exported/alt-extract-all-git-versions.bash.v13-13Apr24
@@ -164,8 +167,9 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## Error: unable to resolve commit 49d1dfc9c25e959ead5d861dde183baa115f2542
 
 #-------------------------------------------------------------------------------
-# fix git-conflicts-alias
+# TODO2: fix git-conflicts-alias
 
+## BAD:
 ## $ git-conflicts-alias 
 ## grep: mezcla: Is a directory
 ##               ^^^^^^^^^^^^^^
@@ -174,11 +178,12 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## jug
 
 #-------------------------------------------------------------------------------
-# fix git-next-checkin
+# TODO2: fix git-next-checkin
 #
 # note: "git diff --numstat filename" => git diff --numstat -- filename"
 #
 
+## BAD:
 ## $ git-next-checkin 
 ## Note: binary file so bypassing diff
 ## fatal: ambiguous argument '_typos.toml': unknown revision or path not in the working tree.
@@ -192,3 +197,179 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## _typos.toml
 ## library/train_util.py
 ## tests/test_train_textual_inversion.py
+
+## -----------------------------------------------------------------------------
+
+## TODO3: Make sure usage only changes the size field (nothing in filename)
+##
+## $ usage
+## #
+## 286.667G        ./backup/tpo-servidor/jul-1.976K
+##        ^ OK                                    ^ BAD
+
+##------------------------------------------------------------------------------
+
+## TODO2: Make sure git-hidden works in non-repo dir (e.g., build)
+##
+## [BAD]
+## $ pwd
+## /home/tomohara/temp/tpo-OSCAR-code-temp/build
+##
+## $ git-hidden 
+##
+## [OK]
+## $ cd ..
+## $ git-hidden 
+## S oscar/tests/sessiontests.cpp
+
+##------------------------------------------------------------------------------
+
+## TODO: fix readonly issues with ~/xfer dir
+## BAD:
+## $ vivo-upload _master-note-info.list
+## scp: xfer/_master-note-info.list: Permission denied
+
+##------------------------------------------------------------------------------
+
+## TODO1: trap silly alias edits [somehow]
+##
+## BAD:
+## $ script-update 
+## Script started, output log file is '_update-20jun25.log'.
+## /home/tomohara/bin/adhoc/make-git-update.bash 
+## /home/tomohara/bin/adhoc/../tomohara-proper-aliases.bash: eval: line 605: unexpected EOF while looking for matching `''
+## ...
+
+##------------------------------------------------------------------------------
+##
+## TODO: fix usage numeric suffixes to just apply once
+## NOTE: redundant with TODO item above
+##
+## BAD:
+## $ echo $"4096\tmy-file-4096" | apply-usage-numeric-suffixes
+## 4K\tmy-file-4K
+##
+
+##------------------------------------------------------------------------------
+
+## TODO: check for convert_emoticons.py edge cases
+## $ echo "▶️_" | convert_emoticons.py --verbose -
+## /home/tomohara/Mezcla/mezcla/convert_emoticons.py --verbose -
+## Processing entire input
+## [black right-pointing triangle]️_
+
+##------------------------------------------------------------------------------
+
+## TODO: make sure git aliases handle filenames with @'s
+## 
+## $ git-files-changed 
+## Array found where operator expected at -e line 1, near "s@^/home/tomohara/temp/n8n-temp/packages/@n8n/nodes-langchain/?@@i"
+## syntax error at -e line 1, near "s@^/home/tomohara/temp/n8n-temp/packages/@n8n/nodes-langchain/?@@i"
+## Execution of -e aborted due to compilation errors.
+##
+## $ pwd
+## /home/tomohara/temp/n8n-temp/packages/@n8n/nodes-langchain
+
+##------------------------------------------------------------------------------
+
+## TODO: make sure no gratitous usage entries (e.g., xyz.perl whatver)
+##
+## $ ./perlcalc.perl -help
+## 
+## usage: perlcalc.perl [options]
+## 
+## options = [-init=expr] [-fmt=printf-format-spec] [-integer | -precision=N] [-args | -]
+## 
+## examples:
+## 
+## perlcalc.perl whatever
+## perlcalc.perl -precision=6 '1/10e6'
+
+##------------------------------------------------------------------------------
+
+## TODO: make sure no temporary scripts in repo
+##
+## $ git-log- _debug-prep_brill.perl | grep -c commit
+## 3
+
+##------------------------------------------------------------------------------
+
+## TODO2: Problem running mezcla under hostwinds due to dependencies issue
+## (e.g., when running under root).
+##
+## $ mezcla
+## Traceback (most recent call last):
+##   File "/root/mezcla-tom/mezcla", line 14, in <module>
+##     from mezcla import debug
+##   File "/home/tomohara/python/Mezcla/mezcla/__init__.py", line 51, in <module>
+##     from mezcla import debug
+##   File "/home/tomohara/python/Mezcla/mezcla/debug.py", line 81, in <module>
+##     import six
+## ModuleNotFoundError: No module named 'six'
+##
+## OK as regular user:
+##
+## $ mezcla
+## /home/tomohara/mezcla-tom/mezcla
+## Version: 1.4.0.4
+## Install path: /home/tomohara/python/Mezcla/mezcla
+##
+
+$ mezcla 2>&1 | grep Version | perl -pe 's/[0-9]+/N/g;'
+Version: N.N.N.N
+
+##------------------------------------------------------------------------------
+
+## TODO3: Problem with alt-extract-all-git-versions.bash
+## $ git-extract-all-versions ./mezcla/tests/resources/test.arpa
+## Warning: Additional cases due to renames: try alt-extract-all-git-versions.bash
+## /home/tomohara/temp/tmp/all_versions_exported/test.arpa.v1-13Dec23
+## 
+##  versions stored in /home/tomohara/temp/tmp/all_versions_exported for ./mezcla/tests/resources/test.arpa
+## 
+## $ alt-git-extract-all-versions ./mezcla/tests/resources/test.arpa
+## Trying main path mezcla/tests/resources/test.arpa for version v2
+## /home/tomohara/temp/tmp/all_versions_exported/test.arpa.v2-13Dec23
+## Trying main path mezcla/tests/resources/test.arpa for version v1
+## fatal: Not a valid object name 186208f3f131789a27a4207538da47a9fa617edc:mezcla/tests/resources/test.arpa
+## Trying alternative path 
+## Error: unable to resolve commit 186208f3f131789a27a4207538da47a9fa617edc
+## /home/tomohara/temp/tmp/all_versions_exported/test.arpa.v1-03Feb23
+## 
+## 2 versions stored in /home/tomohara/temp/tmp/all_versions_exported for ./mezcla/tests/resources/test.arpa
+
+##------------------------------------------------------------------------------
+
+## TODO3: fix git-hide
+## $ git-hide libgfortran.so.4
+## fatal: Unable to mark file libgfortran.so.4
+##
+## $ pwd-host-info 
+## /home/tomohara/visual-diff
+## ec2-micro
+## ip-172-31-37-185
+
+##-----------------------------------------------------------------------------
+
+## TODO3: fix path during remote logins
+## $ jug-login
+## ...
+## Welcome to Ubuntu 22.04.3 LTS (GNU/Linux 6.5.0-44-generic x86_64)
+## ...
+## Last login: Wed Sep  3 22:52:01 2025 from 192.168.86.95
+## set_xterm_title.bash: command not found
+
+##------------------------------------------------------------------------------
+
+## TODO3: fix intermittent problem with set_xterm_title.bash not updating terminal window title
+##
+## bad:
+## cd ~/technical
+## set_xterm_title.bash fubar
+## $ show-window-list | grep -c fubar
+## 0
+##
+## ok:
+## $ set_xterm_title.bash fubar-set_xterm_title
+## $ show-window-list | grep fubar
+## 0x052cf344  0 tpo-jugador alt $ fubar-set_xterm_title; Py3.11; pid:365159

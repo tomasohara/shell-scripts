@@ -1,4 +1,4 @@
-# *-*-perl-*-*
+#! /usr/bin/env -S perl -sw
 eval 'exec perl -Ssw $0 "$@"'
     if 0;
 #
@@ -32,8 +32,9 @@ if (!defined($ARGV[0])) {
 }
 
 &init_var(*timeseed, &FALSE);	# use current time for seed
+&init_var(*perl_random_seed, 0); # random seed for perl scripts
 &init_var(*seed, 		# random seed to use
-	  ($timeseed ? time : 0));
+	  ($timeseed ? time : $perl_random_seed));
 
 # Read the entire file
 my @file = <ARGV>;

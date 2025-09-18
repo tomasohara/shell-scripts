@@ -10,7 +10,8 @@
 #   SC2016 (info): Expressions don't expand in single quotes
 #   SC2027 (warning): The surrounding quotes actually unquote this.
 #   SC2046: Quote this to prevent word splitting
-#   SC2086: Double quote to prevent globbing)
+#   SC2068: Double quote array expansions to avoid re-splitting elements
+#   SC2086: Double quote to prevent globbing
 #   SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?.
 #
 
@@ -18,10 +19,13 @@
 # TODO: automate the derivation of the following (e.g., drop 'plus' or 'alias' suffix)
 alias git-add-='git-add-plus'
 alias git-diff-='git-diff-plus'
+## TEMP:
+alias git-diff='git-diff-plus'
 alias git-difftool-='git-difftool-plus'
 alias git-log-='git-log-plus'
 alias git-update-='git-update-plus' 
-alias git-vdiff='git-vdiff-alias '
+alias git-vdiff='git-vdiff-alias'
+alias git-vdiff-='git-vdiff-alias'
 alias git-all-update='update-main-repos.bash'
 alias git-extract-all-versions='extract-all-git-versions.bash --human'
 alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human'
@@ -29,7 +33,10 @@ alias git-files-changed=git-diff-list
 alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
 function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
+alias git-push='git-push-alias'
 ## TODO: alias git-X-='git-X-plus'
+## -or- TODO: alias git-X-alias='invoke-git-command pull'
+
 #
 # Github
 alias git-hide='git update-index --skip-worktree'
@@ -73,15 +80,43 @@ simple-alias-fn plint 'PAGER=cat python-lint'
 # plint-torch(...): pylint w/ torch no-member warnings, etc. ignored
 alias-fn plint-torch 'plint "$@" | egrep -v "torch.*(no-member|no-name-in-module)"'
 # plint-tester-testee(filename): run pylint over test file and tested file
-## OLD: alias-fn plint-tester-testee 'plint "$1" tests/test_"$1"'
 function plint-tester-testee {
     local script="$1"
     local test_script="tests/test_$script"
-    plint "$script" "$test_script"
+    if [ "$1" == "" ]; then
+        ## TODO: local func="${BASH_SOURCE[0]:-func}"
+        ## DEBUG: echo "${BASH_SOURCE[@]}"
+        local func=plint-tester-testee
+        echo "Usage: [PYLINT=prog] [TEST=B] $func script"
+        echo "ex: TEST=1 PYLINT=python-lint-work $func cut.py"
+        return
+    fi
+    if [ "${VERBOSE:-0}" == "1" ]; then
+        echo "$script"
+        echo "$test_script"
+    fi
+    local pylint_result
+    local pylint="${PYLINT:-python-lint}"
+    pylint_result=$($pylint "$script" "$test_script")
+    local pylint_status=$?
+    echo "$pylint_result"
+    ## DEBUG: echo "pylint_status=$pylint_status"
     if [ "${TEST:-0}" == "1" ]; then
+        # check for specific error ignoring module line  (e.g., *...* Module mezcla.cut)
+        # ex: "cut.py:10:0: C0301: Line too long (103/100) (line-too-long)"
+        if [[ $pylint_result =~ [0-9]:[0-9] ]]; then
+            local newline_tab=$'\n\t'
+            pause-for-enter "pylint issues;${newline_tab}proceed?"
+        fi
         test-python-script "$test_script"
     fi
-    }
+    return "$pylint_status"
+}
+}
+#
+## TODO3: simple-alias-fn plint-tester-testee-strict 'PYTEST_OPTS="$default_pytest_opts --runxfail"'
+function plint-tester-testee-strict {
+    PYTEST_OPTS="--runxfail $default_pytest_opts" plint-tester-testee "$@";
 }
 #
 # clone-repo(url): clone github repo at URL into current dir with logging
@@ -93,7 +128,7 @@ function clone-repo () {
     log="_clone-$repo-$(T).log"
     # maldito linux: -c option required for command for
     # shellcheck disable=SC2086
-    if [ "$(under-linux)" = "1" ]; then
+    if [[ ("$(under-linux)" == "1") || ("$(under-cygwin)" == "1") ]]; then
         command script "$log" -c "git clone '$url'"
     else
         command script "$log" git clone "$url"
@@ -107,13 +142,15 @@ function clone-repo () {
 }
 # black-plain(file): run black python reformatted over FILE filtering out emoticons
 simple-alias-fn black-plain 'convert-emoticons-aux black'
+alias batspp-simple=simple_batspp.py
+alias batspp-prep=jupyter_to_batspp.py
 
 # run-python-script(script, args): run SCRIPT with ARGS with output to dir/_base-#.out
 # and stderr to dir/_base-#.log where # is value of global $_PSL_.
 # The arguments are passed along unless USE_STDIN is 1.
 # note: Checks for errors afterwards. Uses non-locals _PSL_, out_base and log.
 function run-python-script {
-    ## DEBUG: trace-vars _PSL_ out_base log
+    ## DEBUG: trace-vars _PSL_ out base log
     if [ "$1" = "" ]; then
         echo "Usage: [ENV-OPTIONS] run-python-script script arg ..."
         echo "   ENV-OPTIONS: [USE_STDIN=B] [USE_STDOUT=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] [KEEP_EMPTY_OUT=b] [PYTHON=path] [PYTHON_RUN_LABEL=str]"
@@ -148,17 +185,13 @@ function run-python-script {
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
     # TODO3: rework to avoid problem with _PSL_ not being updated (or at least detect the error)!
-    ## OLD:
-    ## declare -g _PSL_ log out
-    ## local out_base
-    declare -g _PSL_ log out out_base PYTHON
+    declare -g _PSL_ log out PYTHON      # global declaration
     local module_spec=""
     let _PSL_++
     # TODO3: add OUT_BASE to override default
     local run_label="${PYTHON_RUN_LABEL:-"run"}"
-    ## OLD: run_label=$(echo "$run_label" | perl -pe 'chomp; s/([^\.])$/\1\./;')
     run_label=$(echo "$run_label" | perl -pe 'chomp; s/\.$//;')
-    out_base="$out_dir/_$script_base.$(TODAY).$run_label.$_PSL_"
+    local out_base="$out_dir/_$script_base.$(TODAY).$run_label.$_PSL_"
     if [ "$PROFILE_SCRIPT" == "1" ]; then
        out_base="$out_base.profile"
        module_spec="-m cProfile -o $out_base.data"
@@ -167,9 +200,11 @@ function run-python-script {
        out_base="$out_base.trace"
        module_spec="-m trace --trace"
     fi
+    base="$out_base"
+    reference-variable "$base"
     log="$out_base.log"
     out="$out_base.out"
-    ## DEBUG: trace-vars _PSL_ out_base log
+    ## DEBUG: trace-vars _PSL_ base out log
     local python_arg="-"
     # shellcheck disable=SC2086
     {
@@ -206,9 +241,6 @@ function run-python-script {
             command rm -v "$out"
         fi
     fi
-    ## OLD:
-    ## # Show common errors in log
-    ## check-errors-excerpt "$log"
 }
 # run-python-script-reset(): reset variables used in run-python-script
 function run-python-script-reset {
@@ -217,12 +249,12 @@ function run-python-script-reset {
 }
 
 # pytest stuff
-default_pytest_opts="-vv --capture=tee-sys"
+default_pytest_opts=(-vv --capture=tee-sys)
 #
 # test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
     if [ "$1" = "" ]; then
-        echo "Usage: [PYTEST_OPTS=[\"$default_pytest_opts\"]] [PYTEST_DEBUG_LEVEL=N] [PYTEST=path] test-python-script script"
+        echo "Usage: [PYTEST_OPTS=[\"${default_pytest_opts[*]}\"]] [PYTEST_DEBUG_LEVEL=N] [PYTEST=path] test-python-script script"
         echo "Note: When debugging you might need to use --runxfail and -s to see full error info."
         echo "The debugging level defaults to 5 (unlike run-python-script)."
         return
@@ -239,7 +271,7 @@ function test-python-script {
     else
         echo "Warning: cannnot resolve test for _$test_script" 1>&2
     fi
-    local pytest_opts="${PYTEST_OPTS:-"$default_pytest_opts"}"
+    local pytest_opts="${PYTEST_OPTS:-"${default_pytest_opts[*]}"}"
     # TODO3: drop inheritance spec in summary
     # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "tests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
     PYTHON_DEBUG_LEVEL="${PYTEST_DEBUG_LEVEL:-5}" PYTHONUNBUFFERED=1 PYTHON="$PYTEST $pytest_opts" run-python-script "$test_script" "$@" 2>&1;
@@ -249,12 +281,12 @@ function test-python-script {
 function test-python-script-method {
     local method="$1";
     shift;
-    PYTEST_OPTS="-k $method $default_pytest_opts" test-python-script "$@";
+    PYTEST_OPTS="-k $method ${default_pytest_opts[*]}" test-python-script "$@";
 }
 #
 # test-python-script-strict(test-script): run TEST-SCRIPT via pytest with xfail ignored
 function test-python-script-strict {
-    PYTEST_OPTS="--runxfail $default_pytest_opts" test-python-script "$@";
+    PYTEST_OPTS="--runxfail ${default_pytest_opts[*]}" test-python-script "$@";
 }
 #
 # test-python-script-method-strict: likewise for just a method
@@ -262,7 +294,7 @@ function test-python-script-method-strict {
     ## TODO2: default_pytest_opts="--runxfail" test-python-script-method "$@";
     local method="$1";
     shift;
-    PYTEST_OPTS="--runxfail -k $method $default_pytest_opts" test-python-script "$@";
+    PYTEST_OPTS="--runxfail -k $method ${default_pytest_opts[*]}" test-python-script "$@";
 }
 
 # disable-python-warnings(): Ignore warning due to Pydantic quirks
@@ -270,7 +302,6 @@ function test-python-script-method-strict {
 # Note: Format is PYTHONWARNINGS="action:message:category:module:lineno";
 # but, have to use the Sledge hammer approach due to Pydantic module organization.
 function disable-python-warnings {
-    ## OLD: export PYTHONWARNINGS="ignore::UserWarning"
     ## TODO: export PYTHONWARNINGS="ignore::UserWarning,ignore::LangChainDeprecationWarning"
     ## NOTE: maldito langchain makes life difficult
     ##    isinstance(LangChainDeprecationWarning, UserWarning) => False
@@ -338,7 +369,6 @@ function export-notebook {
     if [ "$pretty" != "0" ]; then
         # Make sure run_cell_magic are split across lines for sake of diff
         # ex: "get_ipython().run_cell_magic('time', 'x += 1\ny += 2\n'...)" => "... 'x += 1\n" \\<newline>\ny += 2\n \\<newline>'...)"
-        ## BAD: perl -i.bak -pe 's/(run_cell_magic.*)[^\\]\n/\1\\\n \\/g;' "$out_path"
         perl -i.bak -pe 'while (/^get_ipython.*\\n/) { s/^(get_ipython.*)\\n/\1 \\\\\n/g; }' "$out_path"
     fi
 
@@ -361,7 +391,6 @@ function run-notebook {
     base="$(basename "$file" .ipynb)"
     rename-with-file-date "$TMP/$base.py" "$base".{out,log}
     export-notebook "$file"
-    ## OLD: rename-with-file-date "$base"*
     ("${IPYTHON[@]}" "$TMP/$base.py" | ansifilter) > "$base.out" 2> "$base.log"
     check-errors-excerpt "$base.log"
     head "$base.out" "$base.log"
@@ -390,7 +419,6 @@ function compare-exported-notebooks {
         return
     fi
     base="$(basename "$file" .ipynb)"
-    ## OLD: local python_path="_temp/$base.py"
     local temp_dir
     temp_dir="$(dirname "$base.py")/_temp"
     mkdir -p "$temp_dir"
@@ -410,7 +438,6 @@ function compare-notebook-scripts {
 }
  
 # run-jupyter-notebook-pristine(port): invoke jupter notenook w/o startup config
-## OLD: alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$TMP/ipython" run-jupyter-notebook'
 alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$IPYTHON_TMP" run-jupyter-notebook'
  
  
@@ -420,7 +447,11 @@ alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$IPYTHON_TMP" run
 
 # color-test-failures(): show color-coded test result for pytest run (yellow for xfailed and red for regular fail)
 # color-test-results: likewise with green for passed and faint green xpassed
-simple-alias-fn color-output 'colout --case-insensitive'
+function color-output {
+    # note: in python 3.12: colout issues a bunch of SyntaxWarnings
+    ## TEST: colout --case-insensitive "$@" 2>&1 | grep -v 'SyntaxWarning: invalid escape sequence';
+    PYTHONWARNINGS="ignore::SyntaxWarning" colout --case-insensitive "$@" 2>&1 | grep -v 'SyntaxWarning: invalid escape sequence';
+}
 function color-test-failures {
     cat "$@" | color-output "\b(failed|error)" red | color-output "(xfaile?d?)" yellow;
 }
@@ -483,7 +514,6 @@ function ssh-cache {
     # note: ignores SC2046 (warning): Quote this to prevent word splitting
     # shellcheck disable=2046
     eval $(ssh-agent)
-    ## OLD: ssh-add "$HOME/.ssh/id_$USER"
     local one_month=$((60 * 60 * 24 * 31))
     ssh-add -t "$one_month" "$HOME/.ssh/id_$USER"
 }
@@ -517,12 +547,17 @@ function shell-check-stdin {
     ## DEBUG: echo "in shell-check-stdin: args='$*'"
     echo "Enter snippet lines and then ^D"
     shell-check -
-    # shellcheck disable=SC2181
     [[ $? -eq 0 ]] && echo "shellcheck OK"
 }
 #
 # shell-check-loose(): run shellcheck with relaxed rules
-simple-alias-fn shell-check-loose 'shellcheck --exclude="SC2046,SC2086"'
+# shell-check-stdin-loose(): likewsie over stdin
+cond-export LOOSE_SHELL_CHECK_EXCLUDE "SC2046,SC2068,SC2086"
+# shellcheck disable=SC2016
+simple-alias-fn shell-check-loose 'shellcheck --exclude="$LOOSE_SHELL_CHECK_EXCLUDE"'
+function shell-check-stdin-loose {
+    SHELL_CHECK_EXCLUDE="$LOOSE_SHELL_CHECK_EXCLUDE,$SHELL_CHECK_EXCLUDE" shell-check-stdin "$@"
+}
 
 # tabify(text): convert spaces in TEXT to tabs
 # TODO: account for quotes
@@ -576,7 +611,6 @@ alias root-prompt-remote=remote-prompt-root
 # note: Issues warning if $PS_symbol not set to avoid messing with PS1, etc.
 function reset-prompt-label {
     local label="$1"
-    ## OLD: local old_label=""
     local old_symbol="$"
     declare -g PS_symbol                # global declaration
     if [ "$PS_symbol" == "" ]; then
@@ -586,18 +620,22 @@ function reset-prompt-label {
     if [[ $PS_symbol =~ [^A-Za-z0-9\ _-]$ ]]; then
         # TODO3: avoid duplication of regex
         # NOTE: ideally should be like @vals = $(get_matches(regex))
-        ## OLD: old_label=$(echo "$PS_symbol" | perl -pe 's/^([\w\s]+)(.*\W)$/$1/;')
         old_symbol=$(echo "$PS_symbol" | perl -pe 's/^([\w\s]+)(.*\W)$/$2/;')
-        ## OLD: trace-vars old_old_label old_symbol
         ## DEBUG: trace-vars old_symbol
     else
         echo "FYI: PS_symbol w/o trailing symbol: '$PS_symbol'" 1>&2
     fi
     reset-prompt "$label $old_symbol"
 }
-# reset-prompt-label-here(): sets prompt label to dir basename with existing PS_symbol proper (e.g., "alt $" => "bin $")
+# reset-prompt-here(): sets prompt label to dir basename with existing PS_symbol proper (e.g., "alt $" => "bin $")
 # shellcheck disable=SC2016
-alias-fn reset-prompt-label-here 'reset-prompt-label "$(basename $PWD)"'
+alias-fn reset-prompt-here 'reset-prompt-label "$(basename $PWD)"'
+# reset-prompt-alt/NOTES/...(): resets prompt label to affix
+for label in alt NOTES; do 
+    eval "alias reset-prompt-$label=\"reset-prompt-label $label\""
+done
+## TODO4: rename alt-xterm-title to alt-xterm-title-old)
+alias alt-xterm-title-new='reset-prompt-label alt'
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
 function pristine-bash {
@@ -653,6 +691,7 @@ function rename-last-snapshot {
 #
 # fix-transcript-timestamp(file): put text on same line in YouTube transcripts in FILE
 alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
+alias youtube-transcript-fix=fix-transcript-timestamp
 # youtube-transcript(url, file): download YoutTube transcript at URL to FILE
 function youtube-transcript {
     if [[ ("$2" == "") || ("$1" == "--help") ]]; then
@@ -689,6 +728,13 @@ function youtube-transcript-alt {
         alias-python "$(which youtube_transcript.py)" "$url" > "$file"
     fi
 }
+# yt-transcript(url, basename): download YouTube video transcript at URL and save to BASENAME-ddMMMyy.list
+# TODO3: add helper alias 
+function yt-transcript {
+    local filename="$2-youtube-$(T).list"
+    youtube-transcript "$1" "$filename"
+    echo $'See\n\t'"$filename"
+}
 
 #...............................................................................
 # System stuff
@@ -704,6 +750,28 @@ function get-host-nickname {
     fi
     echo "$nickname"
 }
+
+#...............................................................................
+# Signatures
+
+# derive-signatures(): Generate aliases for signatures from files like ~/info/.home-signature
+# example: for ~/info/.po-signature, generate 'alias po-signature="signature po"'
+function derive-signatures() {
+    local f prefix
+    for f in "$HOME/info/".*signature; do
+        if [[ ! -e "$f" ]]; then
+            echo "Warning: No signature found in $HOME/info"
+            break
+        fi
+        prefix="$(echo "$f" | perl -pe 's/^.*\.(.*)-signature/$1/;')"
+        # shellcheck disable=2046
+        eval "alias $prefix-signature='signature $prefix'"
+    done
+}
+#
+if [[ -e "$HOME/info" ]]; then
+    derive-signatures
+fi
 
 #...............................................................................
 # Archive related
@@ -752,7 +820,7 @@ under-macos 1 && alias calendar="cal"
 
 # Ps-time: show processes by time via ps_sort.perl
 # shellcheck disable=SC2016
-alias-fn ps-time 'LINES=1000 COLUMNS=256 ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
+alias-fn ps-time 'LINES=1000 COLUMNS=256 alias-perl ps_sort.perl -time2num -num_times=1 -by=time - 2>&1 | $PAGER'
 #
 # screen-reattach: restart GNU screen session
 # options: -d -RR: reattach a session and if necessary detach or create it
@@ -792,6 +860,11 @@ simple-alias-fn screenshot-window 'gnome-screenshot --window --delay ${SCREENSHO
 # show-window-list(): show window title, etc.
 alias show-window-list='wmctrl -l'
 
+# curl-save(url): download URL and save in file with similar name
+# note: --location enables redirections
+# TODO3: strip URL args
+alias curl-save='curl --location --remote-name'
+
 #...............................................................................
 # Linux admin
 
@@ -815,9 +888,6 @@ simple-alias-fn emacs-wide-horizontal 'tpo-invoke-emacs.sh -geometry 288x50 -eva
 
 # df-h(dir=[.], ...): show DIR disk free in human readable format
 function df-h {
-    ## OLD:
-    ## local dirs=("$@")
-    ## if [[ "${#dirs[@]}" == 0 ]]; then dirs=(.); fi
     local dirs=("${@:-.}")
     df -h "${dirs[@]}"
 }
@@ -862,6 +932,5 @@ alias kill-kdiff3='kill-it kdiff3'
 alias kill-firefox='kill-it firefox'
 alias kill-jupyter='kill-it python.*jupyter'
 alias kill-chromiun='kill-it chromium'
-## OLD: alias kill-sleep='kill_em.sh sleep'
 alias kill-sleep='kill-em sleep'
 alias kill-hp='kill-it hp-systray'

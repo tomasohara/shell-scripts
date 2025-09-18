@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/env bash
 #
 # start.sh: invokes document-specific program based on file argument (e.g., okular for pdf files). This is analogous to the Windows start command.
 #
@@ -168,7 +168,10 @@ lower_file=$(echo "$file" | perl -pe 's/(.*)/\L$1/;')
 # Change invoked program if different for editing than for viewing
 office_program="libreoffice"
 pdf_program="evince"
-image_program="eog"
+## OLD: image_program="eog"
+## NOTE: eog is anachronistic so trying KDE-ish gwenview; install as follows
+##   sudo apt install gwenview
+image_program="gwenview"
 default_program="emacs"
 # TODO: doc_program="libreoffice"
 if [ "$for_editting" = "1" ]; then
@@ -207,7 +210,7 @@ case "$lower_file" in
     # if other applications are associated (e.g,. TextEdit for .rtf), then need to invoke via specific office program [maldito mac/microsoft].
     # note: MacOs has awkware sequence via [Finder > GetInfo > OpenWith/ChangeAll] to change the default. See
     #    https://www.macworld.com/article/672511/how-to-change-default-apps-on-mac.html
-    *.doc* | *.docx* | *.pptx* | *.odp* | *.odt* | *.odg* | *.rtf* | *.xls* | *.xlsx* | *.csv*) invoke "$office_program" "$@" & ;;
+    *.doc* | *.docx* | *.pptx* | *.odp* | *.odt* | *.odg* | *.rtf* | *.xls* | *.xlsx* | *.ods* | *.csv*) invoke "$office_program" "$@" & ;;
 
     # HTML files and XML files
     # TODO: convert filename arguments to use file:// prefix (to distinguish from URL's)

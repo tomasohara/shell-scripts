@@ -50,7 +50,8 @@ if [[ ("$1" == "") || ("$1" == "--help") ]]; then
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."
     echo "- By default only includes text files with 'notes' in name, along with adhoc filters."
-    echo "- Env vars: ALL_TEXT, CRONTAB, SRC_DIR, TRACE, VERBOSE, FIND_COMMAND_OPTIONS, FIND_GLOBAL_OPTIONS."
+    echo "- ALL_TEXT=1 uses a broader set of text files (e.g., not just 'notes' in name)."
+    echo "- Other env vars: ALL_TEXT, CRONTAB, SRC_DIR, TRACE, VERBOSE, FIND_COMMAND_OPTIONS, FIND_GLOBAL_OPTIONS."
     echo ""
     exit
 fi
@@ -134,6 +135,7 @@ find_command_options="${FIND_COMMAND_OPTIONS:-}"
 find_global_options="${FIND_GLOBAL_OPTIONS:-}"
 # shellcheck disable=SC2086
 if [ "${ALL_TEXT:-0}" == "1" ]; then
+    # Note: Uses all text files (e.g., .txt or .text)
     # TODO: rework so that pattern-type options specified individially (e.g., LOG_FILES, ADHOC_NOTES, etc)
     find $find_command_options "${SRC_DIR:-.}" $find_global_options \(  -iname '*.txt' -o -iname '*.text' \) 2> "$new_base.files.log" | $EGREP -iv '/(backup|old|temp)/' | perl -pe 's/ /\\ /g;' > "$new_base.files.list";
 else

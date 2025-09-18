@@ -1,4 +1,4 @@
-#!/bin/bash
+#! /usr/bin/env bash
 #
 # xlispstat.sh: invokes the right version of xlispstat for the platform
 # (Linux or Sun Solaris), using the required resource/working storage 

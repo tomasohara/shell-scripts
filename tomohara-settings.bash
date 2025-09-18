@@ -22,9 +22,10 @@ fi
 OSTYPE_BRIEF="$OSTYPE"
 case "$OSTYPE_BRIEF" in
     linux*) export OSTYPE_BRIEF=linux; ;;
+    cygwin*) export OSTYPE_BRIEF=cygwin; ;;
     solaris*) export OSTYPE_BRIEF=solaris;  alias printenv='printenv.sh' ;;
     darwin*) export OSTYPE_BRIEF=mac-os;  ;;
-    *) echo "Warning: unknown OS type"; ;;
+    *) echo "Warning: unknown OS type ($OSTYPE)"; ;;
 esac
 
 # Add directories to path: ./bin, ./bin/<OS>
@@ -95,6 +96,7 @@ shopt -s nocaseglob
 export LESSCHARSET=utf-8
 # Also have it display binary characters  as underline instead of reverse video (i.e., standout)
 export LESSBINFMT="*u<%02X>"
+export SHELL="/bin/bash"
 
 # Don't enable default .bashrc settings
 cond-export SKIP_DEFAULT_BASHRC 1
@@ -102,6 +104,9 @@ cond-export SKIP_DEFAULT_BASHRC 1
 cond-export SKIP_TAB_COMPLETION 1
 # Invoke image viewer after renaming snapshots
 cond-export RENAME_SNAPSHOT_PREVIEW 1
+# Get rid of (mostly) nitpicking shellcheck warnings
+# See shell-check function comments for synopsis.
+cond-export SHELL_CHECK_EXCLUDE "SC1090,SC1091,SC2004,SC2009,SC2012,SC2119,SC2120,SC2129,SC2155,SC2164,SC2181,SC2196,SC2219,SC2230"
 
 # Get idiosyncratic aliases
 conditional-source "$TOM_BIN/tomohara-proper-aliases.bash"
@@ -112,6 +117,10 @@ cond-export XTERM_SHOW_PID 1
 # User-specific mount directory
 cond-export MNT /media/"$USER"
 
+# Use native KDE open dialogs (e.g., for recent files feature)
+# TODO2: put in user-specific settings (e.g., ~/.local/sell-scripts-settings.bash)
+cond-export GTK_USE_PORTAL 1
+
 # Emacs stuff
 # use emacs with crontab
 ## TODO: export EDITOR="emacs -nw"
@@ -120,9 +129,15 @@ export EDITOR="emacs"
 # Other default programs (e.g., for use with start.sh)
 export BROWSER="google-chrome"
 
+# Perl stuff
+cond-export PERL_RANDOM_SEED 122949823   # 7 millionth prime
+
 # Linux stuff
+## OLD:
 if [ "$(under-linux)" = "1" ]; then
     cond-export WNSEARCHDIR /usr/share/wordnet
+elif [ "$(under-cygwin)" = "1" ]; then
+    cond-export WNSEARCHDIR /lib/wnres/dict
 fi
 if [ "$DOMAIN_NAME" = "" ]; then
     # shellcheck disable=SC2155
