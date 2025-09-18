@@ -140,7 +140,7 @@ if [[ "$1" == "" ]]; then
     ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--TODO] [--trace] [--help] [--]"
+    echo "Usage: $0 [--TODO] [--trace] [--help] [--| -]"
     echo ""
     echo "Examples:"
     echo ""
