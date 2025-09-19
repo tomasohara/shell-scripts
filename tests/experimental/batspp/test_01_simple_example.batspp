@@ -1,0 +1,11 @@
+# handshake
+$ echo "System online. Awaiting orders."
+System online. Awaiting orders.
+
+# arithmetic
+$ echo $((100 + 50))
+150
+
+$ TODO
+add-todo "[within N weeks] ..X."
+
