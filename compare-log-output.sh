@@ -17,7 +17,8 @@ if [ "${VERBOSE:-0}" = "1" ]; then
 fi
 
 # Parse command-line arguments
-diff=kdiff.sh
+## OLD: diff=kdiff.sh
+diff=(kdiff.sh)
 #
 # Regex patterns:
 # - 1. hexadecimal with prefix (e.g., "0x1234")
@@ -48,12 +49,17 @@ while [ "$moreoptions" = "1" ]; do
 	set -o xtrace
 	## DEBUG: set -o verbose
     elif [ "$1" = "--diff" ]; then
-	diff="$2";
+	## OLD: diff="$2";
+	## TODO: diff=("${2[@]}");
+        # note: ignores shellcheck SC2206: Quote to prevent word splitting/globbing
+        # shellcheck disable=SC2206
+        diff=($2);
 	shift
     elif [ "$1" = "--verbose" ]; then
 	verbose_output=1
     elif [ "$1" = "--plain-diff" ]; then
-	diff="diff";
+	## OLD: diff="diff";
+	diff=(diff);
     elif [ "$1" = "--include-ptrs" ]; then
         echo "Warning: deprecated option: $1"
         filter_hex=1;
@@ -203,4 +209,5 @@ if [ "$retain_whitespace" = "0" ]; then
 fi
 
 # Do comparison of the result
-"$diff" "$TMP/$base1" "$TMP/$base2"
+## OLD: "$diff" "$TMP/$base1" "$TMP/$base2"
+"${diff[@]}" "$TMP/$base1" "$TMP/$base2"
