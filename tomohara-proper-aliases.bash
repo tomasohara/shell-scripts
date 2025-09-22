@@ -115,8 +115,15 @@ function plint-tester-testee {
 }
 #
 ## TODO3: simple-alias-fn plint-tester-testee-strict 'PYTEST_OPTS="$default_pytest_opts --runxfail"'
+# plint-tester-testee-strict: likewise with pytest run strict mode
 function plint-tester-testee-strict {
-    PYTEST_OPTS="--runxfail $default_pytest_opts" plint-tester-testee "$@";
+    TEST=1 PYTEST_OPTS="--runxfail ${default_pytest_opts[*]}" plint-tester-testee "$@";
+}
+# plint-tester-testee-method-strict: likewise for just a method
+function plint-tester-testee-method-strict {
+    local method="$1";
+    shift;
+    TEST=1 PYTEST_OPTS="--runxfail -k $method ${default_pytest_opts[*]}" plint-tester-testee "$@";
 }
 #
 # clone-repo(url): clone github repo at URL into current dir with logging
