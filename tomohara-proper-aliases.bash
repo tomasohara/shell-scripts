@@ -106,7 +106,8 @@ function plint-tester-testee {
         # ex: "cut.py:10:0: C0301: Line too long (103/100) (line-too-long)"
         if [[ $pylint_result =~ [0-9]:[0-9] ]]; then
             local newline_tab=$'\n\t'
-            pause-for-enter "pylint issues;${newline_tab}proceed?"
+            ## TODO4: add support for reading response (e.g., N)
+            pause-for-enter "pylint issues;${newline_tab}proceed? (Enter for Y otherwise ^C)"
         fi
         test-python-script "$test_script"
     fi
