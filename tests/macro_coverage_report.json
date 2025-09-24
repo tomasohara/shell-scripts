@@ -1,0 +1,1498 @@
+[
+  {
+    "macro": "startup-trace",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "space-check",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 6,
+    "status": "untested"
+  },
+  {
+    "macro": "show-path-dir",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "append-path",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "append-path-force",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "prepend-path-force",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "append-python-path",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "alt-xterm-title",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 7,
+    "status": "untested"
+  },
+  {
+    "macro": "cd",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "pushd-q",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "copy-readonly-to-dir",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 5,
+    "status": "untested"
+  },
+  {
+    "macro": "dir-proper",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "dir-full",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "dir-sans-backups",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "dir-ro",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "dir-rw",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "subdirs-proper",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "dir_options_sans_t",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "subdirs-alpha",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "sublinks",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "sublinks-alpha",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "gr",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "gr-",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "grep-unique",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "grep-missing",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "gu-all",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "gu-",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "grepl",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "gr-c",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "show-line-context",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "findspec",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "findspec-all",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "fs",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "fs-ls",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "fs-ext",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "fs-ls-",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "findgrep-verbose",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "findgrep",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "findgrep-",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "findgrep-ext",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "fgr",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "fgr-ext",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "fgr-py-etc",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "find-files-there",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "find-files-here",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "em-file",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 10,
+    "status": "untested"
+  },
+  {
+    "macro": "em-debug",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "todo-one-week",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "todo",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "TODO1",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "mail-todo",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "add-track-time",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "track-time",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "old-calc",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "perl-calc",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "perl-calc-init",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "old-perl-calc",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "asctime",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "filter-dirnames",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "comma-ize-number",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "apply-numeric-suffixes",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 4,
+    "status": "untested"
+  },
+  {
+    "macro": "apply-usage-numeric-suffixes",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 3,
+    "status": "untested"
+  },
+  {
+    "macro": "number-columns",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "number-columns-comma",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "backup-file",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "byte-usage",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 7,
+    "status": "untested"
+  },
+  {
+    "macro": "tkdiff",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "diff-rev",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 24,
+    "status": "untested"
+  },
+  {
+    "macro": "ls-relative",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "make-tar",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 52,
+    "status": "untested"
+  },
+  {
+    "macro": "tar-dir",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 9,
+    "status": "untested"
+  },
+  {
+    "macro": "tar-just-dir",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "tar-this-dir",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "tar-this-dir-normal",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "tar-just-this-dir",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "unset-tar-bzip2",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "set-tar-xz",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "make-recent-tar",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "extract-tar",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "extract-tar-force",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "extract-tar-here",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "sort-tar-archive",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "count-tokens",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "count-line-text",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "notes-grep",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "heuristic-notes-entry-gr-aux",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 22,
+    "status": "untested"
+  },
+  {
+    "macro": "prep-brill",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "pdf-view",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "image-view",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "all-pdf-to-ascii",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "show-macros",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "para-sort",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "asc-it",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "remove-cr-and-backup",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "show-line",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "line-wc",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "line-len",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "para-len",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "check-class-dist",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "calc-stdev",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "lynx-dump-stdout",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "setenv",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "show-unicode-code-info-aux",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "show-unicode-code-info-stdin",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "kdiff-merge",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 7,
+    "status": "untested"
+  },
+  {
+    "macro": "rpm-extract",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "apropos-command",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "perl-echo",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "perl-echo-sans-newline",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "perl-printf",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "perl-print-n",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "quote-tokens",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "trace-cmd",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 11,
+    "status": "untested"
+  },
+  {
+    "macro": "count-exts",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "fix-sudoer-home-permission",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 15,
+    "status": "untested"
+  },
+  {
+    "macro": "check-html-java-script",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 7,
+    "status": "untested"
+  },
+  {
+    "macro": "scp-host-down",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "ps-all",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 9,
+    "status": "untested"
+  },
+  {
+    "macro": "get-process-parent",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "python-lint-full",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 17,
+    "status": "untested"
+  },
+  {
+    "macro": "python-lint-work",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "python-lint",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "python-import-path-all",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "python-import-path-full",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "python-import-path",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "python-package-members",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "ipython",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 10,
+    "status": "untested"
+  },
+  {
+    "macro": "py-diff",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "run-jupyter-notebook",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 17,
+    "status": "untested"
+  },
+  {
+    "macro": "extract-text",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 1,
+    "status": "untested"
+  },
+  {
+    "macro": "randomize-datafile",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 12,
+    "status": "untested"
+  },
+  {
+    "macro": "curl-dump",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 6,
+    "status": "untested"
+  },
+  {
+    "macro": "url-path",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 4,
+    "status": "untested"
+  },
+  {
+    "macro": "sleepyhead",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 0.0,
+    "covered_lines": 0,
+    "total_lines": 6,
+    "status": "untested"
+  },
+  {
+    "macro": "get-free-filename",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 6.25,
+    "covered_lines": 1,
+    "total_lines": 16,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "notes-entry-gr-aux",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 6.67,
+    "covered_lines": 1,
+    "total_lines": 15,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "set-title-to-current-dir",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 7.69,
+    "covered_lines": 1,
+    "total_lines": 13,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "signature",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 8.33,
+    "covered_lines": 1,
+    "total_lines": 12,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "copy-readonly-spec",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 10.0,
+    "covered_lines": 1,
+    "total_lines": 10,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "prepare-find-files-here",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 10.53,
+    "covered_lines": 4,
+    "total_lines": 38,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "run-python-lint-batched",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 11.11,
+    "covered_lines": 3,
+    "total_lines": 27,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "run-jupyter-notebook-posthoc",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 11.11,
+    "covered_lines": 1,
+    "total_lines": 9,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "pdf-to-ascii",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 11.54,
+    "covered_lines": 3,
+    "total_lines": 26,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "grep-to-less",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 12.5,
+    "covered_lines": 1,
+    "total_lines": 8,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "scp-aws-down",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 12.5,
+    "covered_lines": 1,
+    "total_lines": 8,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "get-python-lint-dir",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 12.5,
+    "covered_lines": 1,
+    "total_lines": 8,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "filter-random",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 13.89,
+    "covered_lines": 5,
+    "total_lines": 36,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "rename-with-file-date",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 14.58,
+    "covered_lines": 7,
+    "total_lines": 48,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "sudo-admin",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 18.75,
+    "covered_lines": 3,
+    "total_lines": 16,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "zhead",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 20.0,
+    "covered_lines": 1,
+    "total_lines": 5,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "lynx-dump",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 20.0,
+    "covered_lines": 4,
+    "total_lines": 20,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "add-python-path",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 20.0,
+    "covered_lines": 2,
+    "total_lines": 10,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "check-errors-excerpt",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 21.05,
+    "covered_lines": 4,
+    "total_lines": 19,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "view-todo",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 28.57,
+    "covered_lines": 2,
+    "total_lines": 7,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "cmd-output",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 30.0,
+    "covered_lines": 3,
+    "total_lines": 10,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "check-errors",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 30.77,
+    "covered_lines": 4,
+    "total_lines": 13,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "dir",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 33.33,
+    "covered_lines": 4,
+    "total_lines": 12,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "show-all-macros",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 33.33,
+    "covered_lines": 2,
+    "total_lines": 6,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "scp-aws-up",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 33.33,
+    "covered_lines": 2,
+    "total_lines": 6,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "invoke-browser",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 35.29,
+    "covered_lines": 6,
+    "total_lines": 17,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "pause-for-enter",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 35.71,
+    "covered_lines": 5,
+    "total_lines": 14,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "new-tar-this-dir",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 36.84,
+    "covered_lines": 7,
+    "total_lines": 19,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "conditional-export",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 42.11,
+    "covered_lines": 8,
+    "total_lines": 19,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "cmd-usage",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 42.86,
+    "covered_lines": 3,
+    "total_lines": 7,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "compress-dir",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 60.0,
+    "covered_lines": 3,
+    "total_lines": 5,
+    "status": "insufficiently_tested"
+  },
+  {
+    "macro": "ssh-host-login-aws",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 83.33,
+    "covered_lines": 5,
+    "total_lines": 6,
+    "status": "well_tested"
+  },
+  {
+    "macro": "conditional-source",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "zless",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "prepend-python-path",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "background-app",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "pushd",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "popd",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "popd-q",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "subdirs",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "gr-less",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "em-fn",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "em-quick",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "set-tar-bzip2",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "view-tar",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "show-variables",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "last-n-with-header",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "group-members",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "split-tokens",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "perl-print",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "uncompress-dir",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 4,
+    "total_lines": 4,
+    "status": "well_tested"
+  },
+  {
+    "macro": "ssh-host-aws-aux",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  },
+  {
+    "macro": "scp-host-up",
+    "file": "/home/ricekiller/aveey-shell-scripts/tomohara-aliases.bash",
+    "percent_covered": 100.0,
+    "covered_lines": 1,
+    "total_lines": 1,
+    "status": "well_tested"
+  }
+]
