@@ -53,9 +53,17 @@ RESULTS_DIR = "results-dir"
 JSON_FILENAME = "json-filename"
 DIAGNOSTIC_MODE = "diagnostic"
 HEURISTIC_MODE = "heuristic"
+# NEW: Add constant for the tabulate option
+USE_TABULATE = "tabulate"
 
 # Constants
 TL = debug.TL
+# NEW: Add environment variable to control output for full coverage analysis
+INCLUDE_ZERO_FAILURES = system.getenv_bool(
+    "INCLUDE_ZERO_FAILURES", 
+    False,
+    description="Include macros with zero failures in the heuristic report"
+)
 
 # ------------------------------------------------------------------------------
 # Core Logic Class (API)
@@ -67,12 +75,22 @@ class FailureAnalyzer:
     file processing, and reporting.
     """
 
-    def __init__(self, results_dir: str, is_heuristic: bool, json_filename: str | None = None):
+    # OLD:
+    # def __init__(self, results_dir: str, is_heuristic: bool, json_filename: str | None = None):
+    #     """Initializes the analyzer with all necessary parameters."""
+    #     self.results_dir = results_dir
+    #     self.is_heuristic = is_heuristic
+    #     self.json_filename = self._resolve_json_filename(json_filename)
+    #     self.report_data = []
+
+    # NEW: Modified to accept the use_tabulate flag
+    def __init__(self, results_dir: str, is_heuristic: bool, json_filename: str | None = None, use_tabulate: bool = False):
         """Initializes the analyzer with all necessary parameters."""
         self.results_dir = results_dir
         self.is_heuristic = is_heuristic
         self.json_filename = self._resolve_json_filename(json_filename)
         self.report_data = []
+        self.use_tabulate = use_tabulate
 
     def run(self):
         """
@@ -85,10 +103,13 @@ class FailureAnalyzer:
             self.report_data = self._analyze_test_run()
 
         if not self.report_data:
-            if self.is_heuristic:
-                print("\nAnalysis complete. No macro usage was found in test outputs.")
-            else:
-                print("\nAnalysis complete. No actionable failures were extracted.")
+            # OLD:
+            # if self.use_tabulate:
+            #     if self.is_heuristic:
+            #         print("\nAnalysis complete. No macro usage was found in test outputs.")
+            #     else:
+            #         print("\nAnalysis complete. No actionable failures were extracted.")
+            # NEW: No output if no data, to keep stdout clean.
             return
 
         self._write_json_report()
@@ -154,10 +175,8 @@ class FailureAnalyzer:
     def _analyze_test_run(self) -> list:
         """Orchestrates the original analysis, blaming test blocks."""
         aggregated_failures = defaultdict(lambda: {'sources': set(), 'count': 0})
-        print("--- Audit Trail: Processing Failure Logs (Original Mode) ---")
         output_files = self._find_output_files()
         if not output_files:
-            print(f"No output files (*.outputpp.out) found in directory: {self.results_dir}")
             return []
         for output_file_str in output_files:
             output_file = Path(output_file_str)
@@ -167,13 +186,11 @@ class FailureAnalyzer:
             base_name = output_file.name.replace('.outputpp.out', '')
             source_filename = f"{base_name}.batspp"
             generated_script_path = str(output_file.with_name(f"{base_name}.outputpp"))
-            print(f"   -> Analyzing {len(failed_tests)} failure(s) in: {source_filename}")
             for test_name in failed_tests:
                 suspect = self._extract_from_generated_script(generated_script_path, test_name)
                 if suspect:
                     aggregated_failures[suspect]['sources'].add(source_filename)
                     aggregated_failures[suspect]['count'] += 1
-        print("-" * 54)
         if not aggregated_failures:
             return []
         for data in aggregated_failures.values():
@@ -182,10 +199,7 @@ class FailureAnalyzer:
 
     def _analyze_macro_failures(self) -> list:
         """Estimates which macros/functions are failing the most."""
-        print("--- Running Macro Failure Heuristic Analysis ---")
         try:
-            # CORE FIX: Restored the '-i' flag to force an interactive shell.
-            # This ensures ~/.bashrc is fully sourced, defining functions and variables.
             raw_macros_output = gh.run("bash -c -i 'show-macros-proper'", check=True).splitlines()
         except (subprocess.CalledProcessError, FileNotFoundError) as e:
             system.exit(f"Error: Could not execute 'show-macros-proper'. Is it in your PATH? Details: {e}", status_code=1)
@@ -197,7 +211,6 @@ class FailureAnalyzer:
                 continue
 
             sanitized = my_re.sub(r'\s*\(\)\s*$', '', my_re.sub(r'^\s*function\s+', '', stripped_line)).strip()
-            # Use the more permissive regex that allows for '.' in names.
             if my_re.match(r'^[a-zA-Z0-9_.:-]+$', sanitized):
                 macros.add(sanitized)
 
@@ -208,7 +221,6 @@ class FailureAnalyzer:
         macro_stats = defaultdict(lambda: {'total': 0, 'bad': 0, 'bad_files': set()})
         output_files = self._find_output_files()
         if not output_files:
-            print(f"No output files (*.outputpp.out) found in directory: {self.results_dir}")
             return []
         for output_file_str in output_files:
             output_file = Path(output_file_str)
@@ -240,7 +252,6 @@ class FailureAnalyzer:
 
     def _write_json_report(self):
         """Writes the analysis data to a JSON file."""
-        print(f"\nWriting full report to {self.json_filename}...")
         if not self.is_heuristic:
             output_data = [{"rank": i, "impact_score": data['impact'], "failure_count": data['count'], "affected_files": len(data['sources']), "source_files": sorted(list(data['sources'])), "suspect_command": command} for i, (command, data) in enumerate(self.report_data, 1)]
         else:
@@ -248,34 +259,129 @@ class FailureAnalyzer:
         try:
             json_string = json.dumps(output_data, indent=2)
             system.write_file(self.json_filename, json_string)
-            print("JSON report generated successfully.")
         except IOError as e:
             system.exit(f"Error: Could not write JSON report to {self.json_filename}: {e}", status_code=1)
 
+    # OLD:
+    # def _print_summary_table(self):
+    #     """Prints the formatted summary table to the console."""
+    #     table_format = "fancy_grid" if self.use_tabulate else "tsv"
+    #     table_data = []
+    #
+    #     if self.is_heuristic:
+    #         snake_headers = ['rank', 'macro_function', 'bad_hits', 'total_uses', 'failure_rate_pct', 'failing_in_files']
+    #         
+    #         if self.use_tabulate:
+    #             headers = [h.replace('_', ' ').title() for h in snake_headers]
+    #             max_col_widths = [None, None, None, None, None, 45]
+    #         else: # TSV mode
+    #             headers = snake_headers
+    #             max_col_widths = None
+    #
+    #         # Filter data based on the environment variable and output mode.
+    #         if self.use_tabulate and not INCLUDE_ZERO_FAILURES:
+    #             # Default tabulate view: show only macros with failures.
+    #             data_to_process = [d for d in self.report_data if d['bad'] > 0]
+    #         else:
+    #             # TSV or tabulate with INCLUDE_ZERO_FAILURES: show all macros.
+    #             data_to_process = self.report_data
+    #
+    #         for i, data in enumerate(data_to_process, 1):
+    #             rate_str = f"{data['pct_bad']:.1f}"
+    #             failing_files = data['failing_in_files']
+    #             
+    #             if self.use_tabulate:
+    #                 rate_str += "%"
+    #                 files_str = "\n".join(failing_files[:3])
+    #                 if len(failing_files) > 3:
+    #                     files_str += f"\n(...and {len(failing_files) - 3} more)"
+    #             else:
+    #                 files_str = ";".join(failing_files)
+    #
+    #             table_data.append([i, data['macro'], data['bad'], data['total'], rate_str, files_str])
+    #         
+    #         if table_data:
+    #             print(tabulate(table_data, headers=headers, tablefmt=table_format, maxcolwidths=max_col_widths))
+    #
+    #     else: # Original analysis mode
+    #         snake_headers = ['rank', 'impact_score', 'failure_count', 'affected_files', 'suspect_command']
+    #
+    #         if self.use_tabulate:
+    #             headers = [h.replace('_', ' ').title() for h in snake_headers]
+    #             max_col_widths = [None, None, None, None, 70]
+    #         else: # TSV mode
+    #             headers = snake_headers
+    #             max_col_widths = None
+    #         
+    #         data_to_process = self.report_data # Already filtered for failures
+    #
+    #         for i, (command, data) in enumerate(data_to_process, 1):
+    #             command_str = command.replace('\n', ' ') if not self.use_tabulate else command
+    #             table_data.append([i, data['impact'], data['count'], len(data['sources']), command_str])
+    #         
+    #         if table_data:
+    #             print(tabulate(table_data, headers=headers, tablefmt=table_format, maxcolwidths=max_col_widths))
+
+    # NEW: Refactored to apply INCLUDE_ZERO_FAILURES consistently to both TSV and tabulate modes.
     def _print_summary_table(self):
         """Prints the formatted summary table to the console."""
+        table_format = "fancy_grid" if self.use_tabulate else "tsv"
+        table_data = []
+
         if self.is_heuristic:
-            print("\n--- Top 20 Suspect Macros/Functions (Sorted by Failure Count) ---")
-            headers = ['Rank', 'Macro/Function', 'Bad Hits', 'Total Uses', 'Failure Rate', 'Failing In']
-            table_data = []
-            for i, data in enumerate(self.report_data[:20], 1):
-                rate_str = f"{data['pct_bad']:.1f}%"
+            snake_headers = ['rank', 'macro_function', 'bad_hits', 'total_uses', 'failure_rate_pct', 'failing_in_files']
+            
+            if self.use_tabulate:
+                headers = [h.replace('_', ' ').title() for h in snake_headers]
+                max_col_widths = [None, None, None, None, None, 45]
+            else: # TSV mode
+                headers = snake_headers
+                max_col_widths = None
+
+            # Unified filtering logic for both TSV and tabulate modes.
+            if not INCLUDE_ZERO_FAILURES:
+                # Default for both modes: show only macros with failures.
+                data_to_process = [d for d in self.report_data if d['bad'] > 0]
+            else:
+                # If env var is set, show all used macros for a full coverage view.
+                data_to_process = self.report_data
+
+            for i, data in enumerate(data_to_process, 1):
+                rate_str = f"{data['pct_bad']:.1f}"
                 failing_files = data['failing_in_files']
-                files_str = ""
-                if failing_files:
-                    files_to_show = failing_files[:3]
-                    files_str = "\n".join(files_to_show)
+                
+                if self.use_tabulate:
+                    rate_str += "%"
+                    files_str = "\n".join(failing_files[:3])
                     if len(failing_files) > 3:
                         files_str += f"\n(...and {len(failing_files) - 3} more)"
+                else:
+                    files_str = ";".join(failing_files)
+
                 table_data.append([i, data['macro'], data['bad'], data['total'], rate_str, files_str])
-            print(tabulate(table_data, headers=headers, tablefmt="fancy_grid", maxcolwidths=[None, None, None, None, None, 45]))
+            
+            if table_data:
+                print(tabulate(table_data, headers=headers, tablefmt=table_format, maxcolwidths=max_col_widths))
+
         else:
-            print("\n--- Top 20 Failure Summary (Sorted by Impact) ---")
-            headers = ['Rank', 'Impact', 'Count', 'Files', 'Suspect Command(s)']
-            table_data = []
-            for i, (command, data) in enumerate(self.report_data[:20], 1):
-                table_data.append([i, data['impact'], data['count'], len(data['sources']), command])
-            print(tabulate(table_data, headers=headers, tablefmt="fancy_grid", maxcolwidths=[None, None, None, None, 70]))
+            snake_headers = ['rank', 'impact_score', 'failure_count', 'affected_files', 'suspect_command']
+
+            if self.use_tabulate:
+                headers = [h.replace('_', ' ').title() for h in snake_headers]
+                max_col_widths = [None, None, None, None, 70]
+            else:
+                headers = snake_headers
+                max_col_widths = None
+            
+            data_to_process = self.report_data # Already filtered for failures
+
+            for i, (command, data) in enumerate(data_to_process, 1):
+                command_str = command.replace('\n', ' ') if not self.use_tabulate else command
+                table_data.append([i, data['impact'], data['count'], len(data['sources']), command_str])
+            
+            if table_data:
+                print(tabulate(table_data, headers=headers, tablefmt=table_format, maxcolwidths=max_col_widths))
+
 
 # ------------------------------------------------------------------------------
 # Command-Line Interface (CLI) Wrapper
@@ -290,6 +396,8 @@ class Script(Main):
     json_filename = None
     diagnostic_mode = False
     heuristic_mode = False
+    # NEW: Add member for the tabulate option
+    use_tabulate = False
 
     def setup(self):
         """Check results of command line processing and initialize members."""
@@ -308,6 +416,8 @@ class Script(Main):
         self.diagnostic_mode = self.get_parsed_option(DIAGNOSTIC_MODE, self.diagnostic_mode)
         self.heuristic_mode = self.get_parsed_option(HEURISTIC_MODE, self.heuristic_mode)
         self.json_filename = self.get_parsed_option(JSON_FILENAME, None)
+        # NEW: Get the value of the tabulate option from the command line
+        self.use_tabulate = self.get_parsed_option(USE_TABULATE, self.use_tabulate)
 
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
 
@@ -315,15 +425,26 @@ class Script(Main):
         """
         Main processing step. Instantiates and runs the FailureAnalyzer.
         """
-        version = "v18-addon.24"
-        print(f"Executing {version} analysis on target directory: {self.results_dir}\n")
-
+        # OLD:
+        # if self.use_tabulate:
+        #     version = "v18-addon.24"
+        #     print(f"Executing {version} analysis on target directory: {self.results_dir}\n")
+        
+        # OLD:
+        # analyzer = FailureAnalyzer(
+        #     results_dir=self.results_dir,
+        #     is_heuristic=self.heuristic_mode,
+        #     json_filename=self.json_filename
+        # )
+        
+        # NEW: Pass the use_tabulate flag to the analyzer
         analyzer = FailureAnalyzer(
             results_dir=self.results_dir,
             is_heuristic=self.heuristic_mode,
-            json_filename=self.json_filename
+            json_filename=self.json_filename,
+            use_tabulate=self.use_tabulate
         )
-        
+
         analyzer.run()
 
 def main():
@@ -334,7 +455,9 @@ def main():
         auto_help=True,
         boolean_options=[
             (DIAGNOSTIC_MODE, "Enable diagnostic mode to analyze file content"),
-            (HEURISTIC_MODE, "Use Tom's macro failure heuristic instead of the default analysis")
+            (HEURISTIC_MODE, "Use Tom's macro failure heuristic instead of the default analysis"),
+            # NEW: Add the command-line option for tabulate
+            (USE_TABULATE, "Format the summary table with borders. Default is TSV.")
         ],
         text_options=[
             (RESULTS_DIR, "Path to the test results directory"),
