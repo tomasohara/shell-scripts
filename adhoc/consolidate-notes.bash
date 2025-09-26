@@ -66,6 +66,8 @@ while [ "$moreoptions" == "1" ]; do
 	trace=1
     elif [ "${CRONTAB:-0}" == "1" ]; then
         # TEMP: ignore options if invoked via crontab (requires env option)
+        # Note: Used when bash used to invoke cronjob.
+        # ex: 30 2 * * * bash -c "CRONTAB=1 SRC_DIR=~tomohara bash --login -i $ADHOC_BIN/consolidate-notes.bash - > ~tomohara/_consolidate-notes.log 2>&1"
         echo "Warning: ignoring options ($*)"
 	break
     elif [[ ("$1" == "--") || ("$1" == "-") ]]; then
