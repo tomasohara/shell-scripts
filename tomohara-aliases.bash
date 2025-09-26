@@ -2797,7 +2797,7 @@ function hw2-upload-misc-single {
     hw2-upload-misc "$@"
     echo see "$HW2_MISC/$(basename "$1")"
 }
-alias hw2-download=new-hw-download
+## OLD: alias hw2-download=new-hw-download
 
 # Set dummy default host on AWS and HostWinds so hostname always in xterm title (see set_xterm_title.bash).
 # Sample hostnames under AWS is ip-172-31-37-185 and under Hostwinds is ip-172-31-37-185.
