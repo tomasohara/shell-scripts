@@ -1378,8 +1378,9 @@ function byte-usage () {
 }
 ## TODO: function usage () { du --one-file-system --human-readable 2>&1 | sort -rn >| usage.list 2>&1; $PAGER usage.list; }
 
-# check-errors(LOG-FILE): in check for known errors in LOG-FILE...
-# also: check-all-errors|warnings: variants including more patterns and with warnings subsuming errors.
+# check-errors(LOG-FILE): check for known errors in LOG-FILE... with emoji characters changed to
+# character name (e.g., "[check mark] Success" for U+2713).
+# also: check-all-errors/warnings(): variants including more patterns and with warnings subsuming errors.
 # HACK: quiet added to disable filename with multiple files
 function check-errors-aux { alias-perl check_errors.perl "$@"; }
 ## # -or-:
