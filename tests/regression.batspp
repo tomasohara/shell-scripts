@@ -373,3 +373,15 @@ Version: N.N.N.N
 ## $ set_xterm_title.bash fubar-set_xterm_title
 ## $ show-window-list | grep fubar
 ## 0x052cf344  0 tpo-jugador alt $ fubar-set_xterm_title; Py3.11; pid:365159
+
+##------------------------------------------------------------------------------
+
+## TODO3: fix trace-vars handling of whitespace
+##
+## $ export SD_URL=" "
+##
+## $ trace-vars SD_URL 
+## SD_URL=; 
+##
+## $ echo ">$SD_URL<"
+## > <
