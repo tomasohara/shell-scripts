@@ -257,7 +257,6 @@ function run-python-script-reset {
 
 # pytest stuff
 # options: --vv: doubly verbose; --capture=no: don't capture stderr
-## OLD: default_pytest_opts=(-vv --capture=tee-sys)
 default_pytest_opts=(-vv --capture=no)
 #
 # test-python-script(test-script): run TEST-SCRIPT via pytest
