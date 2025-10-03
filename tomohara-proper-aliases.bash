@@ -115,7 +115,6 @@ function plint-tester-testee {
 }
 }
 #
-## TODO3: simple-alias-fn plint-tester-testee-strict 'PYTEST_OPTS="$default_pytest_opts --runxfail"'
 # plint-tester-testee-strict: likewise with pytest run strict mode
 function plint-tester-testee-strict {
     TEST=1 PYTEST_OPTS="--runxfail ${default_pytest_opts[*]}" plint-tester-testee "$@";
@@ -193,7 +192,7 @@ function run-python-script {
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
     # TODO3: rework to avoid problem with _PSL_ not being updated (or at least detect the error)!
-    declare -g _PSL_ log out PYTHON      # global declaration
+    declare -g _PSL_ base log out PYTHON      # global declaration
     local module_spec=""
     let _PSL_++
     # TODO3: add OUT_BASE to override default
@@ -257,7 +256,9 @@ function run-python-script-reset {
 }
 
 # pytest stuff
-default_pytest_opts=(-vv --capture=tee-sys)
+# options: --vv: doubly verbose; --capture=no: don't capture stderr
+## OLD: default_pytest_opts=(-vv --capture=tee-sys)
+default_pytest_opts=(-vv --capture=no)
 #
 # test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
@@ -299,7 +300,6 @@ function test-python-script-strict {
 #
 # test-python-script-method-strict: likewise for just a method
 function test-python-script-method-strict {
-    ## TODO2: default_pytest_opts="--runxfail" test-python-script-method "$@";
     local method="$1";
     shift;
     PYTEST_OPTS="--runxfail -k $method ${default_pytest_opts[*]}" test-python-script "$@";
