@@ -1,0 +1,1553 @@
+[
+  {
+    "macro": "grep",
+    "bad": 13,
+    "total": 81,
+    "pct_bad": 16.049382716049383,
+    "failing_in_files": [
+      "alias-trace-misc-commands.bats.batspp",
+      "test-check-errors.bats.batspp",
+      "test-tomohara-proper-aliases.bats.batspp",
+      "testing-support-script-tests.bats.batspp",
+      "trace-file-manipulation.bats.batspp",
+      "trace-python-commands.bats.batspp",
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "trace",
+    "bad": 9,
+    "total": 12,
+    "pct_bad": 75.0,
+    "failing_in_files": [
+      "test-tomohara-proper-aliases.bats.batspp",
+      "trace-extensionless-shortcut-V2.bats.batspp",
+      "trace-line-words-commands.bats.batspp",
+      "trace-python-commands.bats.batspp",
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "l",
+    "bad": 9,
+    "total": 91,
+    "pct_bad": 9.89010989010989,
+    "failing_in_files": [
+      "hello-world-revised.bats.batspp",
+      "test-cond-env-setting.bats.batspp",
+      "test-dir-alias.bats.batspp",
+      "trace-extensionless-shortcut-V2.bats.batspp",
+      "trace-line-words-commands.bats.batspp",
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "dir",
+    "bad": 6,
+    "total": 36,
+    "pct_bad": 16.666666666666664,
+    "failing_in_files": [
+      "command-override-cp-mv.bats.batspp",
+      "dir-aliases-test-revised.bats.batspp",
+      "test-tomohara-proper-aliases.bats.batspp",
+      "trace-python-commands.bats.batspp",
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "usage",
+    "bad": 4,
+    "total": 5,
+    "pct_bad": 80.0,
+    "failing_in_files": [
+      "alias-trace-misc-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "script",
+    "bad": 4,
+    "total": 6,
+    "pct_bad": 66.66666666666666,
+    "failing_in_files": [
+      "test-tomohara-proper-aliases.bats.batspp"
+    ]
+  },
+  {
+    "macro": "perl-",
+    "bad": 4,
+    "total": 15,
+    "pct_bad": 26.666666666666668,
+    "failing_in_files": [
+      "test-tomohara-proper-aliases.bats.batspp",
+      "trace-file-manipulation.bats.batspp",
+      "trace-python-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "python-lint",
+    "bad": 3,
+    "total": 3,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-python-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "diff",
+    "bad": 3,
+    "total": 8,
+    "pct_bad": 37.5,
+    "failing_in_files": [
+      "alias-trace-misc-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "egrep",
+    "bad": 3,
+    "total": 26,
+    "pct_bad": 11.538461538461538,
+    "failing_in_files": [
+      "test-cond-env-setting.bats.batspp",
+      "test-tomohara-proper-aliases.bats.batspp",
+      "trace-python-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "byte-usage",
+    "bad": 2,
+    "total": 2,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "alias-trace-misc-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "cp",
+    "bad": 2,
+    "total": 3,
+    "pct_bad": 66.66666666666666,
+    "failing_in_files": [
+      "command-override-cp-mv.bats.batspp",
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "python-import-path",
+    "bad": 2,
+    "total": 3,
+    "pct_bad": 66.66666666666666,
+    "failing_in_files": [
+      "trace-python-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "count-it",
+    "bad": 2,
+    "total": 4,
+    "pct_bad": 50.0,
+    "failing_in_files": [
+      "trace-python-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "v",
+    "bad": 2,
+    "total": 5,
+    "pct_bad": 40.0,
+    "failing_in_files": [
+      "trace-extensionless-shortcut-V2.bats.batspp",
+      "trace-file-manipulation.bats.batspp"
+    ]
+  },
+  {
+    "macro": "perl-grep",
+    "bad": 2,
+    "total": 5,
+    "pct_bad": 40.0,
+    "failing_in_files": [
+      "trace-python-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "rm",
+    "bad": 2,
+    "total": 11,
+    "pct_bad": 18.181818181818183,
+    "failing_in_files": [
+      "dir-aliases-test-revised.bats.batspp",
+      "git-aliases-tests-3.bats.batspp"
+    ]
+  },
+  {
+    "macro": "cd",
+    "bad": 2,
+    "total": 19,
+    "pct_bad": 10.526315789473683,
+    "failing_in_files": [
+      "alias-cd-commands.bats.batspp",
+      "test-tomohara-proper-aliases.bats.batspp"
+    ]
+  },
+  {
+    "macro": "ls",
+    "bad": 2,
+    "total": 49,
+    "pct_bad": 4.081632653061225,
+    "failing_in_files": [
+      "test-eval-condition-alias.bats.batspp",
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "apply-usage-numeric-suffixes",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "alias-trace-misc-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "usage-pp",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "alias-trace-misc-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "diff-default",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "alias-trace-misc-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "diff-ignore-spacing",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "alias-trace-misc-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "do-diff",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "alias-trace-misc-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "glob-links",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "dir-aliases-test-revised.bats.batspp"
+    ]
+  },
+  {
+    "macro": "glob-subdirs",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "dir-aliases-test-revised.bats.batspp"
+    ]
+  },
+  {
+    "macro": "subdirs",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "dir-aliases-test-revised.bats.batspp"
+    ]
+  },
+  {
+    "macro": "cond-setenv",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "test-cond-env-setting.bats.batspp"
+    ]
+  },
+  {
+    "macro": "ps-mine-",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-extensionless-shortcut-V2.bats.batspp"
+    ]
+  },
+  {
+    "macro": "ps-mine",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-extensionless-shortcut-V2.bats.batspp"
+    ]
+  },
+  {
+    "macro": "ps-mine-all",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-extensionless-shortcut-V2.bats.batspp"
+    ]
+  },
+  {
+    "macro": "perl-slurp",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-file-manipulation.bats.batspp"
+    ]
+  },
+  {
+    "macro": "python-lint-work",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-python-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "python-import-path-full",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-python-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "python-trace",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-python-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "which-python",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-python-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "full-dirname",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "linux-version",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "apropos-command",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "bash-trace-off",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "compress-this-dir",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "ununcompress-this-dir",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "old-count-exts",
+    "bad": 1,
+    "total": 1,
+    "pct_bad": 100.0,
+    "failing_in_files": [
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "asctime",
+    "bad": 1,
+    "total": 2,
+    "pct_bad": 50.0,
+    "failing_in_files": [
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "setenv",
+    "bad": 1,
+    "total": 2,
+    "pct_bad": 50.0,
+    "failing_in_files": [
+      "test-cond-env-setting.bats.batspp"
+    ]
+  },
+  {
+    "macro": "count-exts",
+    "bad": 1,
+    "total": 2,
+    "pct_bad": 50.0,
+    "failing_in_files": [
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "extract-matches",
+    "bad": 1,
+    "total": 3,
+    "pct_bad": 33.33333333333333,
+    "failing_in_files": [
+      "test-tomohara-proper-aliases.bats.batspp"
+    ]
+  },
+  {
+    "macro": "intersection",
+    "bad": 1,
+    "total": 3,
+    "pct_bad": 33.33333333333333,
+    "failing_in_files": [
+      "json-related-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "trace-cmd",
+    "bad": 1,
+    "total": 3,
+    "pct_bad": 33.33333333333333,
+    "failing_in_files": [
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "which",
+    "bad": 1,
+    "total": 5,
+    "pct_bad": 20.0,
+    "failing_in_files": [
+      "trace-python-commands.bats.batspp"
+    ]
+  },
+  {
+    "macro": "start",
+    "bad": 1,
+    "total": 8,
+    "pct_bad": 12.5,
+    "failing_in_files": [
+      "trace-unix-alias.bats.batspp"
+    ]
+  },
+  {
+    "macro": "calc",
+    "bad": 0,
+    "total": 9,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "old-calc",
+    "bad": 0,
+    "total": 3,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "perl-calc",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "old-perl-calc",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "hex2dec",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "dec2hex",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "bin2dec",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "dec2bin",
+    "bad": 0,
+    "total": 3,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "calc-prec6",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "calc-init",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "calc-int",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "chdir",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "cd-realdir",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "cd-this-realdir",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "pushd-q",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "pushd",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "popd",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "popd-q",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "gu",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "grepl",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "gr",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "gr-less",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "gr-",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "grep-nonascii",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "fs-",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "prepare-find-files-here",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "find-files-here",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "find-files-",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "find-files",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "fs",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "check-html",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "h",
+    "bad": 0,
+    "total": 7,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "show-macros",
+    "bad": 0,
+    "total": 5,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "show-path",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "filter-dirnames",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "comma-ize-number",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "apply-numeric-suffixes",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "number-columns",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "backup-file",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "signature",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "dobackup",
+    "bad": 0,
+    "total": 3,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "mv",
+    "bad": 0,
+    "total": 4,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "move",
+    "bad": 0,
+    "total": 3,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "copy",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "copy-readonly",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "show-macros-proper",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "ln-symbolic",
+    "bad": 0,
+    "total": 11,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "symlinks",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "symlinks-proper",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "sublinks",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "sublinks-proper",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "ln-symbolic-force",
+    "bad": 0,
+    "total": 3,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "link-symbolic-safe",
+    "bad": 0,
+    "total": 6,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "link-symbolic",
+    "bad": 0,
+    "total": 6,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "ls-long-tsv",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "tomohara-aliases",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "git-branch-alias",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "git-checkout-branch",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "git-update-plus",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "git-update-force",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "git-move-to-dir",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "git-conflicts-alias",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "merge",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "git-diff-list",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "kill-it",
+    "bad": 0,
+    "total": 3,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "vdiff",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "git-vdiff-alias",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "clear",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "cls",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "hist",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "difference",
+    "bad": 0,
+    "total": 5,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "line-difference",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "remove-cr",
+    "bad": 0,
+    "total": 6,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "alt-remove-cr",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "last-n-with-header",
+    "bad": 0,
+    "total": 3,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "show-line",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "url-path",
+    "bad": 0,
+    "total": 3,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "extract-tar",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "un-tar",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "view-tar",
+    "bad": 0,
+    "total": 5,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "make-tar",
+    "bad": 0,
+    "total": 3,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "tar-dir",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "tar-just-dir",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "tar-this-dir",
+    "bad": 0,
+    "total": 5,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "new-tar-this-dir",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "tar-this-dir-dated",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "tar-this-dir-normal",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "tar-just-this-dir",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "tar-just-this-dir-dated",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "make-recent-tar",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "recent-tar-this-dir",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "check-errors",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "rename-with-file-date",
+    "bad": 0,
+    "total": 3,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "em",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "kill-em",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "firefox",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "rename-files",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "perlgrep",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "rename-spaces",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "rename-special-punct",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "move-duplicates",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "rename-parens",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "rename-quotes",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "copy-with-file-date",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "unigrams",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "word-count",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "bigrams",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "lynx-dump-stdout",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "lynx-dump",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "unexport",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "show-unicode-code-info",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "show-unicode-code-info-aux",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "remove-cr-and-backup",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "line-intersection",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "line-wc",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "line-len",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "para-len",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "line-word-len",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "ls-line-len",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "ps-python",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "show-python-path",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "python-import-path-all",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "python-module-version",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "python-module-version-full",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "python-package-members",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "ltc",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "less-",
+    "bad": 0,
+    "total": 3,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "less-tail",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "less-tail-clipped",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "less-clipped",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "ipython",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "randomize-datafile",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "curl-dump",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "colon-sort",
+    "bad": 0,
+    "total": 6,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "colon-sort-rev-num",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "freq-sort",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "echoize",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "para-sort",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "basename-with-dir",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "gtime",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "system-status",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "split-tokens",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "tokenize",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "perl-echo",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "perl-echo-sans-newline",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "perl-printf",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "perl-print",
+    "bad": 0,
+    "total": 2,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "perl-print-n",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "quote",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "quote-tokens",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "set-display-local",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  },
+  {
+    "macro": "bash-trace-on",
+    "bad": 0,
+    "total": 1,
+    "pct_bad": 0.0,
+    "failing_in_files": []
+  }
+]
