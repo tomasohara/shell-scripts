@@ -125,7 +125,10 @@ function plint-tester-testee-method-strict {
     shift;
     TEST=1 PYTEST_OPTS="--runxfail -k $method ${default_pytest_opts[*]}" plint-tester-testee "$@";
 }
-#
+# plint-tester-testee-regular: similarly without strict
+simple-alias-fn plint-tester-testee-regular 'TEST=1 plint-tester-testee';
+## TODO3?: plint-tester-testee-method-regular
+
 # clone-repo(url): clone github repo at URL into current dir with logging
 # TODO2: move to git-related section (better yet into git-aliases.bash)
 function clone-repo () {
