@@ -1,7 +1,7 @@
 # Tests for miscellaneous scripts (i.e., not readily categorizable)
 
 
-## TODO
+## TODO (trap for inaccessible files, such as emacs lock files):
 ## $ consolidate-notes.bash --
 ## ...
 ## 238  >>> FileNotFoundError: [Errno 2] No such file or directory: './config/#_toms-mac-adhoc-notes-apr23.txt#' <<<
