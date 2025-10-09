@@ -528,8 +528,11 @@ function ssh-cache {
     ssh-add -t "$one_month" "$HOME/.ssh/id_$USER"
 }
 alias ssh-access=ssh-cache
- 
+
+# consolidate-notes[-here](): create index of notes for use with grepl-entry
+# note: older here version sets the xterm title
 alias consolidate-notes-here="consolidate-notes.bash --"
+alias consolidate-notes="consolidate-notes.bash --skip-xterm-title --"
  
 # copy-relative(path, dir): copy file at PATH to DIR/PATH
 function copy-relative {
