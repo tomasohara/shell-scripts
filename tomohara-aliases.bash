@@ -3319,9 +3319,11 @@ function curl-dump () {
     curl "$url" > "$base";
 }
 # EX: url-path $BIN/templata.html => "file:///$BIN/template.html"
+# TODO3: add support for Windows
 function url-path () {
     local file="$1"
-    realpath "$file" | perl -pe 's@^@file:///@;'
+    ## OLD: realpath "$file" | perl -pe 's@^@file:///@;'
+    realpath "$file" | perl -pe 's@^@file://@;'
 }
 # invoke-browser(executable, [file]): Invokes browser EXECUTABLE, optionally
 # to open local FILE.
