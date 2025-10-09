@@ -156,7 +156,7 @@ if ( !defined($ARGV[0])) {
     if ($verbose) {
 	## OLD: $example .= "sum_file.perl -ttest -labels -headings -f=5 -f2=6 eval_naive_bayes_4jul.report\n\n";
 	$example .= "sum_file.perl -mann_whitney -fix=0 -col1=2 -col2=4 archive/resnik_brown_object.data\n\n";
-	$example .= "sum_file.perl -diff -append -col1=1 -col2=2 archive/mendenhall_ex13.1.data\n\n";
+	$example .= "sum_file.perl -diff -append -col1=1 -col2=2 archive/mendenhall_ex13.1.data\n";
     }
 
     my($note) = "Notes:\n- Use -'s for cases with no corresponding data.\n";
