@@ -164,7 +164,9 @@ while (<>) {
 	# Update the current line being matched
 	if ($restore ne "") {
 	    ## OLD: my($restore_text) = eval { "$restore"; };
-	    my($restore_text) = eval "$restore";
+	    ## BAD: my($restore_text) = eval "$restore";
+	    ## NOTE: Due to a change in Perl, need to evaluate the variables in the context of a string.
+	    my($restore_text) = eval " \"$restore\" ";
 	    &debug_print(&TL_DETAILED, "restoring $restore_text to line\n");
 	    $_ = $restore_text . $';		# '
 	    &debug_print(&TL_VERBOSE, "line='$_'\n");
