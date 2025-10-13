@@ -26,7 +26,7 @@ fi
 # in $@.
 # NOTE: See sync-loop.sh for an example.
 #
-if [[ "$1" == "" ]]; then
+if [[ ("$1" == "") || ("$1" == "--help") ]]; then
     script=$(basename "$0")
     ## TODO: remove following which is only meant for when ./template.bash run
     if [[ "$script" == "template.bash" ]]; then echo "Warning: not intended for standalone usage"; fi;
@@ -38,11 +38,10 @@ if [[ "$1" == "" ]]; then
     echo ""
     echo "Examples:"
     echo ""
-    ## TODO: example 1
-    echo "$0 example 1"
+    echo "$0 -"
     echo ""
-    ## TODO: example 2
-    echo "$script example 2"
+    echo 'ddmmmyy=$(date '+%d%b%y')'
+    echo "$script - > ~/config/show-KDE-settings.\$ddmmmyy.log 2>&1"
     echo ""
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."
