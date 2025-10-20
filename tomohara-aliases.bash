@@ -999,6 +999,9 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   # grepl-mako-py(pattern): check for pattern in files via grepl (i.e., to less)
   # shellcheck disable=SC2035
   function grepl-mako-py { grepl "$@" *.py *.mako tests/*.py; }
+  #
+  # grepl-hist-tail(): grep through bash history
+  function grepl-hist-tail { history | egrep "$@" | tail; }
 }
 # gr-c: grep through c/c++ source and headers files
 # note: --no-messages suppresses warnings about missing files
