@@ -23,7 +23,6 @@
 # Initialize options and variables
 # NOTE: temp file is of the form /tmp/kill_em_aux_HOSTNAME_PID
 host=$(hostname)
-## OLD: aux_base="/tmp/kill_em_aux_$host.$$"
 tmp="${TMP:-/tmp}"
 aux_base="$tmp/kill_em_aux_$host.$$"
 aux_script="$aux_base.sh"
@@ -45,7 +44,6 @@ force=0
 # Parse command-line arguments
 ignore="-i" # ignore-case flag
 script_name=$(basename "$0")
-## OLD: egrep="egrep"
 egrep="grep --extended-regexp"
 if [ -z "$1" ]; then
     echo ""
@@ -156,7 +154,7 @@ if [ "$pattern" == "." ]; then
       echo "ERROR: unable to determine parent pid"
       exit
     fi
-    $egrep -v "(egrep )|(kill_em.sh )|($$)|($parent)" "$aux_file0" > "$aux_file1"
+    $egrep -v "(egrep )|(kill_em.bash )|($$)|($parent)" "$aux_file0" > "$aux_file1"
     if [ "$verbose_mode" == "1" ]; then
       echo "Related processes"
       cat "$aux_file1"
@@ -168,7 +166,6 @@ fi
 # Do sanity check on processes to kill
 if [ ! -s "$aux_file1" ]; then
     echo "Warning: No processes matched the pattern"
-    ## OLD: exit
 else
 
     # Convert the process listing to a shell script for killing the jobs. The
@@ -186,7 +183,6 @@ fi
 # Do sanity check on kill script
 if [ ! -s "$aux_script" ]; then
     echo "ERROR: Problem preparing aux script for killing processes."
-    ## OLD: exit
 fi
 
 # Execute the kill script after showing the processes to be killed
