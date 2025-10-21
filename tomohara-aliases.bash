@@ -986,6 +986,7 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   # grepl(pattern, [other_grep_args]): invokes grep over PATTERN and OTHER_GREP_ARGS and then pipes into less for PATTERN
   # NOTE: actually uses egrep
   # TODO: use more general way to ensure pattern given last while readily extractable for less -p usage
+  # Warning: unintuitive split of grep arguments for sake of less highlighting
   function grep-to-less () {
       # TODO: fix warning about possible discrepency between grep regex and less, such as when ^ used (e.g., with multiple files in grep output)
       if [[ ($1 =~ ^[^]) && ($# -gt 2) ]]; then
@@ -1001,7 +1002,9 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   function grepl-mako-py { grepl "$@" *.py *.mako tests/*.py; }
   #
   # grepl-hist-tail(): grep through bash history
-  function grepl-hist-tail { history | egrep "$@" | tail; }
+  ## OLD: function grepl-hist-tail { history | egrep "$@"; }
+  # note: uses redundant grepl for highlighting (with potenitally split args noted above)
+  function grepl-hist-tail { history  | grepl "$@" | tail | grepl "$@"; }
 }
 # gr-c: grep through c/c++ source and headers files
 # note: --no-messages suppresses warnings about missing files
