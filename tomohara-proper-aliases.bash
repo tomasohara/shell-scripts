@@ -256,6 +256,7 @@ function run-python-script {
 function run-python-script-reset {
     declare -g _PSL_
     _PSL_=0
+    trace-vars _PSL_
 }
 
 # pytest stuff
