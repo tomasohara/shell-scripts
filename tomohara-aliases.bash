@@ -282,6 +282,7 @@ function downcase-text { echo "$@" | downcase-stdin; }
 # todays-date(): outputs date in format DDmmmYY (e.g., 22apr20)
 ## TODO: drop leading digits in day of month
 ## NOTE: keep in synch with common.perl get_file_ddmmmyy and .emacs edit-adhoc-notes-file
+## example usage: ddmmmyy=$(todays-date); ... run-it > _run-it-$ddmmmyy.log 2>&1
 function todays-date { date '+%d%b%y' | downcase-stdin; }
 # todays-date-mmmYY(): date in format mmmYY (e.g., sep20)
 function todays-date-mmmYY { todays-date | perl -pe 's/^\d\d//;'; }
