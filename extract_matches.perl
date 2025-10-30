@@ -18,6 +18,7 @@ eval 'exec perl -Ssw $0 "$@"'
 # - Check for looping due to empty patterns (e.g., '(.*)').
 # - Only apply s qualifier when -para or -slurp specified.
 # - Add -chomp option as in count_it.perl.
+# - Add diagnostics for match failures.
 #
 
 # Load in the common module, making sure the script dir is in the Perl lib path
