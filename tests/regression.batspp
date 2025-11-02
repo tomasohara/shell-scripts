@@ -385,3 +385,14 @@ Version: N.N.N.N
 ##
 ## $ echo ">$SD_URL<"
 ## > <
+
+##------------------------------------------------------------------------------
+
+## TODO: Track down bug with trave-vars
+##
+## $ var=
+## $ trace-vars var
+## var=var; 
+## 
+## $ echo ">$var<"
+## ><
