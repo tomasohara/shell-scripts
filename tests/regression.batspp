@@ -388,7 +388,7 @@ Version: N.N.N.N
 
 ##------------------------------------------------------------------------------
 
-## TODO: Track down bug with trave-vars
+## TODO2: Track down bug with trace-vars (i.e., due to its local variable $var)
 ##
 ## $ var=
 ## $ trace-vars var
@@ -396,3 +396,26 @@ Version: N.N.N.N
 ## 
 ## $ echo ">$var<"
 ## ><
+
+##------------------------------------------------------------------------------
+
+## TODO3: Make sure quotes shown for files with delete[-dir]-force macros,
+## regardless of embedded spaces.
+## NOTE: This first needs support for embedded spaces
+##
+## subdir1="$TMP/temp-dir/temp subdir1-$$"
+## subdir2="$TMP/temp-dir/tempsubdir2-$$"
+## mkdir -p "$subdir1" "$subdir2"
+## file1="$subdir1/'abc def'.list
+## file2="$subdir2/'ghijkl'.list
+## touch "$file1" "$file2"
+##
+## TODO2:
+## ## delete-force "$file1" "$file2" | grep -c '"'
+## ## 2
+## ## delete-dir-force "$subdir1" "$subdir2" | grep -c '"'
+## ## 2
+##
+## delete-force "$file1" "$file2" | grep -c "files with embedded spaces"
+## 1
+
