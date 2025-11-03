@@ -789,17 +789,34 @@ alias rm='command rm -i $other_file_args'
 alias delete='command rm -i $other_file_args'
 # shellcheck disable=SC2034
 {
-    force_echo=""
+    ## NOTE: redundancy is needed for sake of sanity (force_echo was getting inadvertently
+    ## reset due to cut-n-paste)
+    ## BAD: force_echo=""
+    declare -g force_echo
+    force_echo="disable-forced-deletions-aux"
     newline_tab=$'\n\t'
     # TODO1: fix newline/tab support
     # disable-forced-deletions-aux(): shows deletion command on separate line
     # note: for use in $force_echo prefix to delete-force aliases
     function disable-forced-deletions-aux {
+        # Make sure no embedded spaces
+        local f
+        for f in "$@"; do
+            if [[ "$f" =~ " " ]]; then
+                echo "Error: files with embedded spaces not supported by delete[-dir]-force"
+                echo "  $f"
+                return
+            fi
+        done
+
+        # Proceed with 
         echo "Warning: run enable-forced-deletions or issue:"
         echo -n $'\t'
+        ## TODO3: for f in "$@"; do echo -n "\"$f"\"; done
         echo "$@"
     }
 }
+## 
 alias disable-forced-deletions='force_echo="disable-forced-deletions-aux"'
 alias enable-forced-deletions='force_echo=""'
 disable-forced-deletions
