@@ -1427,7 +1427,8 @@ function check-errors () {
 # note: with -relaxed, the pattern matching is looser (hence more errors show)
 alias check-all-errors='check-errors -relaxed'
 alias check-warnings='check-errors -warnings -strict'
-alias check-all-warnings='check-all-errors -warnings -relaxed'
+## OLD: alias check-all-warnings='check-all-errors -warnings -relaxed'
+alias check-all-warnings='check-all-errors -warnings -relaxed -info'
 #
 # check-errors-excerpt(log-file): show errors are start of log-file and at end if different
 # maldito shellcheck: SC2119 [Use ... "$@" if function's $1 should mean script'1 $1]
