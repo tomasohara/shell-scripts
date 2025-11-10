@@ -147,7 +147,8 @@ sub calc_cooccur_helper {
 	    my(@values) = ();
 	    push(@values, @terms) if ($terms_first);
 	    push(@values, &round_all(@metrics));
-	    push(@values, &round_all(@freqs)) if ($verbose);
+	    ## OLD: push(@values, &round_all(@freqs)) if ($verbose);
+	    push(@values, @freqs) if ($verbose);
 	    push(@values, @terms) if (! $terms_first);
 	    print join("\t", @values);
 	    print "\n";
