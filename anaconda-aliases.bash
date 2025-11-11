@@ -197,7 +197,7 @@ function conda-activate-env-like {
     if [ ! -e "$bin_dir" ]; then
         echo "Error: unable to resolve anaconda bin dir"
     else
-        echo "Warning: only prepending PATH w/ $bin_dir (e.g., no CONDA_ env updates)"
+        echo "FYI: only prepending PATH w/ $bin_dir (e.g., no CONDA_ env updates)"
         export PATH="$bin_dir:$PATH";
     fi
     add-conda-env-to-xterm-title
