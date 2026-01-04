@@ -95,15 +95,11 @@ if [ -z "$2" ]; then
     echo ""
     echo "$script '.py' .. > _python_diff.list 2>&1"
     echo ""
-    ## OLD:
-    ## # shellcheck disable=SC2016
-    ## echo '(for f in system.py main.py debug.py; do' "$script" '$f ~/mezcla-clone; done) 2>&1 | less'
     echo "find . -type d -exec \"$script\" --dir {} --verbose '*' ~/repo-main/{} \; > _main-diff-all.log 2>&1"
     echo ""
     echo "git ls-tree -r --name-only HEAD | xargs -I '{}' $script --no-pattern '{}' ~/repo-main/'{}' > _main-diff-tracked.log 2>&1"
     
     echo ""
-    ## OLD: echo "$script" '--match-dot-files ".*bash* .*emacs*" .. > _bash-emacs-diff.list 2>&1'
     echo "$script" '--match-dot-files ".*bash*" .. > _bash-diff.list 2>&1'
     echo ""
     echo "$script --ignore-spacing --diff-options '--context=1' '*.rb' vm-torre > vm-torre.diff 2>&1"
@@ -115,7 +111,6 @@ if [ -z "$2" ]; then
     echo "   'py' => '*py*' but '.py' => '*.py' (not '*.py*')"
     echo "- Use --match-dot-files, to ensure that . matches Unix dot files (e.g., .bashrc)"
     # TODO: interchange .bash and emacs here and in example above
-    ## OLD: echo "   '.emacs' => '.emacs*' (not '*.emacs*')"
     echo "   '.git' => '.git*' (not '*.git*')"
     echo "- The --no-pattern option treats pattern as a file (and likewise for master_dir)"
     echo "- Changes due to whitespace are ignored by default (i.e., --ignore-space-change, and --ignore-blank-lines [diff -wB])."
@@ -245,12 +240,6 @@ log_file="${TMP:-/tmp}/_do_diff.$$.log"
 count=0
 # shellcheck disable=SC2086
 for file in $pattern; do
-    ## OLD: 
-    ## # Add line divider
-    ## if [[ ("$verbose_mode" == "1") && ($count -ge 0) ]]; then
-    ##     echo "------------------------------------------------------------------------"
-    ## fi
-    ## let count++
 
     # Ignore unresolved pattern file (e.g., '*')
     if [ ! -e "$file" ]; then
@@ -266,7 +255,6 @@ for file in $pattern; do
     base=$(basename "$file")
     dir=$(dirname "$file")
     if [ "$dir" != "." ]; then
-        ## OLD: base="$dir/$base"
         base="$(dirname $dir)/$base"
     fi
     other_file="$master"
@@ -313,15 +301,11 @@ for file in $pattern; do
     if [ "$brief" == "0" ]; then
         "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" > "$log_file"
         status=$?
-        ## OLD: perl -pe 's/Files (.*) and (.*) differ/Differences: $1 $2/;' < "$log_file"
         perl -e "\$bd='$base_dir';" -pe 's@Files (.*) and (.*) differ@Differences: $bd$d/$1 $2@;' < "$log_file"
 
         # Show file info with time and size if there are differences
         if [ "$status" != "0" ]; then
             files_differ=true
-            ## OLD:
-            ## ls -l "$file"
-            ## ls -l "$other_file"
         fi
     fi
         
@@ -343,9 +327,6 @@ for file in $pattern; do
     # Show relative difference percent
     ## TODO?: if [[ "$brief" == "0") && $files_differ ]]; then
     if [ "$brief" == "0" ] && $files_differ; then
-        ## OLD:
-        ## num_lines1=$(wc -l < "$file")
-        ## num_lines2=$(wc -l < "$other_file" || echo "0")
         num_lines1=$(cat "$file" | wc -l)
         num_lines2=$(cat "$other_file" | wc -l)
         num_lines=$(( $num_lines1 + $num_lines2 ))
@@ -354,7 +335,6 @@ for file in $pattern; do
         if [ $num_lines -gt 0 ]; then
             relative_diff=$(( $num_diffs * 100 / $num_lines ))
         fi
-        ## OLD: echo "${relative_diff}% differences for $base"
         echo "${relative_diff}% differences for $base_dir/$file"
     fi
 
@@ -364,7 +344,6 @@ for file in $pattern; do
     # Add space divider
     ## TEMP: for consistency with continue'd cases above omits space if verbose, becuase
     ## the divider provides separation.
-    ## OLD: if [ "$quiet" == "0" ]; then
     if [[ ("$quiet" == "0") && ("$verbose_mode" != "1") ]]; then
         echo ""
     fi
