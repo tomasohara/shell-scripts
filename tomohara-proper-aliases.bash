@@ -507,9 +507,17 @@ simple-alias-fn act-plain 'convert-emoticons-aux act'
 # note: strips the 0-len paragraph indicator
 function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -pe 's/^0\t//;'; }
 
+# extract-text(document-file): extracts text from structured document file (e.g., Word or PDF)
+# note: to avoid hardcoded 'python -m mezcla.extract_document_text' invovation uses awkward which-based approach
+## TODO: figure out way for python to pull script from path (as with perl -S)
+function extract-text() { alias-python "$(which extract_document_text.py)" "$@"; }
+alias xtract-text='extract-text'
+alias extract-text-html='html_utils.py --regular'
+#
 # extract-text-html(filename): extract text from HTML in FILENAME
 # shellcheck disable=SC2016
 simple-alias-fn extract-text-html 'alias-python -m mezcla.html_utils --regular'
+alias extract-html-text='extract-text-html'
 
 # MS Office conversions
 function excel-to-csv {
