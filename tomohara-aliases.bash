@@ -2008,7 +2008,8 @@ function para-sort() { perl -00 -e '@paras=(); while (<>) {push(@paras, $_);} pr
 # echoize: output stdin (e.g., command output) on single line, as if echo $(command)
 ## BAD: alias echoize="perl -pe 's/\n(.)/ $1/;'"
 ## TODO: alias echoize="perl -pe 's/\n(.)/ \$1/;'"
-function echoize { perl -00 -pe 's/\n(.)/ $1/g;'; }
+## OLD: function echoize { perl -00 -pe 's/\n(.)/ $1/g;'; }
+function echoize { perl -0777 -pe 's/\n/ /g;  s/\s/ /g;  s/$/\n/;'; }
 
 #-------------------------------------------------------------------------------
 trace file manipulation and conversions
@@ -2817,7 +2818,8 @@ alias hw2-upload='scp-aws-up $NEW_HOSTWINDS_HOST'
 alias hw2-download='scp-aws-down $NEW_HOSTWINDS_HOST'
 #
 HW2_MISC="http://www.tomasohara.trade/misc"
-alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=misc new-hw-upload'
+## OLD: alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=misc new-hw-upload'
+alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=misc hw2-upload'
 function hw2-upload-misc-single {
     hw2-upload-misc "$@"
     echo see "$HW2_MISC/$(basename "$1")"
@@ -3242,12 +3244,14 @@ alias run-jupyter-notebook-redir-open=jupyter-notebook-redir-open
 alias jupyter-notebook-open=jupyter-notebook-redir-open
 
 # Python-based utilities
-# extract-text(document-file): extracts text from structured document file (e.g., Word or PDF)
-# note: to avoid hardcoded 'python -m mezcla.extract_document_text' invovation uses awkward which-based approach
-## TODO: figure out way for python to pull script from path (as with perl -S)
-function extract-text() { alias-python "$(which extract_document_text.py)" "$@"; }
-alias xtract-text='extract-text'
-alias extract-text-html='html_utils.py --regular'
+
+## OLD (moved to tomohara-proper-aliases.bash)
+## # extract-text(document-file): extracts text from structured document file (e.g., Word or PDF)
+## # note: to avoid hardcoded 'python -m mezcla.extract_document_text' invovation uses awkward which-based approach
+## ## TODO: figure out way for python to pull script from path (as with perl -S)
+## function extract-text() { alias-python "$(which extract_document_text.py)" "$@"; }
+## alias xtract-text='extract-text'
+## alias extract-text-html='html_utils.py --regular'
 
 # test-script(script): run unit test for script (i.e., tests/test_script)
 # and outputs to file given by tests/_test-<script_basename>.<date>.log.
