@@ -335,7 +335,12 @@ for file in $pattern; do
         if [ $num_lines -gt 0 ]; then
             relative_diff=$(( $num_diffs * 100 / $num_lines ))
         fi
-        echo "${relative_diff}% differences for $base_dir/$file"
+        ## OLD: echo "${relative_diff}% differences for $base_dir/$file"
+        echo -n "${relative_diff}% differences for $base_dir/$file"
+        if [[ "$verbose_mode" == "1" ]]; then
+            echo -n ": lines1=$num_lines1 lines2=$num_lines2 total=$num_lines diffs=$num_diffs"
+        fi
+        echo ""
     fi
 
     # Show the actual file differences
