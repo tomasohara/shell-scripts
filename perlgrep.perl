@@ -39,7 +39,7 @@ BEGIN {
 # Specify additional diagnostics and strict variable usage, excepting those
 # for command-line arguments (see init_var's in &init).
 use strict;
-use vars qw/$v $i $para $slurp $context $C $A $B $n $max $show_filename $w $c $h/;
+use vars qw/$v $i $para $slurp $context $C $A $B $n $max $show_filename $w $c $h $multi_line/;
 
 # Determine values of command-line arguments
 # TODO: use expanded names for all options (e.g., -not_matching for -v)
@@ -59,11 +59,12 @@ my($just_count) = $c;
 &init_var(*show_filename, 	# include file name in output
 	  ((scalar @ARGV) > 2) && !$h);
 &init_var(*w, &FALSE);		# match word boundaries
+&init_var(*multi_line, &FALSE); # multiline word for paragraph or slurp mode
 
 # Show usage statement if insufficient arguments
 #
 if (!defined($ARGV[0])) {
-    my($options) = "options = [-v] [-i] [-w] [-para] [-A=n | -B=n | -C=n] [-max=N] [-show_filename | -h] [-c]";
+    my($options) = "options = [-v] [-i] [-w] [-para [-multi]] [-A=n | -B=n | -C=n] [-max=N] [-show_filename | -h] [-c]";
     my($example) = "examples:\n\n$script_name -v \"\\t\\t\" 052698_nb_ci_062498_nb55.diff\n\n";
     $example .= "perlgrep.perl -para -i \"coling\" comps.bib | & less\n\n";
     $example .= "$0 -show_filename -max=1 \"\\r\\n\" *.lisp\n\n";
@@ -101,7 +102,9 @@ while (<>) {
     my($num_para_lines) = 0;
     &debug_print(&TL_VERY_VERBOSE, "[$current_file] ");
     if ($para) {
-	&debug_out(&TL_VERY_DETAILED, "P%d L%d:\t%s", $., $para_line_num, $_);
+	my($para_indented) = &indent($_);
+	chomp $para_indented;
+	&debug_out(&TL_VERY_DETAILED, "P%d L%d:\t{\n%s\n}\n", $., $para_line_num, $para_indented);
 	my(@para_lines) = split(/\n/, $_);
 	$num_para_lines = ($#para_lines + 1);
 	&assert($num_para_lines > 0);
@@ -114,20 +117,30 @@ while (<>) {
     my($include) = &FALSE;
 
     # See if the pattern matches the current line
-    # NOTE: s qualifier treats string as single line (in case -para specified)
-    # and, with m qualifier ^ and $ match multiple lines (not just overall start or end).
+    # NOTE: s qualifier treats string as single line; and, with m qualifier
+    # ^ and $ match multiple lines (not just overall start or end).
     # TODO2: rework; also, see if qualifies can be specified via variable)
-    if ($para && ($i && /$pattern/ism) || (/$pattern/sm)) {
+    ## BAD: if ($para && ($i && /$pattern/ism) || (/$pattern/sm)) {
+    if ($para && (($i && /$pattern/is) || (/$pattern/s))) {
 	$include = (! $v);
 	$after_context = ($include ? ($A + 1) : 0);
+	&debug_print(&TL_VERY_VERBOSE, "Matched in para mode\n")
     }
-    elsif (($i && /$pattern/is) || (/$pattern/s)) {
+    elsif ($multi_line && (($i && /$pattern/im) || (/$pattern/m))) {
+	&assert($para || $slurp);
 	$include = (! $v);
 	$after_context = ($include ? ($A + 1) : 0);
+	&debug_print(&TL_VERY_VERBOSE, "Matched in para mode\n")
+    }
+    elsif (($i && /$pattern/i) || (/$pattern/)) {
+	$include = (! $v);
+	$after_context = ($include ? ($A + 1) : 0);
+	&debug_print(&TL_VERY_VERBOSE, "Matched in line mode\n")
     }
     else {
 	$include = $v;
 	$after_context--;
+	&debug_print(&TL_MOST_DETAILED, "Didn't match\n")
     }
     &debug_out(&TL_VERY_VERBOSE, "include=%d; after_context=%d\n", $include, $after_context);
 
