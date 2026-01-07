@@ -2568,6 +2568,7 @@ function cmd-usage () {
 
 #-------------------------------------------------------------------------------
 # More Linux stuff
+## TOM-IDIOSYNCRATIC
 # TODO: condition upon using Linux kernel (or cygwin
 alias configure='./configure --prefix ~'
 alias pp-xml='xmllint --format'
@@ -2581,6 +2582,7 @@ alias soffice-calc='/usr/lib/libreoffice/program/soffice.bin --calc'
 alias libreoffice-write='run-app libreoffice --writer'
 alias libreoffice-pdf='run-app libreoffice --draw'
 alias libreoffice-calc='run-app libreoffice --calc'
+alias libreoffice-main='run-app libreoffice'
 alias start=start.sh
 alias edit='start.sh --edit'
 alias open='start.sh --open'
