@@ -1617,7 +1617,7 @@ function make-tar () {
     local base="$1"; local dir="$2";
     if [[ ("$base" == "--help") ||("$base" == "") ]]; then
         echo "Usage: make-tar base dir [depth [filter]]"
-        echo "Env. options: USE_DATE, TEMP, GTAR, MAX_SIZE, TAR_DEPTH, TAR_FILTER"
+        echo "Env. options: USE_DATE, TEMP, GTAR, MAX_SIZE, TAR_DEPTH, TAR_FILTER, AFFIX"
         echo "note: TEMP used by tar-dir, etc.; Also see [un]set-tar-bzip2 and [un]set-tar-xz"
         echo "(or try GTAR_OPTS='vfJ' [... tor-browser-linux-x86_64-14.5.tar.xz])."
         echo $'example:\n\t'"TEMP='$BACKUP_DIR' tar-this-dir-dated"
@@ -1626,6 +1626,7 @@ function make-tar () {
     ## TODO2: dispense with acrobatic arg parsing!
     local depth="${3:-${TAR_DEPTH:-""}}";
     local filter="${4:-${TAR_FILTER:-""}}"
+    if [ "$AFFIX" != "" ]; then base="$base-$AFFIX"; fi
 
     # Derive find/tar command line options
     local filter_arg=(.)
