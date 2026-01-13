@@ -355,6 +355,7 @@ for file in $pattern; do
 done
 
 # Cleanup
-if [[ $debug_level -lt 6 ]]; then
+## OLD: if [[ $debug_level -lt 6 ]]; then
+if [[ ($debug_level -lt 6) && (-e  "$log_file") ]]; then
     rm "$log_file"
 fi
