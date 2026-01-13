@@ -34,6 +34,7 @@ alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
 function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
 alias git-push='git-push-alias'
+alias git-check-ignore-plus='git check-ignore --non-matching --verbose'
 ## TODO: alias git-X-='git-X-plus'
 ## -or- TODO: alias git-X-alias='invoke-git-command pull'
 
@@ -271,18 +272,35 @@ function test-python-script {
         echo "The debugging level defaults to 5 (unlike run-python-script)."
         return
     fi
-    # Extract test script
+
+    # Derive test script filename
     local test_script="$1"
     shift
     # note: specifying "tests" for script handled indirectly;
     # this also handles cases like "tests/misc_tests.py" without associated module.
+    ## DEBUG:
+    echo "checking $test_script"
     if [ -e "tests/test_$test_script" ]; then
+        # Add test/test_ prefix (e.g., debug.py => tests/test_debug.py)
         test_script="tests/test_$test_script"
-    elif [ -e "$test_script" ]; then
+    else
+        # Insert tests directory and test_ prefix (e.g., mezcla/debug.py => mezcla/tests/test_debug.py)
+        local alt_test_script
+        alt_test_script="$(dirname "$test_script")/tests/test_$(basename "$test_script")"
+        ## DEBUG:
+        echo "checking $alt_test_script"
+        if [ -e "$alt_test_script" ]; then
+            test_script="$alt_test_script"
+        fi
+    fi
+    #
+    if [ -e "$test_script" ]; then
         true;
     else
         echo "Warning: cannnot resolve test for _$test_script" 1>&2
     fi
+
+    # Run the test
     local pytest_opts="${PYTEST_OPTS:-"${default_pytest_opts[*]}"}"
     # TODO3: drop inheritance spec in summary
     # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "tests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
