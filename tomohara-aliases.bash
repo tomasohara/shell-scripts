@@ -102,7 +102,6 @@
 # - ** Minimize overriding commands like 'cd' and 'script' to avoid confusion.
 # - ** Likewise non-standard usages for variables like 'PS1' (e.g., via 'PS_symbol').
 # - * Drop support for solaris and remove BAREBONES_HOST support.
-# - Get rid of old-work junk (e.g., Intemass, Juju, and JSL)!
 # - Replace backquote evaluation (`...`) with $(...)
 # - ** Fix the many cracks that fell through alias categorization (alias/function grouping???).
 # - convert $* to "$@" throughout, as appropriate
@@ -562,7 +561,6 @@ cond-export PS_symbol '$'
 function reset-prompt {
     ## DEBUG: echo "reset-prompt" "$@"
     local new_PS_symbol="$*"
-    ## OLD:
     if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="${DEFAULT_PS_SYMBOL:-$PS_symbol}"; fi
     # Do nothing if empty
     if [ "$new_PS_symbol" = "" ]; then return; fi    
@@ -631,8 +629,6 @@ alias perl-='perl -Ssw'
 ## TODO: function alias-perl { DURING_ALIAS=1 perl "$@"; }
 # alias-perl(): perl with DURING_ALIAS defined (n.b., avoids excess tracing; see common.perl)
 ## NOTE: using perl.sh in alias leads to problems under Github workflows
-## BAD:
-## OLD: alias alias-perl='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
 ## TODO: alias alias-perl='DURING_ALIAS=1 perl.sh -Ssw'
 ## TODO?
 ## function alias-perl {
@@ -1020,7 +1016,6 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   function grepl-mako-py { grepl "$@" *.py *.mako tests/*.py; }
   #
   # grepl-hist-tail(): grep through bash history
-  ## OLD: function grepl-hist-tail { history | egrep "$@"; }
   # note: uses redundant grepl for highlighting (with potenitally split args noted above)
   function grepl-hist-tail { history  | grepl "$@" | tail | grepl "$@"; }
 }
@@ -1427,7 +1422,6 @@ function check-errors () {
 # note: with -relaxed, the pattern matching is looser (hence more errors show)
 alias check-all-errors='check-errors -relaxed'
 alias check-warnings='check-errors -warnings -strict'
-## OLD: alias check-all-warnings='check-all-errors -warnings -relaxed'
 alias check-all-warnings='check-all-errors -warnings -relaxed -info'
 #
 # check-errors-excerpt(log-file): show errors are start of log-file and at end if different
@@ -1570,16 +1564,6 @@ function signature () {
     echo "$filename:"
     cat "$filename"
 }
-## OLD:
-## alias cell-signature='signature cell'
-## alias home-signature='signature home'
-## alias po-signature='signature po'
-## alias tpo-signature='signature tpo'
-## alias tpo-scrappycito-signature='signature tpo-scrappycito'
-## alias scrappycito-signature='signature scrappycito'
-## alias farm-signature='signature farm'
-## alias circulo-signature='signature circulo'
-# TODO: automatically derive aliases for ~/info/*.signature*
 
 #-------------------------------------------------------------------------------
 trace file archiving commands
@@ -1902,7 +1886,6 @@ function pdf-to-ascii () {
         # shellcheck disable=SC2046,SC2086
         cmd.sh --time-out 30 pdftotext $options "$file" "$target";
     else
-        ## OLD: if [ "$verbose" = "1" ]; then echo "skipping existing $target"; fi
         echo "FYI: skipping existing $target"
     fi
     $LS -lt "$target"
@@ -2009,7 +1992,6 @@ function para-sort() { perl -00 -e '@paras=(); while (<>) {push(@paras, $_);} pr
 # echoize: output stdin (e.g., command output) on single line, as if echo $(command)
 ## BAD: alias echoize="perl -pe 's/\n(.)/ $1/;'"
 ## TODO: alias echoize="perl -pe 's/\n(.)/ \$1/;'"
-## OLD: function echoize { perl -00 -pe 's/\n(.)/ $1/g;'; }
 function echoize { perl -0777 -pe 's/\n/ /g;  s/\s/ /g;  s/$/\n/;'; }
 
 #-------------------------------------------------------------------------------
@@ -2419,13 +2401,6 @@ function absolute-path { realpath "$1"; }
 # full-dirname(filename): returns full path of directory for file
 # TODO: use realpath
 #
-# OLD:
-## function full-dirname () {
-##     local dir;
-##     dir=$(dirname "$1");
-##     case $dir in .*) dir="$PWD/$1";; esac;
-##     echo "$dir";
-## }
 function full-dirname { absolute-path "$1"; }
 #
 # base-name-with-dir(file, suffix): version of basename including dir
@@ -2669,7 +2644,6 @@ function get-free-filename() {
 # by accident
 # TOM-IDIOSYNCRATIC
 function sudo-admin () {
-    ## OLD: local prefix="_config."
     local prefix="_admin-config."
     local base
     base="$prefix$(todays-date).log"
@@ -2714,14 +2688,6 @@ function fix-sudoer-home-permission () {
 alias check-html='check-xml --html'
 # check-html-vnu(filename): likewise check HTML using Validator.nu [Nu Html Checker]
 alias check-html-vnu='vnu'
-## TODO: archive (see check_html_javascript.py)
-function check-html-java-script () {
-  local file="$1"
-  local base
-  base="$(basename "$file" .html)"
-  alias-perl extract_subfile.perl -include_start=0 -include_end=0 '<script type=\"text/javascript\">' '</script>' "$file" >| "$TEMP/$base.js"
-  jsl -process "$TEMP/$base.js"
-}
 
 #-------------------------------------------------------------------------------
 # Remote host-related stuff
@@ -2796,23 +2762,6 @@ alias ssh-aws=aws-login
 alias aws-upload=aws-upload-micro
 alias aws-download=aws-download-micro
 #
-## OLD:
-## alias hw-login='ssh-host-login-aws $HOSTWINDS_HOST'
-## alias hw-upload='scp-aws-up $HOSTWINDS_HOST'
-## alias hw-download='scp-aws-down $HOSTWINDS_HOST'
-## alias new-hw-login='ssh-host-login-aws $NEW_HOSTWINDS_HOST'
-## alias new-hw-upload='scp-aws-up $NEW_HOSTWINDS_HOST'
-## alias new-hw-download='scp-aws-down $NEW_HOSTWINDS_HOST'
-## #
-## alias old-hw-login=hw-login
-## alias old-hw-upload=hw-upload
-## alias old-hw-download=hw-download
-## #
-## alias hw1-login=old-hw-login
-## alias hw1-upload=old-hw-upload
-## alias hw1-download=old-hw-download
-## alias hw2-login=new-hw-login
-## alias hw2-upload=new-hw-upload
 alias hw1-login='ssh-host-login-aws $HOSTWINDS_HOST'
 alias hw1-upload='scp-aws-up $HOSTWINDS_HOST'
 alias hw1-download='scp-aws-down $HOSTWINDS_HOST'
@@ -2821,13 +2770,11 @@ alias hw2-upload='scp-aws-up $NEW_HOSTWINDS_HOST'
 alias hw2-download='scp-aws-down $NEW_HOSTWINDS_HOST'
 #
 HW2_MISC="http://www.tomasohara.trade/misc"
-## OLD: alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=misc new-hw-upload'
 alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=misc hw2-upload'
 function hw2-upload-misc-single {
     hw2-upload-misc "$@"
     echo see "$HW2_MISC/$(basename "$1")"
 }
-## OLD: alias hw2-download=new-hw-download
 
 # Set dummy default host on AWS and HostWinds so hostname always in xterm title (see set_xterm_title.bash).
 # Sample hostnames under AWS is ip-172-31-37-185 and under Hostwinds is ip-172-31-37-185.
@@ -3205,7 +3152,6 @@ alias kill-python-all="kill-em python"
 ##     if ...
 ##     }
 ## alias which-python='which-program python'
-## OLD: alias which-python='which python'
 alias which-python='which python3'
 alias python-version='python3 --version'
 
@@ -3263,21 +3209,6 @@ alias jupyter-notebook-open=jupyter-notebook-redir-open
 ## TOM-IDIOSYNCRATIC
 ## OBSOLETE: use test-python-script instead
 #
-## OLD:
-## function test-script () {
-##     local base
-##     base=$(basename "$1" .py)
-##     local date
-##     date=$(todays-date)
-##     # note: uses both Mercurial root and . (in case not in repository)
-##     local root
-##     root=$(hg root)
-##     # maldito shellcheck (SC2086: Double quote to prevent globbing)
-##     # shellcheck disable=SC2086
-##     PYTHONPATH="$root:.:$SANDBOX/tests:$PYTHONPATH" $NICE $PYTHON tests/"test_$base.py" --verbose >| tests/"_test_$base.$date.log" 2>&1;
-##     less-tail tests/"_test_$base.$date.log";
-## }
-## #
 function test-script { test-python-script "$@"; }
 alias test-script-debug='ALLOW_SUBCOMMAND_TRACING=1 DEBUG_LEVEL=5 MISC_TRACING_LEVEL=5 test-script'
 
@@ -3354,7 +3285,6 @@ function curl-dump () {
 # TODO3: add support for Windows
 function url-path () {
     local file="$1"
-    ## OLD: realpath "$file" | perl -pe 's@^@file:///@;'
     realpath "$file" | perl -pe 's@^@file://@;'
 }
 # invoke-browser(executable, [file]): Invokes browser EXECUTABLE, optionally
