@@ -5,13 +5,18 @@
 #    source ~/bin/tomohara-aliases.bash
 #    source ~/bin/anaconda-aliases.bash
 #
-# NOTE: This depends on Tom usual aliases (see all-tomohara-aliases-etc.bash).
+# Note:
+# - This depends on Tom's usual aliases (see all-tomohara-aliases-etc.bash).
+# - Disables shellcheck nitpicking:
+#   [SC1090]: Can't follow non-constant source. Use a directive to specify location.
+#   [SC2010]: Don't use ls | grep. Use a glob or a for loop ...
+# shellcheck disable=SC1090,SC2010
 #
 # TODO: reproduce alias definitions from tomohara-aliases.bash here so independent
 # TODO3: document environment variables: CONDA_PROMPT_MODIFIER, XTERM_TITLE_SUFFIX, etc.
 #
 #------------------------------------------------------------------------
-# Copyright (c) 2020 Thomas P. O'Hara
+# Copyright (c) 2020-2025 ScrappyCito, LLC
 #
 # This software is Open Source, licensed under the GNU Lesser General Public Version 3 (LGPLv3). See LICENSE.txt in directory (or repository).
 #
@@ -20,8 +25,11 @@
 ## set -o xtrace
 ## DEBUG: echo "in anaconda-aliases.bash"
 
+# Globals
 python="python3"
 perl="perl -Ssw"
+anaconda3_dir="$HOME/anaconda3"
+anaconda2_dir="$HOME/anaconda2"
 
 # Find directory for conda
 # TODO: Use a more standard fallback location
@@ -59,9 +67,10 @@ function add-conda-env-to-xterm-title {
     set-title-to-current-dir
 }
 
-# TODO: Put in a separate file (e.g., .bashrc.anaconda)
-anaconda3_dir="$HOME/anaconda3"
-anaconda2_dir="$HOME/anaconda2"
+## OLD:
+## anaconda3_dir="$HOME/anaconda3"
+## anaconda2_dir="$HOME/anaconda2"
+
 # init-condaN([- | dir]): initialize anaconda using specified dir (or ~/anaconda3)
 function init-condaN {
     local anaconda_dir="$1"
@@ -75,11 +84,14 @@ function init-condaN {
     # See https://unix.stackexchange.com/questions/506352/bash-what-does-masking-return-values-mean
     local conda_setup
     conda_setup="$("$anaconda_dir"'/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
-    if [ $? -eq 0 ]; then
+    local status=$?
+    if [ $status -eq 0 ]; then
         eval "$conda_setup"
     else
-        if [ -f "$anaconda_dir/etc/profile.d/conda.sh" ]; then
-            . "$anaconda_dir/etc/profile.d/conda.sh"
+        local conda_script="$anaconda_dir/etc/profile.d/conda.sh"
+        echo "FYI: Return code $status from default conda setup so trying $conda_script"
+        if [ -f  "$conda_script" ]; then
+            . "$conda_script"
         fi
         prepend-path "$anaconda_dir/bin"
     fi
@@ -135,6 +147,10 @@ function activation-helper {
     echo "Issuing: $conda_command" "$command" "$env"
     echo "Alt: $alt_conda_command" "$command" "$env"
     $conda_command "$command" "$env"
+    local status=$?
+    if [ $status -ne 0 ]; then
+        echo "Warning: status $status from invocation"
+    fi
     ## DEBUG:
     trace-python-path
     ## DEBUG: echo "out activation-helper($@)"
@@ -149,8 +165,6 @@ alias all-conda-to-pythonpath='export PYTHONPATH=$anaconda3_dir/envs/env_tensorf
 alias conda-list-env='conda list env'
 #
 # conda-list-env-hack(): show environent names from typical directories
-# maldito shellcheck [SC2010]: Don't use ls | grep. Use a glob or a for loop ...
-# shellcheck disable=SC2010
 function conda-list-env-hack-aux { ls ~/.conda/envs "${ANACONDA_HOME}"/envs 2> /dev/null | grep -v ':$' | sort; }
 function conda-list-env-hack { conda-list-env-hack-aux | echoize; }
 #
@@ -217,11 +231,14 @@ function old-init-conda {
     local base="$ANACONDA_HOME"
     local conda_setup
     conda_setup="$("$base/bin/conda" 'shell.bash' 'hook' 2> /dev/null)"
-    if [ $? -eq 0 ]; then
+    local status=$?
+    if [ $status -eq 0 ]; then
         eval "$conda_setup"
     else
-        if [ -f "$base/etc/profile.d/conda.sh" ]; then
-            . "$base/etc/profile.d/conda.sh"
+        local conda_script="$base/etc/profile.d/conda.sh"
+        echo "FYI: Return code $status from default conda setup so trying $conda_script"
+        if [ -f "$conda_script" ]; then
+            . "$conda_script"
         fi
         prepend-path "$base/bin"
     fi
@@ -231,16 +248,20 @@ function old-init-conda {
 }
 #   # <<< conda initialize <<<
 
-# conda-create-env(name, [python_version=3.9]): create Python3 environment for Python 3.9 by default
+# conda-create-env(name, [python_version=3.NN]): create Python3 environment for Python 3.12+ by default
 # TODO: determine the version, make sure ipython gets installed
 function conda-create-env {
+    local default_version="3.12"
+    local latest_version="3.14"
     if [ "$1" = "" ]; then
-        echo "usage: conda-create-env name [python_version=3.9]"
+        local env_label="py-${latest_version/./-}"
+        echo "usage: conda-create-env name [python_version=$default_version]"
+        echo "ex: conda-create-env $env_label $latest_version"
         return
     fi
     local name="$1"
     local python_version="$2"
-    if [ "$python_version" = "" ]; then python_version="3.9"; fi
+    if [ "$python_version" = "" ]; then python_version="$default_version"; fi
     ensure-conda-loaded
     echo "issuing: conda create --yes --name '$name' python='$python_version'"
     conda create --yes --name "$name" python="$python_version"
