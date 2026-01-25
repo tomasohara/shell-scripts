@@ -278,8 +278,7 @@ function test-python-script {
     shift
     # note: specifying "tests" for script handled indirectly;
     # this also handles cases like "tests/misc_tests.py" without associated module.
-    ## DEBUG:
-    echo "checking $test_script"
+    ## DEBUG: echo "checking script $test_script"
     if [ -e "tests/test_$test_script" ]; then
         # Add test/test_ prefix (e.g., debug.py => tests/test_debug.py)
         test_script="tests/test_$test_script"
@@ -287,8 +286,7 @@ function test-python-script {
         # Insert tests directory and test_ prefix (e.g., mezcla/debug.py => mezcla/tests/test_debug.py)
         local alt_test_script
         alt_test_script="$(dirname "$test_script")/tests/test_$(basename "$test_script")"
-        ## DEBUG:
-        echo "checking $alt_test_script"
+        ## DEBUG: echo "checking alternative script $alt_test_script"
         if [ -e "$alt_test_script" ]; then
             test_script="$alt_test_script"
         fi
@@ -734,7 +732,8 @@ alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
 alias youtube-transcript-fix=fix-transcript-timestamp
 # youtube-transcript(url, file): download YoutTube transcript at URL to FILE
 function youtube-transcript {
-    if [[ ("$2" == "") || ("$1" == "--help") ]]; then
+    # note: checks for missing filename from yt-transcript below
+    if [[ ("$2" == "") || ($2 =~ ^-.*) || ("$1" == "--help") ]]; then
         echo "Usage: youtube-transcript url file" 1>&2
         echo "" 1>&2
         echo "Note: More details follow:"  1>&2
@@ -746,6 +745,7 @@ function youtube-transcript {
     local url="$1"
     local file="$2"
     alias-python -m mezcla.examples.youtube_transcript "$url" > "$file"
+    head "$file"
 }
 # youtube-transcript-alt(): workaround for silly bash problem:
 #    $ youtube-transcript 'https://www.youtube.com/watch?v=gcgMyRfE8a4&t=247s'
