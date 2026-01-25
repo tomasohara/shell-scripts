@@ -20,7 +20,8 @@
 #     $((arithmetic))              evaluate arithmetic expression
 #     $(command ...)               same as `command ...`
 #     ${var:-default}              use $var or "default"
-#     ${var//from/to}              var with FROM pattern changed to TO
+#     ${var/from/to}               var with FROM pattern changed to TO (once)
+#     ${var//from/to}              likewise for all occurrences
 #     true                         no-op
 #     $#                           number of positional arguments
 #     $*                           all positional arguments
