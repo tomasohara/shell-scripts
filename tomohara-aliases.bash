@@ -1244,6 +1244,7 @@ function view-todo () {
 function todo-one-week () { add-todo "[within 1 week] " "$@"; }
 #
 function todo () { if [ "$1" == "" ]; then echo add-todo '"[within N weeks] ..."'; else todo-one-week "$@"; fi; }
+function todo-sans-pager () { add-todo "$@" 2>&1 | head -1; }
 #
 # todo:(text): convenience alias for todo() for cut-n-paste of 'TODO: ...' notes from files
 alias todo:='todo'
@@ -3313,7 +3314,8 @@ function invoke-browser() {
 ## alias opera='invoke-browser command "opera"'
 ## NOTE: which is a Bash builtin
 # TODO: make following conditioned up Linux
-alias chromium='invoke-browser /usr/lib/chromium-browser/chromium-browser'
+## OLD: alias chromium='invoke-browser /usr/lib/chromium-browser/chromium-browser'
+alias chromium='invoke-browser /usr/bin/chromium-browser'
 ## TODO: drop which's
 ## BAD: function which { builtin which "$1" 2> /dev/null; }
 function which { command which "$1" 2> /dev/null; }
