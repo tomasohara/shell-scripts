@@ -234,8 +234,8 @@ while (<>) {
 	my($env_spec) = "SHOW_ELAPSED=1 FROM=$from TO=$to";
 	my($save_trace_level) = &DEBUG_LEVEL;
 	&debug_on(3);
-        ## TODO3: rework so stdin redirection comes before stderr
-        print(&to_utf8(&run_command_over("$env_spec machine_translation.py 2>| $log", 
+        # note: uses {text} placeholder so that temp input filename comes before stderr
+        print(&to_utf8(&run_command_over("$env_spec machine_translation.py {text} 2>| $log", 
 					 "$text\n", 3)));
 	print("\n\n");
 	debug_out(6, "log: {\n%s}\n", &read_file($log));
