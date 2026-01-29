@@ -69,6 +69,7 @@ fi
 add-python-path "$HOME/Mezcla/mezcla"
 ## OLD: append-path "$HOME/mezcla-tom/examples:$HOME/python/examples:$TOM_BIN/bruno"
 append-path "$HOME/Mezcla/mezcla/examples"
+append-path "$HOME/Mezcla/tools"
 #
 # HACK: make sure ~/mezcla-tom used if available
 if [ -e "$HOME/mezcla-tom" ]; then add-python-path "$HOME/mezcla-tom"; fi
