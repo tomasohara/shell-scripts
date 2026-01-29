@@ -736,7 +736,10 @@ function youtube-transcript {
     if [[ ("$2" == "") || ($2 =~ ^-.*) || ("$1" == "--help") ]]; then
         echo "Usage: youtube-transcript url file" 1>&2
         echo "" 1>&2
-        echo "Note: More details follow:"  1>&2
+        echo "Example:" 1>&2
+        echo "    yt-transcript https://www.youtube.com/watch?v=miJRWAEeuUY vivobook" 1>&2
+        echo "" 1>&2
+        echo "Note: More details follow (n.b., python script interface):"  1>&2
         echo "" 1>&2
         ## TODO3: add alias for showing condensed mezcla script usage notes
         alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;' 1>&2
@@ -745,7 +748,7 @@ function youtube-transcript {
     local url="$1"
     local file="$2"
     alias-python -m mezcla.examples.youtube_transcript "$url" > "$file"
-    head "$file"
+    head --verbose "$file"
 }
 # youtube-transcript-alt(): workaround for silly bash problem:
 #    $ youtube-transcript 'https://www.youtube.com/watch?v=gcgMyRfE8a4&t=247s'
@@ -773,7 +776,7 @@ function youtube-transcript-alt {
 function yt-transcript {
     local filename="$2-youtube-$(T).list"
     youtube-transcript "$1" "$filename"
-    echo $'See\n\t'"$filename"
+    ## OLD: echo $'See\n\t'"$filename"
 }
 
 #...............................................................................
