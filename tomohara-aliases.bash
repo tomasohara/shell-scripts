@@ -168,6 +168,8 @@ alias conditional-setenv='conditional-export'
 alias cond-export='conditional-export'
 # TODO: drop following after all do_setup.bash settings moved here
 alias cond-setenv='conditional-export'
+# global(var-name, ...): declare var-name to be global (e.g., global count)
+alias global='declare -g'
 
 # For debugging: Uncomment the following to display the environment variables (TODO: rework via startup-trace).
 ## printenv.sh
