@@ -1611,7 +1611,8 @@ function make-tar () {
     ## TODO2: dispense with acrobatic arg parsing!
     local depth="${3:-${TAR_DEPTH:-""}}";
     local filter="${4:-${TAR_FILTER:-""}}"
-    if [ "$AFFIX" != "" ]; then base="$base-$AFFIX"; fi
+    local affix="${AFFIX:-""}"
+    if [ "$affix" != "" ]; then base="$base-$affix"; fi
 
     # Derive find/tar command line options
     local filter_arg=(.)
@@ -1620,6 +1621,7 @@ function make-tar () {
     if [ "$dir" = "" ]; then dir="."; fi;
     if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
     if [ "$filter" != "" ]; then filter_arg=(-v "$filter"); fi;
+    global USE_DATE
     if [ "$USE_DATE" = "1" ]; then
         base="$base-$(TODAY)";
         ## TEST: rename-with-file-date "$base"*
@@ -1629,6 +1631,7 @@ function make-tar () {
 	    fi;
 	done
     fi
+    global MAX_SIZE
     if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
 
     # Invoke find/tar
@@ -2838,6 +2841,14 @@ simple-alias-fn ps-mem ps-sort-mem
 simple-alias-fn ps-sort-help 'alias-perl ps_sort.perl'
 simple-alias-fn ps-sort-cpu 'ps-sort-once -by=cpu'
 
+# mkdir-and-chdir(dir): create dir and then change into it
+function mkdir-then-chdir {
+    local dir="$1"
+    [ "$2" == "" ] || echo "Warning: ignoring '$2' ...";
+    mkdir "$dir"
+    cd "$dir"
+}
+
 # get-process-parent(pid): return parent process-id for PID
 # $ ps al | egrep "(PID|$$)"
 # F   UID   PID  PPID PRI  NI    VSZ   RSS WCHAN  STAT TTY        TIME COMMAND
@@ -3431,6 +3442,26 @@ function sleepyhead() {
     echo "end: $(date)" $'\n' >> "$log_file"
 }
 alias sleepy='sleepyhead'
+
+#-------------------------------------------------------------------------------
+# Math functions
+#
+# via https://stackoverflow.com/questions/21452752/how-to-find-min-of-two-variables-in-linux
+# TODO4: add min-str and max-str (e.g., using -le)???
+#
+function min {
+    local a=$1 b=$2;
+    local result;
+    result=$(( a <= b ? a : b ));
+    echo $result;
+}
+#
+function max {
+    local a=$1 b=$2;
+    local result;
+    result=$(( a >= b ? a : b ));
+    echo $result;
+}
 
 #------------------------------------------------------------------------
 # Aliases for [re-]invoking aliases
