@@ -99,6 +99,18 @@ export LESSCHARSET=utf-8
 export LESSBINFMT="*u<%02X>"
 export SHELL="/bin/bash"
 
+# Temp directory overrides (n.b., a little redundant w/ tomohara-aliases.bash).
+# Note:
+# - TEMP: useful temporary files (e.g., testing trace files)
+# - TMP: arbitrary temporary files (e.g., Unix default)
+# - TMPDIR: alias for TMP (n.b., stricty speaking, the preferred setting)
+# - See https://docs.python.org/3/library/tempfile.html.
+# - Also see tomohara-aliases.bash and ~/.bash_profile.
+## HACK: don't allow /tmp for TMP or TMPDIR (for persistence)
+if [ "$TMP" = "/tmp" ]; then export TMP "$TEMP/tmp"; fi
+if [ "$TMPDIR" = "/tmp" ]; then export TMPDIR "$TEMP/tmp"; fi
+mkdir -p "$TEMP" "$TMP" "$TMPDIR"
+
 # Don't enable default .bashrc settings
 cond-export SKIP_DEFAULT_BASHRC 1
 # Don't enable tab completion (n.b., due to slow init)
