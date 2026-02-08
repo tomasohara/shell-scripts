@@ -919,6 +919,19 @@ function git-toggle-push {
     echo "GIT_SKIP_PUSH=$GIT_SKIP_PUSH"
 }
 
+# git-ls-tree-relative([tree_ish=HEAD]): shows repo files relative to current dir
+# note: relative-listing support via POE Assistant
+function git-ls-tree-relative {
+    local tree_ish="${1:-HEAD}"
+    local depth=$(git rev-parse --show-prefix | tr -cd '/' | wc -c);
+    local up=""
+    if [ $depth -gt 0 ]; then
+        local up=$(printf '../%.0s' $(seq 1 "$depth"));
+    fi
+    ## DEBUG: trace-vars tree_ish depth up
+    git ls-tree -r --full-tree --name-only "$tree_ish" | sed "s#^#$up#";
+}
+
 #-------------------------------------------------------------------------------
 
 # git-alias-usage (): tips on interactive usage (n.b., aka git-template)
@@ -1011,8 +1024,14 @@ function git-misc-alias-usage() {
     echo "   GIT_AUTO_NEXT GIT_FORCE GIT_LOG_DIR GIT_MESSAGE GIT_NO_CONFIRM GIT_SKIP_ADD GIT_SKIP_PUSH GIT_TEST_MESSAGE GIT_TOKEN GIT_USER PRESERVE_GIT_STASH"
     echo ""
     echo "Source code grepping:"
+    ##
+    ## OLD:
     ## TODO3: get ls-tree to show output relative to current subdirectory
-    echo "   (git-cd-root-alias; git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
+    ## echo "   (git-cd-root-alias; git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
+    ##
+    # NOTE: -r for recurse dirs; --name-only to omit details; and HEAD for current commit head;
+    #
+    echo "   (git-ls-tree-relative | xargs -I '{}' grep --with-filename 'pattern' {}) 2>&1 | less"
     echo ""
     echo "Odds and ends:"
     echo '   head $(git-root-alias)/config'
