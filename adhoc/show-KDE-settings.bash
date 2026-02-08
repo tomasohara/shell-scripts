@@ -40,6 +40,8 @@ if [[ ("$1" == "") || ("$1" == "--help") ]]; then
     echo ""
     echo "$0 -"
     echo ""
+    # filter shellcheck SC2016 (info): Expressions don't expand in single quotes
+    # shellcheck disable=SC2016
     echo 'ddmmmyy=$(date '+%d%b%y')'
     echo "$script - > ~/config/show-KDE-settings.\$ddmmmyy.log 2>&1"
     echo ""
@@ -92,9 +94,27 @@ for module in $(kcmshell5 --list | cut -f1 -d' ' | sort); do
     fi
 done
 
-# Export settings configurations to a file for comparison
-## OLD: echo -e "\nExporting Plasma settings to ~/plasma-settings-dump.txt for comparison:"
-head --lines=10000 ~/.config/kdeglobals ~/.config/plasmarc ~/.config/plasma-org.kde.plasma.desktop-appletsrc
+# Trace import setting configurations
+# note: refined via Gemini
+echo -e "\n--- KDE Configuration Dump ---\n"
+#
+# Core Desktop, Layout, and Window Rules
+head --lines=10000 \
+    ~/.config/kdeglobals \
+    ~/.config/plasmarc \
+    ~/.config/plasma-org.kde.plasma.desktop-appletsrc \
+    ~/.config/kwinrulesrc \
+    ~/.config/kwalletrc \
+    ~/.config/kwinrc \
+    ~/.config/kglobalshortcutsrc \
+    ~/.config/khotkeysrc \
+    ~/.config/plasmanotifyrc \
+    ~/.config/kactivitymanagerdrc \
+    ~/.config/kcminputrc \
+    ~/.config/kfontinstuirc \
+    ~/.config/kscreenlockerrc \
+    ~/.config/powermanagementprofilesrc
+
 ## TODO:
 ## ... > ~/plasma-settings-dump.txt 2>/dev/null
 ## echo "Settings exported to ~/plasma-settings-dump.txt"
