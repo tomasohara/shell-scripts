@@ -261,7 +261,10 @@ function conda-create-env {
     fi
     local name="$1"
     local python_version="$2"
-    if [ "$python_version" = "" ]; then python_version="$default_version"; fi
+    if [ "$python_version" = "" ]; then
+        sleep-for 5 "Warning: using default version $default_version"
+        python_version="$default_version";
+    fi
     ensure-conda-loaded
     echo "issuing: conda create --yes --name '$name' python='$python_version'"
     conda create --yes --name "$name" python="$python_version"
