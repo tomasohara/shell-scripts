@@ -869,13 +869,14 @@ alias-fn ps-time 'LINES=1000 COLUMNS=256 alias-perl ps_sort.perl -time2num -num_
 # options: -d -RR: reattach a session and if necessary detach or create it
 alias-fn screen-reattach 'screen -d -RR'
 
-# sleep-for(seconds, [message]): sleep for SECONDS with MESSAGE ("delay for Ns")
-function sleep-for {
-    local sec="$1"
-    local msg="${2:-"delay for ${sec}s"}"
-    echo "$msg"
-    sleep "$sec"
-}
+## OLD:
+## # sleep-for(seconds, [message]): sleep for SECONDS with MESSAGE ("delay for Ns")
+## function sleep-for {
+##     local sec="$1"
+##     local msg="${2:-"delay for ${sec}s"}"
+##     echo "$msg"
+##     sleep "$sec"
+## }
 
 # image-metadata(file): show metadata about image (e.g., associated text)
 simple-alias-fn image-metadata 'identify -verbose'
