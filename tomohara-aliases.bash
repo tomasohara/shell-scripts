@@ -529,11 +529,13 @@ unset MAIL
 # Unix environ stuff
 # Note:
 # - TEMP is private temp dir (e.g., ~/temp); TMP is system temp dir (e.g., /tmp)
-# TODO: Put settings in .bashrc, so that trace could use TEMP.
+# - See https://en.wikipedia.org/wiki/TMPDIR.
+# - Also see tomohara-settings.bash and ~/.bash_profile.
 cond-export TEMP "$HOME/temp"
-## HACK: don't allow /tmp for TMP
-## TODO1: move TMP, etc. into tomohara-settings.bash
-if [ "$TMP" = "/tmp" ]; then unset TMP; fi
+## OLD:
+## ## HACK: don't allow /tmp for TMP
+## ## TODO1: move TMP, etc. into tomohara-settings.bash
+## if [ "$TMP" = "/tmp" ]; then unset TMP; fi
 cond-export TMP "$TEMP/tmp"
 cond-export TMPDIR "$TMP"
 mkdir -p "$TEMP" "$TMP" "$TMPDIR"
@@ -1899,6 +1901,7 @@ function pdf-to-ascii () {
 function all-pdf-to-ascii () { for f in *.pdf; do pdf-to-ascii "$f"; done; }
 
 # Specialized file editors
+## TODO3: fix comment header [editors???]
 #
 # run-app(path, [arg, ...]): run app in background saving log to TEMP/basename-date.log
 function run-app {
@@ -1914,7 +1917,8 @@ function run-app {
     "$path" "$@" >> "$log" 2>&1 &
     ## TODO: make sure command invoked OK and then put into background
     local delay=5
-    sleep-for "$delay" "waiting ${delay}s for $log"
+    ## OLD: sleep-for "$delay" "waiting ${delay}s for $log"
+    sleep-for "$delay" "waiting for log"
     check-errors-excerpt "$log"
 }
 alias foxit='run-app /opt/foxitsoftware/foxitreader/FoxitReader'
@@ -2359,10 +2363,9 @@ function show-unicode-code-info-stdin() { local in_file="$TEMP/show-unicode-code
 function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
 #
 # show-unicode-control-chars(): Convert ascii control characters to printable Unicode ones (e.g., ␀ for 0x00)
-## BAD: function show-unicode-control-chars { perl -pe 'use Encode "decode_utf8"; s/[\x00-\x1F]/chr($&+0x2400)/e;'; }
 # See https://stackoverflow.com/questions/42193957/errorwide-character-in-print-at-x-at-line-35-fh-read-text-files-from-comm.
-## BAD: function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr($& + 0x2400)/eg;'; }
-function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
+## OLD: function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
+function display-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
 #
 ## TODO2: rework show-unicode-code-info*/show-unicode-control-chars for tab-completion
 ## TEMP:
@@ -2469,6 +2472,16 @@ function perl-print-n () { perl -e "printf \"$1\";"; }
 # quote-tokens(): puts double quote around each token on commnd line
 # note: used to circumvent google search's annoying search term dropping
 function quote-tokens () { echo "$@" | perl -pe 's/(\S+)/"\1"/g;'; }
+
+# sleep-for(seconds, [message], [delay_spec]): sleep for SECONDS with MESSAGE (e.g., "delay") and DELAY_SPEC (e.g., "[sleep for Ns]")
+function sleep-for {
+    local sec="$1"
+    ## OLD: local msg="${2:-"delay for ${sec}s"}"
+    local msg="${2:-"delay"}"
+    local delay_spec="${3:-"[sleep for ${sec}s]"}"
+    echo "$msg $delay_spec"
+    sleep "$sec"
+}
 
 # Unix/Win32 networking aliases
 if [ "$OSTYPE" != "cygwin" ]; then alias ipconfig=ifconfig; fi
