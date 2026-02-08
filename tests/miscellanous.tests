@@ -37,6 +37,14 @@
 ##          git diff "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log"
 ##      done
 
+## TODO: git-ls-tree-relative
+##
+## $ cd .github/workflows
+## ../../.github/CODEOWNERS
+## ...
+## ../../.gitignore
+## ...
+
 #...............................................................................
 ## TODO:
 ## - check for merge_notes.py incorporating results of existing merger.
