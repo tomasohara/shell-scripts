@@ -24,8 +24,12 @@
 #   outside/RB	137
 #   outside/NN	53
 #   outside/JJ	19
+#-------------------------------------------------------------------------------
+# Note:
+# - Converted from count_it.perl by Bruno Lima.
 #
-# Copyright (c) 2000-2001 Cycorp, Inc.  All rights reserved.
+# Copyright (c) 2022-2026 ScrappyCito, LLC.
+# Portions Copyright (c) 2000-2001 Cycorp, Inc.  All rights reserved.
 # Portions Copyright (c) 1996-1999 Tom O'Hara (at NMSU).  All rights reserved.
 
 
