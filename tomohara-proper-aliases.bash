@@ -734,15 +734,30 @@ alias youtube-transcript-fix=fix-transcript-timestamp
 function youtube-transcript {
     # note: checks for missing filename from yt-transcript below
     if [[ ("$2" == "") || ($2 =~ ^-.*) || ("$1" == "--help") ]]; then
-        echo "Usage: youtube-transcript url file" 1>&2
-        echo "" 1>&2
-        echo "Example:" 1>&2
-        echo "    yt-transcript https://www.youtube.com/watch?v=miJRWAEeuUY vivobook" 1>&2
-        echo "" 1>&2
-        echo "Note: More details follow (n.b., python script interface):"  1>&2
-        echo "" 1>&2
+        ## OLD:
+        ## echo "Usage: youtube-transcript url file" 1>&2
+        ## echo "" 1>&2
+        ## echo "Example:" 1>&2
+        ## echo "    yt-transcript https://www.youtube.com/watch?v=miJRWAEeuUY vivobook" 1>&2
+        ## echo "" 1>&2
+        ## echo "Note: More details follow (n.b., python script interface):"  1>&2
+        ## echo "" 1>&2
         ## TODO3: add alias for showing condensed mezcla script usage notes
-        alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;' 1>&2
+        ## OLD: alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;' 1>&2
+        echo "Usage: youtube-transcript url label"
+        echo ""
+        echo "Example:"
+        echo "    yt-transcript https://www.youtube.com/watch?v=miJRWAEeuUY vivobook"
+        echo ""
+        echo "Note:"
+        echo "- The label gets is affix of the output file:"
+        echo "    {label}-youtube-{date}.list"
+        echo "  where date uses ddmmmyy format."
+        echo ""
+        echo "- More details follow (n.b., python script interface):" 
+        echo ""
+        ## TODO3: add alias for showing condensed mezcla script usage notes
+        (alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;') | indent-text
         return
     fi
     local url="$1"
