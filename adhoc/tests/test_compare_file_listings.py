@@ -28,10 +28,7 @@ from mezcla import system
 # Note: Two references are used for the module to be tested:
 #    THE_MODULE:                        global module object
 #    TestIt.script_module:              path to file
-## TODO: import adhoc.compare_file_listings as THE_MODULE
-# Note: Uses importlib since module name has hyphens
-import importlib
-THE_MODULE = importlib.import_module("adhoc.compare-file-listings")
+import adhoc.compare_file_listings as THE_MODULE
 
 #------------------------------------------------------------------------
 
