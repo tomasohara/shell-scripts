@@ -34,7 +34,7 @@ if [[ ("$1" == "") || ("$1" == "--help") ]]; then
     ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--TODO] [--trace] [--help] [--]"
+    echo "Usage: $0 [--TODO] [--trace] [--help] [--all] [--]"
     echo ""
     echo "Examples:"
     echo ""
@@ -46,6 +46,7 @@ if [[ ("$1" == "") || ("$1" == "--help") ]]; then
     echo "$script - > ~/config/show-KDE-settings.\$ddmmmyy.log 2>&1"
     echo ""
     echo "Notes:"
+    echo "- Use --all to include all ~/.config/k* files"
     echo "- The -- option is to use default options and to avoid usage statement."
     ## TODO: add more notes
     ## echo ""
@@ -57,13 +58,13 @@ fi
 # TODO: set getopt-type utility
 #
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
+include_all=0
 while [[ "$moreoptions" == "1" ]]; do
     # TODO : add real options
     if [[ "$1" == "--trace" ]]; then
         set -o xtrace
-    elif [[ "$1" == "--TODO-fubar" ]]; then
-        ## TODO: implement
-        echo "TODO-fubar"
+    elif [[ "$1" == "--all" ]]; then
+        include_all=1
     elif [[ ("$1" == "--") || ("$1" == "-") ]]; then
         shift
         break
@@ -99,20 +100,24 @@ done
 echo -e "\n--- KDE Configuration Dump ---\n"
 #
 # Core Desktop, Layout, and Window Rules
-head --lines=10000 \
-    ~/.config/kdeglobals \
-    ~/.config/plasmarc \
-    ~/.config/plasma-org.kde.plasma.desktop-appletsrc \
-    ~/.config/kwinrulesrc \
-    ~/.config/kwalletrc \
-    ~/.config/kwinrc \
-    ~/.config/kglobalshortcutsrc \
-    ~/.config/khotkeysrc \
-    ~/.config/plasmanotifyrc \
+k_config_files=( \
     ~/.config/kactivitymanagerdrc \
     ~/.config/kcminputrc \
+    ~/.config/kdeglobals \
     ~/.config/kfontinstuirc \
+    ~/.config/kglobalshortcutsrc \
+    ~/.config/khotkeysrc \
     ~/.config/kscreenlockerrc \
+    ~/.config/kwalletrc \
+    ~/.config/kwinrc \
+    ~/.config/kwinrulesrc)
+if [ "$include_all" == "1" ]; then
+    k_config_files=(~/.config/k*)
+fi
+head --lines=10000 "${k_config_files[@]}" \
+    ~/.config/plasma-org.kde.plasma.desktop-appletsrc \
+    ~/.config/plasmanotifyrc \
+    ~/.config/plasmarc \
     ~/.config/powermanagementprofilesrc
 
 ## TODO:
