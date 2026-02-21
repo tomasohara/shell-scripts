@@ -289,6 +289,17 @@ function conda-init-env {
     add-conda-env-to-xterm-title
 }
 
+# disable-conda(): remove anaconda components from path.
+# note: via Gemini-3.
+function disable-conda {
+    export PATH=$(perl -e '
+        %seen=();
+        @p = grep { $_ ne "" && !/conda|anaconda/i && !$seen{$_}++ }
+             split(/:/, $ENV{PATH});
+        print join(":", @p);
+      ')
+}
+
 # Misc. aliases
 alias conda-info-env='conda info --envs'
 
