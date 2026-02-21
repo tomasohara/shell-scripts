@@ -419,3 +419,7 @@ Version: N.N.N.N
 ## delete-force "$file1" "$file2" | grep -c "files with embedded spaces"
 ## 1
 
+##------------------------------------------------------------------------------
+
+## TODO2: add tests for check-errors variations
+## check-[all-]warnings vs [all-]check-errors
