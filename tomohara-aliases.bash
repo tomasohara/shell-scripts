@@ -1020,8 +1020,12 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   function grepl-mako-py { grepl "$@" *.py *.mako tests/*.py; }
   #
   # grepl-hist-tail(): grep through bash history
-  # note: uses redundant grepl for highlighting (with potenitally split args noted above)
+  # note: uses redundant grepl for highlighting (with potentially split args noted above for grep-to-less)
   function grepl-hist-tail { history  | grepl "$@" | tail | grepl "$@"; }
+  #
+  # grepl-bashrc-etc(): grep through bash rc files excluding history
+  # note: see grepl-hist-tail for rationale
+  function grepl-bashrc-etc { grepl "$@" ~/.*bash* | grep -v '\.bash_history' | tail | grepl "$@"; }
 }
 # gr-c: grep through c/c++ source and headers files
 # note: --no-messages suppresses warnings about missing files
@@ -1055,13 +1059,16 @@ alias gr-nonascii='alias-perl perlgrep.perl -n "[\x80-\xFF]"'
 function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pattern find-option ... "; else command find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 2>&1 | $GREP -v '^find: '; fi; }
 # findspec[-all](dir, pattern, option): find files in directory tried, optionally following links (-all)
 function findspec-all () { command find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | $GREP -v '^find: '; }
+# TODO2: issue warning that fs filters backup and build dirs
 function fs () { findspec . "$@" | $EGREP -iv '(/(backup|build)/)'; } 
-function fs-ls () { fs "$@" -exec ls -l {} \; ; }
+## OLD: function fs-ls () { fs "$@" -exec ls -l {} \; ; }
+function fs-ls () { fs "$@" -exec ls "$core_dir_options" {} \; ; }
 simple-alias-fn fs- 'findspec-all .'
 ## Lorenzo review: should change this to fs-alt following TODO's
 function fs-ext () { find . -iname \*."$1" | $EGREP -iv '(/(backup|build)/)'; } 
 # TODO: extend fs-ext to allow for basename pattern (e.g., fs-ext java ImportXML)
-function fs-ls- () { fs- "$@" -exec ls -l {} \; ; }
+## OLD: function fs-ls- () { fs- "$@" -exec ls -l {} \; ; }
+function fs-ls- () { fs- "$@" -exec ls "$core_dir_options" {} \; ; }
 ## Lorenzo review: should change this to fs-ls-alt following TODO's
 #
 findgrep_opts="-in"
@@ -1424,10 +1431,14 @@ function check-errors () {
     fi;
     (DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL convert-emoticons-stdin | $PAGER;
 }
-# note: with -relaxed, the pattern matching is looser (hence more errors show)
+# check-all-errors/warnings (file, ...): include more types of errors/warnings
+# note: With -relaxed, the pattern matching is looser (hence more errors show)
+# In addition, all following based on check-errors alias to avoid sanity check assertion
+# that would occur with defining check-all-warnings in terms of check-warnings.
 alias check-all-errors='check-errors -relaxed'
 alias check-warnings='check-errors -warnings -strict'
-alias check-all-warnings='check-all-errors -warnings -relaxed -info'
+## OLD: alias check-all-warnings='check-all-errors -warnings -relaxed -info'
+alias check-all-warnings='check-errors -warnings -relaxed -info'
 #
 # check-errors-excerpt(log-file): show errors are start of log-file and at end if different
 # maldito shellcheck: SC2119 [Use ... "$@" if function's $1 should mean script'1 $1]
@@ -1905,6 +1916,12 @@ function all-pdf-to-ascii () { for f in *.pdf; do pdf-to-ascii "$f"; done; }
 #
 # run-app(path, [arg, ...]): run app in background saving log to TEMP/basename-date.log
 function run-app {
+    if [[ ("$1" == "") || (("$1" == "--help")) ]]; then
+        echo "usage: run-app ..."
+        echo "note: set VERBOSE=1 for log exceprt"
+        echo "ex: VERBOSE=1 run-app libreoffice -n ~/Templates/Letter-Portrait-Halfinch.ott"
+        return
+    fi
     local path="$1";
     local app
     app=$(basename "$path");
@@ -1914,12 +1931,22 @@ function run-app {
     if [ -e "$log" ]; then
         echo "FYI: Updating $app's log $log"
     fi
+    local verbose=$(is-true "VERBOSE");
+
+    # Format header with timestamp
+    ## TODO2: add new alias for timestamp with hour
+    local date_yyyy_mm_dd_hhmm="$(date '+%Y-%m-%d %H:%M')"
+    echo "$date_yyyy_mm_dd_hhmm"$'\n' >> "$log"
+    echo "$path" "$@" >> "$log" 2>&1 &
+    
+    # Invoke and trace log excerpt
     "$path" "$@" >> "$log" 2>&1 &
     ## TODO: make sure command invoked OK and then put into background
     local delay=5
     ## OLD: sleep-for "$delay" "waiting ${delay}s for $log"
     sleep-for "$delay" "waiting for log"
     check-errors-excerpt "$log"
+    $verbose && tail "$log" | truncate-width
 }
 alias foxit='run-app /opt/foxitsoftware/foxitreader/FoxitReader'
 alias gimp='run-app gimp'
@@ -2554,7 +2581,9 @@ function cmd-usage () {
     local usage_file
     usage_file="_$(echo "$command" | perl -pe 's@[/ .]@_@g; s/_+/_/g;')-usage.list"
     $command --help  2>&1 | ansifilter > "$usage_file"
-    if [ $? -eq 0 ]; then $PAGER_NOEXIT "$usage_file"; fi
+    ## OLD: if [ $? -eq 0 ]; then $PAGER_NOEXIT "$usage_file"; fi
+    [ $? -eq 0 ] || sleep-for 1 "FYI: using existing file";
+    $PAGER_NOEXIT "$usage_file";
 }
 ## TODO:
 ## function cmd-usage () {
@@ -3013,6 +3042,8 @@ alias ps-python-full='ps-mine python'
 # also excludes related bash and time processes.
 alias ps-python='ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|perl-regexp|update-manager|software-properties|networkd-dispatcher|/usr/bin|((bash|emacs|time) .*python))"'
 alias show-python-path='show-path-dir PYTHONPATH'
+# mezcla-debug(): invoke debug.py (n.b., used for diagnostic purposes with its imports)
+simple-alias-fn mezcla-debug 'alias-python -m mezcla.debug'
 
 # Remove compiled files .pyc for regular (debug) version and .pyo for optimized
 # TODO: add option for forced removal; try using '-name "*.py[co]"')
