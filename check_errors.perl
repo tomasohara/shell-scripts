@@ -29,7 +29,7 @@ eval 'exec perl -Ssw $0 "$@"'
 BEGIN { 
     my $dir = `dirname $0`; chomp $dir; unshift(@INC, $dir); 
     require 'common.perl';
-    use vars qw/$verbose /;
+    use vars qw/$verbose $strict/;
 }
 
 # Specify additional diagnostics and strict variable usage, excepting those
@@ -68,8 +68,12 @@ my $asterisks = (! $no_asterisks);
 &init_var(*ruby, &FALSE);	   	# alias for -skip_ruby_lib
 &init_var(*skip_ruby_lib, $ruby);	# skip Ruby library related errors
 &init_var(*relaxed, &FALSE);            # relaxed for special cases
-## TODO2: use different option for strict error checking (as -strict not commonly used)
-$strict = (! $relaxed);                 # note: overrides common.perl default of 0
+## TODO2: use different option for strict error checking (as -strict not commonly used in other perl scripts)
+## OLD: $strict = (! $relaxed);                 # note: overrides common.perl default of 0
+# note: overrides common.perl default of 0
+my($strict_default) = ($strict || (! $relaxed));
+&init_var(*strict, $strict_default);    # alias for (! $relaxed)
+&assertion(! ($relaxed && $strict));
 &init_var(*quiet, &FALSE);              # just output errors proper (e.g., no filenames)
 &init_var(*matching, &FALSE);           # show matching text
 
@@ -210,6 +214,7 @@ while (<>) {
 	    || /: No match/		# shell warning?
 	    || /\\ No newline at end/   # diff warning
 	    || /: warning\b/		# Ruby warnings
+	    || (/: not found/i)         # Android logcat warning
 	    || /^\s*bash: /             # ex: "bash: [: : unary operator expected"
 	    || /Traceback|\S+Error/     # Python exceptions (caught)
 	    || /\b\S+Warning/           # Python warning (e.g., RuntimeWarning)
