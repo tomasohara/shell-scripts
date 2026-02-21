@@ -978,6 +978,12 @@ function docker-cleanup {
     }
 }
 
+#...............................................................................
+# Multimedia stuff
+
+# test-audio: plays a small audio file (to test volume)
+simple-alias-fn test-audio 'start /usr/share/sounds/Yaru/stereo/complete.oga'
+
 #................................................................................
 # Doubly idiosyncratic stuff (i.e., given "tomohara-proper" part of filename)
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
