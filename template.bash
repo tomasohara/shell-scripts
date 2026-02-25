@@ -109,8 +109,9 @@
 #   (e.g., ${!#} for last argument--see https://stackoverflow.com/questions/1853946/getting-the-last-argument-passed-to-a-shell-script).
 # - Document regex match quirks.
 # - Document file tests (e.g., -e fubar.txt).
-# - BASH_SOURCE usage for when source'd
+# - BASH_SOURCE usage for when source'd; in general: invocation stack array
 #     src_dir=$(dirname "${BASH_SOURCE[0]}")
+# - name of current function: "${FUNCNAME[0]}"; in general: call stack array
 # - value=${value@L}                    # make lowercase
 #
 
