@@ -187,6 +187,9 @@ while (<>) {
 	   || /^\s*FAILED\b/i           # pytest failure
 	   || /\|\s*(ERROR|CRITICAL)\s*\|/       # loguru (e.g., "| ERROR | ...")
 
+	   # Android errors
+	   || /Command failed:/i        # Command failed: [ ... apk ]
+
 	   # Cygwin errors
 	   || /\bunable to remap\b/
 
