@@ -262,8 +262,46 @@ alias disable-startup-tracing='export STARTUP_TRACING=0'
 alias enable-console-tracing='export CONSOLE_TRACING=1'
 alias disable-console-tracing='export CONSOLE_TRACING=0'
 
+#................................................................................
 # Helper functions (along with aliases and variables)
 #
+
+# missing-options(): whether no options specified or --help/-h
+# note: based on POE Assistant
+function missing-options {
+    [[ $# -eq 0 || "$1" == "--help" || "$1" == "-h" ]]
+}
+
+# usage(): helper alias for showing function usage statements
+# note: based on POE Assistant
+# Sample usage:
+#    if missing-options; then
+#       function-usage --synopsis "fouled up beyond recognition" --example "fubar now"
+#       return
+#    fi
+function function-usage {
+    local synopsis=""
+    local example=""
+    local notes=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --synopsis) synopsis="$2"; shift 2 ;;
+            --example)  example="$2"; shift 2 ;;
+            --notes)    notes="$2"; shift 2 ;;
+            *) break ;;
+        esac
+    done
+
+    local fn="${FUNCNAME[1]}"
+
+    [[ -n "$synopsis" ]] && echo "usage: $fn $synopsis"
+    [[ -n "$example"  ]] && echo "example: $example"
+    [[ -n "$notes"    ]] && echo -e "note:\n$notes"
+
+    return 0
+}
+
 # space-check(arg): ensures ARG has no embedded spaces (and no other arguments)
 function space-check() {
    if [ "$2" != "" ]; then
@@ -280,11 +318,22 @@ function space-check() {
 ## function downcase-stdin() { perl-utf8 -pe 's/.*/\L$&/;'; }
 function downcase-stdin { perl -pe "use open ':std', ':encoding(UTF-8)'; s/.*/\L$&/;"; }
 function downcase-text { echo "$@" | downcase-stdin; }
+# date-ddmmmyy(date_spec): return date using European style (e.g., 25feb26)
+function date-ddmmmyy {
+    if [ "$1" == "" ]; then
+        echo "usage: _ date-specification"
+        echo "example: ${FUNCNAME[0]} --date='@'"
+        echo "alt example: ${FUNCNAME[0]} --date='@0'"
+        ## TODO5: arcane example: $((36525/100 * 60*60*24))
+    fi
+    date --date "$1" '+%d%b%y' | downcase-stdin;
+}
 # todays-date(): outputs date in format DDmmmYY (e.g., 22apr20)
 ## TODO: drop leading digits in day of month
 ## NOTE: keep in synch with common.perl get_file_ddmmmyy and .emacs edit-adhoc-notes-file
 ## example usage: ddmmmyy=$(todays-date); ... run-it > _run-it-$ddmmmyy.log 2>&1
-function todays-date { date '+%d%b%y' | downcase-stdin; }
+## OLD: function todays-date { date '+%d%b%y' | downcase-stdin; }
+function todays-date { date-ddmmmyy "now"; }
 # todays-date-mmmYY(): date in format mmmYY (e.g., sep20)
 function todays-date-mmmYY { todays-date | perl -pe 's/^\d\d//;'; }
 # hoy: alternative to todays-date
@@ -294,6 +343,23 @@ hoy=$(todays-date)
 # TODO: punt on tab-completion (i.e., TODAY => today)???
 alias TODAY=todays-date
 alias date-central='TZ="America/Chicago" date'
+
+# ddmmmyy-hhmm(): return timestamp in European-like format using a single token (e.g., 31dec25@2359).
+# note: This is intended for use in filenames (e.g., _free-21Feb26@1549).
+# ex: 01jan26@0001).
+function mmddyy-hhmm {
+    date '+%d%b%y@%H%M'
+}
+
+# file-date-mmdddyy(): return file's timestamp in European format without hours and minutes
+# note: %y gives time of last data modification, human-readable
+function file-date-mmdddyy {
+    if [ missing-options "$@" ]; then
+        function-usage --synopsis "return file timestamp using mmdddyy" --example "/tmp/fubar.txt"
+        return        
+    fi
+    date-ddmmmyy "$(stat --format=%y "$1")";
+}
 
 ## TOM-IDIOSYNCRATIC
 # em-adhoc-notes(): edit adhoc notes file using format _{dir}-notes-{host}-{date} (e.g., _bin-notes-reempl-may22.txt)
@@ -2325,7 +2391,10 @@ function rename-with-file-date() {
             eval "$move_command" "$f" "$new_f";
         elif [ -L "$f" ]; then              # symbolic link exists
             # note: gets mod time via 'stat -c %y'
-            new_f=$(get-free-filename "$f.$(date --date="$(stat -c %y "$f")" '+%d%b%y')" ".")
+            ## OLD: new_f=$(get-free-filename "$f.$(date --date="$(stat -c %y "$f")" '+%d%b%y')" ".")
+            local date_spec
+            date_spec=$(file-date-mmdddyy "$f")
+            new_f=$(get-free-filename "$f.$date_spec" ".")
             eval "$move_command" "$f" "$new_f";
         else
             ## TODO2: [ $verbose ] && echo "FYI: no '$f'"
@@ -2418,7 +2487,7 @@ alias diff3-merge='command diff3 --merge --text --diff-program=diff.sh'
 ## TODO: --auto
 function kdiff-merge() {
     if [ "$3" = "" ]; then
-        echo "usage: $0 changed1 old changed2 output"
+        echo "usage: ${FUNCNAME[0]} changed1 old changed2 output"
         return
     fi
     kdiff3 --merge --output "$4" "$1" "$2" "$3"
@@ -2565,13 +2634,27 @@ alias kill-iceweasel='kill-em iceweasel'
 #
 function cmd-output () {
     local command="$*"
+    if [[ ("$command" == "--help") || ("$command" == "") ]]; then
+        echo "usage: [ADD_MINUTES=1] ${FUNCNAME[0]} [--help] [command [arg ...]]"
+        return
+    fi
     ## BAD: local output_base, output_file
     local output_base output_file
-    output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')-$(TODAY)"
+    ## OLD: output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')-$(TODAY)"
+    output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')"
+    if [ "${ADD_MINUTES:0}" == "1" ]; then
+        output_base="${output_base}-$(mmddyy-hhmm)"
+    else
+        output_base="${output_base}-$(TODAY)"
+    fi
     output_file="$(get-free-filename "$output_base" . list)"
     ## TODO3?: use separate invocations for aliases than for other commands
     ($command || eval "$command") 2>&1 | ansifilter > "$output_file"
     $PAGER_NOEXIT "$output_file"
+}
+# cmd-output-hhmm(): version of cmd-output adding HHMM to timestamp
+function cmd-output-hhmm () {
+    ADD_MINUTES=1 cmd-output "$@"
 }
 
 # cmd-usage(command): output usage for command to _command.list (with spaces
