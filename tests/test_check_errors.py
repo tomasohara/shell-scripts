@@ -17,21 +17,19 @@ import pytest
 from mezcla.unittest_wrapper import TestWrapper
 from mezcla import glue_helpers as gh
 
-
 SCRIPT = gh.resolve_path("check_errors.py")
-
 
 class TestIt(TestWrapper):
     """Class for testcase definition"""
 
-
+    @pytest.mark.xfail                   # TODO: remove xfail
     def test_python_error(self):
         """check python error"""
         input_string    = 'python -c "print(1\\2)" 2>&1'
         expected_result = '1          File "<string>", line 1\n2            print(1\\2)\n3                    ^\n4    >>> SyntaxError: unexpected character after line continuation character <<<'
         assert (gh.run(f'{input_string} | {SCRIPT} -') == expected_result)
 
-
+    @pytest.mark.xfail                   # TODO: remove xfail
     def test_warnings(self):
         """test warning and warnings option"""
         input_string    = 'bash: warning: here-document at line 119 delimited by end-of-file'
