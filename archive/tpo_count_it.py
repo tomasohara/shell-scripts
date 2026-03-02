@@ -122,39 +122,39 @@ class CountIt(Main):
 
         # Check the command-line options
         # Each variable corresponds to one or more --var=value commandline options
-        self.ignore_case      = (self.has_parsed_option(IGNORE_SHORT) or
-                                 self.has_parsed_option(IGNORE_LONG))
-        foldcase              = (self.has_parsed_option(FOLD) or
-                                 self.has_parsed_option(FOLDCASE) or
+        self.ignore_case      = (self.get_parsed_option(IGNORE_SHORT) or
+                                 self.get_parsed_option(IGNORE_LONG))
+        foldcase              = (self.get_parsed_option(FOLD) or
+                                 self.get_parsed_option(FOLDCASE) or
                                  self.ignore_case)
-        self.preserve         = (self.has_parsed_option(PRESERVE) or
+        self.preserve         = (self.get_parsed_option(PRESERVE) or
                                  not foldcase)
-        self.paragraph_mode   =  self.has_parsed_option(PARA)
-        self.file_input_mode  =  self.has_parsed_option(SLURP)
-        self.freq_first       =  self.has_parsed_option(FREQ_FIRST)
-        self.alpha            =  self.has_parsed_option(ALPHA)
-        self.compact          =  self.has_parsed_option(COMPACT)
-        self.cumulative       =  self.has_parsed_option(CUMULATIVE)
+        self.paragraph_mode   =  self.get_parsed_option(PARA)
+        self.file_input_mode  =  self.get_parsed_option(SLURP)
+        self.freq_first       =  self.get_parsed_option(FREQ_FIRST)
+        self.alpha            =  self.get_parsed_option(ALPHA)
+        self.compact          =  self.get_parsed_option(COMPACT)
+        self.cumulative       =  self.get_parsed_option(CUMULATIVE)
 
-        self.occurrences      =  self.has_parsed_option(OCCURRENCES)
+        self.occurrences      =  self.get_parsed_option(OCCURRENCES)
         self.occurrence_field =  1 if self.occurrences else 0
         self.occurrence_field =  self.get_parsed_option(OCCURRENCE_FIELD, self.occurrence_field)
 
-        self.percents         =  self.has_parsed_option(PERCENTS)
-        nonsingletons         = (self.has_parsed_option(MIN2) or
-                                 self.has_parsed_option(MULTIPLE) or
-                                 self.has_parsed_option(NONSINGLETON) or
-                                 self.has_parsed_option(NONSINGLETONS))
+        self.percents         =  self.get_parsed_option(PERCENTS)
+        nonsingletons         = (self.get_parsed_option(MIN2) or
+                                 self.get_parsed_option(MULTIPLE) or
+                                 self.get_parsed_option(NONSINGLETON) or
+                                 self.get_parsed_option(NONSINGLETONS))
         self.min_freq         =  2 if nonsingletons else 1
         self.min_freq         =  self.get_parsed_option(MIN_FREQ, self.min_freq)
 
-        self.trim             =  self.has_parsed_option(TRIM)
-        self.unaccent         =  self.has_parsed_option(UNACCENT)
+        self.trim             =  self.get_parsed_option(TRIM)
+        self.unaccent         =  self.get_parsed_option(UNACCENT)
 
         self.pattern          =  self.get_parsed_argument(PATTERN, "")
         self.pattern          =  system.read_file(self.pattern) if system.file_exists(self.pattern) else self.pattern # check if is a file with pattern (to cirvumvent shell UTF8 issues)
 
-        self.chomp            = (self.has_parsed_option(CHOMP) or
+        self.chomp            = (self.get_parsed_option(CHOMP) or
                                  not re.match('\\n', self.pattern))
 
         self.restore          =  self.get_parsed_argument(RESTORE, "")
@@ -164,8 +164,8 @@ class CountIt(Main):
         # See if regex has line achor (^ or $)
         # NOTE: Escaped $ are ignored.
         has_line_anchor     = re.search(r'^\^|[^\\]\$$', self.pattern)
-        self.one_per_line   = self.has_parsed_option(ONE_PER_LINE) or has_line_anchor         # only count one instance of the pattern per line
-        self.multi_per_line = self.has_parsed_option(MULTI_PER_LINE) or not self.one_per_line # count multiple instance of the pattern per line (even when ^ and $ are specified)
+        self.one_per_line   = self.get_parsed_option(ONE_PER_LINE) or has_line_anchor         # only count one instance of the pattern per line
+        self.multi_per_line = self.get_parsed_option(MULTI_PER_LINE) or not self.one_per_line # count multiple instance of the pattern per line (even when ^ and $ are specified)
         debug.assertion(not (self.one_per_line and self.multi_per_line))
 
 

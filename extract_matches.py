@@ -88,17 +88,17 @@ class ExtractMatches(Main):
         self.pattern         = self.get_parsed_argument(PATTERN, "")
         self.replacement     = self.get_parsed_argument(REPLACEMENT, "")
         self.restore         = self.get_parsed_argument(RESTORE, "")
-        self.paragraph_mode  = self.has_parsed_option(PARA)
-        self.file_input_mode = self.has_parsed_option(SLURP) or self.has_parsed_option(FILE)
+        self.paragraph_mode  = self.get_parsed_option(PARA)
+        self.file_input_mode = self.get_parsed_option(SLURP) or self.get_parsed_option(FILE)
         self.fields          = self.get_parsed_option(FIELDS, 1)
-        single               = self.has_parsed_option(SINGLE)
-        self.one_per_line    = self.has_parsed_option(ONE_PER_LINE) or single
-        self.multi_per_line  = self.has_parsed_option(MULTI_PER_LINE) or not single
+        single               = self.get_parsed_option(SINGLE)
+        self.one_per_line    = self.get_parsed_option(ONE_PER_LINE) or single
+        self.multi_per_line  = self.get_parsed_option(MULTI_PER_LINE) or not single
         self.max_count       = system.maxint() if self.multi_per_line else 1
         self.max_count       = self.get_parsed_option(MAX_COUNT, self.max_count)
-        self.ignore_case     = self.has_parsed_option(IGNORE)
-        self.preserve        = self.has_parsed_option(PRESERVE)
-        self.chomp           = (self.has_parsed_option(CHOMP) or
+        self.ignore_case     = self.get_parsed_option(IGNORE)
+        self.preserve        = self.get_parsed_option(PRESERVE)
+        self.chomp           = (self.get_parsed_option(CHOMP) or
                                 not my_re.match('\\n', self.pattern))
 
 
