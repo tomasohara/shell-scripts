@@ -25,9 +25,11 @@ importlib_metadata
 ipython
 jupyter
 numpy
+openai
 pylint
 pytest
 pyyaml
+selenium
 six
 #
 #...............................................................................
