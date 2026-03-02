@@ -52,10 +52,10 @@ PARA           = 'para'           # paragraph input mode
 SLURP          = 'slurp'          # alias for -file
 FILE           = 'file'           # entire file input mode
 FIELDS         = 'fields'         # number of output fields
-SINGLE         = 'single'         # alias for -one_per_line
-ONE_PER_LINE   = 'one_per_line'   # only count one instance of the pattern per line
-MULTI_PER_LINE = 'multi_per_line' # multiple matches per line
-MAX_COUNT      = 'max_count'      # maximum number of matches per line
+SINGLE         = 'single'         # alias for -one-per-line
+ONE_PER_LINE   = 'one-per-line'   # only count one instance of the pattern per line
+MULTI_PER_LINE = 'multi-per-line' # multiple matches per line
+MAX_COUNT      = 'max-count'      # maximum number of matches per line
 IGNORE         = 'i'              # ignore case
 PRESERVE       = 'preserve'       # preserve case (when -i in effect)
 CHOMP          = 'chomp'          # strip newline at end
@@ -222,7 +222,7 @@ if __name__ == '__main__':
                          boolean_options      = [(PARA,           'paragraph input mode'),
                                                  (SLURP,          'alias for -file'),
                                                  (FILE,           'entire file input mode'),
-                                                 (SINGLE,         'alias for -one_per_line'),
+                                                 (SINGLE,         'alias for -one-per-line'),
                                                  (ONE_PER_LINE,   'only count one instance of the pattern per line'),
                                                  (MULTI_PER_LINE, 'multiple matches per line'),
                                                  (IGNORE,         'ignore case'),

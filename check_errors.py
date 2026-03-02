@@ -31,7 +31,7 @@ ex: check_errors.py whatever\n
 Notes:\n
 - The default context is 1\n
 - Warnings are skipped by default\n
-- Use -no_asterisks if input uses ***'s outside of error contexts\n
+- Use -no-asterisks if input uses ***'s outside of error contexts\n
 Use -relaxed to exclude special cases (e.g., xyz='error')\n
 """
 
@@ -49,11 +49,11 @@ from mezcla import system
 # Command-line labels constants
 WARNING       = 'warning'       # alias for -warnings
 WARNINGS      = 'warnings'      # include warnings?
-SKIP_WARNINGS = 'skip_warnings' # omit warnings?
+SKIP_WARNINGS = 'skip-warnings' # omit warnings?
 CONTEXT       = 'context'       # context lines before and after
-NO_ASTERISKS  = 'no_asterisks'  # skip warnings for '***' in text
-RUBY          = 'ruby'          # alias for -skip_ruby_lib
-SKIP_RUBY_LIB = 'skip_ruby_lib' # skip Ruby library related errors
+NO_ASTERISKS  = 'no-asterisks'  # skip warnings for '***' in text
+RUBY          = 'ruby'          # alias for -skip-ruby-lib
+SKIP_RUBY_LIB = 'skip-ruby-lib' # skip Ruby library related errors
 RELAXED       = 'relaxed'       # relaxed for special cases
 STRICT        = 'strict'        # alias for relaxed=0
 VERBOSE       = 'verbose'       # show more details
@@ -271,7 +271,7 @@ if __name__ == '__main__':
                                          (WARNINGS,      'include warnings?'),
                                          (SKIP_WARNINGS, 'omit warnings?'),
                                          (NO_ASTERISKS,  'skip warnings for "***" in text'),
-                                         (RUBY,          'alias for -skip_ruby_lib'),
+                                         (RUBY,          'alias for -skip-ruby-lib'),
                                          (SKIP_RUBY_LIB, 'skip Ruby library related errors'),
                                          (RELAXED,       'relaxed for special cases'),
                                          (STRICT,        'alias for relaxed=0'),

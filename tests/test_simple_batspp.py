@@ -94,7 +94,7 @@ class TestIt(TestWrapper):
         self.do_assert("3 tests, 0 failure(s), 1 ignored" in output)
         return
 
-    @pytest.mark.xfail                   # TODO: remove xfail
+    ## OLD: @pytest.mark.xfail                   # TODO: remove xfail
     @trap_exception
     def test_preprocess_batspp(self):
         """TODO: flesh out test for preprocess_batspp"""

@@ -38,7 +38,7 @@ class TestIt(TestWrapper):
         """test extract matches"""
         input_string    = '  cat\n  dog\n  cat\n  whale'
         expected_result = 'cat\ndog\ncat\nwhale'
-        filename        = '/tmp/test_file.txt '
+        filename        = '/tmp/test_extract_file.txt'
         gh.run(f'touch {filename} && echo "{input_string}" > {filename}')
         self.assertEqual(gh.run(f'{SCRIPT} "^\\s*(\\S+)" {filename}'), expected_result)
 
@@ -83,7 +83,7 @@ class TestIt(TestWrapper):
         """test max_count option"""
         input_string    = ' dog cat whale hamster cat cat dog'
         expected_result = 'dog\ncat\nwhale\nhamster'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --max_count 4 "\\w+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --max-count 4 "\\w+"'), expected_result)
 
 
     def test_ignore_case(self):
