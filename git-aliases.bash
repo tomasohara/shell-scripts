@@ -112,6 +112,17 @@
 # 3: push this change to the remote server
 #     git push
 #
+#...............................................................................
+# Steps in fleshing out empty repo (just created via Github)
+#  - via https://github.com/tomasohara/temporary-repo:
+#    …or create a new repository on the command line
+#    echo "# temporary-repo" >> README.md
+#    git init
+#    git add README.md
+#    git commit -m "first commit"
+#    git branch -M main
+#    git remote add origin https://github.com/tomasohara/temporary-repo.git
+#    git push -u origin main
 #................................................................................
 # Aliases from tomohara-aliaes.bash:
 #-------------------------------------------------------------------------------
