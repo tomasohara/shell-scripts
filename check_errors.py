@@ -81,18 +81,16 @@ class CheckErrors(Main):
     def setup(self):
         """Process arguments"""
 
-
         # Check the command-line options
-        warnings           = self.has_parsed_option(WARNING) or self.has_parsed_option(WARNINGS)
-        skip_warnings      = self.has_parsed_option(SKIP_WARNINGS) or not warnings
+        warnings           = self.get_parsed_option(WARNING) or self.get_parsed_option(WARNINGS)
+        skip_warnings      = self.get_parsed_option(SKIP_WARNINGS) or not warnings
         self.show_warnings = not skip_warnings
         self.context       = self.get_parsed_option(CONTEXT, 3)
-        self.asterisks     = not self.has_parsed_option(NO_ASTERISKS)
-        self.skip_ruby_lib = self.has_parsed_option(RUBY) or self.has_parsed_option(SKIP_RUBY_LIB)
-        self.strict        = self.has_parsed_option(STRICT) or not self.has_parsed_option(RELAXED)
-        self.verbose       = self.has_parsed_option(VERBOSE)
+        self.asterisks     = not self.get_parsed_option(NO_ASTERISKS)
+        self.skip_ruby_lib = self.get_parsed_option(RUBY) or self.get_parsed_option(SKIP_RUBY_LIB)
+        self.strict        = self.get_parsed_option(STRICT) or not self.get_parsed_option(RELAXED)
+        self.verbose       = self.get_parsed_option(VERBOSE)
         debug.trace_object(5, self, label="Script instance")
-
 
     def process_line(self, line):
         """Process each line of the input stream"""
