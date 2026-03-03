@@ -450,7 +450,7 @@ class Batspp(Main):
         # Run unless adminstrative user and --force not 
         skip_bats = SKIP_BATS
         if not skip_bats:
-            is_admin = my_re.search(r"root|admin|adm", gh.run("groups"))
+            is_admin = my_re.search(r"\b(root|admin|adm)\b", gh.run("groups"))
             if is_admin:
                 if not self.force:
                     system.exit("Error: running bats under admin-like account requires --{force} option", force=FORCE)
