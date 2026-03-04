@@ -1,49 +1,67 @@
 # The following packages are required. They can be installed as follows:
-#    sudo apt-get install $(grep -v ^# required-packages.txt)
+#    sudo apt-get install $(sed 's/ #.*//' required-packages.txt | grep -v ^#) 2> /dev/null
 #
 # In addition, there are some optional packages, which be installed as follows:
-#    sudo apt-get install $(perl -pe 's/^#opt#\s*//;' required-packages.txt | grep -v '^#')
+#    sudo apt-get install $(perl -pe 's/^#opt#\s*//;' required-packages.txt | sed 's/ #.*//' | grep -v '^#') 2> /dev/null
 #
 # Note:
 # - The package names are based on Ubuntu, and should be compatible with other
 #   debian-based Linux distributions.
 # - See requirements.txt for Python package requirements.
 #
-ansifilter
-batspp
-diffutils
-git
-jupyter-core
-kdiff3
-less
-lynx
-openssh
-perl
-python3-pip
-python3
-python-is-python3
-tar
-tcsh
-wget
-xmllint
-zip
+ansifilter                              # - ANSI terminal escape code filter
+batspp                                  # - Bash Automated Testing System with Preprocessor
+diffutils                               # - GNU diff utilities (diff, cmp, etc.)
+enchant-2                               # - Generic spell checking library
+git                                     # - Fast, distributed revision control system
+jupyter-core                            # - Core common functionality of Jupyter projects
+kdiff3                                  # - Compares and merges files or directories
+less                                    # - Pager program
+lsb-release                             # - Linux Standard Base version reporting utility
+lynx                                    # - Text-based web browser
+ncurses-bin                             # - Terminal-related programs and scripts (e.g., tput)
+openssh                                 # - Secure Shell (SSH) protocol for remote login
+p7zip-full                              # - 7z and 7za file archivers
+perl                                    # - Practical Extraction and Report Language
+pv                                      # - Monitor the progress of data through a pipe
+python3-pip                             # - Python 3 package installer
+python3                                 # - Python 3 interpreter
+python-is-python3                       # - Symlinks /usr/bin/python to python3
+rcs                                     # - Revision Control System
+tar                                     # - Tape Archiver for file archiving
+tcsh                                    # - TENEX C Shell, enhanced version of Berkeley C shell
+wget                                    # - Retrieves files from the web
+xmllint                                 # - XML linting and processing tool
+zip                                     # - Archiver for .zip files
 #
 #................................................................................
 # Optional packages
 #
-#opt# ImageMagick
+#opt# ImageMagick                       # - Image manipulation tools
 ## OLD: #opt# extcolors
-#opt# nmap
-#opt# poppler-utils
-#opt# rcs
-#opt# shellcheck
-#opt# colout
-#opt# tesseract-ocr
-#opt# kazam
-#opt# screen
-#opt# nvtop
-## TODO: #opt# brew install act   # see https://github.com/nektos/act
+#opt# acl                               # - Access Control Lists utilities
+#opt# awscli                            # - Amazon Web Services Command Line Interface
+#opt# curl                             # - Transferring data with URL syntax
+#opt# cvs                               # - Concurrent Versions System
+#opt# ghostscript                       # - PostScript and PDF interpreter
+#opt# gimp                              # - GNU Image Manipulation Program
+#opt# gv                                # - PostScript and PDF viewer for X
+#opt# gwenview                          # - Image viewer for KDE
+#opt# libreoffice                       # - Free office suite
+#opt# mercurial                         # - Distributed revision control system (hg)
+#opt# nautilus                          # - File manager for GNOME
+#opt# nmap                              # - Network exploration tool and port scanner
+#opt# nvidia-utils-common               # - NVIDIA driver support files
+#opt# poppler-utils                     # - PDF utilities (based on poppler)
+#opt# rcs                               # - Revision Control System
+#opt# shellcheck                        # - Static analysis tool for shell scripts
+#opt# colout                            # - Color up text from the command line
+#opt# tesseract-ocr                     # - Optical Character Recognition (OCR)
+#opt# kazam                             # - Screen recording and screen capture
+#opt# screen                            # - Terminal multiplexer
+#opt# nvtop                             # - NVIDIA GPUs display monitor
+## TODO: #opt# brew install act         # - see https://github.com/nektos/act
 ## TODO: docker
 ##
 ## TODO: #opt# xyz
-#opt# kcov                        # see https://github.com/SimonKagstrom/kcov
+#opt# kcov                              # - Code coverage tool for compiled programs and shell scripts
