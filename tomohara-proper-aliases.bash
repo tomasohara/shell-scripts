@@ -693,6 +693,22 @@ function indent-text {
 # shellcheck disable=SC2016
 alias-fn rename-adhoc-notes 'rename-files -q "$(get-host-nickname)-adhoc-notes" "$(basename $PWD)-adhoc-notes-$(get-host-nickname)"'
 
+#...............................................................................
+# Temp file (n.b., for use with online tools like AI assistants)
+
+# copy-to-temp-as-txt(file, ...): copies file to temp and add .txt extension for braindead web upload interfaces (e.g., AI assistants)
+# note: similar to copy f ~/temp/$b.txt with touch
+# OLD: rename-files -t -regex '$' '.txt' /home/tomohara/temp/plasma-org.kde.plasma.desktop-appletsrc.v*; also copy f ~/temp and then touch
+#
+function copy-to-temp-as-txt {
+    local file="$1"
+    local temp_file
+    global TEMP
+    temp_file="$TEMP/$(basename "$file").txt"
+    copy "$file" "$temp_file"
+    touch "$temp_file"
+}
+
 #................................................................................
 # Snapshot related
 
