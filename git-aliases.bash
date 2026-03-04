@@ -65,7 +65,7 @@
 #   -- obsolete
 #      GIT_USER                  user ID for authentication
 #      GIT_TOKEN                 user token from Github
-#   GIT_NO_CONFIRM               omit confirmation (used is automated tests(
+#   GIT_NO_CONFIRM               omit confirmation (used is automated tests)
 #   GIT_FORCE                    force an operation (e.g., git add ignored file)
 #   GIT_LOG_DIR                  where to put command logs (e.g, log-files)
 #   GIT_SKIP_ADD                 skip implicit 'git add' in git-add-commit-push
