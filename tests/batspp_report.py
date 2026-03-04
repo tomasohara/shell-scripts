@@ -166,6 +166,30 @@ def round3(num):
     # EX: round3(0.12) => "0.123"
     return system.round_as_str(num, precision=3)
 
+def select_test_files(files, test_regex=None, all_option=False, include_batspp_files=False):
+    """Select test definition files from FILES"""
+    ipynb_files = []
+    batspp_files = []
+    avoided_files = []
+    for file in files:
+        is_ipynb = file.endswith(IPYNB)
+        is_batspp = include_batspp_files and file.endswith(BATSPP)
+        if not (is_ipynb or is_batspp):
+            continue
+        if test_regex and not my_re.search(fr"{test_regex}", file):
+            debug.trace(3, f"FYI: Ignoring {file} not matching TEST_REGEX ({test_regex})")
+            continue
+        if not all_option and NOBATSPP in file:
+            debug.trace(4, f"FYI: Ignoring NOBATSPP file: {file}")
+            avoided_files.append(file)
+            continue
+        if is_ipynb:
+            ipynb_files.append(file)
+        else:
+            batspp_files.append(file)
+    debug.trace_expr(5, ipynb_files, batspp_files, avoided_files)
+    return ipynb_files, batspp_files, avoided_files
+
 #-------------------------------------------------------------------------------
 # NOTE: *** This function is too monolithinc: it should be structured like kcov_result.py ***
 # TODO2: Convert batspp-proper logic into a class with a separate method for each step; the
@@ -198,6 +222,7 @@ def main():
     TEXT_REPORTS_ARG = "txt"
     ALL_REPORTS_ARG = "all"
     BATSPP_SWITCH_ARG = "switch"
+    BATSPP_FILES_ARG = "batspp-files"
     FORCE_ARG = "force"
     CLEAN_ARG = "clean"
     DEFINITIONS_ARG = "definitions"
@@ -212,6 +237,7 @@ def main():
             (FORCE_ARG, "Force running under admin-like account"),
             (CLEAN_ARG, "Remove output from previous runs; *** warning: this removes entire subdirectories"),
             (BATSPP_SWITCH_ARG, "Uses batspp library instead of ../simple_batspp.py script"),
+            (BATSPP_FILES_ARG, "Include *.batspp testfiles directly (no ipynb conversion)"),
         ],
         text_options=[
             (DEFINITIONS_ARG, "Script with alias definitions to be sourced"),
@@ -232,9 +258,10 @@ def main():
     FORCE_OPTION = main_app.get_parsed_option(FORCE_ARG, UNDER_TESTING_VM or FORCE_RUN)
     CLEAN_OPTION = main_app.get_parsed_option(CLEAN_ARG, CLEAN_DEFAULT)
     BATSPP_SWITCH_OPTION = main_app.get_parsed_option(BATSPP_SWITCH_ARG)
+    BATSPP_FILES_OPTION = main_app.get_parsed_option(BATSPP_FILES_ARG)
     USE_SIMPLE_BATSPP = (not BATSPP_SWITCH_OPTION)
     DEFINITIONS_SCRIPT = main_app.get_parsed_option(DEFINITIONS_ARG)
-    debug.trace_expr(4, NO_OPTION, TXT_OPTION, KCOV_OPTION, FORCE_OPTION, CLEAN_OPTION, BATSPP_SWITCH_OPTION, USE_SIMPLE_BATSPP, DEFINITIONS_SCRIPT)
+    debug.trace_expr(4, NO_OPTION, TXT_OPTION, KCOV_OPTION, FORCE_OPTION, CLEAN_OPTION, BATSPP_SWITCH_OPTION, BATSPP_FILES_OPTION, USE_SIMPLE_BATSPP, DEFINITIONS_SCRIPT)
     RUN_BATS = (TXT_OPTION or not NO_OPTION)
     debug.assertion(TXT_OPTION or KCOV_OPTION)
 
@@ -352,9 +379,10 @@ def main():
     
     # 1) Identifying .ipynb files
     i = 1
-    ipynb_array = []
-    avoid_array = []
-    avoid_count = 0
+    ipynb_array, direct_batspp_files, avoid_array = select_test_files(
+        files, test_regex=TEST_REGEX, all_option=ALL_OPTION, include_batspp_files=BATSPP_FILES_OPTION)
+    avoid_count = len(avoid_array)
+    direct_batspp_array = [gh.form_path(test_path, file) for file in direct_batspp_files]
     success_test_array = []
     failure_test_array = []
 
@@ -367,23 +395,18 @@ def main():
     print(f"TEST_REGEX={TEST_REGEX} DEBUG_LEVEL={system.getenv('DEBUG_LEVEL')}")
     debug.trace_expr(1, OUTPUT_DIR, SINGLE_STORE)
 
-    for file in files:
-        is_ipynb = file.endswith(IPYNB)
-        if is_ipynb:
-            if TEST_REGEX and not my_re.search(fr"{TEST_REGEX}", file):
-                debug.trace(3, f"FYI: Ignoring {file} not matching TEST_REGEX ({TEST_REGEX})")
-                continue
-            if not ALL_OPTION and NOBATSPP in file:
-                debug.trace(4, f"FYI: Ignoring NOBATSPP file: {file}")
-                print(f"NOBATSPP File Found [{i}]: {file}")
-                avoid_array.append(file)
-                avoid_count += 1
-                continue
-            print(f"JUPYTER Testfile Found [{i}]: {file}")
-            ipynb_array.append(file)
-            i += 1
+    for file in avoid_array:
+        print(f"NOBATSPP File Found [{i}]: {file}")
+        i += 1
+    for file in ipynb_array:
+        print(f"JUPYTER Testfile Found [{i}]: {file}")
+        i += 1
+    for file in direct_batspp_files:
+        print(f"BATSPP Testfile Found [{i}]: {file}")
+        i += 1
 
-    print(f"\nIPYNB Files Found (Total - NOBATSPP): {i-1} - {avoid_count} = {i-avoid_count-1}")
+    print(f"\nIPYNB Files Found (Total - NOBATSPP): {len(ipynb_array) + avoid_count} - {avoid_count} = {len(ipynb_array)}")
+    print(f"Direct BATSPP Files Found: {len(direct_batspp_array)}")
 
     # 2) Generating .batspp files from .ipynb files
     i = 1
@@ -411,6 +434,16 @@ def main():
     ipynb_count = i - 1
     debug.trace_expr(5, ipynb_count, batspp_array)
     debug.assertion(ipynb_count == len(batspp_array))
+    generated_batspp_array = list(batspp_array)
+    generated_batspp_count = len(generated_batspp_array)
+    generated_basenames = {gh.basename(path) for path in generated_batspp_array}
+    for direct_batspp_file in direct_batspp_array:
+        if gh.basename(direct_batspp_file) in generated_basenames:
+            debug.trace(4, f"FYI: Skipping duplicate BATSPP file: {direct_batspp_file}")
+            continue
+        batspp_array.append(direct_batspp_file)
+    direct_batspp_count = len(batspp_array) - generated_batspp_count
+    debug.trace_expr(5, generated_batspp_count, direct_batspp_count)
 
     # 3) Executing batspp files & storing them as bats
     ## OLD: print(f"\n\n==========BATS GENERATED==========\n")
@@ -521,7 +554,7 @@ def main():
     sucess_test_array_SORT = sorted(success_test_array, key=lambda x: x["test_success_rate"], reverse = True)
     failure_test_array_SORT = sorted(failure_test_array, key=lambda x: x["test_success_rate"], reverse = True)
 
-    for file in batspp_array:
+    for file in generated_batspp_array:
         is_batspp = file.endswith(BATSPP)
 
         if is_batspp:
@@ -532,14 +565,15 @@ def main():
     # 5) Summary Statistics
     set_wt = set(working_testfiles)
     error_testfiles = [tf for tf in ipynb_array if tf not in set_wt]
-    faulty_count = ipynb_count - batspp_count
+    faulty_count = ipynb_count - generated_batspp_count
 
     NaN = math.nan
     print(f"\n======================================================")
     print(f"SUMMARY STATISTICS:\n")
     print(f"simple_batspp.py used: {bool(USE_SIMPLE_BATSPP)}")
     print(f"No. of IPYNB testfiles: {ipynb_count + avoid_count}")
-    print(f"No. of BATSPP files (generated): {batspp_count if RUN_BATS else NaN}")
+    print(f"No. of BATSPP files (generated): {generated_batspp_count if RUN_BATS else NaN}")
+    print(f"No. of BATSPP files (direct): {direct_batspp_count if RUN_BATS else NaN}")
     print(f"No. of FAULTY testfiles: {faulty_count if RUN_BATS else NaN}")
     print(f"No. of AVOIDED testfiles: {avoid_count}")
     print(f"Total no. of good tests: {total_count_ok}")

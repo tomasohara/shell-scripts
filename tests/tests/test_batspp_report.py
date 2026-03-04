@@ -17,6 +17,8 @@
 # Standard packages
 import unittest
 import re
+import os
+import subprocess
 
 # Installed packages
 import pytest
@@ -177,6 +179,172 @@ class TestBatsppReport(TestWrapper):
         """Tests environment variables in script"""
         debug.trace(4, f"TestBatsppReport.test_env_variables(); self={self}")
         assert (False)
+
+def test_round3_precision():
+    """Round helper should keep three decimal digits"""
+    assert THE_MODULE.round3(1/3) == "0.333"
+
+def test_load_thresholds_reads_yaml(tmp_path):
+    """Threshold loader should return parsed YAML mapping"""
+    yaml_file = tmp_path / "thresholds.yaml"
+    yaml_file.write_text("minimum_score: 75\nsuites:\n  smoke: 90\n", encoding="utf-8")
+    thresholds = THE_MODULE.load_thresholds(str(yaml_file))
+    assert thresholds["minimum_score"] == 75
+    assert thresholds["suites"]["smoke"] == 90
+
+def test_outputpp_extension_constant():
+    """Guard against regressions in outputpp naming"""
+    assert THE_MODULE.OUTPUTPP == ".bats.outputpp"
+
+def test_select_test_files_default_ignores_batspp():
+    """By default only ipynb should be selected"""
+    files = ["a.ipynb", "b.batspp", "note.txt"]
+    ipynb_files, batspp_files, avoided_files = THE_MODULE.select_test_files(files)
+    assert ipynb_files == ["a.ipynb"]
+    assert batspp_files == []
+    assert avoided_files == []
+
+def test_select_test_files_optional_includes_batspp():
+    """When enabled, direct batspp files should be selected too"""
+    files = ["a.ipynb", "b.batspp", "NOBATSPP-c.ipynb", "NOBATSPP-d.batspp"]
+    ipynb_files, batspp_files, avoided_files = THE_MODULE.select_test_files(
+        files, include_batspp_files=True)
+    assert ipynb_files == ["a.ipynb"]
+    assert batspp_files == ["b.batspp"]
+    assert avoided_files == ["NOBATSPP-c.ipynb", "NOBATSPP-d.batspp"]
+
+def test_select_test_files_all_option_keeps_nobatspp():
+    """--all behavior should keep NOBATSPP files"""
+    files = ["NOBATSPP-c.ipynb", "NOBATSPP-d.batspp"]
+    ipynb_files, batspp_files, avoided_files = THE_MODULE.select_test_files(
+        files, all_option=True, include_batspp_files=True)
+    assert ipynb_files == ["NOBATSPP-c.ipynb"]
+    assert batspp_files == ["NOBATSPP-d.batspp"]
+    assert avoided_files == []
+
+def test_select_test_files_respects_regex():
+    """Regex filtering should apply to both ipynb and direct batspp files"""
+    files = ["git-aliases-tests-1.ipynb", "git-aliases-tests-1.batspp", "other.batspp"]
+    ipynb_files, batspp_files, _ = THE_MODULE.select_test_files(
+        files, test_regex=r"^git-aliases-tests-1", include_batspp_files=True)
+    assert ipynb_files == ["git-aliases-tests-1.ipynb"]
+    assert batspp_files == ["git-aliases-tests-1.batspp"]
+
+def test_direct_batspp_temp_suite_macro_micro_differ(tmp_path):
+    """Run a temp direct-batspp suite and validate divergent macro/micro means"""
+    tests_dir = tmp_path / "defs"
+    output_dir = tmp_path / "out"
+    tests_dir.mkdir()
+    output_dir.mkdir()
+
+    file1 = tests_dir / "temp-a.batspp"
+    file1.write_text(
+        "# Global Setup\n"
+        "$ shopt -s expand_aliases\n"
+        "$ alias hi='echo hi'\n\n"
+        "# Test a1\n"
+        "$ hi\n"
+        "hi\n\n"
+        "# Test a2\n"
+        "$ echo two\n"
+        "two\n",
+        encoding="utf-8")
+
+    file2 = tests_dir / "temp-b.batspp"
+    file2.write_text(
+        "# Global Setup\n"
+        "$ shopt -s expand_aliases\n"
+        "$ alias hi='echo hi'\n\n"
+        "# Test b1\n"
+        "$ hi\n"
+        "hi\n\n"
+        "# Test b2 (intentional fail)\n"
+        "$ echo three\n"
+        "WRONG-three\n",
+        encoding="utf-8")
+
+    file3 = tests_dir / "temp-c.batspp"
+    file3.write_text(
+        "# Global Setup\n"
+        "$ shopt -s expand_aliases\n"
+        "$ alias hi='echo hi'\n\n"
+        "# Test c1\n"
+        "$ echo c1\n"
+        "c1\n\n"
+        "# Test c2\n"
+        "$ echo c2\n"
+        "c2\n\n"
+        "# Test c3\n"
+        "$ echo c3\n"
+        "c3\n\n"
+        "# Test c4\n"
+        "$ echo c4\n"
+        "c4\n\n"
+        "# Test c5 (intentional fail)\n"
+        "$ echo c5\n"
+        "WRONG-c5\n\n"
+        "# Test c6 (intentional fail)\n"
+        "$ echo c6\n"
+        "WRONG-c6\n",
+        encoding="utf-8")
+
+    env = os.environ.copy()
+    env.update({
+        "PYTHONPATH": f"..:.:{env.get('PYTHONPATH', '')}",
+        "TEST_DIR": str(tests_dir),
+        "OUTPUT_DIR": str(output_dir),
+        "FORCE_RUN": "1",
+        "UNDER_TESTING_VM": "1",
+        "CLEAN_OUTPUT": "1",
+        "DEBUG_LEVEL": "0",
+    })
+    result = subprocess.run(
+        ["python3", "batspp_report.py", "--txt", "--all", "--batspp-files", "--force"],
+        cwd=system.real_path("tests"),
+        env=env,
+        text=True,
+        capture_output=True,
+        check=False)
+    assert result.returncode == 0, result.stdout + "\n" + result.stderr
+    output = result.stdout + "\n" + result.stderr
+    assert "Direct BATSPP Files Found: 3" in output
+    assert "No. of BATSPP files (direct): 3" in output
+    assert "(7/10)" in output
+    macro_match = re.search(r"Macro success score:\s*([0-9.]+)%", output)
+    micro_match = re.search(r"Micro success score:\s*([0-9.]+)%", output)
+    assert macro_match and micro_match
+    macro_score = float(macro_match.group(1))
+    micro_score = float(micro_match.group(1))
+    assert macro_score != micro_score
+    assert macro_score > micro_score
+
+@pytest.mark.xfail(reason="TODO: define exact rounding/format contract for summary percentages")
+def test_direct_batspp_macro_format_is_fixed_precision():
+    """Edge-case TODO: enforce exact decimal precision for macro/micro output"""
+    assert False
+
+@pytest.mark.xfail(reason="TODO: convert YAML parse failures to user-friendly script errors")
+def test_load_thresholds_invalid_yaml_friendly_failure(tmp_path):
+    """Edge-case TODO: malformed YAML should map to a friendly script-level error"""
+    yaml_file = tmp_path / "thresholds-bad.yaml"
+    yaml_file.write_text("minimum_score: [\n", encoding="utf-8")
+    with pytest.raises(SystemExit, match=r"threshold"):
+        THE_MODULE.load_thresholds(str(yaml_file))
+
+@pytest.mark.xfail(reason="TODO: define explicit NaN policy for round3")
+def test_round3_rejects_nan():
+    """Edge-case TODO: define/implement NaN handling contract"""
+    with pytest.raises(ValueError):
+        THE_MODULE.round3(float("nan"))
+
+@pytest.mark.xfail(reason="TODO: support case-insensitive test file extensions")
+def test_select_test_files_case_insensitive_extensions():
+    """Edge-case TODO: accept uppercase .IPYNB/.BATSPP names"""
+    files = ["A.IPYNB", "B.BATSPP"]
+    ipynb_files, batspp_files, _ = THE_MODULE.select_test_files(
+        files, include_batspp_files=True)
+    assert ipynb_files == ["A.IPYNB"]
+    assert batspp_files == ["B.BATSPP"]
 
 
 if __name__ == "__main__":
