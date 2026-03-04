@@ -130,7 +130,11 @@ BATS_EVAL = system.getenv_bool(
     description="Evaluate tests via bats rather than bash")
 BASH_EVAL = (not BATS_EVAL)
 OMIT_SHORT_OPTIONS = system.getenv_bool(
-    "OMIT_SHORT_OPTIONS", False,
+    # NOTE: Disabling short options so that usage is more informative.
+    # ex: "usage: batspp_report.py [-h] [-o] [-n] [-k] ..."
+    #  => " ...                    [-h] [--omit-reports] [--no] [--kcov]"
+    ## OLD: "OMIT_SHORT_OPTIONS", False,
+    "OMIT_SHORT_OPTIONS", True,
     description="Only allow long command line options")
 ALLOW_SHORT_OPTIONS = (not OMIT_SHORT_OPTIONS)
 ## BAD:
