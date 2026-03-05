@@ -175,8 +175,7 @@ while read -r LINE; do
         echo "Warning: adding time of day ($hour_spec) to distinguish '$output_file'";
         output_file="${output_file}_${hour_spec}";
     fi
-    ## DEBUG:
-    echo "Trying main path $REL_GIT_PATH_TO_FILE for version $version_spec"
+    $debug && echo "Trying main path $REL_GIT_PATH_TO_FILE for version $version_spec"
     git cat-file -p "$COMMIT_SHA:$REL_GIT_PATH_TO_FILE" > "$output_file" 2> "$info.err"
     if [ $? -eq 0 ]; then
         let GOOD_COUNT++
