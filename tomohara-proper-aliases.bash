@@ -19,14 +19,14 @@
 # TODO: automate the derivation of the following (e.g., drop 'plus' or 'alias' suffix)
 alias git-add-='git-add-plus'
 alias git-diff-='git-diff-plus'
-alias gdiff=git-diff
 ## TEMP:
 alias git-diff='git-diff-plus'
 alias git-difftool-='git-difftool-plus'
 alias git-log-='git-log-plus'
 alias git-update-='git-update-plus' 
 alias git-vdiff='git-vdiff-alias'
-alias git-vdiff-='git-vdiff-alias'
+## OLD: alias git-vdiff-='git-vdiff-alias'
+alias gdiff=git-vdiff
 alias git-all-update='update-main-repos.bash'
 alias git-extract-all-versions='extract-all-git-versions.bash --human'
 alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human'
@@ -48,6 +48,7 @@ alias git-status-sans-tom="git-status | egrep -v '(^|[-_/.])tom([-_/.]|$)'"
 alias git-status-tom=git-status-sans-tom
 # TODO: work out better alias name
 alias git-stat=git-status-sans-tom
+alias gstat=git-stat
 # TODO: better name (e.g., git-diff-name-only-main?) and/or decompose git-name-diff-branch?
 alias git-name-diff-main='git diff --name-only main..HEAD | cat'
 #
@@ -948,7 +949,9 @@ alias free-memory='free --wide --human | grep -v Swap:'
 # clear-cache: clear disk cache
 # See https://linux-mm.org/Drop_Caches and https://www.linuxatemyram.com
 # TODO: get this to work completely; explain Admin filter
-simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
+## OLD: simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
+## NOTE: 71 is ANSI color index for mediumseagreen (#5faf5f)
+simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory | colout "free" 71'; echo
 
 #...............................................................................
 # Emacs related
