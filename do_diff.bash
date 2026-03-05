@@ -100,7 +100,8 @@ if [ -z "$2" ]; then
     echo "git ls-tree -r --name-only HEAD | xargs -I '{}' $script --no-pattern '{}' ~/repo-main/'{}' > _main-diff-tracked.log 2>&1"
     
     echo ""
-    echo "$script" '--match-dot-files ".*bash*" .. > _bash-diff.list 2>&1'
+    echo "$script" '--match-dot-files ".*bash*" .. > _bash-diff-$(todays-date).list 2>&1'
+    ## TODO: add notes on aliases used in script usages (i.e., here and elsewhere)
     echo ""
     echo "$script --ignore-spacing --diff-options '--context=1' '*.rb' vm-torre > vm-torre.diff 2>&1"
     echo ""
