@@ -16,7 +16,6 @@
 #   git-update-plus                  # git-pull with stashed changes
 #
 #   git-commit-and-push file...      # commits file and pushes to remote
-#
 #...............................................................................
 # Notes:
 #
@@ -80,7 +79,6 @@
 #   SC2086 [Double quote to prevent globbing and word splitting]
 #
 # - By the way, "maldito" is Spanish for "damn", which is a mild expletive in English.
-#
 #................................................................................
 # Examples:
 # TODO2: show the corresponding alias; also move git-mv example later to this section)
@@ -99,7 +97,6 @@
 # 1. git add - this stages your changes for committing
 # 2. git commit - this commits your staged changes locally
 # 3. git push - this pushes your committed changes to a remote
-#
 #...............................................................................
 # based on https://stackoverflow.com/questions/2641146/handling-file-renames-in-git:
 #
@@ -111,7 +108,13 @@
 #     git commit -m "renamed old-file to new-file"
 # 3: push this change to the remote server
 #     git push
+#................................................................................
+# Deleting file from repo:
+#   git rm old-file
+#   git commit -m "deleted old-file"
+#   git push
 #
+# See https://stackoverflow.com/questions/2047465/how-do-i-delete-a-file-from-a-git-repository.
 #...............................................................................
 # Steps in fleshing out empty repo (just created via Github)
 #  - via https://github.com/tomasohara/temporary-repo:
@@ -1023,8 +1026,9 @@ function git-misc-alias-usage() {
     # note: git-rm-alias stages the deletion, but git-update-force's stash/pop cycle unstages it.
     # So 'git add' (implicit in git-update-commit-push) re-stages the deletion—do NOT use GIT_SKIP_ADD=1.
     # See https://stackoverflow.com/questions/37279654/when-should-i-use-rm-git-rm-git-rm-cached-git-add.
-    ## BAD: GIT_SKIP_ADD=1 skips re-staging after stash/pop, so commit finds nothing staged
+    ## BAD (GIT_SKIP_ADD=1 skips re-staging after stash/pop, so commit finds nothing staged):
     ## echo '   old="TODO..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" GIT_SKIP_ADD=1 git-update-commit-push "$old"'
+    ## TODO3: rework to avoid stash by git-update-commit-push when just deleting files
     echo '   old="TODO-filename..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" git-update-commit-push "$old"'
     echo ""
     echo "To check in all tracked files with changes (examinar primero):"
