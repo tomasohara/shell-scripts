@@ -2283,6 +2283,7 @@ alias rename-bad-dashes="rename-files -quick -global -regex ' \-' '_'; rename-fi
 # move-output-files: likewise for output files with version numbers to ./output
 # note: versioned files are those ending in numerics or with numeric affix
 ## TODO: use perl-style regex for more precise matching (maldito over-arching glob's)
+## TODO3: reconcile with move-versioned-files-alt which is more precise but with less coverage.
 # maldito shellcheck: SC2120 (warning): ... references arguments, but none are ever passed.
 # shellcheck disable=SC2120
 function move-versioned-files {
@@ -2328,15 +2329,18 @@ alias move-old-files='move-versioned-files "*" old'
 function move-versioned-files-alt {
     mkdir -p old;
     # note: regex is treated as a glob during move proper
-    local version_regex="[0-9][0-9][a-z][a-z][a-z][0-9][0-9]"
-    local alt_version_regex="[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]"
+    local version_regex="[0-9][0-9][a-z][a-z][a-z][0-9][0-9]"            # ddMMMyy
+    local alt_version_regex="[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]" # MM-dd-yyyy
     if [ "${STRICT:-0}" == "1" ]; then
         version_regex="[^0-9]${version_regex}[^0-9]"
         alt_version_regex="[^0-9]${alt_version_regex}[^0-9]"
     fi
+    ## TODO2: work out a glob accounting for dot files
     move --no-clobber ./*$version_regex* ./*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
+    move --no-clobber ./.*$version_regex* ./.*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
     local false_positives
     false_positives="$(ls old/*$version_regex*  old/*$alt_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|(.txt$)")"
+    false_positives="$false_positives$(ls old/.*$version_regex*  old/.*$alt_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|(.txt$)")"
     if [ "$false_positives" != "" ]; then
         echo "Warning: potential misplaced files (e.g., .txt ext or adhoc affix)"
         echo "    $false_positives"
