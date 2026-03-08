@@ -951,7 +951,7 @@ alias free-memory='free --wide --human | grep -v Swap:'
 # TODO: get this to work completely; explain Admin filter
 ## OLD: simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
 ## NOTE: 71 is ANSI color index for mediumseagreen (#5faf5f)
-simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory | colout "free" 71'; echo
+simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory | colout "free" 71'
 
 #...............................................................................
 # Emacs related
