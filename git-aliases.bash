@@ -1020,9 +1020,12 @@ function git-misc-alias-usage() {
     echo "    GIT_MESSAGE='moved' git-move-to-dir DIR file1 file2"
     echo ""
     echo "To delete files (mucho cuidado):"
-    # note: Bypasses 'git add' in git-update-commit-push (TODO3: customize alias for this).
+    # note: git-rm-alias stages the deletion, but git-update-force's stash/pop cycle unstages it.
+    # So 'git add' (implicit in git-update-commit-push) re-stages the deletion—do NOT use GIT_SKIP_ADD=1.
     # See https://stackoverflow.com/questions/37279654/when-should-i-use-rm-git-rm-git-rm-cached-git-add.
-    echo '   old="TODO..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" GIT_SKIP_ADD=1 git-update-commit-push "$old"'
+    ## BAD: GIT_SKIP_ADD=1 skips re-staging after stash/pop, so commit finds nothing staged
+    ## echo '   old="TODO..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" GIT_SKIP_ADD=1 git-update-commit-push "$old"'
+    echo '   old="TODO..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" git-update-commit-push "$old"'
     echo ""
     echo "To check in all tracked files with changes (examinar primero):"
     echo "   GIT_MESSAGE='...' git-update-commit-push \$(git-files-changed)"
