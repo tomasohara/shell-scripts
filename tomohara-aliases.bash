@@ -918,7 +918,11 @@ function copy-readonly-to-dir () {
 cond-export NICE "nice -19"
 ## DUPLICATE: export TIME_CMD="/usr/bin/time"
 
+# fix-group-dir-permissions(): fix group sticky bin for directory
+## OLD (deprecated):
 alias fix-dir-permissions="find . -type d -exec chmod go+xs {} \;"
+## TODO3 (add "use set_group_permissions.bash" warning):
+function fix-group-dir-permissions { (find . -type d | xargs chmod --changes go+xs ) 2>&1 | $PAGER; }
 
 #-------------------------------------------------------------------------------
 trace directory commands
@@ -1171,8 +1175,8 @@ function prepare-find-files-here () {
     fi
     if [ "$1" != "" ]; then
         echo "Error: No arguments accepted; did you mean find-files-here?"
-        echo "Usage: $0 [--out-dir dir]"
-        echo "ex: cd /; $0 --out-dir ~/temp/fs-index"
+        echo "Usage: ${FUNCNAME[0]} [--out-dir dir]"
+        echo "ex: cd /; ${FUNCNAME[0]} --out-dir ~/temp/fs-index"
         return
     fi
     # Note:: uses -a to include dot files
@@ -1996,6 +2000,7 @@ function run-app {
     log=$TEMP/"$app-$(TODAY).log"
     if [ -e "$log" ]; then
         echo "FYI: Updating $app's log $log"
+        python -c 'print("-" * 80)' >> $log
     fi
     local verbose=$(is-true "VERBOSE");
 
@@ -2811,7 +2816,6 @@ function fix-sudoer-home-permission () {
         echo "Warning: no sudo user for current shell"
     else
         rename-with-file-date "$changes_log"
-        # TODO: account for alternative home dir schemes
         chown --recursive --changes "$SUDO_USER" "$user_home" > "$changes_log" 2>&1
         $PAGER "$changes_log"
     fi
