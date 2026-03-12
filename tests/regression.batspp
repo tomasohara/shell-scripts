@@ -160,7 +160,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## BAD:
 ## $ NUM_REVISIONS=5 alt-git-extract-all-versions alt-extract-all-git-versions.bash
 ## Trying main path alt-extract-all-git-versions.bash for version v13
-## /home/tomohara/temp/tmp/all-git-versions/alt-extract-all-git-versions.bash.v13-13Apr24
+## $TMP/all-git-versions/alt-extract-all-git-versions.bash.v13-13Apr24
 ## Trying main path alt-extract-all-git-versions.bash for version v12
 ## fatal: Not a valid object name 49d1dfc9c25e959ead5d861dde183baa115f2542:alt-extract-all-git-versions.bash
 ## Trying alternative path 
