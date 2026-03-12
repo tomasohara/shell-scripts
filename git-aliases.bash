@@ -946,6 +946,27 @@ function git-ls-tree-relative {
     git ls-tree -r --full-tree --name-only "$tree_ish" | sed "s#^#$up#";
 }
 
+# git-checkout-from(timestamp): checking out repository at particular TIMESTAMP [for given BRANCH]
+# see https://stackoverflow.com/questions/6990484/how-to-checkout-in-git-by-date
+# ex: git-checkout-from 2026-01-01
+function git-checkout-from {
+    local timestamp="$1";
+    if [ "$timestamp" = "" ]; then
+        echo "usage: ${FUNCNAME[0]} timestamp"
+        echo "example: ${FUNCNAME[0]} 2025-12-31"
+        echo "note: Use git-checkout-branch to go from detached-head state back to normal."
+        return
+    fi
+    local branch=$(git-current-branch)
+    ## TODO2: make sure before-timespec usage OK
+    # ex: git checkout $(git rev-list -n 1 --first-parent --before="$timestamp" "$branch")
+    ## TODO3:
+    ## local command="git rev-list -n 1 --first-parent --before='$timestamp' '$branch'"
+    ## echo "Issuing: git checkout \$($command)"
+    ## git checkout "$($command)"
+    git checkout $(git rev-list -n 1 --first-parent --before="$timestamp" "$branch")
+}
+
 #-------------------------------------------------------------------------------
 
 # git-alias-usage (): tips on interactive usage (n.b., aka git-template)
