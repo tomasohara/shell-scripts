@@ -23,6 +23,8 @@ function full-usage {
     local script
     script="$(basename "$0")"
     echo ""
+    echo "    Warning: deprecated script: use alt-extract-all-git-versions.bash."
+    echo ""
     echo "Usage: [env-spec] $script [--human] [--help] git-path [extract-dir]"
     echo ""
     echo "Examples:"
