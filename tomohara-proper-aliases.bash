@@ -21,12 +21,13 @@ alias git-add-='git-add-plus'
 alias git-diff-='git-diff-plus'
 ## TEMP:
 alias git-diff='git-diff-plus'
+alias gdiff=git-diff
 alias git-difftool-='git-difftool-plus'
 alias git-log-='git-log-plus'
 alias git-update-='git-update-plus' 
 alias git-vdiff='git-vdiff-alias'
 ## OLD: alias git-vdiff-='git-vdiff-alias'
-alias gdiff=git-vdiff
+alias gvdiff=git-vdiff
 alias git-all-update='update-main-repos.bash'
 alias git-extract-all-versions='extract-all-git-versions.bash --human'
 alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human'
