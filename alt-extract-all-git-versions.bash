@@ -24,13 +24,14 @@
 function full-usage {
     local script
     script="$(basename "$0")"
+    declare -g export_to_expr
     echo ""
     echo "Usage: [env-spec] $script [--human] [--help] git-path [extract-dir]"
     echo ""
     echo "Examples:"
     echo ""
     # HACK: Uses Usage in filename so shows up in brief usage
-    echo "NUM_REVISIONS=5 $script --human Usage.txt /tmp/git-versions"
+    echo "NUM_REVISIONS=5 $script --human Usage.txt $TMP/git-versions"
     echo ""
     echo "PRETTY=1 VERBOSE=1 $0 Dockerfile"
     echo ""
@@ -60,7 +61,7 @@ fi
 # we'll write all git versions of the file to this folder:
 TMP=${TMP:-/tmp}
 # shellcheck disable=SC2016
-export_to_expr='$TMP/all_versions_exported'
+export_to_expr='$TMP/all-git-versions'
 # note: see https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
 # shellcheck disable=SC2116
 $debug && echo "export_to_expr=$export_to_expr"
