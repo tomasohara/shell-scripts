@@ -748,28 +748,20 @@ function rename-last-snapshot {
 # fix-transcript-timestamp(file): put text on same line in YouTube transcripts in FILE
 alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
 alias youtube-transcript-fix=fix-transcript-timestamp
+
 # youtube-transcript(url, file): download YoutTube transcript at URL to FILE
+# TODO1: reconcile with youtube-transcript-alt below
 function youtube-transcript {
-    # note: checks for missing filename from yt-transcript below
+    # note: checks for missing filename (see yt-transcript macro below)
     if [[ ("$2" == "") || ($2 =~ ^-.*) || ("$1" == "--help") ]]; then
-        ## OLD:
-        ## echo "Usage: youtube-transcript url file" 1>&2
-        ## echo "" 1>&2
-        ## echo "Example:" 1>&2
-        ## echo "    yt-transcript https://www.youtube.com/watch?v=miJRWAEeuUY vivobook" 1>&2
-        ## echo "" 1>&2
-        ## echo "Note: More details follow (n.b., python script interface):"  1>&2
-        ## echo "" 1>&2
-        ## TODO3: add alias for showing condensed mezcla script usage notes
-        ## OLD: alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;' 1>&2
-        echo "Usage: youtube-transcript url label"
+        echo "Usage: youtube-transcript url prefix"
         echo ""
         echo "Example:"
-        echo "    yt-transcript https://www.youtube.com/watch?v=miJRWAEeuUY vivobook"
+        echo "    yt-transcript vivobook 'https://www.youtube.com/watch?v=miJRWAEeuUY'"
         echo ""
         echo "Note:"
-        echo "- The label gets is affix of the output file:"
-        echo "    {label}-youtube-{date}.list"
+        echo "- The prefix forms basis for output file:"
+        echo "    {prefix}-youtube-{date}.list"
         echo "  where date uses ddmmmyy format."
         echo ""
         echo "- More details follow (n.b., python script interface):" 
@@ -783,10 +775,13 @@ function youtube-transcript {
     alias-python -m mezcla.examples.youtube_transcript "$url" > "$file"
     head --verbose "$file"
 }
-# youtube-transcript-alt(): workaround for silly bash problem:
+# youtube-transcript-alt(url, file): workaround for bash problem w/ youtube-transcript
+# over URL due to missing FILE argument:
 #    $ youtube-transcript 'https://www.youtube.com/watch?v=gcgMyRfE8a4&t=247s'
 #    bash: : No such file or directory
-# This also allows for stdout instead of requiring a file.
+# Specifically, when FILE option was unspecified, the bad expansion was as follows:
+#    $ youtube-transcript 'https://www.youtube.com/...' > ""
+# This macro also allows for stdout instead of requiring a file (via use of "-").
 # TODO: check for &'s in URL and issue warning
 # DUH: The "$file" redirection was causing problems (Thanks, Grok!)
 # TODO2: check for other aliases with similar issues
@@ -804,12 +799,13 @@ function youtube-transcript-alt {
         alias-python "$(which youtube_transcript.py)" "$url" > "$file"
     fi
 }
-# yt-transcript(url, basename): download YouTube video transcript at URL and save to BASENAME-ddMMMyy.list
-# TODO3: add helper alias 
+# yt-transcript(prefix, url): download YouTube video transcript at URL and save to PREFIX-youtube-mmmyy.list
+# note: PREFIX specified before URL for better clarity; see usage under youtube-transcript macro above.
 function yt-transcript {
-    local filename="$2-youtube-$(T).list"
-    youtube-transcript "$1" "$filename"
-    ## OLD: echo $'See\n\t'"$filename"
+    local prefix="$1"
+    local url="$2"
+    local filename="$prefix-youtube-$(todays-date-mmmYY).list"
+    youtube-transcript "$url" "$filename"
 }
 
 #...............................................................................
