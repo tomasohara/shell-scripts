@@ -1091,10 +1091,12 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   #
   # grepl-hist-tail(): grep through bash history
   # note: uses redundant grepl for highlighting (with potentially split args noted above for grep-to-less)
+  # TODO3: remove redundant item number (due to history and grepl)
+  #    7255: 7255  [2026-03-13 22:57:03] my-gnome-terminal --title "copilot: mezcla" --no-xterm-title
   function grepl-hist-tail { history  | grepl "$@" | tail | grepl "$@"; }
   #
   # grepl-bashrc-etc(): grep through bash rc files excluding history
-  # note: see grepl-hist-tail for rationale
+  # note: see grepl-hist-tail for rationale (e.g., double grepl and potentially split args)
   function grepl-bashrc-etc { grepl "$@" ~/.*bash* | grep -v '\.bash_history' | tail | grepl "$@"; }
 }
 # gr-c: grep through c/c++ source and headers files
