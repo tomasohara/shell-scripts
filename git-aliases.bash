@@ -186,6 +186,17 @@ function quiet-unalias-alias {
     unalias "$@" 2> /dev/null || true;
 }
 
+# alias-function(name, command, ...): define NAME alias via function def w/ COMMAND ...
+# NOTE: This is a simplified version of simple-alias-fn from tomohara-aliases.bash
+# intended as replacement for 'alias name=command' usages.
+# It takes the alias name and a command, appending "$@" to the command.
+function alias-function {
+    local alias="$1"
+    shift
+    local command="$*"
+    eval "function $alias { $command" '"$@"' "; }"
+}
+
 # HACK: wrapper around check_errors.perl w/ new QUIET option
 function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 $PERL check_errors.perl -context=5 "$@") 2>&1; }
 
@@ -446,7 +457,7 @@ EOF
 }
 #
 # note: following for backward compatibility
-simple-alias-fn git-commit-and-push git-add-commit-push
+alias-function git-commit-and-push git-add-commit-push
 
 
 # git-update-commit-push(file, ...): updates local repo and then commits FILE... to global repo
@@ -621,6 +632,17 @@ function unescape-at-sign {
 # Note:
 # - Normalizes the listing such as by changing a/<path> to a: <path> and likwise for b.
 # - The optional FILES-ETC are passed along to git-diff command.
+#
+# ex: git-diff-plus HEAD~1 tomohara-aliases.bash
+#
+# Note: See gitrevisions(7) for details on revision syntax.
+#
+# FUTURE WORK: Expose useful git revision/diff features (e.g., passing HEAD~1)
+# transparently to other alias wrappers such as git-difftool-plus,
+# git-vdiff-alias, and the git-checkin-* templates.
+#
+# TODO2: Refactor the revision parsing logic (using git rev-parse) into a helper
+# function to make it reusable in other git-xyz-plus wrappers.
 function git-diff-plus {
     local log;
     log=$(get-temp-log-name "diff");
@@ -632,6 +654,23 @@ function git-diff-plus {
     ## Note:
     ## - Uses git-diff-list[-template] so file order reflects subdir embedding level.
     ## - The 'diff -- file' format is used in case of spaces or other special characters.
+
+    local -a git_args=()
+    local seen_dash_dash=0
+    for arg in "$@"; do
+        if [[ "$arg" == "--" ]]; then
+            seen_dash_dash=1
+        elif [[ $seen_dash_dash -eq 1 ]]; then
+            continue
+        elif [[ "$arg" == -* ]]; then
+            git_args+=("$arg")
+        elif git rev-parse --verify --quiet "$arg^{commit}" >/dev/null 2>&1 || \
+             git rev-parse --verify --quiet "$arg^{tree}" >/dev/null 2>&1 || \
+             git rev-parse --verify --quiet "$arg^{blob}" >/dev/null 2>&1; then
+            git_args+=("$arg")
+        fi
+    done
+
     local OLDIFS="$IFS"                 # save inter-field separator
     IFS=$'\n'
     echo "" >| "$log"
@@ -640,7 +679,7 @@ function git-diff-plus {
         ## TODO:
         ## local f_escape
         ## f_escape="$(echo "$f" | perl -pe 's/@/\\@/g;')"
-        git diff -- "$f" | escape-at-sign | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@$1$2 $3: @g) {}' | unescape-at-sign >> "$log" 2>&1
+        git diff "${git_args[@]}" -- "$f" | escape-at-sign | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@$1$2 $3: @g) {}' | unescape-at-sign >> "$log" 2>&1
     done
     IFS="$OLDIFS"                       # restore inter-field separator
     #
@@ -853,10 +892,10 @@ alias git-cd-root-alias='cd $(git-root-alias)'
 alias git-invoke-next-single-checkin=invoke-next-single-checkin
 # NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
 # shellcheck disable=SC2139
-alias-fn git-alias-refresh "source '${BASH_SOURCE[0]}'"    # bash idiom for current script filename
-simple-alias-fn git-refresh-aliases 'git-alias-refresh'
-simple-alias-fn git-next-checkin 'invoke-alt-checkin'      # uses alt-invoke-next-single-checkin
-simple-alias-fn git-extract-all-versions 'extract-all-git-versions.bash'
+alias-function git-alias-refresh "source '${BASH_SOURCE[0]}'"    # bash idiom for current script filename
+alias-function git-refresh-aliases 'git-alias-refresh'
+alias-function git-next-checkin 'invoke-alt-checkin'      # uses alt-invoke-next-single-checkin
+alias-function git-extract-all-versions 'extract-all-git-versions.bash'
 ## TEST: hide tracing output alias git-next-checkin='invoke-alt-checkin 2> /dev/null'
 # git-tar-repo(): create tar archive of entire repo
 alias git-tar-repo=tar-this-dir-dated
@@ -903,7 +942,7 @@ function git-checkout-branch {
     # Show end of log
     git-alias-review-log "$log"
 }
-simple-alias-fn git-branch-checkout  git-checkout-branch 
+alias-function git-branch-checkout  git-checkout-branch 
 
 # git-branch-alias(): return current branch for repo
 function git-current-branch {
