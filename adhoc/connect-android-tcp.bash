@@ -75,7 +75,8 @@ Options:
   -           Confirm execution (required)
 
 Notes:
-  Environment options: DEBUG_LEVEL, STRICT, TRACE, and VERBOSE.
+- Environment options: DEBUG_LEVEL, STRICT, TRACE, and VERBOSE.
+- To stop connection, issue: adb disconnect
 EOF
     exit 0
 }
@@ -183,7 +184,7 @@ msg "🔎" "Detected phone USB IP: $PHONE_IP"
 # Retry briefly to handle adbd restart timing after 'adb tcpip'
 msg "⏳" "Connecting to $TARGET..."
 for attempt in {1..10}; do
-    CONNECT_OUTPUT=$(adb connect "$TARGET" 2>&1 || true)
+    CONNECT_OUTPUT=$(timeout 1 adb connect "$TARGET" 2>&1 || true)
     if echo "$CONNECT_OUTPUT" | grep -E -q "connected|already connected"; then
         msg "✅" "Successfully connected to $TARGET [attempt $attempt]"
         echo
