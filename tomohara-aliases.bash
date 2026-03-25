@@ -268,11 +268,12 @@ alias disable-console-tracing='export CONSOLE_TRACING=0'
 
 # missing-options(): whether no options specified or --help/-h
 # note: based on POE Assistant
+# usage: if missing-options "$@"; then echo "Usage: ..."; fi
 function missing-options {
     [[ $# -eq 0 || "$1" == "--help" || "$1" == "-h" ]]
 }
 
-# usage(): helper alias for showing function usage statements
+# function-usage(): helper alias for showing function usage statements
 # note: based on POE Assistant
 # Sample usage:
 #    if missing-options; then
@@ -354,7 +355,7 @@ function mmddyy-hhmm {
 # file-date-mmdddyy(): return file's timestamp in European format without hours and minutes
 # note: %y gives time of last data modification, human-readable
 function file-date-mmdddyy {
-    if [ missing-options "$@" ]; then
+    if missing-options "$@"; then
         function-usage --synopsis "return file timestamp using mmdddyy" --example "/tmp/fubar.txt"
         return        
     fi
@@ -1154,7 +1155,14 @@ function findgrep- () { find $1 -iname $2 -print -exec $GREP $findgrep_opts "$3"
 ## Lorenzo review: should change this to findgrep-alt following TODO's
 function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$dir" -iname "*.$ext" -exec $GREP $findgrep_opts "$@" \{\}  /dev/null \;; }
 # fgr(filename_pattern, line_pattern): $GREP through files matching FILENAME_PATTERN for LINE_PATTERN
-function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
+# fgr-full(pattern): full findgrep from current dir for PATTERN
+function fgr-full { findgrep . "$@"; }
+# fgr-ext-full(extension, pattern): full findgrep for *.EXTENSION from current dir for PATTERN
+function fgr-ext-full { findgrep-ext . "$@"; }
+## OLD:
+## function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
+## function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
+function fgr () { fgr-full | $EGREP -v '((/backup)|(/build))'; }
 function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
 simple-alias-fn fgr-py 'fgr-ext py'
 simple-alias-fn fgr-jupyter 'fgr-ext ipynb'
@@ -2689,8 +2697,25 @@ function cmd-usage () {
 ## TOM-IDIOSYNCRATIC
 # TODO: condition upon using Linux kernel (or cygwin
 alias configure='./configure --prefix ~'
-alias pp-xml='xmllint --format'
-alias pp-html='pp-xml --html'
+# pp-xml(xml-file): prettyprint xml-file to stdout
+# pp-html(html-file): prettyprint html-file to stdout
+## OLD:
+## alias pp-xml='xmllint --format'
+## alias pp-html='pp-xml --html'
+function pp-xml {
+    if missing-options "$@"; then
+        function-usage --synopsis "prettyprint xml" --example "my-doc.xml"
+        return        
+    fi
+    xmllint --format "$@"
+}
+function pp-html {
+    if missing-options "$@"; then
+        function-usage --synopsis "prettyprint html" --example "my-page.html"
+        return        
+    fi
+    pp-xml --html "$@"
+}
 # ex: pp-url "www.fu.com?p1=fu&p2=bar" => "www.fu.com\n\t?p1=fu\n\t&p2=bar"
 alias pp-url-aux='perl -pe "s/[\&\?]/\n\t$&/g;"'
 function pp-url { echo "$@" | pp-url-aux; }
@@ -3202,7 +3227,7 @@ function python-lint-work() {
 # TODO: rename as python-lint-tpo for clarity (and make python-lint as alias for it)
 # note: R0801 is for duplicate lines across source files (no mnemonic)
 function python-lint() {
-    local disables="duplicate-code,bad-whitespace,bad-indentation,bare-except,c-extension-no-member,consider-using-enumerate,consider-using-f-string,consider-using-with,global-statement,global-variable-not-assigned,keyword-arg-before-vararg,len-as-condition,line-too-long,logging-not-lazy,misplaced-comparison-constant,no-self-use,redefined-variable-type,redundant-keyword-arg,superfluous-parens,too-many-arguments,too-many-instance-attributes,trailing-newlines,useless-else-on-loop,useless-return,useless-super-delegation,useless-import-alias,wrong-import-order,wrong-import-position"
+    local disables="duplicate-code,bad-whitespace,bad-indentation,bare-except,c-extension-no-member,consider-using-enumerate,consider-using-f-string,consider-using-with,global-statement,global-variable-not-assigned,keyword-arg-before-vararg,len-as-condition,line-too-long,logging-not-lazy,misplaced-comparison-constant,no-self-use,redefined-variable-type,redundant-keyword-arg,superfluous-parens,too-many-arguments,too-many-branches,too-many-instance-attributes,too-many-locals,too-many-public-methods,too-many-statements,trailing-newlines,useless-else-on-loop,useless-return,useless-super-delegation,useless-import-alias,wrong-import-order,wrong-import-position"
     python-lint-work --disable="$disables" "$@" 2>&1 | $PAGER;
 }
 # python-lint-filtered(file, ...): uses additional PYLINT_FILTER with python-lint over FILE ...
