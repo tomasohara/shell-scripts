@@ -133,7 +133,7 @@ info="$TMP/_$base.$$.info"
 git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
 TOTAL_NUM=$(wc -l < "$info")
 if [ "${QUICK_MODE:-0}" == "0" ]; then
-    total_num_cases=$(git --no-pager log --follow "$GIT_PATH_TO_FILE" | grep -c -v '^commit')
+    total_num_cases=$(git --no-pager log --follow "$GIT_PATH_TO_FILE" | grep -c '^commit')
     if [ "$TOTAL_NUM" != "$total_num_cases" ]; then
         echo "Warning: Additional cases due to renames: try alt-extract-all-git-versions.bash"
     fi
