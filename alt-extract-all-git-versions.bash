@@ -141,7 +141,7 @@ else
     # TODO2: factor in relative path of current directory if not invoked from git root
     # "R100     .github/workflows/python.yml    .github/workflows/github.yml"
     git log --name-status --follow "$GIT_PATH_TO_FILE" | grep ^R > "$info.renames"
-    ALT_PATHS=$(cut -f2 -d $'\t' "$info.renames")
+    ALT_PATHS=($(cut -f2 -d $'\t' "$info.renames"))
     $debug && echo "ALT_PATHS=(${ALT_PATHS[*]})"
 fi
 TOTAL_NUM=$(wc -l < "$info")
