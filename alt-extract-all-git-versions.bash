@@ -19,6 +19,20 @@
 # TODO1: fix problem with extraneous error codes from git cat-file over alternative
 # TODO3: merge with extract-all-git-versions.bash
 #
+# -------------------------------------------------------------------------------
+# Details of Rename Resolution:
+# - Uses a single 'git log --follow --name-status' pass to build a per-commit
+#   mapping of (date, SHA, actual-file-path).
+# - For A/C/M/T status lines the path is taken as-is; for R (rename) lines the
+#   old path (pre-rename, field 2) is used, since that is the path git cat-file
+#   needs to retrieve the file content from that commit.
+# - This replaces an earlier two-pass approach (separate commit list + rename list
+#   via grep ^R) that failed when git --follow traced history through
+#   content-similar but independently-created files.  In that case --follow
+#   produced no R entry in the name-status output (the sibling file appeared as A),
+#   leaving ALT_PATHS empty and making every fallback attempt fail.
+# -------------------------------------------------------------------------------
+#
 
 # Helpers
 function full-usage {
@@ -136,13 +150,18 @@ if [ "$ALLOW_RENAMES" == "0" ]; then
     git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
 else
     # note: --follow is used to account for renames (see other options above)
-    git log --follow --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
-    # Get information on renames
-    # TODO2: factor in relative path of current directory if not invoked from git root
-    # "R100     .github/workflows/python.yml    .github/workflows/github.yml"
-    git log --name-status --follow "$GIT_PATH_TO_FILE" | grep ^R > "$info.renames"
-    ALT_PATHS=($(cut -f2 -d $'\t' "$info.renames"))
-    $debug && echo "ALT_PATHS=(${ALT_PATHS[*]})"
+    # Combine commit info and per-commit file path into one pass:
+    #   - COMMIT lines give date and SHA
+    #   - A/C/M/T lines give path the file had in that commit
+    #   - R lines give the old path (field 2) the file had before the rename
+    # This avoids a separate rename-detection pass and correctly handles cases
+    # where --follow uses content-similarity but produces no R entry (false renames
+    # between independently-created files with similar content).
+    git log --follow --name-status --format="COMMIT %ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | \
+        perl -ne 'if (/^COMMIT (\S+) (\S+)/) { ($date,$sha)=($1,$2) }
+                  elsif (/^[ACMT]\t(.+)/)    { print "$date $sha $1\n" }
+                  elsif (/^R\d+\t([^\t]+)/)  { print "$date $sha $1\n" }' > "$info"
+    $debug && echo "Commit/path list:"; $debug && cat "$info"
 fi
 TOTAL_NUM=$(wc -l < "$info")
 
@@ -170,32 +189,30 @@ while read -r LINE; do
         version_spec="v$VERSION_NUM"
     fi
     COMMIT_SHA=$(echo "$LINE" | cut -d ' ' -f 2)
-    $debug && echo "COUNT=$COUNT LINE=$LINE COMMIT_DATE=$COMMIT_DATE COMMIT_SHA=$COMMIT_SHA"
+    # for ALLOW_RENAMES use per-commit path extracted from --name-status (field 3+);
+    # otherwise use the fixed relative path
+    COMMIT_FILE_PATH="$REL_GIT_PATH_TO_FILE"
+    if [ "$ALLOW_RENAMES" == "1" ]; then
+        COMMIT_FILE_PATH=$(echo "$LINE" | cut -d ' ' -f 3-)
+    fi
+    $debug && echo "COUNT=$COUNT COMMIT_DATE=$COMMIT_DATE COMMIT_SHA=$COMMIT_SHA COMMIT_FILE_PATH=$COMMIT_FILE_PATH"
     output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.${version_spec}-${date_spec}"
     if [ -e "$output_file" ]; then
         echo "Warning: adding time of day ($hour_spec) to distinguish '$output_file'";
         output_file="${output_file}_${hour_spec}";
     fi
-    $debug && echo "Trying main path $REL_GIT_PATH_TO_FILE for version $version_spec"
-    git cat-file -p "$COMMIT_SHA:$REL_GIT_PATH_TO_FILE" > "$output_file" 2> "$info.err"
+    $debug && echo "Trying path $COMMIT_FILE_PATH for version $version_spec"
+    git cat-file -p "$COMMIT_SHA:$COMMIT_FILE_PATH" > "$output_file" 2> "$info.err"
+    commit_resolved=false
     if [ $? -eq 0 ]; then
+        commit_resolved=true
         let GOOD_COUNT++
     else
         head -3 "$info.err"
-        if [ "$ALLOW_RENAMES" == "1" ]; then
-            for f in "${ALT_PATHS[@]}"; do
-                echo "Trying alternative path $f"
-                git cat-file -p "$COMMIT_SHA:$f" >| "$output_file" 2>  "$info.err"
-                if [ $? -eq 0 ]; then
-                    let GOOD_COUNT++
-                    break
-                fi
-                head -3 "$info.err"
-            done
-            echo "Error: unable to resolve commit $COMMIT_SHA"
-        fi
+        echo "Error: unable to resolve commit $COMMIT_SHA"
+        rm -f "$output_file"
     fi
-    $verbose && echo "$output_file"
+    $verbose && $commit_resolved && echo "$output_file"
 done <"$info"
 
 # return success code
