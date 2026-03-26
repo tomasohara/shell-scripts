@@ -37,8 +37,8 @@ webcolors                               # - Library for working with color names
 xmltodict                               # - Makes working with XML feel like working with JSON
 youtube-transcript-api                  # - API for getting transcripts for YouTube videos
 pyenchant                               # - Spellchecking library
-spacy                                   # - Industrial-strength Natural Language Processing
-transformers                            # - State-of-the-art Machine Learning (Hugging Face)
+#opt# spacy                                   # - Industrial-strength Natural Language Processing
+#opt# transformers                            # - State-of-the-art Machine Learning (Hugging Face)
 #
 #...............................................................................
 # Redundant specification of some dependencies due to Git workflow quirk,
