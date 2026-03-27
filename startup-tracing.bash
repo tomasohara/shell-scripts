@@ -7,7 +7,7 @@
 #
 # NOTES:
 # - Environment variables
-#	STARTUP_TRACING		enables tracing if 1
+#	STARTUP_TRACING		enables tracing to log file if 1
 #	CONSOLE_TRACING		echoes to console as well as log file
 #	VERBOSE_TRACING		echoes miscellaneous tracing as well (but just to console)
 #
