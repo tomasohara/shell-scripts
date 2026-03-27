@@ -134,7 +134,8 @@
 #
 
 # For debugging: Uncomment the following line(s)
-## DEBUG: echo in tomohara-aliases.bash 1>&2
+## OLD: ## DEBUG: echo in tomohara-aliases.bash 1>&2
+[[ DEBUG_LEVEL -ge 6 ]] && echo in "${BASH_SOURCE[0]}" 1>&2
 ## DEBUG: set -o xtrace
 
 #...............................................................................
@@ -223,7 +224,7 @@ cond-export DEBUG_LEVEL 3
 # otherwise $HOME/bin
 ## TOM-IDIOSYNCRATIC
 ## DEBUG: 
-# Note: ${BASH_SOURCE[0]}" is the scirpt being sourced. The array itself gives
+# Note: ${BASH_SOURCE[0]}" is the script being sourced. The array itself gives
 # the source files for all functions on the execution call stack.
 # See https://stackoverflow.com/questions/35006457/choosing-between-0-and-bash-source.
 alias_source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
@@ -255,6 +256,7 @@ function quiet-conditional-source { source "$@" > /dev/null 2>&1; }
 # Enable full-blown startup tracing if evailable
 # note: kept separate for use in other scripts
 conditional-source "$TOM_BIN/startup-tracing.bash"
+startup-trace "post-tracing init in ${BASH_SOURCE[0]}"
 #
 alias trace='startup-trace'
 alias enable-startup-tracing='export STARTUP_TRACING=1'
@@ -523,7 +525,10 @@ trace start of main settings
 # TODO: define a function for removing duplicates from the PATH while
 # preserving the order
 function show-path-dir () { (echo "${1}:"; printenv "$1" | perl -pe "s/:/\n/g;") | $PAGER; }
+# show-path(): show PATH entries one per line
+# show-lib-path(): shows LD_LIBRARY_PATH entries one per line
 alias show-path='show-path-dir PATH'
+alias show-lib-path='show-path-dir LD_LIBRARY_PATH'
 # append-path(path): appends PATH to environment variable unless already there
 ## TODO: function in-path { local path=$(tr ":" "\n" | $GREP "^$1$$"); return ($path != ""); }
 # TODO: add force argument to ensure last (or first)
@@ -627,7 +632,7 @@ alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
 # Note: PS_symbol defines the prompt symbol (e.g., '$' vs. '§' [U+00A7])
 # example override (from .bashrc):
 #    export PS_symbol="¢"      # cent sign (U+00A2)
-## TODO: resolve interaction among 'reset-prompt', 'script' and 'add-conda-env-to-xterm-title' (see anacdonda-aliases.bash for latter)
+## TODO: resolve interaction among 'reset-prompt', 'script' and 'add-conda-env-to-xterm-title' (see anaconda-aliases.bash for latter)
 cond-export PS_symbol '$'
 function reset-prompt {
     ## DEBUG: echo "reset-prompt" "$@"
@@ -1098,7 +1103,8 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   #
   # grepl-bashrc-etc(): grep through bash rc files excluding history
   # note: see grepl-hist-tail for rationale (e.g., double grepl and potentially split args)
-  function grepl-bashrc-etc { grepl "$@" ~/.*bash* | grep -v '\.bash_history' | tail | grepl "$@"; }
+  ## BAD: function grepl-bashrc-etc { grepl "$@" ~/.*bash* | grep -v '\.bash_history' | tail | grepl "$@"; }
+  function grepl-bashrc-etc { grepl "$@" ~/.*bash* | grep -v '\.bash_history' | grepl "$@"; }
 }
 # gr-c: grep through c/c++ source and headers files
 # note: --no-messages suppresses warnings about missing files
@@ -1136,6 +1142,8 @@ function findspec-all () { command find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 
 function fs () { findspec . "$@" | $EGREP -iv '(/(backup|build)/)'; } 
 ## OLD: function fs-ls () { fs "$@" -exec ls -l {} \; ; }
 function fs-ls () { fs "$@" -exec ls "$core_dir_options" {} \; ; }
+# fs-ls-new(pattern): like fs-ls but omitting (extraneous) -print output
+function fs-ls-new () { findspec . "$@" -exec ls "$core_dir_options" {} \; ; }
 simple-alias-fn fs- 'findspec-all .'
 ## Lorenzo review: should change this to fs-alt following TODO's
 function fs-ext () { find . -iname \*."$1" | $EGREP -iv '(/(backup|build)/)'; } 
@@ -3159,6 +3167,7 @@ alias ps-python-full='ps-mine python'
 # note: excludes ipython and known system-related python scripts;
 # also excludes related bash and time processes.
 alias ps-python='ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|perl-regexp|update-manager|software-properties|networkd-dispatcher|/usr/bin|((bash|emacs|time) .*python))"'
+# show-python-path(): shows PYTHONPATH entries one per line
 alias show-python-path='show-path-dir PYTHONPATH'
 # mezcla-debug(): invoke debug.py (n.b., used for diagnostic purposes with its imports)
 simple-alias-fn mezcla-debug 'alias-python -m mezcla.debug'
@@ -3453,7 +3462,12 @@ function filter-random() {
 
 # Load supporting scripts
 #
+## OLD:
 conditional-source "$TOM_BIN/anaconda-aliases.bash"
+## TODO2:
+## if [[ $USE_ANACONDA =~ 1|true ]]; then
+##     conditional-source "$TOM_BIN/anaconda-aliases.bash";
+## fi
 conditional-source "$TOM_BIN/git-aliases.bash"
 
 # Web access
