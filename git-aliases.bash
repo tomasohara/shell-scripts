@@ -498,7 +498,7 @@ alias git-push-alias='invoke-git-command push'
 alias git-pull-alias='invoke-git-command pull'
 
 # Misc git commands (redirected to log file)
-# NOTE: commands with much output like git-log invoke less
+# NOTE: commands with much output like git-log-plus invoke less
 # TODO: add invoke-git-command-paged wrapper (a la git ... | less)
 alias git-status='invoke-git-command status'
 function git-log-plus { invoke-git-command log --name-status "$@" | less --quit-if-one-screen; }
@@ -507,6 +507,7 @@ alias git-log-diff-plus='invoke-git-command log --patch'
 alias git-log-follow='git-log-plus --follow'
 alias git-blame-alias='invoke-git-command blame'
 alias git-rm-alias='invoke-git-command rm'
+alias git-checkout-alias='invoke-git-command checkout'
 
 # git-add-plus: add filename(s) to repository
 # note: if GIT_FORCE is 1 then --force added (e.g., to override .gitignore)
