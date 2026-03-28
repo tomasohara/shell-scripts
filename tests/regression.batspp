@@ -423,3 +423,22 @@ Version: N.N.N.N
 
 ## TODO2: add tests for check-errors variations
 ## check-[all-]warnings vs [all-]check-errors
+
+##------------------------------------------------------------------------------
+
+## TODO2: add tests for most-recent-backup to avoid similar files due to affixes
+## $ most-recent-backup .bashrc
+## ./backup/.bashrc.tpo.~46~
+
+##------------------------------------------------------------------------------
+
+## TODO2: add tests for script-update session includes supporting aliases
+## script-update
+##
+## ...
+## Usual check-in process:
+##     git-cd-root-alias; git-tar-repo-proper; git-update-force; git-next-checkin
+##     # -or-: git-cd-root-alias; git-update-verified; git-conflicts-alias; git-next-checkin
+##     git-next-checkin                      # repeat, as needed
+## conditional-source: command not found
+## ^^^^^^^^^^^^^^^^^^
