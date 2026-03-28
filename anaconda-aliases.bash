@@ -49,7 +49,8 @@ fi
 function add-conda-env-to-xterm-title {
     ## DEBUG: echo "in add-conda-env-to-xterm-title"
     export XTERM_TITLE_SUFFIX
-    XTERM_TITLE_SUFFIX="Py$($python --version 2>&1 | $perl extract_matches.perl -i 'python (\d+.\d+)')"
+    ## OLD: XTERM_TITLE_SUFFIX="Py$($python --version 2>&1 | $perl extract_matches.perl -i 'python (\d+.\d+)')"
+    XTERM_TITLE_SUFFIX="Py$($python --version 2>&1 | $perl -pe 's/^.*Python (\d+.\d+).*/$1/i;')"
     declare CONDA_PROMPT_MODIFIER
     # note: removes extraneous trailing spaces
     if [[ $CONDA_PROMPT_MODIFIER =~ \ *$ ]]; then
