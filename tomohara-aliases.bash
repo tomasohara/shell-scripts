@@ -1611,7 +1611,7 @@ alias diff-log-output='compare-log-output.sh'
 alias vdiff-rev=kdiff-rev
 
 # most-recent-backup(file): returns most recent backup for FILE in ./backup, accounting for revisions (e.g., extract_matches.perl.~4~)
-# ntoe: now uses backup dir relative to file if a path
+# note: now uses backup dir relative to file if a path
 function most-recent-backup {
     if [ "$1" = "" ]; then
         echo "usage: most-recent-backup filename"
@@ -1628,7 +1628,8 @@ function most-recent-backup {
         dir="$file_dir/$dir"
     fi
     ## TODO: rework to avoid false positives
-    $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~*)?" | head -1;
+    ## BAD: $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~*)?" | head -1;
+    $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~.*)?$" | head -1;
 }
 # TODO: test for dot-files:
 #   touch backup .fubar.~666~; most-recent-backup .fubar => .fubar
@@ -3065,8 +3066,9 @@ function script {
     reset-prompt "$PS_symbol:\$"
     ## DEBUG: echo "script: 1. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
 
-    # Reset bashrc status variables
-    export PROFILE_PROCESSED=0 BASHRC_PROCESSED=0
+    ## OLD:
+    ## # Reset bashrc status variables
+    ## export PROFILE_PROCESSED=0 BASHRC_PROCESSED=0
     
     # Change xterm title to match
     set-title-to-current-dir
@@ -3086,6 +3088,8 @@ function script {
     set-xterm-title --simple "$save_full" "$save_icon"
 }
 }
+#
+# script-update(): invoke a script for a git session
 # TODO: put this in a separate file
 function script-update {
     local command_indicator=""
@@ -3097,7 +3101,7 @@ function script-update {
     script  "_update-$(T).log"  $command_indicator make-git-update.bash
 }
 
-# ansi-filter(filename]: wrapper around ansifilter with stdio and stdout instead of files
+# ansi-filter(filename): wrapper around ansifilter with stdio and stdout instead of files
 # TODO: issue request for proper Unix stdin support (n.b., this function is much ado about nothing)
 function ansi-filter {
     local input_file="$1"
