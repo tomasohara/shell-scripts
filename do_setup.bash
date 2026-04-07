@@ -1315,11 +1315,20 @@ fi
 ## # ex: extract-matches "genls (.*) Dog" dogs.cyc
 ## function old-extract-matches () { perl -ne "while (/$1/) { printf \"%s\\n\", \$1; s/$1//; }" $2; }
 
+# Miscellaneous PATH and PERLLIB manipulation (e.g., removing home dir paths)
+## TODO2: make deprecated
+# cd-env(): add $PWD to start of path and PERLLIB
 alias cd-env='export PERLLIB=`pwd`:${PERLLIB}; export PATH=`pwd`:${PATH};'
+# dir-env(dir): add DIR to start of path and PERLLIB
 function dir-env () { _dir=$1; export PERLLIB=${_dir}:${PERLLIB}; export PATH=${_dir}:${PATH}; unset _dir; }
+#
+# strip-dirs(path-value, path-prefix): remove PATH-PREFIX from PATH-VALUE
 function strip-dirs () { echo $1 | perl -pe s#$2[^:]+:?##g; }
+# clear-my-env(): remove $HOME from PATH and PERLLIB entries
 function clear-my-env () { export PATH=`strip-dirs $PATH $HOME`; export PERLLIB=`strip-dirs $PERLLIB $HOME`; }
+# clear-local-env(): remove /home/... from PATH and PERLLIB entries
 function clear-local-env () { export PATH=`strip-dirs $PATH /home`; export PERLLIB=`strip-dirs $PERLLIB /home`; }
+# show-perl-libs(): show library paths that Perl uses
 function show-perl-libs () { perl -e 'print join("\n", @INC), "\n";'; }
 
 #........................................................................
