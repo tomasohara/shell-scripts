@@ -91,6 +91,7 @@
 #    shellcheck disable=SC1001,SC1091
 #
 # TODO:
+# - ***** Move settings to tomohara-settings.bash (i.e., export's and the like).
 # - ***** Put work-specific stuff in separate file!"
 # - **** Add EX-bases tests for all numeric aliases!
 # - ***** Fix problems noted by shellcheck (and rework false positives)!.
@@ -135,7 +136,7 @@
 
 # For debugging: Uncomment the following line(s)
 ## OLD: ## DEBUG: echo in tomohara-aliases.bash 1>&2
-[[ DEBUG_LEVEL -ge 6 ]] && echo in "${BASH_SOURCE[0]}" 1>&2
+[[ $DEBUG_LEVEL -ge 6 ]] && echo in "${BASH_SOURCE[0]}" 1>&2
 ## DEBUG: set -o xtrace
 
 #...............................................................................
@@ -299,7 +300,7 @@ function function-usage {
     local fn="${FUNCNAME[1]}"
 
     [[ -n "$synopsis" ]] && echo "usage: $fn $synopsis"
-    [[ -n "$example"  ]] && echo "example: $example"
+    [[ -n "$example"  ]] && echo "example: $fn $example"
     [[ -n "$notes"    ]] && echo -e "note:\n$notes"
 
     return 0
@@ -416,12 +417,14 @@ function quiet-unalias {
 # command [is] saved ... default value [is] 500...
 # - HISTFILESIZE: maximum number of lines contained in the history file. 
 # TODO: do more excerpting or just summarize above.
-set bell-style none
+## BAD: set bell-style none
+## NOTE: 'set bell-style none' is a readline/.inputrc directive, not a bash command
 export HISTCONTROL=ignoredups
 export HISTTIMEFORMAT='[%F %T] '
 # Ensure that the history files are merged (n.b., timestamping required for
 # proper sequencing of entries from different shell windows).
-set histappend
+## BAD: set histappend
+shopt -s histappend
 # note: following are 50x the defaults
 ## BAD:
 ## export HISTSIZE=50000
@@ -928,7 +931,11 @@ cond-export NICE "nice -19"
 ## OLD (deprecated):
 alias fix-dir-permissions="find . -type d -exec chmod go+xs {} \;"
 ## TODO3 (add "use set_group_permissions.bash" warning):
-function fix-group-dir-permissions { (find . -type d | xargs chmod --changes go+xs ) 2>&1 | $PAGER; }
+## OLD: function fix-group-dir-permissions { (find . -type d | xargs chmod --changes go+xs ) 2>&1 | $PAGER; }
+## NOTE: Uses 'print0 ... xargs -0' to avoid chell-check warning; via POE Assistant
+function fix-group-dir-permissions { (find . -type d -print0 | xargs -0 chmod --changes go+xs) 2>&1 | "$PAGER"; }
+## TODO2: function fix-group-dir-permissions { (find . -type d -exec chmod --changes go+xs {} +) 2>&1 | "$PAGER"; }
+## where '-exec ... +' is replacement for xargs usage
 
 #-------------------------------------------------------------------------------
 trace directory commands
@@ -1730,10 +1737,10 @@ function make-tar () {
         base="$base-$(TODAY)";
         ## TEST: rename-with-file-date "$base"*
         for f in "$base".tar.{gz,log}; do
-	    if [ -e "$f" ]; then
-		move "$f" "$(get-free-filename "$f" "-")";
-	    fi;
-	done
+            if [ -e "$f" ]; then
+                move "$f" "$(get-free-filename "$f" "-")";
+            fi;
+        done
     fi
     global MAX_SIZE
     if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
@@ -2018,8 +2025,8 @@ function run-app {
     local log
     log=$TEMP/"$app-$(TODAY).log"
     if [ -e "$log" ]; then
-        echo "FYI: Updating $app's log $log"
-        python -c 'print("-" * 80)' >> $log
+        echo "FYI: Updating $app's log '$log'"
+        python -c 'print("-" * 80)' >> "$log"
     fi
     local verbose=$(is-true "VERBOSE");
 
@@ -2655,6 +2662,43 @@ function count-exts-all { (count-exts | cat; $LS | count-it '^[^.]+(\.*)$') | so
 
 alias kill-iceweasel='kill-em iceweasel'
 
+# flatten-path(path-label): convert PATH-LABEL to flattened file name:
+# - slash, whitespace, and non-filename-safe chars converted to _
+# - leading dashes converted to _
+# - collapse multiple underscores to a single _
+# ex: "recipes/regex/__init__.py" => "recipes_regex__init__.py"
+# note:
+# - this is intended for when there is wide variation of the input as with such as cmd-output
+# - developed with several different AI assistants (POE, GPT, Claude)
+# ex: "recipes/regex/__init__.py" => "recipes_regex_init_.py"
+# TODO2: allow for existing __'s to be preserved; trim leading/trailing underscores
+#
+function flatten-path {
+    # note: uses -pe '...' to avoid heredoc/pipe stdin conflict; \w covers unicode word chars; -CS is for unicode
+    printf '%s\n' "$@" | perl -CS -pe '
+        s/^-/_/u;         # leading dash => _
+        s{[/\h]}{_}gu;    # slash + horizontal whitespace => _
+        s/[^\w.\n-]/_/gu; # remaining non-filename-safe chars => _ (preserves unicode \w, dot, newline, dash)
+        s/_+/_/g;         # collapse multple _s
+        ## TODO?:
+        ## s/_{3,}/_/g;      # collapse 3+ underscores to one (preserves existing __)
+        ## s/^_+//;          # trim leading underscores
+        ## s/_+$//;          # trim trailing underscores
+    '
+}
+## TODO2:
+## function flatten-path {
+##     printf '%s\n' "$*" |
+##         perl -p <<PERL
+##             s/^-/_/;                    # leading dash
+##             s{[\/\s]}{_}g;              # slash + whitespace
+##             s{[^A-Za-z0-9._-]}{_}g;     # unsafe chars
+##             s/_{3,}/_/g;                # collapse 3+
+##             s/^_+//;                    # trim leading _
+##             s/_+$//;                    # trim trailing _
+## PERL
+## }
+##
 # cmd-output(cmd, ...): show output for cmd to _{cmd}-$(TODAY).log (with spaces
 # replaced by underscores)
 # note: subsequent files for the same date use ...-$(TODAY).N.log (for N=1, ...)
@@ -2669,7 +2713,8 @@ function cmd-output () {
     ## BAD: local output_base, output_file
     local output_base output_file
     ## OLD: output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')-$(TODAY)"
-    output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')"
+    ## OLD: output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')"
+    output_base="_$(flatten-path "$command-usage.list")"
     if [ "${ADD_MINUTES:0}" == "1" ]; then
         output_base="${output_base}-$(mmddyy-hhmm)"
     else
@@ -2690,7 +2735,8 @@ function cmd-output-hhmm () {
 function cmd-usage () {
     local command="$*"
     local usage_file
-    usage_file="_$(echo "$command" | perl -pe 's@[/ .]@_@g; s/_+/_/g;')-usage.list"
+    ## OLD: usage_file="_$(echo "$command" | perl -pe 's@[/ .]@_@g; s/_+/_/g;')-usage.list"
+    usage_file="_$(flatten-path "$command-usage.list")"
     $command --help  2>&1 | ansifilter > "$usage_file"
     ## OLD: if [ $? -eq 0 ]; then $PAGER_NOEXIT "$usage_file"; fi
     [ $? -eq 0 ] || sleep-for 1 "FYI: using existing file";
@@ -3308,7 +3354,8 @@ function python-module-version-alt {
 }
 function python-package-members() { local package="$1"; alias-python -c "import $package; print(dir($package));"; }
 #
-alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  alias-python setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
+## OLD: alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  alias-python setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
+alias python-setup-install='log=setup.log;  rename-with-file-date "$log";  uname -a > "$log";  alias-python setup.py install --record installed-files.list >> "$log" 2>&1;  ltc "$log"'
 # TODO: add -v (the xargs usage seems to block it)
 alias python-uninstall-setup='cat installed-files.list | xargs command rm -vi; alias-perl rename_files.perl -regex ^ un installed-files.list'
 
@@ -3664,9 +3711,3 @@ alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 # Optional end tracing
 trace 'out tomohara-aliases.bash'
 ## DEBUG: echo 'out tomohara-aliases.bash'
-
-## Lorenzo review: what's the purpose of keeping the OLD lines that only change /usr/bin to command or use alias-perl?
-## note: '## OLD" is used for three reasons:
-## 1. to facilitate manual merge,
-## 2. to highlight old approach when new changes are work-in-progress; and,
-## 3. because Tom is a packrat (i.e., cachivachero)!
