@@ -338,19 +338,34 @@ function disable-python-warnings {
     export PYTHONWARNINGS="ignore"
 }
  
-# pip-freeze(): save pip freeze in _pip-freeze-{env_spec}-ddMMMyy.log
-## note: the ghost of python 2 lives on [WTH?!]
+# pip-freeze([env_name=""]): save pip freeze in _pip-freeze-$ENV_NAME-ddMMMyy.log,
+# where ENV_NAME defaults to virtual env root dir basename (e.g., android-py-3-11) if python3
+# is in /usr/local/misc/programs/anaconda3/envs/android-py-3-11/bin
+## TODO2: handle non-venv directories better (rather than using interactive override)
+## note: the ghost of python 2 lives on--ex: need for explicit python3 [WTH?!]
 function pip-freeze {
     # TODO2: rework via cmd-output
     local env_spec=""
-    local env_name
-    # ex: /Users/eafqe/python/.venv-nlp-py-12/bin/python => venv-nlp-py-12
-    env_name="$(which python3 | extract-matches "([^\.\/]+)\/bin\/python")"
+    local env_name="${1:-""}"
+    # derive default env name label from python bin path
+    # ex: /Users/eafqe/python/.venv-nlp-py-12/bin/python => .venv-nlp-py-12
+    if [ "$env_name" == "" ]; then
+        ## OLD: env_name="$(which python3 | extract-matches "([^\.\/]+)\/bin\/python")"
+        env_name="$(which python3 | extract-matches "([^\/]+)\/bin\/python")"
+    fi
+    if [ "$env_name" == "" ]; then
+        # note: options: -e use readline; -i initialize readline buffer; -r backslash is not an escape
+        ## TODO2: make interactive override an option
+        env_name="$(which python3 | perl -pe "s@$HOME/+@@; s@.python3?@@; s@/+@-@g;")"
+        echo "Override env label for pip-freeze affix ($env_name)?"
+        read -r -e -i "$env_name" env_name
+    fi
     if [ "$env_name" != "" ]; then
         env_spec="-$env_name"
     fi
     local freeze_file
     freeze_file="_pip-freeze${env_spec}-$(T).log"
+    freeze_file="${freeze_file//--/-}"
     rename-with-file-date "$freeze_file"
     pip3 freeze > "$freeze_file"
     echo "$freeze_file"
@@ -538,6 +553,9 @@ alias extract-text-html='html_utils.py --regular'
 simple-alias-fn extract-text-html 'alias-python -m mezcla.html_utils --regular'
 alias extract-html-text='extract-text-html'
 
+#-------------------------------------------------------------------------------
+# MS Office like stuff
+
 # MS Office conversions
 function excel-to-csv {
     local file="$1"
@@ -545,7 +563,26 @@ function excel-to-csv {
     base="$(remove-extension "$file")";
     python -c "import pandas as pd; df = pd.read_excel('$file', dtype=str); df.to_csv('$base.csv', index=False, encoding='utf-8-sig');";
 }
- 
+
+
+# libroffice-text([filename]): open LibreOffice for new text document
+# via POE Assistant
+function libroffice-text {
+    if missing-options "$@"; then
+        function-usage --synopsis "create new LibreOffice text document (or open existing)" --example "memo-para-jefe"
+        return        
+    fi
+    local file="${1%.odt}.odt"
+
+    # Only create if missing
+    if [[ ! -e "$file" ]]; then
+        touch -- "$file"
+    fi
+    run-app libreoffice --writer "$file"
+}
+
+#-------------------------------------------------------------------------------
+
 # Github/ssh stuff
 # ssh-cache: activate ssh agent and add user's private key
 function ssh-cache {
@@ -705,7 +742,8 @@ alias-fn rename-adhoc-notes 'rename-files -q "$(get-host-nickname)-adhoc-notes" 
 function copy-to-temp-as-txt {
     local file="$1"
     local temp_file
-    global TEMP
+    ## TODO3: global TEMP
+    declare -g TEMP
     temp_file="$TEMP/$(basename "$file").txt"
     copy "$file" "$temp_file"
     touch "$temp_file"
@@ -937,6 +975,40 @@ alias show-window-list='wmctrl -l'
 # note: --location enables redirections
 # TODO3: strip URL args
 alias curl-save='curl --location --remote-name'
+
+# remove-path-entries(pattern): remove entries matching pattern from PATH_VAR and prune duplicate entries
+# ex: remove-path-entries "conda|anaconda"
+# ex: remove-path-entries cuda LD_LIBRARY_PATH
+# note: via Gemini-3 and POE Assistant
+function remove-path-entries {
+    if missing-options "$@"; then
+        function-usage --synopsis "remove env path var entries" --example "games"
+        return        
+    fi
+    local pattern="$1"
+    local var="${2:-PATH}"
+    local new_value
+    ## TODO3: convert to python help to allow for convenient tracing
+    new_value="$(
+        REMOVE_PATTERN="$pattern" \
+        TARGET_VAR="${!var}" \
+        perl -e '
+            my $pattern = $ENV{REMOVE_PATTERN};
+            my %seen;
+            my @parts = grep {
+                $_ ne "" &&
+                $_ !~ /$pattern/i &&
+                !$seen{$_}++
+            } split(/:/, $ENV{TARGET_VAR});
+            print join(":", @parts);
+        '
+    )"
+    
+    printf -v "$var" '%s' "$new_value"
+    ## OLD: export "$var"
+    eval 'export $var'
+}
+
 
 #...............................................................................
 # Linux admin
