@@ -74,8 +74,10 @@
 #      -n string                    whether string is non-empty
 #      -z string                    whether string is empty
 #  - here-documents
-#      <<END ... END                multiple line using ... (i.e., "here docs")
-#      <<<"text"                    single line using TEXT (i.e., "here string")
+#      <<END\n line1\n...\nEND      multiple line using line1, ... as stdin
+#  - here-strings
+#      <<<"text"                    single line using TEXT as stdin
+#  - indented here-documents        END can be indented; unfortunately requires tab indentation--hence brittle
 #  - sequence expression
 #      {n..m}                       echo "digits:" {0..9}; echo "letters: " {a..z}
 #  - advanced redirection
