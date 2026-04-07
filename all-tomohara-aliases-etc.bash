@@ -93,4 +93,10 @@ if [ "${DIR_ALIAS_HACK:-0}" = "1" ]; then
     #
 fi
 ##
-$was_tracing || set - -o xtrace
+## BAD: $was_tracing || set - -o xtrace
+## NOTE: This above set the $@ parameters to "-o xtrace"! Via bash manual:
+##   set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
+##     - Signal the end of options, cause all remaining  args to be assigned
+##       to the positional parameters. The -x and -v options are turned off. ...
+##
+$was_tracing || set +o xtrace
