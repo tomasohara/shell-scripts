@@ -469,7 +469,7 @@ function git-update-commit-push {
         echo "Warning: consider canceling given possible update error (status=$?)"
     fi
     git-commit-and-push "$@"
-    # DEBUG: set - -o xtrace
+    # DEBUG: set +o xtrace
 }
 #
 # git-update-commit-push-all(): adds all files for checkin
@@ -844,7 +844,9 @@ function alt-invoke-next-single-checkin {
         git diff --numstat -- "$mod_file" | head
         true
     fi
-    local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
+    ## OLD: local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
+    # note: Uses single quote to avoid interpolating variable references (e.g., $- or $TRACE)'.
+    local prompt="GIT_MESSAGE='...' git-update-commit-push \"$mod_file\""
     local command
     echo "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
     local OLD_GIT_MESSAGE=$GIT_MESSAGE
