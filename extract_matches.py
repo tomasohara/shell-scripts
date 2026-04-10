@@ -150,10 +150,10 @@ class ExtractMatches(Main):
             self.max_count = 1
         else:
             self.max_count = system.MAX_SIZE if self.multi_per_line else 1        
-        
+
+        ## TODO2: clarify following
         if my_re.match(r"\(.*\*\)", self.pattern):
             raise ValueError("Pattern may cause infinite loop: pattern matches everything.")
-
 
         ## Enforce a single pattern per line when beginning-of-line pattern (^) used
         # if my_re.search(r"^\^.*|.*\$$", self.pattern):
