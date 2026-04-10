@@ -10,10 +10,19 @@
 #
 # Usage example:
 #   source ~/bin/new-backup-aliases.sh
-#   backup_dir="j:/backup/tpo-esc"
-#   cd c:/
+#   backup_dir="/d/backup/tpo-esc"
+#   backup_base="_do_d_backup-$(T)"
+#   cd /c
 #   create-backup-script
-#   trace-cmd source /tmp/_do_backup.sh > ${backup_dir}/_do_backup.log 2>&1
+#   trace-cmd source "$TMP/$backup_base.sh" > "${backup_dir}/$backup_base".log 2>&1
+#
+## OLD:
+## # Usage example:
+## #   source ~/bin/new-backup-aliases.sh
+## #   backup_dir="j:/backup/tpo-esc"
+## #   cd c:/
+## #   create-backup-script
+## #   trace-cmd source /tmp/_do_backup.sh > ${backup_dir}/_do_backup.log 2>&1
 #
 # TODO: convert example to Linux
 #
@@ -102,10 +111,9 @@ function create-backup-script () {
 # Auxiliary alias for tracing command execution (i.e., temporarily enabling trace)
 #
 function trace-cmd () {
-    set -o xtrace;
-    ## OLD: eval "$@";
-    eval "$*"
-    set - -o xtrace
+    bash-trace-on
+    eval "$@";
+    bash-trace-off
 }
 
 if [ "$1" = "" ]; then
