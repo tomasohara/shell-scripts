@@ -756,10 +756,10 @@ function set-title-to-current-dir () {
 if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-dir; fi
 #
 alias reset-xterm-title='set-xterm-window "$HOSTNAME $PWD"'
-# alt-xterm-title([prefix=alt]): change xterm title to PREFIX DIR-BASENAME [PWD]
+# old-alt-xterm-title([prefix=alt]): change xterm title to PREFIX DIR-BASENAME [PWD]
 # Warning: this doesn't modify the prompt symbol (e.g. $PS_symbol). For that,
 # use the new reset-prompt-label in tomohara-proper-aliases.bash.
-function alt-xterm-title() { 
+function old-alt-xterm-title() { 
     local dir
     local prefix="$1"
     if [ "$prefix" = "" ]; then prefix="alt"; fi
@@ -851,6 +851,14 @@ alias cls="command clear -x"
 alias mv='$MV'
 alias move='mv'
 alias move-force='move -f'
+# move-then-link(file, dir): moves FILE to DIR and then creates symbolic link
+function move-then-link {
+    local file="$1"
+    ## TODO: chomp $dir
+    local dir="$2"
+    move "$file" "$dir"
+    link-symbolic "$dir/$file"
+}
 # TODO: make sure symbolic links are copied as-is (ie, not dereferenced)
 CP="command cp -ip $other_file_args"
 reference-variable "$CP"
@@ -902,6 +910,7 @@ alias remove-force='delete-force'
 # TODO: make sure that rellowing only applied to directories
 alias remove-dir='command rm -rvi'
 alias delete-dir='remove-dir'
+## TODO2: rework xyz-force as prompted command (e.g., `read -r -e -i "$prompt" command; eval "$command";`)
 alias remove-dir-force='$force_echo command rm -rfv'
 alias delete-dir-force='remove-dir-force'
 #
@@ -2436,7 +2445,7 @@ function rename-with-file-date() {
             [ $verbose = 1 ] && echo "FYI: no '$f'"
         fi
     done;
-    ## DEBUG: set - -o xtrace
+    ## DEBUG: set +o xtrace
 }
 ## HACK: See if function required for proper handling by bats-core
 function copy-with-file-date { rename-with-file-date --copy "$@"; }
@@ -2619,9 +2628,10 @@ if [ "$OSTYPE" != "cygwin" ]; then alias ipconfig=ifconfig; fi
 alias set-display-local='export DISPLAY=localhost:0.0'
 
 # Bash aliases
-# Note: '- -o' is idiom for turning off
+# Note: '-o' ('+o') is idiom for turning off (on)
 alias bash-trace-on='set -o xtrace'
-alias bash-trace-off='set - -o xtrace'
+## BAD: alias bash-trace-off='set - -o xtrace'
+alias bash-trace-off='set +o xtrace'
 #
 # trace-cmd(command-line): runs command-line with bash tracing enable to
 # show argument expansion with result piped into less
