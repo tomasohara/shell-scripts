@@ -54,7 +54,7 @@ BEGIN {
 # Specify additional diagnostics and strict variable usage, excepting those
 # for command-line arguments (see init_var's in &init).
 use strict "refs";			# allow string deferencing (for -occurrences support)
-use vars qw/$utf8 $i $ignore_case $i $ignore_case $foldcase $fold $preserve 
+use vars qw/$utf8 $unicode $i $ignore_case $i $ignore_case $foldcase $fold $preserve 
             $para $slurp $multi_per_line $one_per_line $freq_first $alpha $compact $cumulative
             $occurrences $occurrence_field $percents $multiple $nonsingletons $min2 $min_freq $trim $unaccent $pattern_file $pattern $locale $chomp/;
 use vars qw/$nonsingleton $restore $field $show_zeros/;
@@ -93,12 +93,13 @@ my($default_pattern) = (($pattern_file ne "") ? &read_file($pattern_file) : "");
 &init_var_exp(*locale, &FALSE);		# honor environment locale settings
 &init_var(*chomp, &FALSE);		# strip newline at end (TODO make default unless \n in pattern)
 &init_var(*restore, "");		# portion of matching text to be restored
+&init_var(*unicode, $utf8);		# enable Unicode support (like Python's default): '.' matches Unicode chars
 
 # Get the pattern and options from the command line
 # Process the command-line options
 if (!defined($ARGV[0])) {
     my($options) = "options = [-i(gnore)] [-alpha] [-freq_first] [-para] [-preserve] [-foldcase]\n";
-    $options    .= "          [-compact] [-min_freq=N | -nonsingletons | -min2] [-slurp] [-unaccent] [-chomp]\n";
+    $options    .= "          [-compact] [-min_freq=N | -nonsingletons | -min2] [-slurp] [-unaccent] [-chomp] [-unicode]\n";
     $options    .= "          [-occurrences] [-cumulative] [-multi_per_line|-one_per_line] [-restore] [-show_zeros]\n";
     my($example) = "examples:\n\nls | $script_name '\\.([^\\.]+)\$'\n\n";
     $example .= "$0 '(outside\/\\S+)' omcsraw.tag\n\n";
@@ -180,6 +181,13 @@ my($num) = 0;			# number of distinct cases (pattern instances)
 
 $/ = "" if ($para);		# paragraph input mode
 $/ = 0777 if ($slurp);		# complete-file input mode
+
+# Enable Unicode I/O so '.' matches Unicode characters (like Python's default behavior)
+if ($unicode) {
+    binmode(STDIN,  ":utf8");
+    binmode(STDOUT, ":utf8");
+    binmode(STDERR, ":utf8");
+}
 
 ## OLD:
 ## # Enable UTF8 I/O

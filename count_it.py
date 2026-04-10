@@ -10,7 +10,7 @@
 #
 # tabulating most commonly used commands:
 #
-#   $ history | tpo_count_it.py "^\s*\d+\s*(\S+)" - | less
+#   $ history | count_it.py "^\s*\d+\s*(\S+)" - | less
 #   ps_mine 13
 #   w       11
 #   gr      7
@@ -19,7 +19,7 @@
 #
 # tabulating part-of-speech usage for particular words
 #
-#   $ tpo_count_it.py "(outside\/\S+)" ~/OpenMind/data/omcsraw.tag
+#   $ count_it.py "(outside\/\S+)" ~/OpenMind/data/omcsraw.tag
 #   outside/IN	502
 #   outside/RB	137
 #   outside/NN	53
@@ -36,10 +36,10 @@
 """
 Script to count the occurrences of a pattern in the input
 
-examples:\n\nls | tpo_count_it.py '\\.([^\\.]+)$'\n\n
-tpo_count_it.py '(outside\\/\\S+)' omcsraw.tag\n\n
-tpo_count_it.py '(.)' - < wiki-lang-info/utf8/da  >| /tmp/da.freq\n\n
-tpo_count_it.py -restore='{match.group(3)}' '((\\S+\\s+)((\\S+\\s+){2}\\S+))' time-tracking-aug21.list | head\n\n
+examples:\n\nls | count_it.py '\\.([^\\.]+)$'\n\n
+count_it.py '(outside\\/\\S+)' omcsraw.tag\n\n
+count_it.py '(.)' - < wiki-lang-info/utf8/da  >| /tmp/da.freq\n\n
+count_it.py -restore='{match.group(3)}' '((\\S+\\s+)((\\S+\\s+){2}\\S+))' time-tracking-aug21.list | head\n\n
 """
 
 
@@ -84,6 +84,7 @@ UNACCENT          = 'unaccent'          # remove accent marks from input
 PATTERN           = 'pattern'           # regex pattern to check for
 CHOMP             = 'chomp'             # strip newline at end
 RESTORE           = 'restore'           # portion of matching text to be restored
+PATTERN_FILE      = 'pattern-file'      # file with pattern (to circumvent shell UTF8 issues)
 MULTI_PER_LINE    = 'multi-per-line'    # count multiple instance of the pattern per line (even when ^ and $ are specified)
 ONE_PER_LINE      = 'one-per-line'      # only count one instance of the pattern per line
 VERBOSE           = 'verbose'           # verbose output mode
@@ -156,7 +157,13 @@ class CountIt(Main):
         self.unaccent         =  self.get_parsed_option(UNACCENT)
 
         self.pattern          =  self.get_parsed_argument(PATTERN, "")
-        self.pattern          =  system.read_file(self.pattern) if system.file_exists(self.pattern) else self.pattern # check if is a file with pattern (to cirvumvent shell UTF8 issues)
+        pattern_file          =  self.get_parsed_option(PATTERN_FILE, "")
+        if pattern_file:
+            self.pattern      =  system.read_file(pattern_file).strip()
+        ## OLD inline heuristic: check if is a file with pattern (to circumvent shell UTF8 issues)
+        ## self.pattern       =  system.read_file(self.pattern) if system.file_exists(self.pattern) else self.pattern
+        elif system.file_exists(self.pattern):
+            self.pattern      =  system.read_file(self.pattern)
 
         self.chomp            = (self.get_parsed_option(CHOMP) or
                                  not re.match('\\n', self.pattern))
@@ -359,5 +366,6 @@ if __name__ == '__main__':
                   positional_arguments = [(PATTERN,          'regex pattern or file with pattern (to circumvent shell UTF8 issues) to check for')],
                   int_options          = [(OCCURRENCE_FIELD, 'field giving occurrence count'),
                                           (MIN_FREQ,         'min frequency to show in output')],
-                  text_options         = [(RESTORE,          'simulate look-ahead')])
+                  text_options         = [(RESTORE,          'simulate look-ahead'),
+                                          (PATTERN_FILE,     'file with pattern (to circumvent shell UTF8 issues)')])
     app.run()

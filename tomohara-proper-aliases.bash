@@ -24,6 +24,7 @@ alias git-diff='git-diff-plus'
 alias gdiff=git-diff
 alias git-difftool-='git-difftool-plus'
 alias git-log-='git-log-plus'
+alias glog='git-log-'
 alias git-update-='git-update-plus' 
 alias git-vdiff='git-vdiff-alias'
 ## OLD: alias git-vdiff-='git-vdiff-alias'
@@ -712,8 +713,8 @@ alias-fn reset-prompt-here 'reset-prompt-label "$(basename $PWD)"'
 for label in alt NOTES; do 
     eval "alias reset-prompt-$label=\"reset-prompt-label $label\""
 done
-## TODO4: rename alt-xterm-title to alt-xterm-title-old)
-alias alt-xterm-title-new='reset-prompt-label alt'
+## OLD: ## TODO4: rename alt-xterm-title to alt-xterm-title-old)
+alias alt-xterm-title='reset-prompt-label alt'
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
 function pristine-bash {
