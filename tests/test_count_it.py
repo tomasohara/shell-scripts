@@ -20,7 +20,8 @@ from mezcla.unittest_wrapper import TestWrapper
 from mezcla import glue_helpers as gh
 
 #OLD: SCRIPT = './../tpo_count_it.py'
-script_name = '../tpo_count_it.py'
+#OLD: script_name = '../tpo_count_it.py'
+script_name = '../count_it.py'
 SCRIPT = gh.resolve_path(script_name)
 
 
@@ -106,7 +107,7 @@ class TestIt(TestWrapper):
         input_string    = 'BiRd doG cat Cat Dog dOg dog BiRd BiRd Bird BiRd ocean caT oceaN'
         expected_result = 'bird\t5\ndog\t4\ncat\t3\nocean\t2'
         self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --i "[a-z]+"'), expected_result)
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --ignore_case "[a-z]+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --ignore-case "[a-z]+"'), expected_result)
 
 
     def test_preserve(self):
@@ -123,8 +124,8 @@ class TestIt(TestWrapper):
         input_string        = 'dog dog cat cat dog dog cat fish fish'
         expected_result     = '4\tdog\n3\tcat\n2\tfish'
         not_expected_result = 'dog\t4\ncat\t3\nfish\t2'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --freq_first "\\w+"'), expected_result)
-        self.assertNotEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --freq_first "\\w+"'), not_expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --freq-first "\\w+"'), expected_result)
+        self.assertNotEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --freq-first "\\w+"'), not_expected_result)
 
 
     def test_alpha(self):
@@ -154,7 +155,7 @@ class TestIt(TestWrapper):
         """test ocurrence field option"""
         input_string    = 'neo@hotmail.com\nmorfeo@gmail.com\ntrinity@gmail.com\nsmith@hotmail.com\ncypher@hotmail.com\ndozer@yahoo.com'
         expected_result = 'hotmail.com\t3\ngmail.com\t2\nyahoo.com\t1'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --occurrence_field 2 "(\\w+)@(.*$)"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --occurrence-field 2 "(\\w+)@(.*$)"'), expected_result)
 
 
     def test_percents(self):
@@ -178,7 +179,7 @@ class TestIt(TestWrapper):
         """test min freq option"""
         input_string    = 'dog dog cat dog dog cat dog dog cat fish cat fish monkey monkey cat fish'
         expected_result = 'dog\t6\ncat\t5'
-        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --min_freq 4 "\\w+"'), expected_result)
+        self.assertEqual(gh.run(f'echo "{input_string}" | {SCRIPT} --min-freq 4 "\\w+"'), expected_result)
 
 
     def test_trim(self):

@@ -450,7 +450,7 @@ class Batspp(Main):
         # Run unless adminstrative user and --force not 
         skip_bats = SKIP_BATS
         if not skip_bats:
-            is_admin = my_re.search(r"root|admin|adm", gh.run("groups"))
+            is_admin = my_re.search(r"\b(root|admin|adm)\b", gh.run("groups"))
             if is_admin:
                 if not self.force:
                     system.exit("Error: running bats under admin-like account requires --{force} option", force=FORCE)
@@ -913,28 +913,32 @@ class CustomTestsToBats:
         if not OMIT_TRACE:
             verbose_print = '| hexview.perl' if  self._verbose else ''
             #
-            def esc(text, max_len=None):
-                """Escape text for printing with single quotes replaced with double
-                Note: Uses string representation (repr), up to MAX_LEN characters;
-                intended for bash echo inside single quoted string, which precludes use of \'
+            def esc_quote_etc(text, max_len=None):
+                """Escape text for printing in bash double-quoted echo output.
+                Note: Uses string representation (repr), up to MAX_LEN characters.
                 """
                 ## TODO: single quoted text with unicode prime symbol
-                ## TEST: return text.replace("'", '\\"')
-                ## TODO: result = repr(text).replace("'", "\u2032")         # U+2032: prime (′)
+                ## TEST: return text.replace("\'", '\\"')
+                ## TODO: result = repr(text).replace("\'", "\u2032")         # U+2032: prime (′)
                 if max_len is None:
                     max_len = MAX_ESCAPED_LEN
-                result = gh.elide(repr(text).replace("'", '"'), max_len=max_len)
-                debug.trace(T9, f"esc({text!r} => {result}")
+                ## OLD: result = gh.elide(repr(text).replace("\'", '\"'), max_len=max_len)
+                result = gh.elide(repr(text), max_len=max_len)
+                result = result.replace("\\", "\\\\").replace('"', '\\"')
+                result = result.replace("$", "\\$").replace("`", "\\`")
+                debug.trace(T9, f"esc_quote_etc({text!r} => {result}")
                 return result
             #
             # note: 'actual' here is the code, but 'expected' is the output
             debug_text = ('\techo ""\n' +
                           ('\t# shellcheck disable=SC2016,SC2028\n' if FILTER_SHELLCHECK else '') +
-                          f"\techo '========== actual: {esc(actual)} =========='\n" +   
+                          ## OLD: f"\techo '========== actual: {esc_quote_etc(actual)} =========='\n" +
+                          f'\techo "========== actual: {esc_quote_etc(actual)} =========="\n' +
                           f'\techo "${actual_var}"\n' +
                           (f'\techo "${actual_var}" {verbose_print}\n' if self._verbose else "") +
                           ('\t# shellcheck disable=SC2016,SC2028\n' if FILTER_SHELLCHECK else '') +
-                          f"\techo '========== expect: {esc(expected)} =========='\n" +
+                          ## OLD: f"\techo '========== expect: {esc_quote_etc(expected)} =========='\n" +
+                          f'\techo "========== expect: {esc_quote_etc(expected)} =========="\n' +
                           f'\techo "${expected_var}"\n' +
                           (f'\techo "${expected_var}" {verbose_print}\n' if self._verbose else "") +
                           '\techo "============================"\n')

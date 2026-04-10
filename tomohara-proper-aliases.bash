@@ -21,11 +21,14 @@ alias git-add-='git-add-plus'
 alias git-diff-='git-diff-plus'
 ## TEMP:
 alias git-diff='git-diff-plus'
+alias gdiff=git-diff
 alias git-difftool-='git-difftool-plus'
 alias git-log-='git-log-plus'
+alias glog='git-log-'
 alias git-update-='git-update-plus' 
 alias git-vdiff='git-vdiff-alias'
-alias git-vdiff-='git-vdiff-alias'
+## OLD: alias git-vdiff-='git-vdiff-alias'
+alias gvdiff=git-vdiff
 alias git-all-update='update-main-repos.bash'
 alias git-extract-all-versions='extract-all-git-versions.bash --human'
 alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human'
@@ -34,6 +37,7 @@ alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
 function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
 alias git-push='git-push-alias'
+alias git-check-ignore-plus='git check-ignore --non-matching --verbose'
 ## TODO: alias git-X-='git-X-plus'
 ## -or- TODO: alias git-X-alias='invoke-git-command pull'
 
@@ -46,6 +50,7 @@ alias git-status-sans-tom="git-status | egrep -v '(^|[-_/.])tom([-_/.]|$)'"
 alias git-status-tom=git-status-sans-tom
 # TODO: work out better alias name
 alias git-stat=git-status-sans-tom
+alias gstat=git-stat
 # TODO: better name (e.g., git-diff-name-only-main?) and/or decompose git-name-diff-branch?
 alias git-name-diff-main='git diff --name-only main..HEAD | cat'
 #
@@ -106,7 +111,8 @@ function plint-tester-testee {
         # ex: "cut.py:10:0: C0301: Line too long (103/100) (line-too-long)"
         if [[ $pylint_result =~ [0-9]:[0-9] ]]; then
             local newline_tab=$'\n\t'
-            pause-for-enter "pylint issues;${newline_tab}proceed?"
+            ## TODO4: add support for reading response (e.g., N)
+            pause-for-enter "pylint issues;${newline_tab}proceed? (Enter for Y otherwise ^C)"
         fi
         test-python-script "$test_script"
     fi
@@ -114,11 +120,20 @@ function plint-tester-testee {
 }
 }
 #
-## TODO3: simple-alias-fn plint-tester-testee-strict 'PYTEST_OPTS="$default_pytest_opts --runxfail"'
+# plint-tester-testee-strict: likewise with pytest run strict mode
 function plint-tester-testee-strict {
-    PYTEST_OPTS="--runxfail $default_pytest_opts" plint-tester-testee "$@";
+    TEST=1 PYTEST_OPTS="--runxfail ${default_pytest_opts[*]}" plint-tester-testee "$@";
 }
-#
+# plint-tester-testee-method-strict: likewise for just a method
+function plint-tester-testee-method-strict {
+    local method="$1";
+    shift;
+    TEST=1 PYTEST_OPTS="--runxfail -k $method ${default_pytest_opts[*]}" plint-tester-testee "$@";
+}
+# plint-tester-testee-regular: similarly without strict
+simple-alias-fn plint-tester-testee-regular 'TEST=1 plint-tester-testee';
+## TODO3?: plint-tester-testee-method-regular
+
 # clone-repo(url): clone github repo at URL into current dir with logging
 # TODO2: move to git-related section (better yet into git-aliases.bash)
 function clone-repo () {
@@ -185,7 +200,7 @@ function run-python-script {
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
     # TODO3: rework to avoid problem with _PSL_ not being updated (or at least detect the error)!
-    declare -g _PSL_ log out PYTHON      # global declaration
+    declare -g _PSL_ base log out PYTHON      # global declaration
     local module_spec=""
     let _PSL_++
     # TODO3: add OUT_BASE to override default
@@ -246,10 +261,12 @@ function run-python-script {
 function run-python-script-reset {
     declare -g _PSL_
     _PSL_=0
+    trace-vars _PSL_
 }
 
 # pytest stuff
-default_pytest_opts=(-vv --capture=tee-sys)
+# options: --vv: doubly verbose; --capture=no: don't capture stderr
+default_pytest_opts=(-vv --capture=no)
 #
 # test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
@@ -259,18 +276,33 @@ function test-python-script {
         echo "The debugging level defaults to 5 (unlike run-python-script)."
         return
     fi
-    # Extract test script
+
+    # Derive test script filename
     local test_script="$1"
     shift
     # note: specifying "tests" for script handled indirectly;
     # this also handles cases like "tests/misc_tests.py" without associated module.
+    ## DEBUG: echo "checking script $test_script"
     if [ -e "tests/test_$test_script" ]; then
+        # Add test/test_ prefix (e.g., debug.py => tests/test_debug.py)
         test_script="tests/test_$test_script"
-    elif [ -e "$test_script" ]; then
+    else
+        # Insert tests directory and test_ prefix (e.g., mezcla/debug.py => mezcla/tests/test_debug.py)
+        local alt_test_script
+        alt_test_script="$(dirname "$test_script")/tests/test_$(basename "$test_script")"
+        ## DEBUG: echo "checking alternative script $alt_test_script"
+        if [ -e "$alt_test_script" ]; then
+            test_script="$alt_test_script"
+        fi
+    fi
+    #
+    if [ -e "$test_script" ]; then
         true;
     else
         echo "Warning: cannnot resolve test for _$test_script" 1>&2
     fi
+
+    # Run the test
     local pytest_opts="${PYTEST_OPTS:-"${default_pytest_opts[*]}"}"
     # TODO3: drop inheritance spec in summary
     # ex: "tests/test_convert_emoticons.py::TestIt::test_over_script <- mezcla/unittest_wrapper.py XPASS" => "tests/test_convert_emoticons.py::TestIt::test_over_script XPASS"
@@ -291,7 +323,6 @@ function test-python-script-strict {
 #
 # test-python-script-method-strict: likewise for just a method
 function test-python-script-method-strict {
-    ## TODO2: default_pytest_opts="--runxfail" test-python-script-method "$@";
     local method="$1";
     shift;
     PYTEST_OPTS="--runxfail -k $method ${default_pytest_opts[*]}" test-python-script "$@";
@@ -308,19 +339,34 @@ function disable-python-warnings {
     export PYTHONWARNINGS="ignore"
 }
  
-# pip-freeze(): save pip freeze in _pip-freeze-{env_spec}-ddMMMyy.log
-## note: the ghost of python 2 lives on [WTH?!]
+# pip-freeze([env_name=""]): save pip freeze in _pip-freeze-$ENV_NAME-ddMMMyy.log,
+# where ENV_NAME defaults to virtual env root dir basename (e.g., android-py-3-11) if python3
+# is in /usr/local/misc/programs/anaconda3/envs/android-py-3-11/bin
+## TODO2: handle non-venv directories better (rather than using interactive override)
+## note: the ghost of python 2 lives on--ex: need for explicit python3 [WTH?!]
 function pip-freeze {
     # TODO2: rework via cmd-output
     local env_spec=""
-    local env_name
-    # ex: /Users/eafqe/python/.venv-nlp-py-12/bin/python => venv-nlp-py-12
-    env_name="$(which python3 | extract-matches "([^\.\/]+)\/bin\/python")"
+    local env_name="${1:-""}"
+    # derive default env name label from python bin path
+    # ex: /Users/eafqe/python/.venv-nlp-py-12/bin/python => .venv-nlp-py-12
+    if [ "$env_name" == "" ]; then
+        ## OLD: env_name="$(which python3 | extract-matches "([^\.\/]+)\/bin\/python")"
+        env_name="$(which python3 | extract-matches "([^\/]+)\/bin\/python")"
+    fi
+    if [ "$env_name" == "" ]; then
+        # note: options: -e use readline; -i initialize readline buffer; -r backslash is not an escape
+        ## TODO2: make interactive override an option
+        env_name="$(which python3 | perl -pe "s@$HOME/+@@; s@.python3?@@; s@/+@-@g;")"
+        echo "Override env label for pip-freeze affix ($env_name)?"
+        read -r -e -i "$env_name" env_name
+    fi
     if [ "$env_name" != "" ]; then
         env_spec="-$env_name"
     fi
     local freeze_file
     freeze_file="_pip-freeze${env_spec}-$(T).log"
+    freeze_file="${freeze_file//--/-}"
     rename-with-file-date "$freeze_file"
     pip3 freeze > "$freeze_file"
     echo "$freeze_file"
@@ -496,9 +542,20 @@ simple-alias-fn act-plain 'convert-emoticons-aux act'
 # note: strips the 0-len paragraph indicator
 function para-len-alt { perl -00 -pe 's/\n(.)/\r$1/g;' "$@" | line-len | perl -pe 's/^0\t//;'; }
 
+# extract-text(document-file): extracts text from structured document file (e.g., Word or PDF)
+# note: to avoid hardcoded 'python -m mezcla.extract_document_text' invovation uses awkward which-based approach
+## TODO: figure out way for python to pull script from path (as with perl -S)
+function extract-text() { alias-python "$(which extract_document_text.py)" "$@"; }
+alias xtract-text='extract-text'
+alias extract-text-html='html_utils.py --regular'
+#
 # extract-text-html(filename): extract text from HTML in FILENAME
 # shellcheck disable=SC2016
 simple-alias-fn extract-text-html 'alias-python -m mezcla.html_utils --regular'
+alias extract-html-text='extract-text-html'
+
+#-------------------------------------------------------------------------------
+# MS Office like stuff
 
 # MS Office conversions
 function excel-to-csv {
@@ -507,7 +564,26 @@ function excel-to-csv {
     base="$(remove-extension "$file")";
     python -c "import pandas as pd; df = pd.read_excel('$file', dtype=str); df.to_csv('$base.csv', index=False, encoding='utf-8-sig');";
 }
- 
+
+
+# libroffice-text([filename]): open LibreOffice for new text document
+# via POE Assistant
+function libroffice-text {
+    if missing-options "$@"; then
+        function-usage --synopsis "create new LibreOffice text document (or open existing)" --example "memo-para-jefe"
+        return        
+    fi
+    local file="${1%.odt}.odt"
+
+    # Only create if missing
+    if [[ ! -e "$file" ]]; then
+        touch -- "$file"
+    fi
+    run-app libreoffice --writer "$file"
+}
+
+#-------------------------------------------------------------------------------
+
 # Github/ssh stuff
 # ssh-cache: activate ssh agent and add user's private key
 function ssh-cache {
@@ -518,8 +594,11 @@ function ssh-cache {
     ssh-add -t "$one_month" "$HOME/.ssh/id_$USER"
 }
 alias ssh-access=ssh-cache
- 
+
+# consolidate-notes[-here](): create index of notes for use with grepl-entry
+# note: older here version sets the xterm title
 alias consolidate-notes-here="consolidate-notes.bash --"
+alias consolidate-notes="consolidate-notes.bash --skip-xterm-title --"
  
 # copy-relative(path, dir): copy file at PATH to DIR/PATH
 function copy-relative {
@@ -634,8 +713,8 @@ alias-fn reset-prompt-here 'reset-prompt-label "$(basename $PWD)"'
 for label in alt NOTES; do 
     eval "alias reset-prompt-$label=\"reset-prompt-label $label\""
 done
-## TODO4: rename alt-xterm-title to alt-xterm-title-old)
-alias alt-xterm-title-new='reset-prompt-label alt'
+## OLD: ## TODO4: rename alt-xterm-title to alt-xterm-title-old)
+alias alt-xterm-title='reset-prompt-label alt'
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
 function pristine-bash {
@@ -654,6 +733,22 @@ function indent-text {
 # rename-adhoc-notes(): rename adhoc notes under $PWD from HOST-adhoc-notes to {dir-basename}-adhoc-notes-HOST
 # shellcheck disable=SC2016
 alias-fn rename-adhoc-notes 'rename-files -q "$(get-host-nickname)-adhoc-notes" "$(basename $PWD)-adhoc-notes-$(get-host-nickname)"'
+
+#...............................................................................
+# Temp file (n.b., for use with online tools like AI assistants)
+
+# copy-to-temp-as-txt(file, ...): copies file to temp and add .txt extension for braindead web upload interfaces (e.g., AI assistants)
+# note: basically copy $f ~/temp/$b.txt with touch
+#
+function copy-to-temp-as-txt {
+    local file="$1"
+    local temp_file
+    ## TODO3: global TEMP
+    declare -g TEMP
+    temp_file="$TEMP/$(basename "$file").txt"
+    copy "$file" "$temp_file"
+    touch "$temp_file"
+}
 
 #................................................................................
 # Snapshot related
@@ -692,25 +787,40 @@ function rename-last-snapshot {
 # fix-transcript-timestamp(file): put text on same line in YouTube transcripts in FILE
 alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
 alias youtube-transcript-fix=fix-transcript-timestamp
+
 # youtube-transcript(url, file): download YoutTube transcript at URL to FILE
+# TODO1: reconcile with youtube-transcript-alt below
 function youtube-transcript {
-    if [[ ("$2" == "") || ("$1" == "--help") ]]; then
-        echo "Usage: youtube-transcript url file" 1>&2
-        echo "" 1>&2
-        echo "Note: More details follow:"  1>&2
-        echo "" 1>&2
+    # note: checks for missing filename (see yt-transcript macro below)
+    if [[ ("$2" == "") || ($2 =~ ^-.*) || ("$1" == "--help") ]]; then
+        echo "Usage: youtube-transcript url prefix"
+        echo ""
+        echo "Example:"
+        echo "    yt-transcript vivobook 'https://www.youtube.com/watch?v=miJRWAEeuUY'"
+        echo ""
+        echo "Note:"
+        echo "- The prefix forms basis for output file:"
+        echo "    {prefix}-youtube-{date}.list"
+        echo "  where date uses ddmmmyy format."
+        echo ""
+        echo "- More details follow (n.b., python script interface):" 
+        echo ""
         ## TODO3: add alias for showing condensed mezcla script usage notes
-        alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;' 1>&2
+        (alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;') | indent-text
         return
     fi
     local url="$1"
     local file="$2"
     alias-python -m mezcla.examples.youtube_transcript "$url" > "$file"
+    head --verbose "$file"
 }
-# youtube-transcript-alt(): workaround for silly bash problem:
+# youtube-transcript-alt(url, file): workaround for bash problem w/ youtube-transcript
+# over URL due to missing FILE argument:
 #    $ youtube-transcript 'https://www.youtube.com/watch?v=gcgMyRfE8a4&t=247s'
 #    bash: : No such file or directory
-# This also allows for stdout instead of requiring a file.
+# Specifically, when FILE option was unspecified, the bad expansion was as follows:
+#    $ youtube-transcript 'https://www.youtube.com/...' > ""
+# This macro also allows for stdout instead of requiring a file (via use of "-").
 # TODO: check for &'s in URL and issue warning
 # DUH: The "$file" redirection was causing problems (Thanks, Grok!)
 # TODO2: check for other aliases with similar issues
@@ -728,12 +838,13 @@ function youtube-transcript-alt {
         alias-python "$(which youtube_transcript.py)" "$url" > "$file"
     fi
 }
-# yt-transcript(url, basename): download YouTube video transcript at URL and save to BASENAME-ddMMMyy.list
-# TODO3: add helper alias 
+# yt-transcript(prefix, url): download YouTube video transcript at URL and save to PREFIX-youtube-mmmyy.list
+# note: PREFIX specified before URL for better clarity; see usage under youtube-transcript macro above.
 function yt-transcript {
-    local filename="$2-youtube-$(T).list"
-    youtube-transcript "$1" "$filename"
-    echo $'See\n\t'"$filename"
+    local prefix="$1"
+    local url="$2"
+    local filename="$prefix-youtube-$(todays-date-mmmYY).list"
+    youtube-transcript "$url" "$filename"
 }
 
 #...............................................................................
@@ -826,13 +937,14 @@ alias-fn ps-time 'LINES=1000 COLUMNS=256 alias-perl ps_sort.perl -time2num -num_
 # options: -d -RR: reattach a session and if necessary detach or create it
 alias-fn screen-reattach 'screen -d -RR'
 
-# sleep-for(seconds, [message]): sleep for SECONDS with MESSAGE ("delay for Ns")
-function sleep-for {
-    local sec="$1"
-    local msg="${2:-"delay for ${sec}s"}"
-    echo "$msg"
-    sleep "$sec"
-}
+## OLD:
+## # sleep-for(seconds, [message]): sleep for SECONDS with MESSAGE ("delay for Ns")
+## function sleep-for {
+##     local sec="$1"
+##     local msg="${2:-"delay for ${sec}s"}"
+##     echo "$msg"
+##     sleep "$sec"
+## }
 
 # image-metadata(file): show metadata about image (e.g., associated text)
 simple-alias-fn image-metadata 'identify -verbose'
@@ -865,6 +977,40 @@ alias show-window-list='wmctrl -l'
 # TODO3: strip URL args
 alias curl-save='curl --location --remote-name'
 
+# remove-path-entries(pattern): remove entries matching pattern from PATH_VAR and prune duplicate entries
+# ex: remove-path-entries "conda|anaconda"
+# ex: remove-path-entries cuda LD_LIBRARY_PATH
+# note: via Gemini-3 and POE Assistant
+function remove-path-entries {
+    if missing-options "$@"; then
+        function-usage --synopsis "remove env path var entries" --example "games"
+        return        
+    fi
+    local pattern="$1"
+    local var="${2:-PATH}"
+    local new_value
+    ## TODO3: convert to python help to allow for convenient tracing
+    new_value="$(
+        REMOVE_PATTERN="$pattern" \
+        TARGET_VAR="${!var}" \
+        perl -e '
+            my $pattern = $ENV{REMOVE_PATTERN};
+            my %seen;
+            my @parts = grep {
+                $_ ne "" &&
+                $_ !~ /$pattern/i &&
+                !$seen{$_}++
+            } split(/:/, $ENV{TARGET_VAR});
+            print join(":", @parts);
+        '
+    )"
+    
+    printf -v "$var" '%s' "$new_value"
+    ## OLD: export "$var"
+    eval 'export $var'
+}
+
+
 #...............................................................................
 # Linux admin
 
@@ -873,7 +1019,9 @@ alias free-memory='free --wide --human | grep -v Swap:'
 # clear-cache: clear disk cache
 # See https://linux-mm.org/Drop_Caches and https://www.linuxatemyram.com
 # TODO: get this to work completely; explain Admin filter
-simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
+## OLD: simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
+## NOTE: 71 is ANSI color index for mediumseagreen (#5faf5f)
+simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory | colout "free" 71'
 
 #...............................................................................
 # Emacs related
@@ -918,6 +1066,12 @@ function docker-cleanup {
         docker system prune --force
     }
 }
+
+#...............................................................................
+# Multimedia stuff
+
+# test-audio: plays a small audio file (to test volume)
+simple-alias-fn test-audio 'start /usr/share/sounds/Yaru/stereo/complete.oga'
 
 #................................................................................
 # Doubly idiosyncratic stuff (i.e., given "tomohara-proper" part of filename)

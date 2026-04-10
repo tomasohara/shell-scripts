@@ -5,34 +5,63 @@
 #    pip install --requirement requirements.txt
 #
 # Advanced usage (installs optional packages):
-#    pip install --verbose $(perl -pe 's/^#opt#\s*//;' requirements.txt | grep -v '^#')
+#    pip install --verbose $(perl -pe 's/^#opt#\s*//;' requirements.txt | sed 's/ #.*//' | grep -v '^#') 2> /dev/null
 #
-batspp
-click
-mezcla>=1.3.9.8
-## NOTE: pipreqs disabled due to problem with Docker build. It is only
-## used in local-workflows.sh and normally not invoked.
-## OLD: pipreqs
-## TODO: wheel (avoids similar build related issues)
+batspp                                  # - Bash Automated Testing System with Preprocessor
+click                                   # - Composable command line interface toolkit
+mezcla>=1.3.9.8                         # - Miscellaneous Python scripts and utilities for R&D
+#
+#...............................................................................
+# Additional dependencies found from imports
+#
+absl-py                                 # - Abseil Python Common Libraries
+bashlex                                 # - Python parser for bash
+cachetools                              # - Extensible memoizing collections and decorators
+cherrypy                                # - Minimalist Python object-oriented HTTP framework
+diskcache                               # - Disk and file backed persistent cache
+flask                                   # - Lightweight WSGI web application framework
+gensim                                  # - Topic modeling for humans
+matplotlib                              # - Python 2D plotting library
+nltk                                    # - Natural Language Toolkit
+numba                                   # - NumPy aware dynamic Python compiler
+pandas                                  # - Powerful data structures for data analysis and statistics
+Pillow                                  # - Python Imaging Library (Fork)
+psutil                                  # - Cross-platform lib for process and system monitoring
+requests                                # - Python HTTP for Humans
+scikit-learn                            # - Machine learning in Python
+stop-words                              # - Get list of common stop words
+torch                                   # - Tensors and Dynamic neural networks (PyTorch)
+tqdm                                    # - Fast, Extensible Progress Meter
+unidecode                               # - Unicode to ASCII transliteration
+webcolors                               # - Library for working with color names and values
+xmltodict                               # - Makes working with XML feel like working with JSON
+youtube-transcript-api                  # - API for getting transcripts for YouTube videos
+pyenchant                               # - Spellchecking library
+#opt# spacy                                   # - Industrial-strength Natural Language Processing
+#opt# transformers                            # - State-of-the-art Machine Learning (Hugging Face)
+#
 #...............................................................................
 # Redundant specification of some dependencies due to Git workflow quirk,
 # such as with mezcla. (Also, some are just optional for mezcla.)
 #
 # note: post-install for bash_kernel: python -m bash_kernel.install
-bash_kernel
+bash_kernel                             # - A bash kernel for Jupyter
 #
-importlib_metadata
-ipython
-jupyter
-numpy
-pylint
-pytest
-pyyaml
-six
+importlib_metadata                      # - Library to access the metadata for a Python package
+ipython                                 # - Interactive Python shell
+jupyter                                 # - Jupyter notebook and related tools
+numpy                                   # - Fundamental package for scientific computing
+openai                                  # - Python client library for the OpenAI API
+pylint                                  # - Python static code analysis
+pytest                                  # - Python testing framework
+pyyaml                                  # - YAML parser and emitter for Python
+selenium                                # - Browser automation
+six                                     # - Python 2 and 3 compatibility utilities
+#
+extcolors                               # - Extract colors from an image
 #
 #...............................................................................
 # Optional packages
 #
-#opt# extcolors
-#opt# tesseract
-#opt# black
+#opt# tesseract                         # - Optical Character Recognition (OCR)
+#opt# black                             # - The uncompromising Python code formatter

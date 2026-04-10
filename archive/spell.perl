@@ -9,7 +9,7 @@ eval 'exec perl -Ssw $0 "$@"'
 # sorting), but this is not on by default as the sorting puts all proper
 # names first, which simplifies reviewing.
 # 
-# TODO: re-implement suppport for personal spelling file via posthoc difference check
+# TODO: re-implement support for personal spelling file via posthoc difference check
 #...............................................................................
 # Note: sample spell file for aspell (via https://blog.samat.org/2008/11/02/creating-your-own-personal-aspell-dictionary):
 #    personal_ws-1.1 en 0

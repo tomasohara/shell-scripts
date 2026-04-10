@@ -1,7 +1,7 @@
 # Tests for miscellaneous scripts (i.e., not readily categorizable)
 
 
-## TODO
+## TODO (trap for inaccessible files, such as emacs lock files):
 ## $ consolidate-notes.bash --
 ## ...
 ## 238  >>> FileNotFoundError: [Errno 2] No such file or directory: './config/#_toms-mac-adhoc-notes-apr23.txt#' <<<
@@ -36,6 +36,14 @@
 ##      for f in $(git-diff-list); do
 ##          git diff "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log"
 ##      done
+
+## TODO: git-ls-tree-relative
+##
+## $ cd .github/workflows
+## ../../.github/CODEOWNERS
+## ...
+## ../../.gitignore
+## ...
 
 #...............................................................................
 ## TODO:

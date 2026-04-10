@@ -91,6 +91,7 @@
 #    shellcheck disable=SC1001,SC1091
 #
 # TODO:
+# - ***** Move settings to tomohara-settings.bash (i.e., export's and the like).
 # - ***** Put work-specific stuff in separate file!"
 # - **** Add EX-bases tests for all numeric aliases!
 # - ***** Fix problems noted by shellcheck (and rework false positives)!.
@@ -102,7 +103,6 @@
 # - ** Minimize overriding commands like 'cd' and 'script' to avoid confusion.
 # - ** Likewise non-standard usages for variables like 'PS1' (e.g., via 'PS_symbol').
 # - * Drop support for solaris and remove BAREBONES_HOST support.
-# - Get rid of old-work junk (e.g., Intemass, Juju, and JSL)!
 # - Replace backquote evaluation (`...`) with $(...)
 # - ** Fix the many cracks that fell through alias categorization (alias/function grouping???).
 # - convert $* to "$@" throughout, as appropriate
@@ -135,7 +135,8 @@
 #
 
 # For debugging: Uncomment the following line(s)
-## DEBUG: echo in tomohara-aliases.bash 1>&2
+## OLD: ## DEBUG: echo in tomohara-aliases.bash 1>&2
+[[ $DEBUG_LEVEL -ge 6 ]] && echo in "${BASH_SOURCE[0]}" 1>&2
 ## DEBUG: set -o xtrace
 
 #...............................................................................
@@ -169,6 +170,8 @@ alias conditional-setenv='conditional-export'
 alias cond-export='conditional-export'
 # TODO: drop following after all do_setup.bash settings moved here
 alias cond-setenv='conditional-export'
+# global(var-name, ...): declare var-name to be global (e.g., global count)
+alias global='declare -g'
 
 # For debugging: Uncomment the following to display the environment variables (TODO: rework via startup-trace).
 ## printenv.sh
@@ -222,7 +225,7 @@ cond-export DEBUG_LEVEL 3
 # otherwise $HOME/bin
 ## TOM-IDIOSYNCRATIC
 ## DEBUG: 
-# Note: ${BASH_SOURCE[0]}" is the scirpt being sourced. The array itself gives
+# Note: ${BASH_SOURCE[0]}" is the script being sourced. The array itself gives
 # the source files for all functions on the execution call stack.
 # See https://stackoverflow.com/questions/35006457/choosing-between-0-and-bash-source.
 alias_source_dir="$(dirname "${BASH_SOURCE[0]:-$0}")"
@@ -254,6 +257,7 @@ function quiet-conditional-source { source "$@" > /dev/null 2>&1; }
 # Enable full-blown startup tracing if evailable
 # note: kept separate for use in other scripts
 conditional-source "$TOM_BIN/startup-tracing.bash"
+startup-trace "post-tracing init in ${BASH_SOURCE[0]}"
 #
 alias trace='startup-trace'
 alias enable-startup-tracing='export STARTUP_TRACING=1'
@@ -261,8 +265,47 @@ alias disable-startup-tracing='export STARTUP_TRACING=0'
 alias enable-console-tracing='export CONSOLE_TRACING=1'
 alias disable-console-tracing='export CONSOLE_TRACING=0'
 
+#................................................................................
 # Helper functions (along with aliases and variables)
 #
+
+# missing-options(): whether no options specified or --help/-h
+# note: based on POE Assistant
+# usage: if missing-options "$@"; then echo "Usage: ..."; fi
+function missing-options {
+    [[ $# -eq 0 || "$1" == "--help" || "$1" == "-h" ]]
+}
+
+# function-usage(): helper alias for showing function usage statements
+# note: based on POE Assistant
+# Sample usage:
+#    if missing-options; then
+#       function-usage --synopsis "fouled up beyond recognition" --example "fubar now"
+#       return
+#    fi
+function function-usage {
+    local synopsis=""
+    local example=""
+    local notes=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --synopsis) synopsis="$2"; shift 2 ;;
+            --example)  example="$2"; shift 2 ;;
+            --notes)    notes="$2"; shift 2 ;;
+            *) break ;;
+        esac
+    done
+
+    local fn="${FUNCNAME[1]}"
+
+    [[ -n "$synopsis" ]] && echo "usage: $fn $synopsis"
+    [[ -n "$example"  ]] && echo "example: $fn $example"
+    [[ -n "$notes"    ]] && echo -e "note:\n$notes"
+
+    return 0
+}
+
 # space-check(arg): ensures ARG has no embedded spaces (and no other arguments)
 function space-check() {
    if [ "$2" != "" ]; then
@@ -279,10 +322,22 @@ function space-check() {
 ## function downcase-stdin() { perl-utf8 -pe 's/.*/\L$&/;'; }
 function downcase-stdin { perl -pe "use open ':std', ':encoding(UTF-8)'; s/.*/\L$&/;"; }
 function downcase-text { echo "$@" | downcase-stdin; }
+# date-ddmmmyy(date_spec): return date using European style (e.g., 25feb26)
+function date-ddmmmyy {
+    if [ "$1" == "" ]; then
+        echo "usage: _ date-specification"
+        echo "example: ${FUNCNAME[0]} --date='@'"
+        echo "alt example: ${FUNCNAME[0]} --date='@0'"
+        ## TODO5: arcane example: $((36525/100 * 60*60*24))
+    fi
+    date --date "$1" '+%d%b%y' | downcase-stdin;
+}
 # todays-date(): outputs date in format DDmmmYY (e.g., 22apr20)
 ## TODO: drop leading digits in day of month
 ## NOTE: keep in synch with common.perl get_file_ddmmmyy and .emacs edit-adhoc-notes-file
-function todays-date { date '+%d%b%y' | downcase-stdin; }
+## example usage: ddmmmyy=$(todays-date); ... run-it > _run-it-$ddmmmyy.log 2>&1
+## OLD: function todays-date { date '+%d%b%y' | downcase-stdin; }
+function todays-date { date-ddmmmyy "now"; }
 # todays-date-mmmYY(): date in format mmmYY (e.g., sep20)
 function todays-date-mmmYY { todays-date | perl -pe 's/^\d\d//;'; }
 # hoy: alternative to todays-date
@@ -292,6 +347,23 @@ hoy=$(todays-date)
 # TODO: punt on tab-completion (i.e., TODAY => today)???
 alias TODAY=todays-date
 alias date-central='TZ="America/Chicago" date'
+
+# ddmmmyy-hhmm(): return timestamp in European-like format using a single token (e.g., 31dec25@2359).
+# note: This is intended for use in filenames (e.g., _free-21Feb26@1549).
+# ex: 01jan26@0001).
+function mmddyy-hhmm {
+    date '+%d%b%y@%H%M'
+}
+
+# file-date-mmdddyy(): return file's timestamp in European format without hours and minutes
+# note: %y gives time of last data modification, human-readable
+function file-date-mmdddyy {
+    if missing-options "$@"; then
+        function-usage --synopsis "return file timestamp using mmdddyy" --example "/tmp/fubar.txt"
+        return        
+    fi
+    date-ddmmmyy "$(stat --format=%y "$1")";
+}
 
 ## TOM-IDIOSYNCRATIC
 # em-adhoc-notes(): edit adhoc notes file using format _{dir}-notes-{host}-{date} (e.g., _bin-notes-reempl-may22.txt)
@@ -345,12 +417,14 @@ function quiet-unalias {
 # command [is] saved ... default value [is] 500...
 # - HISTFILESIZE: maximum number of lines contained in the history file. 
 # TODO: do more excerpting or just summarize above.
-set bell-style none
+## BAD: set bell-style none
+## NOTE: 'set bell-style none' is a readline/.inputrc directive, not a bash command
 export HISTCONTROL=ignoredups
 export HISTTIMEFORMAT='[%F %T] '
 # Ensure that the history files are merged (n.b., timestamping required for
 # proper sequencing of entries from different shell windows).
-set histappend
+## BAD: set histappend
+shopt -s histappend
 # note: following are 50x the defaults
 ## BAD:
 ## export HISTSIZE=50000
@@ -454,7 +528,10 @@ trace start of main settings
 # TODO: define a function for removing duplicates from the PATH while
 # preserving the order
 function show-path-dir () { (echo "${1}:"; printenv "$1" | perl -pe "s/:/\n/g;") | $PAGER; }
+# show-path(): show PATH entries one per line
+# show-lib-path(): shows LD_LIBRARY_PATH entries one per line
 alias show-path='show-path-dir PATH'
+alias show-lib-path='show-path-dir LD_LIBRARY_PATH'
 # append-path(path): appends PATH to environment variable unless already there
 ## TODO: function in-path { local path=$(tr ":" "\n" | $GREP "^$1$$"); return ($path != ""); }
 # TODO: add force argument to ensure last (or first)
@@ -527,11 +604,13 @@ unset MAIL
 # Unix environ stuff
 # Note:
 # - TEMP is private temp dir (e.g., ~/temp); TMP is system temp dir (e.g., /tmp)
-# TODO: Put settings in .bashrc, so that trace could use TEMP.
+# - See https://en.wikipedia.org/wiki/TMPDIR.
+# - Also see tomohara-settings.bash and ~/.bash_profile.
 cond-export TEMP "$HOME/temp"
-## HACK: don't allow /tmp for TMP
-## TODO1: move TMP, etc. into tomohara-settings.bash
-if [ "$TMP" = "/tmp" ]; then unset TMP; fi
+## OLD:
+## ## HACK: don't allow /tmp for TMP
+## ## TODO1: move TMP, etc. into tomohara-settings.bash
+## if [ "$TMP" = "/tmp" ]; then unset TMP; fi
 cond-export TMP "$TEMP/tmp"
 cond-export TMPDIR "$TMP"
 mkdir -p "$TEMP" "$TMP" "$TMPDIR"
@@ -556,12 +635,11 @@ alias run-csh='export USE_CSH=1; csh; export USE_CSH=0'
 # Note: PS_symbol defines the prompt symbol (e.g., '$' vs. '§' [U+00A7])
 # example override (from .bashrc):
 #    export PS_symbol="¢"      # cent sign (U+00A2)
-## TODO: resolve interaction among 'reset-prompt', 'script' and 'add-conda-env-to-xterm-title' (see anacdonda-aliases.bash for latter)
+## TODO: resolve interaction among 'reset-prompt', 'script' and 'add-conda-env-to-xterm-title' (see anaconda-aliases.bash for latter)
 cond-export PS_symbol '$'
 function reset-prompt {
     ## DEBUG: echo "reset-prompt" "$@"
     local new_PS_symbol="$*"
-    ## OLD:
     if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="${DEFAULT_PS_SYMBOL:-$PS_symbol}"; fi
     # Do nothing if empty
     if [ "$new_PS_symbol" = "" ]; then return; fi    
@@ -630,8 +708,6 @@ alias perl-='perl -Ssw'
 ## TODO: function alias-perl { DURING_ALIAS=1 perl "$@"; }
 # alias-perl(): perl with DURING_ALIAS defined (n.b., avoids excess tracing; see common.perl)
 ## NOTE: using perl.sh in alias leads to problems under Github workflows
-## BAD:
-## OLD: alias alias-perl='DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
 ## TODO: alias alias-perl='DURING_ALIAS=1 perl.sh -Ssw'
 ## TODO?
 ## function alias-perl {
@@ -680,10 +756,10 @@ function set-title-to-current-dir () {
 if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-dir; fi
 #
 alias reset-xterm-title='set-xterm-window "$HOSTNAME $PWD"'
-# alt-xterm-title([prefix=alt]): change xterm title to PREFIX DIR-BASENAME [PWD]
+# old-alt-xterm-title([prefix=alt]): change xterm title to PREFIX DIR-BASENAME [PWD]
 # Warning: this doesn't modify the prompt symbol (e.g. $PS_symbol). For that,
 # use the new reset-prompt-label in tomohara-proper-aliases.bash.
-function alt-xterm-title() { 
+function old-alt-xterm-title() { 
     local dir
     local prefix="$1"
     if [ "$prefix" = "" ]; then prefix="alt"; fi
@@ -775,6 +851,14 @@ alias cls="command clear -x"
 alias mv='$MV'
 alias move='mv'
 alias move-force='move -f'
+# move-then-link(file, dir): moves FILE to DIR and then creates symbolic link
+function move-then-link {
+    local file="$1"
+    ## TODO: chomp $dir
+    local dir="$2"
+    move "$file" "$dir"
+    link-symbolic "$dir/$file"
+}
 # TODO: make sure symbolic links are copied as-is (ie, not dereferenced)
 CP="command cp -ip $other_file_args"
 reference-variable "$CP"
@@ -788,17 +872,34 @@ alias rm='command rm -i $other_file_args'
 alias delete='command rm -i $other_file_args'
 # shellcheck disable=SC2034
 {
-    force_echo=""
+    ## NOTE: redundancy is needed for sake of sanity (force_echo was getting inadvertently
+    ## reset due to cut-n-paste)
+    ## BAD: force_echo=""
+    declare -g force_echo
+    force_echo="disable-forced-deletions-aux"
     newline_tab=$'\n\t'
     # TODO1: fix newline/tab support
     # disable-forced-deletions-aux(): shows deletion command on separate line
     # note: for use in $force_echo prefix to delete-force aliases
     function disable-forced-deletions-aux {
+        # Make sure no embedded spaces
+        local f
+        for f in "$@"; do
+            if [[ "$f" =~ " " ]]; then
+                echo "Error: files with embedded spaces not supported by delete[-dir]-force"
+                echo "  $f"
+                return
+            fi
+        done
+
+        # Proceed with 
         echo "Warning: run enable-forced-deletions or issue:"
         echo -n $'\t'
+        ## TODO3: for f in "$@"; do echo -n "\"$f"\"; done
         echo "$@"
     }
 }
+## 
 alias disable-forced-deletions='force_echo="disable-forced-deletions-aux"'
 alias enable-forced-deletions='force_echo=""'
 disable-forced-deletions
@@ -809,6 +910,7 @@ alias remove-force='delete-force'
 # TODO: make sure that rellowing only applied to directories
 alias remove-dir='command rm -rvi'
 alias delete-dir='remove-dir'
+## TODO2: rework xyz-force as prompted command (e.g., `read -r -e -i "$prompt" command; eval "$command";`)
 alias remove-dir-force='$force_echo command rm -rfv'
 alias delete-dir-force='remove-dir-force'
 #
@@ -834,7 +936,15 @@ function copy-readonly-to-dir () {
 cond-export NICE "nice -19"
 ## DUPLICATE: export TIME_CMD="/usr/bin/time"
 
+# fix-group-dir-permissions(): fix group sticky bin for directory
+## OLD (deprecated):
 alias fix-dir-permissions="find . -type d -exec chmod go+xs {} \;"
+## TODO3 (add "use set_group_permissions.bash" warning):
+## OLD: function fix-group-dir-permissions { (find . -type d | xargs chmod --changes go+xs ) 2>&1 | $PAGER; }
+## NOTE: Uses 'print0 ... xargs -0' to avoid chell-check warning; via POE Assistant
+function fix-group-dir-permissions { (find . -type d -print0 | xargs -0 chmod --changes go+xs) 2>&1 | "$PAGER"; }
+## TODO2: function fix-group-dir-permissions { (find . -type d -exec chmod --changes go+xs {} +) 2>&1 | "$PAGER"; }
+## where '-exec ... +' is replacement for xargs usage
 
 #-------------------------------------------------------------------------------
 trace directory commands
@@ -986,6 +1096,7 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   # grepl(pattern, [other_grep_args]): invokes grep over PATTERN and OTHER_GREP_ARGS and then pipes into less for PATTERN
   # NOTE: actually uses egrep
   # TODO: use more general way to ensure pattern given last while readily extractable for less -p usage
+  # Warning: unintuitive split of grep arguments for sake of less highlighting
   function grep-to-less () {
       # TODO: fix warning about possible discrepency between grep regex and less, such as when ^ used (e.g., with multiple files in grep output)
       if [[ ($1 =~ ^[^]) && ($# -gt 2) ]]; then
@@ -999,6 +1110,17 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   # grepl-mako-py(pattern): check for pattern in files via grepl (i.e., to less)
   # shellcheck disable=SC2035
   function grepl-mako-py { grepl "$@" *.py *.mako tests/*.py; }
+  #
+  # grepl-hist-tail(): grep through bash history
+  # note: uses redundant grepl for highlighting (with potentially split args noted above for grep-to-less)
+  # TODO3: remove redundant item number (due to history and grepl)
+  #    7255: 7255  [2026-03-13 22:57:03] my-gnome-terminal --title "copilot: mezcla" --no-xterm-title
+  function grepl-hist-tail { history  | grepl "$@" | tail | grepl "$@"; }
+  #
+  # grepl-bashrc-etc(): grep through bash rc files excluding history
+  # note: see grepl-hist-tail for rationale (e.g., double grepl and potentially split args)
+  ## BAD: function grepl-bashrc-etc { grepl "$@" ~/.*bash* | grep -v '\.bash_history' | tail | grepl "$@"; }
+  function grepl-bashrc-etc { grepl "$@" ~/.*bash* | grep -v '\.bash_history' | grepl "$@"; }
 }
 # gr-c: grep through c/c++ source and headers files
 # note: --no-messages suppresses warnings about missing files
@@ -1032,13 +1154,18 @@ alias gr-nonascii='alias-perl perlgrep.perl -n "[\x80-\xFF]"'
 function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pattern find-option ... "; else command find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 2>&1 | $GREP -v '^find: '; fi; }
 # findspec[-all](dir, pattern, option): find files in directory tried, optionally following links (-all)
 function findspec-all () { command find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | $GREP -v '^find: '; }
+# TODO2: issue warning that fs filters backup and build dirs
 function fs () { findspec . "$@" | $EGREP -iv '(/(backup|build)/)'; } 
-function fs-ls () { fs "$@" -exec ls -l {} \; ; }
+## OLD: function fs-ls () { fs "$@" -exec ls -l {} \; ; }
+function fs-ls () { fs "$@" -exec ls "$core_dir_options" {} \; ; }
+# fs-ls-new(pattern): like fs-ls but omitting (extraneous) -print output
+function fs-ls-new () { findspec . "$@" -exec ls "$core_dir_options" {} \; ; }
 simple-alias-fn fs- 'findspec-all .'
 ## Lorenzo review: should change this to fs-alt following TODO's
 function fs-ext () { find . -iname \*."$1" | $EGREP -iv '(/(backup|build)/)'; } 
 # TODO: extend fs-ext to allow for basename pattern (e.g., fs-ext java ImportXML)
-function fs-ls- () { fs- "$@" -exec ls -l {} \; ; }
+## OLD: function fs-ls- () { fs- "$@" -exec ls -l {} \; ; }
+function fs-ls- () { fs- "$@" -exec ls "$core_dir_options" {} \; ; }
 ## Lorenzo review: should change this to fs-ls-alt following TODO's
 #
 findgrep_opts="-in"
@@ -1052,7 +1179,14 @@ function findgrep- () { find $1 -iname $2 -print -exec $GREP $findgrep_opts "$3"
 ## Lorenzo review: should change this to findgrep-alt following TODO's
 function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$dir" -iname "*.$ext" -exec $GREP $findgrep_opts "$@" \{\}  /dev/null \;; }
 # fgr(filename_pattern, line_pattern): $GREP through files matching FILENAME_PATTERN for LINE_PATTERN
-function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
+# fgr-full(pattern): full findgrep from current dir for PATTERN
+function fgr-full { findgrep . "$@"; }
+# fgr-ext-full(extension, pattern): full findgrep for *.EXTENSION from current dir for PATTERN
+function fgr-ext-full { findgrep-ext . "$@"; }
+## OLD:
+## function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
+## function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
+function fgr () { fgr-full | $EGREP -v '((/backup)|(/build))'; }
 function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
 simple-alias-fn fgr-py 'fgr-ext py'
 simple-alias-fn fgr-jupyter 'fgr-ext ipynb'
@@ -1075,8 +1209,8 @@ function prepare-find-files-here () {
     fi
     if [ "$1" != "" ]; then
         echo "Error: No arguments accepted; did you mean find-files-here?"
-        echo "Usage: $0 [--out-dir dir]"
-        echo "ex: cd /; $0 --out-dir ~/temp/fs-index"
+        echo "Usage: ${FUNCNAME[0]} [--out-dir dir]"
+        echo "ex: cd /; ${FUNCNAME[0]} --out-dir ~/temp/fs-index"
         return
     fi
     # Note:: uses -a to include dot files
@@ -1225,6 +1359,7 @@ function view-todo () {
 function todo-one-week () { add-todo "[within 1 week] " "$@"; }
 #
 function todo () { if [ "$1" == "" ]; then echo add-todo '"[within N weeks] ..."'; else todo-one-week "$@"; fi; }
+function todo-sans-pager () { add-todo "$@" 2>&1 | head -1; }
 #
 # todo:(text): convenience alias for todo() for cut-n-paste of 'TODO: ...' notes from files
 alias todo:='todo'
@@ -1378,8 +1513,9 @@ function byte-usage () {
 }
 ## TODO: function usage () { du --one-file-system --human-readable 2>&1 | sort -rn >| usage.list 2>&1; $PAGER usage.list; }
 
-# check-errors(LOG-FILE): in check for known errors in LOG-FILE...
-# also: check-all-errors|warnings: variants including more patterns and with warnings subsuming errors.
+# check-errors(LOG-FILE): check for known errors in LOG-FILE... with emoji characters changed to
+# character name (e.g., "[check mark] Success" for U+2713).
+# also: check-all-errors/warnings(): variants including more patterns and with warnings subsuming errors.
 # HACK: quiet added to disable filename with multiple files
 function check-errors-aux { alias-perl check_errors.perl "$@"; }
 ## # -or-:
@@ -1399,10 +1535,14 @@ function check-errors () {
     fi;
     (DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL convert-emoticons-stdin | $PAGER;
 }
-# note: with -relaxed, the pattern matching is looser (hence more errors show)
+# check-all-errors/warnings (file, ...): include more types of errors/warnings
+# note: With -relaxed, the pattern matching is looser (hence more errors show)
+# In addition, all following based on check-errors alias to avoid sanity check assertion
+# that would occur with defining check-all-warnings in terms of check-warnings.
 alias check-all-errors='check-errors -relaxed'
 alias check-warnings='check-errors -warnings -strict'
-alias check-all-warnings='check-all-errors -warnings -relaxed'
+## OLD: alias check-all-warnings='check-all-errors -warnings -relaxed -info'
+alias check-all-warnings='check-errors -warnings -relaxed -info'
 #
 # check-errors-excerpt(log-file): show errors are start of log-file and at end if different
 # maldito shellcheck: SC2119 [Use ... "$@" if function's $1 should mean script'1 $1]
@@ -1487,7 +1627,7 @@ alias diff-log-output='compare-log-output.sh'
 alias vdiff-rev=kdiff-rev
 
 # most-recent-backup(file): returns most recent backup for FILE in ./backup, accounting for revisions (e.g., extract_matches.perl.~4~)
-# ntoe: now uses backup dir relative to file if a path
+# note: now uses backup dir relative to file if a path
 function most-recent-backup {
     if [ "$1" = "" ]; then
         echo "usage: most-recent-backup filename"
@@ -1504,7 +1644,8 @@ function most-recent-backup {
         dir="$file_dir/$dir"
     fi
     ## TODO: rework to avoid false positives
-    $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~*)?" | head -1;
+    ## BAD: $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~*)?" | head -1;
+    $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~.*)?$" | head -1;
 }
 # TODO: test for dot-files:
 #   touch backup .fubar.~666~; most-recent-backup .fubar => .fubar
@@ -1544,16 +1685,6 @@ function signature () {
     echo "$filename:"
     cat "$filename"
 }
-## OLD:
-## alias cell-signature='signature cell'
-## alias home-signature='signature home'
-## alias po-signature='signature po'
-## alias tpo-signature='signature tpo'
-## alias tpo-scrappycito-signature='signature tpo-scrappycito'
-## alias scrappycito-signature='signature scrappycito'
-## alias farm-signature='signature farm'
-## alias circulo-signature='signature circulo'
-# TODO: automatically derive aliases for ~/info/*.signature*
 
 #-------------------------------------------------------------------------------
 trace file archiving commands
@@ -1591,7 +1722,7 @@ function make-tar () {
     local base="$1"; local dir="$2";
     if [[ ("$base" == "--help") ||("$base" == "") ]]; then
         echo "Usage: make-tar base dir [depth [filter]]"
-        echo "Env. options: USE_DATE, TEMP, GTAR, MAX_SIZE, TAR_DEPTH, TAR_FILTER"
+        echo "Env. options: USE_DATE, TEMP, GTAR, MAX_SIZE, TAR_DEPTH, TAR_FILTER, AFFIX"
         echo "note: TEMP used by tar-dir, etc.; Also see [un]set-tar-bzip2 and [un]set-tar-xz"
         echo "(or try GTAR_OPTS='vfJ' [... tor-browser-linux-x86_64-14.5.tar.xz])."
         echo $'example:\n\t'"TEMP='$BACKUP_DIR' tar-this-dir-dated"
@@ -1600,6 +1731,8 @@ function make-tar () {
     ## TODO2: dispense with acrobatic arg parsing!
     local depth="${3:-${TAR_DEPTH:-""}}";
     local filter="${4:-${TAR_FILTER:-""}}"
+    local affix="${AFFIX:-""}"
+    if [ "$affix" != "" ]; then base="$base-$affix"; fi
 
     # Derive find/tar command line options
     local filter_arg=(.)
@@ -1608,15 +1741,17 @@ function make-tar () {
     if [ "$dir" = "" ]; then dir="."; fi;
     if [ "$depth" != "" ]; then depth_arg="-maxdepth $depth"; fi;
     if [ "$filter" != "" ]; then filter_arg=(-v "$filter"); fi;
+    global USE_DATE
     if [ "$USE_DATE" = "1" ]; then
         base="$base-$(TODAY)";
         ## TEST: rename-with-file-date "$base"*
         for f in "$base".tar.{gz,log}; do
-	    if [ -e "$f" ]; then
-		move "$f" "$(get-free-filename "$f" "-")";
-	    fi;
-	done
+            if [ -e "$f" ]; then
+                move "$f" "$(get-free-filename "$f" "-")";
+            fi;
+        done
     fi
+    global MAX_SIZE
     if [ "$MAX_SIZE" != "" ]; then size_arg="-size -${MAX_SIZE}c"; fi
 
     # Invoke find/tar
@@ -1875,7 +2010,6 @@ function pdf-to-ascii () {
         # shellcheck disable=SC2046,SC2086
         cmd.sh --time-out 30 pdftotext $options "$file" "$target";
     else
-        ## OLD: if [ "$verbose" = "1" ]; then echo "skipping existing $target"; fi
         echo "FYI: skipping existing $target"
     fi
     $LS -lt "$target"
@@ -1883,9 +2017,16 @@ function pdf-to-ascii () {
 function all-pdf-to-ascii () { for f in *.pdf; do pdf-to-ascii "$f"; done; }
 
 # Specialized file editors
+## TODO3: fix comment header [editors???]
 #
 # run-app(path, [arg, ...]): run app in background saving log to TEMP/basename-date.log
 function run-app {
+    if [[ ("$1" == "") || (("$1" == "--help")) ]]; then
+        echo "usage: run-app ..."
+        echo "note: set VERBOSE=1 for log exceprt"
+        echo "ex: VERBOSE=1 run-app libreoffice -n ~/Templates/Letter-Portrait-Halfinch.ott"
+        return
+    fi
     local path="$1";
     local app
     app=$(basename "$path");
@@ -1893,13 +2034,25 @@ function run-app {
     local log
     log=$TEMP/"$app-$(TODAY).log"
     if [ -e "$log" ]; then
-        echo "FYI: Updating $app's log $log"
+        echo "FYI: Updating $app's log '$log'"
+        python -c 'print("-" * 80)' >> "$log"
     fi
+    local verbose=$(is-true "VERBOSE");
+
+    # Format header with timestamp
+    ## TODO2: add new alias for timestamp with hour
+    local date_yyyy_mm_dd_hhmm="$(date '+%Y-%m-%d %H:%M')"
+    echo "$date_yyyy_mm_dd_hhmm"$'\n' >> "$log"
+    echo "$path" "$@" >> "$log" 2>&1 &
+    
+    # Invoke and trace log excerpt
     "$path" "$@" >> "$log" 2>&1 &
     ## TODO: make sure command invoked OK and then put into background
     local delay=5
-    sleep-for "$delay" "waiting ${delay}s for $log"
+    ## OLD: sleep-for "$delay" "waiting ${delay}s for $log"
+    sleep-for "$delay" "waiting for log"
     check-errors-excerpt "$log"
+    $verbose && tail "$log" | truncate-width
 }
 alias foxit='run-app /opt/foxitsoftware/foxitreader/FoxitReader'
 alias gimp='run-app gimp'
@@ -1982,7 +2135,7 @@ function para-sort() { perl -00 -e '@paras=(); while (<>) {push(@paras, $_);} pr
 # echoize: output stdin (e.g., command output) on single line, as if echo $(command)
 ## BAD: alias echoize="perl -pe 's/\n(.)/ $1/;'"
 ## TODO: alias echoize="perl -pe 's/\n(.)/ \$1/;'"
-function echoize { perl -00 -pe 's/\n(.)/ $1/g;'; }
+function echoize { perl -0777 -pe 's/\n/ /g;  s/\s/ /g;  s/$/\n/;'; }
 
 #-------------------------------------------------------------------------------
 trace file manipulation and conversions
@@ -2170,6 +2323,7 @@ alias rename-bad-dashes="rename-files -quick -global -regex ' \-' '_'; rename-fi
 # move-output-files: likewise for output files with version numbers to ./output
 # note: versioned files are those ending in numerics or with numeric affix
 ## TODO: use perl-style regex for more precise matching (maldito over-arching glob's)
+## TODO3: reconcile with move-versioned-files-alt which is more precise but with less coverage.
 # maldito shellcheck: SC2120 (warning): ... references arguments, but none are ever passed.
 # shellcheck disable=SC2120
 function move-versioned-files {
@@ -2215,15 +2369,18 @@ alias move-old-files='move-versioned-files "*" old'
 function move-versioned-files-alt {
     mkdir -p old;
     # note: regex is treated as a glob during move proper
-    local version_regex="[0-9][0-9][a-z][a-z][a-z][0-9][0-9]"
-    local alt_version_regex="[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]"
+    local version_regex="[0-9][0-9][a-z][a-z][a-z][0-9][0-9]"            # ddMMMyy
+    local alt_version_regex="[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]" # MM-dd-yyyy
     if [ "${STRICT:-0}" == "1" ]; then
         version_regex="[^0-9]${version_regex}[^0-9]"
         alt_version_regex="[^0-9]${alt_version_regex}[^0-9]"
     fi
+    ## TODO2: work out a glob accounting for dot files
     move --no-clobber ./*$version_regex* ./*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
+    move --no-clobber ./.*$version_regex* ./.*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
     local false_positives
     false_positives="$(ls old/*$version_regex*  old/*$alt_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|(.txt$)")"
+    false_positives="$false_positives$(ls old/.*$version_regex*  old/.*$alt_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|(.txt$)")"
     if [ "$false_positives" != "" ]; then
         echo "Warning: potential misplaced files (e.g., .txt ext or adhoc affix)"
         echo "    $false_positives"
@@ -2278,14 +2435,17 @@ function rename-with-file-date() {
             eval "$move_command" "$f" "$new_f";
         elif [ -L "$f" ]; then              # symbolic link exists
             # note: gets mod time via 'stat -c %y'
-            new_f=$(get-free-filename "$f.$(date --date="$(stat -c %y "$f")" '+%d%b%y')" ".")
+            ## OLD: new_f=$(get-free-filename "$f.$(date --date="$(stat -c %y "$f")" '+%d%b%y')" ".")
+            local date_spec
+            date_spec=$(file-date-mmdddyy "$f")
+            new_f=$(get-free-filename "$f.$date_spec" ".")
             eval "$move_command" "$f" "$new_f";
         else
             ## TODO2: [ $verbose ] && echo "FYI: no '$f'"
             [ $verbose = 1 ] && echo "FYI: no '$f'"
         fi
     done;
-    ## DEBUG: set - -o xtrace
+    ## DEBUG: set +o xtrace
 }
 ## HACK: See if function required for proper handling by bats-core
 function copy-with-file-date { rename-with-file-date --copy "$@"; }
@@ -2343,10 +2503,9 @@ function show-unicode-code-info-stdin() { local in_file="$TEMP/show-unicode-code
 function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
 #
 # show-unicode-control-chars(): Convert ascii control characters to printable Unicode ones (e.g., ␀ for 0x00)
-## BAD: function show-unicode-control-chars { perl -pe 'use Encode "decode_utf8"; s/[\x00-\x1F]/chr($&+0x2400)/e;'; }
 # See https://stackoverflow.com/questions/42193957/errorwide-character-in-print-at-x-at-line-35-fh-read-text-files-from-comm.
-## BAD: function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr($& + 0x2400)/eg;'; }
-function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
+## OLD: function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
+function display-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
 #
 ## TODO2: rework show-unicode-code-info*/show-unicode-control-chars for tab-completion
 ## TEMP:
@@ -2372,7 +2531,7 @@ alias diff3-merge='command diff3 --merge --text --diff-program=diff.sh'
 ## TODO: --auto
 function kdiff-merge() {
     if [ "$3" = "" ]; then
-        echo "usage: $0 changed1 old changed2 output"
+        echo "usage: ${FUNCNAME[0]} changed1 old changed2 output"
         return
     fi
     kdiff3 --merge --output "$4" "$1" "$2" "$3"
@@ -2391,13 +2550,6 @@ function absolute-path { realpath "$1"; }
 # full-dirname(filename): returns full path of directory for file
 # TODO: use realpath
 #
-# OLD:
-## function full-dirname () {
-##     local dir;
-##     dir=$(dirname "$1");
-##     case $dir in .*) dir="$PWD/$1";; esac;
-##     echo "$dir";
-## }
 function full-dirname { absolute-path "$1"; }
 #
 # base-name-with-dir(file, suffix): version of basename including dir
@@ -2461,14 +2613,25 @@ function perl-print-n () { perl -e "printf \"$1\";"; }
 # note: used to circumvent google search's annoying search term dropping
 function quote-tokens () { echo "$@" | perl -pe 's/(\S+)/"\1"/g;'; }
 
+# sleep-for(seconds, [message], [delay_spec]): sleep for SECONDS with MESSAGE (e.g., "delay") and DELAY_SPEC (e.g., "[sleep for Ns]")
+function sleep-for {
+    local sec="$1"
+    ## OLD: local msg="${2:-"delay for ${sec}s"}"
+    local msg="${2:-"delay"}"
+    local delay_spec="${3:-"[sleep for ${sec}s]"}"
+    echo "$msg $delay_spec"
+    sleep "$sec"
+}
+
 # Unix/Win32 networking aliases
 if [ "$OSTYPE" != "cygwin" ]; then alias ipconfig=ifconfig; fi
 alias set-display-local='export DISPLAY=localhost:0.0'
 
 # Bash aliases
-# Note: '- -o' is idiom for turning off
+# Note: '-o' ('+o') is idiom for turning off (on)
 alias bash-trace-on='set -o xtrace'
-alias bash-trace-off='set - -o xtrace'
+## BAD: alias bash-trace-off='set - -o xtrace'
+alias bash-trace-off='set +o xtrace'
 #
 # trace-cmd(command-line): runs command-line with bash tracing enable to
 # show argument expansion with result piped into less
@@ -2509,6 +2672,43 @@ function count-exts-all { (count-exts | cat; $LS | count-it '^[^.]+(\.*)$') | so
 
 alias kill-iceweasel='kill-em iceweasel'
 
+# flatten-path(path-label): convert PATH-LABEL to flattened file name:
+# - slash, whitespace, and non-filename-safe chars converted to _
+# - leading dashes converted to _
+# - collapse multiple underscores to a single _
+# ex: "recipes/regex/__init__.py" => "recipes_regex__init__.py"
+# note:
+# - this is intended for when there is wide variation of the input as with such as cmd-output
+# - developed with several different AI assistants (POE, GPT, Claude)
+# ex: "recipes/regex/__init__.py" => "recipes_regex_init_.py"
+# TODO2: allow for existing __'s to be preserved; trim leading/trailing underscores
+#
+function flatten-path {
+    # note: uses -pe '...' to avoid heredoc/pipe stdin conflict; \w covers unicode word chars; -CS is for unicode
+    printf '%s\n' "$@" | perl -CS -pe '
+        s/^-/_/u;         # leading dash => _
+        s{[/\h]}{_}gu;    # slash + horizontal whitespace => _
+        s/[^\w.\n-]/_/gu; # remaining non-filename-safe chars => _ (preserves unicode \w, dot, newline, dash)
+        s/_+/_/g;         # collapse multple _s
+        ## TODO?:
+        ## s/_{3,}/_/g;      # collapse 3+ underscores to one (preserves existing __)
+        ## s/^_+//;          # trim leading underscores
+        ## s/_+$//;          # trim trailing underscores
+    '
+}
+## TODO2:
+## function flatten-path {
+##     printf '%s\n' "$*" |
+##         perl -p <<PERL
+##             s/^-/_/;                    # leading dash
+##             s{[\/\s]}{_}g;              # slash + whitespace
+##             s{[^A-Za-z0-9._-]}{_}g;     # unsafe chars
+##             s/_{3,}/_/g;                # collapse 3+
+##             s/^_+//;                    # trim leading _
+##             s/_+$//;                    # trim trailing _
+## PERL
+## }
+##
 # cmd-output(cmd, ...): show output for cmd to _{cmd}-$(TODAY).log (with spaces
 # replaced by underscores)
 # note: subsequent files for the same date use ...-$(TODAY).N.log (for N=1, ...)
@@ -2516,13 +2716,28 @@ alias kill-iceweasel='kill-em iceweasel'
 #
 function cmd-output () {
     local command="$*"
+    if [[ ("$command" == "--help") || ("$command" == "") ]]; then
+        echo "usage: [ADD_MINUTES=1] ${FUNCNAME[0]} [--help] [command [arg ...]]"
+        return
+    fi
     ## BAD: local output_base, output_file
     local output_base output_file
-    output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')-$(TODAY)"
+    ## OLD: output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')-$(TODAY)"
+    ## OLD: output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')"
+    output_base="_$(flatten-path "$command-usage.list")"
+    if [ "${ADD_MINUTES:0}" == "1" ]; then
+        output_base="${output_base}-$(mmddyy-hhmm)"
+    else
+        output_base="${output_base}-$(TODAY)"
+    fi
     output_file="$(get-free-filename "$output_base" . list)"
     ## TODO3?: use separate invocations for aliases than for other commands
     ($command || eval "$command") 2>&1 | ansifilter > "$output_file"
     $PAGER_NOEXIT "$output_file"
+}
+# cmd-output-hhmm(): version of cmd-output adding HHMM to timestamp
+function cmd-output-hhmm () {
+    ADD_MINUTES=1 cmd-output "$@"
 }
 
 # cmd-usage(command): output usage for command to _command.list (with spaces
@@ -2530,9 +2745,12 @@ function cmd-output () {
 function cmd-usage () {
     local command="$*"
     local usage_file
-    usage_file="_$(echo "$command" | perl -pe 's@[/ .]@_@g; s/_+/_/g;')-usage.list"
+    ## OLD: usage_file="_$(echo "$command" | perl -pe 's@[/ .]@_@g; s/_+/_/g;')-usage.list"
+    usage_file="_$(flatten-path "$command-usage.list")"
     $command --help  2>&1 | ansifilter > "$usage_file"
-    if [ $? -eq 0 ]; then $PAGER_NOEXIT "$usage_file"; fi
+    ## OLD: if [ $? -eq 0 ]; then $PAGER_NOEXIT "$usage_file"; fi
+    [ $? -eq 0 ] || sleep-for 1 "FYI: using existing file";
+    $PAGER_NOEXIT "$usage_file";
 }
 ## TODO:
 ## function cmd-usage () {
@@ -2541,10 +2759,28 @@ function cmd-usage () {
 
 #-------------------------------------------------------------------------------
 # More Linux stuff
+## TOM-IDIOSYNCRATIC
 # TODO: condition upon using Linux kernel (or cygwin
 alias configure='./configure --prefix ~'
-alias pp-xml='xmllint --format'
-alias pp-html='pp-xml --html'
+# pp-xml(xml-file): prettyprint xml-file to stdout
+# pp-html(html-file): prettyprint html-file to stdout
+## OLD:
+## alias pp-xml='xmllint --format'
+## alias pp-html='pp-xml --html'
+function pp-xml {
+    if missing-options "$@"; then
+        function-usage --synopsis "prettyprint xml" --example "my-doc.xml"
+        return        
+    fi
+    xmllint --format "$@"
+}
+function pp-html {
+    if missing-options "$@"; then
+        function-usage --synopsis "prettyprint html" --example "my-page.html"
+        return        
+    fi
+    pp-xml --html "$@"
+}
 # ex: pp-url "www.fu.com?p1=fu&p2=bar" => "www.fu.com\n\t?p1=fu\n\t&p2=bar"
 alias pp-url-aux='perl -pe "s/[\&\?]/\n\t$&/g;"'
 function pp-url { echo "$@" | pp-url-aux; }
@@ -2554,6 +2790,7 @@ alias soffice-calc='/usr/lib/libreoffice/program/soffice.bin --calc'
 alias libreoffice-write='run-app libreoffice --writer'
 alias libreoffice-pdf='run-app libreoffice --draw'
 alias libreoffice-calc='run-app libreoffice --calc'
+alias libreoffice-main='run-app libreoffice'
 alias start=start.sh
 alias edit='start.sh --edit'
 alias open='start.sh --open'
@@ -2639,7 +2876,6 @@ function get-free-filename() {
 # by accident
 # TOM-IDIOSYNCRATIC
 function sudo-admin () {
-    ## OLD: local prefix="_config."
     local prefix="_admin-config."
     local base
     base="$prefix$(todays-date).log"
@@ -2672,7 +2908,6 @@ function fix-sudoer-home-permission () {
         echo "Warning: no sudo user for current shell"
     else
         rename-with-file-date "$changes_log"
-        # TODO: account for alternative home dir schemes
         chown --recursive --changes "$SUDO_USER" "$user_home" > "$changes_log" 2>&1
         $PAGER "$changes_log"
     fi
@@ -2684,14 +2919,6 @@ function fix-sudoer-home-permission () {
 alias check-html='check-xml --html'
 # check-html-vnu(filename): likewise check HTML using Validator.nu [Nu Html Checker]
 alias check-html-vnu='vnu'
-## TODO: archive (see check_html_javascript.py)
-function check-html-java-script () {
-  local file="$1"
-  local base
-  base="$(basename "$file" .html)"
-  alias-perl extract_subfile.perl -include_start=0 -include_end=0 '<script type=\"text/javascript\">' '</script>' "$file" >| "$TEMP/$base.js"
-  jsl -process "$TEMP/$base.js"
-}
 
 #-------------------------------------------------------------------------------
 # Remote host-related stuff
@@ -2766,23 +2993,6 @@ alias ssh-aws=aws-login
 alias aws-upload=aws-upload-micro
 alias aws-download=aws-download-micro
 #
-## OLD:
-## alias hw-login='ssh-host-login-aws $HOSTWINDS_HOST'
-## alias hw-upload='scp-aws-up $HOSTWINDS_HOST'
-## alias hw-download='scp-aws-down $HOSTWINDS_HOST'
-## alias new-hw-login='ssh-host-login-aws $NEW_HOSTWINDS_HOST'
-## alias new-hw-upload='scp-aws-up $NEW_HOSTWINDS_HOST'
-## alias new-hw-download='scp-aws-down $NEW_HOSTWINDS_HOST'
-## #
-## alias old-hw-login=hw-login
-## alias old-hw-upload=hw-upload
-## alias old-hw-download=hw-download
-## #
-## alias hw1-login=old-hw-login
-## alias hw1-upload=old-hw-upload
-## alias hw1-download=old-hw-download
-## alias hw2-login=new-hw-login
-## alias hw2-upload=new-hw-upload
 alias hw1-login='ssh-host-login-aws $HOSTWINDS_HOST'
 alias hw1-upload='scp-aws-up $HOSTWINDS_HOST'
 alias hw1-download='scp-aws-down $HOSTWINDS_HOST'
@@ -2791,12 +3001,11 @@ alias hw2-upload='scp-aws-up $NEW_HOSTWINDS_HOST'
 alias hw2-download='scp-aws-down $NEW_HOSTWINDS_HOST'
 #
 HW2_MISC="http://www.tomasohara.trade/misc"
-alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=misc new-hw-upload'
+alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=misc hw2-upload'
 function hw2-upload-misc-single {
     hw2-upload-misc "$@"
     echo see "$HW2_MISC/$(basename "$1")"
 }
-alias hw2-download=new-hw-download
 
 # Set dummy default host on AWS and HostWinds so hostname always in xterm title (see set_xterm_title.bash).
 # Sample hostnames under AWS is ip-172-31-37-185 and under Hostwinds is ip-172-31-37-185.
@@ -2859,6 +3068,14 @@ simple-alias-fn ps-mem ps-sort-mem
 simple-alias-fn ps-sort-help 'alias-perl ps_sort.perl'
 simple-alias-fn ps-sort-cpu 'ps-sort-once -by=cpu'
 
+# mkdir-and-chdir(dir): create dir and then change into it
+function mkdir-then-chdir {
+    local dir="$1"
+    [ "$2" == "" ] || echo "Warning: ignoring '$2' ...";
+    mkdir "$dir"
+    cd "$dir"
+}
+
 # get-process-parent(pid): return parent process-id for PID
 # $ ps al | egrep "(PID|$$)"
 # F   UID   PID  PPID PRI  NI    VSZ   RSS WCHAN  STAT TTY        TIME COMMAND
@@ -2905,8 +3122,9 @@ function script {
     reset-prompt "$PS_symbol:\$"
     ## DEBUG: echo "script: 1. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
 
-    # Reset bashrc status variables
-    export PROFILE_PROCESSED=0 BASHRC_PROCESSED=0
+    ## OLD:
+    ## # Reset bashrc status variables
+    ## export PROFILE_PROCESSED=0 BASHRC_PROCESSED=0
     
     # Change xterm title to match
     set-title-to-current-dir
@@ -2926,6 +3144,8 @@ function script {
     set-xterm-title --simple "$save_full" "$save_icon"
 }
 }
+#
+# script-update(): invoke a script for a git session
 # TODO: put this in a separate file
 function script-update {
     local command_indicator=""
@@ -2937,7 +3157,7 @@ function script-update {
     script  "_update-$(T).log"  $command_indicator make-git-update.bash
 }
 
-# ansi-filter(filename]: wrapper around ansifilter with stdio and stdout instead of files
+# ansi-filter(filename): wrapper around ansifilter with stdio and stdout instead of files
 # TODO: issue request for proper Unix stdin support (n.b., this function is much ado about nothing)
 function ansi-filter {
     local input_file="$1"
@@ -3007,7 +3227,10 @@ alias ps-python-full='ps-mine python'
 # note: excludes ipython and known system-related python scripts;
 # also excludes related bash and time processes.
 alias ps-python='ps-python-full | $EGREP -iv "(screenlet|ipython|egrep|perl-regexp|update-manager|software-properties|networkd-dispatcher|/usr/bin|((bash|emacs|time) .*python))"'
+# show-python-path(): shows PYTHONPATH entries one per line
 alias show-python-path='show-path-dir PYTHONPATH'
+# mezcla-debug(): invoke debug.py (n.b., used for diagnostic purposes with its imports)
+simple-alias-fn mezcla-debug 'alias-python -m mezcla.debug'
 
 # Remove compiled files .pyc for regular (debug) version and .pyo for optimized
 # TODO: add option for forced removal; try using '-name "*.py[co]"')
@@ -3046,7 +3269,8 @@ function python-lint-full() {
         root="$root:$(hg root 2> /dev/null)";
     fi
     ## TODO: --persistent=n (to avoid caching); record pylint status ($?)
-    PYTHONPATH="$root:.:$PYTHONPATH" $NICE pylint "$@" | perl -00 -ne 'while (/(\n\S+:\s*\d+[^\n]+)\n( +)/) { s/(\n\S+:\s*\d+[^\n]+)\n( +)/$1\r$2/mg; } print("$_");' 2>&1 | $PAGER;
+    ## OLD: PYTHONPATH="$root:.:$PYTHONPATH" $NICE pylint --reports=n --score=n --persistent=n "$@" 2>&1 | $PAGER;
+    PYTHONPATH="$root:.:$PYTHONPATH" $NICE pylint --reports=n --score=n --persistent=n "$@" 2>&1 | $PAGER;
     ## TODO3:
     ## local pylint_out="$TMP/_pylint-$$.out"
     ## PYTHONPATH="$root:$PYTHONPATH" $NICE pylint "$@" >| "$pylint_out"
@@ -3065,10 +3289,16 @@ function python-lint-full() {
 #   ex: No config file found ...
 # - the following has two regex: *modify the first* to add more conditions to ignore; the second is just for the extraneous pylint output
 # TODO4: refine (e.g., drop unnecessary-pass)
-function python-lint-work() { python-lint-full "$@" 2>&1 | $EGREP -v '\((bad-continuation|bad-option-value|fixme|invalid-name|locally-disabled|too-few-public-methods|too-many-\S+|trailing-whitespace|star-args|unnecessary-pass)\)' | $EGREP -v '^(([A-Z]:[0-9]+)|(Your code has been rated)|(No config file found)|(PYLINTHOME is now)|(\-\-\-\-\-))' | $PAGER; }
+function python-lint-work() {
+    local disables="bad-continuation,bad-option-value,fixme,invalid-name,locally-disabled,too-few-public-methods,trailing-whitespace,star-args,unnecessary-pass,R09,C0302"
+    python-lint-full --disable="$disables" "$@" 2>&1 | $PAGER;
+}
 # TODO: rename as python-lint-tpo for clarity (and make python-lint as alias for it)
 # note: R0801 is for duplicate lines across source files (no mnemonic)
-function python-lint() { python-lint-work --disable=R0801 "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-f-string|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|no-self-use|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
+function python-lint() {
+    local disables="duplicate-code,bad-whitespace,bad-indentation,bare-except,c-extension-no-member,consider-using-enumerate,consider-using-f-string,consider-using-with,global-statement,global-variable-not-assigned,keyword-arg-before-vararg,len-as-condition,line-too-long,logging-not-lazy,misplaced-comparison-constant,no-self-use,redefined-variable-type,redundant-keyword-arg,superfluous-parens,too-many-arguments,too-many-branches,too-many-instance-attributes,too-many-locals,too-many-public-methods,too-many-statements,trailing-newlines,useless-else-on-loop,useless-return,useless-super-delegation,useless-import-alias,wrong-import-order,wrong-import-position"
+    python-lint-work --disable="$disables" "$@" 2>&1 | $PAGER;
+}
 # python-lint-filtered(file, ...): uses additional PYLINT_FILTER with python-lint over FILE ...
 # note: added for run-python-lint-batched over mako-generated scripts
 function python-lint-filtered {
@@ -3134,7 +3364,8 @@ function python-module-version-alt {
 }
 function python-package-members() { local package="$1"; alias-python -c "import $package; print(dir($package));"; }
 #
-alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  alias-python setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
+## OLD: alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  alias-python setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
+alias python-setup-install='log=setup.log;  rename-with-file-date "$log";  uname -a > "$log";  alias-python setup.py install --record installed-files.list >> "$log" 2>&1;  ltc "$log"'
 # TODO: add -v (the xargs usage seems to block it)
 alias python-uninstall-setup='cat installed-files.list | xargs command rm -vi; alias-perl rename_files.perl -regex ^ un installed-files.list'
 
@@ -3174,7 +3405,6 @@ alias kill-python-all="kill-em python"
 ##     if ...
 ##     }
 ## alias which-python='which-program python'
-## OLD: alias which-python='which python'
 alias which-python='which python3'
 alias python-version='python3 --version'
 
@@ -3216,12 +3446,14 @@ alias run-jupyter-notebook-redir-open=jupyter-notebook-redir-open
 alias jupyter-notebook-open=jupyter-notebook-redir-open
 
 # Python-based utilities
-# extract-text(document-file): extracts text from structured document file (e.g., Word or PDF)
-# note: to avoid hardcoded 'python -m mezcla.extract_document_text' invovation uses awkward which-based approach
-## TODO: figure out way for python to pull script from path (as with perl -S)
-function extract-text() { alias-python "$(which extract_document_text.py)" "$@"; }
-alias xtract-text='extract-text'
-alias extract-text-html='html_utils.py --regular'
+
+## OLD (moved to tomohara-proper-aliases.bash)
+## # extract-text(document-file): extracts text from structured document file (e.g., Word or PDF)
+## # note: to avoid hardcoded 'python -m mezcla.extract_document_text' invovation uses awkward which-based approach
+## ## TODO: figure out way for python to pull script from path (as with perl -S)
+## function extract-text() { alias-python "$(which extract_document_text.py)" "$@"; }
+## alias xtract-text='extract-text'
+## alias extract-text-html='html_utils.py --regular'
 
 # test-script(script): run unit test for script (i.e., tests/test_script)
 # and outputs to file given by tests/_test-<script_basename>.<date>.log.
@@ -3230,21 +3462,6 @@ alias extract-text-html='html_utils.py --regular'
 ## TOM-IDIOSYNCRATIC
 ## OBSOLETE: use test-python-script instead
 #
-## OLD:
-## function test-script () {
-##     local base
-##     base=$(basename "$1" .py)
-##     local date
-##     date=$(todays-date)
-##     # note: uses both Mercurial root and . (in case not in repository)
-##     local root
-##     root=$(hg root)
-##     # maldito shellcheck (SC2086: Double quote to prevent globbing)
-##     # shellcheck disable=SC2086
-##     PYTHONPATH="$root:.:$SANDBOX/tests:$PYTHONPATH" $NICE $PYTHON tests/"test_$base.py" --verbose >| tests/"_test_$base.$date.log" 2>&1;
-##     less-tail tests/"_test_$base.$date.log";
-## }
-## #
 function test-script { test-python-script "$@"; }
 alias test-script-debug='ALLOW_SUBCOMMAND_TRACING=1 DEBUG_LEVEL=5 MISC_TRACING_LEVEL=5 test-script'
 
@@ -3306,7 +3523,12 @@ function filter-random() {
 
 # Load supporting scripts
 #
+## OLD:
 conditional-source "$TOM_BIN/anaconda-aliases.bash"
+## TODO2:
+## if [[ $USE_ANACONDA =~ 1|true ]]; then
+##     conditional-source "$TOM_BIN/anaconda-aliases.bash";
+## fi
 conditional-source "$TOM_BIN/git-aliases.bash"
 
 # Web access
@@ -3318,9 +3540,10 @@ function curl-dump () {
     curl "$url" > "$base";
 }
 # EX: url-path $BIN/templata.html => "file:///$BIN/template.html"
+# TODO3: add support for Windows
 function url-path () {
     local file="$1"
-    realpath "$file" | perl -pe 's@^@file:///@;'
+    realpath "$file" | perl -pe 's@^@file://@;'
 }
 # invoke-browser(executable, [file]): Invokes browser EXECUTABLE, optionally
 # to open local FILE.
@@ -3348,7 +3571,8 @@ function invoke-browser() {
 ## alias opera='invoke-browser command "opera"'
 ## NOTE: which is a Bash builtin
 # TODO: make following conditioned up Linux
-alias chromium='invoke-browser /usr/lib/chromium-browser/chromium-browser'
+## OLD: alias chromium='invoke-browser /usr/lib/chromium-browser/chromium-browser'
+alias chromium='invoke-browser /usr/bin/chromium-browser'
 ## TODO: drop which's
 ## BAD: function which { builtin which "$1" 2> /dev/null; }
 function which { command which "$1" 2> /dev/null; }
@@ -3465,6 +3689,26 @@ function sleepyhead() {
 }
 alias sleepy='sleepyhead'
 
+#-------------------------------------------------------------------------------
+# Math functions
+#
+# via https://stackoverflow.com/questions/21452752/how-to-find-min-of-two-variables-in-linux
+# TODO4: add min-str and max-str (e.g., using -le)???
+#
+function min {
+    local a=$1 b=$2;
+    local result;
+    result=$(( a <= b ? a : b ));
+    echo $result;
+}
+#
+function max {
+    local a=$1 b=$2;
+    local result;
+    result=$(( a >= b ? a : b ));
+    echo $result;
+}
+
 #------------------------------------------------------------------------
 # Aliases for [re-]invoking aliases
 ## TOM-IDIOSYNCRATIC
@@ -3477,9 +3721,3 @@ alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 # Optional end tracing
 trace 'out tomohara-aliases.bash'
 ## DEBUG: echo 'out tomohara-aliases.bash'
-
-## Lorenzo review: what's the purpose of keeping the OLD lines that only change /usr/bin to command or use alias-perl?
-## note: '## OLD" is used for three reasons:
-## 1. to facilitate manual merge,
-## 2. to highlight old approach when new changes are work-in-progress; and,
-## 3. because Tom is a packrat (i.e., cachivachero)!

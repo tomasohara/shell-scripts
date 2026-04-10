@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# tpo_count_it.py: script to count the occurrences of a pattern in the input
+# count_it.py: script to count the occurrences of a pattern in the input
 #
 # NOTE: This is a simple script that turns out to be very useful
 # for a variety of tasks, especially in corpus analysis.
@@ -10,7 +10,7 @@
 #
 # tabulating most commonly used commands:
 #
-#   $ history | tpo_count_it.py "^\s*\d+\s*(\S+)" - | less
+#   $ history | count_it.py "^\s*\d+\s*(\S+)" - | less
 #   ps_mine 13
 #   w       11
 #   gr      7
@@ -19,23 +19,27 @@
 #
 # tabulating part-of-speech usage for particular words
 #
-#   $ tpo_count_it.py "(outside\/\S+)" ~/OpenMind/data/omcsraw.tag
+#   $ count_it.py "(outside\/\S+)" ~/OpenMind/data/omcsraw.tag
 #   outside/IN	502
 #   outside/RB	137
 #   outside/NN	53
 #   outside/JJ	19
+#-------------------------------------------------------------------------------
+# Note:
+# - Converted from count_it.perl by Bruno Lima.
 #
-# Copyright (c) 2000-2001 Cycorp, Inc.  All rights reserved.
+# Copyright (c) 2022-2026 ScrappyCito, LLC.
+# Portions Copyright (c) 2000-2001 Cycorp, Inc.  All rights reserved.
 # Portions Copyright (c) 1996-1999 Tom O'Hara (at NMSU).  All rights reserved.
 
 
 """
 Script to count the occurrences of a pattern in the input
 
-examples:\n\nls | tpo_count_it.py '\\.([^\\.]+)$'\n\n
-tpo_count_it.py '(outside\\/\\S+)' omcsraw.tag\n\n
-tpo_count_it.py '(.)' - < wiki-lang-info/utf8/da  >| /tmp/da.freq\n\n
-tpo_count_it.py -restore='{match.group(3)}' '((\\S+\\s+)((\\S+\\s+){2}\\S+))' time-tracking-aug21.list | head\n\n
+examples:\n\nls | count_it.py '\\.([^\\.]+)$'\n\n
+count_it.py '(outside\\/\\S+)' omcsraw.tag\n\n
+count_it.py '(.)' - < wiki-lang-info/utf8/da  >| /tmp/da.freq\n\n
+count_it.py -restore='{match.group(3)}' '((\\S+\\s+)((\\S+\\s+){2}\\S+))' time-tracking-aug21.list | head\n\n
 """
 
 
@@ -57,31 +61,32 @@ from mezcla import misc_utils
 
 # Command-line labels constants
 IGNORE_SHORT      = 'i'                 # ignore case in the pattern matching
-IGNORE_LONG       = 'ignore_case'       # alias for --i option
+IGNORE_LONG       = 'ignore-case'       # alias for --i option
 FOLDCASE          = 'foldcase'          # fold (convert) text to lowercase
 FOLD              = 'fold'              # alias for --foldcase
 PRESERVE          = 'preserve'          # preserve the case of text matching pattern
 PARA              = 'para'              # apply the pattern to paragraphs not lines
 SLURP             = 'slurp'             # apply the pattern to entire files
-FREQ_FIRST        = 'freq_first'        # put frequency counts first (ie, <freq><tab><data>)
+FREQ_FIRST        = 'freq-first'        # put frequency counts first (ie, <freq><tab><data>)
 ALPHA             = 'alpha'             # alphabetical sort
 COMPACT           = 'compact'           # compact all whitespace sequences
 CUMULATIVE        = 'cumulative'        # include column for cumulative counts
 OCCURRENCES       = 'occurrences'       # the tags being counted are actually occurrence counts
-OCCURRENCE_FIELD  = 'occurrence_field'  # field giving occurrence count (e.g., 1 for $1)
+OCCURRENCE_FIELD  = 'occurrence-field'  # field giving occurrence count (e.g., 1 for $1)
 PERCENTS          = 'percents'          # shows the relative percents
 MIN2              = 'min2'              # alias for --nonsingletons
 MULTIPLE          = 'multiple'          # alias for --nonsingletons
 NONSINGLETON      = 'nonsingleton'      # alias for --nonsingletons
 NONSINGLETONS     = 'nonsingletons'     # omit cases that occur once
-MIN_FREQ          = 'min_freq'          # min frequency show to show in output
+MIN_FREQ          = 'min-freq'          # min frequency show to show in output
 TRIM              = 'trim'              # trim whitespace in matched text
 UNACCENT          = 'unaccent'          # remove accent marks from input
 PATTERN           = 'pattern'           # regex pattern to check for
 CHOMP             = 'chomp'             # strip newline at end
 RESTORE           = 'restore'           # portion of matching text to be restored
-MULTI_PER_LINE    = 'multi_per_line'    # count multiple instance of the pattern per line (even when ^ and $ are specified)
-ONE_PER_LINE      = 'one_per_line'      # only count one instance of the pattern per line
+PATTERN_FILE      = 'pattern-file'      # file with pattern (to circumvent shell UTF8 issues)
+MULTI_PER_LINE    = 'multi-per-line'    # count multiple instance of the pattern per line (even when ^ and $ are specified)
+ONE_PER_LINE      = 'one-per-line'      # only count one instance of the pattern per line
 VERBOSE           = 'verbose'           # verbose output mode
 # TODO: add optional extended help with examples for misc. options
 
@@ -122,39 +127,45 @@ class CountIt(Main):
 
         # Check the command-line options
         # Each variable corresponds to one or more --var=value commandline options
-        self.ignore_case      = (self.has_parsed_option(IGNORE_SHORT) or
-                                 self.has_parsed_option(IGNORE_LONG))
-        foldcase              = (self.has_parsed_option(FOLD) or
-                                 self.has_parsed_option(FOLDCASE) or
+        self.ignore_case      = (self.get_parsed_option(IGNORE_SHORT) or
+                                 self.get_parsed_option(IGNORE_LONG))
+        foldcase              = (self.get_parsed_option(FOLD) or
+                                 self.get_parsed_option(FOLDCASE) or
                                  self.ignore_case)
-        self.preserve         = (self.has_parsed_option(PRESERVE) or
+        self.preserve         = (self.get_parsed_option(PRESERVE) or
                                  not foldcase)
-        self.paragraph_mode   =  self.has_parsed_option(PARA)
-        self.file_input_mode  =  self.has_parsed_option(SLURP)
-        self.freq_first       =  self.has_parsed_option(FREQ_FIRST)
-        self.alpha            =  self.has_parsed_option(ALPHA)
-        self.compact          =  self.has_parsed_option(COMPACT)
-        self.cumulative       =  self.has_parsed_option(CUMULATIVE)
+        self.paragraph_mode   =  self.get_parsed_option(PARA)
+        self.file_input_mode  =  self.get_parsed_option(SLURP)
+        self.freq_first       =  self.get_parsed_option(FREQ_FIRST)
+        self.alpha            =  self.get_parsed_option(ALPHA)
+        self.compact          =  self.get_parsed_option(COMPACT)
+        self.cumulative       =  self.get_parsed_option(CUMULATIVE)
 
-        self.occurrences      =  self.has_parsed_option(OCCURRENCES)
+        self.occurrences      =  self.get_parsed_option(OCCURRENCES)
         self.occurrence_field =  1 if self.occurrences else 0
         self.occurrence_field =  self.get_parsed_option(OCCURRENCE_FIELD, self.occurrence_field)
 
-        self.percents         =  self.has_parsed_option(PERCENTS)
-        nonsingletons         = (self.has_parsed_option(MIN2) or
-                                 self.has_parsed_option(MULTIPLE) or
-                                 self.has_parsed_option(NONSINGLETON) or
-                                 self.has_parsed_option(NONSINGLETONS))
+        self.percents         =  self.get_parsed_option(PERCENTS)
+        nonsingletons         = (self.get_parsed_option(MIN2) or
+                                 self.get_parsed_option(MULTIPLE) or
+                                 self.get_parsed_option(NONSINGLETON) or
+                                 self.get_parsed_option(NONSINGLETONS))
         self.min_freq         =  2 if nonsingletons else 1
         self.min_freq         =  self.get_parsed_option(MIN_FREQ, self.min_freq)
 
-        self.trim             =  self.has_parsed_option(TRIM)
-        self.unaccent         =  self.has_parsed_option(UNACCENT)
+        self.trim             =  self.get_parsed_option(TRIM)
+        self.unaccent         =  self.get_parsed_option(UNACCENT)
 
         self.pattern          =  self.get_parsed_argument(PATTERN, "")
-        self.pattern          =  system.read_file(self.pattern) if system.file_exists(self.pattern) else self.pattern # check if is a file with pattern (to cirvumvent shell UTF8 issues)
+        pattern_file          =  self.get_parsed_option(PATTERN_FILE, "")
+        if pattern_file:
+            self.pattern      =  system.read_file(pattern_file).strip()
+        ## OLD inline heuristic: check if is a file with pattern (to circumvent shell UTF8 issues)
+        ## self.pattern       =  system.read_file(self.pattern) if system.file_exists(self.pattern) else self.pattern
+        elif system.file_exists(self.pattern):
+            self.pattern      =  system.read_file(self.pattern)
 
-        self.chomp            = (self.has_parsed_option(CHOMP) or
+        self.chomp            = (self.get_parsed_option(CHOMP) or
                                  not re.match('\\n', self.pattern))
 
         self.restore          =  self.get_parsed_argument(RESTORE, "")
@@ -164,8 +175,8 @@ class CountIt(Main):
         # See if regex has line achor (^ or $)
         # NOTE: Escaped $ are ignored.
         has_line_anchor     = re.search(r'^\^|[^\\]\$$', self.pattern)
-        self.one_per_line   = self.has_parsed_option(ONE_PER_LINE) or has_line_anchor         # only count one instance of the pattern per line
-        self.multi_per_line = self.has_parsed_option(MULTI_PER_LINE) or not self.one_per_line # count multiple instance of the pattern per line (even when ^ and $ are specified)
+        self.one_per_line   = self.get_parsed_option(ONE_PER_LINE) or has_line_anchor         # only count one instance of the pattern per line
+        self.multi_per_line = self.get_parsed_option(MULTI_PER_LINE) or not self.one_per_line # count multiple instance of the pattern per line (even when ^ and $ are specified)
         debug.assertion(not (self.one_per_line and self.multi_per_line))
 
 
@@ -355,5 +366,6 @@ if __name__ == '__main__':
                   positional_arguments = [(PATTERN,          'regex pattern or file with pattern (to circumvent shell UTF8 issues) to check for')],
                   int_options          = [(OCCURRENCE_FIELD, 'field giving occurrence count'),
                                           (MIN_FREQ,         'min frequency to show in output')],
-                  text_options         = [(RESTORE,          'simulate look-ahead')])
+                  text_options         = [(RESTORE,          'simulate look-ahead'),
+                                          (PATTERN_FILE,     'file with pattern (to circumvent shell UTF8 issues)')])
     app.run()

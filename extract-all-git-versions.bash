@@ -7,6 +7,13 @@
 # - shell check
 #   SC2016 (info): Expressions don't expand in single quotes
 #   SC2116 (style): Useless echo?
+# - Uses git log with following options (seee git-log manpage):
+#      --date-order       commit timestamp order
+#      --diff-filter=d    exclude deletions
+#      --reverse          show older commits first
+#      --format="%ad %H"  author date with hour
+#      --date=iso-strict  strict ISO 8601 format
+#      --follow           list history beyond renames
 #
 # TODO3: merge with alt-extract-all-git-versions.bash
 #
@@ -16,7 +23,9 @@ function full-usage {
     local script
     script="$(basename "$0")"
     echo ""
-    echo "Usage: NUM_REVISIONS=N $script [--human] [--help] git-path [extract-dir]"
+    echo "    Warning: deprecated script: use alt-extract-all-git-versions.bash."
+    echo ""
+    echo "Usage: [env-spec] $script [--human] [--help] git-path [extract-dir]"
     echo ""
     echo "Examples:"
     echo ""
@@ -26,8 +35,9 @@ function full-usage {
     echo "PRETTY=1 VERBOSE=1 $0 Dockerfile"
     echo ""
     echo "Notes:"
-    echo "- default extract-dir: $export_to_expr"
-    echo "- Env. vars: {EXPORT_TO, NUM_REVISIONS, PRETTY, QUICK_MODE, VERBOSE, TMP}"
+    echo "- Default extract-dir: $export_to_expr"
+    echo "- Env. vars: {EXPORT_TO, NUM_REVISIONS, PRETTY, VERBOSE, TMP}"
+    echo "- Experimental ones: {QUICK_MODE}"
     echo ""
 }
 
@@ -69,16 +79,14 @@ if [ "$1" = "--help" ]; then
     full-usage
     exit
 fi
-EXPORT_TO="${2:-$DEFAULT_EXPORT_TO}"
+export_to_value="${EXPORT_TO:-$DEFAULT_EXPORT_TO}"
+EXPORT_TO="${2:-$export_to_value}"
 #
 # take relative path to the file to inspect
 GIT_PATH_TO_FILE="$1"
 
-## OLD: USAGE=$'\nNote:\n- cd to the root of your git proj, as follows:\n  cd "$(git rev-parse --show-toplevel)"\n- specify path to file you with to inspect\n- example:\n  '"$0 some/path/to/file"
 NEWLINE=$'\n'
 TWO_NEWLINES="$NEWLINE$NEWLINE"
-## OLD: script="$(basename "$0")"
-## OLD: USAGE="Usage: $(basename "$0") [--human] path [extract-dir=$DEFAULT_EXPORT_TO]${NEWLINE}${NEWLINE}Example(s):${NEWLINE}${NEWLINE}$0 README.md /tmp/README-versions${NEWLINE}${NEWLINE}PRETTY=1 VERBOSE=1 ${script} Dockerfile"
 USAGE=$(full-usage | grep 'Usage')
 
 # check if got argument
@@ -113,27 +121,27 @@ if [ ! -d "${EXPORT_TO}" ]; then
 fi
 
 ## uncomment next line to clear export folder each time you run script
-#rm "${EXPORT_TO}"/*
+## rm "${EXPORT_TO}"/*
 
-# reset coutner
+# reset counter and do other initializaiton
 COUNT=0
-# other initializaiton
+GOOD_COUNT=0
 base=$(basename "$0" .bash)
 info="$TMP/_$base.$$.info"
 
 # Get information on commits, optionally checking for additional records due to renames
 git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
-num_cases=$(wc -l < "$info")
-if [ "${QUICK_MODE:-1}" == "1" ]; then
-    ## OLD: total_num_cases=$(git log --follow "$GIT_PATH_TO_FILE" | grep -c -v '^commit')
-    total_num_cases=$(git --no-pager log --follow "$GIT_PATH_TO_FILE" | grep -c -v '^commit')
-    if [ "$num_cases" != "$total_num_cases" ]; then
-	echo "Warning: Additional cases due to renames: try alt-extract-all-git-versions.bash"
+TOTAL_NUM=$(wc -l < "$info")
+if [ "${QUICK_MODE:-0}" == "0" ]; then
+    total_num_cases=$(git --no-pager log --follow "$GIT_PATH_TO_FILE" | grep -c '^commit')
+    if [ "$TOTAL_NUM" != "$total_num_cases" ]; then
+        echo "Warning: Additional cases due to renames: try alt-extract-all-git-versions.bash"
     fi
 fi
 
-num_revisions="${NUM_REVISIONS:-$num_cases}"
-first_case=$(($num_cases - $num_revisions + 1))
+# Extract the revisions
+NUM_REVISIONS="${NUM_REVISIONS:-$TOTAL_NUM}"
+first_case=$(($TOTAL_NUM - $NUM_REVISIONS + 1))
 while read -r LINE; do
     # ex: 2021-05-09T22:27:20-05:00 d124b2a3c1de2b2c0cd834b0fa9097e871d7f141
     COUNT=$((COUNT + 1))
@@ -147,24 +155,25 @@ while read -r LINE; do
     date_spec="$COMMIT_DATE"
     hour_spec=""
     if $pretty; then
-	date_spec="$(date "+%d%b%y" --date="$COMMIT_DATE")"
-	hour_spec="$(date "+%H%M" --date="$COMMIT_DATE")"
-	version_spec="v$COUNT"
+        date_spec="$(date "+%d%b%y" --date="$COMMIT_DATE")"
+        hour_spec="$(date "+%H%M" --date="$COMMIT_DATE")"
+        version_spec="v$COUNT"
     fi
     COMMIT_SHA=$(echo "$LINE" | cut -d ' ' -f 2)
     $debug && echo "COUNT=$COUNT LINE=$LINE COMMIT_DATE=$COMMIT_DATE COMMIT_SHA=$COMMIT_SHA"
-    ## OLD: $verbose && printf '.'
-    ## OLD: output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.$COUNT.$COMMIT_DATE"
     output_file="$EXPORT_TO/$GIT_SHORT_FILENAME.${version_spec}-${date_spec}"
     if [ -e "$output_file" ]; then
-	echo "Warning: adding time of day ($hour_spec) to distinguish '$output_file'";
-	output_file="${output_file}_${hour_spec}";
+        echo "Warning: adding time of day ($hour_spec) to distinguish '$output_file'";
+        output_file="${output_file}_${hour_spec}";
     fi
     git cat-file -p "$COMMIT_SHA:$REL_GIT_PATH_TO_FILE" > "$output_file"
+    if [ $? -eq 0 ]; then
+        let GOOD_COUNT++
+    fi
     $verbose && echo "$output_file"
 done <"$info"
 
 # return success code
 $verbose && echo ""
-echo "$NUM_REVISIONS versions stored in ${EXPORT_TO} for $GIT_PATH_TO_FILE"
+echo "$GOOD_COUNT versions stored in ${EXPORT_TO} for $GIT_PATH_TO_FILE"
 exit 0

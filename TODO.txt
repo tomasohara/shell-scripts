@@ -17,3 +17,4 @@ Things to do
   $ ls archive/*telnet*
   archive/bad-telnet.perl  archive/telnet.perl  archive/test-telnet.perl
   archive/new-telnet.perl  archive/telnet.sh    archive/was-telnet.perl
+- P4: make sure shell scripts honor --help

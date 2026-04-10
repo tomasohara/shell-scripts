@@ -75,6 +75,9 @@ shell-scripts
 **/*.[0-9][0-9][A-Za-z]*[0-9][0-9]
 # ex: usage.list.08Jan22.2
 **/*.[0-9][0-9][A-Za-z]*[0-9][0-9].*
+## TEST:
+## ex: poe-models-25sep25.json
+**/*[.-][0-9][0-9][A-Za-z]*[0-9][0-9][.-]*
 versioned-files
 
 # Emacs

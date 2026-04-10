@@ -158,8 +158,8 @@ function resolve-path() {
     echo "$new_filename"
 }
 
-# Reset bash flags
-export BASHRC_PROCESSED=0 PROFILE_PROCESSED=0 SCRIPT_PID=""
+# Reset bashrc flags
+export BASHRC_PROCESSED=0 PROFILE_PROCESSED=0 SCRIPT_PID="" PS_symbol=""
 
 ## TODO: resolve <space> in emacs options
 # EX: "-DAMA-Ubuntu<space>Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1" => "-DAMA-Ubuntu Mono-normal-normal-normal-*-24-*-*-*-m-0-iso10646-1"

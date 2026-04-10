@@ -23,7 +23,8 @@ jobs:
       matrix:
         os: [ubuntu-22.04]
         ## TODO: os: [ubuntu-20.04, ubuntu-latest]
-        python-version: ["3.8", "3.9", "3.10"]
+        ## OLD: python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
         ## TODO: 3.x [latest; -or latest, latest-1, latest-2, ...]
 
     steps:

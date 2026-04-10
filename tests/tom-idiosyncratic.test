@@ -11,7 +11,7 @@
 #...............................................................................
 # pwd aliases
 
-# Make sure nickname and full name note empty
+# Make sure nickname and full name not empty
 #
 # note: '(pwd-host-info) ...' used due to odd output w/ pwd alias
 

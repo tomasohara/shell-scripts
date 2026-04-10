@@ -2,12 +2,12 @@
 #
 # Convenience script for loading all my aliases, functions, etc.
 #
+# Tom's typical usage (n.b., idiosyncratic settings):
+#   SOURCE_SETTINGS=1 source ~tomohara/bin/all-tomohara-aliases-etc.bash
+#
 # Simple Usage (see advanced below for use in scripts):
 #   export TOM_BIN=/home/tom/shell-script;
 #   source $TOM_BIN/all-tomohara-aliases-etc.bash
-#
-# Tom's typical usage (n.b., idiosyncratic settings):
-#   SOURCE_SETTINGS=1 source "$HOME/bin/all-tomohara-aliases-etc.bash"
 #
 # Debugging usage:
 #   TRACE_SOURCE=1 VERBOSE_SOURCE=1 source ~/bin/all-tomohara-aliases-etc.bash > ~/bin/all-tomohara-aliases-etc.debug.log 2>&1
@@ -93,4 +93,10 @@ if [ "${DIR_ALIAS_HACK:-0}" = "1" ]; then
     #
 fi
 ##
-$was_tracing || set - -o xtrace
+## BAD: $was_tracing || set - -o xtrace
+## NOTE: This above set the $@ parameters to "-o xtrace"! Via bash manual:
+##   set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
+##     - Signal the end of options, cause all remaining  args to be assigned
+##       to the positional parameters. The -x and -v options are turned off. ...
+##
+$was_tracing || set +o xtrace

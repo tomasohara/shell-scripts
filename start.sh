@@ -203,7 +203,7 @@ case "$lower_file" in
     *.mov* | *.mp*4) invoke vlc "$@" & ;;
 
     # Audio files
-    *.mp*3 | *.wav*) invoke vlc "$@" & ;;
+    *.mp*3 | *.og? | *.wav*) invoke vlc "$@" & ;;
     
     # MS Office and LibreOffice files: word processor files, spreadsheets, etc.
     # warning: this only works well for MS-specific extension (.

@@ -94,7 +94,7 @@ class TestIt(TestWrapper):
         self.do_assert("3 tests, 0 failure(s), 1 ignored" in output)
         return
 
-    @pytest.mark.xfail                   # TODO: remove xfail
+    ## OLD: @pytest.mark.xfail                   # TODO: remove xfail
     @trap_exception
     def test_preprocess_batspp(self):
         """TODO: flesh out test for preprocess_batspp"""
@@ -102,6 +102,75 @@ class TestIt(TestWrapper):
         contents = ("$ echo hey \\\n" +
                     "you\n")
         self.do_assert("\\" not in THE_MODULE.preprocess_batspp(contents))
+        return
+
+    @trap_exception
+    def test_convert_to_bats_preserves_single_quotes(self):
+        """Make sure debug trace keeps single quotes in expected text"""
+        debug.trace(4, f"TestIt.test_convert_to_bats_preserves_single_quotes(); self={self}")
+        test_obj = THE_MODULE.CommandTests()
+        old_omit_trace = THE_MODULE.OMIT_TRACE
+        try:
+            THE_MODULE.OMIT_TRACE = False
+            test_case = THE_MODULE.TestFieldTypes(
+                entire="# Test quote check\n",
+                title="quote-check",
+                setup="",
+                actual="$ echo ok\n",
+                expected="Error: Use 'git-update-force' to update with changed files",
+            )
+            bats_text, _ = test_obj._convert_to_bats(test_case)
+            self.do_assert("Use 'git-update-force'" in bats_text)
+            self.do_assert('Use "git-update-force"' not in bats_text)
+        finally:
+            THE_MODULE.OMIT_TRACE = old_omit_trace
+        return
+
+    @trap_exception
+    def test_convert_to_bats_escapes_double_quote_and_dollar(self):
+        """Make sure debug trace escapes shell-sensitive chars in header text"""
+        debug.trace(4, f"TestIt.test_convert_to_bats_escapes_double_quote_and_dollar(); self={self}")
+        test_obj = THE_MODULE.CommandTests()
+        old_omit_trace = THE_MODULE.OMIT_TRACE
+        try:
+            THE_MODULE.OMIT_TRACE = False
+            test_case = THE_MODULE.TestFieldTypes(
+                entire="# Test shell escape check\n",
+                title="shell-escape-check",
+                setup="",
+                actual="$ echo ok\n",
+                expected='value: "double" $HOME',
+            )
+            bats_text, _ = test_obj._convert_to_bats(test_case)
+            self.do_assert('\\"double\\"' in bats_text)
+            self.do_assert('\\$HOME' in bats_text)
+        finally:
+            THE_MODULE.OMIT_TRACE = old_omit_trace
+        return
+
+    @pytest.mark.xfail(reason="TODO: support optional non-elided debug headers for long output")
+    @trap_exception
+    def test_convert_to_bats_no_elision_for_long_expected(self):
+        """Edge-case TODO: allow preserving full long expected text in debug header"""
+        debug.trace(4, f"TestIt.test_convert_to_bats_no_elision_for_long_expected(); self={self}")
+        test_obj = THE_MODULE.CommandTests()
+        old_omit_trace = THE_MODULE.OMIT_TRACE
+        old_max_len = THE_MODULE.MAX_ESCAPED_LEN
+        try:
+            THE_MODULE.OMIT_TRACE = False
+            THE_MODULE.MAX_ESCAPED_LEN = 24
+            test_case = THE_MODULE.TestFieldTypes(
+                entire="# Test long expected\n",
+                title="long-expected",
+                setup="",
+                actual="$ echo ok\n",
+                expected="0123456789-abcdefghijklmnopqrstuvwxyz-tail",
+            )
+            bats_text, _ = test_obj._convert_to_bats(test_case)
+            self.do_assert("abcdefghijklmnopqrstuvwxyz-tail" in bats_text)
+        finally:
+            THE_MODULE.OMIT_TRACE = old_omit_trace
+            THE_MODULE.MAX_ESCAPED_LEN = old_max_len
         return
 
 

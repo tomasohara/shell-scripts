@@ -18,6 +18,7 @@ eval 'exec perl -Ssw $0 "$@"'
 # - Check for looping due to empty patterns (e.g., '(.*)').
 # - Only apply s qualifier when -para or -slurp specified.
 # - Add -chomp option as in count_it.perl.
+# - Add diagnostics for match failures.
 #
 
 # Load in the common module, making sure the script dir is in the Perl lib path
@@ -164,7 +165,9 @@ while (<>) {
 	# Update the current line being matched
 	if ($restore ne "") {
 	    ## OLD: my($restore_text) = eval { "$restore"; };
-	    my($restore_text) = eval "$restore";
+	    ## BAD: my($restore_text) = eval "$restore";
+	    ## NOTE: Due to a change in Perl, need to evaluate the variables in the context of a string.
+	    my($restore_text) = eval " \"$restore\" ";
 	    &debug_print(&TL_DETAILED, "restoring $restore_text to line\n");
 	    $_ = $restore_text . $';		# '
 	    &debug_print(&TL_VERBOSE, "line='$_'\n");

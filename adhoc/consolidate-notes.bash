@@ -39,7 +39,7 @@ if [[ ("$1" == "") || ("$1" == "--help") ]]; then
     ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--trace] [--help] [--]"
+    echo "Usage: $0 [--trace] [--help] [--skip-xterm-title] [--]"
     echo ""
     echo "Examples:"
     echo ""
@@ -61,14 +61,20 @@ fi
 #
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 trace=0
+skip_xterm_title=false
 while [ "$moreoptions" == "1" ]; do
     if [ "$1" == "--trace" ]; then
 	trace=1
     elif [ "${CRONTAB:-0}" == "1" ]; then
         # TEMP: ignore options if invoked via crontab (requires env option)
+        # Note: Used when bash used to invoke cronjob.
+        # ex: 30 2 * * * bash -c "CRONTAB=1 SRC_DIR=~tomohara bash --login -i $ADHOC_BIN/consolidate-notes.bash - > ~tomohara/_consolidate-notes.log 2>&1"
         echo "Warning: ignoring options ($*)"
 	break
     elif [[ ("$1" == "--") || ("$1" == "-") ]]; then
+	break
+    elif [[ ("$1" == "--skip-xterm-title") ]]; then
+        skip_xterm_title=true
 	break
     else
 	echo "ERROR: Unknown option: $1";
@@ -109,7 +115,7 @@ new_base="_new-$base"
 cd "${TARGET_DIR:-.}"
 ## TEMP: ensure full path used (TODO: only if SRC_DIR equals TARGET_DIR)
 cd-realdir
-set-xterm-title "merge-notes [$PWD]"
+$skip_xterm_title || set-xterm-title "merge-notes [$PWD]"
 
 # Rename temporary files (in case of aborted run)
 temp_files="$(ls "$new_base.files.list" "$new_base.files.log" "$new_base.list" "$new_base.list.log" 2> /dev/null)"

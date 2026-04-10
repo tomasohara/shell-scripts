@@ -49,7 +49,7 @@ PQR	-	-	R2C3	r2c3
 
 #................................................................................
 # cut.perl
-# TOOD: mucho mas
+# TODO: mucho mas
 
 $ echo "\t" | cut.perl -f=2 -missing=FU -
 FU
@@ -66,6 +66,6 @@ Tomás
 
 # note: should not be itegral
 $ calc "round(100e12, 0)"
-100000000000000
+100000000000000.000
 $ calc-int '100e12'
 100000000000000

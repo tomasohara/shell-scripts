@@ -16,7 +16,6 @@
 #   git-update-plus                  # git-pull with stashed changes
 #
 #   git-commit-and-push file...      # commits file and pushes to remote
-#
 #...............................................................................
 # Notes:
 #
@@ -65,7 +64,7 @@
 #   -- obsolete
 #      GIT_USER                  user ID for authentication
 #      GIT_TOKEN                 user token from Github
-#   GIT_NO_CONFIRM               omit confirmation (used is automated tests(
+#   GIT_NO_CONFIRM               omit confirmation (used is automated tests)
 #   GIT_FORCE                    force an operation (e.g., git add ignored file)
 #   GIT_LOG_DIR                  where to put command logs (e.g, log-files)
 #   GIT_SKIP_ADD                 skip implicit 'git add' in git-add-commit-push
@@ -80,7 +79,6 @@
 #   SC2086 [Double quote to prevent globbing and word splitting]
 #
 # - By the way, "maldito" is Spanish for "damn", which is a mild expletive in English.
-#
 #................................................................................
 # Examples:
 # TODO2: show the corresponding alias; also move git-mv example later to this section)
@@ -99,7 +97,6 @@
 # 1. git add - this stages your changes for committing
 # 2. git commit - this commits your staged changes locally
 # 3. git push - this pushes your committed changes to a remote
-#
 #...............................................................................
 # based on https://stackoverflow.com/questions/2641146/handling-file-renames-in-git:
 #
@@ -111,7 +108,24 @@
 #     git commit -m "renamed old-file to new-file"
 # 3: push this change to the remote server
 #     git push
+#................................................................................
+# Deleting file from repo:
+#   git rm old-file
+#   git commit -m "deleted old-file"
+#   git push
 #
+# See https://stackoverflow.com/questions/2047465/how-do-i-delete-a-file-from-a-git-repository.
+#...............................................................................
+# Steps in fleshing out empty repo (just created via Github)
+#  - via https://github.com/tomasohara/temporary-repo:
+#    …or create a new repository on the command line
+#    echo "# temporary-repo" >> README.md
+#    git init
+#    git add README.md
+#    git commit -m "first commit"
+#    git branch -M main
+#    git remote add origin https://github.com/tomasohara/temporary-repo.git
+#    git push -u origin main
 #................................................................................
 # Aliases from tomohara-aliaes.bash:
 #-------------------------------------------------------------------------------
@@ -170,6 +184,17 @@ function downcase-stdin-alias ()
 # TODO: add clear-and-redefine-aliases function elsewhere to address this
 function quiet-unalias-alias {
     unalias "$@" 2> /dev/null || true;
+}
+
+# alias-function(name, command, ...): define NAME alias via function def w/ COMMAND ...
+# NOTE: This is a simplified version of simple-alias-fn from tomohara-aliases.bash
+# intended as replacement for 'alias name=command' usages.
+# It takes the alias name and a command, appending "$@" to the command.
+function alias-function {
+    local alias="$1"
+    shift
+    local command="$*"
+    eval "function $alias { $command" '"$@"' "; }"
 }
 
 # HACK: wrapper around check_errors.perl w/ new QUIET option
@@ -432,7 +457,7 @@ EOF
 }
 #
 # note: following for backward compatibility
-simple-alias-fn git-commit-and-push git-add-commit-push
+alias-function git-commit-and-push git-add-commit-push
 
 
 # git-update-commit-push(file, ...): updates local repo and then commits FILE... to global repo
@@ -444,7 +469,7 @@ function git-update-commit-push {
         echo "Warning: consider canceling given possible update error (status=$?)"
     fi
     git-commit-and-push "$@"
-    # DEBUG: set - -o xtrace
+    # DEBUG: set +o xtrace
 }
 #
 # git-update-commit-push-all(): adds all files for checkin
@@ -473,7 +498,7 @@ alias git-push-alias='invoke-git-command push'
 alias git-pull-alias='invoke-git-command pull'
 
 # Misc git commands (redirected to log file)
-# NOTE: commands with much output like git-log invoke less
+# NOTE: commands with much output like git-log-plus invoke less
 # TODO: add invoke-git-command-paged wrapper (a la git ... | less)
 alias git-status='invoke-git-command status'
 function git-log-plus { invoke-git-command log --name-status "$@" | less --quit-if-one-screen; }
@@ -482,6 +507,7 @@ alias git-log-diff-plus='invoke-git-command log --patch'
 alias git-log-follow='git-log-plus --follow'
 alias git-blame-alias='invoke-git-command blame'
 alias git-rm-alias='invoke-git-command rm'
+alias git-checkout-alias='invoke-git-command checkout'
 
 # git-add-plus: add filename(s) to repository
 # note: if GIT_FORCE is 1 then --force added (e.g., to override .gitignore)
@@ -607,6 +633,17 @@ function unescape-at-sign {
 # Note:
 # - Normalizes the listing such as by changing a/<path> to a: <path> and likwise for b.
 # - The optional FILES-ETC are passed along to git-diff command.
+#
+# ex: git-diff-plus HEAD~1 tomohara-aliases.bash
+#
+# Note: See gitrevisions(7) for details on revision syntax.
+#
+# FUTURE WORK: Expose useful git revision/diff features (e.g., passing HEAD~1)
+# transparently to other alias wrappers such as git-difftool-plus,
+# git-vdiff-alias, and the git-checkin-* templates.
+#
+# TODO2: Refactor the revision parsing logic (using git rev-parse) into a helper
+# function to make it reusable in other git-xyz-plus wrappers.
 function git-diff-plus {
     local log;
     log=$(get-temp-log-name "diff");
@@ -618,6 +655,23 @@ function git-diff-plus {
     ## Note:
     ## - Uses git-diff-list[-template] so file order reflects subdir embedding level.
     ## - The 'diff -- file' format is used in case of spaces or other special characters.
+
+    local -a git_args=()
+    local seen_dash_dash=0
+    for arg in "$@"; do
+        if [[ "$arg" == "--" ]]; then
+            seen_dash_dash=1
+        elif [[ $seen_dash_dash -eq 1 ]]; then
+            continue
+        elif [[ "$arg" == -* ]]; then
+            git_args+=("$arg")
+        elif git rev-parse --verify --quiet "$arg^{commit}" >/dev/null 2>&1 || \
+             git rev-parse --verify --quiet "$arg^{tree}" >/dev/null 2>&1 || \
+             git rev-parse --verify --quiet "$arg^{blob}" >/dev/null 2>&1; then
+            git_args+=("$arg")
+        fi
+    done
+
     local OLDIFS="$IFS"                 # save inter-field separator
     IFS=$'\n'
     echo "" >| "$log"
@@ -626,7 +680,7 @@ function git-diff-plus {
         ## TODO:
         ## local f_escape
         ## f_escape="$(echo "$f" | perl -pe 's/@/\\@/g;')"
-        git diff -- "$f" | escape-at-sign | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@$1$2 $3: @g) {}' | unescape-at-sign >> "$log" 2>&1
+        git diff "${git_args[@]}" -- "$f" | escape-at-sign | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@$1$2 $3: @g) {}' | unescape-at-sign >> "$log" 2>&1
     done
     IFS="$OLDIFS"                       # restore inter-field separator
     #
@@ -790,7 +844,9 @@ function alt-invoke-next-single-checkin {
         git diff --numstat -- "$mod_file" | head
         true
     fi
-    local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
+    ## OLD: local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
+    # note: Uses single quote to avoid interpolating variable references (e.g., $- or $TRACE)'.
+    local prompt="GIT_MESSAGE='...' git-update-commit-push \"$mod_file\""
     local command
     echo "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
     local OLD_GIT_MESSAGE=$GIT_MESSAGE
@@ -839,10 +895,10 @@ alias git-cd-root-alias='cd $(git-root-alias)'
 alias git-invoke-next-single-checkin=invoke-next-single-checkin
 # NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
 # shellcheck disable=SC2139
-alias-fn git-alias-refresh "source '${BASH_SOURCE[0]}'"    # bash idiom for current script filename
-simple-alias-fn git-refresh-aliases 'git-alias-refresh'
-simple-alias-fn git-next-checkin 'invoke-alt-checkin'      # uses alt-invoke-next-single-checkin
-simple-alias-fn git-extract-all-versions 'extract-all-git-versions.bash'
+alias-function git-alias-refresh "source '${BASH_SOURCE[0]}'"    # bash idiom for current script filename
+alias-function git-refresh-aliases 'git-alias-refresh'
+alias-function git-next-checkin 'invoke-alt-checkin'      # uses alt-invoke-next-single-checkin
+alias-function git-extract-all-versions 'extract-all-git-versions.bash'
 ## TEST: hide tracing output alias git-next-checkin='invoke-alt-checkin 2> /dev/null'
 # git-tar-repo(): create tar archive of entire repo
 alias git-tar-repo=tar-this-dir-dated
@@ -889,7 +945,7 @@ function git-checkout-branch {
     # Show end of log
     git-alias-review-log "$log"
 }
-simple-alias-fn git-branch-checkout  git-checkout-branch 
+alias-function git-branch-checkout  git-checkout-branch 
 
 # git-branch-alias(): return current branch for repo
 function git-current-branch {
@@ -917,6 +973,40 @@ function git-toggle-push {
         GIT_SKIP_PUSH=1
     fi
     echo "GIT_SKIP_PUSH=$GIT_SKIP_PUSH"
+}
+
+# git-ls-tree-relative([tree_ish=HEAD]): shows repo files relative to current dir
+# note: relative-listing support via POE Assistant
+function git-ls-tree-relative {
+    local tree_ish="${1:-HEAD}"
+    local depth=$(git rev-parse --show-prefix | tr -cd '/' | wc -c);
+    local up=""
+    if [ $depth -gt 0 ]; then
+        local up=$(printf '../%.0s' $(seq 1 "$depth"));
+    fi
+    ## DEBUG: trace-vars tree_ish depth up
+    git ls-tree -r --full-tree --name-only "$tree_ish" | sed "s#^#$up#";
+}
+
+# git-checkout-from(timestamp): checking out repository at particular TIMESTAMP [for given BRANCH]
+# see https://stackoverflow.com/questions/6990484/how-to-checkout-in-git-by-date
+# ex: git-checkout-from 2026-01-01
+function git-checkout-from {
+    local timestamp="$1";
+    if [ "$timestamp" = "" ]; then
+        echo "usage: ${FUNCNAME[0]} timestamp"
+        echo "example: ${FUNCNAME[0]} 2025-12-31"
+        echo "note: Use git-checkout-branch to go from detached-head state back to normal."
+        return
+    fi
+    local branch=$(git-current-branch)
+    ## TODO2: make sure before-timespec usage OK
+    # ex: git checkout $(git rev-list -n 1 --first-parent --before="$timestamp" "$branch")
+    ## TODO3:
+    ## local command="git rev-list -n 1 --first-parent --before='$timestamp' '$branch'"
+    ## echo "Issuing: git checkout \$($command)"
+    ## git checkout "$($command)"
+    git checkout $(git rev-list -n 1 --first-parent --before="$timestamp" "$branch")
 }
 
 #-------------------------------------------------------------------------------
@@ -996,9 +1086,13 @@ function git-misc-alias-usage() {
     echo "    GIT_MESSAGE='moved' git-move-to-dir DIR file1 file2"
     echo ""
     echo "To delete files (mucho cuidado):"
-    # note: Bypasses 'git add' in git-update-commit-push (TODO3: customize alias for this).
+    # note: git-rm-alias stages the deletion, but git-update-force's stash/pop cycle unstages it.
+    # So 'git add' (implicit in git-update-commit-push) re-stages the deletion—do NOT use GIT_SKIP_ADD=1.
     # See https://stackoverflow.com/questions/37279654/when-should-i-use-rm-git-rm-git-rm-cached-git-add.
-    echo '   old="TODO..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" GIT_SKIP_ADD=1 git-update-commit-push "$old"'
+    ## BAD (GIT_SKIP_ADD=1 skips re-staging after stash/pop, so commit finds nothing staged):
+    ## echo '   old="TODO..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" GIT_SKIP_ADD=1 git-update-commit-push "$old"'
+    ## TODO3: rework to avoid stash by git-update-commit-push when just deleting files
+    echo '   old="TODO-filename..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" git-update-commit-push "$old"'
     echo ""
     echo "To check in all tracked files with changes (examinar primero):"
     echo "   GIT_MESSAGE='...' git-update-commit-push \$(git-files-changed)"
@@ -1011,8 +1105,14 @@ function git-misc-alias-usage() {
     echo "   GIT_AUTO_NEXT GIT_FORCE GIT_LOG_DIR GIT_MESSAGE GIT_NO_CONFIRM GIT_SKIP_ADD GIT_SKIP_PUSH GIT_TEST_MESSAGE GIT_TOKEN GIT_USER PRESERVE_GIT_STASH"
     echo ""
     echo "Source code grepping:"
+    ##
+    ## OLD:
     ## TODO3: get ls-tree to show output relative to current subdirectory
-    echo "   (git-cd-root-alias; git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
+    ## echo "   (git-cd-root-alias; git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
+    ##
+    # NOTE: -r for recurse dirs; --name-only to omit details; and HEAD for current commit head;
+    #
+    echo "   (git-ls-tree-relative | xargs -I '{}' grep --with-filename 'pattern' {}) 2>&1 | less"
     echo ""
     echo "Odds and ends:"
     echo '   head $(git-root-alias)/config'

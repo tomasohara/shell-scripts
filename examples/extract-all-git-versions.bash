@@ -15,6 +15,7 @@
 function full-usage {
     local script
     script="$(basename "$0")"
+    echo "    Warning: deprecated script: use alt-extract-all-git-versions.bash."
     echo ""
     echo "Usage: NUM_REVISIONS=N $script [--human] [--help] git-path [extract-dir]"
     echo ""

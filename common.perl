@@ -616,9 +616,12 @@ sub run_command_fmt {
 # Run's the specified command using the data as input returning the output
 # as a string.
 #
-# NOTE: The commmand is assumed to take a file name as the last input. A
-# temporary file is created for this purpose, which uses a unique ID and
-# is retained during debugging.
+# NOTE:
+# - The commmand is assumed to take a file name as the last input. A
+#   temporary file is created for this purpose, which uses a unique ID and
+#   is retained during debugging.
+# - If the placeholder {text} is used, then the filename is put there. See
+#   qd_trans_spanish.perl for an example.
 #
 # TODO: just use a single temp file (eg, temp-run-command-$$.data) rather
 # than separate ones (e.g., temp-run-command-$$-$num.data) unless verbose debugging
@@ -632,7 +635,17 @@ sub run_command_over {
     # Output input to temp file and then run command using the file as input
     my($temp_file) = sprintf("%s%s-%d-%d.data", &TEMP_DIR, "temp-run-command", $$, $run_num++);
     &write_file($temp_file, $input);
-    my($result) = &run_command(sprintf("%s %s", $command, $temp_file), $trace_level);
+    ## OLD: my($result) = &run_command(sprintf("%s %s", $command, $temp_file), $trace_level);
+    my($full_command) = $command;
+    my($placeholder_text) = "{text}";
+    my($placeholder_offset) = index($command, $placeholder_text);
+    if ($placeholder_offset >= 0) {
+	$full_command =~ s/$placeholder_text/$temp_file/;
+    }
+    else {
+	$full_command .= " $temp_file";
+    }
+    my($result) = &run_command($full_command, $trace_level);
     ## TODO: add $preserve_temp_files option
     unlink $temp_file unless (&DEBUG_LEVEL >= $trace_level);
 

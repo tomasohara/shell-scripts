@@ -160,7 +160,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## BAD:
 ## $ NUM_REVISIONS=5 alt-git-extract-all-versions alt-extract-all-git-versions.bash
 ## Trying main path alt-extract-all-git-versions.bash for version v13
-## /home/tomohara/temp/tmp/all_versions_exported/alt-extract-all-git-versions.bash.v13-13Apr24
+## $TMP/all-git-versions/alt-extract-all-git-versions.bash.v13-13Apr24
 ## Trying main path alt-extract-all-git-versions.bash for version v12
 ## fatal: Not a valid object name 49d1dfc9c25e959ead5d861dde183baa115f2542:alt-extract-all-git-versions.bash
 ## Trying alternative path 
@@ -323,20 +323,20 @@ Version: N.N.N.N
 ## TODO3: Problem with alt-extract-all-git-versions.bash
 ## $ git-extract-all-versions ./mezcla/tests/resources/test.arpa
 ## Warning: Additional cases due to renames: try alt-extract-all-git-versions.bash
-## /home/tomohara/temp/tmp/all_versions_exported/test.arpa.v1-13Dec23
+## /home/tomohara/temp/tmp/all-git-versions/test.arpa.v1-13Dec23
 ## 
-##  versions stored in /home/tomohara/temp/tmp/all_versions_exported for ./mezcla/tests/resources/test.arpa
+##  versions stored in /home/tomohara/temp/tmp/all-git-versions for ./mezcla/tests/resources/test.arpa
 ## 
 ## $ alt-git-extract-all-versions ./mezcla/tests/resources/test.arpa
 ## Trying main path mezcla/tests/resources/test.arpa for version v2
-## /home/tomohara/temp/tmp/all_versions_exported/test.arpa.v2-13Dec23
+## /home/tomohara/temp/tmp/all-git-versions/test.arpa.v2-13Dec23
 ## Trying main path mezcla/tests/resources/test.arpa for version v1
 ## fatal: Not a valid object name 186208f3f131789a27a4207538da47a9fa617edc:mezcla/tests/resources/test.arpa
 ## Trying alternative path 
 ## Error: unable to resolve commit 186208f3f131789a27a4207538da47a9fa617edc
-## /home/tomohara/temp/tmp/all_versions_exported/test.arpa.v1-03Feb23
+## /home/tomohara/temp/tmp/all-git-versions/test.arpa.v1-03Feb23
 ## 
-## 2 versions stored in /home/tomohara/temp/tmp/all_versions_exported for ./mezcla/tests/resources/test.arpa
+## 2 versions stored in /home/tomohara/temp/tmp/all-git-versions for ./mezcla/tests/resources/test.arpa
 
 ##------------------------------------------------------------------------------
 
@@ -373,3 +373,72 @@ Version: N.N.N.N
 ## $ set_xterm_title.bash fubar-set_xterm_title
 ## $ show-window-list | grep fubar
 ## 0x052cf344  0 tpo-jugador alt $ fubar-set_xterm_title; Py3.11; pid:365159
+
+##------------------------------------------------------------------------------
+
+## TODO3: fix trace-vars handling of whitespace
+##
+## $ export SD_URL=" "
+##
+## $ trace-vars SD_URL 
+## SD_URL=; 
+##
+## $ echo ">$SD_URL<"
+## > <
+
+##------------------------------------------------------------------------------
+
+## TODO2: Track down bug with trace-vars (i.e., due to its local variable $var)
+##
+## $ var=
+## $ trace-vars var
+## var=var; 
+## 
+## $ echo ">$var<"
+## ><
+
+##------------------------------------------------------------------------------
+
+## TODO3: Make sure quotes shown for files with delete[-dir]-force macros,
+## regardless of embedded spaces.
+## NOTE: This first needs support for embedded spaces
+##
+## subdir1="$TMP/temp-dir/temp subdir1-$$"
+## subdir2="$TMP/temp-dir/tempsubdir2-$$"
+## mkdir -p "$subdir1" "$subdir2"
+## file1="$subdir1/'abc def'.list
+## file2="$subdir2/'ghijkl'.list
+## touch "$file1" "$file2"
+##
+## TODO2:
+## ## delete-force "$file1" "$file2" | grep -c '"'
+## ## 2
+## ## delete-dir-force "$subdir1" "$subdir2" | grep -c '"'
+## ## 2
+##
+## delete-force "$file1" "$file2" | grep -c "files with embedded spaces"
+## 1
+
+##------------------------------------------------------------------------------
+
+## TODO2: add tests for check-errors variations
+## check-[all-]warnings vs [all-]check-errors
+
+##------------------------------------------------------------------------------
+
+## TODO2: add tests for most-recent-backup to avoid similar files due to affixes
+## $ most-recent-backup .bashrc
+## ./backup/.bashrc.tpo.~46~
+
+##------------------------------------------------------------------------------
+
+## TODO2: add tests for script-update session includes supporting aliases
+## script-update
+##
+## ...
+## Usual check-in process:
+##     git-cd-root-alias; git-tar-repo-proper; git-update-force; git-next-checkin
+##     # -or-: git-cd-root-alias; git-update-verified; git-conflicts-alias; git-next-checkin
+##     git-next-checkin                      # repeat, as needed
+## conditional-source: command not found
+## ^^^^^^^^^^^^^^^^^^

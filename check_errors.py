@@ -31,7 +31,7 @@ ex: check_errors.py whatever\n
 Notes:\n
 - The default context is 1\n
 - Warnings are skipped by default\n
-- Use -no_asterisks if input uses ***'s outside of error contexts\n
+- Use -no-asterisks if input uses ***'s outside of error contexts\n
 Use -relaxed to exclude special cases (e.g., xyz='error')\n
 """
 
@@ -49,11 +49,11 @@ from mezcla import system
 # Command-line labels constants
 WARNING       = 'warning'       # alias for -warnings
 WARNINGS      = 'warnings'      # include warnings?
-SKIP_WARNINGS = 'skip_warnings' # omit warnings?
+SKIP_WARNINGS = 'skip-warnings' # omit warnings?
 CONTEXT       = 'context'       # context lines before and after
-NO_ASTERISKS  = 'no_asterisks'  # skip warnings for '***' in text
-RUBY          = 'ruby'          # alias for -skip_ruby_lib
-SKIP_RUBY_LIB = 'skip_ruby_lib' # skip Ruby library related errors
+NO_ASTERISKS  = 'no-asterisks'  # skip warnings for '***' in text
+RUBY          = 'ruby'          # alias for -skip-ruby-lib
+SKIP_RUBY_LIB = 'skip-ruby-lib' # skip Ruby library related errors
 RELAXED       = 'relaxed'       # relaxed for special cases
 STRICT        = 'strict'        # alias for relaxed=0
 VERBOSE       = 'verbose'       # show more details
@@ -81,18 +81,16 @@ class CheckErrors(Main):
     def setup(self):
         """Process arguments"""
 
-
         # Check the command-line options
-        warnings           = self.has_parsed_option(WARNING) or self.has_parsed_option(WARNINGS)
-        skip_warnings      = self.has_parsed_option(SKIP_WARNINGS) or not warnings
+        warnings           = self.get_parsed_option(WARNING) or self.get_parsed_option(WARNINGS)
+        skip_warnings      = self.get_parsed_option(SKIP_WARNINGS) or not warnings
         self.show_warnings = not skip_warnings
         self.context       = self.get_parsed_option(CONTEXT, 3)
-        self.asterisks     = not self.has_parsed_option(NO_ASTERISKS)
-        self.skip_ruby_lib = self.has_parsed_option(RUBY) or self.has_parsed_option(SKIP_RUBY_LIB)
-        self.strict        = self.has_parsed_option(STRICT) or not self.has_parsed_option(RELAXED)
-        self.verbose       = self.has_parsed_option(VERBOSE)
+        self.asterisks     = not self.get_parsed_option(NO_ASTERISKS)
+        self.skip_ruby_lib = self.get_parsed_option(RUBY) or self.get_parsed_option(SKIP_RUBY_LIB)
+        self.strict        = self.get_parsed_option(STRICT) or not self.get_parsed_option(RELAXED)
+        self.verbose       = self.get_parsed_option(VERBOSE)
         debug.trace_object(5, self, label="Script instance")
-
 
     def process_line(self, line):
         """Process each line of the input stream"""
@@ -271,7 +269,7 @@ if __name__ == '__main__':
                                          (WARNINGS,      'include warnings?'),
                                          (SKIP_WARNINGS, 'omit warnings?'),
                                          (NO_ASTERISKS,  'skip warnings for "***" in text'),
-                                         (RUBY,          'alias for -skip_ruby_lib'),
+                                         (RUBY,          'alias for -skip-ruby-lib'),
                                          (SKIP_RUBY_LIB, 'skip Ruby library related errors'),
                                          (RELAXED,       'relaxed for special cases'),
                                          (STRICT,        'alias for relaxed=0'),

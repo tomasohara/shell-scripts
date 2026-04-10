@@ -20,7 +20,8 @@
 #     $((arithmetic))              evaluate arithmetic expression
 #     $(command ...)               same as `command ...`
 #     ${var:-default}              use $var or "default"
-#     ${var//from/to}              var with FROM pattern changed to TO
+#     ${var/from/to}               var with FROM pattern changed to TO (once)
+#     ${var//from/to}              likewise for all occurrences
 #     true                         no-op
 #     $#                           number of positional arguments
 #     $*                           all positional arguments
@@ -73,8 +74,10 @@
 #      -n string                    whether string is non-empty
 #      -z string                    whether string is empty
 #  - here-documents
-#      <<END ... END                multiple line using ... (i.e., "here docs")
-#      <<<"text"                    single line using TEXT (i.e., "here string")
+#      <<END\n line1\n...\nEND      multiple line using line1, ... as stdin
+#  - here-strings
+#      <<<"text"                    single line using TEXT as stdin
+#  - indented here-documents        END can be indented; unfortunately requires tab indentation--hence brittle
 #  - sequence expression
 #      {n..m}                       echo "digits:" {0..9}; echo "letters: " {a..z}
 #  - advanced redirection
@@ -108,8 +111,9 @@
 #   (e.g., ${!#} for last argument--see https://stackoverflow.com/questions/1853946/getting-the-last-argument-passed-to-a-shell-script).
 # - Document regex match quirks.
 # - Document file tests (e.g., -e fubar.txt).
-# - BASH_SOURCE usage for when source'd
+# - BASH_SOURCE usage for when source'd; in general: invocation stack array
 #     src_dir=$(dirname "${BASH_SOURCE[0]}")
+# - name of current function: "${FUNCNAME[0]}"; in general: call stack array
 # - value=${value@L}                    # make lowercase
 #
 
@@ -140,7 +144,7 @@ if [[ "$1" == "" ]]; then
     ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--TODO] [--trace] [--help] [--]"
+    echo "Usage: $0 [--TODO] [--trace] [--help] [--| -]"
     echo ""
     echo "Examples:"
     echo ""
