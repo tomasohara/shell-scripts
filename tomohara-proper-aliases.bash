@@ -327,6 +327,12 @@ function test-python-script-method-strict {
     shift;
     PYTEST_OPTS="--runxfail -k $method ${default_pytest_opts[*]}" test-python-script "$@";
 }
+#
+alias run-main='DEBUG_LEVEL=5 run-python-script ./main.py'
+
+## NOTE: workaround for Bash quirk with subshell-specific _PSL_ due to '... &'
+## TODO3: add run-python-app
+alias run-main-app='let _PSL_++; _PSL_=$_PSL_ run-main &'
 
 # disable-python-warnings(): Ignore warning due to Pydantic quirks
 ## TODO:PYTHONWARNINGS="ignore:::pydantic"
