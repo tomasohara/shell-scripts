@@ -327,6 +327,9 @@ function test-python-script-method-strict {
     shift;
     PYTEST_OPTS="--runxfail -k $method ${default_pytest_opts[*]}" test-python-script "$@";
 }
+#
+alias run-main='DEBUG_LEVEL=5 run-python-script ./main.py'
+alias run-main-app='run-main &'
 
 # disable-python-warnings(): Ignore warning due to Pydantic quirks
 ## TODO:PYTHONWARNINGS="ignore:::pydantic"
