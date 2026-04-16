@@ -866,6 +866,10 @@ alias copy='$CP'
 alias del="delete"
 alias copy-force='command cp -fp $other_file_args'
 alias cp='command cp -i $other_file_args'
+alias copy-noclobber-old='copy --no-clobber'
+alias copy-noclobber='copy --update=none'
+alias move-noclobber-old='move --no-clobber'
+alias move-noclobber='move --update=none'
 # maldito shellcheck bug: SC2032: Use own script or sh -c '..' to run this from find
 # shellcheck disable=SC2032
 alias rm='command rm -i $other_file_args'
