@@ -110,7 +110,9 @@
 
 # Show usage if no arguments or --help
 # TODO: put argument processing in loop (see template.bash)
-## NOTE: Uses /tmp as the files accumlate a lot over time
+# Note: Uses /tmp as the files accumlate a lot over time.
+# Uses fallback user for sake of cron (e.g., jobs using aliases via bash -c).
+USER="${USER:-$(whoami)}"
 restore_dir="/tmp/set-xterm-title-$USER"
 mkdir --parents "$restore_dir"
 restore_base="$restore_dir/$PPID"

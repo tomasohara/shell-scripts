@@ -866,6 +866,10 @@ alias copy='$CP'
 alias del="delete"
 alias copy-force='command cp -fp $other_file_args'
 alias cp='command cp -i $other_file_args'
+alias copy-noclobber-old='copy --no-clobber'
+alias copy-noclobber='copy --update=none'
+alias move-noclobber-old='move --no-clobber'
+alias move-noclobber='move --update=none'
 # maldito shellcheck bug: SC2032: Use own script or sh -c '..' to run this from find
 # shellcheck disable=SC2032
 alias rm='command rm -i $other_file_args'
@@ -3296,7 +3300,7 @@ function python-lint-work() {
 # TODO: rename as python-lint-tpo for clarity (and make python-lint as alias for it)
 # note: R0801 is for duplicate lines across source files (no mnemonic)
 function python-lint() {
-    local disables="duplicate-code,bad-whitespace,bad-indentation,bare-except,c-extension-no-member,consider-using-enumerate,consider-using-f-string,consider-using-with,global-statement,global-variable-not-assigned,keyword-arg-before-vararg,len-as-condition,line-too-long,logging-not-lazy,misplaced-comparison-constant,no-self-use,redefined-variable-type,redundant-keyword-arg,superfluous-parens,too-many-arguments,too-many-branches,too-many-instance-attributes,too-many-locals,too-many-public-methods,too-many-statements,trailing-newlines,useless-else-on-loop,useless-return,useless-super-delegation,useless-import-alias,wrong-import-order,wrong-import-position"
+    local disables="duplicate-code,bad-whitespace,bad-indentation,bare-except,c-extension-no-member,consider-using-enumerate,consider-using-f-string,consider-using-with,global-statement,global-variable-not-assigned,keyword-arg-before-vararg,len-as-condition,line-too-long,logging-not-lazy,misplaced-comparison-constant,no-self-use,redefined-variable-type,redundant-keyword-arg,superfluous-parens,too-many-arguments,too-many-branches,too-many-instance-attributes,too-many-locals,too-many-public-methods,too-many-positional-arguments,too-many-statements,trailing-newlines,useless-else-on-loop,useless-return,useless-super-delegation,useless-import-alias,wrong-import-order,wrong-import-position"
     python-lint-work --disable="$disables" "$@" 2>&1 | $PAGER;
 }
 # python-lint-filtered(file, ...): uses additional PYLINT_FILTER with python-lint over FILE ...
