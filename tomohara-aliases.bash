@@ -718,9 +718,10 @@ simple-alias-fn alias-perl 'DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -
 #
 # alias-python: python invocation for using in aliases
 # note: avoids excess tracing; see debug.py and main.py;
-# uses function to allow ALIAS_DEBUG_LEVEL override.
+# uses function to allow ALIAS_DEBUG_LEVEL override;
+# also sets PYTHONSAFEPATH to avoid conflicts from mezcla from current dir.
 # shellcheck disable=SC2016
-simple-alias-fn alias-python 'DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
+simple-alias-fn alias-python 'DURING_ALIAS=1 PYTHONSAFEPATH=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
 #
 export MANPATH="$HOME/perl/share/man/man1:$MANPATH"
 append-path "$HOME/perl/bin"
