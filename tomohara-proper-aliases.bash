@@ -328,11 +328,17 @@ function test-python-script-method-strict {
     PYTEST_OPTS="--runxfail -k $method ${default_pytest_opts[*]}" test-python-script "$@";
 }
 #
-alias run-main='DEBUG_LEVEL=5 run-python-script ./main.py'
-
+# run-main: invoke main.py with debug level 5 or higher
+## TODO3: lower debug level to 4 (e.g., Android apps stable)
+function run-main {
+    DEBUG_LEVEL="$(max $DEBUG_LEVEL 5)" run-python-script ./main.py;
+}
+# run-main-app: invoke main.py in background
 ## NOTE: workaround for Bash quirk with subshell-specific _PSL_ due to '... &'
 ## TODO3: add run-python-app
-alias run-main-app='let _PSL_++; _PSL_=$_PSL_ run-main &'
+function run-main-app {
+    let _PSL_++; _PSL_=$_PSL_ run-main &
+}
 
 # disable-python-warnings(): Ignore warning due to Pydantic quirks
 ## TODO:PYTHONWARNINGS="ignore:::pydantic"
