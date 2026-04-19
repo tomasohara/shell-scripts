@@ -648,7 +648,8 @@ function git-diff-plus {
     local log;
     log=$(get-temp-log-name "diff");
     # Perform diff and convert a/ and /b path prefixes to 'a: ' and 'b: '
-    # ex: diff --git a/.github/act.yml b/.github/... => "diff --git a: .github/,,,"
+    ## OLD: # ex: diff --git a/.github/act.yml b/.github/... => "diff --git a: .github/,,,"
+    # ex: diff --git a/.github/act.yml b/.github/... => "diff --git a: .github/..."
     # ex: --- "a/.github/act.yml" => "--- a: .github/act.yml"
     ## TODO? (account for subdirectories 'a' or 'b'):
     ## git diff "$@" | perl -pe 's@^(diff|\-\-\-|\+\+\+) (?!.*[ab]/.*)([ab])/@\1\2 \3: @;' >| "$log";
@@ -960,7 +961,8 @@ function git-conflicts-alias {
     ## TODO3: get ls-tree to show output relative to current subdirectory
     local restore_dir="$PWD"
     git-cd-root-alias
-    git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {};
+    ## OLD: git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {};
+    git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename --directories=skip '^<<<<<<<' {};
     cd "$restore_dir"
 }
 
