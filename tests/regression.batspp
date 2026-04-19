@@ -455,7 +455,7 @@ Version: N.N.N.N
 
 ##------------------------------------------------------------------------------
 
-## TODO2: make sure date aliases use lowercase
+## TODO2: make sure European-style date aliases use lowercase
 $ ddmmmyy_regex='[0-9].*[A-Z].*[0-9]'
 $ todays-date | egrep -c "$ddmmmyy_regex"
 0
