@@ -112,6 +112,7 @@ function invoke () {
     local file="$2"
     local today
     today=$(date '+%d%b%y')
+    today="${today,,}"                  # converts all text to lower
     local log_dir="$TEMP/$USER/invocations"
     if [ ! -e "log_dir" ]; then mkdir -p "$log_dir"; fi
     local log_file
