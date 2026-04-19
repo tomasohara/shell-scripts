@@ -352,8 +352,10 @@ alias date-central='TZ="America/Chicago" date'
 # note: This is intended for use in filenames (e.g., _free-21Feb26@1549).
 # ex: 01jan26@0001).
 function mmddyy-hhmm {
-    date '+%d%b%y@%H%M'
+    ## OLD: date '+%d%b%y@%H%M'
+    date '+%d%b%y@%H%M' | downcase-stdin;
 }
+alias todays-date-hhmm='mmddyy-hhmm'
 
 # file-date-mmdddyy(): return file's timestamp in European format without hours and minutes
 # note: %y gives time of last data modification, human-readable
@@ -719,7 +721,8 @@ simple-alias-fn alias-perl 'DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -
 # alias-python: python invocation for using in aliases
 # note: avoids excess tracing; see debug.py and main.py;
 # uses function to allow ALIAS_DEBUG_LEVEL override;
-# also sets PYTHONSAFEPATH to avoid conflicts from mezcla from current dir.
+# also sets PYTHONSAFEPATH to avoid conflicts from mezcla from current dir
+# (n.b., added in python 3.11).
 # shellcheck disable=SC2016
 simple-alias-fn alias-python 'DURING_ALIAS=1 PYTHONSAFEPATH=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
 #
