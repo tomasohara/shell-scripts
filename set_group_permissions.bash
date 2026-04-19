@@ -43,8 +43,11 @@ group="${2:-operator}"
 
 #...............................................................................
 
+# todays-date(): returns date in format ddmmmyy (e.g., 19apr26)
 function todays-date { 
-    date '+%d%b%y'
+    ## OLD: date '+%d%b%y'
+    local date_spec=$(date '+%d%b%y');  # ex: 19Apr26
+    echo "${date_spec,,}"               # converts all text to lower
 }
 
 #...............................................................................
