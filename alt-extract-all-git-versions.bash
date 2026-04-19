@@ -44,8 +44,13 @@ function full-usage {
     echo ""
     echo "Examples:"
     echo ""
-    # HACK: Uses Usage in filename so shows up in brief usage
-    echo "NUM_REVISIONS=5 $script --human Usage.txt $export_to_expr"
+    ##
+    ## OLD:
+    ## # HACK: Uses Usage in filename so shows up in brief usage
+    ## echo "NUM_REVISIONS=5 $script --human Usage.txt $export_to_expr"
+    ##
+    # HACK: Uses 'Usage' in filename so shows up in brief usage: see USAGE=... below.
+    echo "NUM_REVISIONS=5 $script --human --verbose Usage.txt $export_to_expr"
     echo ""
     echo "PRETTY=1 VERBOSE=1 $0 Dockerfile"
     echo ""
@@ -85,15 +90,21 @@ pretty=false
 if [ "${PRETTY:-0}" = "1" ]; then pretty=true; fi
 
 # Command line argument checks
-if [ "$1" = "--human" ]; then
-    verbose=true
-    pretty=true
-    shift
-fi
-if [ "$1" = "--help" ]; then
-    full-usage
-    exit
-fi
+while [[ $1 =~ ^-.* ]]; do
+    if [ "$1" = "--human" ]; then
+        ## OLD: verbose=true
+        pretty=true
+        shift
+    fi
+    if [ "$1" = "--verbose" ]; then
+        verbose=true
+        shift
+    fi
+    if [ "$1" = "--help" ]; then
+        full-usage
+        exit
+    fi
+done
 export_to_value="${EXPORT_TO:-$DEFAULT_EXPORT_TO}"
 EXPORT_TO="${2:-$export_to_value}"
 #
@@ -102,7 +113,7 @@ GIT_PATH_TO_FILE="$1"
 
 NEWLINE=$'\n'
 TWO_NEWLINES="$NEWLINE$NEWLINE"
-USAGE=$(full-usage | grep 'Usage')
+USAGE=$(full-usage | grep 'Usage')      # brief usage
 
 # check if got argument
 if [ "${GIT_PATH_TO_FILE}" == "" ]; then
@@ -180,11 +191,15 @@ while read -r LINE; do
     date_spec="$COMMIT_DATE"
     hour_spec=""
     if $pretty; then
+        # Use more readable date and version specs
+        # ex: "README.md.1-2024-01-24T14:02:43+05:45" => "README.md.v3-24jan24"
         date_spec="$(date "+%d%b%y" --date="$COMMIT_DATE")"
+        date_spec="${date_spec,,}"      # converts all text to lower
         hour_spec="$(date "+%H%M" --date="$COMMIT_DATE")"
         VERSION_NUM="$COUNT"
         if [ "$ALLOW_RENAMES" == "1" ]; then
-            VERSION_NUM=$(($TOTAL_NUM - $COUNT + 1))
+            ## OLD: VERSION_NUM=$(($TOTAL_NUM - $COUNT + 1))
+            VERSION_NUM=$((TOTAL_NUM - COUNT + 1))
         fi
         version_spec="v$VERSION_NUM"
     fi
@@ -204,12 +219,16 @@ while read -r LINE; do
     $debug && echo "Trying path $COMMIT_FILE_PATH for version $version_spec"
     git cat-file -p "$COMMIT_SHA:$COMMIT_FILE_PATH" > "$output_file" 2> "$info.err"
     commit_resolved=false
-    if [ $? -eq 0 ]; then
+    ## OLD: if [ $? -eq 0 ]; then
+    status="$?"
+    if [ $status -eq 0 ]; then
         commit_resolved=true
-        let GOOD_COUNT++
+        ## OLD: let GOOD_COUNT++
+        (( GOOD_COUNT++ ))
     else
         head -3 "$info.err"
-        echo "Error: unable to resolve commit $COMMIT_SHA"
+        ## OLD: echo "Error: unable to resolve commit $COMMIT_SHA"
+        echo "Error: unable to resolve commit $COMMIT_SHA (status=$status)"
         rm -f "$output_file"
     fi
     $verbose && $commit_resolved && echo "$output_file"
