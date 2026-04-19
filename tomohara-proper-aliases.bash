@@ -30,8 +30,11 @@ alias git-vdiff='git-vdiff-alias'
 ## OLD: alias git-vdiff-='git-vdiff-alias'
 alias gvdiff=git-vdiff
 alias git-all-update='update-main-repos.bash'
-alias git-extract-all-versions='extract-all-git-versions.bash --human'
-alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human'
+## OLD:
+## alias git-extract-all-versions='extract-all-git-versions.bash --human'
+## alias git-extract-all-versions='extract-all-git-versions.bash --human'
+alias git-extract-all-versions='VERBOSE=1 extract-all-git-versions.bash --human'
+alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human --verbose'
 alias git-files-changed=git-diff-list
 alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
