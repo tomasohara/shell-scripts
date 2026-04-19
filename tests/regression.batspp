@@ -1,4 +1,12 @@
 # Tests to avoid regressions of old errors
+#
+# Note:
+# - This covers scripts as well as aliases and functions.
+# - Snippet for running this file through shellcheck:
+#     $ perl -pe 's/^[^#\$].*//; s/^\$ //;' tests/regression.batspp | shell-check --shell=bash -
+#   This strips expected output (i.e., '^[^#\$].*') to avoid confusing shellcheck.
+#   Similarly, it strips the prompt indicator (i.e., '^\$ ') from the command line.
+#
 
 #...............................................................................
 
@@ -48,9 +56,9 @@ $ echo ok | check-errors | wc -l
 0
 
 # Make sure QUIET=0 hides file name
-# f=$TMP/_hey.list
-$ echo warning: hey > $f
-$ QUIET=0 check-errors $f | wc -l
+$ f="$TMP"/_hey.list
+$ echo warning: hey > "$f"
+$ QUIET=0 check-errors "$f" | wc -l
 0
 
 # Make sure no exceptions reported
@@ -74,10 +82,12 @@ caught exception from user code	1
 
 # Setup
 $ base=/tmp/rename-filenames
-$ dir=/tmp/rename-filenames
+$ dir="$base"
 $ mkdir -p "$dir"
-$ pushd $dir
-$ for char in "—" "·" "®" "“" "”" "″" "‶" "‘" "’" "–"; do echo "$char" > $dir/_${char}_.list; done
+$ pushd "$dir"
+# note: ignoring shellcheck SC1111 [This is a unicode quote. Delete and retype it (or ignore/singlequote for literal).]
+# shellcheck disable=SC1110,SC1111
+$ for char in "—" "·" "®" "“" "”" "″" "‶" "‘" "’" "–"; do echo "$char" > "$dir/_${char}_.list"; done
 
 # Setup
 $ ls _*_.list 2> /dev/null > pre.list
@@ -109,7 +119,7 @@ $ [ "1" -eq "$(wc -l < post.list)" ]; echo "$?"
 #
 ## TODO
 $ all_diff_counts=$(git-diff-list | sort | wc -l)
-$ unique_diff_counts=$(git-diff-list | sort -u | wc -l
+$ unique_diff_counts=$(git-diff-list | sort -u | wc -l)
 $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 
 # TODO2: make sure zip is install
@@ -442,3 +452,12 @@ Version: N.N.N.N
 ##     git-next-checkin                      # repeat, as needed
 ## conditional-source: command not found
 ## ^^^^^^^^^^^^^^^^^^
+
+##------------------------------------------------------------------------------
+
+## TODO2: make sure date aliases use lowercase
+$ ddmmmyy_regex='[0-9].*[A-Z].*[0-9]'
+$ todays-date | egrep -c "$ddmmmyy_regex"
+0
+$ todays-date | egrep -i -c "$ddmmmyy_regex"
+1
