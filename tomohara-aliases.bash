@@ -725,6 +725,13 @@ simple-alias-fn alias-perl 'DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -
 # (n.b., added in python 3.11).
 # shellcheck disable=SC2016
 simple-alias-fn alias-python 'DURING_ALIAS=1 PYTHONSAFEPATH=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
+# alias-python-which(script): invoke script as alias (e.g., minimal tracing)
+## TODO2: derive more intuitive name (e.g., 
+function alias-python-which {
+    local script="$1"
+    shift
+    alias-python "$(which "$script")" "$@";
+}
 #
 export MANPATH="$HOME/perl/share/man/man1:$MANPATH"
 append-path "$HOME/perl/bin"
