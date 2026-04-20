@@ -396,6 +396,9 @@ function venv-activate {
     python3 --version
 }
 
+# ansifilter-typescript(arg, ...): invoke adaptive_log_filter.py with ARG(s)
+simple-alias-fn ansifilter-typescript 'alias-python-which adaptive_log_filter.py --collapse'
+
 #-------------------------------------------------------------------------------
 # Jupyter notebook stuff
  
