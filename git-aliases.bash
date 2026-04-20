@@ -492,6 +492,7 @@ function invoke-git-command {
 }
 # TODO: git-command => git-command-alias
 alias git-command='invoke-git-command'
+alias git-cmd=git-command
 ## TODO3: git-push-plus => git-push-alias (as simple wrapper)
 ## OLD: alias git-push-plus='invoke-git-command push'
 alias git-push-alias='invoke-git-command push'
@@ -508,6 +509,7 @@ alias git-log-follow='git-log-plus --follow'
 alias git-blame-alias='invoke-git-command blame'
 alias git-rm-alias='invoke-git-command rm'
 alias git-checkout-alias='invoke-git-command checkout'
+
 
 # git-add-plus: add filename(s) to repository
 # note: if GIT_FORCE is 1 then --force added (e.g., to override .gitignore)
