@@ -55,7 +55,8 @@ jobs:
           echo "end of python dependencies (status=$?)"
           # Software packages
           sudo apt-get update
-          sudo apt-get install $(sed 's/ \#.*//' required-packages.txt | grep -v '^#')
+          ## TODO: sudo apt-get install --yes --fix-missing $(sed 's/ \#.*//' required-packages.txt | grep -v '^#')
+          sudo apt-get install --yes --fix-missing tcsh
           echo "end of other dependencies (status=$?)"
 
       - name: Run Python Tests under Runner
