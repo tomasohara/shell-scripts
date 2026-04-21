@@ -52,10 +52,10 @@ jobs:
         run: |
           # Python packages
           pip install --verbose --requirement requirements.txt
+          echo "end of python dependencies (status=$?)"
           # Software packages
           apt-get install $(sed 's/ \#.*//' required-packages.txt | grep -v '^#') 2> /dev/null
-          # Show status
-          echo "end of Install Dependencies (status=$?)"
+          echo "end of other dependencies (status=$?)"
 
       - name: Run Python Tests under Runner
         run: |
