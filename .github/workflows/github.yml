@@ -50,7 +50,10 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          # Python packages
           pip install --verbose --requirement requirements.txt
+          # Software packages
+          sudo apt-get install $(sed 's/ \#.*//' required-packages.txt | grep -v '^#') 2> /dev/null
 
       - name: Run Python Tests under Runner
         run: |
