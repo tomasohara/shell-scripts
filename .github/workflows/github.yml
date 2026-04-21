@@ -53,7 +53,9 @@ jobs:
           # Python packages
           pip install --verbose --requirement requirements.txt
           # Software packages
-          sudo apt-get install $(sed 's/ \#.*//' required-packages.txt | grep -v '^#') 2> /dev/null
+          apt-get install $(sed 's/ \#.*//' required-packages.txt | grep -v '^#') 2> /dev/null
+          # Show status
+          echo "end of Install Dependencies (status=$?)"
 
       - name: Run Python Tests under Runner
         run: |
