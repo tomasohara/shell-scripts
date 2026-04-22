@@ -1658,15 +1658,18 @@ function most-recent-backup {
         file="$(basename "$file")"
         dir="$file_dir/$dir"
     fi
-    ## TODO: rework to avoid false positives
+    ## OLD: ## TODO: rework to avoid false positives
     ## BAD: $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~*)?" | head -1;
-    $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~.*)?$" | head -1;
+    ## OLD: $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~.*)?$" | head -1;
+    ## TODO2: Let the shell include dotfiles (e.g., via temporary 'shopt -s dotglob nullglob')
+    ## NOTE: See TODO.txt entry for 21 Apr 26
+    $LS -t "$dir"/* "$dir"/.* 2> /dev/null | $EGREP "/$file(~|.~.*)?$" | head -1;
 }
 # TODO: test for dot-files:
 #   touch backup .fubar.~666~; most-recent-backup .fubar => .fubar
 #
 # diff-backup(diff_command, file, [diff_arg ...]): compare FILE vs. most recent backup, using DIFF_PROGRAM and optional DIFF_ARGs
-# TODO: fix handling of dot files
+## OLD: # TODO: fix handling of dot files
 function diff-backup-helper {
     local diff="$1"; local file="$2";
     shift 2;
