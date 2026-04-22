@@ -1051,7 +1051,8 @@ function git-alias-usage () {
     echo ''
     echo 'Usual check-in process:'
     # TODO2: rework git-update-force via dry-run git-update with conflict check
-    echo '    git-cd-root-alias; git-tar-repo-proper; git-update-force; git-next-checkin'
+    echo '    # OLD: git-cd-root-alias; git-tar-repo-proper; git-update-force; git-next-checkin'
+    echo '    git-cd-root-alias; git-tar-repo-proper; git-update-force; git-status; git-next-checkin'
     echo '    # -or-: git-cd-root-alias; git-update-verified; git-conflicts-alias; git-next-checkin'
     echo '    git-next-checkin                      # repeat, as needed'
 
