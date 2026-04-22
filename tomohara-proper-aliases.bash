@@ -137,19 +137,25 @@ function plint-tester-testee-method-strict {
 simple-alias-fn plint-tester-testee-regular 'TEST=1 plint-tester-testee';
 ## TODO3?: plint-tester-testee-method-regular
 
-# clone-repo(url): clone github repo at URL into current dir with logging
+# clone-repo(url, args, ...): clone github repo at URL into current dir with logging
+## OLD: clone-repo(url): clone github repo at URL into current dir with logging
+# example: git-clone-alias https://github.com/ChromeDevTools/devtools-frontend --branch main --single-branch --depth 1
 # TODO2: move to git-related section (better yet into git-aliases.bash)
 function clone-repo () {
     local url repo log
     url="$1"
+    shift
+    ## TODO4: rework args to use last one as repo
+    local args
+    args=("$@")
     repo=$(basename "$url" .git)
     log="_clone-$repo-$(T).log"
     # maldito linux: -c option required for command for
     # shellcheck disable=SC2086
     if [[ ("$(under-linux)" == "1") || ("$(under-cygwin)" == "1") ]]; then
-        command script "$log" -c "git clone '$url'"
+        command script "$log" -c "git clone ${args[*]} '$url'"
     else
-        command script "$log" git clone "$url"
+        command script "$log" git clone "${args[@]}" "$url"
     fi
     #
     ls -R "$repo" >> "$log"
@@ -503,8 +509,6 @@ function compare-notebook-scripts {
  
 # run-jupyter-notebook-pristine(port): invoke jupter notenook w/o startup config
 alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$IPYTHON_TMP" run-jupyter-notebook'
- 
- 
 
 #...............................................................................
 # Python utiities
@@ -937,6 +941,12 @@ function create-zip-from-parent {
     popd
 }
 alias zip-from-parent=create-zip-from-parent
+
+#...............................................................................
+# Unix stuff
+
+# chmod-execute([args], file): add execute permission for FILE w/ optional ARGS
+simple-alias-fn chmod-execute 'chmod --changes +x'
 
 #...............................................................................
 # Linux stuff
