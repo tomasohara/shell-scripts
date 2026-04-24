@@ -340,7 +340,7 @@ function test-python-script-method-strict {
 # run-main: invoke main.py with debug level 5 or higher
 ## TODO3: lower debug level to 4 (e.g., Android apps stable)
 function run-main {
-    DEBUG_LEVEL="$(max $DEBUG_LEVEL 5)" run-python-script ./main.py;
+    DEBUG_LEVEL="$(max "$DEBUG_LEVEL" 5)" run-python-script ./main.py;
 }
 # run-main-app: invoke main.py in background
 ## NOTE: workaround for Bash quirk with subshell-specific _PSL_ due to '... &'
@@ -588,9 +588,9 @@ function excel-to-csv {
 }
 
 
-# libroffice-text([filename]): open LibreOffice for new text document
+# libreoffice-text([filename]): open LibreOffice for new text document
 # via POE Assistant
-function libroffice-text {
+function libreoffice-text {
     if missing-options "$@"; then
         function-usage --synopsis "create new LibreOffice text document (or open existing)" --example "memo-para-jefe"
         return        
@@ -602,6 +602,32 @@ function libroffice-text {
         touch -- "$file"
     fi
     run-app libreoffice --writer "$file"
+}
+#
+# libroffice-text-from-html-clipboard(filename): creates LibreOffice document from clipboard HTML data
+# via POE Assistant
+function libroffice-text-from-html-clipboard() {
+    local base="${1%.odt}"
+    local doc_file="$base.odt"
+    local doc_exists=false
+    if [[ -e "$doc_file" ]]; then doc_exists=true; fi
+    if missing-options "$@" || $doc_exists ; then
+        function-usage --synopsis "create LibreOffice text document from clipboard" --example "$HOME/Documents/chat-google-gemini-billing"
+        $doc_exists && { printf "Error: new filename should be specified:\n    "; ls -lt -- "$doc_file"; }
+        return 1
+    fi
+    local temp_html="$TEMP/$(basename "$base.html")"
+
+    # Copy from clipboard and make sure html header included
+    rename-with-file-date "$temp_html"
+    xclip -selection clipboard -t text/html -o > "$temp_html"
+    if [ "" == "$(grep "<body>" "$temp_html")" ]; then
+        perl -i.bak -pe 's@.*@<!DOCTYPE html><html lang="en">\n$&\n</body></html>\n@;' "$temp_html"
+    fi
+
+    # Convert HTML to document and then open
+    libreoffice --headless --convert-to odt "$temp_html" --outdir "$(dirname "$base")"
+    libreoffice "$doc_file" &
 }
 
 #-------------------------------------------------------------------------------
