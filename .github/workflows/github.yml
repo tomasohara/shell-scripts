@@ -13,19 +13,12 @@ jobs:
 
   build-and-test-runner:
     name: Build and Run Tests via Runner
-    ## OLD:
-    ## ## NOTE: need to track down differences between Docker and Runner runs
-    ## ## TEMP: disable tests (and just run Docker version below)
-    ## if: ${{ false }}
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        ## OLD: 20.04 reached EOL on May 2025
-        ## os: [ubuntu-20.04]
         os: [ubuntu-22.04]
         ## TODO: os: [ubuntu-20.04, ubuntu-latest]
-        ## OLD: python-version: ["3.8", "3.9", "3.10"]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         ## TODO: 3.x [latest; -or latest, latest-1, latest-2, ...]
 
@@ -55,7 +48,7 @@ jobs:
           echo "end of python dependencies (status=$?)"
           # Software packages
           sudo apt-get update
-          ## TODO: sudo apt-get install --yes --fix-missing $(sed 's/ \#.*//' required-packages.txt | grep -v '^#')
+          ## TODO2: sudo apt-get install --yes --fix-missing $(sed 's/ \#.*//' required-packages.txt | grep -v '^#')
           sudo apt-get install --yes --fix-missing tcsh
           echo "end of other dependencies (status=$?)"
 
@@ -68,8 +61,6 @@ jobs:
     ## TEMP: disable use of Docker
     ## TODO3: derive via environment or via github.event flags (see act.yml)
     if: false
-    ## OLD: 20.04 reached EOL on May 2025
-    ## runs-on: [ubuntu-20.04]
     runs-on: [ubuntu-22.04]
 
     ## TEST:
@@ -88,7 +79,6 @@ jobs:
 
       - name: Run tests
         run: |
-          ## OLD: docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
           # Note: command format: docker run [OPTIONS] IMAGE [COMMAND] [ARG...];
           # The environment file normally has no entries (i.e., just comments).
           docker run --env-file _temp-user-docker.env --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
