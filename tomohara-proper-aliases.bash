@@ -137,19 +137,25 @@ function plint-tester-testee-method-strict {
 simple-alias-fn plint-tester-testee-regular 'TEST=1 plint-tester-testee';
 ## TODO3?: plint-tester-testee-method-regular
 
-# clone-repo(url): clone github repo at URL into current dir with logging
+# clone-repo(url, args, ...): clone github repo at URL into current dir with logging
+## OLD: clone-repo(url): clone github repo at URL into current dir with logging
+# example: git-clone-alias https://github.com/ChromeDevTools/devtools-frontend --branch main --single-branch --depth 1
 # TODO2: move to git-related section (better yet into git-aliases.bash)
 function clone-repo () {
     local url repo log
     url="$1"
+    shift
+    ## TODO4: rework args to use last one as repo
+    local args
+    args=("$@")
     repo=$(basename "$url" .git)
     log="_clone-$repo-$(T).log"
     # maldito linux: -c option required for command for
     # shellcheck disable=SC2086
     if [[ ("$(under-linux)" == "1") || ("$(under-cygwin)" == "1") ]]; then
-        command script "$log" -c "git clone '$url'"
+        command script "$log" -c "git clone ${args[*]} '$url'"
     else
-        command script "$log" git clone "$url"
+        command script "$log" git clone "${args[@]}" "$url"
     fi
     #
     ls -R "$repo" >> "$log"
@@ -334,7 +340,7 @@ function test-python-script-method-strict {
 # run-main: invoke main.py with debug level 5 or higher
 ## TODO3: lower debug level to 4 (e.g., Android apps stable)
 function run-main {
-    DEBUG_LEVEL="$(max $DEBUG_LEVEL 5)" run-python-script ./main.py;
+    DEBUG_LEVEL="$(max "$DEBUG_LEVEL" 5)" run-python-script ./main.py;
 }
 # run-main-app: invoke main.py in background
 ## NOTE: workaround for Bash quirk with subshell-specific _PSL_ due to '... &'
@@ -503,8 +509,6 @@ function compare-notebook-scripts {
  
 # run-jupyter-notebook-pristine(port): invoke jupter notenook w/o startup config
 alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$IPYTHON_TMP" run-jupyter-notebook'
- 
- 
 
 #...............................................................................
 # Python utiities
@@ -584,9 +588,9 @@ function excel-to-csv {
 }
 
 
-# libroffice-text([filename]): open LibreOffice for new text document
+# libreoffice-text([filename]): open LibreOffice for new text document
 # via POE Assistant
-function libroffice-text {
+function libreoffice-text {
     if missing-options "$@"; then
         function-usage --synopsis "create new LibreOffice text document (or open existing)" --example "memo-para-jefe"
         return        
@@ -598,6 +602,32 @@ function libroffice-text {
         touch -- "$file"
     fi
     run-app libreoffice --writer "$file"
+}
+#
+# libroffice-text-from-html-clipboard(filename): creates LibreOffice document from clipboard HTML data
+# via POE Assistant
+function libroffice-text-from-html-clipboard() {
+    local base="${1%.odt}"
+    local doc_file="$base.odt"
+    local doc_exists=false
+    if [[ -e "$doc_file" ]]; then doc_exists=true; fi
+    if missing-options "$@" || $doc_exists ; then
+        function-usage --synopsis "create LibreOffice text document from clipboard" --example "$HOME/Documents/chat-google-gemini-billing"
+        $doc_exists && { printf "Error: new filename should be specified:\n    "; ls -lt -- "$doc_file"; }
+        return 1
+    fi
+    local temp_html="$TEMP/$(basename "$base.html")"
+
+    # Copy from clipboard and make sure html header included
+    rename-with-file-date "$temp_html"
+    xclip -selection clipboard -t text/html -o > "$temp_html"
+    if [ "" == "$(grep "<body>" "$temp_html")" ]; then
+        perl -i.bak -pe 's@.*@<!DOCTYPE html><html lang="en">\n$&\n</body></html>\n@;' "$temp_html"
+    fi
+
+    # Convert HTML to document and then open
+    libreoffice --headless --convert-to odt "$temp_html" --outdir "$(dirname "$base")"
+    libreoffice "$doc_file" &
 }
 
 #-------------------------------------------------------------------------------
@@ -937,6 +967,12 @@ function create-zip-from-parent {
     popd
 }
 alias zip-from-parent=create-zip-from-parent
+
+#...............................................................................
+# Unix stuff
+
+# chmod-execute([args], file): add execute permission for FILE w/ optional ARGS
+simple-alias-fn chmod-execute 'chmod --changes +x'
 
 #...............................................................................
 # Linux stuff

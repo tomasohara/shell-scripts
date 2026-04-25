@@ -279,17 +279,22 @@ function missing-options {
 # function-usage(): helper alias for showing function usage statements
 # note: based on POE Assistant
 # Sample usage:
-#    if missing-options; then
-#       function-usage --synopsis "fouled up beyond recognition" --example "fubar now"
-#       return
-#    fi
+#    function fubar {
+#        if missing-options "$@"; then
+#           function-usage --synopsis "fouled up beyond recognition" --example "now"
+#           return
+#        fi
+#        echo "is fubar: " "$1"
+#    }
 function function-usage {
     local synopsis=""
     local example=""
     local notes=""
+    local args="{path | -}    # with - for stdin"
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
+            --args) args="$2"; shift 2 ;;
             --synopsis) synopsis="$2"; shift 2 ;;
             --example)  example="$2"; shift 2 ;;
             --notes)    notes="$2"; shift 2 ;;
@@ -299,9 +304,10 @@ function function-usage {
 
     local fn="${FUNCNAME[1]}"
 
-    [[ -n "$synopsis" ]] && echo "usage: $fn $synopsis"
-    [[ -n "$example"  ]] && echo "example: $fn $example"
-    [[ -n "$notes"    ]] && echo -e "note:\n$notes"
+    echo "Usage: $fn $args"
+    [[ -n "$synopsis" ]] && echo "Synopsis: $synopsis"
+    [[ -n "$example"  ]] && echo "Example: $fn $example"
+    [[ -n "$notes"    ]] && echo -e "Note:\n$notes"
 
     return 0
 }
@@ -361,7 +367,7 @@ alias todays-date-hhmm='mmddyy-hhmm'
 # note: %y gives time of last data modification, human-readable
 function file-date-mmdddyy {
     if missing-options "$@"; then
-        function-usage --synopsis "return file timestamp using mmdddyy" --example "/tmp/fubar.txt"
+        function-usage --synopsis "return file timestamp using mmdddyy" --example "$TMP/fubar.txt"
         return        
     fi
     date-ddmmmyy "$(stat --format=%y "$1")";
@@ -609,10 +615,6 @@ unset MAIL
 # - See https://en.wikipedia.org/wiki/TMPDIR.
 # - Also see tomohara-settings.bash and ~/.bash_profile.
 cond-export TEMP "$HOME/temp"
-## OLD:
-## ## HACK: don't allow /tmp for TMP
-## ## TODO1: move TMP, etc. into tomohara-settings.bash
-## if [ "$TMP" = "/tmp" ]; then unset TMP; fi
 cond-export TMP "$TEMP/tmp"
 cond-export TMPDIR "$TMP"
 mkdir -p "$TEMP" "$TMP" "$TMPDIR"
@@ -1658,15 +1660,18 @@ function most-recent-backup {
         file="$(basename "$file")"
         dir="$file_dir/$dir"
     fi
-    ## TODO: rework to avoid false positives
+    ## OLD: ## TODO: rework to avoid false positives
     ## BAD: $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~*)?" | head -1;
-    $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~.*)?$" | head -1;
+    ## OLD: $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~.*)?$" | head -1;
+    ## TODO2: Let the shell include dotfiles (e.g., via temporary 'shopt -s dotglob nullglob')
+    ## NOTE: See TODO.txt entry for 21 Apr 26
+    $LS -t "$dir"/* "$dir"/.* 2> /dev/null | $EGREP "/$file(~|.~.*)?$" | head -1;
 }
 # TODO: test for dot-files:
 #   touch backup .fubar.~666~; most-recent-backup .fubar => .fubar
 #
 # diff-backup(diff_command, file, [diff_arg ...]): compare FILE vs. most recent backup, using DIFF_PROGRAM and optional DIFF_ARGs
-# TODO: fix handling of dot files
+## OLD: # TODO: fix handling of dot files
 function diff-backup-helper {
     local diff="$1"; local file="$2";
     shift 2;
@@ -1954,7 +1959,7 @@ function heuristic-notes-entry-gr-aux() {
     shift
     local regex="$*"
     # Filter by search terms joined by regex operators
-    local temp_base="/tmp/_heuristic-notes-entry-gr-aux"
+    local temp_base="$TMP/_heuristic-notes-entry-gr-aux"
     local term_num=0
     # note: preprocesses to make Perl "paragraphs" be based on dash-line headers
     perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $note_files >| "$temp_base.$term_num"
