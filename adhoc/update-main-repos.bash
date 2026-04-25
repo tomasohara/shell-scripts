@@ -67,7 +67,7 @@ if [ "$OTHER_REPOS" != "" ]; then
 fi
 if [ ${#repos[@]} -eq 0 ]; then
     # TODO: drop idiosyncratic repos (e.g., non-public)
-    repos=(~/bin ~/mezcla ~/text-categorization ~/visual-diff ~/programs/bash/tom-shell-scripts ~/programs/python/mezcla-clone)
+    repos=(~/bin ~/mezcla ~/text-categorization ~/visual-diff ~/programs/bash/tom-shell-scripts ~/programs/python/mezcla-clone ~/programs/python/search-diff-engine)
 fi
 for dir in "${repos[@]}"; do
     # Make repo dir active
