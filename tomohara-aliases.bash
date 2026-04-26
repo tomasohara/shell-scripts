@@ -2399,8 +2399,10 @@ function move-versioned-files-alt {
     move --no-clobber ./*$version_regex* ./*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
     move --no-clobber ./.*$version_regex* ./.*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
     local false_positives
-    false_positives="$(ls old/*$version_regex*  old/*$alt_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|(.txt$)")"
-    false_positives="$false_positives$(ls old/.*$version_regex*  old/.*$alt_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|(.txt$)")"
+    # note: uses -d to avoid descending into matched directories (which would list unrelated files);
+    # uses [^a-zA-Z]\.txt$ to avoid flagging compound extensions like .log.txt or .list.txt
+    false_positives="$(ls -d old/*$version_regex*  old/*$alt_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|([^a-zA-Z]\.txt$)")"
+    false_positives="$false_positives$(ls -d old/.*$version_regex*  old/.*$alt_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|([^a-zA-Z]\.txt$)")"
     if [ "$false_positives" != "" ]; then
         echo "Warning: potential misplaced files (e.g., .txt ext or adhoc affix)"
         echo "    $false_positives"
