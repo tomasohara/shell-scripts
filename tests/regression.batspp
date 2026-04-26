@@ -461,3 +461,14 @@ $ todays-date | egrep -c "$ddmmmyy_regex"
 0
 $ todays-date | egrep -i -c "$ddmmmyy_regex"
 1
+
+##------------------------------------------------------------------------------
+
+## TODO4: make sure // not used in file paths in do_diff.bash output
+##
+## EX: "Differences: .//home/tomohara/temp/temp-shell-scripts/start.sh start.sh"
+##                    ^^
+##
+## $ git ls-tree -r --name-only HEAD | xargs -I '{}' do_diff.bash --side-by-side --no-pattern $other/'{}' '{}' >| _main-diff-tracked.log 2>&1
+## $ grep -c '\.//' _main-diff-tracked.log
+## 0

@@ -36,3 +36,10 @@ note:
         | $EGREP "/$file(~|.~.*)?$" \
         | xargs ls -t 2>/dev/null \
         | head -1
+
+--------------------------------------------------------------------------------
+Sat 25 Apr 26
+
+note:
+- P4: reword usages of maldito
+- ex: "maldito shellcheck" => "shellcheck filtering
