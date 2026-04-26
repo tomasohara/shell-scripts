@@ -2640,6 +2640,7 @@ function sleep-for {
     local msg="${2:-"delay"}"
     local delay_spec="${3:-"[sleep for ${sec}s]"}"
     echo "$msg $delay_spec"
+    ## TODO3: allow for keypress (n.b., control-C aborts containing function)
     sleep "$sec"
 }
 
@@ -2769,7 +2770,7 @@ function cmd-usage () {
     usage_file="_$(flatten-path "$command-usage.list")"
     $command --help  2>&1 | ansifilter > "$usage_file"
     ## OLD: if [ $? -eq 0 ]; then $PAGER_NOEXIT "$usage_file"; fi
-    [ $? -eq 0 ] || sleep-for 1 "FYI: using existing file";
+    [ $? -eq 0 ] || sleep-for 1.5 "FYI: using existing file";
     $PAGER_NOEXIT "$usage_file";
 }
 ## TODO:
