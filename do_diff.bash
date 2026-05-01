@@ -88,7 +88,7 @@ diff_cmd="diff"
 nopattern="0"
 verbose_mode="1"
 match_dot_files="0"
-no_glob="0"
+## OLD: no_glob="0"
 base_dir="."
 recursive="0"
 
@@ -176,10 +176,12 @@ while [[ "$1" =~ ^- ]]; do
         verbose_mode="0"
     elif [[ ("$1" == "--nopattern") || ("$1" == "--no-pattern") ]]; then
         nopattern="1"
-        ## TODO3: reduce redundant flags
-        no_glob="1"
+        ## OLD:
+        ## ## TODO3: reduce redundant flags
+        ## no_glob="1"
     elif [ "$1" == "--no-glob" ]; then
-        no_glob="1"
+        ## OLD: no_glob="1"
+        nopattern="1"
     elif [ "$1" == "--match-dot-files" ]; then
         match_dot_files="1"
     elif [ "$1" == "--ignore-all-space" ]; then
@@ -202,9 +204,11 @@ done
 # Get pattern from first argument
 # shellcheck disable=SC2049
 if [ -z "$pattern" ]; then
-    if [ "$no_glob" == "1" ]; then
+    ## OLD: if [ "$no_glob" == "1" ]; then
+    if [ "$nopattern" == "1" ]; then
         # Treat first argument as pattern without * added
         pattern="$1"
+        if [ ! -e "$pattern" ]; then echo "Warning: pattern/file \"$pattern\" not found"; fi
     elif [[ "$1" =~ \*.*\ \*\. ]]; then
         # ex: "*.py *.mako"
         echo "Warning: Assuming implicit --no-glob, as otherwise space would be in extension"
@@ -289,7 +293,12 @@ for file in $pattern; do
     if [ -d "$other_file" ]; then
         if [ -e "$other_file/$file" ]; then
             # Retains directory in "pattern"
-            # TODO: assert $nopattern
+            ## OLD: # TODO: assert $nopattern
+            # Note: assumes pattern is actually a file
+            if [[ ("$nopattern" == "0") ]]; then
+                echo "Warning: directory retained in pattern due to unexpected condition:"
+                echo "   pattern=\"$pattern\" other_file=\"$other_file\" file=\"$file\""
+            fi
             other_file="$other_file/$file"
         else
             # Ignores directory in "pattern"
