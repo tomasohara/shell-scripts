@@ -40,6 +40,7 @@
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
 #
+## TODO4: handle invalid non-numeric values better, such as treating as 0; ex: (( DEBUG_LEVEL >= 6 ))
 if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
     echo "$0 $*"
 fi
