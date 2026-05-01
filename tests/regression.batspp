@@ -472,3 +472,29 @@ $ todays-date | egrep -i -c "$ddmmmyy_regex"
 ## $ git ls-tree -r --name-only HEAD | xargs -I '{}' do_diff.bash --side-by-side --no-pattern $other/'{}' '{}' >| _main-diff-tracked.log 2>&1
 ## $ grep -c '\.//' _main-diff-tracked.log
 ## 0
+
+## TODO2: make sure do_diff.bash warns about bad input files
+##
+## $ do_diff.bash --no-pattern ./fubar/.bashrc ~  2>&1 | head -5
+## $
+
+##..............................................................................
+
+## TODO3: make sure common environment variable set
+##
+## $ [[ ($BACKUP_DIR != "") && (-e "$BACKUP_DIR") ]]; echo $?
+## 0
+
+##------------------------------------------------------------------------------
+
+## TODO2: make sure old perl scripts work
+## 
+## $ qd-trans-sp
+## Can't locate spanish.perl in @INC (@INC entries checked: /home/tomohara/bin/ /home/tomohara/perl/lib/perl5/5.16 /home/tomohara/perl/lib/perl5/5.16/vender_perl /home/tomohara/bin /home/tomohara/perl/lib/perl5/5.16 ... /usr/share/perl/5.38 /usr/local/lib/site_perl) at /home/tomohara/bin/qd_trans_spanish.perl line 43.
+
+##..............................................................................
+
+## TODO4: make sure DEBUG_LEVEL tests account for non-numeric values
+##
+## $ DEBUG_LEVEL=one em
+## /home/tomohara/bin/tpo-invoke-emacs.sh: line 43: [: one: integer expression expected
