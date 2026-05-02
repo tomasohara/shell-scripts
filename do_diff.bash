@@ -57,7 +57,6 @@
 #
 debug_level="${DEBUG_LEVEL:-0}"
 if [ "$debug_level" -ge 4 ]; then
-    ## OLD: echo "$0 $@"
     echo "$0 $*"
 fi
 if [ "${TRACE:-0}" = "1" ]; then
@@ -88,7 +87,6 @@ diff_cmd="diff"
 nopattern="0"
 verbose_mode="1"
 match_dot_files="0"
-## OLD: no_glob="0"
 base_dir="."
 recursive="0"
 
@@ -99,7 +97,7 @@ if [ -z "$2" ]; then
     echo "Usage: $script [option] {--all | pattern} master_dir"
     echo ""
     echo "   options: [--check-space-changes | --ignore-spacing] [--brief] [--quiet] [--verbose] [--diff cmd] [--diff-options text] [--match-dot-files]"
-    echo "   other options: [-side-by-side] [--ignore-all-space] [--no-pattern] [--no-glob] [--kdiff] [--trace] [--dir dir]"
+    echo "   other options: [--side-by-side] [--ignore-all-space] [--no-pattern] [--no-glob] [--kdiff] [--trace] [--dir dir]"
     echo ""
     echo "Examples:"
     echo ""
@@ -109,13 +107,10 @@ if [ -z "$2" ]; then
     echo ""
     echo "find . -type d -exec \"$script\" --dir {} --verbose '*' ~/repo-main/{} \; > _main-diff-all.log 2>&1"
     echo ""
-    ## OLD: echo "git ls-tree -r --name-only HEAD | xargs -I '{}' $script --no-pattern '{}' ~/repo-main/'{}' > _main-diff-tracked.log 2>&1"
     ##
     # note: uses --side-by-side to show master on left and branch on right (n.b., use wide editor window, such as 132+ columns)
     echo "git ls-tree -r --name-only HEAD | xargs -I '{}' $script --side-by-side --no-pattern ~/repo-main/'{}' '{}' > _main-diff-tracked.log 2>&1"
     echo ""
-    ## OLD: echo "$script" '--match-dot-files ".*bash*" .. > _bash-diff.list 2>&1'
-    ## OLD2: echo "$script" '--match-dot-files ".*bash*" .. > _bash-diff-$(todays-date).list 2>&1'
     echo "$script" "--match-dot-files \".*bash*\" .. > _bash-diff-\$(todays-date).list 2>&1"
     ## TODO: add notes on aliases used in script usages (i.e., here and elsewhere)
     echo ""
@@ -176,11 +171,7 @@ while [[ "$1" =~ ^- ]]; do
         verbose_mode="0"
     elif [[ ("$1" == "--nopattern") || ("$1" == "--no-pattern") ]]; then
         nopattern="1"
-        ## OLD:
-        ## ## TODO3: reduce redundant flags
-        ## no_glob="1"
     elif [ "$1" == "--no-glob" ]; then
-        ## OLD: no_glob="1"
         nopattern="1"
     elif [ "$1" == "--match-dot-files" ]; then
         match_dot_files="1"
@@ -204,7 +195,6 @@ done
 # Get pattern from first argument
 # shellcheck disable=SC2049
 if [ -z "$pattern" ]; then
-    ## OLD: if [ "$no_glob" == "1" ]; then
     if [ "$nopattern" == "1" ]; then
         # Treat first argument as pattern without * added
         pattern="$1"
@@ -293,7 +283,6 @@ for file in $pattern; do
     if [ -d "$other_file" ]; then
         if [ -e "$other_file/$file" ]; then
             # Retains directory in "pattern"
-            ## OLD: # TODO: assert $nopattern
             # Note: assumes pattern is actually a file
             if [[ ("$nopattern" == "0") ]]; then
                 echo "Warning: directory retained in pattern due to unexpected condition:"
@@ -311,7 +300,6 @@ for file in $pattern; do
     # note: recursive omits some verbose output to cut down on clutter
     # example: the file-vs-other line is omitted; --dir sets --quiet
     if [ "$quiet" == "0" ]; then
-        ## OLD: echo "$base_dir/$file vs. $other_file"
         echo "$base_dir/$file vs. $other_file" | normalize-path
     fi
     if [ ! -e "$other_file" ]; then
@@ -328,7 +316,6 @@ for file in $pattern; do
     if [ "$brief" == "0" ]; then
         "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" > "$log_file"
         status=$?
-        ## OLD: perl -e "\$bd='$base_dir';" -pe 's@Files (.*) and (.*) differ@Differences: $bd$d/$1 $2@;' < "$log_file"
         perl -e "\$bd='$base_dir';" -pe 's@Files (.*) and (.*) differ@Differences: $bd$d/$1 $2@;' < "$log_file" | normalize-path
 
         # Show file info with time and size if there are differences
@@ -364,8 +351,6 @@ for file in $pattern; do
         if [ $num_lines -gt 0 ]; then
             relative_diff=$(( $num_diffs * 100 / $num_lines ))
         fi
-        ## OLD: echo "${relative_diff}% differences for $base_dir/$file"
-        ## OLD2: echo -n "${relative_diff}% differences for $base_dir/$file"
         ## TODO4: consolidate path fixup's (e.g., // => /)
         file_path="$(echo "${base_dir/$file}" | normalize-path)"
         echo -n "${relative_diff}% differences for $file_path"
@@ -387,7 +372,6 @@ for file in $pattern; do
 done
 
 # Cleanup
-## OLD: if [[ $debug_level -lt 6 ]]; then
 if [[ ($debug_level -lt 6) && (-e  "$log_file") ]]; then
     rm "$log_file"
 fi
