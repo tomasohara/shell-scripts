@@ -604,9 +604,14 @@ function libreoffice-text {
     run-app libreoffice --writer "$file"
 }
 #
-# libroffice-text-from-html-clipboard(filename): creates LibreOffice document from clipboard HTML data
+## OLD/BAD:
+## libroffice-text-from-html-clipboard(filename): creates LibreOffice document from clipboard HTML data
+## # via POE Assistant
+## function libroffice-text-from-html-clipboard() {
+#
+# libreoffice-text-from-html-clipboard(filename): creates LibreOffice document from clipboard HTML data
 # via POE Assistant
-function libroffice-text-from-html-clipboard() {
+function libreoffice-text-from-html-clipboard() {
     local base="${1%.odt}"
     local doc_file="$base.odt"
     local doc_exists=false
