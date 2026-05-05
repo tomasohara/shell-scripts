@@ -294,6 +294,8 @@ print "\n" if ($verbose);
 # Note: aborts if strict mode and file not found
 #
 sub show_current_file_info {
+    &debug_print(&TL_VERBOSE, "show_current_file_info(@_); current_file=$current_file\n");
+
     # Make sure file exists (or stderr)
     if ($strict && ($current_file ne "-") && (! &file_exists($current_file)) && defined($ARGV[0])) {
 	&exit("Error: file '$current_file' not accessible.")
