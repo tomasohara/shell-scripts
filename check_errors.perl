@@ -20,7 +20,6 @@ eval 'exec perl -Ssw $0 "$@"'
 # - Don't reproduce lines in case of overlapping context regions.
 # - Have option to make search case-insensitive.
 # - Add option to show which case is being violated (since context display can be confusing, especially when control characters occur in context [as with output form linux script command]).
-# - Convert into python.
 # - Have option to skip filenames in input.
 # - Add codes for error types for convenient filtering (a la pylint).
 #
@@ -44,7 +43,7 @@ if (!defined($ARGV[0])) {
     $options .= " [-relaxed | -strict] [-verbose] [-quiet] [-before=N] [-after=N] [-matching]";
     my $example = "ex: $script_name log-file\n";
     my $note = "Notes:\n";
-    $note .= "- The default context is 1.\n";
+    $note .= "- The default context is 3.\n";
     $note .= "- Warnings are skipped by default.\n";
     $note .= "- Use -no_astericks if input uses ***'s outside of error contexts.\n";
     $note .= "- Use -relaxed to include special cases (e.g., xyz='error').\n";
@@ -69,7 +68,6 @@ my $asterisks = (! $no_asterisks);
 &init_var(*skip_ruby_lib, $ruby);	# skip Ruby library related errors
 &init_var(*relaxed, &FALSE);            # relaxed for special cases
 ## TODO2: use different option for strict error checking (as -strict not commonly used in other perl scripts)
-## OLD: $strict = (! $relaxed);                 # note: overrides common.perl default of 0
 # note: overrides common.perl default of 0
 my($strict_default) = ($strict || (! $relaxed));
 &init_var(*strict, $strict_default);    # alias for (! $relaxed)
@@ -179,7 +177,6 @@ while (<>) {
 	   # Python errors
 	   || /^\s*Traceback/		# stack trace
 	   # note: excludes exception repr's (e.g., <class 'AssertionError'>)
-	   ## OLD: || /(^|\s)[A-Z]\S+Error(\s|:|$)/	# exception (e.g., TypeError)
 	   || (/(^|\s)[A-Z]\S+Error(\s|:|$)/	# exception (e.g., TypeError)
 	       && ($relaxed || ! /BrokenPipeError|SillyPythonException/))
 	   || (/^\S+\.\S+Error:/)       # package specific (e.g., azure.ServiceRequestError)
