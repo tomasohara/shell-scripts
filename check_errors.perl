@@ -39,7 +39,7 @@ use vars qw/$warning $warnings $skip_warnings $context $no_asterisks $skip_ruby_
 use vars qw/$relaxed $strict $quiet $matching $before $after $info/;
 
 if (!defined($ARGV[0])) {
-    my $options = "options = [-warnings | -info] [-context=N] [-no_astericks] [-skip_ruby_lib]";
+    my $options = "options = [-warnings | -info] [-context=N] [-no_asterisks] [-skip_ruby_lib]";
     # TODO2: split options in main and misc (e.g., [-skip_ruby_lib])
     $options .= " [-relaxed | -strict] [-verbose] [-quiet] [-before=N] [-after=N] [-matching]";
     my $example = "ex: $script_name log-file\n";
