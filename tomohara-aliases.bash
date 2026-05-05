@@ -718,7 +718,10 @@ alias perl-='perl -Ssw'
 ##    DURING_ALIAS=1 env perl --Sw "eval $*";
 ## }
 # shellcheck disable=SC2016
-simple-alias-fn alias-perl 'DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
+## OLD: simple-alias-fn alias-perl 'DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
+# note: DURING_ALIAS normally unset; set as 0 to debug aliases using alias-perl
+# example: DURING_ALIAS=0 check-errors $log
+simple-alias-fn alias-perl 'DURING_ALIAS=${DURING_ALIAS:-1} DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
 #
 # alias-python: python invocation for using in aliases
 # note: avoids excess tracing; see debug.py and main.py;
@@ -2012,7 +2015,8 @@ function image-view () { gpicview "$@" & }
 function pdf-to-ascii () {
     if [ "$1" = "" ]; then
         echo "usage: pdf-to-ascii file [verbose=0] [options='-layout']"
-        echo "note: use ' ' for options to use default"
+        ## OLD: echo "note: use ' ' for options to use default"
+        echo "note: use ' ' for options to use default (e.g., single column)"
         echo "ex: pdf-to-ascii zhang-skillspan-naccl2022.pdf 1 ' '"
         return
     fi
