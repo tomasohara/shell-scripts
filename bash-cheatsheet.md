@@ -62,6 +62,7 @@ value="${value@L}"              # lowercase (alternative form)
 ```bash
 if [ "$x" = "value" ]; then echo yes; fi
 if [[ "$x" == value* ]]; then echo glob; fi
+# TODO: add regex gotcha's (e.g., potential trailing space confusion)
 if [[ "$x" =~ ^re[gG]ex$ ]]; then echo regex; fi
 
 if [[ EXPR_a ]]; then
