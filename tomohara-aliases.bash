@@ -729,7 +729,7 @@ simple-alias-fn alias-perl 'DURING_ALIAS=${DURING_ALIAS:-1} DEBUG_LEVEL=$ALIAS_D
 # also sets PYTHONSAFEPATH to avoid conflicts from mezcla from current dir
 # (n.b., added in python 3.11).
 # shellcheck disable=SC2016
-simple-alias-fn alias-python 'DURING_ALIAS=1 PYTHONSAFEPATH=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
+simple-alias-fn alias-python 'DURING_ALIAS=${DURING_ALIAS:-1} PYTHONSAFEPATH=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL python3'
 # alias-python-which(script): invoke script as alias (e.g., minimal tracing)
 ## TODO2: derive more intuitive name (e.g., 
 function alias-python-which {
@@ -1553,7 +1553,7 @@ function check-errors () {
         ## DEBUG: echo "Adding stdin"
         args+=("-");
     fi;
-    (DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL QUIET=1 DURING_ALIAS=1 CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL convert-emoticons-stdin | $PAGER;
+    (DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL QUIET=1 DURING_ALIAS=${DURING_ALIAS:-1} CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL convert-emoticons-stdin | $PAGER;
 }
 # check-all-errors/warnings (file, ...): include more types of errors/warnings
 # note: With -relaxed, the pattern matching is looser (hence more errors show)
@@ -2323,7 +2323,7 @@ function rename-emoji-here {
     local files;
     # Note: Disables shellcheck warning SC2207: Prefer mapfile or read -a to split command output (or quote to avoid splitting).
     # shellcheck disable=SC2207
-    files=($(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=1 alias-python -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -));
+    files=($(find . -maxdepth 1 | INPUT_ERROR=ignore  DURING_ALIAS=${DURING_ALIAS:-1} alias-python -m mezcla.simple_main_example --regex '[\u2000-\U0001FFFF]' -));
     rename-emoji "${files[@]}"
 }
 

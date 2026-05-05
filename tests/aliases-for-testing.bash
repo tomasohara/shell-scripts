@@ -69,9 +69,9 @@ source "$this_source_dir/../all-tomohara-aliases-etc.bash"
 # note: DURING_ALIAS minimizes tracing (see main.py and debug.py under mezcla)
 # shellcheck disable=SC2139
 {
-    alias eval-condition="DURING_ALIAS=1 python3 $this_source_dir/eval_condition.py"
-    alias eval-equals="DURING_ALIAS=1 python3 $this_source_dir/eval_condition.py --equals"
-    alias eval-not-equals="DURING_ALIAS=1 python3 $this_source_dir/eval_condition.py --not-equals"
+    alias eval-condition="DURING_ALIAS=${DURING_ALIAS:-1} python3 $this_source_dir/eval_condition.py"
+    alias eval-equals="DURING_ALIAS=${DURING_ALIAS:-1} python3 $this_source_dir/eval_condition.py --equals"
+    alias eval-not-equals="DURING_ALIAS=${DURING_ALIAS:-1} python3 $this_source_dir/eval_condition.py --not-equals"
 }
 
 #-------------------------------------------------------------------------------
