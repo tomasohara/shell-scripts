@@ -1553,7 +1553,9 @@ function check-errors () {
         ## DEBUG: echo "Adding stdin"
         args+=("-");
     fi;
-    (DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL QUIET=1 DURING_ALIAS=${DURING_ALIAS:-1} CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL convert-emoticons-stdin | $PAGER;
+    ## OLD: (DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL QUIET=1 DURING_ALIAS=${DURING_ALIAS:-1} CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL convert-emoticons-stdin | $PAGER;
+    ## TODO4: use QUIET_MODE to minimize potential env conflicts; likewise reword CONTEXT
+    (DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL QUIET="${QUIET:-1}" DURING_ALIAS="${DURING_ALIAS:-1}" CONTEXT="${CONTEXT:-5}" check-errors-aux "${args[@]}") 2>&1 | DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL convert-emoticons-stdin | $PAGER;
 }
 # check-all-errors/warnings (file, ...): include more types of errors/warnings
 # note: With -relaxed, the pattern matching is looser (hence more errors show)
