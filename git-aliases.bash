@@ -494,7 +494,6 @@ function invoke-git-command {
 alias git-command='invoke-git-command'
 alias git-cmd=git-command
 ## TODO3: git-push-plus => git-push-alias (as simple wrapper)
-## OLD: alias git-push-plus='invoke-git-command push'
 alias git-push-alias='invoke-git-command push'
 alias git-pull-alias='invoke-git-command pull'
 
@@ -650,7 +649,6 @@ function git-diff-plus {
     local log;
     log=$(get-temp-log-name "diff");
     # Perform diff and convert a/ and /b path prefixes to 'a: ' and 'b: '
-    ## OLD: # ex: diff --git a/.github/act.yml b/.github/... => "diff --git a: .github/,,,"
     # ex: diff --git a/.github/act.yml b/.github/... => "diff --git a: .github/..."
     # ex: --- "a/.github/act.yml" => "--- a: .github/act.yml"
     ## TODO? (account for subdirectories 'a' or 'b'):
@@ -679,7 +677,6 @@ function git-diff-plus {
     IFS=$'\n'
     echo "" >| "$log"
     for f in $(git-diff-list "$@"); do
-        ## OLD: git diff -- "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log" 2>&1
         ## TODO:
         ## local f_escape
         ## f_escape="$(echo "$f" | perl -pe 's/@/\\@/g;')"
@@ -757,7 +754,6 @@ function git-diff-list {
     ## TODO: pwd="$(realpath --relative-to="$root" ".")"
     # note: Uses case insenstive matching for sake of Windows
     # shellcheck disable=SC2002
-    ## OLD: cat "$diff_list_file" | escape-at-sign | perl -pe "s@^@$root/@i;" | perl -pe "s@^$pwd/?@@i;" | perl -pe "s@^$root/?@\\\$\(git-root-alias\)/@i;"
     local pwd_esc git_root_esc;
     pwd_esc="$(echo -n "$pwd" | escape-at-sign)"
     ## TODO2:
@@ -843,11 +839,9 @@ function alt-invoke-next-single-checkin {
     else
         ## TODO: summarize binary differenecs
         echo "Note: binary file so bypassing diff"
-        ## OLD: git diff --numstat "$mod_file" | head
         git diff --numstat -- "$mod_file" | head
         true
     fi
-    ## OLD: local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
     # note: Uses single quote to avoid interpolating variable references (e.g., $- or $TRACE)'.
     local prompt="GIT_MESSAGE='...' git-update-commit-push \"$mod_file\""
     local command
@@ -883,7 +877,6 @@ function invoke-alt-checkin { alt-invoke-next-single-checkin "$1"; }
 # Various miscellaneous aliases
 alias git-template=git-alias-usage
 alias git-template-misc=git-misc-alias-usage
-## OLD: alias git-root-alias='git rev-parse --show-toplevel'
 function git-root-alias {
     local root
     root=$(git rev-parse --show-toplevel)
@@ -907,7 +900,6 @@ alias-function git-extract-all-versions 'extract-all-git-versions.bash'
 alias git-tar-repo=tar-this-dir-dated
 # git-tar-repo-proper(): create tar archive of repo excluding .git
 # note: this is to create backup before updating repo (in case of conflicts)
-## OLD: alias git-tar-repo-proper='TAR_FILTER="\.git\b" tar-this-dir-dated'
 function git-tar-repo-proper {
     (echo "FYI: Omitting .git from backup"; TAR_FILTER="\.git\b" tar-this-dir-dated) 2>&1 | less;
 }
@@ -963,7 +955,6 @@ function git-conflicts-alias {
     ## TODO3: get ls-tree to show output relative to current subdirectory
     local restore_dir="$PWD"
     git-cd-root-alias
-    ## OLD: git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {};
     git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename --directories=skip '^<<<<<<<' {};
     cd "$restore_dir"
 }
@@ -1051,7 +1042,6 @@ function git-alias-usage () {
     echo ''
     echo 'Usual check-in process:'
     # TODO2: rework git-update-force via dry-run git-update with conflict check
-    echo '    # OLD: git-cd-root-alias; git-tar-repo-proper; git-update-force; git-next-checkin'
     echo '    git-cd-root-alias; git-tar-repo-proper; git-update-force; git-status; git-next-checkin'
     echo '    # -or-: git-cd-root-alias; git-update-verified; git-conflicts-alias; git-next-checkin'
     echo '    git-next-checkin                      # repeat, as needed'
@@ -1101,20 +1091,12 @@ function git-misc-alias-usage() {
     echo ""
     echo "To check in all tracked files with changes (examinar primero):"
     echo "   GIT_MESSAGE='...' git-update-commit-push \$(git-files-changed)"
-    ## OLD:
-    ## echo "    git-checkin-multiple-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
-    ## echo "A lazy-man's alternative, only recommended for single-user repos:"
-    ## echo "    git-checkin-all-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
     echo ""
     echo "Environment variables:"
     echo "   GIT_AUTO_NEXT GIT_FORCE GIT_LOG_DIR GIT_MESSAGE GIT_NO_CONFIRM GIT_SKIP_ADD GIT_SKIP_PUSH GIT_TEST_MESSAGE GIT_TOKEN GIT_USER PRESERVE_GIT_STASH"
     echo ""
     echo "Source code grepping:"
-    ##
-    ## OLD:
-    ## TODO3: get ls-tree to show output relative to current subdirectory
-    ## echo "   (git-cd-root-alias; git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
-    ##
+    #
     # NOTE: -r for recurse dirs; --name-only to omit details; and HEAD for current commit head;
     #
     echo "   (git-ls-tree-relative | xargs -I '{}' grep --with-filename 'pattern' {}) 2>&1 | less"
