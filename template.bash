@@ -112,6 +112,8 @@
 # - Document regex match quirks.
 # - Document file tests (e.g., -e fubar.txt).
 # - BASH_SOURCE usage for when source'd; in general: invocation stack array
+#     echo "in ${BASH_SOURCE[0]}"
+# - alternative BASH_SOURCE usage:
 #     src_dir=$(dirname "${BASH_SOURCE[0]}")
 # - name of current function: "${FUNCNAME[0]}"; in general: call stack array
 # - value=${value@L}                    # make lowercase
