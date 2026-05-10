@@ -274,8 +274,9 @@ function run-python-script-reset {
 }
 
 # pytest stuff
-# options: --vv: doubly verbose; --capture=no: don't capture stderr
-default_pytest_opts=(-vv --capture=no)
+## UPDATE: 05/09/2006: adds summary for all at end
+# options: --vv: doubly verbose; --capture=no: don't capture stderr; -rA: report all
+default_pytest_opts=(-vv --capture=no -rA)
 #
 # test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
@@ -792,6 +793,7 @@ alias-fn rename-adhoc-notes 'rename-files -q "$(get-host-nickname)-adhoc-notes" 
 
 # copy-to-temp-as-txt(file, ...): copies file to temp and add .txt extension for braindead web upload interfaces (e.g., AI assistants)
 # note: basically copy $f ~/temp/$b.txt with touch
+# TODO2: apply de-identification
 #
 function copy-to-temp-as-txt {
     local file="$1"
