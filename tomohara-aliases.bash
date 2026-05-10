@@ -2753,7 +2753,8 @@ function cmd-output () {
     local output_base output_file
     ## OLD: output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')-$(TODAY)"
     ## OLD: output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')"
-    output_base="_$(flatten-path "$command-usage.list")"
+    ## BAD: output_base="_$(flatten-path "$command-usage.list")"
+    output_base="_$(flatten-path "$command")"
     if [ "${ADD_MINUTES:0}" == "1" ]; then
         output_base="${output_base}-$(mmddyy-hhmm)"
     else
