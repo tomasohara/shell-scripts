@@ -300,6 +300,7 @@ function disable-conda {
         print join(":", @p);
       ')
 }
+alias conda-disable=disable-conda
 
 # Misc. aliases
 alias conda-info-env='conda info --envs'
