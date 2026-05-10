@@ -508,7 +508,7 @@ alias git-log-follow='git-log-plus --follow'
 alias git-blame-alias='invoke-git-command blame'
 alias git-rm-alias='invoke-git-command rm'
 alias git-checkout-alias='invoke-git-command checkout'
-
+alias git-branch-plus='git-command branch -vv'
 
 # git-add-plus: add filename(s) to repository
 # note: if GIT_FORCE is 1 then --force added (e.g., to override .gitignore)
