@@ -1104,13 +1104,20 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   # grep-missing(pattern, file, ...): show files without pattern 
   # TODO: archive
   function grep-missing () { $EGREP -c $MY_GREP_OPTIONS "$@" | $GREP ":0"; }
+  # gu: case-insensitive grep-unique
   alias gu='grep-unique -i'
   alias gu-='grep-unique'
   # gu-all: run gu over all files in current dir
   # TODO: archive
   function gu-all () { grep-unique "$@" ./* | $PAGER; }
   #
-  function gu- () { $GREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0"; }
+  ## NOTE: The following was being ignored due to alias
+  ## BAD: function gu- () { $GREP -c $MY_GREP_OPTIONS "$@" | $GREP -v ":0"; }
+  #
+  # zgrep-unique: variant of grep-unique for gzipped files
+  function zgrep-unique () { GREP=zgrep grep-unique "$@"; }
+  alias zgu='zgrep-unique -i'
+  #
   ## Lorenzo review: should change this to gu-alt following TODO's
   #
   # grepl(pattern, [other_grep_args]): invokes grep over PATTERN and OTHER_GREP_ARGS and then pipes into less for PATTERN
@@ -2696,8 +2703,9 @@ alias ununcompress-this-dir='uncompress-dir $PWD'
 
 # count-exts(): tabulate the file extensions in current directory
 # count-exts-all(): likewise including cases with no extension (e.g., 'it')
-function count-exts () { $LS | count-it '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
-function count-exts-all { (count-exts | cat; $LS | count-it '^[^.]+(\.*)$') | sort $SORT_COL2 -rn | $PAGER; }
+## UPDATE: 05/12/2026: adds -one_per_line to avoid multiple counts
+function count-exts () { $LS | count-it -one_per_line '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
+function count-exts-all { (count-exts | cat; $LS | count-it -one_per_line '^[^.]+(\.*)$') | sort $SORT_COL2 -rn | $PAGER; }
 
 alias kill-iceweasel='kill-em iceweasel'
 
