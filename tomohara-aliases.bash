@@ -135,7 +135,6 @@
 #
 
 # For debugging: Uncomment the following line(s)
-## OLD: ## DEBUG: echo in tomohara-aliases.bash 1>&2
 [[ $DEBUG_LEVEL -ge 6 ]] && echo in "${BASH_SOURCE[0]}" 1>&2
 ## DEBUG: set -o xtrace
 
@@ -342,7 +341,6 @@ function date-ddmmmyy {
 ## TODO: drop leading digits in day of month
 ## NOTE: keep in synch with common.perl get_file_ddmmmyy and .emacs edit-adhoc-notes-file
 ## example usage: ddmmmyy=$(todays-date); ... run-it > _run-it-$ddmmmyy.log 2>&1
-## OLD: function todays-date { date '+%d%b%y' | downcase-stdin; }
 function todays-date { date-ddmmmyy "now"; }
 # todays-date-mmmYY(): date in format mmmYY (e.g., sep20)
 function todays-date-mmmYY { todays-date | perl -pe 's/^\d\d//;'; }
@@ -358,7 +356,6 @@ alias date-central='TZ="America/Chicago" date'
 # note: This is intended for use in filenames (e.g., _free-21Feb26@1549).
 # ex: 01jan26@0001).
 function mmddyy-hhmm {
-    ## OLD: date '+%d%b%y@%H%M'
     date '+%d%b%y@%H%M' | downcase-stdin;
 }
 alias todays-date-hhmm='mmddyy-hhmm'
@@ -718,7 +715,6 @@ alias perl-='perl -Ssw'
 ##    DURING_ALIAS=1 env perl --Sw "eval $*";
 ## }
 # shellcheck disable=SC2016
-## OLD: simple-alias-fn alias-perl 'DURING_ALIAS=1 DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
 # note: DURING_ALIAS normally unset; set as 0 to debug aliases using alias-perl
 # example: DURING_ALIAS=0 check-errors $log
 simple-alias-fn alias-perl 'DURING_ALIAS=${DURING_ALIAS:-1} DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
@@ -960,7 +956,6 @@ cond-export NICE "nice -19"
 ## OLD (deprecated):
 alias fix-dir-permissions="find . -type d -exec chmod go+xs {} \;"
 ## TODO3 (add "use set_group_permissions.bash" warning):
-## OLD: function fix-group-dir-permissions { (find . -type d | xargs chmod --changes go+xs ) 2>&1 | $PAGER; }
 ## NOTE: Uses 'print0 ... xargs -0' to avoid chell-check warning; via POE Assistant
 function fix-group-dir-permissions { (find . -type d -print0 | xargs -0 chmod --changes go+xs) 2>&1 | "$PAGER"; }
 ## TODO2: function fix-group-dir-permissions { (find . -type d -exec chmod --changes go+xs {} +) 2>&1 | "$PAGER"; }
@@ -1183,7 +1178,6 @@ function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pat
 function findspec-all () { command find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | $GREP -v '^find: '; }
 # TODO2: issue warning that fs filters backup and build dirs
 function fs () { findspec . "$@" | $EGREP -iv '(/(backup|build)/)'; } 
-## OLD: function fs-ls () { fs "$@" -exec ls -l {} \; ; }
 function fs-ls () { fs "$@" -exec ls "$core_dir_options" {} \; ; }
 # fs-ls-new(pattern): like fs-ls but omitting (extraneous) -print output
 function fs-ls-new () { findspec . "$@" -exec ls "$core_dir_options" {} \; ; }
@@ -1191,7 +1185,6 @@ simple-alias-fn fs- 'findspec-all .'
 ## Lorenzo review: should change this to fs-alt following TODO's
 function fs-ext () { find . -iname \*."$1" | $EGREP -iv '(/(backup|build)/)'; } 
 # TODO: extend fs-ext to allow for basename pattern (e.g., fs-ext java ImportXML)
-## OLD: function fs-ls- () { fs- "$@" -exec ls -l {} \; ; }
 function fs-ls- () { fs- "$@" -exec ls "$core_dir_options" {} \; ; }
 ## Lorenzo review: should change this to fs-ls-alt following TODO's
 #
@@ -1210,9 +1203,6 @@ function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$
 function fgr-full { findgrep . "$@"; }
 # fgr-ext-full(extension, pattern): full findgrep for *.EXTENSION from current dir for PATTERN
 function fgr-ext-full { findgrep-ext . "$@"; }
-## OLD:
-## function fgr () { findgrep . "$@" | $EGREP -v '((/backup)|(/build))'; }
-## function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
 function fgr () { fgr-full | $EGREP -v '((/backup)|(/build))'; }
 function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
 simple-alias-fn fgr-py 'fgr-ext py'
@@ -1560,7 +1550,6 @@ function check-errors () {
         ## DEBUG: echo "Adding stdin"
         args+=("-");
     fi;
-    ## OLD: (DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL QUIET=1 DURING_ALIAS=${DURING_ALIAS:-1} CONTEXT=5 check-errors-aux "${args[@]}") 2>&1 | DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL convert-emoticons-stdin | $PAGER;
     ## TODO4: use QUIET_MODE to minimize potential env conflicts; likewise reword CONTEXT
     (DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL QUIET="${QUIET:-1}" DURING_ALIAS="${DURING_ALIAS:-1}" CONTEXT="${CONTEXT:-5}" check-errors-aux "${args[@]}") 2>&1 | DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL convert-emoticons-stdin | $PAGER;
 }
@@ -1570,7 +1559,6 @@ function check-errors () {
 # that would occur with defining check-all-warnings in terms of check-warnings.
 alias check-all-errors='check-errors -relaxed'
 alias check-warnings='check-errors -warnings -strict'
-## OLD: alias check-all-warnings='check-all-errors -warnings -relaxed -info'
 alias check-all-warnings='check-errors -warnings -relaxed -info'
 #
 # check-errors-excerpt(log-file): show errors are start of log-file and at end if different
@@ -1672,9 +1660,6 @@ function most-recent-backup {
         file="$(basename "$file")"
         dir="$file_dir/$dir"
     fi
-    ## OLD: ## TODO: rework to avoid false positives
-    ## BAD: $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~*)?" | head -1;
-    ## OLD: $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~.*)?$" | head -1;
     ## TODO2: Let the shell include dotfiles (e.g., via temporary 'shopt -s dotglob nullglob')
     ## NOTE: See TODO.txt entry for 21 Apr 26
     $LS -t "$dir"/* "$dir"/.* 2> /dev/null | $EGREP "/$file(~|.~.*)?$" | head -1;
@@ -1683,7 +1668,6 @@ function most-recent-backup {
 #   touch backup .fubar.~666~; most-recent-backup .fubar => .fubar
 #
 # diff-backup(diff_command, file, [diff_arg ...]): compare FILE vs. most recent backup, using DIFF_PROGRAM and optional DIFF_ARGs
-## OLD: # TODO: fix handling of dot files
 function diff-backup-helper {
     local diff="$1"; local file="$2";
     shift 2;
@@ -2024,7 +2008,6 @@ function image-view () { gpicview "$@" & }
 function pdf-to-ascii () {
     if [ "$1" = "" ]; then
         echo "usage: pdf-to-ascii file [verbose=0] [options='-layout']"
-        ## OLD: echo "note: use ' ' for options to use default"
         echo "note: use ' ' for options to use default (e.g., single column)"
         echo "ex: pdf-to-ascii zhang-skillspan-naccl2022.pdf 1 ' '"
         return
@@ -2082,7 +2065,6 @@ function run-app {
     "$path" "$@" >> "$log" 2>&1 &
     ## TODO: make sure command invoked OK and then put into background
     local delay=5
-    ## OLD: sleep-for "$delay" "waiting ${delay}s for $log"
     sleep-for "$delay" "waiting for log"
     check-errors-excerpt "$log"
     $verbose && tail "$log" | truncate-width
@@ -2470,7 +2452,6 @@ function rename-with-file-date() {
             eval "$move_command" "$f" "$new_f";
         elif [ -L "$f" ]; then              # symbolic link exists
             # note: gets mod time via 'stat -c %y'
-            ## OLD: new_f=$(get-free-filename "$f.$(date --date="$(stat -c %y "$f")" '+%d%b%y')" ".")
             local date_spec
             date_spec=$(file-date-mmdddyy "$f")
             new_f=$(get-free-filename "$f.$date_spec" ".")
@@ -2539,7 +2520,6 @@ function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
 #
 # show-unicode-control-chars(): Convert ascii control characters to printable Unicode ones (e.g., ␀ for 0x00)
 # See https://stackoverflow.com/questions/42193957/errorwide-character-in-print-at-x-at-line-35-fh-read-text-files-from-comm.
-## OLD: function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
 function display-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
 #
 ## TODO2: rework show-unicode-code-info*/show-unicode-control-chars for tab-completion
@@ -2651,7 +2631,6 @@ function quote-tokens () { echo "$@" | perl -pe 's/(\S+)/"\1"/g;'; }
 # sleep-for(seconds, [message], [delay_spec]): sleep for SECONDS with MESSAGE (e.g., "delay") and DELAY_SPEC (e.g., "[sleep for Ns]")
 function sleep-for {
     local sec="$1"
-    ## OLD: local msg="${2:-"delay for ${sec}s"}"
     local msg="${2:-"delay"}"
     local delay_spec="${3:-"[sleep for ${sec}s]"}"
     echo "$msg $delay_spec"
@@ -2759,9 +2738,6 @@ function cmd-output () {
     fi
     ## BAD: local output_base, output_file
     local output_base output_file
-    ## OLD: output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')-$(TODAY)"
-    ## OLD: output_base="_$(echo -n "$command" | perl -pe 's/[^\w.-]/_/g;')"
-    ## BAD: output_base="_$(flatten-path "$command-usage.list")"
     output_base="_$(flatten-path "$command")"
     if [ "${ADD_MINUTES:0}" == "1" ]; then
         output_base="${output_base}-$(mmddyy-hhmm)"
@@ -2783,10 +2759,8 @@ function cmd-output-hhmm () {
 function cmd-usage () {
     local command="$*"
     local usage_file
-    ## OLD: usage_file="_$(echo "$command" | perl -pe 's@[/ .]@_@g; s/_+/_/g;')-usage.list"
     usage_file="_$(flatten-path "$command-usage.list")"
     $command --help  2>&1 | ansifilter > "$usage_file"
-    ## OLD: if [ $? -eq 0 ]; then $PAGER_NOEXIT "$usage_file"; fi
     [ $? -eq 0 ] || sleep-for 1.5 "FYI: using existing file";
     $PAGER_NOEXIT "$usage_file";
 }
@@ -2802,9 +2776,6 @@ function cmd-usage () {
 alias configure='./configure --prefix ~'
 # pp-xml(xml-file): prettyprint xml-file to stdout
 # pp-html(html-file): prettyprint html-file to stdout
-## OLD:
-## alias pp-xml='xmllint --format'
-## alias pp-html='pp-xml --html'
 function pp-xml {
     if missing-options "$@"; then
         function-usage --synopsis "prettyprint xml" --example "my-doc.xml"
@@ -3160,10 +3131,6 @@ function script {
     reset-prompt "$PS_symbol:\$"
     ## DEBUG: echo "script: 1. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
 
-    ## OLD:
-    ## # Reset bashrc status variables
-    ## export PROFILE_PROCESSED=0 BASHRC_PROCESSED=0
-    
     # Change xterm title to match
     set-title-to-current-dir
     ## DEBUG: echo "script: 2. PS1='$PS1' old_PS_symbol='$old_PS_symbol' PS_symbol='$new_PS_symbol'"
@@ -3307,7 +3274,6 @@ function python-lint-full() {
         root="$root:$(hg root 2> /dev/null)";
     fi
     ## TODO: --persistent=n (to avoid caching); record pylint status ($?)
-    ## OLD: PYTHONPATH="$root:.:$PYTHONPATH" $NICE pylint --reports=n --score=n --persistent=n "$@" 2>&1 | $PAGER;
     PYTHONPATH="$root:.:$PYTHONPATH" $NICE pylint --reports=n --score=n --persistent=n "$@" 2>&1 | $PAGER;
     ## TODO3:
     ## local pylint_out="$TMP/_pylint-$$.out"
@@ -3402,7 +3368,6 @@ function python-module-version-alt {
 }
 function python-package-members() { local package="$1"; alias-python -c "import $package; print(dir($package));"; }
 #
-## OLD: alias python-setup-install='log=setup.log;  rename-with-file-date $log;  uname -a > $log;  alias-python setup.py install --record installed-files.list >> $log 2>&1;  ltc $log'
 alias python-setup-install='log=setup.log;  rename-with-file-date "$log";  uname -a > "$log";  alias-python setup.py install --record installed-files.list >> "$log" 2>&1;  ltc "$log"'
 # TODO: add -v (the xargs usage seems to block it)
 alias python-uninstall-setup='cat installed-files.list | xargs command rm -vi; alias-perl rename_files.perl -regex ^ un installed-files.list'
@@ -3561,7 +3526,6 @@ function filter-random() {
 
 # Load supporting scripts
 #
-## OLD:
 conditional-source "$TOM_BIN/anaconda-aliases.bash"
 ## TODO2:
 ## if [[ $USE_ANACONDA =~ 1|true ]]; then
@@ -3609,7 +3573,6 @@ function invoke-browser() {
 ## alias opera='invoke-browser command "opera"'
 ## NOTE: which is a Bash builtin
 # TODO: make following conditioned up Linux
-## OLD: alias chromium='invoke-browser /usr/lib/chromium-browser/chromium-browser'
 alias chromium='invoke-browser /usr/bin/chromium-browser'
 ## TODO: drop which's
 ## BAD: function which { builtin which "$1" 2> /dev/null; }
