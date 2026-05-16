@@ -247,7 +247,9 @@ if [ "$base_dir" != "." ]; then
 fi
 
 # Do the actual diff
-log_file="${TMP:-/tmp}/_do_diff.$$.log"
+# TODO3: use mktemp
+## OLD: log_file="${TMP:-/tmp}/_do_diff.$$.log"
+log_file="$(mktemp --tmpdir _do_diff.XXXXX.log)"
 count=0
 # shellcheck disable=SC2086
 for file in $pattern; do
@@ -314,7 +316,7 @@ for file in $pattern; do
     # grepping (e.g., `do_diff.sh ... | grep '^Differences:'`).
     files_differ=false
     if [ "$brief" == "0" ]; then
-        "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" > "$log_file"
+        "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" >| "$log_file"
         status=$?
         perl -e "\$bd='$base_dir';" -pe 's@Files (.*) and (.*) differ@Differences: $bd$d/$1 $2@;' < "$log_file" | normalize-path
 
@@ -337,7 +339,7 @@ for file in $pattern; do
     fi
     
     # Perform the actual diff
-    "$diff_cmd" $space_options $diff_options "$file" "$other_file" > "$log_file" 2>&1
+    "$diff_cmd" $space_options $diff_options "$file" "$other_file" >| "$log_file" 2>&1
     
     # Show relative difference percent
     ## TODO?: if [[ "$brief" == "0") && $files_differ ]]; then
