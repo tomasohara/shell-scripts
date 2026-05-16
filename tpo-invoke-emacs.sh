@@ -63,6 +63,7 @@ if [ "$1" = "--help" ]; then
     echo "Notes:"
     echo "- Put any emacs arguments after the -- spec."
     echo "- You can also use EMACS_PROGRAM environment variable to override program."
+    echo "- Uses cygwin to resolve path for Windows."
     echo ""
     exit
 fi
@@ -101,9 +102,14 @@ moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 quick=0
 emacs_args=0
 under_mac="0"
+under_cygwin="0"
 if [[ "$OSTYPE" =~ darwin.* ]]; then
     under_mac="1"
 fi
+if [ "$OSTYPE" == "cygwin" ]; then
+    under_cygwin="1"
+fi
+#
 while [ "$moreoptions" = "1" ]; do
     if [ "$1" = "--trace" ]; then
         set -o xtrace;
@@ -155,7 +161,11 @@ function resolve-path() {
     local filename="$1"
     local new_filename
     new_filename="$(realpath "$filename")"
-    ## DEBUG: echo "resolving '$filename' => '$new_filename'" 1>&2
+    if [ "$under_cygwin" == "1" ]; then
+        new_filename="$(cygpath -wa "$filename")"
+    fi
+    ## DEBUG:
+    echo "resolving '$filename' => '$new_filename'" 1>&2
     echo "$new_filename"
 }
 
@@ -176,7 +186,8 @@ if [ "$in_background" = "1" ]; then
     # TODO: rework so that no-op option added if empty (to avoid SC2086 disabled)
     #   ex: emacs "${emacs_options:- --eval 1}" "$@" &
     args=("$@");
-    if [ "$under_mac" = "1" ]; then
+    ## OLD: if [ "$under_mac" = "1" ]; then
+    if [[ ("$under_mac" = "1") || ("$under_cygwin" = "1") ]]; then
         args=()
         if [ $# == 0 ]; then args+=("$(resolve-path .)"); fi
         # note: resolve fullpath for non-option filename due to quirk under macos
