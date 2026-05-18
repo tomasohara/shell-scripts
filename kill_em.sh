@@ -18,7 +18,8 @@
 # - figure out occasional problem with graphling files not getting deleted after processed killed
 
 # Uncomment the following line for tracing
-# set echo=1
+#
+set echo=1
 
 # Initialize options and variables
 # NOTE: temp file is of the form /tmp/kill_em_aux_HOSTNAME_PID
@@ -116,8 +117,10 @@ while ("$1" =~ -*)
         ## OLD: set user="[a-z_][a-z0-9_-]*"
 	## NOTE: If user ID too long, it is trancated in the ps listing and a + is appended.
 	## EX: thomas_+ 27423  0.0  0.0  14864  1124 pts/1    S+   19:36   0:00 grep -E -i jupyter
-	set user="[a-z_][a-z0-9_-+]*"
-	if ("$OSTYPE" == "linux") then
+	## OLD: set user="[a-z_][a-z0-9_-+]*"
+	set user="[a-z_][a-z0-9_+-]*"
+	## OLD: if ("$OSTYPE" == "linux") then
+	if (("$OSTYPE" == "linux") || ("$OSTYPE" == "cygwin")) then
 	    set user="\S+"
 	    set egrep="grep --perl-regexp"
 	endif
@@ -144,6 +147,9 @@ set options = "auxww"
 # NOTE: the ps command itself is filtered out since not active later
 if ($OSTYPE == solaris) set options = "-ef"
 ## OLD: ps $options | grep "^ *$user" | egrep -v "\bps $options\b" | egrep -v "\b$$\b" | egrep -v "$filter" | egrep $ignore "$pattern" > $aux_file0
+##
+## DEBUG: echo ps $options \| $egrep "^ *$user" \| $egrep -v "\bps $options\b" \| $egrep -v "\b$$\b" \| $egrep -v "$filter" \| $egrep $ignore "$pattern" \> $aux_file0
+##
 ps $options | $egrep "^ *$user" | $egrep -v "\bps $options\b" | $egrep -v "\b$$\b" | $egrep -v "$filter" | $egrep $ignore "$pattern" > $aux_file0
 if ("$verbose_mode" == "1") then
     echo "Candidate processes (prior to parent and current script filtering)"
