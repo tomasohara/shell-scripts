@@ -206,7 +206,8 @@ if [ -z "$pattern" ]; then
     elif [ -f "$1" ]; then
         # specific file (e.g., "README.txt")
         pattern="$1"
-    elif [[ "$1" =~ \.* ]]; then
+    ## BAD: elif [[ "$1" =~ \.* ]]; then
+    elif [[ "$1" =~ ^\. ]]; then
         # note: dot file (e.g., ".emacs") requires use of --match-dot-files
         if [ "$match_dot_files" == "1" ]; then
             # note: special case handling since can't use *.emacs* (i.e., substring case below)
@@ -218,8 +219,11 @@ if [ -z "$pattern" ]; then
     elif [[ "$1" =~ \*\. ]]; then
         # extension (e.g., "*.py")
         pattern="*$1"
+    elif [[ "$1" == "*" ]]; then
+        # retain glob as is (e.g., "*")
+        pattern="$1"
     else
-        # substring of file
+        # substring of file (e.g., "extract")
         pattern="*$1*"
     fi
     shift
@@ -247,8 +251,6 @@ if [ "$base_dir" != "." ]; then
 fi
 
 # Do the actual diff
-# TODO3: use mktemp
-## OLD: log_file="${TMP:-/tmp}/_do_diff.$$.log"
 log_file="$(mktemp --tmpdir _do_diff.XXXXX.log)"
 count=0
 # shellcheck disable=SC2086
@@ -283,7 +285,8 @@ for file in $pattern; do
     # Note: similar to diff-rev alias
     # ex: "bin/tests/README.ipynb" => "tests/README.ipynb"
     if [ -d "$other_file" ]; then
-        if [ -e "$other_file/$file" ]; then
+        ## BAD: if [ -e "$other_file/$file" ]; then
+        if [[ "$(dirname "$file")" != "." ]] && [ -e "$other_file/$file" ]; then
             # Retains directory in "pattern"
             # Note: assumes pattern is actually a file
             if [[ ("$nopattern" == "0") ]]; then
@@ -354,7 +357,8 @@ for file in $pattern; do
             relative_diff=$(( $num_diffs * 100 / $num_lines ))
         fi
         ## TODO4: consolidate path fixup's (e.g., // => /)
-        file_path="$(echo "${base_dir/$file}" | normalize-path)"
+        ## BAD: file_path="$(echo "${base_dir/$file}" | normalize-path)"
+        file_path="$(echo "${base_dir}/${file}" | normalize-path)"
         echo -n "${relative_diff}% differences for $file_path"
         if [[ "$verbose_mode" == "1" ]]; then
             echo -n ": lines1=$num_lines1 lines2=$num_lines2 total=$num_lines diffs=$num_diffs"
