@@ -765,7 +765,7 @@ function set-title-to-current-dir () {
     ## TEST: set-xterm-window "$PS_symbol $dir [$pwd]$other_info";
     ## TODO: set-xterm-window "$dir [$PS_symbol$pwd]$other_info";
 }
-if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-dir; fi
+## OLD: if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-dir; fi
 #
 alias reset-xterm-title='set-xterm-window "$HOSTNAME $PWD"'
 # old-alt-xterm-title([prefix=alt]): change xterm title to PREFIX DIR-BASENAME [PWD]
@@ -1710,7 +1710,9 @@ trace file archiving commands
 # -x extract; -v verbose; -f file source; -z compressed; -k don't overwrite files
 ## NOTE: gtar is used on some BSD-based system (e.g., MacOS), but tar is used on Linux.
 GTAR="tar"
-if [ "$(which gtar)" != "" ]; then
+## OLD: if [ "$(which gtar)" != "" ]; then
+## TODO3: add which-no-error alias
+if [ "$(which gtar 2> /dev/null)" != "" ]; then
     GTAR="gtar"
 fi
 if [[ ! $($GTAR --version) =~ GNU ]]; then
@@ -3717,6 +3719,12 @@ alias tomohara-aliases='source "$TOM_BIN/tomohara-aliases.bash"'
 alias tomohara-settings='source "$TOM_BIN/tomohara-settings.bash"'
 alias more-tomohara-aliases='source "$TOM_BIN/more-tomohara-aliases.bash"'
 alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
+
+#------------------------------------------------------------------------
+# End processing
+
+# Set xterm title based on current directory
+if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-dir; fi
 
 #------------------------------------------------------------------------
 # Optional end tracing
