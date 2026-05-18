@@ -42,3 +42,12 @@ function startup-trace () {
 	echo "$* [$HOSTNAME $(date)]";
     fi;
 }
+
+##------------------------------------------------------------------------------
+## TEMP: Duplicate definitions to work around chicken-and-egg problem
+
+# conditional-source(filename): source in bash commands from filename if exists
+function conditional-source () { if [ -e "$1" ]; then source $1; else echo "Warning: bash script file not found (so not sourced):"; echo "    $1"; fi; }
+#
+# append-path(path): appends PATH to environment variable unless already there
+function append-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="${PATH}:$1"; fi }
