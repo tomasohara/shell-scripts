@@ -517,3 +517,13 @@ WARNING: Anchors currently start or end line: consider -one_per_line
 
 $ echo "abc...xyz" | count_it.perl 'xyz$' tests/*.py
 WARNING: Anchors currently start or end line: consider -one_per_line
+
+##------------------------------------------------------------------------------
+
+## TODO4: Make sure noclobber not inherited by scripts using '... > file',
+## such as do_diff.bash.
+## ex: /c/devel/shell-scripts/do_diff.bash: line 317: /tmp/tmp/_do_diff.10911.log: cannot overwrite existing file
+
+## $ do_diff.bash --dir tests '*.bash' $PWD/tests > _do_diff.$(T).log 2>&1
+## $ grep -c "cannot overwrite existing file" _do_diff.$(T).log
+## 0
