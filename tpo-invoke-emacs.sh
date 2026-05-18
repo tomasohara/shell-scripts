@@ -63,7 +63,8 @@ if [ "$1" = "--help" ]; then
     echo "Notes:"
     echo "- Put any emacs arguments after the -- spec."
     echo "- You can also use EMACS_PROGRAM environment variable to override program."
-    echo "- Uses cygwin to resolve path for Windows."
+    echo "- Uses Cygwin to resolve path for Windows."
+    echo "- Under Mac or Cygwin, --nohup is default."
     echo ""
     exit
 fi
@@ -91,10 +92,11 @@ fi
 ##     fi
 ## fi
 
-# Use nohup if under Mac OS
-if [[ "$OSTYPE" =~ darwin.* ]]; then
-    use_nohup="1"
-fi
+## OLD:
+## # Use nohup if under Mac OS
+## if [[ "$OSTYPE" =~ darwin.* ]]; then
+##     use_nohup="1"
+## fi
 
 # Parse command-line options
 #
@@ -108,6 +110,10 @@ if [[ "$OSTYPE" =~ darwin.* ]]; then
 fi
 if [ "$OSTYPE" == "cygwin" ]; then
     under_cygwin="1"
+fi
+# Use nohup if under MacOS or Cygwin
+if [[ ("$under_mac" = "1") || ("$under_cygwin" = "1") ]]; then
+    use_nohup="1"
 fi
 #
 while [ "$moreoptions" = "1" ]; do
@@ -164,8 +170,7 @@ function resolve-path() {
     if [ "$under_cygwin" == "1" ]; then
         new_filename="$(cygpath -wa "$filename")"
     fi
-    ## DEBUG:
-    echo "resolving '$filename' => '$new_filename'" 1>&2
+    ## DEBUG: echo "resolving '$filename' => '$new_filename'" 1>&2
     echo "$new_filename"
 }
 
