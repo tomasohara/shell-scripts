@@ -14,6 +14,7 @@
 #     if (( ARITH_EXPR )); then STMT; fi
 #     if [ -s "file" ]; then ...; fi    where -s is non-empty test (see below)
 #     case EXPR in PATTERN_a) STMT_a;; PATTERN_b) STMT_b;; ... esac
+#         where ';;' is analogous to break in C (to avoid fallthrough)
 #     for name [in words ...]; do commands; done
 #     for (( expr1 ; expr2 ; expr3 )) ; do commands ; done
 #     while [ expr ] ; do commands ; done
@@ -96,7 +97,7 @@
 # - if [[ $JAVA_HOME =~ x64 ]]; then echo "64-bit Java"; fi
 #   note: need to use .* not * for filename patterns (e.g., $fname =~ ^.*xcf$)
 # - case "$HOST_NICKNAME" in ec2*) echo "AWS";; hostw*) echo "HW";; *) echo "non-server"; esac
-#   NOTE: each case must end in ';;'
+#   NOTE: each case must end in ';;' (or ';&' or ';;&').
 # - if [[ $1 =~ .*/ ]]; then echo "$1" ends in slash; fi
 # - if [[ ! $file =~ http ]]; then echo hey; fi
 #
