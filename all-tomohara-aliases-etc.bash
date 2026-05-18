@@ -42,6 +42,13 @@
 #   fi
 #
 
+# Guard against re-entry
+if [ "${ALIASES_PROCESSED:-0}" == 1 ]; then
+    echo "Warning: unexpected re-invocation of ${BASH_SOURCE[0]}"
+    return
+fi
+ALIASES_PROCESSED=1
+
 # Set bash regular and/or verbose tracing
 # note: tracing off by default unless active for current shell
 was_tracing=false
