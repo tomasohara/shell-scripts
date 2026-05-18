@@ -107,8 +107,8 @@ export SHELL="/bin/bash"
 # - See https://docs.python.org/3/library/tempfile.html.
 # - Also see tomohara-aliases.bash and ~/.bash_profile.
 ## HACK: don't allow /tmp for TMP or TMPDIR (for persistence)
-if [ "$TMP" = "/tmp" ]; then export TMP "$TEMP/tmp"; fi
-if [ "$TMPDIR" = "/tmp" ]; then export TMPDIR "$TEMP/tmp"; fi
+if [ "$TMP" = "/tmp" ]; then export TMP="$TEMP/tmp"; fi
+if [ "$TMPDIR" = "/tmp" ]; then export TMPDIR="$TEMP/tmp"; fi
 mkdir -p "$TEMP" "$TMP" "$TMPDIR"
 
 # Don't enable default .bashrc settings
