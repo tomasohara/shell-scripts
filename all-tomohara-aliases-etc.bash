@@ -44,7 +44,7 @@
 
 # Guard against re-entry
 if [ "${ALIASES_PROCESSED:-0}" == 1 ]; then
-    echo "Warning: unexpected re-invocation of ${BASH_SOURCE[0]}"
+    echo "Warning: unexpected re-invocation of ${BASH_SOURCE[0]}; set ALIASES_PROCESSED=0 first"
     return
 fi
 ALIASES_PROCESSED=1
