@@ -854,6 +854,10 @@ if [ "$OSTYPE" = "solaris" ]; then other_file_args=""; fi
 ## TAKE2
 alias clear="echo 'use cls instead (or command clear)'"
 alias cls="command clear -x"
+# reset: wrapper around command with warning scrollback buffer
+## TODO3: use reset-terminal?
+simple-alias-fn reset 'sleep-for 3 "Warning: reset might clear scrollback"; command reset'
+#
 {
     # TODO: see if this is a shellcheck bug
     #    SC2034: MV appears unused. Verify it or export it.
@@ -1538,7 +1542,9 @@ function check-errors-aux { alias-perl check_errors.perl "$@"; }
 ## # -or-:
 ## function check-errors-aux { PERL_SWITCH_PARSING=1 check_errors.py "$@"; };
 # note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
-ALIAS_DEBUG_LEVEL=${ALIAS_DEBUG_LEVEL:-${DEBUG_LEVEL:-2}}
+## OLD: ALIAS_DEBUG_LEVEL=${ALIAS_DEBUG_LEVEL:-${DEBUG_LEVEL:-2}}
+## TODO: ALIAS_DEBUG_LEVEL=${ALIAS_DEBUG_LEVEL:-$(min DEBUG_LEVEL 2)}
+ALIAS_DEBUG_LEVEL=${ALIAS_DEBUG_LEVEL:-2}
 function check-errors () {
     ## NOTE: gotta dislike bash!
     local args=("$@");
@@ -2726,7 +2732,18 @@ function flatten-path {
 ##             s/_+$//;                    # trim trailing _
 ## PERL
 ## }
-##
+#
+# Define fallbacks for missing supporting commands
+if [ "$(which ansifilter)" == "" ]; then
+    echo "Warning: defining vacuous ansifilter"  1>&2
+    # ansifilter: no-op filter for when ansifilter command not installed
+    ## TODO3: use different alias name for use in other aliases (e.g., cmd-output)
+    function ansifilter {
+        echo "FYI: vacuous ansifilter" 1>&2
+        cat "$@";
+    }
+fi
+#
 # cmd-output(cmd, ...): show output for cmd to _{cmd}-$(TODAY).log (with spaces
 # replaced by underscores)
 # note: subsequent files for the same date use ...-$(TODAY).N.log (for N=1, ...)
