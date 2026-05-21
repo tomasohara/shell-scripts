@@ -66,7 +66,16 @@ fi
 # Python stuff
 ## OLD: prepend-path "$HOME/python/Mezcla/mezcla"
 ## OLD: add-python-path "$HOME/python/Mezcla/mezcla"
-add-python-path "$HOME/Mezcla/mezcla"
+## OLD: add-python-path "$HOME/Mezcla/mezcla"
+# NOTE: Accounts for case-sensitivity differences in mezcla's repo and package dirs;
+# traditionally, ~/Mezcla was the repo; and, ~/mezcla was the package dir.
+if [ "$(under-cygwin)" = "1" ]; then
+    # Windows is case-insensitive by default so Mezcla-repo used for root dir.
+    add-python-path "$HOME/Mezcla-repo/mezcla"
+else
+    # Under case-sensitive Linux & MacOS, ~/Mezcla is the root, and ~/mezcla the package.
+    add-python-path "$HOME/Mezcla/mezcla"
+fi
 ## OLD: append-path "$HOME/mezcla-tom/examples:$HOME/python/examples:$TOM_BIN/bruno"
 append-path "$HOME/Mezcla/mezcla/examples"
 append-path "$HOME/Mezcla/tools"
