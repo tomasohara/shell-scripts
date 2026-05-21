@@ -1139,7 +1139,8 @@ simple-alias-fn test-audio 'start /usr/share/sounds/Yaru/stereo/complete.oga'
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
 #
 alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
-alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
+## OLD: alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
+alias all-tomohara-aliases='ALIASES_PROCESSED=0 source $TOM_BIN/all-tomohara-aliases-etc.bash'
 alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
 #
 # note: kill-em targets process name, and kill-it uses pattern (hence riskier)
