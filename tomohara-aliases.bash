@@ -3174,7 +3174,8 @@ function script {
 function script-update {
     local command_indicator=""
     ## TODO: under-linux 1 && command_indicator="-c"
-    if [ "$(under-linux)" = "1" ]; then
+    ## OLD: if [ "$(under-linux)" = "1" ]; then
+    if [[ ("$(under-linux)" = "1") || ("$(under-cygwin)" = "1")]]; then
         command_indicator="-c"
     fi
     # shellcheck disable=SC2046,SC2086
