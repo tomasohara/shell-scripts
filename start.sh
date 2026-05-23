@@ -37,6 +37,11 @@ BROWSER=${BROWSER:-firefox}
 # Support for MacOS-special casing
 under_mac=0
 if [ "$(uname)" = "Darwin" ]; then under_mac=1; fi
+# Likewise for Cygwin
+under_cygwin=0
+if [ "$OSTYPE" == "cygwin" ]; then
+    under_cygwin=1
+fi
 
 # Parse command-line options
 # TODO: #
@@ -44,6 +49,7 @@ more_options=0; case "$1" in -*) more_options=1 ;; esac
 show_usage=0;
 for_editting=0
 verbose=0
+use_cmd=0
 while [ "$more_options" = "1" ]; do
     if [ "$1" = "--trace" ]; then
 	set -o xtrace;
@@ -61,6 +67,8 @@ while [ "$more_options" = "1" ]; do
 	under_mac=0;
     elif [ "$1" = "--verbose" ]; then
 	verbose=1;
+    elif [ "$1" = "--use-cmd" ]; then
+	use_cmd=1;
     elif [ "$1" = "--" ]; then
 	break;
     else
@@ -82,7 +90,7 @@ if [[ ($show_usage = 1) || ("$file" = "") || ("$arg2" != "") ]]; then
     script=$(basename "$0")
     echo ""
     echo "Usage: $script [--view|[--edit|--open]] [--verbose] [--trace] [misc-options] file"
-    echo "    misc-options: [--help] [--not-mac]"
+    echo "    misc-options: [--help] [--not-mac] [--use-cmd]"
     echo ""
     echo "Examples:"
     echo ""
@@ -128,6 +136,10 @@ function invoke () {
 	    program_arg="-a $program"
 	    program="open"
 	fi
+    fi
+    if [[ ("$under_cygwin" == "1") && ("$use_cmd" == "1") ]]; then
+        ## TODO2: add program_arg support to invoke function
+        program_arg="/c"
     fi
     ## OLD: "$program" "$file" >> "$log_file" 2>&1
     # disable shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
@@ -187,6 +199,20 @@ if [ "$under_mac" = "1" ]; then
     office_program="open"
     default_program="open"
 fi
+# 
+if [ "$under_cygwin" == "1" ]; then
+    ## TODO3: add env. options to override defaults
+    # NOTE: evince doesn't work without active x server (n.b., awkward to use under Windows)
+    pdf_program="acrobat"
+    if [ "$use_cmd" == "1" ]; then
+        cmd="cmd"
+        pdf_program="$cmd"
+        image_program="$cmd"
+        office_program="$cmd"
+        default_program="$cmd"
+    fi
+fi
+#
 if [[ $lower_file =~ ^.*\.xcf$ ]]; then
     image_program="gimp"
 fi
