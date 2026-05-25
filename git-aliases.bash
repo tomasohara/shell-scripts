@@ -168,8 +168,10 @@ PERL="perl -Ssw"     # S: find in path; s: enable switches; w: show warnings
 function echo-plus {
     local now_ns diff_ns sec nsec diff
     declare -f last_time_ns
+    local use_git_time_diff="${GIT_TIME_DIFF:-0}"
+    ## DEBUG: trace-vars use_git_time_diff
 
-    if (( ${GIT_TIME_DIFF:-0} > 0 )); then
+    if [ "$use_git_time_diff" != "0" ]; then
         now_ns=$(date +%s%N)
 
         if [[ -n "${last_time_ns:-0}" ]]; then
@@ -183,8 +185,8 @@ function echo-plus {
 
         # Note: Uses stderr for diagnostics to avoid incorporation into templates
         ## BAD: command echo "$@" "[diff=${diff}s]"
-        command echo -n "$@"
-        command echo "[diff=${diff}s]" 1>&2
+        command echo "$@"
+        command echo -e "\t[diff=${diff}s]" 1>&2
         # optional extra diagnostics:
         # command echo -e "time_ns=$now_ns\nlast_ns=${last_time_ns:-<unset>}\ndiff=$diff" >&2
 
@@ -931,9 +933,13 @@ function git-root-alias {
 }
 alias git-cd-root-alias='cd $(git-root-alias)'
 alias git-invoke-next-single-checkin=invoke-next-single-checkin
-# NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
-# shellcheck disable=SC2139
-alias-function git-alias-refresh "source '${BASH_SOURCE[0]}'"    # bash idiom for current script filename
+## BAD:
+## # NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
+## # shellcheck disable=SC2139
+## alias-function git-alias-refresh "source '${BASH_SOURCE[0]}'"    # bash idiom for current script filename
+function git-alias-refresh {
+    source "${BASH_SOURCE[0]}"    # bash idiom for current script filename
+}
 alias-function git-refresh-aliases 'git-alias-refresh'
 alias-function git-next-checkin 'invoke-alt-checkin'      # uses alt-invoke-next-single-checkin
 alias-function git-extract-all-versions 'extract-all-git-versions.bash'
