@@ -219,6 +219,13 @@ PATH="$PATH:/new/bin"           # append to PATH
 PATH="/new/bin:$PATH"           # prepend to PATH
 ```
 
+## SPECIAL COMMANDS
+```
+: [argument]                    # null command (for side effect)
+! [argument]                    # negative null command
+![non-space]...                 # history subsitution
+```
+
 ## DEBUGGING
 
 ```bash
