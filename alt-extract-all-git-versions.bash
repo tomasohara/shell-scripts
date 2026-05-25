@@ -217,7 +217,9 @@ while read -r LINE; do
         output_file="${output_file}_${hour_spec}";
     fi
     $debug && echo "Trying path $COMMIT_FILE_PATH for version $version_spec"
-    git cat-file -p "$COMMIT_SHA:$COMMIT_FILE_PATH" > "$output_file" 2> "$info.err"
+    ## OLD: git cat-file -p "$COMMIT_SHA:$COMMIT_FILE_PATH" > "$output_file" 2> "$info.err"
+    ## NOTE: >| used since $info.err reused
+    git cat-file -p "$COMMIT_SHA:$COMMIT_FILE_PATH" > "$output_file" 2>| "$info.err"
     commit_resolved=false
     ## OLD: if [ $? -eq 0 ]; then
     status="$?"
