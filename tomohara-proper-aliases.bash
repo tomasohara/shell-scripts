@@ -708,11 +708,11 @@ function trace-vars {
         ## echo -n "$var="$(eval echo "\$$var")"; "
         ## TODO: value="$(eval "echo \$$var")"
         ## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
-        echo -n "$var=$(eval echo "\${$var}"); "
-        ## TODO: echo -n "$value; " 1>&2
+        ## OLD: echo -n "$var=$(eval echo "\${$var}"); "
+        echo -n "$var=$(eval echo "\${$var}"); " 1>&2
     done
-    echo
-    ## TODO: echo 1>&2
+    ## OLD: echo
+    echo 1>&2
 }
 # trace-array-vars(var, ...): trace each ARRAY in command line
 # note: output format: ARR1=(VAL11 ... VAL1n); ARR2=(VAL21 ... VAL2n);
@@ -821,9 +821,15 @@ function rename-last-snapshot {
         new_name="$new_name-$(T).png"
     fi
     local last_file
+    local pictures_dir="$HOME/Pictures"
+    if [ "$(under-cygwin)" == "1" ]; then
+        # note: there might be several Screenshots subdirs so use last (n.b., OneDrive quirk)
+        pictures_dir="$(ls -td "$HOME/Pictures/Screenshots"* | head -1)"
+    fi
     # TODO: have options to use latest file (regardless of name) 
     # shellcheck disable=SC2010
-    last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
+    ## OLD: last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
+    last_file="$(ls -t "$pictures_dir/"*.png | grep -i '/screen.*shot' | head -1)"
     move "$last_file" "$new_name"
 
     # Optionally preview result
