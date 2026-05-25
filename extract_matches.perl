@@ -85,6 +85,7 @@ my($ignore_case) = $i;
 my($auto_pattern) = &FALSE;		# automatically derive pattern (for tab-delimited fields)
 
 # Initialization locale information
+## TODO3: fix up for the hasty uncomment
 # if ($locale) {
     use locale;
 # }
