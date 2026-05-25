@@ -161,9 +161,9 @@ PERL="perl -Ssw"     # S: find in path; s: enable switches; w: show warnings
 
 # echo-plus(arg, ...): wrapper around echo command with ARG, used for optional diagnostics.
 # For example, when GIT_TIME_DIFF set, this shows time since last command.
-# Warning: This is intended for output at various milestones so that time diff meaningful;
-# in addition, it might lead to evaluation issues due to interpolation or eval, so
-# plain echo should be used instead (e.g., see git-next-checkin and supporting macros).
+# Warning: *** Intended for output at various milestones so that time diff meaningful;
+# however, as it might lead to evaluation issues due to interpolation or eval,
+# plain echo should be used instead (e.g., git-checkin-single-template and supporting macros).
 # note: via Codex 5.3
 function echo-plus {
     local now_ns diff_ns sec nsec diff
@@ -181,7 +181,10 @@ function echo-plus {
             diff="0.000000000"
         fi
 
-        command echo "$@" "[diff=${diff}s]"
+        # Note: Uses stderr for diagnostics to avoid incorporation into templates
+        ## BAD: command echo "$@" "[diff=${diff}s]"
+        command echo -n "$@"
+        command echo "[diff=${diff}s]" 1>&2
         # optional extra diagnostics:
         # command echo -e "time_ns=$now_ns\nlast_ns=${last_time_ns:-<unset>}\ndiff=$diff" >&2
 
@@ -755,6 +758,7 @@ function git-vdiff-alias {
 #   where -F'/' sets the field separator to /; awk splits line and prints the depth (i.e., #/'s - 1) plus line;
 #   it then sorts the output and removes the depth count.
 # - Additional arguments passed along to git-diff (e.g., specific filenames or commits)
+# - Warning: *** Templates should not use echo-plus to avoid having diagnostics in template output.
 #
 function git-diff-list-template {
     declare -g diff_list_file
@@ -806,22 +810,22 @@ function git-checkin-template-aux {
 #
 function git-checkin-single-template {
     git-checkin-template-aux
-    echo-plus "# To check in one file (ideally with main differences noted):"
-    echo-plus "mod_file=\$(head -1 < \"\$diff_list_file\"); git-difftool-plus \"\$mod_file\""
-    echo-plus "echo-plus GIT_MESSAGE=\\\"...\\\" git-update-commit-push \"\$mod_file\""
+    echo "# To check in one file (ideally with main differences noted):"
+    echo "mod_file=\$(head -1 < \"\$diff_list_file\"); git-difftool-plus \"\$mod_file\""
+    echo "echo GIT_MESSAGE=\\\"...\\\" git-update-commit-push \"\$mod_file\""
 }
 #    
 function git-checkin-multiple-template {
     git-checkin-template-aux
-    echo-plus "# To generate template from above diff for individual check-in's:"
-    echo-plus "cat \$diff_list_file | xargs -I \"{}\" echo-plus GIT_MESSAGE=\\\"...\\\" git-update-commit-push \"{}\""
+    echo "# To generate template from above diff for individual check-in's:"
+    echo "cat \$diff_list_file | xargs -I \"{}\" echo-plus GIT_MESSAGE=\\\"...\\\" git-update-commit-push \"{}\""
 }
 #
 function git-checkin-all-template {
     git-checkin-template-aux
-    echo-plus "# To do shamelessly lazy check-in of all modified files:"
+    echo "# To do shamelessly lazy check-in of all modified files:"
     # shellcheck disable=SC2028
-    echo-plus "echo-plus GIT_MESSAGE=\'misc. update\' git-update-commit-push \$(cat \$diff_list_file)"
+    echo "echo-plus GIT_MESSAGE=\'misc. update\' git-update-commit-push \$(cat \$diff_list_file)"
 }
 
 # invoke-next-single-checkin: outputs and runs the next single-checking template
@@ -842,14 +846,14 @@ function alt-invoke-next-single-checkin {
     if [ "$mod_file" = "" ]; then
         mod_file="$(git-diff-list | head -1)";
         if [ "$mod_file" = "" ]; then
-            echo-plus "Warning: unable to infer modified file. Perhaps,"
-            echo-plus "    Tha-tha-that's all folks"'!'
-            echo-plus ""
+            echo "Warning: unable to infer modified file. Perhaps,"
+            echo "    Tha-tha-that's all folks"'!'
+            echo ""
             local divider
             divider=$(perl -e 'print("." x 80);')
-            echo-plus "$divider"
+            echo "$divider"
             git-status
-            echo-plus "..."
+            echo "..."
             return;
         fi
     fi
