@@ -204,6 +204,7 @@ if [ "$under_cygwin" == "1" ]; then
     ## TODO3: add env. options to override defaults
     # NOTE: evince doesn't work without active x server (n.b., awkward to use under Windows)
     pdf_program="acrobat"
+    image_program="mspaint"
     if [ "$use_cmd" == "1" ]; then
         cmd="cmd"
         pdf_program="$cmd"
