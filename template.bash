@@ -3,7 +3,7 @@
 # TODO: name.sh: explanation
 #
 # NOTES:
-# - cheatsheet with templates for common bash expressions:
+# - cheatsheet with templates for common bash expressions (and a few esoteric):
 #     template                     comment
 #     
 #     if [ $x == value ]; then STMT; fi    old-style is [ $x = value ] ...
@@ -21,9 +21,13 @@
 #     $((arithmetic))              evaluate arithmetic expression
 #     $(command ...)               same as `command ...`
 #     ${var:-default}              use $var or "default"
+#     ${var:=default}              likewise and also assigns default if unset
 #     ${var/from/to}               var with FROM pattern changed to TO (once)
 #     ${var//from/to}              likewise for all occurrences
-#     true                         no-op
+#     true                         no-op (similar to :)
+#     false                        negative no-op (similar to !)
+#     :                            null command (special builtin)
+#     !                            negative null command (special builtin)
 #     $#                           number of positional arguments
 #     $*                           all positional arguments
 #     "$@"                         likewise all args but with individually quoting
@@ -91,6 +95,9 @@
 #     [ "${ENV_VAR:-0}" == "1" ]    [ "${VERBOSE:-0}" == "1" ]
 #  - general boolean env. testing   uses new function in tomohara-aliases.bash
 #     local var=$(is-true "VAR");   local verbose=$(is-true "VERBOSE");
+#  - deleting aliases and functions
+#     unalias my-alias
+#     unset -f my-function
 # Examples:
 # - for (( i=0; i<10; i++ )); do  echo $i; done
 # - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
@@ -170,7 +177,7 @@ fi
 #
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 while [[ "$moreoptions" == "1" ]]; do
-    # TODO : add real options
+    # TODO: add real options
     if [[ "$1" == "--trace" ]]; then
         set -o xtrace
     elif [[ "$1" == "--TODO-fubar" ]]; then
