@@ -117,8 +117,10 @@ echo "$anaconda2_dir" > /dev/null
 function trace-python-path {
     local python_path=""
     python_path=$(command which $python 2> /dev/null)
-    trace-vars python_path
-    reference-variable "$python_path"
+    ## OLD:
+    ## trace-vars python_path
+    ## reference-variable "$python_path"
+    echo "python_path: $python_path" 1>&2
 }
 
 # Work around for intermittent problems w/ 'conda activate' requiring 'source activate' instead.
@@ -152,8 +154,7 @@ function activation-helper {
     if [ $status -ne 0 ]; then
         echo "Warning: status $status from invocation"
     fi
-    ## DEBUG:
-    trace-python-path
+    ## DEBUG: trace-python-path
     ## DEBUG: echo "out activation-helper($@)"
 }
 alias conda-activate='activation-helper activate'
@@ -216,8 +217,7 @@ function conda-activate-env-like {
         export PATH="$bin_dir:$PATH";
     fi
     add-conda-env-to-xterm-title
-    ## DEBUG:
-    trace-python-path
+    ## DEBUG: trace-python-path
 }
 #
 function conda-deactivate-env {
