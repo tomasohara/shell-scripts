@@ -867,7 +867,9 @@ function youtube-transcript {
         echo "- More details follow (n.b., python script interface):" 
         echo ""
         ## TODO3: add alias for showing condensed mezcla script usage notes
-        (alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;') | indent-text
+        ## OLD: (alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;') | indent-text
+        ## TODO2: alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -pe 's/^/  /g; s/    /   /g;'
+        alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -pe 's/    /  /; s/^/  /;'
         return
     fi
     local url="$1"
