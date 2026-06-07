@@ -15,6 +15,7 @@
 # - By default, this aborts if run under an admin-like account (e.g., root or power user), because the tests might inadvertantly delete files.
 # - It is best to used full paths in traces to facilitate cut-n-paste, such
 #   as if the current directory changes (e.g., in summary_stats.bash).
+# - Use `jupyter console` to invoke a CLI verson of Jupyter (i.e., not ipython).
 #
 
 """
