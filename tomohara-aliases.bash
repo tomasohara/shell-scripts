@@ -1128,7 +1128,9 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
       if [[ ($1 =~ ^[^]) && ($# -gt 2) ]]; then
           echo "Error: ^ will be intrepretted differently by less (e.g., due to multiple files)" 1>&2
       else
-          $EGREP $MY_GREP_OPTIONS "$@" | $PAGER_NOEXIT -p"$1";
+          ## OLD: $EGREP $MY_GREP_OPTIONS "$@" | $PAGER_NOEXIT -p"$1";
+          # NOTE: Only uses pager if more than one screen
+          $EGREP $MY_GREP_OPTIONS "$@" | $PAGER -p"$1";
       fi
   }
   alias grepl-='grep-to-less'
@@ -1141,12 +1143,16 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   # note: uses redundant grepl for highlighting (with potentially split args noted above for grep-to-less)
   # TODO3: remove redundant item number (due to history and grepl)
   #    7255: 7255  [2026-03-13 22:57:03] my-gnome-terminal --title "copilot: mezcla" --no-xterm-title
-  function grepl-hist-tail { history  | grepl "$@" | tail | grepl "$@"; }
+  ## OLD: function grepl-hist-tail { history  | grepl "$@" | tail | grepl "$@"; }
+  # NOTE: Uses tac (reverse) so that larger context available.
+  function grepl-hist-tail { history  | grepl "$@" | tac | grepl "$@"; }
   #
   # grepl-bashrc-etc(): grep through bash rc files excluding history
   # note: see grepl-hist-tail for rationale (e.g., double grepl and potentially split args)
   ## BAD: function grepl-bashrc-etc { grepl "$@" ~/.*bash* | grep -v '\.bash_history' | tail | grepl "$@"; }
-  function grepl-bashrc-etc { grepl "$@" ~/.*bash* | grep -v '\.bash_history' | grepl "$@"; }
+  ## OLD: function grepl-bashrc-etc { grepl "$@" ~/.*bash* | grep -v '\.bash_history' | grepl "$@"; }
+  # note: includes related bash aliases under ~/bin (n.b., an outgrowth of .bashrc stuff)
+  function grepl-bashrc-etc { grepl "$@" ~/.*bash* "$TOM_BIN"/*tomohara*bash | grep -v '\.bash_history' | grepl "$@"; }
 }
 # gr-c: grep through c/c++ source and headers files
 # note: --no-messages suppresses warnings about missing files
