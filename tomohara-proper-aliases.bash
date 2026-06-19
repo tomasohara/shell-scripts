@@ -635,6 +635,7 @@ function libreoffice-text-from-html-clipboard() {
     libreoffice --headless --convert-to odt "$temp_html" --outdir "$(dirname "$base")"
     libreoffice "$doc_file" &
 }
+alias libreoffice-from-clipboard=libreoffice-text-from-html-clipboard
 
 #-------------------------------------------------------------------------------
 
