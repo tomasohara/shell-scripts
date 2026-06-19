@@ -1143,9 +1143,11 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   # note: uses redundant grepl for highlighting (with potentially split args noted above for grep-to-less)
   # TODO3: remove redundant item number (due to history and grepl)
   #    7255: 7255  [2026-03-13 22:57:03] my-gnome-terminal --title "copilot: mezcla" --no-xterm-title
-  ## OLD: function grepl-hist-tail { history  | grepl "$@" | tail | grepl "$@"; }
-  # NOTE: Uses tac (reverse) so that larger context available.
-  function grepl-hist-tail { history  | grepl "$@" | tac | grepl "$@"; }
+  ## OLD:
+  ## function grepl-hist-tail { history  | grepl "$@" | tail | grepl "$@"; }
+  ## # NOTE: Uses tac (reverse) so that larger context available.
+  ## OLD: function grepl-hist-tail { history  | grepl "$@" | tac | grepl "$@"; }
+  function grepl-hist-tail { history  | PAGER="$PAGER_NOEXIT +G" grepl "$@"; }
   #
   # grepl-bashrc-etc(): grep through bash rc files excluding history
   # note: see grepl-hist-tail for rationale (e.g., double grepl and potentially split args)
