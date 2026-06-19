@@ -158,8 +158,10 @@ check-errors-excerpt "$new_base.files.log"
 
 # Perform the note entry merging
 # TODO: check stdin support in main.py
+debug_level="${DEBUG_LEVEL:-4}"
 # shellcheck disable=SC2086
-DEBUG_LEVEL=4 xargs $PYTHON -m mezcla.merge_notes --ignore-dividers --output-dividers --show-file-info < "$new_base.files.list" > "$new_base.list" 2> "$new_base.list.log";
+DEBUG_LEVEL="$debug_level" xargs $PYTHON -m mezcla.merge_notes --ignore-dividers --output-dividers --show-file-info < "$new_base.files.list" > "$new_base.list" 2> "$new_base.list.log";
+## OLD: DEBUG_LEVEL=4 xargs $PYTHON -m mezcla.merge_notes --ignore-dividers --output-dividers --show-file-info < "$new_base.files.list" > "$new_base.list" 2> "$new_base.list.log";
 check-errors-excerpt "$new_base.list.log";
 
 # Set read-only
