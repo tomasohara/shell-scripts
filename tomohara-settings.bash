@@ -96,6 +96,8 @@ cond-export SKIP_EXPECTED_ERRORS 1      # skip pytests known to fail (e.g., to f
 
 # Enable timestamp preservation during git-update alias operations (n.b., stash pop quirk)
 cond-export PRESERVE_GIT_STASH 1
+# TODO4: get default via git-aliases.bash (e.g., via new git-log-dir-alias)
+cond-export GIT_LOG_DIR log-files
 
 # Misc bash options
 # make file globs cases insensitve
