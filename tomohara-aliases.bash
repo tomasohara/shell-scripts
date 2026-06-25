@@ -89,6 +89,12 @@
 #    -- SC1001: Can't follow non-constant source
 #    -- SC1091: Not following: ... was not specified as input (see shellcheck -x)
 #    shellcheck disable=SC1001,SC1091
+# - Directly-related scripts:
+#   all-tomohara-aliases-etc.bash do_setup.bash more-tomohara-aliases.bash tomohara-proper-aliases.bash tomohara-settings.bash
+# - Supporting scripts:
+#   set_xterm_title.bash startup-tracing.bash
+# - Supplemental scripts:
+#   anaconda-aliases.bash git-aliases.bash kill_em.bash ps_mine.bash
 #
 # TODO:
 # - ***** Move settings to tomohara-settings.bash (i.e., export's and the like).
@@ -935,6 +941,7 @@ alias remove-dir-force='$force_echo command rm -rfv'
 alias delete-dir-force='remove-dir-force'
 #
 alias copy-readonly='copy-readonly.sh'
+alias copy-readonly-force='copy-readonly.sh --force'
 function copy-readonly-spec () {
     local spec="$1"
     local dir="$2"
@@ -3187,7 +3194,8 @@ function script-update {
         command_indicator="-c"
     fi
     # shellcheck disable=SC2046,SC2086
-    script  "_update-$(T).log"  $command_indicator make-git-update.bash
+    ## OLD: script  "_update-$(T).log"  $command_indicator make-git-update.bash
+    script  "${GIT_LOG_DIR:-.}/_update-$(T).log"  $command_indicator make-git-update.bash
 }
 
 # ansi-filter(filename): wrapper around ansifilter with stdio and stdout instead of files
