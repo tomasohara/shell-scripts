@@ -94,6 +94,7 @@ my($default_pattern) = (($pattern_file ne "") ? &read_file($pattern_file) : "");
 &init_var(*chomp, &FALSE);		# strip newline at end (TODO make default unless \n in pattern)
 &init_var(*restore, "");		# portion of matching text to be restored
 &init_var(*unicode, $utf8);		# enable Unicode support (like Python's default): '.' matches Unicode chars
+&init_var(*as_is, &FALSE);              # don't fixup pattern (e.g., outer parens)
 
 # Get the pattern and options from the command line
 # Process the command-line options
@@ -168,9 +169,11 @@ if ($show_zeros) {
 # Put grouping parenthesis around pattern, if none present
 # NOTE: Escaped parentheses are ignored.
 # TODO: (" $pattern " !~ /[^\\]\(.*\)[^\\]/)
-if ((($pattern =~ /\\\(.*\\\)/) && ($pattern !~ /[^\\]\(.*\)[^\\]/))
-    || ($pattern !~ /\(.*\)/)) {
-    $pattern = "(" . $pattern . ")";
+if (! $as_is) {
+    if ((($pattern =~ /\\\(.*\\\)/) && ($pattern !~ /[^\\]\(.*\)[^\\]/))
+	|| ($pattern !~ /\(.*\)/)) {
+	$pattern = "(" . $pattern . ")";
+    }
 }
 
 # Process each line of the input stream
