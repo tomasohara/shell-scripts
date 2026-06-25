@@ -248,14 +248,17 @@ function get-temp-log-name {
     local label=${1:-temp}
     local now_mmddyyhhmm
     # note: done each time in case user cd's to a different directory
-    local LOG_DIR="${GIT_LOG_DIR:-./log-files}"
-    mkdir --parents "$LOG_DIR"
+    ## OLD: local LOG_DIR="${GIT_LOG_DIR:-./log-files}"
+    ## NOTE: global so that default stored in environment
+    declare -g GIT_LOG_DIR
+    GIT_LOG_DIR="${GIT_LOG_DIR:-./log-files}"
+    mkdir --parents "$GIT_LOG_DIR"
     now_mmddyyhhmm=$(date '+%d%b%y-%H%M' | downcase-stdin-alias);
     # TODO: use integral suffix (not hex)
     local log_file
-    log_file=$(mktemp "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log")
+    log_file=$(mktemp "$GIT_LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log")
     ## TEMP: rename existing temp file (MacOs quirk?)
-    if [ -s "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log" ]; then
+    if [ -s "$GIT_LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log" ]; then
         echo-plus "FYI: applying get-temp-log-name workaround"
         rename-with-file-date "$log_file"
         touch "$log_file"
