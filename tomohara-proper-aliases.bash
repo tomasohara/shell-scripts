@@ -103,19 +103,26 @@ function plint-tester-testee {
         echo "$script"
         echo "$test_script"
     fi
+    
+    # Show python lint result
     local pylint_result
     local pylint="${PYLINT:-python-lint}"
     pylint_result=$($pylint "$script" "$test_script")
     local pylint_status=$?
-    echo "$pylint_result"
+    ## OLD: echo "$pylint_result"
+    if [ "$pylint_result" != "" ]; then
+        echo "$pylint_result"
+    fi
     ## DEBUG: echo "pylint_status=$pylint_status"
+
+    # Test the script (n.b., verifies whether to proceed when pylint errors)
     if [ "${TEST:-0}" == "1" ]; then
         # check for specific error ignoring module line  (e.g., *...* Module mezcla.cut)
         # ex: "cut.py:10:0: C0301: Line too long (103/100) (line-too-long)"
         if [[ $pylint_result =~ [0-9]:[0-9] ]]; then
             local newline_tab=$'\n\t'
             ## TODO4: add support for reading response (e.g., N)
-            pause-for-enter "pylint issues;${newline_tab}proceed? (Enter for Y otherwise ^C)"
+            pause-for-enter "pylint issues:${newline_tab}proceed? (Enter for Y otherwise ^C)"
         fi
         test-python-script "$test_script"
     fi
@@ -187,7 +194,13 @@ function run-python-script {
     # note: "tests" might be specified for script (e.g., test-python-script tests)
     local script_path="$1"
     if [ ! -e "$script_path" ]; then
-        script_path="$(which "$script_path")"
+        ## BAD: script_path="$(which "$script_path")"
+        # Uses script path based on Bash path if exists
+        local temp_script_path
+        temp_script_path="$(which "$script_path")"
+        if [ -e "$temp_script_path" ]; then
+            script_path="$script_path"
+        fi
     fi
     shift
     local script_args=("$@")
@@ -309,7 +322,9 @@ function test-python-script {
     if [ -e "$test_script" ]; then
         true;
     else
-        echo "Warning: cannnot resolve test for _$test_script" 1>&2
+        ## OLD: echo "Warning: cannnot resolve test for _$test_script" 1>&2
+        ## NOTE: Pauses before executing all tests from running due to run-python-script/pytest quirk
+        sleep-for 3 "Warning: cannot resolve test for $test_script" 1>&2
     fi
 
     # Run the test
@@ -983,6 +998,7 @@ function create-zip-from-parent {
     popd
 }
 alias zip-from-parent=create-zip-from-parent
+alias zip-from-parent-encrypted='ENCRYPT=1 zip-from-parent'
 
 #...............................................................................
 # Unix stuff
