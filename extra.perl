@@ -964,8 +964,10 @@ sub derive_time_stamp {
 # note: format MM/DD/YYYY HH:MM:SS.mmmmmmZ; requires DataTime installation (e.g., `cpan cpan DateTime::Format::Strptime`)
 # via https://stackoverflow.com/questions/4127102/parse-timestamp-with-millisecond-in-perl:
 # EX: parse_iso_timestamp("[2026-06-25T03:52:31.9868345Z]") => "[2026-06-25T03:52:31.9868345Z 1782359551.986]"
+#
 our($init) = &FALSE;
 our($Strp) = undef;
+#
 # init_DateTime(): initialize the date parser
 sub init_DateTime {
     use DateTime::Format::Strptime;
@@ -984,6 +986,24 @@ sub parse_iso_timestamp {
     &debug_print(&TL_VERY_VERBOSE, "parse_iso_timestamp(@_) => $epoch\n");
     return $epoch;
 }
+## TODO3: rework to use pure Perl (via ChatGPT-5)
+## sub parse_iso_timestamp {
+##     my ($date) = @_;
+## 
+##     if ($date =~ /
+##         (\d{4})-(\d{2})-(\d{2})
+##         T
+##         (\d{2}):(\d{2}):(\d{2})
+##         \.(\d+)Z
+##     /x) {
+##         my ($Y,$M,$D,$h,$m,$s,$frac)=($1,$2,$3,$4,$5,$6,$7);
+##         my $epoch = timegm($s,$m,$h,$D,$M-1,$Y);
+##         $epoch += "0.$frac";
+##         return $epoch;
+##     }
+## 
+##     return undef;
+## }
 
 # stringify_value(value, [indent]): returns ascii representation of Perl value,
 # which could include embedded references
