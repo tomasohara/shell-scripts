@@ -292,6 +292,7 @@ function run-python-script-reset {
 # options: --vv: doubly verbose; --capture=no: don't capture stderr; -rA: report all
 ## OLD: default_pytest_opts=(-vv --capture=no -rA)
 # shellcheck disable=SC2206
+## TODO3: rework to just use PYTEST_OPTIONS
 default_pytest_opts=(${PYTEST_OPTIONS:-})
 #
 # test-python-script(test-script): run TEST-SCRIPT via pytest
