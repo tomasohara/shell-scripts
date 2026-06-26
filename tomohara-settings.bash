@@ -93,6 +93,10 @@ cond-export BRIEF_USAGE 1               # running w/o args shows usage line
 cond-export TRACE_INVOCATION 1          # trace script invocation argv
 cond-export DISABLE_RECURSIVE_DELETE 1  # don't allow rm -r during cleanup
 cond-export SKIP_EXPECTED_ERRORS 1      # skip pytests known to fail (e.g., to filter error messages from check-errors)
+#
+# Testing stuff:
+# pytest options: --vv: doubly verbose; --capture=no: don't capture stderr; -rA: report all
+cond-export PYTEST_OPTIONS="-vv --capture=no -rA"
 
 # Enable timestamp preservation during git-update alias operations (n.b., stash pop quirk)
 cond-export PRESERVE_GIT_STASH 1
