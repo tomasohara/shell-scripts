@@ -32,8 +32,9 @@ eval 'exec perl -Ssw $0 "$@"'
 BEGIN { 
     ## OLD: my $dir = `dirname '$0'`; chomp $dir; unshift(@INC, $dir);
     ## TODO: my $dir = `dirname '$0' 2> /dev/null`; chomp $dir; unshift(@INC, $dir);
-    use File::Basename;
-    my $dir = dirname($0);
+    # note: doesn't import from File::Basename to avoid conflicts with common.perl for dirname and basename.
+    use File::Basename();
+    my $dir = File::Basename::dirname($0);
     unshift @INC, $dir if defined $dir && -d $dir;
     
     require 'common.perl';
