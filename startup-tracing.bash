@@ -26,7 +26,8 @@ DEBUG_LEVEL=${DEBUG_LEVEL:-0}
 if [ "$TEMP" = "" ]; then TEMP="$TMP"; fi
 if [ "$TEMP" = "" ]; then TEMP=/tmp; fi
 
-function startup-trace () { 
+function startup-trace () {
+    # Set tracing (TODO3: put in separate function like startup-trace-init)
     if [ "$VERBOSE_TRACING" = "1" ]; then 
 	set -o xtrace;
 	echo TEMP=$TEMP;
@@ -35,10 +36,12 @@ function startup-trace () {
 	    set -o verbose
 	fi
     fi;
+
+    # File logging and/or console
     if [ "$STARTUP_TRACING" = "1" ]; then
 	echo "$* [$HOSTNAME $(date)]" >> "$TEMP/_startup-$USER-$HOST-$$.log";
     fi; 
-    if [ "$CONSOLE_TRACING" = "1" ]; then
+    if [ "$CONSOLE_TRACING" = "1" ] || [ "$DEBUG_LEVEL" -ge 6 ]; then
 	echo "$* [$HOSTNAME $(date)]";
     fi;
 }
