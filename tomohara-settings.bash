@@ -96,7 +96,7 @@ cond-export SKIP_EXPECTED_ERRORS 1      # skip pytests known to fail (e.g., to f
 #
 # Testing stuff:
 # pytest options: --vv: doubly verbose; --capture=no: don't capture stderr; -rA: report all
-cond-export PYTEST_OPTIONS="-vv --capture=no -rA"
+cond-export PYTEST_OPTIONS "-vv --capture=no -rA"
 
 # Enable timestamp preservation during git-update alias operations (n.b., stash pop quirk)
 cond-export PRESERVE_GIT_STASH 1
