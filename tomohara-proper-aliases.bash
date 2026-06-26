@@ -13,6 +13,7 @@
 #   SC2068: Double quote array expansions to avoid re-splitting elements
 #   SC2086: Double quote to prevent globbing
 #   SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?.
+#   SC2206: Quote to prevent word splitting/globbing.
 #
 
 # Change git-xyz-plus to git-xyz- for sake of tab completion
@@ -199,7 +200,7 @@ function run-python-script {
         local temp_script_path
         temp_script_path="$(which "$script_path")"
         if [ -e "$temp_script_path" ]; then
-            script_path="$script_path"
+            script_path="$temp_script_path"
         fi
     fi
     shift
@@ -289,7 +290,9 @@ function run-python-script-reset {
 # pytest stuff
 ## UPDATE: 05/09/2006: adds summary for all at end
 # options: --vv: doubly verbose; --capture=no: don't capture stderr; -rA: report all
-default_pytest_opts=(-vv --capture=no -rA)
+## OLD: default_pytest_opts=(-vv --capture=no -rA)
+# shellcheck disable=SC2206
+default_pytest_opts=(${PYTEST_OPTIONS:-})
 #
 # test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
@@ -591,6 +594,20 @@ alias extract-text-html='html_utils.py --regular'
 # shellcheck disable=SC2016
 simple-alias-fn extract-text-html 'alias-python -m mezcla.html_utils --regular'
 alias extract-html-text='extract-text-html'
+
+# expand-timestamp(text): convert timestamps in TEXT to floating point
+# EX: expand-timestamp("in: 2026-06-25T03:52:31.9868345Z") => "in: 2026-06-25T03:52:31.9868345Z 1782373951.986834"
+#
+## TODO3
+## function convert-timestamp {
+##     alias-python -c "from mezcla.misc_utils import parse_timestamp as pts; print(pts('$*').timestamp())"
+## }
+function expand-timestamp {
+    # note: time require that cpan DateTime be installed.
+    perl -pe 'BEGIN { require "./extra.perl"; }
+              s/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)/
+                $1 . " " . parse_iso_timestamp($1)/ex;'
+}
 
 #-------------------------------------------------------------------------------
 # MS Office like stuff
