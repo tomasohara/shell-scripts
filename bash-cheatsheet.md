@@ -2,6 +2,7 @@
 
 Notes:
 - Intended as a compact, high-signal reminder of common idioms.
+- Unfortunately, it became a little monster: see \*'s for important stuff.
 - Favors modern Bash (3.2+; associative arrays and case modification require 4+).
 - Run Bash in a pristine environment via:
     `env --ignore-environment bash --noprofile --norc`
@@ -14,7 +15,7 @@ Notes:
 var="value"                     # assignment (no spaces around =)
 readonly CONST="fixed"          # read-only variable
 export VAR="value"              # export to child processes
-declare -g GLOBAL="x"           # global declaration from within a function
+declare -g GLOBAL="x"           # * global declaration from within a function
 
 # Defaulting / guarding
 echo "${var:-default}"          # use default if var unset or empty
@@ -41,16 +42,16 @@ echo "${var%%pattern}"          # longest suffix removal
 
 # Substitution
 echo "${var/from/to}"           # replace first match
-echo "${var//from/to}"          # replace all matches
+echo "${var//from/to}"          # ** replace all matches
 echo "${var/#from/to}"          # replace at start only
 echo "${var/%from/to}"          # replace at end only
 
 # Substring
-echo "${var:2}"                 # from offset 2
-echo "${var:2:5}"               # offset 2, length 5
+echo "${var:2}"                 # substring from offset 2
+echo "${var:2:5}"               # * "" at offset 2, length 5
 
 # Case modification (Bash 4+)
-echo "${var^}"                  # capitalize first
+echo "${var^}"                  # uppercase first (i.e., capitalize)
 echo "${var^^}"                 # uppercase all
 echo "${var,}"                  # lowercase first
 echo "${var,,}"                 # lowercase all
@@ -128,14 +129,14 @@ echo {a..z}
 ```bash
 arr=(one two three)
 echo "${arr[0]}"                # first element
-echo "${arr[@]}"                # all elements (individually quoted)
+echo "${arr[@]}"                # ** all elements (individually quoted)
 echo "${arr[*]}"                # all elements (single word)
-echo "${#arr[@]}"               # number of elements
+echo "${#arr[@]}"               # * number of elements
 arr+=(four)                     # append
 
 local dirs=("${@:-.}")          # default to current dir if no args
 
-declare -A map                  # associative array (Bash 4+)
+declare -A map                  # * associative array (Bash 4+)
 map[key]="value"
 echo "${map[key]}"
 ```
@@ -154,15 +155,15 @@ let delay+=5
 ## Functions
 
 ```bash
-myfunc() {
+function myfunc {                # -or- myfunc () { ... }
     local arg1="$1"
     local var1 var2="init"
     echo "$arg1"
     return 0
 }
 
-echo "${FUNCNAME[0]}"           # current function name
-echo "${FUNCNAME[@]}"           # call stack
+echo "${FUNCNAME[0]}"           # * current function name
+echo "${FUNCNAME[@]}"           # * call stack
 
 src_dir=$(dirname "${BASH_SOURCE[0]}")
 ```
@@ -191,7 +192,7 @@ result=`command args`           # legacy form
 ```bash
 cmd > file                      # stdout to file
 cmd 2> file                     # stderr to file
-cmd &> file                     # stdout + stderr to file
+cmd &> file                     # * stdout + stderr to file
 cmd >> file                     # append stdout
 cmd 2>&1                        # redirect stderr to stdout
 ```
@@ -199,19 +200,19 @@ cmd 2>&1                        # redirect stderr to stdout
 ## Here Documents / Here Strings
 
 ```bash
-cat <<EOF
+cat <<EOF                       # here doc
 line1
 line2
 EOF
 
-grep foo <<<"some text string"
-
-cat <<-EOF
+cat <<-EOF                      # indented here doc (n.b., requires tab)
 	indented line
 EOF
+
+grep foo <<<"some text"        # ** here string
 ```
 
-## PATH MANIPULATION
+## Path Manipulation
 
 ```bash
 PATH="${PATH#/some/bin:}"       # remove prefix from PATH
@@ -219,9 +220,9 @@ PATH="$PATH:/new/bin"           # append to PATH
 PATH="/new/bin:$PATH"           # prepend to PATH
 ```
 
-## SPECIAL COMMANDS
+## Special Commands
 ```
-: [argument]                    # null command (for side effect)
+: [argument]                    # * null command (for side effect)
 ! [argument]                    # negative null command
 ![non-space]...                 # history subsitution
 ```
@@ -244,7 +245,26 @@ shopt -s expand_aliases
 env --ignore-environment bash --noprofile --norc
 ```
 
-## Commonly used commands, etc.
+## \* Pro Tips
+
+note: via Claude Opus 4.8
+
+```
+# Pro Tips (optional patterns to consider adding):
+# - Cleanup on exit via trap:
+#     tmp=$(mktemp); trap 'rm -f "$tmp"' EXIT
+# - Guard required external commands:
+#     command -v curl >/dev/null || { echo "Error: curl not found" >&2; exit 1; }
+# - Use ${BASH_SOURCE[0]} instead of $0 when the script might be sourced:
+#     script_dir=$(dirname "${BASH_SOURCE[0]}")
+# - Use readonly for constants:
+#     readonly MAX_RETRIES=3
+# - Use printf for portable formatted output (echo -e is not portable):
+#     printf "%-20s %s\n" "$key" "$value"
+
+```
+
+## \*\* Commonly Used Commands, etc.
 
 note: Stuff from old template.bash
 	
@@ -279,7 +299,7 @@ note: Stuff from old template.bash
 #     $?                           status of last command: 0 for success
 ```
 
-## 
+## \* Useful Bash snippets
 
 ```
 #  - variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
@@ -343,7 +363,7 @@ note: Stuff from old template.bash
 #     unset -f my-function
 ```
 
-## Miscellaneous examples
+## Miscellaneous Examples
 
 ```
 # - for (( i=0; i<10; i++ )); do  echo $i; done
