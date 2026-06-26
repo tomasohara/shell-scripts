@@ -605,7 +605,7 @@ alias extract-html-text='extract-text-html'
 ## }
 function expand-timestamp {
     # note: time require that cpan DateTime be installed.
-    perl -pe 'BEGIN { require "./extra.perl"; }
+    perl -pe 'BEGIN { require "extra.perl"; }
               s/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)/
                 $1 . " " . parse_iso_timestamp($1)/ex;'
 }
