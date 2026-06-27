@@ -18,8 +18,11 @@ Misc. Notes:
 - Update 26 Jun 2026: Incorporated tips from old template.bash.
 - Update 27 Jun 2026: Starred constructs used by template.bash; added option
   parsing (getopt) and script-checking sections.
-- References below to 'template' are for template.bash
+- References below to 'template' are for template.bash.
 
+TODO:
+- Rework the prioritization to distinguish (a) use in highlighting important constructs
+  with respect to the repo usage versus (b) pointing out some of the subtleties of Bash.
 
 ## Variables
 
@@ -36,11 +39,11 @@ echo "${var:+alt}"              # use alt if var is set (and non-empty)
 echo "${var:?error message}"    # error (and exit) if var unset or empty
 
 # Indirect expansion
-name="PATH"
+name="PATH"                     # name of variable to dereference
 echo "${!name}"                 # value of variable named PATH
 
 # Length
-echo "${#var}"
+echo "${#var}"                  # number of characters in value
 ```
 
 ## Parameter Expansion (String Operations)
@@ -432,12 +435,12 @@ note: Stuff from old template.bash
 # - if [[ $JAVA_HOME =~ x64 ]]; then echo "64-bit Java"; fi
 #   note: need to use .* not * for filename patterns (e.g., $fname =~ ^.*xcf$)
 # - case "$HOST_NICKNAME" in ec2*) echo "AWS";; hostw*) echo "HW";; *) echo "non-server"; esac
-#   NOTE: each case must end in ';;' (or ';&' or ';;&').
+#   note: each case must end in ';;' (or ';&' or ';;&').
 # - if [[ $1 =~ .*/ ]]; then echo "$1" ends in slash; fi
 # - if [[ ! $file =~ http ]]; then echo hey; fi
 ```
 
-## TODO
+## TODO (e.g., Additions and Loose Ends)
 
 ```
 # - *** Update me (e.g., from recent scripts)! ***
