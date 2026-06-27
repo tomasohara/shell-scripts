@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#! /usr/bin/env bash
 #
 # ps_mine.sh: show processes belonging to a particular user
 # note: the processes are shown sorted by CPU and then by memory
@@ -30,7 +30,6 @@
 # TODO:
 # - Have option to duplicate headers at end.
 # - *** Optionally make the filters case insensitive.
-# - ** Cleanup source (remove comments flagged with OLD).
 #
 
 # Uncomment (or comment) the following for enabling (or disabling) tracing
