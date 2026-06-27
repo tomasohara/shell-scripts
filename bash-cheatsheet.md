@@ -2,12 +2,24 @@
 
 Notes:
 - Intended as a compact, high-signal reminder of common idioms.
-- Unfortunately, it became a little monster: see \*'s for important stuff.
+- Update 27 Jun 2026: simplified the descriptions (e.g., clarify template references).
+- The \*'d constructs flag important common constructs used in this repo and
+  assumed by the prototypical script in template.bash (e.g., defaulting, env-flag tests, 
+  functions, case-based option parsing, etc.). 
+- Review these \*'d cases when creating new script or porting an existing script to the repo.
+
+Misc. Notes:
 - Favors modern Bash (3.2+; associative arrays and case modification require 4+).
 - Run Bash in a pristine environment via:
     `env --ignore-environment bash --noprofile --norc`
+- Sanity-check scripts with `bash -n` (syntax) and `shellcheck` (lint); see the
+  "Checking / Validating Scripts" section below.
 - via POE Assistant and then Claude
 - Update 26 Jun 2026: Incorporated tips from old template.bash.
+- Update 27 Jun 2026: Starred constructs used by template.bash; added option
+  parsing (getopt) and script-checking sections.
+- References below to 'template' are for template.bash
+
 
 ## Variables
 
@@ -18,7 +30,7 @@ export VAR="value"              # export to child processes
 declare -g GLOBAL="x"           # * global declaration from within a function
 
 # Defaulting / guarding
-echo "${var:-default}"          # use default if var unset or empty
+echo "${var:-default}"          # ** use default if var unset or empty (template: ${DEBUG_LEVEL:-0})
 echo "${var:=default}"          # assign default if var unset or empty
 echo "${var:+alt}"              # use alt if var is set (and non-empty)
 echo "${var:?error message}"    # error (and exit) if var unset or empty
@@ -76,7 +88,7 @@ fi
 
 if [[ (EXPR1) && (EXPR2) ]]; then STMT; fi
 if (( n > 10 )); then echo big; fi
-if [ "$n" -eq 3 ]; then echo tres; fi   # -eq -ne -lt -le -gt -ge
+if [ "$n" -eq 3 ]; then echo tres; fi   # * -eq -ne -lt -le -gt -ge
 
 # File tests
 [ -e file ]                     # exists
@@ -89,19 +101,20 @@ if [ "$n" -eq 3 ]; then echo tres; fi   # -eq -ne -lt -le -gt -ge
 [ -n "$str" ]                   # non-empty string
 [ -z "$str" ]                   # empty string
 
-result=$([ "$test" ] && echo "true-val" || echo "false-val")
+result=$([ "$test" ] && echo "true-val" || echo "false-val")   # * ternary idiom (template: DEBUG_SCRIPT=...)
 
-[ "${VERBOSE:-0}" == "1" ]
+[ "${VERBOSE:-0}" == "1" ]      # ** boolean env-flag test (used throughout repo & template)
 ```
 
-## Case
+## \* Case Statement (Pattern-matching Multi-way Branch)
 
 ```bash
+# * Core of the template's option-parsing loop (see getopt section below).
 case "$var" in
     pattern1)  echo one ;;
     ec2*)      echo AWS ;;
     hostw*)    echo HW ;;
-    *)         echo default ;;
+    *)         echo default ;;        # default/catch-all clause
 esac
 ```
 
@@ -152,11 +165,12 @@ let i++
 let delay+=5
 ```
 
-## Functions
+## \* Functions
 
 ```bash
-function myfunc {                # -or- myfunc () { ... }
-    local arg1="$1"
+function myfunc {               # -or- myfunc () { ... }); * function definition
+	: "docstring workaround"
+    local arg1="$1"             # * local: keep helper vars out of global scope
     local var1 var2="init"
     echo "$arg1"
     return 0
@@ -171,20 +185,44 @@ src_dir=$(dirname "${BASH_SOURCE[0]}")
 ## Positional Parameters
 
 ```bash
-echo "$#"                       # number of args
+echo "$#"                       # * number of args (template: orig_argc=$#)
 echo "$*"                       # all args as one word
-echo "$@"                       # all args individually quoted
+echo "$@"                       # ** all args individually quoted
 echo "${!#}"                    # last argument
-echo "$?"                       # exit status of last command
+echo "$?"                       # * exit status of last command (template: getopt check)
 
-shift
+shift                           # * drop $1 (template option loop); 'shift 2' drops $1 and $2
+```
+
+## \*\* Command-Line Option Parsing (getopt)
+
+The template's primary structure: getopt normalizes short/long options, then a
+case loop consumes them. (Bash's builtin `getopts` handles short options only;
+the external `getopt` adds long options.) See examples/chatgpt-get-long-options-parsing.bash.
+
+```bash
+# -o = short opts; --long = long opts; trailing ':' means "takes a value"
+TEMP=$(getopt -o htvl: --long help,trace,verbose,level: -n "$0" -- "$@")
+if [ $? != 0 ]; then echo "Error: bad options" >&2; exit 1; fi
+eval set -- "$TEMP"             # ** reassign $1,$2,... to normalized args (quotes essential)
+
+while true; do
+    case "$1" in
+        -h|--help)    show_usage=1; shift ;;
+        -t|--trace)   trace=1; shift ;;
+        -l|--level)   level="$2"; shift 2 ;;    # * value option consumes $1 and $2
+        --)           shift; break ;;           # ** end of options; rest are positional
+        *)            echo "Internal error: $1" >&2; exit 1 ;;
+    esac
+done
+# getopt unravels bundled short opts (-tv -> -t -v) and reorders args before "--"
 ```
 
 ## Command Substitution
 
 ```bash
-result=$(command args)          # preferred form
-result=`command args`           # legacy form
+result=$(command args)          # ** preferred form (template: script=$(basename "$0"))
+result=`command args`           # legacy form (avoid: no nesting, awkward quoting)
 ```
 
 ## Redirection
@@ -195,6 +233,7 @@ cmd 2> file                     # stderr to file
 cmd &> file                     # * stdout + stderr to file
 cmd >> file                     # append stdout
 cmd 2>&1                        # redirect stderr to stdout
+echo "Error: ..." >&2           # * write message to stderr (template: error/usage output)
 ```
 
 ## Here Documents / Here Strings
@@ -205,11 +244,11 @@ line1
 line2
 EOF
 
-cat <<-EOF                      # indented here doc (n.b., requires tab)
-	indented line
+cat <<-EOF                      # * indented here doc (n.b., requires tab)
+    indented line               # should be "\tindented line" (i.e., space used in markdown)
 EOF
 
-grep foo <<<"some text"        # ** here string
+grep foo <<<"some text"         # ** here string
 ```
 
 ## Path Manipulation
@@ -230,12 +269,14 @@ PATH="/new/bin:$PATH"           # prepend to PATH
 ## Debugging
 
 ```bash
-set -o xtrace                   # show expansions (set -x)
+set -o xtrace                   # * show expansions (set -x)
 set -o verbose                  # show raw input lines (set -v)
 set -e                          # exit on error (use cautiously)
 set -u                          # error on unset variables
 set -o pipefail                 # fail on pipe errors
+set -euo pipefail               # * strict mode, combined (n.b., in template gated by STRICT=1)
 
+# ** Template header: env-flag-gated tracing (enable without editing the script)
 if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then echo "$0 $*"; fi
 if [[ "${TRACE:-0}" == "1" ]]; then set -o xtrace; fi
 if [[ "${VERBOSE:-0}" == "1" ]]; then set -o verbose; fi
@@ -243,6 +284,26 @@ if [[ "${VERBOSE:-0}" == "1" ]]; then set -o verbose; fi
 shopt -s expand_aliases
 
 env --ignore-environment bash --noprofile --norc
+```
+
+## \* Checking / Validating Scripts
+
+```bash
+bash -n script.bash             # ** syntax check only (parse, don't run)
+shellcheck script.bash          # ** static analysis / lint (catches quoting bugs, etc.)
+shellcheck -s bash script.bash  # force bash dialect
+bash -x script.bash args        # run with execution trace (debugging)
+```
+
+```bash
+# * Check every real bash script in a directory.
+#   n.b. filter by shebang: .sh here includes csh scripts that bash -n would
+#   wrongly flag (this repo has 5 such #!/bin/csh files, e.g. kill_em.sh).
+for f in *.bash *.sh; do
+    head -1 "$f" | grep -q bash || continue   # skip non-bash (csh, etc.)
+    bash -n "$f" || echo "SYNTAX ERROR: $f"
+done
+# Repo status (27 Jun 2026): all 29 bash scripts pass 'bash -n'.
 ```
 
 ## \* Pro Tips
@@ -267,7 +328,7 @@ note: via Claude Opus 4.8
 ## \*\* Commonly Used Commands, etc.
 
 note: Stuff from old template.bash
-	
+
 ```
 #     template                     comment
 #     
