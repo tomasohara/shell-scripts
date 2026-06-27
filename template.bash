@@ -2,7 +2,7 @@
 #
 # TODO: name.sh: brief explanation
 #
-#    TODO: details
+# TODO: details (e.g., a paragraph or two)
 #
 # Note:
 # - See bash-cheatsheet.md for commonly used bash snippets.
@@ -73,8 +73,9 @@ orig_argc=$#
 # - see examples/chatgpt-get-long-options-parsing.bash for more background.
 # TODO: update -o and --long specs to match your options
 TEMP=$(getopt -o htv --long help,trace,verbose -n "$0" -- "$@")
-if [ $? != 0 ]; then
-    echo "Error: getopt failed; terminating." >&2
+status=$?
+if [ $status != 0 ]; then
+    echo "Error: getopt failed (status=$status); terminating." >&2
     exit 1
 fi
 $DEBUG_SCRIPT && echo "TEMP=$TEMP"
