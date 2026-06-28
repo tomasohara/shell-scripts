@@ -17,10 +17,17 @@ repos=()
 if [ "$1" == "--help" ]; then
     script=$(basename "$0")
     # TODO2: make repos an argument and drop ~/bin, etc.
-    echo "usage: [env] $script [--help] [repo ...]"
-    echo '    env: OTHER_REPOS="..." SKIP_SUMMARY=B'
-    echo "example(s):"
-    echo "    OTHER_REPOS=fu $0"
+    echo "Usage: [env] $script [--help] [repo ...]"
+    echo '    env: OTHER_REPOS="string-list" SHOW_SUMMARY=B'
+    echo ""
+    echo "Examples:"
+    echo ""
+    echo "OTHER_REPOS=\"repo1 repo2\" $0"
+    echo ""
+    echo "SHOW_SUMMARY=0 $script"
+    echo ""
+    echo "Note:"
+    echo "- OTHER_REPOS is space-delimited: specify repos via positional argument(s) otherwise."
     exit
 fi
 if [ "$1" != "" ]; then
@@ -66,7 +73,8 @@ echo "in $0: $(date)" >> "$log"
 # Determine directories
 # pre-init: OTHER_REPOS="$HOME/text-categorization $HOME/programs/python/visual-diff"
 if [ "$OTHER_REPOS" != "" ]; then
-    if [ ${#OTHER_REPOS[@]} -gt 1 ]; then
+    ## TODO2: drop array support as it requires sourcing the script
+    if declare -p OTHER_REPOS 2>/dev/null | grep -q 'declare \-a'; then
         ## DEBUG: echo "OTHER_REPOS as array"
         repos+=("${OTHER_REPOS[@]}")
     else
