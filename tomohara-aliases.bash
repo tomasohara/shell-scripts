@@ -3505,6 +3505,7 @@ function test-script { test-python-script "$@"; }
 alias test-script-debug='ALLOW_SUBCOMMAND_TRACING=1 DEBUG_LEVEL=5 MISC_TRACING_LEVEL=5 test-script'
 
 # randomize-datafile(file, [num|percent]): randomize datafile optionally pruned to NUM lines (or percent), preserving header line
+# ex: randomize-datafile tests/faithful.data 10% | wc -l => 28
 #
 function randomize-datafile() {
     local file="$1"
@@ -3519,10 +3520,12 @@ function randomize-datafile() {
     fi
 }
 
-# filter-random(pct, file, [include_header=1]): Randomize lines based on percentages, using output lile (e.g., _r10pct-fubar.data).
+# filter-random(pct, file, [include_header=1]): Randomize lines based on percentages, using output file (e.g., _r10pct-fubar.data).
+# ex: filter-random 10 tests/faithful.data; wc -l < tests/_r10pct-faithful.data => 20
 # Notes:
 # - By default, includes first line assuming it is header line.
 # - Includes support for compressed files (both input and output).
+# TODO4: create a separate script
 function filter-random() {
     local pct="$1"
     local file="$2"
@@ -3548,11 +3551,16 @@ function filter-random() {
        type="zcat"; 
        result=$(echo "$result" | perl -pe 's/.gz$//;')
     fi
-    local opts=""
-    if [ "$include_header" = "1" ]; then opts="$opts --include-header"; fi
+    ## OLD:
+    ## local opts=""
+    ## if [ "$include_header" = "1" ]; then opts="$opts --include-header"; fi
+    local opts=()
+    if [ "$include_header" = "1" ]; then opts=($opts --include-header); fi
     # maldito shellcheck (SC2086: Double quote to prevent globbing)
     # shellcheck disable=SC2086
-    $type "$file" | alias-python -m filter_random "$opts" --ratio "$ratio" - > "$result" 2> "$result.log"
+    ## BAD: $type "$file" | alias-python -m filter_random "$opts" --ratio "$ratio" - > "$result" 2> "$result.log"
+    ## OLD: $type "$file" | alias-python -m mezcla.filter_random "$opts" --ratio "$ratio" - > "$result" 2> "$result.log"
+    $type "$file" | alias-python -m mezcla.filter_random "${opts[@]}" --ratio "$ratio" - > "$result" 2> "$result.log"
 
     # Compress result if original compressed
     if [ "$compressed" = "1" ]; then 
