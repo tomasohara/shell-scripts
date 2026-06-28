@@ -23,6 +23,11 @@ Misc. Notes:
 TODO:
 - Rework the prioritization to distinguish (a) use in highlighting important constructs
   with respect to the repo usage versus (b) pointing out some of the subtleties of Bash.
+- TEMP: track down red highlighting override issue w/ pandoc
+  <!-- TEMP: 
+  ```bash
+  # TODO: fix .emacs.markdown.css
+  ```
 
 ## Variables
 
@@ -147,7 +152,7 @@ arr=(one two three)
 echo "${arr[0]}"                # first element
 echo "${arr[@]}"                # ** all elements (individually quoted)
 echo "${arr[*]}"                # all elements (single word)
-echo "${#arr[@]}"               # * number of elements
+echo "${#arr[@]}"               # * number of elements (length)
 arr+=(four)                     # append
 
 local dirs=("${@:-.}")          # default to current dir if no args
