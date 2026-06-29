@@ -2,14 +2,16 @@
 #
 # TODO: name.sh: brief explanation
 #
-#    TODO: details
+# TODO: details (e.g., a paragraph or two)
 #
 # Note:
 # - See bash-cheatsheet.md for commonly used bash snippets.
 # - This was inspired by TODO.
 #
 # TODO:
-# - Stuff to be addressed ... TODO.
+# - Review Bash "Pro Tips" in bash-cheatsheet.md.
+# - Customize this script by addressing TODO's (and then remove them).
+# - Mention stuff to be addressed ... TODO.
 #
 
 # Set bash regular and/or verbose tracing
@@ -25,60 +27,119 @@ fi
 if [[ "${VERBOSE:-0}" == "1" ]]; then
     set -o verbose
 fi
+if [[ "${STRICT:-0}" == "1" ]]; then
+    set -euo pipefail
+fi
 
-# Show usage statement
-# TODO: convert into a function that get invoked when $1 is empty or --help
-# in $@.
-# NOTE: See sync-loop.sh for an example.
-#
-if [[ "$1" == "" ]]; then
+# Display command-line usage
+function usage() {
+    local script
     script=$(basename "$0")
-    ## TODO: remove following which is only meant for when ./template.bash run
-    if [[ "$script" == "template.bash" ]]; then echo "Warning: not intended for standalone usage"; fi;
-    ## TODO: if [[ $script ~= *\ * ]]; then script='"'$script'"; fi
-    ## TODO: base=$(basename "$0" .bash)
     echo ""
-    ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--TODO] [--trace] [--help] [--| -]"
+    ## TODO: update options list to match actual options
+    echo "Usage: $script [--TODO-option] [--verbose] [--trace] [--help] [-- | -]"
     echo ""
     echo "Examples:"
     echo ""
     ## TODO: example 1
-    echo "$0 example 1"
+    echo "$script example-arg-1"
     echo ""
     ## TODO: example 2
-    echo "$script example 2"
+    echo "$script --TODO-option example-arg-2"
     echo ""
     echo "Notes:"
-    echo "- The -- option is to use default options and to avoid usage statement."
+    echo "- The -- option uses defaults and avoids the usage statement."
+    echo "- Use DEBUG_SCRIPT=1 to show getopt processing."
     ## TODO: add more notes
-    ## echo ""
     echo ""
+}
+
+# Initialize options
+# TODO: add/remove variables to match actual options below
+show_usage=0
+trace=0
+verbose=0
+## TODO: add script-specific option variables (examples):
+## fubar=0
+## level=0
+DEBUG_SCRIPT=$([ "${DEBUG_SCRIPT:-0}" -eq 1 ] && echo true || echo false)
+orig_argc=$#
+
+# Parse options with getopt
+# Note:
+# - getopt unravels combined short options (e.g., "-tv" -> "-t -v")
+# - options taking a value argument have a colon appended (e.g., "level:").
+# - see examples/chatgpt-get-long-options-parsing.bash for more background.
+# TODO: update -o and --long specs to match your options
+TEMP=$(getopt -o htv --long help,trace,verbose -n "$0" -- "$@")
+status=$?
+if [ $status != 0 ]; then
+    echo "Error: getopt failed (status=$status); terminating." >&2
+    exit 1
+fi
+$DEBUG_SCRIPT && echo "TEMP=$TEMP"
+# Reassign $1, $2, etc. to the normalized getopt output.
+# Note: quotes around "$TEMP" are essential.
+eval set -- "$TEMP"
+
+# Process each option
+while true; do
+    $DEBUG_SCRIPT && echo "\$1=$1"
+    case "$1" in
+        -h|--help)
+            show_usage=1
+            shift
+            ;;
+        ## TODO: add script-specific options (see commented examples below)
+        ## -f|--fubar)
+        ##     fubar=1
+        ##     shift
+        ##     ;;
+        ## -l|--level)
+        ##     level="$2"
+        ##     shift 2
+        ##     ;;
+        -t|--trace)
+            trace=1
+            shift
+            ;;
+        -v|--verbose)
+            verbose=1
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Internal error: unexpected option: $1" >&2
+            exit 1
+            ;;
+    esac
+done
+
+# Apply trace and verbose now that they've been parsed
+# note: This is the preferred way to trace the script proper
+if [ "$trace" == "1" ]; then
+    set -o xtrace
+fi
+if [ "$verbose" == "1" ]; then
+    set -o verbose
+fi
+
+# Show usage if --help or if no arguments were given at all (orig_argc=0).
+# Note: passing -- explicitly skips the no-arg check (orig_argc > 0).
+# TODO: replace orig_argc check with [ "$#" -eq 0 ] if positional args are required
+if [ "$show_usage" == "1" ] || [ "$orig_argc" -eq 0 ]; then
+    ## TODO: remove the following line (only relevant when running template.bash directly)
+    if [[ "$(basename "$0")" == "template.bash" ]]; then echo "Warning: not intended for standalone usage"; fi
+    usage
     exit
 fi
 
-# Parse command-line options
-# TODO: set getopt-type utility
-#
-moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
-while [[ "$moreoptions" == "1" ]]; do
-    # TODO: add real options
-    if [[ "$1" == "--trace" ]]; then
-        set -o xtrace
-    elif [[ "$1" == "--TODO-fubar" ]]; then
-        ## TODO: implement
-        echo "TODO-fubar"
-    elif [[ ("$1" == "--") || ("$1" == "-") ]]; then
-        shift
-        break
-    else
-        echo "Error: Unknown option: $1";
-        exit
-    fi
-    shift;
-    moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
-done
-# TODO: add positional arg assignment (delete if not planned)
-## todo_arg1="$1"
+# TODO: assign positional arguments (delete if not planned)
+## arg1="$1"
+## arg2="${2:-}"
 
-# TODO: Do whatever
+# TODO: do whatever
+   
