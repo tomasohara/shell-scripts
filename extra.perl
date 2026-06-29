@@ -30,8 +30,13 @@ eval 'exec perl -Ssw $0 "$@"'
 # Load in the common module, making sure the script dir is in the Perl lib path
 # TODO: handle interactive usage (e.g., perl -e 'require "Extra.perl"; ...').
 BEGIN { 
-    my $dir = `dirname '$0'`; chomp $dir; unshift(@INC, $dir);
+    ## OLD: my $dir = `dirname '$0'`; chomp $dir; unshift(@INC, $dir);
     ## TODO: my $dir = `dirname '$0' 2> /dev/null`; chomp $dir; unshift(@INC, $dir);
+    # note: doesn't import from File::Basename to avoid conflicts with common.perl for dirname and basename.
+    use File::Basename();
+    my $dir = File::Basename::dirname($0);
+    unshift @INC, $dir if defined $dir && -d $dir;
+    
     require 'common.perl';
     ## use HotKey;		# reads single character from input without blocking
     ## OLD: require 'timelocal.pl';	# perl library for time functions
@@ -954,6 +959,54 @@ sub derive_time_stamp {
     return ($time);
 }
 
+# parse_iso_timestamp(timestamp): convert ISO-8601 format date into floating
+# point value (seconds since 1970).
+# note: format MM/DD/YYYY HH:MM:SS.mmmmmmZ; requires DataTime installation (e.g., `cpan cpan DateTime::Format::Strptime`)
+# via https://stackoverflow.com/questions/4127102/parse-timestamp-with-millisecond-in-perl:
+# EX: parse_iso_timestamp("[2026-06-25T03:52:31.9868345Z]") => "[2026-06-25T03:52:31.9868345Z 1782359551.986]"
+#
+## OLD:
+## 
+## our($init) = &FALSE;
+## our($Strp) = undef;
+## #
+## # init_DateTime(): initialize the date parser
+## sub init_DateTime {
+##     use DateTime::Format::Strptime;
+##     $Strp = new DateTime::Format::Strptime(
+##         pattern   => '%Y-%m-%dT%H:%M:%S.%NZ',
+##         time_zone => 'UTC');
+## }
+## #
+## sub parse_iso_timestamp {
+##     my($date) = @_;
+##     if (! $Strp) {
+## 	&init_DateTime();
+##     }
+##     my($dt) = $Strp->parse_datetime($date);
+##     my($epoch) = $dt->epoch + $dt->millisecond / 1000;
+##     &debug_print(&TL_VERY_VERBOSE, "parse_iso_timestamp(@_) => $epoch\n");
+##     return $epoch;
+## }
+## NOTE: version usinf=g pure Perl (via ChatGPT-5)
+##
+sub parse_iso_timestamp {
+    my ($date) = @_;
+
+    if ($date =~ /
+        (\d{4})-(\d{2})-(\d{2})
+        T
+        (\d{2}):(\d{2}):(\d{2})
+        \.(\d+)Z
+    /x) {
+        my ($Y,$M,$D,$h,$m,$s,$frac)=($1,$2,$3,$4,$5,$6,$7);
+        my $epoch = timegm($s,$m,$h,$D,$M-1,$Y);
+        $epoch += "0.$frac";
+        return $epoch;
+    }
+
+    return undef;
+}
 
 # stringify_value(value, [indent]): returns ascii representation of Perl value,
 # which could include embedded references

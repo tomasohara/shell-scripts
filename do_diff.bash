@@ -7,6 +7,7 @@
 # Notes:
 # - Also see diff.sh for simpler version.
 # - shellcheck filtering:
+#   SC2002 [Useless cat. Consider 'cmd < file | ..' or 'cmd file | ..' instead]
 #   SC2016: Expressions don't expand in single quotes, use double quotes for that.
 #   SC2049: =~ is for regex. Use == for globs.
 #   SC2086: Double quote to prevent globbing and word splitting.
@@ -56,7 +57,7 @@
 #
 debug_level="${DEBUG_LEVEL:-0}"
 if [ "$debug_level" -ge 4 ]; then
-    echo "$0 $@"
+    echo "$0 $*"
 fi
 if [ "${TRACE:-0}" = "1" ]; then
     set -o xtrace
@@ -64,6 +65,16 @@ fi
 if [ "${VERBOSE:-0}" = "1" ]; then
     set -o verbose
 fi
+
+# Helper functions
+
+# Make sure paths don't have relics like double slashes
+# EX: normalize-path "a/b//d.txt" => "a/b/d.txt"
+function normalize-path {
+    ## BAD: echo "$*" | perl -pe 's@//@/@g;';
+    ## TODO?: printf '%s\n' "$1" | perl -pe 's@//@+/@g;';
+    perl -pe 's@/+@/@g;'
+}
 
 # Initialize
 pattern=""
@@ -76,7 +87,6 @@ diff_cmd="diff"
 nopattern="0"
 verbose_mode="1"
 match_dot_files="0"
-no_glob="0"
 base_dir="."
 recursive="0"
 
@@ -87,7 +97,7 @@ if [ -z "$2" ]; then
     echo "Usage: $script [option] {--all | pattern} master_dir"
     echo ""
     echo "   options: [--check-space-changes | --ignore-spacing] [--brief] [--quiet] [--verbose] [--diff cmd] [--diff-options text] [--match-dot-files]"
-    echo "   other options: [-side-by-side] [--ignore-all-space] [--no-pattern] [--no-glob] [--kdiff] [--trace] [--dir dir]"
+    echo "   other options: [--side-by-side] [--ignore-all-space] [--no-pattern] [--no-glob] [--kdiff] [--trace] [--dir dir]"
     echo ""
     echo "Examples:"
     echo ""
@@ -97,10 +107,12 @@ if [ -z "$2" ]; then
     echo ""
     echo "find . -type d -exec \"$script\" --dir {} --verbose '*' ~/repo-main/{} \; > _main-diff-all.log 2>&1"
     echo ""
-    echo "git ls-tree -r --name-only HEAD | xargs -I '{}' $script --no-pattern '{}' ~/repo-main/'{}' > _main-diff-tracked.log 2>&1"
-    
+    ##
+    # note: uses --side-by-side to show master on left and branch on right (n.b., use wide editor window, such as 132+ columns)
+    echo "git ls-tree -r --name-only HEAD | xargs -I '{}' $script --side-by-side --no-pattern ~/repo-main/'{}' '{}' > _main-diff-tracked.log 2>&1"
     echo ""
-    echo "$script" '--match-dot-files ".*bash*" .. > _bash-diff.list 2>&1'
+    echo "$script" "--match-dot-files \".*bash*\" .. > _bash-diff-\$(todays-date).list 2>&1"
+    ## TODO: add notes on aliases used in script usages (i.e., here and elsewhere)
     echo ""
     echo "$script --ignore-spacing --diff-options '--context=1' '*.rb' vm-torre > vm-torre.diff 2>&1"
     echo ""
@@ -159,10 +171,8 @@ while [[ "$1" =~ ^- ]]; do
         verbose_mode="0"
     elif [[ ("$1" == "--nopattern") || ("$1" == "--no-pattern") ]]; then
         nopattern="1"
-        ## TODO3: reduce redundant flags
-        no_glob="1"
     elif [ "$1" == "--no-glob" ]; then
-        no_glob="1"
+        nopattern="1"
     elif [ "$1" == "--match-dot-files" ]; then
         match_dot_files="1"
     elif [ "$1" == "--ignore-all-space" ]; then
@@ -185,9 +195,10 @@ done
 # Get pattern from first argument
 # shellcheck disable=SC2049
 if [ -z "$pattern" ]; then
-    if [ "$no_glob" == "1" ]; then
+    if [ "$nopattern" == "1" ]; then
         # Treat first argument as pattern without * added
         pattern="$1"
+        if [ ! -e "$pattern" ]; then echo "Warning: pattern/file \"$pattern\" not found"; fi
     elif [[ "$1" =~ \*.*\ \*\. ]]; then
         # ex: "*.py *.mako"
         echo "Warning: Assuming implicit --no-glob, as otherwise space would be in extension"
@@ -195,7 +206,8 @@ if [ -z "$pattern" ]; then
     elif [ -f "$1" ]; then
         # specific file (e.g., "README.txt")
         pattern="$1"
-    elif [[ "$1" =~ \.* ]]; then
+    ## BAD: elif [[ "$1" =~ \.* ]]; then
+    elif [[ "$1" =~ ^\. ]]; then
         # note: dot file (e.g., ".emacs") requires use of --match-dot-files
         if [ "$match_dot_files" == "1" ]; then
             # note: special case handling since can't use *.emacs* (i.e., substring case below)
@@ -207,8 +219,11 @@ if [ -z "$pattern" ]; then
     elif [[ "$1" =~ \*\. ]]; then
         # extension (e.g., "*.py")
         pattern="*$1"
+    elif [[ "$1" == "*" ]]; then
+        # retain glob as is (e.g., "*")
+        pattern="$1"
     else
-        # substring of file
+        # substring of file (e.g., "extract")
         pattern="*$1*"
     fi
     shift
@@ -236,7 +251,7 @@ if [ "$base_dir" != "." ]; then
 fi
 
 # Do the actual diff
-log_file="${TMP:-/tmp}/_do_diff.$$.log"
+log_file="$(mktemp --tmpdir _do_diff.XXXXX.log)"
 count=0
 # shellcheck disable=SC2086
 for file in $pattern; do
@@ -270,9 +285,14 @@ for file in $pattern; do
     # Note: similar to diff-rev alias
     # ex: "bin/tests/README.ipynb" => "tests/README.ipynb"
     if [ -d "$other_file" ]; then
-        if [ -e "$other_file/$file" ]; then
+        ## BAD: if [ -e "$other_file/$file" ]; then
+        if [[ "$(dirname "$file")" != "." ]] && [ -e "$other_file/$file" ]; then
             # Retains directory in "pattern"
-            # TODO: assert $nopattern
+            # Note: assumes pattern is actually a file
+            if [[ ("$nopattern" == "0") ]]; then
+                echo "Warning: directory retained in pattern due to unexpected condition:"
+                echo "   pattern=\"$pattern\" other_file=\"$other_file\" file=\"$file\""
+            fi
             other_file="$other_file/$file"
         else
             # Ignores directory in "pattern"
@@ -285,7 +305,7 @@ for file in $pattern; do
     # note: recursive omits some verbose output to cut down on clutter
     # example: the file-vs-other line is omitted; --dir sets --quiet
     if [ "$quiet" == "0" ]; then
-        echo "$base_dir/$file vs. $other_file"
+        echo "$base_dir/$file vs. $other_file" | normalize-path
     fi
     if [ ! -e "$other_file" ]; then
         if [ "$quiet" == "0" ]; then
@@ -299,9 +319,9 @@ for file in $pattern; do
     # grepping (e.g., `do_diff.sh ... | grep '^Differences:'`).
     files_differ=false
     if [ "$brief" == "0" ]; then
-        "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" > "$log_file"
+        "$diff_cmd" --brief $space_options $diff_options "$file" "$other_file" >| "$log_file"
         status=$?
-        perl -e "\$bd='$base_dir';" -pe 's@Files (.*) and (.*) differ@Differences: $bd$d/$1 $2@;' < "$log_file"
+        perl -e "\$bd='$base_dir';" -pe 's@Files (.*) and (.*) differ@Differences: $bd$d/$1 $2@;' < "$log_file" | normalize-path
 
         # Show file info with time and size if there are differences
         if [ "$status" != "0" ]; then
@@ -322,10 +342,11 @@ for file in $pattern; do
     fi
     
     # Perform the actual diff
-    "$diff_cmd" $space_options $diff_options "$file" "$other_file" > "$log_file" 2>&1
+    "$diff_cmd" $space_options $diff_options "$file" "$other_file" >| "$log_file" 2>&1
     
     # Show relative difference percent
     ## TODO?: if [[ "$brief" == "0") && $files_differ ]]; then
+    # shellcheck disable=SC2002
     if [ "$brief" == "0" ] && $files_differ; then
         num_lines1=$(cat "$file" | wc -l)
         num_lines2=$(cat "$other_file" | wc -l)
@@ -335,8 +356,10 @@ for file in $pattern; do
         if [ $num_lines -gt 0 ]; then
             relative_diff=$(( $num_diffs * 100 / $num_lines ))
         fi
-        ## OLD: echo "${relative_diff}% differences for $base_dir/$file"
-        echo -n "${relative_diff}% differences for $base_dir/$file"
+        ## TODO4: consolidate path fixup's (e.g., // => /)
+        ## BAD: file_path="$(echo "${base_dir/$file}" | normalize-path)"
+        file_path="$(echo "${base_dir}/${file}" | normalize-path)"
+        echo -n "${relative_diff}% differences for $file_path"
         if [[ "$verbose_mode" == "1" ]]; then
             echo -n ": lines1=$num_lines1 lines2=$num_lines2 total=$num_lines diffs=$num_diffs"
         fi
@@ -355,7 +378,6 @@ for file in $pattern; do
 done
 
 # Cleanup
-## OLD: if [[ $debug_level -lt 6 ]]; then
 if [[ ($debug_level -lt 6) && (-e  "$log_file") ]]; then
     rm "$log_file"
 fi

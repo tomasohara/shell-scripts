@@ -1315,11 +1315,20 @@ fi
 ## # ex: extract-matches "genls (.*) Dog" dogs.cyc
 ## function old-extract-matches () { perl -ne "while (/$1/) { printf \"%s\\n\", \$1; s/$1//; }" $2; }
 
+# Miscellaneous PATH and PERLLIB manipulation (e.g., removing home dir paths)
+## TODO2: make deprecated
+# cd-env(): add $PWD to start of path and PERLLIB
 alias cd-env='export PERLLIB=`pwd`:${PERLLIB}; export PATH=`pwd`:${PATH};'
+# dir-env(dir): add DIR to start of path and PERLLIB
 function dir-env () { _dir=$1; export PERLLIB=${_dir}:${PERLLIB}; export PATH=${_dir}:${PATH}; unset _dir; }
+#
+# strip-dirs(path-value, path-prefix): remove PATH-PREFIX from PATH-VALUE
 function strip-dirs () { echo $1 | perl -pe s#$2[^:]+:?##g; }
+# clear-my-env(): remove $HOME from PATH and PERLLIB entries
 function clear-my-env () { export PATH=`strip-dirs $PATH $HOME`; export PERLLIB=`strip-dirs $PERLLIB $HOME`; }
+# clear-local-env(): remove /home/... from PATH and PERLLIB entries
 function clear-local-env () { export PATH=`strip-dirs $PATH /home`; export PERLLIB=`strip-dirs $PERLLIB /home`; }
+# show-perl-libs(): show library paths that Perl uses
 function show-perl-libs () { perl -e 'print join("\n", @INC), "\n";'; }
 
 #........................................................................
@@ -1591,56 +1600,9 @@ trace Unix aliases
 alias redhat-version="/etc/redhat-release"
 ## OLD: alias system-status='system_status.sh -'
 
-## OLD
-## function apropos-command () { apropos $* 2>&1 | $GREP '(1)' | $PAGER; }
-## function split-tokens () { perl -pe "s/\s+/\n/g;" "$@"; }
-## alias tokenize='split-tokens'
-## function perl-echo () { perl -e 'print "'$1'\n";'; }
-## ## function perl-printf () { perl -e 'printf "$1\n", @_[1..$#_];';  }
-## ##
-## ## function perl-printf () { perl -e "printf \"$1\"", qw/$2 $3 $4 $5 $6 $7 $8 $9/; }
-## function perl-printf () { perl -e "printf \"$1\", $2;"; }
-## ##
-## ## TODO: get folllowing to work for 'perl-print "how now\nbrown cow\n"'
-## ## function perl-print () { perl -e "print $1"; -e 'print "\n";'; }
-## function perl-print () { perl -e "printf \"$1\";" -e 'print "\n";'; }
-## function perl-print-n () { perl -e "printf \"$1\";"; }
-
-## OLD
-## # Unix/Win32 networking aliases
-## if [ "$OSTYPE" != "cygwin" ]; then alias ipconfig=ifconfig; fi
-## alias set-display-local='export DISPLAY=localhost:0.0'
-
 ## OLD:
-## # Bash aliases
-## alias bash-trace-on='set -o xtrace'
-## alias bash-trace-off='set - -o xtrace' ## ???
-## function trace-cmd() { bash-trace-on; eval "$@"; bash-trace-off; }
-## ## ALT: function trace-cmd() { bash-trace-on; @_; bash-trace-off; }
-## alias cmd-trace='trace-cmd'
-
-## OLD:
-## # Compressing/uncompressing a subdirectory tree (ignoring symbolic links) 
-## # TODO: write scripts for this (given the comlexity)
-## # TODO: don't uncompress compressed archives (.tar.gz files)
-## function compress-dir() { log_file=/tmp/compress_`basename "$1"`.log ; find $1 \( -not -type l \) -exec gzip -vf {} \; >| "$log_file" 2>&1; $PAGER "$log_file"; }
-## # NOTE: zipped archived are kept compressed
-## function uncompress-dir() { log_file=/tmp/uncompress_`basename "$1"`.log ; find $1 \( -not -type l \) \( -not -name \*.tar.gz \) -exec gunzip -vf {} \; >| "$log_file" 2>&1; $PAGER "$log_file"; }
-## alias compress-cd='compress-dir $PWD'
-## alias uncompress-cd='uncompress-dir $PWD'
-
-alias old-count-exts='ls | count-it "\.[^.]*\w" | sort $SORT_COL2 -rn | $PAGER'
-function count-exts () { ls | count-it '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
-
-## OLD: alias kill-netscape='kill_em.sh -p netscape; /bin/rm -v -f $HOME/.netscape/lock'
-## OLD: alias kill-cmucl='kill_em.sh -p cmucl'
-## OLD: alias kill-sleep='kill_em.sh sleep'
-## function kill-gnome () { foreach.sh 'kill_em.sh $f' gnome magicdev panel xscreensaver cdplayer_applet  enlightenment asclock_applet ical gtcd sproingies  }
-
-## OLD
-## # Aliases for working with Perlfect indexing system
-## trace indexing commands
-## conditional-source $BIN/indexing-aliases.bash
+## alias old-count-exts='ls | count-it "\.[^.]*\w" | sort $SORT_COL2 -rn | $PAGER'
+## function count-exts () { ls | count-it '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
 
 #-------------------------------------------------------------------------------
 # TeX stuff

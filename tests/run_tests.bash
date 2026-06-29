@@ -20,12 +20,15 @@ if [ "${VERBOSE:-0}" = "1" ]; then
 fi
 dir=$(dirname "${BASH_SOURCE[0]}")
 
-# Make sure directory and parent directory on PATH and PYTHONPATH
+# Make sure directory and parent directory on PATH and PYTHONPATH (at start).
 # TODO3: find out why not being done under Github runner (docker OK)
-script_dir="$(realpath "$dir/..")"
+SCRIPT_DIR="$(realpath "$dir/..")"
 test_dir="$(realpath "$dir")"
-export PATH="$PATH:$script_dir:$test_dir"
-export PYTHONPATH="$PYTHONPATH:$script_dir:$test_dir"
+## OLD:
+## export PATH="$PATH:$script_dir:$test_dir:$script_dir/archive:$script_dir/adhoc:$script_dir/linux"
+## export PYTHONPATH="$PYTHONPATH:$script_dir:$test_dir"
+export PATH="$SCRIPT_DIR:$test_dir:$SCRIPT_DIR/archive:$SCRIPT_DIR/adhoc:$SCRIPT_DIR/linux:$PATH"
+export PYTHONPATH="$SCRIPT_DIR:$test_dir:$PYTHONPATH"
 
 # Optionally source temporary settings script
 # Note: workaround for adhoc environment settings (see local-workflow.sh)

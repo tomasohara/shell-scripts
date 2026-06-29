@@ -1,118 +1,17 @@
 #! /usr/bin/env bash
 #
-# TODO: name.sh: explanation
+# TODO: name.sh: brief explanation
 #
-# NOTES:
-# - cheatsheet with templates for common bash expressions:
-#     template                     comment
-#     
-#     if [ $x == value ]; then STMT; fi    old-style is [ $x = value ] ...
-#     if [ EXPR_a ]; then STMT_a; elif [ EXPR_a  ]; then STMT_b; else STMT_c; fi
-#     if [[ (EXPR1) && (EXPR2) ]]; then STMT; fi
-#     if [[ $var =~ pattern ]]; then STMT; fi       note: requires Bash 3.0+
-#        where pattern is unquoted egrep regex (n.b., use .*.ext not *.ext)
-#     if (( ARITH_EXPR )); then STMT; fi
-#     if [ -s "file" ]; then ...; fi    where -s is non-empty test (see below)
-#     case EXPR in PATTERN_a) STMT_a;; PATTERN_b) STMT_b;; ... esac
-#     for name [in words ...]; do commands; done
-#     for (( expr1 ; expr2 ; expr3 )) ; do commands ; done
-#     while [ expr ] ; do commands ; done
-#     $((arithmetic))              evaluate arithmetic expression
-#     $(command ...)               same as `command ...`
-#     ${var:-default}              use $var or "default"
-#     ${var/from/to}               var with FROM pattern changed to TO (once)
-#     ${var//from/to}              likewise for all occurrences
-#     true                         no-op
-#     $#                           number of positional arguments
-#     $*                           all positional arguments
-#     "$@"                         likewise all args but with individually quoting
-#     $?                           status of last command: 0 for success
-# - tools like OpenAI Codex and GitHub Copliot can be used to translate Bash constructs
-#     https://github.com/features/copilot
-# - For sake of simplicity, not all of the syntax is covered. (Likewise below.)
-# - Running bash in a fresh environment (i.e., pristine settings):
-#      env --ignore-environment bash --noprofile --norc
-#   See https://unix.stackexchange.com/questions/48994/how-to-run-a-program-in-a-clean-environment-in-bash.
-# TODO:
-#  - variable increments (e.g., 'let i++' and 'let max_mem=(4 * 1024')
-#     note: EXPR is C style;
-#         Format                    Example(s)
-#         let EXPR                  let i++
-#         let VAR=(EXPR)            let max_mem=(4 * 1024);    let delay+=5
-#   - comparison operators:
-#         -[eg|ne|lt|le|gt|ge]      if [ $num -eq 3 ]; then echo "tres"; fi
-#   - array variables
-#         arr=(v1 value2 ... vN)    initialize
-#         ${#arr[@]}                number of elements (i.e., length)
-#         ${arr[1]}                 second element
-#         ${arr[*]}                 all elements
-#         "${arr[@]}"               likewise all but individually quoted (a la "$@")
-#         arr+=(value)              append value
-#         "${arr:-default}"         default value; local dirs=("${@:-.}")
-#   - conditional expression (a la C ternary operator (test ? true-result : false-result)
-#     note: approximation via https://stackoverflow.com/questions/3953645/ternary-operator-in-bash
-#         $([ test ] && echo "true-result" || echo "false-result")
-#   - echo to stderr (or print)     echo "..." 1>&2
-#   - expression evaluation
-#         (( EXPR ))                (( L++ ))
-#     Preferred for arithmetic: see https://wiki.bash-hackers.org/commands/builtin/let.
-#   - early return
-#      return                       just inside functions
-#      -or- exit                    early script termination; *** avoid in functions or if script sourced ***
-#   - history mechanism
-#     !?string[?]                   find last command with string
-#  - local variable declaration     note: space-separated not comma; simplified
-#      local var1[=val1] [var2[=val2] ...]
-#  - global variable declaration
-#      declare -g variable
-#  - common file tests
-#      -s file                      non-empty file (n.b., nothing like csh's -z)
-#      -e file                      file exists
-#      -f file                      regular file
-#      -d file                      file is directory
-#  - other common tests
-#      -n string                    whether string is non-empty
-#      -z string                    whether string is empty
-#  - here-documents
-#      <<END ... END                multiple line using ... (i.e., "here docs")
-#      <<<"text"                    single line using TEXT (i.e., "here string")
-#  - sequence expression
-#      {n..m}                       echo "digits:" {0..9}; echo "letters: " {a..z}
-#  - advanced redirection
-#      &>                           same as `> ... 2>&1`
-#  - common or useful bash arguments
-#     -i -c                         run command as if interactive invocation
-#     shopt -s expand_aliases       for alias support in scripts
-#     TODO3: flesh out
-#  - simple boolean env. testing    note: used throughout repo for convenience
-#     [ "${ENV_VAR:-0}" == "1" ]    [ "${VERBOSE:-0}" == "1" ]
-#  - general boolean env. testing   uses new function in tomohara-aliases.bash
-#     local var=$(is-true "VAR");   local verbose=$(is-true "VERBOSE");
-# Examples:
-# - for (( i=0; i<10; i++ )); do  echo $i; done
-# - if [ "$XYZ" = "" ]; then export XYZ=fubar; fi
-# - if [[ $JAVA_HOME =~ x64 ]]; then echo "64-bit Java"; fi
-#   note: need to use .* not * for filename patterns (e.g., $fname =~ ^.*xcf$)
-# - case "$HOST_NICKNAME" in ec2*) echo "AWS";; hostw*) echo "HW";; *) echo "non-server"; esac
-#   NOTE: each case must end in ';;'
-# - if [[ $1 =~ .*/ ]]; then echo "$1" ends in slash; fi
-# - if [[ ! $file =~ http ]]; then echo hey; fi
+# TODO: details (e.g., a paragraph or two)
+#
+# Note:
+# - See bash-cheatsheet.md for commonly used bash snippets.
+# - This was inspired by TODO.
 #
 # TODO:
-# - *** Update me (e.g., from recent scripts)! ***
-# - change existing scripts to use '#! /usr/bin/env bash'
-# - Check the TODO comments for customizations needed for the script."
-# - Put the template for common bash expressions elsewhere.
-# - Add examples for each of the templates above.
-# - Change 'shift 1' to 'shift' in ~/bin bash scripts.
-# - Mention some useful variables:
-#   (e.g., ${!#} for last argument--see https://stackoverflow.com/questions/1853946/getting-the-last-argument-passed-to-a-shell-script).
-# - Document regex match quirks.
-# - Document file tests (e.g., -e fubar.txt).
-# - BASH_SOURCE usage for when source'd; in general: invocation stack array
-#     src_dir=$(dirname "${BASH_SOURCE[0]}")
-# - name of current function: "${FUNCNAME[0]}"; in general: call stack array
-# - value=${value@L}                    # make lowercase
+# - Review Bash "Pro Tips" in bash-cheatsheet.md.
+# - Customize this script by addressing TODO's (and then remove them).
+# - Mention stuff to be addressed ... TODO.
 #
 
 # Set bash regular and/or verbose tracing
@@ -128,60 +27,119 @@ fi
 if [[ "${VERBOSE:-0}" == "1" ]]; then
     set -o verbose
 fi
+if [[ "${STRICT:-0}" == "1" ]]; then
+    set -euo pipefail
+fi
 
-# Show usage statement
-# TODO: convert into a function that get invoked when $1 is empty or --help
-# in $@.
-# NOTE: See sync-loop.sh for an example.
-#
-if [[ "$1" == "" ]]; then
+# Display command-line usage
+function usage() {
+    local script
     script=$(basename "$0")
-    ## TODO: remove following which is only meant for when ./template.bash run
-    if [[ "$script" == "template.bash" ]]; then echo "Warning: not intended for standalone usage"; fi;
-    ## TODO: if [[ $script ~= *\ * ]]; then script='"'$script'"; fi
-    ## TODO: base=$(basename "$0" .bash)
     echo ""
-    ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--TODO] [--trace] [--help] [--| -]"
+    ## TODO: update options list to match actual options
+    echo "Usage: $script [--TODO-option] [--verbose] [--trace] [--help] [-- | -]"
     echo ""
     echo "Examples:"
     echo ""
     ## TODO: example 1
-    echo "$0 example 1"
+    echo "$script example-arg-1"
     echo ""
     ## TODO: example 2
-    echo "$script example 2"
+    echo "$script --TODO-option example-arg-2"
     echo ""
     echo "Notes:"
-    echo "- The -- option is to use default options and to avoid usage statement."
+    echo "- The -- option uses defaults and avoids the usage statement."
+    echo "- Use DEBUG_SCRIPT=1 to show getopt processing."
     ## TODO: add more notes
-    ## echo ""
     echo ""
+}
+
+# Initialize options
+# TODO: add/remove variables to match actual options below
+show_usage=0
+trace=0
+verbose=0
+## TODO: add script-specific option variables (examples):
+## fubar=0
+## level=0
+DEBUG_SCRIPT=$([ "${DEBUG_SCRIPT:-0}" -eq 1 ] && echo true || echo false)
+orig_argc=$#
+
+# Parse options with getopt
+# Note:
+# - getopt unravels combined short options (e.g., "-tv" -> "-t -v")
+# - options taking a value argument have a colon appended (e.g., "level:").
+# - see examples/chatgpt-get-long-options-parsing.bash for more background.
+# TODO: update -o and --long specs to match your options
+TEMP=$(getopt -o htv --long help,trace,verbose -n "$0" -- "$@")
+status=$?
+if [ $status != 0 ]; then
+    echo "Error: getopt failed (status=$status); terminating." >&2
+    exit 1
+fi
+$DEBUG_SCRIPT && echo "TEMP=$TEMP"
+# Reassign $1, $2, etc. to the normalized getopt output.
+# Note: quotes around "$TEMP" are essential.
+eval set -- "$TEMP"
+
+# Process each option
+while true; do
+    $DEBUG_SCRIPT && echo "\$1=$1"
+    case "$1" in
+        -h|--help)
+            show_usage=1
+            shift
+            ;;
+        ## TODO: add script-specific options (see commented examples below)
+        ## -f|--fubar)
+        ##     fubar=1
+        ##     shift
+        ##     ;;
+        ## -l|--level)
+        ##     level="$2"
+        ##     shift 2
+        ##     ;;
+        -t|--trace)
+            trace=1
+            shift
+            ;;
+        -v|--verbose)
+            verbose=1
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Internal error: unexpected option: $1" >&2
+            exit 1
+            ;;
+    esac
+done
+
+# Apply trace and verbose now that they've been parsed
+# note: This is the preferred way to trace the script proper
+if [ "$trace" == "1" ]; then
+    set -o xtrace
+fi
+if [ "$verbose" == "1" ]; then
+    set -o verbose
+fi
+
+# Show usage if --help or if no arguments were given at all (orig_argc=0).
+# Note: passing -- explicitly skips the no-arg check (orig_argc > 0).
+# TODO: replace orig_argc check with [ "$#" -eq 0 ] if positional args are required
+if [ "$show_usage" == "1" ] || [ "$orig_argc" -eq 0 ]; then
+    ## TODO: remove the following line (only relevant when running template.bash directly)
+    if [[ "$(basename "$0")" == "template.bash" ]]; then echo "Warning: not intended for standalone usage"; fi
+    usage
     exit
 fi
 
-# Parse command-line options
-# TODO: set getopt-type utility
-#
-moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
-while [[ "$moreoptions" == "1" ]]; do
-    # TODO : add real options
-    if [[ "$1" == "--trace" ]]; then
-        set -o xtrace
-    elif [[ "$1" == "--TODO-fubar" ]]; then
-        ## TODO: implement
-        echo "TODO-fubar"
-    elif [[ ("$1" == "--") || ("$1" == "-") ]]; then
-        shift
-        break
-    else
-        echo "Error: Unknown option: $1";
-        exit
-    fi
-    shift;
-    moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
-done
-# TODO: add positional arg assignment (delete if not planned)
-## todo_arg1="$1"
+# TODO: assign positional arguments (delete if not planned)
+## arg1="$1"
+## arg2="${2:-}"
 
-# TODO: Do whatever
+# TODO: do whatever
+   

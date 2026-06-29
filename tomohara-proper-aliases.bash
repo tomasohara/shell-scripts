@@ -13,6 +13,7 @@
 #   SC2068: Double quote array expansions to avoid re-splitting elements
 #   SC2086: Double quote to prevent globbing
 #   SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?.
+#   SC2206: Quote to prevent word splitting/globbing.
 #
 
 # Change git-xyz-plus to git-xyz- for sake of tab completion
@@ -21,14 +22,20 @@ alias git-add-='git-add-plus'
 alias git-diff-='git-diff-plus'
 ## TEMP:
 alias git-diff='git-diff-plus'
+alias gdiff=git-diff
 alias git-difftool-='git-difftool-plus'
 alias git-log-='git-log-plus'
+alias glog='git-log-'
 alias git-update-='git-update-plus' 
 alias git-vdiff='git-vdiff-alias'
-alias git-vdiff-='git-vdiff-alias'
+## OLD: alias git-vdiff-='git-vdiff-alias'
+alias gvdiff=git-vdiff
 alias git-all-update='update-main-repos.bash'
-alias git-extract-all-versions='extract-all-git-versions.bash --human'
-alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human'
+## OLD:
+## alias git-extract-all-versions='extract-all-git-versions.bash --human'
+## alias git-extract-all-versions='extract-all-git-versions.bash --human'
+alias git-extract-all-versions='VERBOSE=1 extract-all-git-versions.bash --human'
+alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human --verbose'
 alias git-files-changed=git-diff-list
 alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
@@ -47,6 +54,7 @@ alias git-status-sans-tom="git-status | egrep -v '(^|[-_/.])tom([-_/.]|$)'"
 alias git-status-tom=git-status-sans-tom
 # TODO: work out better alias name
 alias git-stat=git-status-sans-tom
+alias gstat=git-stat
 # TODO: better name (e.g., git-diff-name-only-main?) and/or decompose git-name-diff-branch?
 alias git-name-diff-main='git diff --name-only main..HEAD | cat'
 #
@@ -96,19 +104,26 @@ function plint-tester-testee {
         echo "$script"
         echo "$test_script"
     fi
+    
+    # Show python lint result
     local pylint_result
     local pylint="${PYLINT:-python-lint}"
     pylint_result=$($pylint "$script" "$test_script")
     local pylint_status=$?
-    echo "$pylint_result"
+    ## OLD: echo "$pylint_result"
+    if [ "$pylint_result" != "" ]; then
+        echo "$pylint_result"
+    fi
     ## DEBUG: echo "pylint_status=$pylint_status"
+
+    # Test the script (n.b., verifies whether to proceed when pylint errors)
     if [ "${TEST:-0}" == "1" ]; then
         # check for specific error ignoring module line  (e.g., *...* Module mezcla.cut)
         # ex: "cut.py:10:0: C0301: Line too long (103/100) (line-too-long)"
         if [[ $pylint_result =~ [0-9]:[0-9] ]]; then
             local newline_tab=$'\n\t'
             ## TODO4: add support for reading response (e.g., N)
-            pause-for-enter "pylint issues;${newline_tab}proceed? (Enter for Y otherwise ^C)"
+            pause-for-enter "pylint issues:${newline_tab}proceed? (Enter for Y otherwise ^C)"
         fi
         test-python-script "$test_script"
     fi
@@ -130,19 +145,25 @@ function plint-tester-testee-method-strict {
 simple-alias-fn plint-tester-testee-regular 'TEST=1 plint-tester-testee';
 ## TODO3?: plint-tester-testee-method-regular
 
-# clone-repo(url): clone github repo at URL into current dir with logging
+# clone-repo(url, args, ...): clone github repo at URL into current dir with logging
+## OLD: clone-repo(url): clone github repo at URL into current dir with logging
+# example: git-clone-alias https://github.com/ChromeDevTools/devtools-frontend --branch main --single-branch --depth 1
 # TODO2: move to git-related section (better yet into git-aliases.bash)
 function clone-repo () {
     local url repo log
     url="$1"
+    shift
+    ## TODO4: rework args to use last one as repo
+    local args
+    args=("$@")
     repo=$(basename "$url" .git)
     log="_clone-$repo-$(T).log"
     # maldito linux: -c option required for command for
     # shellcheck disable=SC2086
     if [[ ("$(under-linux)" == "1") || ("$(under-cygwin)" == "1") ]]; then
-        command script "$log" -c "git clone '$url'"
+        command script "$log" -c "git clone ${args[*]} '$url'"
     else
-        command script "$log" git clone "$url"
+        command script "$log" git clone "${args[@]}" "$url"
     fi
     #
     ls -R "$repo" >> "$log"
@@ -174,7 +195,13 @@ function run-python-script {
     # note: "tests" might be specified for script (e.g., test-python-script tests)
     local script_path="$1"
     if [ ! -e "$script_path" ]; then
-        script_path="$(which "$script_path")"
+        ## BAD: script_path="$(which "$script_path")"
+        # Uses script path based on Bash path if exists
+        local temp_script_path
+        temp_script_path="$(which "$script_path")"
+        if [ -e "$temp_script_path" ]; then
+            script_path="$temp_script_path"
+        fi
     fi
     shift
     local script_args=("$@")
@@ -261,8 +288,12 @@ function run-python-script-reset {
 }
 
 # pytest stuff
-# options: --vv: doubly verbose; --capture=no: don't capture stderr
-default_pytest_opts=(-vv --capture=no)
+## UPDATE: 05/09/2006: adds summary for all at end
+# options: --vv: doubly verbose; --capture=no: don't capture stderr; -rA: report all
+## OLD: default_pytest_opts=(-vv --capture=no -rA)
+# shellcheck disable=SC2206
+## TODO3: rework to just use PYTEST_OPTIONS
+default_pytest_opts=(${PYTEST_OPTIONS:-})
 #
 # test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
@@ -295,7 +326,9 @@ function test-python-script {
     if [ -e "$test_script" ]; then
         true;
     else
-        echo "Warning: cannnot resolve test for _$test_script" 1>&2
+        ## OLD: echo "Warning: cannnot resolve test for _$test_script" 1>&2
+        ## NOTE: Pauses before executing all tests from running due to run-python-script/pytest quirk
+        sleep-for 3 "Warning: cannot resolve test for $test_script" 1>&2
     fi
 
     # Run the test
@@ -323,6 +356,18 @@ function test-python-script-method-strict {
     shift;
     PYTEST_OPTS="--runxfail -k $method ${default_pytest_opts[*]}" test-python-script "$@";
 }
+#
+# run-main: invoke main.py with debug level 5 or higher
+## TODO3: lower debug level to 4 (e.g., Android apps stable)
+function run-main {
+    DEBUG_LEVEL="$(max "$DEBUG_LEVEL" 5)" run-python-script ./main.py;
+}
+# run-main-app: invoke main.py in background
+## NOTE: workaround for Bash quirk with subshell-specific _PSL_ due to '... &'
+## TODO3: add run-python-app
+function run-main-app {
+    let _PSL_++; _PSL_=$_PSL_ run-main &
+}
 
 # disable-python-warnings(): Ignore warning due to Pydantic quirks
 ## TODO:PYTHONWARNINGS="ignore:::pydantic"
@@ -335,19 +380,34 @@ function disable-python-warnings {
     export PYTHONWARNINGS="ignore"
 }
  
-# pip-freeze(): save pip freeze in _pip-freeze-{env_spec}-ddMMMyy.log
-## note: the ghost of python 2 lives on [WTH?!]
+# pip-freeze([env_name=""]): save pip freeze in _pip-freeze-$ENV_NAME-ddMMMyy.log,
+# where ENV_NAME defaults to virtual env root dir basename (e.g., android-py-3-11) if python3
+# is in /usr/local/misc/programs/anaconda3/envs/android-py-3-11/bin
+## TODO2: handle non-venv directories better (rather than using interactive override)
+## note: the ghost of python 2 lives on--ex: need for explicit python3 [WTH?!]
 function pip-freeze {
     # TODO2: rework via cmd-output
     local env_spec=""
-    local env_name
-    # ex: /Users/eafqe/python/.venv-nlp-py-12/bin/python => venv-nlp-py-12
-    env_name="$(which python3 | extract-matches "([^\.\/]+)\/bin\/python")"
+    local env_name="${1:-""}"
+    # derive default env name label from python bin path
+    # ex: /Users/eafqe/python/.venv-nlp-py-12/bin/python => .venv-nlp-py-12
+    if [ "$env_name" == "" ]; then
+        ## OLD: env_name="$(which python3 | extract-matches "([^\.\/]+)\/bin\/python")"
+        env_name="$(which python3 | extract-matches "([^\/]+)\/bin\/python")"
+    fi
+    if [ "$env_name" == "" ]; then
+        # note: options: -e use readline; -i initialize readline buffer; -r backslash is not an escape
+        ## TODO2: make interactive override an option
+        env_name="$(which python3 | perl -pe "s@$HOME/+@@; s@.python3?@@; s@/+@-@g;")"
+        echo "Override env label for pip-freeze affix ($env_name)?"
+        read -r -e -i "$env_name" env_name
+    fi
     if [ "$env_name" != "" ]; then
         env_spec="-$env_name"
     fi
     local freeze_file
     freeze_file="_pip-freeze${env_spec}-$(T).log"
+    freeze_file="${freeze_file//--/-}"
     rename-with-file-date "$freeze_file"
     pip3 freeze > "$freeze_file"
     echo "$freeze_file"
@@ -361,6 +421,9 @@ function venv-activate {
     which python3
     python3 --version
 }
+
+# ansifilter-typescript(arg, ...): invoke adaptive_log_filter.py with ARG(s)
+simple-alias-fn ansifilter-typescript 'alias-python-which adaptive_log_filter.py --collapse'
 
 #-------------------------------------------------------------------------------
 # Jupyter notebook stuff
@@ -466,8 +529,6 @@ function compare-notebook-scripts {
  
 # run-jupyter-notebook-pristine(port): invoke jupter notenook w/o startup config
 alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$IPYTHON_TMP" run-jupyter-notebook'
- 
- 
 
 #...............................................................................
 # Python utiities
@@ -535,6 +596,23 @@ alias extract-text-html='html_utils.py --regular'
 simple-alias-fn extract-text-html 'alias-python -m mezcla.html_utils --regular'
 alias extract-html-text='extract-text-html'
 
+# expand-timestamp(text): convert timestamps in TEXT to floating point
+# EX: expand-timestamp("in: 2026-06-25T03:52:31.9868345Z") => "in: 2026-06-25T03:52:31.9868345Z 1782373951.986834"
+#
+## TODO3
+## function convert-timestamp {
+##     alias-python -c "from mezcla.misc_utils import parse_timestamp as pts; print(pts('$*').timestamp())"
+## }
+function expand-timestamp {
+    # note: time require that cpan DateTime be installed.
+    perl -pe 'BEGIN { require "extra.perl"; }
+              s/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)/
+                $1 . " " . parse_iso_timestamp($1)/ex;'
+}
+
+#-------------------------------------------------------------------------------
+# MS Office like stuff
+
 # MS Office conversions
 function excel-to-csv {
     local file="$1"
@@ -542,7 +620,58 @@ function excel-to-csv {
     base="$(remove-extension "$file")";
     python -c "import pandas as pd; df = pd.read_excel('$file', dtype=str); df.to_csv('$base.csv', index=False, encoding='utf-8-sig');";
 }
- 
+
+
+# libreoffice-text([filename]): open LibreOffice for new text document
+# via POE Assistant
+function libreoffice-text {
+    if missing-options "$@"; then
+        function-usage --synopsis "create new LibreOffice text document (or open existing)" --example "memo-para-jefe"
+        return        
+    fi
+    local file="${1%.odt}.odt"
+
+    # Only create if missing
+    if [[ ! -e "$file" ]]; then
+        touch -- "$file"
+    fi
+    run-app libreoffice --writer "$file"
+}
+#
+## OLD/BAD:
+## libroffice-text-from-html-clipboard(filename): creates LibreOffice document from clipboard HTML data
+## # via POE Assistant
+## function libroffice-text-from-html-clipboard() {
+#
+# libreoffice-text-from-html-clipboard(filename): creates LibreOffice document from clipboard HTML data
+# via POE Assistant
+function libreoffice-text-from-html-clipboard() {
+    local base="${1%.odt}"
+    local doc_file="$base.odt"
+    local doc_exists=false
+    if [[ -e "$doc_file" ]]; then doc_exists=true; fi
+    if missing-options "$@" || $doc_exists ; then
+        function-usage --synopsis "create LibreOffice text document from clipboard" --example "$HOME/Documents/chat-google-gemini-billing"
+        $doc_exists && { printf "Error: new filename should be specified:\n    "; ls -lt -- "$doc_file"; }
+        return 1
+    fi
+    local temp_html="$TEMP/$(basename "$base.html")"
+
+    # Copy from clipboard and make sure html header included
+    rename-with-file-date "$temp_html"
+    xclip -selection clipboard -t text/html -o > "$temp_html"
+    if [ "" == "$(grep "<body>" "$temp_html")" ]; then
+        perl -i.bak -pe 's@.*@<!DOCTYPE html><html lang="en">\n$&\n</body></html>\n@;' "$temp_html"
+    fi
+
+    # Convert HTML to document and then open
+    libreoffice --headless --convert-to odt "$temp_html" --outdir "$(dirname "$base")"
+    libreoffice "$doc_file" &
+}
+alias libreoffice-from-clipboard=libreoffice-text-from-html-clipboard
+
+#-------------------------------------------------------------------------------
+
 # Github/ssh stuff
 # ssh-cache: activate ssh agent and add user's private key
 function ssh-cache {
@@ -613,11 +742,11 @@ function trace-vars {
         ## echo -n "$var="$(eval echo "\$$var")"; "
         ## TODO: value="$(eval "echo \$$var")"
         ## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
-        echo -n "$var=$(eval echo "\${$var}"); "
-        ## TODO: echo -n "$value; " 1>&2
+        ## OLD: echo -n "$var=$(eval echo "\${$var}"); "
+        echo -n "$var=$(eval echo "\${$var}"); " 1>&2
     done
-    echo
-    ## TODO: echo 1>&2
+    ## OLD: echo
+    echo 1>&2
 }
 # trace-array-vars(var, ...): trace each ARRAY in command line
 # note: output format: ARR1=(VAL11 ... VAL1n); ARR2=(VAL21 ... VAL2n);
@@ -672,8 +801,8 @@ alias-fn reset-prompt-here 'reset-prompt-label "$(basename $PWD)"'
 for label in alt NOTES; do 
     eval "alias reset-prompt-$label=\"reset-prompt-label $label\""
 done
-## TODO4: rename alt-xterm-title to alt-xterm-title-old)
-alias alt-xterm-title-new='reset-prompt-label alt'
+## OLD: ## TODO4: rename alt-xterm-title to alt-xterm-title-old)
+alias alt-xterm-title='reset-prompt-label alt'
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
 function pristine-bash {
@@ -697,13 +826,14 @@ alias-fn rename-adhoc-notes 'rename-files -q "$(get-host-nickname)-adhoc-notes" 
 # Temp file (n.b., for use with online tools like AI assistants)
 
 # copy-to-temp-as-txt(file, ...): copies file to temp and add .txt extension for braindead web upload interfaces (e.g., AI assistants)
-# note: similar to copy f ~/temp/$b.txt with touch
-# OLD: rename-files -t -regex '$' '.txt' /home/tomohara/temp/plasma-org.kde.plasma.desktop-appletsrc.v*; also copy f ~/temp and then touch
+# note: basically copy $f ~/temp/$b.txt with touch
+# TODO2: apply de-identification
 #
 function copy-to-temp-as-txt {
     local file="$1"
     local temp_file
-    global TEMP
+    ## TODO3: global TEMP
+    declare -g TEMP
     temp_file="$TEMP/$(basename "$file").txt"
     copy "$file" "$temp_file"
     touch "$temp_file"
@@ -725,9 +855,15 @@ function rename-last-snapshot {
         new_name="$new_name-$(T).png"
     fi
     local last_file
+    local pictures_dir="$HOME/Pictures"
+    if [ "$(under-cygwin)" == "1" ]; then
+        # note: there might be several Screenshots subdirs so use last (n.b., OneDrive quirk)
+        pictures_dir="$(ls -td "$HOME/Pictures/Screenshots"* | head -1)"
+    fi
     # TODO: have options to use latest file (regardless of name) 
     # shellcheck disable=SC2010
-    last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
+    ## OLD: last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
+    last_file="$(ls -t "$pictures_dir/"*.png | grep -i '/screen.*shot' | head -1)"
     move "$last_file" "$new_name"
 
     # Optionally preview result
@@ -746,34 +882,28 @@ function rename-last-snapshot {
 # fix-transcript-timestamp(file): put text on same line in YouTube transcripts in FILE
 alias-fn fix-transcript-timestamp 'perl -i.bak -pe "s/(:\d\d)\n/\1\t/;" "$@"'
 alias youtube-transcript-fix=fix-transcript-timestamp
+
 # youtube-transcript(url, file): download YoutTube transcript at URL to FILE
+# TODO1: reconcile with youtube-transcript-alt below
 function youtube-transcript {
-    # note: checks for missing filename from yt-transcript below
+    # note: checks for missing filename (see yt-transcript macro below)
     if [[ ("$2" == "") || ($2 =~ ^-.*) || ("$1" == "--help") ]]; then
-        ## OLD:
-        ## echo "Usage: youtube-transcript url file" 1>&2
-        ## echo "" 1>&2
-        ## echo "Example:" 1>&2
-        ## echo "    yt-transcript https://www.youtube.com/watch?v=miJRWAEeuUY vivobook" 1>&2
-        ## echo "" 1>&2
-        ## echo "Note: More details follow (n.b., python script interface):"  1>&2
-        ## echo "" 1>&2
-        ## TODO3: add alias for showing condensed mezcla script usage notes
-        ## OLD: alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;' 1>&2
-        echo "Usage: youtube-transcript url label"
+        echo "Usage: youtube-transcript url prefix"
         echo ""
         echo "Example:"
-        echo "    yt-transcript https://www.youtube.com/watch?v=miJRWAEeuUY vivobook"
+        echo "    yt-transcript vivobook 'https://www.youtube.com/watch?v=miJRWAEeuUY'"
         echo ""
         echo "Note:"
-        echo "- The label gets is affix of the output file:"
-        echo "    {label}-youtube-{date}.list"
+        echo "- The prefix forms basis for output file:"
+        echo "    {prefix}-youtube-{date}.list"
         echo "  where date uses ddmmmyy format."
         echo ""
         echo "- More details follow (n.b., python script interface):" 
         echo ""
         ## TODO3: add alias for showing condensed mezcla script usage notes
-        (alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;') | indent-text
+        ## OLD: (alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;') | indent-text
+        ## TODO2: alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -pe 's/^/  /g; s/    /   /g;'
+        alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -pe 's/    /  /; s/^/  /;'
         return
     fi
     local url="$1"
@@ -781,10 +911,13 @@ function youtube-transcript {
     alias-python -m mezcla.examples.youtube_transcript "$url" > "$file"
     head --verbose "$file"
 }
-# youtube-transcript-alt(): workaround for silly bash problem:
+# youtube-transcript-alt(url, file): workaround for bash problem w/ youtube-transcript
+# over URL due to missing FILE argument:
 #    $ youtube-transcript 'https://www.youtube.com/watch?v=gcgMyRfE8a4&t=247s'
 #    bash: : No such file or directory
-# This also allows for stdout instead of requiring a file.
+# Specifically, when FILE option was unspecified, the bad expansion was as follows:
+#    $ youtube-transcript 'https://www.youtube.com/...' > ""
+# This macro also allows for stdout instead of requiring a file (via use of "-").
 # TODO: check for &'s in URL and issue warning
 # DUH: The "$file" redirection was causing problems (Thanks, Grok!)
 # TODO2: check for other aliases with similar issues
@@ -802,12 +935,13 @@ function youtube-transcript-alt {
         alias-python "$(which youtube_transcript.py)" "$url" > "$file"
     fi
 }
-# yt-transcript(url, basename): download YouTube video transcript at URL and save to BASENAME-ddMMMyy.list
-# TODO3: add helper alias 
+# yt-transcript(prefix, url): download YouTube video transcript at URL and save to PREFIX-youtube-mmmyy.list
+# note: PREFIX specified before URL for better clarity; see usage under youtube-transcript macro above.
 function yt-transcript {
-    local filename="$2-youtube-$(T).list"
-    youtube-transcript "$1" "$filename"
-    ## OLD: echo $'See\n\t'"$filename"
+    local prefix="$1"
+    local url="$2"
+    local filename="$prefix-youtube-$(todays-date-mmmYY).list"
+    youtube-transcript "$url" "$filename"
 }
 
 #...............................................................................
@@ -882,6 +1016,13 @@ function create-zip-from-parent {
     popd
 }
 alias zip-from-parent=create-zip-from-parent
+alias zip-from-parent-encrypted='ENCRYPT=1 zip-from-parent'
+
+#...............................................................................
+# Unix stuff
+
+# chmod-execute([args], file): add execute permission for FILE w/ optional ARGS
+simple-alias-fn chmod-execute 'chmod --changes +x'
 
 #...............................................................................
 # Linux stuff
@@ -940,6 +1081,40 @@ alias show-window-list='wmctrl -l'
 # TODO3: strip URL args
 alias curl-save='curl --location --remote-name'
 
+# remove-path-entries(pattern): remove entries matching pattern from PATH_VAR and prune duplicate entries
+# ex: remove-path-entries "conda|anaconda"
+# ex: remove-path-entries cuda LD_LIBRARY_PATH
+# note: via Gemini-3 and POE Assistant
+function remove-path-entries {
+    if missing-options "$@"; then
+        function-usage --synopsis "remove env path var entries" --example "games"
+        return        
+    fi
+    local pattern="$1"
+    local var="${2:-PATH}"
+    local new_value
+    ## TODO3: convert to python help to allow for convenient tracing
+    new_value="$(
+        REMOVE_PATTERN="$pattern" \
+        TARGET_VAR="${!var}" \
+        perl -e '
+            my $pattern = $ENV{REMOVE_PATTERN};
+            my %seen;
+            my @parts = grep {
+                $_ ne "" &&
+                $_ !~ /$pattern/i &&
+                !$seen{$_}++
+            } split(/:/, $ENV{TARGET_VAR});
+            print join(":", @parts);
+        '
+    )"
+    
+    printf -v "$var" '%s' "$new_value"
+    ## OLD: export "$var"
+    eval 'export $var'
+}
+
+
 #...............................................................................
 # Linux admin
 
@@ -948,7 +1123,9 @@ alias free-memory='free --wide --human | grep -v Swap:'
 # clear-cache: clear disk cache
 # See https://linux-mm.org/Drop_Caches and https://www.linuxatemyram.com
 # TODO: get this to work completely; explain Admin filter
-simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
+## OLD: simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
+## NOTE: 71 is ANSI color index for mediumseagreen (#5faf5f)
+simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory | colout "free" 71'
 
 #...............................................................................
 # Emacs related
@@ -1005,7 +1182,8 @@ simple-alias-fn test-audio 'start /usr/share/sounds/Yaru/stereo/complete.oga'
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
 #
 alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
-alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
+## OLD: alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
+alias all-tomohara-aliases='ALIASES_PROCESSED=0 source $TOM_BIN/all-tomohara-aliases-etc.bash'
 alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
 #
 # note: kill-em targets process name, and kill-it uses pattern (hence riskier)

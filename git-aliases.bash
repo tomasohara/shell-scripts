@@ -16,7 +16,6 @@
 #   git-update-plus                  # git-pull with stashed changes
 #
 #   git-commit-and-push file...      # commits file and pushes to remote
-#
 #...............................................................................
 # Notes:
 #
@@ -65,22 +64,23 @@
 #   -- obsolete
 #      GIT_USER                  user ID for authentication
 #      GIT_TOKEN                 user token from Github
-#   GIT_NO_CONFIRM               omit confirmation (used is automated tests)
+#   GIT_AUTO_NEXT                automatically proceed with next checkin
 #   GIT_FORCE                    force an operation (e.g., git add ignored file)
 #   GIT_LOG_DIR                  where to put command logs (e.g, log-files)
+#   GIT_NO_CONFIRM               omit confirmation (used is automated tests)
 #   GIT_SKIP_ADD                 skip implicit 'git add' in git-add-commit-push
 #   GIT_SKIP_PUSH                skip 'git push' after commit
 #   GIT_TEST_MESSAGE             commit message if GIT_NO_CONFIRM used
-#   GIT_AUTO_NEXT                automatically proceed with next checkin
+#   GIT_TIME_DIFF                add time difference to output (n.b., poor man's profiler)
 #   PAGER                        less (or more)
 #
 # - maldito shellcheck:
 #   SC2002 [Useless cat. Consider 'cmd < file | ..' or 'cmd file | ..' instead]
 #   SC2016 [Expressions don't expand in single, use double]
+#   SC2028 [Echo may not expand escape sequences. Use printf.]
 #   SC2086 [Double quote to prevent globbing and word splitting]
 #
 # - By the way, "maldito" is Spanish for "damn", which is a mild expletive in English.
-#
 #................................................................................
 # Examples:
 # TODO2: show the corresponding alias; also move git-mv example later to this section)
@@ -99,7 +99,6 @@
 # 1. git add - this stages your changes for committing
 # 2. git commit - this commits your staged changes locally
 # 3. git push - this pushes your committed changes to a remote
-#
 #...............................................................................
 # based on https://stackoverflow.com/questions/2641146/handling-file-renames-in-git:
 #
@@ -111,7 +110,13 @@
 #     git commit -m "renamed old-file to new-file"
 # 3: push this change to the remote server
 #     git push
+#................................................................................
+# Deleting file from repo:
+#   git rm old-file
+#   git commit -m "deleted old-file"
+#   git push
 #
+# See https://stackoverflow.com/questions/2047465/how-do-i-delete-a-file-from-a-git-repository.
 #...............................................................................
 # Steps in fleshing out empty repo (just created via Github)
 #  - via https://github.com/tomasohara/temporary-repo:
@@ -154,6 +159,43 @@ PERL="perl -Ssw"     # S: find in path; s: enable switches; w: show warnings
 #................................................................................
 # Aliases
 
+# echo-plus(arg, ...): wrapper around echo command with ARG, used for optional diagnostics.
+# For example, when GIT_TIME_DIFF set, this shows time since last command.
+# Warning: *** Intended for output at various milestones so that time diff meaningful;
+# however, as it might lead to evaluation issues due to interpolation or eval,
+# plain echo should be used instead (e.g., git-checkin-single-template and supporting macros).
+# note: via Codex 5.3
+function echo-plus {
+    local now_ns diff_ns sec nsec diff
+    declare -f last_time_ns
+    local use_git_time_diff="${GIT_TIME_DIFF:-0}"
+    ## DEBUG: trace-vars use_git_time_diff
+
+    if [ "$use_git_time_diff" != "0" ]; then
+        now_ns=$(date +%s%N)
+
+        if [[ -n "${last_time_ns:-0}" ]]; then
+            diff_ns=$(( now_ns - last_time_ns ))
+            sec=$(( diff_ns / 1000000000 ))
+            nsec=$(( diff_ns % 1000000000 ))
+            printf -v diff '%d.%09d' "$sec" "$nsec"
+        else
+            diff="0.000000000"
+        fi
+
+        # Note: Uses stderr for diagnostics to avoid incorporation into templates
+        ## BAD: command echo "$@" "[diff=${diff}s]"
+        command echo "$@"
+        command echo -e "\t[diff=${diff}s]" 1>&2
+        # optional extra diagnostics:
+        # command echo -e "time_ns=$now_ns\nlast_ns=${last_time_ns:-<unset>}\ndiff=$diff" >&2
+
+        last_time_ns=$now_ns
+    else
+        command echo "$@"
+    fi
+}
+
 # git-pause-for-enter(): print message and wait for user to press enter
 # TODO: extend to press-any-key; see
 #    https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
@@ -164,7 +206,7 @@ function git-pause-for-enter () {
     # Maldito shellcheck: SC2162 [read without -r will mangle backslashes].
     # shellcheck disable=SC2162
     if [ "$GIT_NO_CONFIRM" = "1" ]; then
-        echo "GIT_NO_CONFIRM set to 1, so skipping confirmation"
+        echo-plus "GIT_NO_CONFIRM set to 1, so skipping confirmation"
     else 
         read -p "$message "
     fi
@@ -183,6 +225,17 @@ function quiet-unalias-alias {
     unalias "$@" 2> /dev/null || true;
 }
 
+# alias-function(name, command, ...): define NAME alias via function def w/ COMMAND ...
+# NOTE: This is a simplified version of simple-alias-fn from tomohara-aliases.bash
+# intended as replacement for 'alias name=command' usages.
+# It takes the alias name and a command, appending "$@" to the command.
+function alias-function {
+    local alias="$1"
+    shift
+    local command="$*"
+    eval "function $alias { $command" '"$@"' "; }"
+}
+
 # HACK: wrapper around check_errors.perl w/ new QUIET option
 function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 $PERL check_errors.perl -context=5 "$@") 2>&1; }
 
@@ -195,19 +248,22 @@ function get-temp-log-name {
     local label=${1:-temp}
     local now_mmddyyhhmm
     # note: done each time in case user cd's to a different directory
-    local LOG_DIR="${GIT_LOG_DIR:-./log-files}"
-    mkdir --parents "$LOG_DIR"
+    ## OLD: local LOG_DIR="${GIT_LOG_DIR:-./log-files}"
+    ## NOTE: global so that default stored in environment
+    declare -g GIT_LOG_DIR
+    GIT_LOG_DIR="${GIT_LOG_DIR:-./log-files}"
+    mkdir --parents "$GIT_LOG_DIR"
     now_mmddyyhhmm=$(date '+%d%b%y-%H%M' | downcase-stdin-alias);
     # TODO: use integral suffix (not hex)
     local log_file
-    log_file=$(mktemp "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log")
+    log_file=$(mktemp "$GIT_LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log")
     ## TEMP: rename existing temp file (MacOs quirk?)
-    if [ -s "$LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log" ]; then
-        echo "FYI: applying get-temp-log-name workaround"
+    if [ -s "$GIT_LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log" ]; then
+        echo-plus "FYI: applying get-temp-log-name workaround"
         rename-with-file-date "$log_file"
         touch "$log_file"
     fi
-    echo "$log_file"
+    echo-plus "$log_file"
 }
 
 # git-alias-review-log(file): review log FILE checking for common errors
@@ -218,8 +274,8 @@ function git-alias-review-log {
     local errors
     errors=$(get-log-errors "$log")
     if [ "$errors" != "" ]; then
-        echo "*** Error(s):"
-        echo "$errors"
+        echo-plus "*** Error(s):"
+        echo-plus "$errors"
         local status=1
     fi
     tail "$log" | cat | truncate-width;
@@ -236,7 +292,7 @@ function git-alias-review-log {
 function git-update-plus {
     if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
        set-global-credentials
-       echo "GIT_USER: $GIT_USER;  GIT_TOKEN: $GIT_TOKEN"
+       echo-plus "GIT_USER: $GIT_USER;  GIT_TOKEN: $GIT_TOKEN"
     fi
     #
     local log
@@ -253,9 +309,9 @@ function git-update-plus {
 
         # Require force to perform update when there are changed files
         local git_force="${GIT_FORCE:-0}"
-        ## DEBUG: echo "git-update-plus: git_force=$git_force"
+        ## DEBUG: echo-plus "git-update-plus: git_force=$git_force"
         if [ "$git_force" = "0" ]; then
-            echo "Error: Use 'git-update-force' to update with changed files (n.b., potential for conflicts)"
+            echo-plus "Error: Use 'git-update-force' to update with changed files (n.b., potential for conflicts)"
             return
         fi
             
@@ -265,58 +321,59 @@ function git-update-plus {
             local root_dir
             root_dir="$(git-root-alias)"
             if [ "$PWD" != "$root_dir" ]; then
-                echo "Temporarily changing working directory to root: $root_dir"
+                echo-plus "Temporarily changing working directory to root: $root_dir"
                 restore_dir="$PWD"
                 cd "$(git-root-alias)"
             fi
 
             # Create zip (-v for verbose & -y for symlinks)
             command rm -f _stash.zip
-            echo "issuing: zip over changed files (for later restore)"
-            echo "git-diff-list | zip -v -y -@ _stash.zip" >> "$log" 2>&1
+            echo-plus "issuing: zip over changed files (for later restore)"
+            echo-plus "git-diff-list | zip -v -y -@ _stash.zip" >> "$log" 2>&1
             git-diff-list | zip -v -y -@ _stash.zip >> "$log" 2>&1
         else
             # note: zip options: -y retain links; -v verbose
-            echo "Not zipping changes because PRESERVE_GIT_STASH not 1"
+            echo-plus "Not zipping changes because PRESERVE_GIT_STASH not 1"
         fi
     else
-        echo "No changed files so no pre-stash-pop timestamp check"
+        echo-plus "No changed files so no pre-stash-pop timestamp check"
     fi
 
     # Do the stash[-push]/pull/stash-pop
-    echo "issuing: git stash"
+    echo-plus "issuing: git stash"
     git stash >> "$log" 2>&1
-    echo "issuing: git pull --all --verbose"
+    echo-plus "issuing: git pull --all --verbose"
     git pull --all --verbose >> "$log" 2>&1
-    if [ $? -ne 0 ]; then
-        echo "Warning: problem with pull (status=$?)"
+    local status=$?
+    if [ $status -ne 0 ]; then
+        echo-plus "Warning: problem with pull (status=$status)"
     fi
-    echo "issuing: git stash pop"
+    echo-plus "issuing: git stash pop"
     git stash pop >> "$log" 2>&1
 
     # Optionally restore timestamps for changed files
     if [ "$changed_files" != "" ]; then
         if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
-            echo "issuing: unzip over _stash.zip (to restore timestamps)"
+            echo-plus "issuing: unzip over _stash.zip (to restore timestamps)"
             # note: unzip options: -o overwrite; -v verbose:
-            echo "unzip -v -o _stash.zip" >> "$log"
+            echo-plus "unzip -v -o _stash.zip" >> "$log"
             unzip -v -o _stash.zip >> "$log" 2>&1
             
             # Restore working directory
             if [ "$restore_dir" != "" ]; then
-                echo "Restoring working directory: $restore_dir"
+                echo-plus "Restoring working directory: $restore_dir"
                 cd "$restore_dir"
             fi
         else
-            echo "Not unzipping changes (because PRESERVE_GIT_STASH not 1)"
+            echo-plus "Not unzipping changes (because PRESERVE_GIT_STASH not 1)"
         fi
     else
-        echo "No changed files so no post-stash-pop timestamp check"
+        echo-plus "No changed files so no post-stash-pop timestamp check"
     fi
 
     # Show end of log
     # TODO: filter unzip output
-    echo >> "$log"
+    echo-plus >> "$log"
     git-alias-review-log "$log"
 }
 
@@ -333,7 +390,7 @@ function git-update-verified {
     local changed
     changed="$(git-diff-list)"
     if [ "$changed" != "" ]; then
-        echo "Current changes: $changed"
+        echo-plus "Current changes: $changed"
         git-pause-for-enter "Proceed with update even though potential for conflict? (Enter for Y otherwise ^C)"
     fi
     git-update-force
@@ -368,12 +425,12 @@ function set-global-credentials {
     local credentials_file="_my-git-credentials-etc.bash.list"
     # Note: check stored credentials
     if [[ -e ~/.git-credentials ]]; then
-        echo "Using git-based credentials via ~/.git-credentials"
+        echo-plus "Using git-based credentials via ~/.git-credentials"
     else
-        echo "Warning: use deprecated credentials file sourcing"
+        echo-plus "Warning: use deprecated credentials file sourcing"
         for dir in . ~; do
             if [[ ($GIT_USER = "") && (-e "$dir/$credentials_file") ]]; then
-                echo "Sourcing credentials ($dir/$credentials_file)"
+                echo-plus "Sourcing credentials ($dir/$credentials_file)"
                 source "$dir/$credentials_file"
                 break
             fi
@@ -395,38 +452,38 @@ function git-add-commit-push {
     # TODO: rework so that message passed as argument (to avoid stale messages from environment)
     local message="${GIT_MESSAGE:-...}"
     if [ "$message" = "..." ]; then 
-        echo "Error: '...' or '' not allowed for commit message"
-        echo "This avoids to avoid cut-n-paste error (e.g., [G]IT_MESSAGE-typo)"
+        echo-plus "Error: '...' or '' not allowed for commit message"
+        echo-plus "This avoids to avoid cut-n-paste error (e.g., [G]IT_MESSAGE-typo)"
         return 1
     fi
     #
     if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
        set-global-credentials
-       echo "GIT_USER: $GIT_USER;  GIT_TOKEN: $GIT_TOKEN"
+       echo-plus "GIT_USER: $GIT_USER;  GIT_TOKEN: $GIT_TOKEN"
     fi
     #
     local dir
     if [ "$file_spec" = "" ]; then
-        echo "Warning: *** No file specified (cuidado!)"
+        echo-plus "Warning: *** No file specified (cuidado!)"
     elif [ "${GIT_SKIP_ADD:-0}" = "1" ]; then
-        echo "skipping: git add $*"
+        echo-plus "skipping: git add $*"
     else
-        echo "issuing: git add" "$@"
+        echo-plus "issuing: git add" "$@"
         git-add-plus "$@" >> "$log" 2>&1
     fi
 
     # Push the changes after showing synopsis and getting user confirmation
-    echo ""
+    echo-plus ""
     git-pause-for-enter "About to commit $file_spec (with message '$message')"
-    echo "issuing: git commit -m '$message'"
+    echo-plus "issuing: git commit -m '$message'"
     git commit -m "$message" >> "$log" 2>&1
     perl -pe 's/^/    /;' "$log"
     #
     if [ "${GIT_SKIP_PUSH:-0}" == "1" ]; then
-        echo "Skipping push (due to GIT_SKIP_PUSH)"
+        echo-plus "Skipping push (due to GIT_SKIP_PUSH)"
     else    
         git-pause-for-enter 'FYI: About to push, so review commit log above.'
-        echo "issuing: git push --verbose"
+        echo-plus "issuing: git push --verbose"
         if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
            git push --verbose <<EOF >> "$log" 2>&1
 $GIT_USER
@@ -436,14 +493,14 @@ EOF
            git push --verbose >> "$log" 2>&1
         fi
     fi
-    echo >> "$log"
+    echo-plus >> "$log"
 
     # Sanity check
     git-alias-review-log "$log"
 }
 #
 # note: following for backward compatibility
-simple-alias-fn git-commit-and-push git-add-commit-push
+alias-function git-commit-and-push git-add-commit-push
 
 
 # git-update-commit-push(file, ...): updates local repo and then commits FILE... to global repo
@@ -451,11 +508,12 @@ simple-alias-fn git-commit-and-push git-add-commit-push
 function git-update-commit-push {
     # DEBUG: set -o xtrace
     git-update-force
-    if [ $? -ne 0 ]; then
-        echo "Warning: consider canceling given possible update error (status=$?)"
+    local status=$?
+    if [ $status -ne 0 ]; then
+        echo-plus "Warning: consider canceling given possible update error (status=$status)"
     fi
     git-commit-and-push "$@"
-    # DEBUG: set - -o xtrace
+    # DEBUG: set +o xtrace
 }
 #
 # git-update-commit-push-all(): adds all files for checkin
@@ -468,7 +526,7 @@ function invoke-git-command {
     shift
     local log
     log=$(get-temp-log-name "$command")
-    echo "issuing: git $command $*"
+    echo-plus "issuing: git $command $*"
     git "$command" "$@" >> "$log" 2>&1
     ## PREVIOUS: less
     ## NOTE: unfortunately, less clears the screen
@@ -478,13 +536,13 @@ function invoke-git-command {
 }
 # TODO: git-command => git-command-alias
 alias git-command='invoke-git-command'
+alias git-cmd=git-command
 ## TODO3: git-push-plus => git-push-alias (as simple wrapper)
-## OLD: alias git-push-plus='invoke-git-command push'
 alias git-push-alias='invoke-git-command push'
 alias git-pull-alias='invoke-git-command pull'
 
 # Misc git commands (redirected to log file)
-# NOTE: commands with much output like git-log invoke less
+# NOTE: commands with much output like git-log-plus invoke less
 # TODO: add invoke-git-command-paged wrapper (a la git ... | less)
 alias git-status='invoke-git-command status'
 function git-log-plus { invoke-git-command log --name-status "$@" | less --quit-if-one-screen; }
@@ -493,6 +551,8 @@ alias git-log-diff-plus='invoke-git-command log --patch'
 alias git-log-follow='git-log-plus --follow'
 alias git-blame-alias='invoke-git-command blame'
 alias git-rm-alias='invoke-git-command rm'
+alias git-checkout-alias='invoke-git-command checkout'
+alias git-branch-plus='git-command branch -vv'
 
 # git-add-plus: add filename(s) to repository
 # note: if GIT_FORCE is 1 then --force added (e.g., to override .gitignore)
@@ -526,36 +586,36 @@ function git-reset-file {
     ##     git-pause-for-enter $'Warning: reset --hard changes the both index and working tree!\nPress enter to proceed'
     ## fi
     if [ "$*" = "" ]; then
-        echo "Error: need to specify a file"
+        echo-plus "Error: need to specify a file"
         return 1
     fi
 
     # Isolate old versions
     mkdir -p _git-trash >> "$log" 2>&1;
-    echo "issuing: cp -vpf $* _git-trash";
+    echo-plus "issuing: cp -vpf $* _git-trash";
     # Note: Uses  'command cp' to avoid confirmation when same file already in trash.
     # This is a design decision since resets aren't common (e.g., vs. timestamping trash files).
     command cp -vpf "$@" _git-trash >> "$log" 2>&1;
 
     # Forget state
-    echo "issuing: git reset HEAD $*";
+    echo-plus "issuing: git reset HEAD $*";
     git reset HEAD "$@" >> "$log" 2>&1;
     ## TODO: git reset HEAD $reset_options "$@" >> "$log" 2>&1;
     ## NOTE: leads to "Cannot do hard reset with paths" error
     
     # Re-checkout
     # TODO: add option for 'git checkout HEAD -- ...'???
-    echo "issuing: git checkout -- $*";
+    echo-plus "issuing: git checkout -- $*";
     git checkout -- "$@" >> "$log" 2>&1;
 
     # Issue warning if stash non-empty
-    echo "issuing: git stash list"
+    echo-plus "issuing: git stash list"
     local stash
     stash=$(git stash list)
     if [ "$stash" != "" ]; then
-        echo "Warning: non-empty stash:"
-        echo "$stash" | perl -pe 's/^/    /;'
-        echo "Consider issuing following: git stash drop"
+        echo-plus "Warning: non-empty stash:"
+        echo-plus "$stash" | perl -pe 's/^/    /;'
+        echo-plus "Consider issuing following: git stash drop"
     fi
 
     # Sanity check
@@ -582,13 +642,13 @@ function git-restore-file-helper {
 
     # Isolate old versions
     mkdir -p _git-trash >> "$log" 2>&1;
-    echo "issuing: cp -vpf $* _git-trash";
+    echo-plus "issuing: cp -vpf $* _git-trash";
     # Note: Uses  'command cp' to avoid confirmation when same file already in trash.
     # This is a design decision since restores aren't common (e.g., vs. timestamping trash files).
     command cp -vpf "$@" _git-trash >> "$log" 2>&1;
 
     # Restore working tree files
-    echo "issuing: git restore $option $*";
+    echo-plus "issuing: git restore $option $*";
     # shellcheck disable=SC2086
     git restore $option "$@" >> "$log" 2>&1;
     
@@ -618,26 +678,53 @@ function unescape-at-sign {
 # Note:
 # - Normalizes the listing such as by changing a/<path> to a: <path> and likwise for b.
 # - The optional FILES-ETC are passed along to git-diff command.
+#
+# ex: git-diff-plus HEAD~1 tomohara-aliases.bash
+#
+# Note: See gitrevisions(7) for details on revision syntax.
+#
+# FUTURE WORK: Expose useful git revision/diff features (e.g., passing HEAD~1)
+# transparently to other alias wrappers such as git-difftool-plus,
+# git-vdiff-alias, and the git-checkin-* templates.
+#
+# TODO2: Refactor the revision parsing logic (using git rev-parse) into a helper
+# function to make it reusable in other git-xyz-plus wrappers.
 function git-diff-plus {
     local log;
     log=$(get-temp-log-name "diff");
     # Perform diff and convert a/ and /b path prefixes to 'a: ' and 'b: '
-    # ex: diff --git a/.github/act.yml b/.github/... => "diff --git a: .github/,,,"
+    # ex: diff --git a/.github/act.yml b/.github/... => "diff --git a: .github/..."
     # ex: --- "a/.github/act.yml" => "--- a: .github/act.yml"
     ## TODO? (account for subdirectories 'a' or 'b'):
     ## git diff "$@" | perl -pe 's@^(diff|\-\-\-|\+\+\+) (?!.*[ab]/.*)([ab])/@\1\2 \3: @;' >| "$log";
     ## Note:
     ## - Uses git-diff-list[-template] so file order reflects subdir embedding level.
     ## - The 'diff -- file' format is used in case of spaces or other special characters.
+
+    local -a git_args=()
+    local seen_dash_dash=0
+    for arg in "$@"; do
+        if [[ "$arg" == "--" ]]; then
+            seen_dash_dash=1
+        elif [[ $seen_dash_dash -eq 1 ]]; then
+            continue
+        elif [[ "$arg" == -* ]]; then
+            git_args+=("$arg")
+        elif git rev-parse --verify --quiet "$arg^{commit}" >/dev/null 2>&1 || \
+             git rev-parse --verify --quiet "$arg^{tree}" >/dev/null 2>&1 || \
+             git rev-parse --verify --quiet "$arg^{blob}" >/dev/null 2>&1; then
+            git_args+=("$arg")
+        fi
+    done
+
     local OLDIFS="$IFS"                 # save inter-field separator
     IFS=$'\n'
-    echo "" >| "$log"
+    echo-plus "" >| "$log"
     for f in $(git-diff-list "$@"); do
-        ## OLD: git diff -- "$f" | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@\1\2 \3: @g) {}' >> "$log" 2>&1
         ## TODO:
         ## local f_escape
         ## f_escape="$(echo "$f" | perl -pe 's/@/\\@/g;')"
-        git diff -- "$f" | escape-at-sign | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@$1$2 $3: @g) {}' | unescape-at-sign >> "$log" 2>&1
+        git diff "${git_args[@]}" -- "$f" | escape-at-sign | perl -pe 'while(s@^(diff|\-\-\-|\+\+\+)(.*) ([ab])/@$1$2 $3: @g) {}' | unescape-at-sign >> "$log" 2>&1
     done
     IFS="$OLDIFS"                       # restore inter-field separator
     #
@@ -655,7 +742,7 @@ function git-diff-plus {
 #
 function git-difftool-plus {
     ## TODO: add trace-command function
-    ## TODO: echo "issuing: git difftool --no-prompt ..." 1>&2
+    ## TODO: echo-plus "issuing: git difftool --no-prompt ..." 1>&2
     git difftool --no-prompt "$@";
 }
 #
@@ -663,7 +750,7 @@ function git-difftool-plus {
 # TODO: see if way to have functions trump aliases
 #
 function git-vdiff-alias {
-    ## DEBUG: echo in git-vdiff;
+    ## DEBUG: echo-plus in git-vdiff;
     git-difftool-plus "$@" &
     }
 
@@ -676,6 +763,7 @@ function git-vdiff-alias {
 #   where -F'/' sets the field separator to /; awk splits line and prints the depth (i.e., #/'s - 1) plus line;
 #   it then sorts the output and removes the depth count.
 # - Additional arguments passed along to git-diff (e.g., specific filenames or commits)
+# - Warning: *** Templates should not use echo-plus to avoid having diagnostics in template output.
 #
 function git-diff-list-template {
     declare -g diff_list_file
@@ -685,11 +773,11 @@ function git-diff-list-template {
     # ex: "diff --git a/tomohara-aliases.bash b/tomohara-aliases.bash" => "tomohara-aliases.bash:
     # TODO: ex: "diff --cc mezcla/data_utils.py" => "mezcla/data_utils.py"
     ## TODO3: rework to avoid shellcheck warning [SC2028 (info): echo may not expand escape sequences. Use printf.]
-    # shellcheck disable=SC2028
     ## BAD:
-    ## echo "git diff --name-only | awk -F'/' '{ print NF-1 \"\t\" \$0 }' | sort --key=1 --numeric-sort | cut -f2- >| \$diff_list_file"
-    # note: sometime duplicate entries are produced, so uniq used
+    ## echo-plus "git diff --name-only | awk -F'/' '{ print NF-1 \"\t\" \$0 }' | sort --key=1 --numeric-sort | cut -f2- >| \$diff_list_file"
+    # note: sometimes duplicate entries are produced, so uniq used
     # TODO2: handle filenames with spaces
+    # shellcheck disable=SC2028
     echo "git diff --name-only" "$@" "| awk -F'/' '{ print NF-1 \"\t\" \$0 }' | sort --key=1 --numeric-sort | cut -f2- | uniq >| \$diff_list_file"
 }
 function git-diff-list {
@@ -710,12 +798,12 @@ function git-diff-list {
     pwd="$(realpath ".")"
     ## TODO: pwd="$(realpath --relative-to="$root" ".")"
     # note: Uses case insenstive matching for sake of Windows
-    # shellcheck disable=SC2002
-    ## OLD: cat "$diff_list_file" | escape-at-sign | perl -pe "s@^@$root/@i;" | perl -pe "s@^$pwd/?@@i;" | perl -pe "s@^$root/?@\\\$\(git-root-alias\)/@i;"
-    local pwd_esc git_root_esc;
+    local pwd_esc root_esc;
+    ## OLD: local pwd_esc git_root_esc;
     pwd_esc="$(echo -n "$pwd" | escape-at-sign)"
     ## TODO2:
     root_esc="$(git-root-alias | escape-at-sign)"
+    # shellcheck disable=SC2002
     cat "$diff_list_file" | escape-at-sign | perl -pe "s@^@$root_esc/@i;" | perl -pe "s@^${pwd_esc}/?@@i;" | unescape-at-sign;
     ## TEST: cat "$diff_list_file" | escape-at-sign | perl -pe "s@^@$root/@i;" | perl -pe "s@^$pwd_esc/?@@i;" | perl -pe "s@^$root_esc/?@\\\$\(git-root-alias\)/@i;" | unescape-at-sign;
 }
@@ -735,13 +823,14 @@ function git-checkin-single-template {
 function git-checkin-multiple-template {
     git-checkin-template-aux
     echo "# To generate template from above diff for individual check-in's:"
-    echo "cat \$diff_list_file | xargs -I \"{}\" echo GIT_MESSAGE=\\\"...\\\" git-update-commit-push \"{}\""
+    echo "cat \$diff_list_file | xargs -I \"{}\" echo-plus GIT_MESSAGE=\\\"...\\\" git-update-commit-push \"{}\""
 }
 #
 function git-checkin-all-template {
     git-checkin-template-aux
     echo "# To do shamelessly lazy check-in of all modified files:"
-    echo "echo GIT_MESSAGE=\'misc. update\' git-update-commit-push \$(cat \$diff_list_file)"
+    # shellcheck disable=SC2028
+    echo "echo-plus GIT_MESSAGE=\'misc. update\' git-update-commit-push \$(cat \$diff_list_file)"
 }
 
 # invoke-next-single-checkin: outputs and runs the next single-checking template
@@ -782,11 +871,11 @@ function alt-invoke-next-single-checkin {
     is_text=$(file "$mod_file" | $egrep -i ':.*(text|JSON|UTF-8)')
     ## HACK: add special case exceptions
     if [ "$is_text" = "" ]; then
-        case "$mod_file" in *.css | *.csv | *.html | *.ipynb | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for braindead file command (known program extension in $mod_file)" ;; esac
+        case "$mod_file" in *.css | *.csv | *.html | *.ipynb | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for brain-dead file command (known program extension in $mod_file)" ;; esac
     fi;
     if [ "$is_text" != "" ]; then
         if [ "$GIT_NO_CONFIRM" = "1" ]; then
-            echo "GIT_NO_CONFIRM enabled, so skipping difftool (e.g., for visual diff)"
+            echo-plus "GIT_NO_CONFIRM enabled, so skipping difftool (e.g., for visual diff)"
         else
             # note: pauses a little so that user can update cursor before focus shifts
             # TODO: see how to keep focus on terminal window for git update
@@ -796,18 +885,18 @@ function alt-invoke-next-single-checkin {
         fi
     else
         ## TODO: summarize binary differenecs
-        echo "Note: binary file so bypassing diff"
-        ## OLD: git diff --numstat "$mod_file" | head
+        echo-plus "Note: binary file so bypassing diff"
         git diff --numstat -- "$mod_file" | head
         true
     fi
-    local prompt="GIT_MESSAGE=\"...\" git-update-commit-push \"$mod_file\""
+    # note: Uses single quote to avoid interpolating variable references (e.g., $- or $TRACE)'.
+    local prompt="GIT_MESSAGE='...' git-update-commit-push \"$mod_file\""
     local command
-    echo "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
+    echo-plus "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
     local OLD_GIT_MESSAGE=$GIT_MESSAGE
     # note: options: -e use readline; -i initialize readline buffer; -r backslash is not an escape
     if [ "$GIT_NO_CONFIRM" = "1" ]; then 
-        echo "GIT_NO_CONFIRM set to 1, so skipping git-update-commit-push confirmation"
+        echo-plus "GIT_NO_CONFIRM set to 1, so skipping git-update-commit-push confirmation"
         export GIT_MESSAGE=${GIT_TEST_MESSAGE:-"default"}
         command="git-update-commit-push \"$mod_file\""
     else 
@@ -816,8 +905,8 @@ function alt-invoke-next-single-checkin {
     # Evaluate the user's checkin command
     # TODO: rework using a safer approach with reading checking comment and issuing git-update-commit-push directly
     ## DEBUG:
-    ## echo "Running (n,b, *** be careful nothing lost ***):"
-    ## echo "   $command"
+    ## echo-plus "Running (n,b, *** be careful nothing lost ***):"
+    ## echo-plus "   $command"
     eval "$command"
 
     # Restore message
@@ -835,7 +924,6 @@ function invoke-alt-checkin { alt-invoke-next-single-checkin "$1"; }
 # Various miscellaneous aliases
 alias git-template=git-alias-usage
 alias git-template-misc=git-misc-alias-usage
-## OLD: alias git-root-alias='git rev-parse --show-toplevel'
 function git-root-alias {
     local root
     root=$(git rev-parse --show-toplevel)
@@ -844,24 +932,27 @@ function git-root-alias {
         ## OLD" root=$(echo "$root" | perl -pe 's@([a-z]):@/\1@i;')
         root=$(echo -n "$root" | escape-at-sign | perl -pe 's@([a-z]):@/$1@i;' | unescape-at-sign)
     fi
-    echo $root
+    echo-plus "$root"
 }
 alias git-cd-root-alias='cd $(git-root-alias)'
 alias git-invoke-next-single-checkin=invoke-next-single-checkin
-# NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
-# shellcheck disable=SC2139
-alias-fn git-alias-refresh "source '${BASH_SOURCE[0]}'"    # bash idiom for current script filename
-simple-alias-fn git-refresh-aliases 'git-alias-refresh'
-simple-alias-fn git-next-checkin 'invoke-alt-checkin'      # uses alt-invoke-next-single-checkin
-simple-alias-fn git-extract-all-versions 'extract-all-git-versions.bash'
+## BAD:
+## # NOTE: squashes maldito shellcheck warning (i.e., SC2139: This expands when defined)
+## # shellcheck disable=SC2139
+## alias-function git-alias-refresh "source '${BASH_SOURCE[0]}'"    # bash idiom for current script filename
+function git-alias-refresh {
+    source "${BASH_SOURCE[0]}"    # bash idiom for current script filename
+}
+alias-function git-refresh-aliases 'git-alias-refresh'
+alias-function git-next-checkin 'invoke-alt-checkin'      # uses alt-invoke-next-single-checkin
+alias-function git-extract-all-versions 'extract-all-git-versions.bash'
 ## TEST: hide tracing output alias git-next-checkin='invoke-alt-checkin 2> /dev/null'
 # git-tar-repo(): create tar archive of entire repo
 alias git-tar-repo=tar-this-dir-dated
 # git-tar-repo-proper(): create tar archive of repo excluding .git
 # note: this is to create backup before updating repo (in case of conflicts)
-## OLD: alias git-tar-repo-proper='TAR_FILTER="\.git\b" tar-this-dir-dated'
 function git-tar-repo-proper {
-    (echo "FYI: Omitting .git from backup"; TAR_FILTER="\.git\b" tar-this-dir-dated) 2>&1 | less;
+    (echo-plus "FYI: Omitting .git from backup"; TAR_FILTER="\.git\b" tar-this-dir-dated) 2>&1 | less;
 }
 #
 # TODO2: add some type of confirmation
@@ -875,8 +966,8 @@ function git-checkout-branch {
     log=$(realpath "$(get-temp-log-name 'update')")
     # TODO2: define helper function for usage
     if [[ ("$branch" = "") || ("$branch" == "--help") ]]; then
-        echo "usage: git-checkout-branch [--help | branch]"
-        echo "note: available branches:"
+        echo-plus "usage: git-checkout-branch [--help | branch]"
+        echo-plus "note: available branches:"
         # TODO: get maldito git to cooperate better (e.g., plain text option)!
         # shellcheck disable=SC2016
         PAGER="" git branch --all | $PERL extract_matches.perl -replacement='    $1' 'remotes/origin/(\S+)$'
@@ -887,26 +978,26 @@ function git-checkout-branch {
     if [ "$branch_ref" -gt 0 ]; then
         # Do the stash[-push]/checkout/stash-pop
         # TODO: use 'git switch'
-        echo "issuing: git stash"
+        echo-plus "issuing: git stash"
         git stash >> "$log" 2>&1
         # note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
         git-command checkout "$branch" --  >> "$log" 2>&1
-        echo "issuing: git stash pop"
+        echo-plus "issuing: git stash pop"
         git stash pop >> "$log" 2>&1
     else
-        echo "Error: unknown branch '$branch'"
+        echo-plus "Error: unknown branch '$branch'"
     fi;
 
     # Show end of log
     git-alias-review-log "$log"
 }
-simple-alias-fn git-branch-checkout  git-checkout-branch 
+alias-function git-branch-checkout  git-checkout-branch 
 
 # git-branch-alias(): return current branch for repo
 function git-current-branch {
     local git_branch
     git_branch="$(git status | $PERL extract_matches.perl "On branch (\S+)")"
-    echo "$git_branch"
+    echo-plus "$git_branch"
 }
 alias git-branch-alias='git-current-branch'
 
@@ -915,7 +1006,7 @@ function git-conflicts-alias {
     ## TODO3: get ls-tree to show output relative to current subdirectory
     local restore_dir="$PWD"
     git-cd-root-alias
-    git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename '^<<<<<<<' {};
+    git ls-tree -r --full-tree --name-only HEAD | xargs -I '{}' grep --with-filename --directories=skip '^<<<<<<<' {};
     cd "$restore_dir"
 }
 
@@ -927,7 +1018,7 @@ function git-toggle-push {
     else
         GIT_SKIP_PUSH=1
     fi
-    echo "GIT_SKIP_PUSH=$GIT_SKIP_PUSH"
+    echo-plus "GIT_SKIP_PUSH=$GIT_SKIP_PUSH"
 }
 
 # git-ls-tree-relative([tree_ish=HEAD]): shows repo files relative to current dir
@@ -936,11 +1027,32 @@ function git-ls-tree-relative {
     local tree_ish="${1:-HEAD}"
     local depth=$(git rev-parse --show-prefix | tr -cd '/' | wc -c);
     local up=""
-    if [ $depth -gt 0 ]; then
+    if [[ $depth -gt 0 ]]; then
         local up=$(printf '../%.0s' $(seq 1 "$depth"));
     fi
     ## DEBUG: trace-vars tree_ish depth up
     git ls-tree -r --full-tree --name-only "$tree_ish" | sed "s#^#$up#";
+}
+
+# git-checkout-from(timestamp): checking out repository at particular TIMESTAMP [for given BRANCH]
+# see https://stackoverflow.com/questions/6990484/how-to-checkout-in-git-by-date
+# ex: git-checkout-from 2026-01-01
+function git-checkout-from {
+    local timestamp="$1";
+    if [ "$timestamp" = "" ]; then
+        echo-plus "usage: ${FUNCNAME[0]} timestamp"
+        echo-plus "example: ${FUNCNAME[0]} 2025-12-31"
+        echo-plus "note: Use git-checkout-branch to go from detached-head state back to normal."
+        return
+    fi
+    local branch=$(git-current-branch)
+    ## TODO2: make sure before-timespec usage OK
+    # ex: git checkout $(git rev-list -n 1 --first-parent --before="$timestamp" "$branch")
+    ## TODO3:
+    ## local command="git rev-list -n 1 --first-parent --before='$timestamp' '$branch'"
+    ## echo-plus "Issuing: git checkout \$($command)"
+    ## git checkout "$($command)"
+    git checkout "$(git rev-list -n 1 --first-parent --before="$timestamp" "$branch")"
 }
 
 #-------------------------------------------------------------------------------
@@ -977,11 +1089,11 @@ function git-alias-usage () {
     local next_mod_file
     next_mod_file="$(git-diff-list 2> /dev/null | head -1)"
     if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
-    echo '    git-next-checkin "'${next_mod_file}'"'
+    echo '    git-next-checkin "'"${next_mod_file}"'"'
     echo ''
     echo 'Usual check-in process:'
     # TODO2: rework git-update-force via dry-run git-update with conflict check
-    echo '    git-cd-root-alias; git-tar-repo-proper; git-update-force; git-next-checkin'
+    echo '    git-cd-root-alias; git-tar-repo-proper; git-update-force; git-status; git-next-checkin'
     echo '    # -or-: git-cd-root-alias; git-update-verified; git-conflicts-alias; git-next-checkin'
     echo '    git-next-checkin                      # repeat, as needed'
 
@@ -1020,26 +1132,22 @@ function git-misc-alias-usage() {
     echo "    GIT_MESSAGE='moved' git-move-to-dir DIR file1 file2"
     echo ""
     echo "To delete files (mucho cuidado):"
-    # note: Bypasses 'git add' in git-update-commit-push (TODO3: customize alias for this).
+    # note: git-rm-alias stages the deletion, but git-update-force's stash/pop cycle unstages it.
+    # So 'git add' (implicit in git-update-commit-push) re-stages the deletion—do NOT use GIT_SKIP_ADD=1.
     # See https://stackoverflow.com/questions/37279654/when-should-i-use-rm-git-rm-git-rm-cached-git-add.
-    echo '   old="TODO..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" GIT_SKIP_ADD=1 git-update-commit-push "$old"'
+    ## BAD (GIT_SKIP_ADD=1 skips re-staging after stash/pop, so commit finds nothing staged):
+    ## echo '   old="TODO..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" GIT_SKIP_ADD=1 git-update-commit-push "$old"'
+    ## TODO3: rework to avoid stash by git-update-commit-push when just deleting files
+    echo '   old="TODO-filename..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" git-update-commit-push "$old"'
     echo ""
     echo "To check in all tracked files with changes (examinar primero):"
     echo "   GIT_MESSAGE='...' git-update-commit-push \$(git-files-changed)"
-    ## OLD:
-    ## echo "    git-checkin-multiple-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
-    ## echo "A lazy-man's alternative, only recommended for single-user repos:"
-    ## echo "    git-checkin-all-template >| \$TMP/_template.sh; source \$TMP/_template.sh"
     echo ""
     echo "Environment variables:"
     echo "   GIT_AUTO_NEXT GIT_FORCE GIT_LOG_DIR GIT_MESSAGE GIT_NO_CONFIRM GIT_SKIP_ADD GIT_SKIP_PUSH GIT_TEST_MESSAGE GIT_TOKEN GIT_USER PRESERVE_GIT_STASH"
     echo ""
     echo "Source code grepping:"
-    ##
-    ## OLD:
-    ## TODO3: get ls-tree to show output relative to current subdirectory
-    ## echo "   (git-cd-root-alias; git ls-tree -r --name-only HEAD | xargs -I '{}' grep --with-filename 'pattern' {}) | less"
-    ##
+    #
     # NOTE: -r for recurse dirs; --name-only to omit details; and HEAD for current commit head;
     #
     echo "   (git-ls-tree-relative | xargs -I '{}' grep --with-filename 'pattern' {}) 2>&1 | less"

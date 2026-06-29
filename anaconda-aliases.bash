@@ -49,7 +49,8 @@ fi
 function add-conda-env-to-xterm-title {
     ## DEBUG: echo "in add-conda-env-to-xterm-title"
     export XTERM_TITLE_SUFFIX
-    XTERM_TITLE_SUFFIX="Py$($python --version 2>&1 | $perl extract_matches.perl -i 'python (\d+.\d+)')"
+    ## OLD: XTERM_TITLE_SUFFIX="Py$($python --version 2>&1 | $perl extract_matches.perl -i 'python (\d+.\d+)')"
+    XTERM_TITLE_SUFFIX="Py$($python --version 2>&1 | $perl -pe 's/^.*Python (\d+.\d+).*/$1/i;')"
     declare CONDA_PROMPT_MODIFIER
     # note: removes extraneous trailing spaces
     if [[ $CONDA_PROMPT_MODIFIER =~ \ *$ ]]; then
@@ -116,8 +117,10 @@ echo "$anaconda2_dir" > /dev/null
 function trace-python-path {
     local python_path=""
     python_path=$(command which $python 2> /dev/null)
-    trace-vars python_path
-    reference-variable "$python_path"
+    ## OLD:
+    ## trace-vars python_path
+    ## reference-variable "$python_path"
+    echo "python_path: $python_path" 1>&2
 }
 
 # Work around for intermittent problems w/ 'conda activate' requiring 'source activate' instead.
@@ -151,8 +154,7 @@ function activation-helper {
     if [ $status -ne 0 ]; then
         echo "Warning: status $status from invocation"
     fi
-    ## DEBUG:
-    trace-python-path
+    ## DEBUG: trace-python-path
     ## DEBUG: echo "out activation-helper($@)"
 }
 alias conda-activate='activation-helper activate'
@@ -215,8 +217,7 @@ function conda-activate-env-like {
         export PATH="$bin_dir:$PATH";
     fi
     add-conda-env-to-xterm-title
-    ## DEBUG:
-    trace-python-path
+    ## DEBUG: trace-python-path
 }
 #
 function conda-deactivate-env {
@@ -299,6 +300,7 @@ function disable-conda {
         print join(":", @p);
       ')
 }
+alias conda-disable=disable-conda
 
 # Misc. aliases
 alias conda-info-env='conda info --envs'

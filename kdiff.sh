@@ -57,7 +57,7 @@ file2="$2"
 if [ "$OSTYPE" == "cygwin" ]; then
     file1=$(cygpath -w "$file1")
     file2=$(cygpath -w "$file2")
-    kdiff="cygstart $kdiff"
+    ## OLD: kdiff="cygstart $kdiff"
 fi
 
 # Make sure file2 exists, using file1 pattern unless absolute-ish

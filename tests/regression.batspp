@@ -1,4 +1,12 @@
 # Tests to avoid regressions of old errors
+#
+# Note:
+# - This covers scripts as well as aliases and functions.
+# - Snippet for running this file through shellcheck:
+#     $ perl -pe 's/^[^#\$].*//; s/^\$ //;' tests/regression.batspp | shell-check --shell=bash -
+#   This strips expected output (i.e., '^[^#\$].*') to avoid confusing shellcheck.
+#   Similarly, it strips the prompt indicator (i.e., '^\$ ') from the command line.
+#
 
 #...............................................................................
 
@@ -48,9 +56,9 @@ $ echo ok | check-errors | wc -l
 0
 
 # Make sure QUIET=0 hides file name
-# f=$TMP/_hey.list
-$ echo warning: hey > $f
-$ QUIET=0 check-errors $f | wc -l
+$ f="$TMP"/_hey.list
+$ echo warning: hey > "$f"
+$ QUIET=0 check-errors "$f" | wc -l
 0
 
 # Make sure no exceptions reported
@@ -74,10 +82,12 @@ caught exception from user code	1
 
 # Setup
 $ base=/tmp/rename-filenames
-$ dir=/tmp/rename-filenames
+$ dir="$base"
 $ mkdir -p "$dir"
-$ pushd $dir
-$ for char in "—" "·" "®" "“" "”" "″" "‶" "‘" "’" "–"; do echo "$char" > $dir/_${char}_.list; done
+$ pushd "$dir"
+# note: ignoring shellcheck SC1111 [This is a unicode quote. Delete and retype it (or ignore/singlequote for literal).]
+# shellcheck disable=SC1110,SC1111
+$ for char in "—" "·" "®" "“" "”" "″" "‶" "‘" "’" "–"; do echo "$char" > "$dir/_${char}_.list"; done
 
 # Setup
 $ ls _*_.list 2> /dev/null > pre.list
@@ -109,7 +119,7 @@ $ [ "1" -eq "$(wc -l < post.list)" ]; echo "$?"
 #
 ## TODO
 $ all_diff_counts=$(git-diff-list | sort | wc -l)
-$ unique_diff_counts=$(git-diff-list | sort -u | wc -l
+$ unique_diff_counts=$(git-diff-list | sort -u | wc -l)
 $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 
 # TODO2: make sure zip is install
@@ -160,7 +170,7 @@ $ [ "$all_diff_counts" == "$unique_diff_counts" ]; echo $?
 ## BAD:
 ## $ NUM_REVISIONS=5 alt-git-extract-all-versions alt-extract-all-git-versions.bash
 ## Trying main path alt-extract-all-git-versions.bash for version v13
-## /home/tomohara/temp/tmp/all_versions_exported/alt-extract-all-git-versions.bash.v13-13Apr24
+## $TMP/all-git-versions/alt-extract-all-git-versions.bash.v13-13Apr24
 ## Trying main path alt-extract-all-git-versions.bash for version v12
 ## fatal: Not a valid object name 49d1dfc9c25e959ead5d861dde183baa115f2542:alt-extract-all-git-versions.bash
 ## Trying alternative path 
@@ -323,20 +333,20 @@ Version: N.N.N.N
 ## TODO3: Problem with alt-extract-all-git-versions.bash
 ## $ git-extract-all-versions ./mezcla/tests/resources/test.arpa
 ## Warning: Additional cases due to renames: try alt-extract-all-git-versions.bash
-## /home/tomohara/temp/tmp/all_versions_exported/test.arpa.v1-13Dec23
+## /home/tomohara/temp/tmp/all-git-versions/test.arpa.v1-13Dec23
 ## 
-##  versions stored in /home/tomohara/temp/tmp/all_versions_exported for ./mezcla/tests/resources/test.arpa
+##  versions stored in /home/tomohara/temp/tmp/all-git-versions for ./mezcla/tests/resources/test.arpa
 ## 
 ## $ alt-git-extract-all-versions ./mezcla/tests/resources/test.arpa
 ## Trying main path mezcla/tests/resources/test.arpa for version v2
-## /home/tomohara/temp/tmp/all_versions_exported/test.arpa.v2-13Dec23
+## /home/tomohara/temp/tmp/all-git-versions/test.arpa.v2-13Dec23
 ## Trying main path mezcla/tests/resources/test.arpa for version v1
 ## fatal: Not a valid object name 186208f3f131789a27a4207538da47a9fa617edc:mezcla/tests/resources/test.arpa
 ## Trying alternative path 
 ## Error: unable to resolve commit 186208f3f131789a27a4207538da47a9fa617edc
-## /home/tomohara/temp/tmp/all_versions_exported/test.arpa.v1-03Feb23
+## /home/tomohara/temp/tmp/all-git-versions/test.arpa.v1-03Feb23
 ## 
-## 2 versions stored in /home/tomohara/temp/tmp/all_versions_exported for ./mezcla/tests/resources/test.arpa
+## 2 versions stored in /home/tomohara/temp/tmp/all-git-versions for ./mezcla/tests/resources/test.arpa
 
 ##------------------------------------------------------------------------------
 
@@ -423,3 +433,97 @@ Version: N.N.N.N
 
 ## TODO2: add tests for check-errors variations
 ## check-[all-]warnings vs [all-]check-errors
+
+##------------------------------------------------------------------------------
+
+## TODO2: add tests for most-recent-backup to avoid similar files due to affixes
+## $ most-recent-backup .bashrc
+## ./backup/.bashrc.tpo.~46~
+
+##------------------------------------------------------------------------------
+
+## TODO2: add tests for script-update session includes supporting aliases
+## script-update
+##
+## ...
+## Usual check-in process:
+##     git-cd-root-alias; git-tar-repo-proper; git-update-force; git-next-checkin
+##     # -or-: git-cd-root-alias; git-update-verified; git-conflicts-alias; git-next-checkin
+##     git-next-checkin                      # repeat, as needed
+## conditional-source: command not found
+## ^^^^^^^^^^^^^^^^^^
+
+##------------------------------------------------------------------------------
+
+## TODO2: make sure European-style date aliases use lowercase
+$ ddmmmyy_regex='[0-9].*[A-Z].*[0-9]'
+$ todays-date | egrep -c "$ddmmmyy_regex"
+0
+$ todays-date | egrep -i -c "$ddmmmyy_regex"
+1
+
+##------------------------------------------------------------------------------
+
+## TODO4: make sure // not used in file paths in do_diff.bash output
+##
+## EX: "Differences: .//home/tomohara/temp/temp-shell-scripts/start.sh start.sh"
+##                    ^^
+##
+## $ git ls-tree -r --name-only HEAD | xargs -I '{}' do_diff.bash --side-by-side --no-pattern $other/'{}' '{}' >| _main-diff-tracked.log 2>&1
+## $ grep -c '\.//' _main-diff-tracked.log
+## 0
+
+## TODO2: make sure do_diff.bash warns about bad input files
+##
+## $ do_diff.bash --no-pattern ./fubar/.bashrc ~  2>&1 | head -5
+## $
+
+##..............................................................................
+
+## TODO3: make sure common environment variable set
+##
+## $ [[ ($BACKUP_DIR != "") && (-e "$BACKUP_DIR") ]]; echo $?
+## 0
+
+##------------------------------------------------------------------------------
+
+## TODO2: make sure old perl scripts work
+## 
+## $ qd-trans-sp
+## Can't locate spanish.perl in @INC (@INC entries checked: /home/tomohara/bin/ /home/tomohara/perl/lib/perl5/5.16 /home/tomohara/perl/lib/perl5/5.16/vender_perl /home/tomohara/bin /home/tomohara/perl/lib/perl5/5.16 ... /usr/share/perl/5.38 /usr/local/lib/site_perl) at /home/tomohara/bin/qd_trans_spanish.perl line 43.
+
+##..............................................................................
+
+## TODO4: make sure DEBUG_LEVEL tests account for non-numeric values
+##
+## $ DEBUG_LEVEL=one em
+## /home/tomohara/bin/tpo-invoke-emacs.sh: line 43: [: one: integer expression expected
+
+##------------------------------------------------------------------------------
+
+## TODO3: add tests verifying patterns with anchors in count_it.perl, etc.
+##
+## NOTE: false positive w/ [^...]
+## $ count_it.perl 'skipif.([^,]+)' tests/*.py
+## WARNING: Anchors currently start or end line: consider -one_per_line
+## not TEST_UNSUPPORTED	5
+## not OPENAI_API_KEY	3
+## not RUN_SLOW_TESTS	1
+
+## Good cases
+
+$ echo "abc...xyz" | count_it.perl '^abc' tests/*.py
+WARNING: Anchors currently start or end line: consider -one_per_line
+
+$ echo "abc...xyz" | count_it.perl 'xyz$' tests/*.py
+WARNING: Anchors currently start or end line: consider -one_per_line
+
+##------------------------------------------------------------------------------
+
+## TODO4: Make sure noclobber not inherited by scripts using '... > file',
+## such as do_diff.bash.
+## ex: /c/devel/shell-scripts/do_diff.bash: line 317: /tmp/tmp/_do_diff.10911.log: cannot overwrite existing file
+
+## $ do_diff.bash --dir tests '*.bash' $PWD/tests > _do_diff.$(T).log 2>&1
+## $ grep -c "cannot overwrite existing file" _do_diff.$(T).log
+## 0

@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 #
 # adhoc script to update all repo's
+# UPDATE: 28 Jun 20206: upgrade including support for OTHER_REPOS as string list or array
 #
 
 # Uncomment following line(s) for tracing:
@@ -16,10 +17,17 @@ repos=()
 if [ "$1" == "--help" ]; then
     script=$(basename "$0")
     # TODO2: make repos an argument and drop ~/bin, etc.
-    echo "usage: [env] $script [--help] [repo ...]"
-    echo '    env: OTHER_REPOS="..." SKIP_SUMMARY=B'
-    echo "example(s):"
-    echo "    OTHER_REPOS=fu $0"
+    echo "Usage: [env] $script [--help] [repo ...]"
+    echo '    env: OTHER_REPOS="string-list" SHOW_SUMMARY=B'
+    echo ""
+    echo "Examples:"
+    echo ""
+    echo "OTHER_REPOS=\"repo1 repo2\" $0"
+    echo ""
+    echo "SHOW_SUMMARY=0 $script"
+    echo ""
+    echo "Note:"
+    echo "- OTHER_REPOS is space-delimited: specify repos via positional argument(s) otherwise."
     exit
 fi
 if [ "$1" != "" ]; then
@@ -34,7 +42,8 @@ fi
 
 # Enable Bash aliases, etc.
 ## maldito shellcheck: [SC1090: Can't follow non-constant source]
-# shellcheck disable=SC1090
+## and [SC1091: Not following: ... was not specified as input (see shellcheck -x)]
+# shellcheck disable=SC1090,SC1091
 {
     shopt -s expand_aliases
     src_dir="$(dirname "${BASH_SOURCE[0]}")"
@@ -52,6 +61,7 @@ if [ "${VERBOSE:-0}" = "1" ]; then
     set -o verbose
 fi
 
+# Initialize
 mkdir -p ~/config ~/temp
 log=~/config/_update-all-repos-$(T).log
 temp_log=~/temp/_update-all-repos-$(T).temp.log
@@ -59,20 +69,32 @@ rename-with-file-date "$log" "$temp_log" &> /dev/null
 ## TODO4: resolve problem w/ $* leading to 'histappend'
 ## DEBUG: echo "${BASH_SOURCE[0]} $*" | tee "$log"
 echo "in $0: $(date)" >> "$log"
+
+# Determine directories
 # pre-init: OTHER_REPOS="$HOME/text-categorization $HOME/programs/python/visual-diff"
 if [ "$OTHER_REPOS" != "" ]; then
-    # note: ignores SC2206: Quote to prevent word splitting/globbing
-    # shellcheck disable=SC2206
-    repos+=($OTHER_REPOS)
+    ## TODO2: drop array support as it requires sourcing the script
+    if declare -p OTHER_REPOS 2>/dev/null | grep -q 'declare \-a'; then
+        ## DEBUG: echo "OTHER_REPOS as array"
+        repos+=("${OTHER_REPOS[@]}")
+    else
+        # fallback: space-delimited string
+        ## DEBUG: echo "OTHER_REPOS as string list"
+        read -r -a tmp <<< "$OTHER_REPOS"
+        repos+=("${tmp[@]}")
+    fi
 fi
 if [ ${#repos[@]} -eq 0 ]; then
     # TODO: drop idiosyncratic repos (e.g., non-public)
-    repos=(~/bin ~/mezcla ~/text-categorization ~/visual-diff ~/programs/bash/tom-shell-scripts ~/programs/python/mezcla-clone)
+    repos=(~/bin ~/mezcla ~/text-categorization ~/visual-diff ~/programs/bash/tom-shell-scripts ~/programs/python/mezcla-clone ~/programs/python/search-diff-engine)
 fi
+## DEBUG: set | grep ^repos=
+
+# Update each directory
 for dir in "${repos[@]}"; do
     # Make repo dir active
     echo "repo: $dir" | tee --append "$log"
-    command cd "$dir"
+    command cd "$dir" || continue
 
     # Update, check for errors, and show summary stats
     git-update-plus 2>&1 | grep -v "No stash entries found" >| "$temp_log"

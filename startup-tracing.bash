@@ -7,8 +7,8 @@
 #
 # NOTES:
 # - Environment variables
-#	STARTUP_TRACING		enables tracing if 1
-#	CONSOLE_TRACING		echoes to console as well as log file
+#	STARTUP_TRACING		enables tracing to log file if 1
+#	CONSOLE_TRACING		echoes to console
 #	VERBOSE_TRACING		echoes miscellaneous tracing as well (but just to console)
 #
 # TODO:
@@ -26,7 +26,8 @@ DEBUG_LEVEL=${DEBUG_LEVEL:-0}
 if [ "$TEMP" = "" ]; then TEMP="$TMP"; fi
 if [ "$TEMP" = "" ]; then TEMP=/tmp; fi
 
-function startup-trace () { 
+function startup-trace () {
+    # Set tracing (TODO3: put in separate function like startup-trace-init)
     if [ "$VERBOSE_TRACING" = "1" ]; then 
 	set -o xtrace;
 	echo TEMP=$TEMP;
@@ -35,10 +36,21 @@ function startup-trace () {
 	    set -o verbose
 	fi
     fi;
+
+    # File logging and/or console
     if [ "$STARTUP_TRACING" = "1" ]; then
 	echo "$* [$HOSTNAME $(date)]" >> "$TEMP/_startup-$USER-$HOST-$$.log";
     fi; 
-    if [ "$CONSOLE_TRACING" = "1" ]; then
+    if [ "$CONSOLE_TRACING" = "1" ] || [ "$DEBUG_LEVEL" -ge 6 ]; then
 	echo "$* [$HOSTNAME $(date)]";
     fi;
 }
+
+##------------------------------------------------------------------------------
+## TEMP: Duplicate definitions to work around chicken-and-egg problem
+
+# conditional-source(filename): source in bash commands from filename if exists
+function conditional-source () { if [ -e "$1" ]; then source $1; else echo "Warning: bash script file not found (so not sourced):"; echo "    $1"; fi; }
+#
+# append-path(path): appends PATH to environment variable unless already there
+function append-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="${PATH}:$1"; fi }

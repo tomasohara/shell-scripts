@@ -13,17 +13,13 @@ jobs:
 
   build-and-test-runner:
     name: Build and Run Tests via Runner
-    ## OLD:
-    ## ## NOTE: need to track down differences between Docker and Runner runs
-    ## ## TEMP: disable tests (and just run Docker version below)
-    ## if: ${{ false }}
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         os: [ubuntu-22.04]
         ## TODO: os: [ubuntu-20.04, ubuntu-latest]
-        python-version: ["3.8", "3.9", "3.10"]
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
         ## TODO: 3.x [latest; -or latest, latest-1, latest-2, ...]
 
     steps:
@@ -47,7 +43,14 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          # Python packages
           pip install --verbose --requirement requirements.txt
+          echo "end of python dependencies (status=$?)"
+          # Software packages
+          sudo apt-get update
+          ## TODO2: sudo apt-get install --yes --fix-missing $(sed 's/ \#.*//' required-packages.txt | grep -v '^#')
+          sudo apt-get install --yes --fix-missing tcsh
+          echo "end of other dependencies (status=$?)"
 
       - name: Run Python Tests under Runner
         run: |
@@ -76,7 +79,6 @@ jobs:
 
       - name: Run tests
         run: |
-          ## OLD: docker run --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
           # Note: command format: docker run [OPTIONS] IMAGE [COMMAND] [ARG...];
           # The environment file normally has no entries (i.e., just comments).
           docker run --env-file _temp-user-docker.env --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev

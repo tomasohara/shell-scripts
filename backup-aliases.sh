@@ -6,10 +6,20 @@
 #
 # usage example:
 #   source ~/bin/backup-aliases.sh
-#   backup_dir="f:/backup/tpo-torre/d"
-#   cd d:/
-#   create-backup-script /tmp/_do_d_backup.sh
-#   trace-cmd source /tmp/_do_d_backup.sh >| ${backup_dir}/_do_d_backup.log 2>&1
+#   backup_dir="/d/backup/tpo-torre/d"
+#   backup_base="_do_d_backup-$(T)"
+#   cd /d
+#   create-backup-script "$TMP/$backup_base.sh"
+#   trace-cmd source "$TMP/$backup_base.sh" > ${backup_dir}/"$backup_base.log" 2>&1
+#
+## OLD:
+## # usage example:
+## #   source ~/bin/backup-aliases.sh
+## #   backup_dir="f:/backup/tpo-torre/d"
+## #   backup_base="$TMP/_do_d_backup-$(T)""
+## #   cd d:/
+## #   create-backup-script "$backup_base.sh"
+## #   trace-cmd source "$backup_base.sh" >| ${backup_dir}/"$backup_base.log" 2>&1
 #
 # NOTE:
 # - Inremental backups are done when MAX_MOD_TIME enironment variable set.
@@ -205,9 +215,9 @@ function create-backup-script () {
 # Auxiliary alias for tracing command execution (i.e., temporarily enabling trace)
 #
 function trace-cmd () {
-    set -o xtrace;
+    bash-trace-on
     eval "$@";
-    set - -o xtrace
+    bash-trace-off
 }
 
 cat <<USAGE_END

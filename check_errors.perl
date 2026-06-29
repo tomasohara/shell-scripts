@@ -20,7 +20,6 @@ eval 'exec perl -Ssw $0 "$@"'
 # - Don't reproduce lines in case of overlapping context regions.
 # - Have option to make search case-insensitive.
 # - Add option to show which case is being violated (since context display can be confusing, especially when control characters occur in context [as with output form linux script command]).
-# - Convert into python.
 # - Have option to skip filenames in input.
 # - Add codes for error types for convenient filtering (a la pylint).
 #
@@ -39,12 +38,12 @@ use vars qw/$warning $warnings $skip_warnings $context $no_asterisks $skip_ruby_
 use vars qw/$relaxed $strict $quiet $matching $before $after $info/;
 
 if (!defined($ARGV[0])) {
-    my $options = "options = [-warnings | -info] [-context=N] [-no_astericks] [-skip_ruby_lib]";
+    my $options = "options = [-warnings | -info] [-context=N] [-no_asterisks] [-skip_ruby_lib]";
     # TODO2: split options in main and misc (e.g., [-skip_ruby_lib])
     $options .= " [-relaxed | -strict] [-verbose] [-quiet] [-before=N] [-after=N] [-matching]";
     my $example = "ex: $script_name log-file\n";
     my $note = "Notes:\n";
-    $note .= "- The default context is 1.\n";
+    $note .= "- The default context is 3.\n";
     $note .= "- Warnings are skipped by default.\n";
     $note .= "- Use -no_astericks if input uses ***'s outside of error contexts.\n";
     $note .= "- Use -relaxed to include special cases (e.g., xyz='error').\n";
@@ -69,7 +68,6 @@ my $asterisks = (! $no_asterisks);
 &init_var(*skip_ruby_lib, $ruby);	# skip Ruby library related errors
 &init_var(*relaxed, &FALSE);            # relaxed for special cases
 ## TODO2: use different option for strict error checking (as -strict not commonly used in other perl scripts)
-## OLD: $strict = (! $relaxed);                 # note: overrides common.perl default of 0
 # note: overrides common.perl default of 0
 my($strict_default) = ($strict || (! $relaxed));
 &init_var(*strict, $strict_default);    # alias for (! $relaxed)
@@ -179,7 +177,6 @@ while (<>) {
 	   # Python errors
 	   || /^\s*Traceback/		# stack trace
 	   # note: excludes exception repr's (e.g., <class 'AssertionError'>)
-	   ## OLD: || /(^|\s)[A-Z]\S+Error(\s|:|$)/	# exception (e.g., TypeError)
 	   || (/(^|\s)[A-Z]\S+Error(\s|:|$)/	# exception (e.g., TypeError)
 	       && ($relaxed || ! /BrokenPipeError|SillyPythonException/))
 	   || (/^\S+\.\S+Error:/)       # package specific (e.g., azure.ServiceRequestError)
@@ -294,6 +291,8 @@ print "\n" if ($verbose);
 # Note: aborts if strict mode and file not found
 #
 sub show_current_file_info {
+    &debug_print(&TL_VERBOSE, "show_current_file_info(@_); current_file=$current_file\n");
+
     # Make sure file exists (or stderr)
     if ($strict && ($current_file ne "-") && (! &file_exists($current_file)) && defined($ARGV[0])) {
 	&exit("Error: file '$current_file' not accessible.")

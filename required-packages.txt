@@ -10,7 +10,8 @@
 # - See requirements.txt for Python package requirements.
 #
 ansifilter                              # - ANSI terminal escape code filter
-batspp                                  # - Bash Automated Testing System with Preprocessor
+## OLD: batspp                          # - Bash Automated Testing System with Preprocessor
+bats	                                # - bash automated testing system
 diffutils                               # - GNU diff utilities (diff, cmp, etc.)
 enchant-2                               # - Generic spell checking library
 git                                     # - Fast, distributed revision control system
@@ -20,7 +21,8 @@ less                                    # - Pager program
 lsb-release                             # - Linux Standard Base version reporting utility
 lynx                                    # - Text-based web browser
 ncurses-bin                             # - Terminal-related programs and scripts (e.g., tput)
-openssh                                 # - Secure Shell (SSH) protocol for remote login
+## OLD: openssh                         # - Secure Shell (SSH) protocol for remote login
+openssh-client                          # - Secure Shell (SSH) protocol for remote login
 p7zip-full                              # - 7z and 7za file archivers
 perl                                    # - Practical Extraction and Report Language
 pv                                      # - Monitor the progress of data through a pipe
@@ -31,7 +33,8 @@ rcs                                     # - Revision Control System
 tar                                     # - Tape Archiver for file archiving
 tcsh                                    # - TENEX C Shell, enhanced version of Berkeley C shell
 wget                                    # - Retrieves files from the web
-xmllint                                 # - XML linting and processing tool
+## OLD: xmllint                         # - XML linting and processing tool
+libxml2-utils                           # - XML linting and processing tool
 zip                                     # - Archiver for .zip files
 #
 #................................................................................

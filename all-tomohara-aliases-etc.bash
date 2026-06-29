@@ -42,6 +42,13 @@
 #   fi
 #
 
+# Guard against re-entry
+if [ "${ALIASES_PROCESSED:-0}" == 1 ]; then
+    echo "Warning: unexpected re-invocation of ${BASH_SOURCE[0]}; set ALIASES_PROCESSED=0 first"
+    return
+fi
+ALIASES_PROCESSED=1
+
 # Set bash regular and/or verbose tracing
 # note: tracing off by default unless active for current shell
 was_tracing=false
@@ -93,4 +100,10 @@ if [ "${DIR_ALIAS_HACK:-0}" = "1" ]; then
     #
 fi
 ##
-$was_tracing || set - -o xtrace
+## BAD: $was_tracing || set - -o xtrace
+## NOTE: This above set the $@ parameters to "-o xtrace"! Via bash manual:
+##   set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
+##     - Signal the end of options, cause all remaining  args to be assigned
+##       to the positional parameters. The -x and -v options are turned off. ...
+##
+$was_tracing || set +o xtrace

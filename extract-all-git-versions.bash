@@ -23,6 +23,8 @@ function full-usage {
     local script
     script="$(basename "$0")"
     echo ""
+    echo "    Warning: deprecated script: use alt-extract-all-git-versions.bash."
+    echo ""
     echo "Usage: [env-spec] $script [--human] [--help] git-path [extract-dir]"
     echo ""
     echo "Examples:"
@@ -131,7 +133,7 @@ info="$TMP/_$base.$$.info"
 git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
 TOTAL_NUM=$(wc -l < "$info")
 if [ "${QUICK_MODE:-0}" == "0" ]; then
-    total_num_cases=$(git --no-pager log --follow "$GIT_PATH_TO_FILE" | grep -c -v '^commit')
+    total_num_cases=$(git --no-pager log --follow "$GIT_PATH_TO_FILE" | grep -c '^commit')
     if [ "$TOTAL_NUM" != "$total_num_cases" ]; then
         echo "Warning: Additional cases due to renames: try alt-extract-all-git-versions.bash"
     fi

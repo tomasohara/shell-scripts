@@ -18,3 +18,28 @@ Things to do
   archive/bad-telnet.perl  archive/telnet.perl  archive/test-telnet.perl
   archive/new-telnet.perl  archive/telnet.sh    archive/was-telnet.perl
 - P4: make sure shell scripts honor --help
+
+--------------------------------------------------------------------------------
+Tue 21 Apr 26
+
+note:
+- should  fix most-recent-backup function to avoid issue with dot file globbing
+- suggestion from POE Assistant
+- old
+   $LS -t "$dir"/* "$dir"/.* | $EGREP "/$file(~|.~.*)?$" | head -1
+- new
+    shopt -s dotglob nullglob
+    local files=( "$dir"/* )
+    shopt -u dotglob nullglob
+
+    printf '%s\n' "${files[@]}" \
+        | $EGREP "/$file(~|.~.*)?$" \
+        | xargs ls -t 2>/dev/null \
+        | head -1
+
+--------------------------------------------------------------------------------
+Sat 25 Apr 26
+
+note:
+- P4: reword usages of maldito
+- ex: "maldito shellcheck" => "shellcheck filtering
