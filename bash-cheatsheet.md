@@ -23,11 +23,6 @@ Misc. Notes:
 TODO:
 - Rework the prioritization to distinguish (a) use in highlighting important constructs
   with respect to the repo usage versus (b) pointing out some of the subtleties of Bash.
-- TEMP: track down red highlighting override issue w/ pandoc
-  <!-- TEMP: 
-  ```bash
-  # TODO: fix .emacs.markdown.css
-  ```
 
 ## Variables
 
@@ -273,6 +268,7 @@ PATH="/new/bin:$PATH"           # prepend to PATH
 ! [argument]                    # negative null command
 ![non-space]...                 # history subsitution
 ```
+<-- TODO2: flesh out history substitution and note relation to grepl-hist-tail -->
 
 ## Debugging
 
