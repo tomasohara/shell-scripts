@@ -2883,6 +2883,7 @@ alias restart-system='shutdown-system --reboot'
 alias blank-screen='xset dpms force off'
 alias stop-service='systemctl stop'
 alias restart-service='sudo systemctl restart'
+alias unmount=umount
 # TODO: rename as map-internet-ports???
 # map-ports: shows TCP ports being listened to on the remote host
 # note: -Pn option skips host discovery (a la no ping)
