@@ -57,7 +57,8 @@ use strict "refs";			# allow string deferencing (for -occurrences support)
 use vars qw/$utf8 $unicode $i $ignore_case $i $ignore_case $foldcase $fold $preserve 
             $para $slurp $multi_per_line $one_per_line $freq_first $alpha $compact $cumulative
             $occurrences $occurrence_field $percents $multiple $nonsingletons $min2 $min_freq $trim $unaccent $pattern_file $pattern $locale $chomp/;
-use vars qw/$nonsingleton $restore $field $show_zeros/;
+## UPDATE: 1 Jul 2026: added $normalize and trim warning
+use vars qw/$nonsingleton $restore $field $show_zeros $normalize/;
 
 # Check the command-line options
 # Each variable initialized corresponds to -var=value commandline option
@@ -85,8 +86,9 @@ use vars qw/$nonsingleton $restore $field $show_zeros/;
 my($min_freq_default) = ($show_zeros ? 0 : ($nonsingletons ? 2 : 1));
 &init_var(*min_freq, 			# min frequency to show in output
 	  $min_freq_default);
-&init_var(*trim, &FALSE);		# trim whitespace in matched text
-&init_var(*unaccent, &FALSE);		# remove accent marks from input
+&init_var(*normalize, &FALSE);          # normalize tags (e.g., whitespace and accents)
+&init_var(*trim, $normalize);		# trim whitespace in matched text
+&init_var(*unaccent, $normalize);	# remove accent marks from input
 &init_var(*pattern_file, "");		# file with pattern (to circumvent shell UTF8 issues)
 my($default_pattern) = (($pattern_file ne "") ? &read_file($pattern_file) : "");
 &init_var_exp(*pattern, $default_pattern); # regex pattern to check for
@@ -99,7 +101,8 @@ my($default_pattern) = (($pattern_file ne "") ? &read_file($pattern_file) : "");
 # Get the pattern and options from the command line
 # Process the command-line options
 if (!defined($ARGV[0])) {
-    my($options) = "options = [-i(gnore)] [-alpha] [-freq_first] [-para] [-preserve] [-foldcase]\n";
+    ## TODO2: add separate line for miscellaneous options (as in sum_file.perl)
+    my($options) = "options = [-i(gnore)] [-alpha] [-freq_first] [-para] [-preserve] [-foldcase] [-trim] [-normalize]\n";
     $options    .= "          [-compact] [-min_freq=N | -nonsingletons | -min2] [-slurp] [-unaccent] [-chomp] [-unicode]\n";
     $options    .= "          [-occurrences] [-cumulative] [-multi_per_line|-one_per_line] [-restore] [-show_zeros]\n";
     my($example) = "examples:\n\nls | $script_name '\\.([^\\.]+)\$'\n\n";
@@ -110,18 +113,19 @@ if (!defined($ARGV[0])) {
     $note .= "notes:\n\nThe patterns are regular expressions using Perl's extensions\n";
     $note .= "See manual page for details (e.g., 'man perlre')\n\n";
     $note .= "To tabulate only parts of the pattern, use parenthesis as illustrated above.\n\n";
-    ## TODO3: show misc options only if -verbose (as in sum_file.perl)
-    ## ... $note .= "- Use -verbose for more help or to show extracted data."
-    $note .= "Miscellaneous options:\n";
-    $note .= "-compact to treat runs of whitespace as single space\n";
-    $note .= "-nonsingletons to ignore item occurring just once\n";
-    $note .= "-para reads text in paragraph mode (rather than line)\n";
-    $note .= "-slurp reads the entire file at once (for long-distance patterns)\n";
-    $note .= "-occurrences incorporates count field (\$1 for pattern & \$2 count)\n";
-    $note .= "-multi_per_line allows for multple occurrences in a line (assumed unless ^ used)\n";
-    $note .= "-restore is used to simulate look-ahead (see example above).\n";
-    $note .= "-show_zeros is used to show patterns not matched.\n";
-    ## TODO: add optional extended help with examples for misc. options
+    $note .= "Use -verbose for more help or to show more summary output.\n\n";
+    if ($verbose) {
+	$note .= "Miscellaneous options:\n";
+	$note .= "-compact to treat runs of whitespace as single space\n";
+	$note .= "-nonsingletons to ignore item occurring just once\n";
+	$note .= "-para reads text in paragraph mode (rather than line)\n";
+	$note .= "-slurp reads the entire file at once (for long-distance patterns)\n";
+	$note .= "-occurrences incorporates count field (\$1 for pattern & \$2 count)\n";
+	$note .= "-multi_per_line allows for multple occurrences in a line (assumed unless ^ used)\n";
+	$note .= "-restore is used to simulate look-ahead (see example above).\n";
+	$note .= "-show_zeros is used to show patterns not matched.\n";
+	$note .= "-trim removes outer whitespace, -unaccent strips accents, and -normalize does both.\n";
+    }
 
     ## OLD: die "\nusage: $script_name [options] pattern file ...\n\n$options\n\n$example\n$note\n";
     print STDERR "\nusage: $script_name [options] pattern file ...\n\n$options\n\n$example$note\n";
@@ -304,13 +308,24 @@ if ($occurrences || $verbose) {
 print("Frequency of $pattern\n") if ($verbose);
 my($sort_function) = ($alpha ? \&sorted_hash_keys_alphabetic : \&sorted_hash_keys_reverse_numeric);
 my($cumulative_tag_count) = 0;
+my($displayed_trim_warning) = &FALSE;
 foreach my $tag (&$sort_function(\%count)) {
     my($tag_count) = &get_entry(\%count, $tag, 0);
     last if ($tag_count < $min_freq);
     ## TODO3: streamline the above short circuit with below inclusion checks
     ## OLD if ($tag_count != 0) ...
     if (($tag_count != 0) || ($show_zeros)) {
-	$tag =~ s/\n$//;
+	# Strip newlines from tag (TODO: generalize)
+	## OLD: $tag =~ s/\n$//;
+	if ($tag =~ /^(.*)\n$/) {
+	    $tag = "$1\\n";
+	    if (! $displayed_trim_warning) {
+		&debug_print(&TL_USUAL, "FYI: trailing newline in $tag (consider -trim)\n");
+		$displayed_trim_warning = &TRUE;
+	    }
+	}
+
+	# Show result with optional relative frequency
 	if ($freq_first) {
 	    print $tag_count, "\t", $tag;
 	}
