@@ -297,6 +297,8 @@ function git-update-plus {
     #
     local log
     log=$(realpath "$(get-temp-log-name 'update')")
+    ## UPDATE 03 Jul 2026: moves stash zip to $TMP
+    local stash_zipfile="$TMP/_git-stash.$$.zip"
 
     # Optionally preserve timestamps for changed files
     # NOTES:
@@ -327,10 +329,10 @@ function git-update-plus {
             fi
 
             # Create zip (-v for verbose & -y for symlinks)
-            command rm -f _stash.zip
+            command rm -f "$stash_zipfile"
             echo-plus "issuing: zip over changed files (for later restore)"
-            echo-plus "git-diff-list | zip -v -y -@ _stash.zip" >> "$log" 2>&1
-            git-diff-list | zip -v -y -@ _stash.zip >> "$log" 2>&1
+            echo-plus "git-diff-list | zip -v -y -@ \"$stash_zipfile\"" >> "$log" 2>&1
+            git-diff-list | zip -v -y -@ "$stash_zipfile" >> "$log" 2>&1
         else
             # note: zip options: -y retain links; -v verbose
             echo-plus "Not zipping changes because PRESERVE_GIT_STASH not 1"
@@ -354,10 +356,10 @@ function git-update-plus {
     # Optionally restore timestamps for changed files
     if [ "$changed_files" != "" ]; then
         if [ "${PRESERVE_GIT_STASH:-0}" = "1" ]; then
-            echo-plus "issuing: unzip over _stash.zip (to restore timestamps)"
+            echo-plus "issuing: unzip over \"$stash_zipfile\" (to restore timestamps)"
             # note: unzip options: -o overwrite; -v verbose:
-            echo-plus "unzip -v -o _stash.zip" >> "$log"
-            unzip -v -o _stash.zip >> "$log" 2>&1
+            echo-plus "unzip -v -o \"$stash_zipfile\"" >> "$log"
+            unzip -v -o "$stash_zipfile" >> "$log" 2>&1
             
             # Restore working directory
             if [ "$restore_dir" != "" ]; then
@@ -553,6 +555,7 @@ alias git-blame-alias='invoke-git-command blame'
 alias git-rm-alias='invoke-git-command rm'
 alias git-checkout-alias='invoke-git-command checkout'
 alias git-branch-plus='git-command branch -vv'
+alias git-create-branch='git-command switch -C'
 
 # git-add-plus: add filename(s) to repository
 # note: if GIT_FORCE is 1 then --force added (e.g., to override .gitignore)
@@ -836,8 +839,11 @@ function git-checkin-all-template {
 # invoke-next-single-checkin: outputs and runs the next single-checking template
 function invoke-next-single-checkin {
     # TODO: use unique tempfile (e.g., mktemp)
-    git-checkin-single-template >| "$TMP/_template.sh"
-    source "$TMP/_template.sh"
+    ## OLD:
+    ## git-checkin-single-template >| "$TMP/_template.sh"
+    ## source "$TMP/_template.sh"
+    git-checkin-single-template >| "$TMP/_git-template.$$e.sh"
+    source "$TMP/_template.$$.sh"
 }
 #
 # alt-invoke-next-single-checkin([filename]) alternative version that uses readline
