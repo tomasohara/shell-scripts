@@ -56,6 +56,7 @@ MAX_BRIGHTNESS_STEP = 0.60
 BETTER_GROW_FACTOR = 1.10
 NOT_SURE_SHRINK_FACTOR = 0.75
 WORSE_SHRINK_FACTOR = 0.50
+WORSE_RETRY_SCALE = 0.50
 
 MIN_GAMMA = 0.30
 MAX_GAMMA = 1.50
@@ -179,11 +180,18 @@ def channel_to_byte(value: float) -> int:
     return int(round(clamp(normalized, 0.0, 1.0) * 255.0))
 
 
+def channel_to_unit(value: float) -> float:
+    """Convert gamma channel value in [MIN_GAMMA, MAX_GAMMA] to [0,1]."""
+    return clamp((value - MIN_GAMMA) / (MAX_GAMMA - MIN_GAMMA), 0.0, 1.0)
+
+
 def picker_color_to_gamma(
-    red: int, green: int, blue: int, current_gamma: tuple[float, float, float]
+    red: float, green: float, blue: float, current_gamma: tuple[float, float, float]
 ) -> tuple[float, float, float]:
     """Map a picked color to gamma balance while preserving current average gamma."""
-    color_values = [max(component / 255.0, 0.05) for component in (red, green, blue)]
+    uses_integral = max(red, green, blue) > 1.0
+    scale = 255.0 if uses_integral else 1.0
+    color_values = [max(component / scale, 0.05) for component in (red, green, blue)]
     color_mean = sum(color_values) / 3.0
     normalized = [component / color_mean for component in color_values]
     gamma_mean = sum(current_gamma) / 3.0
@@ -317,7 +325,10 @@ class CalibrationState:
                     MAX_BRIGHTNESS_STEP,
                 )
 
-        step_scale = 1.0 if status in {"better", "worse"} else 0.5
+        step_scale = 1.0 if status == "better" else 0.5
+        if status == "worse":
+            # Avoid no-op loops from revert-then-reapply at minimum step.
+            step_scale = WORSE_RETRY_SCALE
         d_red = 0.0
         d_green = 0.0
         d_blue = 0.0
@@ -391,7 +402,7 @@ class CalibrationState:
         return summary, self.last_delta
 
 
-def apply_xrandr(state: CalibrationState, dry_run: bool, verbose: bool) -> str:
+def apply_xrandr(state: CalibrationState, dry_run: bool, _verbose: bool = False) -> str:
     """Apply the current state to xrandr and return the exact command text."""
     command = build_xrandr_command(state.output, state.gamma, state.brightness)
     printable = " ".join(command)
@@ -417,7 +428,9 @@ def run_cli_loop(state: CalibrationState, dry_run: bool, verbose: bool) -> int:
             f"steps(gamma={state.gamma_step:.3f}, brightness={state.brightness_step:.3f})"
         )
         if verbose:
-            choices_spec = " ".join(system.unique_items(STATUS_OPTIONS + COLOR_OPTIONS + BRIGHTNESS_OPTIONS))
+            choices_spec = " ".join(
+                system.unique_items(STATUS_OPTIONS + COLOR_OPTIONS + BRIGHTNESS_OPTIONS)
+            )
             print(f"choices:\n\t{choices_spec}")
         raw_feedback = input("Iteration feedback: ").strip()
         if raw_feedback.lower() == "quit":
@@ -432,7 +445,7 @@ def run_cli_loop(state: CalibrationState, dry_run: bool, verbose: bool) -> int:
 
         summary, _ = state.apply_feedback(status, color_feedback, brightness_feedback)
         try:
-            command_text = apply_xrandr(state, dry_run=dry_run, verbose=verbose)
+            command_text = apply_xrandr(state, dry_run=dry_run, _verbose=verbose)
         except RuntimeError as err:
             print(str(err))
             return 1
@@ -441,8 +454,9 @@ def run_cli_loop(state: CalibrationState, dry_run: bool, verbose: bool) -> int:
     return 0
 
 
-def build_pyqt_ui(state: CalibrationState, dry_run: bool, verbose: bool):
+def build_pyqt_ui(state: CalibrationState, dry_run: bool, _verbose: bool):
     """Create and return a PyQt window class instance."""
+    # pylint: disable=import-outside-toplevel
     try:
         from PyQt6.QtCore import Qt
         from PyQt6.QtGui import QColor
@@ -509,6 +523,8 @@ def build_pyqt_ui(state: CalibrationState, dry_run: bool, verbose: bool):
             self.brightness_buttons = {}
             self.rgb_sliders = {}
             self.rgb_spins = {}
+            self._picker_baseline_gamma = state.gamma
+            self._picker_original_gamma = state.gamma
 
             self.current_output_value = QLabel("")
             self.current_gamma_value = QLabel("")
@@ -521,10 +537,12 @@ def build_pyqt_ui(state: CalibrationState, dry_run: bool, verbose: bool):
                 self.current_delta_value,
             ):
                 label.setStyleSheet("font-family: monospace; font-size: 14px;")
+                label.setTextInteractionFlags(Qt.TextSelectableByMouse)
 
             self.command_label = QLabel("")
             self.command_label.setWordWrap(True)
             self.command_label.setStyleSheet("font-family: monospace;")
+            self.command_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
 
             self.history_box = QTextEdit()
             self.history_box.setReadOnly(True)
@@ -534,6 +552,9 @@ def build_pyqt_ui(state: CalibrationState, dry_run: bool, verbose: bool):
             self.color_preview = QLabel("      ")
             self.color_preview.setFixedWidth(80)
             self.color_preview.setStyleSheet("border: 1px solid #666;")
+            self.color_preview_value = QLabel("")
+            self.color_preview_value.setStyleSheet("font-family: monospace;")
+            self.color_preview_value.setTextInteractionFlags(Qt.TextSelectableByMouse)
 
             manual_box = QGroupBox(
                 "Direct RGB / brightness controls (alternative to feedback loop)"
@@ -578,16 +599,19 @@ def build_pyqt_ui(state: CalibrationState, dry_run: bool, verbose: bool):
             apply_manual_button.clicked.connect(self.on_apply_manual_controls)
             manual_layout.addWidget(pick_color_button, 4, 0)
             manual_layout.addWidget(self.color_preview, 4, 1)
-            manual_layout.addWidget(self.auto_apply_box, 4, 2)
-            manual_layout.addWidget(apply_manual_button, 5, 0, 1, 3)
+            manual_layout.addWidget(self.color_preview_value, 4, 2)
+            manual_layout.addWidget(self.auto_apply_box, 5, 0, 1, 3)
+            manual_layout.addWidget(apply_manual_button, 6, 0, 1, 3)
             manual_box.setLayout(manual_layout)
 
             apply_feedback_button = QPushButton("Apply feedback step")
             reapply_button = QPushButton("Reapply current settings")
             reset_button = QPushButton("Reset to defaults")
+            copy_snapshot_button = QPushButton("Copy form snapshot")
             apply_feedback_button.clicked.connect(self.on_apply_feedback)
             reapply_button.clicked.connect(self.on_reapply)
             reset_button.clicked.connect(self.on_reset_defaults)
+            copy_snapshot_button.clicked.connect(self.on_copy_snapshot)
 
             form_layout = QFormLayout()
             form_layout.addRow("Output:", self.output_edit)
@@ -626,6 +650,7 @@ def build_pyqt_ui(state: CalibrationState, dry_run: bool, verbose: bool):
             feedback_buttons.addWidget(apply_feedback_button)
             feedback_buttons.addWidget(reapply_button)
             feedback_buttons.addWidget(reset_button)
+            feedback_buttons.addWidget(copy_snapshot_button)
 
             top = QVBoxLayout()
             top.addLayout(form_layout)
@@ -672,6 +697,10 @@ def build_pyqt_ui(state: CalibrationState, dry_run: bool, verbose: bool):
             self.color_preview.setStyleSheet(
                 f"background-color: rgb({red}, {green}, {blue}); border: 1px solid #666;"
             )
+            self.color_preview_value.setText(
+                f"rgb={red}:{green}:{blue}  "
+                f"rgbf={red/255.0:.2f}:{green/255.0:.2f}:{blue/255.0:.2f}"
+            )
 
         def sync_controls_from_state(self):
             """Update direct controls from current state values."""
@@ -700,7 +729,7 @@ def build_pyqt_ui(state: CalibrationState, dry_run: bool, verbose: bool):
         def apply_and_refresh(self, summary: str, add_to_history: bool = True):
             """Run xrandr with current state and refresh UI."""
             try:
-                command_text = apply_xrandr(state, dry_run=dry_run, verbose=verbose)
+                command_text = apply_xrandr(state, dry_run=dry_run, _verbose=_verbose)
             except RuntimeError as err:
                 QMessageBox.critical(self, "xrandr error", str(err))
                 self.refresh_labels(summary if add_to_history else "")
@@ -752,22 +781,28 @@ def build_pyqt_ui(state: CalibrationState, dry_run: bool, verbose: bool):
         def on_picker_color_changed(self, picked):
             """Apply live color-picker crosshair movement to xrandr immediately."""
             baseline_gamma = self._picker_baseline_gamma
+            redf = picked.redF()
+            greenf = picked.greenF()
+            bluef = picked.blueF()
             new_gamma = picker_color_to_gamma(
-                picked.red(), picked.green(), picked.blue(), baseline_gamma
+                redf, greenf, bluef, baseline_gamma
             )
             state.gamma = new_gamma
             self.sync_controls_from_state()
             self.apply_state_from_controls()
             self.apply_and_refresh(
-                f"Live color picker -> gamma={gamma_to_text(state.gamma)}",
+                "Live color picker -> "
+                f"rgb={picked.red()}:{picked.green()}:{picked.blue()}, "
+                f"rgbf={redf:.2f}:{greenf:.2f}:{bluef:.2f}, "
+                f"gamma={gamma_to_text(state.gamma)}",
                 add_to_history=False,
             )
 
         def on_pick_color(self):
             """Use color picker to set RGB balance with live xrandr updates."""
             red, green, blue = state.gamma
-            initial_color = QColor(
-                channel_to_byte(red), channel_to_byte(green), channel_to_byte(blue)
+            initial_color = QColor.fromRgbF(
+                channel_to_unit(red), channel_to_unit(green), channel_to_unit(blue)
             )
             self._picker_baseline_gamma = state.gamma
             self._picker_original_gamma = state.gamma
@@ -777,16 +812,22 @@ def build_pyqt_ui(state: CalibrationState, dry_run: bool, verbose: bool):
             accepted = bool(dialog.exec())
             if accepted:
                 picked = dialog.selectedColor()
+                redf = picked.redF()
+                greenf = picked.greenF()
+                bluef = picked.blueF()
                 state.gamma = picker_color_to_gamma(
-                    picked.red(),
-                    picked.green(),
-                    picked.blue(),
+                    redf,
+                    greenf,
+                    bluef,
                     self._picker_baseline_gamma,
                 )
                 self.sync_controls_from_state()
                 self.apply_state_from_controls()
                 self.apply_and_refresh(
-                    f"Applied color-picker balance -> gamma={gamma_to_text(state.gamma)}"
+                    "Applied color-picker balance -> "
+                    f"rgb={picked.red()}:{picked.green()}:{picked.blue()}, "
+                    f"rgbf={redf:.2f}:{greenf:.2f}:{bluef:.2f}, "
+                    f"gamma={gamma_to_text(state.gamma)}"
                 )
             else:
                 ## OLD:
@@ -836,18 +877,80 @@ def build_pyqt_ui(state: CalibrationState, dry_run: bool, verbose: bool):
             self.sync_controls_from_state()
             self.apply_and_refresh("Defaults restored and applied.")
 
+        def build_snapshot_text(self) -> str:
+            """Return a concise, copy-friendly snapshot of current form values."""
+            red, green, blue = state.gamma
+            red_i, green_i, blue_i = (
+                channel_to_byte(red),
+                channel_to_byte(green),
+                channel_to_byte(blue),
+            )
+            red_u, green_u, blue_u = (
+                channel_to_unit(red),
+                channel_to_unit(green),
+                channel_to_unit(blue),
+            )
+            d_red, d_green, d_blue, d_brightness = state.last_delta
+            status = self.selected_key(self.status_buttons, "better")
+            color_feedback = self.selected_key(self.color_buttons, "not-sure")
+            brightness_feedback = self.selected_key(self.brightness_buttons, "not-sure")
+            history = self.history_box.toPlainText().strip()
+            if not history:
+                history = "(empty)"
+            return "\n".join(
+                [
+                    f"Output: {state.output}",
+                    (
+                        f"Gamma (R:G:B): {red:.2f}:{green:.2f}:{blue:.2f} "
+                        f"(rgb={red_i}:{green_i}:{blue_i}, "
+                        f"rgbf={red_u:.2f}:{green_u:.2f}:{blue_u:.2f})"
+                    ),
+                    f"Brightness: {state.brightness:.2f}",
+                    (
+                        f"Selected feedback: status={status}, color={color_feedback}, "
+                        f"brightness={brightness_feedback}"
+                    ),
+                    (
+                        f"Last delta: R={d_red:+.2f}, G={d_green:+.2f}, B={d_blue:+.2f}, "
+                        f"brightness={d_brightness:+.2f}; step={state.gamma_step:.2f}/"
+                        f"{state.brightness_step:.2f}; iter={state.iteration}"
+                    ),
+                    f"Last command: {self.command_label.text()}",
+                    "History:",
+                    history,
+                ]
+            )
+
+        def on_copy_snapshot(self):
+            """Copy the entire form snapshot to clipboard."""
+            QApplication.clipboard().setText(self.build_snapshot_text())
+            self.history_box.append("Copied form snapshot to clipboard.")
+
         def refresh_labels(self, last_message: str):
             """Refresh labels and append status text."""
             red, green, blue = state.gamma
+            red_i, green_i, blue_i = (
+                channel_to_byte(red),
+                channel_to_byte(green),
+                channel_to_byte(blue),
+            )
+            red_u, green_u, blue_u = (
+                channel_to_unit(red),
+                channel_to_unit(green),
+                channel_to_unit(blue),
+            )
             d_red, d_green, d_blue, d_brightness = state.last_delta
             self.current_output_value.setText(state.output)
             self.current_gamma_value.setText(
-                f"{red:.2f}:{green:.2f}:{blue:.2f}  (R={red:.2f}, G={green:.2f}, B={blue:.2f})"
+                f"{red:.2f}:{green:.2f}:{blue:.2f}  "
+                f"(rgb={red_i}:{green_i}:{blue_i}, "
+                f"rgbf={red_u:.2f}:{green_u:.2f}:{blue_u:.2f})"
             )
             self.current_brightness_value.setText(f"{state.brightness:.2f}")
             self.current_delta_value.setText(
-                f"R={d_red:+.2f}, G={d_green:+.2f}, B={d_blue:+.2f}, brightness={d_brightness:+.2f}; "
-                f"step={state.gamma_step:.3f}/{state.brightness_step:.3f}; iter={state.iteration}"
+                f"R={d_red:+.2f}, G={d_green:+.2f}, B={d_blue:+.2f}, "
+                f"brightness={d_brightness:+.2f}; "
+                f"step={state.gamma_step:.2f}/{state.brightness_step:.2f}; iter={state.iteration}"
             )
             if last_message:
                 self.history_box.append(last_message)
@@ -882,7 +985,9 @@ def main() -> int:
         return run_cli_loop(state, dry_run=dry_run, verbose=verbose)
 
     try:
-        qapplication, window_class, pyqt_version = build_pyqt_ui(state, dry_run=dry_run, verbose=verbose)
+        qapplication, window_class, pyqt_version = build_pyqt_ui(
+            state, dry_run=dry_run, _verbose=verbose
+        )
     except ImportError:
         print("PyQt5/PyQt6 not installed; switching to CLI mode.\n")
         return run_cli_loop(state, dry_run=dry_run, verbose=verbose)
