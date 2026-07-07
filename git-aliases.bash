@@ -961,7 +961,7 @@ function git-tar-repo-proper {
     (echo-plus "FYI: Omitting .git from backup"; TAR_FILTER="\.git\b" tar-this-dir-dated) 2>&1 | less;
 }
 #
-# TODO2: add some type of confirmation
+# TODO2: add some type of confirmation; also allow for changing the message
 alias git-checkin-new-alias="GIT_MESSAGE='initial version' git-update-commit-push"
 
 # TODO:
