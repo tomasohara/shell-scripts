@@ -3525,16 +3525,21 @@ alias test-script-debug='ALLOW_SUBCOMMAND_TRACING=1 DEBUG_LEVEL=5 MISC_TRACING_L
 # randomize-datafile(file, [num|percent]): randomize datafile optionally pruned to NUM lines (or percent), preserving header line
 # ex: randomize-datafile tests/faithful.data 10% | wc -l => 28
 #
+function randomize-lines { alias-python -m mezcla.randomize_lines "$@"; }
+function randomize-lines-stdin { randomize-lines "$@" -; }
+#
 function randomize-datafile() {
     local file="$1"
     local num_lines="$2"
     if [[ $num_lines =~ % ]]; then
         num_lines=${num_lines//%/}
-        alias-python -m mezcla.randomize_lines --header --percent "$num_lines" "$file"
+        ## OLD: alias-python -m mezcla.randomize_lines --header --percent "$num_lines" "$file"
+        randomize-lines --header --percent "$num_lines" "$file"
     else
         if [ "$num_lines" = "" ]; then num_lines=$(wc -l < "$file"); fi
         head -1 "$file"
-        tail --lines=+2 "$file" | alias-python -m mezcla.randomize_lines - | head -"$num_lines"
+        # OLD: tail --lines=+2 "$file" | alias-python -m mezcla.randomize_lines - | head -"$num_lines"
+        tail --lines=+2 "$file" | randomize-lines-stdin | head -"$num_lines"
     fi
 }
 
