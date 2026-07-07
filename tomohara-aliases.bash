@@ -361,16 +361,20 @@ alias date-central='TZ="America/Chicago" date'
 # ddmmmyy-hhmm(): return timestamp in European-like format using a single token (e.g., 31dec25@2359).
 # note: This is intended for use in filenames (e.g., _free-21Feb26@1549).
 # ex: 01jan26@0001).
-function mmddyy-hhmm {
+function ddmmmyy-hhmm {
     date '+%d%b%y@%H%M' | downcase-stdin;
 }
-alias todays-date-hhmm='mmddyy-hhmm'
+alias todays-date-hhmm='ddmmmyy-hhmm'
+# ddmmmyy-verbose(): output timestamp like 'Tue 07 Jul 26'
+function ddmmmyy-verbose {              ## TODO3: rename as dow-ddmmmyy?
+    date '+%a %d %b %y'
+}
 
-# file-date-mmdddyy(): return file's timestamp in European format without hours and minutes
+# file-date-ddmmmyy(): return file's timestamp in European format without hours and minutes
 # note: %y gives time of last data modification, human-readable
-function file-date-mmdddyy {
+function file-date-ddmmmyy {
     if missing-options "$@"; then
-        function-usage --synopsis "return file timestamp using mmdddyy" --example "$TMP/fubar.txt"
+        function-usage --synopsis "return file timestamp using ddmmmyy" --example "$TMP/fubar.txt"
         return        
     fi
     date-ddmmmyy "$(stat --format=%y "$1")";
@@ -952,6 +956,7 @@ function copy-readonly-spec () {
     # shellcheck disable=SC2086
     for f in $($LS $spec); do copy-readonly "$f" "$dir"; done
 }
+## TODO4: copy-readonly-spec-force; add related env to copy-readonly.sh
 # copy-readonly-to-dir(dir, file, ...): variant of copy-readonly-spec with
 # directory first and files given in args 2, 3, etc.
 function copy-readonly-to-dir () {
@@ -2476,7 +2481,7 @@ function rename-with-file-date() {
         elif [ -L "$f" ]; then              # symbolic link exists
             # note: gets mod time via 'stat -c %y'
             local date_spec
-            date_spec=$(file-date-mmdddyy "$f")
+            date_spec=$(file-date-ddmmmyy "$f")
             new_f=$(get-free-filename "$f.$date_spec" ".")
             eval "$move_command" "$f" "$new_f";
         else
@@ -2774,7 +2779,7 @@ function cmd-output () {
     local output_base output_file
     output_base="_$(flatten-path "$command")"
     if [ "${ADD_MINUTES:0}" == "1" ]; then
-        output_base="${output_base}-$(mmddyy-hhmm)"
+        output_base="${output_base}-$(ddmmmyy-hhmm)"
     else
         output_base="${output_base}-$(TODAY)"
     fi
@@ -2883,7 +2888,18 @@ alias restart-system='shutdown-system --reboot'
 alias blank-screen='xset dpms force off'
 alias stop-service='systemctl stop'
 alias restart-service='sudo systemctl restart'
-alias unmount=umount
+## OLD: alias unmount=umount
+# mount(): wrapper around command with safety guards
+function unmount {
+    local dangerous_option=false
+    if [ "--all" in ]; then
+        dangerous_option=true
+    fi
+    if $dangerous_option; then
+        pause-for-enter "Risky umount option(s): are you sure?"
+    fi
+    umount "$@"
+}
 # TODO: rename as map-internet-ports???
 # map-ports: shows TCP ports being listened to on the remote host
 # note: -Pn option skips host discovery (a la no ping)
@@ -2962,6 +2978,7 @@ function fix-sudoer-home-permission () {
 # check-html(filename): check HTML in filename
 alias check-html='check-xml --html'
 # check-html-vnu(filename): likewise check HTML using Validator.nu [Nu Html Checker]
+# note: vnu might require special installation environment (e.g., homebrew)
 alias check-html-vnu='vnu'
 
 #-------------------------------------------------------------------------------
