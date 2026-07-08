@@ -3789,6 +3789,7 @@ alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 # End processing
 
 # Set xterm title based on current directory
+## TODO3: move elsewhere (e.g., all-tomohara-aliases-etc.bash) to avoid chicken and egg problem with path (e.g, for set_xterm_title.bash)
 if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-dir; fi
 
 #------------------------------------------------------------------------
