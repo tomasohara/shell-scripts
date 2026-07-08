@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Configure Environment
         ## TODO2: clarify why used
@@ -58,7 +58,7 @@ jobs:
           echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> "$GITHUB_ENV"
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -93,7 +93,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Build docker image
         run: |

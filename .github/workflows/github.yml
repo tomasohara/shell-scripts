@@ -23,17 +23,21 @@ jobs:
         ## TODO: 3.x [latest; -or latest, latest-1, latest-2, ...]
 
     steps:
+      ## NOTE: Action pins use major-version tags (e.g. @v5). These float within
+      ## a major but do NOT cross a major bump (e.g. the Node 20->24 runtime
+      ## change), so new majors must be adopted deliberately. Dependabot (see
+      ## ../dependabot.yml) opens PRs to keep these versions synchronized.
       - name: Checkout Repository
         ## See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-versioned-actions
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Cache Python Dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
@@ -71,7 +75,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Build docker image
         run: |

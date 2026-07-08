@@ -1,0 +1,16 @@
+version: 2
+updates:
+  # Keep GitHub Actions (checkout, setup-python, cache, etc.) up to date.
+  # Opens PRs when a newer version — including a new major like the Node 20->24
+  # bump — is released, so we don't drift onto deprecated runtimes again.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      # Bundle all action bumps into a single PR to reduce noise.
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"
