@@ -42,6 +42,9 @@
 #   fi
 #
 
+# Optional startup trace
+(( DEBUG_LEVEL >= 6 )) && echo "in ${BASH_SOURCE[0]}"
+
 # Guard against re-entry
 if [ "${ALIASES_PROCESSED:-0}" == 1 ]; then
     echo "Warning: unexpected re-invocation of ${BASH_SOURCE[0]}; set ALIASES_PROCESSED=0 first"
@@ -78,6 +81,12 @@ if [ "$TOM_BIN" != "$source_dir" ]; then
     echo "    $TOM_BIN"
     echo "    $source_dir"
     source_dir="$TOM_BIN"
+fi
+## TEMP: make sure source dir in path
+## NOTE: also done in tomohara-settings but needed for set-title-to-current-dir in tomohara-settings.bash
+## TODO3: egrep "^|:$source_dir/?":)"
+if [ "$(echo ":$PATH:" | egrep ":$source_dir/?":)" = "" ]; then
+   export PATH="$PATH:$TOM_BIN"
 fi
 source "$source_dir/tomohara-aliases.bash"
 if [ "${SOURCE_SETTINGS:-0}" = "1" ]; then
