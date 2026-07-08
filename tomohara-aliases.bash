@@ -2710,10 +2710,11 @@ alias ununcompress-this-dir='uncompress-dir $PWD'
 
 # count-exts(): tabulate the file extensions in current directory
 # count-exts-all(): likewise including cases with no extension (e.g., 'it')
+## TODO4: add option to include dotfiles (i.e., ls -a ...)
 ## UPDATE: 05/12/2026: adds -one_per_line to avoid multiple counts
-function count-exts () { $LS | count-it -one_per_line '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
-function count-exts-all { (count-exts | cat; $LS | count-it -one_per_line '^[^.]+(\.*)$') | sort $SORT_COL2 -rn | $PAGER; }
-
+function count-exts () { $LS | count-it -chomp -one_per_line '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
+## BAD: function count-exts-all { (count-exts | cat; $LS | count-it -chomp -one_per_line '^[^.]+(\.*)$') | sort $SORT_COL2 -rn | $PAGER; }
+function count-exts-all { (count-exts | cat; $LS | count-it -chomp -one_per_line '^[^.]+$') | sort $SORT_COL2 -rn | $PAGER; }
 alias kill-iceweasel='kill-em iceweasel'
 
 # flatten-path(path-label): convert PATH-LABEL to flattened file name:
