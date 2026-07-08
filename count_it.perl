@@ -320,7 +320,7 @@ foreach my $tag (&$sort_function(\%count)) {
 	if ($tag =~ /^(.*)\n$/) {
 	    $tag = "$1\\n";
 	    if (! $displayed_trim_warning) {
-		&debug_print(&TL_USUAL, "FYI: trailing newline in $tag (consider -trim)\n");
+		&debug_print(&TL_WARNING, "Warning: trailing newline in $tag (consider -trim or -chomp)\n");
 		$displayed_trim_warning = &TRUE;
 	    }
 	}
