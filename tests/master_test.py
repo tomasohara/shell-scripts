@@ -3,6 +3,7 @@
 # note: Tana's script for running Python tests as part of workflow
 #
 # TODO2: reconcile with version in mezcla
+## UPDATE 13 Jul 26: Increases threshold default.
 #
 
 
@@ -158,11 +159,11 @@ def main():
 
     # Load the thresholds from the YAML file, falling back to defaults for all test files
     # in the tests directory (TODO: merge the two sources with file trumping default).
-    # note: uses default of 25% succeses allowed just for sake of getting tests operational
+    # note: uses default of 50% successes.
     # under Github actions (TODO: lower to 50%).
     THRESHOLDS_FILE = "thresholds.yaml"
     thresholds_path = gh.resolve_path(THRESHOLDS_FILE)
-    thresholds = {test_file: 25.0 for test_file in gh.get_matching_files("tests/test_*.py")}
+    thresholds = {test_file: 50.0 for test_file in gh.get_matching_files("tests/test_*.py")}
     debug.trace_expr(5, thresholds, prefix="default thresholds: ")
     if system.file_exists(thresholds_path):
         thresholds.update(load_thresholds(thresholds_path))
