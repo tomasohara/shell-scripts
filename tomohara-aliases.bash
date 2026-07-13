@@ -95,6 +95,8 @@
 #   set_xterm_title.bash startup-tracing.bash
 # - Supplemental scripts:
 #   anaconda-aliases.bash git-aliases.bash kill_em.bash ps_mine.bash
+## UPDATE: 12 July 2026: section tracing generalization and commenting out very old aliases
+## TODO2: continue with section/tracing cleanup and old alias isolation
 #
 # TODO:
 # - ***** Move settings to tomohara-settings.bash (i.e., export's and the like).
@@ -456,7 +458,7 @@ export HISTFILESIZE=32767
 shopt -s nocasematch
 
 #-------------------------------------------------------------------------------
-trace do_setup.bash invocation
+trace "do_setup.bash invocation"
 
 # Get initital settings from ~/bin/do_setup.bash
 if [ -e "$TOM_BIN/do_setup.bash" ]; then source "$TOM_BIN/do_setup.bash"; fi
@@ -537,7 +539,7 @@ alias ltc=less-tail-clipped
 cond-export ZPAGER zless
 
 #-------------------------------------------------------------------------------
-trace start of main settings
+trace "start of main settings"
 
 # Path settings
 # TODO: define a function for removing duplicates from the PATH while
@@ -775,7 +777,6 @@ function set-title-to-current-dir () {
     ## TEST: set-xterm-window "$PS_symbol $dir [$pwd]$other_info";
     ## TODO: set-xterm-window "$dir [$PS_symbol$pwd]$other_info";
 }
-## OLD: if [[ ("$TERM" = "xterm") || ("$TERM" = "cygwin") ]]; then set-title-to-current-dir; fi
 #
 alias reset-xterm-title='set-xterm-window "$HOSTNAME $PWD"'
 # old-alt-xterm-title([prefix=alt]): change xterm title to PREFIX DIR-BASENAME [PWD]
@@ -811,7 +812,7 @@ cond-export LANGUAGE_TOOL_HOME "$TOM_DIR/programs/java/LanguageTool-2.1"
 #------------------------------------------------------------------------
 # Shell aliases for overriding commands, etc
 #
-trace alias overrides
+trace "alias overrides (e.g., file/dir manipulation)"
 
 # Command overrides for cd, etc. that set the xterm title to the current directory
 # TODO: use alias's instead so that the same name can be used as the command
@@ -978,7 +979,7 @@ function fix-group-dir-permissions { (find . -type d -print0 | xargs -0 chmod --
 ## where '-exec ... +' is replacement for xargs usage
 
 #-------------------------------------------------------------------------------
-trace directory commands
+trace "file/dir commands (e.g., ls and ln based)"
 
 # Support for ls (list directory contents)
 # 
@@ -1064,7 +1065,7 @@ alias ln-symbolic-force='ln-symbolic --force'
 alias link-symbolic-force=ln-symbolic-force
 
 #-------------------------------------------------------------------------------
-trace grep commands
+trace "grep commands and find, etc."
 
 # check for a modern version of grep. For example,
 #
@@ -1140,7 +1141,6 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
       if [[ ($1 =~ ^[^]) && ($# -gt 2) ]]; then
           echo "Error: ^ will be intrepretted differently by less (e.g., due to multiple files)" 1>&2
       else
-          ## OLD: $EGREP $MY_GREP_OPTIONS "$@" | $PAGER_NOEXIT -p"$1";
           # NOTE: Only uses pager if more than one screen
           $EGREP $MY_GREP_OPTIONS "$@" | $PAGER -p"$1";
       fi
@@ -1155,16 +1155,11 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   # note: uses redundant grepl for highlighting (with potentially split args noted above for grep-to-less)
   # TODO3: remove redundant item number (due to history and grepl)
   #    7255: 7255  [2026-03-13 22:57:03] my-gnome-terminal --title "copilot: mezcla" --no-xterm-title
-  ## OLD:
-  ## function grepl-hist-tail { history  | grepl "$@" | tail | grepl "$@"; }
-  ## # NOTE: Uses tac (reverse) so that larger context available.
-  ## OLD: function grepl-hist-tail { history  | grepl "$@" | tac | grepl "$@"; }
   function grepl-hist-tail { history  | PAGER="$PAGER_NOEXIT +G" grepl "$@"; }
   #
   # grepl-bashrc-etc(): grep through bash rc files excluding history
   # note: see grepl-hist-tail for rationale (e.g., double grepl and potentially split args)
   ## BAD: function grepl-bashrc-etc { grepl "$@" ~/.*bash* | grep -v '\.bash_history' | tail | grepl "$@"; }
-  ## OLD: function grepl-bashrc-etc { grepl "$@" ~/.*bash* | grep -v '\.bash_history' | grepl "$@"; }
   # note: includes related bash aliases under ~/bin (n.b., an outgrowth of .bashrc stuff)
   function grepl-bashrc-etc { grepl "$@" ~/.*bash* "$TOM_BIN"/*tomohara*bash | grep -v '\.bash_history' | grepl "$@"; }
 }
@@ -1304,6 +1299,7 @@ alias find-files-='find-files-there'
 #--------------------------------------------------------------------------------
 # Emacs commands
 ## TOM-IDIOSYNCRATIC
+trace "emacs related"
 #
 # emacs-tpo([args] [file]...) invokes emacs w/ ~.emacs.tpo if exists otherwise ~/.emacs
 # em: alias for emacs (or emacs-tpo) with dired for current directory if no file given
@@ -1457,7 +1453,7 @@ alias convert-emoticons='alias-python "$(which convert_emoticons.py)"'
 alias convert-emoticons-stdin='convert-emoticons -'
 
 #-------------------------------------------------------------------------------
-trace Miscellaneous commands
+trace "Miscellaneous commands"
 
 ## MISC:
 ## alias startx-='startx >| startx.log 2>&1'
@@ -1562,7 +1558,6 @@ function check-errors-aux { alias-perl check_errors.perl "$@"; }
 ## # -or-:
 ## function check-errors-aux { PERL_SWITCH_PARSING=1 check_errors.py "$@"; };
 # note: ALIAS_DEBUG_LEVEL is global for aliases and functions which should use default DEBUG_LEVEL (e.g., 2), not current (e.g., 4)
-## OLD: ALIAS_DEBUG_LEVEL=${ALIAS_DEBUG_LEVEL:-${DEBUG_LEVEL:-2}}
 ## TODO: ALIAS_DEBUG_LEVEL=${ALIAS_DEBUG_LEVEL:-$(min DEBUG_LEVEL 2)}
 ALIAS_DEBUG_LEVEL=${ALIAS_DEBUG_LEVEL:-2}
 function check-errors () {
@@ -1729,14 +1724,13 @@ function signature () {
 }
 
 #-------------------------------------------------------------------------------
-trace file archiving commands
+trace "file archiving commands"
 
 # Tar archive creation and manipulation
 # tar options:
 # -x extract; -v verbose; -f file source; -z compressed; -k don't overwrite files
 ## NOTE: gtar is used on some BSD-based system (e.g., MacOS), but tar is used on Linux.
 GTAR="tar"
-## OLD: if [ "$(which gtar)" != "" ]; then
 ## TODO3: add which-no-error alias
 if [ "$(which gtar 2> /dev/null)" != "" ]; then
     GTAR="gtar"
@@ -1844,11 +1838,13 @@ function tar-dir () {
 # Note: will exclude folders based on make-tar behaviour with specified depth 
 function tar-just-dir () { tar-dir "$1" 1; }
 #
-# tar-this-dir(): create tar archive into TEMP, for sud-directory tree routed
+# tar-this-dir(): create tar archive into TEMP, for sub-directory tree routed
 # in current directory (using directory basename as file prefix instead of .)
 # ex: TEMP=/mnt/my-external-drive/tmp tar-this-dir
 # Note: will include empty folders in dir given the unspecified optional parameters, see make-tar
-function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")"; popd-q; }
+## BAD: function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")"; popd-q; }
+## TODO3: apply fix upstream (e.g., in tar-dir)
+function tar-this-dir () { local dir="$PWD"; pushd-this-realdir; tar-dir "$(basename "$dir")"; popd; }
 # test of resolving problem with tar-this-dir if dir a symbolic link from apparent parent
 # TODO: fixme
 function new-tar-this-dir () {
@@ -2107,7 +2103,7 @@ alias gimp='run-app gimp'
 alias do-resize='resize >| $TEMP/resize.sh; conditional-source $TEMP/resize.sh'
 
 #-------------------------------------------------------------------------------
-trace alias/function info
+trace "alias/function info"
 
 # Displaying bash aliases and functions
 # note: '.' used in grep to handle special case of no pattern;
@@ -2157,7 +2153,7 @@ function show-functions-proper { show-functions | extract-matches "^(\S+) \(" | 
 # NOTE: probably not possible for syntax reasons (e.g., braces)
 
 #-------------------------------------------------------------------------------
-trace setup and sorting wrappers
+trace "setup and sorting wrappers"
 
 # Editing and activating new settings
 #
@@ -2181,7 +2177,7 @@ function para-sort() { perl -00 -e '@paras=(); while (<>) {push(@paras, $_);} pr
 function echoize { perl -0777 -pe 's/\n/ /g;  s/\s/ /g;  s/$/\n/;'; }
 
 #-------------------------------------------------------------------------------
-trace file manipulation and conversions
+trace "file manipulation and conversions"
 
 ## TODO: make obsolete
 function asc-it () { dobackup.sh "$1"; asc < backup/"$1" >| "$1"; } 
@@ -2204,7 +2200,7 @@ function show-line () { tail --lines=+"$1" "$2" | head -1; }
 function last-n-with-header () { head --lines=1 "$2"; tail --lines="$1" "$2"; }
 
 #-------------------------------------------------------------------------------
-trace line/word count, etc. commands
+trace "line/word count, etc. commands"
 
 # line-wc; alias for counting words on individual lines thoughout a file
 # (Gotta hate csh)
@@ -2220,18 +2216,26 @@ function check-class-dist () { count-it "^(\S+)\t" "$1" | perl- calc_entropy.per
 alias 2bib='bibitem2bib'
 
 #-------------------------------------------------------------------------------
-trace extension-less shortcuts
-## TODO: say what???!!! (i.e., wrt extension-less)
+## OLD:
+## trace extension-less shortcuts
+## ## TODO: say what???!!! (i.e., wrt extension-less)
+trace "adhoc unix aliases (e.g., showing or killing processes, etc.)"
 
 # TODO: generate aliases for .sh and .perl scripts automatically
 # ls *.sh *.perl | perl -pe "s/(\w+)\.\w+/alias \1='$&'/g; s/(\w+.perl)/perl- \1/g;" >| _all_alias.list
-alias convert-termstrings='perl- convert_termstrings.perl'
-alias do-rcsdiff='do_rcsdiff.sh'
+##
+## TODO2: deprecate old aliases (e.g., unattested in recent Bash history files)
+## OLD:
+## alias convert-termstrings='perl- convert_termstrings.perl'
+## alias do-rcsdiff='do_rcsdiff.sh'
+##
 alias dobackup='dobackup.sh'
 alias kill-em='kill_em.bash'
 alias kill-it='kill-em --pattern'
 # ps-mine: wrapper around ps_mine.sh w/ filtering (e.g., defunct)
-alias ps-mine='ps_mine.bash --filtered'
+## OLD: alias ps-mine='ps_mine.bash --filtered'
+alias ps-mine-regular='ps_mine.bash'
+alias ps-mine='ps-mine-regular --filtered'
 # NOTE: see filter-dirnames added to strip directory names
 # TODO: rename as ps-mine-sans-dirs
 ## BAD: alias ps-mine-='ps-mine "$@" | filter-dirnames'
@@ -2243,14 +2247,21 @@ function ps-users { ps_mine.sh -a | $GREP -v ^root; }
 deprecated-alias-fn ps-mine- ps-mine-sans-dir
 alias ps_mine='ps-mine'
 ## DUP: alias ps-mine-='ps-mine "$@" | filter-dirnames'
-alias ps-mine-all='ps-mine --all'
+## OLD: alias ps-mine-all='ps-mine --all'
+alias ps-mine-all='ps-mine-regular --all'
 alias rename-files='alias-perl rename_files.perl'
 alias rename_files='rename-files'
 alias foreach='alias-perl foreach.perl'
 
+# check-mem-usage(process): show regular memory usage for given PROCESS (n.b., not virtual)
+# note: uses RSS (resident set size) from ps utility
+## TODO3: just show regular memory usage (not paged, etc.)
+function check-mem-usage { ps-mine "$@" | sum_file.perl -precision=0 -fix -col=6 - | apply-usage-numeric-suffixes; }
+
 #--------------------------------------------------------------------------------
-# Adhoc aliases for renaming aliases
+# Adhoc aliases for renaming files
 ## TOM-IDIOSYNCRATIC
+trace "adhoc file-renaming aliases"
 
 # rename-spaces: replace spaces in filenames of current dir with underscores
 alias-fn rename-spaces 'rename-files -q -global -rename_old " " "_"'
@@ -2555,7 +2566,7 @@ function display-unicode-control-chars { perl -pe 'use open ":std", ":encoding(U
 alias display-unicode-info=show-unicode-code-info-stdin
 
 #-------------------------------------------------------------------------------
-trace Unix aliases
+trace "Unix aliases"
 
 ## TODO: archive
 function group-members () { ypcat group | $GREP -i "$1"; }
@@ -2889,15 +2900,16 @@ alias restart-system='shutdown-system --reboot'
 alias blank-screen='xset dpms force off'
 alias stop-service='systemctl stop'
 alias restart-service='sudo systemctl restart'
-## OLD: alias unmount=umount
 # mount(): wrapper around command with safety guards
 function unmount {
     local dangerous_option=false
-    if [ "--all" in ]; then
+    ## Note: Bash idiom for --all in $@
+    if [[ " $* " =~ " --all " ]]; then
         dangerous_option=true
     fi
     if $dangerous_option; then
-        pause-for-enter "Risky umount option(s): are you sure?"
+        echo -e "Risky umount option(s):\n    $*"
+        pause-for-enter "Are you sure?"
     fi
     umount "$@"
 }
@@ -3208,12 +3220,10 @@ function script {
 function script-update {
     local command_indicator=""
     ## TODO: under-linux 1 && command_indicator="-c"
-    ## OLD: if [ "$(under-linux)" = "1" ]; then
     if [[ ("$(under-linux)" = "1") || ("$(under-cygwin)" = "1")]]; then
         command_indicator="-c"
     fi
     # shellcheck disable=SC2046,SC2086
-    ## OLD: script  "_update-$(T).log"  $command_indicator make-git-update.bash
     script  "${GIT_LOG_DIR:-.}/_update-$(T).log"  $command_indicator make-git-update.bash
 }
 
@@ -3534,12 +3544,10 @@ function randomize-datafile() {
     local num_lines="$2"
     if [[ $num_lines =~ % ]]; then
         num_lines=${num_lines//%/}
-        ## OLD: alias-python -m mezcla.randomize_lines --header --percent "$num_lines" "$file"
         randomize-lines --header --percent "$num_lines" "$file"
     else
         if [ "$num_lines" = "" ]; then num_lines=$(wc -l < "$file"); fi
         head -1 "$file"
-        # OLD: tail --lines=+2 "$file" | alias-python -m mezcla.randomize_lines - | head -"$num_lines"
         tail --lines=+2 "$file" | randomize-lines-stdin | head -"$num_lines"
     fi
 }
@@ -3575,15 +3583,10 @@ function filter-random() {
        type="zcat"; 
        result=$(echo "$result" | perl -pe 's/.gz$//;')
     fi
-    ## OLD:
-    ## local opts=""
-    ## if [ "$include_header" = "1" ]; then opts="$opts --include-header"; fi
     local opts=()
-    if [ "$include_header" = "1" ]; then opts=($opts --include-header); fi
+    if [ "$include_header" = "1" ]; then opts+=(--include-header); fi
     # maldito shellcheck (SC2086: Double quote to prevent globbing)
     # shellcheck disable=SC2086
-    ## BAD: $type "$file" | alias-python -m filter_random "$opts" --ratio "$ratio" - > "$result" 2> "$result.log"
-    ## OLD: $type "$file" | alias-python -m mezcla.filter_random "$opts" --ratio "$ratio" - > "$result" 2> "$result.log"
     $type "$file" | alias-python -m mezcla.filter_random "${opts[@]}" --ratio "$ratio" - > "$result" 2> "$result.log"
 
     # Compress result if original compressed
@@ -3694,7 +3697,7 @@ fi
 # Miscellaneous bash scripting helpers
 
 # TODO: move other aliases here
-trace bash helpers
+trace "bash helpers"
 
 # shell-check[-full](options, script, ...): run script through shellcheck
 # with filtering given it's awkward filtering mecahanism
@@ -3746,7 +3749,7 @@ alias kill-clam-antivirus='kill-em --all -p clamd'
 
 #........................................................................
 # Miscellaneous local environment helpers
-trace misc local helpers
+trace "misc local helpers"
 
 # sleepyhead: Invoke SleepyHead with debug trace sent to log file under ~/temp.
 ## TOM-IDIOSYNCRATIC
