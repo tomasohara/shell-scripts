@@ -1185,7 +1185,7 @@ alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 ## OLD: alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
 ## OLD: alias all-tomohara-aliases='ALIASES_PROCESSED=0 source $TOM_BIN/all-tomohara-aliases-etc.bash'
 ## TODO2: add sanity check to detect aliases masking functions (e.g., all-tomohara-aliases).
-function all-tomohara-aliases { ALIASES_PROCESSED=0 source $TOM_BIN/all-tomohara-aliases-etc.bash; }
+function all-tomohara-aliases { ALIASES_PROCESSED=0 source "$TOM_BIN/all-tomohara-aliases-etc.bash"; }
 ## TODO4: fallback version for scripts where TOM_BIN is not preset:
 ## function all-tomohara-aliases { ALIASES_PROCESSED=0 source "${TOM_BIN:-$(dirname "${BASH_SOURCE[0]:-$0}")}/all-tomohara-aliases-etc.bash"; }
 alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
