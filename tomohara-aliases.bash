@@ -3649,13 +3649,14 @@ function invoke-browser() {
 ## alias opera='invoke-browser command "opera"'
 ## NOTE: which is a Bash builtin
 # TODO: make following conditioned up Linux
-alias chromium='invoke-browser /usr/bin/chromium-browser'
+## OLD: alias chromium='invoke-browser /usr/bin/chromium-browser'
 ## TODO: drop which's
 ## BAD: function which { builtin which "$1" 2> /dev/null; }
 function which { command which "$1" 2> /dev/null; }
 # maldito shellcheck: SC2139: [This expands when defined, not when used. Consider escaping]
 # shellcheck disable=SC2139
 {
+alias chromium='invoke-browser "'"$(which chromium)"'"'
 ## TEST: alias firefox='invoke-browser "'"$(which firefox 2> /dev/null)"'"'
 alias firefox='invoke-browser "'"$(which firefox)"'"'
 ## TEST: alias opera='invoke-browser "'"$(which opera 2> /dev/null)"'"'
