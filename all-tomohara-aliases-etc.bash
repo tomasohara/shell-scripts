@@ -1,13 +1,14 @@
 #! /usr/bin/env bash
 #
 # Convenience script for loading all my aliases, functions, etc.
+## UPDATE 12 Jul 26: TOM_BIN-related cleanup.
 #
 # Tom's typical usage (n.b., idiosyncratic settings):
 #   SOURCE_SETTINGS=1 source ~tomohara/bin/all-tomohara-aliases-etc.bash
 #
 # Simple Usage (see advanced below for use in scripts):
-#   export TOM_BIN=/home/tom/shell-script;
-#   source $TOM_BIN/all-tomohara-aliases-etc.bash
+#   export TOM_BIN="/home/tom/shell-script"
+#   source "$TOM_BIN/all-tomohara-aliases-etc.bash"
 #
 # Debugging usage:
 #   TRACE_SOURCE=1 VERBOSE_SOURCE=1 source ~/bin/all-tomohara-aliases-etc.bash > ~/bin/all-tomohara-aliases-etc.debug.log 2>&1
@@ -55,7 +56,6 @@ ALIASES_PROCESSED=1
 # Set bash regular and/or verbose tracing
 # note: tracing off by default unless active for current shell
 was_tracing=false
-## OLD: if [ "1" = "$(set -o | grep -v '^xtrace.*on')" ]; then
 if [[ "" != "$(set -o | grep 'xtrace.*on')" ]]; then 
    was_tracing=true
 fi
@@ -83,11 +83,11 @@ if [ "$TOM_BIN" != "$source_dir" ]; then
     source_dir="$TOM_BIN"
 fi
 ## TEMP: make sure source dir in path
-## NOTE: also done in tomohara-settings but needed for set-title-to-current-dir in tomohara-settings.bash
-## TODO3: egrep "^|:$source_dir/?":)"
+## NOTE: also done in tomohara-settings but needed here for set-title-to-current-dir in tomohara-settings.bash
 if [ "$(echo ":$PATH:" | egrep ":$source_dir/?":)" = "" ]; then
    export PATH="$PATH:$TOM_BIN"
 fi
+(( DEBUG_LEVEL >= 4 )) && echo "FYI: sourcing $source_dir/tomohara-aliases.bash, etc."
 source "$source_dir/tomohara-aliases.bash"
 if [ "${SOURCE_SETTINGS:-0}" = "1" ]; then
     source "$source_dir/tomohara-settings.bash"
@@ -109,8 +109,8 @@ if [ "${DIR_ALIAS_HACK:-0}" = "1" ]; then
     #
 fi
 ##
-## BAD: $was_tracing || set - -o xtrace
-## NOTE: This above set the $@ parameters to "-o xtrace"! Via bash manual:
+## VERY-BAD: $was_tracing || set - -o xtrace
+## NOTE: The above set the $@ parameters to "-o xtrace"! Via bash manual:
 ##   set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
 ##     - Signal the end of options, cause all remaining  args to be assigned
 ##       to the positional parameters. The -x and -v options are turned off. ...
