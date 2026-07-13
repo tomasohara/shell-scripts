@@ -661,7 +661,9 @@ function libreoffice-text-from-html-clipboard() {
     rename-with-file-date "$temp_html"
     xclip -selection clipboard -t text/html -o > "$temp_html"
     if [ "" == "$(grep "<body>" "$temp_html")" ]; then
-        perl -i.bak -pe 's@.*@<!DOCTYPE html><html lang="en">\n$&\n</body></html>\n@;' "$temp_html"
+        ## BAD: perl -i.bak -pe 's@.*@<!DOCTYPE html><html lang="en">\n$&\n</body></html>\n@;' "$temp_html"
+        # ex: <pre><font ...></pre> => <!DOCTYPE html><html lang="en"><pre>...</pre></html>"
+        perl -i.bak -pe 's@.*@<!DOCTYPE html><html lang="en">\n$&\n</html>\n@;' "$temp_html"
     fi
 
     # Convert HTML to document and then open
@@ -1188,6 +1190,12 @@ alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 function all-tomohara-aliases { ALIASES_PROCESSED=0 source "$TOM_BIN/all-tomohara-aliases-etc.bash"; }
 ## TODO4: fallback version for scripts where TOM_BIN is not preset:
 ## function all-tomohara-aliases { ALIASES_PROCESSED=0 source "${TOM_BIN:-$(dirname "${BASH_SOURCE[0]:-$0}")}/all-tomohara-aliases-etc.bash"; }
+# all-tomohara-aliases-here(): reload tomohara aliases from current directory showing invocations
+## OLD: function all-tomohara-aliases-here { DEBUG_LEVEL=5 TOM_BIN="$PWD" all-tomohara-aliases; }
+function all-tomohara-aliases-here {
+    DEBUG_LEVEL=4 TRACE_SOURCE=1 TOM_BIN="$PWD" all-tomohara-aliases
+}
+# all-tomohara-settings(): enable tomohara settings as well as aliases
 alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
 #
 # note: kill-em targets process name, and kill-it uses pattern (hence riskier)
