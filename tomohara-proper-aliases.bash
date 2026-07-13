@@ -1193,7 +1193,8 @@ function all-tomohara-aliases { ALIASES_PROCESSED=0 source "$TOM_BIN/all-tomohar
 # all-tomohara-aliases-here(): reload tomohara aliases from current directory showing invocations
 ## OLD: function all-tomohara-aliases-here { DEBUG_LEVEL=5 TOM_BIN="$PWD" all-tomohara-aliases; }
 function all-tomohara-aliases-here {
-    DEBUG_LEVEL=4 TRACE_SOURCE=1 TOM_BIN="$PWD" all-tomohara-aliases
+    ## BAD: DEBUG_LEVEL=4 TRACE_SOURCE=1 TOM_BIN="$PWD" all-tomohara-aliases
+    DEBUG_LEVEL=4 TOM_BIN="$PWD" all-tomohara-aliases
 }
 # all-tomohara-settings(): enable tomohara settings as well as aliases
 alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
