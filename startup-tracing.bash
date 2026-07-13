@@ -13,6 +13,7 @@
 #
 # TODO:
 # - Use DEBUG_LEVEL rather than VERBOSE_TRACING.
+# TODO2: Rename as tomohara-startup-tracing.bash as interwined with the eponymous scripts (tomohara-aliases.bash, etc.)???.
 #
 
 # maldito spellcheck: this should be an option, not the default
@@ -26,6 +27,7 @@ DEBUG_LEVEL=${DEBUG_LEVEL:-0}
 if [ "$TEMP" = "" ]; then TEMP="$TMP"; fi
 if [ "$TEMP" = "" ]; then TEMP=/tmp; fi
 
+# startup-trace(msg): trace MSG at DEBUG_LEVEL 5+
 function startup-trace () {
     # Set tracing (TODO3: put in separate function like startup-trace-init)
     if [ "$VERBOSE_TRACING" = "1" ]; then 
@@ -41,10 +43,12 @@ function startup-trace () {
     if [ "$STARTUP_TRACING" = "1" ]; then
 	echo "$* [$HOSTNAME $(date)]" >> "$TEMP/_startup-$USER-$HOST-$$.log";
     fi; 
-    if [ "$CONSOLE_TRACING" = "1" ] || [ "$DEBUG_LEVEL" -ge 6 ]; then
+    if [ "$CONSOLE_TRACING" = "1" ] || [ "$DEBUG_LEVEL" -ge 5 ]; then
 	echo "$* [$HOSTNAME $(date)]";
     fi;
 }
+# startup-trace-debug(msg): trace MSG with DEBUG_LEVEL 6+
+function startup-trace-debug { DEBUG_LEVEL=$(min DEBUG_LEVEL 6) startup-trace "$@"; }
 
 ##------------------------------------------------------------------------------
 ## TEMP: Duplicate definitions to work around chicken-and-egg problem
@@ -54,3 +58,6 @@ function conditional-source () { if [ -e "$1" ]; then source $1; else echo "Warn
 #
 # append-path(path): appends PATH to environment variable unless already there
 function append-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="${PATH}:$1"; fi }
+#
+# min(x, y): minimum of X and Y
+function min { local a=$1 b=$2; echo $(( a <= b ? a : b )); }
