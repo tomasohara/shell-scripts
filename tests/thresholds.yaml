@@ -9,7 +9,7 @@ test_bash2python.py: 40
 test_check_errors.py: 40
 test_extract_matches.py: 40
 # note: current oddball at 21.7%
-test_tpo_count_it.py: 20
+## OLD: test_tpo_count_it.py: 20
 
 # Alias tests
 # note: 36% is typical lower bound, so most thresholds start at 30
@@ -49,10 +49,12 @@ perl-script-NOBATSPP.ipynb: 0
 testing-support-script-tests.ipynb: 40
 README.ipynb: 60
 # low thresholds for work-in-progress tests
-git-aliases-tests-1.ipynb: 30
-git-aliases-tests-2.ipynb: 30
-git-aliases-tests-3.ipynb: 30
-test-eval-condition-alias.ipynb: 20
-alias-sanity-checks.ipynb: 40
+## OLD:
+## git-aliases-tests-1.ipynb: 30
+## git-aliases-tests-2.ipynb: 30
+## git-aliases-tests-3.ipynb: 30
+## test-eval-condition-alias.ipynb: 20
+## alias-sanity-checks.ipynb: 40
+test-tomohara-proper-aliases.ipynb: 75
 # temporary no-threshold setting for new tests
 # n/a
