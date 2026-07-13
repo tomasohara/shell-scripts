@@ -87,7 +87,13 @@ fi
 if [ "$(echo ":$PATH:" | egrep ":$source_dir/?":)" = "" ]; then
    export PATH="$PATH:$TOM_BIN"
 fi
-(( DEBUG_LEVEL >= 4 )) && echo "FYI: sourcing $source_dir/tomohara-aliases.bash, etc."
+## OLD: (( DEBUG_LEVEL >= 4 )) && echo "FYI: sourcing $source_dir/tomohara-aliases.bash, etc."
+## TODO3: define temporary alias (or rename to something specialized)
+function source {
+    local script="$1"
+    (( DEBUG_LEVEL >= 4 )) && echo "issuing: source \"$script\""
+    command source "$script"
+}
 source "$source_dir/tomohara-aliases.bash"
 if [ "${SOURCE_SETTINGS:-0}" = "1" ]; then
     source "$source_dir/tomohara-settings.bash"
