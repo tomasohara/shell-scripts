@@ -97,6 +97,7 @@
 #   anaconda-aliases.bash git-aliases.bash kill_em.bash ps_mine.bash
 ## UPDATE: 12 July 2026: section tracing generalization and commenting out very old aliases
 ## TODO2: continue with section/tracing cleanup and old alias isolation
+## UPDATE 12 Jul 26: trace now uses DEBUG_LEVEL 5 (versus 5 for startup-trace)
 #
 # TODO:
 # - ***** Move settings to tomohara-settings.bash (i.e., export's and the like).
@@ -245,9 +246,9 @@ fi
 master_alias_script="all-tomohara-aliases-etc.bash"
 cond-export TOM_BIN "$alias_source_dir"
 if [ ! -e "$TOM_BIN/$master_alias_script" ]; then
-    echo "Warning: Unable to find $master_alias_script in Tom's bin directory ()" 1>&2
+    echo "Warning: Unable to find \"$master_alias_script\" in Tom's bin directory ($TOM_BIN)" 1>&2
 fi
-alias tomohara-setup='source $TOM_BIN/$master_alias_script'
+alias tomohara-setup='source "$TOM_BIN/$master_alias_script"'
 
 # Alias for startup-script tracing via startup-trace function
 if [ ! -e "$HOME/temp" ]; then
@@ -266,7 +267,9 @@ function quiet-conditional-source { source "$@" > /dev/null 2>&1; }
 conditional-source "$TOM_BIN/startup-tracing.bash"
 startup-trace "post-tracing init in ${BASH_SOURCE[0]}"
 #
-alias trace='startup-trace'
+## OLD: alias trace='startup-trace'
+## TODO2: replace trace with startup-trace-debug directly (to avoid clobbering external alias called 'trace')
+alias trace='startup-trace-debug'
 alias enable-startup-tracing='export STARTUP_TRACING=1'
 alias disable-startup-tracing='export STARTUP_TRACING=0'
 alias enable-console-tracing='export CONSOLE_TRACING=1'
@@ -368,9 +371,10 @@ function ddmmmyy-hhmm {
 }
 alias todays-date-hhmm='ddmmmyy-hhmm'
 # ddmmmyy-verbose(): output timestamp like 'Tue 07 Jul 26'
-function ddmmmyy-verbose {              ## TODO3: rename as dow-ddmmmyy?
+function ddmmmyy-verbose {
     date '+%a %d %b %y'
 }
+alias dow-ddmmmyy=ddmmmyy-verbose
 
 # file-date-ddmmmyy(): return file's timestamp in European format without hours and minutes
 # note: %y gives time of last data modification, human-readable
@@ -466,8 +470,9 @@ if [ -e "$TOM_BIN/do_setup.bash" ]; then source "$TOM_BIN/do_setup.bash"; fi
 #-------------------------------------------------------------------------------
 trace 'in tomohara-aliases.bash'
 
-# # HACK: load in older tpo-setup.bash
-# conditional-source $TOM_BIN/tpo-setup.bash
+## OLD:
+## # # HACK: load in older tpo-setup.bash
+## # conditional-source $TOM_BIN/tpo-setup.bash
 
 # under-os(regex, [quiet=0]): Whether REGEX matches $OSTYPE
 # note: outputs boolean code and also sets status code
@@ -3767,13 +3772,16 @@ alias sleepy='sleepyhead'
 # via https://stackoverflow.com/questions/21452752/how-to-find-min-of-two-variables-in-linux
 # TODO4: add min-str and max-str (e.g., using -le)???
 #
+# min(x, y): return smaller of X and Y
 function min {
     local a=$1 b=$2;
     local result;
     result=$(( a <= b ? a : b ));
     echo $result;
 }
+## TODO3 (drop local vars): ex: function min { echo $(( $1 <= $2 ? $1 : $2 )); }
 #
+# max(x, y): return larger of X and Y
 function max {
     local a=$1 b=$2;
     local result;
