@@ -1849,7 +1849,8 @@ function tar-just-dir () { tar-dir "$1" 1; }
 # Note: will include empty folders in dir given the unspecified optional parameters, see make-tar
 ## BAD: function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")"; popd-q; }
 ## TODO3: apply fix upstream (e.g., in tar-dir)
-function tar-this-dir () { local dir="$PWD"; pushd-this-realdir; tar-dir "$(basename "$dir")"; popd; }
+## BAD: function tar-this-dir () { local dir="$PWD"; pushd-this-realdir; tar-dir "$(basename "$dir")"; popd; }
+function tar-this-dir () { pushd-this-realdir; tar-dir "$PWD"; popd; }
 # test of resolving problem with tar-this-dir if dir a symbolic link from apparent parent
 # TODO: fixme
 function new-tar-this-dir () {
