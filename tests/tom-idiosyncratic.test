@@ -38,7 +38,8 @@ $ (pwd-host-info) 2>&1 | grep -c '^ *$'
 # misc aliases
 
 $ x=123; y=321
-$ trace-vars x y
+## OLD: $ trace-vars x y
+$ trace-vars x y 2>&1
 x=123; y=321; 
 
 #...............................................................................
