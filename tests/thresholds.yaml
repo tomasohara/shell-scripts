@@ -48,6 +48,7 @@ sudocommentstest-NOBATSPP.ipynb: 0
 perl-script-NOBATSPP.ipynb: 0
 testing-support-script-tests.ipynb: 40
 README.ipynb: 60
+#
 # low thresholds for work-in-progress tests
 ## OLD:
 ## git-aliases-tests-1.ipynb: 30
@@ -55,6 +56,10 @@ README.ipynb: 60
 ## git-aliases-tests-3.ipynb: 30
 ## test-eval-condition-alias.ipynb: 20
 ## alias-sanity-checks.ipynb: 40
+#
+# High thresholds for critical aliases
 test-tomohara-proper-aliases.ipynb: 75
+tar-aliases-tests.ipynb: 80
+#
 # temporary no-threshold setting for new tests
 # n/a
