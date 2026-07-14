@@ -28,12 +28,8 @@ alias git-log-='git-log-plus'
 alias glog='git-log-'
 alias git-update-='git-update-plus' 
 alias git-vdiff='git-vdiff-alias'
-## OLD: alias git-vdiff-='git-vdiff-alias'
 alias gvdiff=git-vdiff
 alias git-all-update='update-main-repos.bash'
-## OLD:
-## alias git-extract-all-versions='extract-all-git-versions.bash --human'
-## alias git-extract-all-versions='extract-all-git-versions.bash --human'
 alias git-extract-all-versions='VERBOSE=1 extract-all-git-versions.bash --human'
 alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human --verbose'
 alias git-files-changed=git-diff-list
@@ -110,7 +106,6 @@ function plint-tester-testee {
     local pylint="${PYLINT:-python-lint}"
     pylint_result=$($pylint "$script" "$test_script")
     local pylint_status=$?
-    ## OLD: echo "$pylint_result"
     if [ "$pylint_result" != "" ]; then
         echo "$pylint_result"
     fi
@@ -146,7 +141,6 @@ simple-alias-fn plint-tester-testee-regular 'TEST=1 plint-tester-testee';
 ## TODO3?: plint-tester-testee-method-regular
 
 # clone-repo(url, args, ...): clone github repo at URL into current dir with logging
-## OLD: clone-repo(url): clone github repo at URL into current dir with logging
 # example: git-clone-alias https://github.com/ChromeDevTools/devtools-frontend --branch main --single-branch --depth 1
 # TODO2: move to git-related section (better yet into git-aliases.bash)
 function clone-repo () {
@@ -290,7 +284,6 @@ function run-python-script-reset {
 # pytest stuff
 ## UPDATE: 05/09/2006: adds summary for all at end
 # options: --vv: doubly verbose; --capture=no: don't capture stderr; -rA: report all
-## OLD: default_pytest_opts=(-vv --capture=no -rA)
 # shellcheck disable=SC2206
 ## TODO3: rework to just use PYTEST_OPTIONS
 default_pytest_opts=(${PYTEST_OPTIONS:-})
@@ -326,7 +319,6 @@ function test-python-script {
     if [ -e "$test_script" ]; then
         true;
     else
-        ## OLD: echo "Warning: cannnot resolve test for _$test_script" 1>&2
         ## NOTE: Pauses before executing all tests from running due to run-python-script/pytest quirk
         sleep-for 3 "Warning: cannot resolve test for $test_script" 1>&2
     fi
@@ -392,7 +384,6 @@ function pip-freeze {
     # derive default env name label from python bin path
     # ex: /Users/eafqe/python/.venv-nlp-py-12/bin/python => .venv-nlp-py-12
     if [ "$env_name" == "" ]; then
-        ## OLD: env_name="$(which python3 | extract-matches "([^\.\/]+)\/bin\/python")"
         env_name="$(which python3 | extract-matches "([^\/]+)\/bin\/python")"
     fi
     if [ "$env_name" == "" ]; then
@@ -733,7 +724,8 @@ function shell-check-stdin-loose {
 function tabify {
     perl -pe 's/ /\t/g;'
 }
-# trace-vars(var, ...): trace each VAR in command line
+## OLD: # trace-vars(var, ...): trace each VAR in command line
+# trace-vars(var, ...): trace each VAR in command line to stderr
 # note: output format: VAR1=VAL1; ... VARn=VALn;
 # TODO2: fix bug with trailing whitespace being ignored
 function trace-vars {
@@ -744,10 +736,8 @@ function trace-vars {
         ## echo -n "$var="$(eval echo "\$$var")"; "
         ## TODO: value="$(eval "echo \$$var")"
         ## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
-        ## OLD: echo -n "$var=$(eval echo "\${$var}"); "
         echo -n "$var=$(eval echo "\${$var}"); " 1>&2
     done
-    ## OLD: echo
     echo 1>&2
 }
 # trace-array-vars(var, ...): trace each ARRAY in command line
@@ -803,7 +793,6 @@ alias-fn reset-prompt-here 'reset-prompt-label "$(basename $PWD)"'
 for label in alt NOTES; do 
     eval "alias reset-prompt-$label=\"reset-prompt-label $label\""
 done
-## OLD: ## TODO4: rename alt-xterm-title to alt-xterm-title-old)
 alias alt-xterm-title='reset-prompt-label alt'
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
@@ -864,7 +853,6 @@ function rename-last-snapshot {
     fi
     # TODO: have options to use latest file (regardless of name) 
     # shellcheck disable=SC2010
-    ## OLD: last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
     last_file="$(ls -t "$pictures_dir/"*.png | grep -i '/screen.*shot' | head -1)"
     move "$last_file" "$new_name"
 
@@ -903,7 +891,6 @@ function youtube-transcript {
         echo "- More details follow (n.b., python script interface):" 
         echo ""
         ## TODO3: add alias for showing condensed mezcla script usage notes
-        ## OLD: (alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;') | indent-text
         ## TODO2: alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -pe 's/^/  /g; s/    /   /g;'
         alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -pe 's/    /  /; s/^/  /;'
         return
@@ -1043,15 +1030,6 @@ alias-fn ps-time 'LINES=1000 COLUMNS=256 alias-perl ps_sort.perl -time2num -num_
 # options: -d -RR: reattach a session and if necessary detach or create it
 alias-fn screen-reattach 'screen -d -RR'
 
-## OLD:
-## # sleep-for(seconds, [message]): sleep for SECONDS with MESSAGE ("delay for Ns")
-## function sleep-for {
-##     local sec="$1"
-##     local msg="${2:-"delay for ${sec}s"}"
-##     echo "$msg"
-##     sleep "$sec"
-## }
-
 # image-metadata(file): show metadata about image (e.g., associated text)
 simple-alias-fn image-metadata 'identify -verbose'
 # show-sd-prompts(file): show keywords in image file for Stable Diffusion prompts
@@ -1112,7 +1090,6 @@ function remove-path-entries {
     )"
     
     printf -v "$var" '%s' "$new_value"
-    ## OLD: export "$var"
     eval 'export $var'
 }
 
@@ -1125,7 +1102,6 @@ alias free-memory='free --wide --human | grep -v Swap:'
 # clear-cache: clear disk cache
 # See https://linux-mm.org/Drop_Caches and https://www.linuxatemyram.com
 # TODO: get this to work completely; explain Admin filter
-## OLD: simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
 ## NOTE: 71 is ANSI color index for mediumseagreen (#5faf5f)
 simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory | colout "free" 71'
 
@@ -1184,14 +1160,11 @@ simple-alias-fn test-audio 'start /usr/share/sounds/Yaru/stereo/complete.oga'
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
 #
 alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
-## OLD: alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
-## OLD: alias all-tomohara-aliases='ALIASES_PROCESSED=0 source $TOM_BIN/all-tomohara-aliases-etc.bash'
 ## TODO2: add sanity check to detect aliases masking functions (e.g., all-tomohara-aliases).
 function all-tomohara-aliases { ALIASES_PROCESSED=0 source "$TOM_BIN/all-tomohara-aliases-etc.bash"; }
 ## TODO4: fallback version for scripts where TOM_BIN is not preset:
 ## function all-tomohara-aliases { ALIASES_PROCESSED=0 source "${TOM_BIN:-$(dirname "${BASH_SOURCE[0]:-$0}")}/all-tomohara-aliases-etc.bash"; }
 # all-tomohara-aliases-here(): reload tomohara aliases from current directory showing invocations
-## OLD: function all-tomohara-aliases-here { DEBUG_LEVEL=5 TOM_BIN="$PWD" all-tomohara-aliases; }
 function all-tomohara-aliases-here {
     ## BAD: DEBUG_LEVEL=4 TRACE_SOURCE=1 TOM_BIN="$PWD" all-tomohara-aliases
     DEBUG_LEVEL=4 TOM_BIN="$PWD" all-tomohara-aliases
