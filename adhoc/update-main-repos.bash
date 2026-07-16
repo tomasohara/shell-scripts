@@ -1,7 +1,12 @@
 #! /usr/bin/env bash
 #
-# adhoc script to update all repo's
-# UPDATE: 28 Jun 20206: upgrade including support for OTHER_REPOS as string list or array
+# Adhoc script to update all of the user's main repositories. They can be
+# specified on the command lines or in the OTHER_REPOS env var.
+#
+## UPDATE 16 Jul 26: cleanup
+## 
+## # adhoc script to update all repo's
+## # UPDATE: 28 Jun 20206: upgrade including support for OTHER_REPOS as string list or array
 #
 
 # Uncomment following line(s) for tracing:
@@ -24,7 +29,7 @@ if [ "$1" == "--help" ]; then
     echo ""
     echo "OTHER_REPOS=\"repo1 repo2\" $0"
     echo ""
-    echo "SHOW_SUMMARY=0 $script"
+    echo "SHOW_SUMMARY=0 VERBOSE_MODE=1 $script repo-dir1 ..."
     echo ""
     echo "Note:"
     echo "- OTHER_REPOS is space-delimited: specify repos via positional argument(s) otherwise."
@@ -94,7 +99,7 @@ fi
 ## UPDATE 15 Jul 26: adds VERBOSE_MODE support to show repo URL
 ## TODO2: verbose_mode=$(getenv-bool "VERBOSE_MODE" false)
 verbose_mode=$(is-true "VERBOSE_MODE")
-trace-vars verbose_mode
+## DEBUG: trace-vars verbose_mode
 for dir in "${repos[@]}"; do
     # Make repo dir active
     # Show repo and url (e.g., "repo: /home/tomohara/bin [https://github.com/tomasohara/shell-scripts]"
