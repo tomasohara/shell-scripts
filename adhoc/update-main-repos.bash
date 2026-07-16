@@ -91,10 +91,22 @@ fi
 ## DEBUG: set | grep ^repos=
 
 # Update each directory
+## UPDATE 15 Jul 26: adds VERBOSE_MODE support to show repo URL
+## TODO2: verbose_mode=$(getenv-bool "VERBOSE_MODE" false)
+verbose_mode=$(is-true "VERBOSE_MODE")
+trace-vars verbose_mode
 for dir in "${repos[@]}"; do
     # Make repo dir active
-    echo "repo: $dir" | tee --append "$log"
+    # Show repo and url (e.g., "repo: /home/tomohara/bin [https://github.com/tomasohara/shell-scripts]"
+    if $verbose_mode; then
+        echo -n "$dir" | tee --append "$log"
+    else
+        echo "repo: $dir" | tee --append "$log"
+    fi
     command cd "$dir" || continue
+    if $verbose_mode; then
+        echo -e "\t[$(git-repo-url)]" | tee --append "$log"
+    fi
 
     # Update, check for errors, and show summary stats
     git-update-plus 2>&1 | grep -v "No stash entries found" >| "$temp_log"
