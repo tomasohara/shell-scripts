@@ -596,6 +596,55 @@ function is-true {
     echo $result
 }
 
+# to_bool(value): convert VALUE to canonical "true" or "false" string
+# note: mirrors mezcla system.to_bool (https://github.com/tomasohara/Mezcla); pure Bash
+# note: true-like values: 1, true, yes, on (case-insensitive); everything else is false
+# usage: result=$(to_bool "$some_var")
+# EX: to_bool 1   => true
+# EX: to_bool 0   => false
+# EX: to_bool yes => true
+# EX: to_bool ""  => false
+function to_bool {
+    local value
+    value=$(echo "${1:-}" | tr '[:upper:]' '[:lower:]')
+    case "$value" in
+        1|true|yes|on)  echo "true"  ;;
+        *)              echo "false" ;;
+    esac
+}
+
+# getenv_bool(env_var, [default=false], [description]): look up ENV_VAR and return as bool
+# note: mirrors mezcla system.getenv_bool (https://github.com/tomasohara/Mezcla); pure Bash
+# note: default is "false" when omitted, matching Mezcla's DEFAULT_GETENV_BOOL=False
+# note: optional description is printed to stderr as a self-documenting hint when provided
+# usage: local debug=$(getenv_bool DEBUG)
+# usage: local verbose=$(getenv_bool VERBOSE false "enable verbose output")
+# EX: DEBUG=1 getenv_bool DEBUG              => true
+# EX: getenv_bool UNSET_VAR                 => false
+# EX: getenv_bool UNSET_VAR true            => true
+function getenv_bool {
+    local env_var="${1:-}"
+    local default="${2:-false}"
+    local description="${3:-}"
+
+    # Print self-documenting description to stderr when caller supplies one
+    if [[ -n "$description" ]]; then
+        echo "${env_var}: ${description} [default: ${default}]" >&2
+    fi
+
+    # Resolve env var value, falling back to default when unset or empty
+    local raw_value
+    raw_value=$(eval echo "\${${env_var}:-}")
+
+    if [[ -z "$raw_value" ]]; then
+        to_bool "$default"
+    else
+        to_bool "$raw_value"
+    fi
+}
+# getenv_boolean: synonym matching Mezcla's alias
+alias getenv_boolean=getenv_bool
+
 #-------------------------------------------------------------------------------
 # Bash stuff (settings, etc.)
 #
