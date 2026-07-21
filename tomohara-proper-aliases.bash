@@ -29,13 +29,18 @@ alias glog='git-log-'
 alias git-update-='git-update-plus' 
 alias git-vdiff='git-vdiff-alias'
 alias gvdiff=git-vdiff
+# git-all-update[-verbose]: update main repos, optionally with URL dislay
 alias git-all-update='update-main-repos.bash'
+alias git-all-update-verbose='VERBOSE_MODE=1 git-all-update'
 alias git-extract-all-versions='VERBOSE=1 extract-all-git-versions.bash --human'
 alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human --verbose'
 alias git-files-changed=git-diff-list
 alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
-function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
+# git-repo-url: returns URL for git repo in current dir.
+## OLD: function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
+## NOTE: uses first url (TODO1: use para-match to filter submodule)
+function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config" | head -1; }
 alias git-push='git-push-alias'
 alias git-check-ignore-plus='git check-ignore --non-matching --verbose'
 ## TODO: alias git-X-='git-X-plus'

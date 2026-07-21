@@ -900,8 +900,11 @@ alias-fn pushd-this-realdir 'pushd "$(realpath ".")"'
 
 # pushd-q, popd-q: quiet versions of pushd and popd
 #
-function pushd-q () { builtin pushd "$@" >| /dev/null; }
-function popd-q () { builtin popd >| /dev/null; }
+## OLD:
+## function pushd-q () { builtin pushd "$@" >| /dev/null; }
+## function popd-q () { builtin popd >| /dev/null; }
+function pushd-q () { builtin pushd "$@" &> /dev/null; }
+function popd-q () { builtin popd &> /dev/null; }
 #
 
 # Command overrides for moving and copying files
@@ -1895,11 +1898,13 @@ function tar-just-dir () { tar-dir "$1" 1; }
 # tar-this-dir(): create tar archive into TEMP, for sub-directory tree routed
 # in current directory (using directory basename as file prefix instead of .)
 # ex: TEMP=/mnt/my-external-drive/tmp tar-this-dir
-# Note: will include empty folders in dir given the unspecified optional parameters, see make-tar
+# Note: will include empty folders in dir given the unspecified optional parameters, see make-tar.
+# Also, error messages are swallowed (n.b., to hide ANSI escapes from pushd/popd).
 ## BAD: function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")"; popd-q; }
 ## TODO3: apply fix upstream (e.g., in tar-dir)
 ## BAD: function tar-this-dir () { local dir="$PWD"; pushd-this-realdir; tar-dir "$(basename "$dir")"; popd; }
-function tar-this-dir () { pushd-this-realdir; tar-dir "$PWD"; popd; }
+## OLD: function tar-this-dir () { pushd-this-realdir; tar-dir "$PWD"; popd; }
+function tar-this-dir () { pushd-q "$(realpath "$PWD")"; tar-dir "$PWD"; popd-q; }
 # test of resolving problem with tar-this-dir if dir a symbolic link from apparent parent
 # TODO: fixme
 function new-tar-this-dir () {
