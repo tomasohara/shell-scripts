@@ -2922,8 +2922,9 @@ function unmount {
         echo -e "Risky umount option(s):\n    $*"
         pause-for-enter "Are you sure?"
     fi
-    umount "$@"
+    command umount "$@"
 }
+alias umount=unmount
 # TODO: rename as map-internet-ports???
 # map-ports: shows TCP ports being listened to on the remote host
 # note: -Pn option skips host discovery (a la no ping)
