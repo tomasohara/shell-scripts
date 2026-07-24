@@ -2959,21 +2959,35 @@ function get-free-filename() {
 # date using numeric suffixes if necessary until the filename is free (e.g., _config.30aug22.log2)
 # note: exsting _config*.log files are made read-only so not later overwritten
 # by accident
+# note: checks $ADMIN_DIR for log files
 # TOM-IDIOSYNCRATIC
 function sudo-admin () {
     local prefix="_admin-config."
     local base
+    local admin_dir="${ADMIN_DIR:-"$HOME/admin"}"
+
+    # Make sure log file unique and writable
     base="$prefix$(todays-date).log"
     sudo chmod ugo-w "$prefix"*.log* 2> /dev/null
     local script_log
     # TODO: (get-free-filename "$base" "." "log")???
     script_log=$(get-free-filename "$base")
+
+    # Setup transcript options
     # note: maldito mac: need to special case
+    # The option t 0 specifies a timing data interval of 0 seconds.
     local script_options="--flush"
     if [ "$(under-macos)" = "1" ]; then script_options="-t 0"; fi
+
+    # Invoke the new session via separate login
+    ## TODO2: check that admin dir is only accessible to user or root (e.g., go-rwx); TODO3: automate cd
+    [ "$(realpath "$PWD")" != "$(realpath "$admin_dir")" ] && echo "Warning: should run from admin dir ($admin_dir)"
+    echo -e "FYI: change into admin dir, such as follows:\n    cd $admin_dir"
+    # note: uses --login so no shared settings (e.g., env variables)
     # maldito shellcheck: SC2033 [Shell functions can't be passed to external commands]; SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2033,SC2086
-    sudo --set-home   script $script_options "$script_log"
+    sudo --login script $script_options "$script_log"
+    ## OLD: sudo --set-home   script $script_options "$script_log"
 }
 
 # sync2(): invokes files system synchronization twice: one for good effect
@@ -3235,6 +3249,9 @@ function script-update {
     if [[ ("$(under-linux)" = "1") || ("$(under-cygwin)" = "1")]]; then
         command_indicator="-c"
     fi
+    # Make sure log dir exists
+    mkdir --parents "${GIT_LOG_DIR:-.}"
+    # Invoke the transcript capture, running bash after showing template
     # shellcheck disable=SC2046,SC2086
     script  "${GIT_LOG_DIR:-.}/_update-$(T).log"  $command_indicator make-git-update.bash
 }
