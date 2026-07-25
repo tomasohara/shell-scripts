@@ -50,3 +50,8 @@ Sun 12 Jul 26
 note:
 - P2: rename core alias-related scripts using tomohara affix to make easier to find (e.g., tomohara-startup-tracing.bash).
 
+--------------------------------------------------------------------------------
+Fri 24 Jul 26 [19:52:26]
+
+P2: run scripts under strict error checking (e.g., `set -u` might error on $1 checks)
+P3: address TODO notes in new docs dir (e.g., todo-address-alias-sanity-check-jul2026.pdf)
