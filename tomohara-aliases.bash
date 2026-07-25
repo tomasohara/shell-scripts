@@ -202,17 +202,19 @@ function alias-fn {
     eval "function $alias { $body; }"
 }
 # simple-alias-fn(name, command): variant that takes command and appends "$@"
-# ex: simple-alias-fn git-next-checkin 'invoke-alt-checkin'
+# ex: simple-alias-fn git-next-checkin 'invoke-alt-checkin' yields
+#     git-next-checkin () { invoke-alt-checkin "$@"; }
 # Note: this is streamlined version of alias-fn intended as replacement for 'alias name=command' usages
 function simple-alias-fn {
-    if [ "$3" != "" ]; then
+    if [ ($# -ne 2) ]; then
+        echo "Error: unrecognized argument(s): '${*:2}'"
         echo "usage: simple-alias-fn alias command"
         echo "note: '\$\@' gets appended to command"
         return
     fi
     local alias="$1"
     local command="$2"
-    # note: 
+    # note: uses eval used to interpolate label and command (with $@ appended)
     eval "function $alias { $command" '"$@"' "; }"
 }
 # deprecated-alias-fn: version of simple-alias-fn that issues deprecated warning
@@ -2971,7 +2973,8 @@ function sudo-admin () {
     sudo chmod ugo-w "$prefix"*.log* 2> /dev/null
     local script_log
     # TODO: (get-free-filename "$base" "." "log")???
-    script_log=$(get-free-filename "$base")
+    ## OLD: script_log=$(get-free-filename "$base")
+    script_log=$(realpath $(get-free-filename "$base"))
 
     # Setup transcript options
     # note: maldito mac: need to special case
