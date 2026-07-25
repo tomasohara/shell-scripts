@@ -206,10 +206,13 @@ function alias-fn {
 #     git-next-checkin () { invoke-alt-checkin "$@"; }
 # Note: this is streamlined version of alias-fn intended as replacement for 'alias name=command' usages
 function simple-alias-fn {
-    if [ ($# -ne 2) ]; then
-        echo "Error: unrecognized argument(s): '${*:2}'"
+    if [ $# -ne 2 ]; then
+        ## OLD: echo "Error: unrecognized argument(s): '${*:2}'"
+        ## TODO4: output each extraneous argument quoted individually
+        echo "Error: unrecognized argument(s):" "${*:3}"
         echo "usage: simple-alias-fn alias command"
-        echo "note: '\$\@' gets appended to command"
+        ## OLD: echo "note: '\$@' gets appended to command"
+        printf "note: %s gets appended to command\n" '"$@"'
         return
     fi
     local alias="$1"
