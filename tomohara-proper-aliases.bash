@@ -31,7 +31,9 @@ alias git-vdiff='git-vdiff-alias'
 alias gvdiff=git-vdiff
 # git-all-update[-verbose]: update main repos, optionally with URL dislay
 alias git-all-update='update-main-repos.bash'
-alias git-all-update-verbose='VERBOSE_MODE=1 git-all-update'
+## OLD: alias git-all-update-verbose='VERBOSE_MODE=1 git-all-update'
+## TODO2: add check for complex aliases involving environment usage (e.g., only applied to first command)
+simple-alias-fn git-all-update-verbose 'VERBOSE_MODE=1 update-main-repos.bash'
 alias git-extract-all-versions='VERBOSE=1 extract-all-git-versions.bash --human'
 alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human --verbose'
 alias git-files-changed=git-diff-list
@@ -793,7 +795,10 @@ function reset-prompt-label {
 }
 # reset-prompt-here(): sets prompt label to dir basename with existing PS_symbol proper (e.g., "alt $" => "bin $")
 # shellcheck disable=SC2016
-alias-fn reset-prompt-here 'reset-prompt-label "$(basename $PWD)"'
+## BAD: alias-fn reset-prompt-here 'reset-prompt-label "$(basename $PWD)"'
+function reset-prompt-here {
+    reset-prompt-label "$(basename "$PWD")";
+}
 # reset-prompt-alt/NOTES/...(): resets prompt label to affix
 for label in alt NOTES; do 
     eval "alias reset-prompt-$label=\"reset-prompt-label $label\""
