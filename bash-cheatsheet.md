@@ -63,7 +63,7 @@ echo "${var/%from/to}"          # replace at end only
 
 # Substring
 echo "${var:2}"                 # substring from offset 2
-echo "${var:2:5}"               # * "" at offset 2, length 5
+echo "${var:2:5}"               # * "" at offset 2, length 5; slice-like substring
 
 # Case modification (Bash 4+)
 echo "${var^}"                  # uppercase first (i.e., capitalize)
@@ -149,7 +149,8 @@ echo "${arr[@]}"                # ** all elements (individually quoted)
 echo "${arr[*]}"                # all elements (single word)
 echo "${#arr[@]}"               # * number of elements (length)
 arr+=(four)                     # append
-
+echo "${arr[@]:3:2}"            # array slice at START of size LEN
+echo "${*:2}"                   # slices arguments from $2 to end, joined by spaces
 local dirs=("${@:-.}")          # default to current dir if no args
 
 declare -A map                  # * associative array (Bash 4+)
