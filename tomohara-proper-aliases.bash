@@ -1180,32 +1180,66 @@ function all-tomohara-aliases-here {
     DEBUG_LEVEL=4 TOM_BIN="$PWD" all-tomohara-aliases
 }
 # all-tomohara-settings(): enable tomohara settings as well as aliases
-alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
+# note: a function (not an alias) so that env-var prefixes carry over to both
+# parts (with an alias, "V=1 all-tomohara-settings" only affects the aliases part)
+function all-tomohara-settings {
+    all-tomohara-aliases
+    source "$TOM_BIN/tomohara-settings.bash"
+}
 # update-env-path(env_var, old-path, new-path): change OLD-PATH to NEW-PATH in PATH-like ENV-VAR
-# (XYZPATH="/home/me/a:/tmp/a:/home/me/a/1"; update-env-path XYZPATH /home/me/a /home/me/z; "echo $XYZPATH"
-#  => "/home/me/z:b:/home/me/z/1")
+# note: OLD-PATH only matches at the start of a path component (i.e., ^ or :) and must
+# end the component (i.e., : or end-of-string) or continue into a subdir (i.e., /)
+# EX: XYZPATH="/home/me/a:/tmp/a:/home/me/a/1"; update-env-path XYZPATH /home/me/a /home/me/z; echo "$XYZPATH"
+#     => "/home/me/z:/tmp/a:/home/me/z/1"
 function update-env-path {
+    if missing-options "$@" || [ "$3" == "" ]; then
+        function-usage --args "env-var old-path new-path" --synopsis "change OLD-PATH to NEW-PATH in PATH-like ENV-VAR" --example "PYTHONPATH /home/me/a /home/me/z"
+        return
+    fi
     local env_var="$1"
-    local old_path="$2"
-    local new_path="$3"
-    local old_value="$(eval echo "\${$env_var}")"
-    local new_value="$(echo "$old_value" | perl -pe "s@$old_path([:/$)]@$new_path\1@g;")"
-    ## DEBUG:
-    echo "issuing: export $env_var=\"$new_value\""
-    eval "export $env_var=\"$new_value"\"
+    # note: trailing slashes dropped so that subdirectory matching works
+    local old_path="${2%/}"
+    local new_path="${3%/}"
+    # note: guards against an empty old-path, which would otherwise match everywhere
+    if [ "$old_path" == "" ]; then
+        echo "Error: ${FUNCNAME[0]} requires a non-empty old-path" 1>&2
+        return 1
+    fi
+    local old_value="${!env_var}"
+    local new_value
+    # note: values passed via environment so that perl sees them literally (see remove-path-entries)
+    new_value="$(
+        printf '%s' "$old_value" |
+            OLD_PATH="$old_path" NEW_PATH="$new_path" \
+                perl -pe 's/(^|:)\Q$ENV{OLD_PATH}\E(?=[:\/]|$)/$1$ENV{NEW_PATH}/g;'
+    )"
+    if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+        echo "issuing: export $env_var='$new_value'" 1>&2
+    fi
+    printf -v "$env_var" '%s' "$new_value"
+    export "${env_var?}"
 }
 # all-tomohara-settings-here(): reset TOM_BIN to . and update env path vars, etc.
+# note: TOM_BIN must already be set, as it gives the old path to be replaced
 function all-tomohara-settings-here {
-    # Replace existing PATH-related settings
-    local old_tom_bin="$TOM_BIN"
+    local old_tom_bin="${TOM_BIN%/}"
     local new_tom_bin="$PWD"
-    for env_var in PATH PYTHONPATH PERLLIB; do
-        update-env-path "$env_var" "$old_tom_bin" "$new_tom_bin" 
-    done
+    local env_var
+    if [ "$old_tom_bin" == "" ]; then
+        echo "Error: ${FUNCNAME[0]} requires TOM_BIN to be set" 1>&2
+        return 1
+    fi
+
+    # Replace existing PATH-related settings
+    if [ "$old_tom_bin" != "$new_tom_bin" ]; then
+        for env_var in PATH PYTHONPATH PERLLIB; do
+            update-env-path "$env_var" "$old_tom_bin" "$new_tom_bin"
+        done
+    fi
 
     # Update other settings
     export TOM_BIN="$new_tom_bin"
-    DEBUG_LEVEL=4 TOM_BIN="$PWD" all-tomohara-settings
+    DEBUG_LEVEL=4 all-tomohara-settings
 }
 #
 # note: kill-em targets process name, and kill-it uses pattern (hence riskier)
