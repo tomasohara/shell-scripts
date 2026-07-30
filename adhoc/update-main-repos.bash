@@ -99,6 +99,7 @@ fi
 ## UPDATE 15 Jul 26: adds VERBOSE_MODE support to show repo URL
 ## TODO2: verbose_mode=$(getenv-bool "VERBOSE_MODE" false)
 verbose_mode=$(is-true "VERBOSE_MODE")
+$verbose_mode && echo "$0"
 ## DEBUG: trace-vars verbose_mode
 for dir in "${repos[@]}"; do
     # Make repo dir active
