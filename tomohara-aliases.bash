@@ -192,6 +192,7 @@ alias global='declare -g'
 # - Use dummy command if a background command is invoked: gotta hate Bash!
 #   ex: alias-fn eyes 'xeyes & true'
 # - General version as replacement for complex aliases with multiple commands
+# - Warning: This will remove an existing alias using same name.
 ##
 # ex: alias-fn trace-PS1 'echo \$PS1="$PS1" 1>&2'
 # TODO: fix problem with embedded invocations (see em-adhoc-notes below)
@@ -199,6 +200,9 @@ function alias-fn {
     local alias="$1"
     shift
     local body="$*"
+    # Remove existing alias of same name"
+    eval "alias $alias &> /dev/null"
+    # Define the function
     eval "function $alias { $body; }"
 }
 # simple-alias-fn(name, command): variant that takes command and appends "$@"
@@ -3823,10 +3827,15 @@ function max {
 #------------------------------------------------------------------------
 # Aliases for [re-]invoking aliases
 ## TOM-IDIOSYNCRATIC
-alias tomohara-aliases='source "$TOM_BIN/tomohara-aliases.bash"'
-alias tomohara-settings='source "$TOM_BIN/tomohara-settings.bash"'
-alias more-tomohara-aliases='source "$TOM_BIN/more-tomohara-aliases.bash"'
-alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
+## OLD:
+## alias tomohara-aliases='source "$TOM_BIN/tomohara-aliases.bash"'
+## alias tomohara-settings='source "$TOM_BIN/tomohara-settings.bash"'
+## alias more-tomohara-aliases='source "$TOM_BIN/more-tomohara-aliases.bash"'
+## alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
+alias-fn tomohara-aliases 'source "$TOM_BIN/tomohara-aliases.bash"'
+alias-fn tomohara-settings 'source "$TOM_BIN/tomohara-settings.bash"'
+alias-fn more-tomohara-aliases 'source "$TOM_BIN/more-tomohara-aliases.bash"'
+alias-fn tomohara-proper-aliases 'source "$TOM_BIN/tomohara-proper-aliases.bash"'
 
 #------------------------------------------------------------------------
 # End processing
