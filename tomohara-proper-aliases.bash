@@ -1181,6 +1181,32 @@ function all-tomohara-aliases-here {
 }
 # all-tomohara-settings(): enable tomohara settings as well as aliases
 alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
+# update-env-path(env_var, old-path, new-path): change OLD-PATH to NEW-PATH in PATH-like ENV-VAR
+# (XYZPATH="/home/me/a:/tmp/a:/home/me/a/1"; update-env-path XYZPATH /home/me/a /home/me/z; "echo $XYZPATH"
+#  => "/home/me/z:b:/home/me/z/1")
+function update-env-path {
+    local env_var="$1"
+    local old_path="$2"
+    local new_path="$3"
+    local old_value="$(eval echo "\${$env_var}")"
+    local new_value="$(echo "$old_value" | perl -pe "s@$old_path([:/$)]@$new_path\1@g;")"
+    ## DEBUG:
+    echo "issuing: export $env_var=\"$new_value\""
+    eval "export $env_var=\"$new_value"\"
+}
+# all-tomohara-settings-here(): reset TOM_BIN to . and update env path vars, etc.
+function all-tomohara-settings-here {
+    # Replace existing PATH-related settings
+    local old_tom_bin="$TOM_BIN"
+    local new_tom_bin="$PWD"
+    for env_var in PATH PYTHONPATH PERLLIB; do
+        update-env-path "$env_var" "$old_tom_bin" "$new_tom_bin" 
+    done
+
+    # Update other settings
+    export TOM_BIN="$new_tom_bin"
+    DEBUG_LEVEL=4 TOM_BIN="$PWD" all-tomohara-settings
+}
 #
 # note: kill-em targets process name, and kill-it uses pattern (hence riskier)
 alias kill-kdiff3='kill-it kdiff3'
