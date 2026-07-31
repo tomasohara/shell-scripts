@@ -24,6 +24,12 @@ TODO:
 - Rework the prioritization to distinguish (a) use in highlighting important constructs
   with respect to the repo usage versus (b) pointing out some of the subtleties of Bash.
 
+## Confusion shortlist
+
+```bash
+cmd &> file                     # not `cmd >& file`; same as `cmd > file 2>&1`
+```
+
 ## Variables
 
 ```bash
