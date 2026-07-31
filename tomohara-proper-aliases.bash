@@ -95,12 +95,16 @@ alias-fn plint-torch 'plint "$@" | egrep -v "torch.*(no-member|no-name-in-module
 function plint-tester-testee {
     local script="$1"
     local test_script="tests/test_$script"
-    if [ "$1" == "" ]; then
+    ## OLD: if [ "$1" == "" ]; then
+    if [[ (! -e "$script") || (! -e "$test_script") ]]; then
         ## TODO: local func="${BASH_SOURCE[0]:-func}"
         ## DEBUG: echo "${BASH_SOURCE[@]}"
         local func=plint-tester-testee
         echo "Usage: [PYLINT=prog] [TEST=B] $func script"
         echo "ex: TEST=1 PYLINT=python-lint-work $func cut.py"
+        if [ ! -e "$test_script" ]; then
+            echo "Error: can't find \"$test_script\": this should be run from same dir as script being tested"
+        fi
         return
     fi
     if [ "${VERBOSE:-0}" == "1" ]; then
