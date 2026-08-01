@@ -1,5 +1,9 @@
 #! /usr/bin/env python
-
+#
+# This is a work-in-progress script used for automating the update of the Jupyter
+# notebooks for testing (e.g., after alias changes).
+# It superceded the similar automate_ipynb.py.
+#
 # DATE: 2023-09-26 (22:38 +05:45 GMT)
 # INDEV: automate_notebook.py
 # Automates Jupyter Notebook testing using Selenium Webdriver
@@ -27,6 +31,9 @@
 
 # Usage Example (run from shell-scripts/tests/):
 # ricekiller@pop-os:~/shell-scripts/tests$ JUPYTER_PASSWORD="password" python3 automate_ipynb --include hello-world-basic.ipynb
+#
+## Update 31 Jul 26: start of cleanup
+#
 
 """
 Automates Jupyter Notebook testing using Selenium Webdriver
@@ -48,16 +55,16 @@ from mezcla.main import Main
 from mezcla import system
 from mezcla import glue_helpers as gh
 
-## Debug Tracing
+# Debug Tracing
 debug.trace(5, f"global __doc__: {__doc__}")
 debug.assertion(__doc__)
 
-## Constants 0 (Command-line Labels)
+# Constants 0 (Command-line Labels)
 OPT_INCLUDE_TESTFILE = "include"
 OPT_FIRST_N_TESTFILE = "first"
 OPT_VERBOSE = "verbose"
 
-## Constants I (Initials for script)
+# Constants I (Initials for script)
 TL = debug.TL
 TESTFILE_URL = "http://127.0.0.1:8888/tree/tests/"
 JUPYTER_TOKEN = ""
@@ -69,7 +76,7 @@ COMMAND_IS_JUPYTER_RUNNING = "jupyter nbclassic list"
 CURRENT_PATH = gh.real_path(".")
 debug.assertion(TESTFILE_URL.endswith("/"))
 
-## Constant II (Elements for Selenium Webdriver)
+# Constant II (Elements for Selenium Webdriver)
 # Waiting Time before re-running a test
 SELENIUM_SLEEP_RERUN = 10
 # Implicit Wait = Amount of time before throwing a 'NoSuchElementException'
@@ -100,13 +107,23 @@ XPATH_MENU_CHANGE_KERNEL = f"//li[@id='{ID_MENU_CHANGE_KERNEL}']/a"
 XPATH_KERNEL_SUBMENU_BASH = f"//li[@id='{ID_KERNEL_SUBMENU_BASH}']/a"
 XPATH_CHECKPOINT_STATUS = f"//span[@id='{ID_CHECKPOINT_STATUS}']"
 
-## Environment options
+# Environment options
 SELECT_NOBATSPP = system.getenv_bool("SELECT_NOBATSPP", False,
                         description="Includes testfiles with NOBATSPP during automation (Default: False)")
 JUPYTER_PASSWORD = system.getenv_text("JUPYTER_PASSWORD", JUPYTER_TOKEN,
                         description="Token or Password for Jupyter Notebook (DEFAULT: '')")
-USE_FIREFOX = system.getenv_bool("USE_FIREFOX", True,
-                        description="Uses GeckoDriver when True, else uses ChromeDriver (Default: True)")
+## OLD:
+## USE_FIREFOX = system.getenv_bool("USE_FIREFOX", True,
+##                         description="Uses GeckoDriver when True, else uses ChromeDriver (Default: True)")
+## TODO2: create Selenium module in mezcla for (e.g., building upon code in html_utils.py)
+USE_CHROME = system.getenv_bool(
+    "USE_CHROME", False,
+    description="Uses Chrome webdriver")
+
+USE_FIREFOX = system.getenv_bool(
+    "USE_FIREFOX", (not USE_CHROME),
+    description="Uses GeckoDriver (enabled if not Chrome)")
+
 AUTOMATION_DURATION_RERUN = system.getenv_int("AUTOMATION_DURATION_RERUN", SELENIUM_SLEEP_RERUN,
                         description="Sets duration (in seconds) for automating re-run for each testfile (Default: 30)")
 OUTPUT_PATH = system.getenv_text("OUTPUT_PATH", ".",
@@ -126,7 +143,7 @@ FORCE_SET_BASH_KERNEL = system.getenv_bool("FORCE_SET_BASH_KERNEL", False,
 
 ## TODO: Force run Jupyter from the root "shell-scripts" directory
 if FORCE_RUN_JUPYTER:
-    ## Check if Jupyter Notebook is running in the background
+    # Check if Jupyter Notebook is running in the background
     is_jupyter_running = gh.run(COMMAND_IS_JUPYTER_RUNNING)
     jupyter_instances = is_jupyter_running.split("\n")[1:]
     if len(jupyter_instances) > 0:
@@ -135,24 +152,29 @@ if FORCE_RUN_JUPYTER:
         print("Jupyter is NOT running")
         run_jupyter_path = gh.dirname(CURRENT_PATH)
         try:
-            subprocess.run(COMMAND_RUN_JUPYTER, cwd=run_jupyter_path, shell=True)
-        except Exception as e:
-            print (f"Error: {e}")
-        ## CHECKPOINT ## 
+            subprocess.run(COMMAND_RUN_JUPYTER, cwd=run_jupyter_path, shell=True, check=False)
+        ## OLD:
+        ##  subprocess.run(COMMAND_RUN_JUPYTER, cwd=run_jupyter_path, shell=True)
+        ## except Exception as e:
+        ##     print (f"Error: {e}")
+        ## ## CHECKPOINT ##
+        except:
+            system.print_exception_info("force-run-jupyter")
 
 class AutomateNotebook:
     """Consists of functions for the automation of testfiles (.ipynb)"""
 
+    ## TODO2: avoid such oddball naming conventions
     def __init__(
         self,
-        OPT_INCLUDE_TESTFILE,
-        OPT_FIRST_N_TESTFILE,
-        OPT_VERBOSE   
+        OPT_INCLUDE_TESTFILE_ARG,
+        OPT_FIRST_N_TESTFILE_ARG,
+        OPT_VERBOSE_ARG   
     ):
         """Initializer for class: AutomateNotebook"""
-        self.OPT_INCLUDE_TESTFILE = OPT_INCLUDE_TESTFILE
-        self.OPT_FIRST_N_TESTFILE = OPT_FIRST_N_TESTFILE
-        self.OPT_VERBOSE = OPT_VERBOSE
+        self.OPT_INCLUDE_TESTFILE = OPT_INCLUDE_TESTFILE_ARG
+        self.OPT_FIRST_N_TESTFILE = OPT_FIRST_N_TESTFILE_ARG
+        self.OPT_VERBOSE = OPT_VERBOSE_ARG
         self.driver = webdriver.Firefox() if USE_FIREFOX else webdriver.Chrome()
 
     ## OLD: WebDriver object is not callable    
@@ -237,25 +259,25 @@ class AutomateNotebook:
                     url = TESTFILE_URL + url
                 
                 start_time = time.time()
-                # driver = webdriver.Firefox() if USE_FIREFOX else webdriver.Chrome()
+                ## OLD: # driver = webdriver.Firefox() if USE_FIREFOX else webdriver.Chrome()
                 driver = self.driver
                 debug.trace_expr(5, url)
                 driver.get(url)
-                # driver.implicitly_wait(IMPLICIT_WAIT)
+                ## OLD: # driver.implicitly_wait(IMPLICIT_WAIT)
                 debug.trace_expr(5, JUPYTER_PASSWORD)
                 
                 token_password_box = self.find_element(By.XPATH, XPATH_PASSWORD_INPUT)
                 token_password_submit = self.find_element(By.XPATH, XPATH_LOGIN_SUBMIT)
                 
                 if (JUPYTER_PASSWORD.strip() and token_password_box and token_password_submit):
-                    # OLD: token_password_box = self.find_element(By.ID, ID_PASSWORD_INPUT)
+                    ## OLD: token_password_box = self.find_element(By.ID, ID_PASSWORD_INPUT)
                     if token_password_box is not None and JUPYTER_PASSWORD != "":
-                    # OLD: token_input_submit = self.find_element(By.ID, ID_LOGIN_SUBMIT)
+                        ## OLD: token_input_submit = self.find_element(By.ID, ID_LOGIN_SUBMIT)
                         token_password_box.send_keys(JUPYTER_PASSWORD)
                     if token_password_box is not None and JUPYTER_PASSWORD != "":
                         token_password_submit.click()
                     
-                    ## Invalid Credentials is shown if the credentials are not matching
+                    # Invalid Credentials is shown if the credentials are not matching
                     try:
                         token_invalid_credentials = self.find_element(By.XPATH, XPATH_INVALID_CREDENTIALS)
                         if token_invalid_credentials is not None:
@@ -264,8 +286,11 @@ class AutomateNotebook:
                         system.print_exception_info("Invalid Credentials used for notebook")
                         print("Invalid Credentials. Retry with another password.")
                         break
-                    except Exception as e:
-                        debug.trace_expr(6)
+                    ## BAD:
+                    ## except Exception as e:
+                    ##    debug.trace_expr(6)
+                    except:
+                       debug.trace_exception_info(6, "credentials")
 
                 driver.implicitly_wait(5)
                 
@@ -309,7 +334,7 @@ class AutomateNotebook:
                 driver.quit()
 
     def do_it(self):
-
+        """Do the steps"""
         filename = self.OPT_INCLUDE_TESTFILE
         ## OLD: test_files = [filename] if (filename != "-") else self.return_ipynb_url_array()
         if filename in [None, ""]:
@@ -339,17 +364,19 @@ class RunScriptAutomateNotebook(Main):
         """Process main script"""
         start_time_main = time.time()
         ## OLD: self.automate_testfile(self.return_ipynb_url_array())
-        # test_files = [self.filename] if (self.filename != "-") else self.return_ipynb_url_array()
-        # self.automate_testfile(test_files)
+        ## OLD:
+        ## # test_files = [self.filename] if (self.filename != "-") else self.return_ipynb_url_array()
+        ## # self.automate_testfile(test_files)
         automate_ipynb = AutomateNotebook(
             self.opt_include_testfile,
             self.opt_first_n_testfile,
             self.opt_verbose
         )
-        # if FORCE_RUN_JUPYTER:
-        #     time.sleep(1)
-        #     # OLD: gh.run(COMMAND_RUN_JUPYTER)
-        #     os.system(COMMAND_RUN_JUPYTER)
+        ## OLD
+        ## # if FORCE_RUN_JUPYTER:
+        ## #     time.sleep(1)
+        ## #     # OLD: gh.run(COMMAND_RUN_JUPYTER)
+        ## #     os.system(COMMAND_RUN_JUPYTER)
         automate_ipynb.do_it()
         print(f"\nTotal Time (including pauses): {round(time.time() - start_time_main, 2)} sec\n")
 
