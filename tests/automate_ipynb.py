@@ -1,10 +1,16 @@
 #! /usr/bin/env python
-
+#
+## Update 31 Jul 2: notes obsolescence
+# This is a very much work-in-progress script used for automating the
+# update of the Jupyter notebooks for testing (e.g., after alias changes).
+# WARNING: *** This has been superceded by automate_notebook.py *** and
+# unfortunately left in the repo without clarification.
+#
 # DATE: 2023-09-26 (22:38 +05:45 GMT)
 # INDEV: automate_ipynb_indev.py
 # Automates Jupyter Notebook testing using Selenium Webdriver
 # Estimated Time (default, per testfile): (SELENIUM_SLEEP_RERUN + 20) + [0 to 1] seconds
-
+#
 # TODO: (A LOT!)
 # (CHECKED) 1. Convert to a class-based approach
 # 2. (EXPERIMENTAL - ENV VAR) Run the command run-jupyter-notebook before starting the tests
@@ -12,7 +18,7 @@
 # 4. IMP: Detect if run-jupyter-notebook is executed (if not, execute) 
 # 5. Fix the location of TESTFILE_URL
 # 6. Add script termination for Invalid Credentials (XPATH ADDED)
-
+#
 # Author: Aviyan Acharya (avyn.xyz@gmail.com)
 
 """
