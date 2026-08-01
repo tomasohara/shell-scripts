@@ -94,6 +94,7 @@ TAGS
 .mypy_cache
 .vscode
 .idea
+.claude
 
 # OS-specific directories
 ## TODO: re-enable
