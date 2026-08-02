@@ -188,6 +188,15 @@ class TestIt(TestWrapper):
                        f"Unexpected files passed to automate_testfile: {captured}")
         return
 
+    def test_12_automate_testfile_empty_list_no_crash(self):
+        """Regression: automate_testfile([]) used to raise UnboundLocalError on 'driver'"""
+        debug.trace(4, f"TestIt.test_12_automate_testfile_empty_list_no_crash(); self={self}")
+        app = _make_automate_notebook(self.monkeypatch)
+        app.automate_testfile([])
+        self.do_assert(not app.driver.quit.called,
+                       "driver.quit() should not be called when there are no testfiles")
+        return
+
 
 #------------------------------------------------------------------------
 

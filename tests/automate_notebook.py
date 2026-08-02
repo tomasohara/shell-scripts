@@ -249,18 +249,21 @@ class AutomateNotebook:
     def automate_testfile(self, url_arr:str):
         """Automates the testfile using URLs from argument"""
         debug.trace(5, f"automate_testfile({url_arr!r})")
+        if not url_arr:
+            system.print_stderr("Warning: no testfiles to automate")
+            return
 
         test_count = 1
         print("\nDuration for each testfiles (in seconds):\n")
         ## NEW: Added an external try (nested try-catch)
+        ## note: driver bound before the loop so it's defined even if url_arr is empty
+        driver = self.driver
         try:
             for url in url_arr:
                 if not url.startswith("http"):
                     url = TESTFILE_URL + url
-                
+
                 start_time = time.time()
-                ## OLD: # driver = webdriver.Firefox() if USE_FIREFOX else webdriver.Chrome()
-                driver = self.driver
                 debug.trace_expr(5, url)
                 driver.get(url)
                 ## OLD: # driver.implicitly_wait(IMPLICIT_WAIT)
@@ -386,7 +389,7 @@ def main():
         description = __doc__.format(script=gh.basename(__file__)),
         skip_input = False,
         manual_input = True,
-        auto_help = False,
+        auto_help = True,
         boolean_options=[
             (OPT_VERBOSE, "Verbose Mode"),
         ],
