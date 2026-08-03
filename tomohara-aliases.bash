@@ -98,6 +98,7 @@
 ## UPDATE: 12 July 2026: section tracing generalization and commenting out very old aliases
 ## TODO2: continue with section/tracing cleanup and old alias isolation
 ## UPDATE 12 Jul 26: trace now uses DEBUG_LEVEL 5 (versus 5 for startup-trace)
+## UPDATE 3 Aug 26: proper fix for tar-this-dir.
 #
 # TODO:
 # - ***** Move settings to tomohara-settings.bash (i.e., export's and the like).
@@ -211,11 +212,9 @@ function alias-fn {
 # Note: this is streamlined version of alias-fn intended as replacement for 'alias name=command' usages
 function simple-alias-fn {
     if [ $# -ne 2 ]; then
-        ## OLD: echo "Error: unrecognized argument(s): '${*:2}'"
         ## TODO4: output each extraneous argument quoted individually
         echo "Error: unrecognized argument(s):" "${*:3}"
         echo "usage: simple-alias-fn alias command"
-        ## OLD: echo "note: '\$@' gets appended to command"
         printf "note: %s gets appended to command\n" '"$@"'
         return
     fi
@@ -276,7 +275,6 @@ function quiet-conditional-source { source "$@" > /dev/null 2>&1; }
 conditional-source "$TOM_BIN/startup-tracing.bash"
 startup-trace "post-tracing init in ${BASH_SOURCE[0]}"
 #
-## OLD: alias trace='startup-trace'
 ## TODO2: replace trace with startup-trace-debug directly (to avoid clobbering external alias called 'trace')
 alias trace='startup-trace-debug'
 alias enable-startup-tracing='export STARTUP_TRACING=1'
@@ -478,10 +476,6 @@ if [ -e "$TOM_BIN/do_setup.bash" ]; then source "$TOM_BIN/do_setup.bash"; fi
 
 #-------------------------------------------------------------------------------
 trace 'in tomohara-aliases.bash'
-
-## OLD:
-## # # HACK: load in older tpo-setup.bash
-## # conditional-source $TOM_BIN/tpo-setup.bash
 
 # under-os(regex, [quiet=0]): Whether REGEX matches $OSTYPE
 # note: outputs boolean code and also sets status code
@@ -859,10 +853,6 @@ alias cd-this-realdir='cd-realdir .'
 alias-fn pushd-this-realdir 'pushd "$(realpath ".")"'
 
 # pushd-q, popd-q: quiet versions of pushd and popd
-#
-## OLD:
-## function pushd-q () { builtin pushd "$@" >| /dev/null; }
-## function popd-q () { builtin popd >| /dev/null; }
 function pushd-q () { builtin pushd "$@" &> /dev/null; }
 function popd-q () { builtin popd &> /dev/null; }
 #
@@ -1852,6 +1842,7 @@ function tar-dir () {
 ## }
 ##
 
+# tar-just-dir: creates archive of current directory without subdirectories
 # Note: will exclude folders based on make-tar behaviour with specified depth 
 function tar-just-dir () { tar-dir "$1" 1; }
 #
@@ -1860,35 +1851,59 @@ function tar-just-dir () { tar-dir "$1" 1; }
 # ex: TEMP=/mnt/my-external-drive/tmp tar-this-dir
 # Note: will include empty folders in dir given the unspecified optional parameters, see make-tar.
 # Also, error messages are swallowed (n.b., to hide ANSI escapes from pushd/popd).
+# Warning: changes into parent directory which could cuase confusion if aborted mid-stream.
+##
 ## BAD: function tar-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")"; popd-q; }
 ## TODO3: apply fix upstream (e.g., in tar-dir)
 ## BAD: function tar-this-dir () { local dir="$PWD"; pushd-this-realdir; tar-dir "$(basename "$dir")"; popd; }
-## OLD: function tar-this-dir () { pushd-this-realdir; tar-dir "$PWD"; popd; }
-function tar-this-dir () { pushd-q "$(realpath "$PWD")"; tar-dir "$PWD"; popd-q; }
-# test of resolving problem with tar-this-dir if dir a symbolic link from apparent parent
-# TODO: fixme
-function new-tar-this-dir () {
-    ## TODO: fix un-initialized base variable
-    # example dir change: /home/tomohara/tpo-magro-p3 [=> /media/tomohara/ff3410d4-5ffc-4c01-a2ca-75244b882aa2]
-    local dir
-    dir=$(basename "$PWD"); 
-    # Go to parent dir                        /home/tomohara
-    pushd-q ..
-    # Get real basename                       ff3410d4-5ffc-4c01-a2ca-75244b882aa2
-    local real_base="$base"
-    if [ -L "$base" ]; then
-        real_base=$($LS -ld "$base" | perl -pe 's@^.* -> (.*/)?([^/]+)@$2@;');
-        # Go to real parent                   /media/tomohara
-        cd "$(realpath "$dir"/..)"
+## OLD&BAD: function tar-this-dir () { pushd-this-realdir; tar-dir "$PWD"; popd; }
+## VERY BAD: function tar-this-dir () { pushd-q "$(realpath "$PWD")"; tar-dir "$PWD"; popd-q; }
+##
+function tar-this-dir () {
+    # Change into parent dir after recording basename of realpath
+    local orig_basename tar_basename
+    orig_basename="$(basename "$PWD")"
+    pushd-q "$(realpath "$PWD")";
+    tar_basename="$(basename "$PWD")"
+    if [ "$orig_basename" != "$tar_basename" ]; then
+        sleep-for 1.5 "Warning: basename change in tar: $orig_basename => $tar_basename"
     fi
-    # Create tar of real subdir
-    # TODO: pass along actual basename so that tar file can be renamed
-    tar-dir "$real_base";
+    cd ..
+ 
+    # Create the archive and then restore working dir
+    # note: uses basename so that full paths not stored in archive;
+    # example: README path is shell-scripts/README.md not /home/tomohara/shell-scripts/README.md
+    # TODO2: see if original basename can be preserved
+    tar-dir "$tar_basename";
     popd-q;
 }
+## OLD:
+## # test of resolving problem with tar-this-dir if dir a symbolic link from apparent parent
+## # TODO: fixme
+## function new-tar-this-dir () {
+##     ## TODO: fix un-initialized base variable
+##     # example dir change: /home/tomohara/tpo-magro-p3 [=> /media/tomohara/ff3410d4-5ffc-4c01-a2ca-75244b882aa2]
+##     local dir
+##     dir=$(basename "$PWD"); 
+##     # Go to parent dir                        /home/tomohara
+##     pushd-q ..
+##     # Get real basename                       ff3410d4-5ffc-4c01-a2ca-75244b882aa2
+##     local real_base="$base"
+##     if [ -L "$base" ]; then
+##         real_base=$($LS -ld "$base" | perl -pe 's@^.* -> (.*/)?([^/]+)@$2@;');
+##         # Go to real parent                   /media/tomohara
+##         cd "$(realpath "$dir"/..)"
+##     fi
+##     # Create tar of real subdir
+##     # TODO: pass along actual basename so that tar file can be renamed
+##     tar-dir "$real_base";
+##     popd-q;
+## }
 #
-# tar-this-dir-normal: creates archive of directory, excluding archive, backup, and temp subdirectories
+alias new-tar-this-dir=tar-this-dir
 
+# tar-this-dir-normal: creates archive of directory, excluding archive, backup, and temp subdirectories
+##
 ## Lorenzo: tar-this-dir-normal and tar-just-this-dir can be expressend in terms of a helper function like
 ## function helper() {local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" $1 $2; popd-q; }
 ## alias tar-this-dir-normal=helper "" "/(archive|backup|temp)/"
@@ -2236,24 +2251,17 @@ function check-class-dist () { count-it "^(\S+)\t" "$1" | perl- calc_entropy.per
 alias 2bib='bibitem2bib'
 
 #-------------------------------------------------------------------------------
-## OLD:
-## trace extension-less shortcuts
-## ## TODO: say what???!!! (i.e., wrt extension-less)
 trace "adhoc unix aliases (e.g., showing or killing processes, etc.)"
 
 # TODO: generate aliases for .sh and .perl scripts automatically
 # ls *.sh *.perl | perl -pe "s/(\w+)\.\w+/alias \1='$&'/g; s/(\w+.perl)/perl- \1/g;" >| _all_alias.list
 ##
 ## TODO2: deprecate old aliases (e.g., unattested in recent Bash history files)
-## OLD:
-## alias convert-termstrings='perl- convert_termstrings.perl'
-## alias do-rcsdiff='do_rcsdiff.sh'
 ##
 alias dobackup='dobackup.sh'
 alias kill-em='kill_em.bash'
 alias kill-it='kill-em --pattern'
 # ps-mine: wrapper around ps_mine.sh w/ filtering (e.g., defunct)
-## OLD: alias ps-mine='ps_mine.bash --filtered'
 alias ps-mine-regular='ps_mine.bash'
 alias ps-mine='ps-mine-regular --filtered'
 # NOTE: see filter-dirnames added to strip directory names
@@ -2267,7 +2275,6 @@ function ps-users { ps_mine.sh -a | $GREP -v ^root; }
 deprecated-alias-fn ps-mine- ps-mine-sans-dir
 alias ps_mine='ps-mine'
 ## DUP: alias ps-mine-='ps-mine "$@" | filter-dirnames'
-## OLD: alias ps-mine-all='ps-mine --all'
 alias ps-mine-all='ps-mine-regular --all'
 alias rename-files='alias-perl rename_files.perl'
 alias rename_files='rename-files'
@@ -2980,7 +2987,6 @@ function sudo-admin () {
     sudo chmod ugo-w "$prefix"*.log* 2> /dev/null
     local script_log
     # TODO: (get-free-filename "$base" "." "log")???
-    ## OLD: script_log=$(get-free-filename "$base")
     script_log=$(realpath $(get-free-filename "$base"))
 
     # Setup transcript options
@@ -2997,7 +3003,6 @@ function sudo-admin () {
     # maldito shellcheck: SC2033 [Shell functions can't be passed to external commands]; SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2033,SC2086
     sudo --login script $script_options "$script_log"
-    ## OLD: sudo --set-home   script $script_options "$script_log"
 }
 
 # sync2(): invokes files system synchronization twice: one for good effect
@@ -3683,7 +3688,6 @@ function invoke-browser() {
 ## alias opera='invoke-browser command "opera"'
 ## NOTE: which is a Bash builtin
 # TODO: make following conditioned up Linux
-## OLD: alias chromium='invoke-browser /usr/bin/chromium-browser'
 ## TODO: drop which's
 ## BAD: function which { builtin which "$1" 2> /dev/null; }
 function which { command which "$1" 2> /dev/null; }
@@ -3827,11 +3831,6 @@ function max {
 #------------------------------------------------------------------------
 # Aliases for [re-]invoking aliases
 ## TOM-IDIOSYNCRATIC
-## OLD:
-## alias tomohara-aliases='source "$TOM_BIN/tomohara-aliases.bash"'
-## alias tomohara-settings='source "$TOM_BIN/tomohara-settings.bash"'
-## alias more-tomohara-aliases='source "$TOM_BIN/more-tomohara-aliases.bash"'
-## alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
 alias-fn tomohara-aliases 'source "$TOM_BIN/tomohara-aliases.bash"'
 alias-fn tomohara-settings 'source "$TOM_BIN/tomohara-settings.bash"'
 alias-fn more-tomohara-aliases 'source "$TOM_BIN/more-tomohara-aliases.bash"'
