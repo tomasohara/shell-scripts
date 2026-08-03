@@ -50,6 +50,12 @@ VERBOSE = "verbose"
 
 ## Constants I (Initials for script)
 TL = debug.TL
+## WARNING: *** Testfiles must live in this repo (this script assumed tests/) ***
+## Automation works by driving a real browser against a locally running Jupyter
+## instance rooted here, so a testfile elsewhere on disk (or under an unrelated
+## repo) won't be found even if the given path itself exists. (See the same
+## limitation, addressed via an explicit repo-membership check, in the
+## superceding automate_notebook.py.)
 TESTFILE_URL = "http://127.0.0.1:8888/tree/"
 JUPYTER_TOKEN = "111222"
 JUPYTER_EXTENSION = ".ipynb"
