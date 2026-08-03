@@ -48,6 +48,8 @@ import subprocess
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.chrome.options import Options as ChromeOptions
 
 # Local modules
 from mezcla import debug
@@ -66,6 +68,12 @@ OPT_VERBOSE = "verbose"
 
 # Constants I (Initials for script)
 TL = debug.TL
+## WARNING: *** Testfiles must live in this repo (under tests/) ***
+## Automation works by driving a real browser against a locally running Jupyter
+## instance rooted here, so a testfile is only ever opened by basename (e.g., via
+## --include or a positional filename argument). A copy elsewhere on disk (e.g.,
+## under /tmp) or an unrelated repo won't be found, even though the path itself
+## might exist: see AutomateNotebook.resolve_testfile.
 TESTFILE_URL = "http://127.0.0.1:8888/tree/tests/"
 JUPYTER_TOKEN = ""
 JUPYTER_EXTENSION = ".ipynb"
@@ -124,6 +132,10 @@ USE_FIREFOX = system.getenv_bool(
     "USE_FIREFOX", (not USE_CHROME),
     description="Uses GeckoDriver (enabled if not Chrome)")
 
+HEADLESS_WEBDRIVER = system.getenv_bool(
+    "HEADLESS_WEBDRIVER", True,
+    description="Runs the browser without a visible window (Default: True)")
+
 AUTOMATION_DURATION_RERUN = system.getenv_int("AUTOMATION_DURATION_RERUN", SELENIUM_SLEEP_RERUN,
                         description="Sets duration (in seconds) for automating re-run for each testfile (Default: 30)")
 OUTPUT_PATH = system.getenv_text("OUTPUT_PATH", ".",
@@ -175,9 +187,39 @@ class AutomateNotebook:
         self.OPT_INCLUDE_TESTFILE = OPT_INCLUDE_TESTFILE_ARG
         self.OPT_FIRST_N_TESTFILE = OPT_FIRST_N_TESTFILE_ARG
         self.OPT_VERBOSE = OPT_VERBOSE_ARG
-        self.driver = webdriver.Firefox() if USE_FIREFOX else webdriver.Chrome()
+        self.driver = self.make_driver()
 
-    ## OLD: WebDriver object is not callable    
+    @staticmethod
+    def make_driver():
+        """Creates the Selenium webdriver instance (Firefox or Chrome, per HEADLESS_WEBDRIVER)"""
+        debug.trace(5, f"make_driver(); USE_FIREFOX={USE_FIREFOX} HEADLESS_WEBDRIVER={HEADLESS_WEBDRIVER}")
+        if USE_FIREFOX:
+            options = FirefoxOptions()
+            if HEADLESS_WEBDRIVER:
+                options.add_argument("-headless")
+            driver = webdriver.Firefox(options=options)
+        else:
+            options = ChromeOptions()
+            if HEADLESS_WEBDRIVER:
+                options.add_argument("-headless")
+            driver = webdriver.Chrome(options=options)
+        return driver
+
+    @staticmethod
+    def resolve_testfile(filename):
+        """Makes sure FILENAME resolves (by basename) to a testfile under the repo's
+        tests/ dir, issuing a fatal error otherwise (see WARNING above TESTFILE_URL).
+        Returns the resolved path (n.b., just for tracing; callers still refer to the
+        testfile by basename, as automate_testfile does its own basename resolution)"""
+        debug.trace(5, f"resolve_testfile({filename!r})")
+        basename = gh.basename(filename)
+        resolved = gh.resolve_path(basename, heuristic=True)
+        if not system.file_exists(resolved):
+            system.exit(f"Error: testfile not found in repo (tests/): {filename!r}")
+        debug.trace(5, f"resolve_testfile() => {resolved!r}")
+        return resolved
+
+    ## OLD: WebDriver object is not callable
     # def wrapup(self):
     #     """Process end of input"""
     #     if self.driver:
@@ -261,7 +303,10 @@ class AutomateNotebook:
         try:
             for url in url_arr:
                 if not url.startswith("http"):
-                    url = TESTFILE_URL + url
+                    # note: only the basename is used, as testfiles are served
+                    # relative to TESTFILE_URL regardless of the argument's path
+                    # (e.g., an --include/positional arg outside of tests/)
+                    url = TESTFILE_URL + gh.basename(url)
 
                 start_time = time.time()
                 debug.trace_expr(5, url)
@@ -359,6 +404,12 @@ class RunScriptAutomateNotebook(Main):
         """Check results of command line processing"""
         # TODO: rework to make environment optional
         self.opt_include_testfile = self.get_parsed_argument(OPT_INCLUDE_TESTFILE, self.opt_include_testfile)
+        # note: also honor the positional filename argument (e.g., `automate_notebook.py some.ipynb`)
+        if (not self.opt_include_testfile) and self.filename and (self.filename != "-"):
+            self.opt_include_testfile = self.filename
+        # note: fail fast (before launching a browser) if the testfile isn't in the repo
+        if self.opt_include_testfile:
+            AutomateNotebook.resolve_testfile(self.opt_include_testfile)
         self.opt_first_n_testfile = int(self.get_parsed_argument(OPT_FIRST_N_TESTFILE, self.opt_first_n_testfile))
         self.opt_verbose = self.get_parsed_option(OPT_VERBOSE, self.opt_verbose)
         debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
