@@ -1236,9 +1236,14 @@ function all-tomohara-settings-here {
 
     # Replace existing PATH-related settings
     if [ "$old_tom_bin" != "$new_tom_bin" ]; then
+        echo "Updating PATH env vars"
         for env_var in PATH PYTHONPATH PERLLIB; do
             update-env-path "$env_var" "$old_tom_bin" "$new_tom_bin"
         done
+        if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+            echo "Path revision:"
+            show-path | cat -n | egrep "($old_tom_bin)|($new_tom_bin)"
+        fi
     fi
 
     # Update other settings
