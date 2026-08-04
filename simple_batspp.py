@@ -93,6 +93,9 @@
 ##   This requires that the test definitions be converted to proper bash functions:
 ##      perl -pe 's/^\@test "(.*)"/function $1/;' my-test.bats > my-text.bash
 ## - add examples below to help clarify processing
+##
+## UPDATE 04 Aug 26: Adds support for strict eval (i.e., set -euo pipefail).
+##
 
 """
 BATSPP
@@ -219,6 +222,10 @@ OLD_ACTUAL_EVAL = system.getenv_bool("OLD_ACTUAL_EVAL", False,
 # Flags
 USE_INDENT_PATTERN = system.getenv_bool("USE_INDENT_PATTERN", False,
                                         "Use old regex for indentation")
+STRICT_EVAL = system.getenv_bool(
+    "STRICT_EVAL", False,
+    "Evaluate scripts with Bash strict mode via `set -euo pipefail`")
+
 
 # Some constants
 ## Bruno: can you explain this pattern?
@@ -475,12 +482,14 @@ class Batspp(Main):
         """Process tests setup"""
         debug.trace(T7, f'batspp - processing setup')
 
+        # NOTE: files are loaded globally to to avoid problems with functions commands.
 
-        # NOTE: files are loaded globally to
-        #       to avoid problems with functions
-        #       commands.
-
-
+        # Enable optional strict mode
+        # TODO2: apply this at the function level  (e.g., toggle on and off for each).
+        if STRICT_EVAL:
+            self.bats_content += ("# Enable strict evaluation\n" +
+                                  "set -euo pipefail\n\n")
+        
         # Make executables ./tests/../ visible to PATH
         #
         # This is usefull then the file is specially for testing.
@@ -923,7 +932,8 @@ class CustomTestsToBats:
                 if max_len is None:
                     max_len = MAX_ESCAPED_LEN
                 ## OLD: result = gh.elide(repr(text).replace("\'", '\"'), max_len=max_len)
-                result = gh.elide(repr(text), max_len=max_len)
+                ## BAD: result = gh.elide(repr(text), max_len=max_len)
+                result = repr(gh.elide(text, max_len=max_len))
                 result = result.replace("\\", "\\\\").replace('"', '\\"')
                 result = result.replace("$", "\\$").replace("`", "\\`")
                 debug.trace(T9, f"esc_quote_etc({text!r} => {result}")
@@ -933,12 +943,14 @@ class CustomTestsToBats:
             debug_text = ('\techo ""\n' +
                           ('\t# shellcheck disable=SC2016,SC2028\n' if FILTER_SHELLCHECK else '') +
                           ## OLD: f"\techo '========== actual: {esc_quote_etc(actual)} =========='\n" +
-                          f'\techo "========== actual: {esc_quote_etc(actual)} =========="\n' +
+                          ## OLD: f'\techo "========== actual: {esc_quote_etc(actual)} =========="\n' +
+                          f"\tprintf \"========== actual: '%s' ==========\\n\" {esc_quote_etc(actual)} \n" +
                           f'\techo "${actual_var}"\n' +
                           (f'\techo "${actual_var}" {verbose_print}\n' if self._verbose else "") +
                           ('\t# shellcheck disable=SC2016,SC2028\n' if FILTER_SHELLCHECK else '') +
                           ## OLD: f"\techo '========== expect: {esc_quote_etc(expected)} =========='\n" +
-                          f'\techo "========== expect: {esc_quote_etc(expected)} =========="\n' +
+                          ## OLD f'\techo "========== expect: {esc_quote_etc(expected)} =========="\n' +
+                          f"\tprintf \"========== expect: '%s' ==========\\n\" {esc_quote_etc(expected)} \n" +
                           f'\techo "${expected_var}"\n' +
                           (f'\techo "${expected_var}" {verbose_print}\n' if self._verbose else "") +
                           '\techo "============================"\n')
