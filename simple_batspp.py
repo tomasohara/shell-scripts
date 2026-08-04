@@ -118,7 +118,7 @@ Also you can test bash functions:
  fibonacci 9 => "0 1 1 2 3 5 8 13 21 34"
 
 Simple usage:
-MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 {prog} xyz.batspp > xyz.log 2>&1
+echo $'$ id root\\nuid=0(root) gid=0(root) groups=0(root)' > /tmp/id.batspp; GLOBAL_TEST_DIR=1 IGNORE_SETUP_OUTPUT=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 {prog} /tmp/id.batspp
 """
 
 
