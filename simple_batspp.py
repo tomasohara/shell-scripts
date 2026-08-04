@@ -229,7 +229,8 @@ STRICT_EVAL = system.getenv_bool(
 
 # Some constants
 ## Bruno: can you explain this pattern?
-INDENT_PATTERN = r'^[^\w\$\(\n\{\}]'               # note: modified in __process_tests
+_INDENT_PATTERN_BASE = r'^[^\w\$\(\n\{\}]'
+INDENT_PATTERN = _INDENT_PATTERN_BASE                  # note: recomputed in __process_tests
 BATSPP_EXTENSION = '.batspp'
 # Trace levels usually go from from 6 .. 9, but from 4 .. 7 for tom, tohara, etc.
 USER = system.getenv_text("USER", "user",
@@ -357,7 +358,6 @@ TestFieldTypes = namedtuple("TestFieldTypes", TEST_FIELD_NAMES)
 class Batspp(Main):
     """This process and run custom tests using bats-core"""
 
-
     # Class-level member variables for arguments (avoids need for class constructor)
     testfile     = ''
     output       = ''
@@ -366,17 +366,26 @@ class Batspp(Main):
     force        = FORCE_RUN
     jupyter      = False
 
-
-    # Global States
+    # Global States (initialized in setup to avoid duplicate code)
     is_test_file = None
-    file_content = ''
-    eval_prog = ("bats" if not BASH_EVAL else "bash")
-    bats_content = f'#!/usr/bin/env {eval_prog}\n\n'
-    if BASH_TRACE:
-        bats_content += "# enable command tracing\nset -o xtrace\n\n"
+    file_content = None
+    eval_prog = None
+    bats_content = None
 
     def setup(self):
         """Process arguments"""
+        debug.trace(T8, f"{self.__class__.__name__}.setup({self})")
+
+        # Reinitialize per-instance mutable state to prevent leakage across
+        # multiple runs in the same process (e.g., during testing).
+        ## TODO2: put the evaluation state in a separate class than this Main-based one,
+        ## which is intended for CLI processing.
+        eval_prog = ("bats" if not BASH_EVAL else "bash")
+        self.bats_content = f'#!/usr/bin/env {eval_prog}\n\n'
+        if BASH_TRACE:
+            self.bats_content += "# enable command tracing\nset -o xtrace\n\n"
+        self.is_test_file = None
+        self.file_content = ''
 
         # Check the command-line options
         self.testfile     = self.get_parsed_argument(TESTFILE, self.testfile)
@@ -398,7 +407,7 @@ class Batspp(Main):
     def run_main_step(self):
         """Process main script"""
         # TODO4: remove temp files unless debugging
-        debug.trace_object(T7, f"{self.__class__.__name__}.run_main_step()")
+        debug.trace(T7, f"{self.__class__.__name__}.run_main_step()")
 
         # Optionally convert Jupyter notebook (.ipynb) to BatsPP file (.batspp)
         if self.jupyter:
@@ -428,11 +437,9 @@ class Batspp(Main):
         if not self.file_content.endswith('\n\n'):
             self.file_content += '\n'
 
-
         self.__process_setup()
         self.__process_teardown()
         self.__process_tests()
-
 
         # Set Bats filename
         if self.output:
@@ -444,15 +451,12 @@ class Batspp(Main):
         else:
             batsfile = self.temp_file
 
-
         # Save Bats file
         system.write_file(batsfile, self.bats_content)
-
 
         # Add execution permission to directly run the result test file
         if self.output:
             gh.run(f'chmod +x {batsfile}')
-
 
         # Run unless adminstrative user and --force not 
         skip_bats = SKIP_BATS
@@ -554,22 +558,26 @@ class Batspp(Main):
         debug.trace(T7, f'batspp - processing teardown')
         # WORK-IN-PROGRESS
 
-
     def __process_tests(self):
         """Process tests"""
         debug.trace(T7, f'batspp - processing tests')
 
         # Tests with simple indentation (i.e. #) are ignored on batspp files.
         # Tests with double indentation (i.e. ##) are ignored on shell scripts.
-        global INDENT_PATTERN
+        # Note: Computes the full indent pattern from the base constant each time
+        # to avoid corrupting the global across multiple runs in the same process.
+        global INDENT_PATTERN, _test_num
+        _test_num = 0
+        indent_pattern = _INDENT_PATTERN_BASE
         if self.is_test_file:
             ## Note: The {0} causes the following indent pattern to be ignored:
             ##   [^\w\$\(\n\{\}]
-            INDENT_PATTERN += r'{0}'
-            ## TODO: INDENT_PATTERN += "[^#]"
+            indent_pattern += r'{0}'
+            ## TODO: indent_pattern += "[^#]"
         else:
-            INDENT_PATTERN += r'?'
-        INDENT_PATTERN += r'\s*'
+            indent_pattern += r'?'
+        indent_pattern += r'\s*'
+        INDENT_PATTERN = indent_pattern
 
         command_tests  = CommandTests(verbose_debug=self.verbose)
         function_tests = FunctionTests(verbose_debug=self.verbose)
@@ -749,7 +757,6 @@ class CustomTestsToBats:
         result = TestFieldTypes(*[entire, title, setup, actual, expected])
         debug.trace(T7, f'batspp (test {self._test_id}) - _common_process({test!r}) => {result!r}')
         return result
-
 
     def _last_process(self, test):
         """Process test fields before convert into bats"""
@@ -1237,7 +1244,6 @@ class CommandTests(CustomTestsToBats):
 
         super().__init__(patterns, re_flags=flags, verbose_debug=verbose_debug)
 
-
     def _first_process(self, match):
         """First process after match, format matched results into [entire, title, setup, actual, expected]"""
 
@@ -1251,7 +1257,6 @@ class CommandTests(CustomTestsToBats):
                 
         debug.trace(T7, f'batspp (test {self._test_id}) - CommandTests._first_process({match}) => {result}')
         return result
-
 
     def _last_process(self, test):
         """Process test fields before convert into bats"""
@@ -1273,11 +1278,9 @@ class FunctionTests(CustomTestsToBats):
     """Extract and process specific function tests"""
     ## TODO: add examples (e.g., to help distinguish regex from one for CommandTests)
 
-
     # Class globals
     assert_eq     = r'=>'
     assert_ne     = r'=\/>'
-
 
     def __init__(self, verbose_debug=False):
 
@@ -1318,7 +1321,6 @@ class FunctionTests(CustomTestsToBats):
 
         super().__init__(patterns, re_flags=flags, verbose_debug=verbose_debug)
 
-
     def _first_process(self, match):
         """First process after match, format matched results into [entire, title, setup, actual, expected]"""
 
@@ -1338,10 +1340,8 @@ class FunctionTests(CustomTestsToBats):
         debug.trace(T7, f'batspp (test {self._test_id}) - _first_process({match}) => {result}')
         return result
 
-
     def _last_process(self, test):
         """Process test fields before convert into bats"""
-
         entire, title, setup, actual, expected = test
 
         # Disable alias adding '//' to functions
