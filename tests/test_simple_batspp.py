@@ -26,6 +26,7 @@ from mezcla import debug
 ## TODO: from mezcla import glue_helpers as gh
 from mezcla.my_regex import my_re
 from mezcla import system
+## OLD: from mezcla import glue_helpers as gh
 
 # Note: Two references are used for the module to be tested:
 #    THE_MODULE:                  global module object
@@ -82,6 +83,70 @@ class TestIt(TestWrapper):
         # note: The global setup block is emitted as raw code (not a numbered test),
         # so only 2 actual tests are counted ("Test fu" and "Test fu again").
         self.do_assert("2 tests, 0 failure(s), 0 ignored" in output)
+        return
+
+    def test_data_file_direct(self):
+        """Version of test_data_file using API (i.e., not subprocess)"""
+        self.monkeypatch.setattr(THE_MODULE, "TEST_FILE", True)
+        self.monkeypatch.setattr(THE_MODULE, "GLOBAL_TEST_DIR", True)
+        self.monkeypatch.setattr(THE_MODULE, "PARA_BLOCKS", True)
+        self.monkeypatch.setattr(THE_MODULE, "BASH_EVAL", True)
+        ## TODO?: self.monkeypatch.setattr(THE_MODULE, "IGNORE_SETUP_OUTPUT", True)
+        temp_file = self.create_temp_file(FUBAR_TEST)
+        runtime_args = ["--force", temp_file]
+        app = THE_MODULE.get_app(runtime_args=runtime_args)
+        app.run()
+        out = self.get_stdout()
+        self.do_assert("2 tests, 0 failure(s), 0 ignored" in out)
+
+    def test_app_reentry(self):
+        """Verifies that Batspp can be run multiple times (re-entry) without state corruption by resetting the app"""
+        ## TODO2: streamline via monkeypatch, use test_data_file_direct for firsat run, and make more mezcla like
+        debug.trace(4, f"TestIt.test_app_reentry(); self={self}")
+        ## TODO2: self.create_temp_file
+        system.write_file(self.temp_file, FUBAR_TEST)
+        output_file = self.temp_file + ".batspp"
+        
+        old_env = {
+            "TEST_FILE": THE_MODULE.TEST_FILE,
+            "MATCH_SENTINELS": THE_MODULE.MATCH_SENTINELS,
+            "PARA_BLOCKS": THE_MODULE.PARA_BLOCKS,
+            "BASH_EVAL": THE_MODULE.BASH_EVAL,
+            "GLOBAL_TEST_DIR": THE_MODULE.GLOBAL_TEST_DIR,
+            "IGNORE_SETUP_OUTPUT": THE_MODULE.IGNORE_SETUP_OUTPUT,
+            "IGNORE_ALL_COMMENTS": THE_MODULE.IGNORE_ALL_COMMENTS,
+        }
+        
+        try:
+            THE_MODULE.TEST_FILE = True
+            THE_MODULE.MATCH_SENTINELS = True
+            THE_MODULE.PARA_BLOCKS = True
+            THE_MODULE.BASH_EVAL = True
+            THE_MODULE.GLOBAL_TEST_DIR = True
+            THE_MODULE.IGNORE_SETUP_OUTPUT = True
+            THE_MODULE.IGNORE_ALL_COMMENTS = True
+            
+            runtime_args = ["--force", "--output", output_file, self.temp_file]
+            
+            app = THE_MODULE.get_app(runtime_args=runtime_args)
+            
+            # 1. First run via app.run()
+            self.clear_stdout_stderr()
+            app.run()
+            
+            out1 = self.get_stdout_stderr()[0]
+            self.do_assert("2 tests, 0 failure(s), 0 ignored" in out1, f"First run failed: {out1}")
+            
+            # 2. Re-run via setup() and run_main_step()
+            self.clear_stdout_stderr()
+            app.setup()
+            app.run_main_step()
+            
+            out2 = self.get_stdout_stderr()[0]
+            self.do_assert("2 tests, 0 failure(s), 0 ignored" in out2, f"Second run failed: {out2}")
+        finally:
+            for k, v in old_env.items():
+                setattr(THE_MODULE, k, v)
         return
 
     ## OLD: @pytest.mark.xfail                   # TODO: remove xfail
