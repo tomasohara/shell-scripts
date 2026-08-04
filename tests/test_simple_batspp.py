@@ -67,19 +67,21 @@ class TestIt(TestWrapper):
     # TODO: use_temp_base_dir = True            # treat TEMP_BASE as directory
     # note: temp_file defined by parent (along with script_module, temp_base, and test_num)
 
-    @pytest.mark.xfail                   # TODO: remove xfail
     @trap_exception
     def test_data_file(self):
-        """Makes sure TODO works as expected"""
+        """Makes sure alias-based tests run correctly via BASH_EVAL"""
         debug.trace(4, f"TestIt.test_data_file(); self={self}")
 
         system.write_file(self.temp_file, FUBAR_TEST)
         output = self.run_script(
             options=f"--output {self.temp_file}.batspp",
-            env_options="TEST_FILE=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1",
+            env_options=("TEST_FILE=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1"
+                         " GLOBAL_TEST_DIR=1 IGNORE_SETUP_OUTPUT=1"
+                         " IGNORE_ALL_COMMENTS=1"),
             data_file=self.temp_file)
-        # note: The setup is counted as a no-op test (i.e., ignored)
-        self.do_assert("3 tests, 0 failure(s), 1 ignored" in output)
+        # note: The global setup block is emitted as raw code (not a numbered test),
+        # so only 2 actual tests are counted ("Test fu" and "Test fu again").
+        self.do_assert("2 tests, 0 failure(s), 0 ignored" in output)
         return
 
     ## OLD: @pytest.mark.xfail                   # TODO: remove xfail
@@ -136,10 +138,9 @@ class TestIt(TestWrapper):
             THE_MODULE.OMIT_TRACE = old_omit_trace
         return
 
-    @pytest.mark.xfail(reason="TODO: support optional non-elided debug headers for long output")
     @trap_exception
     def test_convert_to_bats_no_elision_for_long_expected(self):
-        """Edge-case TODO: allow preserving full long expected text in debug header"""
+        """Make sure long expected text is preserved (not elided) in debug header"""
         debug.trace(4, f"TestIt.test_convert_to_bats_no_elision_for_long_expected(); self={self}")
         test_obj = THE_MODULE.CommandTests()
         old_omit_trace = THE_MODULE.OMIT_TRACE
