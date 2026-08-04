@@ -118,7 +118,14 @@ Also you can test bash functions:
  fibonacci 9 => "0 1 1 2 3 5 8 13 21 34"
 
 Simple usage:
-echo $'$ id root\\nuid=0(root) gid=0(root) groups=0(root)' > /tmp/id.batspp; GLOBAL_TEST_DIR=1 IGNORE_SETUP_OUTPUT=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 {prog} /tmp/id.batspp
+COMMON_WORKAROUNDS=1 {prog} - <<<$'$ : && echo "T"\\nT'
+
+Typical usage:
+echo /tmp/root-id.batspp; <<END
+  $ id root
+  uid=0(root) gid=0(root) groups=0(root)
+END
+GLOBAL_TEST_DIR=1 IGNORE_SETUP_OUTPUT=1 {prog} /tmp/id.batspp
 """
 
 
@@ -131,6 +138,7 @@ import random
 
 # Local packages
 from mezcla.main import Main
+## TEST: from mezcla.main import FILENAME
 from mezcla.my_regex import my_re
 from mezcla      import system
 from mezcla      import debug
@@ -160,6 +168,14 @@ COPY_DIR = system.getenv_bool("COPY_DIR", False,
 FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
                                "Force execution of the run even if admin-like user, etc.")
 # Options to work around quirks with Batspp
+COMMON_WORKAROUNDS = "GLOBAL_TEST_DIR=1 IGNORE_SETUP_OUTPUT=1 MATCH_SENTINELS=1 PARA_BLOCKS"
+APPLY_WORKAROUNDS = system.getenv_bool(
+    "APPLY_WORKAROUNDS", False,
+    f"Apply common workarounds: {COMMON_WORKAROUNDS}")
+if APPLY_WORKAROUNDS:
+    for spec in COMMON_WORKAROUNDS.split():
+        var, val = spec.split("=")
+        system.setenv(var, val)
 PREPROCESS_BATSPP = system.getenv_bool("PREPROCESS_BATSPP", False,
                                        "Preprocess .batspp format file, removing line continuations")
 MATCH_SENTINELS = system.getenv_bool("MATCH_SENTINELS", False,
@@ -233,8 +249,10 @@ _INDENT_PATTERN_BASE = r'^[^\w\$\(\n\{\}]'
 INDENT_PATTERN = _INDENT_PATTERN_BASE                  # note: recomputed in __process_tests
 BATSPP_EXTENSION = '.batspp'
 # Trace levels usually go from from 6 .. 9, but from 4 .. 7 for tom, tohara, etc.
-USER = system.getenv_text("USER", "user",
-                          "User name")
+## OLD:
+## USER = system.getenv_text("USER", "user",
+##                           "User name")
+USER = system.USER
 T6_DEFAULT = (6 if not USER.startswith("to") else 4)
 T6 = system.getenv_int("T6", T6_DEFAULT,
                        "Trace level to use for T6")
@@ -389,12 +407,20 @@ class Batspp(Main):
 
         # Check the command-line options
         self.testfile     = self.get_parsed_argument(TESTFILE, self.testfile)
+        ## TODO (n.b., requires skip_input=False): self.testfile = self.filename
         self.output       = self.get_parsed_argument(OUTPUT, self.output)
         self.source       = self.get_parsed_argument(SOURCE, self.source)
         self.jupyter      = self.get_parsed_option(JUPYTER, self.jupyter)
         self.force        = self.get_parsed_option(FORCE, self.force)
         self.verbose      = self.get_parsed_option(VERBOSE, system.getenv_bool("VERBOSE"))
 
+        # Remap stdin to temp file
+        if self.testfile == "-":
+            ## BAD: self.testfile = gh.create_temp_file(system.read_all_stdin())
+            ## TODO: self.testfile = gh.create_temp_file(self.read_entire_input())
+            self.testfile = gh.write_temp_file("testfile.sdtin", self.read_entire_input(),
+                                                temp_dir=TEMP_DIR)
+        
         debug.trace(T7, (f'batspp - testfile: {self.testfile}, '
                          f'output: {self.output}, '
                          f'source: {self.source}, '
@@ -441,7 +467,8 @@ class Batspp(Main):
         self.__process_teardown()
         self.__process_tests()
 
-        # Set Bats filename
+        # Set Bats filename by changing extension to .bats
+        ## TODO2: clarify the intension with respect to directory
         if self.output:
             batsfile = self.output
             if batsfile.endswith('/'):
@@ -450,13 +477,15 @@ class Batspp(Main):
                 batsfile += f'{name}.bats'
         else:
             batsfile = self.temp_file
+        debug.trace_expr(T7, batsfile)
 
         # Save Bats file
         system.write_file(batsfile, self.bats_content)
 
-        # Add execution permission to directly run the result test file
-        if self.output:
-            gh.run(f'chmod +x {batsfile}')
+        ## OLD:
+        ## # Add execution permission to directly run the result test file
+        ## if self.output:
+        ##     gh.run(f'chmod +x {batsfile}')
 
         # Run unless adminstrative user and --force not 
         skip_bats = SKIP_BATS
@@ -478,7 +507,7 @@ class Batspp(Main):
             eval_log = (EVAL_LOG if EVAL_LOG else (self.temp_file + ".eval.log"))
             bats_output = gh.run(f'{eval_prog} {BATS_OPTIONS} {batsfile} < /dev/null 2> {eval_log}')
             print(bats_output)
-            system.print_stderr(debug.call(4, gh.run, f"check_errors.perl {eval_log}") or "")
+            system.print_stderr(debug.call(T6, gh.run, f"check_errors.perl {eval_log}") or "")
             debug.assertion(not my_re.search(r"^0 tests", bats_output, re.MULTILINE))
 
 
@@ -706,8 +735,8 @@ class CustomTestsToBats:
         if STRIP_COMMENTS:
             field = my_re.sub(r'^\s*\#.*\n', '', field, flags=re.MULTILINE)
         ## TODO2: debug.trace(T8, f"_preprocess_command({in_field!r}) ==  {field!r}")
-        debug.trace(5, f"_preprocess_command({in_field!r}) == {field!r}")
-        
+        debug.trace(T7, f"_preprocess_command({in_field!r}) == {field!r}")
+
         return field
 
     def _preprocess_output(self, field):
@@ -735,7 +764,7 @@ class CustomTestsToBats:
 
     def _common_process(self, test):
         """Common process for each field in test"""
-        debug.trace(6, f'in _common_process({test!r})')
+        debug.trace(T6, f'in _common_process({test!r})')
         result = []
 
         # Get indent used
@@ -1352,16 +1381,31 @@ class FunctionTests(CustomTestsToBats):
         debug.trace(T7, f'batspp (test {self._test_id}) - _last_process({test}) => {result}')
         return result
 
+def get_app(runtime_args=None, **kwargs):
+    """Instantiates and returns the Batspp application"""
+    debug.trace_expr(T6, runtime_args, kwargs, prefix="get_app: ")
+    app = Batspp(description=__doc__.format(prog=gh.basename(__file__)),
+                 use_temp_base_dir=True,
+                 ## TEST: positional_arguments=[(FILENAME, 'test file path')],
+                 ## OLD: positional_arguments=[(TESTFILE, 'test file path')],
+                 positional_arguments=[(TESTFILE, 'test file path', "-", "?")],
+                 boolean_options=[(VERBOSE, 'show verbose debug'),
+                                  (FORCE, 'Run even under admin-like account'),
+                                  (JUPYTER, 'Convert jupyter file to batspp')],
+                 text_options=[(OUTPUT, 'target output .bats filepath'),
+                               (SOURCE, 'file to be sourced')],
+                 # note: enable run_main_step and skip FILENAME
+                 manual_input=True,
+                 skip_input=True,
+                 ## TEST:
+                 auto_help=True,
+                 runtime_args=runtime_args,
+                 **kwargs)
+    debug.trace(T7, "app() => {app!r}")
+    return app
+
 #-------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    app = Batspp(description          = __doc__.format(prog=gh.basename(__file__)),
-                 ## TODO: use_temp_base_dir=True,
-                 positional_arguments = [(TESTFILE, 'test file path')],
-                 boolean_options      = [(VERBOSE,  'show verbose debug'),
-                                         (FORCE,    'Run even under admin-like account'),
-                                         (JUPYTER,  'Convert jupyter file to batspp')],
-                 text_options         = [(OUTPUT,   'target output .bats filepath'),
-                                         (SOURCE,   'file to be sourced')],
-                 manual_input         = True)
-    app.run()
+    main_app = get_app()
+    main_app.run()
