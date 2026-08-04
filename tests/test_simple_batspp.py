@@ -7,6 +7,8 @@
 #   option shows tracing output normally suppressed by unittest_wrapper.py.
 # - This can be run as follows:
 #   $ PYTHONPATH=".:$PYTHONPATH" python ./mezcla/tests/test_simple_batspp.py
+# - Ignores class-internals warning:
+#   pylint: disable=protected-access
 #
 
 """Tests for simple_batspp module"""
@@ -43,31 +45,17 @@ if not my_re.search(__file__, r"\btemplate.py$"):
 ##                            description="Fouled Up Beyond All Recognition processing")
 
 FUBAR_TEST = r"""
-    # Fubar test
-    
     # Global setup
     $ num_fu=0
-    ## TODO: $ alias fubar='let num_fu++; echo num_fu="$(eval echo "\${num_fu}")"'
-    $ alias fubar='let num_fu++'
-    
-    # Setup
-    $ num_fu=1
-    
+    $ alias fubar='let num_fu++; echo num_fu=$num_fu'
+
     # Test fu
-    ## TODO: $ fubar
-    ## TEST: 
-    ## $ fubar; echo "num_fu=$num_fu"
-    ## num_fu=1
-    $ fubar; echo fubar
-    fubar
+    $ fubar
+    num_fu=1
     
     # Test fu again
-    ## TODO: $ echo $(fubar)
-    ## TEST: 
-    ## $ fubar; echo "num_fu=$num_fu"
-    ## num_fu=2
-    $ fubar; echo fubar
-    fubar
+    $ fubar
+    num_fu=2
 """.replace("    ", "")
 
 #------------------------------------------------------------------------
