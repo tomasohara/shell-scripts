@@ -979,14 +979,15 @@ class CustomTestsToBats:
             debug_text = ('\techo ""\n' +
                           ('\t# shellcheck disable=SC2016,SC2028\n' if FILTER_SHELLCHECK else '') +
                           ## OLD: f"\techo '========== actual: {esc_quote_etc(actual)} =========='\n" +
-                          ## OLD: f'\techo "========== actual: {esc_quote_etc(actual)} =========="\n' +
-                          f"\tprintf \"========== actual: '%s' ==========\\n\" {esc_quote_etc(actual)} \n" +
+                          ## NOTE: Leads to shellcheck SC2028 [expand escape sequences]; Try FILTER_SHELLCHECK.
+                          f'\techo "========== actual: {esc_quote_etc(actual)} =========="\n' +
+                          ## TODO?: f"\tprintf \"========== actual: '%s' ==========\\n\" {esc_quote_etc(actual)} \n" +
                           f'\techo "${actual_var}"\n' +
                           (f'\techo "${actual_var}" {verbose_print}\n' if self._verbose else "") +
                           ('\t# shellcheck disable=SC2016,SC2028\n' if FILTER_SHELLCHECK else '') +
                           ## OLD: f"\techo '========== expect: {esc_quote_etc(expected)} =========='\n" +
-                          ## OLD f'\techo "========== expect: {esc_quote_etc(expected)} =========="\n' +
-                          f"\tprintf \"========== expect: '%s' ==========\\n\" {esc_quote_etc(expected)} \n" +
+                          f'\techo "========== expect: {esc_quote_etc(expected)} =========="\n' +
+                          ## TODO?: f"\tprintf \"========== expect: '%s' ==========\\n\" {esc_quote_etc(expected)} \n" +
                           f'\techo "${expected_var}"\n' +
                           (f'\techo "${expected_var}" {verbose_print}\n' if self._verbose else "") +
                           '\techo "============================"\n')
