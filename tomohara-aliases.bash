@@ -1169,6 +1169,9 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   ## BAD: function grepl-bashrc-etc { grepl "$@" ~/.*bash* | grep -v '\.bash_history' | tail | grepl "$@"; }
   # note: includes related bash aliases under ~/bin (n.b., an outgrowth of .bashrc stuff)
   function grepl-bashrc-etc { grepl "$@" ~/.*bash* "$TOM_BIN"/*tomohara*bash | grep -v '\.bash_history' | grepl "$@"; }
+  #
+  # grepl-git: run grepl over Git repo
+  function grepl-git { grepl "$@" $(git-ls-tree-relative); }
 }
 # gr-c: grep through c/c++ source and headers files
 # note: --no-messages suppresses warnings about missing files
