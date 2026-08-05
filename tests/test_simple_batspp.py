@@ -69,84 +69,58 @@ class TestIt(TestWrapper):
     # note: temp_file defined by parent (along with script_module, temp_base, and test_num)
 
     @trap_exception
-    def test_data_file(self):
-        """Makes sure alias-based tests run correctly via BASH_EVAL"""
-        debug.trace(4, f"TestIt.test_data_file(); self={self}")
+    def test_data_file_subprocess(self):
+        """Makes sure alias-based tests run correctly via BASH_EVAL.
+        note: This uses a subprocess: see test_data_file_direct for the class-based invocation."""
+        debug.trace(4, f"TestIt.test_data_file_subprocess(); self={self}")
 
         system.write_file(self.temp_file, FUBAR_TEST)
         output = self.run_script(
             options=f"--output {self.temp_file}.batspp",
             env_options=("TEST_FILE=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1"
                          " GLOBAL_TEST_DIR=1 IGNORE_SETUP_OUTPUT=1"
-                         " IGNORE_ALL_COMMENTS=1"),
+                         " IGNORE_ALL_COMMENTS=1 FORCE_RUN=1"),
             data_file=self.temp_file)
         # note: The global setup block is emitted as raw code (not a numbered test),
         # so only 2 actual tests are counted ("Test fu" and "Test fu again").
         self.do_assert("2 tests, 0 failure(s), 0 ignored" in output)
         return
 
-    def test_data_file_direct(self):
-        """Version of test_data_file using API (i.e., not subprocess)"""
+    def _run_data_file_direct(self):
+        """Helper for test_data_file_direct that returns the app"""
         self.monkeypatch.setattr(THE_MODULE, "TEST_FILE", True)
+        self.monkeypatch.setattr(THE_MODULE, "MATCH_SENTINELS", True)
         self.monkeypatch.setattr(THE_MODULE, "GLOBAL_TEST_DIR", True)
         self.monkeypatch.setattr(THE_MODULE, "PARA_BLOCKS", True)
         self.monkeypatch.setattr(THE_MODULE, "BASH_EVAL", True)
-        ## TODO?: self.monkeypatch.setattr(THE_MODULE, "IGNORE_SETUP_OUTPUT", True)
+        self.monkeypatch.setattr(THE_MODULE, "IGNORE_SETUP_OUTPUT", True)
+        self.monkeypatch.setattr(THE_MODULE, "IGNORE_ALL_COMMENTS", True)
         temp_file = self.create_temp_file(FUBAR_TEST)
         runtime_args = ["--force", temp_file]
         app = THE_MODULE.get_app(runtime_args=runtime_args)
         app.run()
         out = self.get_stdout()
         self.do_assert("2 tests, 0 failure(s), 0 ignored" in out)
+        return app
 
-    def test_app_reentry(self):
+    def test_data_file_direct(self):
+        """Version of test_data_file using API (i.e., not subprocess)"""
+        self._run_data_file_direct()
+
+    def test_reentry_app(self):
         """Verifies that Batspp can be run multiple times (re-entry) without state corruption by resetting the app"""
-        ## TODO2: streamline via monkeypatch, use test_data_file_direct for firsat run, and make more mezcla like
-        debug.trace(4, f"TestIt.test_app_reentry(); self={self}")
-        ## TODO2: self.create_temp_file
-        system.write_file(self.temp_file, FUBAR_TEST)
-        output_file = self.temp_file + ".batspp"
+        debug.trace(4, f"TestIt.test_reentry_app(); self={self}")
         
-        old_env = {
-            "TEST_FILE": THE_MODULE.TEST_FILE,
-            "MATCH_SENTINELS": THE_MODULE.MATCH_SENTINELS,
-            "PARA_BLOCKS": THE_MODULE.PARA_BLOCKS,
-            "BASH_EVAL": THE_MODULE.BASH_EVAL,
-            "GLOBAL_TEST_DIR": THE_MODULE.GLOBAL_TEST_DIR,
-            "IGNORE_SETUP_OUTPUT": THE_MODULE.IGNORE_SETUP_OUTPUT,
-            "IGNORE_ALL_COMMENTS": THE_MODULE.IGNORE_ALL_COMMENTS,
-        }
+        # 1. First run via app.run()
+        app = self._run_data_file_direct()
         
-        try:
-            THE_MODULE.TEST_FILE = True
-            THE_MODULE.MATCH_SENTINELS = True
-            THE_MODULE.PARA_BLOCKS = True
-            THE_MODULE.BASH_EVAL = True
-            THE_MODULE.GLOBAL_TEST_DIR = True
-            THE_MODULE.IGNORE_SETUP_OUTPUT = True
-            THE_MODULE.IGNORE_ALL_COMMENTS = True
-            
-            runtime_args = ["--force", "--output", output_file, self.temp_file]
-            
-            app = THE_MODULE.get_app(runtime_args=runtime_args)
-            
-            # 1. First run via app.run()
-            self.clear_stdout_stderr()
-            app.run()
-            
-            out1 = self.get_stdout_stderr()[0]
-            self.do_assert("2 tests, 0 failure(s), 0 ignored" in out1, f"First run failed: {out1}")
-            
-            # 2. Re-run via setup() and run_main_step()
-            self.clear_stdout_stderr()
-            app.setup()
-            app.run_main_step()
-            
-            out2 = self.get_stdout_stderr()[0]
-            self.do_assert("2 tests, 0 failure(s), 0 ignored" in out2, f"Second run failed: {out2}")
-        finally:
-            for k, v in old_env.items():
-                setattr(THE_MODULE, k, v)
+        # 2. Re-run via setup() and run_main_step()
+        self.clear_stdout_stderr()
+        app.setup()
+        app.run_main_step()
+        
+        out2 = self.get_stdout_stderr()[0]
+        self.do_assert("2 tests, 0 failure(s), 0 ignored" in out2, f"Second run failed: {out2}")
         return
 
     ## OLD: @pytest.mark.xfail                   # TODO: remove xfail
@@ -172,7 +146,8 @@ class TestIt(TestWrapper):
                 title="quote-check",
                 setup="",
                 actual="$ echo ok\n",
-                expected="Error: Use 'git-update-force' to update with changed files",
+                # note: Changed to FYI to avoid false positive with check_errors.perl when debugging
+                expected="FYI: Use 'git-update-force' to update with changed files",
             )
             bats_text, _ = test_obj._convert_to_bats(test_case)
             self.do_assert("Use 'git-update-force'" in bats_text)
