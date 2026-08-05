@@ -125,7 +125,7 @@ echo /tmp/root-id.batspp; <<END
   $ id root
   uid=0(root) gid=0(root) groups=0(root)
 END
-GLOBAL_TEST_DIR=1 IGNORE_SETUP_OUTPUT=1 {prog} /tmp/id.batspp
+BASH_EVAL=1 GLOBAL_TEST_DIR=1 {prog} /tmp/id.batspp
 """
 
 
