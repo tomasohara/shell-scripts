@@ -118,7 +118,7 @@ Also you can test bash functions:
  fibonacci 9 => "0 1 1 2 3 5 8 13 21 34"
 
 Simple usage:
-COMMON_WORKAROUNDS=1 {prog} - <<<$'$ : && echo "T"\\nT'
+APPLY_WORKAROUNDS=1 {prog} - <<<$'$ : && echo "T"\\nT'
 
 Typical usage:
 echo /tmp/root-id.batspp; <<END
@@ -168,13 +168,13 @@ COPY_DIR = system.getenv_bool("COPY_DIR", False,
 FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
                                "Force execution of the run even if admin-like user, etc.")
 # Options to work around quirks with Batspp
-COMMON_WORKAROUNDS = "GLOBAL_TEST_DIR=1 IGNORE_SETUP_OUTPUT=1 MATCH_SENTINELS=1 PARA_BLOCKS"
+COMMON_WORKAROUNDS = "BASH_EVAL=1 GLOBAL_TEST_DIR=1 IGNORE_SETUP_OUTPUT=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 TEST_FILE=1"
 APPLY_WORKAROUNDS = system.getenv_bool(
     "APPLY_WORKAROUNDS", False,
     f"Apply common workarounds: {COMMON_WORKAROUNDS}")
 if APPLY_WORKAROUNDS:
     for spec in COMMON_WORKAROUNDS.split():
-        var, val = spec.split("=")
+        var, val = tuple(spec.split("="))
         system.setenv(var, val)
 PREPROCESS_BATSPP = system.getenv_bool("PREPROCESS_BATSPP", False,
                                        "Preprocess .batspp format file, removing line continuations")
@@ -394,6 +394,9 @@ class Batspp(Main):
         """Process arguments"""
         debug.trace(T8, f"{self.__class__.__name__}.setup({self})")
 
+        # note: removes non-dir file if exists
+        gh.full_mkdir(TEMP_DIR, force=True)
+        
         # Reinitialize per-instance mutable state to prevent leakage across
         # multiple runs in the same process (e.g., during testing).
         ## TODO2: put the evaluation state in a separate class than this Main-based one,
@@ -418,7 +421,8 @@ class Batspp(Main):
         if self.testfile == "-":
             ## BAD: self.testfile = gh.create_temp_file(system.read_all_stdin())
             ## TODO: self.testfile = gh.create_temp_file(self.read_entire_input())
-            self.testfile = gh.write_temp_file("testfile.sdtin", self.read_entire_input(),
+            ## OLD: os.makedirs(TEMP_DIR, exist_ok=True)
+            self.testfile = gh.write_temp_file("testfile.stdin", self.read_entire_input(),
                                                 temp_dir=TEMP_DIR)
         
         debug.trace(T7, (f'batspp - testfile: {self.testfile}, '
