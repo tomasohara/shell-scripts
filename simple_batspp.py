@@ -244,6 +244,7 @@ STRICT_EVAL = system.getenv_bool(
 
 
 # Some constants
+TL = debug.TL
 ## Bruno: can you explain this pattern?
 _INDENT_PATTERN_BASE = r'^[^\w\$\(\n\{\}]'
 INDENT_PATTERN = _INDENT_PATTERN_BASE                  # note: recomputed in __process_tests
@@ -411,8 +412,8 @@ class Batspp(Main):
         # Check the command-line options
         self.testfile     = self.get_parsed_argument(TESTFILE, self.testfile)
         ## TODO (n.b., requires skip_input=False): self.testfile = self.filename
-        self.output       = self.get_parsed_argument(OUTPUT, self.output)
-        self.source       = self.get_parsed_argument(SOURCE, self.source)
+        self.output       = self.get_parsed_option(OUTPUT, self.output)
+        self.source       = self.get_parsed_option(SOURCE, self.source)
         self.jupyter      = self.get_parsed_option(JUPYTER, self.jupyter)
         self.force        = self.get_parsed_option(FORCE, self.force)
         self.verbose      = self.get_parsed_option(VERBOSE, system.getenv_bool("VERBOSE"))
@@ -1406,6 +1407,10 @@ def get_app(runtime_args=None, **kwargs):
                  auto_help=True,
                  runtime_args=runtime_args,
                  **kwargs)
+    # Workaround: if TEMP_FILE causes temp_file to equal temp_base while being a directory
+    if app.use_temp_base_dir and app.temp_file == app.temp_base:
+        debug.trace(TL.WARNING, "Warning: applying workaround to mezcla temp_base bug")
+        app.temp_file = gh.form_path(app.temp_base, "temp.txt")
     debug.trace(T7, "app() => {app!r}")
     return app
 
