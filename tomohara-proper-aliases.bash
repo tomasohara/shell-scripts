@@ -803,8 +803,9 @@ function reset-prompt-label {
 function reset-prompt-here {
     reset-prompt-label "$(basename "$PWD")";
 }
-# reset-prompt-alt/NOTES/...(): resets prompt label to affix
-for label in alt NOTES; do 
+# reset-prompt-alt/NOTES/...(): resets prompt label to affix;
+# example: alias reset-prompt-NOTES='reset-prompt-label NOTES'
+for label in alt NOTES; do
     eval "alias reset-prompt-$label=\"reset-prompt-label $label\""
 done
 alias alt-xterm-title='reset-prompt-label alt'
