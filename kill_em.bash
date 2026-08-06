@@ -16,6 +16,9 @@
 # TODO:
 # - separate out the Graphling support into a new script just for that
 # - figure out occasional problem with graphling files not getting deleted after processed killed
+#
+## UPDATE 05 Aug 26: adds --verify
+#
 
 # Uncomment the following line for tracing
 # set -x
@@ -40,6 +43,7 @@ test=0
 verbose_mode=0
 command_line="$0 $*"
 force=0
+verify=0
 
 # Parse command-line arguments
 ignore="-i" # ignore-case flag
@@ -49,7 +53,7 @@ if [ -z "$1" ]; then
     echo ""
     echo "Usage: $0 options [process_name]"
     echo ""
-    echo "Options: [--pattern | -p] [--filter pattern] [--ignore-case | -i-] [--preserve-case] [--user id] [--all | -a] [--test] [--verbose] [--trace] [--force]"
+    echo "Options: [--pattern | -p] [--filter pattern] [--ignore-case | -i-] [--preserve-case] [--user id] [--all | -a] [--test] [--verbose] [--trace] [--force] [--verify]"
     echo ""
     echo "notes:"
     echo "- The --pattern (-p) option treats process_name as regex for egrep."
@@ -61,6 +65,7 @@ if [ -z "$1" ]; then
     echo "- The --verbose options displays progress output."
     echo "- The --trace options shows commands to be executed (via csh echo=1)."
     echo "- The --force is required if running as root (e.g., via sudo)."
+    echo "- The --verify option waits for verification."
     echo ""
     echo "Examples:"
     echo ""
@@ -89,6 +94,8 @@ while [[ $1 =~ ^-.* ]]; do
         set -x
     elif [ "$1" == "--force" ]; then
         force=1
+    elif [ "$1" == "--verify" ]; then
+        verify=1
     elif [ "$1" == "--verbose" ]; then
         verbose_mode=1
         echo "command: $command_line"
@@ -177,6 +184,10 @@ else
     perl -pe "s/^ *$user *//g;" < "$aux_file1" | sed -e 's/ .*//g' | $egrep -v '^ *$' | sort -n | perl -00 -n -e 's/\n/ /g; s/^/kill -9 /; print "$_\n";' > "$aux_script"
     if [ $test == 1 ]; then
         perl -i.bak -pe 's/^/echo /;' "$aux_script"
+    fi
+    if [ $verify == 1 ]; then
+        echo "Press enter to proceed"
+        read
     fi
 fi
 
