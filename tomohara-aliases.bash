@@ -2263,7 +2263,7 @@ trace "adhoc unix aliases (e.g., showing or killing processes, etc.)"
 ##
 alias dobackup='dobackup.sh'
 alias kill-em='kill_em.bash'
-alias kill-it='kill-em --pattern'
+alias kill-it='kill-em --verify --pattern'
 # ps-mine: wrapper around ps_mine.sh w/ filtering (e.g., defunct)
 alias ps-mine-regular='ps_mine.bash'
 alias ps-mine='ps-mine-regular --filtered'
