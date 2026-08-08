@@ -24,7 +24,7 @@ if [ "$1" == "--help" ]; then
     script=$(basename "$0")
     # TODO2: make repos an argument and drop ~/bin, etc.
     echo "Usage: [env] $script [--help] [repo ...]"
-    echo '    env: OTHER_REPOS="string-list" SHOW_SUMMARY=B'
+    echo '    env: OTHER_REPOS="string-list" SHOW_SUMMARY=B VERBOSE_MODE=B'
     echo ""
     echo "Examples:"
     echo ""
@@ -34,6 +34,8 @@ if [ "$1" == "--help" ]; then
     echo ""
     echo "Note:"
     echo "- OTHER_REPOS is space-delimited: specify repos via positional argument(s) otherwise."
+    echo "- SHOW_SUMMARY shows current repo status"
+    echo "- VERBOSE_MODE adds repo url, branch, and related info"
     exit
 fi
 if [ "$1" != "" ]; then
