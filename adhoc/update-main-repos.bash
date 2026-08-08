@@ -6,7 +6,8 @@
 ## UPDATE 16 Jul 26: cleanup
 ## 
 ## # adhoc script to update all repo's
-## # UPDATE: 28 Jun 20206: upgrade including support for OTHER_REPOS as string list or array
+## # UPDATE 08 Aug 26: adds repo branch to verbose output
+## # UPDATE: 28 Jun 2020: upgrade including support for OTHER_REPOS as string list or array
 #
 
 # Uncomment following line(s) for tracing:
@@ -103,13 +104,15 @@ $verbose_mode && echo "$0"
 ## DEBUG: trace-vars verbose_mode
 for dir in "${repos[@]}"; do
     # Make repo dir active
+    command cd "$dir" || continue
+
     # Show repo and url (e.g., "repo: /home/tomohara/bin [https://github.com/tomasohara/shell-scripts]"
     if $verbose_mode; then
         echo -n "$dir" | tee --append "$log"
     else
         echo "repo: $dir" | tee --append "$log"
     fi
-    command cd "$dir" || continue
+    # 
     if $verbose_mode; then
         echo -e "\t[$(git-repo-url)]" | tee --append "$log"
     fi
@@ -118,6 +121,9 @@ for dir in "${repos[@]}"; do
     git-update-plus 2>&1 | grep -v "No stash entries found" >| "$temp_log"
     check-errors-excerpt "$temp_log"
     if [[ "$show_summary" == "1" ]]; then
+        if $verbose_mode; then
+            echo -e "\t$(git-branch-alias)"
+        fi
         (grep "files changed" "$temp_log" || echo "No changes") | perl -pe 's/^/\t/;'
     fi
 
