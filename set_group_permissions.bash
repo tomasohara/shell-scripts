@@ -79,7 +79,8 @@ chgrp -R --changes "$group" "$dir" >> "$log" 2>&1
 chmod -R --changes g+rwx "$dir" >> "$log" 2>&1
 
 # Set execute/search for directories and apply sticky bit
-find "$dir" -type d -exec chmod --changes g+s,g+x {} \; >> "$log" 2>&1
+## BAD: find "$dir" -type d -exec chmod --changes g+s,g+x {} \; >> "$log" 2>&1
+find "$dir" -type d -exec chmod --changes g+s,g+x,+t {} \; >> "$log" 2>&1
 
 # Set default permissions for new files (using setfacl)
 setfacl -R -m g::rwX "$dir" >> "$log" 2>&1
