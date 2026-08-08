@@ -202,7 +202,7 @@ function alias-fn {
     shift
     local body="$*"
     # Remove existing alias of same name"
-    eval "alias $alias &> /dev/null"
+    eval "unalias $alias &> /dev/null"
     # Define the function
     eval "function $alias { $body; }"
 }
@@ -220,6 +220,8 @@ function simple-alias-fn {
     fi
     local alias="$1"
     local command="$2"
+    # Remove existing alias of same name"
+    eval "unalias $alias &> /dev/null"
     # note: uses eval used to interpolate label and command (with $@ appended)
     eval "function $alias { $command" '"$@"' "; }"
 }
@@ -908,6 +910,9 @@ alias move-noclobber='move --update=none'
 # shellcheck disable=SC2032
 alias rm='command rm -i $other_file_args'
 alias delete='command rm -i $other_file_args'
+#
+# disable-forced-deletions[-aux]: explains how to disable safety guard, including check for embedded spaces
+# note: defines $force_echo for use with delete-force and delete-dir-force
 # shellcheck disable=SC2034
 {
     ## NOTE: redundancy is needed for sake of sanity (force_echo was getting inadvertently
@@ -924,14 +929,15 @@ alias delete='command rm -i $other_file_args'
         local f
         for f in "$@"; do
             if [[ "$f" =~ " " ]]; then
-                echo "Error: files with embedded spaces not supported by delete[-dir]-force"
+                echo "Error: files with embedded spaces not supported by delete[-dir]-force, etc."
                 echo "  $f"
                 return
             fi
         done
 
-        # Proceed with 
-        echo "Warning: run enable-forced-deletions or issue:"
+        # Output command to be run along with workarounds for safety guards
+        ## OLD: echo "Warning: run enable-forced-deletions or issue:"
+        echo "Warning: run enable-forced-deletions, force_echo='' ${FUNCNAME[1]} ..., or following:"
         echo -n $'\t'
         ## TODO3: for f in "$@"; do echo -n "\"$f"\"; done
         echo "$@"
@@ -942,16 +948,21 @@ alias disable-forced-deletions='force_echo="disable-forced-deletions-aux"'
 alias enable-forced-deletions='force_echo=""'
 disable-forced-deletions
 #
-alias delete-force='$force_echo command rm -f $other_file_args'
+# delete-force(file, ...): rm -f FILE w/ sanity checks
+# delete-dir-force(dir, ...): rm -rf FILE w/ sanity checks
+## OLD: alias delete-force='$force_echo command rm -f $other_file_args'
+simple-alias-fn delete-force '$force_echo command rm -f $other_file_args'
 #
 alias remove-force='delete-force'
 # TODO: make sure that rellowing only applied to directories
 alias remove-dir='command rm -rvi'
 alias delete-dir='remove-dir'
 ## TODO2: rework xyz-force as prompted command (e.g., `read -r -e -i "$prompt" command; eval "$command";`)
-alias remove-dir-force='$force_echo command rm -rfv'
+## OLD: alias remove-dir-force='$force_echo command rm -rfv'
+simple-alias-fn remove-dir-force '$force_echo command rm -rfv'
 alias delete-dir-force='remove-dir-force'
-#
+
+# Commands for copying files and ensuring read-only flag set
 alias copy-readonly='copy-readonly.sh'
 alias copy-readonly-force='copy-readonly.sh --force'
 function copy-readonly-spec () {
@@ -972,7 +983,8 @@ function copy-readonly-to-dir () {
     shift
     for f in "$@"; do copy-readonly "$f" "$dir"; done
 }
-#
+
+# Settings for running commands at lower priority and for timing
 cond-export NICE "nice -19"
 ## DUPLICATE: export TIME_CMD="/usr/bin/time"
 
