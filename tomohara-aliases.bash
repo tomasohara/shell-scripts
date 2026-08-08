@@ -1883,7 +1883,8 @@ function tar-this-dir () {
     if [ "$orig_basename" != "$tar_basename" ]; then
         sleep-for 1.5 "Warning: basename change in tar: $orig_basename => $tar_basename"
     fi
-    cd ..
+    ## BAD: cd ..
+    command cd ..
  
     # Create the archive and then restore working dir
     # note: uses basename so that full paths not stored in archive;
