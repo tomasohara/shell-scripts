@@ -186,6 +186,7 @@ else
         perl -i.bak -pe 's/^/echo /;' "$aux_script"
     fi
     if [ $verify == 1 ]; then
+        ## TODO3: add helper script to facilitate consistency (e.g., for use in pause-for-enter)
         echo "Press enter to proceed"
         read
     fi
