@@ -147,6 +147,7 @@
 #     Use '--' to separate paths from revisions, like this:
 #     'git <command> [<revision>...] -- [<file>...]'
 #
+## UPDATE 09 Aug 26: tags long-standing issues: see "quirk/bug"
 
 ## DEBUG: echo "in ${BASH_SOURCE[0]}"
 
@@ -257,8 +258,7 @@ function get-temp-log-name {
     # TODO: use integral suffix (not hex)
     local log_file
     log_file=$(mktemp "$GIT_LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log")
-    ## TEMP: rename existing temp file (MacOs quirk?)
-    ## BAD: if [ -s "$GIT_LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log" ]; then
+    # note: renames existing temp file (MacOs quirk/bug)
     if [ -s "${log_file}" ]; then
         echo-plus "FYI: applying get-temp-log-name workaround"
         rename-with-file-date "$log_file"
@@ -290,6 +290,7 @@ function git-alias-review-log {
 # - If GIT_NO_CONFIRM is 1, pause for enter does not pause
 # - Requires GIT_FORCE of 1 if there are changed files (to avoid inadvertant conflict).
 # - TODO2: decompose this monster of a function!
+# - Warning (quirk/bug): This can produce conflicts in repos not changed, so backup beforehand (see git-alias-usage).
 function git-update-plus {
     if [ "$UNSAFE_GIT_CREDENTIALS" = "1" ]; then
        set-global-credentials
@@ -303,8 +304,8 @@ function git-update-plus {
 
     # Optionally preserve timestamps for changed files
     # NOTES:
-    # - The stash-pop causes the timestamps to be changed. The workaround to this quirk
-    # - backups and restore the modified files via zip (for subdirs and symbolic links).
+    # - The stash-pop causes the timestamps to be changed. The workaround to this quirk/bug
+    #   backups and restore the modified files via zip (for subdirs and symbolic links).
     local changed_files
     changed_files="$(git-diff-list "$@")"
     local restore_dir=""
@@ -742,7 +743,7 @@ function git-diff-plus {
 #   [difftool "kdiff3"]
 #       path = /usr/bin/kdiff3
 #       trustExitCode = false
-# TODO1: work around quirk with plain diff being invoked in certain situations (e.g., merge conflict)
+# TODO1: work around quirk/bug with plain diff being invoked in certain situations (e.g., merge conflict)
 #
 function git-difftool-plus {
     ## TODO: add trace-command function
@@ -1098,9 +1099,11 @@ function git-alias-usage () {
     if [ "$next_mod_file" = "" ]; then next_mod_file="TODO:filename"; fi
     echo '    git-next-checkin "'"${next_mod_file}"'"'
     echo ''
-    echo 'Usual check-in process:'
+    echo 'Usual check-in process (n.b., use git-tar-repo-proper if large):'
     # TODO2: rework git-update-force via dry-run git-update with conflict check
-    echo '    git-cd-root-alias; git-tar-repo-proper; git-update-force; git-status; git-next-checkin'
+    ## OLD: echo '    git-cd-root-alias; git-tar-repo-proper; git-update-force; git-status; git-next-checkin'
+    ## NOTE: reverted to including .git for sake of conflict post-mortem
+    echo '    git-cd-root-alias; git-tar-repo; git-update-force; git-status; git-next-checkin'
     echo '    # -or-: git-cd-root-alias; git-update-verified; git-conflicts-alias; git-next-checkin'
     echo '    git-next-checkin                      # repeat, as needed'
 
