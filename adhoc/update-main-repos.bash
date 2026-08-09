@@ -56,9 +56,11 @@ fi
     shopt -s expand_aliases
     src_dir="$(dirname "${BASH_SOURCE[0]}")"
     bin_dir="${src_dir}/.."
-    source "$bin_dir/tomohara-aliases.bash"
-    source "$bin_dir/tomohara-proper-aliases.bash"
-    source "$bin_dir/tomohara-settings.bash"
+    ## OLD:
+    ## source "$bin_dir/tomohara-aliases.bash"
+    ## source "$bin_dir/tomohara-proper-aliases.bash"
+    ## source "$bin_dir/tomohara-settings.bash"
+    SOURCE_SETTINGS=1 source "$bin_dir"/all-tomohara-aliases-etc.bash
 }
 
 # Set bash regular and/or verbose tracing
@@ -106,7 +108,14 @@ $verbose_mode && echo "$0"
 ## DEBUG: trace-vars verbose_mode
 for dir in "${repos[@]}"; do
     # Make repo dir active
-    command cd "$dir" || continue
+    ## OLD: command cd "$dir" || continue
+    ## OLD: if [ ! -d "$dir" ]; then
+    result=$(command cd "$dir" 2>&1)
+    if [ -n "$result" ]; then
+        ## echo "Warning: missing directory '$dir'"
+        echo "Warning: unable to cd into '$dir': '$result'"
+        continue
+    fi
 
     # Show repo and url (e.g., "repo: /home/tomohara/bin [https://github.com/tomasohara/shell-scripts]"
     if $verbose_mode; then
