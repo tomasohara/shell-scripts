@@ -113,7 +113,9 @@ for dir in "${repos[@]}"; do
     result=$(command cd "$dir" 2>&1)
     if [ -n "$result" ]; then
         ## echo "Warning: missing directory '$dir'"
-        echo "Warning: unable to cd into '$dir': '$result'"
+        ## OLD: echo "Warning: unable to cd into '$dir': '$result'"
+        echo "Warning: unable to cd into repo dir ($dir)":
+        echo $'\tDetails:' "$result"
         continue
     fi
 
