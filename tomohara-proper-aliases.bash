@@ -1218,9 +1218,6 @@ function update-env-path {
         printf '%s' "$old_value" |
             OLD_PATH="$old_path" NEW_PATH="$new_path" \
                 perl -pe 's/(^|:)\Q$ENV{OLD_PATH}\E(?=[:\/]|$)/$1$ENV{NEW_PATH}/g;'
-        printf '%s' "$old_value" |
-            OLD_PATH="$old_path" NEW_PATH="$new_path" \
-                perl -pe 's/(^|:)\Q$ENV{OLD_PATH}\E(?=[:\/]|$)/$1$ENV{NEW_PATH}/g;'
     )"
     #                       path-delim  --------      dir-delim       ++++++++
     if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
@@ -1228,12 +1225,15 @@ function update-env-path {
     fi
     printf -v "$env_var" '%s' "$new_value"
     export "${env_var?}"
+    if [ $(eval "${$env_var}") =~ "$old_path" ]; then
+        echo "Warning: problem applying in update-env-path for $env_var"
+    fi
 }
 # all-tomohara-settings-here(): reset TOM_BIN to . and update env path vars, etc.
 # note: TOM_BIN must already be set, as it gives the old path to be replaced
 function all-tomohara-settings-here {
     ## TEMP (get revised aliases):
-    all-tomohara-settings
+    all-tomohara-aliases-here
     local old_tom_bin="${TOM_BIN%/}"
     local new_tom_bin="$PWD"
     local env_var
