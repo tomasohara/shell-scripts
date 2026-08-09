@@ -1225,7 +1225,7 @@ function update-env-path {
     fi
     printf -v "$env_var" '%s' "$new_value"
     export "${env_var?}"
-    if [ $(eval "${$env_var}") =~ "$old_path" ]; then
+    if [[ "$(trace-var $env_var 2>&1)" =~ "$old_path" ]]; then
         echo "Warning: problem applying in update-env-path for $env_var"
     fi
 }
