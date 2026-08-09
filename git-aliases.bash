@@ -258,7 +258,8 @@ function get-temp-log-name {
     local log_file
     log_file=$(mktemp "$GIT_LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log")
     ## TEMP: rename existing temp file (MacOs quirk?)
-    if [ -s "$GIT_LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log" ]; then
+    ## BAD: if [ -s "$GIT_LOG_DIR/_git-$label-${now_mmddyyhhmm}-XXX.log" ]; then
+    if [ -s "${log_file}" ]; then
         echo-plus "FYI: applying get-temp-log-name workaround"
         rename-with-file-date "$log_file"
         touch "$log_file"
