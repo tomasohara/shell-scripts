@@ -102,7 +102,7 @@ if [ "$n" -eq 3 ]; then echo tres; fi   # * -eq -ne -lt -le -gt -ge
 # File tests
 [ -e file ]                     # file exists
 [ -f file ]                     # regular file
-[ -d dir  ]                     # directory
+[ -d dir  ]                     # file is directory
 [ -s file ]                     # non-empty file
 [ -r file ]                     # readable file
 
