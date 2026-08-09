@@ -100,11 +100,11 @@ if (( n > 10 )); then echo big; fi
 if [ "$n" -eq 3 ]; then echo tres; fi   # * -eq -ne -lt -le -gt -ge
 
 # File tests
-[ -e file ]                     # exists
+[ -e file ]                     # file exists
 [ -f file ]                     # regular file
 [ -d dir  ]                     # directory
-[ -s file ]                     # non-empty
-[ -r file ]                     # readable
+[ -s file ]                     # non-empty file
+[ -r file ]                     # readable file
 
 # String tests
 [ -n "$str" ]                   # non-empty string
