@@ -1213,11 +1213,16 @@ function update-env-path {
     local old_value="${!env_var}"
     local new_value
     # note: values passed via environment so that perl sees them literally (see remove-path-entries)
+    # TODO2: fix the buggy global regex; applied twice to handle adjacent entries
     new_value="$(
         printf '%s' "$old_value" |
             OLD_PATH="$old_path" NEW_PATH="$new_path" \
                 perl -pe 's/(^|:)\Q$ENV{OLD_PATH}\E(?=[:\/]|$)/$1$ENV{NEW_PATH}/g;'
+        printf '%s' "$old_value" |
+            OLD_PATH="$old_path" NEW_PATH="$new_path" \
+                perl -pe 's/(^|:)\Q$ENV{OLD_PATH}\E(?=[:\/]|$)/$1$ENV{NEW_PATH}/g;'
     )"
+    #                       path-delim  --------      dir-delim       ++++++++
     if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
         echo "issuing: export $env_var='$new_value'" 1>&2
     fi
@@ -1227,6 +1232,8 @@ function update-env-path {
 # all-tomohara-settings-here(): reset TOM_BIN to . and update env path vars, etc.
 # note: TOM_BIN must already be set, as it gives the old path to be replaced
 function all-tomohara-settings-here {
+    ## TEMP (get revised aliases):
+    all-tomohara-settings
     local old_tom_bin="${TOM_BIN%/}"
     local new_tom_bin="$PWD"
     local env_var
@@ -1245,6 +1252,8 @@ function all-tomohara-settings-here {
             echo "Path revision:"
             show-path | cat -n | egrep "($old_tom_bin)|($new_tom_bin)"
         fi
+        ## DEBUG:
+        show-path | grep tomohara/bin
     fi
 
     # Update other settings
