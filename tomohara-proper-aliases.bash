@@ -1232,8 +1232,6 @@ function update-env-path {
 # all-tomohara-settings-here(): reset TOM_BIN to . and update env path vars, etc.
 # note: TOM_BIN must already be set, as it gives the old path to be replaced
 function all-tomohara-settings-here {
-    ## TEMP (get revised aliases):
-    all-tomohara-aliases-here
     local old_tom_bin="${TOM_BIN%/}"
     local new_tom_bin="$PWD"
     local env_var
@@ -1241,6 +1239,7 @@ function all-tomohara-settings-here {
         echo "Error: ${FUNCNAME[0]} requires TOM_BIN to be set" 1>&2
         return 1
     fi
+    ## TEMP (get revised aliases): all-tomohara-aliases-here
 
     # Replace existing PATH-related settings
     if [ "$old_tom_bin" != "$new_tom_bin" ]; then
@@ -1253,7 +1252,13 @@ function all-tomohara-settings-here {
             show-path | cat -n | egrep "($old_tom_bin)|($new_tom_bin)"
         fi
         ## DEBUG:
-        show-path | grep tomohara/bin
+        local old_usage
+        old_usage="$(show-path | grep "$old_tom_bin")"
+        if [ "$old_usage" != "" ]; then
+            echo "Warning: old dir '$old_tom_bin' still used:"
+            echo $'\t'"$old_usage"
+        fi
+        
     fi
 
     # Update other settings
