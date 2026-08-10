@@ -945,8 +945,12 @@ alias delete='command rm -i $other_file_args'
 ##
 # shellcheck disable=SC2016
 {
-    alias disable-forced-deletions='force_echo="disable-forced-deletions-aux"'
-    alias enable-forced-deletions='force_echo=""'
+    ## BAD:
+    ## alias disable-forced-deletions='force_echo="disable-forced-deletions-aux"'
+    ## alias enable-forced-deletions='force_echo=""'
+    # note: the braces added for shellcheck cause aliases to be undefined, so functions used.
+    alias-fn disable-forced-deletions 'force_echo="disable-forced-deletions-aux"'
+    alias-fn enable-forced-deletions 'force_echo=""'
     disable-forced-deletions
     #
     # delete-force(file, ...): rm -f FILE w/ sanity checks
