@@ -1264,7 +1264,7 @@ function all-tomohara-settings-here {
         fi
         ## DEBUG:
         local old_usage
-        old_usage="$(show-path | grep "$old_tom_bin")"
+        old_usage="$(show-path | grep "$old_tom_bin[:/]")"
         if [ "$old_usage" != "" ]; then
             echo "Warning: old dir '$old_tom_bin' still used:"
             echo $'\t'"$old_usage"
