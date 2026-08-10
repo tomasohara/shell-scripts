@@ -80,7 +80,8 @@ source_dir="$(realpath "$(dirname "${BASH_SOURCE[0]:-$0}")")"
 # note: TOM_BIN is not updated via realpath to allow for PATH substitutions:
 # see all-tomohara-settings-here in tomohara-proper-aliases.bash.
 if [ "$TOM_BIN" = "" ]; then export TOM_BIN="$(realpath "$source_dir")"; fi
-if [ "$TOM_BIN" != "$source_dir" ]; then
+## OLD: if [ "$TOM_BIN" != "$source_dir" ]; then
+if [ "$(realpath "$TOM_BIN")" != "$source_dir" ]; then
     echo "FYI: TOM_BIN different from all-tomohara-aliases-etc.bash source dir:"
     echo "    $TOM_BIN"
     echo "    $source_dir"
