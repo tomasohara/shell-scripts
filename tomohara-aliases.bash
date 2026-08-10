@@ -3475,6 +3475,7 @@ function run-python-lint-batched () {
          local d
          d=$(dirname "$f")
          if [[ $f =~ / ]]; then pre="$(basename "$d")-"; fi
+         # note: fixes DEBUG_LEVEL at verbose (5); TODO3: why? (e.g., 5 vs 4)
          DEBUG_LEVEL=5 python-lint-filtered "$f" >| "$out_dir/$pre$b".log 2>&1
          head "$out_dir/$pre$b".log
      done) >| "$out_dir/summary.log"
