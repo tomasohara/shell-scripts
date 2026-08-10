@@ -234,7 +234,8 @@ function run-python-script {
     # TODO3: add OUT_BASE to override default
     local run_label="${PYTHON_RUN_LABEL:-"run"}"
     run_label=$(echo "$run_label" | perl -pe 'chomp; s/\.$//;')
-    local out_base="$out_dir/_$script_base.$(TODAY).$run_label.$_PSL_"
+    local out_base
+    out_base="$out_dir/_$script_base.$(TODAY).$run_label.$_PSL_"
     if [ "$PROFILE_SCRIPT" == "1" ]; then
        out_base="$out_base.profile"
        module_spec="-m cProfile -o $out_base.data"
@@ -658,7 +659,8 @@ function libreoffice-text-from-html-clipboard() {
         $doc_exists && { printf "Error: new filename should be specified:\n    "; ls -lt -- "$doc_file"; }
         return 1
     fi
-    local temp_html="$TEMP/$(basename "$base.html")"
+    local temp_html
+    temp_html="$TEMP/$(basename "$base.html")"
 
     # Copy from clipboard and make sure html header included
     rename-with-file-date "$temp_html"
@@ -945,7 +947,8 @@ function youtube-transcript-alt {
 function yt-transcript {
     local prefix="$1"
     local url="$2"
-    local filename="$prefix-youtube-$(todays-date-mmmYY).list"
+    local filename
+    filename="$prefix-youtube-$(todays-date-mmmYY).list"
     youtube-transcript "$url" "$filename"
 }
 
@@ -1249,7 +1252,8 @@ function all-tomohara-settings-here {
         for env_var in PATH PYTHONPATH PERLLIB; do
             update-env-path "$env_var" "$old_tom_bin" "$new_tom_bin"
             ## TEMP (via Gemini): try again via realpath:
-            local old_real="$(realpath "$old_tom_bin" 2>/dev/null)"
+            local old_real
+            old_real="$(realpath "$old_tom_bin" 2>/dev/null)"
             if [ -n "$old_real" ] && [ "$old_real" != "$old_tom_bin" ]; then
                 update-env-path "$env_var" "$old_real" "$new_tom_bin"
             fi
