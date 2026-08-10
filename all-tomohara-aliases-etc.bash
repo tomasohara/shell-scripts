@@ -74,8 +74,12 @@ shopt -s expand_aliases
 $show_tracing && set -o xtrace
 ##
 source_dir="$(realpath "$(dirname "${BASH_SOURCE[0]:-$0}")")"
-export TOM_BIN
-TOM_BIN="$(realpath "${TOM_BIN:-"$source_dir"}")"
+## BAD:
+## export TOM_BIN
+## TOM_BIN="$(realpath "${TOM_BIN:-"$source_dir"}")"
+# note: TOM_BIN is not updated via realpath to allow for PATH substitutions:
+# see all-tomohara-settings-here in tomohara-proper-aliases.bash.
+if [ "$TOM_BIN" = "" ]; then export TOM_BIN="$(realpath "$source_dir")"; fi
 if [ "$TOM_BIN" != "$source_dir" ]; then
     echo "FYI: TOM_BIN different from all-tomohara-aliases-etc.bash source dir:"
     echo "    $TOM_BIN"
