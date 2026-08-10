@@ -530,6 +530,7 @@ function compare-notebook-scripts {
 }
  
 # run-jupyter-notebook-pristine(port): invoke jupter notenook w/o startup config
+# note: uses fixed DEBUG_LEVEL for warnings (2)
 alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$IPYTHON_TMP" run-jupyter-notebook'
 
 #...............................................................................
@@ -1181,7 +1182,7 @@ function all-tomohara-aliases { ALIASES_PROCESSED=0 source "$TOM_BIN/all-tomohar
 ## function all-tomohara-aliases { ALIASES_PROCESSED=0 source "${TOM_BIN:-$(dirname "${BASH_SOURCE[0]:-$0}")}/all-tomohara-aliases-etc.bash"; }
 # all-tomohara-aliases-here(): reload tomohara aliases from current directory showing invocations
 function all-tomohara-aliases-here {
-    ## BAD: DEBUG_LEVEL=4 TRACE_SOURCE=1 TOM_BIN="$PWD" all-tomohara-aliases
+    # note: fixes DEBUG_LEVEL at detailed (4)
     DEBUG_LEVEL=4 TOM_BIN="$PWD" all-tomohara-aliases
 }
 # all-tomohara-settings(): enable tomohara settings as well as aliases
@@ -1197,6 +1198,7 @@ function all-tomohara-settings {
 # EX: XYZPATH="/home/me/a:/tmp/a:/home/me/a/1"; update-env-path XYZPATH /home/me/a /home/me/z; echo "$XYZPATH"
 #     => "/home/me/z:/tmp/a:/home/me/z/1"
 function update-env-path {
+    (( DEBUG_LEVEL >= 4 )) && echo "${FUNCNAME[0]}" "$@"
     if missing-options "$@" || [ "$3" == "" ]; then
         function-usage --args "env-var old-path new-path" --synopsis "change OLD-PATH to NEW-PATH in PATH-like ENV-VAR" --example "PYTHONPATH /home/me/a /home/me/z"
         return
@@ -1220,12 +1222,12 @@ function update-env-path {
                 perl -pe 's/(^|:)\Q$ENV{OLD_PATH}\E(?=[:\/]|$)/$1$ENV{NEW_PATH}/g;'
     )"
     #                       path-delim  --------      dir-delim       ++++++++
-    if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+    if [ "${DEBUG_LEVEL:-0}" -ge 5 ]; then
         echo "issuing: export $env_var='$new_value'" 1>&2
     fi
     printf -v "$env_var" '%s' "$new_value"
     export "${env_var?}"
-    if [[ "$(trace-var $env_var 2>&1)" =~ "$old_path" ]]; then
+    if [[ "$(trace-var "$env_var" 2>&1)" =~ $old_path ]]; then
         echo "Warning: problem applying in update-env-path for $env_var"
     fi
 }
@@ -1246,6 +1248,11 @@ function all-tomohara-settings-here {
         echo "Updating PATH env vars"
         for env_var in PATH PYTHONPATH PERLLIB; do
             update-env-path "$env_var" "$old_tom_bin" "$new_tom_bin"
+            ## TEMP (via Gemini): try again via realpath:
+            local old_real="$(realpath "$old_tom_bin" 2>/dev/null)"
+            if [ -n "$old_real" ] && [ "$old_real" != "$old_tom_bin" ]; then
+                update-env-path "$env_var" "$old_real" "$new_tom_bin"
+            fi
         done
         if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
             echo "Path revision:"
@@ -1263,6 +1270,7 @@ function all-tomohara-settings-here {
 
     # Update other settings
     export TOM_BIN="$new_tom_bin"
+    # note: fixes DEBUG_LEVEL at detailed (4)
     DEBUG_LEVEL=4 all-tomohara-settings
 }
 #
