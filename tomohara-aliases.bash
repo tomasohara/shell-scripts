@@ -3755,16 +3755,15 @@ function shell-check {                  ## TOM-IDIOSYNCRATIC
     # - SC2009: Consider using pgrep instead of grepping ps output.
     # - SC2012: Use find instead of ls to better handle non-alphanumeric filenames
     # - SC2119 [Use ... "$@" if function's $1 should mean script'1 $1]
-    # - SC2120: foo references arguments, but none are ever passed.
+    # - SC2120: [function] references arguments, but none are ever passed.
     # - SC2129: Consider using { cmd1; cmd2; } >> file instead of individual redirects
-    # - SC2155 (warning): Declare and assign separately to avoid masking return values
     # - SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
     # - SC2181 (style): Check exit code directly with e.g. 'if mycmd;' ...
     # - SC2196 (info): egrep is non-standard
     # - SC2219 (style): Instead of 'let expr', prefer (( expr )) .
     # - SC2230: which is non-standard
     local strict="${STRICT_MODE:-0}"
-    local exclude="${SHELL_CHECK_EXCLUDE:-SC1090,SC1091,SC2004,SC2009,SC2012,SC2119,SC2120,SC2129,SC2155,SC2164,SC2181,SC2196,SC2219,SC2230}"
+    local exclude="${SHELL_CHECK_EXCLUDE:-SC1090,SC1091,SC2004,SC2009,SC2012,SC2119,SC2120,SC2129,SC2164,SC2181,SC2196,SC2219,SC2230}"
     local exclude_args="--exclude=$exclude"
     if [ "$strict" != "0" ]; then
         exclude_args=""
