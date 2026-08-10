@@ -3,6 +3,7 @@
 # Adhoc script to update all of the user's main repositories. They can be
 # specified on the command lines or in the OTHER_REPOS env var.
 #
+## UPDATE 10 Aug 26: drops hard-coded defaults and adds show-usage function
 ## UPDATE 16 Jul 26: cleanup
 ## 
 ## # adhoc script to update all repo's
@@ -17,10 +18,7 @@
 ## set -o xtrace
 ## DEBUG: set -o verbose
 
-# Show usage if requested
-show_summary="${SHOW_SUMMARY:-1}"
-repos=()
-if [ "$1" == "--help" ]; then
+function show-usage {
     script=$(basename "$0")
     # TODO2: make repos an argument and drop ~/bin, etc.
     echo "Usage: [env] $script [--help] [repo ...]"
@@ -36,7 +34,17 @@ if [ "$1" == "--help" ]; then
     echo "- OTHER_REPOS is space-delimited: specify repos via positional argument(s) otherwise."
     echo "- SHOW_SUMMARY shows current repo status"
     echo "- VERBOSE_MODE adds repo url, branch, and related info"
+}
+
+# Show usage if requested
+show_summary="${SHOW_SUMMARY:-1}"
+repos=()
+if [ "$1" == "--help" ]; then
+    show-usage
     exit
+fi
+if [[ ("$1" == "--") || ("$1" == "-") ]]; then
+    shift
 fi
 if [ "$1" != "" ]; then
     repos+=("$@")
@@ -95,8 +103,11 @@ if [ "$OTHER_REPOS" != "" ]; then
     fi
 fi
 if [ ${#repos[@]} -eq 0 ]; then
-    # TODO: drop idiosyncratic repos (e.g., non-public)
-    repos=(~/bin ~/mezcla ~/text-categorization ~/visual-diff ~/programs/bash/tom-shell-scripts ~/programs/python/mezcla-clone ~/programs/python/search-diff-engine)
+    ## OLD:
+    ## # TODO: drop idiosyncratic repos (e.g., non-public)
+    ## repos=(~/bin ~/mezcla ~/text-categorization ~/visual-diff ~/programs/bash/tom-shell-scripts ~/programs/python/mezcla-clone ~/programs/python/search-diff-engine)
+    show-usage
+    exit
 fi
 ## DEBUG: set | grep ^repos=
 
