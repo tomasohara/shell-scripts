@@ -936,7 +936,6 @@ alias delete='command rm -i $other_file_args'
         done
 
         # Output command to be run along with workarounds for safety guards
-        ## OLD: echo "Warning: run enable-forced-deletions or issue:"
         echo "Warning: run enable-forced-deletions, force_echo='' ${FUNCNAME[1]} ..., or following:"
         echo -n $'\t'
         ## TODO3: for f in "$@"; do echo -n "\"$f"\"; done
@@ -945,7 +944,7 @@ alias delete='command rm -i $other_file_args'
 }
 ##
 # shellcheck disable=SC2016
-    {
+{
     alias disable-forced-deletions='force_echo="disable-forced-deletions-aux"'
     alias enable-forced-deletions='force_echo=""'
     disable-forced-deletions
@@ -959,7 +958,6 @@ alias delete='command rm -i $other_file_args'
     alias remove-dir='command rm -rvi'
     alias delete-dir='remove-dir'
     ## TODO2: rework xyz-force as prompted command (e.g., `read -r -e -i "$prompt" command; eval "$command";`)
-    ## OLD: alias remove-dir-force='$force_echo command rm -rfv'
     simple-alias-fn remove-dir-force '$force_echo command rm -rfv'
     alias delete-dir-force='remove-dir-force'
 }
@@ -1897,28 +1895,6 @@ function tar-this-dir () {
     tar-dir "$tar_basename";
     popd-q;
 }
-## OLD:
-## # test of resolving problem with tar-this-dir if dir a symbolic link from apparent parent
-## # TODO: fixme
-## function new-tar-this-dir () {
-##     ## TODO: fix un-initialized base variable
-##     # example dir change: /home/tomohara/tpo-magro-p3 [=> /media/tomohara/ff3410d4-5ffc-4c01-a2ca-75244b882aa2]
-##     local dir
-##     dir=$(basename "$PWD"); 
-##     # Go to parent dir                        /home/tomohara
-##     pushd-q ..
-##     # Get real basename                       ff3410d4-5ffc-4c01-a2ca-75244b882aa2
-##     local real_base="$base"
-##     if [ -L "$base" ]; then
-##         real_base=$($LS -ld "$base" | perl -pe 's@^.* -> (.*/)?([^/]+)@$2@;');
-##         # Go to real parent                   /media/tomohara
-##         cd "$(realpath "$dir"/..)"
-##     fi
-##     # Create tar of real subdir
-##     # TODO: pass along actual basename so that tar file can be renamed
-##     tar-dir "$real_base";
-##     popd-q;
-## }
 #
 alias new-tar-this-dir=tar-this-dir
 
@@ -3007,7 +2983,6 @@ function sudo-admin () {
     sudo chmod ugo-w "$prefix"*.log* 2> /dev/null
     local script_log
     # TODO: (get-free-filename "$base" "." "log")???
-    ## OLD: script_log=$(realpath $(get-free-filename "$base"))
     script_log=$(realpath "$(get-free-filename "$base")")
 
     # Setup transcript options
