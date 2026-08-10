@@ -736,9 +736,9 @@ alias perl-='perl -Ssw'
 ## function alias-perl {
 ##    DURING_ALIAS=1 env perl --Sw "eval $*";
 ## }
-# shellcheck disable=SC2016
 # note: DURING_ALIAS normally unset; set as 0 to debug aliases using alias-perl
 # example: DURING_ALIAS=0 check-errors $log
+# shellcheck disable=SC2016
 simple-alias-fn alias-perl 'DURING_ALIAS=${DURING_ALIAS:-1} DEBUG_LEVEL=$ALIAS_DEBUG_LEVEL perl -Ssw'
 #
 # alias-python: python invocation for using in aliases
@@ -943,24 +943,26 @@ alias delete='command rm -i $other_file_args'
         echo "$@"
     }
 }
-## 
-alias disable-forced-deletions='force_echo="disable-forced-deletions-aux"'
-alias enable-forced-deletions='force_echo=""'
-disable-forced-deletions
-#
-# delete-force(file, ...): rm -f FILE w/ sanity checks
-# delete-dir-force(dir, ...): rm -rf FILE w/ sanity checks
-## OLD: alias delete-force='$force_echo command rm -f $other_file_args'
-simple-alias-fn delete-force '$force_echo command rm -f $other_file_args'
-#
-alias remove-force='delete-force'
-# TODO: make sure that rellowing only applied to directories
-alias remove-dir='command rm -rvi'
-alias delete-dir='remove-dir'
-## TODO2: rework xyz-force as prompted command (e.g., `read -r -e -i "$prompt" command; eval "$command";`)
-## OLD: alias remove-dir-force='$force_echo command rm -rfv'
-simple-alias-fn remove-dir-force '$force_echo command rm -rfv'
-alias delete-dir-force='remove-dir-force'
+##
+# shellcheck disable=SC2016
+    {
+    alias disable-forced-deletions='force_echo="disable-forced-deletions-aux"'
+    alias enable-forced-deletions='force_echo=""'
+    disable-forced-deletions
+    #
+    # delete-force(file, ...): rm -f FILE w/ sanity checks
+    # delete-dir-force(dir, ...): rm -rf FILE w/ sanity checks
+    simple-alias-fn delete-force '$force_echo command rm -f $other_file_args'
+    #
+    alias remove-force='delete-force'
+    # TODO: make sure that rellowing only applied to directories
+    alias remove-dir='command rm -rvi'
+    alias delete-dir='remove-dir'
+    ## TODO2: rework xyz-force as prompted command (e.g., `read -r -e -i "$prompt" command; eval "$command";`)
+    ## OLD: alias remove-dir-force='$force_echo command rm -rfv'
+    simple-alias-fn remove-dir-force '$force_echo command rm -rfv'
+    alias delete-dir-force='remove-dir-force'
+}
 
 # Commands for copying files and ensuring read-only flag set
 alias copy-readonly='copy-readonly.sh'
@@ -1183,7 +1185,9 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   function grepl-bashrc-etc { grepl "$@" ~/.*bash* "$TOM_BIN"/*tomohara*bash | grep -v '\.bash_history' | grepl "$@"; }
   #
   # grepl-git: run grepl over Git repo
+  # shellcheck disable=SC2046
   function grepl-git { grepl "$@" $(git-ls-tree-relative); }
+  ## TODO3 (handle embedded spaces): { local OLDIFS="$IFS"; IFS=$'\n; local arr=( $(git-ls-tree-relative) ); grepl "$@" "$arr[@]"; IFS="$OLDIFS"; }
 }
 # gr-c: grep through c/c++ source and headers files
 # note: --no-messages suppresses warnings about missing files
@@ -3003,7 +3007,8 @@ function sudo-admin () {
     sudo chmod ugo-w "$prefix"*.log* 2> /dev/null
     local script_log
     # TODO: (get-free-filename "$base" "." "log")???
-    script_log=$(realpath $(get-free-filename "$base"))
+    ## OLD: script_log=$(realpath $(get-free-filename "$base"))
+    script_log=$(realpath "$(get-free-filename "$base")")
 
     # Setup transcript options
     # note: maldito mac: need to special case
@@ -3847,10 +3852,13 @@ function max {
 #------------------------------------------------------------------------
 # Aliases for [re-]invoking aliases
 ## TOM-IDIOSYNCRATIC
-alias-fn tomohara-aliases 'source "$TOM_BIN/tomohara-aliases.bash"'
-alias-fn tomohara-settings 'source "$TOM_BIN/tomohara-settings.bash"'
-alias-fn more-tomohara-aliases 'source "$TOM_BIN/more-tomohara-aliases.bash"'
-alias-fn tomohara-proper-aliases 'source "$TOM_BIN/tomohara-proper-aliases.bash"'
+# shellcheck disable=SC2016
+{
+    alias-fn tomohara-aliases 'source "$TOM_BIN/tomohara-aliases.bash"'
+    alias-fn tomohara-settings 'source "$TOM_BIN/tomohara-settings.bash"'
+    alias-fn more-tomohara-aliases 'source "$TOM_BIN/more-tomohara-aliases.bash"'
+    alias-fn tomohara-proper-aliases 'source "$TOM_BIN/tomohara-proper-aliases.bash"'
+}
 
 #------------------------------------------------------------------------
 # End processing
