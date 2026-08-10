@@ -76,7 +76,12 @@ fi
 chgrp -R --changes "$group" "$dir" >> "$log" 2>&1
 
 # Set base permissions (read/write for group)
-chmod -R --changes g+rwx "$dir" >> "$log" 2>&1
+# Note: X (conditional execute) only assigns execute permission if another user class has it.
+# For example it is added to group permissions if user has it (e.g., rwx-rw-r-- => rwx-rwx-r--
+# but rw--rw-r-- => rw--rw--r--).
+# See https://linuxcapable.com/chmod-command-in-linux-with-examples.
+## BAD: chmod -R --changes g+rwx "$dir" >> "$log" 2>&1
+chmod -R --changes g+rwX "$dir" >> "$log" 2>&1
 
 # Set execute/search for directories and apply sticky bit
 ## BAD: find "$dir" -type d -exec chmod --changes g+s,g+x {} \; >> "$log" 2>&1
