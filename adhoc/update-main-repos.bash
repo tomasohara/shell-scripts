@@ -120,13 +120,17 @@ $verbose_mode && echo "$0"
 for dir in "${repos[@]}"; do
     # Make repo dir active
     ## OLD: command cd "$dir" || continue
-    ## OLD: if [ ! -d "$dir" ]; then
-    result=$(command cd "$dir" 2>&1)
-    if [ -n "$result" ]; then
+    ## OLD:if [ ! -d "$dir" ]; then
+    ## BAD:
+    ## result=$(command cd "$dir" 2>&1)
+    ## if [ -n "$result" ]; then
+    ## NOTE: $(cd ...) creates subprocess so effect is temporary
+    if ! command cd "$dir" >| "$temp_log" 2>&1; then
         ## echo "Warning: missing directory '$dir'"
         ## OLD: echo "Warning: unable to cd into '$dir': '$result'"
         echo "Warning: unable to cd into repo dir ($dir)":
-        echo $'\tDetails:' "$result"
+        ## OLD: echo $'\tDetails:' "$result"
+        echo $'\t'"$(cat "$temp_log")"
         continue
     fi
 
@@ -146,7 +150,10 @@ for dir in "${repos[@]}"; do
     check-errors-excerpt "$temp_log"
     if [[ "$show_summary" == "1" ]]; then
         if $verbose_mode; then
-            echo -e "\t$(git-branch-alias)"
+            ## OLD: echo -e "\t$(git-branch-alias)"
+            branch="$(git-branch-alias)"
+            last_commit_info="$(git log -1 --all | echoize | COLUMNS=132 truncate-width)"
+            echo -e "\t$branch; $last_commit_info"
         fi
         (grep "files changed" "$temp_log" || echo "No changes") | perl -pe 's/^/\t/;'
     fi
