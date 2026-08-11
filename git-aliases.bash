@@ -249,7 +249,6 @@ function get-temp-log-name {
     local label=${1:-temp}
     local now_mmddyyhhmm
     # note: done each time in case user cd's to a different directory
-    ## OLD: local LOG_DIR="${GIT_LOG_DIR:-./log-files}"
     ## NOTE: global so that default stored in environment
     declare -g GIT_LOG_DIR
     GIT_LOG_DIR="${GIT_LOG_DIR:-./log-files}"
@@ -279,6 +278,7 @@ function git-alias-review-log {
         echo-plus "$errors"
         local status=1
     fi
+    ## TODO3: use ellipses when info truncated
     tail "$log" | cat | truncate-width;
     return $status
 }
@@ -346,6 +346,7 @@ function git-update-plus {
     # Do the stash[-push]/pull/stash-pop
     echo-plus "issuing: git stash"
     git stash >> "$log" 2>&1
+    ## TODO4: filter the old repos from the update listing (see git-alias-review-log)
     echo-plus "issuing: git pull --all --verbose"
     git pull --all --verbose >> "$log" 2>&1
     local status=$?
@@ -799,12 +800,11 @@ function git-diff-list {
     local root
     root="$(git-root-alias)"
     local pwd
-    ## OLD:
+    ## PREVIOUS:
     pwd="$(realpath ".")"
     ## TODO: pwd="$(realpath --relative-to="$root" ".")"
     # note: Uses case insenstive matching for sake of Windows
     local pwd_esc root_esc;
-    ## OLD: local pwd_esc git_root_esc;
     pwd_esc="$(echo -n "$pwd" | escape-at-sign)"
     ## TODO2:
     root_esc="$(git-root-alias | escape-at-sign)"
@@ -841,9 +841,6 @@ function git-checkin-all-template {
 # invoke-next-single-checkin: outputs and runs the next single-checking template
 function invoke-next-single-checkin {
     # TODO: use unique tempfile (e.g., mktemp)
-    ## OLD:
-    ## git-checkin-single-template >| "$TMP/_template.sh"
-    ## source "$TMP/_template.sh"
     git-checkin-single-template >| "$TMP/_git-template.$$e.sh"
     source "$TMP/_template.$$.sh"
 }
@@ -1100,8 +1097,7 @@ function git-alias-usage () {
     echo '    git-next-checkin "'"${next_mod_file}"'"'
     echo ''
     echo 'Usual check-in process (n.b., use git-tar-repo-proper if large):'
-    # TODO2: rework git-update-force via dry-run git-update with conflict check
-    ## OLD: echo '    git-cd-root-alias; git-tar-repo-proper; git-update-force; git-status; git-next-checkin'
+    # TODO1: rework git-update-force via dry-run git-update with conflict check
     ## NOTE: reverted to including .git for sake of conflict post-mortem
     echo '    git-cd-root-alias; git-tar-repo; git-update-force; git-status; git-next-checkin'
     echo '    # -or-: git-cd-root-alias; git-update-verified; git-conflicts-alias; git-next-checkin'
