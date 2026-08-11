@@ -95,6 +95,7 @@
 #   set_xterm_title.bash startup-tracing.bash
 # - Supplemental scripts:
 #   anaconda-aliases.bash git-aliases.bash kill_em.bash ps_mine.bash
+## UPDATE 11 Aug 26: no[-]clobber cleanup
 ## UPDATE: 12 July 2026: section tracing generalization and commenting out very old aliases
 ## TODO2: continue with section/tracing cleanup and old alias isolation
 ## UPDATE 12 Jul 26: trace now uses DEBUG_LEVEL 5 (versus 5 for startup-trace)
@@ -608,6 +609,7 @@ function is-true {
 export FIGNORE=".o:.fasl:.fas:.lib"
 ## TEST: export FIGNORE=".o:.fasl:.fas:.lib:.log"
 ## TODO: figure out how to exclude .log for executable-tab-expansion (e.g., first position)
+## NOTE: bash flag is 'noclobber' but cp/mv option is '--no-clobber'
 set -o noclobber
 #
 # case-insensitive file glob
@@ -902,10 +904,17 @@ alias copy='$CP'
 alias del="delete"
 alias copy-force='command cp -fp $other_file_args'
 alias cp='command cp -i $other_file_args'
-alias copy-noclobber-old='copy --no-clobber'
-alias copy-noclobber='copy --update=none'
-alias move-noclobber-old='move --no-clobber'
-alias move-noclobber='move --update=none'
+# note: unfortunately --no-clobber replaced with awkward --update=none';
+# in addition, --update[=UPDATE] not added until 2023; so, copy-no-clobber-old maintained.
+## OLD:
+## alias copy-noclobber-old='copy --no-clobber'
+## alias copy-noclobber='copy --update=none'
+## alias move-noclobber-old='move --no-clobber'
+## alias move-noclobber='move --update=none'
+alias copy-no-clobber-old='copy --no-clobber'
+alias copy-no-clobber='copy --update=none'
+alias move-no-clobber-old='move --no-clobber'
+alias move-no-clobber='move --update=none'
 # maldito shellcheck bug: SC2032: Use own script or sh -c '..' to run this from find
 # shellcheck disable=SC2032
 alias rm='command rm -i $other_file_args'
@@ -2457,8 +2466,10 @@ function move-versioned-files-alt {
         alt_version_regex="[^0-9]${alt_version_regex}[^0-9]"
     fi
     ## TODO2: work out a glob accounting for dot files
-    move --no-clobber ./*$version_regex* ./*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
-    move --no-clobber ./.*$version_regex* ./.*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
+    ## OLD: move --no-clobber ./*$version_regex* ./*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
+    ## OLD: move --no-clobber ./.*$version_regex* ./.*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
+    move-no-clobber ./*$version_regex* ./*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
+    move-no-clobber ./.*$version_regex* ./.*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
     local false_positives
     # note: uses -d to avoid descending into matched directories (which would list unrelated files);
     # uses [^a-zA-Z]\.txt$ to avoid flagging compound extensions like .log.txt or .list.txt
