@@ -134,6 +134,13 @@ for dir in "${repos[@]}"; do
         continue
     fi
 
+    # Ascertain that the local repo is fully accessible
+    ## TODO3: trap error message and show in verbose mode
+    if ! git-is-repo-accessible; then
+        echo -e "\tWarning: repository not fully accessible (e.g., missing or unreadable .git)"
+        continue
+    fi
+
     # Show repo and url (e.g., "repo: /home/tomohara/bin [https://github.com/tomasohara/shell-scripts]"
     if $verbose_mode; then
         echo -n "$dir" | tee --append "$log"

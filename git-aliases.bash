@@ -283,6 +283,11 @@ function git-alias-review-log {
     return $status
 }
 
+# git-is-repo-accessible(): returns true if current directory is a fully accessible git repo
+function git-is-repo-accessible {
+    git rev-parse --is-inside-work-tree >/dev/null 2>&1
+}
+
 # git-update-plus(): updates local from global repo. This uses git-stash to hide local changes
 # does a git-pull, and then restores local changes.
 # Note:

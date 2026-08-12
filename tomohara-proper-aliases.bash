@@ -43,6 +43,7 @@ alias git-script-update='script-update'
 ## OLD: function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
 ## NOTE: uses first url (TODO1: use para-match to filter submodule)
 function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config" | head -1; }
+alias git-is-repo-accessible-alias='git-is-repo-accessible'
 alias git-push='git-push-alias'
 alias git-check-ignore-plus='git check-ignore --non-matching --verbose'
 ## TODO: alias git-X-='git-X-plus'
