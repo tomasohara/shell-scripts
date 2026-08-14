@@ -6,6 +6,8 @@
 # note:
 # - Based on Grok3 revision to old bash snippet.
 #
+## UPDATE 14 Aug 26: Makes group stick bit optional.
+
 
 # Set bash regular and/or verbose tracing
 if [ "${TRACE:-0}" = "1" ]; then
@@ -21,7 +23,8 @@ if [ "$1" = "" ]; then
     ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--trace] [--help] [--] dir [group=operator]"
+    echo "Usage: [envopt] $0 [--trace] [--help] [--] dir [group=operator]"
+    echo "    envopt: [CHOWN=B] [FORCE=B] [STICKY=B]"
     echo ""
     echo "Examples:"
     echo ""
@@ -33,6 +36,7 @@ if [ "$1" = "" ]; then
     echo "- The -- option is to use default options and to avoid usage statement."
     echo "- Use CHOWN=1 to change ownership (e.g., sudo user)."
     echo "- Use FORCE=1 to bypass restrictions (e.g., chown of /home/... dir)."
+    echo "- Use STICKY=1 to enable groups sticky bit (n.b., in addition to setgid)."
     ## TODO: add more notes
     ## echo ""
     echo ""
@@ -85,6 +89,11 @@ chmod -R --changes g+rwX "$dir" >> "$log" 2>&1
 
 # Set execute/search for directories and apply sticky bit
 ## BAD: find "$dir" -type d -exec chmod --changes g+s,g+x {} \; >> "$log" 2>&1
+## OLD: find "$dir" -type d -exec chmod --changes g+s,g+x,+t {} \; >> "$log" 2>&1
+mode="g+s,g+x"
+if [ "${STICKY:-0}" == "1" ]; then
+    mode="$mode,+t";
+fi
 find "$dir" -type d -exec chmod --changes g+s,g+x,+t {} \; >> "$log" 2>&1
 
 # Set default permissions for new files (using setfacl)
