@@ -94,7 +94,7 @@ mode="g+s,g+x"
 if [ "${STICKY:-0}" == "1" ]; then
     mode="$mode,+t";
 fi
-find "$dir" -type d -exec chmod --changes g+s,g+x,+t {} \; >> "$log" 2>&1
+find "$dir" -type d -exec chmod --changes "$mode" {} \; >> "$log" 2>&1
 
 # Set default permissions for new files (using setfacl)
 setfacl -R -m g::rwX "$dir" >> "$log" 2>&1
