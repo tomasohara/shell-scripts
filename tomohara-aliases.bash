@@ -949,6 +949,7 @@ alias delete='command rm -i $other_file_args'
         echo -n $'\t'
         ## TODO3: for f in "$@"; do echo -n "\"$f"\"; done
         echo "$@"
+        echo -e "\t# or: cmd-output $*"
     }
 }
 ##
