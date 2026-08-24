@@ -137,7 +137,8 @@ for dir in "${repos[@]}"; do
     # Ascertain that the local repo is fully accessible
     ## TODO3: trap error message and show in verbose mode
     if ! git-is-repo-accessible; then
-        echo -e "\tWarning: repository not fully accessible (e.g., missing or unreadable .git)"
+        ## OLD: echo -e "\tWarning: repository not fully accessible (e.g., missing or unreadable .git)"
+        echo -e "\tWarning: repository ($dir) not fully accessible"
         continue
     fi
 
