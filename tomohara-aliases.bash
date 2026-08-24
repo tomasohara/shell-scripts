@@ -95,6 +95,7 @@
 #   set_xterm_title.bash startup-tracing.bash
 # - Supplemental scripts:
 #   anaconda-aliases.bash git-aliases.bash kill_em.bash ps_mine.bash
+## UPDATE 24 Aug 26: findspec filter output
 ## UPDATE 11 Aug 26: no[-]clobber cleanup
 ## UPDATE: 12 July 2026: section tracing generalization and commenting out very old aliases
 ## TODO2: continue with section/tracing cleanup and old alias isolation
@@ -146,7 +147,7 @@
 #
 
 # For debugging: Uncomment the following line(s)
-[[ $DEBUG_LEVEL -ge 6 ]] && echo in "${BASH_SOURCE[0]}" 1>&2
+(( DEBUG_LEVEL >= 6 )) && echo in "${BASH_SOURCE[0]}" 1>&2
 ## DEBUG: set -o xtrace
 
 #...............................................................................
@@ -1233,14 +1234,22 @@ alias gr-nonascii='alias-perl perlgrep.perl -n "[\x80-\xFF]"'
 function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pattern find-option ... "; else command find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 2>&1 | $GREP -v '^find: '; fi; }
 # findspec[-all](dir, pattern, option): find files in directory tried, optionally following links (-all)
 function findspec-all () { command find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | $GREP -v '^find: '; }
-# TODO2: issue warning that fs filters backup and build dirs
-function fs () { findspec . "$@" | $EGREP -iv '(/(backup|build)/)'; } 
+## OLD: # TODO2: issue warning that fs filters backup and build dirs
+# findspec-filter: filters miscellaneous files from find-file output (e.g., backup, build, etc.);
+function findspec-filter {
+    local regex="/(backup|build|old)/"
+    (( DEBUG_LEVEL >= 3 )) && echo "FYI: Filtering '$regex'" 1>&2
+    $EGREP -iv "$regex"
+}
+## OLD: function fs () { findspec . "$@" | $EGREP -iv '(/(backup|build)/)'; } 
+function fs () { findspec . "$@" | findspec-filter; } 
 function fs-ls () { fs "$@" -exec ls "$core_dir_options" {} \; ; }
 # fs-ls-new(pattern): like fs-ls but omitting (extraneous) -print output
 function fs-ls-new () { findspec . "$@" -exec ls "$core_dir_options" {} \; ; }
 simple-alias-fn fs- 'findspec-all .'
-## Lorenzo review: should change this to fs-alt following TODO's
-function fs-ext () { find . -iname \*."$1" | $EGREP -iv '(/(backup|build)/)'; } 
+## OLD: ## Lorenzo review: should change this to fs-alt following TODO's
+## OLD: function fs-ext () { find . -iname \*."$1" | $EGREP -iv '(/(backup|build|old)/)'; } 
+function fs-ext () { find . -iname \*."$1" | findspec-filter; } 
 # TODO: extend fs-ext to allow for basename pattern (e.g., fs-ext java ImportXML)
 function fs-ls- () { fs- "$@" -exec ls "$core_dir_options" {} \; ; }
 ## Lorenzo review: should change this to fs-ls-alt following TODO's
