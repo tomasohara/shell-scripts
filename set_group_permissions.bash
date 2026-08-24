@@ -6,6 +6,7 @@
 # note:
 # - Based on Grok3 revision to old bash snippet.
 #
+## UPDATE 24 Aug 26: Adds REMOVE option (e.g., sticky bit).
 ## UPDATE 14 Aug 26: Makes group stick bit optional.
 
 
@@ -24,7 +25,7 @@ if [ "$1" = "" ]; then
     echo ""
     ## TODO: add option or remove TODO placeholder
     echo "Usage: [envopt] $0 [--trace] [--help] [--] dir [group=operator]"
-    echo "    envopt: [CHOWN=B] [FORCE=B] [STICKY=B]"
+    echo "    envopt: [CHOWN=B] [FORCE=B] [STICKY=B] [UPDATE=B]"
     echo ""
     echo "Examples:"
     echo ""
@@ -37,6 +38,7 @@ if [ "$1" = "" ]; then
     echo "- Use CHOWN=1 to change ownership (e.g., sudo user)."
     echo "- Use FORCE=1 to bypass restrictions (e.g., chown of /home/... dir)."
     echo "- Use STICKY=1 to enable groups sticky bit (n.b., in addition to setgid)."
+    echo "- Use REMOVE=1 to remove certain permissions (e.g. existing sticky bit)."
     ## TODO: add more notes
     ## echo ""
     echo ""
@@ -44,6 +46,7 @@ if [ "$1" = "" ]; then
 fi
 dir="$1"
 group="${2:-operator}"
+REMOVE="${REMOVE:-0}"
 
 #...............................................................................
 
@@ -93,6 +96,11 @@ chmod -R --changes g+rwX "$dir" >> "$log" 2>&1
 mode="g+s,g+x"
 if [ "${STICKY:-0}" == "1" ]; then
     mode="$mode,+t";
+else
+    # note: optionally removes sticky bit due to complication with shared git dirs
+    if [ "$REMOVE" == "1" ]; then
+        mode="$mode,-t";
+    fi
 fi
 find "$dir" -type d -exec chmod --changes "$mode" {} \; >> "$log" 2>&1
 
