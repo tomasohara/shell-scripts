@@ -3,12 +3,7 @@
 # Adhoc script to update all of the user's main repositories. They can be
 # specified on the command lines or in the OTHER_REPOS env var.
 #
-## UPDATE 10 Aug 26: drops hard-coded defaults and adds show-usage function
-## UPDATE 16 Jul 26: cleanup
-## 
-## # adhoc script to update all repo's
-## # UPDATE 08 Aug 26: adds repo branch to verbose output
-## # UPDATE: 28 Jun 2020: upgrade including support for OTHER_REPOS as string list or array
+## UPDATE 24 Aug 26: Make warning display consistent
 #
 
 # Uncomment following line(s) for tracing:
@@ -64,10 +59,6 @@ fi
     shopt -s expand_aliases
     src_dir="$(dirname "${BASH_SOURCE[0]}")"
     bin_dir="${src_dir}/.."
-    ## OLD:
-    ## source "$bin_dir/tomohara-aliases.bash"
-    ## source "$bin_dir/tomohara-proper-aliases.bash"
-    ## source "$bin_dir/tomohara-settings.bash"
     SOURCE_SETTINGS=1 source "$bin_dir"/all-tomohara-aliases-etc.bash
 }
 
@@ -103,9 +94,6 @@ if [ "$OTHER_REPOS" != "" ]; then
     fi
 fi
 if [ ${#repos[@]} -eq 0 ]; then
-    ## OLD:
-    ## # TODO: drop idiosyncratic repos (e.g., non-public)
-    ## repos=(~/bin ~/mezcla ~/text-categorization ~/visual-diff ~/programs/bash/tom-shell-scripts ~/programs/python/mezcla-clone ~/programs/python/search-diff-engine)
     show-usage
     exit
 fi
@@ -119,17 +107,12 @@ $verbose_mode && echo "$0"
 ## DEBUG: trace-vars verbose_mode
 for dir in "${repos[@]}"; do
     # Make repo dir active
-    ## OLD: command cd "$dir" || continue
-    ## OLD:if [ ! -d "$dir" ]; then
     ## BAD:
     ## result=$(command cd "$dir" 2>&1)
     ## if [ -n "$result" ]; then
     ## NOTE: $(cd ...) creates subprocess so effect is temporary
     if ! command cd "$dir" >| "$temp_log" 2>&1; then
-        ## echo "Warning: missing directory '$dir'"
-        ## OLD: echo "Warning: unable to cd into '$dir': '$result'"
         echo "Warning: unable to cd into repo dir ($dir)":
-        ## OLD: echo $'\tDetails:' "$result"
         echo $'\t'"$(cat "$temp_log")"
         continue
     fi
@@ -137,8 +120,7 @@ for dir in "${repos[@]}"; do
     # Ascertain that the local repo is fully accessible
     ## TODO3: trap error message and show in verbose mode
     if ! git-is-repo-accessible; then
-        ## OLD: echo -e "\tWarning: repository not fully accessible (e.g., missing or unreadable .git)"
-        echo -e "\tWarning: repository ($dir) not fully accessible"
+        echo -e "Warning: repository ($dir) not fully accessible"
         continue
     fi
 
@@ -158,7 +140,6 @@ for dir in "${repos[@]}"; do
     check-errors-excerpt "$temp_log"
     if [[ "$show_summary" == "1" ]]; then
         if $verbose_mode; then
-            ## OLD: echo -e "\t$(git-branch-alias)"
             branch="$(git-branch-alias)"
             last_commit_info="$(git log -1 --all | echoize | COLUMNS=132 truncate-width)"
             echo -e "\t$branch; $last_commit_info"
