@@ -285,7 +285,11 @@ function git-alias-review-log {
 
 # git-is-repo-accessible(): returns true if current directory is a fully accessible git repo
 function git-is-repo-accessible {
-    git rev-parse --is-inside-work-tree >/dev/null 2>&1
+    ## OLD: git rev-parse --is-inside-work-tree >/dev/null 2>&1
+    ## TODO3: add option to invoke-git-command to ignore output
+    local log
+    log=$(get-temp-log-name "git-is-repo-accessible")
+    invoke-git-command rev-parse --is-inside-work-tree >> "$log" 2>&1
 }
 
 # git-update-plus(): updates local from global repo. This uses git-stash to hide local changes
@@ -538,11 +542,13 @@ function invoke-git-command {
     log=$(get-temp-log-name "$command")
     echo-plus "issuing: git $command $*"
     git "$command" "$@" >> "$log" 2>&1
+    local status="$?"
     ## PREVIOUS: less
     ## NOTE: unfortunately, less clears the screen
     ## TODO: less --quit-if-one-screen "$log"
     cat "$log"
     # TODO: git-alias-review-log "$log"
+    return $status
 }
 # TODO: git-command => git-command-alias
 alias git-command='invoke-git-command'
