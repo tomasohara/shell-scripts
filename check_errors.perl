@@ -168,6 +168,7 @@ while (<>) {
 	   
 	   # Java errors
 	   || /^\s*Exception\b/
+	   || /Execution failed/        # Execution failed for task ... [Gradle]
 
 	   # Ruby errors
 	   || /: undefined\b/
