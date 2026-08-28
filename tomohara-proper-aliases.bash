@@ -735,9 +735,10 @@ function shell-check-stdin-loose {
 }
 
 # tabify(text): convert spaces in TEXT to tabs
+# note: consecutive spaces become one tab
 # TODO: account for quotes
 function tabify {
-    perl -pe 's/ /\t/g;'
+    perl -pe 's/ +/\t/g;'
 }
 ## OLD: # trace-vars(var, ...): trace each VAR in command line
 # trace-vars(var, ...): trace each VAR in command line to stderr
