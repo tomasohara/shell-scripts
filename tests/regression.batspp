@@ -527,3 +527,11 @@ WARNING: Anchors currently start or end line: consider -one_per_line
 ## $ do_diff.bash --dir tests '*.bash' $PWD/tests > _do_diff.$(T).log 2>&1
 ## $ grep -c "cannot overwrite existing file" _do_diff.$(T).log
 ## 0
+
+##------------------------------------------------------------------------------
+
+## TODO3: fix bug/quirks with reset-prompt-label
+## ai-user $ reset-prompt-label TPO-TEMP
+## TPO-TEMP -user $ reset-prompt-label TPO-TEMP
+## TPO-TEMP -TEMP -user $ reset-prompt 'TPO-TEMP $'
+## TPO-TEMP $ 
