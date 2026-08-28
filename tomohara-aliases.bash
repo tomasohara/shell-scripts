@@ -1263,18 +1263,35 @@ function findgrep () { find $1 -iname \*"$2"\* -exec $GREP $findgrep_opts "$3" $
 # TODO: archive
 function findgrep- () { find $1 -iname $2 -print -exec $GREP $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} \;; }
 ## Lorenzo review: should change this to findgrep-alt following TODO's
+# findgrep-ext(dir, ext, grep-arg, ...): finds EXT in DIR and grep ARG ...
+# ex: findgrep-ext ~/python py eval
 function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$dir" -iname "*.$ext" -exec $GREP $findgrep_opts "$@" \{\}  /dev/null \;; }
+#
+# alt-findgrep-ext(dir, exts, grep-args): like findgrep-ext but with comma-separated ext list
+# ex: alt-findgrep-ext ~/programs "java,kt" println
+# note: requires GNU find; -H is --with-filename (todo2 add to findgrep_opts); via GPT-5.6-Terra
+function alt-findgrep-ext {
+    local dir="$1"
+    local exts=${2//,/|}
+    shift 2;
+    find . -regextype posix-extended -iregex ".*\.($exts)" -exec $GREP $findgrep_opts -H "$@" {} +
+}
+#
 # fgr(filename_pattern, line_pattern): $GREP through files matching FILENAME_PATTERN for LINE_PATTERN
 # fgr-full(pattern): full findgrep from current dir for PATTERN
 function fgr-full { findgrep . "$@"; }
 # fgr-ext-full(extension, pattern): full findgrep for *.EXTENSION from current dir for PATTERN
 function fgr-ext-full { findgrep-ext . "$@"; }
-function fgr () { fgr-full | $EGREP -v '((/backup)|(/build))'; }
-function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
+## OLD: function fgr () { fgr-full | $EGREP -v '((/backup)|(/build))'; }
+## OLD: function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
+function fgr () { fgr-full | findspec-filter; }
+function fgr-ext () { findgrep-ext . "$@" | findspec-filter; }
+function alt-fgr-ext () { alt-findgrep-ext . "$@" | findspec-filter; }
 simple-alias-fn fgr-py 'fgr-ext py'
 simple-alias-fn fgr-jupyter 'fgr-ext ipynb'
 function fgr-py-etc () { fgr-py "$@"; fgr-jupyter "$@"; }
 alias fgr-java='fgr-ext java'
+alias fgr-kotlin='alt-fgr-ext java,kt'
 #
 # prepare-find-files-here([--out-dir out_dir_spec]): produces listing(s) of files in current directory
 # tree, in support of find-files-here; this contains full ls entry (as with -l).
@@ -3136,11 +3153,19 @@ alias hw2-login='ssh-host-login-aws $NEW_HOSTWINDS_HOST'
 alias hw2-upload='scp-aws-up $NEW_HOSTWINDS_HOST'
 alias hw2-download='scp-aws-down $NEW_HOSTWINDS_HOST'
 #
-HW2_MISC="http://www.tomasohara.trade/misc"
-alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=misc hw2-upload'
+## OLD:
+## HW2_MISC="http://www.tomasohara.trade/misc"
+## alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=misc hw2-upload'
+HW2_MISC="https://www.tomasohara.trade/share"
+alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=share hw2-upload'
 function hw2-upload-misc-single {
-    hw2-upload-misc "$@"
-    echo see "$HW2_MISC/$(basename "$1")"
+    hw2-upload-misc "$1"
+    ## OLD: echo see "$HW2_MISC/$(basename "$1")"
+    local url
+    url="$HW2_MISC/$(basename "$1")"
+    echo "see $url"
+    echo "in: $(wc "$1" | tabify)"
+    echo "out: $(curl --silent "$url" | wc | tabify)"
 }
 
 # Set dummy default host on AWS and HostWinds so hostname always in xterm title (see set_xterm_title.bash).
