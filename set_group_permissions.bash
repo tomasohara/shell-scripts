@@ -105,6 +105,7 @@ fi
 find "$dir" -type d -exec chmod --changes "$mode" {} \; >> "$log" 2>&1
 
 # Set default permissions for new files (using setfacl)
+# TODO2: o+rX?
 setfacl -R -m g::rwX "$dir" >> "$log" 2>&1
 setfacl -R -m d:g::rwX "$dir" >> "$log" 2>&1
 
