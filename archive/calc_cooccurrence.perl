@@ -1,4 +1,5 @@
-#! /usr/bin/env -S perl -sw
+# *-*-perl-*-*
+## TODO: #! /usr/bin/env -S perl -sw
 eval 'exec perl -Ssw $0 "$@"'
     if 0;
 #!/usr/local/bin/perl -s
