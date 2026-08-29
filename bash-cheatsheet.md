@@ -297,6 +297,12 @@ shopt -s expand_aliases
 env --ignore-environment bash --noprofile --norc
 ```
 
+## Miscellaneous
+
+```bash
+v=$(printf '_%.0s' {1..16})    # same as `v="_" * 16` in Python
+```
+
 ## \* Checking / Validating Scripts
 
 ```bash
