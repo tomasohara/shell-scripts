@@ -95,6 +95,7 @@
 #   set_xterm_title.bash startup-tracing.bash
 # - Supplemental scripts:
 #   anaconda-aliases.bash git-aliases.bash kill_em.bash ps_mine.bash
+## UPDATE 29 Aug 26: move-versioned-files-alt revision
 ## UPDATE 24 Aug 26: findspec filter output
 ## UPDATE 11 Aug 26: no[-]clobber cleanup
 ## UPDATE: 12 July 2026: section tracing generalization and commenting out very old aliases
@@ -2479,29 +2480,31 @@ alias move-adhoc-files='move-log-files; move-output-files'
 alias move-old-files='move-versioned-files "*" old'
 #
 # move-versioned-files-alt: alternative version for moving all files with DDMMMDD-style timestamp into ./old
-# Also include MM-DD-YYYY.
+# Also includes MM-DD-YYYY and YYYYMMDD_HHMMSS.
 # note: incldues sanity check for misplaced files (e.g., adhoc notes or .txt)
 # shellcheck disable=SC2010,SC2086
 {
 function move-versioned-files-alt {
     mkdir -p old;
     # note: regex is treated as a glob during move proper
-    local version_regex="[0-9][0-9][a-z][a-z][a-z][0-9][0-9]"            # ddMMMyy
-    local alt_version_regex="[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]" # MM-dd-yyyy
+    local version_regex="[0-9][0-9][a-z][a-z][a-z][0-9][0-9]"            # ddMMMyy (e.g., run-15jul26.log)
+    local alt_version_regex="[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]" # MM-dd-yyyy (e.g., Claim_Summary_03-16-2025.csv)
+    local alt2_version_regex="[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9]" # Screenshot_yyyymmdd_hhmmss (e.g., Screenshot_20260703_203324.png)
     if [ "${STRICT:-0}" == "1" ]; then
         version_regex="[^0-9]${version_regex}[^0-9]"
         alt_version_regex="[^0-9]${alt_version_regex}[^0-9]"
+        alt2_version_regex="[^0-9]${alt2_version_regex}[^0-9]"
     fi
     ## TODO2: work out a glob accounting for dot files
     ## OLD: move --no-clobber ./*$version_regex* ./*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
     ## OLD: move --no-clobber ./.*$version_regex* ./.*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
-    move-no-clobber ./*$version_regex* ./*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
-    move-no-clobber ./.*$version_regex* ./.*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
+    move-no-clobber ./*$version_regex* ./*$alt_version_regex* ./*$alt2_version_regex* old 2>&1 | grep -v "cannot stat"
+    move-no-clobber ./.*$version_regex* ./.*$alt_version_regex* ./.*$alt2_version_regex* old 2>&1 | grep -v "cannot stat"
     local false_positives
     # note: uses -d to avoid descending into matched directories (which would list unrelated files);
     # uses [^a-zA-Z]\.txt$ to avoid flagging compound extensions like .log.txt or .list.txt
-    false_positives="$(ls -d old/*$version_regex*  old/*$alt_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|([^a-zA-Z]\.txt$)")"
-    false_positives="$false_positives$(ls -d old/.*$version_regex*  old/.*$alt_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|([^a-zA-Z]\.txt$)")"
+    false_positives="$(ls -d old/*$version_regex*  old/*$alt_version_regex* old/*$alt2_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|([^a-zA-Z]\.txt$)")"
+    false_positives="$false_positives$(ls -d old/.*$version_regex*  old/.*$alt_version_regex* old/.*$alt2_version_regex* 2>&1 | $GREP -v 'No such file' | $EGREP "(adhoc)|([^a-zA-Z]\.txt$)")"
     if [ "$false_positives" != "" ]; then
         echo "Warning: potential misplaced files (e.g., .txt ext or adhoc affix)"
         echo "    $false_positives"
