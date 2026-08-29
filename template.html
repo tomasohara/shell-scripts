@@ -11,9 +11,16 @@
     <SCRIPT src="https://code.jquery.com/jquery-1.12.4.js"></SCRIPT>
 
     <STYLE>
+      /* Styling for web page */
       body {
          /* Use a Sans-Serif font (so better on low resolutions) */
          font-family: Arial, Helvetica, sans-serif;
+      }
+
+      /* Styling for table */
+      .my-table, .my-table th, .my-table td {
+	  border: 1px solid black;
+	  border-collapse: collapse;   /* ensure borders continuous */
       }
 
       /* For debugging, add border around each element */
@@ -47,7 +54,7 @@
            - Alternatively via Perl, use following:
              perl -pe 's@^([^\t]+)\t([^\n]+)@\t<tr><td>\1</td> <td>\2</td></tr>@;' < {input-file} > {temp-output-file}
         -->
-      <TABLE>
+      <TABLE class="my-table">
         <!-- TODO: See whether th should be used in place of td in thead -->
         <THEAD>
           <TR><TD>TODO:column-1</TD> <TD>TODO:column-2</TD></TR>
@@ -59,7 +66,7 @@
       </TABLE>
 
       <H3>Disclaimer</H3>
-      TODO: All code is freely available in the <A HREF="http://www.gnu.org">GNU</A> sense:
+      TODO: All code is freely available in the <A HREF="http://www.gnu.org">GNU</A> sense.
 
       <!--...................................................................-->
 
