@@ -287,9 +287,11 @@ function git-alias-review-log {
 function git-is-repo-accessible {
     ## OLD: git rev-parse --is-inside-work-tree >/dev/null 2>&1
     ## TODO3: add option to invoke-git-command to ignore output
-    local log
-    log=$(get-temp-log-name "git-is-repo-accessible")
-    invoke-git-command rev-parse --is-inside-work-tree >> "$log" 2>&1
+    ## OLD:
+    ## local log
+    ## log=$(get-temp-log-name "git-is-repo-accessible")
+    ## invoke-git-command rev-parse --is-inside-work-tree >> "$log" 2>&1
+    invoke-git-command rev-parse --is-inside-work-tree
 }
 
 # git-update-plus(): updates local from global repo. This uses git-stash to hide local changes
@@ -979,7 +981,7 @@ alias git-checkin-new-alias="GIT_MESSAGE='initial version' git-update-commit-pus
 function git-checkout-branch {
     local branch="$1"
     local log
-    log=$(realpath "$(get-temp-log-name 'update')")
+    log=$(realpath "$(get-temp-log-name 'checkout-branch')")
     # TODO2: define helper function for usage
     if [[ ("$branch" = "") || ("$branch" == "--help") ]]; then
         echo-plus "usage: git-checkout-branch [--help | branch]"
@@ -997,7 +999,8 @@ function git-checkout-branch {
         echo-plus "issuing: git stash"
         git stash >> "$log" 2>&1
         # note: uses -- after branch to avoid ambiguity in case also a file [confounded git!]
-        git-command checkout "$branch" --  >> "$log" 2>&1
+        ## OLD: git-command checkout "$branch" --  >> "$log" 2>&1
+        git-command checkout "$branch" --
         echo-plus "issuing: git stash pop"
         git stash pop >> "$log" 2>&1
     else
@@ -1005,6 +1008,7 @@ function git-checkout-branch {
     fi;
 
     # Show end of log
+    ## TODO2: use git-command for stash/pop and drop local log
     git-alias-review-log "$log"
 }
 alias-function git-branch-checkout  git-checkout-branch 
