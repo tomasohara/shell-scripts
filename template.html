@@ -6,6 +6,7 @@
     <META charset="UTF-8">
     <META name="viewport" content="width=device-width, initial-scale=1.0">
     <TITLE>TODO: Title</TITLE>
+
     <!-- Following is for debugging (e.g., console usage of $) -->
     <SCRIPT src="https://code.jquery.com/jquery-1.12.4.js"></SCRIPT>
 
@@ -63,20 +64,11 @@
       <!--...................................................................-->
 
       <SCRIPT>
-       <!-- DEBUG: trace out screen and window dimensions
-         var height, width
-         height = $(window).height();
-         width = $(window).width();
-         $("#browser-dim-id").text(width + "x" + height);
-         console.debug("Browser window dimensions: " + width + "x" + height);
-         //
-         height = window.screen.height;
-         width = window.screen.width;
-         $("#screen-dim-id").text(width + "x" + height);
-         console.debug("Screen dimensions: " + width + "x" + height);
-       -->
+        // Trace out screen and window dimensions
+        console.debug("Browser window dimensions: " + $(window).width() + "x" + $(window).height());
+        //
+        console.debug("Screen dimensions: " + window.screen.height + "x" + window.screen.width);
       </SCRIPT>
-
       
   </BODY>
 </HTML>
