@@ -122,5 +122,5 @@ tail "$log"
 if [[ ("${TRAVERSE:-1}" == 1) && (-h "$dir") ]]; then
     target=$(realpath "$dir")
     echo "Re=invoking over symbolic link '$target'"
-    "$0" "$target"
+    "$0" "$target" "$group"
 fi
