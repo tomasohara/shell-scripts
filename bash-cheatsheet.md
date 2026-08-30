@@ -105,6 +105,7 @@ if [ "$n" -eq 3 ]; then echo tres; fi   # * -eq -ne -lt -le -gt -ge
 [ -d dir  ]                     # file is directory
 [ -s file ]                     # non-empty file
 [ -r file ]                     # readable file
+[ -h file ]                     # file is symbolic link
 
 # String tests
 [ -n "$str" ]                   # non-empty string
