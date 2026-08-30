@@ -6,6 +6,7 @@
 # note:
 # - Based on Grok3 revision to old bash snippet.
 #
+## UPDATE 30 Aug 26: Traverses through symbolic links
 ## UPDATE 24 Aug 26: Adds REMOVE option (e.g., sticky bit).
 ## UPDATE 14 Aug 26: Makes group stick bit optional.
 
@@ -19,9 +20,9 @@ if [ "${VERBOSE:-0}" = "1" ]; then
 fi
 
 # Show usage
+script=$(basename "$0")
+base=$(basename "$0" .bash)
 if [ "$1" = "" ]; then
-    script=$(basename "$0")
-    ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
     echo "Usage: [envopt] $0 [--trace] [--help] [--] dir [group=operator]"
@@ -31,7 +32,7 @@ if [ "$1" = "" ]; then
     echo ""
     echo "CHOWN=1 $0 /usr/local/misc/programs/"
     echo ""
-    echo "sudo $script ~/programs/bash/shell-scripts-devel"
+    echo "sudo $script ~/programs/bash/shell-scripts-devel > _$base.log 2>&1"
     echo ""
     echo "Notes:"
     echo "- The -- option is to use default options and to avoid usage statement."
@@ -39,6 +40,7 @@ if [ "$1" = "" ]; then
     echo "- Use FORCE=1 to bypass restrictions (e.g., chown of /home/... dir)."
     echo "- Use STICKY=1 to enable groups sticky bit (n.b., in addition to setgid)."
     echo "- Use REMOVE=1 to remove certain permissions (e.g. existing sticky bit)."
+    echo "- Use TRAVERSE=1 to traverse through symbolic links."
     ## TODO: add more notes
     ## echo ""
     echo ""
@@ -53,7 +55,8 @@ REMOVE="${REMOVE:-0}"
 # todays-date(): returns date in format ddmmmyy (e.g., 19apr26)
 function todays-date { 
     ## OLD: date '+%d%b%y'
-    local date_spec=$(date '+%d%b%y');  # ex: 19Apr26
+    local date_spec
+    date_spec=$(date '+%d%b%y');        # ex: 19Apr26
     echo "${date_spec,,}"               # converts all text to lower
 }
 
@@ -63,7 +66,7 @@ function todays-date {
 dir_label="${dir//\//_}"
 
 # Use TEMP env var or default to /tmp, include timestamp in log name
-log="${TMP:-/tmp}/_add-sticky-${dir_label}-$(todays-date).log"
+log="${TMP:-/tmp}/_$base-${dir_label}-$(todays-date).log"
 
 # Clear log file
 echo "" > "$log"
@@ -113,3 +116,11 @@ setfacl -R -m d:g::rwX "$dir" >> "$log" 2>&1
 echo "Permission changes log: $log"
 wc -l "$log"
 tail "$log"
+
+# Optionally, do the same for the target of a symbolic link
+# note: needed because not all commands support chmod's -H option for traversal through links
+if [[ ("${TRAVERSE:-1}" == 1) && (-h "$dir") ]]; then
+    target=$(realpath "$dir")
+    echo "Re=invoking over symbolic link '$target'"
+    "$0" "$target"
+fi
