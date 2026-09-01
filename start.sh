@@ -7,7 +7,9 @@
 # - Allow for user to override the application, such as via enironment
 #   (e.g., IMAGE_APP=gimp).
 # - Get programs for each type from user configuration files (e.g., mime settings).
+# - P2: add env. options to override defaults.
 #
+## UPDATE 31 Aug 26: Updates defaults.
 
 # Uncomment following line(s) for tracing:
 # - xtrace shows arg expansion (and often is sufficient)
@@ -127,7 +129,6 @@ function invoke () {
     log_file="$log_dir/$(basename "$program")-$(basename "$file")-$today.log"
     local program_arg=""
     if [ ! -e "$log_file" ]; then touch "$log_file"; fi
-    ## OLD: if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" \"$file\" >> \"$log_file\" 2>&1"; fi
     if [[ (! -e "$program") && ("$program" != "open") ]]; then
 	if [ "$under_mac" = "1" ]; then
             if [[ ! ("$program" =~ .*\.app) ]]; then
@@ -141,7 +142,6 @@ function invoke () {
         ## TODO2: add program_arg support to invoke function
         program_arg="/c"
     fi
-    ## OLD: "$program" "$file" >> "$log_file" 2>&1
     # disable shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2086
     {
@@ -168,9 +168,9 @@ function invoke () {
 
 # If a directory, open using file explorer (e.g., nautilus)
 if [ -d "$file" ]; then
-    ## OLD: nautilus "$file" &
-    file_manager=nautilus
-    ## OLD: if [ "$under_mac" = "1" ]; then file_manager="/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder"; fi
+    ## OLD: file_manager=nautilus
+    ## TODO?: file_manager=nemo
+    file_manager=dolphin
     if [ "$under_mac" = "1" ]; then file_manager="open"; fi
     "$file_manager" "$file" &
     exit
@@ -181,7 +181,6 @@ lower_file=$(echo "$file" | perl -pe 's/(.*)/\L$1/;')
 # Change invoked program if different for editing than for viewing
 office_program="libreoffice"
 pdf_program="evince"
-## OLD: image_program="eog"
 ## NOTE: eog is anachronistic so trying KDE-ish gwenview; install as follows
 ##   sudo apt install gwenview
 image_program="gwenview"
@@ -201,7 +200,6 @@ if [ "$under_mac" = "1" ]; then
 fi
 # 
 if [ "$under_cygwin" == "1" ]; then
-    ## TODO3: add env. options to override defaults
     # NOTE: evince doesn't work without active x server (n.b., awkward to use under Windows)
     pdf_program="acrobat"
     image_program="mspaint"
