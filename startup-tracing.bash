@@ -52,9 +52,11 @@ function startup-trace-debug { DEBUG_LEVEL=$(min DEBUG_LEVEL 6) startup-trace "$
 
 ##------------------------------------------------------------------------------
 ## TEMP: Duplicate definitions to work around chicken-and-egg problem
+## NOTE: See tomohara-aliases.bash in shell-scripts repo
 
 # conditional-source(filename): source in bash commands from filename if exists
-function conditional-source () { if [ -e "$1" ]; then source $1; else echo "Warning: bash script file not found (so not sourced):"; echo "    $1"; fi; }
+## OLD: function conditional-source () { if [ -e "$1" ]; then source $1; else echo "Warning: bash script file not found (so not sourced):"; echo "    $1"; fi; }
+function conditional-source () { if [ -e "$1" ]; then source $1; else startup-trace -e "Warning: bash script file not found (so not sourced):\n    $1"; fi; }
 #
 # append-path(path): appends PATH to environment variable unless already there
 function append-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="${PATH}:$1"; fi }
