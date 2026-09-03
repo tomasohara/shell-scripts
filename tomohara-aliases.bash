@@ -3535,15 +3535,19 @@ alias python-setup-install='log=setup.log;  rename-with-file-date "$log";  uname
 alias python-uninstall-setup='cat installed-files.list | xargs command rm -vi; alias-perl rename_files.perl -regex ^ un installed-files.list'
 
 # ipython(): overrides ipython command to set xterm title and to add git repo base directory to python path
+# example xterm title: '$ ipython [/home/tomohara/bin]'
 function ipython() { 
     local ipython
     ipython=$(which ipython)
     if [ "$ipython" = "" ]; then echo "Error: install ipython first"; return; fi
+    ## OLD: set-xterm-window "ipython [$PWD]"
+    ## TEST: set-xterm-window "ipython [$PWD]; pid=$$"
     set-xterm-window "ipython [$PWD]"
     # note: git-root currently `git rev-parse --show-toplevel' (see git-aliases.bash);
     # no-op if not in a git repo (e.g., PYTHONPATH=":..."
     git_base_dir=$(git-root 2> /dev/null)
-    PYTHONPATH="$git_base_dir:$PYTHONPATH" command ipython "$@"
+    ## OLD: PYTHONPATH="$git_base_dir:$PYTHONPATH" command ipython "$@"
+    PYTHONPATH="$git_base_dir:$PYTHONPATH" command ipython --no-term-title "$@"
 }
 
 # python-trace(script, arg, ...): Run python SCRIPT with statement tracing
