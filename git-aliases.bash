@@ -1159,7 +1159,10 @@ function git-misc-alias-usage() {
     ## BAD (GIT_SKIP_ADD=1 skips re-staging after stash/pop, so commit finds nothing staged):
     ## echo '   old="TODO..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" GIT_SKIP_ADD=1 git-update-commit-push "$old"'
     ## TODO3: rework to avoid stash by git-update-commit-push when just deleting files
-    echo '   old="TODO-filename..."; git-rm-alias "$old"; GIT_MESSAGE="deleted" git-update-commit-push "$old"'
+    echo '   old="TODO-filename"; git-rm-alias "$old"; GIT_MESSAGE="deleted" git-update-commit-push "$old"'
+    echo ""
+    echo "To compress files (¡cuidado!):"
+    echo '   old="TODO-filename"; gzip "$old"; git-rm-alias "$old"; GIT_MESSAGE="compressed" git-update-commit-push "$old" "$old.gz"'
     echo ""
     echo "To check in all tracked files with changes (¡examinar primero!):"
     echo "   GIT_MESSAGE='...' git-update-commit-push \$(git-files-changed)"
