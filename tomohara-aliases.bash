@@ -1270,7 +1270,8 @@ function findgrep-ext () { local dir="$1"; local ext="$2"; shift; shift; find "$
 #
 # alt-findgrep-ext(dir, exts, grep-args): like findgrep-ext but with comma-separated ext list
 # ex: alt-findgrep-ext ~/programs "java,kt" println
-# note: requires GNU find; -H is --with-filename (todo2 add to findgrep_opts); via GPT-5.6-Terra
+# note: requires GNU find; -H is --with-filename (todo2 add to findgrep_opts); via GPT-5.6-Terra;
+# also, use of '+' for -exec terminator instead of ';' uses xargs-like expansion.
 function alt-findgrep-ext {
     local dir="$1"
     local exts=${2//,/|}
@@ -2791,7 +2792,9 @@ alias ununcompress-this-dir='uncompress-dir $PWD'
 # count-exts-all(): likewise including cases with no extension (e.g., 'it')
 ## TODO4: add option to include dotfiles (i.e., ls -a ...)
 ## UPDATE: 05/12/2026: adds -one_per_line to avoid multiple counts
-function count-exts () { $LS | count-it -chomp -one_per_line '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
+## OLD: function count-exts () { $LS | count-it -chomp -one_per_line '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
+function count-exts-stdin () { count-it -chomp -one_per_line '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
+function count-exts { $LS | count-exts-stdin; }
 ## BAD: function count-exts-all { (count-exts | cat; $LS | count-it -chomp -one_per_line '^[^.]+(\.*)$') | sort $SORT_COL2 -rn | $PAGER; }
 function count-exts-all { (count-exts | cat; $LS | count-it -chomp -one_per_line '^[^.]+$') | sort $SORT_COL2 -rn | $PAGER; }
 alias kill-iceweasel='kill-em iceweasel'
