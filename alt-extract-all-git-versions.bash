@@ -67,7 +67,10 @@ if [ "${VERBOSE:-0}" = "1" ]; then
     verbose=true
 fi
 debug=false
-if [ "${DEBUG:-0}" = "1" ]; then
+## OLD: if [ "${DEBUG:-0}" = "1" ]; then
+## NOTE: TL=4 (detailed) is typically used for debugging
+debug_default=$(( DEBUG_LEVEL >= 4 || DEBUG > 0 )) 
+if [ "${DEBUG:-$debug_default}" = "1" ]; then
     debug=true
 fi
 if [ "${TRACE:-0}" = "1" ]; then
@@ -124,7 +127,8 @@ fi
 # check if file exists
 if [ ! -f "${GIT_PATH_TO_FILE}" ]; then
     echo "Error: File '${GIT_PATH_TO_FILE}' does not exist.${TWO_NEWLINES}${USAGE}" >&2
-    exit 1
+    ## OLD: exit 1
+    $debug || exit 1
 fi
 
 # make sure in repo dir
