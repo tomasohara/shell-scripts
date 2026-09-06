@@ -108,8 +108,8 @@ if [ "$n" -eq 3 ]; then echo tres; fi   # * -eq -ne -lt -le -gt -ge
 [ -h file ]                     # file is symbolic link
 
 # String tests
-[ -n "$str" ]                   # non-empty string
-[ -z "$str" ]                   # empty string
+[ -n "$str" ]                   # non-empty string (i.e., non-zero length)
+[ -z "$str" ]                   # empty string (i.e., zero length)
 
 result=$([ "$test" ] && echo "true-val" || echo "false-val")   # * ternary idiom (template: DEBUG_SCRIPT=...)
 
