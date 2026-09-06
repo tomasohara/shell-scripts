@@ -903,7 +903,7 @@ function alt-invoke-next-single-checkin {
         else
             # Show brief excerpt of diff excluding meta-data
             echo "$mod_file diff excerpt:"
-            git diff -- "$mod_file" | egrep -v '\-\-\-|\+\+\+' | grep -1 '^[-+]' | indent-text
+            git diff -- "$mod_file" | egrep -v '\-\-\-|\+\+\+' | grep -1 '^[-+]' | indent-text | head
 
             # note: pauses a little so that user can update cursor before focus shifts
             # TODO: see how to keep focus on terminal window for git update
