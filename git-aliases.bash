@@ -237,6 +237,12 @@ function alias-function {
     eval "function $alias { $command" '"$@"' "; }"
 }
 
+# indent-text([filename]): indent text in input by 4 spaces
+# echo "some text" | indent-text => "    some text"
+function indent-text {
+    perl -pe "s/^/    /;" "$@";
+}
+
 # HACK: wrapper around check_errors.perl w/ new QUIET option
 function get-log-errors () { (QUIET=1 DEBUG_LEVEL=1 $PERL check_errors.perl -context=5 "$@") 2>&1; }
 
@@ -895,6 +901,10 @@ function alt-invoke-next-single-checkin {
         if [ "$GIT_NO_CONFIRM" = "1" ]; then
             echo-plus "GIT_NO_CONFIRM enabled, so skipping difftool (e.g., for visual diff)"
         else
+            # Show brief excerpt of diff excluding meta-data
+            echo "$mod_file diff excerpt:"
+            git diff -- "$mod_file" | egrep -v '\-\-\-|\+\+\+' | grep -1 '^[-+]' | indent-text
+
             # note: pauses a little so that user can update cursor before focus shifts
             # TODO: see how to keep focus on terminal window for git update
             local delay=5
