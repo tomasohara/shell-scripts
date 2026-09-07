@@ -18,6 +18,7 @@
 #
 # TODO1: fix problem with extraneous error codes from git cat-file over alternative
 # TODO3: merge with extract-all-git-versions.bash
+# TODO2: check for files never in the repo (i.e., to distinguish non-existing current file from never existing file)
 #
 # -------------------------------------------------------------------------------
 # Details of Rename Resolution:
@@ -33,6 +34,7 @@
 #   leaving ALT_PATHS empty and making every fallback attempt fail.
 # -------------------------------------------------------------------------------
 #
+## UPDATE 07 Sep 26: fix by Gemini 3.1 Pro to allow for deleted files
 
 # Helpers
 function full-usage {
@@ -123,14 +125,13 @@ if [ "${GIT_PATH_TO_FILE}" == "" ]; then
     echo "${USAGE}" >&2
     exit 1
 fi
-
-# check if file exists
-if [ ! -f "${GIT_PATH_TO_FILE}" ]; then
-    echo "Error: File '${GIT_PATH_TO_FILE}' does not exist.${TWO_NEWLINES}${USAGE}" >&2
-    ## OLD: exit 1
-    $debug || exit 1
-fi
-
+## OLD:
+## # check if file exists
+## if [ ! -f "${GIT_PATH_TO_FILE}" ]; then
+##     echo "Error: File '${GIT_PATH_TO_FILE}' does not exist.${TWO_NEWLINES}${USAGE}" >&2
+##     ## OLD: exit 1
+##     $debug || exit 1
+## fi
 # make sure in repo dir
 if ! git rev-parse --show-toplevel >/dev/null 2>&1 ; then
     echo "Error: you must run this from within a git working directory.${TWO_NEWLINES}${USAGE}" >&2
@@ -138,8 +139,11 @@ if ! git rev-parse --show-toplevel >/dev/null 2>&1 ; then
 fi
 
 # Resolve relative path with respect to git root directory
+# note: -m (--canonicalize-missing) allows for a missing file
 GIT_ROOT_DIR="$(realpath "$(git rev-parse --show-toplevel)")"
-REL_GIT_PATH_TO_FILE="$(realpath "$GIT_PATH_TO_FILE" | perl -pe "s@$GIT_ROOT_DIR/@@;")"
+## OLD:
+## REL_GIT_PATH_TO_FILE="$(realpath "$GIT_PATH_TO_FILE" | perl -pe "s@$GIT_ROOT_DIR/@@;")"
+REL_GIT_PATH_TO_FILE="$(realpath -m "$GIT_PATH_TO_FILE" | perl -pe "s@$GIT_ROOT_DIR/@@;")"
 
 # extract just a filename from given relative path (will be used in result file names)
 GIT_SHORT_FILENAME=$(basename "$GIT_PATH_TO_FILE")
@@ -161,8 +165,11 @@ info="$TMP/_$base.$$.info"
 ALLOW_RENAMES="${ALLOW_RENAMES:-1}"
 
 # Get information on commits, optionally checking for additional records due to renames
+# note: Filename put after -- in case it no longer exists.
 if [ "$ALLOW_RENAMES" == "0" ]; then
-    git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
+    ## OLD:
+    ## git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
+    git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict -- "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
 else
     # note: --follow is used to account for renames (see other options above)
     # Combine commit info and per-commit file path into one pass:
@@ -172,7 +179,9 @@ else
     # This avoids a separate rename-detection pass and correctly handles cases
     # where --follow uses content-similarity but produces no R entry (false renames
     # between independently-created files with similar content).
-    git log --follow --name-status --format="COMMIT %ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | \
+    ## OLD:
+    ## git log --follow --name-status --format="COMMIT %ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | \
+    git log --follow --name-status --format="COMMIT %ad %H" --date=iso-strict -- "$GIT_PATH_TO_FILE" | \
         perl -ne 'if (/^COMMIT (\S+) (\S+)/) { ($date,$sha)=($1,$2) }
                   elsif (/^[ACMT]\t(.+)/)    { print "$date $sha $1\n" }
                   elsif (/^R\d+\t([^\t]+)/)  { print "$date $sha $1\n" }' > "$info"
