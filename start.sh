@@ -172,6 +172,13 @@ if [ -d "$file" ]; then
     ## TODO?: file_manager=nemo
     file_manager=dolphin
     if [ "$under_mac" = "1" ]; then file_manager="open"; fi
+    if [ "$under_cygwin" = "1" ]; then
+        # via GPT 5.6 Terra:
+        # `start` is a cmd.exe built-in.  The empty string is the window title;
+        # without it, a quoted pathname can be interpreted as that title.
+        cmd.exe /c start "" "$(cygpath -aw -- "$file")" &
+        exit
+    fi
     "$file_manager" "$file" &
     exit
 fi
