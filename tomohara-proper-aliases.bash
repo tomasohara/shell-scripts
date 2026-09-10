@@ -885,6 +885,7 @@ function rename-last-snapshot {
         start "$new_name"
     fi
 }
+alias-fn rename-last-snapshot-no-preview 'RENAME_SNAPSHOT_PREVIEW=0 rename-last-snapshot'
 
 #................................................................................
 # Media related
