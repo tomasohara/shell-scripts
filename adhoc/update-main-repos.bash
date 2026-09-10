@@ -83,7 +83,8 @@ echo "in $0: $(date)" >> "$log"
 # pre-init: OTHER_REPOS="$HOME/text-categorization $HOME/programs/python/visual-diff"
 if [ "$OTHER_REPOS" != "" ]; then
     ## TODO2: drop array support as it requires sourcing the script
-    if declare -p OTHER_REPOS 2>/dev/null | grep -q 'declare \-a'; then
+    ## BAD: if declare -p OTHER_REPOS 2>/dev/null | grep -q 'declare \-a'; then
+    if declare -p OTHER_REPOS 2>/dev/null | grep -q "declare .-a"; then
         ## DEBUG: echo "OTHER_REPOS as array"
         repos+=("${OTHER_REPOS[@]}")
     else
