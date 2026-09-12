@@ -1,3 +1,18 @@
+# dependabot.yml: GitHub's built-in dependency updater.
+#
+# Overview via Claude Fable 5:
+# On the schedule below it checks each configured ecosystem for newer versions
+# and opens PRs (bundled per the `groups` config, capped by open-pull-requests-limit).
+# This covers *version* updates only; security-alert PRs are governed by the repo
+# settings under Settings > Advanced Security and ignore these limits.
+#
+# Ecosystems here must match files in the repo:
+#  github-actions -> .github/workflows/,
+#  pip -> requirements.txt,
+#  gitsubmodule -> .gitmodules).
+#
+# Docs: https://docs.github.com/en/code-security/dependabot
+
 version: 2
 updates:
   # Keep GitHub Actions (checkout, setup-python, cache, etc.) up to date.
