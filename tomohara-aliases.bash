@@ -95,6 +95,7 @@
 #   set_xterm_title.bash startup-tracing.bash
 # - Supplemental scripts:
 #   anaconda-aliases.bash git-aliases.bash kill_em.bash ps_mine.bash
+## UPDATE 12 Sep 26: start of tar-dir cleanup (e.g., dependency documentation)
 ## UPDATE 29 Aug 26: move-versioned-files-alt revision
 ## UPDATE 24 Aug 26: findspec filter output
 ## UPDATE 11 Aug 26: no[-]clobber cleanup
@@ -1791,6 +1792,8 @@ function signature () {
 
 #-------------------------------------------------------------------------------
 trace "file archiving commands"
+##
+## TODO2: document dependencies for make-tar, tar-dir, etc.
 
 # Tar archive creation and manipulation
 # tar options:
@@ -1818,17 +1821,23 @@ function ls-relative () { $LS -d "$1" | perl -pe "s@$HOME@~@;"; }
 # TODO1: liberate me (e.g., put main support into script)!
 # Note: -xdev is so that find doesn't use other file systems
 # - depth and filter args can be given via TAR_DEPTH and TAR_FILTER
+# Warning: See tar-dir and tests/tar-aliases-tests.ipynb for main dependencies.
 find_options="-xdev"
 function make-tar () {
     # Warning: if no optional arguments are given, find and filtering will be skipped to preserve empty folders
     #          Otherwise if optional args are present, empty dirs will be excluded from final tar
     # Check arguments
     local base="$1"; local dir="$2";
-    if [[ ("$base" == "--help") ||("$base" == "") ]]; then
-        echo "Usage: make-tar base dir [depth [filter]]"
+    ## OLD: if [[ ("$base" == "--help") ||("$base" == "") ]]; then
+    ## NOTE: checks for --help anywhere to simplify regex (TODO3: "--help" != argv[i] for i ...)
+    ## TODO3: if [[ (("$*" =~ --help) && (! "$*" =~ --force)) || ("$base" == "") ]]; then
+    if [[ (("$*" =~ --help) && ("${SKIP_TAR_HELP:-0}" == "1")) || ("$base" == "") ]]; then
+        echo "Usage: make-tar base dir [depth [filter]] [misc]"
         echo "Env. options: USE_DATE, TEMP, GTAR, MAX_SIZE, TAR_DEPTH, TAR_FILTER, AFFIX"
         echo "note: TEMP used by tar-dir, etc.; Also see [un]set-tar-bzip2 and [un]set-tar-xz"
         echo "(or try GTAR_OPTS='vfJ' [... tor-browser-linux-x86_64-14.5.tar.xz])."
+        ## TODO3: echo "Miscellaneous args include --help and --force (e.g., to enable or bypass usage)."
+        echo "Misc args include --help and SKIP_TAR_HELP=1 (e.g., to enable or bypass usage)."
         echo $'example:\n\t'"TEMP='$BACKUP_DIR' tar-this-dir-dated"
         return
     fi
@@ -1879,6 +1888,7 @@ function make-tar () {
 #
 # tar-dir(dir, depth, [filter]): create archive of DIR in ~/xfer, using subdirectories up to DEPTH, and optionally 
 # filtering files matching exclusion filter.
+# Warning: See tar-dir-dated and tests/tar-aliases-tests.ipynb for main dependencies.
 #
 function tar-dir () {
     check_usage "$1" $'usage: tar-dir dir [depth]\nnote: see make-tar for more"' && return
@@ -1934,7 +1944,9 @@ function tar-this-dir () {
     # note: uses basename so that full paths not stored in archive;
     # example: README path is shell-scripts/README.md not /home/tomohara/shell-scripts/README.md
     # TODO2: see if original basename can be preserved
-    tar-dir "$tar_basename";
+    ## OLD: tar-dir "$tar_basename";
+    ## NOTE: passes along arguments (for testing --force option to make-tar)
+    tar-dir "$tar_basename" "$@";
     popd-q;
 }
 #
