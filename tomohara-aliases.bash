@@ -95,6 +95,7 @@
 #   set_xterm_title.bash startup-tracing.bash
 # - Supplemental scripts:
 #   anaconda-aliases.bash git-aliases.bash kill_em.bash ps_mine.bash
+## UPDATE 13 Sep 26: reworks tar-this-dir-normal & tar-just-this-dir in terms of tar-this-dir; refines usage for tar aliases; adds usage for make-recent-tar; renames tar-this-dir-pruned and deprecates tar-this-dir-normal
 ## UPDATE 12 Sep 26: start of tar-dir cleanup (e.g., dependency documentation)
 ## UPDATE 29 Aug 26: move-versioned-files-alt revision
 ## UPDATE 24 Aug 26: findspec filter output
@@ -295,6 +296,7 @@ alias disable-console-tracing='export CONSOLE_TRACING=0'
 # missing-options(): whether no options specified or --help/-h
 # note: based on POE Assistant
 # usage: if missing-options "$@"; then echo "Usage: ..."; fi
+# TODO2: rename to reflect usage check (e.g., missing-options-or-help)
 function missing-options {
     ## OLD: [[ $# -eq 0 || "$1" == "--help" || "$1" == "-h" ]]
     [[ $# -eq 0 || " $* " == *" --help "* || " $* " == *" -h "* ]]
@@ -699,6 +701,7 @@ alias rehash='hash -r; hash -l'
 #
 # check_usage(arg, help): shows HELP if ARG --help or empty, setting status true (0) if displayed
 # sample: check_usage "$1" $'usage: munge filename\nexample: munge /etc/password' && return
+# Warning: This might soon be deprecated in favor of missing-options/function-usage.
 function check_usage {
     local expected_arg="$1"
     local usage_text="$2"
@@ -1893,7 +1896,15 @@ function make-tar () {
 # Warning: See tar-dir-dated and tests/tar-aliases-tests.ipynb for main dependencies.
 #
 function tar-dir () {
-    check_usage "$1" $'usage: tar-dir dir [depth]\nnote: see make-tar for more"' && return
+    ## OLD: check_usage "$1" $'usage: tar-dir dir [depth]\nnote: see make-tar for more"' && return
+    if missing-options "$@"; then
+        echo "Usage: "${FUNCNAME[0]}" dir [depth]"
+        echo ""
+        echo "note: see make-tar for env var details"
+        echo ""
+        make-tar --help
+        return
+    fi
     # Warning: see behaviour with optional arguments and subdirs in make-tar
     ## TODO 2: add support for optional filtering 
     local dir="$1"; local depth="$2";
@@ -1955,16 +1966,23 @@ function tar-this-dir () {
 #
 alias new-tar-this-dir=tar-this-dir
 
-# tar-this-dir-normal: creates archive of directory, excluding archive, backup, and temp subdirectories
+# tar-this-dir-pruned: creates archive of directory, excluding archive, backup, and temp subdirectories
+# note: deprecated alias is tar-this-dir-normal
 ##
 ## Lorenzo: tar-this-dir-normal and tar-just-this-dir can be expressend in terms of a helper function like
 ## function helper() {local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" $1 $2; popd-q; }
 ## alias tar-this-dir-normal=helper "" "/(archive|backup|temp)/"
 ## alias tar-just-this-dir=helper "1" ""
-function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" "" "/(archive|backup|temp)/"; popd-q; }
+## OLD: function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" "" "/(archive|backup|temp)/"; popd-q; }
+function tar-this-dir-pruned { tar-this-dir "" "/(archive|backup|temp)/"; }
+function tar-this-dir-normal { echo "Warning: deprecated function ${FUNCNAME[0]}" 1>&2; tar-this-dir-pruned "$@"; }
+## TODO1: rename tar-this-dir-normal usages as tar-this-dir-pruned
 ## TODO2: fix so tar-dir takes the filter arguments
 
-function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
+# tar-just-this-dir: creates tar of current dir without subdirectories
+## OLD: function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
+function tar-just-this-dir () { tar-this-dir 1; }
+
 # GTAR_OPTS: usual options for aliases using gnu tar
 GTAR_OPTS=""
 ## TODO2: GTAR_USUAL="$GTAR GTAR_OPTS"
@@ -1972,7 +1990,18 @@ function set-tar-bzip2 () { GTAR_OPTS="vfj"; }
 function unset-tar-bzip2 () { reset-tar-opts; }
 function set-tar-xz () { GTAR_OPTS="vfJ"; }
 function reset-tar-opts { GTAR_OPTS="vfz"; }
-function make-recent-tar () { (find . -type f -mtime -"$2" | $GTAR "c${GTAR_OPTS}T" "$1" -; ) 2>&1 | $PAGER; ls-relative "$1"; }
+#
+# make-recent-tar(basename, days-old): create tar of current dir, saving as 
+## OLD: function make-recent-tar () { (find . -type f -mtime -"$2" | $GTAR "c${GTAR_OPTS}T" "$1" -; ) 2>&1 | $PAGER; ls-relative "$1"; }
+function make-recent-tar {
+    if missing-options "$@"; then
+        function-usage --args "tar-file-name num-days" --synopsis "make recent tar in TAR-FILE-NAME for files up to NUM-DAYS old" --note "Generate gzipped tar archive in TAR-FILE-NAME of current dir for files up to DAYS-OLD" --example "my-tar.gz 3"
+        return        
+    fi
+    missing-options "$@" && 
+    (find . -type f -mtime -"$2" | $GTAR "c${GTAR_OPTS}T" "$1" -; ) 2>&1 | $PAGER; ls-relative "$1";
+}
+#
 reset-tar-opts
 #
 # " (for Emacs)
