@@ -296,7 +296,8 @@ alias disable-console-tracing='export CONSOLE_TRACING=0'
 # note: based on POE Assistant
 # usage: if missing-options "$@"; then echo "Usage: ..."; fi
 function missing-options {
-    [[ $# -eq 0 || "$1" == "--help" || "$1" == "-h" ]]
+    ## OLD: [[ $# -eq 0 || "$1" == "--help" || "$1" == "-h" ]]
+    [[ $# -eq 0 || " $* " == *" --help "* || " $* " == *" -h "* ]]
 }
 
 # function-usage(): helper alias for showing function usage statements
@@ -1831,7 +1832,8 @@ function make-tar () {
     ## OLD: if [[ ("$base" == "--help") ||("$base" == "") ]]; then
     ## NOTE: checks for --help anywhere to simplify regex (TODO3: "--help" != argv[i] for i ...)
     ## TODO3: if [[ (("$*" =~ --help) && (! "$*" =~ --force)) || ("$base" == "") ]]; then
-    if [[ (("$*" =~ --help) && ("${SKIP_TAR_HELP:-0}" == "0")) || ("$base" == "") ]]; then
+    ## OLD: if [[ (("$*" =~ --help) && ("${SKIP_TAR_HELP:-0}" == "0")) || ("$base" == "") ]]; then
+    missing-options "$@" && if [ "${SKIP_TAR_HELP:-0}" == "0" ]; then
         echo "Usage: make-tar base dir [depth [filter]] [misc]"
         echo "Env. options: USE_DATE, TEMP, GTAR, MAX_SIZE, TAR_DEPTH, TAR_FILTER, AFFIX"
         echo "note: TEMP used by tar-dir, etc.; Also see [un]set-tar-bzip2 and [un]set-tar-xz"
