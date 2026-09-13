@@ -1831,7 +1831,7 @@ function make-tar () {
     ## OLD: if [[ ("$base" == "--help") ||("$base" == "") ]]; then
     ## NOTE: checks for --help anywhere to simplify regex (TODO3: "--help" != argv[i] for i ...)
     ## TODO3: if [[ (("$*" =~ --help) && (! "$*" =~ --force)) || ("$base" == "") ]]; then
-    if [[ (("$*" =~ --help) && ("${SKIP_TAR_HELP:-0}" == "1")) || ("$base" == "") ]]; then
+    if [[ (("$*" =~ --help) && ("${SKIP_TAR_HELP:-0}" == "0")) || ("$base" == "") ]]; then
         echo "Usage: make-tar base dir [depth [filter]] [misc]"
         echo "Env. options: USE_DATE, TEMP, GTAR, MAX_SIZE, TAR_DEPTH, TAR_FILTER, AFFIX"
         echo "note: TEMP used by tar-dir, etc.; Also see [un]set-tar-bzip2 and [un]set-tar-xz"
@@ -1895,9 +1895,10 @@ function tar-dir () {
     # Warning: see behaviour with optional arguments and subdirs in make-tar
     ## TODO 2: add support for optional filtering 
     local dir="$1"; local depth="$2";
+    shift 2;
     local archive_base
     archive_base="$TEMP"/$(basename "$dir")
-    make-tar "$archive_base" "$dir" "$depth" 
+    make-tar "$archive_base" "$dir" "$depth" "$@"
 }
 ## TODO: fix indentation for tar-dir and other aliases (make sure 4 spaces used); also, make sure no tabs used as w/ tar-dir above
 ##
