@@ -109,6 +109,7 @@
 # - ***** Move settings to tomohara-settings.bash (i.e., export's and the like).
 # - ***** Put work-specific stuff in separate file!"
 # - **** Add EX-bases tests for all numeric aliases!
+# - **** Export shell variables used in aliases (n.b., avoid GTAR_OPTS bug in subshell).
 # - ***** Fix problems noted by shellcheck (and rework false positives)!.
 # - *** Indent [maldito] shell-check blocks.
 # - ** Add macros to provide cribsheet on usage!
@@ -2001,8 +2002,8 @@ function make-recent-tar {
         function-usage --args "tar-file-name num-days" --synopsis "make recent tar in TAR-FILE-NAME for files up to NUM-DAYS old" --note "Generate gzipped tar archive in TAR-FILE-NAME of current dir for files up to DAYS-OLD" --example "my-tar.gz 3"
         return        
     fi
-    missing-options "$@" && 
-    (find . -type f -mtime -"$2" | $GTAR "c${GTAR_OPTS}T" "$1" -; ) 2>&1 | $PAGER; ls-relative "$1";
+    (find . -type f -mtime -"$2" | $GTAR "c${GTAR_OPTS}T" "$1" -; ) 2>&1 | $PAGER;
+    ls-relative "$1";
 }
 #
 reset-tar-opts
