@@ -17,6 +17,7 @@
 #   as if the current directory changes (e.g., in summary_stats.bash).
 # - Use `jupyter console` to invoke a CLI verson of Jupyter (i.e., not ipython).
 #
+## UPDATE 14 Sep 26: filters console tracing
 
 """
   Test automation & report generation for BatsPP test files for Bash.
@@ -321,9 +322,10 @@ def main():
             # copies ./tests files into bats test dir (under temp); retains outer
             # quotation marks in output; uses single test directory; passes along
             # the --force option; ignores tests segments that are just comments.
+            # CONSOLE_TRACING disabled to facilitate bats header line sanity check.
             eval_log = output_file + ".eval.log"
             lenient_eval = (not STRICT_EVAL)
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} IGNORE_ALL_COMMENTS=1 IGNORE_SETUP_OUTPUT=1 python3 {parent_dir}/simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} IGNORE_ALL_COMMENTS=1 IGNORE_SETUP_OUTPUT=1 CONSOLE_TRACING=0 python3 {parent_dir}/simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         # Output excerpts from BatsPP source file, Bats output file and conversion log file.
@@ -491,7 +493,8 @@ def main():
                 output_lines_filtered = [item for item in output_lines if not item.startswith("#")]
                 debug.trace_expr(5, output_lines_filtered)
                 if output_lines_filtered:
-                    # Ignore the line given the number of tests (e.g., "1..5")
+                    # Ignore the line giving the number of BATS tests (e.g., "1..5")
+                    # note: CONSOLE_TRACING should be 0 (see startup-tracing.bash)
                     header_line = output_lines_filtered.pop(0)
                     debug.trace_expr(5, header_line)
                     debug.assertion(my_re.search(r"^1\.\.\d+", header_line) or (header_line == "0..0"),
