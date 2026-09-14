@@ -1984,7 +1984,9 @@ function tar-this-dir-normal { echo "Warning: deprecated function ${FUNCNAME[0]}
 function tar-just-this-dir () { tar-this-dir 1; }
 
 # GTAR_OPTS: usual options for aliases using gnu tar
-GTAR_OPTS=""
+## NOTE: GTAR_OPTS needs to be env for sake of subshell
+## BAD: GTAR_OPTS=""
+export GTAR_OPTS=""
 ## TODO2: GTAR_USUAL="$GTAR GTAR_OPTS"
 function set-tar-bzip2 () { GTAR_OPTS="vfj"; }
 function unset-tar-bzip2 () { reset-tar-opts; }
