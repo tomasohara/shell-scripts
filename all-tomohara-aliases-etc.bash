@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 #
 # Convenience script for loading all my aliases, functions, etc.
+## UPDATE 14 Sep 26: Traces to stderr (for sake of batspp tests).
 ## UPDATE 12 Jul 26: TOM_BIN-related cleanup.
 #
 # Tom's typical usage (n.b., idiosyncratic settings):
@@ -48,7 +49,7 @@
 
 # Guard against re-entry
 if [ "${ALIASES_PROCESSED:-0}" == 1 ]; then
-    echo "Warning: unexpected re-invocation of ${BASH_SOURCE[0]}; set ALIASES_PROCESSED=0 first"
+    echo "Warning: unexpected re-invocation of ${BASH_SOURCE[0]}; set ALIASES_PROCESSED=0 first" 1>&2
     return
 fi
 ALIASES_PROCESSED=1
@@ -82,9 +83,9 @@ source_dir="$(realpath "$(dirname "${BASH_SOURCE[0]:-$0}")")"
 if [ "$TOM_BIN" = "" ]; then export TOM_BIN="$(realpath "$source_dir")"; fi
 ## OLD: if [ "$TOM_BIN" != "$source_dir" ]; then
 if [ "$(realpath "$TOM_BIN")" != "$source_dir" ]; then
-    echo "FYI: TOM_BIN different from all-tomohara-aliases-etc.bash source dir:"
-    echo "    $TOM_BIN"
-    echo "    $source_dir"
+    echo "FYI: TOM_BIN different from all-tomohara-aliases-etc.bash source dir:" 1>&2
+    echo "    $TOM_BIN" 1>&2
+    echo "    $source_dir" 1>&2
     source_dir="$TOM_BIN"
 fi
 ## TEMP: make sure source dir in path
@@ -96,7 +97,7 @@ fi
 ## TODO3: define temporary alias (or rename to something specialized)
 function source {
     local script="$1"
-    (( DEBUG_LEVEL >= 4 )) && echo "issuing: source \"$script\""
+    (( DEBUG_LEVEL >= 4 )) && echo "issuing: source \"$script\"" 1>&2
     command source "$script"
 }
 source "$source_dir/tomohara-aliases.bash"
