@@ -718,6 +718,7 @@ function check_usage {
 ## TOM-IDIOSYNCRATIC
 
 # reset CDPATH to just current directory
+# note: this is used for resolving sub-directories without using ./subdir
 export CDPATH=.
 
 # flag for turning off GNOME, which can be flakey at times
@@ -1993,7 +1994,7 @@ function unset-tar-bzip2 () { reset-tar-opts; }
 function set-tar-xz () { GTAR_OPTS="vfJ"; }
 function reset-tar-opts { GTAR_OPTS="vfz"; }
 #
-# make-recent-tar(basename, days-old): create tar of current dir, saving as 
+# make-recent-tar(tar-file-name, days-old): create tar of current dir as TAR-FILE-NAME including up to DAYS-OLD files
 ## OLD: function make-recent-tar () { (find . -type f -mtime -"$2" | $GTAR "c${GTAR_OPTS}T" "$1" -; ) 2>&1 | $PAGER; ls-relative "$1"; }
 function make-recent-tar {
     if missing-options "$@"; then
@@ -2021,7 +2022,8 @@ alias untar-force='extract-tar-force'
 alias create-tar='make-tar-with-subdirs'
 alias make-full-tar='make-tar'
 # TODO: handle filenames with embedded spaces
-alias recent-tar-this-dir='make-recent-tar $TEMP/recent-$(basename "$PWD")'
+## OLD: alias recent-tar-this-dir='make-recent-tar $TEMP/recent-$(basename "$PWD")'
+alias-fn recent-tar-this-dir 'make-recent-tar "$TEMP/recent-$(basename "$PWD").tar.gz"'
 function sort-tar-archive() { ($GTAR "t${GTAR_OPTS}" "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
 #
 # TODO: tar-this-dir-there???
