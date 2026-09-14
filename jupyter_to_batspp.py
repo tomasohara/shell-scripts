@@ -73,7 +73,7 @@
 #    Wed Jun 21 06:30:51 CDT 2023
 #    
 #
-
+## UPDATE 13 Sep 26: Adds OMIT_PROMPT (for .sh output).
 
 """
 Jupyter to Batspp: This converts Jupyter to Batspp tests,
@@ -113,7 +113,9 @@ JUPYTER_EXTENSION = 'ipynb'
 BATSPP_EXTENSION  = 'batspp'
 SH_EXTENSION  = 'sh'
 TL = debug.TL
-
+OMIT_PROMPT = system.getenv_bool(
+    "OMIT_PROMPT", False,
+    desc="Omit $ prompt before commands when just outputting code (i.e., .sh)")
 
 class JupyterToBatspp(Main):
     """This convert Jupyter tests into Batspp tests"""
@@ -192,13 +194,16 @@ class JupyterToBatspp(Main):
                     if line.lower() == '# setup\n':
                         is_setup = True
                     elif line.lower() in ['# continuation\n', '# continue\n', '# test']:
-                    ## Lorenzo: Is there any use for this comments or just for setup?
+                        ## Lorenzo: Is there any use for this comments or just for setup?
                         is_setup = False
 
                     # Check if line is a comment or command
                     if not line.startswith('#'):
-                        debug.trace(6, f"Adding shell prompt '$' to {line_spec}")
-                        batspp_content += '$ '
+                        if self.just_code and OMIT_PROMPT:
+                            debug.trace(5, f"FYI: not adding shell prompt '$' to {line_spec}")
+                        else:
+                            debug.trace(6, f"Adding shell prompt '$' to {line_spec}")
+                            batspp_content += '$ '
 
                     batspp_content += ensure_new_line(line)
 
