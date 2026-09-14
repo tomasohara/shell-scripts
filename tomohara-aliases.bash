@@ -110,6 +110,8 @@
 # - ***** Put work-specific stuff in separate file!"
 # - **** Add EX-bases tests for all numeric aliases!
 # - **** Export shell variables used in aliases (n.b., avoid GTAR_OPTS bug in subshell).
+# - P2: Replace `shift 2` with new shift2 alias using two shift's; see
+#   https://unix.stackexchange.com/questions/673866/shift-shift-versus-shift-2-when-using-bash
 # - ***** Fix problems noted by shellcheck (and rework false positives)!.
 # - *** Indent [maldito] shell-check blocks.
 # - ** Add macros to provide cribsheet on usage!
@@ -1910,7 +1912,9 @@ function tar-dir () {
     # Warning: see behaviour with optional arguments and subdirs in make-tar
     ## TODO 2: add support for optional filtering 
     local dir="$1"; local depth="$2";
-    shift 2;
+    ## NOTE: `shift n` is no-op is n greater than number of arguments
+    ## BAD: shift 2;
+    shift; shift
     local archive_base
     archive_base="$TEMP"/$(basename "$dir")
     make-tar "$archive_base" "$dir" "$depth" "$@"
@@ -1951,7 +1955,7 @@ function tar-this-dir () {
     pushd-q "$(realpath "$PWD")";
     tar_basename="$(basename "$PWD")"
     if [ "$orig_basename" != "$tar_basename" ]; then
-        sleep-for 1.5 "Warning: basename change in tar: $orig_basename => $tar_basename"
+        sleep-for 1.5 "Warning: basename change in tar-this-dir: $orig_basename => $tar_basename"
     fi
     ## BAD: cd ..
     command cd ..
