@@ -59,8 +59,11 @@ alias git-status-tom=git-status-sans-tom
 # TODO: work out better alias name
 alias git-stat=git-status-sans-tom
 alias gstat=git-stat
-# TODO: better name (e.g., git-diff-name-only-main?) and/or decompose git-name-diff-branch?
-alias git-name-diff-main='git diff --name-only main..HEAD | cat'
+## OLD:
+## # TODO: better name (e.g., git-diff-name-only-main?) and/or decompose git-name-diff-branch?
+## alias git-name-diff-main='git diff --name-only main..HEAD | cat'
+## NOTE: name avoid tab-completion conflict with git-next-checkin (i.e., git-n)
+alias git-diff-name-only-main='git diff --name-only main..HEAD | cat'
 #
 # git-rename-revert(file, ...): renames FILE with data and then reverts
 # note: uses touch to avoid extraneous error message
