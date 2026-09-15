@@ -95,6 +95,7 @@
 #   set_xterm_title.bash startup-tracing.bash
 # - Supplemental scripts:
 #   anaconda-aliases.bash git-aliases.bash kill_em.bash ps_mine.bash
+## UPDATE 13 Sep 26: changes tar-this-dir warning to an FYI
 ## UPDATE 13 Sep 26: reworks tar-this-dir-normal & tar-just-this-dir in terms of tar-this-dir; refines usage for tar aliases; adds usage for make-recent-tar; renames tar-this-dir-pruned and deprecates tar-this-dir-normal
 ## UPDATE 12 Sep 26: start of tar-dir cleanup (e.g., dependency documentation)
 ## UPDATE 29 Aug 26: move-versioned-files-alt revision
@@ -301,7 +302,6 @@ alias disable-console-tracing='export CONSOLE_TRACING=0'
 # usage: if missing-options "$@"; then echo "Usage: ..."; fi
 # TODO2: rename to reflect usage check (e.g., missing-options-or-help)
 function missing-options {
-    ## OLD: [[ $# -eq 0 || "$1" == "--help" || "$1" == "-h" ]]
     [[ $# -eq 0 || " $* " == *" --help "* || " $* " == *" -h "* ]]
 }
 
@@ -917,11 +917,6 @@ alias copy-force='command cp -fp $other_file_args'
 alias cp='command cp -i $other_file_args'
 # note: unfortunately --no-clobber replaced with awkward --update=none';
 # in addition, --update[=UPDATE] not added until 2023; so, copy-no-clobber-old maintained.
-## OLD:
-## alias copy-noclobber-old='copy --no-clobber'
-## alias copy-noclobber='copy --update=none'
-## alias move-noclobber-old='move --no-clobber'
-## alias move-noclobber='move --update=none'
 alias copy-no-clobber-old='copy --no-clobber'
 alias copy-no-clobber='copy --update=none'
 alias move-no-clobber-old='move --no-clobber'
@@ -1244,21 +1239,17 @@ alias gr-nonascii='alias-perl perlgrep.perl -n "[\x80-\xFF]"'
 function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pattern find-option ... "; else command find $1 -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 2>&1 | $GREP -v '^find: '; fi; }
 # findspec[-all](dir, pattern, option): find files in directory tried, optionally following links (-all)
 function findspec-all () { command find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | $GREP -v '^find: '; }
-## OLD: # TODO2: issue warning that fs filters backup and build dirs
 # findspec-filter: filters miscellaneous files from find-file output (e.g., backup, build, etc.);
 function findspec-filter {
     local regex="/(backup|build|old)/"
     (( DEBUG_LEVEL >= 3 )) && echo "FYI: Filtering '$regex'" 1>&2
     $EGREP -iv "$regex"
 }
-## OLD: function fs () { findspec . "$@" | $EGREP -iv '(/(backup|build)/)'; } 
 function fs () { findspec . "$@" | findspec-filter; } 
 function fs-ls () { fs "$@" -exec ls "$core_dir_options" {} \; ; }
 # fs-ls-new(pattern): like fs-ls but omitting (extraneous) -print output
 function fs-ls-new () { findspec . "$@" -exec ls "$core_dir_options" {} \; ; }
 simple-alias-fn fs- 'findspec-all .'
-## OLD: ## Lorenzo review: should change this to fs-alt following TODO's
-## OLD: function fs-ext () { find . -iname \*."$1" | $EGREP -iv '(/(backup|build|old)/)'; } 
 function fs-ext () { find . -iname \*."$1" | findspec-filter; } 
 # TODO: extend fs-ext to allow for basename pattern (e.g., fs-ext java ImportXML)
 function fs-ls- () { fs- "$@" -exec ls "$core_dir_options" {} \; ; }
@@ -1293,8 +1284,6 @@ function alt-findgrep-ext {
 function fgr-full { findgrep . "$@"; }
 # fgr-ext-full(extension, pattern): full findgrep for *.EXTENSION from current dir for PATTERN
 function fgr-ext-full { findgrep-ext . "$@"; }
-## OLD: function fgr () { fgr-full | $EGREP -v '((/backup)|(/build))'; }
-## OLD: function fgr-ext () { findgrep-ext . "$@" | $EGREP -v '(/(backup)|(build)/)'; }
 function fgr () { fgr-full | findspec-filter; }
 function fgr-ext () { findgrep-ext . "$@" | findspec-filter; }
 function alt-fgr-ext () { alt-findgrep-ext . "$@" | findspec-filter; }
@@ -1836,10 +1825,6 @@ function make-tar () {
     #          Otherwise if optional args are present, empty dirs will be excluded from final tar
     # Check arguments
     local base="$1"; local dir="$2";
-    ## OLD: if [[ ("$base" == "--help") ||("$base" == "") ]]; then
-    ## NOTE: checks for --help anywhere to simplify regex (TODO3: "--help" != argv[i] for i ...)
-    ## TODO3: if [[ (("$*" =~ --help) && (! "$*" =~ --force)) || ("$base" == "") ]]; then
-    ## OLD: if [[ (("$*" =~ --help) && ("${SKIP_TAR_HELP:-0}" == "0")) || ("$base" == "") ]]; then
     missing-options "$@" && if [ "${SKIP_TAR_HELP:-0}" == "0" ]; then
         echo "Usage: make-tar base dir [depth [filter]] [misc]"
         echo "Env. options: USE_DATE, TEMP, GTAR, MAX_SIZE, TAR_DEPTH, TAR_FILTER, AFFIX"
@@ -1900,7 +1885,6 @@ function make-tar () {
 # Warning: See tar-dir-dated and tests/tar-aliases-tests.ipynb for main dependencies.
 #
 function tar-dir () {
-    ## OLD: check_usage "$1" $'usage: tar-dir dir [depth]\nnote: see make-tar for more"' && return
     if missing-options "$@"; then
         echo "Usage: "${FUNCNAME[0]}" dir [depth]"
         echo ""
@@ -1955,7 +1939,7 @@ function tar-this-dir () {
     pushd-q "$(realpath "$PWD")";
     tar_basename="$(basename "$PWD")"
     if [ "$orig_basename" != "$tar_basename" ]; then
-        sleep-for 1.5 "Warning: basename change in tar-this-dir: $orig_basename => $tar_basename"
+        sleep-for 1.5 "FYI: basename change in tar-this-dir: $orig_basename => $tar_basename"
     fi
     ## BAD: cd ..
     command cd ..
@@ -1964,7 +1948,7 @@ function tar-this-dir () {
     # note: uses basename so that full paths not stored in archive;
     # example: README path is shell-scripts/README.md not /home/tomohara/shell-scripts/README.md
     # TODO2: see if original basename can be preserved
-    ## OLD: tar-dir "$tar_basename";
+    ## PREVIOUS: tar-dir "$tar_basename";
     ## NOTE: passes along arguments (for testing --force option to make-tar)
     tar-dir "$tar_basename" "$@";
     popd-q;
@@ -1979,14 +1963,14 @@ alias new-tar-this-dir=tar-this-dir
 ## function helper() {local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" $1 $2; popd-q; }
 ## alias tar-this-dir-normal=helper "" "/(archive|backup|temp)/"
 ## alias tar-just-this-dir=helper "1" ""
-## OLD: function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" "" "/(archive|backup|temp)/"; popd-q; }
+## PREVIOUS: function tar-this-dir-normal () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" "" "/(archive|backup|temp)/"; popd-q; }
 function tar-this-dir-pruned { tar-this-dir "" "/(archive|backup|temp)/"; }
 function tar-this-dir-normal { echo "Warning: deprecated function ${FUNCNAME[0]}" 1>&2; tar-this-dir-pruned "$@"; }
 ## TODO1: rename tar-this-dir-normal usages as tar-this-dir-pruned
 ## TODO2: fix so tar-dir takes the filter arguments
 
 # tar-just-this-dir: creates tar of current dir without subdirectories
-## OLD: function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
+## PREVIOUS: function tar-just-this-dir () { local dir="$PWD"; pushd-q ..; tar-dir "$(basename "$dir")" 1; popd-q; }
 function tar-just-this-dir () { tar-this-dir 1; }
 
 # GTAR_OPTS: usual options for aliases using gnu tar
@@ -2000,7 +1984,7 @@ function set-tar-xz () { GTAR_OPTS="vfJ"; }
 function reset-tar-opts { GTAR_OPTS="vfz"; }
 #
 # make-recent-tar(tar-file-name, days-old): create tar of current dir as TAR-FILE-NAME including up to DAYS-OLD files
-## OLD: function make-recent-tar () { (find . -type f -mtime -"$2" | $GTAR "c${GTAR_OPTS}T" "$1" -; ) 2>&1 | $PAGER; ls-relative "$1"; }
+## PREVIOUS: function make-recent-tar () { (find . -type f -mtime -"$2" | $GTAR "c${GTAR_OPTS}T" "$1" -; ) 2>&1 | $PAGER; ls-relative "$1"; }
 function make-recent-tar {
     if missing-options "$@"; then
         function-usage --args "tar-file-name num-days" --synopsis "make recent tar in TAR-FILE-NAME for files up to NUM-DAYS old" --note "Generate gzipped tar archive in TAR-FILE-NAME of current dir for files up to DAYS-OLD" --example "my-tar.gz 3"
@@ -2027,7 +2011,7 @@ alias untar-force='extract-tar-force'
 alias create-tar='make-tar-with-subdirs'
 alias make-full-tar='make-tar'
 # TODO: handle filenames with embedded spaces
-## OLD: alias recent-tar-this-dir='make-recent-tar $TEMP/recent-$(basename "$PWD")'
+## PREVIOUS: alias recent-tar-this-dir='make-recent-tar $TEMP/recent-$(basename "$PWD")'
 alias-fn recent-tar-this-dir 'make-recent-tar "$TEMP/recent-$(basename "$PWD").tar.gz"'
 function sort-tar-archive() { ($GTAR "t${GTAR_OPTS}" "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
 #
@@ -2550,8 +2534,6 @@ function move-versioned-files-alt {
         alt2_version_regex="[^0-9]${alt2_version_regex}[^0-9]"
     fi
     ## TODO2: work out a glob accounting for dot files
-    ## OLD: move --no-clobber ./*$version_regex* ./*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
-    ## OLD: move --no-clobber ./.*$version_regex* ./.*$alt_version_regex* old 2>&1 | grep -v "cannot stat"
     move-no-clobber ./*$version_regex* ./*$alt_version_regex* ./*$alt2_version_regex* old 2>&1 | grep -v "cannot stat"
     move-no-clobber ./.*$version_regex* ./.*$alt_version_regex* ./.*$alt2_version_regex* old 2>&1 | grep -v "cannot stat"
     local false_positives
@@ -2845,7 +2827,6 @@ alias ununcompress-this-dir='uncompress-dir $PWD'
 # count-exts-all(): likewise including cases with no extension (e.g., 'it')
 ## TODO4: add option to include dotfiles (i.e., ls -a ...)
 ## UPDATE: 05/12/2026: adds -one_per_line to avoid multiple counts
-## OLD: function count-exts () { $LS | count-it -chomp -one_per_line '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
 function count-exts-stdin () { count-it -chomp -one_per_line '\.[^.]+$' | sort $SORT_COL2 -rn | $PAGER; }
 function count-exts { $LS | count-exts-stdin; }
 ## BAD: function count-exts-all { (count-exts | cat; $LS | count-it -chomp -one_per_line '^[^.]+(\.*)$') | sort $SORT_COL2 -rn | $PAGER; }
@@ -3212,14 +3193,10 @@ alias hw2-login='ssh-host-login-aws $NEW_HOSTWINDS_HOST'
 alias hw2-upload='scp-aws-up $NEW_HOSTWINDS_HOST'
 alias hw2-download='scp-aws-down $NEW_HOSTWINDS_HOST'
 #
-## OLD:
-## HW2_MISC="http://www.tomasohara.trade/misc"
-## alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=misc hw2-upload'
 HW2_MISC="https://www.tomasohara.trade/share"
 alias hw2-upload-misc='echo see $HW2_MISC; SSH_XFER=share hw2-upload'
 function hw2-upload-misc-single {
     hw2-upload-misc "$1"
-    ## OLD: echo see "$HW2_MISC/$(basename "$1")"
     local url
     url="$HW2_MISC/$(basename "$1")"
     echo "see $url"
@@ -3593,13 +3570,11 @@ function ipython() {
     local ipython
     ipython=$(which ipython)
     if [ "$ipython" = "" ]; then echo "Error: install ipython first"; return; fi
-    ## OLD: set-xterm-window "ipython [$PWD]"
     ## TEST: set-xterm-window "ipython [$PWD]; pid=$$"
     set-xterm-window "ipython [$PWD]"
     # note: git-root currently `git rev-parse --show-toplevel' (see git-aliases.bash);
     # no-op if not in a git repo (e.g., PYTHONPATH=":..."
     git_base_dir=$(git-root 2> /dev/null)
-    ## OLD: PYTHONPATH="$git_base_dir:$PYTHONPATH" command ipython "$@"
     PYTHONPATH="$git_base_dir:$PYTHONPATH" command ipython --no-term-title "$@"
 }
 
