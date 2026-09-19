@@ -272,7 +272,10 @@ while (<>) {
 	    &debug_print(&TL_VERBOSE, "current text='$text'\n");
 	}
 	else {
-	    $text = $';				# '
+	    ## NOTE: Fix by GPT-5.6-Terra for hanging issue
+	    ## EXAMPLE: $ check-errors -context=0 /var/log/syslog | count-it '(?=(\S+(?:[ \t]+\S+){1,4}))' | head
+	    ## OLD: $text = $';				# '
+	    $text = ($found ? $' : "");         # '
 	}
 
 
