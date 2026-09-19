@@ -535,3 +535,9 @@ WARNING: Anchors currently start or end line: consider -one_per_line
 ## TPO-TEMP -user $ reset-prompt-label TPO-TEMP
 ## TPO-TEMP -TEMP -user $ reset-prompt 'TPO-TEMP $'
 ## TPO-TEMP $ 
+
+##------------------------------------------------------------------------------
+
+## TODO3: fix ln-symbolic when first argument used for target by accident
+##   $ mkdir /tmp/exists; ln-symbolic exists /tmp/exists
+##   '/tmp/exists/exists' -> 'exists'
