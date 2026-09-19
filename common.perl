@@ -2397,5 +2397,9 @@ sub get_file_ddmmmyy {
 # in the package loading.
 
 &init_common();
+if (&DETAILED_DEBUGGING) {
+    my($_package, $filename, $_line) = caller;
+    &debug_print(1, "caller: $filename\n");
+}
 &assert(&TRUE != &FALSE);
 1;
