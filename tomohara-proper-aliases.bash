@@ -262,21 +262,21 @@ function run-python-script {
     local python_arg="-"
     # shellcheck disable=SC2086
     {
-	if [ "${USE_STDIN:-0}" == "1" ]; then
-	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
-	    ## TODO2:
+        if [ "${USE_STDIN:-0}" == "1" ]; then
+            # note: assumes python script uses - to indicate stdin as per norm for mezcla
+            ## TODO2:
             echo "${script_args[*]}" | DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" $python_arg > "$out" 2> "$log"
-	else
-	    # note: disables - with explicit arguments or if running pytest
-	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
+        else
+            # note: disables - with explicit arguments or if running pytest
+            if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
             if [ "${USE_STDOUT:-1}" == "1" ]; then
-	        DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log"
+                DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log"
             else
                 # TODO3: extend to handle special case with USE_STDIN
-	        DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1
+                DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1
                 touch "$out"
             fi
-	fi
+        fi
     }
     # Finalize code profiling
     if [ "$PROFILE_SCRIPT" == "1" ]; then

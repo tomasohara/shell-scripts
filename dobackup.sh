@@ -45,9 +45,9 @@ endif
 # TODO: make BACKUP the symbolic link instead
 if (! -e ./backup/. ) then
     if (-e ./BACKUP) then
-	ln -s BACKUP backup
+        ln -s BACKUP backup
     else
-	mkdir ./backup
+        mkdir ./backup
     endif
 endif
 
@@ -64,26 +64,26 @@ while ("$1" != "")
     endif
     
     if (! -d "$fil") then
-	# Output current file to backup (TODO: only do in verbose mode)
-	## TODO: set basefil = "`basename ""$fil""`"
-	set basefil = `basename "$fil"`
-	if (-e "$dir/$basefil") then
-	    echo "Backing up '$fil' to '$backup_dir/$basefil'"
+        # Output current file to backup (TODO: only do in verbose mode)
+        ## TODO: set basefil = "`basename ""$fil""`"
+        set basefil = `basename "$fil"`
+        if (-e "$dir/$basefil") then
+            echo "Backing up '$fil' to '$backup_dir/$basefil'"
         else
             echo "Warning: not backing up '$fil' to '$backup_dir/$basefil'; try $rel_backup_arg"
-	endif
+        endif
 
-	# Make existing version of backup file writable
-	## OLD: echo "Backing up '$fil' to '$backup_dir/$basefil'"
-	## OLD: if (-e "$backup_dir/$basefil") chmod u+w "$backup_dir/$basefil"
-	if (-e "$backup_dir/$basefil") then
-	    chmod u+w "$backup_dir/$basefil"
-	endif
+        # Make existing version of backup file writable
+        ## OLD: echo "Backing up '$fil' to '$backup_dir/$basefil'"
+        ## OLD: if (-e "$backup_dir/$basefil") chmod u+w "$backup_dir/$basefil"
+        if (-e "$backup_dir/$basefil") then
+            chmod u+w "$backup_dir/$basefil"
+        endif
 
-	# Copy the file and remove write access
-	# TODO: just issue error message if file doesn't exist (i.e., don't run cp and chmod commands)
-	cp -p "$fil" "$backup_dir"
-	chmod ugo-w "$backup_dir/$basefil"
+        # Copy the file and remove write access
+        # TODO: just issue error message if file doesn't exist (i.e., don't run cp and chmod commands)
+        cp -p "$fil" "$backup_dir"
+        chmod ugo-w "$backup_dir/$basefil"
     endif
     shift
 end

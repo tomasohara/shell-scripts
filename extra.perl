@@ -38,12 +38,12 @@ BEGIN {
     unshift @INC, $dir if defined $dir && -d $dir;
     
     require 'common.perl';
-    ## use HotKey;		# reads single character from input without blocking
-    ## OLD: require 'timelocal.pl';	# perl library for time functions
+    ## use HotKey;              # reads single character from input without blocking
+    ## OLD: require 'timelocal.pl';     # perl library for time functions
     use Time::Local;
     *timelocal::cheat = \&Time::Local::cheat;
 
-    ## OLD: use Data::Dumper;	# stringifies perl data structures for printing and eval 
+    ## OLD: use Data::Dumper;   # stringifies perl data structures for printing and eval 
 }
 
 # Uncomment the following to check for undeclared variables.
@@ -71,51 +71,51 @@ sub init_extra {
     &init_var(*use_MI, &FALSE);
     &init_var(*use_dice, (! $use_MI));
     &init_var(*null_eof, &FALSE);
-    &init_var(*numeric_format, "%.3f");	# numeric format for rounding and normalization
+    &init_var(*numeric_format, "%.3f"); # numeric format for rounding and normalization
     &init_var(*stringify_indent, 0);
     
     # Associative arrays for abbreviations
     %months = ("january", "jan",
-    	   "february", "feb",
-    	   "march", "mar",
-    	   "april", "apr",
-    	   "may", "may",
-    	   "june", "jun",
-    	   "july", "jul",
-    	   "august", "aug",
-    	   # "september", "sept",
-    	   "september", "sep",
-    	   "october", "oct",
-    	   "november", "nov",
-    	   "december", "dec");
+           "february", "feb",
+           "march", "mar",
+           "april", "apr",
+           "may", "may",
+           "june", "jun",
+           "july", "jul",
+           "august", "aug",
+           # "september", "sept",
+           "september", "sep",
+           "october", "oct",
+           "november", "nov",
+           "december", "dec");
     %weekdays = ("sunday", "sun",
-    	     "monday", "mon",
-    	     "tuesday", "tues",
-    	     "wednesday", "wed",
-    	     "thursday", "thurs",
-    	     "friday", "fri",
-    	     "saturday", "sat");
+             "monday", "mon",
+             "tuesday", "tues",
+             "wednesday", "wed",
+             "thursday", "thurs",
+             "friday", "fri",
+             "saturday", "sat");
     
     # Alternative format for converting months into indices
     @month_names = ("\tjanuary\tjan\t",
-    	   "\tfebruary\tfeb\t",
-    	   "\tmarch\tmar\t",
-    	   "\tapril\tapr\t",
-    	   "\tmay\tmay\t",
-    	   "\tjune\tjun\t",
-    	   "\tjuly\tjul\t",
-    	   "\taugust\taug\t",
-    	   "\tseptember\tsep\t",
-    	   "\toctober\toct\t",
-    	   "\tnovember\tnov\t",
-    	   "\tdecember\tdec\t");
+           "\tfebruary\tfeb\t",
+           "\tmarch\tmar\t",
+           "\tapril\tapr\t",
+           "\tmay\tmay\t",
+           "\tjune\tjun\t",
+           "\tjuly\tjul\t",
+           "\taugust\taug\t",
+           "\tseptember\tsep\t",
+           "\toctober\toct\t",
+           "\tnovember\tnov\t",
+           "\tdecember\tdec\t");
 
     # Optionally initialize random number with 100,000th prime (1318699.
     # NOTE: Using default seed allows for reproducibility since random numbers differ between runs otherwise.
-    &init_var(*default_random, &FALSE);		# use default random number seed
-    &init_var(*seed, 1318699);			# random number seed (0 none)
+    &init_var(*default_random, &FALSE);         # use default random number seed
+    &init_var(*seed, 1318699);                  # random number seed (0 none)
     if ($default_random) {
-	&debug_print(&TL_BASIC, "Setting random number seed to $seed\n");
+        &debug_print(&TL_BASIC, "Setting random number seed to $seed\n");
         srand($seed);
     }
 
@@ -150,7 +150,7 @@ sub init_topN {
     my($num) = @_;
     
     if (defined($num)) {
-	$TOPN = $num;
+        $TOPN = $num;
     }
     &debug_print(&TL_VERBOSE, "init_topN(@_): TOPN=$TOPN\n");
 
@@ -188,23 +188,23 @@ sub revise_topN {
     # Find the position in the list where it belongs
     my($pos) = -1;
     for ($i = 0; $i < $TOPN; $i++) {
-	# NOTE: ties might eventually fall off the list
-	if ((!defined($$max_value_ref[$i])) 
-	    || ($value > $$max_value_ref[$i])) {
-	    $pos = $i;
-	    last;
-	}
+        # NOTE: ties might eventually fall off the list
+        if ((!defined($$max_value_ref[$i])) 
+            || ($value > $$max_value_ref[$i])) {
+            $pos = $i;
+            last;
+        }
     }
     if ($pos == -1) {
-	return;
+        return;
     }
 
     # Shift the lesser entries down the list
     for ($i = ($TOPN - 1); $i > $pos; $i--) {
-	if (defined($$max_value_ref[$i - 1])) {
-	    $$max_value_ref[$i] = $$max_value_ref[$i - 1];
-	    $$max_label_ref[$i] = $$max_label_ref[$i - 1];
-	}
+        if (defined($$max_value_ref[$i - 1])) {
+            $$max_value_ref[$i] = $$max_value_ref[$i - 1];
+            $$max_label_ref[$i] = $$max_label_ref[$i - 1];
+        }
     }
     $$max_value_ref[$pos] = $value;
     $$max_label_ref[$pos] = $label;
@@ -227,8 +227,8 @@ sub show_topN {
     my($i);
 
     for ($i = 0; $i < $TOPN; $i++) {
-	printf $FILE $display_format, $$max_label_ref[$i], $$max_value_ref[$i] 
-	    unless (!defined($$max_label_ref[$i]));
+        printf $FILE $display_format, $$max_label_ref[$i], $$max_value_ref[$i] 
+            unless (!defined($$max_label_ref[$i]));
     }
 
     return;
@@ -250,9 +250,9 @@ sub abbreviate {
 
     # Substitute the abbreviation for each key in the table
     foreach $key (keys(%$abbrevs_ref)) {
-	my($abbreviation) = &get_entry($abbrevs_ref, $key, "");
-	&assert($abbreviation ne "");
-	$text =~ s/$key/$abbreviation/ig;
+        my($abbreviation) = &get_entry($abbrevs_ref, $key, "");
+        &assert($abbreviation ne "");
+        $text =~ s/$key/$abbreviation/ig;
     }
 
     return ($text);
@@ -283,9 +283,9 @@ sub month_value {
     my($i);
 
     for ($i = 0; $i <= $#month_names; $i++) {
-	if (index($month_names[$i], &to_lower("\t$month\t")) != -1) {
-	     $value = $i + 1;
-	 }
+        if (index($month_names[$i], &to_lower("\t$month\t")) != -1) {
+             $value = $i + 1;
+         }
     }
     &debug_print(&TL_VERBOSE, "month_value(@_) => $value\n");
 
@@ -301,8 +301,8 @@ sub month_abbrev {
     my($month) = "???";
 
     if (($value > 0) && ($value <= ($#month_names + 1))) {
-	$month = $month_names[$value - 1];
-	$month =~ s/\t\S+\t(\S+)\t/$1/;
+        $month = $month_names[$value - 1];
+        $month =~ s/\t\S+\t(\S+)\t/$1/;
     }
     &debug_print(&TL_VERBOSE, "month_abbrev(@_) => $month\n");
 
@@ -331,8 +331,8 @@ sub format_assoc_data_aux {
     my($count) = 0;
     my($key);
     foreach $key (&$sort_routine($freq_assoc_ref)) {
-	push (@formatted_data, (sprintf "%s%s%s", $key, $freq_delim, $$freq_assoc_ref{$key}));
-	last if (++$count >= $max);
+        push (@formatted_data, (sprintf "%s%s%s", $key, $freq_delim, $$freq_assoc_ref{$key}));
+        last if (++$count >= $max);
     }
 
     return (join($entry_delim, @formatted_data));
@@ -372,9 +372,9 @@ sub format_numeric_assoc_data {
 # by reverse numeric order of the values
 #
 # variants:
-# sorted_hash_keys_numeric		keys sorted by numeric order of the values
-# sorted_hash_keys_alphabetic		keys sorted by alphatic order of value
-# sorted_hash_keys_numeric_keys		keys sorted by numeric order of value
+# sorted_hash_keys_numeric              keys sorted by numeric order of the values
+# sorted_hash_keys_alphabetic           keys sorted by alphatic order of value
+# sorted_hash_keys_numeric_keys         keys sorted by numeric order of value
 #
 # EX: sorted_hash_keys_reverse_numeric({joe => 87, steve => 101, tom => 55}) => ("steve", "joe", "tom")
 #
@@ -420,7 +420,7 @@ sub get_web_frequency {
     my($quote) = (index($phrase, "'") != -1) ? '"' : "'";
     my($result) = &run_command("web_freq.perl $options $quote$phrase$quote");
     if ($result =~ /^(\d+)/) {
-	$freq = $1;
+        $freq = $1;
     }
 
     return ($freq);
@@ -433,10 +433,10 @@ sub get_web_frequency {
 # either mutual information or the Dice coefficient
 #
 #   mutual information:
-#	log2(P(X=1,Y=1) / P(X=1) * P(Y=1))
+#       log2(P(X=1,Y=1) / P(X=1) * P(Y=1))
 #
 #   the Dice coefficient:
-#	Dice(X,Y) = 2 * p(X=1,Y=1)/(p(X=1) + p(Y=1))
+#       Dice(X,Y) = 2 * p(X=1,Y=1)/(p(X=1) + p(Y=1))
 #
 # EX: (web_cooccurrence("close", "proximity") > web_cooccurrence("near", "proximity")) => 1
 #
@@ -471,23 +471,23 @@ sub web_cooccurrence {
 
     # Determine the co-occurrence metric
     if ($use_MI) {
-	my($MI) = 0;
-	if (($prob_X > 0) && ($prob_Y > 0) && ($prob_XY > 0)) {
-	    $MI = log($prob_XY / ($prob_X * $prob_Y)) / log(2);
-	}
-	$metric = $MI;
+        my($MI) = 0;
+        if (($prob_X > 0) && ($prob_Y > 0) && ($prob_XY > 0)) {
+            $MI = log($prob_XY / ($prob_X * $prob_Y)) / log(2);
+        }
+        $metric = $MI;
     }
     if ($use_dice) {
-	my($dice) = 0;
-	if (($prob_Y > 0) && ($prob_XY > 0)) {
-	    $dice = 2 * $prob_XY / ($prob_X + $prob_Y);
-	}
-	$metric = $dice;
+        my($dice) = 0;
+        if (($prob_Y > 0) && ($prob_XY > 0)) {
+            $dice = 2 * $prob_XY / ($prob_X + $prob_Y);
+        }
+        $metric = $dice;
     }
 
     # Trace contingency table in format suitable for calc_multi_x2.perl
     if ($verbose) {
-	printf "%d %d %d %d %s\n", $freq_X1_Y1, $freq_X1_Y0, $freq_X0_Y1, $freq_X0_Y0, join(" ", @_);
+        printf "%d %d %d %d %s\n", $freq_X1_Y1, $freq_X1_Y0, $freq_X0_Y1, $freq_X0_Y0, join(" ", @_);
     }
 
     return ($metric);
@@ -497,7 +497,7 @@ sub web_cooccurrence {
 # 
 sub print_web_cooccurrence_header {
     if ($verbose) {
-	printf "+A+B +A-B -A+B -A-B words\n";
+        printf "+A+B +A-B -A+B -A-B words\n";
     }
 }
 
@@ -535,23 +535,23 @@ sub read_frequencies {
 
     if (! open(FREQ, "<$file")) {
         &error("unable to open frequency file: $file ($!)\n");
-	return (0);
+        return (0);
     }
 
     my($total_freq) = 0;
     while (<FREQ>) {
         &dump_line("freq: $_", &TL_MOST_VERBOSE);
         chomp;
-        s/^[;\#].*//;			# strip comments
-        next if (/^\s*$/);		# ignore blank lines
+        s/^[;\#].*//;                   # strip comments
+        next if (/^\s*$/);              # ignore blank lines
         my($key, $count) = split('\t', $_);
-	if ($freq_first) {
-	    ($count, $key) = split('\t', $_);
-	}
+        if ($freq_first) {
+            ($count, $key) = split('\t', $_);
+        }
         next if (!defined($key));
-	$key = &to_lower($key);		# make sure key is lowercase
+        $key = &to_lower($key);         # make sure key is lowercase
 
-	${$freq_list_ref}{$key} = 0 if (!defined(${$freq_list_ref}{$key}));
+        ${$freq_list_ref}{$key} = 0 if (!defined(${$freq_list_ref}{$key}));
         ${$freq_list_ref}{$key} += $count;
         $total_freq += $count;
     }
@@ -615,11 +615,11 @@ sub hash_key {
 
     my ($char);
     foreach $char (split(//, $key)) {
-	&debug_out(&TL_VERY_VERBOSE, "temp result=%d ord(char)=%d\n", 
-		   $result, ord($char));
-	$result = (($result * 33) + ord($char));
-	$result += &MAXINT if ($result < 0);
-	## $result = -$result if ($result < 0);
+        &debug_out(&TL_VERY_VERBOSE, "temp result=%d ord(char)=%d\n", 
+                   $result, ord($char));
+        $result = (($result * 33) + ord($char));
+        $result += &MAXINT if ($result < 0);
+        ## $result = -$result if ($result < 0);
     }
     $result += ($result / 32);
     $result += &MAXINT if ($result < 0);
@@ -645,9 +645,9 @@ sub get_user_response {
     # Initialization so that Hotkey module only loaded if needed
     # note: this avoid problem with background processing of the scripts
     if (! $get_user_response_init) {
-	&debug_print(&TL_VERBOSE, "using Hotkey\n");
-	eval "use HotKey;";
-	$get_user_response_init = &TRUE;
+        &debug_print(&TL_VERBOSE, "using Hotkey\n");
+        eval "use HotKey;";
+        $get_user_response_init = &TRUE;
     }
 
     # Set stardard output, and error to be unbuffered
@@ -660,21 +660,21 @@ sub get_user_response {
     my($response) = "";
     my($done);
     do {
-	$response = readkey();
-	$done = &TRUE;
+        $response = readkey();
+        $done = &TRUE;
 
-	# If terminal EOF is being ignored, reset the completion flag on null input
-	# NOTE: This circumvents problems with readkey() on older Linux configurations
-	&debug_out(&TL_MOST_VERBOSE, "readkey() => %s (%d)\n", $response, ord($response));
-	if ($null_eof && (ord($response) == 0)) {
-	    $done = (! $wait);
-	}
+        # If terminal EOF is being ignored, reset the completion flag on null input
+        # NOTE: This circumvents problems with readkey() on older Linux configurations
+        &debug_out(&TL_MOST_VERBOSE, "readkey() => %s (%d)\n", $response, ord($response));
+        if ($null_eof && (ord($response) == 0)) {
+            $done = (! $wait);
+        }
     } while (! $done);
     print "$response\n";
 
     # Issue error and quit if end of file was encountered
     if (ord($response) == 0) {
-	&exit("Unexpected end of file\n");
+        &exit("Unexpected end of file\n");
     }
 
     return ($response);
@@ -688,9 +688,9 @@ sub get_next_char {
     # Initialization so that ReadKey module only loaded if needed
     # note: this avoid problem with background processing of the scripts
     if (! $get_next_char_init) {
-	&debug_print(&TL_VERBOSE, "using Term::ReadKey\n");
-	eval "use Term::ReadKey;";
-	$get_next_char_init = &TRUE;
+        &debug_print(&TL_VERBOSE, "using Term::ReadKey\n");
+        eval "use Term::ReadKey;";
+        $get_next_char_init = &TRUE;
     }
 
     # Read the character, defaulting to ""
@@ -712,12 +712,12 @@ sub get_boolean_response {
     &debug_print(&TL_VERY_VERBOSE, "get_boolean_response(@_)\n");
 
     for (;;) {
-	my($response) = &get_user_response($prompt);
-	if ($response =~ /[yn]/i) {
-	    $OK = ($response =~ /y/i);
-	    last;
-	}
-	print "\b";
+        my($response) = &get_user_response($prompt);
+        if ($response =~ /[yn]/i) {
+            $OK = ($response =~ /y/i);
+            last;
+        }
+        print "\b";
     }
 
     return ($OK);
@@ -733,13 +733,13 @@ sub get_numeric_response {
     &debug_print(&TL_VERY_VERBOSE, "get_numeric_response(@_)\n");
 
     for (;;) {
-	my($response) = &get_user_response("$prompt ($min-$max): ");
-	if ($response =~ /^[0-9]+$/) {
-	    if (($response >= $min) && ($response <= $max)) {
-		$choice = $response;
-		last;
-	    }
-	}
+        my($response) = &get_user_response("$prompt ($min-$max): ");
+        if ($response =~ /^[0-9]+$/) {
+            if (($response >= $min) && ($response <= $max)) {
+                $choice = $response;
+                last;
+            }
+        }
     }
 
     return ($choice);
@@ -754,13 +754,13 @@ sub get_numeric_response {
 sub readline {
     my($prompt) = @_;
     my($line) = "";
-	my($char) = "";
+        my($char) = "";
 
     # Read the line a character at a time
     print $prompt;
     while ($char ne "\n") {
-	$char = &readkey();
-	$line .= $char;
+        $char = &readkey();
+        $line .= $char;
     }
     chomp $line;
     print "$line\n";
@@ -777,12 +777,12 @@ sub normalize_numeric_array {
     my($sum) = 0.0;    
 
     for (my $i = 0; $i <= $#vector; $i++) {
-	$sum += $vector[$i];
+        $sum += $vector[$i];
     }
     if ($sum > 0) {
-	for (my $i = 0; $i <= $#vector; $i++) {
-	    $vector[$i] = $vector[$i] / $sum;
-	}
+        for (my $i = 0; $i <= $#vector; $i++) {
+            $vector[$i] = $vector[$i] / $sum;
+        }
     }
 
     return (@vector);
@@ -804,13 +804,13 @@ sub calc_entropy {
     my($prob);
 
     foreach $prob (@dist) {
-	$max_prob = &max($prob, $max_prob);
-	$p_lg_p = 0;
-	if ($prob > 0) {
-	    $p_lg_p = - $prob * log2($prob);
-	}
-	$entropy += $p_lg_p;
-	&debug_out(&TL_VERBOSE, "p=%.3f; p lg(p)=%.3f\n", $prob, $p_lg_p);
+        $max_prob = &max($prob, $max_prob);
+        $p_lg_p = 0;
+        if ($prob > 0) {
+            $p_lg_p = - $prob * log2($prob);
+        }
+        $entropy += $p_lg_p;
+        &debug_out(&TL_VERBOSE, "p=%.3f; p lg(p)=%.3f\n", $prob, $p_lg_p);
     }
     &debug_out(&TL_VERBOSE, "entropy=%.3f\n", $entropy);
 
@@ -873,79 +873,79 @@ sub derive_time_stamp {
     # example: 'Sun, 01 Mar 1998 00:56:28'
     $date =~ s/,/ /;
     if ($date =~ /(\w\w\w)\s+(\d+)\s+(\w\w\w)\s+(\d{4}|\d{2})\s+(\d?\d):(\d\d):(\d\d)/) {
-	$weekday = $1; $mday = $2; $mon = $3; $year = $4;
-	$hour = $5; $min = $6; $sec = $7;
-	&debug_print(&TL_VERY_DETAILED, "date format: WWW[,] DD MMM YYYY HH:MM:SS\n");
+        $weekday = $1; $mday = $2; $mon = $3; $year = $4;
+        $hour = $5; $min = $6; $sec = $7;
+        &debug_print(&TL_VERY_DETAILED, "date format: WWW[,] DD MMM YYYY HH:MM:SS\n");
     }
     # Check for WWW[,] MMM DD HH:MM:SS YYYY
     # example: 'From tomohara@oleada Sun Mar  1 00:56:28 1998'
     elsif ($date =~ /(\w\w\w)\s+(\w\w\w)\s+(\d+)\s+(\d\d):(\d\d):(\d\d)\s+(\d{4})/) {
-	$weekday = $1; $mday = $3; $mon = $2; $year = $7;
-	$hour = $4; $min = $5; $sec = $6;
-	&debug_print(&TL_VERY_DETAILED, "date format: WWW[,] MMM DD HH:MM:SS YYYY\n");
+        $weekday = $1; $mday = $3; $mon = $2; $year = $7;
+        $hour = $4; $min = $5; $sec = $6;
+        &debug_print(&TL_VERY_DETAILED, "date format: WWW[,] MMM DD HH:MM:SS YYYY\n");
     }
     # Check for DD MMM YYYY HH:MM:SS
     # example: '18 JUL 1963 18:10:10'
     elsif ($date =~ /(\d+)\s+(\w\w\w)\s+(\d{4}|\d{2})\s+(\d?\d):(\d\d):(\d\d)/) {
-	$weekday = "???"; $mday = $1; $mon = $2; $year = $3;
-	$hour = $4; $min = $5; $sec = $6;
-	&debug_print(&TL_VERY_DETAILED, "date format: DD MMM YYYY HH:MM:SS\n");
+        $weekday = "???"; $mday = $1; $mon = $2; $year = $3;
+        $hour = $4; $min = $5; $sec = $6;
+        &debug_print(&TL_VERY_DETAILED, "date format: DD MMM YYYY HH:MM:SS\n");
     }
     # Check for WWW MMM DD HH:MM:SS ZZZ YYYY
     # example: 'Sat Mar 22 13:00:21 MST 2003'
     # TODO: reconcile this with case 2 above
     elsif ($date =~ /(\w\w\w)\s+(\w\w\w)\s+(\d\d?)\s+(\d\d):(\d\d):(\d\d)\s+(\w\w\w)\s+(\d\d\d\d)/) {
-	$weekday = $1; $mday = $3; $mon = $2; $year = $8; $zone = $7;
-	$hour = $4; $min = $5; $sec = $6;
-	&debug_print(&TL_VERY_DETAILED, "date format: WWW MMM DD HH:MM:SS ZZZ YYYY\n");
+        $weekday = $1; $mday = $3; $mon = $2; $year = $8; $zone = $7;
+        $hour = $4; $min = $5; $sec = $6;
+        &debug_print(&TL_VERY_DETAILED, "date format: WWW MMM DD HH:MM:SS ZZZ YYYY\n");
     }
     # Check for  WWW D+ MMM YY HH:MMxm
     # example: 'Sun 1 Mar 98 12:30am'
     elsif ($date =~ /(\w\w\w)\s+(\d+|\d\d)\s+(\w\w\w)\s+(\d{4}|\d{2})\s+(\d?\d):(\d\d)([ap]m)/i) {
-	$weekday = $1; $mday = $2; $mon = $3; $year = $4;
-	$hour = $5; $min = $6; my($am_pm) = $7;
-	if ($am_pm =~ /PM/i) {
-	    $hour += 12;
-	}
-	elsif ($hour == 12) {
-	    $hour = 0;
-	}
-	&debug_print(&TL_VERBOSE, "date format: WWW D+ MMM YY HH:MMxm\n");
+        $weekday = $1; $mday = $2; $mon = $3; $year = $4;
+        $hour = $5; $min = $6; my($am_pm) = $7;
+        if ($am_pm =~ /PM/i) {
+            $hour += 12;
+        }
+        elsif ($hour == 12) {
+            $hour = 0;
+        }
+        &debug_print(&TL_VERBOSE, "date format: WWW D+ MMM YY HH:MMxm\n");
     }
     # Check for MM/DD/YYYY
     elsif ($date =~ /(\d{1,2})\/(\d{1,2})\/(\d{2,4})/i) {
-	$mday = $2; $mon = $1; $year = $3;
-	$hour = 0; $min = 0; $sec = 0;
-	$mday = 1 if (!defined($mday) || !is_numeric($mday));
-	&debug_print(&TL_VERY_DETAILED, "date format: MM/DD/YYYY\n");
+        $mday = $2; $mon = $1; $year = $3;
+        $hour = 0; $min = 0; $sec = 0;
+        $mday = 1 if (!defined($mday) || !is_numeric($mday));
+        &debug_print(&TL_VERY_DETAILED, "date format: MM/DD/YYYY\n");
     }
     # Check for [DD] MMM YYYY
     # TODO: make the time optional in the above patterns
     elsif ($date =~ /(\d*)\s*([a-z]{3,})\s+(\d{4}|\d{2})/i) {
-	$mday = $1; $mon = $2; $year = $3;
-	$hour = 0; $min = 0; $sec = 0;
-	$mday = 1 if (!defined($mday) || !is_numeric($mday));
-	&debug_print(&TL_VERY_DETAILED, "date format: [DD] MMM YYYY\n");
+        $mday = $1; $mon = $2; $year = $3;
+        $hour = 0; $min = 0; $sec = 0;
+        $mday = 1 if (!defined($mday) || !is_numeric($mday));
+        &debug_print(&TL_VERY_DETAILED, "date format: [DD] MMM YYYY\n");
     }
     else {
-	&error("Unrecognized date format in '$date' (derive_time_stamp)\n");
+        &error("Unrecognized date format in '$date' (derive_time_stamp)\n");
     }
 
     # Make sure the values are in the correct ranges (eg, months 1-12; full years)
     if (! &is_numeric($mon)) {
-	$mon = &month_value($mon);
+        $mon = &month_value($mon);
     }
     $mon--;
     &assert(($mon >= 0) && ($mon < 12));
     $year -= 1900 if ($year >= 1900);
 ##     if ($year < 1900) {
-## 	# TODO: make option to control how two-digit years are interpretted
-## 	if ($year < 50) {
-## 	    $year += 2000;
-## 	}
-## 	else {
-## 	    $year += 1900;
-## 	}
+##      # TODO: make option to control how two-digit years are interpretted
+##      if ($year < 50) {
+##          $year += 2000;
+##      }
+##      else {
+##          $year += 1900;
+##      }
 ##     }
     &debug_print(&TL_VERY_VERBOSE, "tf=(weekday, mon, mday, year, hour, min, sec, zone)\n");
     &debug_print(&TL_VERY_DETAILED, "tf=($weekday, $mon, $mday, $year, $hour, $min, $sec, $zone)\n");
@@ -981,7 +981,7 @@ sub derive_time_stamp {
 ## sub parse_iso_timestamp {
 ##     my($date) = @_;
 ##     if (! $Strp) {
-## 	&init_DateTime();
+##      &init_DateTime();
 ##     }
 ##     my($dt) = $Strp->parse_datetime($date);
 ##     my($epoch) = $dt->epoch + $dt->millisecond / 1000;
@@ -1022,9 +1022,9 @@ sub stringify_value {
 
     # Make sure Dumper module loaded
     if (! $stringify_init) {
-	&debug_print(&TL_VERBOSE, "using Data::Dumper\n");
-	eval "use Data::Dumper";
-	$stringify_init = &TRUE;
+        &debug_print(&TL_VERBOSE, "using Data::Dumper\n");
+        eval "use Data::Dumper";
+        $stringify_init = &TRUE;
     }
 
     # Change indentation
@@ -1034,7 +1034,7 @@ sub stringify_value {
     # Get ascii representation of the value, ignoring variable part of the assignment 
     my($string_value) = Dumper($value);
     &debug_out(&TL_VERY_VERBOSE, "Dumper(%s) => '%s'\n",
-	       (defined($value) ? $value : "undef"), $string_value);
+               (defined($value) ? $value : "undef"), $string_value);
 
     # Ignore 'VARn =' prefix
     $string_value =~ s/^\$VAR\d+ = ([^\000]*);$/$1/;
@@ -1076,10 +1076,10 @@ sub max_label {
 
     # Check each value against current max, updating max and label
     for (my $i = 0; $i <= $#$values_ref; $i++) {
-	if ($max < $$values_ref[$i]) {
-	    $max = $$values_ref[$i];
-	    $label = $$labels_ref[$i];
-	}
+        if ($max < $$values_ref[$i]) {
+            $max = $$values_ref[$i];
+            $label = $$labels_ref[$i];
+        }
     }
     &debug_print(&TL_VERY_VERBOSE, "max_label(@_) => \"$label\"\n");
 

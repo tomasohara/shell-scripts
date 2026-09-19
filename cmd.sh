@@ -24,26 +24,26 @@ set show_usage = "0"
 if ("$1" == "") set show_usage = "1"
 while ("$1" =~ -*)
     if ("$1" == "--time-out") then
-	set use_time_out = 1
-	if ("$2" =~ [0-9]*) then
-	    set time_out = $2
-	    set time_out_specified = 1
-	    shift
-	endif
-	set redirect = 0
+        set use_time_out = 1
+        if ("$2" =~ [0-9]*) then
+            set time_out = $2
+            set time_out_specified = 1
+            shift
+        endif
+        set redirect = 0
     else if ("$1" == "--redirect") then
-	set redirect = 1
+        set redirect = 1
     else if ("$1" == "--out-file") then
-	set log_file = "$2"
-	set temp_log = 0
-	shift
+        set log_file = "$2"
+        set temp_log = 0
+        shift
     else if ("$1" == "--verbose") then
-	set detailed = 1
+        set detailed = 1
     else if ("$1" == "--trace") then
-	set echo = 1
+        set echo = 1
     else
-	set show_usage=1
-	echo "Error: unexpected option: $1"
+        set show_usage=1
+        echo "Error: unexpected option: $1"
     endif
     shift
 end
@@ -75,8 +75,8 @@ if ($use_time_out == 1) then
     set force_option = ""
     if ( "`printenv OSTYPE`" == "cygwin" ) set force_option = "-f"
     if ($detailed == 1) then
-	## OLD: echo "Issuing: (sleep $time_out ... kill $force_option -9 $$) &" >> "$log_file"
-	echo "Issuing: (sleep $time_out ... kill $force_option -9 $$) &"
+        ## OLD: echo "Issuing: (sleep $time_out ... kill $force_option -9 $$) &" >> "$log_file"
+        echo "Issuing: (sleep $time_out ... kill $force_option -9 $$) &"
     endif
     ( (sleep $time_out; kill $force_option -9 $$) & ) >& /dev/null
 endif
@@ -85,22 +85,22 @@ endif
 # NOTE: redirection doesn't work with time-out's since the script gets killed
 if ($redirect == 1) then
     if ($detailed == 1) then
-	## OLD: echo "Issuing: $command" >>&! "$log_file"
-	echo "Issuing: $command"
+        ## OLD: echo "Issuing: $command" >>&! "$log_file"
+        echo "Issuing: $command"
     endif
     ## DEBUG:
     ## set echo=1
     ## $command
     $command >>&! "$log_file"
     if ($temp_log == 1) then
-	cat "$log_file"
-	rm "$log_file"
+        cat "$log_file"
+        rm "$log_file"
     else
-	echo "See $log_file for output"
+        echo "See $log_file for output"
     endif
 else
     if ($detailed == 1) then
-	echo "Issuing: $command"
+        echo "Issuing: $command"
     endif
     $command
 endif

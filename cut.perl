@@ -17,7 +17,7 @@ BEGIN {
     require 'common.perl';
     ## TODO: use vars qw/$verbose/;
 }
-use English;				# for $PREMATCH, etc.
+use English;                            # for $PREMATCH, etc.
 
 # Specify additional diagnostics and strict variable usage, excepting those
 # for command-line arguments (see init_var's in &init).
@@ -45,22 +45,22 @@ if (!defined($ARGV[0])) {
 # Check the command-line options
 # note: Each variable initialized corresponds to a -var=value commandline option
 &init_var(*col, "");                            # alias for -fields="COL+1"
-&init_var(*f, "");		                # alias for -fields
+&init_var(*f, "");                              # alias for -fields
 &assertion(($col eq "") || ($f eq ""));
-## OLD: &init_var(*fields, $f);	                # list of field numbers or ranges to include
+## OLD: &init_var(*fields, $f);                 # list of field numbers or ranges to include
 my($fields_default) = (($col ne "") ? $col : $f); # default for -fields using -col or -f values
 #
 &init_var(*fields,               # 1-based field specification as in cut,
-	  $fields_default);      # (e.g, "Ni or Ni-Mi[, ...]")
+          $fields_default);      # (e.g, "Ni or Ni-Mi[, ...]")
 #
 my($field_spec) = $fields;
-&init_var(*fix, &FALSE);		# treat whitespace as field delimiters
+&init_var(*fix, &FALSE);                # treat whitespace as field delimiters
 ## TODO: 
 &init_var(*delim, "\t");                # alias for -delimiter
-## OLD: &init_var(*delimiter, "\t");	# field delimiter for data
+## OLD: &init_var(*delimiter, "\t");    # field delimiter for data
 ## TODO: 
-&init_var(*delimiter, $delim);		# field delimiter for data
-&init_var(*missing, "???");		# value to use if not enough columns
+&init_var(*delimiter, $delim);          # field delimiter for data
+&init_var(*missing, "???");             # value to use if not enough columns
 if ($fix) {
     &assertion($delimiter =~ /^\s+$/);
 }
@@ -76,7 +76,7 @@ while (<>) {
     # Optionally, fix up the data into columns
     # Note: mainly intended for whitespace-delimited data
     if ($fix) {
-	s/\s+/$delimiter/g;
+        s/\s+/$delimiter/g;
     }
     # HACK: Replace non-space delimiter within quotes with <DELIM> token
     # TODO: Use unassigned Unicode value in place of <DELIM>
@@ -86,29 +86,29 @@ while (<>) {
     &trace_array(\@columns, &TL_VERY_DETAILED, "\@columns");
     my($new_num_columns) = scalar @columns;
     if ($new_num_columns != $num_columns) {
-	$num_columns = $new_num_columns;
-	@fields = &derive_fields($field_spec, $num_columns);
+        $num_columns = $new_num_columns;
+        @fields = &derive_fields($field_spec, $num_columns);
     }
 
     # Print each of column entries for the fields specified
     my(%missing_columns);
     for (my $i = 0; $i <= $#fields; $i++) {
-	print $delimiter if ($i > 0);
-	my($col) = $fields[$i] - 1;
-	my($value) = $columns[$col];
-	## TODO: $value = "" if (! defined($value));
-	# HACK: Restore delimiter within value (e.g., ',' within address)
-	if (! defined($value)) {
-	    ## BAD: $value = "???";
-	    $value = $missing;
-	    if (! defined($missing_columns{$col})) {
-		&debug_print(&TL_USUAL, "Warning: Missing value at line $. column $col\n");
-		$missing_columns{$col} = &TRUE;
-	    }
-	}
-	$value = &decode_delimiter($value);
-	## OLD: print $value if (defined($columns[$col]));
-	print $value;
+        print $delimiter if ($i > 0);
+        my($col) = $fields[$i] - 1;
+        my($value) = $columns[$col];
+        ## TODO: $value = "" if (! defined($value));
+        # HACK: Restore delimiter within value (e.g., ',' within address)
+        if (! defined($value)) {
+            ## BAD: $value = "???";
+            $value = $missing;
+            if (! defined($missing_columns{$col})) {
+                &debug_print(&TL_USUAL, "Warning: Missing value at line $. column $col\n");
+                $missing_columns{$col} = &TRUE;
+            }
+        }
+        $value = &decode_delimiter($value);
+        ## OLD: print $value if (defined($columns[$col]));
+        print $value;
     }
     print "\n";
 }
@@ -128,20 +128,20 @@ sub encode_delimiter {
     &debug_print(&TL_VERY_VERBOSE, "encode_delimiter(@_)\n");
     if ($delimiter !~ /^\s+$/) {
         my($before) = $_;
-	my($count) = 0;
+        my($count) = 0;
         while (($text =~ /^[^"]*"([^"]*)"/) && ($count < &MAX_EMBEDDED)) {
             my($pre, $value, $post) = ($`, $1, $');
             $value =~ s/$delimiter/&DELIM_TOKEN/ge;
             $text = $pre . $value . $post;
-	    $count++;
+            $count++;
         }
         my($after) = $text;
         if ($before ne $after) {
             &debug_print(&TL_DETAILED, "line changed from '$before' to '$after'\n");
         }
-	if ($count == &MAX_EMBEDDED) {
-	    &warning("max number of delim-embedded fields reached: &MAX_EMBEDDED\n");
-	}
+        if ($count == &MAX_EMBEDDED) {
+            &warning("max number of delim-embedded fields reached: &MAX_EMBEDDED\n");
+        }
     }
     &debug_print(&TL_MOST_VERBOSE, "encode_delimiter(@_) => '$text'");
     return ($text);
@@ -167,14 +167,14 @@ sub derive_fields {
     while ($field_spec =~ /(\d+)-(\d+)?/) {
         my($start, $end) = ($1, $2);
         if (! defined($end)) {
-	    $end = $num_columns;
+            $end = $num_columns;
         }
         &debug_print(&TL_VERY_DETAILED, "s=$start, e=$end\n");
         my($subfield_spec) = "";
     
         # Convert i-j format (e.g., "4-7" => "4,5,6,7")
         for (my $i = $start; $i < $end; $i++) {
-	    $subfield_spec .= "$i,"
+            $subfield_spec .= "$i,"
         }
         $subfield_spec .= "$end";
     

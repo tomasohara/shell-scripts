@@ -32,3 +32,15 @@ python -m bash_kernel.install
 python -m nltk.downloader punkt averaged_perceptron_tagger
 python -m spacy download en_core_web_lg
 ```
+
+## Batch tab expansion
+
+Normally Emacs is used to "untabify" interactively. However, it can be done in batch mode as follows:
+
+```
+$ sudo apt install moreutils
+
+$ for f in $(grep --files-with-matches $'\t' *.bash *.perl *.sh *.py *.csh); do expand "$f" | sponge "$f"; done
+```
+
+This should be used with caution, so carefully review the diffs against the repo before checking in.

@@ -20,15 +20,15 @@ moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 show_usage=0
 while [ "$moreoptions" == "1" ]; do
     if [ "$1" == "--trace" ]; then
-	set -o xtrace;
+        set -o xtrace;
     elif [ "$1" == "--cmd" ]; then
-	kdiff="$2"
+        kdiff="$2"
         shift
     elif [ "$1" == "--help" ]; then
-	show_usage=1
+        show_usage=1
     else
-	echo "ERROR: Unknown option: $1";
-	exit;
+        echo "ERROR: Unknown option: $1";
+        exit;
     fi
     shift 1;
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac

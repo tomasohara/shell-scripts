@@ -104,39 +104,39 @@ endif
 # TODO: allows options after pattern (e.g., `while (("$1" =~ -*) || ("$2" =~ -*))`)
 while ("$1" =~ -*)
     if ("$1" == "--all") then
-	set pattern = "*"
+        set pattern = "*"
     else if (("$1" == "-b") || ("$1" == "-wb") || ("$1" == "--ignore-spacing")) then
         # Ignore all spacing-related differences (i.e., -wbB)
-	## OLD: set diff_options = "$diff_options --ignore-space-change --ignore-all-space --ignore-blank-lines"
-	set space_options = "--ignore-space-change --ignore-all-space --ignore-blank-lines"
+        ## OLD: set diff_options = "$diff_options --ignore-space-change --ignore-all-space --ignore-blank-lines"
+        set space_options = "--ignore-space-change --ignore-all-space --ignore-blank-lines"
     else if ("$1" == "--check-space-changes") then
-	set space_options=""
+        set space_options=""
     else if ("$1" == "--brief") then
-	set brief = "1"
+        set brief = "1"
     else if ("$1" == "--diff") then
-	set diff_cmd = "$2"
-	shift
+        set diff_cmd = "$2"
+        shift
     else if ("$1" == "--diff-options") then
-	set diff_options = "$diff_options $2"
-	shift
+        set diff_options = "$diff_options $2"
+        shift
     else if ("$1" == "--quiet") then
-	set quiet = "1"
-	set verbose_mode = "0"
+        set quiet = "1"
+        set verbose_mode = "0"
     else if ("$1" == "--verbose") then
-	set verbose_mode = "1"
+        set verbose_mode = "1"
     else if ("$1" == "--nopattern") then
-	set nopattern = "1"
+        set nopattern = "1"
     else if ("$1" == "--no-glob") then
-	set no_glob = "1"
+        set no_glob = "1"
     else if ("$1" == "--match-dot-files") then
-	set match_dot_files = "1"
+        set match_dot_files = "1"
     else if ("$1" == "--ignore-all-space") then
-	set diff_options = "$diff_options --ignore-all-space"
+        set diff_options = "$diff_options --ignore-all-space"
     else if ("$1" == "--trace") then
-	set echo = 1
+        set echo = 1
     else
-	echo "ERROR: unknown option: $1"
-	exit
+        echo "ERROR: unknown option: $1"
+        exit
     endif
     shift
 end
@@ -152,29 +152,29 @@ endif
 if ("$pattern" == "") then
     if ("$no_glob" == "1") then
         # Treat first argument as pattern without * added
-	set pattern = "$1"
+        set pattern = "$1"
     else if ("$1" =~ \*.*\ \*\.*) then
         # ex: "*.py *.mako"
         echo "Assuming implicit --no-glob, as otherwise space would be in extension"
-	set pattern = "$1"
+        set pattern = "$1"
     else if (-f "$1") then
         # specific file (e.g., "README.txt")
-	set pattern = "$1"
+        set pattern = "$1"
     else if ("$1" =~ \.*) then
         # note: dot file (e.g., ".emacs") requires use of --match-dot-files
-	if ("$match_dot_files" == "1") then
-	    # note: special case handling since can't use *.emacs* (i.e., substring case below)
-	    set pattern = "$1*"
-	else
-	    # convenience so that '.py' gets treated as '*.py'
-	    set pattern = "*$1"
-	endif
+        if ("$match_dot_files" == "1") then
+            # note: special case handling since can't use *.emacs* (i.e., substring case below)
+            set pattern = "$1*"
+        else
+            # convenience so that '.py' gets treated as '*.py'
+            set pattern = "*$1"
+        endif
     else if ("$1" =~ \*\.*) then
         # extension (e.g., "*.py")
-	set pattern = "*$1"
+        set pattern = "*$1"
     else
         # substring of file
-	set pattern = "*$1*"
+        set pattern = "*$1*"
     endif
     shift
 endif
@@ -192,8 +192,8 @@ endif
 #
 foreach file ($pattern)
    if ("$file" =~ \*\$\*) then
-	echo "Warning: Ignoring file with $ in name"
-	continue
+        echo "Warning: Ignoring file with $ in name"
+        continue
    endif
    # Derive base name for file, including relative directory (e.g., in case pattern specifies subdirectory)
    ## OLD: set base = `basename "$file"`
@@ -222,11 +222,11 @@ foreach file ($pattern)
        $diff_cmd --brief $space_options $diff_options "$file" "$other_file" | perl -pe 's/Files (.*) and (.*) differ/Differences: $1 $2/;'
        ## OLD: if ($? == 1) then
        if ($status == 1) then
-	   ls -l "$file"
-	   ls -l "$other_file"
+           ls -l "$file"
+           ls -l "$other_file"
        endif
    endif
-	
+        
    # Show the actual file differences
    ## OLD: $diff_cmd $diff_options "$file" "$other_file"
    $diff_cmd $space_options $diff_options "$file" "$other_file"

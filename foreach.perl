@@ -6,12 +6,12 @@ eval 'exec perl -Ssw $0 "$@"'
 #
 # foreach.perl: Evaluate a command for each argument. The special variable
 # $f will be replaced by the current file. Other variables are as follows:
-#	$f	fully-specified file name
-#	$d	directory name
-#	$b	file w/o directory
-#	$B	same but also without file extensions
-#	$h	host name
-#       $n	alias for $f (for use with -count option)
+#       $f      fully-specified file name
+#       $d      directory name
+#       $b      file w/o directory
+#       $B      same but also without file extensions
+#       $h      host name
+#       $n      alias for $f (for use with -count option)
 #       $q      single quote
 #       $qq     double quote
 # These can also be referred to a &f, etc.
@@ -54,21 +54,21 @@ use vars qw/$kill $status $remote $no_files $pause $all $busy_load $trace
 &init_var(*no_files, $remote && ($#ARGV == 0));
 ## &init_var(*pause, 60);
 &init_var(*pause,               # number of seconds to sleep after issuing command
-	  ($remote ? 60 : 0));
+          ($remote ? 60 : 0));
 my($file_required) = (!($kill || $status));
-&init_var(*all, &FALSE);	# use all available host
+&init_var(*all, &FALSE);        # use all available host
 &init_var(*busy_load, 0.50);
-&init_var(*trace, &FALSE);	# display command to be executed
-&init_var(*quote, &FALSE);	# put quotes around the $f placeholder
-&init_var(*nonfile, &FALSE);	# the $f placeholder is not for a file
-&init_var(*noquote, $nonfile);	# don't automatically put quotes around the $f
+&init_var(*trace, &FALSE);      # display command to be executed
+&init_var(*quote, &FALSE);      # put quotes around the $f placeholder
+&init_var(*nonfile, &FALSE);    # the $f placeholder is not for a file
+&init_var(*noquote, $nonfile);  # don't automatically put quotes around the $f
 #
-&init_var(*from, 1);		# for loop start value
+&init_var(*from, 1);            # for loop start value
 my($loop_count) = defined($to) ? ($to - $from + 1) : defined($count) ? $count : 0;
 &init_var(*to, $from + $loop_count - 1); # for loop end value
-&init_var(*count, $loop_count);		# number of times for loop
-&init_var(*step, 1);		# loop increment
-&init_var(*init_vars, "");	# user variables initialized on command line (e.g., foreach.perl -myvar=77 -init_vars="myvar" ...)
+&init_var(*count, $loop_count);         # number of times for loop
+&init_var(*step, 1);            # loop increment
+&init_var(*init_vars, "");      # user variables initialized on command line (e.g., foreach.perl -myvar=77 -init_vars="myvar" ...)
 &init_var(*test, &FALSE);       # dry run (e.g., test of arg expansion)
 
 # Reference all of the user init-vars
@@ -87,11 +87,11 @@ foreach my $var (&tokenize($init_vars)) {
 my($domain_name_command) = "domainname.sh";
 &init_var(*DOMAINNAME, "");
 $DOMAINNAME = &run_command($domain_name_command) unless ($DOMAINNAME ne "");
-&init_var(*ssh, &FALSE);	# use ssh rather than rsh
+&init_var(*ssh, &FALSE);        # use ssh rather than rsh
 my($rsh_options) = ($ssh ? "--ssh" : "");
-&init_var(*HOST, "???");	# current host
-&init_var(*hostlist,		# list of hosts for remote execution
-	  ($remote ? &default_host_list() : "localhost"));
+&init_var(*HOST, "???");        # current host
+&init_var(*hostlist,            # list of hosts for remote execution
+          ($remote ? &default_host_list() : "localhost"));
 my(@host) = &tokenize($hostlist);
 my($num_hosts) = $#host + 1;
 &assert($num_hosts > 0);
@@ -113,7 +113,7 @@ my($command) = shift @ARGV;
 # Create a dummy file for each host (to execute upon)
 # TODO: handle more directly in the loop logic below
 if (defined($ARGV[0]) && ($ARGV[0] eq "-")) {
-    undef $/;			# set entire-file-mode input
+    undef $/;                   # set entire-file-mode input
     @ARGV = split(/\n/, <STDIN>);
 }
 elsif ($no_files) {
@@ -129,17 +129,17 @@ elsif ($no_files) {
 if ($kill || $status) {
     my($command_line) = $command;
     if ($kill) {
-	# Use a  script to kill the remote job
-	$command_line =~ s/\|/\\\|/g;
-	&debug_out(6, "command_line=%s\n", $command_line);
-	$command_line = "${script_dir}/kill_em.sh -p '$command_line'";
+        # Use a  script to kill the remote job
+        $command_line =~ s/\|/\\\|/g;
+        &debug_out(6, "command_line=%s\n", $command_line);
+        $command_line = "${script_dir}/kill_em.sh -p '$command_line'";
     }
     else {
-	# Use a script to show all the user's jobs (on the remote host)
-	$command_line = "${script_dir}/ps_mine.sh --verbose";
+        # Use a script to show all the user's jobs (on the remote host)
+        $command_line = "${script_dir}/ps_mine.sh --verbose";
     }
     foreach my $host (@host) {
-	&issue_command("rsh.sh $rsh_options --time-out $host $command_line");
+        &issue_command("rsh.sh $rsh_options --time-out $host $command_line");
     }
     &exit;
 }
@@ -155,14 +155,14 @@ if (($command !~ /[\$\&]\{?[fbdBhn]\}?/) && ($no_files == &FALSE)) {
 if ($count > 0) {
     @ARGV = ();
     for (my $i = $from; $i <= $to; $i += $step) {
-	push(@ARGV, "$i");
+        push(@ARGV, "$i");
     }
 }
 
 my($host_pos) = 0;
 ## my($count) = 0;
 my($wrap_around) = &FALSE;
-my($n) = 0;			# 1-based position in foreach list
+my($n) = 0;                     # 1-based position in foreach list
 &debug_print(7, "pre foreach ARGV: ARGV=(@ARGV)\n");
 foreach $f (@ARGV) {
     &debug_print(7, "f=$f\n");
@@ -173,63 +173,63 @@ foreach $f (@ARGV) {
 
     # Handle remote-execution option by converting command into rsh command
     if ($remote) {
-	# Pause whenever the host list wraps around
-	&debug_out(6, "host_pos=$host_pos wrap_around=$wrap_around\n");
-	if ($wrap_around) {
-	    &cmd("sleep $pause");
-	    $wrap_around = &FALSE;
-	}
+        # Pause whenever the host list wraps around
+        &debug_out(6, "host_pos=$host_pos wrap_around=$wrap_around\n");
+        if ($wrap_around) {
+            &cmd("sleep $pause");
+            $wrap_around = &FALSE;
+        }
 
-	# If remote execution is desired, find the next host in the list
-	# that is accessible.
-	for (my $i = 0; $i < $num_hosts; $i++) {
-	    $host = $host[$host_pos];
-	    if (++$host_pos == $num_hosts) {
-		$host_pos = 0;
-		$wrap_around = &TRUE;
-	    }
+        # If remote execution is desired, find the next host in the list
+        # that is accessible.
+        for (my $i = 0; $i < $num_hosts; $i++) {
+            $host = $host[$host_pos];
+            if (++$host_pos == $num_hosts) {
+                $host_pos = 0;
+                $wrap_around = &TRUE;
+            }
 
-	    # Make sure the host is accessible
-	    my($ping_result) = &run_command("ping.sh $host");
-	    if (($ping_result eq "") || ($ping_result  =~ /(time.*out)|(unknown)/i)) {
-		&debug_out(4, "unable to ping $host\n");
-		next;
-		}
+            # Make sure the host is accessible
+            my($ping_result) = &run_command("ping.sh $host");
+            if (($ping_result eq "") || ($ping_result  =~ /(time.*out)|(unknown)/i)) {
+                &debug_out(4, "unable to ping $host\n");
+                next;
+                }
 
-	    # Make sure the host isn't too busy (e.g., load should be under 1)
-	    if ($busy_load > 0.0) {
-		my($load_info) = &run_command("rup.sh --time-out $host");
-		my(($load_avg)) = ($load_info =~ /load average:\s([^ \t,]+),/);
-		if (!defined($load_avg) || ($load_avg >= $busy_load)) {
-		    &debug_out(4, "$host too busy (load >= $busy_load): $load_info\n");
-		    next;
-		}
-	    }
+            # Make sure the host isn't too busy (e.g., load should be under 1)
+            if ($busy_load > 0.0) {
+                my($load_info) = &run_command("rup.sh --time-out $host");
+                my(($load_avg)) = ($load_info =~ /load average:\s([^ \t,]+),/);
+                if (!defined($load_avg) || ($load_avg >= $busy_load)) {
+                    &debug_out(4, "$host too busy (load >= $busy_load): $load_info\n");
+                    next;
+                }
+            }
 
-	    # Accept this host 
-	    last;
-	}
+            # Accept this host 
+            last;
+        }
 
-	# Add the rsh command for remote execution.
-	# NOTE: Done for commands separated by semicolons as well
-	$command_line = "rsh.sh $rsh_options $host $command_line";
-	$command_line =~ s/; ([^r])/; rsh.sh $rsh_options $host $1/g;
+        # Add the rsh command for remote execution.
+        # NOTE: Done for commands separated by semicolons as well
+        $command_line = "rsh.sh $rsh_options $host $command_line";
+        $command_line =~ s/; ([^r])/; rsh.sh $rsh_options $host $1/g;
 
-	# Make sure the file name path is fully specified.
-	# Otherwise the file might be taken from the user's home directory.
-	$f = &make_full_path($f) unless ($nonfile);
+        # Make sure the file name path is fully specified.
+        # Otherwise the file might be taken from the user's home directory.
+        $f = &make_full_path($f) unless ($nonfile);
     }
     if (($quote || ($f =~ /\s/)) && (! $noquote)) {
-	$f = '"' . $f . '"';
+        $f = '"' . $f . '"';
     }
-    $b = &remove_dir($f);	# $b placeholder for basename
+    $b = &remove_dir($f);       # $b placeholder for basename
     $B = $b;
-    $B =~ s/\..*$//;		# $B placeholder for basename sans extension
-    $d = &dirname($f);		# $d placeholder for directory
-    $h = $host;			# $h placeholder for remote host name
+    $B =~ s/\..*$//;            # $B placeholder for basename sans extension
+    $d = &dirname($f);          # $d placeholder for directory
+    $h = $host;                 # $h placeholder for remote host name
     $q = "'";                   # $q placeholder for single quote
     $qq = '"';                  # (likewise $qq for double quote)
-    ## $n = $f;			# $n placeholder for count
+    ## $n = $f;                 # $n placeholder for count
     &debug_out(6, "f=%s d=%s b=%s B=%s h=%s\n", $f, $d, $b, $B, $host);
 
     # Evaluate and run the command
@@ -240,14 +240,14 @@ foreach $f (@ARGV) {
     my($prefix) = ($test ? "test " : "");
     &debug_out(&TL_VERBOSE, "${prefix}issuing: %s\n", $command_line);
     if ($trace | $test) {
-	printf STDERR "${prefix}issuing: %s\n", eval "\"$command_line\"";
+        printf STDERR "${prefix}issuing: %s\n", eval "\"$command_line\"";
     }
     if ($test) {
-	next;
+        next;
     }
     eval("issue_command(\"$command_line\", &TL_DETAILED);");
     if ($pause) {
-	&cmd("sleep $pause");
+        &cmd("sleep $pause");
     }
 }
 
@@ -274,82 +274,82 @@ sub default_host_list ()
     my($host_list) = "";
     
     if ($DOMAINNAME eq "crl.nmsu.edu") {
-	# note: need to hardcode list to avoid using certain machines
-	$host_list = " marathon  tenedos  pramnos  messene  thebes "
-	    . " hellespont  temese  lemnos  ismaros  phoenicia "
-	    . " troia  amnisos  argos  asteris  ephyre "
-	    . " gortyn  kydonia  nericos  pharos  oleada "
-	    . " kimmerion  corinth  ilios  orchomenos  krouni "
-	    . " kyklopon  kypros  sparta  zakynthos "
-	    . "";
+        # note: need to hardcode list to avoid using certain machines
+        $host_list = " marathon  tenedos  pramnos  messene  thebes "
+            . " hellespont  temese  lemnos  ismaros  phoenicia "
+            . " troia  amnisos  argos  asteris  ephyre "
+            . " gortyn  kydonia  nericos  pharos  oleada "
+            . " kimmerion  corinth  ilios  orchomenos  krouni "
+            . " kyklopon  kypros  sparta  zakynthos "
+            . "";
     }
     elsif ($DOMAINNAME eq "cs.nmsu.edu") {
-	# Check for the old beowolf cluster
-	if ($HOST eq "medusa") {
-	    $host_list = 
-		"   wb1  wb2  wb3  wb4  wb5  wb6  wb7  wb8  wb9  wb10 "
-		. " wb11 wb12 wb13 wb14 wb15 wb16 wb17 wb18 wb19 wb20 "
-		. " wb21 wb22 wb23 wb24 wb25 wb26 wb27 wb28 wb29 wb30 "
-		. " wb31 wb32 "
-		. "";
-	}
-	# Check for the new beowolf cluste
-	elsif ($HOST eq "colossus") {
-	    $host_list = 
-		"   bw1  bw2  bw3  bw4  bw5  bw6  bw7  bw8  bw9  bw10 "
-		. " bw11 bw12 bw13 bw14 bw15 bw16 bw17 bw18 bw19 bw20 "
-		. " bw21 bw22 bw23 bw24 bw25 bw26 bw27 bw28 bw29 bw30 "
-		. " bw31 bw32 "
-		. "";
-	}
-	elsif ($all) {
-	    $host_list = " acapulco antwerp bangkok balamb blake cairo calgary caracas "
-		. " casablanca chicago clink cobra coleman dakar dali detroit "
-		. " duster edsel enzo gremlin hiro hongkong hopkins kinshasa "
-		. " lagos lhasa lima lindbulm lummox maverick midgar mini mustang  "
-		. " nairobi nergal quito prague raven rio salzburg seoul singapore "
-		. " sydney timber utai valencia vegas venice victor vincent vitaly "
-		. " waldo tobago aruba gaan-srv rhuidean simone trinidad grenada "
-		. " grendel jamaica pippo shenyang trutta tuscan viper scanner "
-		. " gato perro salmo medusa ";
-	}
+        # Check for the old beowolf cluster
+        if ($HOST eq "medusa") {
+            $host_list = 
+                "   wb1  wb2  wb3  wb4  wb5  wb6  wb7  wb8  wb9  wb10 "
+                . " wb11 wb12 wb13 wb14 wb15 wb16 wb17 wb18 wb19 wb20 "
+                . " wb21 wb22 wb23 wb24 wb25 wb26 wb27 wb28 wb29 wb30 "
+                . " wb31 wb32 "
+                . "";
+        }
+        # Check for the new beowolf cluste
+        elsif ($HOST eq "colossus") {
+            $host_list = 
+                "   bw1  bw2  bw3  bw4  bw5  bw6  bw7  bw8  bw9  bw10 "
+                . " bw11 bw12 bw13 bw14 bw15 bw16 bw17 bw18 bw19 bw20 "
+                . " bw21 bw22 bw23 bw24 bw25 bw26 bw27 bw28 bw29 bw30 "
+                . " bw31 bw32 "
+                . "";
+        }
+        elsif ($all) {
+            $host_list = " acapulco antwerp bangkok balamb blake cairo calgary caracas "
+                . " casablanca chicago clink cobra coleman dakar dali detroit "
+                . " duster edsel enzo gremlin hiro hongkong hopkins kinshasa "
+                . " lagos lhasa lima lindbulm lummox maverick midgar mini mustang  "
+                . " nairobi nergal quito prague raven rio salzburg seoul singapore "
+                . " sydney timber utai valencia vegas venice victor vincent vitaly "
+                . " waldo tobago aruba gaan-srv rhuidean simone trinidad grenada "
+                . " grendel jamaica pippo shenyang trutta tuscan viper scanner "
+                . " gato perro salmo medusa ";
+        }
 
-	# TODO: Add in other hard-coded lists here
-	elsif (&FALSE) {
-	    $host_list = " a b c ... z ";
-	}
+        # TODO: Add in other hard-coded lists here
+        elsif (&FALSE) {
+            $host_list = " a b c ... z ";
+        }
 
-	# Otherwise use a bunch of Pentium IV Linux hosts
-	else {
-	    $host_list = ""
-		. " antwerp bamf bangkok baz beetle clobber cobra coleman countach dart derf "
-		. " duster eclipse edsel epoch frob feep glob gremlin hongkong hopkins "
-		. " kluge maverick munge nova quine runic scag singapore segv valencia "
-		. " viggen yikes zeroth antwerp seoul ";
-	}
+        # Otherwise use a bunch of Pentium IV Linux hosts
+        else {
+            $host_list = ""
+                . " antwerp bamf bangkok baz beetle clobber cobra coleman countach dart derf "
+                . " duster eclipse edsel epoch frob feep glob gremlin hongkong hopkins "
+                . " kluge maverick munge nova quine runic scag singapore segv valencia "
+                . " viggen yikes zeroth antwerp seoul ";
+        }
     }
     else {
-	$host_list = " "
-	    . &run_command("rup.sh --time-out | sed -e \"s/ up .*//;\" ")
-	    . " ";
+        $host_list = " "
+            . &run_command("rup.sh --time-out | sed -e \"s/ up .*//;\" ")
+            . " ";
     }
     &assert($host_list !~ /^\s*$/);
     &assert($host_list !~ /^\sa b c \.\.\. z $/i);
 
-    return ($host_list);	  
+    return ($host_list);          
 }
 
 
 # Perl constants for use as substitutes for $f, etc.
 # note: case is significant in the placeholders
 #
-sub d { return ($d); }		# current directory
-sub b { return ($b); }		# file basename 
-sub B { return ($B); }		# basename proper (no directory)
-sub f { return ($f); }		# filename
-sub h { return ($h); }		# host for remote execution
-sub q { return ($q); }		# single quote
-sub qq { return ($qq); }	# double quote
+sub d { return ($d); }          # current directory
+sub b { return ($b); }          # file basename 
+sub B { return ($B); }          # basename proper (no directory)
+sub f { return ($f); }          # filename
+sub h { return ($h); }          # host for remote execution
+sub q { return ($q); }          # single quote
+sub qq { return ($qq); }        # double quote
 
 # usage(): Displays usage statement on stdard error
 # TODO: have option for verbose explanation

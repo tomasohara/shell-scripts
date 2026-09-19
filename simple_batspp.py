@@ -535,7 +535,7 @@ class Batspp(Main):
         # The structure should be:
         #  project
         #     ├ script.bash
-        #  	  └ tests/test_script.batspp
+        #         └ tests/test_script.batspp
         if not OMIT_PATH:
             self.bats_content += ('# Make executables ./tests/../ visible to PATH\n'
                                   f'PATH="{gh.dir_path(gh.real_path(self.testfile))}/../:$PATH"\n\n')

@@ -13,8 +13,8 @@
 #     p<path>   default path
 #     <file>    lisp code to load
 # - script options:
-#    --interactive	same as -b
-#    --non-X		for use in non-Windows settings (e.g., remote telnet)
+#    --interactive      same as -b
+#    --non-X            for use in non-Windows settings (e.g., remote telnet)
 # - based on xlispstat.sh with conversion by ChatGPT
 #
 # The --non-X option is to support remote Unix sessions (i.e., from Windows)

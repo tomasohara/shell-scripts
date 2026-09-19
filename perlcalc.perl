@@ -75,24 +75,24 @@ if ((defined($ARGV[0]) && ($ARGV[0] eq "help"))
     || (!defined($ARGV[0]) && &blocking_stdin())) {
     $options = "options = [-init=expr] [-fmt=printf-format-spec] [-integer | -precision=N] [-args | -]";
     $example = "examples:\n\n";
-    $example .=	"$script_name whatever\n";
+    $example .= "$script_name whatever\n";
     $example .= "$script_name -precision=6 '1/10e6'\n";
     die "\nusage: $script_name [options]\n\n$options\n\n$example\n";
 }
 
 use vars qw/$args $init $int $integer $fmt/;
-&init_var_exp(*init, "");	        # initialization expression
-&init_var_exp(*int, &FALSE);	        # alias for -integer
+&init_var_exp(*init, "");               # initialization expression
+&init_var_exp(*int, &FALSE);            # alias for -integer
 &init_var_exp(*integer, $int);          # show integral results
-## OLD: &init_var_exp(*fmt, 		# format for output
+## OLD: &init_var_exp(*fmt,             # format for output
 ##                    $integer ? "%d" : "%g");
 my($default_format) = $integer ? "%d" : (sprintf("%%.%df", $precision));
-&init_var_exp(*fmt, 		# format for output
-	      $default_format);
-## OLD: &init_var(*args, &FALSE);	# read expression from command line
+&init_var_exp(*fmt,             # format for output
+              $default_format);
+## OLD: &init_var(*args, &FALSE);       # read expression from command line
 # TODO: exclude case when argument is file that exists
 my($args_given) = ((defined($ARGV[0]) && ($ARGV[0] ne "-")));
-&init_var(*args, $args_given);	# read expression from command line
+&init_var(*args, $args_given);  # read expression from command line
 
 # Run scripts from temporary file using expression on command line
 # note: uses -args=0 to avoid infinite loop in stdin detection
@@ -122,7 +122,7 @@ while (<>) {
 
     # Print the results of the current evaluation
     if (&trim($expr) ne "") {
-	&debug_print(&TL_VERBOSE, "evaluating expression '$expr'\n");
-	printf("$fmt\n", eval "$expr");
+        &debug_print(&TL_VERBOSE, "evaluating expression '$expr'\n");
+        printf("$fmt\n", eval "$expr");
     }
 }

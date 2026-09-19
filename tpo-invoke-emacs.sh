@@ -138,7 +138,7 @@ while [ "$moreoptions" = "1" ]; do
         shift;
     elif [ "$1" = "--" ]; then
         shift;
-	emacs_args=1
+        emacs_args=1
         break;
     else
         echo "ERROR: Unknown option: $1";
@@ -197,7 +197,7 @@ if [ "$in_background" = "1" ]; then
         if [ $# == 0 ]; then args+=("$(resolve-path .)"); fi
         # note: resolve fullpath for non-option filename due to quirk under macos
         for filename in "$@"; do
-    	    ## DEBUG: echo "filename=$filename"
+            ## DEBUG: echo "filename=$filename"
             if [[ ("$emacs_args" = "0") && ($filename =~ [^-]*) ]]; then
                 filename=$(resolve-path "$filename")
             fi
@@ -212,14 +212,14 @@ if [ "$in_background" = "1" ]; then
         ## echo "background w/ nohup"
         ## echo "issuing: $emacs "${emacs_options[@]}" '$(realpath ${args[*]})' \>\> $TEMP/nohup.log 2>&1 &"
         # shellcheck disable=SC2090
-	nohup "$emacs" "${emacs_options[@]}" "${args[*]}" >> "$TEMP/nohup.log" 2>&1 &
+        nohup "$emacs" "${emacs_options[@]}" "${args[*]}" >> "$TEMP/nohup.log" 2>&1 &
         disown
     else
         ## DEBUG:
         ## echo "regular background (i.e., non-nohup)"
         ## echo "issuing: $emacs "${emacs_options[@]}" ${args[*]} &"
-	## set -o xtrace
-	## echo "${args[@]}"
+        ## set -o xtrace
+        ## echo "${args[@]}"
         "$emacs" "${emacs_options[@]}" "${args[@]}" &
         disown
     fi

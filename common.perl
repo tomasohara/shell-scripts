@@ -63,32 +63,32 @@ eval 'exec perl -Ssw $0 "$@"'
 # asctime(): return the time formatted as with the asctime library function
 # assert(expression) Issues an error message if the expression evaluates to 0.
 # basename(filename, extension): returns the filename w/o the extension.
-# blocking_stdin():	determine whether input from STDIN would block
-# capitalize(word):	returns the word (or text) capitalized.
-# cleanup_common():	module termination cleanup routine
-# cmd(command_line):	same as issue_command(command_line)
+# blocking_stdin():     determine whether input from STDIN would block
+# capitalize(word):     returns the word (or text) capitalized.
+# cleanup_common():     module termination cleanup routine
+# cmd(command_line):    same as issue_command(command_line)
 # copy_file(source_file, destination_file) Copies the source file to the destination. (OS-independent)
 # debug_out(trace_level, format_string, argument, ...) Prints a formatted trace message to STDERR when the current debugging level is at or above the specified level.
 # difference(list1, list2)  Returns the difference of the two lists (passed as references).
-# dirname(file):	returns the directory for the file
+# dirname(file):        returns the directory for the file
 # dump_line([line], [debug_level]):   display line in trace (w/ line number)
 # error_out(format_string, argument, ...) Prints a formatted error message to STDERR
 # filter_warnings(warning_text): Filter benign warnings.
 # find(array_ref, item): returns 0-based position of item in the array
 # get_entry(array, key, [default=0]) Get the value for the key in the associative array, using the given  default if no corresponding entry.
 # get_env(environment_var, default_value, [trace_level]): returns the value of the environment variable, defaulting to the specified value. 
-# get_time():		alias for asctime()
+# get_time():           alias for asctime()
 # incr_entry(array, key, [increment=1]) Increment the value of an associative array by the given amount, which defaults to 1.
-# init_common():	initialize this common module.
+# init_common():        initialize this common module.
 # init_var(variable_name, initial_value)  Initializes a variable unless it is already defined.
 # intersection(list1, list2)  Returns the intersection of the two lists (passed as references).
-# iso_lower(text):	lowercase text accounting for ISO-9660 accents (TODO3: ISO-8859)
+# iso_lower(text):      lowercase text accounting for ISO-9660 accents (TODO3: ISO-8859)
 # iso_remove_diacritics($text): remove diacritic marks from the text
 # issue_command(command_line, [trace_level]) Issue the specified command and ignores the result.
-# lock(*FILE):		locks the specified file for exclusive access
+# lock(*FILE):          locks the specified file for exclusive access
 # make_full_path(filename)   Returns the fully-specified pathname to the file.
 # make_path(directory, filename)  Appends the filename to the directory name to form a full-path file  specification.
-# pwd():		returns the current directory
+# pwd():                returns the current directory
 # read_file(file_name): Reads in the entire file, returned as a text string.
 # remove_dir(full_file_name): removes the directory component from file name
 # reset_trace():      reset the line number and other trace information
@@ -97,8 +97,8 @@ eval 'exec perl -Ssw $0 "$@"'
 # tokenize (text) Returns the list of whitespace-delimited tokens from the text
 # trace_array(array_ref, [debug_level], [label])  Outputs the (list) array to the trace file, unless current debug   level is lower than specified trace level.
 # trace_assoc_array(associative_array_ref, [debug_level])  Outputs the associative array to the trace file, unless current debug   level is lower than specified trace level.
-# trim(text):		removes leading and trailing whitespace
-# unlock(*FILE):	unlocks the specified file
+# trim(text):           removes leading and trailing whitespace
+# unlock(*FILE):        unlocks the specified file
 # write_file(file_name, text): Writes the text to the specified file.
 #
 
@@ -149,18 +149,18 @@ sub SOLARIS { ($OSTYPE eq "solaris" ? &TRUE : &FALSE); }
 # benefit from these trace statements (or even yourself if you
 # revisit the code after a long absence).
 #
-sub TL_ALWAYS {0;}		# message always displayed
-sub TL_ERROR {1;};		# only information about errors
-sub TL_BASIC {2;};		# include important intermediate results
-sub TL_WARNING { &TL_BASIC; }	# alias for TL_BASIC
-sub TL_USUAL {3;};		# a compromise between TL_BASIC & TL_DETAILED
-sub TL_DETAILED {4;};		# detailed information (eg, subroutine calls)
-sub TL_VERBOSE {5;};		# extra information to help with debugging
-sub TL_VERY_DETAILED {6;};	# ex: line-by-line file operations
-sub TL_VERY_VERBOSE {7;};	# ex: string manipulation (eg., tokenization)
-sub TL_MOST_DETAILED {8;};	# ex: frequently called support functions
-sub TL_MOST_VERBOSE {9;};	# ex: results of such functions
-sub TL_ALL {99;}		# all debugging output
+sub TL_ALWAYS {0;}              # message always displayed
+sub TL_ERROR {1;};              # only information about errors
+sub TL_BASIC {2;};              # include important intermediate results
+sub TL_WARNING { &TL_BASIC; }   # alias for TL_BASIC
+sub TL_USUAL {3;};              # a compromise between TL_BASIC & TL_DETAILED
+sub TL_DETAILED {4;};           # detailed information (eg, subroutine calls)
+sub TL_VERBOSE {5;};            # extra information to help with debugging
+sub TL_VERY_DETAILED {6;};      # ex: line-by-line file operations
+sub TL_VERY_VERBOSE {7;};       # ex: string manipulation (eg., tokenization)
+sub TL_MOST_DETAILED {8;};      # ex: frequently called support functions
+sub TL_MOST_VERBOSE {9;};       # ex: results of such functions
+sub TL_ALL {99;}                # all debugging output
 
 sub DEBUG_LEVEL {$debug_level;};
 sub DEBUGGING { return ($debug_level >= TL_USUAL) };
@@ -175,10 +175,10 @@ sub set_strict_mode {
     my($strict_mode) = $_[0];
     ## DEBUG: print STDERR "set_strict_mode($strict_mode)\n";
     if ($strict_mode) {
-	## DEBUG: print STDERR "using strict and diagnostics\n";
-	eval "use strict";
-	## TODO: no strict "refs";		# to allow for symbolic file handles
-	eval "use diagnostics";
+        ## DEBUG: print STDERR "using strict and diagnostics\n";
+        eval "use strict";
+        ## TODO: no strict "refs";              # to allow for symbolic file handles
+        eval "use diagnostics";
     }
 }
 
@@ -206,7 +206,7 @@ sub init_common {
     # So if it is explictly invoked, there's no need to proceed.
     $initialized = &FALSE if (!defined($initialized));
     if ($initialized) {
-	return ($initialized);
+        return ($initialized);
     }
 
     $initialized = &FALSE if (!defined($initialized));
@@ -217,14 +217,14 @@ sub init_common {
     my($env_during_alias) = $ENV{DURING_ALIAS};
     ## DEBUG: print STDERR "\$ENV{DURING_ALIAS}=$env_during_alias\n";
     if (! defined($env_during_alias) || (! $env_during_alias)) {
-	$env_debug_level = $ENV{DEBUG_LEVEL};
+        $env_debug_level = $ENV{DEBUG_LEVEL};
     }
     ## DEBUG: print STDERR "\$ENV{DEBUG_LEVEL}=$env_debug_level\n";
     ## OLD:  map { $debug_level = $_ unless defined($debug_level); } ($d, $ENV{"DEBUG_LEVEL"}, &TL_USUAL);
     map {
-	## DEBUG: print STDERR "debug_level=$debug_level _=$_\n";
-	$debug_level = $_ unless defined($debug_level); 
-	# note: uses first of the three following values that is defined
+        ## DEBUG: print STDERR "debug_level=$debug_level _=$_\n";
+        $debug_level = $_ unless defined($debug_level); 
+        # note: uses first of the three following values that is defined
     } ($d, $env_debug_level, &TL_USUAL);
     ## DEBUG: print STDERR "\$ENV{DEBUG_LEVEL}=$env_debug_level\n";
     ## $debug_line_num = 0;
@@ -240,8 +240,8 @@ sub init_common {
     $FALSE = 0;
     $MAXINT = 2147483647;
     &init_var_exp(*disable_commands, $FALSE);
-    &init_var_exp(*force_WIN32, &FALSE);		# force WIN32 file usage, etc.
-    &init_var_exp(*force_unix, &FALSE);		# force unix file usage, etc.
+    &init_var_exp(*force_WIN32, &FALSE);                # force WIN32 file usage, etc.
+    &init_var_exp(*force_unix, &FALSE);         # force unix file usage, etc.
     $under_WIN32 = defined($ENV{WINDIR});
     $unix = (! $under_WIN32);
     &debug_print(&TL_VERBOSE, "take 1: under_WIN32=$under_WIN32 unix=$unix\n");
@@ -249,24 +249,24 @@ sub init_common {
     # Common arguments for the scripts using common.perl
     #
     $common_options = "[-verbose] [-help]";
-    &init_var_exp(*precision, 3);	# default number of decimal places for rounding
-    &init_var_exp(*verbose, &FALSE);	# verbose output mode
-    &init_var(*help, &FALSE);	        # show usage
-    &init_var_exp(*strict, &FALSE);	# use strict perl type checking
+    &init_var_exp(*precision, 3);       # default number of decimal places for rounding
+    &init_var_exp(*verbose, &FALSE);    # verbose output mode
+    &init_var(*help, &FALSE);           # show usage
+    &init_var_exp(*strict, &FALSE);     # use strict perl type checking
     &set_strict_mode($strict);          # note: could be set via environment so reinvoked (i.e., recheck)
     #
-    &init_var_exp(*unbuffered, &FALSE);	# unbuffered I/O
+    &init_var_exp(*unbuffered, &FALSE); # unbuffered I/O
     &init_var_exp(*debugging_timestamps, &FALSE);   # timestamp all debug output
-    &init_var_exp(*disable_assertions, &FALSE);	    # don't check for assertions
+    &init_var_exp(*disable_assertions, &FALSE);     # don't check for assertions
     &init_var_exp(*preserve_temp,                   # preserve temporary files
-		  &VERBOSE_DEBUGGING);          
+                  &VERBOSE_DEBUGGING);          
 
     # Check options for changing line-input mode
-    &init_var_exp(*para, &FALSE);		# read paragraphs not lines
-    &init_var_exp(*slurp, &FALSE);		# read entire files not lines
+    &init_var_exp(*para, &FALSE);               # read paragraphs not lines
+    &init_var_exp(*slurp, &FALSE);              # read entire files not lines
     &assert(! ($para && $slurp));
-    $/ = "" if ($para);			# paragraph input mode
-    $/ = 0777 if ($slurp);		# complete-file input mode
+    $/ = "" if ($para);                 # paragraph input mode
+    $/ = 0777 if ($slurp);              # complete-file input mode
 
     ## OLD:
     ## # Make sure debugging level corresponds to DEBUG_LEVEL environment variable.
@@ -287,28 +287,28 @@ sub init_common {
 
     # See if running under Windows NT or Win95 instead of Unix
     # note: OSTYPE normally not set in this case
-    &init_var_exp(*OSTYPE, "???");		# Unix operating system type
-    &init_var_exp(*OS, "???");		        # Windows operating system
-    &init_var_exp(*HOST, "???");		# system host name
-    $osname = (defined($^O) ? $^O : "???");	# name of OS under which Perl built
+    &init_var_exp(*OSTYPE, "???");              # Unix operating system type
+    &init_var_exp(*OS, "???");                  # Windows operating system
+    &init_var_exp(*HOST, "???");                # system host name
+    $osname = (defined($^O) ? $^O : "???");     # name of OS under which Perl built
     if ($osname =~ /Win32/i) {
-	$under_WIN32 = &TRUE;
-	$unix = &FALSE;
-	## $redirect = ($debug_level > 3);
+        $under_WIN32 = &TRUE;
+        $unix = &FALSE;
+        ## $redirect = ($debug_level > 3);
     }
     elsif ($OS eq "Windows_NT") {
-	$under_WIN32 = &TRUE;
-	if ($OSTYPE eq "cygwin") {
-	    $unix = &TRUE;
-	}
+        $under_WIN32 = &TRUE;
+        if ($OSTYPE eq "cygwin") {
+            $unix = &TRUE;
+        }
     }
 
     # Account for Unix/Windows differences in filename and path var. delimiter
     $path_delim = "\/";
     $path_var_delim = ":";
     if (&use_WIN32) {
-	$path_delim = "\\";
-	$path_var_delim = ";";
+        $path_delim = "\\";
+        $path_var_delim = ";";
     }
     # TEMP HACK: support for old name (until client scripts revised)
     ## $delim = $path_delim;
@@ -320,11 +320,11 @@ sub init_common {
     $script_name = $0;
     $script_dir = $0;
     if ($script_dir =~ /[$PD]/) {
-	$script_dir =~ s/[$PD][^$PD]*$/$path_delim\./;	# chop off the file name
-	$script_name =~ s/\.?\.?[$PD]?.*[$PD]//; 	# chop off the directory
+        $script_dir =~ s/[$PD][^$PD]*$/$path_delim\./;  # chop off the file name
+        $script_name =~ s/\.?\.?[$PD]?.*[$PD]//;        # chop off the directory
     }
     else {
-	$script_dir = ".";
+        $script_dir = ".";
     }
     $script_dir = &make_full_path($script_dir);
 
@@ -340,25 +340,25 @@ sub init_common {
     $TEMP .= $path_delim unless ($TEMP =~ /[$PD]$/);
 
     if ($unbuffered || &DETAILED_DEBUGGING) {
-	&debug_print(&TL_VERBOSE, "setting unbuffered I/O\n");
-	select(STDIN); $| = 1;		    # set stderr unbuffered
-	select(STDERR); $| = 1;		    # set stderr unbuffered
-	select(STDOUT); $| = 1;		    # set stdout unbuffered
+        &debug_print(&TL_VERBOSE, "setting unbuffered I/O\n");
+        select(STDIN); $| = 1;              # set stderr unbuffered
+        select(STDERR); $| = 1;             # set stderr unbuffered
+        select(STDOUT); $| = 1;             # set stdout unbuffered
     }
 
     # Redirect stdout to file specified with -o option
     if (defined($o)) {
-	&debug_print(&TL_VERY_DETAILED, "redirecting STDOUT to $o\n");
-	close(STDOUT);
-	open(STDOUT, "> $o") ||               # redefine stdout to the file
-	    die "Unable to create output file $o ($!)\n";
+        &debug_print(&TL_VERY_DETAILED, "redirecting STDOUT to $o\n");
+        close(STDOUT);
+        open(STDOUT, "> $o") ||               # redefine stdout to the file
+            die "Unable to create output file $o ($!)\n";
     }
 
     # Redirect stderr to stdout if desired (support for Windows)
     if (defined($redirect) && ($redirect == &TRUE)) {
-	select(STDOUT); $| = 1;		    # set stdout unbuffered
-	open(STDERR, ">&STDOUT");	    # redefine stderr
-	select(STDERR); $| = 1;		    # set stderr unbuffered
+        select(STDOUT); $| = 1;             # set stdout unbuffered
+        open(STDERR, ">&STDOUT");           # redefine stderr
+        select(STDERR); $| = 1;             # set stderr unbuffered
     }
 
     # Make sure input and output use UTF-8
@@ -366,14 +366,14 @@ sub init_common {
     # TODO: add support for automatic decode_utf8 of input (see count_it.perl)
     &init_var_exp(*utf8, &FALSE);
     if ($utf8) {
-	## OLD:
-	## eval "use Encode;";
-	eval "use Encode 'decode_utf8'";
-	## binmode(STDIN, ":utf8");
-	## binmode(STDOUT, ":utf8");
-	## binmode(STDERR, ":utf8");
-	eval 'use open ":std", ":encoding(UTF-8)";';
-	&debug_print(&TL_DETAILED, "Enabled UTF-8 support\n");
+        ## OLD:
+        ## eval "use Encode;";
+        eval "use Encode 'decode_utf8'";
+        ## binmode(STDIN, ":utf8");
+        ## binmode(STDOUT, ":utf8");
+        ## binmode(STDERR, ":utf8");
+        eval 'use open ":std", ":encoding(UTF-8)";';
+        &debug_print(&TL_DETAILED, "Enabled UTF-8 support\n");
     }
 
     # Trace out a few values
@@ -400,12 +400,12 @@ sub init_common {
     &assertion(@sorted_PATH_INC_intersection == @sorted_INC);
     &trace_array(\@sorted_PATH_INC_intersection, &TL_MOST_DETAILED, "\@sorted_PATH_INC_intersection");
     &trace_array(\@sorted_INC, &TL_MOST_DETAILED, "\@sorted_INC");
-	
+        
     
     &init_var_exp(*timeout_script, "cmd.sh"); # script for running commands with timeout check
-    &init_var_exp(*timeout, &FALSE);	# check for command timeout
-    &init_var_exp(*timeout_seconds, 	# seconds to wait for timeout
-		  $timeout ? 60 : -1);
+    &init_var_exp(*timeout, &FALSE);    # check for command timeout
+    &init_var_exp(*timeout_seconds,     # seconds to wait for timeout
+                  $timeout ? 60 : -1);
     &init_var(*wait_for_user, &FALSE);  # wait for user at end of script
 
     $initialized = &TRUE;
@@ -413,7 +413,7 @@ sub init_common {
     # Print optional UTF-8 byte order mark (BOM): (U+FEFF)
     &init_var_exp(*BOM, &FALSE);
     if ($BOM) {
-	print "\xEF\xBB\xBF\n";
+        print "\xEF\xBB\xBF\n";
     }
     &debug_print(&TL_VERY_VERBOSE, "init_common() => $initialized\n");
     
@@ -430,8 +430,8 @@ sub cleanup_common {
 
     # Optionally, wait for the user response before terminating.
     if ($wait_for_user) {
-	require 'extra.perl';
-	&get_user_response("Hit any key to exit: ");
+        require 'extra.perl';
+        &get_user_response("Hit any key to exit: ");
     }
 }
 
@@ -449,8 +449,8 @@ sub force_win32_usage {
 sub exit {
     my($error_message) = @_;
     if (defined($error_message)) {
-	chomp $error_message;
-	&error_out("%s\n", $error_message);
+        chomp $error_message;
+        &error_out("%s\n", $error_message);
     }
     &cleanup_common();
     exit;
@@ -475,11 +475,11 @@ sub get_env {
     $value = $default;
     $var_text = $ENV{$var};
     if (defined($var_text)) {
-	$value = $var_text;
-	}
+        $value = $var_text;
+        }
     &debug_out($trace_level, 
-	       "get_env(\"%s\", \"%s\", trace_level=%d) => %s\n",
-	       $var, $default, $trace_level, $value);
+               "get_env(\"%s\", \"%s\", trace_level=%d) => %s\n",
+               $var, $default, $trace_level, $value);
 
     return $value
 }
@@ -518,7 +518,7 @@ sub ALWAYS_RUN { &FALSE };
 #
 sub run_command {
     if (&use_WIN32) {
-	return (&run_command_win32(@_));
+        return (&run_command_win32(@_));
     }
     my($command, $trace_level, $disable) = @_;
     $trace_level = &TL_VERBOSE+1 unless (defined($trace_level));
@@ -527,39 +527,39 @@ sub run_command {
 
     # See if system commands have been disabled (for testing purposes)
     if ($disable) {
-	&debug_out($trace_level - 1, "(disabled) run_command: %s\n", $command);
-	return ("");
+        &debug_out($trace_level - 1, "(disabled) run_command: %s\n", $command);
+        return ("");
     }
     
     # Add optional timeout check (only works for Unix or CygWin)
     my($temp_script) = "";
     if ($timeout_seconds > 0) {
-	## $command =~ s/([^\\])([*?&])/$1\\$2/g;
-	# TODO: Quote arguments if special shell characters
-	## if ($command =~ /([^\\])([*?&])/) {
-	    ## my($command_name, @args) = split(/ +/, $command);
-	    ## $command = sprintf "$command_name %s", join(" ", map { "\"$_\""; } @args);
-	## }
+        ## $command =~ s/([^\\])([*?&])/$1\\$2/g;
+        # TODO: Quote arguments if special shell characters
+        ## if ($command =~ /([^\\])([*?&])/) {
+            ## my($command_name, @args) = split(/ +/, $command);
+            ## $command = sprintf "$command_name %s", join(" ", map { "\"$_\""; } @args);
+        ## }
 
-	# Use temporary script to run command as eval environment in cmd.sh runs into problems with special shell characters
-	$temp_script = "temp-$$.sh";
-	&write_file($temp_script, "$command\n");
-	$command = "$timeout_script --time-out $timeout_seconds source $temp_script";
+        # Use temporary script to run command as eval environment in cmd.sh runs into problems with special shell characters
+        $temp_script = "temp-$$.sh";
+        &write_file($temp_script, "$command\n");
+        $command = "$timeout_script --time-out $timeout_seconds source $temp_script";
     }
 
     &debug_print($trace_level, "run_command: $command\n");
     open(RUN_COMMAND_FILE, "$command|");
     while (<RUN_COMMAND_FILE>) {
-	$_ =~ s/[\n\r]+$//;
-	$result .= "$_\n";
+        $_ =~ s/[\n\r]+$//;
+        $result .= "$_\n";
     }
     $result =~ s/[\n\r]+$//;
     close(RUN_COMMAND_FILE);
     &debug_out($trace_level+1, "run_command => {\n%s\n}\n", $result);
 
     if ($temp_script ne "") {
-	## OLD: unlink $temp_script unless (&VERBOSE_DEBUGGING);
-	unlink $temp_script unless ($preserve_temp);
+        ## OLD: unlink $temp_script unless (&VERBOSE_DEBUGGING);
+        unlink $temp_script unless ($preserve_temp);
     }
 
     return ($result);
@@ -580,8 +580,8 @@ sub run_command_win32 {
 
     # See if system commands have been disabled (for testing purposes)
     if ($disable) {
-	&debug_out($trace_level - 1, "(disabled) run_command: %s\n", $command);
-	return ("");
+        &debug_out($trace_level - 1, "(disabled) run_command: %s\n", $command);
+        return ("");
     }
 
     # Issue the command (indirectly via system)
@@ -640,10 +640,10 @@ sub run_command_over {
     my($placeholder_text) = "{text}";
     my($placeholder_offset) = index($command, $placeholder_text);
     if ($placeholder_offset >= 0) {
-	$full_command =~ s/$placeholder_text/$temp_file/;
+        $full_command =~ s/$placeholder_text/$temp_file/;
     }
     else {
-	$full_command .= " $temp_file";
+        $full_command .= " $temp_file";
     }
     my($result) = &run_command($full_command, $trace_level);
     ## TODO: add $preserve_temp_files option
@@ -668,15 +668,15 @@ sub issue_command {
     # Also, the command needs to be properly escaped
     # TODO: Add support for Win95 and Win98
     if (&use_WIN32 && ($command !~ /\.exe/)) {
-	$command = "cmd /c " . $command;
+        $command = "cmd /c " . $command;
 
-	# Make sure backslashes are properly escaped
-	$command =~ s/([^\\])\\([^\\])/$1\\\\$2/g;
+        # Make sure backslashes are properly escaped
+        $command =~ s/([^\\])\\([^\\])/$1\\\\$2/g;
     }
 
     # Add optional timeout check (only works for Unix or CygWin)
     if ($timeout_seconds > 0) {
-	$command = "$timeout_script --time-out $timeout_seconds $command";
+        $command = "$timeout_script --time-out $timeout_seconds $command";
     }
 
     &debug_print($trace_level, "issue_command: $command\n");
@@ -758,14 +758,14 @@ sub debug_out {
     # Do sanity check to ensure printf formatting present
     # TODO: move inside trace level test to avoid too many warnings.
     if (&DETAILED_DEBUGGING && ($format_text !~ /%/)) {
-	my($package, $filename, $line) = caller;
-	&warning("No printf format specification at $filename:$line: Consider using debug_print instead of debug_out\n");
+        my($package, $filename, $line) = caller;
+        &warning("No printf format specification at $filename:$line: Consider using debug_print instead of debug_out\n");
     }
 
     # Perform the formatted output unless trace level not sufficiently high.
     if ($level <= $debug_level) {
-	printf STDERR "[%s] ", &asctime, if ($debugging_timestamps);
-	printf STDERR $format_text, @args;
+        printf STDERR "[%s] ", &asctime, if ($debugging_timestamps);
+        printf STDERR $format_text, @args;
     }
     return (1);
 }
@@ -797,7 +797,7 @@ sub debug_out_new {
 sub debug_trace {
     my($level, @text_args) = @_;
     if ($level <= $debug_level) {
-	printf STDERR "[%s] ", &asctime, if ($debugging_timestamps);
+        printf STDERR "[%s] ", &asctime, if ($debugging_timestamps);
         print STDERR @text_args;
     }
 }
@@ -822,7 +822,7 @@ sub debug_printf {
 ## sub debug_code {
 ##     my($level, @command_args) = @_;
 ##     if ($level <= $debug_level) {
-## 	eval "@command_args";
+##      eval "@command_args";
 ##     }
 ## }
 
@@ -900,15 +900,15 @@ sub warning {
 sub assert {
     my($expression, $package, $filename, $line) = @_;
     if ($disable_assertions) {
-	&debug_print(99, "[common]assert(@_) {checking disabled}\n");
-	return;
+        &debug_print(99, "[common]assert(@_) {checking disabled}\n");
+        return;
     }
     &debug_print(&TL_VERBOSE+4, "[common]assert(@_)\n");
 
     # Determine the package to use for the evaluation environment,
     # as well as the filename and line number for the assertion call.
     if (! defined($package)) {
-	($package, $filename, $line) = caller;
+        ($package, $filename, $line) = caller;
     }
 
     # Evaluate the expression in the caller's package
@@ -918,13 +918,13 @@ sub assert {
     # If failed, then display the failed expression along with it's
     # filename and line number (as in the assert macro for C).
     if (!defined($result) || ($result eq "0")) {
-	## OLD: $expression = &run_command("tail +$line '$filename' | head -1", &TL_VERY_VERBOSE);
-	$expression = &run_command("tail --lines=+$line '$filename' | head -1", &TL_VERY_VERBOSE);
-	$expression =~ s/^\s*&?assert(\(.*\));\s*(\#.*)?$/$1/;
-	print STDERR "*** Assertion failed: $expression [$filename: $line] (input line=$.)\n";
+        ## OLD: $expression = &run_command("tail +$line '$filename' | head -1", &TL_VERY_VERBOSE);
+        $expression = &run_command("tail --lines=+$line '$filename' | head -1", &TL_VERY_VERBOSE);
+        $expression =~ s/^\s*&?assert(\(.*\));\s*(\#.*)?$/$1/;
+        print STDERR "*** Assertion failed: $expression [$filename: $line] (input line=$.)\n";
     }
     else {
-	&debug_print(&TL_VERBOSE+4, "result: $result\n");
+        &debug_print(&TL_VERBOSE+4, "result: $result\n");
     }
 }
 
@@ -975,14 +975,14 @@ sub trace_assoc_array {
     $label = $assoc_array_ref if (!defined($label));
 
     if ($trace_level <= &DEBUG_LEVEL) {
-	my($key);
-	&debug_out($trace_level, "%s: {\n", $label);
-	foreach $key (sort(keys(%{$assoc_array_ref}))) {
-	    my($value) = ${$assoc_array_ref}{$key};
-	    $value = "(undefined)" if (!defined($value));
-	    &debug_out($trace_level, "\t%s: %s\n", $key, $value);
-	}
-	&debug_print($trace_level, "\t}\n");
+        my($key);
+        &debug_out($trace_level, "%s: {\n", $label);
+        foreach $key (sort(keys(%{$assoc_array_ref}))) {
+            my($value) = ${$assoc_array_ref}{$key};
+            $value = "(undefined)" if (!defined($value));
+            &debug_out($trace_level, "\t%s: %s\n", $key, $value);
+        }
+        &debug_print($trace_level, "\t}\n");
     }
 
     return;
@@ -1006,18 +1006,18 @@ sub trace_array {
     $label = $array_ref if (!defined($label));
 
     if ($trace_level <= &DEBUG_LEVEL) {
-	my($i);
-	&debug_out($trace_level, "%s:\n", $label);
-	for ($i = 0; $i <= $#{$array_ref}; $i++) {
-	    &debug_out($trace_level, "\t%d:'%s'\n", $i, ${$array_ref}[$i]);
-	}
+        my($i);
+        &debug_out($trace_level, "%s:\n", $label);
+        for ($i = 0; $i <= $#{$array_ref}; $i++) {
+            &debug_out($trace_level, "\t%d:'%s'\n", $i, ${$array_ref}[$i]);
+        }
     }
 
     return;
 }
 
 
-# blocking_stdin():	determine whether input from STDIN would block
+# blocking_stdin():     determine whether input from STDIN would block
 #
 sub blocking_stdin {
     my($blocked) = &FALSE;
@@ -1026,8 +1026,8 @@ sub blocking_stdin {
 
     # Stupidity: non-uniform support for fcntl
     if (&use_WIN32) {
-	&debug_print(&TL_VERBOSE, "skipping blocking_stdin test under Win32\n");
-	return 0;
+        &debug_print(&TL_VERBOSE, "skipping blocking_stdin test under Win32\n");
+        return 0;
     }
     my($perl5) = ($] =~ /^5/);
     eval "use Fcntl;" if ($perl5);
@@ -1042,7 +1042,7 @@ sub blocking_stdin {
     &debug_print(&TL_VERY_VERBOSE, "fcntl(STDIN, &F_GETFL, 0) => $flags\n");
     # TODO: ($flags && O_RDWR)
     if (($flags eq "2") || ($flags eq "8194")) {
-	$blocked = &TRUE;
+        $blocked = &TRUE;
     }
 
     return ($blocked);
@@ -1060,7 +1060,7 @@ sub blocking_stdin {
 #
 #     it.perl:
 #        require 'common.perl'
-#        &init_var(*var1, 99);	;; $var1 => 101;
+#        &init_var(*var1, 99);  ;; $var1 => 101;
 #        &init_var(*var2, 77);  ;; $var2 => 77
 #
 # NOTE: 
@@ -1121,31 +1121,31 @@ sub init_var {
     my($new_value);
 
     if (! defined($var_name)) {
-	if ($use_env_default) {
-	    # Get the value of the corresponding environment variable, if set.
-	    $new_value = &get_env($env_var, $var_value, &TL_VERBOSE+2);
-	    $var_name = $new_value;
-	}
-	else {
-	    # TODO3: cleanup code variable dereferencing to make more intuitive
-	    $var_name = $var_value;
-	    $new_value = $var_value;
-	}
+        if ($use_env_default) {
+            # Get the value of the corresponding environment variable, if set.
+            $new_value = &get_env($env_var, $var_value, &TL_VERBOSE+2);
+            $var_name = $new_value;
+        }
+        else {
+            # TODO3: cleanup code variable dereferencing to make more intuitive
+            $var_name = $var_value;
+            $new_value = $var_value;
+        }
     }
     else {
-	$new_value = $var_name;
+        $new_value = $var_name;
     }
 
     # Update the environment variable to the value, useful for automatic
     # transfer of parameter values to perl scripts invoked by this script.
     if ($export_var) {
-	## OLD:
-	## my($env_var) = *var_name;
-	## $env_var =~ s/^.*:://;
-	&set_env($env_var, $new_value, &TL_VERY_VERBOSE);
+        ## OLD:
+        ## my($env_var) = *var_name;
+        ## $env_var =~ s/^.*:://;
+        &set_env($env_var, $new_value, &TL_VERY_VERBOSE);
     }
     &debug_out(&TL_DETAILED + 1, "init_var(%s, %s): %s=%s\n", 
-	       *var_name, $var_value, *var_name, $var_name);
+               *var_name, $var_value, *var_name, $var_name);
 }
 
 # init_var_exp(variable_name, initial_value)
@@ -1217,11 +1217,11 @@ sub write_file {
     &debug_out($trace_level+3, "text={\n%s}\n", $text);
 
     if (!open(WRITE_FILE, ">$file_name")) {
-	&debug_print(&TL_ERROR, "unable to create $file_name ($!)\n");
-	return;
+        &debug_print(&TL_ERROR, "unable to create $file_name ($!)\n");
+        return;
     }
     if ($utf8) {
-	binmode(WRITE_FILE, ":utf8");
+        binmode(WRITE_FILE, ":utf8");
     }
     print WRITE_FILE $text;
     close(WRITE_FILE);
@@ -1240,11 +1240,11 @@ sub append_file {
     &debug_out(&TL_VERBOSE+3, "text={\n%s}\n", $text);
 
     if (!open(WRITE_FILE, ">>$file_name")) {
-	&debug_print(&TL_ERROR, "unable to append to $file_name ($!)\n");
-	return;
+        &debug_print(&TL_ERROR, "unable to append to $file_name ($!)\n");
+        return;
     }
     if ($utf8) {
-	binmode(WRITE_FILE, ":utf8");
+        binmode(WRITE_FILE, ":utf8");
     }
     print WRITE_FILE $text;
     close(WRITE_FILE);
@@ -1266,13 +1266,13 @@ sub find_library_file {
 
     # Check each directory on PATH for file
     foreach $dir (@search_dirs) {
-	# See if plain file (-f) exists (-e) in current directory
-	my($test_pathname) = &make_path($dir, $file);
-	if (&file_exists($test_pathname)) {
-	    $pathname = &make_full_path($test_pathname);
-	    &assert(&file_exists($pathname));
-	    last;
-	}
+        # See if plain file (-f) exists (-e) in current directory
+        my($test_pathname) = &make_path($dir, $file);
+        if (&file_exists($test_pathname)) {
+            $pathname = &make_full_path($test_pathname);
+            &assert(&file_exists($pathname));
+            last;
+        }
     }
     &debug_print(&TL_DETAILED, "find_library_file(@_) => $pathname\n");
 
@@ -1291,7 +1291,7 @@ sub find_program_file {
 
     my($pathname) = $file;
     if (&use_WIN32 && ($file !~ /.exe/i)) {
-	$file .= ".exe";
+        $file .= ".exe";
     }
     return (&find_library_file($file, @dirs));
 }
@@ -1337,18 +1337,18 @@ sub read_file {
     &debug_print($trace_level, "read_file($file_name)\n");
 
     if (!open(READ_FILE, "<$file_name")) {
-	&error_out("unable to read %s (%s)\n", $file_name, $!);
-	return ($text);
+        &error_out("unable to read %s (%s)\n", $file_name, $!);
+        return ($text);
     }
     if ($utf8) {
-	binmode(READ_FILE, ":utf8");
+        binmode(READ_FILE, ":utf8");
     }
 
     &reset_trace();
     while (<READ_FILE>) {
-	&dump_line($_, &TL_VERBOSE+3);
-	$text =~ s/\r//;	# ignore DOS carriage returns
-	$text .= $_;
+        &dump_line($_, &TL_VERBOSE+3);
+        $text =~ s/\r//;        # ignore DOS carriage returns
+        $text .= $_;
     }
     close(READ_FILE);
     &debug_print(&TL_VERBOSE+4, "text={\n$text}\n");
@@ -1390,19 +1390,19 @@ sub old_intersection {
 
     # Do a merge-style pass, adding equal entries to the list
     for ($i = 0, $j = 0; ($i <= $#sort1 && $j <= $#sort2); ) {
-	&debug_out(&TL_VERBOSE+4, "sort1[%d]='%s' vs sort2[%d]='%s'\n",
-		   $i, $sort1[$i], $j, $sort2[$j]);
-	if ($sort1[$i] lt $sort2[$j]) {
-	    $i++;
-	}
-	elsif ($sort1[$i] gt $sort2[$j]) {
-	    $j++;
-	}
-	else {
-	    $list[$num++] = $sort1[$i];
-	    $i++;
-	    $j++;
-	}
+        &debug_out(&TL_VERBOSE+4, "sort1[%d]='%s' vs sort2[%d]='%s'\n",
+                   $i, $sort1[$i], $j, $sort2[$j]);
+        if ($sort1[$i] lt $sort2[$j]) {
+            $i++;
+        }
+        elsif ($sort1[$i] gt $sort2[$j]) {
+            $j++;
+        }
+        else {
+            $list[$num++] = $sort1[$i];
+            $i++;
+            $j++;
+        }
     }
     my($debug_result) = "intersection((@{$list1_ref}), (@{$list2_ref})) =>\n(@list)\n";
     &assert((1 + $#list) <= ((1 + $#{$list1_ref}) + (1 + $#{$list2_ref})));
@@ -1458,20 +1458,20 @@ sub difference {
                    $i, $sort1[$i], $j, $sort2[$j], $last);
         if ($sort1[$i] lt $sort2[$j]) {
             $list[$num++] = $sort1[$i] unless ($sort1[$i] eq $last);
-	    $last = $sort1[$i];
+            $last = $sort1[$i];
             $i++;
         }
         elsif ($sort1[$i] gt $sort2[$j]) {
             $j++;
         }
         else {
-	    $last = $sort1[$i];
+            $last = $sort1[$i];
             $i++;
             $j++;
         }
     }
     for (; $i <= $#sort1; $i++) {
-	$list[$num++] = $sort1[$i];
+        $list[$num++] = $sort1[$i];
     }
     &debug_print(&TL_VERBOSE+3, "difference((@$list1_ref), (@$list2_ref)) =>\n(@list)\n");
 
@@ -1570,9 +1570,9 @@ sub pwd {
     my($PWD) = ($unix ? "pwd" : "cmd /c cd");
     my($dir);
     
-##    $dir = &run_command("$PWD", 	# command to run
-##			&TL_VERY_VERBOSE, # high trace level
-##			&FALSE); 	# never disabled
+##    $dir = &run_command("$PWD",       # command to run
+##                      &TL_VERY_VERBOSE, # high trace level
+##                      &FALSE);        # never disabled
     $dir = `$PWD`;
     $dir =~ s/[\r\n]+$//;
     &debug_print(&TL_VERY_DETAILED, "pwd(@_) => $dir\n");
@@ -1602,21 +1602,21 @@ sub dirname {
     my($dir) = ".";
     ## if ($file =~ /^(((\.\.[$PD].*[$PD]).*)|([$PD]).*))[^$PD]/) {
     if ($file =~ /(\.?\.?[$PD]?.*[$PD])[^$PD]/) {
-	$dir = $1;
-	&debug_print(&TL_VERY_VERBOSE, "1: dir=$dir\n");
+        $dir = $1;
+        &debug_print(&TL_VERY_VERBOSE, "1: dir=$dir\n");
     }
 
     # Use the current directory if no directory given (or if "." used)
     if (($dir eq "") || ($dir eq ".")) {
-	$dir = &pwd();
-	&debug_print(&TL_VERY_VERBOSE, "2: dir=$dir\n");
+        $dir = &pwd();
+        &debug_print(&TL_VERY_VERBOSE, "2: dir=$dir\n");
     }
     # Make sure the directory name is absolute
     if (($dir !~ /^[$PD]/) && ($dir !~ /^[A-Z]:\\/i) && (! $is_http)) {
-	$dir = &make_path(&pwd(), $dir);
-	&debug_print(&TL_VERY_VERBOSE, "3: dir=$dir\n");
+        $dir = &make_path(&pwd(), $dir);
+        &debug_print(&TL_VERY_VERBOSE, "3: dir=$dir\n");
     }
-    $dir =~ s/\/tmp_mnt//;	# remove temporary NFS file mount directory
+    $dir =~ s/\/tmp_mnt//;      # remove temporary NFS file mount directory
     &debug_print(&TL_MOST_DETAILED, "dirname($file) => $dir\n");
 
     return ($dir);
@@ -1640,7 +1640,7 @@ sub incr_entry {
     &debug_print(&TL_ALL, "incr_entry(@_)\n");
 
     if (!defined($$array_ref{$key})) {
-	$$array_ref{$key} = 0;
+        $$array_ref{$key} = 0;
     }
     $$array_ref{$key} += $increment;
 
@@ -1660,7 +1660,7 @@ sub append_entry {
     &debug_print(&TL_ALL, "append_entry(@_)\n");
 
     if (!defined($$array_ref{$key})) {
-	$$array_ref{$key} = "";
+        $$array_ref{$key} = "";
     }
     $$array_ref{$key} .= $text;
 }
@@ -1678,10 +1678,10 @@ sub get_entry {
     my($value) = $default;
 
     if (defined($$array_ref{$key})) {
-	$value = $$array_ref{$key};
+        $value = $$array_ref{$key};
     }
     &debug_out_fmt(&TL_ALL, "get_entry(%s, '%s', ['%s']) => '%s'\n", 
- 		   $array_ref, $key, $default, $value);
+                   $array_ref, $key, $default, $value);
 
     return ($value);
 }
@@ -1724,7 +1724,7 @@ sub tokenize {
     $text = &trim($text);
     my(@tokens) = split(/$split_pattern/, $text);
     &debug_out(&TL_MOST_DETAILED, "tokenize(%s) => (%s)\n", 
-	       $text, join(", ", @tokens));
+               $text, join(", ", @tokens));
 
     return (@tokens);
 }
@@ -1742,15 +1742,15 @@ sub find {
 
     $item = &to_lower($item) if ($ignore_case);
     for ($i = 0; $i <= $#array; $i++) {
-	my($array_item) = $array[$i];
-	$array_item = &to_lower($array_item) if ($ignore_case);
-	if ($array_item eq $item) {
-	    $pos = $i;
-	    last;
-	}
+        my($array_item) = $array[$i];
+        $array_item = &to_lower($array_item) if ($ignore_case);
+        if ($array_item eq $item) {
+            $pos = $i;
+            last;
+        }
     }
     &debug_out(TL_VERY_VERBOSE, "find(%s, %s, [%s]) => %d\n", 
-	       $array_ref, $item, $ignore_case, $pos);
+               $array_ref, $item, $ignore_case, $pos);
 
     return ($pos);
 }
@@ -1772,8 +1772,8 @@ sub remove_duplicates {
     my($item);
 
     foreach $item (@list) {
-	push(@new_list, $item) unless (defined($seen{$item}));
-	$seen{$item} = &TRUE;
+        push(@new_list, $item) unless (defined($seen{$item}));
+        $seen{$item} = &TRUE;
     }
     return (@new_list);
 }
@@ -1785,9 +1785,9 @@ sub pushnew {
     my($array_ref, @items) = @_;
     my($item);
     foreach $item (@items) {
-	if (find($array_ref, $item) == -1) {
-	    push(@$array_ref, $item);
-	}
+        if (find($array_ref, $item) == -1) {
+            push(@$array_ref, $item);
+        }
     }
     return (scalar (@$array_ref));
 }
@@ -1799,9 +1799,9 @@ sub pushnew {
 #
 # Invoke perl to process the specified command-line, returning the output
 # The command line includes the script to run (without 'perl ' prefix)
-#	&run_perl("testit.perl a b c") 
+#       &run_perl("testit.perl a b c") 
 # That is, this is intended as a shortcut to run_command:
-#	&run_command("perl -Ssw testit.perl a b c");
+#       &run_command("perl -Ssw testit.perl a b c");
 # TODO:
 # - add warning if the command is not a perl script invocation
 # - only use the -S flag when the command line is relative
@@ -1847,7 +1847,7 @@ sub delete_file {
     # Issue warning if problem unless warnings are to be suppressed.
     # In addition, trace the result if debugging.
     if (! ($OK or $warn)) {
-	&warning("Problem deleting '$file_name'\n")
+        &warning("Problem deleting '$file_name'\n")
     }
     &debug_print(&VERY_DETAILED, "delete_file($file_name); status='$OK'\n");
 
@@ -1933,7 +1933,7 @@ sub remove_punctuation {
 sub remove_outer_quotes {
     my($text) = @_;
     if ($text =~ /^\s*([\"\'])([^\000]*)\1\s*$/) {
-	$text = $2;
+        $text = $2;
     }
     &debug_print(&TL_VERY_DETAILED, "remove_outer_quotes(@_) => $text\n");
 
@@ -2050,58 +2050,58 @@ sub utf8_remove_diacritics {
     my($text) = @_;
 
     # TODO: just use tr with the unicode characters
-    $text =~ s/\x{00C0}/A/g;	# À
-    $text =~ s/\x{00C1}/A/g;	# Á
-    $text =~ s/\x{00C2}/A/g;	# Â
-    $text =~ s/\x{00C3}/A/g;	# Ã
-    $text =~ s/\x{00C5}/A/g;	# Å
-    $text =~ s/\x{00C7}/C/g;	# Ç
-    $text =~ s/\x{00C9}/E/g;	# É
-    $text =~ s/\x{00CA}/E/g;	# Ê
-    $text =~ s/\x{00CD}/I/g;	# Í
-    $text =~ s/\x{00D1}/N/g;	# Ñ
-    $text =~ s/\x{00D3}/O/g;	# Ó
-    $text =~ s/\x{00D4}/O/g;	# Ô
-    $text =~ s/\x{00DA}/U/g;	# Ú
-    $text =~ s/\x{00DC}/U/g;	# Ü
-    $text =~ s/\x{00E0}/a/g;	# à
-    $text =~ s/\x{00E1}/a/g;	# á
-    $text =~ s/\x{00E2}/a/g;	# â
-    $text =~ s/\x{00E3}/a/g;	# ã
-    $text =~ s/\x{00E4}/a/g;	# ä
-    $text =~ s/\x{00E5}/a/g;	# å
-    $text =~ s/\x{00E7}/c/g;	# ç
-    $text =~ s/\x{00E8}/e/g;	# è
-    $text =~ s/\x{00E9}/e/g;	# é
-    $text =~ s/\x{00EA}/e/g;	# ê
-    $text =~ s/\x{00EB}/e/g;	# ë
-    $text =~ s/\x{00EC}/i/g;	# ì
-    $text =~ s/\x{00ED}/i/g;	# í
-    $text =~ s/\x{00EE}/i/g;	# î
-    $text =~ s/\x{00EF}/i/g;	# ï
-    $text =~ s/\x{00F0}/o/g;	# ð
-    $text =~ s/\x{00F1}/n/g;	# ñ
-    $text =~ s/\x{00F2}/o/g;	# ò
-    $text =~ s/\x{00F3}/o/g;	# ó
-    $text =~ s/\x{00F4}/o/g;	# ô
-    $text =~ s/\x{00F6}/o/g;	# ö
-    $text =~ s/\x{00F9}/u/g;	# ù
-    $text =~ s/\x{00FA}/u/g;	# ú
-    $text =~ s/\x{00FC}/u/g;	# ü
-    $text =~ s/\x{00FD}/y/g;	# ý
-    $text =~ s/\x{0101}/a/g;	# ā
-    $text =~ s/\x{0107}/c/g;	# ć
-    $text =~ s/\x{010D}/c/g;	# č
-    $text =~ s/\x{0144}/n/g;	# ń
-    $text =~ s/\x{015F}/s/g;	# ş
-    $text =~ s/\x{0160}/S/g;	# Š
-    $text =~ s/\x{016B}/u/g;	# ū
-    $text =~ s/\x{1F78}/o/g;	# ὸ
+    $text =~ s/\x{00C0}/A/g;    # À
+    $text =~ s/\x{00C1}/A/g;    # Á
+    $text =~ s/\x{00C2}/A/g;    # Â
+    $text =~ s/\x{00C3}/A/g;    # Ã
+    $text =~ s/\x{00C5}/A/g;    # Å
+    $text =~ s/\x{00C7}/C/g;    # Ç
+    $text =~ s/\x{00C9}/E/g;    # É
+    $text =~ s/\x{00CA}/E/g;    # Ê
+    $text =~ s/\x{00CD}/I/g;    # Í
+    $text =~ s/\x{00D1}/N/g;    # Ñ
+    $text =~ s/\x{00D3}/O/g;    # Ó
+    $text =~ s/\x{00D4}/O/g;    # Ô
+    $text =~ s/\x{00DA}/U/g;    # Ú
+    $text =~ s/\x{00DC}/U/g;    # Ü
+    $text =~ s/\x{00E0}/a/g;    # à
+    $text =~ s/\x{00E1}/a/g;    # á
+    $text =~ s/\x{00E2}/a/g;    # â
+    $text =~ s/\x{00E3}/a/g;    # ã
+    $text =~ s/\x{00E4}/a/g;    # ä
+    $text =~ s/\x{00E5}/a/g;    # å
+    $text =~ s/\x{00E7}/c/g;    # ç
+    $text =~ s/\x{00E8}/e/g;    # è
+    $text =~ s/\x{00E9}/e/g;    # é
+    $text =~ s/\x{00EA}/e/g;    # ê
+    $text =~ s/\x{00EB}/e/g;    # ë
+    $text =~ s/\x{00EC}/i/g;    # ì
+    $text =~ s/\x{00ED}/i/g;    # í
+    $text =~ s/\x{00EE}/i/g;    # î
+    $text =~ s/\x{00EF}/i/g;    # ï
+    $text =~ s/\x{00F0}/o/g;    # ð
+    $text =~ s/\x{00F1}/n/g;    # ñ
+    $text =~ s/\x{00F2}/o/g;    # ò
+    $text =~ s/\x{00F3}/o/g;    # ó
+    $text =~ s/\x{00F4}/o/g;    # ô
+    $text =~ s/\x{00F6}/o/g;    # ö
+    $text =~ s/\x{00F9}/u/g;    # ù
+    $text =~ s/\x{00FA}/u/g;    # ú
+    $text =~ s/\x{00FC}/u/g;    # ü
+    $text =~ s/\x{00FD}/y/g;    # ý
+    $text =~ s/\x{0101}/a/g;    # ā
+    $text =~ s/\x{0107}/c/g;    # ć
+    $text =~ s/\x{010D}/c/g;    # č
+    $text =~ s/\x{0144}/n/g;    # ń
+    $text =~ s/\x{015F}/s/g;    # ş
+    $text =~ s/\x{0160}/S/g;    # Š
+    $text =~ s/\x{016B}/u/g;    # ū
+    $text =~ s/\x{1F78}/o/g;    # ὸ
 
     # TODO: convert hexview.perl to use helper routine placed in extra.perl
     if ($debug_level >= &TL_MOST_VERBOSE) {
-	&debug_out(-1, "hex in: %s\n", &run_command_over("hexview.perl - <", "@_"));
-	&debug_out(-1, "hex out: %s\n", &run_command_over("hexview.perl - <", $text));
+        &debug_out(-1, "hex in: %s\n", &run_command_over("hexview.perl - <", "@_"));
+        &debug_out(-1, "hex out: %s\n", &run_command_over("hexview.perl - <", $text));
     }
     &debug_print(&TL_VERY_VERBOSE, "utf8_remove_diacritics(@_) => '$text'\n");
 
@@ -2122,9 +2122,9 @@ sub is_numeric {
     my($ok) = &FALSE;
 
     if ((length($text) > 0) 
-	&& ($text =~ /\d+/)
-	&& ($text =~ /^\s*-?\d*\.?\d*(e[+-]?\d+)?\s*$/i)) {
-	$ok = &TRUE;
+        && ($text =~ /\d+/)
+        && ($text =~ /^\s*-?\d*\.?\d*(e[+-]?\d+)?\s*$/i)) {
+        $ok = &TRUE;
     }
     &debug_print(&TL_VERY_VERBOSE, "is_numeric(@_) => $ok\n");
 
@@ -2174,9 +2174,9 @@ sub round_all {
 sub remove_dir {
     my($file) = @_;
 
-    $file =~ s/[$PD]$//;		# chop off extraneous trailing path delim
-    $file =~ s/^\.?\.?[$PD]//;		# chop off relative part of directory
-    $file =~ s/^.*[$PD]//;		# chop off directory prefix
+    $file =~ s/[$PD]$//;                # chop off extraneous trailing path delim
+    $file =~ s/^\.?\.?[$PD]//;          # chop off relative part of directory
+    $file =~ s/^.*[$PD]//;              # chop off directory prefix
 
     &debug_print(&TL_VERY_VERBOSE, "remove_dir(@_); path_delim=$path_delim => $file\n");
 
@@ -2207,7 +2207,7 @@ sub make_path {
     # All but the first component should not specify absolute paths
     # TODO: remove this check
     foreach $file (@file_components) {
-	$file = &remove_dir($file) if ($file =~ /^[$PD]/);
+        $file = &remove_dir($file) if ($file =~ /^[$PD]/);
     }
 
     my($path) = $dir;
@@ -2216,7 +2216,7 @@ sub make_path {
 
     # Make sure Unix pathnames are not used under CygWin with -force_WIN32 in effect
     if ($unix && &use_WIN32 && ($path =~ /\//)) {
-	$path = &run_command("cygpath.exe -w '$path'", &TL_MOST_VERBOSE);
+        $path = &run_command("cygpath.exe -w '$path'", &TL_MOST_VERBOSE);
     }
 
     &debug_print(&TL_MOST_DETAILED, "make_path(@_) => $path\n");
@@ -2384,7 +2384,7 @@ sub get_file_ddmmmyy {
 
     # Format it as ddMMMyy (e.g., 29mar22)
     my(@months) = ( "jan", "feb", "mar", "apr", "may", "jun",
-		    "jul", "aug", "sep", "oct", "nov", "dec" );
+                    "jul", "aug", "sep", "oct", "nov", "dec" );
     my($ddmmmyy) = sprintf "%02d%s%02d", $mday, $months[$mon], (($year + 1900) % 100);
     &debug_print(5, "get_file_ddmmmyy($filename) => $ddmmmyy\n");
 

@@ -25,9 +25,9 @@ if ("$1" == "-k") then
     shift
 endif
 if ("$1" != "") then
-	set cmd = "$*"
-	## if ("$1" =~ [a-z]) set result_file = _$1.lst
-	set result_file = _`basename $1`_.list
+        set cmd = "$*"
+        ## if ("$1" =~ [a-z]) set result_file = _$1.lst
+        set result_file = _`basename $1`_.list
 endif
 
 set this_host = `hostname`
@@ -45,5 +45,5 @@ foreach host ($hosts)
    rsh -n $host $cmd >> $result_file
 end
 cat $result_file
-	      
+              
 

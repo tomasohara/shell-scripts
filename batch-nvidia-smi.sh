@@ -86,13 +86,13 @@ moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 while [[ "$moreoptions" == "1" ]]; do
     # TODO : add real options
     if [[ "$1" == "--trace" ]]; then
-	set -o xtrace
+        set -o xtrace
     elif [[ ("$1" == "--") || ("$1" == "-") ]]; then
         shift
         break
     else
-	echo "ERROR: Unknown option: $1";
-	exit
+        echo "ERROR: Unknown option: $1";
+        exit
     fi
     shift;
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac

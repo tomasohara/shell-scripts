@@ -31,7 +31,7 @@ set aux_file0=$aux_base.lst0
 set aux_file1=$aux_base.lst1
 # Note: by default requires number [from time] prior to process spec.
 set pattern_prefix = ":[0-9][0-9] [^ ]*"
-set filter = '($)(^)'		# filters nothing (i.e., unsatisfiable regex)
+set filter = '($)(^)'           # filters nothing (i.e., unsatisfiable regex)
 set is_root = 0
 set user = `whoami`
 if ("$user" == "root") set is_root = 1
@@ -44,7 +44,7 @@ set command_line = "$0 $argv"
 set force = 0
 
 # Parse command-line arguments
-set ignore = "-i"		# ignore-case flag
+set ignore = "-i"               # ignore-case flag
 set script_name = `basename $0`
 set egrep = "egrep"
 if ("$1" == "") then
@@ -95,38 +95,38 @@ while ("$1" =~ -*)
     else if ("$1" == "--copy") then
         set copy_result = 1
     else if ("$1" =~ --user) then
-	set user = "$2"
-	shift
+        set user = "$2"
+        shift
     else if ("$1" == "--trace") then
         set echo=1
     else if ("$1" == "--force") then
         set force=1
     else if ("$1" == "--verbose") then
         set verbose_mode=1
-	echo "command: $command_line"
+        echo "command: $command_line"
     else if ("$1" == "--test") then
         set test = 1
-	echo "command: $command_line"
+        echo "command: $command_line"
     ## OLD: else if ("$1" == "--all") then
     else if (("$1" == "--all") || ("$1" == "-a")) then
         # HACK: set username as regex to match all users
-	# via https://unix.stackexchange.com/questions/157426/what-is-the-regex-to-validate-linux-users
-	## OLD: set user="[a-z][a-z]*"
+        # via https://unix.stackexchange.com/questions/157426/what-is-the-regex-to-validate-linux-users
+        ## OLD: set user="[a-z][a-z]*"
         ## TODO: support usernames ending in $
         ## BAD: set user="[a-z_][a-z0-9_-]*[\\$]?"
         ## OLD: set user="[a-z_][a-z0-9_-]*"
-	## NOTE: If user ID too long, it is trancated in the ps listing and a + is appended.
-	## EX: thomas_+ 27423  0.0  0.0  14864  1124 pts/1    S+   19:36   0:00 grep -E -i jupyter
-	## OLD: set user="[a-z_][a-z0-9_-+]*"
-	set user="[a-z_][a-z0-9_+-]*"
-	## OLD: if ("$OSTYPE" == "linux") then
-	if (("$OSTYPE" == "linux") || ("$OSTYPE" == "cygwin")) then
-	    set user="\S+"
-	    set egrep="grep --perl-regexp"
-	endif
+        ## NOTE: If user ID too long, it is trancated in the ps listing and a + is appended.
+        ## EX: thomas_+ 27423  0.0  0.0  14864  1124 pts/1    S+   19:36   0:00 grep -E -i jupyter
+        ## OLD: set user="[a-z_][a-z0-9_-+]*"
+        set user="[a-z_][a-z0-9_+-]*"
+        ## OLD: if ("$OSTYPE" == "linux") then
+        if (("$OSTYPE" == "linux") || ("$OSTYPE" == "cygwin")) then
+            set user="\S+"
+            set egrep="grep --perl-regexp"
+        endif
     ## OLD: else if (("$1" == "-a") || ("$1" == "--all")) then
         ## OLD: set pattern_prefix = "."
-	set pattern_prefix = ".*"
+        set pattern_prefix = ".*"
     else
         echo "Error: Unrecognized argument: $1"
         exit
@@ -174,14 +174,14 @@ endif
 if ("$pattern" == ".") then
     set parent=`ps alwx | perl -Ssw extract_matches.perl "^\d+\s+\d+\s+$$\s+(\d+)"`
     if ("$parent" == "") then
-	echo "ERROR: unable to determine parent pid"
-	exit
+        echo "ERROR: unable to determine parent pid"
+        exit
     endif
     ## OLD: egrep -v "(egrep )|(kill_em.sh )|($$)|($parent)" $aux_file0 > $aux_file1
     $egrep -v "(egrep )|(kill_em.sh )|($$)|($parent)" $aux_file0 > $aux_file1
     if ("$verbose_mode" == "1") then
-	echo "Related processes"
-	cat $aux_file1
+        echo "Related processes"
+        cat $aux_file1
     endif
 else
     cp $aux_file0 $aux_file1
@@ -226,7 +226,7 @@ source $aux_script
 ##     echo "Removing files in /tmp/graphling.* and /local/tmp/graphling.*"
 ##     ls -l /tmp/graphling.* /local/tmp/graphling.*
 ##     if ($copy_result) then
-## 	cp -r -p -f /tmp/graphling.*/* /local/tmp/graphling.*/* /home/graphling/TEMP
+##      cp -r -p -f /tmp/graphling.*/* /local/tmp/graphling.*/* /home/graphling/TEMP
 ##     endif
 ## 
 ##     # Remove the temporary GraphLing files that belong to the current user

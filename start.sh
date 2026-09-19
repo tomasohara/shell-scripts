@@ -54,29 +54,29 @@ verbose=0
 use_cmd=0
 while [ "$more_options" = "1" ]; do
     if [ "$1" = "--trace" ]; then
-	set -o xtrace;
+        set -o xtrace;
     elif [ "$1" = "--help" ]; then
-	show_usage=1;
+        show_usage=1;
     elif [ "$1" = "--view" ]; then
-	for_editting=0;
+        for_editting=0;
     elif [ "$1" = "--edit" ]; then
-	for_editting=1;
+        for_editting=1;
     elif [ "$1" = "--open" ]; then
-	for_editting=1;
+        for_editting=1;
     elif [ "$1" = "--under-mac" ]; then
-	under_mac=1;
+        under_mac=1;
     elif [ "$1" = "--not-mac" ]; then
-	under_mac=0;
+        under_mac=0;
     elif [ "$1" = "--verbose" ]; then
-	verbose=1;
+        verbose=1;
     elif [ "$1" = "--use-cmd" ]; then
-	use_cmd=1;
+        use_cmd=1;
     elif [ "$1" = "--" ]; then
-	break;
+        break;
     else
-	echo "ERROR: Unknown option: $1";
-	show_usage=1;
-	break
+        echo "ERROR: Unknown option: $1";
+        show_usage=1;
+        break
     fi
     shift;
     more_options=0; case "$1" in -*) more_options=1 ;; esac
@@ -130,13 +130,13 @@ function invoke () {
     local program_arg=""
     if [ ! -e "$log_file" ]; then touch "$log_file"; fi
     if [[ (! -e "$program") && ("$program" != "open") ]]; then
-	if [ "$under_mac" = "1" ]; then
+        if [ "$under_mac" = "1" ]; then
             if [[ ! ("$program" =~ .*\.app) ]]; then
                 program="$program.app"
             fi
-	    program_arg="-a $program"
-	    program="open"
-	fi
+            program_arg="-a $program"
+            program="open"
+        fi
     fi
     if [[ ("$under_cygwin" == "1") && ("$use_cmd" == "1") ]]; then
         ## TODO2: add program_arg support to invoke function
@@ -259,7 +259,7 @@ case "$lower_file" in
     ## This illustrates what happens when ';;' not used at end of case
     ## *.abc* | *.pdq*) echo hey; emacs "$@"
     ## BAD: *.xyz*)
-    ##		   echo hey2; emacs "$@" & ;;
+    ##             echo hey2; emacs "$@" & ;;
 
     # Invoke MacOs-style app as if program (e.g., Safari.app)
     *.app*)

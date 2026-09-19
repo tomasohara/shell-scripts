@@ -49,7 +49,7 @@ BEGIN {
 # Specify additional diagnostics and strict variable usage, excepting those
 # for command-line arguments (see init_var's in &init).
 use strict;
-no strict "refs";		# to allow for old-style references to arrays (TODO: use #xyz_ref = \@array)
+no strict "refs";               # to allow for old-style references to arrays (TODO: use #xyz_ref = \@array)
 use vars qw/$by $xyz $ps_options $cut_options $num_times $LINES $COLUMNS $max_count $delay $line_len $testing $justuser $USER $username/;
 use vars qw/$batch $full $once $lines $columns $alpha $time2num $DURING_ALIAS $time $mem/;
 
@@ -95,11 +95,11 @@ $columns = ($full ? &MAXINT : $COLUMNS) if ! defined($columns);
 &init_var(*max_count, $lines - 5);
 &init_var(*delay, (($num_times > 1) ? 1: 0));
 &init_var(*line_len, $columns - 2);
-&init_var(*testing, &FALSE);	# script testing mode
-&init_var(*justuser, &FALSE);	# just show current user
+&init_var(*testing, &FALSE);    # script testing mode
+&init_var(*justuser, &FALSE);   # just show current user
 &init_var(*USER, "");
-&init_var(*username,		# just show this user
-	  ($justuser ? $USER : ""));
+&init_var(*username,            # just show this user
+          ($justuser ? $USER : ""));
 &init_var(*batch, &FALSE);      # batch mode (don't poll console for early quit)
 &init_var(*alpha, &FALSE);      # sort alphabetically (i.e., lexicographic)
 &init_var(*time2num, &FALSE);   # convert time to a number for sorting purposes
@@ -130,13 +130,13 @@ if (!defined($ARGV[0])) {
     # TODO: show defaults
     $options .= " [-batch] [-once] [-full] [-alpha] [-time2num]";
     if ($is_solaris) {
-	$options .= "\nfield = [f|s|uid|pid|ppid|c|pri|ni|addr|sz|wchan|stime|tty|time|cmd]";
+        $options .= "\nfield = [f|s|uid|pid|ppid|c|pri|ni|addr|sz|wchan|stime|tty|time|cmd]";
     }
     elsif ($is_linux || $is_mac) {
-	$options .= "\nfield = [user|pid|cpu|mem|vsz|rss|tty|stat|start|time|command]";
+        $options .= "\nfield = [user|pid|cpu|mem|vsz|rss|tty|stat|start|time|command]";
     }
     else {
-	$options .= "\nfield = [pid|cpu|mem|sz|rss|tt|stat|start|time|command]";
+        $options .= "\nfield = [pid|cpu|mem|sz|rss|tt|stat|start|time|command]";
     }
     $options .= "\nother options = " . &COMMON_OPTIONS;
     my($example) = "examples:\n\n$0 -\n\n";
@@ -159,7 +159,7 @@ if (!defined($ARGV[0])) {
     # Note: Removes extraneous newline in last example, so that the examples
     # can be reordered without having to worry about newline convention.
     if ($example =~ /\n\n/) {
-	chomp $example;
+        chomp $example;
     }
     die "\nusage: $script_name [options]\n\n$options\n\n$example\n$note\n";
 }
@@ -174,74 +174,74 @@ PS_LOOP:
 ## TEST2: local($t);
 use vars qw/$t/;
 for ($t = 1; $t <= $num_times; $t++) {
-	
+        
     my($header) = "";
 
     my $i = 0;
     &debug_print(&TL_VERBOSE, "Invoking subprocess: ps $ps_options | cut $cut_options | ...\n");
     open(PS, "ps $ps_options | cut $cut_options |");
     while (<PS>) {
-	&dump_line();
-	chomp;
-	
-	# Save the process-info command header
-	if (/(^USER)|(^ F)/) {
-	    $header = $_;
-	    # TODO: Make sure fields recognized.
-	    next;
-	}
+        &dump_line();
+        chomp;
+        
+        # Save the process-info command header
+        if (/(^USER)|(^ F)/) {
+            $header = $_;
+            # TODO: Make sure fields recognized.
+            next;
+        }
 
-	# Optionally, ignore commands not for desired user
-	if (($username ne "") && ($_ !~ $username)) {
-	    next;
-	}
+        # Optionally, ignore commands not for desired user
+        if (($username ne "") && ($_ !~ $username)) {
+            next;
+        }
 
-	# Fill in the process-info arrays from the process-info data
-	$line_index[$i] = $i;
-	$line[$i] = $_;
-	if ($is_solaris) {
-	    ($f[$i], $s[$i], $user[$i], $pid[$i], $ppid[$i], $cpu[$i], 
-	     $pri[$i], $ni[$i], $sz[$i], $stime[$i], $time[$i], $cmd[$i]) 
-		= split;
-	    $mem[$i] = $sz[$i];
-	}
-	elsif ($is_linux || $is_mac) {
-	    ## OLD:
-	    ## ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $vsz[$i], $rss[$i], 
-	    ##  $tt[$i], $stat[$i], $stime[$i], $time[$i], $command[$i]) = split;
-	    ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $vsz[$i], $rss[$i], 
-	     $tty[$i], $stat[$i], $start[$i], $time[$i], $command[$i]) = split;
+        # Fill in the process-info arrays from the process-info data
+        $line_index[$i] = $i;
+        $line[$i] = $_;
+        if ($is_solaris) {
+            ($f[$i], $s[$i], $user[$i], $pid[$i], $ppid[$i], $cpu[$i], 
+             $pri[$i], $ni[$i], $sz[$i], $stime[$i], $time[$i], $cmd[$i]) 
+                = split;
+            $mem[$i] = $sz[$i];
+        }
+        elsif ($is_linux || $is_mac) {
+            ## OLD:
+            ## ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $vsz[$i], $rss[$i], 
+            ##  $tt[$i], $stat[$i], $stime[$i], $time[$i], $command[$i]) = split;
+            ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $vsz[$i], $rss[$i], 
+             $tty[$i], $stat[$i], $start[$i], $time[$i], $command[$i]) = split;
 
-	    # Make sure hour is two digits (internally) for proper sorting
-	    # Note: it is still printed as is
-	    if (($by eq "time") && ($time[$i] =~ /^\d:/)) {
-		$time[$i] = ("0" . $time[$i]);
-		&debug_print(7, "Made hour two digit: $time[$i]\n");
-	    }
-	    # Convert time (internally) to numeric seconds for sorting purposes
-	    # note: fraction optionally included as is (*e.g., under macos)
-	    if ($time2num) {
-		# examples:    306:25.88    0:04.36
-		if ($time[$i] =~ /^((\d+):)?((\d+):)?(\d+)(\.\d+)?/) {
-		    # groups:      1  2     3  4     5      6
-		    my($hour) = defined($2) ? $2 : 0;
-		    my($min) = defined($4) ? $4 : 0;
-		    my($sec) = $5;
-		    my($fract) = defined($6) ? $6 : 0;
-		    $time[$i] = ($hour * 3600 + $min * 60 + $sec + $fract);
-		    &debug_print(5, "Converted time $& to seconds $time[$i]\n");
-		}
-		else {
-		    &debug_print(5, "Warning: unable to parse time field: $time[$i]\n");
-		}
-	    }
-	}
-	else {
-	    # note: based on SunOS (TODO: what else valid for?)
-	    ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $sz[$i], $rss[$i], 
-	     $tt[$i]) = split;
-	}
-	$i++;
+            # Make sure hour is two digits (internally) for proper sorting
+            # Note: it is still printed as is
+            if (($by eq "time") && ($time[$i] =~ /^\d:/)) {
+                $time[$i] = ("0" . $time[$i]);
+                &debug_print(7, "Made hour two digit: $time[$i]\n");
+            }
+            # Convert time (internally) to numeric seconds for sorting purposes
+            # note: fraction optionally included as is (*e.g., under macos)
+            if ($time2num) {
+                # examples:    306:25.88    0:04.36
+                if ($time[$i] =~ /^((\d+):)?((\d+):)?(\d+)(\.\d+)?/) {
+                    # groups:      1  2     3  4     5      6
+                    my($hour) = defined($2) ? $2 : 0;
+                    my($min) = defined($4) ? $4 : 0;
+                    my($sec) = $5;
+                    my($fract) = defined($6) ? $6 : 0;
+                    $time[$i] = ($hour * 3600 + $min * 60 + $sec + $fract);
+                    &debug_print(5, "Converted time $& to seconds $time[$i]\n");
+                }
+                else {
+                    &debug_print(5, "Warning: unable to parse time field: $time[$i]\n");
+                }
+            }
+        }
+        else {
+            # note: based on SunOS (TODO: what else valid for?)
+            ($user[$i], $pid[$i], $cpu[$i], $mem[$i], $sz[$i], $rss[$i], 
+             $tt[$i]) = split;
+        }
+        $i++;
     }
     close(PS);
 
@@ -249,10 +249,10 @@ for ($t = 1; $t <= $num_times; $t++) {
     # Determine the array to sort by
     #
     # *by_xyz = ($by eq "cpu" ? *by_cpu :
-    #	         $by eq "mem" ? *by_mem :
-    #	         $by eq "sz" ? *by_sz :
-    #	         $by eq "rss" ? *by_rss :
-    #	         *by_default);
+    #            $by eq "mem" ? *by_mem :
+    #            $by eq "sz" ? *by_sz :
+    #            $by eq "rss" ? *by_rss :
+    #            *by_default);
     #
     # Note: See by_xyz function below.
     #
@@ -260,37 +260,37 @@ for ($t = 1; $t <= $num_times; $t++) {
     eval "*xyz = *$by";
     ## OLD: *xyz = *cpu if (!defined($xyz[0]));
     if (!defined($xyz[0])) {
-	print STDERR "Error: bad sort field ($by): using cpu\n";
-	*xyz = *cpu;
+        print STDERR "Error: bad sort field ($by): using cpu\n";
+        *xyz = *cpu;
     }
 
     # Print the information sorted in proper order
     if ($num_times > 1) {
-	&cmd("clear -x") unless ($batch);
-	print "update $t of $num_times\n";
-	&debug_out(&TL_DETAILED, "%s\n", &get_time());
+        &cmd("clear -x") unless ($batch);
+        print "update $t of $num_times\n";
+        &debug_out(&TL_DETAILED, "%s\n", &get_time());
     }
     ## OLD: printf "%s\n", substr($header, 0, $line_len);
-    printf "%s\n", &elide(substr($header, 0, $line_len));	
+    printf "%s\n", &elide(substr($header, 0, $line_len));       
     my $count = 0;
     foreach my $index (sort by_xyz @line_index) {
-	printf "%s\n",  substr($line[$line_index[$index]], 0, $line_len);
-	last if ($count++ == $max_count);
+        printf "%s\n",  substr($line[$line_index[$index]], 0, $line_len);
+        last if ($count++ == $max_count);
     }
 
     # See if the user wants to quit
     # TODO: restructure loop (e.g., with helpers for pause)
     if ($batch) {
-	sleep($delay);
+        sleep($delay);
     }
     else {
         #
         for (my $i = 0; $i < $delay; $i++) {
-	    if (&get_console_char() eq "q") {
-		last PS_LOOP;
-	    }
+            if (&get_console_char() eq "q") {
+                last PS_LOOP;
+            }
     
-	    sleep(1);
+            sleep(1);
         }
     }
 }
@@ -312,10 +312,10 @@ sub by_xyz {
     # Treat time value into decimal
     # NOTE: conditional on it being a known time field
     if (($by =~ /time/) && ($value_a =~ /:/) && ($value_b =~ /:/)) {
-	# TODO: drop extra decimal places
-	$value_a =~ tr/:/./;
-	$value_b =~ tr/:/./;
-	&assert(($value_a !~ /:/) && ($value_b !~ /:/));
+        # TODO: drop extra decimal places
+        $value_a =~ tr/:/./;
+        $value_b =~ tr/:/./;
+        &assert(($value_a !~ /:/) && ($value_b !~ /:/));
     }
 
     # Do reverse comparison (for numbers if numeric).
@@ -324,12 +324,12 @@ sub by_xyz {
     my($comparison) = 0;
     ## OLD: if (&is_numeric($value_b) && &is_numeric($value_a)) {
     if ((! $alpha) && (&is_numeric($value_b) && &is_numeric($value_a))) {
-	&debug_print(&TL_MOST_VERBOSE, "Using (descending) numeric sort\n");
-	$comparison = ($value_b <=> $value_a);
+        &debug_print(&TL_MOST_VERBOSE, "Using (descending) numeric sort\n");
+        $comparison = ($value_b <=> $value_a);
     }
     else {
-	&debug_print(&TL_MOST_VERBOSE, "Using (ascending) lexicographic sort\n");
-	$comparison = ($value_a cmp $value_b);
+        &debug_print(&TL_MOST_VERBOSE, "Using (ascending) lexicographic sort\n");
+        $comparison = ($value_a cmp $value_b);
     }
     &debug_print(&TL_MOST_DETAILED, "by_xyz() => $comparison\n");
 
@@ -362,7 +362,7 @@ sub get_console_char {
 
     # If testing, use the new input routine
     if ($testing) {
-	return (&new_get_console_char());
+        return (&new_get_console_char());
     }
 
     # Read the character after temporarily disabling line input
@@ -402,26 +402,26 @@ sub set_stdin_blocking {
     $flags =~ s/but true//;
     &debug_out(&TL_VERBOSE, "fcntl(STDIN, &F_GETFL, 0) => %08x\n", $flags);
     if ($blocking == &FALSE) {
-	$flags |= &O_NDELAY;	# set on no-delay bit in flags
+        $flags |= &O_NDELAY;    # set on no-delay bit in flags
     }
     else {
-	$flags &= ~&O_NDELAY;	# set off no-delay bit in flags
+        $flags &= ~&O_NDELAY;   # set off no-delay bit in flags
     }
     &debug_out(7, "flags=%08x\n", $flags);
     # TODO?: &debug_out(7, "flags=%08x result=%08x\n", $flags, $result);
     $result = fcntl(STDIN, &F_SETFL, $flags);
     if (defined($result)) {
-	## TODO: drop /but true/ hack
-	$result =~ s/but true//;
+        ## TODO: drop /but true/ hack
+        $result =~ s/but true//;
     }
     else {
-	$result = "";
+        $result = "";
     }
     ## OLD:
     ## &debug_out(&TL_VERBOSE, "fcntl(STDIN, &F_SETFL, %08x) => %08x\n",
-    ##  	  $flags, $result);
+    ##            $flags, $result);
     &debug_out(&TL_VERBOSE, "fcntl(STDIN, &F_SETFL, %08x) => %s\n",
-	       $flags, $result);
+               $flags, $result);
 
     return;
 }
@@ -431,10 +431,10 @@ sub set_stdin_blocking {
 sub elide {
     my($text, $max_len) = @_;
     if (! defined($max_len)) {
-	$max_len = $line_len;
+        $max_len = $line_len;
     }
     if (length($text) > $max_len) {
-	$text = substr($text, 0, $line_len);
+        $text = substr($text, 0, $line_len);
     }
 
     &debug_print(&TL_VERBOSE, "elide(@_) => $text\n");

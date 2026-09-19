@@ -46,9 +46,9 @@
 # ex: to_bool(1) => true; to_bool(0) => false
 function to_bool {
     if [[ ("$1" == "1") || ("$1" == "true") ]]; then
-	echo "true";
+        echo "true";
     else
-	echo "false";
+        echo "false";
     fi;
 }
 #

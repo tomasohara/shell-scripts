@@ -7,9 +7,9 @@
 #
 # NOTES:
 # - Environment variables
-#	STARTUP_TRACING		enables tracing to log file if 1
-#	CONSOLE_TRACING		echoes to console
-#	VERBOSE_TRACING		echoes miscellaneous tracing as well (but just to console)
+#       STARTUP_TRACING         enables tracing to log file if 1
+#       CONSOLE_TRACING         echoes to console
+#       VERBOSE_TRACING         echoes miscellaneous tracing as well (but just to console)
 #
 # TODO:
 # - Use DEBUG_LEVEL rather than VERBOSE_TRACING.
@@ -31,20 +31,20 @@ if [ "$TEMP" = "" ]; then TEMP=/tmp; fi
 function startup-trace () {
     # Set tracing (TODO3: put in separate function like startup-trace-init)
     if [ "$VERBOSE_TRACING" = "1" ]; then 
-	set -o xtrace;
-	echo TEMP=$TEMP;
-	# Enable full trace if debugging (TODO4: ... $(calc-int 'TL_DETAILED'))
-	if [ "$DEBUG_LEVEL" -ge 4 ]; then
-	    set -o verbose
-	fi
+        set -o xtrace;
+        echo TEMP=$TEMP;
+        # Enable full trace if debugging (TODO4: ... $(calc-int 'TL_DETAILED'))
+        if [ "$DEBUG_LEVEL" -ge 4 ]; then
+            set -o verbose
+        fi
     fi;
 
     # File logging and/or console
     if [ "$STARTUP_TRACING" = "1" ]; then
-	echo "$* [$HOSTNAME $(date)]" >> "$TEMP/_startup-$USER-$HOST-$$.log";
+        echo "$* [$HOSTNAME $(date)]" >> "$TEMP/_startup-$USER-$HOST-$$.log";
     fi; 
     if [ "$CONSOLE_TRACING" = "1" ] || [ "$DEBUG_LEVEL" -ge 5 ]; then
-	echo "$* [$HOSTNAME $(date)]";
+        echo "$* [$HOSTNAME $(date)]";
     fi;
 }
 # startup-trace-debug(msg): trace MSG with DEBUG_LEVEL 6+

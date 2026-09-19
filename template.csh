@@ -36,14 +36,14 @@ if ("$1" == "") then
 endif
 while ("$1" =~ -*)
     if ("$1" == "-") then
-	echo "Using default options"
+        echo "Using default options"
     else if ("$1" == "--trace") then
-	set echo = 1
+        set echo = 1
     else if ("$1" == "--fubar") then
-	echo "fubar"
+        echo "fubar"
     else
-	echo "ERROR: unknown option: $1"
-	exit
+        echo "ERROR: unknown option: $1"
+        exit
     endif
     shift
 end

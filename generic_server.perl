@@ -49,10 +49,10 @@ if (!defined($ARGV[0])) {
     die "\nusage: $script_name [options] -\n\n$options\n\n$example\n\n";
 }
 
-&init_var(*port, 2345);			# TCP service port
-&init_var(*be_polite, &FALSE);		# send connection acknowledgement
+&init_var(*port, 2345);                 # TCP service port
+&init_var(*be_polite, &FALSE);          # send connection acknowledgement
 ## &init_var(*server_dir, ".");
-&init_var(*fork, &FALSE);		# use fork for processing requests
+&init_var(*fork, &FALSE);               # use fork for processing requests
 
 # Set up the socket for receiving requests
 #
@@ -61,13 +61,13 @@ $proto = getprotobyname('tcp');
 $ok = socket(Server, PF_INET, SOCK_STREAM, $proto)        || die "socket: $!";
 &debug_out(6, "socket(S,%d,%d,%d) => $ok\n", PF_INET, SOCK_STREAM, $proto);
 setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
-	   pack("l", 1))   || die "setsockopt: $!";
+           pack("l", 1))   || die "setsockopt: $!";
 bind(Server, sockaddr_in($port, INADDR_ANY))        || die "bind: $!";
 listen(Server,SOMAXCONN)                            || die "listen: $!";
 
 our($is_server);
 our($do_shutdown);
-$is_server = &TRUE;		# TODO: use accessor function
+$is_server = &TRUE;             # TODO: use accessor function
 $do_shutdown = &FALSE;
 our($authenticated) = &FALSE;
 
@@ -89,22 +89,22 @@ while (($paddr = accept($client,Server))) {
     # If multiprocessing desired, spawn off child process to carry out
     # the request, having it exit afterwards.
     if ($fork) {
-	$child_pid = fork();
-	if (!defined($child_pid)) {
-	    &error("Problem issuing fork ($!)\n");
-	    $child_pid = -1;
-	}
+        $child_pid = fork();
+        if (!defined($child_pid)) {
+            &error("Problem issuing fork ($!)\n");
+            $child_pid = -1;
+        }
 
-	# If this is the child process, then process the request
-	if ($child_pid == 0) {
-	    &process_client_request($client);
-	    &exit();
-	}
+        # If this is the child process, then process the request
+        if ($child_pid == 0) {
+            &process_client_request($client);
+            &exit();
+        }
     }
 
     # Otherwise, just carry out the requests directly
     else {
-	&process_client_request($client);
+        &process_client_request($client);
     }
 
     close $client;
@@ -127,13 +127,13 @@ while (($paddr = accept($client,Server))) {
 sub process_client_request {
     select($client); $| = 1; select(STDOUT);
     &send_command($client, "INFO", "Connected to Generic Server: " . localtime)
-	if ($be_polite);
+        if ($be_polite);
 
     $authenticated = &FALSE;
     while (<$client>) {
-	chomp;
-	&process_request($client, "$_");
-	last if ($do_shutdown);
+        chomp;
+        &process_request($client, "$_");
+        last if ($do_shutdown);
     }
 }
 
