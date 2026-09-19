@@ -59,6 +59,11 @@ if [ "$OSTYPE" == "cygwin" ]; then
     file2=$(cygpath -w "$file2")
     ## OLD: kdiff="cygstart $kdiff"
 fi
+## TEMP: applies temporary workaround for symbolic link bug
+if [ "$OSTYPE" == "linux" ]; then
+    file1=$(realpath "$file1")
+    file2=$(realpath "$file2")
+fi
 
 # Make sure file2 exists, using file1 pattern unless absolute-ish
 base1="$(basename "$file1")"
