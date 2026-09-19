@@ -1100,6 +1100,10 @@ alias link-symbolic=ln-symbolic
 alias link-symbolic-safe='ln-symbolic --no-target-directory --no-dereference'
 alias ln-symbolic-safe=link-symbolic-safe
 alias link-symbolic-regular='ln-symbolic'
+## TODO2: fix problem with ln-symbolic-force creating link in target directory if already exists (e.g., due to wrong argument order)
+## EXAMPLE:
+##    $ ln-symbolic-force temp-bin-clone adhoc-bin-clone
+##    'adhoc-bin-clone/temp-bin-clone' -> 'temp-bin-clone'
 alias ln-symbolic-force='ln-symbolic --force'
 alias link-symbolic-force=ln-symbolic-force
 
