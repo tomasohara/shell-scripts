@@ -71,7 +71,10 @@
 #    # This test will fail: the time will be different when tested
 #    $ date
 #    Wed Jun 21 06:30:51 CDT 2023
-#    
+#--------------------------------------------------------------------------------
+# note:
+# - Used when testing aliases: see tests/batspp_report.py.
+# - Keep trace level 6 or higher for non-error output.
 #
 ## UPDATE 13 Sep 26: Adds OMIT_PROMPT (for .sh output).
 
@@ -149,7 +152,8 @@ class JupyterToBatspp(Main):
         self.output       = self.get_parsed_option(OUTPUT, self.output)
         self.stdout       = self.get_parsed_option(STDOUT, not self.output)        
         self.verbose      = self.get_parsed_option(VERBOSE, not self.stdout)
-        debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
+        ## OLD: debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
+        debug.trace_object(6, self, label=f"{self.__class__.__name__} instance")
 
 
     def run_main_step(self):
@@ -158,7 +162,8 @@ class JupyterToBatspp(Main):
         # Get Jupyter content
         # TODO: add explicit error handling
         jupyter_content = system.read_file(self.jupyter_file)
-        debug.trace_expr(5, jupyter_content)
+        ## OLD: debug.trace_expr(5, jupyter_content)
+        debug.trace_expr(6, jupyter_content)
         debug.assertion(jupyter_content,
                         f'Error: {self.jupyter_file!r} not found or is empty')
         is_jupyter_notebook = (self.jupyter_file.endswith(JUPYTER_EXTENSION) or
