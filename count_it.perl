@@ -9,6 +9,11 @@ eval 'exec perl -Ssw $0 "$@"'
 # NOTE: This is a simple script that turns out to be very useful
 # for a variety of tasks, especially in corpus analysis.
 #
+## UPDATE 19 Sep 26: uses entire match as tag if pattern has no capture group (e.g., lookahead
+## only); and aborts matching for a line if no progress made (e.g., zero-width match).
+## Changes facilitated by Claude Code using model Sonnet 5.
+## (See tests/pattern-matching.ipynb for examples.)
+#
 # examples:  
 #
 # tabulating most commonly used commands:
@@ -240,11 +245,15 @@ while (<>) {
         &debug_out(&TL_VERY_VERBOSE, "text=%s\n", $text);
         my($found) = &FALSE;
         my($tag);
+        my($prev_text) = $text;         # used to detect lack of progress (see below)
 
         # Try to extract tag from the text
         # NOTE: s qualifier treats string as single line (in case -para specified)
         if (($ignore_case == 1) && ($text =~ /$pattern/si)) {
-            $tag = $1;
+            ## BAD: $tag = $1;
+            ## NOTE: uses entire match if no capture group (e.g., lookahead-only tail like '.(?=\w)'); as with Python findall
+            ## Fix facilitated by Claude Code using model Sonnet 5.
+            $tag = (($#+ >= 1) ? $1 : $&);
             if ($field > 1) {
                 &debug_print(&TL_MOST_VERBOSE, "eval \"\$${field}\"");
                 $tag = eval "\$${field}";
@@ -254,7 +263,8 @@ while (<>) {
             $found = &TRUE;
         }
         elsif (($ignore_case == 0) && ($text =~ /$pattern/s)) {
-            $tag = $1;
+            ## BAD: $tag = $1;
+            $tag = (($#+ >= 1) ? $1 : $&);
             ## BAD: $tag = $1 if ($field == 1) else "eval \$${field}";
             if ($field > 1) {
                 &debug_print(&TL_MOST_VERBOSE, "eval \"\$${field}\"");
@@ -298,6 +308,13 @@ while (<>) {
         # Stop when not found or if just one match per line
         if ((! $found) || ($one_per_line)) {
             $text = "";
+        }
+
+        # Make sure progress made: otherwise, infinite loop (e.g., zero-width match like '(?=(\w))')
+        ## NOTE: added by Claude Code using model Sonnet 5.
+        if ($text eq $prev_text) {
+            &error_out("Unexpected error: text unchanged after matching /%s/ (zero-width match?): breaking out of loop for line %d\n", $pattern, $.);
+            last;
         }
     }
 }

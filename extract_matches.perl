@@ -10,12 +10,17 @@ eval 'exec perl -Ssw $0 "$@"'
 #     function extract_matches () { perl -ne "while (/$1/) { printf \"%s\\n\", \$1; s/$1//; }" $2 }
 # See count_it.perl for a similar script for counting the frequency of such patterns.
 #
+## UPDATE 19 Sep 26: wraps pattern in capture group only if none present (e.g., not when just
+## lookahead, non-capturing group, or escaped parentheses); and aborts matching for a line
+## if no progress made (e.g., zero-width match).
+## Changes facilitated by Claude Code using model Sonnet 5.
+## (See tests/pattern-matching.ipynb for examples.)
+#
 # Portions Copyright (c) 2001 Cycorp, Inc.  All rights reserved.
 # Portions Copyright (c) 2002-2004 Tom O'Hara  All rights reserved.
 #
 # TODO:
 # - Specify list of fields to output (as in cut.perl).
-# - Check for looping due to empty patterns (e.g., '(.*)').
 # - Only apply s qualifier when -para or -slurp specified.
 # - Add -chomp option as in count_it.perl.
 # - Add diagnostics for match failures.
@@ -126,8 +131,15 @@ for ($i = 2; $i <= $fields; $i++) {
     $pattern .= "$sep(\\S+)" if ($auto_pattern);
 }
 
-# Put grouping parenthesis around pattern, if none present
-if ($pattern !~ /\(.*\)/) {
+# Put grouping parenthesis around pattern, if no capture group present
+## BAD: if ($pattern !~ /\(.*\)/) {
+## NOTE: The above was fooled by escaped parentheses (e.g., '\(x\)') and by non-capturing
+## groups or lookaheads (e.g., '\w(?=\w)'), leaving $1 undefined.
+## The number of capture groups is now determined via a dummy match against the empty
+## string (n.b., the empty alternative ensures success, and $#+ is the number of groups).
+## Fix facilitated by Claude Code using model Sonnet 5.
+"" =~ /$pattern|/;
+if ($#+ < 1) {
     $pattern = "(" . $pattern . ")";
 }
 
@@ -156,6 +168,7 @@ while (<>) {
             (($ignore_case  && (m/$pattern/ims) || (m/$pattern/ms))))
            || (($ignore_case && m/$pattern/is) || (m/$pattern/s))) {
         my($matching_text) = $&;
+        my($prev_text) = $_;            # used to detect lack of progress (see below)
         &debug_print(&TL_VERY_DETAILED, "\n");
         &debug_out(&TL_VERY_DETAILED, "matching text: '%s'\n", $matching_text);
         for ($i = 1; $i <= $fields; $i++) {
@@ -209,6 +222,13 @@ while (<>) {
         &debug_print(&TL_VERY_DETAILED, "count=$count max_count=$max_count\n"); 
         $count++;
         last if ($count >= $max_count);
+
+        # Make sure progress made: otherwise, infinite loop (e.g., zero-width match like '(?=(\w))')
+        ## NOTE: added by Claude Code using model Sonnet 5 (cf. count_it.perl).
+        if ($_ eq $prev_text) {
+            &error_out("Unexpected error: text unchanged after matching /%s/ (zero-width match?): breaking out of loop for line %d\n", $pattern, $.);
+            last;
+        }
     }
 
     # Trace out lines not matched
