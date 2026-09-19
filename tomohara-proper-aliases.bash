@@ -39,10 +39,16 @@ alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human --
 alias git-files-changed=git-diff-list
 alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
-# git-repo-url: returns URL for git repo in current dir.
+# git-repo-url: returns URL for git repo in current dir
+# example: https://github.com/tomasohara/shell-scripts
 ## OLD: function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
 ## NOTE: uses first url (TODO1: use para-match to filter submodule)
 function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config" | head -1; }
+# git-slug: returns name for git repo in current dir
+# example: tomasohara/shell-scripts
+# Note: avoids "git-repo-url" for sake of tab completion;
+# for nomenclature, see https://support.atlassian.com/bitbucket-cloud/kb/what-is-a-repository-slug.
+function git-slug { git-repo-url | extract-matches '([^\/]+/[^\/]+)$'; }
 alias git-is-repo-accessible-alias='git-is-repo-accessible'
 alias git-push='git-push-alias'
 alias git-check-ignore-plus='git check-ignore --non-matching --verbose'
@@ -844,13 +850,15 @@ alias-fn rename-adhoc-notes 'rename-files -q "$(get-host-nickname)-adhoc-notes" 
 # TODO2: apply de-identification
 #
 function copy-to-temp-as-txt {
-    local file="$1"
-    local temp_file
-    ## TODO3: global TEMP
-    declare -g TEMP
-    temp_file="$TEMP/$(basename "$file").txt"
-    copy "$file" "$temp_file"
-    touch "$temp_file"
+    ## OLD: local file="$1"
+    for file in "$@"; do
+        local temp_file
+        ## TODO3: global TEMP
+        declare -g TEMP
+        temp_file="$TEMP/$(basename "$file").txt"
+        copy "$file" "$temp_file"
+        touch "$temp_file"
+    done
 }
 
 #................................................................................
