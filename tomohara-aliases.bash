@@ -95,6 +95,7 @@
 #   set_xterm_title.bash startup-tracing.bash
 # - Supplemental scripts:
 #   anaconda-aliases.bash git-aliases.bash kill_em.bash ps_mine.bash
+## UPDATE 20 Sep 26: reworks less macros to minimize redundancy; more macro comments
 ## UPDATE 13 Sep 26: changes tar-this-dir warning to an FYI
 ## UPDATE 13 Sep 26: reworks tar-this-dir-normal & tar-just-this-dir in terms of tar-this-dir; refines usage for tar aliases; adds usage for make-recent-tar; renames tar-this-dir-pruned and deprecates tar-this-dir-normal
 ## UPDATE 12 Sep 26: start of tar-dir cleanup (e.g., dependency documentation)
@@ -537,8 +538,12 @@ cond-export LESS "-cFIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m).
 # Disables full-screen repaints under minimal-installation hosts (e.g., Beowolf nodes)
 if [ "$BAREBONES_HOST" = "1" ]; then export LESS="-cIX-P--Less-- ?f%f:(stdin). ?e(END):?pb(%pb\%) ?m(%i of %m)..%t"; fi
 export PAGER="${PAGER:-less}"
-cond-export PAGER_CHOPPED "less -S"
-cond-export PAGER_NOEXIT "less -+F"
+## OLD:
+## cond-export PAGER_CHOPPED "less -S"
+## cond-export PAGER_NOEXIT "less -+F"
+cond-export PAGER_CHOPPED "$PAGER -S"
+cond-export PAGER_NOEXIT "$PAGER -+F"
+cond-export PAGER_NOEXIT_TAIL "$PAGER_NOEXIT +G"
 # less-pattern(pattern, ...): invoke less with PATTERN (and other args) unless empty
 function less-pattern {
     if [ "$1" ]; then less -p "$@"; else less; fi
@@ -551,10 +556,16 @@ function zhead () {
     shift
     zcat "$file" | head "$@"
 }
-alias less-='$PAGER_NOEXIT'
-alias less-clipped='$PAGER_NOEXIT -S'
-alias less-tail='$PAGER_NOEXIT +G'
-alias less-tail-clipped='$PAGER_NOEXIT +G -S'
+## OLD:
+## alias less-='$PAGER_NOEXIT'
+## alias less-clipped='$PAGER_NOEXIT -S'
+## alias less-tail='$PAGER_NOEXIT +G'
+## alias less-tail-clipped='$PAGER_NOEXIT +G -S'
+simple-alias-fn less-no-exit "$PAGER_NOEXIT"
+alias less-=less-no-exit
+simple-alias-fn less-clipped "$PAGER_NOEXIT -S"
+simple-alias-fn less-tail "$PAGER_NOEXIT +G"
+simple-alias-fn less-tail-clipped "$PAGER_NOEXIT +G -S"
 alias ltc=less-tail-clipped
 cond-export ZPAGER zless
 
@@ -1198,7 +1209,8 @@ cond-export MY_GREP_OPTIONS "-n $skip_dirs -s"
   # note: uses redundant grepl for highlighting (with potentially split args noted above for grep-to-less)
   # TODO3: remove redundant item number (due to history and grepl)
   #    7255: 7255  [2026-03-13 22:57:03] my-gnome-terminal --title "copilot: mezcla" --no-xterm-title
-  function grepl-hist-tail { history  | PAGER="$PAGER_NOEXIT +G" grepl "$@"; }
+  ## OLD: function grepl-hist-tail { history  | PAGER="$PAGER_NOEXIT +G" grepl "$@"; }
+  function grepl-hist-tail { history | PAGER="$PAGER_NOEXIT_TAIL" grepl "$@"; }
   #
   # grepl-bashrc-etc(): grep through bash rc files excluding history
   # note: see grepl-hist-tail for rationale (e.g., double grepl and potentially split args)
@@ -2117,9 +2129,15 @@ function heuristic-notes-entry-gr-aux() {
 alias notes-entry-gr='notes-entry-gr-aux "$notes_glob"'
 function notes-entry-gr-less-p { notes-entry-gr "$@" 2>&1 | less-pattern "$1"; }
 alias entry-notes=notes-entry-gr
-alias cached-entry-gr='notes-entry-gr-aux _master-note-info.list'
-function cached-entry-gr-less-p { cached-entry-gr "$@" 2>&1 | less-pattern "$1"; }
+# cached-entry-gr(pattern): search for PATTERN in current dir master
+## OLD: alias cached-entry-gr='notes-entry-gr-aux _master-note-info.list'
+## TODO3: allow _master-note-info.list to be overwritten
+simple-alias-fn cached-entry-gr 'notes-entry-gr-aux _master-note-info.list'
+## OLD: function cached-entry-gr-less-p { cached-entry-gr "$@" 2>&1 | less-pattern "$1"; }
+## TODO2: rework less-tail/-pattern to be more compositional
+function cached-entry-gr-less-p { cached-entry-gr "$@" 2>&1 | less-tail -p "$1"; }
 # TODO: * work good scheme for shortcut aliases (e.g. both memorable and easily tab-completable)!
+# grepl-entry(pattern): find PATTERN in cached notes and show in pager at end"
 alias grepl-entry=cached-entry-gr-less-p
 alias grepl-entry-here=entry-notes
 
