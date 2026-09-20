@@ -2036,7 +2036,7 @@ alias un-zip='command-to-pager unzip'
 alias color-xterm='rxvt&'
 
 ## OLD: alias count-it='alias-perl count_it.perl'
-alias-fn count-it 'alias-perl count_it.perl'
+simple-alias-fn count-it 'alias-perl count_it.perl'
 alias count_it=count-it
 # count-tokens: count occurrences of space-delimited tokens in input
 function count-tokens () { count-it "\S+" "$@"; }
@@ -2044,7 +2044,7 @@ function count-tokens () { count-it "\S+" "$@"; }
 # TODO: rework via chomp; TODO2: fix stupid problems viewing under MacOS
 function count-line-text () { count-it '^([^\n\r]*)[\n\r]*$' "$@"; }
 ## OLD: alias extract-matches='alias-perl extract_matches.perl'
-alias-fn extract-matches 'alias-perl extract_matches.perl'
+simple-alias-fn extract-matches 'alias-perl extract_matches.perl'
 # EX: echo $'1 one\n2 two\n3' | perlgrep 'o\w' => "1 one"
 alias perlgrep='alias-perl perlgrep.perl'
 alias perl-grep=perlgrep
