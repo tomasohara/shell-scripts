@@ -150,7 +150,8 @@ echo {a..z}
 ## Arrays
 
 ```bash
-arr=(one two three)
+arr=(one two three)             # 
+declare -a arr                  # declaration for array (implicit in a
 echo "${arr[0]}"                # first element
 echo "${arr[@]}"                # ** all elements (individually quoted)
 echo "${arr[*]}"                # all elements (single word)
@@ -160,9 +161,9 @@ echo "${arr[@]:3:2}"            # array slice at START of size LEN
 echo "${*:2}"                   # slices arguments from $2 to end, joined by spaces
 local dirs=("${@:-.}")          # default to current dir if no args
 
-declare -A map                  # * associative array (Bash 4+)
-map[key]="value"
-echo "${map[key]}"
+declare -A map                  # * associative array aka hash (Bash 4+)
+map[key]="value"                # hash assignment (i.e., replace value for key)
+echo "${map[key]}"              # hash access (i.e., get value for key)
 ```
 
 ## Arithmetic
