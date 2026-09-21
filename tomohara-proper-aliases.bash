@@ -1107,17 +1107,23 @@ function remove-path-entries {
     local var="${2:-PATH}"
     local new_value
     ## TODO3: convert to python help to allow for convenient tracing
+    ## TODO4:                   ^^^^ typo???
     new_value="$(
         REMOVE_PATTERN="$pattern" \
         TARGET_VAR="${!var}" \
         perl -e '
+            require "common.perl";  ## TODO4 make optional (e.g., minimal install)
             my $pattern = $ENV{REMOVE_PATTERN};
             my %seen;
+            # Find path entries to retain
             my @parts = grep {
                 $_ ne "" &&
                 $_ !~ /$pattern/i &&
-                !$seen{$_}++
+                (! $seen{$_}++) &&
+                debug_print(4, "Retaining $_\n") &&    ## TODO3: just trace removals
+                &TRUE
             } split(/:/, $ENV{TARGET_VAR});
+            # Reconstruct path (n.b., ignores duplicates)
             print join(":", @parts);
         '
     )"
