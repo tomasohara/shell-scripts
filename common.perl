@@ -2399,7 +2399,9 @@ sub get_file_ddmmmyy {
 &init_common();
 if (&DETAILED_DEBUGGING) {
     my($_package, $filename, $_line) = caller;
-    &debug_print(1, "caller: $filename\n");
+    if ($filename !~ /^(-e)?$/) {  # ignores "-e", empty file, etc.
+	&debug_print(1, "common.perl client: $filename\n");
+    }
 }
 &assert(&TRUE != &FALSE);
 1;
