@@ -601,12 +601,13 @@ function prepend-python-path () { export PYTHONPATH="$1":${PYTHONPATH}; }
 
 # is-true(env_var, default): returns true iff env_var set to true-like value
 # usage: local verbose=$(is-true "VERBOSE"); ... $verbose && echo "step n"
+## TODO3: reconcile with to_bool in add-getenv-bool branch
 function is-true {
     # Get the environment variable name
     local env_name="$1"
     
     # Get the value of that environment variable (default to "false")
-    local value=
+    local value
     value=$(eval echo "\${$env_name:-false}")
     
     # Convert to lowercase for easier checking
@@ -1902,7 +1903,7 @@ function make-tar () {
 #
 function tar-dir () {
     if missing-options "$@"; then
-        echo "Usage: "${FUNCNAME[0]}" dir [depth]"
+        echo "Usage: ${FUNCNAME[0]} dir [depth]"
         echo ""
         echo "note: see make-tar for env var details"
         echo ""
@@ -2028,7 +2029,8 @@ alias create-tar='make-tar-with-subdirs'
 alias make-full-tar='make-tar'
 # TODO: handle filenames with embedded spaces
 ## PREVIOUS: alias recent-tar-this-dir='make-recent-tar $TEMP/recent-$(basename "$PWD")'
-alias-fn recent-tar-this-dir 'make-recent-tar "$TEMP/recent-$(basename "$PWD").tar.gz"'
+## OLD: alias-fn recent-tar-this-dir 'make-recent-tar "$TEMP/recent-$(basename "$PWD").tar.gz"'
+function recent-tar-this-dir { make-recent-tar "$TEMP/recent-$(basename "$PWD").tar.gz"; }
 function sort-tar-archive() { ($GTAR "t${GTAR_OPTS}" "$@" | sort --key=3 -rn) 2>&1 | $PAGER; }
 #
 # TODO: tar-this-dir-there???
@@ -2817,17 +2819,27 @@ alias bash-trace-off='set +o xtrace'
 #
 # trace-cmd(command-line): runs command-line with bash tracing enable to
 # show argument expansion with result piped into less
+# note: use EVAL_COMMAND=1 ... to evaluate the command line (e.g., if given as string)
 function trace-cmd() {
     (
         ## TODO: warn about need for extra quotes
         ## if [[ "$*" =~ " " ]]; then echo  "FYI: Make sure command doubly-quoted to trace-cmd"; fi
         echo "start: $(date)";
-        bash-trace-on; 
-        eval "$*"; 
+        bash-trace-on;
+        # note: The command is normally not evaluated to preserve quoted strings;
+        # however, that is useful for certain types of tracing (e.g., alias expansion).
+        ## OLD: eval "$*";
+        local EVAL_COMMAND=$(is-true "EVAL_COMMAND")
+        if $EVAL_COMMAND; then
+            eval "$*";
+        else
+            "$@";
+        fi
         bash-trace-off;
         echo "end: $(date)";
     ) 2>&1 | $PAGER;
 }
+simple-alias-fn trace-cmd-eval 'EVAL_COMMAND=1 trace-cmd'
 ## ALT: function trace-cmd() { bash-trace-on; @_; bash-trace-off; }
 alias cmd-trace='trace-cmd'
 
