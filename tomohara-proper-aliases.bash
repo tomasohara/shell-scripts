@@ -861,7 +861,13 @@ function copy-to-temp-as-txt {
     done
 }
 
-#................................................................................
+#...............................................................................
+# AI Assistant related
+
+# view-claude-code-transcripts: show Claude Code transcripts reformatted as HTML
+alias view-claude-code-transcripts='uvx claude-code-transcripts'
+
+#...............................................................................
 # Snapshot related
 
 # rename-last-snapshot(new-name): rename most recent snapshot to NEW-NAME (excluding renamed files)
