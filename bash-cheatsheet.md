@@ -7,6 +7,7 @@ Notes:
   assumed by the prototypical script in template.bash (e.g., defaulting, env-flag tests, 
   functions, case-based option parsing, etc.). 
 - Review these \*'d cases when creating new script or porting an existing script to the repo.
+- UPDATE: 2026-09-21: Adds section for pattern matching
 
 Misc. Notes:
 - Favors modern Bash (3.2+; associative arrays and case modification require 4+).
@@ -85,6 +86,7 @@ value="${value@L}"              # lowercase (alternative form)
 if [ "$x" = "value" ]; then echo yes; fi
 if [[ "$x" == value* ]]; then echo glob; fi
 # TODO: add regex gotcha's (e.g., potential trailing space confusion)
+# NOTE: use variable to minimize potential bash expression parsing quirks; ses pattern matching section.
 if [[ "$x" =~ ^re[gG]ex$ ]]; then echo regex; fi
 
 if [[ EXPR_a ]]; then
@@ -297,6 +299,15 @@ if [[ "${VERBOSE:-0}" == "1" ]]; then set -o verbose; fi
 shopt -s expand_aliases
 
 env --ignore-environment bash --noprofile --norc
+```
+
+## Pattern Matching
+
+```bash
+[[ (val =~ pat) ]] && ...       # true if value matches regex pattern
+# warning: better to use variabe for pattern to avoid bash parsing quirks
+#   regex_var = pattern; [[ (value =~ $regex_var) ]] 
+# TODO3: methon specific gotcha's (traling spaces, parenthesis, etc.)
 ```
 
 ## Miscellaneous
