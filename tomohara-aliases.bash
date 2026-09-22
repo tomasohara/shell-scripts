@@ -81,7 +81,6 @@
 #    -- SC2016: Expressions don't expand in single quotes
 #    -- SC2046: Quote this to prevent word splitting
 #    -- SC2086: Double quote to prevent globbing and word splitting.
-#    -- SC2155: Declare and assign separately to avoid masking return values
 #    -- SC2139: This expands when defined, not when used. Consider escaping.
 #    -- SC2206: Quote to prevent word splitting/globbing
 #    -- SC2116: Useless echo?
@@ -382,6 +381,11 @@ hoy=$(todays-date)
 # TODO: punt on tab-completion (i.e., TODAY => today)???
 alias TODAY=todays-date
 alias date-central='TZ="America/Chicago" date'
+#
+# date-yyyy-mm-dd: outputs date in ISO 8601 style
+function date-yyyy-mm-dd {
+    date --date "$1" '+%Y-%m-%d';
+}
 
 # ddmmmyy-hhmm(): return timestamp in European-like format using a single token (e.g., 31dec25@2359).
 # note: This is intended for use in filenames (e.g., _free-21Feb26@1549).
