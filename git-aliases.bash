@@ -475,7 +475,7 @@ function git-add-commit-push {
     local message="${GIT_MESSAGE:-...}"
     if [ "$message" = "..." ]; then 
         echo-plus "Error: '...' or '' not allowed for commit message"
-        echo-plus "This avoids to avoid cut-n-paste error (e.g., [G]IT_MESSAGE-typo)"
+        echo-plus "This is to avoid cut-n-paste errors (e.g., [G]IT_MESSAGE-typo)"
         return 1
     fi
     #
