@@ -2846,6 +2846,8 @@ function trace-cmd() {
 simple-alias-fn trace-cmd-eval 'EVAL_COMMAND=1 trace-cmd'
 ## ALT: function trace-cmd() { bash-trace-on; @_; bash-trace-off; }
 alias cmd-trace='trace-cmd'
+## TODO4: add support for dynamic alias permutations
+alias cmd-trace-eval='trace-cmd-eval'
 
 # Compressing/uncompressing a subdirectory tree (ignoring symbolic links) 
 # TODO: write scripts for this (given the complexity)
