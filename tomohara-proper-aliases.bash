@@ -686,6 +686,8 @@ function libreoffice-text-from-html-clipboard() {
     libreoffice "$doc_file" &
 }
 alias libreoffice-from-clipboard=libreoffice-text-from-html-clipboard
+simple-alias-fn libreoffice-to-pdf 'libreoffice --headless --convert-to pdf'
+alias extract-pdf=libreoffice-to-pdf
 
 #-------------------------------------------------------------------------------
 
@@ -804,7 +806,9 @@ function reset-prompt-label {
     if [[ $PS_symbol =~ [^A-Za-z0-9\ _-]$ ]]; then
         # TODO3: avoid duplication of regex
         # NOTE: ideally should be like @vals = $(get_matches(regex))
-        old_symbol=$(echo "$PS_symbol" | perl -pe 's/^([\w\s]+)(.*\W)$/$2/;')
+        ## BAD: old_symbol=$(echo "$PS_symbol" | perl -pe 's/^([\w\s]+)(.*\W)$/$2/;')
+        # Change facilitated by Antigravity AI Assistant using Gemini 3.1 Pro (Low)
+        old_symbol=$(echo "$PS_symbol" | perl -pe 's/^([\w\s\-]+)(.*\W)$/$2/;')
         ## DEBUG: trace-vars old_symbol
     else
         echo "FYI: PS_symbol w/o trailing symbol: '$PS_symbol'" 1>&2
