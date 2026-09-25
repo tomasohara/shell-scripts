@@ -3,7 +3,7 @@
 # kdiff.sh: Invokes kdiff3 over the files making sure unix paths resolved to windows
 # if under Cygwin.
 #
-## UPDATE 2026-09-25: 
+## UPDATE 2026-09-25: fix for file2 resolution by GPT-5.6 Terra and DRY_RUN, etc.
 
 # Set bash regular and/or verbose tracing
 # - xtrace shows arg expansion (and often is sufficient)
@@ -65,6 +65,7 @@ if [ "$show_usage" == "1" ]; then
 fi
 file1="$1"
 file2="$2"
+input_file1="$file1"
 if [ "$OSTYPE" == "cygwin" ]; then
     file1=$(cygpath -w "$file1")
     file2=$(cygpath -w "$file2")
@@ -76,11 +77,11 @@ if [ "$OSTYPE" == "linux" ]; then
     file2=$(realpath "$file2")
 fi
 
-# Make sure file2 exists, using file1 pattern unless absolute-ish
+# Make sure file2 exists, using relative file1 pattern unless absolute-ish
 base1="$(basename "$file1")"
 ## OLD: if [[ (-d "$file2") && (! "$file1" =~ ^[\/\.].*) && (! -e "$file2/$base1") ]]; then
-if [[ (-d "$file2") && (! -e "$file2/$base1") ]]; then
-    file2="$file2/$file1"
+if [[ (-d "$file2") && (! "$input_file1" =~ ^[\/\.].*) && (! -e "$file2/$base1") ]]; then
+    file2="$file2/$input_file1"
 fi
 
 # Invoke kdiff
