@@ -3,14 +3,25 @@
 # kdiff.sh: Invokes kdiff3 over the files making sure unix paths resolved to windows
 # if under Cygwin.
 #
-#
+## UPDATE 2026-09-25: 
 
-# Uncomment following line(s) for tracing:
+# Set bash regular and/or verbose tracing
 # - xtrace shows arg expansion (and often is sufficient)
 # - verbose shows source commands as is (but usually is superfluous w/ xtrace)
-#  
-## set -o xtrace
-## set -o verbose
+#
+if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+    echo "$0 $*"
+fi
+if [[ "${TRACE:-0}" == "1" ]]; then
+    set -o xtrace
+fi
+if [[ "${VERBOSE:-0}" == "1" ]]; then
+    set -o verbose
+fi
+if [[ "${STRICT:-0}" == "1" ]]; then
+    set -euo pipefail
+fi
+DRY_RUN="${DRY_RUN:-0}"
 
 # Parse command-line options
 #
@@ -73,4 +84,8 @@ if [[ (-d "$file2") && (! -e "$file2/$base1") ]]; then
 fi
 
 # Invoke kdiff
-$kdiff "$file1" "$file2" 2>| "$TMP/kdiff-$$.log" &
+if [ "$DRY_RUN" == "1" ]; then
+    echo "$kdiff" "$file1" "$file2"
+else
+    "$kdiff" "$file1" "$file2" 2>| "$TMP/kdiff-$$.log" &
+fi
