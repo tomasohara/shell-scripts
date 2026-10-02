@@ -44,7 +44,13 @@ function startup-trace () {
         echo "$* [$HOSTNAME $(date)]" >> "$TEMP/_startup-$USER-$HOST-$$.log";
     fi; 
     if [ "$CONSOLE_TRACING" = "1" ] || [ "$DEBUG_LEVEL" -ge 5 ]; then
-        echo "$* [$HOSTNAME $(date)]";
+        ## OLD: echo "$* [$HOSTNAME $(date)]";
+        ## TODO3: echo $* ... $redir
+        if [ "$STDERR_TRACING" = 1 ]; then
+            echo "$* [$HOSTNAME $(date)]" 1>&2;
+        else
+            echo "$* [$HOSTNAME $(date)]";
+        fi;
     fi;
 }
 # startup-trace-debug(msg): trace MSG with DEBUG_LEVEL 6+
