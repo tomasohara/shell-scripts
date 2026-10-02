@@ -735,6 +735,34 @@ function shell-check-last-snippet {
     # shellcheck disable=SC2002
     cat "$1" | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
 }
+
+# Viewing images, etc.
+# get-last-snapshot(dir=.): return last image in DIR (sorted by date)
+# view-last-snapshot(dir=.): view last image in DIR (sorted by date)
+# TODO3: add more general image retrieval (not just popular extensions)
+# note: uses nullglob so that unmatched wildcards expand to nothing
+function get-last-snapshot {
+    local dir="${1:-.}"
+    local image;
+    shopt -s nullglob
+    image=$(ls -t "$dir/"*.png "$dir/"*.jpg /dev/null | head -1);
+    shopt -u nullglob
+    echo "$image";
+}
+function view-last-snapshot {
+    local image dir;
+    image=$(get-last-snapshot "$@")
+    if [ "$image" != /dev/null ]; then
+        start $(get-last-snapshot "$@");
+    else
+        ## TODO2: add better error handling and default dir coordination
+        dir="${*:-.}"
+        echo "Warning: no snapshots found (e.g., in dir '$dir')"
+    fi
+}
+## TEMP:
+quiet-unalias get-last-snapshot view-last-snapshot
+
 #
 # shell-check-stdin(): run shell-check over stdin
 function shell-check-stdin {
