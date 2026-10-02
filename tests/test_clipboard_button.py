@@ -37,7 +37,8 @@ from mezcla.unittest_wrapper import TestWrapper, invoke_tests
 
 THE_MODULE = None
 try:
-    import mezcla.clipboard_button as THE_MODULE
+    ## OLD: import mezcla.clipboard_button as THE_MODULE
+    import clipboard_button as THE_MODULE
 except Exception: # pylint: disable=broad-except
     system.print_exception_info("clipboard_button import")
 
