@@ -11,6 +11,7 @@
 # 
 # Change facilitated by Antigravity using model Gemini 3.1 Pro (Low).
 #
+## UPDATE 2026-10-1: adds ability to run command
 ## UPDATE 2026-09-23: reworks Qt window flags to make optional
 
 """
@@ -49,15 +50,22 @@ WINDOW_FRAMELESS = system.getenv_value(
 WINDOW_TOOL = system.getenv_value(
     "WINDOW_TOOL", None,
     desc="Apply Qt.WindowType.Tool")
-
+BASH_SNIPPET = system.getenv_bool(
+    "BASH_SNIPPET", False,
+    desc="Evaluate text as Bash snippet to derive result")
+UPDATE_BUTTON = system.getenv_bool(
+    "UPDATE_BUTTON", False,
+    desc="Update button to Bash snippet output")
 
 class ClipboardButton(QPushButton): # pylint: disable=too-few-public-methods
     """UI class for the minimalist clipboard button"""
 
     def __init__(self, text: str):
         """Initialize the minimalist UI button"""
+        debug.trace(TL.VERBOSE, f"ClipboardButton.__init__({text}): self={self}")
         super().__init__(text)
         self._text = text
+        self._snippet = text
 
         # Apply minimalist frameless window hint similar to xmessage
         ## OLD: self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.Tool)
@@ -72,13 +80,30 @@ class ClipboardButton(QPushButton): # pylint: disable=too-few-public-methods
             debug.trace_expr(4, flags)
             self.setWindowFlags(flags)
         self.clicked.connect(self.on_click)
+        debug.trace_object(5, self, label=f"{self.__class__.__name__} instance")
+
+        # Simulate initial click to derive text for button
+        if BASH_SNIPPET and UPDATE_BUTTON:
+            self.on_click()
 
     def on_click(self) -> None:
         """Copies text to the clipboard upon button click"""
-        debug.trace(TL.USUAL, f"Button clicked, copying text: {self._text}")
-        QApplication.clipboard().setText(self._text)
-        debug.assertion(QApplication.clipboard().text() == self._text)
-
+        debug.trace(6, "ClipboardButton.on_click()")
+        ## OLD:
+        ## debug.trace(TL.USUAL, f"Button clicked, copying text: {self._text}")
+        ## QApplication.clipboard().setText(self._text)
+        ## debug.assertion(QApplication.clipboard().text() == self._text)
+        action = "copying" if not BASH_SNIPPET else "evaluating"
+        debug.trace(TL.USUAL, f"Button clicked, {action} text: {self._snippet}")
+        text = self._snippet
+        if BASH_SNIPPET:
+            log = gh.get_temp_file()
+            text = gh.run(f"BATCH_MODE=1 CONSOLE_TRACING=0 bash -ic {self._snippet} 2> {log}")
+        QApplication.clipboard().setText(text)
+        if UPDATE_BUTTON:
+            self._text = gh.elide(text)
+            self.setText(self._text)
+        debug.trace_object(6, self, label=f"{self.__class__.__name__} instance")
 
 class ClipboardButtonApp(Main):
     """Script input processing class for minimalist clipboard button"""
