@@ -61,7 +61,7 @@
 .DS_Store
 
 # Misc. tool dirs (e.g., VS Code)
-shell-scripts
+## OLD: shell-scripts
 
 #...............................................................................
 # Idiosyncratic stuff for Tom
