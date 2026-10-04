@@ -1,0 +1,22 @@
+#! /usr/bin/env bash
+#
+# shell-scripts: shows path and version info for shell-scripts repo
+#
+# Note:
+# - Modeled after mezcla's module-info script:
+#   https://github.com/tomasohara/mezcla/blob/development/mezcla/mezcla
+#
+#------------------------------------------------------------------------------
+# Sample output:
+#
+#   /home/tomohara/bin-clone/shell-scripts
+#   Version: 1.4.0
+#   Install path: /tpo/misc/programs/bash/shell-scripts-devel
+#------------------------------------------------------------------------------
+# TODO: add _shell-scripts.bash for implementation (e.g., with support for diagnostics, etc.)
+#
+
+echo "$0"
+src_dir=$(dirname "${BASH_SOURCE[0]}")
+echo "Version: $(cat "$src_dir/version.txt")"
+echo "Install path: $(realpath "$src_dir")"
