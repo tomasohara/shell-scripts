@@ -8,6 +8,9 @@ Change facilitated by Antigravity using model Gemini 3.1 Pro (Low).
 # Standard modules
 import sys
 import os
+from unittest import mock
+
+os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 # Force the local repository root to be at the front of sys.path 
 # so that we don't accidentally import the globally installed Mezcla-tpo.
@@ -27,7 +30,8 @@ if "mezcla" in sys.modules:
 
 # Installed modules
 # pylint: disable=no-name-in-module
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication
 # pylint: enable=no-name-in-module
 
 # Local modules
@@ -45,14 +49,17 @@ except Exception: # pylint: disable=broad-except
 class TestIt(TestWrapper):
     """Class for testcase definition"""
     script_module = TestWrapper.get_testing_module_name(__file__, THE_MODULE)
+    qapp = None
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        """Create and retain the Qt application for all widget tests."""
+        super().setUpClass()
+        cls.qapp = QApplication.instance() or QApplication(sys.argv)
 
     def test_01_gui(self) -> None:
         """Tests the GUI button creation and logic"""
         debug.trace(4, f"TestIt.test_01_gui(); self={self}")
-
-        qapp = QApplication.instance()
-        if not qapp:
-            qapp = QApplication(sys.argv)
 
         # Initialize the UI directly
         button = THE_MODULE.ClipboardButton("test_12345")
@@ -60,7 +67,61 @@ class TestIt(TestWrapper):
         # Fake click
         button.click()
 
-        self.do_assert(qapp.clipboard().text() == "test_12345", "Clipboard not updated")
+        self.do_assert(
+            self.qapp.clipboard().text() == "test_12345",
+            "Clipboard not updated")
+
+    def test_02_window_flags(self) -> None:
+        """Tests named and numeric window-flag parsing."""
+        named_flags = THE_MODULE.get_window_flags("Tool|FramelessWindowHint")
+        numeric_flags = THE_MODULE.get_window_flags(
+            str(Qt.WindowType.Tool.value))
+        self.do_assert(
+            named_flags & Qt.WindowType.Tool,
+            "Named Tool flag not applied")
+        self.do_assert(
+            named_flags & Qt.WindowType.FramelessWindowHint,
+            "Named FramelessWindowHint flag not applied")
+        self.do_assert(
+            numeric_flags == Qt.WindowType.Tool,
+            "Numeric window flag not parsed")
+
+    def test_03_bash_snippet_quoting(self) -> None:
+        """Tests non-interactive Bash snippets are passed as one argument."""
+        snippet = 'printf "%s" "two words"'
+        with mock.patch.object(THE_MODULE, "BASH_SNIPPET", True), \
+             mock.patch.object(THE_MODULE.gh, "get_temp_file",
+                               return_value="/tmp/clipboard-button.log"), \
+             mock.patch.object(THE_MODULE.gh, "run",
+                               return_value="two words") as run:
+            button = THE_MODULE.ClipboardButton(snippet)
+            button.click()
+
+        self.do_assert(
+            run.call_args.args[0] == (
+                "BATCH_MODE=1 CONSOLE_TRACING=0 bash -c "
+                "'printf \"%s\" \"two words\"' 2> /tmp/clipboard-button.log"),
+            "Bash snippet was not shell-quoted")
+        self.do_assert(
+            self.qapp.clipboard().text() == "two words",
+            "Bash snippet output was not copied")
+
+    def test_04_interactive_bash_snippet(self) -> None:
+        """Tests the opt-in interactive Bash mode."""
+        with mock.patch.object(THE_MODULE, "BASH_SNIPPET", True), \
+             mock.patch.object(THE_MODULE, "BASH_INTERACTIVE", True), \
+             mock.patch.object(THE_MODULE.gh, "get_temp_file",
+                               return_value="/tmp/clipboard-button.log"), \
+             mock.patch.object(THE_MODULE.gh, "run",
+                               return_value="result") as run:
+            button = THE_MODULE.ClipboardButton("alias")
+            button.click()
+
+        self.do_assert(
+            run.call_args.args[0] == (
+                "BATCH_MODE=1 CONSOLE_TRACING=0 bash -ic alias "
+                "2> /tmp/clipboard-button.log"),
+            "Interactive Bash option was not enabled")
 
 if __name__ == '__main__':
     debug.trace_current_context()
