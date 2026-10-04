@@ -3,6 +3,7 @@
 # Adhoc script to update all of the user's main repositories. They can be
 # specified on the command lines or in the OTHER_REPOS env var.
 #
+## UPDATE 2026-10-02: ignores OTHER_REPOS if specified via positional args
 ## UPDATE 24 Aug 26: Make warning display consistent
 #
 
@@ -27,6 +28,7 @@ function show-usage {
     echo ""
     echo "Note:"
     echo "- OTHER_REPOS is space-delimited: specify repos via positional argument(s) otherwise."
+    echo "- Warning: OTHER_REPOS ignored if specified via positional arg."
     echo "- SHOW_SUMMARY shows current repo status"
     echo "- VERBOSE_MODE adds repo url, branch, and related info"
 }
@@ -81,20 +83,27 @@ echo "in $0: $(date)" >> "$log"
 
 # Determine directories
 # pre-init: OTHER_REPOS="$HOME/text-categorization $HOME/programs/python/visual-diff"
+## OLD: if [ "$OTHER_REPOS" != "" ]; then
+[ "${DEBUG_LEVEL:-0}" -ge 4 ] && echo "OTHER_REPOS=($OTHER_REPOS); repos=(${repos[*]})"
 if [ "$OTHER_REPOS" != "" ]; then
-    ## TODO2: drop array support as it requires sourcing the script
-    ## BAD: if declare -p OTHER_REPOS 2>/dev/null | grep -q 'declare \-a'; then
-    if declare -p OTHER_REPOS 2>/dev/null | grep -q "declare .-a"; then
-        ## DEBUG: echo "OTHER_REPOS as array"
-        repos+=("${OTHER_REPOS[@]}")
+    if [ ${#repos[@]} -ne 0 ]; then
+        [ "${DEBUG_LEVEL:-0}" -ge 4 ] && echo "FYI: Ignoring OTHER_REPOS"
     else
-        # fallback: space-delimited string
-        ## DEBUG: echo "OTHER_REPOS as string list"
-        read -r -a tmp <<< "$OTHER_REPOS"
-        repos+=("${tmp[@]}")
+        ## TODO2: drop array support as it requires sourcing the script
+        ## BAD: if declare -p OTHER_REPOS 2>/dev/null | grep -q 'declare \-a'; then
+        if declare -p OTHER_REPOS 2>/dev/null | grep -q "declare .-a"; then
+            ## DEBUG: echo "OTHER_REPOS as array"
+            repos+=("${OTHER_REPOS[@]}")
+        else
+            # fallback: space-delimited string
+            ## DEBUG: echo "OTHER_REPOS as string list"
+            read -r -a tmp <<< "$OTHER_REPOS"
+            repos+=("${tmp[@]}")
+        fi
     fi
 fi
 if [ ${#repos[@]} -eq 0 ]; then
+    [ "${DEBUG_LEVEL:-0}" -ge 2 ] && echo -e "Warning: no repos specified\n"
     show-usage
     exit
 fi

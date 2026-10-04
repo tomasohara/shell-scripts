@@ -690,7 +690,9 @@ cond-export PS_symbol '$'
 function reset-prompt {
     ## DEBUG: echo "reset-prompt" "$@"
     local new_PS_symbol="$*"
-    if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="${DEFAULT_PS_SYMBOL:-$PS_symbol}"; fi
+    ## OLD: if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="${DEFAULT_PS_SYMBOL:-$PS_symbol}"; fi
+    ## NOTE: above was a no-op when DEFAULT_PS_SYMBOL undefined
+    if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="${DEFAULT_PS_SYMBOL:-"$"}"; fi
     # Do nothing if empty
     if [ "$new_PS_symbol" = "" ]; then return; fi    
     ## TODO: if [ "$new_PS_symbol" = "" ]; then echo $'Usage: reset-prompt symbol\nex: reset-prompt §"\n'; return; fi
@@ -2558,6 +2560,8 @@ function move-versioned-files-alt {
     local version_regex="[0-9][0-9][a-z][a-z][a-z][0-9][0-9]"            # ddMMMyy (e.g., run-15jul26.log)
     local alt_version_regex="[0-9][0-9]-[0-9][0-9]-[0-9][0-9][0-9][0-9]" # MM-dd-yyyy (e.g., Claim_Summary_03-16-2025.csv)
     local alt2_version_regex="[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9]" # Screenshot_yyyymmdd_hhmmss (e.g., Screenshot_20260703_203324.png)
+    # note: strict mode requires non-digit context
+    ## TODO3: add loose mode for adhoc timestamps (e.g., _make-incremental-backup-20230317.log)
     if [ "${STRICT:-0}" == "1" ]; then
         version_regex="[^0-9]${version_regex}[^0-9]"
         alt_version_regex="[^0-9]${alt_version_regex}[^0-9]"
@@ -2944,7 +2948,8 @@ function cmd-output () {
     fi
     output_file="$(get-free-filename "$output_base" . list)"
     ## TODO3?: use separate invocations for aliases than for other commands
-    ($command || eval "$command") 2>&1 | ansifilter > "$output_file"
+    ## OLD: ($command || eval "$command") 2>&1 | ansifilter > "$output_file"
+    "$@" 2>&1 | ansifilter > "$output_file"
     $PAGER_NOEXIT "$output_file"
 }
 # cmd-output-hhmm(): version of cmd-output adding HHMM to timestamp
@@ -3032,7 +3037,9 @@ alias magnifier='run-app kmag'
 # Linux admin
 
 alias apt-install='sudo apt-get install --yes --fix-missing --no-remove'
-alias apt-update='sudo apt-get update'
+## OLD: alias apt-update='sudo apt-get update'
+## TODO3: add alias-function converter (e.g., `alias='cmd'` => `simple-alias-fn alias 'cmd')
+simple-alias-fn apt-update 'sudo apt-get update'
 alias apt-search='sudo apt-cache search'
 alias apt-installed='sudo apt list --installed'
 alias apt-uninstall='sudo apt-get remove'
@@ -3047,6 +3054,8 @@ alias restart-system='shutdown-system --reboot'
 alias blank-screen='xset dpms force off'
 alias stop-service='systemctl stop'
 alias restart-service='sudo systemctl restart'
+## TODO4: alias open-xhost-authorization='xhost +'
+
 # mount(): wrapper around command with safety guards
 function unmount {
     local dangerous_option=false

@@ -230,10 +230,12 @@ function run-python-script {
     local out_dir="${PYTHON_OUT_DIR:-"$default_out_dir"}"
     script_base="$(basename "$script_path" .py)"
     # TODO: find shortcut for min
-    local python_debug_level="${PYTHON_DEBUG_LEVEL:-4}"
-    if [ "${DEBUG_LEVEL:-0}" -gt "$python_debug_level" ]; then
-        python_debug_level="$DEBUG_LEVEL"
-    fi  
+    ## OLD:
+    ## local python_debug_level="${PYTHON_DEBUG_LEVEL:-4}"
+    ## if [ "${DEBUG_LEVEL:-0}" -gt "$python_debug_level" ]; then
+    ##     python_debug_level="$DEBUG_LEVEL"
+    ## fi
+    local python_debug_level="${PYTHON_DEBUG_LEVEL:-${DEBUG_LEVEL:-4}}"
     #
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
@@ -286,7 +288,8 @@ function run-python-script {
     tail "$log" "$out" | truncate-width
     check-errors-excerpt "$log" "$out"
     ## TEMP: remove emtpy output file (TODO3: streamline -e/-s tests below)
-    if [ "$DEBUG_LEVEL" -ge 4 ]; then
+    ## OLD: if [ "$DEBUG_LEVEL" -ge 4 ]; then
+    if [ "$python_debug_level" -ge 4 ]; then
         ls -lt "$log" "$out"
     fi
     # note: omitting empty-output pruning useful for background job (e.g., "run-python-script ... &")
@@ -301,6 +304,11 @@ function run-python-script-reset {
     declare -g _PSL_
     _PSL_=0
     trace-vars _PSL_
+}
+# run-python-app: invoke run-python-script-reset in background
+## NOTE: workaround for Bash quirk with subshell-specific _PSL_ due to '... &'
+function run-python-app {
+    let _PSL_++; _PSL_=$_PSL_ run-python-script "$@" &
 }
 
 # pytest stuff
@@ -727,6 +735,34 @@ function shell-check-last-snippet {
     # shellcheck disable=SC2002
     cat "$1" | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
 }
+
+# Viewing images, etc.
+# get-last-snapshot(dir=.): return last image in DIR (sorted by date)
+# view-last-snapshot(dir=.): view last image in DIR (sorted by date)
+# TODO3: add more general image retrieval (not just popular extensions)
+# note: uses nullglob so that unmatched wildcards expand to nothing
+function get-last-snapshot {
+    local dir="${1:-.}"
+    local image;
+    shopt -s nullglob
+    image=$(ls -t "$dir/"*.png "$dir/"*.jpg /dev/null | head -1);
+    shopt -u nullglob
+    echo "$image";
+}
+function view-last-snapshot {
+    local image dir;
+    image=$(get-last-snapshot "$@")
+    if [ "$image" != /dev/null ]; then
+        start $(get-last-snapshot "$@");
+    else
+        ## TODO2: add better error handling and default dir coordination
+        dir="${*:-.}"
+        echo "Warning: no snapshots found (e.g., in dir '$dir')"
+    fi
+}
+## TEMP:
+quiet-unalias get-last-snapshot view-last-snapshot
+
 #
 # shell-check-stdin(): run shell-check over stdin
 function shell-check-stdin {

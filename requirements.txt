@@ -26,6 +26,7 @@ nltk                                    # - Natural Language Toolkit
 numba                                   # - NumPy aware dynamic Python compiler
 pandas                                  # - Powerful data structures for data analysis and statistics
 Pillow                                  # - Python Imaging Library (Fork)
+PyQt6                                   # - Cross-platform GUI toolkit (Qt 6 bindings)
 psutil                                  # - Cross-platform lib for process and system monitoring
 requests                                # - Python HTTP for Humans
 scikit-learn                            # - Machine learning in Python

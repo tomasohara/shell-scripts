@@ -66,6 +66,7 @@
 #      GIT_TOKEN                 user token from Github
 #   GIT_AUTO_NEXT                automatically proceed with next checkin
 #   GIT_FORCE                    force an operation (e.g., git add ignored file)
+#   GIT_IGNORE                   ignore errors in operations, such as invalid filename. )This is used when too many files to specify individually.)
 #   GIT_LOG_DIR                  where to put command logs (e.g, log-files)
 #   GIT_NO_CONFIRM               omit confirmation (used is automated tests)
 #   GIT_SKIP_ADD                 skip implicit 'git add' in git-add-commit-push
@@ -586,6 +587,8 @@ function git-add-plus {
     log=$(get-temp-log-name "add");
     local options=""
     if [ "$GIT_FORCE" = "1" ]; then options="--force"; fi
+    ## TODO2: fix; TODO3: apply ignore-error option to other operations
+    if [ "$GIT_IGNORE" = "1" ]; then options="--ignore-errors"; fi
     git add $options "$@" >> "$log" 2>&1;
 
     # Sanity check
