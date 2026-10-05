@@ -1264,7 +1264,9 @@ function findspec () { if [ "$2" = "" ]; then echo "Usage: findspec dir glob-pat
 function findspec-all () { command find $1 -follow -iname \*$2\* $3 $4 $5 $6 $7 $8 $9 -print 2>&1 | $GREP -v '^find: '; }
 # findspec-filter: filters miscellaneous files from find-file output (e.g., backup, build, etc.);
 function findspec-filter {
-    local regex="/(backup|build|old)/"
+    ## OLD: local regex="/(backup|build)/"
+    ## TODO4: local regex="(/(backup|build|old)/)|(/(_.*)/?)"
+    local regex="/(backup|build|old|_.*)/?"
     (( DEBUG_LEVEL >= 3 )) && echo "FYI: Filtering '$regex'" 1>&2
     $EGREP -iv "$regex"
 }
@@ -2838,6 +2840,10 @@ function trace-cmd() {
         # however, that is useful for certain types of tracing (e.g., alias expansion).
         ## OLD: eval "$*";
         local EVAL_COMMAND=$(is-true "EVAL_COMMAND")
+        if [[ ($EVAL_COMMAND != true) && ("" != $(alias "$1" 2> /dev/null)) ]]; then
+            echo "FYI: Using eval to handle alias ($1): see trace-cmd-eval"
+            EVAL_COMMAND=true
+        fi
         if $EVAL_COMMAND; then
             eval "$*";
         else
