@@ -29,6 +29,7 @@ TODO:
 
 ```bash
 cmd &> file                     # not `cmd >& file`; same as `cmd > file 2>&1`
+[ true ] vs. [ $v = true ]      # true is only a command (e.g., not a keyword)
 ```
 
 ## Variables
