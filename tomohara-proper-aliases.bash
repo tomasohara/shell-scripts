@@ -753,7 +753,8 @@ function view-last-snapshot {
     local image dir;
     image=$(get-last-snapshot "$@")
     if [ "$image" != /dev/null ]; then
-        start $(get-last-snapshot "$@");
+        ## OLD: start $(get-last-snapshot "$@");
+        show-thumbnail "$(get-last-snapshot "$@")";
     else
         ## TODO2: add better error handling and default dir coordination
         dir="${*:-.}"
@@ -762,6 +763,16 @@ function view-last-snapshot {
 }
 ## TEMP:
 quiet-unalias get-last-snapshot view-last-snapshot
+#
+function show-thumbnail {
+    : "show-thumbnail(image-path): shows a thumbnail for IMAGE [for env:PREVIEW_TIME secs]"
+    local preview_time="${PREVIEW_TIME:-5}"
+    local H W
+    W=256
+    H=$((9*$W/16))
+    timeout "$preview_time" feh --borderless --geometry="${W}x${H}-0-0"  --scale-down "$@" &
+}
+
 
 #
 # shell-check-stdin(): run shell-check over stdin
@@ -1330,7 +1341,7 @@ function all-tomohara-settings-here {
         fi
         ## DEBUG:
         local old_usage
-        old_usage="$(show-path | grep "$old_tom_bin[:/]")"
+        old_usage="$(show-path | grep "${old_tom_bin}[:/]")"
         if [ "$old_usage" != "" ]; then
             echo "Warning: old dir '$old_tom_bin' still used:"
             echo $'\t'"$old_usage"
