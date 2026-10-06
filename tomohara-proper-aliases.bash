@@ -738,7 +738,8 @@ function shell-check-last-snippet {
 
 # Viewing images, etc.
 # get-last-snapshot(dir=.): return last image in DIR (sorted by date)
-# view-last-snapshot(dir=.): view last image in DIR (sorted by date)
+# view-last-snapshot(dir=.): view last image in DIR (sorted by date);
+# when AS_THUMBNAIL, as thumbnail is displayed (for PREVIEW_TIME)
 # TODO3: add more general image retrieval (not just popular extensions)
 # note: uses nullglob so that unmatched wildcards expand to nothing
 function get-last-snapshot {
@@ -750,17 +751,22 @@ function get-last-snapshot {
     echo "$image";
 }
 function view-last-snapshot {
-    local image dir;
+    local image dir
     image=$(get-last-snapshot "$@")
     if [ "$image" != /dev/null ]; then
         ## OLD: start $(get-last-snapshot "$@");
-        show-thumbnail "$(get-last-snapshot "$@")";
+        if [ "${AS_THUMBNAIL:-0}" == "1" ]; then
+            show-thumbnail "$image"
+        else
+            start "$image"
+        fi
     else
         ## TODO2: add better error handling and default dir coordination
         dir="${*:-.}"
         echo "Warning: no snapshots found (e.g., in dir '$dir')"
     fi
 }
+function view-last-snapshot-thumbnail { AS_THUMBNAIL=1 view-last-snapshot "$@"; }
 ## TEMP:
 quiet-unalias get-last-snapshot view-last-snapshot
 #
@@ -774,7 +780,6 @@ function show-thumbnail {
 }
 
 
-#
 # shell-check-stdin(): run shell-check over stdin
 function shell-check-stdin {
     ## DEBUG: echo "in shell-check-stdin: args='$*'"
