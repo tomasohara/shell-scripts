@@ -60,13 +60,13 @@ Some variations follow. For single-line changes, just use "## OLD: statement ...
 
 0. Other common meta-comments include '## NOTE', '## TODO[n]', and "## UPDATE". These are comments meant more for development than for the code logic. This uses a doubled pound sign (i.e., '##') as the comment indicator, so that the comments are can be more readily removed when development is complete.
 
-0. When making significant changes, create a new git branch based on development, using a task-specific name such as 'refine-type-hints' or 'fix-poe-client'. The intention is to minimize conflicts without a proliferation of miscellaneous branches.
+0. When making significant changes, create a new git branch based on development, using a task-specific name such as 'refine-type-hints' or 'fix-poe-client'. The intention is to minimize conflicts without a proliferation of miscellaneous branches. (Significant changes generally involve multiple files or a substantial revision of a file.)
 
 0. After making a group of commits, push the changes and make sure the remove upstream branch gets set. In general, the remote should be kept updated except when testing tentative changes locally.
 
 0. Don't make edits outside of code directory without confirmation.
 
-0. Don't check-in code without permission (e.g., get confirmation before making commits): I wish to review code before updating git.
+0. Don't check-in code without permission (e.g., get confirmation before making commits): I wish to review code before updating git. In general, don't do any destructive git operations without confirmation.
 
 0. Don't do any code refactoring without confirmation.
 
@@ -91,6 +91,24 @@ Some variations follow. For single-line changes, just use "## OLD: statement ...
 
 0. Avoid overly specific function names, instead chose a name that generalizes the intention  (e.g., `test_hello_world_batspp_epoch_seconds_updates` => `test_hello_world_timestamp_update`).
 
+0. Some clarification for the sake of recalcitrant AI agents:
+
+- Preserve all comments, docstrings, TODOs, attributions, and formatting unless
+  the user explicitly authorizes their removal. They count as code.
+
+- For every replacement, retain the exact prior line(s) immediately above it as
+  `## OLD:` (or `## BAD:` for a confirmed bug). Do not rewrite or consolidate
+  existing comments incidentally.
+
+- Do not make cleanup, wording, docstring, attribution, or formatting changes
+  unrelated to the requested fix.
+
+- Before editing, inspect the complete current diff. Before finishing, review
+  removed lines and obtain confirmation for each removal.
+
+- Keep attribution in commit messages; add source attribution only when
+  explicitly requested.
+  
 ## Terminal guidelines
 
 0. Don't remove existing files without confirmation: rename them instead (e.g., <filename>.DDMmmYY).
