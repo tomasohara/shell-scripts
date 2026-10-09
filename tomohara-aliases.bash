@@ -2106,6 +2106,7 @@ function notes-entry-gr-aux() {
     local glob="$1"
     shift
     # note: convert consecutive newlines within dashed lines to <ln><sp><ln> so inside Perl "paragraph"
+    ## TODO3: add option to use existing cached preprocessing results (likewise below)
     perl -00 -pe 's/\n\n/\n \n/g; s/^\-{40}/\n$&/g;' $glob 2>&1 | perlgrep -para -i "$@" - 2>&1 | convert-emoticons-stdin | less-pattern "$1";
 }
 # heuristic-notes-entry-gr-aux(glob, regex): filters by terms in regex prior to notes-entry-gr-aux,
