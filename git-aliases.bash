@@ -1164,6 +1164,8 @@ function git-misc-alias-usage() {
     echo "To move or rename (¡mucho cuidado!):"
     echo "    GIT_MESSAGE='renamed' git-rename-file OLD NEW-file"
     echo "    GIT_MESSAGE='moved' git-move-to-dir DIR file1 file2"
+    echo "Similarly:"
+    echo "    mkdir -p archive; GIT_MESSAGE='archived' git-move-to-dir archive file"
     echo ""
     echo "To delete files (¡muchisimo cuidado!):"
     # note: git-rm-alias stages the deletion, but git-update-force's stash/pop cycle unstages it.
