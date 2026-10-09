@@ -159,7 +159,7 @@ def run_tests(thresholds):
     code = 0
     if failed > 0:
         code = failed
-        message = "Error: {failed} modules failed"
+        message = f"Error: {failed} modules failed"
     system.exit(message, status_code=code)
 
 #-------------------------------------------------------------------------------
