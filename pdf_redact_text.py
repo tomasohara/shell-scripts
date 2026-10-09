@@ -47,12 +47,10 @@ REDACTION_SCOPES = ("line", "span", "match")
 class Helper:
     """Find matching text and permanently redact it from a PDF."""
 
-    ## OLD: def redact(self, input_pdf: str, output_pdf: str, pattern: str) -> int:
     def redact(
         self, input_pdf: str, output_pdf: str, pattern: str,
         scope: str = "line"
     ) -> int:
-        ## OLD: """Redact every extracted text line matching PATTERN; return line count."""
         """Redact matching text at the requested scope; return the redaction count."""
         debug.trace_expr(
             TL.VERBOSE, input_pdf, output_pdf, pattern, scope,
@@ -76,23 +74,6 @@ class Helper:
             for page in doc:
                 rects = []
 
-                ## OLD:
-                ## for block in page.get_text("dict")["blocks"]:
-                ##     for line in block.get("lines", []):
-                ##         text = "".join(
-                ##             span["text"] for span in line.get("spans", [])
-                ##         )
-                ##         if not regex.search(text):
-                ##             continue
-                ##
-                ##         rect = pymupdf.Rect(line["bbox"])
-                ##         debug.trace(5, f"matches {text} at {rect}")
-                ##         # Add a small margin so glyph edges are covered too.
-                ##         rect.x0 = max(page.rect.x0, rect.x0 - 2)
-                ##         rect.y0 = max(page.rect.y0, rect.y0 - 1)
-                ##         rect.x1 = min(page.rect.x1, rect.x1 + 2)
-                ##         rect.y1 = min(page.rect.y1, rect.y1 + 1)
-                ##         rects.append(rect)
                 if scope == "line":
                     for block in page.get_text("dict")["blocks"]:
                         for line in block.get("lines", []):
@@ -152,7 +133,6 @@ class Helper:
 
                 for rect in rects:
                     page.add_redact_annot(
-                        ## OLD: rect, fill=(1, 1, 1), cross_out=False
                         rect, fill=RGB_TUPLE, cross_out=False
                     )
 
@@ -209,9 +189,6 @@ class Script(Main):
         assert self.output_pdf is not None
         assert self.helper is not None
 
-        ## OLD: count = self.helper.redact(
-        ## OLD:     self.input_pdf, self.output_pdf, self.pattern
-        ## OLD: )
         count = self.helper.redact(
             self.input_pdf, self.output_pdf, self.pattern, scope=self.scope
         )
