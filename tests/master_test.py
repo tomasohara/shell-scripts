@@ -90,6 +90,13 @@ def run_tests(thresholds):
             total_tests = system.to_int(my_re.group(1))
         elif collect_result.returncode not in (0, 5):
             system.print_error(f"Error: Unable to collect tests for {test_filename}.")
+            diagnostic_output = collect_result.stderr.strip()
+            if not diagnostic_output:
+                diagnostic_output = collect_result.stdout.strip()
+            if diagnostic_output:
+                system.print_error(
+                    f"Collection diagnostics for {test_filename}:\n"
+                    f"{diagnostic_output}")
             debug.trace_expr(5, collect_result.stdout, collect_result.stderr)
             failed += 1
             continue
