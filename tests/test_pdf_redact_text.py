@@ -87,6 +87,46 @@ class TestIt(TestWrapper):
                     str(input_pdf), str(input_pdf), r"example"
                 )
 
+    def test_04_redacts_matching_span(self):
+        """Span scope removes the matching span but preserves nearby text."""
+        debug.trace(4, f"TestIt.test_04_redacts_matching_span(); self={self}")
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            input_pdf = Path(temp_dir) / "input.pdf"
+            output_pdf = Path(temp_dir) / "output.pdf"
+
+            doc = pymupdf.open()
+            page = doc.new_page()
+            page.insert_text((72, 72), "Keep: ", fontsize=11)
+            email_x = 72 + pymupdf.get_text_length(
+                "Keep: ", fontname="helv", fontsize=11
+            )
+            page.insert_text(
+                (email_x, 72),
+                "example@example.com",
+                fontsize=11,
+                color=(1, 0, 0),
+            )
+            doc.save(str(input_pdf))
+            doc.close()
+
+            count = THE_MODULE.Helper().redact(
+                str(input_pdf),
+                str(output_pdf),
+                r"example@example\.com",
+                scope="span",
+            )
+
+            self.do_assert(count == 1, f"Expected 1 redacted span, got {count}")
+            output_doc = pymupdf.open(str(output_pdf))
+            text = "\n".join(page.get_text() for page in output_doc)
+            output_doc.close()
+
+            self.do_assert(
+                "example@example.com" not in text,
+                "Matching email remains",
+            )
+            self.do_assert("Keep:" in text, "Neighboring text was removed")               
 
 if __name__ == "__main__":
     debug.trace_current_context()
