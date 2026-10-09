@@ -84,6 +84,7 @@ function remove-extension { echo "$1" | perl -pe 'chomp; s/\.[^\.]+$/$1\n/;'; }
 #
 # sample line annotations:
 # 257087c2 (Tom O'Hara        2022-11-27 18:31:19 -0600 363)         debug.trace(6, f"in process_simple({line!r})")
+## TODO4: move into git-aliases.bash
 #
 function git-blame-plus { 
     local file="$1"
