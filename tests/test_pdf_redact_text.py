@@ -16,7 +16,7 @@ from mezcla.unittest_wrapper import TestWrapper, invoke_tests
 THE_MODULE = None
 try:
     import pdf_redact_text as THE_MODULE
-except Exception:
+except:
     system.print_exception_info("pdf_redact_text import")
 
 
