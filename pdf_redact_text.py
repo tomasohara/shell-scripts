@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Permanently redact PDF text lines matching a regular expression.
+Permanently redact PDF text matching a regular expression.
 
 Example:
    pdf_redact_text.py tpo-resume-sept26.pdf upwork-resume-sept26.pdf --pattern 'tomasohara@gmail\\.com|linkedin\\.com/in/tom-o-hara-980132398|github\\.com/tomasohara'
@@ -30,6 +30,7 @@ TL = debug.TL
 INPUT_PDF = "input-pdf"
 OUTPUT_PDF = "output-pdf"
 PATTERN_ARG = "pattern"
+SCOPE_ARG = "scope"
 
 DEFAULT_PATTERN = (
     r"\w+@\w+\.com"
@@ -39,18 +40,31 @@ RGB_FILL = system.getenv_text(
     "RGB_FILL", "1, 1, 1",
     desc="RGB tuple for redaction rectangle")
 
-class Helper:
-    """Find matching text lines and permanently redact them from a PDF."""
+## UPDATE: Added line, span, and match scopes; facilitated by OpenAI assistant.
+REDACTION_SCOPES = ("line", "span", "match")
 
-    def redact(self, input_pdf: str, output_pdf: str, pattern: str) -> int:
-        """Redact every extracted text line matching PATTERN; return line count."""
+
+class Helper:
+    """Find matching text and permanently redact it from a PDF."""
+
+    ## OLD: def redact(self, input_pdf: str, output_pdf: str, pattern: str) -> int:
+    def redact(
+        self, input_pdf: str, output_pdf: str, pattern: str,
+        scope: str = "line"
+    ) -> int:
+        ## OLD: """Redact every extracted text line matching PATTERN; return line count."""
+        """Redact matching text at the requested scope; return the redaction count."""
         debug.trace_expr(
-            TL.VERBOSE, input_pdf, output_pdf, pattern,
+            TL.VERBOSE, input_pdf, output_pdf, pattern, scope,
             prefix="in Helper.redact: "
         )
 
         if Path(input_pdf).resolve() == Path(output_pdf).resolve():
             raise ValueError("Input and output paths must be different.")
+        if scope not in REDACTION_SCOPES:
+            raise ValueError(
+                f"Invalid scope {scope!r}; choose one of {REDACTION_SCOPES}."
+            )
 
         regex = re.compile(pattern, re.IGNORECASE)
         doc = pymupdf.open(input_pdf)
@@ -62,23 +76,79 @@ class Helper:
             for page in doc:
                 rects = []
 
-                # Group spans into PDF text lines, then match the complete line.
-                for block in page.get_text("dict")["blocks"]:
-                    for line in block.get("lines", []):
-                        text = "".join(
-                            span["text"] for span in line.get("spans", [])
-                        )
-                        if not regex.search(text):
-                            continue
+                ## OLD:
+                ## for block in page.get_text("dict")["blocks"]:
+                ##     for line in block.get("lines", []):
+                ##         text = "".join(
+                ##             span["text"] for span in line.get("spans", [])
+                ##         )
+                ##         if not regex.search(text):
+                ##             continue
+                ##
+                ##         rect = pymupdf.Rect(line["bbox"])
+                ##         debug.trace(5, f"matches {text} at {rect}")
+                ##         # Add a small margin so glyph edges are covered too.
+                ##         rect.x0 = max(page.rect.x0, rect.x0 - 2)
+                ##         rect.y0 = max(page.rect.y0, rect.y0 - 1)
+                ##         rect.x1 = min(page.rect.x1, rect.x1 + 2)
+                ##         rect.y1 = min(page.rect.y1, rect.y1 + 1)
+                ##         rects.append(rect)
+                if scope == "line":
+                    for block in page.get_text("dict")["blocks"]:
+                        for line in block.get("lines", []):
+                            text = "".join(
+                                span["text"] for span in line.get("spans", [])
+                            )
+                            if not regex.search(text):
+                                continue
 
-                        rect = pymupdf.Rect(line["bbox"])
-                        debug.trace(5, f"matches {text} at {rect}")
-                        # Add a small margin so glyph edges are covered too.
-                        rect.x0 = max(page.rect.x0, rect.x0 - 2)
-                        rect.y0 = max(page.rect.y0, rect.y0 - 1)
-                        rect.x1 = min(page.rect.x1, rect.x1 + 2)
-                        rect.y1 = min(page.rect.y1, rect.y1 + 1)
-                        rects.append(rect)
+                            rect = pymupdf.Rect(line["bbox"])
+                            debug.trace(5, f"matches {text} at {rect}")
+                            # Add a small margin so glyph edges are covered too.
+                            rect.x0 = max(page.rect.x0, rect.x0 - 2)
+                            rect.y0 = max(page.rect.y0, rect.y0 - 1)
+                            rect.x1 = min(page.rect.x1, rect.x1 + 2)
+                            rect.y1 = min(page.rect.y1, rect.y1 + 1)
+                            rects.append(rect)
+                else:
+                    for block in page.get_text("rawdict")["blocks"]:
+                        for line in block.get("lines", []):
+                            spans = line.get("spans", [])
+
+                            if scope == "span":
+                                for span in spans:
+                                    text = "".join(
+                                        char["c"]
+                                        for char in span.get("chars", [])
+                                    )
+                                    if regex.search(text):
+                                        rects.append(
+                                            pymupdf.Rect(span["bbox"])
+                                        )
+                                continue
+
+                            # Match the regex against the line while retaining
+                            # the bounding box for each character.
+                            char_data = []
+                            for span in spans:
+                                for char in span.get("chars", []):
+                                    value = char["c"]
+                                    char_rect = pymupdf.Rect(char["bbox"])
+                                    for character in value:
+                                        char_data.append((character, char_rect))
+
+                            text = "".join(value for value, _ in char_data)
+                            for match in regex.finditer(text):
+                                matched_chars = char_data[
+                                    match.start():match.end()
+                                ]
+                                if not matched_chars:
+                                    continue
+
+                                rect = pymupdf.Rect(matched_chars[0][1])
+                                for _, char_rect in matched_chars[1:]:
+                                    rect |= char_rect
+                                rects.append(rect)
 
                 for rect in rects:
                     page.add_redact_annot(
@@ -108,6 +178,7 @@ class Script(Main):
     input_pdf: Optional[str] = None
     output_pdf: Optional[str] = None
     pattern: str = DEFAULT_PATTERN
+    scope: str = "line"
     helper: Optional[Helper] = None
 
     def setup(self) -> None:
@@ -119,6 +190,12 @@ class Script(Main):
         self.pattern = str(
             self.get_parsed_option(PATTERN_ARG, self.pattern)
         )
+        self.scope = str(self.get_parsed_option(SCOPE_ARG, self.scope))
+        if self.scope not in REDACTION_SCOPES:
+            raise ValueError(
+                f"Invalid scope {self.scope!r}; "
+                f"choose one of {REDACTION_SCOPES}."
+            )
         self.helper = Helper()
 
         # Validate the regex before starting PDF processing.
@@ -132,10 +209,13 @@ class Script(Main):
         assert self.output_pdf is not None
         assert self.helper is not None
 
+        ## OLD: count = self.helper.redact(
+        ## OLD:     self.input_pdf, self.output_pdf, self.pattern
+        ## OLD: )
         count = self.helper.redact(
-            self.input_pdf, self.output_pdf, self.pattern
+            self.input_pdf, self.output_pdf, self.pattern, scope=self.scope
         )
-        print(f"Redacted {count} line(s) -> {self.output_pdf}")
+        print(f"Redacted {count} item(s) -> {self.output_pdf}")
 
 
 def main() -> None:
@@ -148,7 +228,8 @@ def main() -> None:
         manual_input=True,
         positional_arguments=[INPUT_PDF, OUTPUT_PDF],
         text_options=[
-            (PATTERN_ARG, "Regex identifying a text line to redact")
+            (PATTERN_ARG, "Regex identifying text to redact"),
+            (SCOPE_ARG, "Redaction scope: line, span, or match"),
         ],
         float_options=None,
     )
