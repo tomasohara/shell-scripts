@@ -755,6 +755,7 @@ function view-last-snapshot {
     image=$(get-last-snapshot "$@")
     if [ "$image" != /dev/null ]; then
         ## OLD: start $(get-last-snapshot "$@");
+        echo "Viewing image $image"
         if [ "${AS_THUMBNAIL:-0}" == "1" ]; then
             show-thumbnail "$image"
         else
