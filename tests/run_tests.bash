@@ -7,6 +7,32 @@
 #   working around quirks for Nektos/Act (see local-workflows.sh).
 #
 
+# Display command-line usage.
+function usage() {
+    local script
+    script=$(basename "$0")
+    echo ""
+    echo "Usage: $script [--help]"
+    echo ""
+    echo "Examples:"
+    echo ""
+    echo "TEST_REGEX='clipboard_button' PYTHONPATH=\"\$PWD:\$PWD/tests:\$PYTHONPATH\" ./$script"
+    echo "RUN_BASH_TESTS=0 TEST_REGEX='bash2python_diff' ./$script"
+    echo ""
+    echo "Notes:"
+    echo "- The runner automatically prepends the repository root and tests directory to PYTHONPATH."
+    echo "- The shorter second form is normally sufficient for Python-only runs; the first remains compatible with template.bash-style invocations."
+    echo "- Set RUN_BASH_TESTS=0 when a Python test filter does not select any BatsPP notebooks."
+    echo ""
+}
+
+case "${1:-}" in
+    -h|--help)
+        usage
+        exit 0
+        ;;
+esac
+
 # Set bash regular and/or verbose tracing
 DEBUG_LEVEL=${DEBUG_LEVEL:-0}
 if [ "$DEBUG_LEVEL" -ge 3 ]; then

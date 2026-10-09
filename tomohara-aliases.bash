@@ -692,7 +692,8 @@ function reset-prompt {
     local new_PS_symbol="$*"
     ## OLD: if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="${DEFAULT_PS_SYMBOL:-$PS_symbol}"; fi
     ## NOTE: above was a no-op when DEFAULT_PS_SYMBOL undefined
-    if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="${DEFAULT_PS_SYMBOL:-"$"}"; fi
+    ## BAD: if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="${DEFAULT_PS_SYMBOL:-"$"}"; fi
+    if [ "$new_PS_symbol" = "" ]; then new_PS_symbol="${DEFAULT_PS_SYMBOL:-$PS_symbol}"; fi
     # Do nothing if empty
     if [ "$new_PS_symbol" = "" ]; then return; fi    
     ## TODO: if [ "$new_PS_symbol" = "" ]; then echo $'Usage: reset-prompt symbol\nex: reset-prompt §"\n'; return; fi
