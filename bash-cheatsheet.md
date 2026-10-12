@@ -79,6 +79,10 @@ echo "${var^^}"                 # uppercase all
 echo "${var,}"                  # lowercase first
 echo "${var,,}"                 # lowercase all
 value="${value@L}"              # lowercase (alternative form)
+
+# Misc. Parameter transformation operators: ${parameter@operator}
+echo "${newline@E}"             # expands backslash escape sequences 
+echo "${var@Q}"                 # quoted in input-compatible format
 ```
 
 ## Conditionals
