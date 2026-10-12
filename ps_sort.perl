@@ -53,6 +53,10 @@ no strict "refs";               # to allow for old-style references to arrays (T
 use vars qw/$by $xyz $ps_options $cut_options $num_times $LINES $COLUMNS $max_count $delay $line_len $testing $justuser $USER $username/;
 use vars qw/$batch $full $once $lines $columns $alpha $time2num $DURING_ALIAS $time $mem/;
 
+# Use stricter init_var env defaults, requiring same case as option variable.
+# note: this avoids conflicts with options using common names (e.g., time or username)
+&make_init_var_case_sensitive(&TRUE);
+
 # Check the command-line options
 # note: OSTYPE needs to be in environment for this to work (see tomohara-aliases.bash)
 ## OLD: &init_var(*by, "cpu");
