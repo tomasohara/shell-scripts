@@ -101,6 +101,7 @@ eval 'exec perl -Ssw $0 "$@"'
 # unlock(*FILE):        unlocks the specified file
 # write_file(file_name, text): Writes the text to the specified file.
 #
+## UPDATE: adds option to make init_var env fallback case sensitive
 
 # 
 # TODO: use 'our' rather than 'use vars':
@@ -1085,6 +1086,7 @@ sub blocking_stdin {
 #................................................................................
 # set_init_var_export(allow): override init_var default exporting to environment
 # block_init_var_via_env(block): don't allow init_var to get defaults from environment
+# make_init_var_case_sensitive(sensitive): use case-sensitive env default with init_var
 #
 our($export_default) = &FALSE;
 sub set_init_var_export {
@@ -1097,8 +1099,21 @@ sub set_init_var_export {
 our($use_env_default) = &TRUE;
 sub block_init_var_via_env {
     # note: Used so that variables are not initialized via environment
+    &debug_print(&TL_VERBOSE, "block_init_var_via_env(@_)\n");
     my($block_env_defaults) = @_;
     $use_env_default = (! $block_env_defaults);
+}
+our($case_sensitive_env_default) = &FALSE;
+sub make_init_var_case_sensitive {
+    # note: Used so that init_var preserves case during lookup to avoid conflict
+    # with options like username (see ps_sort.perl).  By default, the
+    # &init_var(*username, ...) would check "USERNAME" in env, so this instead
+    # would check for "username" (a less common env. setting).  This is mainly
+    # a user convenience allowed by some scripts, so a debug-only sanity check
+    # below makes note when used.
+    ## TODO3: make default case sensitive (n.b., not supported under Windows)
+    &debug_print(&TL_VERBOSE, "make_init_var_case_sensitive(@_)\n");
+    $case_sensitive_env_default = @_
 }
 ## OLD: sub EXPORT {&TRUE;}
 #
@@ -1116,8 +1131,10 @@ sub init_var {
     # TODO2: Make environment default explicit
     my($env_var) = *var_name;
     $env_var =~ s/^.*:://;
-    ## TODO: make this optional
-    $env_var = &to_upper($env_var);
+    my($env_var_original) = $env_var;
+    if (! $case_sensitive_env_default) {
+	$env_var = &to_upper($env_var);
+    }
     my($new_value);
 
     if (! defined($var_name)) {
@@ -1125,6 +1142,11 @@ sub init_var {
             # Get the value of the corresponding environment variable, if set.
             $new_value = &get_env($env_var, $var_value, &TL_VERBOSE+2);
             $var_name = $new_value;
+	    # Sanity check when case-insensitive lookup required
+	    if (&DETAILED_DEBUGGING && (! $case_sensitive_env_default) && (
+		     $new_value ne &get_env($env_var_original, $var_value, &TL_VERBOSE+2))) {
+		&debug_print(1, "FYI: Case-insensitive env default used for $env_var\n");
+	    }
         }
         else {
             # TODO3: cleanup code variable dereferencing to make more intuitive
