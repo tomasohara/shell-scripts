@@ -102,6 +102,7 @@ eval 'exec perl -Ssw $0 "$@"'
 # write_file(file_name, text): Writes the text to the specified file.
 #
 ## UPDATE: adds option to make init_var env fallback case sensitive
+## UPDATE: adds init_var_no_env and init_local_var variants to bypass env defaults
 
 # 
 # TODO: use 'our' rather than 'use vars':
@@ -1087,6 +1088,8 @@ sub blocking_stdin {
 # set_init_var_export(allow): override init_var default exporting to environment
 # block_init_var_via_env(block): don't allow init_var to get defaults from environment
 # make_init_var_case_sensitive(sensitive): use case-sensitive env default with init_var
+# init_var_no_env(variable_name, initial_value, [export]): init_var without env-var fallback
+# init_local_var(variable_name, initial_value, [export]): alias for init_var_no_env
 #
 our($export_default) = &FALSE;
 sub set_init_var_export {
@@ -1113,16 +1116,23 @@ sub make_init_var_case_sensitive {
     # below makes note when used.
     ## TODO3: make default case sensitive (n.b., not supported under Windows)
     &debug_print(&TL_VERBOSE, "make_init_var_case_sensitive(@_)\n");
-    $case_sensitive_env_default = @_
+    ## BAD:
+    ## $case_sensitive_env_default = @_
+    my($sensitive) = (@_ ? $_[0] : &TRUE);
+    $case_sensitive_env_default = $sensitive;
 }
 ## OLD: sub EXPORT {&TRUE;}
 #
 sub init_var {
-    use vars qw/$var_name $var_value $export_var/;
-    local(*var_name, $var_value, $export_var) = @_;
+    ## OLD:
+    ## use vars qw/$var_name $var_value $export_var/;
+    ## local(*var_name, $var_value, $export_var) = @_;
+    use vars qw/$var_name $var_value $export_var $no_env/;
+    local(*var_name, $var_value, $export_var, $no_env) = @_;
     ## TODO: &debug_print(&TL_DETAILED + 2, "in init_var($var_name, _, _)\n");
     my($default_export_var) = $export_default;
     $export_var = $default_export_var if (!defined($export_var));
+    $no_env = &FALSE if (!defined($no_env));
 
     # Determine the environment variable name, which the variable w/o the package 
     # specifier (eg, "*main::use_random_coords" => "use_random_coords").
@@ -1138,13 +1148,18 @@ sub init_var {
     my($new_value);
 
     if (! defined($var_name)) {
-        if ($use_env_default) {
+        ## OLD:
+        ## if ($use_env_default) {
+        if ($use_env_default && (! $no_env)) {
             # Get the value of the corresponding environment variable, if set.
             $new_value = &get_env($env_var, $var_value, &TL_VERBOSE+2);
             $var_name = $new_value;
 	    # Sanity check when case-insensitive lookup required
-	    if (&DETAILED_DEBUGGING && (! $case_sensitive_env_default) && (
-		     $new_value ne &get_env($env_var_original, $var_value, &TL_VERBOSE+2))) {
+	    ## BAD:
+	    ## if (&DETAILED_DEBUGGING && (! $case_sensitive_env_default) && (
+	    ##	     $new_value ne &get_env($env_var_original, $var_value, &TL_VERBOSE+2))) {
+	    if (&DETAILED_DEBUGGING && (! $case_sensitive_env_default) &&
+		defined($ENV{$env_var}) && !defined($ENV{$env_var_original})) {
 		&debug_print(1, "FYI: Case-insensitive env default used for $env_var\n");
 	    }
         }
@@ -1179,6 +1194,23 @@ sub init_var {
 sub init_var_exp {
     &assert(!defined($_[2]));
     &init_var($_[0], $_[1], &TRUE);
+}
+
+# init_var_no_env(variable_name, initial_value, [export=FALSE])
+#
+# Version of init_var that does not check the environment for defaults.
+#
+sub init_var_no_env {
+    my($export_var) = defined($_[2]) ? $_[2] : $export_default;
+    &init_var($_[0], $_[1], $export_var, &TRUE);
+}
+
+# init_local_var(variable_name, initial_value, [export=FALSE])
+#
+# Alias for init_var_no_env (for variables without env-var fallback)
+#
+sub init_local_var {
+    &init_var_no_env(@_);
 }
 
 # min(x, y): returns minimal numeric value

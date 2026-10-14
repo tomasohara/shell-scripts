@@ -60,8 +60,10 @@ use vars qw/$batch $full $once $lines $columns $alpha $time2num $DURING_ALIAS $t
 # Check the command-line options
 # note: OSTYPE needs to be in environment for this to work (see tomohara-aliases.bash)
 ## OLD: &init_var(*by, "cpu");
-&init_var(*mem, &FALSE);
-&init_var(*time, &FALSE);
+## OLD: &init_var(*mem, &FALSE);
+&init_var_no_env(*mem, &FALSE);
+## OLD: &init_var(*time, &FALSE);
+&init_var_no_env(*time, &FALSE);
 my($by_default) = ($time ? "time" : ($mem ? "mem" : "cpu"));
 &init_var(*by, $by_default);
 &init_var(*OSTYPE, "???");
@@ -83,8 +85,10 @@ my($is_mac) = ($OSTYPE =~ ".*darwin.*") ? 1 : 0;
 # note: $DURING_ALIAS set via tomohara-aliases.bash
 &init_var(*DURING_ALIAS, &FALSE);  
 ## OLD: &init_var(*once, &FALSE);      # alias for -num_times=1
-&init_var(*once, $DURING_ALIAS);      # alias for -num_times=1
-&init_var(*full, &FALSE);      # disable row/column truncation
+## OLD: &init_var(*once, $DURING_ALIAS);      # alias for -num_times=1
+&init_var_no_env(*once, $DURING_ALIAS);      # alias for -num_times=1
+## OLD: &init_var(*full, &FALSE);      # disable row/column truncation
+&init_var_no_env(*full, &FALSE);      # disable row/column truncation
 &init_var(*num_times, ($once ? 1 : 60));
 ## HACK: use lowercase lines/columns so that not trumped by environment
 ## TODO: add option to init_var to disable environment value check
@@ -97,15 +101,19 @@ $columns = ($full ? &MAXINT : $COLUMNS) if ! defined($columns);
 ## TODO: &init_var(*columns, ($full ? &MAXINT : $COLUMNS));
 &init_var(*cut_options, ($is_solaris ? "-c1-36,46-52,62-70,79-132" : "-c1-$columns"));
 &init_var(*max_count, $lines - 5);
-&init_var(*delay, (($num_times > 1) ? 1: 0));
+## OLD: &init_var(*delay, (($num_times > 1) ? 1: 0));
+&init_var_no_env(*delay, (($num_times > 1) ? 1: 0));
 &init_var(*line_len, $columns - 2);
-&init_var(*testing, &FALSE);    # script testing mode
+## OLD: &init_var(*testing, &FALSE);    # script testing mode
+&init_var_no_env(*testing, &FALSE);    # script testing mode
 &init_var(*justuser, &FALSE);   # just show current user
 &init_var(*USER, "");
 &init_var(*username,            # just show this user
           ($justuser ? $USER : ""));
-&init_var(*batch, &FALSE);      # batch mode (don't poll console for early quit)
-&init_var(*alpha, &FALSE);      # sort alphabetically (i.e., lexicographic)
+## OLD: &init_var(*batch, &FALSE);      # batch mode (don't poll console for early quit)
+&init_var_no_env(*batch, &FALSE);      # batch mode (don't poll console for early quit)
+## OLD: &init_var(*alpha, &FALSE);      # sort alphabetically (i.e., lexicographic)
+&init_var_no_env(*alpha, &FALSE);      # sort alphabetically (i.e., lexicographic)
 &init_var(*time2num, &FALSE);   # convert time to a number for sorting purposes
 
 use vars qw/@uid @xyz @line @line_index @user @pid @cpu @mem @sz @rss @tt @stat @f @s @ppid @pri @ni @stime @time @cmd/;
