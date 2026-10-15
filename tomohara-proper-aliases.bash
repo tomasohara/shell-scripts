@@ -39,11 +39,17 @@ alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human --
 alias git-files-changed=git-diff-list
 alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
+#
 # git-repo-url: returns URL for git repo in current dir
 # example: https://github.com/tomasohara/shell-scripts
+# sample entry from .git/config:
+#   [remote "origin"]
+#       url = https://github.com/tomasohara/shell-scripts
 ## OLD: function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
 ## NOTE: uses first url (TODO1: use para-match to filter submodule)
-function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config" | head -1; }
+## OLD: function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config" | head -1; }
+function git-repo-url { extract-matches -slurp 'remote[^\[]+url\s*=\s*(\S+)' .git/config | head -1; }
+#
 # git-slug: returns name for git repo in current dir
 # example: tomasohara/shell-scripts
 # Note: avoids "git-repo-url" for sake of tab completion;
