@@ -1,0 +1,127 @@
+# Sanity check for aliases definitions 
+#
+# Note:
+# - This was added to diagnose problems loading the new testing aliases
+#   under tests/aliases-for-testing.bash.
+# - It will also serve as a way to detect other issues loading the definitions.
+
+# Tip: When debugging, loading issues it can be helpful to compare the names of the
+# macros that are defined. This can be done as follows:
+#
+# - under Jupyter:
+#     show-macros-proper . | sort > $TMP/show-macros.jupyetr.list
+# - under Bash:
+#     show-macros-proper . | sort > $TMP/show-macros.bash.list
+#     diff $TMP/show-macros.bash.list $TMP/show-macros.jupyetr.list
+
+## DEBUG:
+## pwd
+
+# Global setup
+$ alias encode-nums='perl -pe "s/\d/N/g;"'
+
+# Global setup
+# Make sure testing aliases defined
+# Warning: only source conditionally so that the proper aliases are loaded
+$ if [ "" == "$(show-macros eval_condition)" ]; then
+$     source aliases-for-testing.bash
+$ fi
+# show-macros eval_condition
+$ [ -n "$(show-macros eval_condition | grep "eval_condition.py")" ]; echo $?
+0
+
+# Make sure at least 900 macros (i.e., aliases and functions)
+$ [ "$(show-macros-proper . | eval-condition '900 < len(stdin.split())')" = "True" ]; echo $?
+0
+
+# Make sure the macro definitions take 4,000+ lines
+$ [ "$(show-macros | eval-condition '4000 < len(stdin.split())')" = "True" ]; echo $?
+0
+
+$ [ "$(show-macros | wc -l | encode-nums)" = "NNNN" ]; echo $?
+0
+
+## NOTE When debugging loading issues, it can be helpful to compare the names of the
+## macros that are defined.
+##
+## - under Jupyter:
+##     show-macros-proper . | sort > $TMP/show-macros.jupyter.list
+##     show-macros-proper . | sort > $TMP/show-macros.jupyter.list
+## - under Bash:
+##     show-macros-proper . | sort > $TMP/show-macros.bash.list
+##     diff $TMP/show-macros.bash.list $TMP/show-macros.jupyter.list
+
+## NOTE: The bash kernel defines a few aliases for displaying images and formatted text (via HTML),
+## as well as for invoking JavScript. See https://github.com/takluyver/bash_kernel.
+##
+## show-macros display
+
+## DEBUG: Examples based on https://github.com/takluyver/bash_kernel
+##
+## cat ~/temp/Flag_of_Argentina.svg.png | display
+## echo "<b>Dog</b>, not a cat." | displayHTML
+## echo "alert('It is known khaleesi\!');" | displayJS
+
+## DEBUG
+##
+## Note: that aliases and function definitions are not taken from the terminal,
+## but, environment variables are.
+##
+## TEST: 
+## - via Bash:
+##   export MY_VAR=123; alias my-alias='echo hey;'; function my-function { echo joe; }
+##   run-jupyter-notebook
+## via http://localhost:8888:
+##    echo $MY_VAR;  alias my-alias;  typeset -f | grep my-function
+
+## DEBUG
+# perl -version
+$ [ -n "$(perl -version | grep -e "perl 5" -e "subversion [N]")" ]; echo $?
+0
+
+## DEBUG
+# perl.sh -version
+$ [ -n "$(perl.sh -version | grep -e "perl 5" -e "subversion [N]" -e "Larry Wall")" ]; echo $?
+0
+
+## DEBUG
+# bash ../perl.sh -version
+## OLD: [ -n "$(bash ../perl.sh -version | grep -e "perl 5" -e "version [N]" -e "perl.org")" ]; echo $?
+$ [ -n "$(bash perl.sh -version | grep -e "perl 5" -e "version [N]" -e "perl.org")" ]; echo $?
+0
+
+$ [ "$(perl -version)" = "$(perl.sh -version)" ]; echo $?
+0
+
+## DEBUG
+# which bash
+$ [ "$(which bash)" = "/usr/bin/bash" ]; echo $?
+0
+
+## DEBUG
+# which env
+$ [ "$(which env)" = "/usr/bin/env" ]; echo $?
+0
+
+## DEBUG
+$ [[ "$(echo $PATH)" =~ [^:]+(:[^:]+)* ]]; echo $?
+0
+
+## DEBUG
+## NOTE: disables pager byredirection
+$ PAGER=show-path 2>&1 | cat
+$ [ $PAGER = "less" ]; echo $?
+0
+
+# Make sure perl.sh invokes perl properly
+$ perl_version=$(perl -version 2>&1 | extract-matches "\(v(\S+)\)")
+$ perl_sh_version=$(perl.sh -version 2>&1 | extract-matches "\(v(\S+)\)")
+# eval-not-equals "$perl_version" "" 
+# eval-equals "$perl_version" "$perl_sh_version" 
+$ [[ "$(eval-not-equals "$perl_version" "")" = "True" && "$(eval-equals "$perl_version" "$perl_sh_version")" = "True" ]]; echo $?
+0
+
+# eval-equals "$perl_version" "$perl_sh_version" 
+$ [[ "$perl_help" == "$perl_sh_help" && "$(eval-equals "$perl_version" "$perl_sh_version")" = "True" ]]; echo $?
+0
+

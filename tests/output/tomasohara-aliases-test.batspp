@@ -1,0 +1,42 @@
+## OLD
+# ls *.html
+
+## OLD
+# url-path template.html
+
+#===============================================================================
+# TODO: find jupyter way to do divider line (or at least bash)
+
+# Global Setup
+## linebr Uses simple bash command to create a series of hypens (-)
+## OLD
+# alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+$ alias linebr="printf '%132s\n' ' ' | tr ' ' '-'"
+$ alias testuserpath="sed 's|/home/[^/]\+/|USER_PATH/|'"
+
+$ [ "$(linebr | grep -o "-" | wc -l)" -eq 132 ]; echo $?
+0
+
+# ls *.rst
+$ [[ -n "$(ls *.rst)" &&  "$(ls *.rst)" =~ docshtest.rst ]]; echo $?
+0
+
+# ## OLD
+# # $ url-path docshtest.rst
+# # | file:////PATH_TO_SHELL_SCRIPTS/shell-scripts/tests/docshtest.rst
+# ## This trims the all unnecessary paths from reverse and reverses the trim
+# ## OLD: url-path docshtest.rst | cut -d ' ' -f 2 | rev | cut -c 1-20 | rev | sed "s|^|PATH_TO_SHELL_SCRIPTS|"
+# # Testuserpath from alias-cd-commands
+# alias testuserpath="sed 's|/home/[^/]\+/|USER_PATH/|'"
+# # alias testuserpath="sed 's|/home/[^/]\+/|USER_PATH/[^/]\+/|'"
+# pwd *.rst | testuserpath
+# ## Sample Output: USER_PATH/tomProject/shell-scripts/tests
+# [ "$(pwd *.rst | testuserpath)" == "USER_PATH\/([^\/]+\/)*shell-scripts\/tests" ]; echo $?
+
+# Get the absolute paths of all .rst files in the current directory and replace the home directory path
+# with "USER_PATH" using the defined alias
+$ output=$(pwd *.rst | testuserpath)
+# Check if the resulting path matches the expected pattern
+$ [[ "$output" =~ USER_PATH/.*(shell-scripts/tests|global-test-dir) ]]; echo $?
+0
+

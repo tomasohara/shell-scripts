@@ -1,0 +1,42 @@
+# Miscellaenous tests for scripts used in alias testing
+
+# Global Setup
+$ BIN_DIR=${TOM_BIN:-$PWD/..}
+# TODO
+
+#-------------------------------------------------------------------------------
+# simple_batspp.py
+
+# Setup
+$ log=$TMP/_simple-alias-test_.log
+$ MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 python3 $BIN_DIR/simple_batspp.py simple-alias-test.batspp >| $log 2>&1
+$ [ -n "$(grep failure $log)" ]; echo $?
+
+## Show results [Shifted to cell above]
+# grep failure $log
+
+## Make sure no failures
+# [ "1" = "$(grep -c '0 failure(s)' $log)" ]; echo $?
+$ [[ "$(grep -c '0 failure(s)' $log)" == "1" ]]; echo $?
+1
+
+#-------------------------------------------------------------------------------
+# jupyter_to_batspp.py
+
+# Setup
+$ log=$TMP/_jupyter_to_batspp_.log
+$ python3 $BIN_DIR/jupyter_to_batspp.py README.ipynb >| $log 2>&1
+$ [ -e $log ]; echo $?
+
+# Show sample
+$ [ "$(tail --lines=15 $log | wc -l)" -eq 15 ]; echo $? 
+0
+
+# Make sure cat command and output present
+$ [[ "$(grep -A1 '\$ cat _abcDEF_' $log | tail -1)" == "a b c D E F" ]]; echo $?
+0
+
+# Make sure status check ($?) present
+$ [[ "$(grep -A1 'num_lower -eq 3' $log | tail -1)" == "0" ]]; echo $?
+0
+

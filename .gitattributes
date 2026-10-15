@@ -1,0 +1,2 @@
+# Generated BatsPP fixtures retain notebook output byte-for-byte.
+tests/output/*.batspp whitespace=-trailing-space,-blank-at-eof

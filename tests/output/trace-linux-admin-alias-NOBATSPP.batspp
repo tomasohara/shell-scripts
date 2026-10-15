@@ -1,0 +1,247 @@
+## THIS TEST requires sudo PERMISSION FOR JUPYTER
+# $ jupyter notebook --allow-root
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+# $ echo 'Hi'
+# | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+PROMPT_HKXQLHMEKLTI\[\]>
+
+## BAD (SUPER BAD)
+# # Delete all aliases and function
+# # TODO: Instead start from pristine environment
+# unalias -a
+# alias | wc -l
+# for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+# typeset -f | egrep '^\w+' | wc -l
+
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+
+# Setting a temp directory for tests
+$ TMP=/tmp/test-admin-commands
+## NOTE: Source it directly from the ./tests directory.
+$ BIN_DIR=$PWD/..
+$ alias | wc -l
+524
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 3245)
+## *** All output from one run to the next needs to be the same ***
+#
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/test-3245
+#
+$ mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+## OLD: cd "$temp_dir"
+$ command cd "$temp_dir"
+$ pwd | testuser
+#
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/tmp/test-admin-commands/test-3245
+
+# Count aliases proper
+$ alias | wc -l
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l
+525
+634
+
+## BAD
+# # Alias are defined as some of them require sudo
+# source $BIN_DIR/tomohara-aliases.bash
+
+## BAD (don't redefine aliases to be tested!):
+## # Removing sudo (halts process, suitable for all users) - FOR TESTING
+## alias apt-install='apt-get install --yes --fix-missing --no-remove'
+## alias apt-search='apt-cache search'
+## alias apt-installed='apt list --installed'
+## alias apt-uninstall='apt-get remove'
+## alias dpkg-install='dpkg --install '
+
+$ if [[ "$USER" == "root" ]]; then
+$     echo "Warning: tests requiring root not run (too dangerous for general usage)"
+$ fi
+
+## 1A) apt-installed : VIEWS ALL INSTALLED PACKAGES
+# Note: Entire list of the package is very large.
+# Example: Sorts and select all packages related to Python3
+## BAD: apt-installed *python3* | grep ipython | cut -d \/ -f 1 | testnum
+$ if [[ "$USER" == "root" ]]; then
+$     apt-installed *python3* | grep ipython | cut -d \/ -f 1 | testnum
+$ else
+$     echo "Warning: apt-installed test requires sudo"
+$ fi
+Warning: apt-installed test requires sudo
+
+## 1B) apt-search : SEARCHES DESIRED PACKAGES IN THE apt REPO
+# Example: Searching for rolldice, a simple apt package
+$ if [[ "$USER" == "root" ]]; then
+$     apt-search rolldice
+$ else
+$     echo "Warning: apt-search test requires sudo"
+$ fi
+Warning: apt-search test requires sudo
+
+# 1C) apt-installed: Lists all installed apt packages
+$ if [[ "$USER" == "root" ]]; then
+$     apt-installed | grep acpi | wc -l
+$ else
+$     echo "Warning: apt-installed test requires sudo"
+$ fi
+Warning: apt-installed test requires sudo
+
+## 1C) apt-install : INSTALLS THE PACKAGE IF PRESENT IN THE REPO
+## NOTE: Installing packages requires sudo
+# Example: Installing rolldice (need a more suitable example - but works)
+# | $ apt-install rolldice
+# | E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)
+# | E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root?
+
+## 1D) apt-uninstall : UNINSTALLS/REMOVES DESIRED PACKAGE IF PRESENT
+## NOTE: Uninstalling packages requires sudo
+# # Example: Uninstalling rolldice
+# $ apt-uninstall rolldice
+# | E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)
+# | E: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root?
+
+## 1E) dpkg-install : INSTALLS A DEBIAN PACKAGE
+## NOTE: dpkg-install also requires sudo
+# Example: Uninstalling rolldice (requires superuser - but works)
+# $ dpkg-install rolldice
+# | dpkg: error: requested operation requires superuser privilege
+
+## TEST 2 - SYSTEM OPERATION ALIASES
+# alias restart-network='sudo ifdown eth0; sudo ifup eth0'
+# alias hibernate-system='sudo systemctl hibernate'
+# alias suspend-system='sudo systemctl suspend'
+# alias blank-screen='xset dpms force off'
+# alias stop-service='systemctl stop'
+# alias restart-service='sudo systemctl restart'
+# # stop-service IS ONLY SAFE TO USE FOR TEST FOR SOME SERVICES
+## BAD (don't add new aliases to be tested--only add helper aliases):
+## # SOME ALIASES: ADDED BY ME
+## alias start-service='systemctl start'
+## alias list-all-service='systemctl --type=service'
+## alias restart-service-sudoless='systemctl restart'
+## alias status-service='systemctl status'
+## alias service-status='status-service'
+
+## BAD (only test aliases defined elsewhere):
+## # 2A) list-all-service : LISTS ALL SERVICES ON THE MACHINE (ALL STATES)
+## list-all-service | grep ufw
+
+## BAD (only test aliases defined elsewhere):
+## # # 2B) stop-service : STOPS DESIRED SERVICE (password prompt appears; p/w required to start/stop the service)
+## stop-service unattended-upgrades
+## # service-status OR status-service VIEWS STATUS OF THE SERVICE
+## # status-service unattended-upgrades 
+##
+## # # commented - tests halts after completion
+
+## BAD (only test aliases defined elsewhere):
+## # 2C) start-service : STARTS DESIRED SERVICE (password prompt appears; p/w required to start/stop the service)
+## start-service unattended-upgrades
+## # service-status OR status-service VIEWS STATUS OF THE SERVICE
+## service-status unattended-upgrades | head -n 1
+
+## BAD (only test aliases defined elsewhere):
+## # 2D) restart-service-sudoless : SUDO-LESS METHOD TO RESTART DESIRED SERVICE 
+## # NOTE: password prompt appears; p/w required to start/stop the service 
+## restart-service-sudoless unattended-upgrades
+##
+## # service-status OR status-service VIEWS STATUS OF THE SERVICE
+## service-status unattended-upgrades | grep Active | cut -d \s -f 1
+##
+## # requires password but tests completes after (check need for batspp)
+
+$ pwd | testuser
+/tmp/test-admin-commands/test-3245
+
+# get-free-filename(base, [sep=""], [ext=""]): get filename starting with BASE that is not used.
+# Note: If <base> exists <base><sep><N> checked until the filename not used (for N in 1, 2, ... ).
+$ printf "HELLO THERE,\nI AM EXTREMELY PLEASED TO USE UBUNTU." >> abc.txt
+$ get-free-filename "abc" . "txt"
+$ linebr
+$ ls -l | awk '!($6="")' | testnum | testuser
+$ linebr
+$ cat "abc.txt"
+abc.1.txt
+--------------------------------------------------------------------------------
+total N    
+-rw-rw-r-- N userxf333 userxf333 NNN  NN NN:NN abc.txt
+--------------------------------------------------------------------------------
+HELLO THERE,
+I AM EXTREMELY PLEASED TO USE UBUNTU.HELLO THERE,
+I AM EXTREMELY PLEASED TO USE UBUNTU.
+
+# There should be 1 match with status 0
+$ get-free-filename "abc" . "txt" | grep -c ".1.txt"
+$ echo $?
+1
+0
+
+## OLD:
+## TEST 4 - SUDO ADMIN (Doesn't work on Jupyter | requires sudo | Halts process)
+##
+## # sudo-admin(): create typescript as sudo user using filename based on current
+## # date using numeric suffixes if necessary until the filename is free.
+## # note: exsting _config*.log files are made read-only so not later overwritten
+## # by accident
+## function sudo-admin () {
+##     local prefix="_config-"
+##     local base="$prefix$(todays-date).log"
+##     sudo chmod ugo-w "$prefix"*.log*
+##     local script_log=$(get-free-filename "$base")
+##     sudo --set-home   script --flush "$script_log"
+## }
+
+# sudo-admin
+
+# Test sync2 alias to synchronize file system memory cache to disk (twice).
+#
+## Should be done from a sysadmin account (Need help)
+## NOTE: checks second invocations takes shorter time
+## OLD: sync2
+## Example:
+## TIMEFORMAT=%U
+## $ time sync2
+## 0.001
+##
+#
+# Have time just shuld user seconds
+## TODO: restore TIMEFORMAT afterwards
+$ TIMEFORMAT=%U
+#
+# Set baseline in case uncached activity
+$ sync2
+#
+# Do an acitivty that should take a millsecond or longer.
+$ time_before=$((time sync2) 2>&1 | tr -d .)
+$ touch $TMP/time-check.list
+$ time_after=$((time sync2) 2>&1 | tr -d .)
+$ echo $time_before $time_after | testnum
+NNNN NNNN
+
+#
+# Make sure time after is longer
+$ [ $time_before -le $time_after ]; echo $?
+0
+
+## fix-sudoer-home-permission gives a warning if no sudo user present
+## OLD: fix-sudoer-home-permission
+$ if [[ "$USER" == "root" ]]; then
+$     fix-sudoer-home-permission
+$ else
+$     echo "Warning: fix-sudoer-home-permission test requires sudo"
+$ fi
+Warning: fix-sudoer-home-permission test requires sudo
+

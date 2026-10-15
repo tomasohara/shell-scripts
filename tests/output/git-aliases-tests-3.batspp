@@ -1,0 +1,151 @@
+# Third test for git aliases (e.g., git-update-plus, git-next-checkin, etc)
+# Note: The aliases should be defined before Jupyter is invoked.
+# For BatsPP, they can loaded via '--source all-tomohara-aliases-etc.bash' option.
+
+# Note:
+# - Need to be very careful to ensure that the output is reproducible.
+# - This can be done by encoding numbers as <num>, hex sequences as <hex>, etc.
+# - In addition, make sure standard error is redirected so that it doesn't confuse BatsPP.
+# - Uses one cell per output (to make this less brittle).
+# - Use 'command cmd args' to invoke cmd's to avoid alias overrides (e.g., 'egrep --color=auto').
+# - For USE_SSH_AUTH usage, see summary_stats.bash.
+#
+# BatsPP quirks (circa Dec 2023):
+# - global setup should not have output, so redirect to /dev/null
+# - commands and comments cannot be mixed in a cell (i.e., only comments first and then commands).
+
+## TODO2: put common setup in helper script
+## ex: source git-aliases-tests-common.sh
+
+# Global Setup
+# Creating temp local repos to test on
+# note: true at end is to avoid stderr status due to rename command failure, which also seems
+# to throw off the bash kernel (e.g., leading to halt during run-all-cells)
+$ TMP=${TMP:-/tmp}
+$ TMPA=$TMP/temp-git-test-3
+$ rename-with-file-date "$TMPA" > /dev/null 2>&1
+$ true
+
+# Global setup
+$ git clone https://github.com/scrappycito/git-bash-test.git "$TMPA" > /dev/null 2>&1
+
+# Global setup
+# Move to local to push some changes
+$ command cd "$TMPA" > /dev/null 2>&1
+#
+# note: optionally setup SSH authentication (for use with Github runner and docker)
+$ if [ "$USE_SSH_AUTH" == "1" ]; then git remote set-url origin "git@github.com:scrappycito/git-bash-test.git"; fi
+#
+$ git pull origin main > /dev/null 2>&1
+$ echo "hello second local" > temp-hello.txt
+$ git add temp-hello.txt > /dev/null 2>&1
+$ git commit -m "first commit on second local" > /dev/null 2>&1
+$ git push  > /dev/null 2>&1
+
+# Note:
+# - changed so that all temp files use "temp-" prefix
+# - these test scripts are written with an eye towards Murphy's Law!
+# ...   That is, what can go wrong will go wrong!
+
+# Note:
+# Use following Bash snippet to output .sh versions to facilitate comparisons
+# (e.g., git-aliases-tests-1 vs git-aliases-tests-2 vs git-aliases-tests-3).
+#
+# note:
+# - [batch] converting all Jupyter bash tests to .sh format (i.e., without expected output)
+#  
+# $ {
+#   # pre-init: CONV_OPTIONS=""; CONV_EXTENSION="batspp";
+#   # pre-init: CONV_GLOB="*tips*"
+#   conv_options="${CONV_OPTIONS:-"--just-code"}";
+#   conv_extension="${CONV_EXTENSION:-"sh"}";
+#   conv_glob="${CONV_GLOB:-"*"}";
+#   #
+#   mkdir -p tests/output-files;
+#   for f in tests/${conv_glob}.ipynb; do
+#       b=$(basename $f .ipynb);
+#       TRACE_INVOCATION=0 jupyter_to_batspp.py $conv_options --stdout $f >| tests/output-files/"$b.$conv_extension";
+#   done;
+# }
+# 
+# $ pwd
+# /home/tomohara/programs/bash/tom-shell-scripts
+
+# Setup
+# git-diff-plus tests
+$ cat temp-hello.txt > temp-bye.txt
+$ echo "differ" >> temp-hello.txt
+$ diffs=$(git-diff-plus temp-hello.txt temp-bye.txt | grep "^\+\w" | wc -l)
+
+# Assert 
+# there should only be one line of difference
+$ [ $diffs -eq 1 ]; echo $?;
+0
+
+# Setup
+# git-diff-list tests
+$ changed=$(git-diff-list | wc -l)
+
+# Assert 
+# there should be one file changed
+$ [ $changed -eq 1 ]; echo $?;
+0
+
+# Setup
+# git-vdiff-alias tests
+# TODO2: what is nvim???
+## OLD: 
+## killall nvim > /dev/null 2>&1
+## git-vdiff-alias > /dev/null 2>&1
+$ kill-it diff.*temp > /dev/null 2>&1
+$ git-vdiff-alias temp-hello.txt &
+$ instances=$(ps -e | grep "diff.*temp" | wc -l)
+
+# Assert there is an instance of the visual diff 
+$ [ $instances -eq 1 ]; echo $?;
+1
+
+# Setup
+# Kill diff
+$ kill-it diff.*temp > /dev/null 2>&1
+
+# Setup
+# git-next-checkin tests
+$ rm -f temp-bye.txt > /dev/null 2>&1
+## DEBUG: git status -s
+$ previous_changes=$( git status -s | wc -l )
+
+# set env variables and run git-next-checkin
+$ export GIT_MESSAGE="checkin"
+$ previous=$GIT_NO_CONFIRM
+$ export GIT_NO_CONFIRM="1"
+# git-next-checkin temp-hello.txt
+$ git-next-checkin temp-hello.txt 2>&1 | command egrep 'hello|issuing'
+issuing: git stash
+issuing: git pull --all
+issuing: git stash pop
+	modified:   temp-hello.txt
+issuing: git add temp-hello.txt
+issuing: git commit -m 'default'
+issuing: git push --verbose
+issuing: git status 
+
+# Setup
+# undo changes and remove newly created files
+$ rm -f _*[0-9]*.log
+
+# Make sure no active changes
+## DEBUG: git status -s
+$ changes=$( git status -s | wc -l )
+$ [ $previous_changes -ge 1 ] && [ $changes -eq 0 ]; echo $?;
+0
+
+# Setup
+$ git rm -f temp-*.txt > /dev/null 2>&1
+$ git add . > /dev/null > /dev/null 2>&1
+$ git commit -m "cleanup test files" > /dev/null 2>&1
+$ git push > /dev/null 2>&1
+
+## NOTE: no need to cleanup up environment in notebook
+## OLD: export GIT_NO_CONFIRM=$previous
+

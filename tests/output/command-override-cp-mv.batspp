@@ -1,0 +1,269 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it.
+# echo "TODO:"
+# echo "  echo \"\$PS1\" | command grep --count --perl-regexp '[\x00-\x1f]'"
+$ actual=${PS1: -1}
+$ [ "$actual" = ">" ]; echo $?
+0
+
+## OLD: For debug
+# alias | wc -l
+# The debugging level should be at most 3
+# Note: this affects output as bash_kernel conflates stderr w/ stdout
+## TODO: echo "DEBUG_LEVEL=$DEBUG_LEVEL" 1>&2
+$ [ "$DEBUG_LEVEL" -lt 4 ]; echo "$?"
+0
+
+# Global Setup
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then 
+$     TMP=/tmp/trace-python-commands
+$ fi
+$ temp_dir=$TMP/trace-python-commands
+## OLD: No use of trash: trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
+$ rename-with-file-date "$temp_dir" > /dev/null
+$ command mkdir -p "$temp_dir"
+# command mkdir -p "$trash_dir"
+$ command cd "$temp_dir"
+
+# Global Setup
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9]/N/g""
+$ alias testuserpath="sed 's|/home/[^/]\+/|USER_PATH/|'"
+$ alias linebr="printf '%132s\n' ' ' | tr ' ' '-'"
+
+## OLD
+## Count aliases proper
+# alias | wc -l
+# Count aliases w/ -dir in name
+# Example:
+#   $ alias | egrep '\-dir\b' | wc -l
+#   29
+$ dir_aliases=$(alias | egrep '\-dir\b' | wc -l)
+$ [ "$dir_aliases" -gt 20 ]; echo "$?"
+0
+
+## OLD
+## Count functions
+# typeset -f | egrep '^\w+' | wc -l
+$ dir_functions=$(typeset -f | egrep '\-dir\b' | wc -l)
+$ [ "$dir_functions" -gt 35 ]; echo "$?"
+0
+
+## BAD
+# source $BIN_DIR/tomohara-aliases.bash
+
+## OLD
+## Shows that cls must be used instead of clear
+# clear
+
+# TEST 1 - MOVE ALIASES
+## CLEARS TEST FOLDER
+## OLD
+# rm -rf ./*
+# linebr
+# ## CREATES TEST SUBJECTS
+# touch abc def ghi
+# mkdir mvtest_dir1
+# ## WORK OF ALIASES
+# mv abc ./mvtest_dir1
+# move def ./mvtest_dir1
+# move-force ghi ./mvtest_dir1
+# linebr
+# ## VIEWING THE CHANGES MADE
+# ls -l | awk '!($6="")' | testnum | testuser
+# linebr
+# ls -l ./mvtest_dir1 | awk '!($6="")' | testnum | testuser
+# linebr
+# BAD: rm -rf ./* > /dev/null
+# command mv -f * "$trash_dir"
+
+## WORK OF ALIASES
+## CREATES TEST SUBJECTS
+$ touch abc def ghi
+$ mkdir mvtest_dir1
+$ [ "$(ls | wc -w)" -eq 4 ]; echo $?
+0
+
+$ mv abc ./mvtest_dir1 > /dev/null
+$ move def ./mvtest_dir1 > /dev/null
+$ move-force ghi ./mvtest_dir1 > /dev/null
+$ [[ "$(ls)" == *"mvtest_dir1"* && "$(ls mvtest_dir1)" == *"abc"* && "$(ls mvtest_dir1)" == *"def"* && "$(ls mvtest_dir1)" == *"ghi"* ]]; echo $?
+0
+
+## VIEWING THE CHANGES MADE
+# OLD: ls -l | awk '!($6="")' | testnum | testuser
+# [[ "$(ls)" == *"mvtest_dir1"* && "$(ls mvtest_dir1)" == *"abc"* && "$(ls mvtest_dir1)" == *"def"* && "$(ls mvtest_dir1)" == *"ghi"* ]]; echo $?
+
+# OLD (Assertion in Cell 12): ls -l ./mvtest_dir1 | awk '!($6="")' | testnum | testuser
+
+# # TEST 2 - COPY ALIASES
+## OLD
+# ## CLEARS TEST FOLDER
+# rm -rf ./*
+# linebr
+# ## CREATES TEST SUBJECTS
+# touch abc def ghi
+# mkdir cptest_dir1
+# ## WORK OF ALIASES
+# cp abc ./cptest_dir1
+# copy def ./cptest_dir1
+# copy-force ghi ./cptest_dir1
+# linebr
+# ## VIEWING THE CHANGES MADE
+# ls -l | awk '!($6="")' | testnum | testuser
+# linebr
+# ls -l ./cptest_dir1 | awk '!($6="")' | testnum | testuser
+# linebr
+
+# BAD: rm -rf ./* > /dev/null
+## OLD: command mv -f * "$trash_dir"
+
+## Shifted contents to cell below
+# touch abc def ghi
+# command mkdir cptest_dir1
+
+## WORK OF ALIASES
+$ touch abc def ghi
+$ command mkdir cptest_dir1
+$ cp abc ./cptest_dir1 > /dev/null
+$ copy def ./cptest_dir1 > /dev/null
+$ copy-force ghi ./cptest_dir1 > /dev/null
+# linebr
+# ls
+
+## VIEWING THE CHANGES MADE - 1
+## OLD: Inconsistent patterns in resutl
+# ls -l | awk '!($6="")' | testnum | testuser
+$ [[ -n "$(ls | grep "cptest_dir1")" && -n "$(ls | grep "abc")" && -n "$(ls | grep "def")" && -n "$(ls | grep "ghi")" ]]
+$ expected1=$?
+$ [[ -n "$(ls cptest_dir1 | grep "abc")" && -n "$(ls cptest_dir1 | grep "def")" && -n "$(ls cptest_dir1 | grep "ghi")" ]]
+$ expected2=$?
+$ [ $excepted1 -eq $excepted2 ]; echo $?
+0
+
+## VIEWING THE CHANGES MADE - 2
+# OLD: ls -l ./cptest_dir1 | awk '!($6="")' | testnum | testuser
+$ [ "$(ls -l ./cptest_dir1 | wc -l)" -eq 4 ]; echo $?
+0
+
+# #=================(TEST ERROR: "/bin/rm: remove regular empty file 'f1'?")=========================#
+# # TEST 3 - REMOVE/DELETE ALIASES
+# ## CLEARS TEST FOLDER
+# rm -rf ./*
+# linebr
+# ## CREATES TEST SUBJECTS
+# touch f1 f2 f3 f4 f5
+# ## WORK OF ALIASES
+# rm f1
+# delete f2
+# remove-force f3
+# linebr
+# ## VIEWING THE CHANGES MADE
+# ls -l
+# linebr
+
+# TEST 4 - REMOVE DIRECTORY ALIASES
+## OLD:
+## CLEARS TEST FOLDER
+# rm -rf ./* > /dev/null
+# linebr
+## CREATES TEST SUBJECTS
+# touch abc def ghi
+# mkdir TDIR1 TDIR2 TDIR3 TDIR4
+# ls -l | awk '!($6="")' | testnum | testuser
+# linebr
+## WORK OF ALIASES (OLD - halts the test)
+# $ remove-dir "TDIR1"
+# | rm: remove directory 'TDIR1'? 
+# $ delete-dir "TDIR2"
+# | rm: remove directory 'TDIR1'? 
+# $ remove-dir-force TDIR3
+# | Warning: run enable-forced-deletions or issue: command rm -rfv hello
+# $ delete-dir-force TDIR4
+# | Warning: run enable-forced-deletions or issue: command rm -rfv hello
+# linebr
+## VIEWING THE CHANGES MADE
+# ls -l | awk '!($6="")' | testnum | testuser
+# linebr
+
+## CREATES TEST SUBJECTS
+$ touch abc def ghi
+$ command mkdir TDIR1 TDIR2 TDIR3 TDIR4
+$ [ -n "$(ls | grep -e abc -e def -e ghi -e TDIR1 -e TDIR2 -e TDIR3 -e TDIR4)" ]; echo $?
+# ls -l | awk '!($6="")' | testnum | testuser
+0
+
+## OLD: Assertion performed in cell above
+# ls -l | awk '!($6="")' | testnum | testuser
+
+## OLD
+# # RUNNING FOR DETAILS
+# copy-readonly | testuser
+# linebr
+# # COPYING .bashrc TO TEST DIRECTORY
+# rm -rf ./* > /dev/null
+# mkdir testdir1
+# linebr
+# copy-readonly ~/.bashrc ./testdir1/ | awk '!($6="")' | testnum | testuser
+# linebr
+# # VIEWING THE COPIED FILE (IN DIR AND CAT)
+# cat ./testdir1/.bashrc | head 
+
+## RUNNING FOR DETAILS
+## [OLD] Error: copy-readonly.sh: command not found
+# copy-readonly
+$ copy-readonly ~/.bashrc ./TDIR1 > /dev/null
+## The permission string of a readonly file is 444
+$ [ "$(stat -c %a "./TDIR1/.bashrc" | tail -c 4)" -eq 444 ]; echo $?
+0
+
+# BAD: rm -rf ./* > /dev/null
+# command mv -f * "$trash_dir"
+# mkdir testdir1
+
+# copy-readonly ~/.bashrc testdir1 | awk '!($6="")' | testnum | testuser
+
+# cat testdir1/.bashrc | head -n 1
+
+# # BEFORE fix-dir-permissions 
+# $ ls -l  
+# | total 4
+# | drwxrwxr-x 2 xaea12 xaea12 4096 Jul  4 21:41 testdir1
+## TODO: Need help with fix-dir-permissions
+$ command mkdir -p parent_directory/dir{1,2,2/subdir{1,2}} > /dev/null
+$ command touch parent_directory/{dir1/{file1.txt,file2.txt},dir2/subdir1/{file3.txt,file4.txt},dir2/subdir2/{file5.txt,file6.txt},file7.txt} > /dev/null
+$ command cd parent_directory > /dev/null
+# Fix directory permissions
+$ fix-dir-permissions > /dev/null
+# List only directories
+$ [ "$(stat -c %a "dir1" | tail -c 4)" -eq 775 ]
+$ expected1=$?
+$ [ "$(stat -c %a "dir2" | tail -c 4)" -eq 775 ]
+$ expected2=$?
+$ [ $expected1 -eq $expected2 ]; echo $?
+## OLD
+# ## AFTER fix-dir-permissions
+# ls -l | awk '!($6="")' | testnum | testuser
+0
+
+# AFTER fix-dir-permissions
+# OLD (Not required): ls -l | awk '!($6="")' | testnum | testuser
+
+## OLD: No use of trash_dir
+# if [[ "$PWD" = *"/tmp/"* ]]; then
+#     command mv -f * "$trash_dir"
+#     echo "Successfully moved to trash"
+# else
+#     echo "Warning: Current directory not in TMP"
+# fi
+

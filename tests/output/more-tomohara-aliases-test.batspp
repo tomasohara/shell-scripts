@@ -1,0 +1,72 @@
+# More tests for tomohara-aliases.bash
+
+# Global Setup
+## TEST: cd /usr/local/misc/programs/bash/shell-scripts-aviyan/tests
+## For number of digits not being critical
+$ alias testnum="sed -r "s/[0-9][0-9]*/N/g""
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+
+$ basename $PWD
+tests
+
+# Setup temp. dir
+# note: variable not used in rm as a precaution
+# BAD: /bin/rm -rf "/tmp/test-dir-15485863"
+## OLD: Used the concept of trash-dir
+# test_dir="/tmp/test-dir-15485863"
+# trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
+# mkdir -p "$test_dir"
+# mkdir -p "$trash_dir"
+# command cd "$test_dir"
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/test-more-tomohara-aliases; fi
+$ temp_dir=$TMP/more-tomohara-aliases-test
+$ rename-with-file-date "$temp_dir"
+$ command mkdir -p "$temp_dir"
+$ command cd "$temp_dir"
+
+#===============================================================================
+# TODO: find jupyter way to do divider line (or at least bash)
+
+# test url-path
+$ echo "<html>This is a HTML file</html>" > template.html
+
+## OLD
+# ls ../*.html
+$ command ls *.html
+template.html
+
+$ dir=$(realpath "..")
+## OLD: Seperated to next cell
+# url-path ../template.html | perl -pe "s@$dir@/x/y/z@;"
+
+$ url-path ../template.html | perl -pe "s@$dir@/x/y/z@;" > url_path.out
+
+$ cat url_path.out | grep -q "file:////x/y/z/template.html" && echo "True" || echo "False"
+True
+
+# # Test dir alias 
+# # note: time-dependent details changed
+$ umask ug=rwx,o=r
+## OLD: Seperated to cells
+# mkdir abc def
+# touch ghi jkl
+# echo > mno
+# dir | perl -pe "s/ (\d+) [\w ]{2,8}/ \1 username /; s/\w\w\w \d+ \d\d:\d\d/mon \1 hh:mm/;";
+
+$ mkdir abc def
+$ touch ghi jkl
+$ echo > mno
+
+# dir | perl -pe "s/ (\d+) [\w ]{2,8}/ \1 username /; s/\w\w\w \d+ \d\d:\d\d/mon \1 hh:mm/;"
+$ dir | perl -pe "s/ (\d+) [\w ]{2,8}/ \1 username /; s/\w\w\w \d+ \d\d:\d\d/mon \1 hh:mm/;" > dir_perl.out
+
+$ cat dir_perl.out | head -n 4 | tail -n 1 | testnum
+-rw-rw-r-- N username er    N mon  hh:mm mno
+
+# Remove everything after use
+## OLD: command mv -f * "$trash_dir"
+# Wrapup
+$ echo "END"
+END
+

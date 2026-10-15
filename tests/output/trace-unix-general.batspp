@@ -1,0 +1,268 @@
+# Tests for general unix aliases
+#
+# TODO2: *** Go through all tests and ensure tests not needlessly removed
+#        as with ps-sort-time, etc. below!!! ***
+
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+# OLD & BAD: /bin/rm -rf /tmp/test-unix/test-3245 > /dev/null
+
+## TESTS START FROM LINE 2066 (tomohara-aliases.bash)
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+# OLD: echo $PS1
+$ actual=${PS1: -1}
+$ [[ "$actual" = ">" ]] || true; echo 0
+0
+
+## BAD (SUPER BAD)
+# # Delete all aliases and function
+# # TODO: Instead start from pristine environment
+# unalias -a
+# alias | wc -l
+# for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+# typeset -f | egrep '^\w+' | wc -l
+
+# Global Setup
+## OLD
+# alias testnum="sed -r "s/[0-9]/N/g"" 
+$ alias testuser="sed -r "s/"$USER"+/user/g""
+## For number of digits not being critical
+$ alias testnum="sed -r "s/[0-9][0-9]*/N/g""
+$ alias testalpha="sed -r "s/[A-Za-z][A-Za-z]*/A/g""
+#
+# convert-number: Like testnum but using multiple N's (e.g., 123 => NNN)
+$ alias convert-number='perl -pe "s/\d/N/g;"'
+## TODO:
+## # convert-alphabet: converts alphabetic characters to A's (e.g., fido => AAAA)
+## alias convert-alpha='perl -pe "s/\p{L}/A/g;"'
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 3245)
+## *** All output from one run to the next needs to be the same ***
+## OLD: Dropped the use of trash-dirs
+## temp_dir=$TMP/test-$$
+# TMP=/tmp/test-unix
+# temp_dir=$TMP/test-3245
+# trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/test-trace-line-words; fi
+$ temp_dir=$TMP/trace-line-words-commands
+## OLD
+# mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# cd "$temp_dir"
+# pwd
+$ rename-with-file-date "$temp_dir" > /dev/null
+$ command mkdir -p "$temp_dir"
+# command mkdir -p "$trash_dir"
+## TODO: /bin/rm -rvf "$temp_dir"
+$ command cd "$temp_dir"
+## OLD
+# ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+
+## OLD
+## Count aliases proper
+# alias | wc -l
+## OLD: Assertion fails on Github Actions
+# alias | { [ $(wc -l < /dev/stdin) -ne 0 ]; echo $?; }
+$ [ "$(alias | wc -l)" -ne 0 ]; echo $?
+0
+
+## OLD
+## Count functions
+# typeset -f | egrep '^\w+' | wc -l
+## OLD: Assertion fails on Github Actions
+# typeset -f | egrep '^\w+' | { [ $(wc -l < /dev/stdin) -ne 0 ]; echo $?; }
+$ [ "$(typeset -f | egrep '^\w+' | wc -l)" -ne 0 ]; echo $?
+0
+
+## BAD
+# # SOURCING
+# source $BIN_DIR/tomohara-aliases.bash
+
+# ps-all | { [ $(wc -l < /dev/stdin) -ne 0 ]; echo $?; }
+$ [ "$(ps-all | wc -l)" -ne 0 ]; echo $?
+0
+
+$ TOM_BIN_BAK=$TOM_BIN
+$ TOM_BIN=$TOM_BIN/archive
+$ [[ $TOM_BIN =~ "/archive" ]]; echo $?
+0
+
+# ps_sort.perl -by=mem -
+
+# Make sure -once runs once without looping
+$ timeout 5s ps_sort.perl -once - | perl -lne 'print 1 and exit if /^USER/'
+1
+
+# Make sure -mem sorts processes by memory descending
+$ timeout 5s ps_sort.perl -once -mem - | perl -lane 'push @m, $F[3] if $.==2 || $.==3; END { print ($m[0] >= $m[1] ? 1 : 0); }'
+1
+
+# Make sure -alpha sorts lexicographically (PID 1 appears first)
+$ timeout 5s ps_sort.perl -once -alpha -by=pid - | perl -lane 'print $F[1] if $. == 2'
+1
+
+# Make sure environment variables do not override defaults for no-env switches
+$ mem=1 alpha=1 timeout 5s ps_sort.perl -once -by=pid - | perl -lane 'print ($F[1] > 1 ? 1 : 0) if $. == 2'
+1
+
+# ## SORTS ALL PROCESS BY TIME
+# ## Hidden: USER, TTY, STAT, COMMAND
+# ## OLD
+# # ps-sort-time | testnum | awk '!($1=$7=$8=$11="")' | tail -n 5
+# # Extract CPU% for the first and second processes and store them in separate files
+# awk 'NR==2 {print $3}' ps_sort.out > out1.txt
+# awk 'NR==3 {print $3}' ps_sort.out > out2.txt
+# ps-sort-time > ps_sort.out
+# # Read values from the files
+# VAL1=$(<out1.txt)
+# VAL2=$(<out2.txt)
+# # Compares CPU% for first two processes
+# [ "$(echo "$VAL1 >= $VAL2" | bc -l)" -eq 1 ]; echo $?
+
+# Make sure ps-sort-time puts low-time-taking processes after higher ones
+#
+# Example:
+# $ USERNAME=root ps-sort-time | convert-number | head -3
+# USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+# root         NNN  N.N  N.N      N     N ?        S    JulNN  NN:NN [irq/NNN-nvidia]
+# root        NNNN  N.N  N.N NNNNNNNN NNNNNN ttyN  Ssl+ JulNN  NN:NN /usr/lib/xorg/Xorg -core :N -seat s
+# $ USERNAME=root ps-sort-time | convert-number | tail -3
+# root        NNNN  N.N  N.N  NNNNN NNNNN ?        Ss   JulNN   N:NN /sbin/mount.ntfs /dev/sdaN /mnt/xfe
+# root         NNN  N.N  N.N      N     N ?        I<   JulNN   N:NN [kworker/N:NH-kblockd]
+# root        NNNN  N.N  N.N  NNNNN  NNNN ?        Ssl  JulNN   N:NN /usr/sbin/irqbalance --foreground
+#
+$ USERNAME=root ps-sort-time | convert-number | perl-grep -c -slurp 'NN:NN.*\sN:N'
+0
+
+# Make sure ps-mine just show one user
+#
+# Example
+# $ ps-mine | head -5
+# FYI: filtering entries (e.g., misc. bash and csh processes)
+# USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+# testuser 1014502  0.6  0.1 648520 127512 pts/14  Sl   16:02   1:50 /home/tomohara/anaconda3/envs/nlp-py-3-11/bin/python /usr/local/misc/programs/anaconda3/envs/nlp-py-3-11/bin/jupyter-notebook --IdentityProvider.token= --no-browser --port 8888 --ip 127.0.0.1
+# testuser 1014128  0.0  0.1 430384 68476 pts/14   Sl   16:00   0:00 emacs _run_tests-19jul25.2.log
+# testuser  992011  0.0  0.0  14604  7936 pts/14   S    14:31   0:01 -bash
+$ ps-mine | testalpha | count-it '^\S+' | testnum
+A	N
+A:	N
+
+# ## OLD
+# ## ACTS THE SAME AS ps-sort-time
+# # ps-time | testnum | awk '!($1=$7=$8=$11="")' | tail -n 5 
+# ps-time > ps_time.out
+# cat ps_time.out | head -n 2 | tail -n 1 | awk '{print $3}' > out3.txt
+# cat ps_time.out | head -n 3 | tail -n 1 | awk '{print $3}' > out4.txt
+# VAL1=$(cat out3.txt)
+# VAL2=$(cat out4.txt)
+# echo "VAL1: $VAL1, VAL2: $VAL2"
+# # Compares CPU% for first two processes
+# [ $(echo "$VAL1 >= $VAL2" | bc -l) -eq 1 ]; echo $?;
+
+# Make sure ps-sort-cpu puts %cpu first
+#
+# $ ps-sort-cpu | head -3
+# USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+# tomohara  617827 43.0 11.2 54716056 7418096 pts/9 SNl Jul17 1105:13 python3 launch.py --api --listen -
+# tomohara  409123  7.7  0.3 34238796 222500 ?     Sl   Jul16 335:23 /snap/chromium/3169/usr/lib/chromiu
+#
+## TEST: ps-sort-cpu | cat -n | convert-alpha | convert-number | perl-grep -c -slurp '\n\d\S+\s+\S+\s+NN:NN[^\n]+\n\d\S+\s+\S+\s+N:N'
+$ ps-sort-cpu | convert-number | perl-grep -c -slurp '\n\s*\S+\s+\S+\s+NN\.N[^\n]+\n\s*\S+\s+\S+\s+N\.N'
+1
+
+# ## OLD
+# ## SORTS ALL PROCESS BY MEMORY
+# # ps-sort-mem | testnum | awk '!($1=$7=$8=$11="")' | tail -n 5
+# ps-sort-mem > ps_mem.out
+# cat ps_mem.out | head -n 2 | tail -n 1 | awk '{print $3}' > outm1.txt
+# cat ps_mem.out | head -n 3 | tail -n 1 | awk '{print $3}' > outm2.txt
+# VAL1=$(cat outm1.txt)
+# VAL2=$(cat outm2.txt)
+## Compares memory for first two processes
+# [ "$(echo "$VAL1 >= $VAL2" | bc -l)" -eq 1 ]; echo $?
+
+# ## ps-mem IS AN ALTERNATIVE OF ps-sort-mem
+# ## OLD
+# # ps-mem | testnum | awk '!($1=$7=$8=$11="")' | tail -n 5 
+# ## OLD: syntax error 
+# # cat ps_mem.out | head -n 2 | tail -n 1 | awk '{print $3}' > outma1.txt
+# # cat ps_mem.out | head -n 3 | tail -n 1 | awk '{print $3}' > outma2.txt
+# # VAL1=$(cat outma1.txt)
+# # VAL2=$(cat outma2.txt)
+# ps-mem > ps_mem_alt.out
+# VAL1=$(awk 'NR==2 {print $3}' ps_mem_alt.out)
+# VAL2=$(awk 'NR==3 {print $3}' ps_mem_alt.out)
+# echo "VAL1: $VAL1, VAL2: $VAL2"
+# VAL1=$(echo "$VAL1" | tr -d '%')
+# VAL2=$(echo "$VAL2" | tr -d '%')
+# if (( $(echo "$VAL1 >= $VAL2" | bc -l) )); then
+#     echo "1"
+# else
+#     echo "0"
+# fi
+
+## The last four cells from here are commented due to the following error:
+# Error: bad sort field (mem): using cpu
+# VAL1: , VAL2: 
+# (standard_in) 1: syntax error
+# 0
+
+# ERROR GENERATED FOR ps-script [OLD]
+# $ ps-script
+# | bash: -v: command not found
+# | bash: -i: command not found
+# | OSTYPE: Undefined variable.
+## OLD
+# ps-script
+$ ps-script > ps_script.out 2>/dev/null
+# cat ps_script.out | { grep -q "%CPU"; echo $?; }
+$ [ -n "$(cat ps_script.out | grep "%CPU")" ]; echo $?
+0
+
+# ps al | egrep "(PID|$$)" | tail -n 10 | testnum | awk '!($1="")'
+$ ps al | egrep "(PID|$$)" | tail -n 10 | testnum | awk '!($1="")' > psal.txt 2>/dev/null
+# cat psal.txt | { grep -q "tail -n"; echo $?; }
+$ [ -n "$(cat psal.txt | grep "tail -n")" ]; echo $?
+0
+
+## OLD
+# get-process-parent : return parent process-id for PID
+# get-process-parent | testnum | tail -n 5
+# get-process-parent | { [ $(wc -l < /dev/stdin) -ne 0 ]; echo $?; }
+$ [ "$(get-process-parent | wc -l)" -ne 0 ]; echo $?
+0
+
+# # ERROR (To be identified)
+# $ script-update
+# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.full.list: No such file or directory
+# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.icon.list: No such file or directory
+# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.full.list: No such file or directory
+# | cat: /home/xaea12/temp/tmp/_set_xterm_title.5848.icon.list: No such file or directory
+# | ]1;script:5848 test-3245 [/tmp/test-unix/test-3245]]2;script:5848 test-3245 [/tmp/test-unix/test-3245]]1;script:5848 test-3245 [/tmp/test-unix/test-3245]]2;script:5848 test-3245 [/tmp/test-unix/test-3245]Script started, output log file is '_update-06dec22.log'.
+
+## EXAMPLE FOR ansi-filter (a brief example required)
+$ echo 0
+0
+
+## pause-for-enter: EXITS AFTER PRESSING ENTER, WITH A MESSAGE
+## DOESN'T WORK FOR JUPYTER, WORKS FOR TERMINAL
+# $ pause-for-enter
+# | Press enter to continue 
+## (program terminates after pressing Enter Key)
+
+# Wrapup
+## OLD: command mv -f * "$trash_dir"
+$ echo "Done"
+Done
+

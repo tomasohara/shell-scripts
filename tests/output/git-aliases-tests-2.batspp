@@ -1,0 +1,200 @@
+# Second test for git aliases (e.g., git-update-plus, git-next-checkin, etc)
+# Note: The aliases should be defined before Jupyter is invoked.
+# For BatsPP, they can loaded via '--source all-tomohara-aliases-etc.bash' option.
+
+# Note:
+# - Need to be very careful to ensure that the output is reproducible.
+# - This can be done by encoding numbers as <num>, hex sequences as <hex>, etc.
+# - In addition, make sure standard error is redirected so that it doesn't confuse BatsPP.
+# - Uses one cell per output (to make this less brittle).
+# - For USE_SSH_AUTH usage, see summary_stats.bash.
+# - Use 'command cmd args' to invoke cmd's to avoid alias overrides (e.g., 'egrep --color=auto').
+#
+# BatsPP quirks (circa Dec 2023):
+# - global setup should not have output, so redirect to /dev/null
+# - commands and comments cannot be mixed in a cell (i.e., only comments first and then commands).
+
+# Global Setup
+# Creating temp local repos to test on
+# note: true at end is to avoid stderr status due to rename command failure, which also seems
+# to throw off the bash kernel (e.g., leading to halt during run-all-cells)
+$ TMP=${TMP:-/tmp}
+$ TMPA="$TMP/temp-git-test-2"
+$ rename-with-file-date "$TMPA" > /dev/null 2>&1
+$ true
+
+# Global setup
+$ git clone https://github.com/scrappycito/git-bash-test.git "$TMPA" > /dev/null 2>&1
+
+# Global setup
+# Define aliases for encoding output (e.g., to ensure output the same across runs).
+## TODO: define a better hex encoder to avoid false positives (e.g., abc).
+## OLD: alias encode-control-chars='perl -pe "s/\t/<tab>/g;  s/[\x00-\x08\x11\x31]/<cc>/g;"'
+$ alias remove-control-chars='perl -pe "s/\t/<tab>/g;  s/[\x00-\x08\x11\x31]//g;"'
+$ alias encode-nums='perl -pe "s/[0-9]+/N/g;"'
+## OLD: alias encode-hex='perl -pe "s/[0-9A-F]{4,}/<hex>/ig;"'
+$ alias encode-hex='perl -pe "s/\b[0-9A-F]{4,}\b/<hex>/ig;"'
+# note: uses perl slurp mode (i.e., read entire file) to check for consecutive newlines
+$ alias encode-newlines='perl -0777 -pe "while (/\n\n/) { s/\n\n/\n<newline>\n/g; }"'
+## OLD: function encode-text () { encode-control-chars | encode-nums | encode-hex | encode-newlines; }
+$ function encode-text () { remove-control-chars | encode-hex | encode-nums | encode-newlines; }
+
+# Note:
+# - changed so that all temp files use "temp-" prefix
+# - these test scripts are written with an eye towards Murphy's Law!
+# ...   That is, what can go wrong will go wrong!
+
+# Global setup
+# Move to local to push some changes
+$ command cd "$TMPA" > /dev/null 2>&1
+$ git pull origin main > /dev/null 2>&1
+#
+# note: optionally setup SSH authentication (for use with Github runner and docker)
+$ if [ "$USE_SSH_AUTH" == "1" ]; then git remote set-url origin "git@github.com:scrappycito/git-bash-test.git"; fi
+#
+$ echo "hello second local" > temp-hello.txt
+$ git add temp-hello.txt > /dev/null 2>&1
+$ git commit -m "first commit on second local" > /dev/null 2>&1
+$ git push  > /dev/null 2>&1
+
+# git-rename-file tests
+# Assert file doesn't exist
+$ [ ! -f "temp-new-hello.txt" ]; echo $?;
+0
+
+$ export GIT_MESSAGE="renamed hello.txt"
+$ previous=$GIT_NO_CONFIRM
+$ export GIT_NO_CONFIRM="1"
+$ contents="$(cat temp-hello.txt)"
+$ git-rename-file temp-hello.txt temp-new-hello.txt 2>&1 | egrep 'hello|issuing' | encode-text
+issuing: git mv temp-hello.txt temp-new-hello.txt
+issuing: git add temp-new-hello.txt
+issuing: git commit -m 'renamed hello.txt'
+    [main <hex>] renamed hello.txt
+     rename temp-hello.txt => temp-new-hello.txt (N%)
+issuing: git push --verbose
+[main <hex>] renamed hello.txt
+ rename temp-hello.txt => temp-new-hello.txt (N%)
+issuing: git reset HEAD temp-hello.txt
+
+# Asserts
+$ [ -f "temp-new-hello.txt" ] && [ "$(cat temp-new-hello.txt)" == "$(echo $contents)" ]; 
+$ echo $?;
+0
+
+# Setup
+# git-restore-staged-alias test
+$ echo "second change on local" >> temp-new-hello.txt
+$ git add temp-new-hello.txt > /dev/null 2>&1
+
+# Assert theres is one staged file 
+$ [ $(git status -s | grep -c "^[MTADRCU]") -eq 1 ]; echo $?; 
+0
+
+# Setup
+## TODO2: add .gitignore for _git-trash (see shell-scripts version)
+$ export GIT_MESSAGE="restored temp-new-hello.txt"
+$ export GIT_NO_CONFIRM="1"
+$ git-restore-staged-alias temp-new-hello.txt
+$ rm -rf _git-trash
+
+# Assert theres are no staged files
+$ [ $(git status -s | grep -c "^[MTADRCU]") -eq 0 ]; echo $?; 
+0
+
+# Setup
+# git-revert-file-alias tests
+$ echo "second change on local" >> temp-new-hello.txt
+
+# Assert theres is 1 unstaged file
+$ [ $(git status -s | grep -c "^\s[MTADRCU]") -eq 1 ]; echo $?; 
+0
+
+#revert unstaged file
+$ export GIT_MESSAGE="reverted temp-new-hello.txt"
+$ export GIT_NO_CONFIRM="1"
+$ git-revert-file-alias temp-new-hello.txt
+$ rm -rf _git-trash
+issuing: cp -vpf temp-new-hello.txt _git-trash
+issuing: git reset HEAD temp-new-hello.txt
+issuing: git checkout -- temp-new-hello.txt
+issuing: git stash list
+'temp-new-hello.txt' -> '_git-trash/temp-new-hello.txt'
+Unstaged changes after reset:
+M	temp-new-hello.txt
+removed '_git-trash/temp-new-hello.txt'
+removed directory '_git-trash'
+
+# Assert file was reverted
+# this matches any files except untracked
+# read https://git-scm.com/docs/git-status#_short_formatz
+$ [ $(git status -s | grep -c "^\s*[MTADRCU]") -eq 0 ]; echo $?; 
+0
+
+# git-move-to-dir tests
+$ mkdir temp-folder
+## OLD: git-move-to-dir "$TMPA/temp-folder" temp-new-hello.txt | true
+## DEBUG: git-move-to-dir temp-folder temp-new-hello.txt
+$ git-move-to-dir temp-folder temp-new-hello.txt 2>&1 | command egrep "folder|hello|issuing" | encode-text
+issuing: git mv temp-new-hello.txt temp-folder
+issuing: git add temp-folder/temp-new-hello.txt
+issuing: git commit -m 'reverted temp-new-hello.txt'
+    [main <hex>] reverted temp-new-hello.txt
+     rename temp-new-hello.txt => temp-folder/temp-new-hello.txt (N%)
+issuing: git push --verbose
+[main <hex>] reverted temp-new-hello.txt
+ rename temp-new-hello.txt => temp-folder/temp-new-hello.txt (N%)
+
+$ command cd temp-folder > /dev/null
+$ ls
+temp-new-hello.txt
+
+#Assert the file has been moved to folder
+$ [ $(ls | wc -l) -eq 1 ]; echo $?;
+0
+
+# git-conflicts-alias tests
+$ command cd "$TMPA"
+# first assert there are no conflicts
+$ [ $(git-conflicts-alias | wc -l) -eq 0 ]; echo $?
+0
+
+# Setup
+# create branches that conflict later
+$ git branch branch-a > /dev/null 2>&1
+$ git branch branch-b > /dev/null 2>&1
+$ git checkout branch-a > /dev/null 2>&1
+$ echo "line a" >> temp-conflicts.txt
+$ git add temp-*txt > /dev/null 2>&1
+$ git commit -m "first commit branch-a" > /dev/null 2>&1
+$ git switch branch-b
+$ echo "line b" >> temp-conflicts.txt
+$ git add temp-*txt > /dev/null 2>&1
+$ git commit -m "first commit branch-b" > /dev/null 2>&1
+
+# Setup
+# merge branches 
+$ git switch main > /dev/null 2>&1
+$ git merge branch-a > /dev/null 2>&1
+$ git merge branch-b | true > /dev/null 2>&1
+
+# assert some conflicts were generated 
+$ [ $(git-conflicts-alias | wc -l) -gt 0 ]; echo $?;
+0
+
+# Setup
+# Cleanup cont.
+# note: true used to reset $? status
+$ git rm -f temp-*.txt > /dev/null 2>&1
+$ git rm -rf temp-folder > /dev/null 2>&1
+$ true
+
+# Setup
+# Check-in cleanup
+$ git add . > /dev/null 2>&1
+$ git commit -m "cleanup test files" > /dev/null 2>&1
+$ git push > /dev/null 2>&1
+
+## NOTE: no need to cleanup up environment in notebook
+## OLD: export GIT_NO_CONFIRM=$previous
+

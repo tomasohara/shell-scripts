@@ -1,0 +1,37 @@
+# Warning: this creates a temporary directory for aliases
+
+# Set directory for alias work
+$ export TEMP_TOM_BIN=/tmp/tomasohara-shell-scripts
+$ export TOM_ALIAS_FILE="$TEMP_TOM_BIN/tomohara-aliases.bash"
+# mkdir -p "$TEMP_TOM_BIN"
+## OLD: Dropped the use of trash_dir
+# export trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
+# command mkdir -p "$trash_dir"
+$ rename-with-file-date "$TEMP_TOM_BIN" > /dev/null
+$ command mkdir -p "$TEMP_TOM_BIN"
+$ command cd "$TEMP_TOM_BIN"
+
+# # Get latest version of aliases
+# curl https://raw.githubusercontent.com/tomasohara/shell-scripts/main/tomohara-aliases.bash > "$TOM_ALIAS_FILE" > /dev/null
+$ curl -s https://raw.githubusercontent.com/tomasohara/shell-scripts/main/tomohara-aliases.bash > "$TOM_ALIAS_FILE"
+
+# file "$TOM_ALIAS_FILE"
+$ tom_alias_file=$(file "$TOM_ALIAS_FILE")
+$ [[ -n "$tom_alias_file" && "$tom_alias_file" =~ shell-scripts/tomohara-aliases.bash ]]; echo $?
+0
+
+# Note: batch mode needed for Jupyter usage
+$ export BATCH_MODE=1
+$ source "$TOM_ALIAS_FILE"
+$ [[ $BATCH_MODE = 1 &&  $0 != "$TOM_ALIAS_FILE" ]]; echo $?
+0
+
+# show-macros | wc -l | { [ $(wc -l < /dev/stdin) -ne 0 ] && echo "NotZero" || echo "Zero"; }
+$ show-macros | wc -l | { [ $(wc -l < /dev/stdin) -ne 0 ] && echo $?; }
+0
+
+## OLD
+# rm -rf "$TEMP_TOM_BIN"
+# BAD: rm -rf "$TEMP_TOM_BIN" > /dev/null
+# BAD TOO: command mv -f * "$trash_dir"
+

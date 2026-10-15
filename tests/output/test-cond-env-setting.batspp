@@ -1,0 +1,107 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+# echo $PS1
+$ actual=${PS1: -1}
+$ [ "$actual" = ">" ]; echo $?
+0
+
+## BAD (SUPER BAD)
+# # Delete all aliases and function
+# # TODO: Instead start from pristine environment
+# unalias -a
+# alias | wc -l
+# for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+# typeset -f | egrep '^\w+' | wc -l
+
+# Global Setup
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+## For number of digits not being critical
+$ alias testnum="sed -r "s/[0-9][0-9]*/N/g""
+
+# Setting a temp directory for tests
+## OLD: TMP=/tmp/test-cond-env
+# OLD
+# ## NOTE: Source it directly from the ./tests directory.
+# BIN_DIR=$PWD/..
+# ## You will need to run jupyter from that directory.
+# ## source $TEMP_BIN/_dir-aliases.bash
+# source _dir-aliases.bash
+# alias | wc -l
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 1710)
+## *** All output from one run to the next needs to be the same ***
+# # temp_dir=$TMP/test-$$
+# temp_dir=$TMP/test-1710
+# trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
+# ## OLD
+# # mkdir -p "$temp_dir"
+# # # TODO: /bin/rm -rvf "$temp_dir"
+# # cd "$temp_dir"
+# command mkdir -p "$temp_dir"
+# command mkdir -p "$trash_dir"
+# # # TODO: /bin/rm -rvf "$temp_dir"
+# command cd "$temp_dir"
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/test-cond-env-setting; fi
+$ temp_dir=$TMP/cond-env-settings
+$ rename-with-file-date "$temp_dir"
+$ command mkdir -p "$temp_dir"
+$ command cd $temp_dir
+## OLD: For debugging
+# pwd
+## OLD
+## ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+renamed '/tmp/test-cond-env-setting/cond-env-settings' -> '/tmp/test-cond-env-setting/cond-env-settings.01May24.7'
+
+# Count aliases proper
+## OLD: alias | wc -l | testnum
+$ [ "$(alias | wc -l)" -gt 440 ]; echo $?
+0
+
+# Count functions
+## OLD: typeset -f | egrep '^\w+' | wc -l | testnum
+$ [ "$(typeset -f | egrep '^\w+' | wc -l)" -gt 480 ]; echo $?
+0
+
+## BAD
+# source $BIN_DIR/tomohara-aliases.bash
+
+# SETTING A ENVIRONMENT VARIABLE NAMED COND_ENV_TEST_TEMP
+$ cond-setenv COND_ENV_TEST_TEMP tmp/cond-env-test-temp
+$ [ "$COND_ENV_TEST_TEMP" == "tmp/cond-env-test-temp" ]; echo $?
+0
+
+# USE OF ENV VARIABLE TO CREATE A SUB-DIRECTORY
+# BAD: rm -rf ./* > /dev/null
+$ mkdir -p $COND_ENV_TEST_TEMP
+# OLD: ls -l | awk '!($6=$7=$8="")' | testnum | testuser
+$ [[ "$(ls | grep -c tmp)" -eq 1 && "$(ls tmp | grep -c cond-env-test-temp)" -eq 1 ]]; echo $?
+0
+
+# THE OUTPUT OF printenv IS STORED IN temp-env-1.tmp CREATED IN THE DIRECTORY SPECIFIED BY $COND_ENV_TEST_TEMP
+## OLD: For debug
+# pwd
+$ printenv > $COND_ENV_TEST_TEMP/temp-env-1.tmp
+# cat $COND_ENV_TEST_TEMP/temp-env-1.tmp | grep -c "shell-scripts"
+$ [ "$(cat $COND_ENV_TEST_TEMP/temp-env-1.tmp | grep -c "shell-scripts")" ]; echo $?
+0
+
+## OLD: Reworked and moved the validation to above cell
+# cat $COND_ENV_TEST_TEMP/temp-env-1.tmp | grep -q "shell-scripts" && echo "True" || echo "False"
+
+## OLD: No use og trash_dir: command mv -f * "$trash_dir"
+# Wrapup
+$ echo "Done!"
+Done!
+

@@ -1,0 +1,185 @@
+# First test for git aliases (e.g., git-update-plus, git-next-checkin, etc)
+# Note: The aliases should be defined before Jupyter is invoked.
+# For BatsPP, they can loaded via '--source all-tomohara-aliases-etc.bash' option.
+
+# Note:
+# - Need to be very careful to ensure that the output is reproducible.
+# - This can be done by encoding numbers as <num>, hex sequences as <hex>, etc.
+# - In addition, make sure standard error is redirected so that it doesn't confuse BatsPP.
+# - Uses one cell per output (to make this less brittle).
+# - For USE_SSH_AUTH usage, see summary_stats.bash.
+# - Use 'command cmd args' to invoke cmd's to avoid alias overrides (e.g., 'egrep --color=auto').
+#
+# BatsPP quirks (circa Dec 2023):
+# - global setup should not have output, so redirect to /dev/null
+# - commands and comments cannot be mixed in a cell (i.e., only comments first and then commands).
+
+# Note:
+# - All temp files use "temp-" prefix.
+# - This has an eye towards Murphy's Law!
+# ...   That is, what can go wrong will go wrong!
+
+# Global Setup
+# Creating temp local repos to test on
+# note: true at end is to avoid stderr status due to rename command failure, which also seems
+# to throw off the bash kernel (e.g., leading to halt during run-all-cells)
+#
+$ TMP=${TMP:-/tmp}
+$ stderr_log="$TMP/temp-git-stderr-$$.log"
+$ touch "$stderr_log"
+$ TMPA=$TMP/temp-git-test-1-A
+$ TMPB=$TMP/temp-git-test-1-B
+$ rename-with-file-date "$TMPA" "$TMPB" >> "$stderr_log" 2>&1
+$ true
+
+# Global setup
+# Define aliases for encoding output (e.g., to ensure output the same across runs).
+$ alias encode-control-chars='perl -pe "s/\t/<tab>/g;  s/[\x00-\x08\x11\x31]/<cc>/g;"'
+$ alias encode-nums='perl -pe "s/[0-9]+/N/g;"'
+## TODO: define a better hex encoder to avoid false positives (e.g., abc).
+$ alias encode-hex='perl -pe "s/[0-9A-F]{4,}/<hex>/ig;"'
+# note: uses perl slurp mode (i.e., read entire file) to check for consecutive newlines
+$ alias encode-newlines='perl -0777 -pe "while (/\n\n/) { s/\n\n/\n<newline>\n/g; }"'
+$ function encode-text () { encode-control-chars | encode-nums | encode-hex | encode-newlines; }
+
+# Global Setup
+# Warning: Due to BatpPP quirk, comments should not be placed within command sequence.
+# So make sure there is only one command sequence per cell
+$ git clone https://github.com/scrappycito/git-bash-test.git "$TMPA" >> "$stderr_log" 2>&1
+$ git clone https://github.com/scrappycito/git-bash-test.git "$TMPB" >> "$stderr_log" 2>&1
+
+# Global setup
+# Move to second local to push some changes
+$ command cd "$TMPB" >> "$stderr_log" 2>&1
+$ if [ "$USE_SSH_AUTH" == "1" ]; then git remote set-url origin "git@github.com:scrappycito/git-bash-test.git"; fi
+$ git pull origin main >> "$stderr_log" 2>&1
+$ echo "hello second local" > temp-hello.txt
+$ git add temp-hello.txt >> "$stderr_log" 2>&1
+$ git commit -m "first commit on second local" >> "$stderr_log" 2>&1
+$ git push  >> "$stderr_log" 2>&1
+
+# Moving to first local
+$ command cd "$TMPA"
+# note: optionally setup SSH authentication (for use with Github runner and docker)
+$ if [ "$USE_SSH_AUTH" == "1" ]; then git remote set-url origin "git@github.com:scrappycito/git-bash-test.git"; fi
+
+# Setup
+# git-branch-alias test
+# switch to new branch
+$ git checkout -b newBranch >> "$stderr_log" 2>&1
+$ actual_branch=$(git branch --show-current)
+
+# Assert
+$ [ $(echo $actual_branch) == "$(git-branch-alias)" ]; echo $?;
+0
+
+#git-checkout-branch test
+$ git-checkout-branch --help
+usage: git-checkout-branch [--help | branch]
+note: available branches:
+    main
+
+$ git-checkout-branch main
+$ actual_branch=$(git branch --show-current)
+issuing: git checkout main --
+Switched to branch 'main'
+Your branch is up to date with 'origin/main'.
+
+# Assert
+$ [ $(echo $actual_branch) == "main" ]; echo $?;
+0
+
+# git-update-plus test
+# note: obfuscate the output; makes sure no control characters passed
+## NOTE: limits the output to make less brittle (e.g., ignorable warnings)
+## OLD: git-update-plus 2>&1 | encode-text
+$ git-update-plus 2>&1 | command egrep 'hello|issuing' | encode-text
+issuing: git stash
+issuing: git pull --all
+issuing: git stash pop
+ temp-hello.txt | <cc> +
+ create mode <cc>N temp-hello.txt
+
+# Assert
+$ [ "$(cat temp-hello.txt)" == "hello second local" ]; echo $?;
+0
+
+# Setup
+# adding changes to not be able to pull
+$ command cd "$TMPB" >> "$stderr_log" 2>&1
+$ echo "second change" > temp-hello2.txt
+$ git add temp-*.txt >> "$stderr_log" 2>&1
+$ git commit -m "second commit" >> "$stderr_log" 2>&1
+$ git push >> "$stderr_log" 2>&1
+
+# Setup
+# Moving to first local
+$ command cd "$TMPA" >> "$stderr_log" 2>&1
+$ echo "second line" >> temp-hello.txt
+
+# Should fail
+$ git-update-plus
+Error: Use 'git-update-force' to update with changed files (n.b., potential for conflicts)
+
+# git-update-force test 
+# should pull
+# note: hides the lines with hex
+## OLD: git-update-force 2>&1 | encode-text
+$ git-update-force 2>&1 | command egrep 'hello|issuing' | encode-text
+issuing: git stash
+issuing: git pull --all
+issuing: git stash pop
+<tab>modified:   temp-hello.txt
+
+#assert
+$ [ "$(cat temp-hello2.txt)" == "second change" ]; echo $?;
+0
+
+# Setup
+#git-commit-and-push test
+$ echo "pushed" > temp-push.txt
+$ git status >> "$stderr_log" 2>&1
+
+# Note: Bypasses confirmation in git-aliases.bash
+$ export GIT_MESSAGE="hello"
+$ previous=$GIT_NO_CONFIRM
+$ export GIT_NO_CONFIRM="1"
+## OLD: git-commit-and-push temp-push.txt 2>&1 | encode-text
+## NOTE: limits the output to make less brittle (e.g., ignorable warnings)
+$ git-commit-and-push temp-push.txt 2>&1 | command egrep 'issuing|push' | encode-text
+issuing: git add temp-push.txt
+issuing: git commit -m 'hello'
+     create mode <cc>N temp-push.txt
+issuing: git push --verbose
+ create mode <cc>N temp-push.txt
+
+# Setup
+$ command cd "$TMPB"
+$ git pull >> "$stderr_log" 2>&1
+
+#assert
+$ [ "$(cat temp-push.txt)" == "pushed" ]; echo $?;
+0
+
+# Setup
+# undo changes and remove newly created files
+$ rm -f temp-*.txt >> "$stderr_log" 2>&1
+$ git rm -f temp-*.txt >> "$stderr_log" 2>&1
+$ git add . >> "$stderr_log" 2>&1
+
+# Setup
+$ git commit -m "cleanup test files" >> "$stderr_log" 2>&1
+
+# Setup
+$ git push >> "$stderr_log" 2>&1
+
+# Setup
+## OLD (moved above)
+## # Note: dirs renamed nstead of deleted; useful for retaining directories for post-hoc analysis
+## # and, true used to avoid extraneous stdout output 
+## rename-with-file-date /tmp/temp-git-test-1-* >> "$stderr_log" 2>&1
+## true
+
+# Setup
+## OLD: export GIT_NO_CONFIRM=$previous
+

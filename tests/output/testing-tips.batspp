@@ -1,0 +1,119 @@
+# Tips for for new testers of the tomohara's aliases and functions
+#
+# This describes how to test the Bash aliases and functions (aka "macros")
+# defined in one of the bash files from https://github.com/tomasohara/shell-scripts
+# (e.g., tomohara-proper-aliases.bash).
+#
+# The focus is on using "example-based testing" to simplify the test suite construction,
+# while allowing for changes in the underlying macro definitions. A typical test has
+# one command to shows the expected output and another command to verify OK:
+#     $ ls -d ~
+#     /home/testuser
+#     $ ls -d ~ | grep -c $USER
+#     1
+# See README.ipynb for more motivation.
+#
+# Notes:
+# - The tests are specified using Jupyter notebooks with Bash support.
+# - A distinct test is usually a pair of Jupyter cells with output based on the command tested.
+#   One output should be for the command itself (e.g., greeting), and another output should be 
+#   some type of validation. For example,
+#      $ greeting
+#      hola, mundo
+#      $ greeting | wc
+#      1       2      12
+#   where greeting might be defined as follows: alias greeting='echo "hola, mundo"'.
+#   For simplicity, the validation is indirect and just checks for one line, two word tokens,
+#   and 12 characters (i.e., including newline). Besides avoiding awkard Bash comparison syntax (see below), 
+#   this indirect validation provides testing flexibility. For example, if the greeting gets changed to 
+#   "hello world", it would still pass.
+# - If you need to do a series of commands for a particular test, use the '# Setup' comment
+#      # Setup
+#      echo "fu" > /tmp/fu.list
+# - There is also a global setup, such as for aliases used trhoughout
+#      # Global setup
+#      alias num-users="who --short | cut -f1 -d' ' | uniq | wc -l"
+# - The following Bash aliases can be used to aid development.
+#     display-macros: show the alias or function definition (helpful for designing clever tests)
+#     tracs-vars: display values of Bash variables (useful for debugging the tests)
+# - The following somewhat cryptic Bash idiom is often used at the end of tests:
+#      [ condition ]; echo $?
+#   It outputs 0 if and only if the test succeeds. For example,
+#      [ $count -gt 0]; echo $?
+#   will output 0 if the count is above 0.
+# - You can use command line tools to update the juptyer notebook. For example,
+#      $ jupyter nbconvert --inplace --execute --allow-errors tests/dummy-test.ipynb
+# - For more details on this testing paradigm, see <repo>/tests/README.ipynb.
+# - See <repo>/bash-cheatsheet.md for common constructs used in the aliases.
+# - Warnings:
+#   - Comments need to preceed Bash commands (i.e., not intermixed): it is best to use separate cells
+#     for multi-step sequences.
+#   - Bash is a real bear! Be careful not to spend too much learning its cryptic syntax, etc.
+
+# Global setup
+# Note: Put any helper aliases for your tests here
+$ alias current-time-in-seconds='date +%s'
+$ alias num-sleep-processes='ps | grep sleep | wc -l'
+
+#................................................................................
+
+# Test sleep-for function
+#
+# note: The sleep-for function shows a message and sleeps for a given amount of time.
+# This test uses the date command to capture elapsed time in seconds to verify sleep-for
+# works as expected. The main complication comes in the Bash syntax for arithmetic.
+#
+## DEBUG display-macros sleep-for
+
+# Setup
+# Make sure 'sleep-for N' sleeps for at least N seconds
+#
+# Sleep for specified seconds 
+$ time_before=$(current-time-in-seconds)
+$ delay=2
+$ sleep-for $delay
+
+# Setup
+# Get time difference
+$ time_after=$(current-time-in-seconds)
+$ time_diff=$(($time_after - $time_before))
+
+## DEBUG: trace-vars time_before time_after time_diff 1>&2
+
+# Make sure at least required delay
+$ [ $time_diff -ge $delay ]; echo $?
+0
+
+#................................................................................
+# Test kill-sleep alias
+#
+# Note: this alias is simple, but testing it is complicated by the need to put a process 
+# in the background and to ensure that nothing is already sleeping. In addition, the
+# steps are split across cells to show what is going on. This is why '# Setup' is used.
+#
+## DEBUG: display-macros kill-sleep
+
+# Setup: make sure no sleep processes
+$ num-sleep-processes
+0
+
+# Setup: start a sleeping process
+$ sleep 10 &
+[1] 1237787
+
+# Output number of sleep processes
+$ num-sleep-processes
+1
+
+# Make sure 1 sleep process
+$ num_sleeping=$(num-sleep-processes)
+$ [ "$num_sleeping" -eq 1 ]; echo $?
+0
+
+# Wrapup
+# Kill the sleep process
+# note: made part of wrapup as output placement not deterministic
+$ kill-sleep >| /tmp/kill-sleep-$$.log 2>&1
+
+# End of test (n.b., avoids extraneous new cells after Kernel > Restart ... Run All Cells)
+

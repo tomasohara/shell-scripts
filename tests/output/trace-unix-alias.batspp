@@ -1,0 +1,300 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it.
+# echo "TODO:"
+# echo "  echo \"\$PS1\" | command grep --count --perl-regexp '[\x00-\x1f]'"
+$ actual=${PS1: -1}
+$ [ "$actual" = ">" ]; echo $?
+0
+
+## OLD: For debug
+# alias | wc -l
+# The debugging level should be at most 3
+# Note: this affects output as bash_kernel conflates stderr w/ stdout
+## TODO: echo "DEBUG_LEVEL=$DEBUG_LEVEL" 1>&2
+$ [ "$DEBUG_LEVEL" -lt 4 ]; echo "$?"
+0
+
+# Global Setup
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then 
+$     TMP=/tmp/trace-unix-alias
+$ fi
+$ temp_dir=$TMP/test-unix-alias
+## OLD: trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
+$ command mkdir -p "$temp_dir"
+## OLD: command mkdir -p "$trash_dir"
+$ command cd "$temp_dir"
+
+# Global Setup
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9][0-9]*/N/g""
+$ alias linebr="printf '%132s\n' ' ' | tr ' ' '-'"
+
+## OLD
+## Count aliases proper
+# alias | wc -l
+# Count aliases w/ -dir in name
+# Example:
+#   $ alias | egrep '\-dir\b' | wc -l
+#   29
+$ dir_aliases=$(alias | egrep '\-dir\b' | wc -l)
+$ [ "$dir_aliases" -gt 20 ]; echo "$?"
+0
+
+## OLD
+## Count functions
+# typeset -f | egrep '^\w+' | wc -l
+$ dir_functions=$(typeset -f | egrep '\-dir\b' | wc -l)
+$ [ "$dir_functions" -gt 35 ]; echo "$?"
+0
+
+## BAD
+# source $BIN_DIR/tomohara-aliases.bash
+
+# ## NEED HELP for ypcat 
+# $ group-members
+# | ypcat: can't get local yp domain: Local domain name not set
+
+## 1A) do-make 
+# BAD: rm -rf ./* > /dev/null
+# command mv -f * "$trash_dir"
+$ mkdir testfolder
+$ echo "Hi Mom!" > himom.txt
+$ echo "Hi Dad!" > hidad.txt
+
+## Dropped support
+# do-make "hidad.txt"
+# cat _make.log
+
+## OLD: ls -l | awk '!($6="")' | testnum | testuser
+$ [ "$(ls | grep -E "himom.txt|hidad.txt|testfolder" | wc -l)" -eq 3 ]; echo $?
+0
+
+# 2A) merge REPLACED BY do-merge 
+## INITIAL FILES TO TEST THE ALIASES
+$ printf "THIS IS THE 1ST FILE." > tf1.txt
+$ printf "THIS IS THE 2ND FILE." > tf2.txt
+$ printf "THIS IS THE 3RD FILE." > tf3.txt
+# MESSAGE SHOWN IF MERGE IS USED
+## OLD: merge tf1.txt tf2.txt
+$ [ "$(merge tf1.txt tf2.txt)" = "do-merge MODFILE1 OLDFILE MODFILE2 > NEWFILE tf1.txt tf2.txt" ]; echo $?
+0
+
+# # 2B) do-merge (halts proces)
+# $ do-merge tf1.txt tf2.txt tf3.txt
+# | <<<<<<< tf1.txt
+# | THIS IS THE 1ST FILE.=======
+# | THIS IS THE 3RD FILE.>>>>>>> tf3.txt
+# | merge: warning: conflicts during merge
+
+# # 2C) diff3-merge (halts process)
+# $ diff3-merge tf1.txt tf2.txt tf3.txt -A
+# | <<<<<<< tf1.txt
+# | THIS IS THE 1ST FILE.||||||| tf2.txt
+# | THIS IS THE 2ND FILE.=======
+# | THIS IS THE 3RD FILE.>>>>>>> tf3.txt
+
+# # 2D) kdiff-merge (opens kdiff window)
+# kdiff-merge tf1.txt tf.txt tf3.txt | testnum
+
+### TO FIX THE ERROR USE "himom.txt" --> himom.txt ###
+## OLD
+# which
+$ which python | grep -q "python" && echo "PY-TRUE" || echo "PY-FALSE"
+# [ "$(which python | grep -q "python")" ]; echo $?
+# # 3A) full-dirname RETURNS THE FULL PATH OF THE FILE
+# full-dirname himom.txt | testuser
+# # 3B) base-name-with-dir RETURNS THE BASENAME INCLUDING dir
+# basename-with-dir himom.txt
+PY-TRUE
+
+## OLD: full-dirname himom.txt
+$ [ "$(full-dirname himom.txt)" = "/tmp/trace-unix-commands/test-7766/himom.txt" ]; echo $?
+1
+
+## OLD: basename-with-dir himom.txt
+$ [ "$(basename-with-dir himom.txt)" = "./himom.txt" ]; echo $?
+0
+
+# ## 3C) rpm-extract IS USED FOR RED HAT BASED DISTROS (RHEL, Fedora) - NEED HELP
+# # ERROR V:
+# # $ rpm-extract himom.txt
+# # | argument is not an RPM package
+# # | cpio: premature end of archive
+
+## 4A) dump-url GIVES ERROR FOR BATSPP 2.1.X (can't use testnum) 
+# dump-url https://www.example.com/
+
+## 4B) gtime (Need help to run commands)
+# ERROR - VI 
+# $ gtime
+# | /usr/bin/time: missing program to run
+# | Try '/usr/bin/time --help' for more information
+## OLD
+# gtime -V | testnum
+$ gtime -f "Real: %e seconds\nUser: %U seconds\nSys: %S seconds" uname | testnum
+Linux
+Real: 0.00 seconds
+User: 0.00 seconds
+Sys: 0.00 seconds
+
+## 4C) linux-version GIVES INFO ALL INFO ABOUT THE OS INSTALLED
+$ linux-version | grep VERSION_ID | testnum
+# os-release ALSO WORKS SAME AS linux-version
+VERSION_ID="N.N"
+
+## 4D) system-status - (awk removes the session-name)
+$ system-status | testnum | testuser | tail -n +2 | awk '!($8="")'
+system_status.sh: command not found
+
+$ apropos-command time | grep asctime | wc -l | testnum
+N
+
+## How split-tokens work
+## OLD
+$ cat hidad.txt
+# linebr
+# split-tokens hidad.txt
+Hi Dad!
+
+$ split-tokens hidad.txt
+Hi
+Dad!
+
+# tokenize SPLITS THE CONTENTS IN SEVERAL LINES ()
+## OLD
+# tokenize _old_make.log
+$ tokenize hidad.txt
+Hi
+Dad!
+
+# perl-echo ONLY PRINTS OUT THE 1ST ARGUMENT
+$ PERL_PRINT='This is Ubuntu!'
+## OLD: perl-echo $PERL_PRINT
+$ [ "$(perl-echo "$PERL_PRINT")" = "$PERL_PRINT" ]; echo $?
+## MOVED: TO NEXT CELL
+# perl-echo-sans-newline $PERL_PRINT
+0
+
+## OLD: perl-echo-sans-newline $PERL_PRINT
+$ [ "$(perl-echo-sans-newline $PERL_PRINT)" = "This" ]; echo $?
+0
+
+# Several print commands (perl-based)
+## OLD: perl-printf 'ONE KISS IS ALL IT TAKES\n'
+$ [ "$(perl-printf 'ONE KISS IS ALL IT TAKES\n' | wc -c)" -eq 25 ]; echo $? 
+# perl-print '2\n3\n5\n7\n11'
+# perl-print-n 'A B C D E F G\n'
+# quote-tokens 'HELP ME!'
+0
+
+# OLD: perl-print '2\n3\n5\n7\n11'
+$ perl-print '2\n3\n5\n7\n11'
+2
+3
+5
+7
+11
+
+# OLD: perl-print-n 'A B C D E F G\n'
+$ [ "$(perl-print-n 'A B C D E F G\n')" = "A B C D E F G" ]; echo $? 
+0
+
+# OLD: quote-tokens 'HELP ME!'
+$ [ "$(quote-tokens 'HELP ME!')" = '"HELP" "ME!"' ]; echo $? 
+0
+
+# # 6A)
+# # Unix/Win32 networking aliases
+# if [ "$OSTYPE" != "cygwin" ]; then alias ipconfig=ifconfig; fi
+# alias set-display-local='export DISPLAY=localhost:0.0'
+$ set-display-local
+$ echo $DISPLAY | testnum
+localhost:N.N
+
+## Need a filter to sensor day and month
+## bash-trace-on ENABLES bash tracing
+$ bash-trace-on | testuser | testnum
+## trace-cmd TRACES COMMANDS AND STATS (TIME) OF THE USER
+$ trace-cmd | testuser | testnum
+## MOVED: NEXT CELL
+# ## bash-trace-on DISABLES bash tracing
+# bash-trace-off | testuser | testnum
+# trace-cmd | testuser | testnum
+start: Tue Apr N N:N:N PM +N N
++ eval ''
++ set - -o xtrace
+end: Tue Apr N N:N:N PM +N N
+
+## bash-trace-on DISABLES bash tracing
+$ bash-trace-off | testuser | testnum
+$ trace-cmd | testuser | testnum
+start: Tue Apr N N:N:N PM +N N
++ eval ''
++ set - -o xtrace
+end: Tue Apr N N:N:N PM +N N
+
+# testing compression and extraction of dirs
+$ ls
+$ cp tf2.txt testfolder/
+## OLD: MOVED TO NEXT CELLS
+# linebr
+# compress-this-dir ./testfolder | testnum
+# linebr
+# ls
+# linebr
+# ununcompress-this-dir ./testfolder | testnum
+hidad.txt  himom.txt  [0m[01;34mtestfolder[0m  tf1.txt  tf2.txt  tf3.txt
+'tf2.txt' -> 'testfolder/tf2.txt'
+
+$ compress-this-dir ./testfolder | { [ $(wc -l < /dev/stdin) -ne 0 ] && echo "NotZero" || echo "Zero"; }
+NotZero
+
+$ command ls
+hidad.txt.gz  himom.txt.gz  testfolder	tf1.txt.gz  tf2.txt.gz	tf3.txt.gz
+
+$ ununcompress-this-dir ./testfolder | { [ $(wc -l < /dev/stdin) -ne 0 ] && echo "NotZero" || echo "Zero"; }
+NotZero
+
+$ command ls
+hidad.txt  himom.txt  testfolder  tf1.txt  tf2.txt  tf3.txt
+
+## You need to use iceweasel to kill it.
+## If iceweasel is not installed, you get this:
+# $ kill-iceweasel
+# | pattern=/:[0-9][0-9] [^ ]*iceweasel/
+# | filter=/($)(^)/
+# | Warning: No processes matched the pattern
+
+# count-exts counts extensions
+$ old-count-exts | testnum
+## OLD
+# linebr
+# count-exts | testnum
+.txt	N
+
+$ count-exts | testnum
+.txt	N
+
+## cmd-usage (HELP REQUIRED | HALTS PROCESS)
+
+## OLD: No use of trash_dir
+# if [[ "$PWD" = *"/tmp/"* ]]; then
+#     command mv -f * "$trash_dir"
+#     echo "Successfully moved to trash"
+# else
+#     echo "Warning: Current directory not in TMP"
+# fi
+# Wrapup
+$ echo "Done"
+Done
+

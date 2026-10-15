@@ -1,0 +1,370 @@
+## TODO1: *** Finish cleaning this up following the changes made to dir-aliases-test-revised.ipynb ***
+## EX: allow user value for $TMP; and make sure tests are not dependent on local environment.
+## *** Make sure 'rm -r' not used (here and elsewhere)!!!
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+## BAD: echo $PS1
+
+## BAD:
+## # Delete all aliases and function
+## # TODO: Instead start from pristine environment
+## unalias -a
+## alias | wc -l
+## for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+## typeset -f | egrep '^\w+' | wc -l
+
+# Global Setup
+## Aliases for censoring username and/or numbers
+$ alias testnum="sed -r "s/[0-9]/N/g""
+$ alias testnumhex="sed -r "s/[0-9][A-F][a-F]/N/g""
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testuserpath="sed 's|/home/[^/]\+/|USER_PATH/|'"
+$ alias linebr="printf '%132s\n' ' ' | tr ' ' '-'"
+
+# Global setup
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 1210)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/test-trace-misc; fi
+## OLD: Used the concept of trash-dir, instead use unique temp_dirs
+# temp_dir=$TMP/test-1001
+# rename-with-file-date "$temp_dir"
+# mkdir -p $temp_dir
+# trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
+# command mkdir -p $trash_dir
+$ temp_dir=$TMP/alias-trace-misc
+$ rename-with-file-date "$temp_dir" > /dev/null
+$ command mkdir -p "$temp_dir"
+$ command cd $temp_dir
+
+## DEBUG:
+## echo "$temp_dir"
+
+## BAD
+## # Count aliases proper
+## alias | wc -l
+## # Count functions
+## typeset -f | egrep '^\w+' | wc -l
+
+## BAD: source $BIN_DIR/tomohara-aliases.bash
+
+##1 SHOWS HISTORY OF BASH COMMANDS
+## BAD: alias hist='history $LINES'
+##2 SHOWS HISTORY WITHOUT TIMESTAMPS
+## BAD: function h { hist | perl -pe 's/^(\s*\d+\s*)(\[[^\]]+\])(.*)/$1$3/;'; }
+## CREATES ERROR (INVALID SYNTAX)
+# $ hist
+# $ h
+# [ hist | perl -pe 's/^\d+\s+\[\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\]$//' ]; echo $?
+$ hist | perl -pe 's/^\d+\s+\[\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\]$//' > /dev/null && echo $?
+0
+
+##3 ASCTIME
+## BAD: function asctime() { perl -e 'print (scalar localtime($1));'; echo ''; }
+## BAD: asctime | perl -pe 's/\d/N/g; s/\w+ \w+/DDD MMM/;'
+# asctime | perl -pe 's/\d+/N/g; s/\w+ \w+/DDD MMM/;'
+$ [ "$(asctime | perl -pe 's/\d+/N/g; s/\w+ \w+/DDD MMM/;')" = "DDD MMM N N:N:N N" ]; echo $?
+0
+
+##4 FILTER DIRECTORY NAMES
+## function filter-dirnames () { perl -pe 's/\/[^ \"]+\/([^ \/\"]+)/$1/g;'; }
+## awk is used for removing PID column (1st col)
+# ps | filter-dirnames | testnum
+$ [ -n "$(ps | filter-dirnames | grep -e "bash" -e "ps" -e "sed" -e "perl")" ]; echo $?
+0
+
+##5 COMMAIZE NUMBERS
+$ [ "$(echo '99012342305324254' | comma-ize-number)" = "99,012,342,305,324,254" ]; echo $?
+0
+
+##6 APPLYING NUMERIC SUFFIXES
+$ [ "$(echo "8000000000" | apply-numeric-suffixes)" = "7.451G" ]; echo $?
+0
+
+##6.1 APPLYING USAGE NUMERIC SUFFIXES
+$ [ "$(echo "8000000000" | apply-usage-numeric-suffixes)" = "7.451T" ]; echo $?
+# echo "8000000" | apply-usage-numeric-suffixes returns 7.63G
+0
+
+# #7 usage-pp
+# ## BATSPP 2.1.X EXCEPTION ERROR AT LINE 8
+#
+# function usage {
+#     output_file=$(default_assignment "$1" "usage.list")
+#     rename-with-file-date "$output_file";
+#     $NICE du --block-size=1K --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1;
+#     $PAGER $output_file;
+# }
+#
+# function usage-alt {
+#     local output_file=$TEMP/$(basename $PWD)"-usage.list";
+#     usage "$output_file"
+# }
+#
+# function byte-usage () { output_file="usage.bytes.list"; backup-file $output_file; $NICE du --bytes --one-file-system 2>&1 | $NICE sort -rn | apply-usage-numeric-suffixes >| $output_file 2>&1; $PAGER $output_file; }
+#
+# alias usage-pp='usage | apply-usage-numeric-suffixes | $PAGER'
+## OLD: Used conditional-echo assertion
+# byte-usage | testnum
+# usage-pp | testnum
+$ byte-usage > /dev/null; usage > /dev/null; [[ -n "$(grep "[0-9]M" usage.bytes.list)" && -n "$(grep "[0-9]K" usage.list)" ]]; echo 0
+0
+
+# ERROR GENERATED - MULTIPLE
+# $ ups a > psa.txt
+# $ usage psa.txt
+# | bash: ups: command not found
+# | bash: default_assignment: command not found
+# | bash: rename-with-file-date: command not found
+# | bash: $output_file: ambiguous redirect
+# | sort: fflush failed: 'standard output': Broken pipe
+# | sort: write error
+## OLD: usage 
+## OLD: Used conditional-echo assertion
+# $ usage | tail --lines=+2
+# | 12K	.
+$ [ -n "$(usage | tail --lines=+2 | grep [0-9]K)" ]; echo $?
+0
+
+#8.1) 
+##
+## TODO: what the hell???!!!
+##   rm -rf ./* > /dev/null
+## NOTE: 'rm  -r' is way too dangerous: rework via another way to ensure uniqueness!
+$ printf "THIS IS THE START\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS A TEST\nTHIS IS THE END\n" > thisisatest.txt
+$ ps -aux > process.txt
+$ [[ -e thisisatest.txt && -e process.txt ]]; echo $?
+# number-columns thisisatest.txt
+# number-columns-comma process.txt
+0
+
+$ [[ "$(number-columns thisisatest.txt)" =~ "1:" && "$(number-columns-comma process.txt)" =~ "1:" ]]; echo $?  
+0
+
+#9) reverse REVERSES cat COMMAND
+## BAD: alias reverse='tac'
+# # Another approach
+# cat thisisatest.txt
+# linebr
+# reverse thisisatest.txt
+$ echo "\n1111\n0000\n1010\n" > tacexample.txt
+# tac tacexample.txt
+$ [[ "$(tac tacexample.txt | head -n 1)" =~ "1010" ]]; echo $?
+0
+
+# HALTS NOTEBOOK
+## BATSPP 2.1.X EXCEPTION ERROR AT LINE 4 (OUTPUT)
+$ backup-file thisisatest.txt > /dev/null
+$ [[ -e "thisisatest.txt" && -e "backup/thisisatest.txt" ]]; echo $?
+0
+
+## BATSPP 2.1.X EXCEPTION ERROR AT LINE 5 (OUTPUT)
+$ byte-usage > /dev/null
+# (Same output for 'byte-usage "Hi Mom"' and 'byte-usage thisisatest.txt')
+$ [[ -e "usage.bytes.list" && -n "$(cat usage.bytes.list | grep -e '[0-9]M')" ]]; echo 0
+0
+
+#11 - LOG FILES ARE REQUIRED FOR check-errors
+## BATSPP 2.1.X EXCEPTION ERROR AT LINE 10 (OUTPUT)
+## TODO2: track down hangup when running entire notebook from scratch
+## NOTE: perhaps related to use of less (see "[1]+ Stopped" in end of output, not visible by default)
+## TODO
+## check-errors process.txt
+## linebr
+## check-all-errors process.txt
+## linebr
+## check-warnings
+## linebr
+## check-all-warnings
+## linebr
+## check-errors-excerpt process.txt
+
+## Issue (Doesn't halt tests, command not found error)
+# $ rdiff process1.txt psa.txt | testnum
+# | Echo: Command not found.
+# | ???
+# | cvs: Command not found.
+# |
+# | echo: No match.
+# | echo: No match.
+# | issuing: tkdiff.tcl -r.-X processX.txt
+# | [X] XXXX
+# | tkdiff.tcl: Command not found.
+
+## Issue (testnum not working)
+# $ tkdiff- process.txt psa.txt
+# | [1] 5244
+
+## Issue (testnum not working)
+# $ vdiff process.txt psa.txt
+# | Error in startup script: couldn't read file "/home/xaea12/bin/tkdiff.tcl": no such file or directory
+# | [2] 5251
+# | [1]   Exit 1                  wish -f $TOM_BIN/tkdiff.tcl "$@"
+
+# diff
+## BAD: 
+## diff_options="--ignore-space-change --ignore-blank-lines"
+## alias diff='command diff $diff_options'
+## alias diff-default='command diff'
+## alias diff-ignore-spacing='diff --ignore-all-space'
+##
+## alias do-diff='do_diff.sh'
+## 
+## function diff-rev () {
+##     local diff_program="diff"
+##     if [ "$1" = "--diff-prog" ]; then
+##         diff_program="$2"
+##         shift 2
+##     fi
+##     local right_file="$1"
+##     local left_file="$2"
+##     
+##     if [ -d "$left_file" ]; then left_file="$left_file"/$(basename "$right_file"); fi
+##     "$diff_program" "$left_file" "$right_file"
+## }
+## alias kdiff-rev='diff-rev --diff-prog kdiff'
+## alias diff-log-output='compare-log-output.sh'
+## alias vdiff-rev=kdiff-rev
+
+# # TESTING diff COMMANDS
+#
+# # EVERY DIFF COMMANDS WORK NORMALLY, BUT TESTS HALT AFTER
+## OLD
+# linebr
+$ printf "A\nB\nC\nD\n" > process1.txt
+$ printf "A\nB\nX\nD\n" > process2.txt
+# # Create or update process1.txt.tmp with new content
+# printf "A\nB\nC\nD\n" > process1.txt.tmp
+# # Rename process1.txt.tmp to process1.txt
+# mv process1.txt.tmp process1.txt
+# # Repeat the same process for process2.txt
+# printf "A\nB\nX\nD\n" > process2.txt.tmp
+# mv process2.txt.tmp process2.txt
+$ [[ -n $(pwd | grep "/tmp/") && -n "$(ls | grep -e process1.txt -e process2.txt)" ]]; echo $?
+0
+
+# #1) diff - HALTS PROCESS (WORKS FINE)
+# $ diff process1.txt process2.txt #(DIFFERENTIATING PROCESSES FOR DIFFERENT INSTANCES)
+# diff process1.txt process2.txt | testuser | testnumhex
+$ diff process1.txt process2.txt > diff_output.txt 2>&1
+$ [[ -n "$(cat diff_output.txt | grep -e "3c3")" && "$(cat diff_output.txt | grep -e ">" -e "<" | wc -l)" = 2 ]]; echo $?
+0
+
+# #2) diff-default - HALTED (WORKS FINE)
+# $ diff-default process1.txt process2.txt
+# diff-default process1.txt process2.txt | testuser | testnumhex
+$ diff-default process1.txt process2.txt > diff_default_output.txt 2>&1
+$ [[ -n "$(cat diff_default_output.txt | grep -e "3c3")" && "$(cat diff_default_output.txt | grep -e ">" -e "<" | wc -l)" = 2 ]]; echo $?
+0
+
+# #3) diff-ignore-spacing -HALTED (WORKS FINE)
+# diff-ignore-spacing process1.txt process2.txt | testuser | testnumhex
+$ diff-ignore-spacing process1.txt process2.txt > diff_ignore_spacing.txt 2>&1
+$ [[ -n "$(cat diff_ignore_spacing.txt | grep -e "3c3")" && "$(cat diff_ignore_spacing.txt | grep -e ">" -e "<" | wc -l)" = 2 ]]; echo $?
+0
+
+# #4) do-diff - HALTED (WORKS FINE)
+# do-diff process1.txt process2.txt | testuser | testnumhex
+$ do-diff process1.txt process2.txt > do_diff.txt 2>&1
+$ [[ -n "$(cat do_diff.txt | grep -e "3c3" -e "process1.txt vs. process2.txt" -e "Differences:")" && "$(cat do_diff.txt | grep -e ">" -e "<" | wc -l)" = 2 ]]; echo $?
+0
+
+# #5) kdiff-rev & vdiff-rev PERFORM THE SAME TASK - HALTS (WORKS FINE)
+# $ kdiff-rev process1.txt process2.txt
+# $ linebr
+# $ vdiff-rev process1.txt process2.txt
+# | [1] 7234
+# | --------------------------------------------------------------------------------
+# | [1]+  Done                    kdiff.sh "$@"
+# | [1] 7238
+
+# 6) diff-log-output
+# A. CREATING log files for tests
+$ printf "TESTFILE1\nNEXT LINE" > testtxt1.txt
+$ printf "TESTFILE2\nNEXT LINE2" > testtxt2.txt
+$ [[ -e testtxt1.txt && -e testtxt2.txt ]]; echo $?
+0
+
+# prepare-find-files-here | testuser | testnum | awk '!($6="")'
+$ [[ "$(prepare-find-files-here | wc -l)" -eq 4 && "$(ls | grep -E 'ls-(a)?l?R' | wc -l)" -eq 4 ]]; echo $?
+0
+
+## BAD: don't test UI apps (n.b., disrupts execution)
+## # Opens kdiff (doesn't halt process)
+## diff-log-output ls-alR.list.log ls-R.list.log
+## TODO2: use --plain-diff
+
+# Global Setup
+#
+## WTF?: rm -rf $HOME/info > /dev/null
+## HACK: map HOME to current directory
+# OLD:
+$ save_HOME=$HOME
+$ HOME=$PWD
+$ mkdir -p $HOME/info
+# BAD: rm -rf ./* > /dev/null
+# command mv -f * $trash_dir
+$ noice_signature="THIS IS A NOICE SIGNATURE"
+$ echo $noice_signature > $HOME/info/.noice-signature
+$ [ -e $HOME/info/.noice-signature ]; echo $?
+0
+
+## BAD: signature noice | testuser
+$ [[ "$(signature noice | tail --lines=+2 | testuser)" = $noice_signature ]]; echo $?
+0
+
+## HACK: restore HOME
+$ HOME=$save_HOME
+$ [ "$HOME" != "$PWD" ]; echo $?
+0
+
+## BAD:
+## /bin/rm $HOME/info/.noice-signature 2> /dev/null
+
+# most-recent-backup(file): returns most recent backup for FILE in ./backup, accounting for revisions (e.g., extract_matches.perl.~4~)
+## BATSPP 2.1.X EXCEPTION ERROR AT LINE 13
+# function most-recent-backup() {
+#     if [ '$1' = '' ]; then
+#         echo 'usage: most-recent-backup filename'
+#         echo 'use BACKUP_DIR=dir ... to override use of ./backup'
+#         return
+#     fi
+#     local file='$1';
+#         local dir='$BACKUP_DIR'; if [ '$dir' = '' ]; then dir=./backup; fi
+#     $LS -t $dir/* | /bin/egrep '/$file(~|.~*)?' | head -1;
+# }
+# function diff-backup-helper {
+#     local diff='$1'; local file='$2'; 
+#     '$diff' $(most-recent-backup "$file") '$file';
+# }
+# alias diff-backup='diff-backup-helper diff'
+# alias kdiff-backup='diff-backup-helper kdiff'
+
+$ dobackup process1.txt > /dev/null
+$ [[ -e "process1.txt" && -e "backup/process1.txt" ]]; echo $?
+0
+
+## COMMENTED: Uses kdiff
+# ## WORKS FINE - MAY HALT THE NOTEBOOK TESTS (Opens kdiff)
+# # $ diff-backup process1.txt
+# diff-backup process1.txt
+
+## BAD: the tests are console based (n.b., GUI apps can pause the script)
+## ## WORKS FINE - MAY HALT THE NOTEBOOK TESTS (Opens kdiff)
+## kdiff-backup process1.txt
+
+## BAD: do this outside of Jupyter (e.g., in case temp_dir set to /tmp)!
+## # NEW (Remove temp after use)
+## rm -rf $temp_dir > /dev/null
+## OLD & BAD: command mv -f * $trash_dir 
+
+## DEBUG:
+# Wrapup
+$ echo "Done"
+Done
+

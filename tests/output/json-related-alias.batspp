@@ -1,0 +1,350 @@
+# Tests for JSON aliases
+
+# NOTE: Work-in-progress revision to testing paradigm.
+# *** Remember to "Keep It Simple, Sam" (i.e., KISS principle). 
+# That is, test for simple things that can be verified with grep -c or similar commands.
+# 
+# For simplicity, the output can still be done as before. However, we will need to
+# add a mechanism so that the test target doesn't change to match the alias revision.
+#
+# We will extend bats_pp to allow for special case tests of the following format:
+#    condition; echo $?
+# The test will be considered passing if and only if the output is 0.
+# For example,
+#    num_lines=$(my-alias | grep -c "pattern")
+#    [ $num_lines -gt 2 ]; echo $?
+#
+# Therefore, one cell can show the command output as done before, and the next cell
+# show the test. For example,
+#    cell 1:
+#       code: 
+#           echo "a b c D E F" > _abcDEF_.txt_
+#           cat _abcDEF_.txt_
+#       output:
+#           a b c D E F
+#    cell 2:
+#       code:
+#           num_lower=$(tr " " "\n" _abcDEF_.txt_ | grep -c "[a-z]")
+#           [ $num_lower -eq 3 ]; echo $?
+#       output:
+#           0
+#
+
+# TEMP: 
+# To avoid issues with 'rm -r' the file clobber operator is used (i.e., ">|")
+# That itself is dangerous, so the filenames start and end with _ to minimize conflict.
+# For example, "file.txt" => "_file.txt_").
+
+## Bracketed Paste is disabled to prevent characters after output
+## TODO1: Make sure this is needed (e.g., run jupyter under Bash shell not zsh)
+## Example: 
+# $ echo 'Hi'
+# | Hi?2004l
+$ bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+## OLD: echo $PS1
+
+## BAD (SUPER BAD)
+# # Delete all aliases and function
+# # TODO: Instead start from pristine environment
+# unalias -a
+# alias | wc -l
+# for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+# typeset -f | egrep '^\w+' | wc -l
+
+# Global setup
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 1210)
+## *** All output from one run to the next needs to be the same ***
+# Setting a temp directory for tests
+## OLD: TMP=/tmp/test-json-alias
+## OLD:0
+## NOTE: Source it directly from the ./tests directory.
+## BIN_DIR=$PWD/..
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/test-json-alias; fi
+## temp_dir=$TMP/test-$$
+$ temp_dir=$TMP/json-related-alias
+$ rename-with-file-date "$temp_dir"
+$ command mkdir -p "$temp_dir"
+$ command cd "$temp_dir"
+## OLD
+# mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# cd "$temp_dir"
+# pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+renamed '/tmp/test-json-alias/json-related-alias' -> '/tmp/test-json-alias/json-related-alias.16Apr24'
+
+## Moved contents from Global Setup that creates output (leads to Assertion failed)
+## OLD: Moved all contents to above cell
+# mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# command cd "$temp_dir"
+# command pwd
+
+## BAD: don't count aliases because they change too often
+## # Count aliases proper
+## alias | wc -l
+## # Count functions
+## typeset -f | egrep '^\w+' | wc -l
+
+## BAD: this should have been cleaned up by now
+## source $BIN_DIR/tomohara-aliases.bash
+
+## TODO: test for expected condition using grep
+## ASIDE: grep issues escape codes for color so use "command grep"
+## NOTE: otherwise the test can succeed if jupyter output is updated along with bad alias definition
+## ex: ... | command grep 'foo => "123...:
+
+# Test JSON pretty printing
+## OLD:
+## EXAMPLES FOR TEST 1 - FROM https://metacpan.org/dist/JSON-PP/view/bin/json_pp
+## OLD: perl -e 'print q|{"foo":"HI MOM!","bar":1234567890000000000000000}|' | pp-json -f json -t dumper
+## Expected output
+## {
+##   bar => "1234567890000000000000000",
+##   foo => "HI MOM!"
+## }
+$ perl -e 'print q|{"foo":"HI MOM!","bar":1234567890000000000000000}|, "\n"' >| _hi-mom.txt_
+$ pp-json < _hi-mom.txt_ >| _hi-mom.pp-json_
+$ wc _hi-mom.*
+  4   9  65 _hi-mom.pp-json_
+  1   2  50 _hi-mom.txt_
+  5  11 115 total
+
+# Check for above line count (status should be 0)
+$ num_lines=$(wc -l < _hi-mom.pp-json_)
+$ [ $num_lines -eq 4 ]; echo "$?"
+0
+
+# Test JSON with for foreign text
+#
+## TODO: *** Review me carefully: for example on updating tests for maintainability ***
+#
+# json-pp WORKS SAME AS pp-json
+#
+## OLD
+## perl -e'print q|{"foo":"あい","bar":1234567890000000000000000}|' | json-pp -f json -t dumper -json_opt pretty,utf8,allow_bignum
+##
+## OUTPUT
+## {
+##  bar => bless( {
+##    sign => "+",
+##     value => bless( [
+##       0,
+##       890000000,
+##       1234567
+##     ], 'Math::BigInt::Calc' )
+##   }, 'Math::BigInt' ),
+## foo => "\x{3042}\x{3044}"
+## }
+## NEW: make sure the hex representation shows up
+## TODO: perl -e 'print q|{"foo":"あい","bar":123456789}|, "\n"' | json-pp  2>&1 | grep -c '\x{3042}\x{3044}'
+#
+## NOTE: *** Keep it simple Sam (i.e., KISS principle): just ensure pretty printed!
+## KISS: make sure foo on single line
+## TEMP: Uses >| to avoid rm issue
+#
+$ perl -e 'print q|{"foo":"あい","bar":123}|, "\n"' >| _foo-bar-123.txt_
+$ result=$(grep foo _foo-bar-123.txt_ | grep -c bar)
+$ [ $result -eq 1 ]; echo $?
+0
+
+$ json-pp < _foo-bar-123.txt_ >| _foo-bar-123.txt.pp_
+$ result=$(grep foo _foo-bar-123.txt.pp_ | grep -c bar)
+$ [ $result -eq 0 ]; echo $?
+0
+
+# note: canonical sorts the keys of hashes (utf8 avoids warning and pretty might be the default
+## OLD: perl -e'print q|{"foo":"あい","bar":1234567890000000000000000}|' | pp-json-sorted -f json -t dumper
+## KISS: just verify sorting done
+$ perl -e 'print q|{"z":1, "a":2}|, "\n"' >| _foo-bar-za.txt_
+$ cat _foo-bar-za.txt_
+$ pp-json-sorted < _foo-bar-za.txt_ >| _foo-bar-za.sorted_
+{"z":1, "a":2}
+
+$ count_z_before_a_unsorted=$(echo "$(cat _foo-bar-za.txt_)" | grep -c "z.*a")
+$ [ $count_z_before_a_unsorted -eq 1 ]; echo $?
+0
+
+$ count_z_before_a_sorted=$(echo "$(cat _foo-bar-za.sorted_)" | grep -c "z.*a")
+$ [ $count_z_before_a_sorted -eq 0 ]; echo $?
+0
+
+## TEST 2 - TEXT MANIPULATION
+# Text manipulation
+# alias intersection=intersection.perl
+# alias difference=intersection.perl -diff
+# alias 'line-intersection=intersection.perl -line'
+# alias 'line-difference=intersection.perl -diff -line'
+
+## OLD: pwd
+
+## TEST 2 - TEXT MANIPULATION
+## BAD: rm -rf ./* > /dev/null
+## TODO1: rework without need to delete files (too dangerous and complicates debugging)
+## TEMP (n.b., uses full path to avoid catastrophe):
+## BAD: rm -rf is bad; better to delete specific files
+## if [ "$DEBUG_LEVEL" -lt 4 ]; then rm -rf /tmp/test-json-alias/test-3214/*; fi
+## printf "This is Line A.\n1 2 3 4 5" > file_a.txt
+## printf "This is Line B.\n1 3 5 7 9" > file_b.txt
+
+# Output text for testing intersection, etc.
+# TEMP: Uses clobber to avoid use of rm
+## OLD
+## printf "This is Line A.\n1 2 3 4 5" >| "$temp_dir"/file_a.txt
+## printf "This is Line B.\n1 3 5 7 9" >| "$temp_dir"/file_b.txt
+$ printf "This is Line A.\n1 2 3 4 5\n" >| "$temp_dir"/_file_a.txt_
+$ printf "This is Line B.\n1 3 5 7 9\n" >| "$temp_dir"/_file_b.txt_
+$ head ./_file_a.txt_ ./_file_b.txt_
+==> ./_file_a.txt_ <==
+This is Line A.
+1 2 3 4 5
+
+==> ./_file_b.txt_ <==
+This is Line B.
+1 3 5 7 9
+
+$ intersection ./_file_a.txt_ ./_file_b.txt_ >| _intersection.out_
+$ cat _intersection.out_
+This
+is
+Line
+1
+3
+5
+
+$ num_lines=$(wc -l < _intersection.out_)
+$ [ $num_lines -eq 6 ]; echo $?
+0
+
+$ difference ./_file_b.txt_ ./_file_a.txt_ >| _difference.out_
+## OLD: Wrong Filename
+# cat _intersection.txt
+$ cat _difference.out_
+7
+9
+B.
+
+$ num_lines=$( wc -l < _difference.out_)
+$ [ $num_lines -eq 3 ]; echo $?
+0
+
+$ line-difference ./_file_b.txt_ ./_file_a.txt_ >| _line-difference.out_
+$ cat _line-difference.out_
+1 3 5 7 9
+This is Line B.
+
+$ num_lines=$(wc -l < _line-difference.out_)
+$ [ $num_lines -eq 2 ]; echo $?
+0
+
+# THIS IS THE DEFAULT PRINT STATEMENT WITH /r (RETURN)
+$ printf "Hi Mom, \rI am using Ubuntu\n" >| _ubuntu-with-cr.out_
+# Note: there should be 27 characters
+$ hexview.perl _ubuntu-with-cr.out_
+$ wc _ubuntu-with-cr.out_
+00000000  48 69 20 4D 6F 6D 2C 20 - 0D 49 20 61 6D 20 75 73  Hi Mom, .I am us
+00000010  69 6E 67 20 55 62 75 6E - 74 75 0A                 ing Ubuntu.
+ 1  6 27 _ubuntu-with-cr.out_
+
+$ num_chars=$(wc -c < _ubuntu-with-cr.out_)
+$ [ $num_chars -eq 27 ];  echo $?
+0
+
+# remove-cr REMOVES RETURNS (or /r)
+$ printf "Hi Mom,\r I am using Ubuntu\n" | remove-cr >| _ubuntu-without-cr.out_
+# Note: there should be 26 characters
+$ hexview.perl _ubuntu-without-cr.out_
+$ wc _ubuntu-without-cr.out_
+00000000  48 69 20 4D 6F 6D 2C 20 - 49 20 61 6D 20 75 73 69  Hi Mom, I am usi
+00000010  6E 67 20 55 62 75 6E 74 - 75 0A                    ng Ubuntu.
+ 1  6 26 _ubuntu-without-cr.out_
+
+$ num_chars=$(wc -c < _ubuntu-without-cr.out_)
+$ [ $num_chars -eq 26 ];  echo $?
+0
+
+# alt-remove-cr IS AN ALTERNATIVE OF remove-cr
+$ printf "Hi Mom,\r I am using Ubuntu\n" | alt-remove-cr >| _alt-remove-cr.out_
+# Note: there should be 26 characters
+$ hexview.perl _alt-remove-cr.out_
+$ wc _alt-remove-cr.out_
+00000000  48 69 20 4D 6F 6D 2C 20 - 49 20 61 6D 20 75 73 69  Hi Mom, I am usi
+00000010  6E 67 20 55 62 75 6E 74 - 75 0A                    ng Ubuntu.
+ 1  6 26 _alt-remove-cr.out_
+
+$ num_chars=$(wc -c < _alt-remove-cr.out_)
+$ [ $num_chars -eq 26 ];  echo $?
+0
+
+# perl-remove-cr ACTS AS remove-cr USING PERL
+##: OLD: printf "Hi Mom,\r I am using Ubuntu\n" | perl-remove-cr
+$ printf "Hi Mom,\r I am using Ubuntu\n" >| _another-cr.txt_
+$ perl-remove-cr _another-cr.txt_
+$ wc _another-cr.txt*
+ 1  6 26 _another-cr.txt_
+ 1  6 27 _another-cr.txt_.bak
+ 2 12 53 total
+
+$ num_chars_backup=$(wc -c < _another-cr.txt_.bak)
+$ num_chars_final=$(wc -c < _another-cr.txt_)
+$ [ $num_chars_backup -gt $num_chars_final ]; echo $?
+0
+
+## DEBUG
+$ command pwd
+/tmp/test-json-alias/json-related-alias
+
+## OLD: pwd
+## BAD: rm -rf ./* > /dev/null
+## TODO1: rework without need to delete files (too dangerous and complicates debugging)
+## TEMP (n.b., uses full path to avoid catastrophe):
+## OLD: if [ "$DEBUG_LEVEL" -lt 4 ]; then rm -rf /tmp/test-json-alias/test-3214/*; fi
+## OLD: printf "Hi Mom,\nThs is the use of printf\nI can use a backslash n to start a new line.\n1\n2\n3"> abc-test.txt
+
+# Test last-n-with-header via printf with backslash
+## TEMP: Uses >| to work around rm issue
+$ printf "Hi Mom,\nThs is the use of printf\nI can use a backslash n to start a new line.\n1\n2\n3\n" >| _abc-test.txt_
+##
+## DEBUG:
+$    cat -n _abc-test.txt_
+     1	Hi Mom,
+     2	Ths is the use of printf
+     3	I can use a backslash n to start a new line.
+     4	1
+     5	2
+     6	3
+
+# Make sure 'last-n-with-header 1 file' includes only first and last line
+## TEMP: Uses >| to avoid rm issue
+$ last-n-with-header 3 _abc-test.txt_ >| _abc-test.last-3-with-header_
+## OLD: Invalid filename (from commit:9409f655)
+# cat _abc-test.last-1-with-header_
+$ cat _abc-test.last-3-with-header_
+Hi Mom,
+1
+2
+3
+
+$ num_with_letters=$(grep -c '[a-z]' < _abc-test.last-3-with-header_)
+$ num_with_digits=$(grep -c '[0-9]' < _abc-test.last-3-with-header_)
+## DEBUG:
+$    echo "letters=$num_with_letters digits=$num_with_digits"
+$ [ $num_with_letters -lt $num_with_digits ]; echo $?
+letters=1 digits=3
+0
+
+$ show-line 3 _abc-test.txt_
+I can use a backslash n to start a new line.
+
+$ num_lines=$(grep -c "backslash" _abc-test.txt_)
+$ [ $num_lines -eq 1 ]; echo $?
+0
+

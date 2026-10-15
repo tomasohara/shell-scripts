@@ -1,0 +1,195 @@
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hi'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+# echo $PS1
+$ actual=${PS1: -1}
+$ [ "$actual" = ">" ] || true; echo 0
+0
+
+## BAD (SUPER BAD)
+# # Delete all aliases and function
+# # TODO: Instead start from pristine environment
+# unalias -a
+# for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+# BIN_DIR=${TOM_BIN:-$PWD/..}
+
+## OLD: Contents moved to cell below
+## Setting a temp directory for tests
+# TMP=/tmp/test-check-errors
+## NOTE: Source it directly from the ./tests directory. [TO BE FIXED]
+$ BIN_DIR=${TOM_BIN:-$PWD/..}
+$ [ -n "$BIN_DIR" ]; echo 0
+0
+
+## OLD
+# temp_dir=$TMP/test-2334
+# mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# cd "$temp_dir"
+# pwd
+## OLD: Used the concept of trash-dir, instead use unique temp_dirs
+# temp_dir=$TMP/test-2334
+# trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
+# command mkdir -p "$temp_dir"
+# command mkdir -p "$trash_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# command cd "$temp_dir"
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/test-check-errors; fi
+$ temp_dir=$TMP/test-check-errors
+$ rename-with-file-date "$temp_dir" > /dev/null
+$ command mkdir -p "$temp_dir"
+$ command cd "$temp_dir"
+## OLD: Debug
+# command pwd
+## OLD
+## ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+
+# Global Setup
+# alias testnum="sed -r "s/[0-9]/X/g"" 
+## For number of digits not being critical
+# alias testuser="sed -r "s/"$USER"+/user/g""
+# alias testnum="sed -r "s/[0-9][0-9]*/N/g""
+
+## OLD
+# command pwd | testuser
+# command pwd
+$ [ "$(command pwd)" = "/tmp/test-check-errors/test-check-errors" ]; echo $?
+0
+
+## TODO: Find a way to remove the full path 
+# python3 $BIN_DIR/check_errors.py | grep -q "ruby" && echo "True" || echo "False" > /dev/null 
+# python3 $BIN_DIR/check_errors.py 2>&1 | grep -q "ruby" && echo "True" || echo "False" > /dev/null 
+$ [ -n "$(python3 $BIN_DIR/check_errors.py 2>&1 | grep "ruby")" ]; echo $?
+0
+
+## OLD
+## pip3 install mezcla | testnum > /dev/null
+## Explicit approach (debian-like): pip3 install mezcla --break-system-packages > /dev/null
+## OLD: Assertion fails during test
+# pip3 install mezcla > /dev/null
+# [ $? -eq 0 ]; echo $? 
+# pip3 install mezcla &> /dev/null && echo "Installation successful" || echo "Installation failed"
+$ pip3 install mezcla &> /dev/null && echo $?;
+0
+
+## NEW
+# pip3 show mezcla | grep -q "tomasohara@gmail.com" && echo "True" || echo "False"
+$ [ -n "$(pip3 show mezcla | grep "Name: mezcla")" ]; echo $?
+0
+
+## BAD
+# check_errors.py
+
+# python3 $BIN_DIR/check_errors.py ./test_check_errors.py
+# # Error: TypeError: 'NoneType' object is not iterable
+
+# check_errors.py ./test_check_errors.py --verbose
+# # Error: TypeError: 'NoneType' object is not iterable
+
+## TODO: testuser doesn't work below
+## TODO: Find a way to remove the full path 
+## OLD
+# python3 $BIN_DIR/check_errors.py -h | testuser
+## TODO: Remove the complete path (along with user) of the check_errors.py script
+# python3 $BIN_DIR/check_errors.py -h 2>&1 | grep -q "ruby" && echo "True" || echo "False"
+$ [ -n "$(python3 $BIN_DIR/check_errors.py -h 2>&1 | grep "ruby")" ]; echo $?
+0
+
+## OLD
+# check_errors.py ./test_extract_matches.py --verbose | testuser
+## Error: TypeError: 'NoneType' object is not iterable
+## TODO: 
+# command python3 $BIN_DIR/check_errors.py $BIN_DIR/tests/test_extract_matches.py --verbose | testuser
+# python3 $BIN_DIR/check_errors.py $BIN_DIR/tests/test_extract_matches.py --verbose > test_extract_matches_verbose.out 2>&1
+# [ -e test_extract_matches_verbose.out ]; echo $?
+
+# SyntaxError: unterminated string literal
+$ echo "print('Hello World)" > helloworld.py
+$ python3 helloworld.py > hello_world_error.log 2>&1
+$ [[ -e "hello_world_error.log" ]]; echo $?
+0
+
+## Assertion for SyntaxError
+$ [[ "$(python3 $BIN_DIR/check_errors.py hello_world_error.log 2>&1)" =~ "SyntaxError" ]]; echo $?
+0
+
+# check_errors.py --warning ./test_extract_matches.py | testuser | testnum
+# # Error: TypeError: 'NoneType' object is not iterable
+# cat test_extract_matches_verbose.out | grep -q "Deleting any temporary files" && echo "True" || echo "False"
+# [ ! -n "$(cat test_extract_matches_verbose.out | grep "Deleting any temporary files")" ]; echo $?
+# python3 $BIN_DIR/check_errors.py $BIN_DIR/tests/test_extract_matches.py --verbose 2>&1 | grep -q "Deleting any temporary files" && echo 0 || echo 1
+
+## Assertion for errors with verbose mode
+$ echo "print(1/0)" > dividebyzero.py
+$ python3 dividebyzero.py > divide_by_zero_error.log 2>&1
+$ [[ -e "divide_by_zero_error.log" && -s "divide_by_zero_error.log" ]]; echo $?
+0
+
+## Assertion for ZeroDivisionError
+$ [[ "$(python3 $BIN_DIR/check_errors.py divide_by_zero_error.log 2>&1)" =~ "ZeroDivisionError" ]]; echo $?
+0
+
+# cat test_extract_matches_verbose.out | grep -q "himom" && echo "True" || echo "False"
+# [ ! -n "$(cat test_extract_matches_verbose.out | grep "himom")" ]; echo $?
+# OLD: Output returns "Processing input" only
+# python3 $BIN_DIR/check_errors.py $BIN_DIR/tests/test_extract_matches.py --verbose 2>&1 | grep -q "himom" && echo 0 || echo 1
+$ printf "x = [1, 2, 3, 4, 5]\nprint(x[6])" > outofrange.py
+$ python3 outofrange.py > outofrange.log 2>&1
+$ [[ -e "outofrange.log" && -s "outofrange.log" ]]; echo $?
+0
+
+## Assertion for IndexError using verbose option
+$ [[ "$(python3 $BIN_DIR/check_errors.py outofrange.log --verbose 2>&1)" =~ "IndexError" ]]; echo $?
+0
+
+# EXPECTED OUTPUT FOR ABOVE COMMAND 
+# Processing input
+# 26           def test_python_error(self):
+# 27               """check python error"""
+# 28               input_string    = 'python -c "print(1\\2)" 2>&1'
+# 29   >>>         expected_result = '1          File "<string>", line 1\n2            print(1\\2)\n3                     ^\n4    >>> SyntaxError: unexpected character after line continuation character <<<' <<<
+# 30               self.assertEqual(gh.run(f'{input_string} | {SCRIPT} -'), expected_result)
+# 31       
+# 32       
+# 48           def test_context_lines(self):
+# 49               """test context lines"""
+# 50               input_string     = 'python -c "print(1\\2)" 2>&1'
+# 51   >>>         result_context_1 = '3                     ^\n4    >>> SyntaxError: unexpected character after line continuation character <<<' <<<
+# 52   >>>         result_context_2 = '2            print(1\\2)\n3                     ^\n4    >>> SyntaxError: unexpected character after line continuation character <<<' <<<
+# 53               self.assertEqual(gh.run(f'{input_string} | {SCRIPT} --context 1 -'), result_context_1)
+# 54               self.assertEqual(gh.run(f'{input_string} | {SCRIPT} --context 2 -'), result_context_2)
+# 55
+
+# # WORKS FOR test_check_errors.py
+# # WORKS FINE (ERROR PRONE ON BATSPP)
+# # $ python3 $BIN_DIR/check_errors.py --warning ./test_check_errors.py
+# check_errors.py --warning ./test_check_errors.py | testuser | testnum
+# # Error: TypeError: 'NoneType' object is not iterable
+## OLD
+# python3 $BIN_DIR/check_errors.py --warning $BIN_DIR/tests/test_check_errors.py > check_errors.output
+# python3 $BIN_DIR/check_errors.py --warning $BIN_DIR/tests/test_check_errors.py > check_errors.output 2>&1
+# [ -e check_errors.output ]; echo $?
+$ python3 $BIN_DIR/check_errors.py --warning $BIN_DIR/tests/test_check_errors.py 2>&1 | grep -q "warning" && echo 0 || echo 1
+0
+
+# cat check_errors.output | grep -q "test_python_error" && echo "True" || echo "False"
+# python3 $BIN_DIR/check_errors.py --warning $BIN_DIR/tests/test_check_errors.py > check_errors.output 2>&1 
+# [ -n "$(cat check_errors.output | grep "test_python_error")" ]; echo $?
+$ python3 $BIN_DIR/check_errors.py --warning $BIN_DIR/tests/test_check_errors.py 2>&1 | grep -q "test_python_error" && echo 0 || echo 1
+0
+
+# BAD: /bin/rm -rf $temp_dir > /dev/null
+## OLD: command mv -f * "$trash_dir"
+# Wrapup
+$ echo "END"
+END
+

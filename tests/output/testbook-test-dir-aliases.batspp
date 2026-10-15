@@ -1,0 +1,145 @@
+## TODO1: archive (n.b., just testing variation of test-dir-alias.ipynb)
+
+# Setup
+$ bind 'set enable-bracketed-paste off'
+
+## BAD (SUPER BAD)
+# # Delete all aliases and function
+# # TODO: Instead start from pristine environment
+# unalias -a
+# for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+
+## OLD: TEST_BIN=/home/test3513/bin
+# SPECIFYING AN IDENTIFIER FOR TMP
+# OLD: TEST_BIN=/home/$USER/tom-project/shell-scripts/tests
+$ TMP=/tmp/test-dir-aliases
+## OLD & BAD
+# source $TEST_BIN/_dir-aliases.bash
+# alias | wc -l
+
+# Global Setup
+## alias testnum="sed -r "s/[0-9]/N/g"" 
+## For number of digits not being critical
+$ alias testnum="sed -r "s/[0-9][0-9]*/N/g""
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+
+## Count aliases proper
+# alias | wc -l | testnum
+$ [ "$(alias | wc -l | testnum)" = "N" ]; echo $?
+0
+
+## Count functions
+# typeset -f | egrep '^\w+' | wc -l | testnum
+$ [ "$(typeset -f | egrep '^\w+' | wc -l | testnum)" = "N" ]; echo $?
+0
+
+## OLD
+# # Test safe symbolic links
+# temp_dir=$TMP/test-$$
+# mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# cd "$temp_dir"
+# pwd
+# Test safe symbolic links
+$ temp_dir=$TMP/test-$$
+$ rename-with-file-date "$temp_dir" > /dev/null
+$ command mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ command cd "$temp_dir"
+
+# echo $USER | testuser
+$ [ "$(echo $USER | testuser)" = "userxf333" ]; echo $?
+0
+
+# The first case succeed
+$ touch file1
+$ [ -n "$(ls | grep file)" ]; echo $?
+## OLD: SEPERATED TO MULTIPLE CELLS
+# ln-symbolic file1 link1
+# # 'link1' -> 'file1'
+# # The second case should should fail
+# ln-symbolic file1 link1
+# # => "ln: failed to create symbolic link 'link1': File exists?"
+# # Should only be four files total (along with . and ..)
+# ls -R | wc -l
+# # => 3
+0
+
+$ ln-symbolic file1 link1 > /dev/null
+$ [[ -h link1 && -n "$(ls -l | grep "link1 -> file1")" ]]; echo $?
+# 'link1' -> 'file1'
+0
+
+## HALTS TEST
+## The second case should should fail
+# $ ln-symbolic file1 link1
+# | ln: failed to create symbolic link 'link1': File exists?
+
+# Should only be four files total (along with . and ..)
+# ls -R | wc -l
+# => 3
+$ [ "$(ls -R | wc -l)" -eq 3 ]; echo $?
+0
+
+## FYI: the current aliases and functions
+## ERROR PRONE COMMAND (BATSPP) - WORKS WELL
+# $ cat $TEST_BIN/_dir-aliases.bash
+
+## OLD: DEBUG
+# ls
+
+## OLD
+# ls -l | testnum | testuser | awk '!($6="")'
+# Assertion performed at cell 10: command ls
+
+## BAD
+# bash $TEST_BIN/_dir-aliases.bash
+
+$ ln-symbolic /tmp temp-link > /dev/null
+$ [[ -h temp-link && -n "$(ls -l | grep "temp-link -> /tmp")" ]]; echo $?
+0
+
+## OLD
+# ls -l | testnum | testuser | awk '!($6="")'
+# command ls
+$ [ "$(command ls | wc -w)" -eq 3 ]; echo $?
+0
+
+$ link-symbolic-safe --force ~/temp temp-link | testuser > /dev/null
+$ [[ -h temp-link && -n "$(ls -l | grep "temp-link -> /home/$USER/temp")" ]]; echo $?
+0
+
+## OLD
+# ls -l | testnum | testuser | awk '!($6="")'
+# command ls
+$ [ "$(command ls | wc -w)" -eq 3 ]; echo $?
+0
+
+## BAD:
+## # Global Setup
+## alias ln-symbolic-force='ln-symbolic --force'
+## ## NEW: Added Global Setup to Cell
+
+# # THIS THROWS AN ERROR AS A SYMBOLIC LINK ALREADY EXISTS
+# $ ln-symbolic /tmp temp-link
+# | ln: failed to create symbolic link 'temp-link/tmp': File exists
+
+# ln CANNOT OVERWRITE DIRECTORY AS WELL, EVEN ON FORCE
+# $ ln-symbolic-force /tmp temp-link
+# | ln: temp-link/tmp: cannot overwrite directory
+
+$ ln-symbolic-force /tmp1 temp-link > /dev/null
+$ [[ -h temp-link && -n "$(ls -l | grep "temp-link -> /home/$USER/temp")" ]]; echo $?
+0
+
+## OLD
+# link-symbolic-safe --force ~/temp temp-link | testuser | testnum
+$ link-symbolic-safe --force ~/temp temp-link | testuser > /dev/null
+$ [[ -h temp-link && -n "$(ls -l | grep "temp-link -> /home/$USER/temp")" ]]; echo $?
+0
+
+# ls -l | testnum | testuser | awk '!($6="")'
+# command ls
+$ [ "$(command ls | wc -w)" -eq 3 ]; echo $?
+0
+

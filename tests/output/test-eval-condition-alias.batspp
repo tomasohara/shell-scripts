@@ -1,0 +1,18 @@
+## TEST: Make sure command is executed when condition is evaluated to true
+$ eval-condition "1 > 0"
+True
+
+## TEST: Make sure command is not executed when condition is evaluated to false
+$ eval-condition "False" --exec "echo 'This should not be printed'"
+
+
+## TEST: Make sure condition evaluation result is printed when --verbose is specified
+$ eval-condition "not True" --verbose --exec "echo 'This should not be printed'"
+Evaluation of condition 'not True': False
+
+
+## TEST: Make sure the stdin is replaced in the condition
+$ ls . | eval-condition "10 < len(stdin.splitlines()) <= 90"
+Processing entire input
+True
+

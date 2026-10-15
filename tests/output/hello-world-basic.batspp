@@ -1,0 +1,16 @@
+# Global Setup
+$ bind 'set enable-bracketed-paste off'
+## OLD: echo 'BIND ON!' returns assertion failed (unexpected header file)
+
+## This is how a simple command works
+$ echo 'BIND ON!'
+BIND ON!
+
+## Here's an example of pipeline
+$ echo 'Hello world' | wc -l
+1
+
+## Tests using single line conditions and echo
+$ [ "$(echo 'Hi Mom!' | wc -c)" -eq 8 ]; echo $? 
+0
+

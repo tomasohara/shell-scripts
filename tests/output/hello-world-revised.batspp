@@ -1,0 +1,60 @@
+## OLD
+## shopt -s expand_aliases
+
+# Global Setup
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9]/N/g""
+## For testnum being non-critical
+# alias testnum="sed -r "s/[0-9][0-9]*/X/g""
+
+$ echo "Hi Mom!"
+Hi Mom!
+
+$ echo 'Hello world' | wc -l
+1
+
+## OLD
+# pwd | testuser
+$ whoami | testuser
+userxf333
+
+# THIS IS A COMMENT
+
+# SKIP
+$ which systemd
+/usr/bin/systemd
+
+## OLD
+# man date | head -n 10
+## Focus on pattern matching
+$ date | grep --perl-regexp --count --ignore-case '^[A-Z]{3}.*[0-9]{4}$'
+1
+
+# awk will be used to remove any factors that may cause an error
+$ ps -l | awk '!($3=$4=$5=$10=$13="")' | testnum
+F S    C PRI NI ADDR  WCHAN TTY  CMD
+N S    N NN N -  do_wai pts/N  bash
+N R    N NN N -  - pts/N  ps
+N S    N NN N -  pipe_r pts/N  awk
+N S    N NN N -  pipe_r pts/N  sed
+
+$ ps | head -n 10 | testuser | testnum
+    PID TTY          TIME CMD
+  NNNNN pts/N    NN:NN:NN bash
+  NNNNN pts/N    NN:NN:NN ps
+  NNNNN pts/N    NN:NN:NN head
+  NNNNN pts/N    NN:NN:NN sed
+  NNNNN pts/N    NN:NN:NN sed
+
+## Zero or Non-Zero checking for wc -l reduces non-critical tests
+$ ps | { [ $(wc -l < /dev/stdin) -ne 0 ] && echo $?; }
+0
+
+## grep-echo pipeline filter: Return true if "character" present else false
+## Example: Check if there are python files (py) in testfolders
+$ ls | grep -q "py" && echo ".py files present" || echo "No .py files present"
+.py files present
+
+# Incase of a false condition, echo $? returns nothing
+$ ls | grep -q "pyx" && echo $?
+
