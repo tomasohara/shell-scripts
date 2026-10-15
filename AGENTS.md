@@ -2,6 +2,8 @@
 
 AI agent instructions for arbitrary repos. This is based on instructions designed for Python, so adapt it accordingly to Bash code, etc.
 
+<!-- UPDATE 2026-10-15: clarify meta comments and conflicting instructions -->
+
 ## Key Conventions
 
 *   **Style**:
@@ -91,7 +93,7 @@ Some variations follow. For single-line changes, just use "## OLD: statement ...
 
 0. Avoid overly specific function names, instead chose a name that generalizes the intention  (e.g., `test_hello_world_batspp_epoch_seconds_updates` => `test_hello_world_timestamp_update`).
 
-0. Some clarification for the sake of recalcitrant AI agents:
+0. Some clarification for the sake of recalcitrant AI agents and/or nitpicking stakeholders (e.g., TPO).
 
 - Preserve all comments, docstrings, TODOs, attributions, and formatting unless
   the user explicitly authorizes their removal. They count as code.
@@ -109,6 +111,10 @@ Some variations follow. For single-line changes, just use "## OLD: statement ...
 - Keep attribution in commit messages; add source attribution only when
   explicitly requested.
   
+- The '## TAG' convention is just for meta-comments about development (e.g. UPDATE): normal comments should use '# Comment'. For example, '## NOTE' might clarify a bug fix, but '# Note' is better for algorithm clarification. This makes it easier to clean up the comments once development has settled down, as the '##' comment prefix suggests the transient nature of the comment.
+
+- Some of the guidelines might conflict with the prompt instructions. Similarly, the instructions might conflict with code snippets used as examples. When in doubt ask for clarification.
+
 ## Terminal guidelines
 
 0. Don't remove existing files without confirmation: rename them instead (e.g., <filename>.DDMmmYY).
