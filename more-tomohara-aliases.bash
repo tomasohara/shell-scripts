@@ -71,8 +71,12 @@ function yaml-to-json {
 #
 
 # remove-extension(filename): remove extension from filename
+# note: dot-files are returned as is unless filename contains 2+ .'s
 # ex: remove-extension fubar.list => fubar
-function remove-extension { echo "$1" | perl -pe 'chomp; s/\.[^\.]+$/$1\n/;'; }
+# ex: remove-extension .emacs => .emacs
+# ex: remove-extension .emacs.latin => .emacs
+## OLD: function remove-extension { echo "$1" | perl -pe 'chomp; s/[^\.]+$/$1\n/;'; }
+function remove-extension { echo "$1" | perl -pe 's/^(.+)\.[^\.]+\n/$1\n/;'; }
 
 #--------------------------------------------------------------------------------
 # Source control
