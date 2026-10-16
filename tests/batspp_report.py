@@ -17,6 +17,7 @@
 #   as if the current directory changes (e.g., in summary_stats.bash).
 # - Use `jupyter console` to invoke a CLI verson of Jupyter (i.e., not ipython).
 #
+## UPDATE 2026-10-15: treats evaluation errors as failures if STOP_ON_FAILURE
 ## UPDATE 14 Sep 26: filters console tracing
 
 """
@@ -114,7 +115,7 @@ SHOW_FAILURE_CONTEXT = system.getenv_bool(
     description="Show context of test failures--useful with Github runner")
 STOP_ON_FAILURE = system.getenv_bool(
     "STOP_ON_FAILURE", False,
-    description="Stop when failure encountered")
+    description="Stop when failure encountered, including any evaluation errors")
 SINGLE_STORE = system.getenv_bool(
     "SINGLE_STORE", False,
     description=f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
@@ -507,6 +508,8 @@ def main():
                 success_rate = (round((count_ok / count_total)*100, 2) if count_total else 0)
                 min_score = system.to_float(thresholds.get(ipynb_from_batspp, DEFAULT_MIN_SCORE))
                 successful = (success_rate >= min_score)
+                if num_eval_errors and STOP_ON_FAILURE:
+                    successful = False
                 debug.trace_expr(4, min_score, count_ok, count_bad, count_total, success_rate, successful)
                 ## OLD: SUMMARY_TEXT = f"{count_ok} out of {count_total} successful ({success_rate}%)\nSuccess: {successful} (threshold = {min_score}%)"
                 SUMMARY_TEXT_SUCCESS_COUNT = f"Success Score: {count_ok} out of {count_total} ({success_rate}%)"
