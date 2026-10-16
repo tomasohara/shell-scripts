@@ -140,7 +140,8 @@ def main() -> None:
     app = Script(
         description=__doc__.format(script=gh.basename(__file__), output_dir=DEFAULT_OUTPUT_DIR),
         manual_input=True,
-        auto_help=False,
+        ## NOTE: auto_help preferred with mezcla
+        auto_help=True,
         text_options=[
             (NOTEBOOK_DIR, "Directory containing Jupyter notebook tests"),
             (OUTPUT_DIR, "Directory for generated BatsPP tests"),
