@@ -44,3 +44,7 @@ fi
 ## export TEST_REGEX="git|tips|entropy|testing-support-script-tests|eval-condition|sanity"
 ## export REMAP_TMP=1               # all /tmp files => $BATSPP_TEMP (see summary_stats.bash)
 ## export SHOW_FAILURE_CONTEXT=0    # hide redundant error report (see batspp_report.py)
+
+# TEMP: Treat evaluation errors as test failure
+# Note: need to work in way for work-in-progress scripts to be excluded
+export STOP_ON_FAILURE=1
