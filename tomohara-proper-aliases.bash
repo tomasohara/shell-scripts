@@ -919,6 +919,8 @@ function copy-to-temp-as-txt {
         ## TODO3: global TEMP
         declare -g TEMP
         temp_file="$TEMP/$(basename "$file").txt"
+        # note: rename .xyz to dot-xyz (e.g., temp/dot-emacs.txt)
+        temp_file="$(echo "$temp_file" | perl -pe 's@/\.([^/]+)$@/dot-$1@;')"
         copy "$file" "$temp_file"
         touch "$temp_file"
     done
