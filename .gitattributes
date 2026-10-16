@@ -1,2 +1,6 @@
 # Generated BatsPP fixtures retain notebook output byte-for-byte.
+# note:
+# - This disables checks for spaces at end of lines or
+#   blank lines at end of the file.
+# - TODO2: disable as not a concern (excepting nitpicking AI agents)
 tests/output/*.batspp whitespace=-trailing-space,-blank-at-eof
