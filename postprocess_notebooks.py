@@ -1,15 +1,18 @@
 #! /usr/bin/env python3
-##
-## Postprocesses Jupyter notebook tests after they have been run.
-## NOTE: Added with assistance from GitHub Copilot CLI using GPT-5.6 Terra.
-##..............................................................................
+#
+# Postprocesses Jupyter notebook tests after they have been run.
+#
+# Note: Added with assistance from GitHub Copilot CLI using GPT-5.6 Terra.
+## UPDATE 2026-10-15: fixup to use preferred output-files
+## TODO1: rework so that it can operate over single file (e.g., via TEST_REGEX).
+## TODO2: put into ./tests dir to reflect test focus (i.e., not general script)
 
 """
 Strip per-cell execution metadata from Jupyter notebook tests and refresh their
 BatsPP equivalents.
 
 The postprocessor preserves all notebook-level metadata and all cell metadata
-other than ``execution``. It writes generated BatsPP files to ``tests/output``
+other than ``execution``. It writes generated BatsPP files to ``{output_dir}``
 by default.
 
 Usage:
@@ -37,7 +40,7 @@ OUTPUT_DIR = "output-dir"
 
 # Defaults
 DEFAULT_NOTEBOOK_DIR = "tests"
-DEFAULT_OUTPUT_DIR = "tests/output"
+DEFAULT_OUTPUT_DIR = gh.form_path("tests", "output-files")
 JUPYTER_EXTENSION = ".ipynb"
 BATSPP_EXTENSION = ".batspp"
 TL = debug.TL
@@ -135,7 +138,7 @@ class Script(Main):
 def main() -> None:
     """Run the notebook postprocessor."""
     app = Script(
-        description=__doc__.format(script=gh.basename(__file__)),
+        description=__doc__.format(script=gh.basename(__file__), output_dir=DEFAULT_OUTPUT_DIR),
         manual_input=True,
         auto_help=False,
         text_options=[
