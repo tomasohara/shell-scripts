@@ -50,6 +50,7 @@
 ## OLD: **/archive
 
 # Output or log-file directories
+# note: output-files require overrides (e.g., git add --force tests/output-files/README.batspp)
 **/log-files
 **/output-files
 **/downloads
