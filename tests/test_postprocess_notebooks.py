@@ -1,7 +1,13 @@
 #! /usr/bin/env python3
-##
-## Tests for ../postprocess_notebooks.py
-##..............................................................................
+#
+# Tests for ../postprocess_notebooks.py
+#
+# note:
+# - Warning: this currently just mocks the BatsPP invocation.
+# - It also tests over synthetic data (i.e., not real notebook tests)
+#
+## UPDATE 2026-10-15: fixup to use preferred output-files
+## TODO1: Test for specific BatsPP output
 
 """Tests for postprocess_notebooks module."""
 
@@ -62,7 +68,7 @@ class TestIt(TestWrapper):
         converter = notebook_dir / "jupyter_to_batspp.py"
         converter.write_text("", encoding="utf-8")
         processor = THE_MODULE.NotebookPostprocessor(
-            notebook_dir, notebook_dir / "output", converter)
+            notebook_dir, notebook_dir / "output-files", converter)
         return processor, notebook_path
 
     def test_postprocess_preserves_notebook_metadata(self):
