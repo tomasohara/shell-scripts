@@ -164,9 +164,11 @@ def main() -> None:
         skip_input=False,
         manual_input=False,
         ## TODO (specify auto_help such as when manual_input set):
-        ## # Note: shows brief usage if no arguments given
+        ## NOTE: In general auto_help should be enabled, especially if the default action
+        ## involves input or includes destructive operations: --help mentions - workaround.
+        ## # Note: shows brief usage if no arguments given (n.b., standard mezcla)
         ## auto_help=True,
-        ## -or-: # Disable inference of --help argument
+        ## -or-: # Disable inference of --help argument (n.b., intentional non-mezcla)
         ## auto_help=False,
         ## TODO: specify options and (required) arguments
         boolean_options=[(TODO_ARG, "TODO-desc--currently greps for TODO")],
