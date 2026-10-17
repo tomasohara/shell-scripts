@@ -1,0 +1,113 @@
+# Scheduled trend report for the Bash and alias testing infrastructure.
+#
+## NOTE: Initial dashboard workflow facilitated by GitHub Copilot (GPT-5.6 Terra).
+name: Weekly-Test-Dashboard
+
+on:
+  schedule:
+    - cron: "15 13 * * 1"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  weekly-dashboard:
+    name: Weekly alias and function coverage summary
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install Dependencies
+        run: |
+          pip install --verbose --requirement requirements.txt
+          sudo apt-get update
+          sudo apt-get install --yes --fix-missing tcsh libegl1 kcov
+
+      - name: Download prior dashboard record
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          previous_run_id="$(gh run list --workflow "$GITHUB_WORKFLOW" --limit 20 \
+            --json databaseId,status --jq '.[] | select(.status == "completed") | .databaseId' \
+            | head -1)"
+          if [ -n "$previous_run_id" ]; then
+            gh run download "$previous_run_id" --name weekly-test-dashboard \
+              --dir previous-dashboard || true
+          fi
+
+      - name: Run tests with alias coverage
+        id: tests
+        continue-on-error: true
+        run: |
+          mkdir -p test-results/batspp-temp
+          set -o pipefail
+          BATSPP_OUTPUT="$PWD/test-results/batspp" \
+          BATSPP_TEMP="$PWD/test-results/batspp-temp" \
+          BATSPP_REPORT_OPTS="--txt --kcov --definitions aliases-for-testing.bash" \
+          ./tests/run_tests.bash 2>&1 | tee test-results/test-run.log
+
+      - name: Record tested software versions
+        if: always()
+        run: |
+          {
+            echo "Python: $(python3 --version)"
+            echo "Bash: $(bash --version | head -1)"
+            echo "BatsPP: $(batspp --version)"
+            echo "Kcov: $(kcov --version)"
+            echo "Mezcla: $(python3 -m pip show mezcla | awk -F': ' '/^Version:/ {print $2}')"
+          } > test-results/environment.txt
+
+      - name: Generate dashboard summary
+        if: always()
+        run: |
+          previous_arg=()
+          if [ -f previous-dashboard/weekly-summary.json ]; then
+            previous_arg=(--previous previous-dashboard/weekly-summary.json)
+          fi
+          python3 tests/weekly_dashboard.py \
+            --python-log test-results/test-run.log \
+            --alias-reports test-results/batspp/txt-reports \
+            --kcov-reports test-results/batspp/kcov-output \
+            --environment test-results/environment.txt \
+            "${previous_arg[@]}" \
+            --output test-results/weekly-summary.json \
+            --markdown test-results/weekly-summary.md
+          cat test-results/weekly-summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Send weekly summary email
+        if: always() && vars.WEEKLY_TEST_EMAIL_ENABLED == 'true'
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USERNAME: ${{ secrets.SMTP_USERNAME }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_FROM: ${{ secrets.SMTP_FROM }}
+          SMTP_TO: ${{ secrets.SMTP_TO }}
+        run: python3 .github/workflows/weekly_test_dashboard_email.py --body-file test-results/weekly-summary.md
+
+      - name: Upload dashboard artifacts
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: weekly-test-dashboard
+          path: |
+            test-results/weekly-summary.json
+            test-results/weekly-summary.md
+            test-results/environment.txt
+            test-results/test-run.log
+            test-results/batspp/txt-reports
+            test-results/batspp/kcov-output
+          retention-days: 90
+
+      - name: Preserve test failure status
+        if: always() && steps.tests.outcome == 'failure'
+        run: exit 1
