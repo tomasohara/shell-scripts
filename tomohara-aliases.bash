@@ -357,6 +357,14 @@ function space-check() {
 ## function downcase-stdin() { perl-utf8 -pe 's/.*/\L$&/;'; }
 function downcase-stdin { perl -pe "use open ':std', ':encoding(UTF-8)'; s/.*/\L$&/;"; }
 function downcase-text { echo "$@" | downcase-stdin; }
+#
+# Make sure GNU's date is available (TODO4: use gdate?)
+# See https://apple.stackexchange.com/questions/231224/how-to-have-gnus-date-in-os-x.
+if [[ ! $(date --version) =~ GNU ]]; then
+    echo "Warning: GNU date not available: install via homebrew coreutils" 1>&2
+    ## TODO3?; ex: export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
+fi
+#
 # date-ddmmmyy(date_spec): return date using European style (e.g., 25feb26)
 function date-ddmmmyy {
     if [ "$1" == "" ]; then
