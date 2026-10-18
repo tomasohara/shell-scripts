@@ -89,6 +89,10 @@ if [ "$(realpath "$TOM_BIN")" != "$source_dir" ]; then
     source_dir="$TOM_BIN"
 fi
 ## TEMP: make sure source dir in path
+## egrep: silly egrep wrapper needed due to overly neat grep developers
+function egrep {
+    command grep --perl-regexp --color=auto "$@"
+}
 ## NOTE: also done in tomohara-settings but needed here for set-title-to-current-dir in tomohara-settings.bash
 if [ "$(echo ":$PATH:" | egrep ":$source_dir/?":)" = "" ]; then
    export PATH="$PATH:$TOM_BIN"
