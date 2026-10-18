@@ -112,7 +112,8 @@ shopt -s nocaseglob
 export LESSCHARSET=utf-8
 # Also have it display binary characters  as underline instead of reverse video (i.e., standout)
 export LESSBINFMT="*u<%02X>"
-export SHELL="/bin/bash"
+## NOTE: disabled to avoid silly MacOS issues which uses old Bash
+## OLD: export SHELL="/bin/bash"
 
 # Temp directory overrides (n.b., a little redundant w/ tomohara-aliases.bash).
 # Note:
