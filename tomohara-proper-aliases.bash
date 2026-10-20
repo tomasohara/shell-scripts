@@ -1061,7 +1061,8 @@ function derive-signatures() {
     local f prefix
     for f in "$HOME/info/".*signature; do
         if [[ ! -e "$f" ]]; then
-            echo "Warning: No signature found in $HOME/info"
+            ## OLD: echo "Warning: No signature found in $HOME/info"
+            echo "Warning: Signature not found: '$f'"
             break
         fi
         prefix="$(echo "$f" | perl -pe 's/^.*\.(.*)-signature/$1/;')"
