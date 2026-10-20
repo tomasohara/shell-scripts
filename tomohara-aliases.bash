@@ -893,6 +893,8 @@ function cd-realdir {
 alias cd-this-realdir='cd-realdir .'
 # shellcheck disable=SC2016
 alias-fn pushd-this-realdir 'pushd "$(realpath ".")"'
+# realpath-here: normalized, full path for current dir
+alias-fn realpath-here 'realpath "${1:-.}"'
 
 # pushd-q, popd-q: quiet versions of pushd and popd
 function pushd-q () { builtin pushd "$@" &> /dev/null; }
