@@ -15,8 +15,9 @@
 # - Use DEBUG_LEVEL rather than VERBOSE_TRACING.
 # TODO2: Rename as tomohara-startup-tracing.bash as interwined with the eponymous scripts (tomohara-aliases.bash, etc.)???.
 #
+## UPDATE 2026-10-20: Revise VERBOSE_TRACING interpretation.
 
-# maldito spellcheck: this should be an option, not the default
+# maldito shellcheck: this should be an option, not the default
 #   SC2153: Possible misspelling: TMP may not be assigned, but TEMP is
 # shellcheck disable=SC2153
 
@@ -30,11 +31,14 @@ if [ "$TEMP" = "" ]; then TEMP=/tmp; fi
 # startup-trace(msg): trace MSG at DEBUG_LEVEL 5+
 function startup-trace () {
     # Set tracing (TODO3: put in separate function like startup-trace-init)
-    if [ "$VERBOSE_TRACING" = "1" ]; then 
+    ## TODO2: straighten out VERBOSE_TRACING ambiguity (e.g., shell-scripts verbose debug level vs Bash verbose option)
+    ## NOTE: SET_XTRACE and SET_VERBOSE added as workaround
+    if [[ ("$VERBOSE_TRACING" = "1") || ("$SET_XTRACE" = "1") ]]; then 
         set -o xtrace;
-        echo TEMP=$TEMP;
+        echo TEMP="$TEMP;"
         # Enable full trace if debugging (TODO4: ... $(calc-int 'TL_DETAILED'))
-        if [ "$DEBUG_LEVEL" -ge 4 ]; then
+        ## OLD: if [ "$DEBUG_LEVEL" -ge 4 ]; then
+        if [[ ("$DEBUG_LEVEL" -ge 7) || ("$SET_VERBOSE" = "1") ]]; then
             set -o verbose
         fi
     fi;
@@ -54,6 +58,7 @@ function startup-trace () {
     fi;
 }
 # startup-trace-debug(msg): trace MSG with DEBUG_LEVEL 6+
+# note: used in tomohara-aliases.bash
 function startup-trace-debug { DEBUG_LEVEL=$(min DEBUG_LEVEL 6) startup-trace "$@"; }
 
 ##------------------------------------------------------------------------------
@@ -62,7 +67,9 @@ function startup-trace-debug { DEBUG_LEVEL=$(min DEBUG_LEVEL 6) startup-trace "$
 
 # conditional-source(filename): source in bash commands from filename if exists
 ## OLD: function conditional-source () { if [ -e "$1" ]; then source $1; else echo "Warning: bash script file not found (so not sourced):"; echo "    $1"; fi; }
-function conditional-source () { if [ -e "$1" ]; then source $1; else startup-trace -e "Warning: bash script file not found (so not sourced):\n    $1"; fi; }
+# note: filters out shellcheck SC1090 [Can't follow non-constant source.]
+# shellcheck disable=SC1090
+function conditional-source () { if [ -e "$1" ]; then source "$1"; else startup-trace -e "Warning: bash script file not found (so not sourced):\n    $1"; fi; }
 #
 # append-path(path): appends PATH to environment variable unless already there
 function append-path () { if [[ ! (($PATH =~ ^$1:) || ($PATH =~ :$1:) || ($PATH =~ :$1$)) ]]; then export PATH="${PATH}:$1"; fi }
