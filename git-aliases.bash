@@ -161,6 +161,15 @@ PERL="perl -Ssw"     # S: find in path; s: enable switches; w: show warnings
 #................................................................................
 # Aliases
 
+# git: wrapper for blocking commands in dry-run mode
+function git {
+    if [ "$GIT_DRY" == "1" ]; then
+        echo "# git " "$@";
+    else
+        command git "$@";
+    fi
+}
+
 # echo-plus(arg, ...): wrapper around echo command with ARG, used for optional diagnostics.
 # For example, when GIT_TIME_DIFF set, this shows time since last command.
 # Warning: *** Intended for output at various milestones so that time diff meaningful;
