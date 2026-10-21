@@ -161,7 +161,8 @@ for dir in "${repos[@]}"; do
 
     # Add to master log
     cat "$temp_log" >> "$log"
-    python -c 'print("-" * 80);' >> "$log"
+    ## OLD: python -c 'print("-" * 80);' >> "$log"
+    python3 -c 'print("-" * 80);' >> "$log"
 done
 
 # Mention log location
