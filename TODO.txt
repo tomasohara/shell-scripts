@@ -11,6 +11,7 @@ Things to do
       }
 - Prune temporary scripts (e.g., it.perl).
 - P1: add more standard versioning (i.e., not just version.txt).
+- P1: replace bare python usages with python3
 - P2: Clarify when all-tomohara-settings needed.
 - P3: Document environment variable usage in main scripts.
 - P4: Modernize Bash expressions in scripts (e.g., [ $x = $y ] => [ $x == $y ]).
@@ -19,6 +20,7 @@ Things to do
   archive/bad-telnet.perl  archive/telnet.perl  archive/test-telnet.perl
   archive/new-telnet.perl  archive/telnet.sh    archive/was-telnet.perl
 - P4: make sure shell scripts honor --help
+- P4: standardize shellcheck references to omit dash except for aliases
 
 --------------------------------------------------------------------------------
 Tue 21 Apr 26
