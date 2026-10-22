@@ -97,7 +97,7 @@ TAGS
 .idea
 .claude
 
-# OS-specific directories
+# OS-specific directories (n.b., requires override for ./mac-os, etc.)
 ## TODO: re-enable
 ## linux
 win32
