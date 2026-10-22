@@ -58,3 +58,9 @@ Fri 24 Jul 26 [19:52:26]
 
 P2: run scripts under strict error checking (e.g., `set -u` might error on $1 checks)
 P3: address TODO notes in new docs dir (e.g., todo-address-alias-sanity-check-jul2026.pdf)
+
+--------------------------------------------------------------------------------
+Wed 21 Oct 26
+
+P1: fix quirks with git-aliases.bash (e.g., .gitconfig getting overwritten under personal-dot-files)
+
