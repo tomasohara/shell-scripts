@@ -25,7 +25,7 @@
 #   PS_symbol: symbol used in bash prompt
 #   SCRIPT_PID: process for script
 #   SUDO_USER: user running sudo (for use in title)
-#   XTERM_SHOW_PID: put PID in xterm title
+#   XTERM_SHOW_PID: put (parent) PID in xterm title
 #   XTERM_TITLE_SUFFIX: suffix for title
 #
 # Example:
@@ -96,7 +96,7 @@
 #   1 Change Icon Name to Pt 
 #   2 Change Window Title to Pt 
 #
-
+## UPDATE 2026-10-22: Allows override of PPID.
 
 # Uncomment following line(s) for tracing (in order of verbosity):
 # - echo args to show invocation (e.g., testing multiple invocations as with in anaconda-aliases.bash)
@@ -115,7 +115,10 @@
 USER="${USER:-$(whoami)}"
 restore_dir="/tmp/set-xterm-title-$USER"
 mkdir --parents "$restore_dir"
-restore_base="$restore_dir/$PPID"
+# note: PPID is read-only so need to use different env var for override
+# See function script in tomohara-aliases.bash.
+PARENT_PID="${PARENT_PID:-$PPID}"
+restore_base="$restore_dir/${PARENT_PID}"
 restore_title=0
 save_title=1
 print_full=0
@@ -172,6 +175,7 @@ if [ "$show_usage" = "1" ]; then
     echo "- Use --no-save to block automatic --save"
     echo "- --restore uses previously saved title and icon (see function script in tomohara-aliases.bash)."
     echo "- --simple avoids adding info from environment (e.g., XTERM_TITLE_SUFFIX & USER)."
+    echo "- With XTERM_SHOW_PID=1, parent PID is shown (e.g., Bash shell for script command)."
     echo ""
     echo "Examples:"
     echo ""
@@ -262,8 +266,8 @@ if [ "$simple_mode" == 0 ]; then
     # If XTERM_SHOW_PID: set, add PID at end (e.g., "; pid 27843")
     #
     if [ "${XTERM_SHOW_PID:-0}" == "1" ]; then
-        full="$full; pid:$PPID"
-        icon="$icon; pid:$PPID"
+        full="$full; pid:${PARENT_PID}"
+        icon="$icon; pid:${PARENT_PID}"
     fi
 
     # Add debugging suffix
