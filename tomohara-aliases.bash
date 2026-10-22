@@ -3372,9 +3372,13 @@ function script {
     ## THIS function is buggy!
     # Note: set_xterm_title.bash keeps track of titles for each process, so save copies of current ones
     local save_full
-    save_full=$(set-xterm-title --print-full)
+    ## HACK: forces shell PID to be parent, working around a MacOS quirk.
+    ## TODO2: issue warning if save_full/_icon empty
+    ## OLD: save_full=$(set-xterm-title --print-full)
+    save_full=$(PARENT_PID="$$" set-xterm-title --print-full)
     local save_icon
-    save_icon=$(set-xterm-title --print-icon)
+    ## OLD: save_icon=$(set-xterm-title --print-icon)
+    save_icon=$(PARENT_PID="$$" set-xterm-title --print-icon)
     ## DEBUG: echo "save_full='$save_full'; save_icon='$save_icon'"
   
     # Change prompt
