@@ -96,7 +96,8 @@ cond-export DISABLE_RECURSIVE_DELETE 1  # don't allow rm -r during cleanup
 #
 # Testing stuff:
 # pytest options: --vv: doubly verbose; --capture=no: don't capture stderr; -rA: report all
-cond-export PYTEST_OPTIONS "-vv --capture=no -rA"
+## OLD: cond-export PYTEST_OPTIONS "-vv --capture=no -rA"
+cond-export PYTEST_OPTS "-vv --capture=no -rA"
 
 # Enable timestamp preservation during git-update alias operations (n.b., stash pop quirk)
 cond-export PRESERVE_GIT_STASH 1
