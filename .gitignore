@@ -11,16 +11,17 @@
 # - The patterns are glob-like with the extension that **/GLOB
 #   matches the glob pattern in any subdirectory.
 # - See 'man gitignore' for details.
-# - * Use check-ignore to test patterns:
-#     $ git check-ignore --non-matching --verbose _fubar.txt
-#     .gitignore:31:**/_*	_fubar.txt
-#     $ git check-ignore --non-matching --verbose fubar.txt
+# - * Use check-ignore to test patterns (n.b., here with index ignored):
+#     $ git check-ignore --non-matching --verbose --no-index _fubar.txt
+#     .gitignore:39:**/_*	_fubar.txt
+#     $ git check-ignore --non-matching --verbose --no-index fubar.txt
 #     ::	fubar.txt
 #  which uses format <file>:<line>:<pattern> (n.b., '::' indicates no match).
 #
 # TODO:
 # - Address the TODO's below.
 #
+## UPDATE 2026-10-26: refines output-files to allow batspp
 
 # Special cases
 # TODO: see why excluded by the rules
@@ -51,8 +52,16 @@
 
 # Output or log-file directories
 # note: output-files require overrides (e.g., git add --force tests/output-files/README.batspp)
+# changes facilitated by Gemini 4 Argon
 **/log-files
-**/output-files
+## OLD:
+## **/output-files
+## NOTE: un-ignore output-files dir itself (overriding ~/.gitignore) and ignore contents so .batspp files can be re-included
+!**/output-files/
+**/output-files/*
+# allows output-files/*.batspp, excluding _*
+!**/output-files/[!_]*.batspp
+# ignore all downloads
 **/downloads
 
 # Jupyter
