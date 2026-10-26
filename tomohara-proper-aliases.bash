@@ -57,7 +57,9 @@ function git-repo-url { extract-matches -slurp 'remote[^\[]+url\s*=\s*(\S+)' .gi
 function git-slug { git-repo-url | extract-matches '([^\/]+/[^\/]+)$'; }
 alias git-is-repo-accessible-alias='git-is-repo-accessible'
 alias git-push='git-push-alias'
-alias git-check-ignore-plus='git check-ignore --non-matching --verbose'
+## OLD: alias git-check-ignore-plus='git check-ignore --non-matching --verbose'
+# git-check-ignore-plus(file): see if FILE excluded by .gitignore, ignoring index
+simple-alias-fn git-check-ignore-plus 'git check-ignore --no-index --non-matching --verbose'
 ## TODO: alias git-X-='git-X-plus'
 ## -or- TODO: alias git-X-alias='invoke-git-command pull'
 
