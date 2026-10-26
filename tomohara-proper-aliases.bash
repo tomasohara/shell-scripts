@@ -116,7 +116,7 @@ function plint-tester-testee {
         ## TODO: local func="${BASH_SOURCE[0]:-func}"
         ## DEBUG: echo "${BASH_SOURCE[@]}"
         local func=plint-tester-testee
-        echo "Usage: [PYLINT=prog] [TEST=B] $func script"
+        echo "Usage: [PYLINT=prog] [TEST=B] [PYTEST_OPTS=text] $func script"
         echo "ex: TEST=1 PYLINT=python-lint-work $func cut.py"
         if [ ! -e "$test_script" ]; then
             echo "Error: can't find \"$test_script\": this should be run from same dir as script being tested"
@@ -321,8 +321,7 @@ function run-python-app {
 ## UPDATE: 05/09/2006: adds summary for all at end
 # options: --vv: doubly verbose; --capture=no: don't capture stderr; -rA: report all
 # shellcheck disable=SC2206
-## TODO3: rework to just use PYTEST_OPTIONS
-default_pytest_opts=(${PYTEST_OPTIONS:-})
+default_pytest_opts=(${PYTEST_OPTS:-"-s"})
 #
 # test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
