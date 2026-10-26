@@ -157,8 +157,8 @@ echo {a..z}
 ## Arrays
 
 ```bash
-arr=(one two three)             # 
-declare -a arr                  # declaration for array (implicit in a
+arr=(one two three)             # assign list of values to array variable
+declare -a arr                  # declaration for array (implicit in an [assignment?])
 echo "${arr[0]}"                # first element
 echo "${arr[@]}"                # ** all elements (individually quoted)
 echo "${arr[*]}"                # all elements (single word)
