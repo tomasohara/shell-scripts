@@ -18,8 +18,7 @@
 # - figure out occasional problem with graphling files not getting deleted after processed killed
 
 # Uncomment the following line for tracing
-#
-set echo=1
+## DEBUG: set echo=1
 
 # Initialize options and variables
 # NOTE: temp file is of the form /tmp/kill_em_aux_HOSTNAME_PID
