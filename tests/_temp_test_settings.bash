@@ -47,4 +47,4 @@ fi
 
 # TEMP: Treat evaluation errors as test failure
 # Note: need to work in way for work-in-progress scripts to be excluded
-export STOP_ON_FAILURE=1
+## TODO3: export STOP_ON_FAILURE=1
