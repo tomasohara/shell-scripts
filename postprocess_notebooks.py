@@ -16,7 +16,7 @@ other than ``execution``. It writes generated BatsPP files to ``{output_dir}``
 by default.
 
 Usage:
-    {script} [--notebook-dir DIRECTORY] [--output-dir DIRECTORY]
+    {script} --notebook-dir tests --output-dir tests/output-files
 """
 
 # Standard modules
@@ -30,6 +30,8 @@ from typing import Any
 from mezcla import debug
 from mezcla import glue_helpers as gh
 from mezcla.main import Main
+from mezcla.my_regex import my_re
+from mezcla import system
 
 debug.trace(5, f"global __doc__: {__doc__}")
 debug.assertion(__doc__)
@@ -44,6 +46,9 @@ DEFAULT_OUTPUT_DIR = gh.form_path("tests", "output-files")
 JUPYTER_EXTENSION = ".ipynb"
 BATSPP_EXTENSION = ".batspp"
 TL = debug.TL
+TEST_REGEX = system.getenv_value(       # TODO3: get from test script (e.g., master_test.py)
+    "TEST_REGEX", None,
+    description="Regex for tests to include; ex: '^alias.*' for debugging")
 
 
 class NotebookPostprocessor:
@@ -61,6 +66,8 @@ class NotebookPostprocessor:
         if not self.notebook_dir.is_dir():
             raise FileNotFoundError(f"Notebook directory not found: {self.notebook_dir}")
         notebooks = sorted(self.notebook_dir.glob(f"*{JUPYTER_EXTENSION}"))
+        if TEST_REGEX:
+            notebooks = [nb for nb in notebooks if my_re.search(TEST_REGEX, str(nb))]
         debug.trace_expr(TL.DETAILED, notebooks, prefix="find_notebooks(): ")
         return notebooks
 
