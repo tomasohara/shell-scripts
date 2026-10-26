@@ -25,10 +25,12 @@ $ [ "$DEBUG_LEVEL" -lt 4 ]; echo "$?"
 
 # Global Setup
 $ TMP=${TMP:-/tmp}
-$ if [ "$DEBUG_LEVEL" -lt 4 ]; then 
-$     TMP=/tmp/trace-unix-alias
-$ fi
+## OLD:
+## if [ "$DEBUG_LEVEL" -lt 4 ]; then 
+##     TMP=/tmp/trace-unix-alias
+## fi
 $ temp_dir=$TMP/test-unix-alias
+$ rename-with-file-date "$temp_dir"
 ## OLD: trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
 $ command mkdir -p "$temp_dir"
 ## OLD: command mkdir -p "$trash_dir"
@@ -117,9 +119,14 @@ $ which python | grep -q "python" && echo "PY-TRUE" || echo "PY-FALSE"
 # basename-with-dir himom.txt
 PY-TRUE
 
+## example
+## $ full-dirname himom.txt
+## /home/testuser/temp/tmp/test-unix-alias/himom.txt
+
 ## OLD: full-dirname himom.txt
-$ [ "$(full-dirname himom.txt)" = "/tmp/trace-unix-commands/test-7766/himom.txt" ]; echo $?
-1
+## BAD: [ "$(full-dirname himom.txt)" = "/tmp/trace-unix-commands/test-7766/himom.txt" ]; echo $?
+$ [ "$(full-dirname himom.txt)" = "$temp_dir/himom.txt" ]; echo $?
+0
 
 ## OLD: basename-with-dir himom.txt
 $ [ "$(basename-with-dir himom.txt)" = "./himom.txt" ]; echo $?
@@ -154,7 +161,17 @@ VERSION_ID="N.N"
 
 ## 4D) system-status - (awk removes the session-name)
 $ system-status | testnum | testuser | tail -n +2 | awk '!($8="")'
-system_status.sh: command not found
+total used free shared buff/cache available  
+Mem: N N N N N N 
+Swap: N N N    
+N:N:N up N days, N:N, N users,  average: N.N, N.N, N.N
+USER TTY FROM LOGIN@ IDLE JCPU PCPU 
+userxf333 pts/N - N:N N:N N.Ns ? 
+tomohara ttyN - NOctN Ndays N:Nm N.Ns 
+userxf333 pts/N - NOctN Ndays N:N ? 
+userxf333 pts/N - NOctN Ndays N.Ns ? 
+userxf333 pts/N - NOctN N:Nm N.Ns ? 
+       
 
 $ apropos-command time | grep asctime | wc -l | testnum
 N
@@ -230,18 +247,52 @@ $ trace-cmd | testuser | testnum
 # ## bash-trace-on DISABLES bash tracing
 # bash-trace-off | testuser | testnum
 # trace-cmd | testuser | testnum
-start: Tue Apr N N:N:N PM +N N
-+ eval ''
-+ set - -o xtrace
-end: Tue Apr N N:N:N PM +N N
+start: Mon Oct N N:N:N AM EDT N
+++ is-true EVAL_COMMAND
+++ local env_name=EVAL_COMMAND
+++ local value
++++ eval echo '${EVAL_COMMAND:-false}'
+++++ echo false
+++ value=false
++++ echo false
++++ tr '[:upper:]' '[:lower:]'
+++ value=false
+++ local result=true
+++ case "$value" in
+++ result=false
+++ echo false
++ local EVAL_COMMAND=false
++ [[ false != true ]]
+++ alias ''
++ [[ '' != '' ]]
++ false
++ set +o xtrace
+end: Mon Oct N N:N:N AM EDT N
 
 ## bash-trace-on DISABLES bash tracing
 $ bash-trace-off | testuser | testnum
 $ trace-cmd | testuser | testnum
-start: Tue Apr N N:N:N PM +N N
-+ eval ''
-+ set - -o xtrace
-end: Tue Apr N N:N:N PM +N N
+start: Mon Oct N N:N:N AM EDT N
+++ is-true EVAL_COMMAND
+++ local env_name=EVAL_COMMAND
+++ local value
++++ eval echo '${EVAL_COMMAND:-false}'
+++++ echo false
+++ value=false
++++ echo false
++++ tr '[:upper:]' '[:lower:]'
+++ value=false
+++ local result=true
+++ case "$value" in
+++ result=false
+++ echo false
++ local EVAL_COMMAND=false
++ [[ false != true ]]
+++ alias ''
++ [[ '' != '' ]]
++ false
++ set +o xtrace
+end: Mon Oct N N:N:N AM EDT N
 
 # testing compression and extraction of dirs
 $ ls
@@ -276,12 +327,6 @@ hidad.txt  himom.txt  testfolder  tf1.txt  tf2.txt  tf3.txt
 # | Warning: No processes matched the pattern
 
 # count-exts counts extensions
-$ old-count-exts | testnum
-## OLD
-# linebr
-# count-exts | testnum
-.txt	N
-
 $ count-exts | testnum
 .txt	N
 
