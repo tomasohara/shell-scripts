@@ -148,6 +148,7 @@
 #     Use '--' to separate paths from revisions, like this:
 #     'git <command> [<revision>...] -- [<file>...]'
 #
+## UPDATE 2026-10-25: adds dynamic env. lookup for GIT_DRY and GIT_NO_CONFIRM.
 ## UPDATE 09 Aug 26: tags long-standing issues: see "quirk/bug"
 
 ## DEBUG: echo "in ${BASH_SOURCE[0]}"
@@ -158,12 +159,18 @@
 egrep="grep --extended-regexp"
 PERL="perl -Ssw"     # S: find in path; s: enable switches; w: show warnings
 
+# Functions for dynamic GIT-related env lookup
+# note: needed because git-aliases.bash gets sourced
+# TODO2: use different naming convention to avoid confusion
+function GIT_DRY { echo "${GIT_DRY:-0}"; }
+function GIT_NO_CONFIRM { echo "${GIT_NO_CONFIRM:-$GIT_DRY}"; }
+
 #................................................................................
 # Aliases
 
 # git: wrapper for blocking commands in dry-run mode
 function git {
-    if [ "$GIT_DRY" == "1" ]; then
+    if [ "$(GIT_DRY)" == "1" ]; then
         echo "# git " "$@";
     else
         command git "$@";
@@ -216,7 +223,7 @@ function git-pause-for-enter () {
     if [ "$message" = "" ]; then message="Press enter to continue"; fi
     # Maldito shellcheck: SC2162 [read without -r will mangle backslashes].
     # shellcheck disable=SC2162
-    if [ "$GIT_NO_CONFIRM" = "1" ]; then
+    if [ "$(GIT_NO_CONFIRM)" = "1" ]; then
         echo-plus "GIT_NO_CONFIRM set to 1, so skipping confirmation"
     else 
         read -p "$message "
@@ -910,7 +917,7 @@ function alt-invoke-next-single-checkin {
         case "$mod_file" in *.css | *.csv | *.html | *.ipynb | *.java | *.js | *.perl | *.py | *.[a-z]*sh | *.text| *.txt) is_text="1"; echo "Special case hack for brain-dead file command (known program extension in $mod_file)" ;; esac
     fi;
     if [ "$is_text" != "" ]; then
-        if [ "$GIT_NO_CONFIRM" = "1" ]; then
+        if [ "$(GIT_NO_CONFIRM)" = "1" ]; then
             echo-plus "GIT_NO_CONFIRM enabled, so skipping difftool (e.g., for visual diff)"
         else
             # Show brief excerpt of diff excluding meta-data
@@ -935,7 +942,7 @@ function alt-invoke-next-single-checkin {
     echo-plus "TODO: modify the GIT_MESSAGE (escaping $'s, etc.) and verify read OK in commit confirmation."
     local OLD_GIT_MESSAGE=$GIT_MESSAGE
     # note: options: -e use readline; -i initialize readline buffer; -r backslash is not an escape
-    if [ "$GIT_NO_CONFIRM" = "1" ]; then 
+    if [ "$(GIT_NO_CONFIRM)" = "1" ]; then 
         echo-plus "GIT_NO_CONFIRM set to 1, so skipping git-update-commit-push confirmation"
         export GIT_MESSAGE=${GIT_TEST_MESSAGE:-"default"}
         command="git-update-commit-push \"$mod_file\""
