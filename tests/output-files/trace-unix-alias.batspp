@@ -11,9 +11,16 @@
 ## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it.
 # echo "TODO:"
 # echo "  echo \"\$PS1\" | command grep --count --perl-regexp '[\x00-\x1f]'"
-$ actual=${PS1: -1}
-$ [ "$actual" = ">" ]; echo $?
-0
+## OLD:
+## actual=${PS1: -1}
+## [ "$actual" = ">" ]; echo $?
+## TODO?: actual="${PS1:-}"
+#
+# Count non-ascii (excludes newline)
+# via ascii manpage:  Oct   Dec   Hex   Char ... 040   32    20    SPACE ... 176   126   7E    ~
+$ non_ascii_count=$(echo -n "$PS1" | grep -v -c '[ - ~]')
+$ [ "$non_ascii_count" -eq 0 ]; echo $?
+1
 
 ## OLD: For debug
 # alias | wc -l
@@ -35,11 +42,16 @@ $ rename-with-file-date "$temp_dir"
 $ command mkdir -p "$temp_dir"
 ## OLD: command mkdir -p "$trash_dir"
 $ command cd "$temp_dir"
+renamed '/home/ai-user/temp/tmp/test-unix-alias' -> '/home/ai-user/temp/tmp/test-unix-alias.26Oct26.3'
 
 # Global Setup
+## TODO2: rename testuser, testnum, etc. to encode-user, encode-num, etc.
 $ alias testuser="sed -r "s/"$USER"+/userxf333/g""
 $ alias testnum="sed -r "s/[0-9][0-9]*/N/g""
+$ alias testalpha='sed -r "s/[A-Za-z]/A/g"'
 $ alias linebr="printf '%132s\n' ' ' | tr ' ' '-'"
+$ alias encode-month='perl -pe "s/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/month/ig;"'
+$ alias encode-weekday='perl -pe "s/\b(sun|mon|tue|wed|thur|fri|sat)\b/weekday/ig;"'
 
 ## OLD
 ## Count aliases proper
@@ -160,18 +172,29 @@ $ linux-version | grep VERSION_ID | testnum
 VERSION_ID="N.N"
 
 ## 4D) system-status - (awk removes the session-name)
-$ system-status | testnum | testuser | tail -n +2 | awk '!($8="")'
-total used free shared buff/cache available  
-Mem: N N N N N N 
-Swap: N N N    
-N:N:N up N days, N:N, N users,  average: N.N, N.N, N.N
-USER TTY FROM LOGIN@ IDLE JCPU PCPU 
-userxf333 pts/N - N:N N:N N.Ns ? 
-tomohara ttyN - NOctN Ndays N:Nm N.Ns 
-userxf333 pts/N - NOctN Ndays N:N ? 
-userxf333 pts/N - NOctN Ndays N.Ns ? 
-userxf333 pts/N - NOctN N:Nm N.Ns ? 
-       
+#
+# example:
+# $ system-status
+# Linux tpo-vivo 7.0.0-38-generic #38~24.04.4-Ubuntu SMP PREEMPT_DYNAMIC Mon Sep 14 16:37:11 UTC 2 x86_64 x86_64 x86_64 GNU/Linux
+#                total        used        free      shared  buff/cache   available
+# Mem:        20307532    11648016     3119144     2092124     7993076     8659516
+# Swap:       23068668     7833328    15235340
+#  14:43:30 up 22 days, 17:05,  7 users,  load average: 0.13, 0.22, 0.36
+# USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU  WHAT
+# testuser  pts/29   -                03:09    1.00s  2:59    ?    /bin/csh -f /home/ai-user/bin/archive/system_st
+# ...
+# testuser  pts/33   -                12Oct26 15:55m  0.52s   ?    (sd-pam)
+#
+## OLD: system-status | testnum | testuser | tail -n +2 | awk '!($8="")'
+## TODO2: add specific check (e.g., generic.*Ubuntu.*Mem.*Swap.*load.*USER)
+$ system-status | testnum | testuser | encode-month | encode-weekday | egrep -v 'pts|tty'
+Linux tpo-vivo N.N.N-N-generic #N~N.N.N-Ubuntu SMP PREEMPT_DYNAMIC weekday month N N:N:N UTC N xN_N xN_N xN_N GNU/Linux
+               total        used        free      shared  buff/cache   available
+Mem:        N    N     N     N     N     N
+Swap:       N     N    N
+ N:N:N up N days, N:N,  N users,  load average: N.N, N.N, N.N
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU  WHAT
+
 
 $ apropos-command time | grep asctime | wc -l | testnum
 N
@@ -238,61 +261,85 @@ $ set-display-local
 $ echo $DISPLAY | testnum
 localhost:N.N
 
-## Need a filter to sensor day and month
+## NOTE: Need a filter to sensor day and month
 ## bash-trace-on ENABLES bash tracing
-$ bash-trace-on | testuser | testnum
-## trace-cmd TRACES COMMANDS AND STATS (TIME) OF THE USER
-$ trace-cmd | testuser | testnum
+## OLD: bash-trace-on | testuser | testnum
+#
+# example:
+# $ cond-export ENV4 value4
+# + conditional-export ENV4 value4
+# ...
+# ++ printenv ENV4
+# + '[' '' == '' ']'
+# + export ENV4=value4
+# ...
+$ unset ENV1 ENV2
+$ bash-trace-on
+$ cond-export ENV1 value1 2>&1 | grep ENV1.*value1
+# note: makes sure 4+ references
+$ c=$(cond-export ENV2 value2 2>&1 | grep -c ENV2.*value2)
+$ bash-trace-off
+$ [ $c -ge 4 ]; echo $?
++ grep --color=auto 'ENV1.*value1'
++ conditional-export ENV1 value1
++ export [01;31m[KENV1=value1[m[K
++ [01;31m[KENV1=value1[m[K
++ args='[01;31m[KENV1 value1[m[K'
++ '[' '[01;31m[KENV1 value1[m[K' = '' ']'
+++ conditional-export ENV2 value2
+++ grep --color=auto -c 'ENV2.*value2'
++ c=4
++ set +o xtrace
+0
+
+# test trace-cmd TRACES COMMANDS AND STATS (TIME) OF THE USER
+## BAD: trace-cmd | testuser | testnum
+$ unset ENV3 ENV4
+$ echo "w/ trace"
+# note: makes sure 4+ references
+$ c=$(trace-cmd cond-export ENV3 value3 | grep -c ENV3.*value3)
+$ [ $c -ge 4 ]; echo $?
+# note: makes sure no references
+$ echo "w/o trace"
+$ c=$(cond-export ENV4 value4 | grep -c ENV4.*value4)
+$ [ $c -eq 0 ]; echo $?
+w/ trace
+0
+w/o trace
+0
+
 ## MOVED: NEXT CELL
 # ## bash-trace-on DISABLES bash tracing
 # bash-trace-off | testuser | testnum
 # trace-cmd | testuser | testnum
-start: Mon Oct N N:N:N AM EDT N
-++ is-true EVAL_COMMAND
-++ local env_name=EVAL_COMMAND
-++ local value
-+++ eval echo '${EVAL_COMMAND:-false}'
-++++ echo false
-++ value=false
-+++ echo false
-+++ tr '[:upper:]' '[:lower:]'
-++ value=false
-++ local result=true
-++ case "$value" in
-++ result=false
-++ echo false
-+ local EVAL_COMMAND=false
-+ [[ false != true ]]
-++ alias ''
-+ [[ '' != '' ]]
-+ false
-+ set +o xtrace
-end: Mon Oct N N:N:N AM EDT N
 
-## bash-trace-on DISABLES bash tracing
-$ bash-trace-off | testuser | testnum
-$ trace-cmd | testuser | testnum
-start: Mon Oct N N:N:N AM EDT N
-++ is-true EVAL_COMMAND
-++ local env_name=EVAL_COMMAND
-++ local value
-+++ eval echo '${EVAL_COMMAND:-false}'
-++++ echo false
-++ value=false
-+++ echo false
-+++ tr '[:upper:]' '[:lower:]'
-++ value=false
-++ local result=true
-++ case "$value" in
-++ result=false
-++ echo false
-+ local EVAL_COMMAND=false
-+ [[ false != true ]]
-++ alias ''
-+ [[ '' != '' ]]
-+ false
+# test bash-trace-off which DISABLES bash tracing
+#
+# example w/ tracing:
+# $ bash-trace-off
+# + set +o xtrace
+$ bash-trace-on
+$ c=$(bash-trace-off | grep -c xtrace)
+$ [ $c -eq 1 ]; echo $?
+$ bash-trace-off
+++ set +o xtrace
+++ grep --color=auto -c xtrace
++ c=0
++ '[' 0 -eq 1 ']'
++ echo 1
+1
 + set +o xtrace
-end: Mon Oct N N:N:N AM EDT N
+
+# test trace-cmd w/o command and using evaluation
+#
+# example:
+# $ EVAL_COMMAND=1 trace-cmd | grep eval
+# +++ eval echo '${EVAL_COMMAND:-false}'
+# + eval ''
+#
+$ c=$(EVAL_COMMAND=1 trace-cmd | grep -c eval)
+$ [ $c -ge 2 ]; echo $?
+0
 
 # testing compression and extraction of dirs
 $ ls
@@ -307,6 +354,7 @@ $ cp tf2.txt testfolder/
 hidad.txt  himom.txt  [0m[01;34mtestfolder[0m  tf1.txt  tf2.txt  tf3.txt
 'tf2.txt' -> 'testfolder/tf2.txt'
 
+## TODO3: compress-dir? 
 $ compress-this-dir ./testfolder | { [ $(wc -l < /dev/stdin) -ne 0 ] && echo "NotZero" || echo "Zero"; }
 NotZero
 
