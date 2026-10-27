@@ -65,11 +65,12 @@ $ dir | perl -pe "s/ (\d+) [\w ]{2,8}/ \1 username /; s/\w\w\w \d+ \d\d:\d\d/mon
 $ cat dir_perl.out | head -n 4 | tail -n 1 | testnum
 -rw-rw-r-- N username -user    N mon  hh:mm mno
 
-$ echo "Error: Important macro(s) not covered (e.g., basename-with-dir)" 1>&2
-$ exit
-Error: Important macro(s) not covered (e.g., basename-with-dir)
-exit
-Restarting Bash
+## OLD:
+## echo "Error: Important macro(s) not covered (e.g., basename-with-dir)" 1>&2
+## exit
+# Test basename-with-dir (facilitated by Gemini 4 Argon)
+$ basename-with-dir /x/y/z/template.html .html
+/x/y/z/template
 
 # Remove everything after use
 ## OLD: command mv -f * "$trash_dir"
