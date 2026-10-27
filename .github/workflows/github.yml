@@ -56,6 +56,8 @@ jobs:
           ## TODO2: sudo apt-get install --yes --fix-missing $(sed 's/ \#.*//' required-packages.txt | grep -v '^#')
           ## NOTE: libegl1 added for clipboard_button.py (Embedded-System Graphics Library)
           sudo apt-get install --yes --fix-missing tcsh libegl1
+          # Install packages from required-packages.txt (facilitated by Gemini 4 Argon)
+          sudo apt-get install --yes --fix-missing $(sed 's/ \#.*//' required-packages.txt | grep -v '^#')
           echo "end of other dependencies (status=$?)"
 
       - name: Run Python Tests under Runner
