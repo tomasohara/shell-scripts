@@ -9,6 +9,13 @@
 # - Uses one cell per output (to make this less brittle).
 # - For USE_SSH_AUTH usage, see summary_stats.bash.
 # - Use 'command cmd args' to invoke cmd's to avoid alias overrides (e.g., 'egrep --color=auto').
+# - Warning: avoid using temporary repo files like temp-fubar.txt (use _temp... instead). Otherwise,
+#   .gitignore might need to be updated as follows:
+#       # Allow temporary files like temp-hello-kitty.txt
+#       !temp-*
+#   See https://github.com/scrappycito/git-bash-test/blob/development/.gitignore.
+# note: use _temp for truly temporary (e.g., _temp-hello-kitty.txt).
+# based on Gemini 4 Argon tip
 #
 # BatsPP quirks (circa Dec 2023):
 # - global setup should not have output, so redirect to /dev/null
@@ -43,7 +50,7 @@ $ alias encode-newlines='perl -0777 -pe "while (/\n\n/) { s/\n\n/\n<newline>\n/g
 $ function encode-text () { encode-control-chars | encode-nums | encode-hex | encode-newlines; }
 
 # Global Setup
-# Warning: Due to BatpPP quirk, comments should not be placed within command sequence.
+# Warning: Due to BatsPP quirk, comments should not be placed within command sequence.
 # So make sure there is only one command sequence per cell
 $ git clone https://github.com/scrappycito/git-bash-test.git "$TMPA" >> "$stderr_log" 2>&1
 $ git clone https://github.com/scrappycito/git-bash-test.git "$TMPB" >> "$stderr_log" 2>&1
@@ -101,7 +108,8 @@ issuing: git stash pop
  create mode <cc>N temp-hello.txt
 
 # Assert
-$ [ "$(cat temp-hello.txt)" == "hello second local" ]; echo $?;
+## OLD: [ "$(cat temp-hello.txt)" == "hello second local" ]; echo $?;
+$ [ "$(cat temp-hello.txt 2>> "$stderr_log")" == "hello second local" ]; echo $?;
 0
 
 # Setup
@@ -132,7 +140,8 @@ issuing: git stash pop
 <tab>modified:   temp-hello.txt
 
 #assert
-$ [ "$(cat temp-hello2.txt)" == "second change" ]; echo $?;
+## OLD: [ "$(cat temp-hello2.txt)" == "second change" ]; echo $?;
+$ [ "$(cat temp-hello2.txt 2>> "$stderr_log")" == "second change" ]; echo $?;
 0
 
 # Setup
@@ -158,7 +167,8 @@ $ command cd "$TMPB"
 $ git pull >> "$stderr_log" 2>&1
 
 #assert
-$ [ "$(cat temp-push.txt)" == "pushed" ]; echo $?;
+## OLD: [ "$(cat temp-push.txt)" == "pushed" ]; echo $?;
+$ [ "$(cat temp-push.txt 2>> "$stderr_log")" == "pushed" ]; echo $?;
 0
 
 # Setup
