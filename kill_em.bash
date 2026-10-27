@@ -17,6 +17,7 @@
 # - separate out the Graphling support into a new script just for that
 # - figure out occasional problem with graphling files not getting deleted after processed killed
 #
+## UPDATE 2026-10-27: makes sure aux script exists before executing via Gemini
 ## UPDATE 05 Aug 26: adds --verify
 #
 
@@ -190,16 +191,27 @@ else
         echo "Press enter to proceed"
         read
     fi
+## BAD:
+## fi
+## 
+## # Do sanity check on kill script
+## if [ ! -s "$aux_script" ]; then
+##     echo "ERROR: Problem preparing aux script for killing processes."
+## fi
+## 
+## # Execute the kill script after showing the processes to be killed
+## cat "$aux_script"
+## source "$aux_script" 2> "$aux_script.log"
+    ## NOTE: only check and execute aux_script when processes matched (facilitated by Gemini 4 Argon)
+    # Do sanity check on kill script
+    if [ ! -s "$aux_script" ]; then
+        echo "ERROR: Problem preparing aux script for killing processes."
+    else
+        # Execute the kill script after showing the processes to be killed
+        cat "$aux_script"
+        source "$aux_script" 2> "$aux_script.log"
+    fi
 fi
-
-# Do sanity check on kill script
-if [ ! -s "$aux_script" ]; then
-    echo "ERROR: Problem preparing aux script for killing processes."
-fi
-
-# Execute the kill script after showing the processes to be killed
-cat "$aux_script"
-source "$aux_script" 2> "$aux_script.log"
 
 # Cleanup things
 if [ -z "$DEBUG_LEVEL" ]; then
