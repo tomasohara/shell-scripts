@@ -15,21 +15,27 @@
 # - Use DEBUG_LEVEL rather than VERBOSE_TRACING.
 # TODO2: Rename as tomohara-startup-tracing.bash as interwined with the eponymous scripts (tomohara-aliases.bash, etc.)???.
 #
+## UPDATE 2026-10-27: reworks STARTUP_TRACING, etc. defaults
 ## UPDATE 2026-10-20: Revise VERBOSE_TRACING interpretation.
 
 # maldito shellcheck: this should be an option, not the default
 #   SC2153: Possible misspelling: TMP may not be assigned, but TEMP is
 # shellcheck disable=SC2153
 
-if [ "$STARTUP_TRACING" = "" ]; then STARTUP_TRACING=0; fi
-if [ "$CONSOLE_TRACING" = "" ]; then CONSOLE_TRACING=0; fi
-if [ "$VERBOSE_TRACING" = "" ]; then VERBOSE_TRACING=0; fi
+if [ "$STARTUP_TRACING" = "" ]; then STARTUP_TRACING=-1; fi
+if [ "$CONSOLE_TRACING" = "" ]; then CONSOLE_TRACING=-1; fi
+if [ "$VERBOSE_TRACING" = "" ]; then VERBOSE_TRACING=-1; fi
 DEBUG_LEVEL=${DEBUG_LEVEL:-0}
 if [ "$TEMP" = "" ]; then TEMP="$TMP"; fi
 if [ "$TEMP" = "" ]; then TEMP=/tmp; fi
 
 # startup-trace(msg): trace MSG at DEBUG_LEVEL 5+
 function startup-trace () {
+    # note: tracing blocked when STARTUP_TRACING explicitly set to 0
+    if [ "$STARTUP_TRACING" = "0" ]; then
+        return
+    fi
+
     # Set tracing (TODO3: put in separate function like startup-trace-init)
     ## TODO2: straighten out VERBOSE_TRACING ambiguity (e.g., shell-scripts verbose debug level vs Bash verbose option)
     ## NOTE: SET_XTRACE and SET_VERBOSE added as workaround
