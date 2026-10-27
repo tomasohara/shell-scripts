@@ -359,7 +359,11 @@ def main():
             print("\nError Details:\n")
             for error in eval_errors:
                 ## BAD: print("\t"+error+"\n")
-                print(f"\t{error}")
+                ## OLD: print(f"\t{error}")
+                # Strip line number column added by check_errors.perl (e.g., "2    >>> ... <<<")
+                # Change facilitated by Gemini 4 Argon
+                error_spec = my_re.sub(r"^[0-9]+ +", "", error)
+                print(f"\t{error_spec}")
             print("")
         
         debug.trace(6, f"\nrun_batspp() ##real_output## => {real_output!r}")
