@@ -513,7 +513,10 @@ class Batspp(Main):
             bats_output = gh.run(f'{eval_prog} {BATS_OPTIONS} {batsfile} < /dev/null 2> {eval_log}')
             print(bats_output)
             system.print_stderr(debug.call(T6, gh.run, f"check_errors.perl {eval_log}") or "")
-            debug.assertion(not my_re.search(r"^0 tests", bats_output, re.MULTILINE))
+            ## OLD: debug.assertion(not my_re.search(r"^0 tests", bats_output, re.MULTILINE))
+            # Allow 0 tests for empty-test-file (facilitated by Gemini 4 Argon)
+            debug.assertion((not my_re.search(r"^0 tests", bats_output, re.MULTILINE))
+                            or ("empty" in self.testfile))
 
 
     def __process_setup(self):
