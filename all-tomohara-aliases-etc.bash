@@ -132,3 +132,6 @@ fi
 ##       to the positional parameters. The -x and -v options are turned off. ...
 ##
 $was_tracing || set +o xtrace
+
+# Optional end trace
+(( DEBUG_LEVEL >= 6 )) && echo "out ${BASH_SOURCE[0]}"
