@@ -31,6 +31,7 @@
 # but, it is awkward to do so for docker or Github runner jobs.
 # 2. For other Github Actions env. vars, see https://www.theserverside.com/blog/Coffee-Talk-Java-News-Stories-and-Opinions/environment-variables-full-list-github-actions
 if [ "$DEPLOYMENT_BASEPATH" == "/opt/runner" ]; then
+    echo "FYI: Enabling settings for Github Runner: USE_SSH_AUTH, etc."
     export ARCHIVE_OUTPUT=1
     export USE_SSH_AUTH=1
     export DEBUG_LEVEL=5
