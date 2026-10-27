@@ -1,5 +1,6 @@
 # The following packages are required. They can be installed as follows:
-#    sudo apt-get install $(sed 's/ #.*//' required-packages.txt | grep -v ^#) 2> /dev/null
+#    sudo apt-get install $(sed 's/  *#.*//' required-packages.txt | grep -v ^#) 2> /dev/null
+# Make sure the main-packages list can be readily extracted (see .github/workflows/github.yml).
 #
 # In addition, there are some optional packages, which be installed as follows:
 #    sudo apt-get install $(perl -pe 's/^#opt#\s*//;' required-packages.txt | sed 's/ #.*//' | grep -v '^#') 2> /dev/null
@@ -9,6 +10,10 @@
 #   debian-based Linux distributions.
 # - See requirements.txt for Python package requirements.
 #
+#................................................................................
+# Main packages
+#
+# ubuntu-name-token                     # - brief description
 ansifilter                              # - ANSI terminal escape code filter
 ## OLD: batspp                          # - Bash Automated Testing System with Preprocessor
 bats	                                # - bash automated testing system
