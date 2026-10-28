@@ -84,8 +84,10 @@ ACT_JSON="${ACT_JSON:-""}"
 RUN_BUILD="${RUN_BUILD:-0}"
 RUN_DOCKER="${RUN_DOCKER:-0}"
 RUN_WORKFLOW="${RUN_WORKFLOW:-1}"
-WORKFLOW_FILE="${WORKFLOW_FILE:-act.yml}"
+## OLD: WORKFLOW_FILE="${WORKFLOW_FILE:-act.yml}"
+WORKFLOW_FILE="${WORKFLOW_FILE:-github.yml}"
 RUN_BUILD_CACHELESS="${RUN_BUILD_CACHELESS:-0}"
+IGNORE_ERRORS="${IGNORE_ERRORS:-0}"
 # TODO3: put all env. init up here for clarity
 #   CLONE_REPO, AUTO_REQS, etc.
 if [ "$DEBUG_LEVEL" -ge 4 ]; then
@@ -105,7 +107,13 @@ usage() {
     echo "  --docker    (-d)    Run Docker directly (bypassing nektos act) (default: $RUN_DOCKER)"
     echo "  --file      (-f)    Specify workflow file (default: $WORKFLOW_FILE)"
     echo "  --json      (-j)    Specify act JSON (default: $ACT_JSON)"
+    echo "  --ignore    (-i)    Ignore errors"
     echo "  --help      (-h)    Displays the help message and exit"
+    echo ""
+    echo "Note:"
+    echo "- Use ACT_PROGRAM to specify different act program."
+    echo "- Use RUN_OPTS to specify additional act options (e.g., --container-architecture linux/amd64 for MacOS)."
+    echo ""
     exit 1
 }
 
@@ -141,6 +149,9 @@ set_option(){
                 echo "Error: Missing argument for --json"
                 usage
             fi
+            ;;
+        --ignore|-i)
+            IGNORE_ERRORS=1
             ;;
         --help|-h)
             usage
@@ -180,13 +191,14 @@ command cd "$src_dir"
 # Do sanity checks for potential problems
 ## TODO1: fix bug with image selection blocking progress (set default and disable interactive mode)
 ##   choose the default image you want to use with act
+if [ "$IGNORE_ERRORS" != 0 ]; then IGNORE_ERRORS=true; else IGNORE_ERRORS=false; fi
 if [[ ("$RUN_WORKFLOW" == "1") && (! -e ~/.actrc) ]]; then
     echo "Error: run act to configure default image in ~/.actrc"
-    exit
+    $IGNORE_ERRORS || exit
 fi
 if [ "" = "$(groups | grep docker)" ]; then
     echo "Error: you need to be in the docker group to use act (or docker)"
-    exit
+    $IGNORE_ERRORS || exit
 fi
 
 # Optionally clone the GitHub repository into temp. dir
@@ -228,6 +240,7 @@ fi
 # TODO1: get this to retain image (to allow for post-mortem review)
 if [[ "$RUN_WORKFLOW" == "1" ]]; then
     act="${ACT_PROGRAM:-act}"
+    ## TODO2: allow for absolute path WORKFLOW_FILE
     file="$WORKFLOW_FILE"
     echo "Running Github Actions locally via $act w/ $file"
 
