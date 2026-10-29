@@ -22,7 +22,8 @@
 # Regular settings
 # Note: Archiving output will only be done if running under docker;
 # also, scp will be skipped. It is used for debugging Github Actions
-## export ARCHIVE_OUTPUT=1            # create output archive in repo root under docker
+## TEMP:
+export ARCHIVE_OUTPUT=1            # create output archive in repo root under docker
 ## export SCP_OUTPUT=0                # don't copy results to server via scp
 ## export USE_SSH_AUTH=0              # use ssh w/ scrappycito.pem for git updates
 
