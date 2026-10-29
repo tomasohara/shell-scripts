@@ -94,6 +94,7 @@
 ##      perl -pe 's/^\@test "(.*)"/function $1/;' my-test.bats > my-text.bash
 ## - add examples below to help clarify processing
 ##
+## UPDATE 2026-10-29: Adds optional timeout.
 ## UPDATE 04 Aug 26: Adds support for strict eval (i.e., set -euo pipefail).
 ##
 
@@ -241,7 +242,9 @@ USE_INDENT_PATTERN = system.getenv_bool("USE_INDENT_PATTERN", False,
 STRICT_EVAL = system.getenv_bool(
     "STRICT_EVAL", False,
     "Evaluate scripts with Bash strict mode via `set -euo pipefail`")
-
+EVAL_TIMEOUT = system.getenv_number(
+    "EVAL_TIMEOUT", -1,
+    "Timeout in seconds for BatsPP evaluation (n.b., ignored if 0 or less)")
 
 # Some constants
 TL = debug.TL
@@ -493,15 +496,13 @@ class Batspp(Main):
         ##     gh.run(f'chmod +x {batsfile}')
 
         # Run unless adminstrative user and --force not 
-        skip_bats = SKIP_BATS
-        if not skip_bats:
+        if not SKIP_BATS:
             is_admin = my_re.search(r"\b(root|admin|adm)\b", gh.run("groups"))
             if is_admin:
                 if not self.force:
                     system.exit("Error: running bats under admin-like account requires --{force} option", force=FORCE)
-                system.print_error("FYI: not recommended to run under admin-like account (to avoid inadvertant deletions, etc..)")
-    
-            
+                system.print_error("FYI: not recommended to run under admin-like account (to avoid inadvertant deletions, etc.)")
+        #
         if not SKIP_BATS:
             ## TODO2: include time out to account for hanging tests
             debug.trace(T7, f'batspp - running test {self.temp_file}')
@@ -510,7 +511,8 @@ class Batspp(Main):
             # note: uses empty stdin in case of buggy tests (to avoid hangup);
             # uses .eval.log to avoid conflict with batspp_report.py
             eval_log = (EVAL_LOG if EVAL_LOG else (self.temp_file + ".eval.log"))
-            bats_output = gh.run(f'{eval_prog} {BATS_OPTIONS} {batsfile} < /dev/null 2> {eval_log}')
+            timeout_spec = ("" if (EVAL_TIMEOUT <= 0) else f"timeout {EVAL_TIMEOUT}")
+            bats_output = gh.run(f'{timeout_spec} {eval_prog} {BATS_OPTIONS} {batsfile} < /dev/null 2> {eval_log}')
             print(bats_output)
             system.print_stderr(debug.call(T6, gh.run, f"check_errors.perl {eval_log}") or "")
             ## OLD: debug.assertion(not my_re.search(r"^0 tests", bats_output, re.MULTILINE))
