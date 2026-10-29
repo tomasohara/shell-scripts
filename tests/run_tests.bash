@@ -6,6 +6,7 @@
 # - Includes support for overriding DEBUG_LEVEL and TEST_REGEX for use with Docker,
 #   working around quirks for Nektos/Act (see local-workflows.sh).
 #
+## UPDATE 2026-10-29: show env. diff after _temp_test_settings.bash
 
 # Display command-line usage.
 function usage() {
@@ -44,6 +45,9 @@ fi
 if [ "${VERBOSE:-0}" = "1" ]; then
     set -o verbose
 fi
+if [[ "${STRICT:-0}" == "1" ]]; then
+    set -euo pipefail
+fi
 dir=$(dirname "${BASH_SOURCE[0]}")
 
 # Make sure directory and parent directory on PATH and PYTHONPATH (at start).
@@ -60,11 +64,16 @@ export PYTHONPATH="$SCRIPT_DIR:$test_dir:$PYTHONPATH"
 # Note: workaround for adhoc environment settings (see local-workflow.sh)
 temp_script="$dir/_temp_test_settings.bash"
 if [ -e "$temp_script" ]; then
-    env_before=$(printenv)
+    env_before="$TEMP/_printenv-before-$$.log"
+    env_after="$TEMP/_printenv-after-$$.log"
+    printenv >| "$env_before"
     source "$temp_script"
-    env_after=$(printenv)
-    if [ "$env_before" != "$env_after" ]; then
-        echo "FYI: environment changes made via $temp_script"
+    printenv >| "$env_after"
+    env_diff="$(diff "$env_before" "$env_after")"
+    if [ "$env_diff" != "" ]; then
+       echo "FYI: environment changes made via $temp_script: {"
+       echo "$env_diff" | perl -pe "s/^/    /;"
+       echo "}"
     fi
 fi
 
