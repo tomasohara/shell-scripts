@@ -459,6 +459,7 @@ function quiet-unalias {
 }
 
 # Bash customizations (e.g., no beep)
+## TODO2: put into tomohara-settings.bash
 # via https://www.gnu.org/software/bash/manual/bash.html
 # - If the histappend shell option is set (see Bash Builtins), the lines are
 # appended to the history file, otherwise the history file is overwritten.
