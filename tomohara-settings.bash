@@ -11,6 +11,13 @@
 # - ** Move misc. settings from .bashrc and tomohara-aliases.bash here.
 # - Flesh out.
 #
+# TODO3:
+# - Document system env vars:
+#   HOSTNAME: Bash builtin for system's network hostname 
+#   OSTYPE: Bash builtin for operating system
+#   etc.
+#   See https://www.gnu.org/software/bash/manual/bash.html#Bash-Variables
+#
 
 # Ensure OSTYPE is environment variable for script usage
 if [ "$(printenv OSTYPE)" = "" ]; then
