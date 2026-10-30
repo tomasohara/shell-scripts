@@ -51,7 +51,9 @@ function startup-trace () {
 
     # File logging and/or console
     if [ "$STARTUP_TRACING" = "1" ]; then
-        echo "$* [$HOSTNAME $(date)]" >> "$TEMP/_startup-$USER-$HOST-$$.log";
+        ## BAD: echo "$* [$HOSTNAME $(date)]" >> "$TEMP/_startup-$USER-$HOST-$$.log";
+        ## NOTE: HOSTNAME is more standard; see https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html
+        echo "$* [$HOSTNAME $(date)]" >> "$TEMP/_startup-$USER-$HOSTNAME-$$.log";
     fi; 
     if [ "$CONSOLE_TRACING" = "1" ] || [ "$DEBUG_LEVEL" -ge 5 ]; then
         ## OLD: echo "$* [$HOSTNAME $(date)]";
