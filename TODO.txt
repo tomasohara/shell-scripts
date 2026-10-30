@@ -64,3 +64,8 @@ Wed 21 Oct 26
 
 P1: fix quirks with git-aliases.bash (e.g., .gitconfig getting overwritten under personal-dot-files)
 
+--------------------------------------------------------------------------------
+Thu 29 Oct 26
+
+P3: Switch from HOST to HOSTNAME in Bash scripts (e.g., set_xterm_title.bash).
+P2: standardize env vars across scripts: see https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html
