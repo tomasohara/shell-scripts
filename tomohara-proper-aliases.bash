@@ -438,7 +438,8 @@ function pip-freeze {
     freeze_file="${freeze_file//--/-}"
     rename-with-file-date "$freeze_file"
     pip3 freeze > "$freeze_file"
-    echo "$freeze_file"
+    ## OLD: echo "$freeze_file"
+    $PAGER "$freeze_file"
 }
 
 # venv-activate([dir=venv]): activate VENV and add python to xterm
