@@ -3119,11 +3119,12 @@ function get-free-filename() {
     echo "$filename"
 }
 
-# sudo-admin(): create typescript as sudo user using filename based on current
+# sudo-admin([args]): create typescript as sudo user using filename based on current
 # date using numeric suffixes if necessary until the filename is free (e.g., _config.30aug22.log2)
 # note: exsting _config*.log files are made read-only so not later overwritten
 # by accident
 # note: checks $ADMIN_DIR for log files
+# ex: 
 # TOM-IDIOSYNCRATIC
 function sudo-admin () {
     local prefix="_admin-config."
@@ -3150,7 +3151,8 @@ function sudo-admin () {
     # note: uses --login so no shared settings (e.g., env variables)
     # maldito shellcheck: SC2033 [Shell functions can't be passed to external commands]; SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2033,SC2086
-    sudo --login script $script_options "$script_log"
+    ## OLD: sudo --login script $script_options "$script_log"
+    sudo "$@" --preserve-env=INTERACTIVE_BASH --login script $script_options "$script_log"
 }
 
 # sync2(): invokes files system synchronization twice: one for good effect
