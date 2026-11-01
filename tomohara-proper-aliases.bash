@@ -31,7 +31,6 @@ alias git-vdiff='git-vdiff-alias'
 alias gvdiff=git-vdiff
 # git-all-update[-verbose]: update main repos, optionally with URL dislay
 alias git-all-update='update-main-repos.bash'
-## OLD: alias git-all-update-verbose='VERBOSE_MODE=1 git-all-update'
 ## TODO2: add check for complex aliases involving environment usage (e.g., only applied to first command)
 simple-alias-fn git-all-update-verbose 'VERBOSE_MODE=1 update-main-repos.bash'
 alias git-extract-all-versions='VERBOSE=1 extract-all-git-versions.bash --human'
@@ -45,10 +44,8 @@ alias git-script-update='script-update'
 # sample entry from .git/config:
 #   [remote "origin"]
 #       url = https://github.com/tomasohara/shell-scripts
-## OLD: function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
-## NOTE: uses first url (TODO1: use para-match to filter submodule)
-## OLD: function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config" | head -1; }
-function git-repo-url { extract-matches -slurp 'remote[^\[]+url\s*=\s*(\S+)' .git/config | head -1; }
+## BAD: function git-repo-url { extract-matches -slurp 'remote[^\[]+url\s*=\s*(\S+)' .git/config | head -1; }
+function git-repo-url { extract-matches -slurp 'remote[^\[]+url\s*=\s*(\S+)' "$(git-root-alias)/.git/config" | head -1; }
 #
 # git-slug: returns name for git repo in current dir
 # example: tomasohara/shell-scripts
@@ -57,7 +54,6 @@ function git-repo-url { extract-matches -slurp 'remote[^\[]+url\s*=\s*(\S+)' .gi
 function git-slug { git-repo-url | extract-matches '([^\/]+/[^\/]+)$'; }
 alias git-is-repo-accessible-alias='git-is-repo-accessible'
 alias git-push='git-push-alias'
-## OLD: alias git-check-ignore-plus='git check-ignore --non-matching --verbose'
 # git-check-ignore-plus(file): see if FILE excluded by .gitignore, ignoring index
 simple-alias-fn git-check-ignore-plus 'git check-ignore --no-index --non-matching --verbose'
 ## TODO: alias git-X-='git-X-plus'
@@ -73,9 +69,6 @@ alias git-status-tom=git-status-sans-tom
 # TODO: work out better alias name
 alias git-stat=git-status-sans-tom
 alias gstat=git-stat
-## OLD:
-## # TODO: better name (e.g., git-diff-name-only-main?) and/or decompose git-name-diff-branch?
-## alias git-name-diff-main='git diff --name-only main..HEAD | cat'
 ## NOTE: name avoid tab-completion conflict with git-next-checkin (i.e., git-n)
 alias git-diff-name-only-main='git diff --name-only main..HEAD | cat'
 #
@@ -113,7 +106,6 @@ alias-fn plint-torch 'plint "$@" | egrep -v "torch.*(no-member|no-name-in-module
 function plint-tester-testee {
     local script="$1"
     local test_script="tests/test_$script"
-    ## OLD: if [ "$1" == "" ]; then
     if [[ (! -e "$script") || (! -e "$test_script") ]]; then
         ## TODO: local func="${BASH_SOURCE[0]:-func}"
         ## DEBUG: echo "${BASH_SOURCE[@]}"
@@ -210,7 +202,7 @@ function run-python-script {
         echo "Usage: [ENV-OPTIONS] run-python-script script arg ..."
         echo "   ENV-OPTIONS: [USE_STDIN=B] [USE_STDOUT=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] [KEEP_EMPTY_OUT=b] [PYTHON=path] [PYTHON_RUN_LABEL=str]"
         echo "note:"
-        echo "- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL)"
+        echo "- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL higher)"
         echo "- PYTHON_OUT_DIR is script dir unless a full path"
         return
     fi
@@ -238,12 +230,8 @@ function run-python-script {
     local out_dir="${PYTHON_OUT_DIR:-"$default_out_dir"}"
     script_base="$(basename "$script_path" .py)"
     # TODO: find shortcut for min
-    ## OLD:
-    ## local python_debug_level="${PYTHON_DEBUG_LEVEL:-4}"
-    ## if [ "${DEBUG_LEVEL:-0}" -gt "$python_debug_level" ]; then
-    ##     python_debug_level="$DEBUG_LEVEL"
-    ## fi
-    local python_debug_level="${PYTHON_DEBUG_LEVEL:-${DEBUG_LEVEL:-4}}"
+    ## OLD: local python_debug_level="${PYTHON_DEBUG_LEVEL:-${DEBUG_LEVEL:-4}}"
+    python_debug_level=${PYTHON_DEBUG_LEVEL:-$(max DEBUG_LEVEL 4)}
     #
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
@@ -296,7 +284,6 @@ function run-python-script {
     tail "$log" "$out" | truncate-width
     check-errors-excerpt "$log" "$out"
     ## TEMP: remove emtpy output file (TODO3: streamline -e/-s tests below)
-    ## OLD: if [ "$DEBUG_LEVEL" -ge 4 ]; then
     if [ "$python_debug_level" -ge 4 ]; then
         ls -lt "$log" "$out"
     fi
@@ -438,7 +425,6 @@ function pip-freeze {
     freeze_file="${freeze_file//--/-}"
     rename-with-file-date "$freeze_file"
     pip3 freeze > "$freeze_file"
-    ## OLD: echo "$freeze_file"
     $PAGER "$freeze_file"
 }
 
@@ -762,7 +748,6 @@ function view-last-snapshot {
     local image dir
     image=$(get-last-snapshot "$@")
     if [ "$image" != /dev/null ]; then
-        ## OLD: start $(get-last-snapshot "$@");
         echo "Viewing image $image"
         if [ "${AS_THUMBNAIL:-0}" == "1" ]; then
             show-thumbnail "$image"
@@ -812,7 +797,6 @@ function shell-check-stdin-loose {
 function tabify {
     perl -pe 's/ +/\t/g;'
 }
-## OLD: # trace-vars(var, ...): trace each VAR in command line
 # trace-vars(var, ...): trace each VAR in command line to stderr
 # note: output format: VAR1=VAL1; ... VARn=VALn;
 # TODO2: fix bug with trailing whitespace being ignored
@@ -915,7 +899,6 @@ alias-fn rename-adhoc-notes 'rename-files -q "$(get-host-nickname)-adhoc-notes" 
 # TODO2: apply de-identification
 #
 function copy-to-temp-as-txt {
-    ## OLD: local file="$1"
     for file in "$@"; do
         local temp_file
         ## TODO3: global TEMP
@@ -1063,7 +1046,6 @@ function derive-signatures() {
     local f prefix
     for f in "$HOME/info/".*signature; do
         if [[ ! -e "$f" ]]; then
-            ## OLD: echo "Warning: No signature found in $HOME/info"
             echo "Warning: Signature not found: '$f'"
             break
         fi
