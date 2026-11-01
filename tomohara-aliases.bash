@@ -94,6 +94,7 @@
 #   set_xterm_title.bash startup-tracing.bash
 # - Supplemental scripts:
 #   anaconda-aliases.bash git-aliases.bash kill_em.bash ps_mine.bash
+## UPDATE 2026-11-01: refine function-usage error handling; adds rename-emoji usage
 ## UPDATE 20 Sep 26: reworks less macros to minimize redundancy; more macro comments
 ## UPDATE 13 Sep 26: changes tar-this-dir warning to an FYI
 ## UPDATE 13 Sep 26: reworks tar-this-dir-normal & tar-just-this-dir in terms of tar-this-dir; refines usage for tar aliases; adds usage for make-recent-tar; renames tar-this-dir-pruned and deprecates tar-this-dir-normal
@@ -323,12 +324,15 @@ function function-usage {
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
-            --args) args="$2"; shift 2 ;;
-            --synopsis) synopsis="$2"; shift 2 ;;
-            --example)  example="$2"; shift 2 ;;
-            --notes)    notes="$2"; shift 2 ;;
-            *) break ;;
+            --args) args="$2"; shift;;
+            --synopsis) synopsis="$2"; shift;;
+            --example)  example="$2"; shift;;
+            --notes)    notes="$2"; shift;;
+            -) true;;
+            -*) echo "Error: Unknown option: $1"; return;;
+            *) break;;
         esac
+        shift
     done
 
     local fn="${FUNCNAME[1]}"
@@ -2483,6 +2487,7 @@ alias rename-emoji-old='rename-files -quick -global -regex "(\xE2[\x80-\xFF]{2})
 # note: if STRIP_EMOTICONS then uses REPLACEMENT_TEXT (see mezcla's convert_emoticons.py)
 function rename-emoji-aux {
     # ex: "LangChain_🦜⛓️_-_Zep" => "LangChain_parrot_chains_-_Zep"
+    function-usage --synopsis "renames or strips emoji characters" --example "_telephone-📞.list" --notes $'- use rename-emoji-[file] for specified files\n- use rename-emoji-here to check non-ascii filenames in current dir'
     local f new_f
     for f in "$@"; do
         ## TODO3: drop variation selectors (U+FE0F)
@@ -2494,6 +2499,7 @@ function rename-emoji-aux {
 simple-alias-fn rename-emoji-verbose rename-emoji-aux
 
 simple-alias-fn rename-emoji 'STRIP_EMOTICONS=1 REPLACEMENT_TEXT=_ rename-emoji-aux'
+alias rename-emoji-file=rename-emoji
 # rename-emoji-here: rename files in current directory with emoji
 function rename-emoji-here {
     # note: ensures no spaces and then filters files by potential emoticons before slow rename-emoji step proper
