@@ -153,7 +153,7 @@ for dir in "${repos[@]}"; do
     if [[ "$show_summary" == "1" ]]; then
         if $verbose_mode; then
             branch="$(git-branch-alias)"
-            last_commit_info="$(git log -1 --all | echoize | COLUMNS=132 truncate-width)"
+            last_commit_info="$(git log -1 --all | echoize | COLUMNS=256 truncate-width)"
             echo -e "\t$branch; $last_commit_info"
         fi
         (grep "files changed" "$temp_log" || echo "No changes") | perl -pe 's/^/\t/;'
