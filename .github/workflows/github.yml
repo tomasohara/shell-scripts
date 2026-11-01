@@ -26,8 +26,15 @@ jobs:
     steps:
       - name: Initial Disk Usage
         run: |
+          echo "File system usage:"
+          df -h
           echo "Top directories by disk usage:"
           du --block-size=1K / 2>&1 | sort -rn | head -20
+
+      - name: Prune Unused Software Directories
+        # note: Needed occasionally to ensure enough space for dependencies
+        run: |
+          rm -rf /usr/local/lib/android /usr/share/dotnet /usr/share/swift
 
       ## NOTE: Action pins use major-version tags (e.g. @v5). These float within
       ## a major but do NOT cross a major bump (e.g. the Node 20->24 runtime
@@ -71,6 +78,8 @@ jobs:
           
       - name: Final Disk Usage
         run: |
+          echo "File system usage:"
+          df -h
           echo "Top directories by disk usage:"
           du --block-size=1K / 2>&1 | sort -rn | head -20
 
