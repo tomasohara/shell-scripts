@@ -24,6 +24,11 @@ jobs:
         ## TODO: 3.x [latest; -or latest, latest-1, latest-2, ...]
 
     steps:
+      - name: Initial Disk Usage
+        run: |
+          echo "Top directories by disk usage:"
+          du --block-size=1K / 2>&1 | sort -rn | head -20
+
       ## NOTE: Action pins use major-version tags (e.g. @v5). These float within
       ## a major but do NOT cross a major bump (e.g. the Node 20->24 runtime
       ## change), so new majors must be adopted deliberately. Dependabot (see
@@ -60,10 +65,15 @@ jobs:
           sudo apt-get install --yes --fix-missing $(sed 's/ \#.*//' required-packages.txt | grep -v '^#')
           echo "end of other dependencies (status=$?)"
 
-      - name: Run Python Tests under Runner
+      - name: Run BatsPP and Python Tests under Runner
         run: |
           PYTHONPATH="$PWD:$PWD/tests:$PYTHONPATH" ./tests/run_tests.bash
           
+      - name: Final Disk Usage
+        run: |
+          echo "Top directories by disk usage:"
+          du --block-size=1K / 2>&1 | sort -rn | head -20
+
   build-and-test-docker:
     name: Build and Run Tests via Docker
     ## TEMP: disable use of Docker
