@@ -24,6 +24,11 @@ jobs:
         ## TODO: 3.x [latest; -or latest, latest-1, latest-2, ...]
 
     steps:
+      - name: Display Environment
+        ## TODO: Make this step debug only
+        run: |
+          printenv | sort
+
       - name: Initial Disk Usage
         run: |
           echo "File system usage:"
