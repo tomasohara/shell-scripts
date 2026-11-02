@@ -3,6 +3,8 @@
 # Note:
 # - See act.yml for the local workflow file.
 # - It also contains a bunch of tips.
+# - For tips on pruning the runners, see
+#   https://dev.to/mathio/squeezing-disk-space-from-github-actions-runners-an-engineers-guide-3pjg
 #
 ## UPDATE 13 Sep 26: updates runner to ubuntu-24.04
 
@@ -39,7 +41,7 @@ jobs:
       - name: Prune Unused Software Directories
         # note: Needed occasionally to ensure enough space for dependencies
         run: |
-          rm -rf /usr/local/lib/android /usr/share/dotnet /usr/share/swift
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /usr/share/swift
 
       ## NOTE: Action pins use major-version tags (e.g. @v5). These float within
       ## a major but do NOT cross a major bump (e.g. the Node 20->24 runtime
