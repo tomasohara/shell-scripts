@@ -1388,8 +1388,10 @@ alias prepare-find-files-there='prepare-find-files-here --out-dir'
 # exs: "./archive:", "-rwxrwx--- 1 root vboxsf   19125 Dec  7  2013 morph.txt", "-rwxrwx--- 1 root vboxsf      35 Jan 17 12:19 python-notes.txt"
 # Note: Perl paragraph-mode search first matches files along with the containing
 # subdirectory, and then line-mode search filters out non-matching files.
+# Also, -multi_line ensures ^ and $ match line boundaries within paragraphs (fix facilitated by Antigravity using Gemini 4 Argon (Medium)).
 #
-function find-files-there () { alias-perl perlgrep.perl -para -i "$@" | $EGREP -i '((:$)|('"$1"'))' | $PAGER_NOEXIT -p "$1"; }
+## BAD: function find-files-there () { alias-perl perlgrep.perl -para -i "$@" | $EGREP -i '((:$)|('"$1"'))' | $PAGER_NOEXIT -p "$1"; }
+function find-files-there () { alias-perl perlgrep.perl -para -multi_line -i "$@" | $EGREP -i '((:$)|('"$1"'))' | $PAGER_NOEXIT -p "$1"; }
 function find-files-here () { find-files-there "$1" "$PWD/ls-alR.list"; }
 # following variants for sake of tab completion
 alias find-files='find-files-here'
