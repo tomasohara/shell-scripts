@@ -64,6 +64,7 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib:$HOME/lib/$OSTYPE_BRIEF"
 export PYTHONPATH="src:$PYTHONPATH:.:.."
 
 # Define HOST_NICKNAME from ~/.host-nickname if unset or the default
+## TODO3: document home dir settings file: ~/.host-nickname
 if [[ ("$HOST_NICKNAME" = "") || ("$HOST_NICKNAME" = "tpo-host") ]]; then
     ## OLD: export HOST_NICKNAME="$(cat ~/.host-nickname 2> /dev/null | grep -v '^#')";
     # shellcheck disable=SC2155
