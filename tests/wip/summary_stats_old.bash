@@ -102,7 +102,8 @@ batspp_result=0
 # to dummy repo's like https://github.com/tomasohara/git-bash-test.
 git config --global user.email "scrappycito@gmail.com"
 git config --global user.name "SCrappy Cito"
-export MY_GIT_TOKEN=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
+## NOTE: Actual tokens should not get checked in! (old one removed; facilitated by Claude Code using Claude Fable 5.2)
+export MY_GIT_TOKEN="${MY_GIT_TOKEN:-ghp_TODO}"
 git config --global url."https://api:$MY_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
 git config --global url."https://ssh:$MY_GIT_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
 git config --global url."https://git:$MY_GIT_TOKEN@github.com/".insteadOf "git@github.com:"

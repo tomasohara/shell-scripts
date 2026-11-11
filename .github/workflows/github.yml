@@ -7,6 +7,7 @@
 #   https://dev.to/mathio/squeezing-disk-space-from-github-actions-runners-an-engineers-guide-3pjg
 #
 ## UPDATE 13 Sep 26: updates runner to ubuntu-24.04
+## UPDATE 11 Nov 26: derives test SSH key from repo secret (facilitated by Claude Code using Claude Fable 5.2)
 
 name: Github-Tests
 
@@ -78,6 +79,23 @@ jobs:
           # Install packages from required-packages.txt (facilitated by Gemini 4 Argon)
           sudo apt-get install --yes --fix-missing $(sed 's/ \#.*//' required-packages.txt | grep -v '^#')
           echo "end of other dependencies (status=$?)"
+
+      - name: Setup Test Credentials
+        # Derives SSH key for git alias tests from repo secret TEST_SSH_KEY
+        # note: The key is put in a file outside of the repo, with just the path
+        # exported (TEST_SSH_KEY_FILE): this way, the secret itself is not in the
+        # environment of the tests. The secret is unavailable for pull requests
+        # from forks or Dependabot, in which case tests run without SSH (see summary_stats.bash).
+        env:
+          TEST_SSH_KEY: ${{ secrets.TEST_SSH_KEY }}
+        run: |
+          if [ -n "$TEST_SSH_KEY" ]; then
+              key_file="$RUNNER_TEMP/_test-ssh-key.pem"
+              (umask 077; printf '%s\n' "$TEST_SSH_KEY" > "$key_file")
+              echo "TEST_SSH_KEY_FILE=$key_file" >> "$GITHUB_ENV"
+          else
+              echo "FYI: TEST_SSH_KEY secret not available, so not using SSH for git tests"
+          fi
 
       - name: Run BatsPP and Python Tests under Runner
         run: |

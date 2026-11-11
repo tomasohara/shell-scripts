@@ -1,0 +1,38 @@
+# CodeQL configuration for code scanning (see ../workflows/codeql.yml)
+#
+# Note:
+# - This only takes effect under CodeQL's "advanced setup": the "default setup"
+#   enabled via the repo settings ignores configuration files.
+# - CodeQL only analyzes Python and Github Actions files here: Bash and Perl
+#   are not supported, so most of the repo is skipped regardless.
+# - The paths are relative to the repo root and can use globs (e.g., **/backup).
+# - The exclusions only apply to code scanning: secret scanning is separate
+#   (see .github/secret_scanning.yml in the docs), and test data should still
+#   be checked for credentials.
+# - Docs: https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/customizing-your-advanced-setup-for-code-scanning
+#
+## NOTE: Created with assistance from Claude Code (model Claude Fable 5.2).
+
+name: "shell-scripts CodeQL config"
+
+paths-ignore:
+  # Testing resources (e.g., images and prompts used as input)
+  # note: not currently in development branch (n.b., added in older branches)
+  - tests/resources
+  # Input and expected output for bash2python.py tests (i.e., generated code)
+  - tests/bash2py-data
+  #
+  # Suggestions for other exclusions:
+  # - old code no longer maintained (n.b., includes superseded workflows)
+  ## TODO: - archive
+  ## TODO: - tests/archive
+  ## TODO: - .github/workflows/archive
+  # - experimental or adhoc code not used by the tests or workflows
+  ## TODO: - tests/wip
+  ## TODO: - work-in-progress
+  ## TODO: - adhoc
+  ## TODO: - examples
+  # - generated test output and backups (mostly ignored via .gitignore)
+  ## TODO: - tests/output-files
+  ## TODO: - "**/backup"
+  ## TODO: - "**/old"
