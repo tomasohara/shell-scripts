@@ -107,8 +107,10 @@ elif [ "${MODIFY_GIT_CONFIG:-0}" == "1" ]; then
     git config --global credential.helper "store"
     ## TODO: git config --file ~/.git-credentials "$MY_GIT_TOKEN"
     ## NOTE: Use a testing account so this doesn't contaminate settings
-    grep -v "^https://scrappycito" ~/.git-credentials > $TMP/.git-credentials.$$
-    ($TMP/.git-credentials.$$; echo "https://scrappycito:$MY_GIT_TOKEN@github.com") > ~/.git-credentials
+    temp_credentials="$TMP/.git-credentials.$$"
+    grep -v "^https://scrappycito" ~/.git-credentials >| "$temp_credentials"
+    echo "https://scrappycito:$MY_GIT_TOKEN@github.com" >> "$temp_credentials"
+    cp -vf "$temp_credentials" ~/.git-credentials
 else
     echo "FYI: using default ~/.gitconfig"
 fi
