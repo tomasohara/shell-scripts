@@ -12,6 +12,7 @@
 #
 ## UPDATE 2026-11-11: reworks MY_GIT_TOKEN init
 ## UPDATE 2026-11-11: gets SSH key via TEST_SSH_KEY_FILE not repo (facilitated by Claude Code using Claude Fable 5.2)
+## UPDATE 2026-11-11: adds TEST_REPO_USER for Github user with test repo (likewise via Claude Code)
 
 # Set bash regular and/or verbose tracing
 DEBUG_LEVEL=${DEBUG_LEVEL:-0}
@@ -62,6 +63,11 @@ cd "$script_dir"
 # - The HOME directory is checked instead of USER because Github and docker use root.
 #    {/home/shell-scripts, /home/runner, /home/testuser}
 ## TODO2: if [[ $HOME =~ /home/(shell-scripts|runner|testuser) ]]; then
+#
+# - The Github user owning the test repo can be overridden via TEST_REPO_USER, such as
+#   to try out the git alias tests with your own copy (i.e., $TEST_REPO_USER/git-bash-test).
+#   This requires a corresponding SSH key (see TEST_SSH_KEY_FILE below).
+export TEST_REPO_USER="${TEST_REPO_USER:-scrappycito}"
 #
 # note: copies to /tmp so that permissions can be changed without affecting repo
 # - The key is no longer in the repo: instead the path is given via TEST_SSH_KEY_FILE,

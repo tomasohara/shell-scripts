@@ -98,6 +98,9 @@ jobs:
           fi
 
       - name: Run BatsPP and Python Tests under Runner
+        # note: optional repo variable for Github user with test repo (default in summary_stats.bash)
+        env:
+          TEST_REPO_USER: ${{ vars.TEST_REPO_USER }}
         run: |
           PYTHONPATH="$PWD:$PWD/tests:$PYTHONPATH" ./tests/run_tests.bash
           

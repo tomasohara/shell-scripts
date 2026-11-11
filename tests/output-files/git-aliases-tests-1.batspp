@@ -8,6 +8,11 @@
 # - In addition, make sure standard error is redirected so that it doesn't confuse BatsPP.
 # - Uses one cell per output (to make this less brittle).
 # - For USE_SSH_AUTH usage, see summary_stats.bash.
+# - The Github user for the test repo is set via TEST_REPO_USER (see global setup below),
+#   with the repo being $TEST_REPO_USER/git-bash-test (i.e., under scrappycito by default).
+#   This is just needed for major overhauls to the tests, so that the changes can be tried
+#   out in your own copy of the repo (e.g., a fork) without affecting the shared one.
+#   That requires a corresponding SSH key (see TEST_SSH_KEY_FILE in summary_stats.bash).
 # - Use 'command cmd args' to invoke cmd's to avoid alias overrides (e.g., 'egrep --color=auto').
 # - Warning: avoid using temporary repo files like temp-fubar.txt (use _temp... instead). Otherwise,
 #   .gitignore might need to be updated as follows:
@@ -32,6 +37,7 @@
 # to throw off the bash kernel (e.g., leading to halt during run-all-cells)
 #
 $ TMP=${TMP:-/tmp}
+$ TEST_REPO_USER=${TEST_REPO_USER:-scrappycito}
 $ stderr_log="$TMP/temp-git-stderr-$$.log"
 $ touch "$stderr_log"
 $ TMPA=$TMP/temp-git-test-1-A
@@ -52,13 +58,13 @@ $ function encode-text () { encode-control-chars | encode-nums | encode-hex | en
 # Global Setup
 # Warning: Due to BatsPP quirk, comments should not be placed within command sequence.
 # So make sure there is only one command sequence per cell
-$ git clone https://github.com/scrappycito/git-bash-test.git "$TMPA" >> "$stderr_log" 2>&1
-$ git clone https://github.com/scrappycito/git-bash-test.git "$TMPB" >> "$stderr_log" 2>&1
+$ git clone https://github.com/$TEST_REPO_USER/git-bash-test.git "$TMPA" >> "$stderr_log" 2>&1
+$ git clone https://github.com/$TEST_REPO_USER/git-bash-test.git "$TMPB" >> "$stderr_log" 2>&1
 
 # Global setup
 # Move to second local to push some changes
 $ command cd "$TMPB" >> "$stderr_log" 2>&1
-$ if [ "$USE_SSH_AUTH" == "1" ]; then git remote set-url origin "git@github.com:scrappycito/git-bash-test.git"; fi
+$ if [ "$USE_SSH_AUTH" == "1" ]; then git remote set-url origin "git@github.com:$TEST_REPO_USER/git-bash-test.git"; fi
 $ git pull origin main >> "$stderr_log" 2>&1
 $ echo "hello second local" > temp-hello.txt
 $ git add temp-hello.txt >> "$stderr_log" 2>&1
@@ -68,7 +74,7 @@ $ git push  >> "$stderr_log" 2>&1
 # Moving to first local
 $ command cd "$TMPA"
 # note: optionally setup SSH authentication (for use with Github runner and docker)
-$ if [ "$USE_SSH_AUTH" == "1" ]; then git remote set-url origin "git@github.com:scrappycito/git-bash-test.git"; fi
+$ if [ "$USE_SSH_AUTH" == "1" ]; then git remote set-url origin "git@github.com:$TEST_REPO_USER/git-bash-test.git"; fi
 
 # Setup
 # git-branch-alias test
