@@ -10,12 +10,17 @@ eval 'exec perl -Ssw $0 "$@"'
 #     function extract_matches () { perl -ne "while (/$1/) { printf \"%s\\n\", \$1; s/$1//; }" $2 }
 # See count_it.perl for a similar script for counting the frequency of such patterns.
 #
+## UPDATE 19 Sep 26: wraps pattern in capture group only if none present (e.g., not when just
+## lookahead, non-capturing group, or escaped parentheses); and aborts matching for a line
+## if no progress made (e.g., zero-width match).
+## Changes facilitated by Claude Code using model Sonnet 5.
+## (See tests/pattern-matching.ipynb for examples.)
+#
 # Portions Copyright (c) 2001 Cycorp, Inc.  All rights reserved.
 # Portions Copyright (c) 2002-2004 Tom O'Hara  All rights reserved.
 #
 # TODO:
 # - Specify list of fields to output (as in cut.perl).
-# - Check for looping due to empty patterns (e.g., '(.*)').
 # - Only apply s qualifier when -para or -slurp specified.
 # - Add -chomp option as in count_it.perl.
 # - Add diagnostics for match failures.
@@ -61,36 +66,37 @@ if (!defined($ARGV[0])) {
     print STDERR "\nusage: $0 [options] pattern\n\n$options\n\n$example\n$note\n";
     &exit();
 }
-&init_var(*replacement, "");		# pattern for replacement (e.g, \1-\2-method)
-&init_var(*restore, "");		# portion of matching text to be restored
-&init_var(*para, &FALSE);		# paragraph input mode
-&init_var(*slurp, &FALSE);		# alias for -file
-&init_var(*file, $slurp);		# entire file input mode
-&init_var(*fields, 1);			# number of output fields
-&init_var(*single, &FALSE);		# alias for -one_per_line
+&init_var(*replacement, "");            # pattern for replacement (e.g, \1-\2-method)
+&init_var(*restore, "");                # portion of matching text to be restored
+&init_var(*para, &FALSE);               # paragraph input mode
+&init_var(*slurp, &FALSE);              # alias for -file
+&init_var(*file, $slurp);               # entire file input mode
+&init_var(*fields, 1);                  # number of output fields
+&init_var(*single, &FALSE);             # alias for -one_per_line
 # NOTE: multi_per_line (as in count_it.perl) is the default
-&init_var(*one_per_line, $single);	# only count one instance of the pattern per line
+&init_var(*one_per_line, $single);      # only count one instance of the pattern per line
 &init_var(*multi_per_line, ! $single);  # multiple matches per line
-&init_var(*max_count,			# maximum number of matches per line
-	  ## OLD: $one_per_line ? 1 : &MAXINT);
-	  $multi_per_line ? &MAXINT : 1);
-&init_var(*i, &FALSE);			# ignore case
-&init_var(*preserve, &FALSE);		# preserve case (when -i in effect)
+&init_var(*max_count,                   # maximum number of matches per line
+          ## OLD: $one_per_line ? 1 : &MAXINT);
+          $multi_per_line ? &MAXINT : 1);
+&init_var(*i, &FALSE);                  # ignore case
+&init_var(*preserve, &FALSE);           # preserve case (when -i in effect)
 &debug_print(&TL_DETAILED, "Note: -preserve not implemented\n") if ($preserve);
-&init_var(*locale, &FALSE);		# use locale information
+&init_var(*locale, &FALSE);             # use locale information
 &init_var(*multi_line_match, &FALSE);   # use m qualifier for multi-line matching
 &init_var(*sep, "\t");                   # field separatpr
 my($single_line_input) = (! ($para || $slurp));
 my($ignore_case) = $i;
-my($auto_pattern) = &FALSE;		# automatically derive pattern (for tab-delimited fields)
+my($auto_pattern) = &FALSE;             # automatically derive pattern (for tab-delimited fields)
 
 # Initialization locale information
+## TODO3: fix up for the hasty uncomment
 # if ($locale) {
     use locale;
 # }
 
 ## TODO -i option
-## &init_var(*i, &FALSE);		# case insensitive
+## &init_var(*i, &FALSE);               # case insensitive
 my($pattern) = shift @ARGV;
 if ($pattern eq "-") {
     $auto_pattern = &TRUE;
@@ -125,8 +131,15 @@ for ($i = 2; $i <= $fields; $i++) {
     $pattern .= "$sep(\\S+)" if ($auto_pattern);
 }
 
-# Put grouping parenthesis around pattern, if none present
-if ($pattern !~ /\(.*\)/) {
+# Put grouping parenthesis around pattern, if no capture group present
+## BAD: if ($pattern !~ /\(.*\)/) {
+## NOTE: The above was fooled by escaped parentheses (e.g., '\(x\)') and by non-capturing
+## groups or lookaheads (e.g., '\w(?=\w)'), leaving $1 undefined.
+## The number of capture groups is now determined via a dummy match against the empty
+## string (n.b., the empty alternative ensures success, and $#+ is the number of groups).
+## Fix facilitated by Claude Code using model Sonnet 5.
+"" =~ /$pattern|/;
+if ($#+ < 1) {
     $pattern = "(" . $pattern . ")";
 }
 
@@ -140,7 +153,7 @@ $replacement =~ s/\\(\d+)/\$$1/g;
 my($total_matched) = 0;
 while (<>) {
     if ($utf8) {
-	$_ = decode_utf8($_);
+        $_ = decode_utf8($_);
     }
     # TODO: add sanity check about DOS carriage returns screwing up pattern matching
     &dump_line("$_", &TL_VERY_VERBOSE);
@@ -152,68 +165,76 @@ while (<>) {
     ## OLD: while (($ignore_case && m/$pattern/is) || (m/$pattern/s)) ...
     my($count) = 0;
     while (($multi_line_match &&
-	    (($ignore_case  && (m/$pattern/ims) || (m/$pattern/ms))))
-	   || (($ignore_case && m/$pattern/is) || (m/$pattern/s))) {
-	my($matching_text) = $&;
-	&debug_print(&TL_VERY_DETAILED, "\n");
-	&debug_out(&TL_VERY_DETAILED, "matching text: '%s'\n", $matching_text);
-	for ($i = 1; $i <= $fields; $i++) {
-	    &debug_out(&TL_VERY_DETAILED, "\$%d = '%s'; ", $i, eval "\${$i}");
-	}
-	&debug_print(&TL_VERY_DETAILED, "\n");
+            (($ignore_case  && (m/$pattern/ims) || (m/$pattern/ms))))
+           || (($ignore_case && m/$pattern/is) || (m/$pattern/s))) {
+        my($matching_text) = $&;
+        my($prev_text) = $_;            # used to detect lack of progress (see below)
+        &debug_print(&TL_VERY_DETAILED, "\n");
+        &debug_out(&TL_VERY_DETAILED, "matching text: '%s'\n", $matching_text);
+        for ($i = 1; $i <= $fields; $i++) {
+            &debug_out(&TL_VERY_DETAILED, "\$%d = '%s'; ", $i, eval "\${$i}");
+        }
+        &debug_print(&TL_VERY_DETAILED, "\n");
 
-	# Update the current line being matched
-	if ($restore ne "") {
-	    ## OLD: my($restore_text) = eval { "$restore"; };
-	    ## BAD: my($restore_text) = eval "$restore";
-	    ## NOTE: Due to a change in Perl, need to evaluate the variables in the context of a string.
-	    my($restore_text) = eval " \"$restore\" ";
-	    &debug_print(&TL_DETAILED, "restoring $restore_text to line\n");
-	    $_ = $restore_text . $';		# '
-	    &debug_print(&TL_VERBOSE, "line='$_'\n");
-	}
-	else {
-	    $_ = $';				# '
-	}
+        # Update the current line being matched
+        if ($restore ne "") {
+            ## OLD: my($restore_text) = eval { "$restore"; };
+            ## BAD: my($restore_text) = eval "$restore";
+            ## NOTE: Due to a change in Perl, need to evaluate the variables in the context of a string.
+            my($restore_text) = eval " \"$restore\" ";
+            &debug_print(&TL_DETAILED, "restoring $restore_text to line\n");
+            $_ = $restore_text . $';            # '
+            &debug_print(&TL_VERBOSE, "line='$_'\n");
+        }
+        else {
+            $_ = $';                            # '
+        }
 
-	# Transform matching text based on replacement pattern (e.g., '$1')
-	## OLD:
-	## my($qualifier) = ($ignore_case ? "i" : "");
-	## eval "\$matching_text =~ s/\$pattern/$replacement/s$qualifier";
-	## my($replacement_text) = eval { $replacement; };
-	my($replacement_text);
-	eval "\$replacement_text = \"$replacement\";";
-	&debug_out(&TL_VERY_DETAILED, "replacement text: '%s'\n", $replacement_text);
-	if ($ignore_case) {
-	    if ($multi_line_match) {
-		$matching_text =~ s/$pattern/$replacement_text/ims;
-	    }
-	    else {
-		$matching_text =~ s/$pattern/$replacement_text/is;
-	    }
-	}
-	else {
-	    if ($multi_line_match) {
-		$matching_text =~ s/$pattern/$replacement_text/ms;
-	    }
-	    else {
-		$matching_text =~ s/$pattern/$replacement_text/s;
-	    }
-	}
-	&debug_out(&TL_VERY_DETAILED, "resulting text: '%s'\n", $matching_text);
-	print "$matching_text\n";
-	$total_matched++;
+        # Transform matching text based on replacement pattern (e.g., '$1')
+        ## OLD:
+        ## my($qualifier) = ($ignore_case ? "i" : "");
+        ## eval "\$matching_text =~ s/\$pattern/$replacement/s$qualifier";
+        ## my($replacement_text) = eval { $replacement; };
+        my($replacement_text);
+        eval "\$replacement_text = \"$replacement\";";
+        &debug_out(&TL_VERY_DETAILED, "replacement text: '%s'\n", $replacement_text);
+        if ($ignore_case) {
+            if ($multi_line_match) {
+                $matching_text =~ s/$pattern/$replacement_text/ims;
+            }
+            else {
+                $matching_text =~ s/$pattern/$replacement_text/is;
+            }
+        }
+        else {
+            if ($multi_line_match) {
+                $matching_text =~ s/$pattern/$replacement_text/ms;
+            }
+            else {
+                $matching_text =~ s/$pattern/$replacement_text/s;
+            }
+        }
+        &debug_out(&TL_VERY_DETAILED, "resulting text: '%s'\n", $matching_text);
+        print "$matching_text\n";
+        $total_matched++;
 
-	# See if limit for displayed matches reached
-	&debug_print(&TL_VERY_DETAILED, "count=$count max_count=$max_count\n"); 
-	$count++;
-	last if ($count >= $max_count);
+        # See if limit for displayed matches reached
+        &debug_print(&TL_VERY_DETAILED, "count=$count max_count=$max_count\n"); 
+        $count++;
+        last if ($count >= $max_count);
+
+        # Make sure progress made: otherwise, infinite loop (e.g., zero-width match like '(?=(\w))')
+        ## NOTE: added by Claude Code using model Sonnet 5 (cf. count_it.perl).
+        if ($_ eq $prev_text) {
+            &error_out("Unexpected error: text unchanged after matching /%s/ (zero-width match?): breaking out of loop for line %d\n", $pattern, $.);
+            last;
+        }
     }
 
     # Trace out lines not matched
     if ($count == 0) {
-	my($line) = ($single_line_input ? $_ : "{ $_ }");
-	&debug_print(&TL_VERY_VERBOSE, "line not matched: $line\n");
+        my($line) = ($single_line_input ? $_ : "{ $_ }");
+        &debug_print(&TL_VERY_VERBOSE, "line not matched: $line\n");
     }
 }
 

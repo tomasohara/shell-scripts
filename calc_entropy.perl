@@ -47,7 +47,7 @@ BEGIN {
 # Specify additional diagnostics and strict variable usage, excepting those
 # for command-line arguments (see init_var's in &init).
 use strict;
-no strict "refs";		# allow for symbolic file handles
+no strict "refs";               # allow for symbolic file handles
 use vars qw/$class_filter $max_count $label $word $last $freq_last
     $freq_first $header $show_header $skip_header $classes $show_classes
     $simple $normalize $fix $alpha $preserve $cumulative $just_freq $no_comments/;
@@ -73,11 +73,11 @@ if (! defined($ARGV[0])) {
     print STDERR "- The -strip_comments option is an alias for old -no_comments=0.\n";
     print STDERR "- Use -verbose for more details.\n";
     if ($verbose) {
-	# TODO: move into common.perl as new function
-	my($detailed_usage) = &run_command("extract_matches.perl -fields=2 'init_var\\(\\*(\\w+).*\\s# (.*)' '$0'");
-	$detailed_usage =~ s/^/  /mg;
-	$detailed_usage =~ s/\t/: /g;
-	print STDERR "- Option descriptions:\n$detailed_usage\n";	
+        # TODO: move into common.perl as new function
+        my($detailed_usage) = &run_command("extract_matches.perl -fields=2 'init_var\\(\\*(\\w+).*\\s# (.*)' '$0'");
+        $detailed_usage =~ s/^/  /mg;
+        $detailed_usage =~ s/\t/: /g;
+        print STDERR "- Option descriptions:\n$detailed_usage\n";       
     }
     
     &exit();
@@ -91,25 +91,25 @@ if (! defined($ARGV[0])) {
 if ($class_filter ne "") {
     $class_filter = &to_lower(" $class_filter ");
 }
-&init_var(*max_count, &MAXINT);		# maximum number of cases to process
-&init_var(*label, "");			# label for entropy display
-&init_var(*word, "n/a");		# word over which distribution is made
-&init_var(*last, &FALSE);		# alias for -freq_last
-&init_var(*freq_last, $last);		# frequency occurs last in the data
-&init_var(*freq_first, ! $freq_last);	# frequency occurs first in the data
-&init_var(*just_freq, &FALSE);		# just output relative frequency
-&init_var(*header, (! $just_freq));	# alias for show_header
-&init_var(*show_header, $header);	# display comment header?
+&init_var(*max_count, &MAXINT);         # maximum number of cases to process
+&init_var(*label, "");                  # label for entropy display
+&init_var(*word, "n/a");                # word over which distribution is made
+&init_var(*last, &FALSE);               # alias for -freq_last
+&init_var(*freq_last, $last);           # frequency occurs last in the data
+&init_var(*freq_first, ! $freq_last);   # frequency occurs first in the data
+&init_var(*just_freq, &FALSE);          # just output relative frequency
+&init_var(*header, (! $just_freq));     # alias for show_header
+&init_var(*show_header, $header);       # display comment header?
 &init_var(*skip_header, ! $show_header); # should the header be skipped?
-&init_var(*classes, &FALSE);		# alias for -show_classes
-&init_var(*show_classes, $classes);	# display class information?
-&init_var(*simple, &FALSE);		# data just contains the probabilities
-&init_var(*fix, &FALSE);		# ensure tab-delimited input
-&init_var(*normalize, &FALSE);		# normalize the probabilities?
-&init_var(*alpha, &FALSE);		# show keys alphabetized
-&init_var(*preserve, &FALSE);		# preserve order of keys
-&init_var(*cumulative, &FALSE);		# show cumulative probability
-## OLD: &init_var(*no_comments, &FALSE);	# used to bypass comment stripping
+&init_var(*classes, &FALSE);            # alias for -show_classes
+&init_var(*show_classes, $classes);     # display class information?
+&init_var(*simple, &FALSE);             # data just contains the probabilities
+&init_var(*fix, &FALSE);                # ensure tab-delimited input
+&init_var(*normalize, &FALSE);          # normalize the probabilities?
+&init_var(*alpha, &FALSE);              # show keys alphabetized
+&init_var(*preserve, &FALSE);           # preserve order of keys
+&init_var(*cumulative, &FALSE);         # show cumulative probability
+## OLD: &init_var(*no_comments, &FALSE);        # used to bypass comment stripping
 &init_var(*strip_comments, &FALSE);     # alias for (confusing) -no_comments=0
 &init_var(*no_comments, ! $strip_comments); # used to bypass comment stripping
 &init_var(*class_width, 0);            # width to use for label (if > 0)
@@ -133,11 +133,11 @@ if ($simple) {
     my(@data);
     # See if command line should be used
     if (($#ARGV >= 0) && ($ARGV[0] ne "-")) {
-	@data = @ARGV;
+        @data = @ARGV;
     }
     # Otherwise get from standard input
     else {
-	@data = &tokenize(join(" ", <STDIN>));
+        @data = &tokenize(join(" ", <STDIN>));
     }
     &simple_calc_entropy(@data);
     &exit();
@@ -154,11 +154,11 @@ if (!defined($ARGV[0])) {
 foreach my $file (@ARGV) {
 
     if ($word eq "n/a") {
-	$word = &remove_dir(&basename($file, ".freq"));
-	}
+        $word = &remove_dir(&basename($file, ".freq"));
+        }
     if (!open(FREQ, "<$file")) {
-	&warning("unable to read $file\n");
-	next;
+        &warning("unable to read $file\n");
+        next;
     }
     &regular_calc_entropy("FREQ", $word);
     close(FREQ);
@@ -172,21 +172,21 @@ foreach my $file (@ARGV) {
 #
 # sample input:
 #
-#    green	0.5
-#    eggs	0.25
-#    with	0.125
-#    spam	0.125
+#    green      0.5
+#    eggs       0.25
+#    with       0.125
+#    spam       0.125
 #
 # sample output:
-#    #		class	freq	prob	-p lg(p)
-#    #		green	0	0.500	0.500
-#    #		eggs	0	0.250	0.500
-#    #		with	0	0.125	0.375
-#    #		spam	0	0.125	0.375
-#    #		total	1	1.000	1.750
+#    #          class   freq    prob    -p lg(p)
+#    #          green   0       0.500   0.500
+#    #          eggs    0       0.250   0.500
+#    #          with    0       0.125   0.375
+#    #          spam    0       0.125   0.375
+#    #          total   1       1.000   1.750
 #
-#    # word	classes	freq	entropy	max_prob
-#    -	4	1	1.750	0.500
+#    # word     classes freq    entropy max_prob
+#    -  4       1       1.750   0.500
 #
 sub regular_calc_entropy {
     &debug_print(&TL_VERBOSE, "regular_calc_entropy(@_)\n");
@@ -200,65 +200,65 @@ sub regular_calc_entropy {
     my($max_label) = "";
     my($max_label_len) = 0;
     while (<$handle>) {
-	&dump_line();
-	chomp;
+        &dump_line();
+        chomp;
 
-	# Skip comments and blank lines
-	## BAD: s/#.*// unless ($no_comments);
-	s/#.*// if ($no_comments);
-	next if (/^\s*$/);
-	## OLD: s/\s\s+/\t/g if ($fix);		# make sure input is tab-delimited
-	s/\s+/\t/g if ($fix);		# make sure input is tab-delimited
-	if (! m/\t/) {
-	    &warning("unexpected input at line $. ($_)\nUse -fix if not tab-delimited.\n");
-	    next;
-	}
+        # Skip comments and blank lines
+        ## BAD: s/#.*// unless ($no_comments);
+        s/#.*// if ($no_comments);
+        next if (/^\s*$/);
+        ## OLD: s/\s\s+/\t/g if ($fix);         # make sure input is tab-delimited
+        s/\s+/\t/g if ($fix);           # make sure input is tab-delimited
+        if (! m/\t/) {
+            &warning("unexpected input at line $. ($_)\nUse -fix if not tab-delimited.\n");
+            next;
+        }
 
-	# Get the frequency and class name, skipping items not in the filter
-	my($freq, $class, $rest);
-	if ($freq_first) {
-	    ($freq, $class, $rest) = split(/\t/, $_);
-	}
-	else {
-	    ($class, $freq, $rest) = split(/\t/, $_);
-	}
-	$rest = "" if (!defined($rest));
-	&debug_print(&TL_DETAILED, "class='$class' freq='$freq' rest='$rest'\n");
+        # Get the frequency and class name, skipping items not in the filter
+        my($freq, $class, $rest);
+        if ($freq_first) {
+            ($freq, $class, $rest) = split(/\t/, $_);
+        }
+        else {
+            ($class, $freq, $rest) = split(/\t/, $_);
+        }
+        $rest = "" if (!defined($rest));
+        &debug_print(&TL_DETAILED, "class='$class' freq='$freq' rest='$rest'\n");
 
-	# Keep track of max label length, etc.
-	if (length($class) > $max_label_len) {
-	    $max_label_len = length($class);
-	    $max_label = $class;
-	}
+        # Keep track of max label length, etc.
+        if (length($class) > $max_label_len) {
+            $max_label_len = length($class);
+            $max_label = $class;
+        }
 
-	# See if the item should be ignored
-	if (! &is_numeric($freq)) {
-	    &warning("unexpected input at line $. ($_)\nUse -last if class comes first\n");
-	    ## return;
-	    next;
-	}
-	if (($class =~ /^total/i) && ($freq == $total_freq)) {
-	    &debug_print(&TL_DETAILED, "skipping totals class '$class'\n");
-	    next;
-	}
-	if (($class_filter ne "") && (index($class_filter, $class) == -1)) {
-	    &debug_print(&TL_DETAILED, "skipping filtered class $class\n");
-	    next;
-	}
-	
-	# Tabulate frequency
-	push(@keys, $class);
-	&incr_entry(\%class_frequency, $class, $freq);
-	$total_freq += $freq;
-	last if (++$count == $max_count);
+        # See if the item should be ignored
+        if (! &is_numeric($freq)) {
+            &warning("unexpected input at line $. ($_)\nUse -last if class comes first\n");
+            ## return;
+            next;
+        }
+        if (($class =~ /^total/i) && ($freq == $total_freq)) {
+            &debug_print(&TL_DETAILED, "skipping totals class '$class'\n");
+            next;
+        }
+        if (($class_filter ne "") && (index($class_filter, $class) == -1)) {
+            &debug_print(&TL_DETAILED, "skipping filtered class $class\n");
+            next;
+        }
+        
+        # Tabulate frequency
+        push(@keys, $class);
+        &incr_entry(\%class_frequency, $class, $freq);
+        $total_freq += $freq;
+        last if (++$count == $max_count);
     }
     close($handle);
 
     # Make sure sufficient data and show summary
     if ($total_freq == 0) {
-	# TODO: add argument for filename for error message
-	&warning("unexpected distribution for $handle (all 0)\n");
-	return;
+        # TODO: add argument for filename for error message
+        &warning("unexpected distribution for $handle (all 0)\n");
+        return;
     }
     &debug_print(&TL_VERBOSE, "max label: $max_label; len: $max_label_len\n");
     
@@ -269,50 +269,50 @@ sub regular_calc_entropy {
     my($class) = "class";
     my($label_width) = (($class_width > 0) ? $class_width : $max_label_len);
     if (length($class) < $label_width) {
-	$class .= (" " x ($label_width - length($class)));
+        $class .= (" " x ($label_width - length($class)));
     }
     print("#\t\t$class\tfreq\tprob\t-p lg(p)\n") if ($verbose && (! $just_freq));
     my($num_classes) = 0;
     my(@sorted_keys) = ($alpha ? sort(@keys) : 
-			$preserve ? @keys : 
-			&sorted_hash_keys_reverse_numeric(\%class_frequency));
+                        $preserve ? @keys : 
+                        &sorted_hash_keys_reverse_numeric(\%class_frequency));
     foreach my $class (@sorted_keys) {
-	&debug_print(&TL_VERBOSE, "class: $class\n");
-	my($freq) = &get_entry(\%class_frequency, $class);
-	next if ($freq == 0);
-	my($prob) = $freq / $total_freq;
-	$sum_p += $prob;
-	$max_prob = &max($prob, $max_prob);
-	my($p_lg_p) = ($prob > 0) ? (- $prob * (log($prob)/$LOG2)) : 0;
-	$entropy += $p_lg_p;
-	my($prob_value) = ($cumulative ? $sum_p : $prob);
-	if ($just_freq) {
-	    print "$class\t" if ($verbose);
-	    print &round($prob_value), "\n";
-	}
-	elsif ($verbose) {
-	    ## OLD: printf ("#\t\t%s\t%d\t%s\t%s\n", $class, $freq, &round($prob_value), &round($p_lg_p));
-	    my($label_width) = (($class_width > 0) ? $class_width : $max_label_len);
-	    &debug_print(&TL_VERBOSE, "width: $label_width\n");
-	    ## TEST: printf("#\t\t%.*s%d\t%s\t%s\n", $label_width, $class, $freq, &round($prob_value), &round($p_lg_p));
-	    if (length($class) < $label_width) {
-		$class .= (" " x ($label_width - length($class)));
-	    }
-	    printf("#\t\t%s\t%d\t%s\t%s\n", $class, $freq, &round($prob_value), &round($p_lg_p));
-	}
-	$num_classes++;
+        &debug_print(&TL_VERBOSE, "class: $class\n");
+        my($freq) = &get_entry(\%class_frequency, $class);
+        next if ($freq == 0);
+        my($prob) = $freq / $total_freq;
+        $sum_p += $prob;
+        $max_prob = &max($prob, $max_prob);
+        my($p_lg_p) = ($prob > 0) ? (- $prob * (log($prob)/$LOG2)) : 0;
+        $entropy += $p_lg_p;
+        my($prob_value) = ($cumulative ? $sum_p : $prob);
+        if ($just_freq) {
+            print "$class\t" if ($verbose);
+            print &round($prob_value), "\n";
+        }
+        elsif ($verbose) {
+            ## OLD: printf ("#\t\t%s\t%d\t%s\t%s\n", $class, $freq, &round($prob_value), &round($p_lg_p));
+            my($label_width) = (($class_width > 0) ? $class_width : $max_label_len);
+            &debug_print(&TL_VERBOSE, "width: $label_width\n");
+            ## TEST: printf("#\t\t%.*s%d\t%s\t%s\n", $label_width, $class, $freq, &round($prob_value), &round($p_lg_p));
+            if (length($class) < $label_width) {
+                $class .= (" " x ($label_width - length($class)));
+            }
+            printf("#\t\t%s\t%d\t%s\t%s\n", $class, $freq, &round($prob_value), &round($p_lg_p));
+        }
+        $num_classes++;
     }
     if ($just_freq) {
-	# do nothing
+        # do nothing
     }
     elsif ($verbose) {
-	printf ("#\t\ttotal\t%d\t%s\t%s\n", $total_freq, &round(1.0), &round($entropy));
-	print "\n";
-	printf "# word\tclasses\tfreq\tentropy\tmax_prob\n" unless ($skip_header);
-	printf "%s\t%d\t%d\t%s\t%s\n", $word, $num_classes, $total_freq, &round($entropy), &round($max_prob);
+        printf ("#\t\ttotal\t%d\t%s\t%s\n", $total_freq, &round(1.0), &round($entropy));
+        print "\n";
+        printf "# word\tclasses\tfreq\tentropy\tmax_prob\n" unless ($skip_header);
+        printf "%s\t%d\t%d\t%s\t%s\n", $word, $num_classes, $total_freq, &round($entropy), &round($max_prob);
     }
     elsif (! $just_freq) {
-	print &round($entropy), "\n";
+        print &round($entropy), "\n";
     }
 }
 
@@ -334,39 +334,39 @@ sub simple_calc_entropy {
     my($entropy) = 0.0;
     my($max_prob) = 0.0;
     if ($verbose && (! $just_freq)) {
-	printf "#\tprob\t-p lg(p)    max p\n";
-	printf "#%s\n", "-" x 32;
+        printf "#\tprob\t-p lg(p)    max p\n";
+        printf "#%s\n", "-" x 32;
     }
     my($num_classes) = (1 + $#data);
     my($sum_p) = 0.0;
 
     foreach my $prob (@data) {
-	$sum_p += $prob;
-	$max_prob = &max($prob, $max_prob);
-	my($p_lg_p) = ($prob > 0) ? (- $prob * (log($prob)/$LOG2)) : 0;
-	$entropy += $p_lg_p;
-	my($prob_value) = ($cumulative ? $sum_p : $prob);
-	## OLD: printf "#\t%.3f\t%.3f\n", $prob_value, $p_lg_p if ($verbose && (! $just_freq));
-	printf "#\t%s\t%s\n", &round($prob_value), &round($p_lg_p) if ($verbose && (! $just_freq));
-	print &round($prob_value), "\n" if ($just_freq);
+        $sum_p += $prob;
+        $max_prob = &max($prob, $max_prob);
+        my($p_lg_p) = ($prob > 0) ? (- $prob * (log($prob)/$LOG2)) : 0;
+        $entropy += $p_lg_p;
+        my($prob_value) = ($cumulative ? $sum_p : $prob);
+        ## OLD: printf "#\t%.3f\t%.3f\n", $prob_value, $p_lg_p if ($verbose && (! $just_freq));
+        printf "#\t%s\t%s\n", &round($prob_value), &round($p_lg_p) if ($verbose && (! $just_freq));
+        print &round($prob_value), "\n" if ($just_freq);
     }
     if ($verbose && (! $just_freq)) {
-	printf "#%s\n", "-" x 32;
-	printf "# word\tclasses\tfreq\tentropy\tmax_prob\n" unless ($skip_header);
-	## OLD: printf "#\t%.3f\t%.3f\t   %.3f\n", $sum_p, $entropy, $max_prob;
-	printf "#\t%s\t%s\t   %s\n", &round($sum_p), &round($entropy), &round($max_prob);
+        printf "#%s\n", "-" x 32;
+        printf "# word\tclasses\tfreq\tentropy\tmax_prob\n" unless ($skip_header);
+        ## OLD: printf "#\t%.3f\t%.3f\t   %.3f\n", $sum_p, $entropy, $max_prob;
+        printf "#\t%s\t%s\t   %s\n", &round($sum_p), &round($entropy), &round($max_prob);
     }
     &debug_print(&TL_VERBOSE, "simple_calc_entropy(@data) => $entropy\n");
 
     if (! $skip_header) {
-	print $label_header;
-	print "Classes\t" if ($show_classes);
-	print "Entropy\n";
+        print $label_header;
+        print "Classes\t" if ($show_classes);
+        print "Entropy\n";
     }
     if (! $just_freq) {
-	print $label_spec;
-	print "${num_classes}\t" if ($show_classes);
-	print &round($entropy), "\n";
+        print $label_spec;
+        print "${num_classes}\t" if ($show_classes);
+        print &round($entropy), "\n";
     }
 }
 

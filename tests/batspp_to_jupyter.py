@@ -326,8 +326,10 @@ def main():
         description=__doc__.format(script=gh.basename(__file__)),
         skip_input=False,
         manual_input=True,
-        auto_help=False,
-        multiple_files=False,
+        ## NOTE: leave defaults unspecified
+        ## OLD:
+        ## auto_help=False,
+        ## multiple_files=False,
         positional_arguments=[
             (OPT_BATSPP_FILE, "Test batspp path")
             ],

@@ -1,0 +1,254 @@
+# Test for directory aliases (e.g., dir-rw)
+#
+# Note: The aliases should be defined before Jupyter is invoked.
+# For BatsPP, they can loaded via '--source all-tomohara-aliases-etc.bash' option.
+
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TODO: Make sure bash kernel recent
+## python-module-version bash_kernel
+## >= 0.9
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+#
+## DEBUG: echo "PS1='$PS1'"
+## RESULT: PS1='[PEXP\[\]ECT_PROMPT>'
+#
+## The following checks for escape codes (e.g., ESC or Hex 0x1B).
+## Unfortunately, the Bash kernel hangs up after processing it.
+##
+## TODO: echo $PS1 | command grep --count --perl-regexp '[\x00-\x1f]'
+## TEMP: echo 0
+##
+## DEBUG
+## echo "TODO:"
+## echo "  echo \"\$PS1\" | command grep --count --perl-regexp '[\x00-\x1f]'"
+
+## BAD
+## # Delete all aliases and function
+## # TODO: Instead start from pristine environment
+## unalias -a
+## alias | wc -l
+## for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+## typeset -f | egrep '^\w+' | wc -l
+
+# Global setup
+## NOTE: Changed so that no warnings from shell-check over
+## Bash form of tests (e.g., with BASH_EVAL=1).
+## OLD:
+## alias testnum="sed -r "s/[0-9]/N/g"" 
+## alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r 's/[0-9]/N/g'"
+$ alias testuser="sed -r \"s/\$USER/userxf333/g\""
+
+## BAD
+## mkdir -p tmp/test-dir-aliases
+
+## NOTE: the debugging level is set outside of Jupyter
+## ## NEW CELL (exp)
+## OLD: DEBUG_LEVEL=0
+$ DEBUG_LEVEL=${DEBUG_LEVEL:-0}
+
+# The debugging level should be at most 3
+# Note: this affects output as bash_kernel conflates stderr w/ stdout
+## TODO: echo "DEBUG_LEVEL=$DEBUG_LEVEL" 1>&2
+$ [ "$DEBUG_LEVEL" -lt 4 ]; echo "$?"
+0
+
+# Global setup
+# Setting a temp directory for tests
+# NOTE: If debugging uses $TMP
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/dir-aliases-test-revised; fi
+$ mkdir --parents "$TMP"
+
+## DEBUG:
+## echo $TMP
+
+## OLD
+#mkdir -p $TMP
+
+## BAD
+## ## NOTE: Source it directly from the ./tests directory.
+## BIN_DIR=$PWD/..
+## ## You will need to run jupyter from that directory.
+## ## source $TEMP_BIN/_dir-aliases.bash
+## alias | wc -l
+## source _dir-aliases.bash
+
+# Count aliases proper
+## TODO: 
+## $ show-macros-proper | perl -pe 's/^alias ([^=]+)=.*/\1/;  s/ \(\)$//;'  | grep -iw ^dir | wc -l
+## 7
+
+# Count aliases w/ -dir in name
+# Example:
+#   $ alias | egrep '\-dir\b' | wc -l
+#   29
+$ dir_aliases=$(alias | egrep '\-dir\b' | wc -l)
+$ [ "$dir_aliases" -gt 20 ]; echo "$?"
+0
+
+## OLD
+## # Count functions
+## typeset -f | egrep '^\w+' | wc -l
+## 408
+
+# Count functions with dir
+$ dir_functions=$(typeset -f | egrep '\-dir\b' | wc -l)
+$ [ "$dir_functions" -gt 40 ]; echo "$?"
+1
+
+# Global setup
+# TODO1: move above
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 7919)
+## *** All output from one run to the next needs to be the same ***
+#
+# Test safe symbolic links
+## temp_dir=$TMP/test-$$
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/test-grep-commands; fi
+## OLD: temp_dir=$TMP/test-7919
+$ temp_dir=$TMP/dir-aliases-test-revised
+#
+# Move existing file out of way
+$ rename-with-file-date "$temp_dir" > /dev/null
+#
+# Create dir and make current
+$ command mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+## BAD:
+## cd "$temp_dir"
+## pwd
+$ command cd "$temp_dir"
+
+## DEBUG: Show full path for temp dir
+## pwd
+
+# Clean up temp dir
+#
+# NOTE: To place it safe, the directory path is reproduced here.
+# IN addition, the output is omitted.
+#
+## NOTE: only delete if not debugging (e.g., $DEBUG_LEVEL < 4)
+## OLD: /bin/rm -rvf "$temp_dir"/*
+## OLD /bin/rm -rvf /tmp/test-dir-aliases/test-7919/* >| /tmp/_cleanup-test-dir-aliases.log 2>&1
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then /bin/rm -rvf "$TMP"/dir-aliases-test-revised/test-7919/* >| /tmp/_cleanup-test-dir-aliases.log 2>&1; fi
+
+## DEBUG
+$ show-macros-proper | grep symbolic | extract_matches.perl "alias ([^=]+)=" | sort -u
+
+## TESTING SYMBOLIC LINKS
+
+# The first case succeed
+#    'link1' -> 'file1'
+$ touch file1
+$ ln-symbolic file1 link1
+'link1' -> 'file1'
+
+# The second case should should fail
+# => "ln: failed to create symbolic link 'link1': File exists?"
+#
+## BAD: ln-symbolic file1 link1
+## TEST: ln-symbolic file1 link1 2>&1
+## NOTE: stderr output might be causing the jupyter bash kernel to hang up
+$ ln-symbolic file1 link1 2>&1 | grep -c exists
+1
+
+## DEBUG
+## NOTE: uses cat to avoid color escape codes in output
+$ ls -R | cat
+.:
+file1
+link1
+
+# Should only be four files total (along with . and ..)
+# => 3
+$ ls -R | wc -l
+3
+
+# FYI: the current aliases and functions
+# ERROR IN BATSPP (WORKS FINE)
+# cat $BIN_DIR/tests/_dir-aliases.bash 
+## TODO: convert this to inline comments (to avoid clutter in the output)
+
+## BAD
+## ##EXECUTING _dir-aliases.bash
+## bash $BIN_DIR/tests/_dir-aliases.bash
+
+## OLD: ## Some of the aliases do not work due to the absence of 'sublinks' command
+# This works with proper sourcing as described at top
+$ symlinks-proper
+link1 -> file1
+
+# SYMBOLIC LINK temp-link CREATED WHICH LINKS /tmp DIRECTORY 
+$ ln-symbolic /tmp temp-link
+'temp-link' -> '/tmp'
+
+## OLD: ls -l | cut CUTS characters between x-y
+## BAD: ls -l | cut --characters=12-46 --complement
+## NOTE: the width depends on user name (i.e., not fixed)
+## DEBUG:
+##   ls -l | testuser | head -3
+##   python -c "print('123456789-' * 6)"
+## OLD2: ls -l | testuser | cut --characters=12-51 --complement
+$ sublinks-proper
+link1 -> file1
+temp-link -> /tmp
+
+## BAD
+## ## CREATES A SYMBOLIC LINK FORCEFULLY
+## alias ln-symbolic-force='ln-symbolic --force'
+
+##  HALT (TBF)
+# ln-symbolic SHOULD GENERATE AN ERROR AS PREVIOUS LINK WITH SAME NAME EXISTS
+# ln: failed to create symbolic link 'temp-link': File exist
+## BAD: ln-symbolic /tmp temp-link
+## OLD (Halts test): ln-symbolic /tmp temp-link 2>1 | grep -c exists
+
+# ln-symbolic-force SHOULD BYPASS THE CONDITION
+# ln: failed to create symbolic link 'temp-link': File exist
+$ ln-symbolic-force /tmp temp-link
+'temp-link/tmp' -> '/tmp'
+
+## CREATES A SAFE SYMBOLIC LINK (link-symbolic-safe='ln-symbolic --no-target-directory --no-dereference')
+$ link-symbolic-safe /tmp/tmp temp-link-safe
+'temp-link-safe' -> '/tmp/tmp'
+
+## SAFE SYMBOLIC LINK BUT FORCEFUL
+$ link-symbolic-safe --force /tmp/tmp temp-link-safe
+'temp-link-safe' -> '/tmp/tmp'
+
+## REVIEWING ALL THE RESULTS IN THE DIRECTORY (RESULTS ARE FILTERED)| OLD: ls -l
+## BAD: ls -l | cut --characters=12-46 --complement
+## BAD2: ls -l | testuser | cut --characters=12-51 --complement
+$ ls-long-tsv | cut --field='1,8-' | tr $'\t' ' ' 
+total
+-rw-r--r-- file1
+lrwxrwxrwx link1 -> file1
+lrwxrwxrwx temp-link -> /tmp
+lrwxrwxrwx temp-link-safe -> /tmp/tmp
+
+#TO VIEW ALL THE SUBLINKS IN THE TESTING DIRECTORY
+$ glob-links
+temp-link
+temp-link-safe
+link1
+
+## TO VIEW SUBDIRECTORIES IN THE TESTING DIRECTORY
+## NOTE: separate temporary directory used for each test
+## BAD: pwd
+$ mkdir test-7919-a test-7919-b
+$ glob-subdirs
+test-7919-b
+test-7919-a
+

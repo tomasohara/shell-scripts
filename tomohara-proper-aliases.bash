@@ -13,6 +13,7 @@
 #   SC2068: Double quote array expansions to avoid re-splitting elements
 #   SC2086: Double quote to prevent globbing
 #   SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?.
+#   SC2206: Quote to prevent word splitting/globbing.
 #
 
 # Change git-xyz-plus to git-xyz- for sake of tab completion
@@ -27,20 +28,34 @@ alias git-log-='git-log-plus'
 alias glog='git-log-'
 alias git-update-='git-update-plus' 
 alias git-vdiff='git-vdiff-alias'
-## OLD: alias git-vdiff-='git-vdiff-alias'
 alias gvdiff=git-vdiff
+# git-all-update[-verbose]: update main repos, optionally with URL dislay
 alias git-all-update='update-main-repos.bash'
-## OLD:
-## alias git-extract-all-versions='extract-all-git-versions.bash --human'
-## alias git-extract-all-versions='extract-all-git-versions.bash --human'
+## TODO2: add check for complex aliases involving environment usage (e.g., only applied to first command)
+simple-alias-fn git-all-update-verbose 'VERBOSE_MODE=1 update-main-repos.bash'
 alias git-extract-all-versions='VERBOSE=1 extract-all-git-versions.bash --human'
 alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human --verbose'
 alias git-files-changed=git-diff-list
 alias git-clone-alias='clone-repo'
 alias git-script-update='script-update'
-function git-repo-url { extract-matches 'url\s*=\s*(\S+)' "$(git-root-alias)/.git/config"; }
+#
+# git-repo-url: returns URL for git repo in current dir
+# example: https://github.com/tomasohara/shell-scripts
+# sample entry from .git/config:
+#   [remote "origin"]
+#       url = https://github.com/tomasohara/shell-scripts
+## BAD: function git-repo-url { extract-matches -slurp 'remote[^\[]+url\s*=\s*(\S+)' .git/config | head -1; }
+function git-repo-url { extract-matches -slurp 'remote[^\[]+url\s*=\s*(\S+)' "$(git-root-alias)/.git/config" | head -1; }
+#
+# git-slug: returns name for git repo in current dir
+# example: tomasohara/shell-scripts
+# Note: avoids "git-repo-url" for sake of tab completion;
+# for nomenclature, see https://support.atlassian.com/bitbucket-cloud/kb/what-is-a-repository-slug.
+function git-slug { git-repo-url | extract-matches '([^\/]+/[^\/]+)$'; }
+alias git-is-repo-accessible-alias='git-is-repo-accessible'
 alias git-push='git-push-alias'
-alias git-check-ignore-plus='git check-ignore --non-matching --verbose'
+# git-check-ignore-plus(file): see if FILE excluded by .gitignore, ignoring index
+simple-alias-fn git-check-ignore-plus 'git check-ignore --no-index --non-matching --verbose'
 ## TODO: alias git-X-='git-X-plus'
 ## -or- TODO: alias git-X-alias='invoke-git-command pull'
 
@@ -54,8 +69,8 @@ alias git-status-tom=git-status-sans-tom
 # TODO: work out better alias name
 alias git-stat=git-status-sans-tom
 alias gstat=git-stat
-# TODO: better name (e.g., git-diff-name-only-main?) and/or decompose git-name-diff-branch?
-alias git-name-diff-main='git diff --name-only main..HEAD | cat'
+## NOTE: name avoid tab-completion conflict with git-next-checkin (i.e., git-n)
+alias git-diff-name-only-main='git diff --name-only main..HEAD | cat'
 #
 # git-rename-revert(file, ...): renames FILE with data and then reverts
 # note: uses touch to avoid extraneous error message
@@ -91,31 +106,40 @@ alias-fn plint-torch 'plint "$@" | egrep -v "torch.*(no-member|no-name-in-module
 function plint-tester-testee {
     local script="$1"
     local test_script="tests/test_$script"
-    if [ "$1" == "" ]; then
+    if [[ (! -e "$script") || (! -e "$test_script") ]]; then
         ## TODO: local func="${BASH_SOURCE[0]:-func}"
         ## DEBUG: echo "${BASH_SOURCE[@]}"
         local func=plint-tester-testee
-        echo "Usage: [PYLINT=prog] [TEST=B] $func script"
+        echo "Usage: [PYLINT=prog] [TEST=B] [PYTEST_OPTS=text] $func script"
         echo "ex: TEST=1 PYLINT=python-lint-work $func cut.py"
+        if [ ! -e "$test_script" ]; then
+            echo "Error: can't find \"$test_script\": this should be run from same dir as script being tested"
+        fi
         return
     fi
     if [ "${VERBOSE:-0}" == "1" ]; then
         echo "$script"
         echo "$test_script"
     fi
+    
+    # Show python lint result
     local pylint_result
     local pylint="${PYLINT:-python-lint}"
     pylint_result=$($pylint "$script" "$test_script")
     local pylint_status=$?
-    echo "$pylint_result"
+    if [ "$pylint_result" != "" ]; then
+        echo "$pylint_result"
+    fi
     ## DEBUG: echo "pylint_status=$pylint_status"
+
+    # Test the script (n.b., verifies whether to proceed when pylint errors)
     if [ "${TEST:-0}" == "1" ]; then
         # check for specific error ignoring module line  (e.g., *...* Module mezcla.cut)
         # ex: "cut.py:10:0: C0301: Line too long (103/100) (line-too-long)"
         if [[ $pylint_result =~ [0-9]:[0-9] ]]; then
             local newline_tab=$'\n\t'
             ## TODO4: add support for reading response (e.g., N)
-            pause-for-enter "pylint issues;${newline_tab}proceed? (Enter for Y otherwise ^C)"
+            pause-for-enter "pylint issues:${newline_tab}proceed? (Enter for Y otherwise ^C)"
         fi
         test-python-script "$test_script"
     fi
@@ -138,7 +162,6 @@ simple-alias-fn plint-tester-testee-regular 'TEST=1 plint-tester-testee';
 ## TODO3?: plint-tester-testee-method-regular
 
 # clone-repo(url, args, ...): clone github repo at URL into current dir with logging
-## OLD: clone-repo(url): clone github repo at URL into current dir with logging
 # example: git-clone-alias https://github.com/ChromeDevTools/devtools-frontend --branch main --single-branch --depth 1
 # TODO2: move to git-related section (better yet into git-aliases.bash)
 function clone-repo () {
@@ -179,7 +202,7 @@ function run-python-script {
         echo "Usage: [ENV-OPTIONS] run-python-script script arg ..."
         echo "   ENV-OPTIONS: [USE_STDIN=B] [USE_STDOUT=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] [KEEP_EMPTY_OUT=b] [PYTHON=path] [PYTHON_RUN_LABEL=str]"
         echo "note:"
-        echo "- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL)"
+        echo "- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL higher)"
         echo "- PYTHON_OUT_DIR is script dir unless a full path"
         return
     fi
@@ -187,7 +210,13 @@ function run-python-script {
     # note: "tests" might be specified for script (e.g., test-python-script tests)
     local script_path="$1"
     if [ ! -e "$script_path" ]; then
-        script_path="$(which "$script_path")"
+        ## BAD: script_path="$(which "$script_path")"
+        # Uses script path based on Bash path if exists
+        local temp_script_path
+        temp_script_path="$(which "$script_path")"
+        if [ -e "$temp_script_path" ]; then
+            script_path="$temp_script_path"
+        fi
     fi
     shift
     local script_args=("$@")
@@ -201,10 +230,8 @@ function run-python-script {
     local out_dir="${PYTHON_OUT_DIR:-"$default_out_dir"}"
     script_base="$(basename "$script_path" .py)"
     # TODO: find shortcut for min
-    local python_debug_level="${PYTHON_DEBUG_LEVEL:-4}"
-    if [ "${DEBUG_LEVEL:-0}" -gt "$python_debug_level" ]; then
-        python_debug_level="$DEBUG_LEVEL"
-    fi  
+    ## OLD: local python_debug_level="${PYTHON_DEBUG_LEVEL:-${DEBUG_LEVEL:-4}}"
+    python_debug_level=${PYTHON_DEBUG_LEVEL:-$(max DEBUG_LEVEL 4)}
     #
     # Run script and check for errors
     # note: $_PSL_, $log and $out are not local, so available to user afterwards
@@ -215,7 +242,8 @@ function run-python-script {
     # TODO3: add OUT_BASE to override default
     local run_label="${PYTHON_RUN_LABEL:-"run"}"
     run_label=$(echo "$run_label" | perl -pe 'chomp; s/\.$//;')
-    local out_base="$out_dir/_$script_base.$(TODAY).$run_label.$_PSL_"
+    local out_base
+    out_base="$out_dir/_$script_base.$(TODAY).$run_label.$_PSL_"
     if [ "$PROFILE_SCRIPT" == "1" ]; then
        out_base="$out_base.profile"
        module_spec="-m cProfile -o $out_base.data"
@@ -232,21 +260,21 @@ function run-python-script {
     local python_arg="-"
     # shellcheck disable=SC2086
     {
-	if [ "${USE_STDIN:-0}" == "1" ]; then
-	    # note: assumes python script uses - to indicate stdin as per norm for mezcla
-	    ## TODO2:
+        if [ "${USE_STDIN:-0}" == "1" ]; then
+            # note: assumes python script uses - to indicate stdin as per norm for mezcla
+            ## TODO2:
             echo "${script_args[*]}" | DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" $python_arg > "$out" 2> "$log"
-	else
-	    # note: disables - with explicit arguments or if running pytest
-	    if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
+        else
+            # note: disables - with explicit arguments or if running pytest
+            if [[ ("${script_args[*]}" != "") || ($PYTHON =~ pytest) ]]; then python_arg=""; fi
             if [ "${USE_STDOUT:-1}" == "1" ]; then
-	        DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log"
+                DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$out" 2> "$log"
             else
                 # TODO3: extend to handle special case with USE_STDIN
-	        DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1
+                DEBUG_LEVEL=$python_debug_level $PYTHON $module_spec "$script_path" "${script_args[@]}" $python_arg > "$log" 2>&1
                 touch "$out"
             fi
-	fi
+        fi
     }
     # Finalize code profiling
     if [ "$PROFILE_SCRIPT" == "1" ]; then
@@ -256,7 +284,7 @@ function run-python-script {
     tail "$log" "$out" | truncate-width
     check-errors-excerpt "$log" "$out"
     ## TEMP: remove emtpy output file (TODO3: streamline -e/-s tests below)
-    if [ "$DEBUG_LEVEL" -ge 4 ]; then
+    if [ "$python_debug_level" -ge 4 ]; then
         ls -lt "$log" "$out"
     fi
     # note: omitting empty-output pruning useful for background job (e.g., "run-python-script ... &")
@@ -272,10 +300,17 @@ function run-python-script-reset {
     _PSL_=0
     trace-vars _PSL_
 }
+# run-python-app: invoke run-python-script-reset in background
+## NOTE: workaround for Bash quirk with subshell-specific _PSL_ due to '... &'
+function run-python-app {
+    let _PSL_++; _PSL_=$_PSL_ run-python-script "$@" &
+}
 
 # pytest stuff
-# options: --vv: doubly verbose; --capture=no: don't capture stderr
-default_pytest_opts=(-vv --capture=no)
+## UPDATE: 05/09/2006: adds summary for all at end
+# options: --vv: doubly verbose; --capture=no: don't capture stderr; -rA: report all
+# shellcheck disable=SC2206
+default_pytest_opts=(${PYTEST_OPTS:-"-s"})
 #
 # test-python-script(test-script): run TEST-SCRIPT via pytest
 function test-python-script {
@@ -308,7 +343,8 @@ function test-python-script {
     if [ -e "$test_script" ]; then
         true;
     else
-        echo "Warning: cannnot resolve test for _$test_script" 1>&2
+        ## NOTE: Pauses before executing all tests from running due to run-python-script/pytest quirk
+        sleep-for 3 "Warning: cannot resolve test for $test_script" 1>&2
     fi
 
     # Run the test
@@ -372,7 +408,6 @@ function pip-freeze {
     # derive default env name label from python bin path
     # ex: /Users/eafqe/python/.venv-nlp-py-12/bin/python => .venv-nlp-py-12
     if [ "$env_name" == "" ]; then
-        ## OLD: env_name="$(which python3 | extract-matches "([^\.\/]+)\/bin\/python")"
         env_name="$(which python3 | extract-matches "([^\/]+)\/bin\/python")"
     fi
     if [ "$env_name" == "" ]; then
@@ -390,7 +425,7 @@ function pip-freeze {
     freeze_file="${freeze_file//--/-}"
     rename-with-file-date "$freeze_file"
     pip3 freeze > "$freeze_file"
-    echo "$freeze_file"
+    $PAGER "$freeze_file"
 }
 
 # venv-activate([dir=venv]): activate VENV and add python to xterm
@@ -508,6 +543,7 @@ function compare-notebook-scripts {
 }
  
 # run-jupyter-notebook-pristine(port): invoke jupter notenook w/o startup config
+# note: uses fixed DEBUG_LEVEL for warnings (2)
 alias run-jupyter-notebook-pristine='DEBUG_LEVEL=2 IPYTHONDIR="$IPYTHON_TMP" run-jupyter-notebook'
 
 #...............................................................................
@@ -576,6 +612,20 @@ alias extract-text-html='html_utils.py --regular'
 simple-alias-fn extract-text-html 'alias-python -m mezcla.html_utils --regular'
 alias extract-html-text='extract-text-html'
 
+# expand-timestamp(text): convert timestamps in TEXT to floating point
+# EX: expand-timestamp("in: 2026-06-25T03:52:31.9868345Z") => "in: 2026-06-25T03:52:31.9868345Z 1782373951.986834"
+#
+## TODO3
+## function convert-timestamp {
+##     alias-python -c "from mezcla.misc_utils import parse_timestamp as pts; print(pts('$*').timestamp())"
+## }
+function expand-timestamp {
+    # note: time require that cpan DateTime be installed.
+    perl -pe 'BEGIN { require "extra.perl"; }
+              s/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z)/
+                $1 . " " . parse_iso_timestamp($1)/ex;'
+}
+
 #-------------------------------------------------------------------------------
 # MS Office like stuff
 
@@ -621,19 +671,25 @@ function libreoffice-text-from-html-clipboard() {
         $doc_exists && { printf "Error: new filename should be specified:\n    "; ls -lt -- "$doc_file"; }
         return 1
     fi
-    local temp_html="$TEMP/$(basename "$base.html")"
+    local temp_html
+    temp_html="$TEMP/$(basename "$base.html")"
 
     # Copy from clipboard and make sure html header included
     rename-with-file-date "$temp_html"
     xclip -selection clipboard -t text/html -o > "$temp_html"
     if [ "" == "$(grep "<body>" "$temp_html")" ]; then
-        perl -i.bak -pe 's@.*@<!DOCTYPE html><html lang="en">\n$&\n</body></html>\n@;' "$temp_html"
+        ## BAD: perl -i.bak -pe 's@.*@<!DOCTYPE html><html lang="en">\n$&\n</body></html>\n@;' "$temp_html"
+        # ex: <pre><font ...></pre> => <!DOCTYPE html><html lang="en"><pre>...</pre></html>"
+        perl -i.bak -pe 's@.*@<!DOCTYPE html><html lang="en">\n$&\n</html>\n@;' "$temp_html"
     fi
 
     # Convert HTML to document and then open
     libreoffice --headless --convert-to odt "$temp_html" --outdir "$(dirname "$base")"
     libreoffice "$doc_file" &
 }
+alias libreoffice-from-clipboard=libreoffice-text-from-html-clipboard
+simple-alias-fn libreoffice-to-pdf 'libreoffice --headless --convert-to pdf'
+alias extract-pdf=libreoffice-to-pdf
 
 #-------------------------------------------------------------------------------
 
@@ -673,7 +729,51 @@ function shell-check-last-snippet {
     # shellcheck disable=SC2002
     cat "$1" | perl -0777 -pe 's/^.*\$:\s*\{(.*)\n\s*\}\s*[^\{]*$/$1\n/s;' | shell-check --shell=bash -;
 }
+
+# Viewing images, etc.
+# get-last-snapshot(dir=.): return last image in DIR (sorted by date)
+# view-last-snapshot(dir=.): view last image in DIR (sorted by date);
+# when AS_THUMBNAIL, as thumbnail is displayed (for PREVIEW_TIME)
+# TODO3: add more general image retrieval (not just popular extensions)
+# note: uses nullglob so that unmatched wildcards expand to nothing
+function get-last-snapshot {
+    local dir="${1:-.}"
+    local image;
+    shopt -s nullglob
+    image=$(ls -t "$dir/"*.png "$dir/"*.jpg /dev/null | head -1);
+    shopt -u nullglob
+    echo "$image";
+}
+function view-last-snapshot {
+    local image dir
+    image=$(get-last-snapshot "$@")
+    if [ "$image" != /dev/null ]; then
+        echo "Viewing image $image"
+        if [ "${AS_THUMBNAIL:-0}" == "1" ]; then
+            show-thumbnail "$image"
+        else
+            start "$image"
+        fi
+    else
+        ## TODO2: add better error handling and default dir coordination
+        dir="${*:-.}"
+        echo "Warning: no snapshots found (e.g., in dir '$dir')"
+    fi
+}
+function view-last-snapshot-thumbnail { AS_THUMBNAIL=1 view-last-snapshot "$@"; }
+## TEMP:
+quiet-unalias get-last-snapshot view-last-snapshot
 #
+function show-thumbnail {
+    : "show-thumbnail(image-path): shows a thumbnail for IMAGE [for env:PREVIEW_TIME secs]"
+    local preview_time="${PREVIEW_TIME:-5}"
+    local H W
+    W=256
+    H=$((9*$W/16))
+    timeout "$preview_time" feh --borderless --geometry="${W}x${H}-0-0"  --scale-down "$@" &
+}
+
+
 # shell-check-stdin(): run shell-check over stdin
 function shell-check-stdin {
     ## DEBUG: echo "in shell-check-stdin: args='$*'"
@@ -692,11 +792,12 @@ function shell-check-stdin-loose {
 }
 
 # tabify(text): convert spaces in TEXT to tabs
+# note: consecutive spaces become one tab
 # TODO: account for quotes
 function tabify {
-    perl -pe 's/ /\t/g;'
+    perl -pe 's/ +/\t/g;'
 }
-# trace-vars(var, ...): trace each VAR in command line
+# trace-vars(var, ...): trace each VAR in command line to stderr
 # note: output format: VAR1=VAL1; ... VARn=VALn;
 # TODO2: fix bug with trailing whitespace being ignored
 function trace-vars {
@@ -707,11 +808,9 @@ function trace-vars {
         ## echo -n "$var="$(eval echo "\$$var")"; "
         ## TODO: value="$(eval "echo \$$var")"
         ## NOTE: See https://stackoverflow.com/questions/11065077/the-eval-command-in-bash-and-its-typical-uses
-        echo -n "$var=$(eval echo "\${$var}"); "
-        ## TODO: echo -n "$value; " 1>&2
+        echo -n "$var=$(eval echo "\${$var}"); " 1>&2
     done
-    echo
-    ## TODO: echo 1>&2
+    echo 1>&2
 }
 # trace-array-vars(var, ...): trace each ARRAY in command line
 # note: output format: ARR1=(VAL11 ... VAL1n); ARR2=(VAL21 ... VAL2n);
@@ -752,7 +851,9 @@ function reset-prompt-label {
     if [[ $PS_symbol =~ [^A-Za-z0-9\ _-]$ ]]; then
         # TODO3: avoid duplication of regex
         # NOTE: ideally should be like @vals = $(get_matches(regex))
-        old_symbol=$(echo "$PS_symbol" | perl -pe 's/^([\w\s]+)(.*\W)$/$2/;')
+        ## BAD: old_symbol=$(echo "$PS_symbol" | perl -pe 's/^([\w\s]+)(.*\W)$/$2/;')
+        # Change facilitated by Antigravity AI Assistant using Gemini 3.1 Pro (Low)
+        old_symbol=$(echo "$PS_symbol" | perl -pe 's/^([\w\s\-]+)(.*\W)$/$2/;')
         ## DEBUG: trace-vars old_symbol
     else
         echo "FYI: PS_symbol w/o trailing symbol: '$PS_symbol'" 1>&2
@@ -761,12 +862,15 @@ function reset-prompt-label {
 }
 # reset-prompt-here(): sets prompt label to dir basename with existing PS_symbol proper (e.g., "alt $" => "bin $")
 # shellcheck disable=SC2016
-alias-fn reset-prompt-here 'reset-prompt-label "$(basename $PWD)"'
-# reset-prompt-alt/NOTES/...(): resets prompt label to affix
-for label in alt NOTES; do 
+## BAD: alias-fn reset-prompt-here 'reset-prompt-label "$(basename $PWD)"'
+function reset-prompt-here {
+    reset-prompt-label "$(basename "$PWD")";
+}
+# reset-prompt-alt/NOTES/...(): resets prompt label to affix;
+# example: alias reset-prompt-NOTES='reset-prompt-label NOTES'
+for label in alt NOTES; do
     eval "alias reset-prompt-$label=\"reset-prompt-label $label\""
 done
-## OLD: ## TODO4: rename alt-xterm-title to alt-xterm-title-old)
 alias alt-xterm-title='reset-prompt-label alt'
 
 # pristine-bash(): invoke Bash with fresh environment, with prompt to 'pristine $' as a reminder
@@ -792,18 +896,28 @@ alias-fn rename-adhoc-notes 'rename-files -q "$(get-host-nickname)-adhoc-notes" 
 
 # copy-to-temp-as-txt(file, ...): copies file to temp and add .txt extension for braindead web upload interfaces (e.g., AI assistants)
 # note: basically copy $f ~/temp/$b.txt with touch
+# TODO2: apply de-identification
 #
 function copy-to-temp-as-txt {
-    local file="$1"
-    local temp_file
-    ## TODO3: global TEMP
-    declare -g TEMP
-    temp_file="$TEMP/$(basename "$file").txt"
-    copy "$file" "$temp_file"
-    touch "$temp_file"
+    for file in "$@"; do
+        local temp_file
+        ## TODO3: global TEMP
+        declare -g TEMP
+        temp_file="$TEMP/$(basename "$file").txt"
+        # note: rename .xyz to dot-xyz (e.g., temp/dot-emacs.txt)
+        temp_file="$(echo "$temp_file" | perl -pe 's@/\.([^/]+)$@/dot-$1@;')"
+        copy "$file" "$temp_file"
+        touch "$temp_file"
+    done
 }
 
-#................................................................................
+#...............................................................................
+# AI Assistant related
+
+# view-claude-code-transcripts: show Claude Code transcripts reformatted as HTML
+alias view-claude-code-transcripts='uvx claude-code-transcripts'
+
+#...............................................................................
 # Snapshot related
 
 # rename-last-snapshot(new-name): rename most recent snapshot to NEW-NAME (excluding renamed files)
@@ -819,9 +933,14 @@ function rename-last-snapshot {
         new_name="$new_name-$(T).png"
     fi
     local last_file
+    local pictures_dir="$HOME/Pictures"
+    if [ "$(under-cygwin)" == "1" ]; then
+        # note: there might be several Screenshots subdirs so use last (n.b., OneDrive quirk)
+        pictures_dir="$(ls -td "$HOME/Pictures/Screenshots"* | head -1)"
+    fi
     # TODO: have options to use latest file (regardless of name) 
     # shellcheck disable=SC2010
-    last_file="$(ls -t ~/Pictures/*.png | grep -i '/screen.*shot' | head -1)"
+    last_file="$(ls -t "$pictures_dir/"*.png | grep -i '/screen.*shot' | head -1)"
     move "$last_file" "$new_name"
 
     # Optionally preview result
@@ -833,6 +952,7 @@ function rename-last-snapshot {
         start "$new_name"
     fi
 }
+alias-fn rename-last-snapshot-no-preview 'RENAME_SNAPSHOT_PREVIEW=0 rename-last-snapshot'
 
 #................................................................................
 # Media related
@@ -859,7 +979,8 @@ function youtube-transcript {
         echo "- More details follow (n.b., python script interface):" 
         echo ""
         ## TODO3: add alias for showing condensed mezcla script usage notes
-        (alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -0777 -pe 's/positional arguments[^\xFF]*//;') | indent-text
+        ## TODO2: alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -pe 's/^/  /g; s/    /   /g;'
+        alias-python -m mezcla.examples.youtube_transcript --help 2>&1 | perl -pe 's/    /  /; s/^/  /;'
         return
     fi
     local url="$1"
@@ -896,7 +1017,8 @@ function youtube-transcript-alt {
 function yt-transcript {
     local prefix="$1"
     local url="$2"
-    local filename="$prefix-youtube-$(todays-date-mmmYY).list"
+    local filename
+    filename="$prefix-youtube-$(todays-date-mmmYY).list"
     youtube-transcript "$url" "$filename"
 }
 
@@ -924,7 +1046,7 @@ function derive-signatures() {
     local f prefix
     for f in "$HOME/info/".*signature; do
         if [[ ! -e "$f" ]]; then
-            echo "Warning: No signature found in $HOME/info"
+            echo "Warning: Signature not found: '$f'"
             break
         fi
         prefix="$(echo "$f" | perl -pe 's/^.*\.(.*)-signature/$1/;')"
@@ -972,6 +1094,7 @@ function create-zip-from-parent {
     popd
 }
 alias zip-from-parent=create-zip-from-parent
+alias zip-from-parent-encrypted='ENCRYPT=1 zip-from-parent'
 
 #...............................................................................
 # Unix stuff
@@ -995,15 +1118,6 @@ alias-fn ps-time 'LINES=1000 COLUMNS=256 alias-perl ps_sort.perl -time2num -num_
 # screen-reattach: restart GNU screen session
 # options: -d -RR: reattach a session and if necessary detach or create it
 alias-fn screen-reattach 'screen -d -RR'
-
-## OLD:
-## # sleep-for(seconds, [message]): sleep for SECONDS with MESSAGE ("delay for Ns")
-## function sleep-for {
-##     local sec="$1"
-##     local msg="${2:-"delay for ${sec}s"}"
-##     echo "$msg"
-##     sleep "$sec"
-## }
 
 # image-metadata(file): show metadata about image (e.g., associated text)
 simple-alias-fn image-metadata 'identify -verbose'
@@ -1049,23 +1163,28 @@ function remove-path-entries {
     local var="${2:-PATH}"
     local new_value
     ## TODO3: convert to python help to allow for convenient tracing
+    ## TODO4:                   ^^^^ typo???
     new_value="$(
         REMOVE_PATTERN="$pattern" \
         TARGET_VAR="${!var}" \
         perl -e '
+            require "common.perl";  ## TODO4 make optional (e.g., minimal install)
             my $pattern = $ENV{REMOVE_PATTERN};
             my %seen;
+            # Find path entries to retain
             my @parts = grep {
                 $_ ne "" &&
                 $_ !~ /$pattern/i &&
-                !$seen{$_}++
+                (! $seen{$_}++) &&
+                debug_print(4, "Retaining $_\n") &&    ## TODO3: just trace removals
+                &TRUE
             } split(/:/, $ENV{TARGET_VAR});
+            # Reconstruct path (n.b., ignores duplicates)
             print join(":", @parts);
         '
     )"
     
     printf -v "$var" '%s' "$new_value"
-    ## OLD: export "$var"
     eval 'export $var'
 }
 
@@ -1078,7 +1197,6 @@ alias free-memory='free --wide --human | grep -v Swap:'
 # clear-cache: clear disk cache
 # See https://linux-mm.org/Drop_Caches and https://www.linuxatemyram.com
 # TODO: get this to work completely; explain Admin filter
-## OLD: simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory; echo'
 ## NOTE: 71 is ANSI color index for mediumseagreen (#5faf5f)
 simple-alias-fn clear-cache 'echo; date; echo before; free-memory; sync; sysctl vm.drop_caches=3; echo after; free-memory | colout "free" 71'
 
@@ -1137,8 +1255,104 @@ simple-alias-fn test-audio 'start /usr/share/sounds/Yaru/stereo/complete.oga'
 # note: although 'kill-it xyz' is not hard to type 'kill-xyz' allows for tab completion
 #
 alias tomohara-proper-aliases='source "$TOM_BIN/tomohara-proper-aliases.bash"'
-alias all-tomohara-aliases='source $TOM_BIN/all-tomohara-aliases-etc.bash'
-alias all-tomohara-settings='all-tomohara-aliases; tomohara-settings'
+## TODO2: add sanity check to detect aliases masking functions (e.g., all-tomohara-aliases).
+function all-tomohara-aliases { ALIASES_PROCESSED=0 source "$TOM_BIN/all-tomohara-aliases-etc.bash"; }
+## TODO4: fallback version for scripts where TOM_BIN is not preset:
+## function all-tomohara-aliases { ALIASES_PROCESSED=0 source "${TOM_BIN:-$(dirname "${BASH_SOURCE[0]:-$0}")}/all-tomohara-aliases-etc.bash"; }
+# all-tomohara-aliases-here(): reload tomohara aliases from current directory showing invocations
+function all-tomohara-aliases-here {
+    # note: fixes DEBUG_LEVEL at detailed (4)
+    DEBUG_LEVEL=4 TOM_BIN="$PWD" all-tomohara-aliases
+}
+# all-tomohara-settings(): enable tomohara settings as well as aliases
+# note: a function (not an alias) so that env-var prefixes carry over to both
+# parts (with an alias, "V=1 all-tomohara-settings" only affects the aliases part)
+function all-tomohara-settings {
+    all-tomohara-aliases
+    source "$TOM_BIN/tomohara-settings.bash"
+}
+# update-env-path(env_var, old-path, new-path): change OLD-PATH to NEW-PATH in PATH-like ENV-VAR
+# note: OLD-PATH only matches at the start of a path component (i.e., ^ or :) and must
+# end the component (i.e., : or end-of-string) or continue into a subdir (i.e., /)
+# EX: XYZPATH="/home/me/a:/tmp/a:/home/me/a/1"; update-env-path XYZPATH /home/me/a /home/me/z; echo "$XYZPATH"
+#     => "/home/me/z:/tmp/a:/home/me/z/1"
+function update-env-path {
+    (( DEBUG_LEVEL >= 4 )) && echo "${FUNCNAME[0]}" "$@"
+    if missing-options "$@" || [ "$3" == "" ]; then
+        function-usage --args "env-var old-path new-path" --synopsis "change OLD-PATH to NEW-PATH in PATH-like ENV-VAR" --example "PYTHONPATH /home/me/a /home/me/z"
+        return
+    fi
+    local env_var="$1"
+    # note: trailing slashes dropped so that subdirectory matching works
+    local old_path="${2%/}"
+    local new_path="${3%/}"
+    # note: guards against an empty old-path, which would otherwise match everywhere
+    if [ "$old_path" == "" ]; then
+        echo "Error: ${FUNCNAME[0]} requires a non-empty old-path" 1>&2
+        return 1
+    fi
+    local old_value="${!env_var}"
+    local new_value
+    # note: values passed via environment so that perl sees them literally (see remove-path-entries)
+    # TODO2: fix the buggy global regex; applied twice to handle adjacent entries
+    new_value="$(
+        printf '%s' "$old_value" |
+            OLD_PATH="$old_path" NEW_PATH="$new_path" \
+                perl -pe 's/(^|:)\Q$ENV{OLD_PATH}\E(?=[:\/]|$)/$1$ENV{NEW_PATH}/g;'
+    )"
+    #                       path-delim  --------      dir-delim       ++++++++
+    if [ "${DEBUG_LEVEL:-0}" -ge 5 ]; then
+        echo "issuing: export $env_var='$new_value'" 1>&2
+    fi
+    printf -v "$env_var" '%s' "$new_value"
+    export "${env_var?}"
+    if [[ "$(trace-var "$env_var" 2>&1)" =~ $old_path ]]; then
+        echo "Warning: problem applying in update-env-path for $env_var"
+    fi
+}
+# all-tomohara-settings-here(): reset TOM_BIN to . and update env path vars, etc.
+# note: TOM_BIN must already be set, as it gives the old path to be replaced
+function all-tomohara-settings-here {
+    local old_tom_bin="${TOM_BIN%/}"
+    local new_tom_bin="$PWD"
+    local env_var
+    if [ "$old_tom_bin" == "" ]; then
+        echo "Error: ${FUNCNAME[0]} requires TOM_BIN to be set" 1>&2
+        return 1
+    fi
+    ## TEMP (get revised aliases): all-tomohara-aliases-here
+
+    # Replace existing PATH-related settings
+    if [ "$old_tom_bin" != "$new_tom_bin" ]; then
+        echo "Updating PATH env vars"
+        for env_var in PATH PYTHONPATH PERLLIB; do
+            update-env-path "$env_var" "$old_tom_bin" "$new_tom_bin"
+            ## TEMP (via Gemini): try again via realpath:
+            local old_real
+            old_real="$(realpath "$old_tom_bin" 2>/dev/null)"
+            if [ -n "$old_real" ] && [ "$old_real" != "$old_tom_bin" ]; then
+                update-env-path "$env_var" "$old_real" "$new_tom_bin"
+            fi
+        done
+        if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+            echo "Path revision:"
+            show-path | cat -n | egrep "($old_tom_bin)|($new_tom_bin)"
+        fi
+        ## DEBUG:
+        local old_usage
+        old_usage="$(show-path | grep "${old_tom_bin}[:/]")"
+        if [ "$old_usage" != "" ]; then
+            echo "Warning: old dir '$old_tom_bin' still used:"
+            echo $'\t'"$old_usage"
+        fi
+        
+    fi
+
+    # Update other settings
+    export TOM_BIN="$new_tom_bin"
+    # note: fixes DEBUG_LEVEL at detailed (4)
+    DEBUG_LEVEL=4 all-tomohara-settings
+}
 #
 # note: kill-em targets process name, and kill-it uses pattern (hence riskier)
 alias kill-kdiff3='kill-it kdiff3'

@@ -55,10 +55,10 @@ function do-backup-dir () { local dir="$1";
     $nice "$tar" cvf "$TMP/$dir.tar" "$dir";
     $nice "$seven_zip" a "${backup_dir}/$dir.7z" "$TMP/$dir.tar";
     if [ $? -eq 0 ]; then
-	## OLD: /bin/rm -fv "$TMP/$dir.tar";
-	command rm -fv "$TMP/$dir.tar";
+        ## OLD: /bin/rm -fv "$TMP/$dir.tar";
+        command rm -fv "$TMP/$dir.tar";
     else
-	echo "Error: Problem running 7zip over '$TMP/$dir.tar'"
+        echo "Error: Problem running 7zip over '$TMP/$dir.tar'"
     fi
 }
 
@@ -67,9 +67,9 @@ function do-backup-dir () { local dir="$1";
 #
 function redux-backup-dir () { local dir="$1";
     if [ ! -e "${backup_dir}/$dir.7z" ]; then
-	do-backup-dir "$dir"
+        do-backup-dir "$dir"
     else 
-	echo "Warning: Skipping backup for $dir since backup already exists"
+        echo "Warning: Skipping backup for $dir since backup already exists"
     fi
 }
 

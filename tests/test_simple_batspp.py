@@ -7,6 +7,8 @@
 #   option shows tracing output normally suppressed by unittest_wrapper.py.
 # - This can be run as follows:
 #   $ PYTHONPATH=".:$PYTHONPATH" python ./mezcla/tests/test_simple_batspp.py
+# - Ignores class-internals warning:
+#   pylint: disable=protected-access
 #
 
 """Tests for simple_batspp module"""
@@ -24,6 +26,7 @@ from mezcla import debug
 ## TODO: from mezcla import glue_helpers as gh
 from mezcla.my_regex import my_re
 from mezcla import system
+## OLD: from mezcla import glue_helpers as gh
 
 # Note: Two references are used for the module to be tested:
 #    THE_MODULE:                  global module object
@@ -43,31 +46,17 @@ if not my_re.search(__file__, r"\btemplate.py$"):
 ##                            description="Fouled Up Beyond All Recognition processing")
 
 FUBAR_TEST = r"""
-    # Fubar test
-    
     # Global setup
     $ num_fu=0
-    ## TODO: $ alias fubar='let num_fu++; echo num_fu="$(eval echo "\${num_fu}")"'
-    $ alias fubar='let num_fu++'
-    
-    # Setup
-    $ num_fu=1
-    
+    $ alias fubar='let num_fu++; echo num_fu=$num_fu'
+
     # Test fu
-    ## TODO: $ fubar
-    ## TEST: 
-    ## $ fubar; echo "num_fu=$num_fu"
-    ## num_fu=1
-    $ fubar; echo fubar
-    fubar
+    $ fubar
+    num_fu=1
     
     # Test fu again
-    ## TODO: $ echo $(fubar)
-    ## TEST: 
-    ## $ fubar; echo "num_fu=$num_fu"
-    ## num_fu=2
-    $ fubar; echo fubar
-    fubar
+    $ fubar
+    num_fu=2
 """.replace("    ", "")
 
 #------------------------------------------------------------------------
@@ -79,19 +68,59 @@ class TestIt(TestWrapper):
     # TODO: use_temp_base_dir = True            # treat TEMP_BASE as directory
     # note: temp_file defined by parent (along with script_module, temp_base, and test_num)
 
-    @pytest.mark.xfail                   # TODO: remove xfail
     @trap_exception
-    def test_data_file(self):
-        """Makes sure TODO works as expected"""
-        debug.trace(4, f"TestIt.test_data_file(); self={self}")
+    def test_data_file_subprocess(self):
+        """Makes sure alias-based tests run correctly via BASH_EVAL.
+        note: This uses a subprocess: see test_data_file_direct for the class-based invocation."""
+        debug.trace(4, f"TestIt.test_data_file_subprocess(); self={self}")
 
         system.write_file(self.temp_file, FUBAR_TEST)
         output = self.run_script(
             options=f"--output {self.temp_file}.batspp",
-            env_options="TEST_FILE=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1",
+            env_options=("TEST_FILE=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1"
+                         " GLOBAL_TEST_DIR=1 IGNORE_SETUP_OUTPUT=1"
+                         " IGNORE_ALL_COMMENTS=1 FORCE_RUN=1"),
             data_file=self.temp_file)
-        # note: The setup is counted as a no-op test (i.e., ignored)
-        self.do_assert("3 tests, 0 failure(s), 1 ignored" in output)
+        # note: The global setup block is emitted as raw code (not a numbered test),
+        # so only 2 actual tests are counted ("Test fu" and "Test fu again").
+        self.do_assert("2 tests, 0 failure(s), 0 ignored" in output)
+        return
+
+    def _run_data_file_direct(self):
+        """Helper for test_data_file_direct that returns the app"""
+        self.monkeypatch.setattr(THE_MODULE, "TEST_FILE", True)
+        self.monkeypatch.setattr(THE_MODULE, "MATCH_SENTINELS", True)
+        self.monkeypatch.setattr(THE_MODULE, "GLOBAL_TEST_DIR", True)
+        self.monkeypatch.setattr(THE_MODULE, "PARA_BLOCKS", True)
+        self.monkeypatch.setattr(THE_MODULE, "BASH_EVAL", True)
+        self.monkeypatch.setattr(THE_MODULE, "IGNORE_SETUP_OUTPUT", True)
+        self.monkeypatch.setattr(THE_MODULE, "IGNORE_ALL_COMMENTS", True)
+        temp_file = self.create_temp_file(FUBAR_TEST)
+        runtime_args = ["--force", temp_file]
+        app = THE_MODULE.get_app(runtime_args=runtime_args)
+        app.run()
+        out = self.get_stdout()
+        self.do_assert("2 tests, 0 failure(s), 0 ignored" in out)
+        return app
+
+    def test_data_file_direct(self):
+        """Version of test_data_file using API (i.e., not subprocess)"""
+        self._run_data_file_direct()
+
+    def test_reentry_app(self):
+        """Verifies that Batspp can be run multiple times (re-entry) without state corruption by resetting the app"""
+        debug.trace(4, f"TestIt.test_reentry_app(); self={self}")
+        
+        # 1. First run via app.run()
+        app = self._run_data_file_direct()
+        
+        # 2. Re-run via setup() and run_main_step()
+        self.clear_stdout_stderr()
+        app.setup()
+        app.run_main_step()
+        
+        out2 = self.get_stdout_stderr()[0]
+        self.do_assert("2 tests, 0 failure(s), 0 ignored" in out2, f"Second run failed: {out2}")
         return
 
     ## OLD: @pytest.mark.xfail                   # TODO: remove xfail
@@ -117,7 +146,8 @@ class TestIt(TestWrapper):
                 title="quote-check",
                 setup="",
                 actual="$ echo ok\n",
-                expected="Error: Use 'git-update-force' to update with changed files",
+                # note: Changed to FYI to avoid false positive with check_errors.perl when debugging
+                expected="FYI: Use 'git-update-force' to update with changed files",
             )
             bats_text, _ = test_obj._convert_to_bats(test_case)
             self.do_assert("Use 'git-update-force'" in bats_text)
@@ -148,10 +178,9 @@ class TestIt(TestWrapper):
             THE_MODULE.OMIT_TRACE = old_omit_trace
         return
 
-    @pytest.mark.xfail(reason="TODO: support optional non-elided debug headers for long output")
     @trap_exception
     def test_convert_to_bats_no_elision_for_long_expected(self):
-        """Edge-case TODO: allow preserving full long expected text in debug header"""
+        """Make sure long expected text is preserved (not elided) in debug header"""
         debug.trace(4, f"TestIt.test_convert_to_bats_no_elision_for_long_expected(); self={self}")
         test_obj = THE_MODULE.CommandTests()
         old_omit_trace = THE_MODULE.OMIT_TRACE

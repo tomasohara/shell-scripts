@@ -3,7 +3,10 @@
 # Note:
 # - See act.yml for the local workflow file.
 # - It also contains a bunch of tips.
+# - For tips on pruning the runners, see
+#   https://dev.to/mathio/squeezing-disk-space-from-github-actions-runners-an-engineers-guide-3pjg
 #
+## UPDATE 13 Sep 26: updates runner to ubuntu-24.04
 
 name: Github-Tests
 
@@ -17,23 +20,44 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-22.04]
+        os: [ubuntu-24.04]
         ## TODO: os: [ubuntu-20.04, ubuntu-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         ## TODO: 3.x [latest; -or latest, latest-1, latest-2, ...]
 
     steps:
+      - name: Display Environment
+        ## TODO: Make this step debug only
+        run: |
+          printenv | sort
+
+      - name: Initial Disk Usage
+        run: |
+          echo "File system usage:"
+          df -h
+          echo "Top directories by disk usage:"
+          du --block-size=1K / 2>&1 | sort -rn | head -20
+
+      - name: Prune Unused Software Directories
+        # note: Needed occasionally to ensure enough space for dependencies
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /usr/share/swift
+
+      ## NOTE: Action pins use major-version tags (e.g. @v5). These float within
+      ## a major but do NOT cross a major bump (e.g. the Node 20->24 runtime
+      ## change), so new majors must be adopted deliberately. Dependabot (see
+      ## ../dependabot.yml) opens PRs to keep these versions synchronized.
       - name: Checkout Repository
         ## See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-versioned-actions
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Cache Python Dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
@@ -49,13 +73,23 @@ jobs:
           # Software packages
           sudo apt-get update
           ## TODO2: sudo apt-get install --yes --fix-missing $(sed 's/ \#.*//' required-packages.txt | grep -v '^#')
-          sudo apt-get install --yes --fix-missing tcsh
+          ## NOTE: libegl1 added for clipboard_button.py (Embedded-System Graphics Library)
+          sudo apt-get install --yes --fix-missing tcsh libegl1
+          # Install packages from required-packages.txt (facilitated by Gemini 4 Argon)
+          sudo apt-get install --yes --fix-missing $(sed 's/ \#.*//' required-packages.txt | grep -v '^#')
           echo "end of other dependencies (status=$?)"
 
-      - name: Run Python Tests under Runner
+      - name: Run BatsPP and Python Tests under Runner
         run: |
           PYTHONPATH="$PWD:$PWD/tests:$PYTHONPATH" ./tests/run_tests.bash
           
+      - name: Final Disk Usage
+        run: |
+          echo "File system usage:"
+          df -h
+          echo "Top directories by disk usage:"
+          du --block-size=1K / 2>&1 | sort -rn | head -20
+
   build-and-test-docker:
     name: Build and Run Tests via Docker
     ## TEMP: disable use of Docker
@@ -71,7 +105,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Build docker image
         run: |

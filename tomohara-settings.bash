@@ -11,6 +11,13 @@
 # - ** Move misc. settings from .bashrc and tomohara-aliases.bash here.
 # - Flesh out.
 #
+# TODO3:
+# - Document system env vars:
+#   HOSTNAME: Bash builtin for system's network hostname 
+#   OSTYPE: Bash builtin for operating system
+#   etc.
+#   See https://www.gnu.org/software/bash/manual/bash.html#Bash-Variables
+#
 
 # Ensure OSTYPE is environment variable for script usage
 if [ "$(printenv OSTYPE)" = "" ]; then
@@ -57,6 +64,7 @@ export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$HOME/lib:$HOME/lib/$OSTYPE_BRIEF"
 export PYTHONPATH="src:$PYTHONPATH:.:.."
 
 # Define HOST_NICKNAME from ~/.host-nickname if unset or the default
+## TODO3: document home dir settings file: ~/.host-nickname
 if [[ ("$HOST_NICKNAME" = "") || ("$HOST_NICKNAME" = "tpo-host") ]]; then
     ## OLD: export HOST_NICKNAME="$(cat ~/.host-nickname 2> /dev/null | grep -v '^#')";
     # shellcheck disable=SC2155
@@ -66,7 +74,16 @@ fi
 # Python stuff
 ## OLD: prepend-path "$HOME/python/Mezcla/mezcla"
 ## OLD: add-python-path "$HOME/python/Mezcla/mezcla"
-add-python-path "$HOME/Mezcla/mezcla"
+## OLD: add-python-path "$HOME/Mezcla/mezcla"
+# NOTE: Accounts for case-sensitivity differences in mezcla's repo and package dirs;
+# traditionally, ~/Mezcla was the repo; and, ~/mezcla was the package dir.
+if [ "$(under-cygwin)" = "1" ]; then
+    # Windows is case-insensitive by default so Mezcla-repo used for root dir.
+    add-python-path "$HOME/Mezcla-repo/mezcla"
+else
+    # Under case-sensitive Linux & MacOS, ~/Mezcla is the root, and ~/mezcla the package.
+    add-python-path "$HOME/Mezcla/mezcla"
+fi
 ## OLD: append-path "$HOME/mezcla-tom/examples:$HOME/python/examples:$TOM_BIN/bruno"
 append-path "$HOME/Mezcla/mezcla/examples"
 append-path "$HOME/Mezcla/tools"
@@ -83,10 +100,17 @@ export GRADIO_SERVER_NAME="$HOSTNAME.local"
 cond-export BRIEF_USAGE 1               # running w/o args shows usage line
 cond-export TRACE_INVOCATION 1          # trace script invocation argv
 cond-export DISABLE_RECURSIVE_DELETE 1  # don't allow rm -r during cleanup
-cond-export SKIP_EXPECTED_ERRORS 1      # skip pytests known to fail (e.g., to filter error messages from check-errors)
+## OLD: cond-export SKIP_EXPECTED_ERRORS 1      # skip pytests known to fail (e.g., to filter error messages from check-errors)
+#
+# Testing stuff:
+# pytest options: --vv: doubly verbose; --capture=no: don't capture stderr; -rA: report all
+## OLD: cond-export PYTEST_OPTIONS "-vv --capture=no -rA"
+cond-export PYTEST_OPTS "-vv --capture=no -rA"
 
 # Enable timestamp preservation during git-update alias operations (n.b., stash pop quirk)
 cond-export PRESERVE_GIT_STASH 1
+# TODO4: get default via git-aliases.bash (e.g., via new git-log-dir-alias)
+cond-export GIT_LOG_DIR log-files
 
 # Misc bash options
 # make file globs cases insensitve
@@ -97,7 +121,8 @@ shopt -s nocaseglob
 export LESSCHARSET=utf-8
 # Also have it display binary characters  as underline instead of reverse video (i.e., standout)
 export LESSBINFMT="*u<%02X>"
-export SHELL="/bin/bash"
+## NOTE: disabled to avoid silly MacOS issues which uses old Bash
+## OLD: export SHELL="/bin/bash"
 
 # Temp directory overrides (n.b., a little redundant w/ tomohara-aliases.bash).
 # Note:
@@ -107,8 +132,8 @@ export SHELL="/bin/bash"
 # - See https://docs.python.org/3/library/tempfile.html.
 # - Also see tomohara-aliases.bash and ~/.bash_profile.
 ## HACK: don't allow /tmp for TMP or TMPDIR (for persistence)
-if [ "$TMP" = "/tmp" ]; then export TMP "$TEMP/tmp"; fi
-if [ "$TMPDIR" = "/tmp" ]; then export TMPDIR "$TEMP/tmp"; fi
+if [ "$TMP" = "/tmp" ]; then export TMP="$TEMP/tmp"; fi
+if [ "$TMPDIR" = "/tmp" ]; then export TMPDIR="$TEMP/tmp"; fi
 mkdir -p "$TEMP" "$TMP" "$TMPDIR"
 
 # Don't enable default .bashrc settings

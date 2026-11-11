@@ -63,6 +63,8 @@ if [ "$1" = "--help" ]; then
     echo "Notes:"
     echo "- Put any emacs arguments after the -- spec."
     echo "- You can also use EMACS_PROGRAM environment variable to override program."
+    echo "- Uses Cygwin to resolve path for Windows."
+    echo "- Under Mac or Cygwin, --nohup is default."
     echo ""
     exit
 fi
@@ -90,10 +92,11 @@ fi
 ##     fi
 ## fi
 
-# Use nohup if under Mac OS
-if [[ "$OSTYPE" =~ darwin.* ]]; then
-    use_nohup="1"
-fi
+## OLD:
+## # Use nohup if under Mac OS
+## if [[ "$OSTYPE" =~ darwin.* ]]; then
+##     use_nohup="1"
+## fi
 
 # Parse command-line options
 #
@@ -101,9 +104,18 @@ moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 quick=0
 emacs_args=0
 under_mac="0"
+under_cygwin="0"
 if [[ "$OSTYPE" =~ darwin.* ]]; then
     under_mac="1"
 fi
+if [ "$OSTYPE" == "cygwin" ]; then
+    under_cygwin="1"
+fi
+# Use nohup if under MacOS or Cygwin
+if [[ ("$under_mac" = "1") || ("$under_cygwin" = "1") ]]; then
+    use_nohup="1"
+fi
+#
 while [ "$moreoptions" = "1" ]; do
     if [ "$1" = "--trace" ]; then
         set -o xtrace;
@@ -126,7 +138,7 @@ while [ "$moreoptions" = "1" ]; do
         shift;
     elif [ "$1" = "--" ]; then
         shift;
-	emacs_args=1
+        emacs_args=1
         break;
     else
         echo "ERROR: Unknown option: $1";
@@ -155,6 +167,9 @@ function resolve-path() {
     local filename="$1"
     local new_filename
     new_filename="$(realpath "$filename")"
+    if [ "$under_cygwin" == "1" ]; then
+        new_filename="$(cygpath -wa "$filename")"
+    fi
     ## DEBUG: echo "resolving '$filename' => '$new_filename'" 1>&2
     echo "$new_filename"
 }
@@ -176,12 +191,13 @@ if [ "$in_background" = "1" ]; then
     # TODO: rework so that no-op option added if empty (to avoid SC2086 disabled)
     #   ex: emacs "${emacs_options:- --eval 1}" "$@" &
     args=("$@");
-    if [ "$under_mac" = "1" ]; then
+    ## OLD: if [ "$under_mac" = "1" ]; then
+    if [[ ("$under_mac" = "1") || ("$under_cygwin" = "1") ]]; then
         args=()
         if [ $# == 0 ]; then args+=("$(resolve-path .)"); fi
         # note: resolve fullpath for non-option filename due to quirk under macos
         for filename in "$@"; do
-    	    ## DEBUG: echo "filename=$filename"
+            ## DEBUG: echo "filename=$filename"
             if [[ ("$emacs_args" = "0") && ($filename =~ [^-]*) ]]; then
                 filename=$(resolve-path "$filename")
             fi
@@ -196,14 +212,14 @@ if [ "$in_background" = "1" ]; then
         ## echo "background w/ nohup"
         ## echo "issuing: $emacs "${emacs_options[@]}" '$(realpath ${args[*]})' \>\> $TEMP/nohup.log 2>&1 &"
         # shellcheck disable=SC2090
-	nohup "$emacs" "${emacs_options[@]}" "${args[*]}" >> "$TEMP/nohup.log" 2>&1 &
+        nohup "$emacs" "${emacs_options[@]}" "${args[*]}" >> "$TEMP/nohup.log" 2>&1 &
         disown
     else
         ## DEBUG:
         ## echo "regular background (i.e., non-nohup)"
         ## echo "issuing: $emacs "${emacs_options[@]}" ${args[*]} &"
-	## set -o xtrace
-	## echo "${args[@]}"
+        ## set -o xtrace
+        ## echo "${args[@]}"
         "$emacs" "${emacs_options[@]}" "${args[@]}" &
         disown
     fi

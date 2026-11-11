@@ -1,0 +1,105 @@
+# echo $PS1
+$ actual=${PS1: -1}
+$ [ "$actual" = ">" ]; echo $?
+0
+
+## BAD
+# # Delete all aliases and function
+# # TODO: Instead start from pristine environment
+# unalias -a
+# alias | wc -l
+# for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+# typeset -f | egrep '^\w+' | wc -l
+# Setting a temp directory for tests
+## OLD
+# TMP=/tmp/test-extensionless
+# BIN_DIR=$PWD/..
+
+## OLD: For debuging
+# alias | wc -l
+
+## OLD
+# mkdir -p "$temp_dir"
+# cd "$temp_dir"
+# pwd
+## OLD: Used the concept of trash-dir, instead use unique temp-dirs
+# temp_dir=$TMP/test-3570
+# trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
+# command mkdir -p "$temp_dir"
+# command mkdir -p "$trash_dir"
+# command cd "$temp_dir"
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/trace-extensionless-shortcut-unicode; fi
+$ temp_dir=$TMP/extensionless-shortcut-unicode
+$ rename-with-file-date "$temp_dir" > /dev/null
+$ command mkdir -p "$temp_dir"
+$ command cd $temp_dir
+## OLD
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+
+# Global Setup
+$ alias testnum="sed -r "s/[0-9,A-F,a-f]/X/g"" 
+$ alias testuser="sed -r "s/"$USER"+/user/g""
+
+## Count aliases proper
+# alias | wc -l | testnum
+$ [ "$(alias | wc -l | testnum)" = "XXX" ]; echo $? 
+0
+
+## Count functions
+# typeset -f | egrep '^\w+' | wc -l | testnum
+$ [ "$(typeset -f | egrep '^\w+' | wc -l | testnum)" = "XXX" ]; echo $? 
+0
+
+## OLD
+# pwd
+# rm -rf ./*
+## BAD: rm -rf ./* > /dev/null
+## BAD TOO: command mv -f * "$trash_dir"
+$ uname -r > version1.txt
+$ [ -e version1.txt ]; echo $?
+0
+
+## BAD
+# source $BIN_DIR/tomohara-aliases.bash
+
+# function show-unicode-code-info-aux() { perl -CIOE   -e 'use Encode "encode_utf8"; print "char\tord\toffset\tencoding\n";'    -ne 'chomp;  printf "%s: %d\n", $_, length($_); foreach $c (split(//, $_)) { $encoding = encode_utf8($c); printf "%s\t%04X\t%d\t%s\n", $c, ord($c), $offset, unpack("H*", $encoding); $offset += length($encoding); }   $offset += length($/); print "\n"; ' < "$1"; }
+# function show-unicode-code-info { show-unicode-code-info-aux "$@"; }
+# function show-unicode-code-info-stdin() { in_file="$TEMP/show-unicode-code-info.$$"; cat >| $in_file;  show-unicode-code-info-aux $in_file; }
+# function output-BOM { perl -e 'print "\xEF\xBB\xBF\n";'; }
+# function show-unicode-control-chars { perl -pe 'use open ":std", ":encoding(UTF-8)"; s/[\x00-\x1F]/chr(ord($&) + 0x2400)/eg;'; }
+
+# OLD: show-unicode-code-info-aux ./version1.txt | testnum
+$ assert1=$(show-unicode-code-info-aux ./version1.txt | wc -l)
+$ assert2=$(show-unicode-code-info-aux ./version1.txt | grep -e "char" -e "ord" -e "offset" -e "encoding")
+$ [[ $assert1 -gt 2 && -n $assert2 ]]; echo $?
+0
+
+# OLD: show-unicode-code-info ./version1.txt | testnum
+$ assert1=$(show-unicode-code-info ./version1.txt | wc -l)
+$ assert1a=$(show-unicode-code-info-aux ./version1.txt)
+$ assert1b=$(show-unicode-code-info ./version1.txt)
+$ assert2=$(show-unicode-code-info ./version1.txt | grep -e "char" -e "ord" -e "offset" -e "encoding")
+$ [[ $assert1a == $assert1b && $assert1 -gt 2 && -n $assert2 ]]; echo $?
+0
+
+## Need Help
+# show-unicode-code-info-stdin ./version1.txt
+
+## Need Help (output-BOM shows no output)
+# output-BOM
+
+## Issue (non ending process) 
+# show-unicode-control-chars version1.txt 
+
+# # ERROR GENERATED (shown below) [0LD]
+# $ show-unicode-code-info-stdin ./catmanual.txt
+# | bash: /show-unicode-code-info.5292: Permission denied
+# | bash: /show-unicode-code-info.5292: No such file or directory
+
+# Wrapup
+$ echo "END"
+## OLD: command mv -f * "$trash_dir"
+END
+

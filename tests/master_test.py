@@ -3,6 +3,8 @@
 # note: Tana's script for running Python tests as part of workflow
 #
 # TODO2: reconcile with version in mezcla
+## UPDATE 19 Sep 26: Uses test count provided by pytest.
+## UPDATE 13 Jul 26: Increases threshold default.
 #
 
 
@@ -77,19 +79,28 @@ def run_tests(thresholds):
         cmd = f"pytest --collect-only {test_path}"
         collect_result = subprocess.run(cmd, shell=True, text=True, capture_output=True, check=False)
         debug.trace_object(6, collect_result)
-        total_tests = len(my_re.findall(r"<TestCaseFunction|<TestCaseClass|<Function|<Class",
-                                        collect_result.stdout))
-        # Compare against alternative way to detemine number of tests
-        # ex: "=== 103 tests collected in 1.64s ==="
-        # TODO2: make alternative method the default
-        if (total_tests == 0) or debug.debugging():
-            summary_total_tests = 0
-            if my_re.search(r"(\d+) tests collected",
-                            collect_result.stdout, flags=my_re.IGNORECASE):
-                summary_total_tests = system.to_int(my_re.group(1))
-            debug.trace_expr(5, total_tests, summary_total_tests)
-            debug.assertion(total_tests == summary_total_tests, assert_level=5)
-            total_tests = (summary_total_tests if (total_tests == 0) else total_tests)
+        ## BAD:
+        ## total_tests = len(my_re.findall(r"<TestCaseFunction|<TestCaseClass|<Function|<Class",
+        ##                                 collect_result.stdout))
+        # The collection tree includes structural nodes (e.g., classes), so
+        # use pytest's summary count instead of counting displayed tree nodes.
+        total_tests = 0
+        if my_re.search(r"(\d+) tests? collected",
+                        collect_result.stdout, flags=my_re.IGNORECASE):
+            total_tests = system.to_int(my_re.group(1))
+        elif collect_result.returncode not in (0, 5):
+            system.print_error(f"Error: Unable to collect tests for {test_filename}.")
+            diagnostic_output = collect_result.stderr.strip()
+            if not diagnostic_output:
+                diagnostic_output = collect_result.stdout.strip()
+            if diagnostic_output:
+                system.print_error(
+                    f"Collection diagnostics for {test_filename}:\n"
+                    f"{diagnostic_output}")
+            debug.trace_expr(5, collect_result.stdout, collect_result.stderr)
+            failed += 1
+            continue
+        debug.trace_expr(5, total_tests)
 
         # Run tests for the test
         cmd = f"pytest {test_path}"
@@ -148,7 +159,7 @@ def run_tests(thresholds):
     code = 0
     if failed > 0:
         code = failed
-        message = "Error: {failed} modules failed"
+        message = f"Error: {failed} modules failed"
     system.exit(message, status_code=code)
 
 #-------------------------------------------------------------------------------
@@ -158,11 +169,11 @@ def main():
 
     # Load the thresholds from the YAML file, falling back to defaults for all test files
     # in the tests directory (TODO: merge the two sources with file trumping default).
-    # note: uses default of 25% succeses allowed just for sake of getting tests operational
+    # note: uses default of 50% successes.
     # under Github actions (TODO: lower to 50%).
     THRESHOLDS_FILE = "thresholds.yaml"
     thresholds_path = gh.resolve_path(THRESHOLDS_FILE)
-    thresholds = {test_file: 25.0 for test_file in gh.get_matching_files("tests/test_*.py")}
+    thresholds = {test_file: 50.0 for test_file in gh.get_matching_files("tests/test_*.py")}
     debug.trace_expr(5, thresholds, prefix="default thresholds: ")
     if system.file_exists(thresholds_path):
         thresholds.update(load_thresholds(thresholds_path))

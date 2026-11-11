@@ -1,0 +1,556 @@
+# Test of complex aliases defined in tomohara-proper-aliases.bash (part 2)
+# See test-tomohara-proper-aliases.ipynb for related tests (and keep in synch).
+#
+# Note:
+# - "Complex" is taken to mean a function body of more than 5 lines.
+# - The aliases should be defined before Jupyter is invoked (see README.ipynb).
+# - Cases already covered by test-tomohara-proper-aliases.ipynb are omitted:
+#     run-python-script, test-python-script, trace-vars, and clone-repo
+#     (tested there via the git-clone-alias alias).
+# - Each test is a pair of cells, as per README.ipynb and testing-tips.ipynb:
+#   the first shows the command output and the second validates it via
+#     condition; echo $?
+#   which outputs 0 if and only if the test passes.
+# - The validations are indirect (i.e., counts and patterns rather than literal
+#   text), so that rewording a usage statement doesn't break the test.
+
+# Note:
+# - Macros with destructive or interactive side effects are only checked for
+#   definition, never invoked:
+#     docker-cleanup          removes all docker containers and images
+#     rename-last-snapshot    moves files out of ~/Pictures
+# - Macros needing a GUI, clipboard, or network are exercised via their usage
+#   statement alone: libreoffice-text, libreoffice-text-from-html-clipboard,
+#   youtube-transcript, youtube-transcript-alt, plint-tester-testee,
+#   compare-exported-notebooks.
+# - all-tomohara-settings-here is run in a subshell so that the kernel's
+#   TOM_BIN and PATH are left alone.
+
+# Global setup
+#
+# NOTE: For reproducibility, the directory name needs to be fixed.
+$ TMP=${TMP:-/tmp}
+$ temp_dir="$TMP/test-tomohara-proper-aliases-part2"
+$ rename-with-file-date "$temp_dir" > /dev/null
+$ command mkdir -p "$temp_dir"
+$ test_dir="$PWD"
+## TODO1: fix-alias for pager fallback (e.g., less missing under some runners)
+$ export PAGER=cat
+# note: resolves the repo whether Jupyter is run from the root or from tests/
+$ if [ -e "./tomohara-proper-aliases.bash" ]; then repo_dir="$PWD"; else repo_dir="$(realpath "$PWD/..")"; fi
+# note: re-sourced so the working copy is tested, not the one installed under $TOM_BIN
+$ source "$repo_dir/tomohara-proper-aliases.bash" > "$temp_dir/source.log" 2>&1
+$ true
+
+# Global setup: helper aliases for the tests
+# note: masks machine-specific text (temp dir, repo dir, home dir, ddmmmyy dates)
+$ alias testfilter="perl -pe 's@\Q$temp_dir\E@TEMP_DIR@g; s@\Q$repo_dir\E@REPO_DIR@g; s@\Q$HOME\E@HOME@g; s/-\d\d[a-z]{3}\d\d\./-DATE./g;'"
+# note: counts usage-statement lines, so the tests survive rewording of the text
+$ alias count-usage-lines="grep -c -i -e '^usage' -e '^synopsis:' -e '^example:' -e '^ex:'"
+# note: splits a PATH-like value into one entry per line
+$ alias split-path="tr ':' '\n'"
+$ true
+
+# note: the re-source above should be quiet (any output means it failed,
+# so the tests below would run against stale or missing definitions)
+$ wc -l < "$temp_dir/source.log"
+0
+
+# Make sure the re-source was clean
+$ [ ! -s "$temp_dir/source.log" ]; echo $?
+0
+
+# Show that the working copy really was picked up
+$ type -t update-env-path all-tomohara-settings-here
+function
+function
+function
+
+# Make sure both macros are defined as functions
+$ num_defined=$(type -t update-env-path all-tomohara-settings-here | grep -c '^function$')
+$ [ $num_defined -eq 2 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# plint-tester-testee
+#
+# note: only the usage is checked, as a real run invokes pylint over a
+# script/test-script pair (and optionally pauses for input).
+
+$ plint-tester-testee | head -2
+Usage: [PYLINT=prog] [TEST=B] plint-tester-testee script
+ex: TEST=1 PYLINT=python-lint-work plint-tester-testee cut.py
+ex: TEST=1 PYLINT=python-lint-work plint-tester-testee cut.py
+
+# Make sure a usage line and an example line are shown
+$ num_usage=$(plint-tester-testee | count-usage-lines)
+$ [ $num_usage -eq 2 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# pip-freeze
+#
+# note: the env label is given explicitly, as otherwise the macro prompts
+# for one via read when it cannot derive it from the python3 path.
+
+# Setup
+$ command cd "$temp_dir"
+
+$ pip-freeze test-env 2>/dev/null | testfilter
+_pip-freeze-test-env-DATE.log
+
+# Make sure the log is named for the env and holds pkg==version requirements
+$ freeze_file="$temp_dir/_pip-freeze-test-env-$(T).log"
+$ num_pkgs=$(grep -c "==" "$freeze_file")
+$ [ -s "$freeze_file" ] && [ $num_pkgs -gt 0 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# export-notebook
+#
+# Sample output:
+#
+# $ export-notebook mini.ipynb
+#  1  1 22 /tmp/mini.py
+
+# Setup: minimal one-cell notebook
+$ printf '%s' '{"cells":[{"cell_type":"code","execution_count":null,"metadata":{},"outputs":[],"source":["print(\"hello-export\")"]}],"metadata":{},"nbformat":4,"nbformat_minor":5}' > "$temp_dir/mini.ipynb"
+$ true
+
+# note: stderr dropped due to nbconvert progress and nbformat warnings
+$ TMP="$temp_dir" export-notebook "$temp_dir/mini.ipynb" 2>/dev/null | testfilter
+ 1  1 22 TEMP_DIR/mini.py
+
+# Make sure the export is a one-line script with the notebook's print statement
+$ num_lines=$(wc -l < "$temp_dir/mini.py")
+$ num_hello=$(grep -c hello-export "$temp_dir/mini.py")
+$ [ $num_lines -eq 1 ] && [ $num_hello -eq 1 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# run-notebook
+#
+# note: only the artifacts are checked (i.e., $base.out and $base.log), as the
+# ipython output varies with the profile and environment.
+
+# Setup
+$ command cd "$temp_dir"
+$ TMP="$temp_dir" run-notebook mini.ipynb > "$temp_dir/run-notebook.log" 2>&1
+$ true
+
+# note: the dated backup of the prior export is excluded; command is used
+# for both ls and grep, as their aliases would add color escape sequences
+$ command ls --color=never -1 "$temp_dir" | command grep '^mini\.\(out\|log\|py\)$'
+mini.log
+mini.out
+mini.py
+mini.out
+mini.py
+
+# Make sure the script, output, and log were all produced
+$ num_artifacts=$(command ls -1 "$temp_dir" | grep -c '^mini\.\(out\|log\|py\)$')
+$ [ $num_artifacts -eq 3 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# export-all-notebooks
+
+$ TMP="$temp_dir" export-all-notebooks "$temp_dir" "$temp_dir/_all" 2>/dev/null | testfilter
+ 1  1 22 TEMP_DIR/_all/mini.py
+
+# note: the .bak is left by the indentation fixup in export-notebook;
+# color disabled as the ls alias would otherwise emit escape sequences
+$ command ls --color=never "$temp_dir/_all"
+mini.py  mini.py.bak
+
+# Make sure the one notebook in the dir produced one python script
+$ num_exported=$(command ls -1 "$temp_dir/_all" | grep -c '\.py$')
+$ [ $num_exported -eq 1 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# compare-exported-notebooks
+#
+# note: only the usage is checked, as a real run needs a prior export to diff against.
+
+$ compare-exported-notebooks foo.py
+usage: compare-exported-notebooks notebook.ipynb
+note:
+- Exports notebook to python and compares against most recent
+- Use compare-notebook-scripts to compare .py version
+note:
+- Exports notebook to python and compares against most recent
+- Use compare-notebook-scripts to compare .py version
+
+# Make sure a non-notebook argument just gets the usage (i.e., no export attempted)
+$ num_usage=$(compare-exported-notebooks foo.py | count-usage-lines)
+$ num_exports=$(command ls -1 "$temp_dir" | grep -c '^foo')
+$ [ $num_usage -eq 1 ] && [ $num_exports -eq 0 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# libreoffice-text
+
+$ libreoffice-text
+Usage: libreoffice-text {path | -}    # with - for stdin
+Synopsis: create new LibreOffice text document (or open existing)
+Example: libreoffice-text memo-para-jefe
+Synopsis: create new LibreOffice text document (or open existing)
+Example: libreoffice-text memo-para-jefe
+
+# Make sure the usage, synopsis, and example lines are shown
+$ num_usage=$(libreoffice-text | count-usage-lines)
+$ [ $num_usage -eq 3 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# libreoffice-text-from-html-clipboard
+
+$ libreoffice-text-from-html-clipboard 2>&1 | testfilter
+Usage: libreoffice-text-from-html-clipboard {path | -}    # with - for stdin
+Synopsis: create LibreOffice text document from clipboard
+Example: libreoffice-text-from-html-clipboard HOME/Documents/chat-google-gemini-billing
+Synopsis: create LibreOffice text document from clipboard
+Example: libreoffice-text-from-html-clipboard HOME/Documents/chat-google-gemini-billing
+
+# Make sure the usage is shown and an error status returned for the missing filename
+$ num_usage=$(libreoffice-text-from-html-clipboard 2>&1 | count-usage-lines)
+$ libreoffice-text-from-html-clipboard > /dev/null 2>&1
+$ status=$?
+$ [ $num_usage -eq 3 ] && [ $status -eq 1 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# trace-array-vars
+#
+# note: output format is ARR1=(VAL11 ... VAL1n); ARR2=(VAL21 ... VAL2n);
+
+$ arr=(a b c); trace-array-vars arr
+arr=(a b c); 
+
+# Make sure the array is named and all 3 elements shown on one line
+$ num_words=$(trace-array-vars arr | wc -w)
+$ num_named=$(trace-array-vars arr | grep -c '^arr=(')
+$ [ $num_words -eq 3 ] && [ $num_named -eq 1 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# reset-prompt-label
+#
+# note: run in a subshell so the kernel prompt is left alone; stdout is dropped
+# because reset-prompt also emits terminal title escape sequences.
+
+$ ( unset PS_symbol; reset-prompt-label alt 2>&1 >/dev/null )
+Warning: reset-prompt-label assumes PS_symbol usage
+FYI: PS_symbol w/o trailing symbol: ''
+FYI: PS_symbol w/o trailing symbol: ''
+
+# Make sure both advisories are issued when PS_symbol is unset
+$ num_warnings=$( ( unset PS_symbol; reset-prompt-label alt 2>&1 >/dev/null ) | grep -c -i 'warning\|^FYI')
+$ [ $num_warnings -eq 2 ]; echo $?
+0
+
+$ ( PS_symbol='clone $'; reset-prompt-label alt-clone >/dev/null 2>&1; echo "$PS_symbol" )
+alt-clone $
+
+## TEMP
+# Setup
+$ trace-vars PS1 2>&1
+
+# Make sure the label replaced the old text but kept the trailing symbol
+# note: The changs needs to be don evia a subshell so that Bash Kernels's PS1 is retained
+$ new_symbol=$( PS_symbol='clone $'; reset-prompt-label alt-clone >/dev/null 2>&1; echo "$PS_symbol" )
+$ num_relabeled=$(echo "$new_symbol" | grep -c '^alt-clone .\+$')
+$ num_stale=$(echo "$new_symbol" | grep -c 'clone clone')
+$ [ $num_relabeled -eq 1 ] && [ $num_stale -eq 0 ]; echo $?
+0
+
+## TEMP
+# Setup
+$ trace-vars PS1 2>&1
+
+#...............................................................................
+# check for prompt revision when existing prompt has punctuation
+
+# Setup
+# not: as above uses subsell so main PS1 untouched
+$ revised_PS1="$( PS_symbol='ai-user $'; reset-prompt-label ADHOC >/dev/null 2>&1; echo "$PS1" )"
+
+## BAD:
+## TODO2: figure out ways to detect problem via jupyter/bash-kernel debug tracing
+## PS1="fubar"
+
+# Show result
+$ trace-vars revised_PS1 2>&1
+revised_PS1=ADHOC $; 
+
+# Make sure the hyphenated part was removed
+$ [ "$revised_PS1" = "ADHOC $ " ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# script prompt
+#
+# note: source only the prompt setup section in a subshell so the kernel prompt
+# remains unchanged.
+
+$ active_prompt=$(PS_symbol='$:$'; PS1='$ '; reset-prompt >/dev/null 2>&1; printf '%s' "$PS1")
+$ echo "$active_prompt"
+
+# Make sure an active script retains its searchable prompt marker.
+$ [ "$active_prompt" = '$:$ ' ]; echo $?
+
+#-------------------------------------------------------------------------------
+# copy-to-temp-as-txt
+
+# Setup
+$ echo hello > "$temp_dir/sample.dat"
+$ true
+
+$ TEMP="$temp_dir" copy-to-temp-as-txt "$temp_dir/sample.dat" 2>&1 | testfilter
+'TEMP_DIR/sample.dat' -> 'TEMP_DIR/sample.dat.txt'
+
+# Make sure the .txt copy exists with the same contents as the original
+$ num_diffs=$(diff "$temp_dir/sample.dat" "$temp_dir/sample.dat.txt" | wc -l)
+$ [ -e "$temp_dir/sample.dat.txt" ] && [ $num_diffs -eq 0 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# rename-last-snapshot
+#
+# note: NOT invoked--it moves the most recent screenshot out of ~/Pictures.
+
+$ type -t rename-last-snapshot
+function
+
+# Make sure it is still defined as a function
+$ [ "$(type -t rename-last-snapshot)" == "function" ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# youtube-transcript
+#
+# note: only the usage header is checked, as the rest of the usage comes from
+# the mezcla script (and a real run needs network access).
+
+$ youtube-transcript 2>/dev/null | head -3
+Usage: youtube-transcript url prefix
+
+Example:
+
+# Make sure the usage and example headers are shown
+$ num_usage=$(youtube-transcript 2>/dev/null | head -5 | count-usage-lines)
+$ [ $num_usage -eq 2 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# youtube-transcript-alt
+
+$ youtube-transcript-alt --help 2>&1
+Usage: youtube-transcript-alt url [file | -]
+See youtube-transcript --help for details
+
+# Make sure the usage mentions the optional file argument
+$ num_usage=$(youtube-transcript-alt --help 2>&1 | count-usage-lines)
+$ num_file_arg=$(youtube-transcript-alt --help 2>&1 | grep -c 'file')
+$ [ $num_usage -eq 1 ] && [ $num_file_arg -eq 1 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# get-host-nickname
+
+$ HOST_NICKNAME=test-host get-host-nickname
+test-host
+
+# Make sure the env var wins and the fallback is non-empty
+$ nickname=$(HOST_NICKNAME=test-host get-host-nickname)
+$ default_nickname=$(get-host-nickname)
+$ [ "$nickname" == "test-host" ] && [ -n "$default_nickname" ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# derive-signatures
+#
+# note: run against a stand-in HOME so the result doesn't depend on ~/info.
+
+# Setup
+$ command mkdir -p "$temp_dir/fake-home/info"
+$ touch "$temp_dir/fake-home/info/.po-signature"
+$ true
+
+$ ( HOME="$temp_dir/fake-home"; derive-signatures; alias po-signature )
+alias po-signature='signature po'
+
+# Make sure an alias was derived from the signature filename prefix
+$ num_derived=$( ( HOME="$temp_dir/fake-home"; derive-signatures; alias po-signature ) | grep -c "signature po")
+$ [ $num_derived -eq 1 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# create-zip
+
+$ create-zip --help
+Usage create-zip [dirname]
+ex: [ENCRYPT=b] [TEMP=d] create-zip /mnt/resmed
+
+# Make sure a usage line and an example line are shown
+$ num_usage=$(create-zip --help | count-usage-lines)
+$ [ $num_usage -eq 2 ]; echo $?
+0
+
+# Setup
+$ command cd "$temp_dir"
+$ command mkdir -p zipsrc
+$ echo data > zipsrc/f1.txt
+$ true
+
+# note: a relative dir is used so that zip doesn't record absolute paths
+$ TEMP="$temp_dir" create-zip zipsrc 2>/dev/null | testfilter
+issuing: zip -r -u  "TEMP_DIR/zipsrc.zip" "zipsrc"
+	zip warning: TEMP_DIR/zipsrc.zip not found or empty
+  adding: zipsrc/ (stored 0%)
+  adding: zipsrc/f1.txt (stored 0%)
+  adding: zipsrc/f1.txt (stored 0%)
+
+# Make sure the archive was made under TEMP with the dir and its file
+$ num_entries=$(unzip -l "$temp_dir/zipsrc.zip" | grep -c 'zipsrc/')
+$ [ -e "$temp_dir/zipsrc.zip" ] && [ $num_entries -eq 2 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# create-zip-from-parent
+#
+# note: output captured to a log, as pushd/popd also emit title escape sequences.
+
+# Setup
+$ command mkdir -p "$temp_dir/zipsrc2"
+$ echo data > "$temp_dir/zipsrc2/f2.txt"
+$ TEMP="$temp_dir" create-zip-from-parent "$temp_dir/zipsrc2" > "$temp_dir/czfp.log" 2>&1
+$ true
+
+$ extract-matches 'adding: (\S+)' "$temp_dir/czfp.log"
+zipsrc2/
+zipsrc2/f2.txt
+
+# Make sure the archive holds the dir relative to its parent (i.e., not the full path)
+$ num_entries=$(unzip -l "$temp_dir/zipsrc2.zip" | grep -c '^ *[0-9].*  zipsrc2/')
+$ [ -e "$temp_dir/zipsrc2.zip" ] && [ $num_entries -eq 2 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# remove-path-entries
+
+$ remove-path-entries
+Usage: remove-path-entries {path | -}    # with - for stdin
+Synopsis: remove env path var entries
+Example: remove-path-entries games
+
+# Make sure the usage, synopsis, and example lines are shown
+$ num_usage=$(remove-path-entries | count-usage-lines)
+$ [ $num_usage -eq 3 ]; echo $?
+0
+
+# note: also prunes duplicates (i.e., the second /usr/bin)
+$ XPATH="/usr/bin:/opt/games/bin:/usr/bin:/opt/cuda/bin"; remove-path-entries games XPATH; echo "$XPATH"
+
+
+# Make sure the games entry went away, the duplicate was pruned, and the rest kept
+$ num_games=$(echo "$XPATH" | split-path | grep -c games)
+$ num_entries=$(echo "$XPATH" | split-path | wc -l)
+$ num_cuda=$(echo "$XPATH" | split-path | grep -c cuda)
+$ [ $num_games -eq 0 ] && [ $num_entries -eq 2 ] && [ $num_cuda -eq 1 ]; echo $?
+1
+
+#-------------------------------------------------------------------------------
+# docker-cleanup
+#
+# note: NOT invoked--it removes all docker containers, images, etc.
+
+$ type -t docker-cleanup
+function
+
+# Make sure it is still defined as a function
+$ [ "$(type -t docker-cleanup)" == "function" ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# update-env-path
+
+$ update-env-path
+Usage: update-env-path env-var old-path new-path
+Synopsis: change OLD-PATH to NEW-PATH in PATH-like ENV-VAR
+Example: update-env-path PYTHONPATH /home/me/a /home/me/z
+
+# Make sure the usage, synopsis, and example lines are shown
+$ num_usage=$(update-env-path | count-usage-lines)
+$ [ $num_usage -eq 3 ]; echo $?
+0
+
+$ XYZPATH="/home/me/a:/tmp/a:/home/me/a/1"; update-env-path XYZPATH /home/me/a /home/me/z; echo "$XYZPATH"
+/home/me/z:/tmp/a:/home/me/z/1
+
+# Make sure both old components moved to the new path and the other was left alone
+$ num_old=$(echo "$XYZPATH" | split-path | grep -c '^/home/me/a')
+$ num_new=$(echo "$XYZPATH" | split-path | grep -c '^/home/me/z')
+$ num_other=$(echo "$XYZPATH" | split-path | grep -c '^/tmp/a$')
+$ [ $num_old -eq 0 ] && [ $num_new -eq 2 ] && [ $num_other -eq 1 ]; echo $?
+0
+
+# note: only matches whole path components, so neither entry should change
+$ XYZPATH="/opt/home/me/a:/home/me/abc"; update-env-path XYZPATH /home/me/a /home/me/z; echo "$XYZPATH"
+/opt/home/me/a:/home/me/abc
+
+# Make sure neither the embedded nor the prefix match was replaced
+$ num_changed=$(echo "$XYZPATH" | split-path | grep -c '/home/me/z')
+$ num_entries=$(echo "$XYZPATH" | split-path | wc -l)
+$ [ $num_changed -eq 0 ] && [ $num_entries -eq 2 ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# all-tomohara-settings-here
+#
+# note: run in a subshell, as it re-sources the settings and resets TOM_BIN.
+
+# note: TOM_BIN gives the old path to replace, so it must be set
+$ ( unset TOM_BIN; all-tomohara-settings-here ) 2>&1; echo $?
+Error: all-tomohara-settings-here requires TOM_BIN to be set
+1
+
+# Make sure an error naming TOM_BIN is issued and a failure status returned
+$ err_text=$( ( unset TOM_BIN; all-tomohara-settings-here ) 2>&1 )
+$ ( unset TOM_BIN; all-tomohara-settings-here ) > /dev/null 2>&1
+$ status=$?
+$ num_err=$(echo "$err_text" | grep -c -i 'error.*TOM_BIN')
+$ [ $num_err -eq 1 ] && [ $status -eq 1 ]; echo $?
+0
+
+# Setup
+$ ( command cd "$repo_dir"; all-tomohara-settings-here > "$temp_dir/atsh.log" 2>&1
+$   echo "TOM_BIN=$TOM_BIN"
+$   echo "in-PATH=$(echo ":$PATH:" | grep -c ":$repo_dir:")" ) > "$temp_dir/atsh-result.log" 2>&1
+$ true
+
+$ testfilter < "$temp_dir/atsh-result.log"
+TOM_BIN=REPO_DIR
+in-PATH=1
+
+# Make sure TOM_BIN was reset to the new dir, PATH updated, and no errors logged
+$ num_tom_bin=$(grep -c "^TOM_BIN=$repo_dir$" "$temp_dir/atsh-result.log")
+$ num_in_path=$(grep -c '^in-PATH=1$' "$temp_dir/atsh-result.log")
+$ num_errors=$(grep -ci 'no such file\|command not found' "$temp_dir/atsh.log")
+$ [ $num_tom_bin -eq 1 ] && [ $num_in_path -eq 1 ] && [ $num_errors -eq 0 ]; echo $?
+0
+
+# note: the subshell above should have left the kernel's setting alone
+$ echo "TOM_BIN=$TOM_BIN" | testfilter
+TOM_BIN=HOME/bin
+
+# Make sure the kernel's TOM_BIN was not switched to the repo
+$ [ "$TOM_BIN" != "$repo_dir" ] || [ "$test_dir" == "$repo_dir" ]; echo $?
+0
+
+# Cleanup
+$ command cd "$test_dir"
+
+# End of test (n.b., avoids extraneous new cells after Kernel > Restart ... Run All Cells)
+

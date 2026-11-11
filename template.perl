@@ -16,7 +16,7 @@ BEGIN {
     use vars qw/$help/;
     ## TODO: use vars qw/$help $verbose $TEMP/;
 }
-## use English;				# for $PREMATCH, etc.
+## use English;                         # for $PREMATCH, etc.
 my($show_help) = $help;
 
 # Specify additional diagnostics and strict variable usage, excepting those
@@ -36,7 +36,7 @@ if ((!defined($ARGV[0]) || $show_help)) {
     my($options) = "main options = [-TODO]";
     $options .= "\nother options = " . &COMMON_OPTIONS;
     my($example) = "Example(s):\n\n$script_name -todo-option TODO-arg\n\n";
-    ## $example .= "$0 example2\n\n";		   	     # TODO: 2nd example
+    ## $example .= "$0 example2\n\n";                        # TODO: 2nd example
     my($note) = "";
     $note .= "Notes:\n\nTODO: Some usage note.\n\n";
 
@@ -48,7 +48,7 @@ if ((!defined($ARGV[0]) || $show_help)) {
 
 # Check the command-line options
 # note: Each variable initialized corresponds to a -var=value commandline option
-## &init_var(*fu, &FALSE);		# TODO: add command-line options
+## &init_var(*fu, &FALSE);              # TODO: add command-line options
 
 while (<>) {
     &dump_line();

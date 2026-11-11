@@ -1,10 +1,16 @@
 #! /usr/bin/env python
-
+#
+## Update 31 Jul 2: notes obsolescence
+# This is a very much work-in-progress script used for automating the
+# update of the Jupyter notebooks for testing (e.g., after alias changes).
+# WARNING: *** This has been superceded by automate_notebook.py *** and
+# unfortunately left in the repo without clarification.
+#
 # DATE: 2023-09-26 (22:38 +05:45 GMT)
 # INDEV: automate_ipynb_indev.py
 # Automates Jupyter Notebook testing using Selenium Webdriver
 # Estimated Time (default, per testfile): (SELENIUM_SLEEP_RERUN + 20) + [0 to 1] seconds
-
+#
 # TODO: (A LOT!)
 # (CHECKED) 1. Convert to a class-based approach
 # 2. (EXPERIMENTAL - ENV VAR) Run the command run-jupyter-notebook before starting the tests
@@ -12,7 +18,7 @@
 # 4. IMP: Detect if run-jupyter-notebook is executed (if not, execute) 
 # 5. Fix the location of TESTFILE_URL
 # 6. Add script termination for Invalid Credentials (XPATH ADDED)
-
+#
 # Author: Aviyan Acharya (avyn.xyz@gmail.com)
 
 """
@@ -44,6 +50,12 @@ VERBOSE = "verbose"
 
 ## Constants I (Initials for script)
 TL = debug.TL
+## WARNING: *** Testfiles must live in this repo (this script assumed tests/) ***
+## Automation works by driving a real browser against a locally running Jupyter
+## instance rooted here, so a testfile elsewhere on disk (or under an unrelated
+## repo) won't be found even if the given path itself exists. (See the same
+## limitation, addressed via an explicit repo-membership check, in the
+## superceding automate_notebook.py.)
 TESTFILE_URL = "http://127.0.0.1:8888/tree/"
 JUPYTER_TOKEN = "111222"
 JUPYTER_EXTENSION = ".ipynb"

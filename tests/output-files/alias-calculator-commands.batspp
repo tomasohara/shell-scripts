@@ -1,0 +1,130 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it.
+# echo "TODO:"
+# echo "  echo \"\$PS1\" | command grep --count --perl-regexp '[\x00-\x1f]'"
+$ actual=${PS1: -1}
+$ [ "$actual" = ">" ]; echo $?
+0
+
+## OLD: For debug
+# alias | wc -l
+# The debugging level should be at most 3
+# Note: this affects output as bash_kernel conflates stderr w/ stdout
+## TODO: echo "DEBUG_LEVEL=$DEBUG_LEVEL" 1>&2
+$ [ "$DEBUG_LEVEL" -lt 4 ]; echo "$?"
+0
+
+# Global setup
+# Setting a temp directory for tests
+# NOTE: If debugging uses $TMP
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/test-calc-commands; fi
+$ mkdir --parents "$TMP"
+
+## OLD
+## Count aliases proper
+# alias | wc -l
+# Count aliases w/ -dir in name
+# Example:
+#   $ alias | egrep '\-dir\b' | wc -l
+#   29
+$ dir_aliases=$(alias | egrep '\-dir\b' | wc -l)
+$ [ "$dir_aliases" -gt 20 ]; echo "$?"
+0
+
+## OLD
+## Count functions
+# typeset -f | egrep '^\w+' | wc -l
+$ dir_functions=$(typeset -f | egrep '\-dir\b' | wc -l)
+$ [ "$dir_functions" -gt 35 ]; echo "$?"
+0
+
+# Global Setup
+## Aliases for censoring any number or username
+$ alias testnumhex="sed -r "s/[0-9,A-F,a-f]/N/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g"" 
+
+# Actual/Expected comparision to be used for floating points
+$ actual=$(old-calc "24 / 4 - (35 / 7) * 5")
+$ expected=-19.0
+$ [ "$(echo "$actual == $expected" | bc)" -eq 1 ]; echo $?
+0
+
+$ [ "$(old-calc "(2^3)*(2^2)")" -gt 2 ]; echo $?
+0
+
+$ [ "$(old-calc "5*4*3*2*1+1")" -gt 0 ]; echo $? 
+0
+
+$ [ $(old-perl-calc "70 + 69 + 68") -eq 207 ]; echo $?
+0
+
+$ actual=$(old-perl-calc "8/8/8/8/8")
+$ expected=0.001953125
+$ [ $actual = $expected ]; echo $?
+0
+
+$ [ $(hex2dec "42Df5D144") = "17950953796" ]; echo $? 
+0
+
+# (F)16 = (15)10
+$ [ $(hex2dec "F") -eq 15 ]; echo $?
+0
+
+$ [ $(dec2hex "128") -eq "80" ]; echo $?
+0
+
+#inclusion of non-decimal numbers yield 0 as a result
+$ [ $(dec2hex "A12") -eq 0 ]; echo $? 
+0
+
+$ [ $(bin2dec "11110011") -eq 243 ]; echo $?
+0
+
+#inclusion of non-binary numbers leads to error
+$ [ $(bin2dec "0110") -lt 8 ]; echo $? 
+0
+
+# Due to longer binary number
+$ [ $(dec2bin "70419" | wc -c) -eq 18 ]; echo $?
+0
+
+#inclusion of non-decimal number leads to error
+$ [ $(dec2bin "10") -eq 1010 ]; echo $? 
+0
+
+$ actual=$(dec2bin "7" | testnumhex)
+$ expected="NNN"
+$ [ "$actual" == "$expected" ]; echo $?
+0
+
+$ actual=$(calc "100/(24*5)")
+$ expected=0.833
+$ [ $actual = $expected ]; echo $?
+0
+
+# Sets precisions to 6 places of decimal
+$ actual=$(calc-prec6 "49/3")
+$ expected="16.333333"
+$ [ $actual = $expected ]; echo $?
+0
+
+$ [ "$(calc-init "+" "100/3")" = "33.333" ]; echo $? 
+0
+
+$ [ "$(calc-int "100/23")" -eq 4 ]; echo $?
+0
+
+## OLD: hv commented on tomohara-aliases.bash
+# ps -l > testforhv.txt
+# hv testforhv.txt | testnumhex
+

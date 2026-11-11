@@ -1,6 +1,10 @@
 #! /usr/bin/env bash
 #
-# adhoc script to update all repo's
+# Adhoc script to update all of the user's main repositories. They can be
+# specified on the command lines or in the OTHER_REPOS env var.
+#
+## UPDATE 2026-10-02: ignores OTHER_REPOS if specified via positional args
+## UPDATE 24 Aug 26: Make warning display consistent
 #
 
 # Uncomment following line(s) for tracing:
@@ -10,17 +14,34 @@
 ## set -o xtrace
 ## DEBUG: set -o verbose
 
+function show-usage {
+    script=$(basename "$0")
+    # TODO2: make repos an argument and drop ~/bin, etc.
+    echo "Usage: [env] $script [--help] [repo ...]"
+    echo '    env: OTHER_REPOS="string-list" SHOW_SUMMARY=B VERBOSE_MODE=B'
+    echo ""
+    echo "Examples:"
+    echo ""
+    echo "OTHER_REPOS=\"repo1 repo2\" $0"
+    echo ""
+    echo "SHOW_SUMMARY=0 VERBOSE_MODE=1 $script repo-dir1 ..."
+    echo ""
+    echo "Note:"
+    echo "- OTHER_REPOS is space-delimited: specify repos via positional argument(s) otherwise."
+    echo "- Warning: OTHER_REPOS ignored if specified via positional arg."
+    echo "- SHOW_SUMMARY shows current repo status"
+    echo "- VERBOSE_MODE adds repo url, branch, and related info"
+}
+
 # Show usage if requested
 show_summary="${SHOW_SUMMARY:-1}"
 repos=()
 if [ "$1" == "--help" ]; then
-    script=$(basename "$0")
-    # TODO2: make repos an argument and drop ~/bin, etc.
-    echo "usage: [env] $script [--help] [repo ...]"
-    echo '    env: OTHER_REPOS="..." SKIP_SUMMARY=B'
-    echo "example(s):"
-    echo "    OTHER_REPOS=fu $0"
+    show-usage
     exit
+fi
+if [[ ("$1" == "--") || ("$1" == "-") ]]; then
+    shift
 fi
 if [ "$1" != "" ]; then
     repos+=("$@")
@@ -34,14 +55,13 @@ fi
 
 # Enable Bash aliases, etc.
 ## maldito shellcheck: [SC1090: Can't follow non-constant source]
-# shellcheck disable=SC1090
+## and [SC1091: Not following: ... was not specified as input (see shellcheck -x)]
+# shellcheck disable=SC1090,SC1091
 {
     shopt -s expand_aliases
     src_dir="$(dirname "${BASH_SOURCE[0]}")"
     bin_dir="${src_dir}/.."
-    source "$bin_dir/tomohara-aliases.bash"
-    source "$bin_dir/tomohara-proper-aliases.bash"
-    source "$bin_dir/tomohara-settings.bash"
+    SOURCE_SETTINGS=1 source "$bin_dir"/all-tomohara-aliases-etc.bash
 }
 
 # Set bash regular and/or verbose tracing
@@ -52,6 +72,7 @@ if [ "${VERBOSE:-0}" = "1" ]; then
     set -o verbose
 fi
 
+# Initialize
 mkdir -p ~/config ~/temp
 log=~/config/_update-all-repos-$(T).log
 temp_log=~/temp/_update-all-repos-$(T).temp.log
@@ -59,31 +80,89 @@ rename-with-file-date "$log" "$temp_log" &> /dev/null
 ## TODO4: resolve problem w/ $* leading to 'histappend'
 ## DEBUG: echo "${BASH_SOURCE[0]} $*" | tee "$log"
 echo "in $0: $(date)" >> "$log"
+
+# Determine directories
 # pre-init: OTHER_REPOS="$HOME/text-categorization $HOME/programs/python/visual-diff"
+## OLD: if [ "$OTHER_REPOS" != "" ]; then
+[ "${DEBUG_LEVEL:-0}" -ge 4 ] && echo "OTHER_REPOS=($OTHER_REPOS); repos=(${repos[*]})"
 if [ "$OTHER_REPOS" != "" ]; then
-    # note: ignores SC2206: Quote to prevent word splitting/globbing
-    # shellcheck disable=SC2206
-    repos+=($OTHER_REPOS)
+    if [ ${#repos[@]} -ne 0 ]; then
+        [ "${DEBUG_LEVEL:-0}" -ge 4 ] && echo "FYI: Ignoring OTHER_REPOS"
+    else
+        ## TODO2: drop array support as it requires sourcing the script
+        ## BAD: if declare -p OTHER_REPOS 2>/dev/null | grep -q 'declare \-a'; then
+        if declare -p OTHER_REPOS 2>/dev/null | grep -q "declare .-a"; then
+            ## DEBUG: echo "OTHER_REPOS as array"
+            repos+=("${OTHER_REPOS[@]}")
+        else
+            # fallback: space-delimited string
+            ## DEBUG: echo "OTHER_REPOS as string list"
+            read -r -a tmp <<< "$OTHER_REPOS"
+            repos+=("${tmp[@]}")
+        fi
+    fi
 fi
 if [ ${#repos[@]} -eq 0 ]; then
-    # TODO: drop idiosyncratic repos (e.g., non-public)
-    repos=(~/bin ~/mezcla ~/text-categorization ~/visual-diff ~/programs/bash/tom-shell-scripts ~/programs/python/mezcla-clone ~/programs/python/search-diff-engine)
+    [ "${DEBUG_LEVEL:-0}" -ge 2 ] && echo -e "Warning: no repos specified\n"
+    show-usage
+    exit
 fi
+## DEBUG: set | grep ^repos=
+
+# Update each directory
+## UPDATE 15 Jul 26: adds VERBOSE_MODE support to show repo URL
+## TODO2: verbose_mode=$(getenv-bool "VERBOSE_MODE" false)
+verbose_mode=$(is-true "VERBOSE_MODE")
+$verbose_mode && echo "$0"
+## DEBUG: trace-vars verbose_mode
 for dir in "${repos[@]}"; do
     # Make repo dir active
-    echo "repo: $dir" | tee --append "$log"
-    command cd "$dir"
+    ## BAD:
+    ## result=$(command cd "$dir" 2>&1)
+    ## if [ -n "$result" ]; then
+    ## NOTE: $(cd ...) creates subprocess so effect is temporary
+    if ! command cd "$dir" >| "$temp_log" 2>&1; then
+        echo "Warning: unable to cd into repo dir ($dir)":
+        echo $'\t'"$(cat "$temp_log")"
+        continue
+    fi
+
+    # Ascertain that the local repo is fully accessible
+    ## TODO3: trap error message and show in verbose mode
+    ## OLD: if ! git-is-repo-accessible; then
+    result=$(git-is-repo-accessible 2>&1)
+    if (( $? > 0 )); then
+        echo -e "Warning: repository ($dir) not fully accessible ($result)"
+        continue
+    fi
+
+    # Show repo and url (e.g., "repo: /home/tomohara/bin [https://github.com/tomasohara/shell-scripts]"
+    if $verbose_mode; then
+        echo -n "$dir" | tee --append "$log"
+    else
+        echo "repo: $dir" | tee --append "$log"
+    fi
+    # 
+    if $verbose_mode; then
+        echo -e "\t[$(git-repo-url)]" | tee --append "$log"
+    fi
 
     # Update, check for errors, and show summary stats
     git-update-plus 2>&1 | grep -v "No stash entries found" >| "$temp_log"
     check-errors-excerpt "$temp_log"
     if [[ "$show_summary" == "1" ]]; then
+        if $verbose_mode; then
+            branch="$(git-branch-alias)"
+            last_commit_info="$(git log -1 --all | echoize | COLUMNS=256 truncate-width)"
+            echo -e "\t$branch; $last_commit_info"
+        fi
         (grep "files changed" "$temp_log" || echo "No changes") | perl -pe 's/^/\t/;'
     fi
 
     # Add to master log
     cat "$temp_log" >> "$log"
-    python -c 'print("-" * 80);' >> "$log"
+    ## OLD: python -c 'print("-" * 80);' >> "$log"
+    python3 -c 'print("-" * 80);' >> "$log"
 done
 
 # Mention log location

@@ -10,6 +10,7 @@
 # - It is safest to use a separate testing account with minimal permissions.
 #   *** Otherwise, bad things might happen to your good files! ***
 #
+## UPDATE 2026-11-11: reworks MY_GIT_TOKEN init
 
 # Set bash regular and/or verbose tracing
 DEBUG_LEVEL=${DEBUG_LEVEL:-0}
@@ -55,11 +56,10 @@ cd "$script_dir"
 # Note:
 # - This is not secure, but scrappycito only has access it is own repos. For example,
 #     https://github.com/scrappycito/git-bash-test.
-# - For SSH, the public sssh key needs to be associated with the repo git GitHub settings
+# - For SSH, the public ssh key needs to be associated with the repo git GitHub settings
 # - For ~/.git-credentials, the key must be saved as plaintext in the file.
 # - The HOME directory is checked instead of USER because Github and docker use root.
 #    {/home/shell-scripts, /home/runner, /home/testuser}
-## OLD: if [[ ("$HOME" == "/home/shell-scripts") || ("$HOME" == "/home/runner") ]]; then
 ## TODO2: if [[ $HOME =~ /home/(shell-scripts|runner|testuser) ]]; then
 #
 # note: copies to /tmp so that permissions can be changed without affecting repo
@@ -69,10 +69,6 @@ ssh_key_path="$TMP/$ssh_key_file"
 cp -vf "${script_dir}/$ssh_key_file" "$ssh_key_path"
 chmod --changes go-rw "$ssh_key_path"
 #
-## OLD:
-## if [[ ! $PWD =~ /home/(shell-scripts|runner)/.* ]]; then
-##    echo "FYI: using default ~/.gitconfig"
-## elif [ "${USE_SSH_AUTH:-1}" == "1" ]; then
 if [ "${USE_SSH_AUTH:-0}" == "1" ]; then
     echo "FYI: using SSH for git authentication"
     if [ "${USE_GIT_CONFIG:-0}" == "1" ]; then
@@ -94,15 +90,15 @@ if [ "${USE_SSH_AUTH:-0}" == "1" ]; then
     # note: this only works for git-bash-test repo (intended for just VM or docker runner)
     ## TEST: git remote set-url origin "git@github.com:scrappycito/git-bash-test.git"
 elif [ "${MODIFY_GIT_CONFIG:-0}" == "1" ]; then
-    echo "FYI: modifying ~/.gitconfig and ~/.git-credentials"
+    echo "FYI: warning modifying ~/.gitconfig and ~/.git-credentials [old/insecure approach]"
         
     # Set user ID (NOTE: uses global so applicable to other repos; see git-aliases-tests-1, etc.)
     git config --global user.email "scrappycito@gmail.com"
     git config --global user.name "Scrappy Cito"
     
     # Overide specific usages to use token
-    ## OLD: export MY_GIT_TOKEN=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
-    export MY_GIT_TOKEN=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
+    ## NOTE: Actual tokens should not get checked in!
+    MY_GIT_TOKEN="${MY_GIT_TOKEN:-ghp_TODO}"
     git config --global url."https://api:$MY_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
     git config --global url."https://ssh:$MY_GIT_TOKEN@github.com/".insteadOf "ssh://git@github.com/"
     git config --global url."https://git:$MY_GIT_TOKEN@github.com/".insteadOf "git@github.com:"
@@ -110,7 +106,11 @@ elif [ "${MODIFY_GIT_CONFIG:-0}" == "1" ]; then
     # Eanble credentials store (i..e, cached in file)
     git config --global credential.helper "store"
     ## TODO: git config --file ~/.git-credentials "$MY_GIT_TOKEN"
-    echo "https://scrappycito:$MY_GIT_TOKEN@github.com" > ~/.git-credentials
+    ## NOTE: Use a testing account so this doesn't contaminate settings
+    temp_credentials="$TMP/.git-credentials.$$"
+    grep -v "^https://scrappycito" ~/.git-credentials >| "$temp_credentials"
+    echo "https://scrappycito:$MY_GIT_TOKEN@github.com" >> "$temp_credentials"
+    cp -vf "$temp_credentials" ~/.git-credentials
 else
     echo "FYI: using default ~/.gitconfig"
 fi
@@ -121,7 +121,8 @@ fi
 # Also, as used here, "temp" is long-term temporary storage and "tmp" shorterm.
 timestamp=$(date '+%d%b%y-%H%M')
 TMP=${TMP:-/tmp}
-BATSPP_OUTPUT="${BATSPP_OUTPUT:-"$HOME/temp/BatsPP-$timestamp"}"
+TEMP="${TEMP:-"$HOME/temp"}"
+BATSPP_OUTPUT="${BATSPP_OUTPUT:-"$TEMP/BatsPP-$timestamp"}"
 BATSPP_TEMP="${BATSPP_TEMP:-"$TMP/BatsPP-$timestamp"}"
 mkdir --parents "$BATSPP_OUTPUT" "$BATSPP_TEMP"
 echo "FYI: Using $BATSPP_OUTPUT for output and $BATSPP_TEMP for temp. files"

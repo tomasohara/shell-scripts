@@ -1,0 +1,13 @@
+# The hello world of Bats-pp tests
+
+
+## OLD: echo 'Hello world' | wc -l
+
+$ echo 'Hello world' | grep -ic hello.world
+1
+
+
+## Wrapup
+$ echo "Seconds since epoch: $(date +%s.%3N)"
+Seconds since epoch: 1785774888.198
+

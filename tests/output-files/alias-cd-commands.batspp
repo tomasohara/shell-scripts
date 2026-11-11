@@ -1,0 +1,135 @@
+# Setup (OPTIONAL - USED IF NEEDED)
+## bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+# echo $PS1
+$ actual=${PS1: -1}
+$ [ "$actual" = ">" ]; echo $?
+0
+
+# # Delete all aliases and function
+# # TODO: Instead start from pristine environment
+# unalias -a
+# alias | wc -l
+# for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+# typeset -f | egrep '^\w+' | wc -l
+
+# Global Setup
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+$ alias testuser="sed -r "s/"$USER"+/user/g""
+$ alias testuserpath="sed 's|/home/[^/]\+/|USER_PATH/|'"
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 6869)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+## OLD
+# mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# cd "$temp_dir"
+# pwd
+## OLD: Used the concept of trash-dir, instead use unique temp_dirs
+# TMP=/tmp/test-cp-mv
+# temp_dir=$TMP/test-6869
+# trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
+# command mkdir -p $temp_dir
+# command mkdir -p $trash_dir
+# command cd $temp_dir
+$ TMP=${TMP:-/tmp}
+$ temp_dir=$TMP/alias-cd-commands
+$ rename-with-file-date "$temp_dir" > /dev/null
+$ command mkdir -p "$temp_dir"
+$ command cd "$temp_dir"
+## OLD
+# # ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+
+## OLD
+# Count aliases proper
+# alias | wc -l
+# alias | wc -l | testnum
+#alias | { [ $(wc -l < /dev/stdin) -ne 0 ]; echo $?; }
+$ [ "$(alias | wc -l)" -ne 0 ]; echo $?
+0
+
+## OLD
+## Count functions
+# typeset -f | egrep '^\w+' | wc -l 
+# typeset -f | egrep '^\w+' | wc -l | testnum
+# typeset -f | egrep '^\w+' | { [ $(wc -l < /dev/stdin) -ne 0 ]; echo $?; }
+$ [ "$(typeset -f | egrep '^\w+' | wc -l)" -ne 0 ]; echo $?
+0
+
+## BAD
+# source $BIN_DIR/tomohara-aliases.bash
+
+## DEBUG
+## SHOWS CURRENT WORKING DIRECTORY
+# pwd
+
+## chdir works as cd
+$ chdir .. > /dev/null
+$ actual1=$(command pwd | testuserpath)
+$ expected1="USER_PATH/temp/tmp"
+## OLD: chdir "test-6869"/ > /dev/null
+$ chdir "$temp_dir" > /dev/null
+$ actual2=$(command pwd | testuserpath)
+$ expected2="USER_PATH/temp/tmp/alias-cd-commands"
+$ [[ $actual1 = $expected1 && $actual2 = $expected2 ]]; echo $?
+0
+
+## cd-realdir - ditto for current directory
+# cd-realdir .. >/dev/null
+# command pwd | testuserpath
+# cd-realdir "$temp_dir" >/dev/null
+# command pwd | testuserpath
+$ cd-realdir .. >/dev/null
+$ actual1=$(command pwd | testuserpath)
+$ expected1="USER_PATH/temp/tmp"
+$ cd-realdir "$temp_dir" >/dev/null
+$ actual2=$(command pwd | testuserpath)
+$ expected2="USER_PATH/temp/tmp/alias-cd-commands"
+$ [[ "$actual1" = "$expected1" && "$actual2" = "$expected2" ]]; echo $?
+0
+
+## cd-this-realdir is an alias for cd-realdir .
+$ cd-this-realdir .. >/dev/null
+## OLD: cd-this-realdir test-6869/
+$ actual1=$(command pwd | testuserpath)
+$ expected="USER_PATH/temp/tmp/alias-cd-commands"
+$ cd-this-realdir "$temp_dir" >/dev/null
+$ actual2=$(command pwd | testuserpath)
+$ [[ "$actual1" = "$expected" && "$actual2" = "$expected" ]]; echo $?
+0
+
+## BAD: rm -rf ./* > /dev/null
+## BAD: command mv -f * $trash_dir
+# mkdir testdir89 testdir90
+$ command mkdir testdir89 testdir90
+$ echo "Testfile1" > testdir89/f11.txt
+$ echo "Testfile2" > testdir89/f12.txt
+$ [ "$(ls -d ./* | wc -w)" -eq 2 ]; echo $?
+0
+
+$ pushd-q testdir89
+# Check if testdir89 in path
+$ [[ "$(ls | grep -e 'f*.txt' | wc -l)" -eq 2 && "$(pwd)" =~ "testdir89" ]]; echo $?
+# linebr
+# popd-q 
+# command ls
+0
+
+## popd-q is equivalent to cd ..
+$ popd-q 
+## OLD
+# ls
+$ [[ "$(ls | grep -e 'testdir*' | wc -l)" -eq 2 && ! "$(pwd)" =~ "testdir" ]]; echo $?
+0
+
+# Wrapup
+$ echo "END"
+END
+

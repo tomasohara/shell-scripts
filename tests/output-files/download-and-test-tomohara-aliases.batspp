@@ -1,0 +1,48 @@
+## BAD APPROACH: rm -rf is very dangerous
+## Warning: this creates a temporary directory for aliases
+# /bin/rm -rf /tmp/tomasohara-shell-scripts/*
+
+# Set directory for alias work
+# Creation of temp directory as trash
+$ export TEMP_TOM_BIN=/tmp/tomasohara-shell-scripts
+$ export trash_dir=/tmp/_temp-trash-$(date "+%Y%m%d%H%M%S")
+$ export TEMP_TOM_ALIAS_FILE="$TEMP_TOM_BIN/tomohara-aliases.bash"
+$ mkdir -p "$TEMP_TOM_BIN"
+$ mkdir -p "$trash_dir"
+$ command cd "$TEMP_TOM_BIN"
+
+## Checks if the directory is empty (1)
+$ command ls | { [ $(wc -l < /dev/stdin) -ne 0 ]; echo $?; }
+1
+
+# Get latest version of aliases
+$ curl https://raw.githubusercontent.com/tomasohara/shell-scripts/main/tomohara-aliases.bash > "$TEMP_TOM_ALIAS_FILE" 2>/dev/null
+
+## Checks if the directory is non-empty (0)
+$ command ls | { [ $(wc -l < /dev/stdin) -ne 0 ]; echo $?; }
+0
+
+$ file "$TEMP_TOM_ALIAS_FILE"
+/tmp/tomasohara-shell-scripts/tomohara-aliases.bash: Bourne-Again shell script, Unicode text, UTF-8 text executable
+
+## OLD: set -o xtrace halts the tests
+# # Note: batch mode needed for Jupyter usage
+# export BATCH_MODE=1
+# set -o xtrace
+# source "$TOM_ALIAS_FILE"
+# echo done
+
+# # Note: batch mode needed for Jupyter usage
+# Global Setup
+$ export BATCH_MODE=1
+
+# set -o xtrace
+
+$ source "$TEMP_TOM_ALIAS_FILE"
+
+$ show-macros | { [ $(wc -l < /dev/stdin) -ne 0 ]; echo $?; }
+0
+
+# Removed the testfile to remove everything after completion
+$ command mv -f * "$trash_dir"
+

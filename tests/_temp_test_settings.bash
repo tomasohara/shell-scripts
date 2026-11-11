@@ -22,7 +22,8 @@
 # Regular settings
 # Note: Archiving output will only be done if running under docker;
 # also, scp will be skipped. It is used for debugging Github Actions
-## export ARCHIVE_OUTPUT=1            # create output archive in repo root under docker
+## TEMP:
+export ARCHIVE_OUTPUT=1            # create output archive in repo root under docker
 ## export SCP_OUTPUT=0                # don't copy results to server via scp
 ## export USE_SSH_AUTH=0              # use ssh w/ scrappycito.pem for git updates
 
@@ -31,6 +32,7 @@
 # but, it is awkward to do so for docker or Github runner jobs.
 # 2. For other Github Actions env. vars, see https://www.theserverside.com/blog/Coffee-Talk-Java-News-Stories-and-Opinions/environment-variables-full-list-github-actions
 if [ "$DEPLOYMENT_BASEPATH" == "/opt/runner" ]; then
+    echo "FYI: Enabling settings for Github Runner: USE_SSH_AUTH, etc."
     export ARCHIVE_OUTPUT=1
     export USE_SSH_AUTH=1
     export DEBUG_LEVEL=5
@@ -44,3 +46,7 @@ fi
 ## export TEST_REGEX="git|tips|entropy|testing-support-script-tests|eval-condition|sanity"
 ## export REMAP_TMP=1               # all /tmp files => $BATSPP_TEMP (see summary_stats.bash)
 ## export SHOW_FAILURE_CONTEXT=0    # hide redundant error report (see batspp_report.py)
+
+# TEMP: Treat evaluation errors as test failure
+# Note: need to work in way for work-in-progress scripts to be excluded
+## TODO3: export STOP_ON_FAILURE=1

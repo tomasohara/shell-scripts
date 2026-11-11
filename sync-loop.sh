@@ -42,23 +42,23 @@ more_options=0; case "$1" in -*) more_options=1 ;; esac
 # TODO: add option for maximum number of iterations 
 while [ "$more_options" = "1" ]; do
     if [ "$1" = "--trace" ]; then
-	set -o xtrace
+        set -o xtrace
     elif [ "$1" = "--help" ]; then
-	show_usage=1
-	break
+        show_usage=1
+        break
     elif [ "$1" = "--delay" ]; then
-	delay="$2"
-	shift
+        delay="$2"
+        shift
     elif [ "$1" = "--verbose" ]; then
-	verbose="true"
+        verbose="true"
     elif [ "$1" = "--" ]; then
-	break
+        break
     elif [ "$1" = "" ]; then
-	echo "Warning: internal error in $0"
-	break
+        echo "Warning: internal error in $0"
+        break
     else
-	echo "ERROR: Unknown option: $1"
-	show_usage=1
+        echo "ERROR: Unknown option: $1"
+        show_usage=1
     fi
     shift
     more_options=0; case "$1" in -*) more_options=1 ;; esac

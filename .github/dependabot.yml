@@ -1,0 +1,34 @@
+# dependabot.yml: GitHub's built-in dependency updater.
+#
+# Overview via Claude Fable 5:
+# On the schedule below it checks each configured ecosystem for newer versions
+# and opens PRs (bundled per the `groups` config, capped by open-pull-requests-limit).
+# This covers *version* updates only; security-alert PRs are governed by the repo
+# settings under Settings > Advanced Security and ignore these limits.
+#
+# Ecosystems here must match files in the repo:
+#  github-actions -> .github/workflows/,
+#  pip -> requirements.txt,
+#  gitsubmodule -> .gitmodules).
+#
+# Docs: https://docs.github.com/en/code-security/dependabot
+
+version: 2
+updates:
+  # Keep GitHub Actions (checkout, setup-python, cache, etc.) up to date.
+  # Opens PRs when a newer version — including a new major like the Node 20->24
+  # bump — is released, so we don't drift onto deprecated runtimes again.
+  ## UPDATE 12 Sep 26: Cut down frequency to minimize reminders.
+  ## TODO2: add overview of Dependabot (Github Actions utility)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      ## OLD: interval: "weekly"
+      interval: "monthly"
+    groups:
+      # Bundle all action bumps into a single PR to reduce noise.
+      github-actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"

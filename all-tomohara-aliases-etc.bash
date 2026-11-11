@@ -1,13 +1,15 @@
 #! /usr/bin/env bash
 #
 # Convenience script for loading all my aliases, functions, etc.
+## UPDATE 14 Sep 26: Traces to stderr (for sake of batspp tests).
+## UPDATE 12 Jul 26: TOM_BIN-related cleanup.
 #
 # Tom's typical usage (n.b., idiosyncratic settings):
 #   SOURCE_SETTINGS=1 source ~tomohara/bin/all-tomohara-aliases-etc.bash
 #
 # Simple Usage (see advanced below for use in scripts):
-#   export TOM_BIN=/home/tom/shell-script;
-#   source $TOM_BIN/all-tomohara-aliases-etc.bash
+#   export TOM_BIN="/home/tom/shell-script"
+#   source "$TOM_BIN/all-tomohara-aliases-etc.bash"
 #
 # Debugging usage:
 #   TRACE_SOURCE=1 VERBOSE_SOURCE=1 source ~/bin/all-tomohara-aliases-etc.bash > ~/bin/all-tomohara-aliases-etc.debug.log 2>&1
@@ -42,10 +44,19 @@
 #   fi
 #
 
+# Optional startup trace
+(( DEBUG_LEVEL >= 6 )) && echo "in ${BASH_SOURCE[0]}"
+
+# Guard against re-entry
+if [ "${ALIASES_PROCESSED:-0}" == 1 ]; then
+    echo "Warning: unexpected re-invocation of ${BASH_SOURCE[0]}; set ALIASES_PROCESSED=0 first" 1>&2
+    return
+fi
+ALIASES_PROCESSED=1
+
 # Set bash regular and/or verbose tracing
 # note: tracing off by default unless active for current shell
 was_tracing=false
-## OLD: if [ "1" = "$(set -o | grep -v '^xtrace.*on')" ]; then
 if [[ "" != "$(set -o | grep 'xtrace.*on')" ]]; then 
    was_tracing=true
 fi
@@ -64,14 +75,35 @@ shopt -s expand_aliases
 $show_tracing && set -o xtrace
 ##
 source_dir="$(realpath "$(dirname "${BASH_SOURCE[0]:-$0}")")"
-export TOM_BIN
-TOM_BIN="$(realpath "${TOM_BIN:-"$source_dir"}")"
-if [ "$TOM_BIN" != "$source_dir" ]; then
-    echo "FYI: TOM_BIN different from all-tomohara-aliases-etc.bash source dir:"
-    echo "    $TOM_BIN"
-    echo "    $source_dir"
+## BAD:
+## export TOM_BIN
+## TOM_BIN="$(realpath "${TOM_BIN:-"$source_dir"}")"
+# note: TOM_BIN is not updated via realpath to allow for PATH substitutions:
+# see all-tomohara-settings-here in tomohara-proper-aliases.bash.
+if [ "$TOM_BIN" = "" ]; then export TOM_BIN="$(realpath "$source_dir")"; fi
+## OLD: if [ "$TOM_BIN" != "$source_dir" ]; then
+if [ "$(realpath "$TOM_BIN")" != "$source_dir" ]; then
+    echo "FYI: TOM_BIN different from all-tomohara-aliases-etc.bash source dir:" 1>&2
+    echo "    $TOM_BIN" 1>&2
+    echo "    $source_dir" 1>&2
     source_dir="$TOM_BIN"
 fi
+## TEMP: make sure source dir in path
+## egrep: silly egrep wrapper needed due to overly neat grep developers
+function egrep {
+    command grep --perl-regexp --color=auto "$@"
+}
+## NOTE: also done in tomohara-settings but needed here for set-title-to-current-dir in tomohara-settings.bash
+if [ "$(echo ":$PATH:" | egrep ":$source_dir/?":)" = "" ]; then
+   export PATH="$PATH:$TOM_BIN"
+fi
+## OLD: (( DEBUG_LEVEL >= 4 )) && echo "FYI: sourcing $source_dir/tomohara-aliases.bash, etc."
+## TODO3: define temporary alias (or rename to something specialized)
+function source {
+    local script="$1"
+    (( DEBUG_LEVEL >= 4 )) && echo "issuing: source \"$script\"" 1>&2
+    command source "$script"
+}
 source "$source_dir/tomohara-aliases.bash"
 if [ "${SOURCE_SETTINGS:-0}" = "1" ]; then
     source "$source_dir/tomohara-settings.bash"
@@ -93,10 +125,13 @@ if [ "${DIR_ALIAS_HACK:-0}" = "1" ]; then
     #
 fi
 ##
-## BAD: $was_tracing || set - -o xtrace
-## NOTE: This above set the $@ parameters to "-o xtrace"! Via bash manual:
+## VERY-BAD: $was_tracing || set - -o xtrace
+## NOTE: The above set the $@ parameters to "-o xtrace"! Via bash manual:
 ##   set [-abefhkmnptuvxBCEHPT] [-o option-name] [--] [-] [arg ...]
 ##     - Signal the end of options, cause all remaining  args to be assigned
 ##       to the positional parameters. The -x and -v options are turned off. ...
 ##
 $was_tracing || set +o xtrace
+
+# Optional end trace
+(( DEBUG_LEVEL >= 6 )) && echo "out ${BASH_SOURCE[0]}"

@@ -1,0 +1,156 @@
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+## OLD: echo $PS1
+$ actual=${PS1: -1}
+$ [ "$actual" = ">" ]; echo $?
+0
+
+## BAD
+# # Delete all aliases and function
+# # TODO: Instead start from pristine environment
+# unalias -a
+# alias | wc -l
+# for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+# typeset -f | egrep '^\w+' | wc -l
+
+# Setting a temp directory for tests
+# TMP=/tmp/test-setupsort
+## NOTE: Source it directly from the ./tests directory.
+## OLD: BIN_DIR=$PWD/..
+## OLD
+# alias | wc -l | test
+
+# Global Setup
+# alias testnum="sed -r "s/[0-9]/H/g"" 
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9][0-9]*/N/g""
+## For number of digits not being critical
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 6411)
+## *** All output from one run to the next needs to be the same ***
+## temp_dir=$TMP/test-$$
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/test-setup-sorting-wrappers; fi
+$ temp_dir=$TMP/trace-setup-sorting-wrappers
+$ rename-with-file-date "$temp_dir" > /dev/null
+## OLD
+# mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# cd "$temp_dir"
+# pwd
+## ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+$ command mkdir -p "$temp_dir"
+# TODO: /bin/rm -rvf "$temp_dir"
+$ command cd "$temp_dir"
+
+## Count aliases proper
+## OLD
+# alias | wc -l
+# alias | wc -l | testnum
+$ dir_aliases=$(alias | egrep '\-dir\b' | wc -l)
+$ [ "$dir_aliases" -gt 20 ]; echo "$?"
+0
+
+## Count functions
+## OLD
+# typeset -f | egrep '^\w+' | wc -l | testnum
+$ dir_functions=$(typeset -f | egrep '\-dir\b' | wc -l)
+$ [ "$dir_functions" -gt 35 ]; echo "$?"
+0
+
+## BAD
+# source $BIN_DIR/tomohara-aliases.bash
+
+## OLD
+# pwd | testuser
+
+# FOR SOME REASONS "cat bashrc-setup" COMMAND GIVES AN ERROR
+# cat ~/.bashrc | tab-sort
+# linebr
+# cat ~/.bashrc | colon-sort
+# linebr
+# cat ~/.bashrc | colon-sort-rev-num
+# linebr
+# cat ~/.bashrc | freq-sort
+# linebr
+## OLD: rm -rf ./* > /dev/null
+## OLD
+# man printf > pf_manual.txt
+## OLD
+# cat pf_manual.txt | tab-sort | testnum | testuser
+# man uname > uname_manual.txt
+
+$ man uname > uname_manual.txt
+
+# OLD: cat uname_manual.txt | grep -q "uname" && echo "True" || echo "False"
+$ [ -n "$(cat uname_manual.txt | grep "uname")" ]; echo $?
+0
+
+## FalseCase: To show that grep-echo pipeline works as usual (should return 1)
+# man printf | grep -q "uname" && echo "True" || echo "False"
+$ [ "$(man printf | grep -c "uname")" -ne 0 ]; echo $?
+1
+
+## TrueCase: To show that grep-echo pipeline works as usual
+# man printf | grep -q "printf" && echo "True" || echo "False"
+$ [ "$(man printf | grep -c "printf")" -gt 0 ]; echo $?
+0
+
+## NEW: Added tail pipeline
+# cat uname_manual.txt | colon-sort | testnum | testuser | tail -n 1
+# cat uname_manual.txt | colon-sort | grep -q "uname" && echo "True" || echo "False"
+$ [ ! -n "$(cat uname_manual.txt | colon-sort | grep -q "uname")" ]; echo $?;
+0
+
+## NEW: Added tail pipeline
+# cat uname_manual.txt | colon-sort-rev-num | grep -q "uname" && echo "True" || echo "False"
+$ [ ! -n "$(cat uname_manual.txt | colon-sort-rev-num | grep -q "uname")" ]; echo $?;
+0
+
+# Data for sorting
+$ echo $'10:20\n5:50' > _data_.list
+$ colon-sort -n _data_.list
+5:50
+10:20
+
+# The first column is sorted by default
+
+$ colon-sort -n _data_.list | head -1 | grep -c 5
+1
+
+$ colon-sort --key=2 -n _data_.list | head -1
+10:20
+
+$ colon-sort --key=2 -n _data_.list | head -1 | grep -v -c 5
+1
+
+## NEW: Added tail pipeline
+## TODO2: rework to use data for which freq-sort and para-sort makes sense
+## OLD: cat uname_manual.txt | freq-sort | grep -q "uname" && echo "True" || echo "False"
+$ [ ! -n "$(cat uname_manual.txt | freq-sort | head -3 | grep -q "uname")" ]; echo $?;
+0
+
+# ECHOES THE FILE 
+$ uname -o > linux-info.txt
+## OLD: Seperated commands increases test score
+# cat linux-info.txt | echoize
+# $ cat ~/.bashrc | echoize
+## TODO2: use multi-line input to echoize
+# cat linux-info.txt | echoize
+$ [ "$(cat linux-info.txt | echoize)" == "GNU/Linux" ]; echo $?;
+0
+
+# SORTS BY PARAGRAPH
+## OLD: cat uname_manual.txt | para-sort | grep -q "uname" && echo "True" || echo "False"
+# cat uname_manual.txt | para-sort | head | grep -q "uname" && echo "True" || echo "False"
+$ [ ! -n "$(cat uname_manual.txt | para-sort | head | grep -q "uname")" ]; echo $?;
+0
+
+# cat uname_manual.txt | echoize | grep -q "uname" && echo "True" || echo "False"
+$ [ ! -n "$(cat uname_manual.txt | echoize | grep -q "uname")" ]; echo $?;
+0
+

@@ -26,19 +26,19 @@ use strict;
 use vars qw/$keys $filter $comments $default $preserve $i $fold_case $preserve_order 
             $preserve_case $labels $undefined $delimiter $cols $use_line_nums/;
 
-&init_var(*keys, &FALSE);		# column 1 specifies keys of lines to be joined
-&init_var(*filter, "");			# pattern for lines to skip
-&init_var(*comments, &FALSE);		# include comments in the result
-&init_var(*default, "n/a");		# default value for the rows
-&init_var(*preserve, &FALSE);		# preserve both case and key order (from input)
-&init_var(*i, &FALSE);			# alias for -fold_case
-&init_var(*fold_case, $i);		# convert keys to lowercases
+&init_var(*keys, &FALSE);               # column 1 specifies keys of lines to be joined
+&init_var(*filter, "");                 # pattern for lines to skip
+&init_var(*comments, &FALSE);           # include comments in the result
+&init_var(*default, "n/a");             # default value for the rows
+&init_var(*preserve, &FALSE);           # preserve both case and key order (from input)
+&init_var(*i, &FALSE);                  # alias for -fold_case
+&init_var(*fold_case, $i);              # convert keys to lowercases
 &init_var(*preserve_order, $preserve);
-&init_var(*preserve_case,  		# maintain the case of keys
-	  ($preserve || (! $fold_case)));
-&init_var(*labels, "");			# labels for the column headers
-&init_var(*undefined, "");		# value to use for undefined data
-&init_var(*delimiter, "\t");		# column delimiter
+&init_var(*preserve_case,               # maintain the case of keys
+          ($preserve || (! $fold_case)));
+&init_var(*labels, "");                 # labels for the column headers
+&init_var(*undefined, "");              # value to use for undefined data
+&init_var(*delimiter, "\t");            # column delimiter
 &init_var(*cols, "");                   # columns to include
 &init_var(*use_line_nums, &FALSE);      # add line number to keys
 
@@ -69,8 +69,8 @@ our(@columns) = split(/[, ]/, $cols);
 &trace_array(\@columns, 4, "columns");
 
 ## TODO:
-## $/ = "" if ($para);		# paragraph input mode
-## / = 0777 if ($slurp);	# complete-file input mode
+## $/ = "" if ($para);          # paragraph input mode
+## / = 0777 if ($slurp);        # complete-file input mode
 
 # Read in all the files into separate column arrays
 # For keys, these are %col_0, %col_1, ..., otherwise @col_0, @col_1, ....
@@ -110,61 +110,61 @@ sub read_columns {
     my($num) = 0;
 
     if (!open(FILE, "<$file")) {
-	&exit("Unable to read file $file ($!)\n");
-	return;
+        &exit("Unable to read file $file ($!)\n");
+        return;
     }
     if ($utf8) {
-	# TODO: use open_file wrapper so binmode can be done automatically
-	binmode(FILE, ":utf8");
+        # TODO: use open_file wrapper so binmode can be done automatically
+        binmode(FILE, ":utf8");
     }
     while (<FILE>) {
-	&dump_line();
-	chop;
-	$num++;
-	next if ((! $comments) && /^\#/);
+        &dump_line();
+        chop;
+        $num++;
+        next if ((! $comments) && /^\#/);
 
-	# Skip the line if it matches the filter
-	if (($filter ne "") && ($_ !~ /$filter/)) {
-	    &debug_print(5, "filtering out data: $_\n");
-	    next;
-	}
+        # Skip the line if it matches the filter
+        if (($filter ne "") && ($_ !~ /$filter/)) {
+            &debug_print(5, "filtering out data: $_\n");
+            next;
+        }
 
-	# Add the data to the appropriate array
-	if ($keys) {
-	    my($key, $data) = ($_ =~ /^([^$delimiter]*)$delimiter(.*)/);
-	    $key = $_ if (!defined($key));
-	    $key = &to_lower($key) unless ($preserve_case);
-	    if ($use_line_nums) {
-		$key = "$. $key";
-	    }
-	    $data = $undefined if (!defined($data));
-	    # Optionally filter data by columns:
-	    if (scalar (@columns)) {
-		my(@values) = split($delimiter, $data);
-		&trace_array(\@values, 5, "values");
-		$data = "";
-		foreach my $c (@columns) {
-		    # note: col 1 is key, which gets stripped, so val[c - 2]
-		    $data .= $delimiter if ($data ne "");
-		    my($value) = $values[$c - 2];
-		    $data .= (defined($value) ? $values[$c - 2] : "");
-		}
-		&debug_print(5, "new data: $data\n");
-	    }
-	    # make sure extraneous delimiters not included in key
-	    &assert(index($key, $delimiter) == -1);
-	    $data =~ s/$delimiter/, /g;		# make sure no tabs in data
-	    &debug_print(&TL_VERY_VERBOSE, "k='$key' d='$data'\n");
-	    if ($preserve_order) {
-		push(@ordered_keys, $key) unless defined($all_keys{$key});
-	    }
-	    $all_keys{$key} = &TRUE;
-	    $$col_array{$key} = $data;
-	}
-	else {
-	    my($data) = $_;
-	    push(@$col_array, $data);
-	}
+        # Add the data to the appropriate array
+        if ($keys) {
+            my($key, $data) = ($_ =~ /^([^$delimiter]*)$delimiter(.*)/);
+            $key = $_ if (!defined($key));
+            $key = &to_lower($key) unless ($preserve_case);
+            if ($use_line_nums) {
+                $key = "$. $key";
+            }
+            $data = $undefined if (!defined($data));
+            # Optionally filter data by columns:
+            if (scalar (@columns)) {
+                my(@values) = split($delimiter, $data);
+                &trace_array(\@values, 5, "values");
+                $data = "";
+                foreach my $c (@columns) {
+                    # note: col 1 is key, which gets stripped, so val[c - 2]
+                    $data .= $delimiter if ($data ne "");
+                    my($value) = $values[$c - 2];
+                    $data .= (defined($value) ? $values[$c - 2] : "");
+                }
+                &debug_print(5, "new data: $data\n");
+            }
+            # make sure extraneous delimiters not included in key
+            &assert(index($key, $delimiter) == -1);
+            $data =~ s/$delimiter/, /g;         # make sure no tabs in data
+            &debug_print(&TL_VERY_VERBOSE, "k='$key' d='$data'\n");
+            if ($preserve_order) {
+                push(@ordered_keys, $key) unless defined($all_keys{$key});
+            }
+            $all_keys{$key} = &TRUE;
+            $$col_array{$key} = $data;
+        }
+        else {
+            my($data) = $_;
+            push(@$col_array, $data);
+        }
     }
     close(FILE);
 
@@ -191,26 +191,26 @@ sub print_columns_by_key {
     &debug_print(4, "print_columns_by_key(@_)\n");
     my(@keys) = ($preserve_order ? @ordered_keys : sort(keys(%all_keys)));
     if ($use_line_nums) {
-	@keys = (sort by_numeric_prefix @keys);
+        @keys = (sort by_numeric_prefix @keys);
     }
     my($r, $c);
     
     # Print a comment giving the source of each column
     printf "# key";
     for ($c = 0; $c < $num_cols; $c++) {
-	printf "\t%s", defined($labels[$c]) ? $labels[$c] : "?";
+        printf "\t%s", defined($labels[$c]) ? $labels[$c] : "?";
     }
     printf "\n";
 
     # Print the data saved for each key
     for ($r = 0; $r <= $#keys; $r++) {
-	printf "%s", $keys[$r];
-	for ($c = 0; $c < $num_cols; $c++) {
-	    my($col_array) = $col_arrays[$c];
-	    printf "\t%s", &get_entry($col_array, $keys[$r], $default);
-	}
-	printf "\n";
-    }	    
+        printf "%s", $keys[$r];
+        for ($c = 0; $c < $num_cols; $c++) {
+            my($col_array) = $col_arrays[$c];
+            printf "\t%s", &get_entry($col_array, $keys[$r], $default);
+        }
+        printf "\n";
+    }       
 
     return;
 }
@@ -224,23 +224,23 @@ sub print_columns_by_row {
     my($r, $c);
 
     for ($r = 0; $r < $max_row; $r++) {
-	my($num_printed_cols) = 0;
-	for ($c = 0; $c < $num_cols; $c++) {
-	    # Skip columns if not in explicit inclusion list.
-	    # TODO: cache the column-incluson check
-	    if ((scalar @columns > 0) && (find(\@columns, $c + 1) == -1)) {
-		&debug_out(5, "Skipping column %d\n", $c + 1);
-		next;
-	    }
-	    
-	    my($col_array) = $col_arrays[$c];
+        my($num_printed_cols) = 0;
+        for ($c = 0; $c < $num_cols; $c++) {
+            # Skip columns if not in explicit inclusion list.
+            # TODO: cache the column-incluson check
+            if ((scalar @columns > 0) && (find(\@columns, $c + 1) == -1)) {
+                &debug_out(5, "Skipping column %d\n", $c + 1);
+                next;
+            }
+            
+            my($col_array) = $col_arrays[$c];
 
-	    printf "\t" if ($num_printed_cols > 0);
-	    $num_printed_cols++;
-	    printf "%s", $$col_array[$r] unless (!defined($$col_array[$r]));
-	}
-	printf "\n";
-    }	    
+            printf "\t" if ($num_printed_cols > 0);
+            $num_printed_cols++;
+            printf "%s", $$col_array[$r] unless (!defined($$col_array[$r]));
+        }
+        printf "\n";
+    }       
 
     return;
 }

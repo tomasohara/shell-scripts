@@ -10,6 +10,7 @@
 # - Avoid using array.pop(0): instead use indexing (e.g., array[0] or array[1:])
 # TODO1 by Aviyan:
 # - Review tests/template.py and add THE_MODULE, etc.
+## UPDATE 14 Sep 26: pylint cleanup
 #
 
 """Tests for batspp_report module"""
@@ -80,7 +81,6 @@ class TestBatsppReport(TestWrapper):
         """Tests txt report format"""
         debug.trace(4, f"TestBatsppReport.test_txt_report_format(); self={self}")
         txt_report_format = r"(\d+) out of (\d+) successful"
-        ## OLD: txt_report_from_dir = gh.read_lines("txt-reports/hello-world.txt")
         report_file = gh.form_path(OUTPUT_DIR, "txt-reports", "hello-world.txt")
         txt_report_from_dir = gh.read_lines(report_file)
         txt_report_search_cond = [
@@ -97,12 +97,6 @@ class TestBatsppReport(TestWrapper):
         self.run_script(f"--no > {self.temp}")
         no_report_command_output = gh.read_lines(self.temp)
         no_report_indicator = ">> SKIPPING BATSPP CHECK (-n ARGUMENT PROVIDED)"
-        ## OLD
-        ## # LACKING: assertEqual cannot compare other types than "str"
-        ## is_no_report = str(
-        ##     True if no_report_indicator in no_report_command_output else False
-        ## )
-        ## self.assertEqual(is_no_report, "True")
         is_no_report = (no_report_indicator in no_report_command_output)
         self.assertTrue(is_no_report)
 
@@ -201,8 +195,8 @@ def test_select_test_files_default_ignores_batspp():
     files = ["a.ipynb", "b.batspp", "note.txt"]
     ipynb_files, batspp_files, avoided_files = THE_MODULE.select_test_files(files)
     assert ipynb_files == ["a.ipynb"]
-    assert batspp_files == []
-    assert avoided_files == []
+    assert not batspp_files
+    assert not avoided_files
 
 def test_select_test_files_optional_includes_batspp():
     """When enabled, direct batspp files should be selected too"""
@@ -220,7 +214,7 @@ def test_select_test_files_all_option_keeps_nobatspp():
         files, all_option=True, include_batspp_files=True)
     assert ipynb_files == ["NOBATSPP-c.ipynb"]
     assert batspp_files == ["NOBATSPP-d.batspp"]
-    assert avoided_files == []
+    assert not avoided_files
 
 def test_select_test_files_respects_regex():
     """Regex filtering should apply to both ipynb and direct batspp files"""

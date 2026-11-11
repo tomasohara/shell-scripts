@@ -1,10 +1,11 @@
-# Workflow for running locally (e.g., via https://github.com/nektos/act)
+# This workflow will run the Python and Bash alias tests
 #
-# Note:
-# - Invoked via local-workflows.sh:
-#     WORKFLOW_FILE=act.yml local-workflow.sh ...
+# Notes:
+# - This is used for debugging when running the workflow locally via Nektos/Act:
+#     WORKFLOW_FILE=debug.yml local-workflow.sh ...
+#   Specifically, it runs with detailed debugging (i.e., DEBUG_LEVEL=5).
 # - This leads to the following type of invocation:
-#     act --container-architecture linux/amd64 --pull="false" -P "ubuntu-latest=local/test-act" -W ./.github/workflows/act.yml
+#     act --container-architecture linux/amd64 --pull="false" -P "ubuntu-latest=local/test-act" -W ./.github/workflows/debug.yml
 # - Based initially on tests.yml from Python mezcla package.
 # - Requires special permission for Github workflows.
 # - For more information see following:
@@ -18,37 +19,37 @@
 #
 # Warning:
 # - *** Changes need to be synchronized in 3 places: Dockerfile, local-workflow.sh, and .github/workflow/*.yml!
-# - It can be tedious to diagnose subtle errors in the yaml specification, especially
-#   because the workflow syntax takes a little liberty. In addition to yamllint,
-#   Try the actionlint utility:
-#       https://github.com/rhysd/actionlint
+# - The environment overrides are not working (e.g., DEBUG_LEVEL and TEST_REGEX);
+#   instead specify them in ../../_temp-user-docker.env
 #
 
-name: Act-Tests
+name: debug-Tests
 
 on: [push, pull_request]
 
 jobs:
-
-  build-and-test-runner:
+  
+  build:
     name: Build and Run Tests via Runner
     # skip during local actions testing (see https://github.com/nektos/act#skipping-jobs)
-    # note: enable by runnng ./local-workflows.sh with ACT_JSON=github-event.json in env
-    ## OLD: if: ${{ !github.event.act }}         # run when local actions testing
-    if: ${{ github.event.github_like }}          # run if emulating github
+    if: ${{ !github.event.act }}        
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        ## TODO: os: [ubuntu-20.04, ubuntu-latest]
         os: [ubuntu-22.04]
-        ## TODO: python-version: ["3.8", "3.9", "3.10"]
-        ## NOTE: only uses one version due to time to run tests locally as well as memory
+        ## TODO: os: [ubuntu-20.04, ubuntu-latest]
         python-version: ["3.9"]
+        ## TODO: python-version: ["3.8", "3.9", "3.10"]
+
+    ## TEST: alternative environment spec for TEST_REGEX override
+    ## See https://help.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
+    ## env:
+    ##    TEST_REGEX: dummy-test
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Configure Environment
         ## TODO2: clarify why used
@@ -58,12 +59,12 @@ jobs:
           echo "PYTHONPATH=$PYTHONPATH:/usr/local/lib/python3.9/dist-packages" >> "$GITHUB_ENV"
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Cache Python Dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('requirements.txt') }}
@@ -93,7 +94,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Build docker image
         run: |
@@ -103,5 +104,13 @@ jobs:
         run: |
           # Note: command format: docker run [OPTIONS] IMAGE [COMMAND] [ARG...];
           # The environment file normally has no entries (i.e., just comments).
-          docker run --env-file _temp-user-docker.env --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
-
+          docker run --env "DEBUG_LEVEL=5" --env-file _temp-user-docker.env --rm --mount type=bind,source="$(pwd)",target=/home/shell-scripts shell-scripts-dev
+        ##
+        ## TEST
+        ## env:
+        ##   DEBUG_LEVEL: 5
+        ##   ## TODO2: fix me!
+        ##   # Note: to test a subset of notebook, define a regex pattern
+        ##   # ex: TEST_REGEX: "(README|testing-tips)"
+        ##   ## TODO: TEST_REGEX: pattern
+        ##   DUMMY_VAR: 1

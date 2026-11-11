@@ -46,20 +46,20 @@ verbose_output=0
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
 while [ "$moreoptions" = "1" ]; do
     if [ "$1" = "--trace" ]; then
-	set -o xtrace
-	## DEBUG: set -o verbose
+        set -o xtrace
+        ## DEBUG: set -o verbose
     elif [ "$1" = "--diff" ]; then
-	## OLD: diff="$2";
-	## TODO: diff=("${2[@]}");
+        ## OLD: diff="$2";
+        ## TODO: diff=("${2[@]}");
         # note: ignores shellcheck SC2206: Quote to prevent word splitting/globbing
         # shellcheck disable=SC2206
         diff=($2);
-	shift
+        shift
     elif [ "$1" = "--verbose" ]; then
-	verbose_output=1
+        verbose_output=1
     elif [ "$1" = "--plain-diff" ]; then
-	## OLD: diff="diff";
-	diff=(diff);
+        ## OLD: diff="diff";
+        diff=(diff);
     elif [ "$1" = "--include-ptrs" ]; then
         echo "Warning: deprecated option: $1"
         filter_hex=1;
@@ -88,17 +88,17 @@ while [ "$moreoptions" = "1" ]; do
         if [ "$ignore_user" != "" ]; then
             ignore_user="$ignore_user|($2)";
         else
-	    ignore_user="$2";
+            ignore_user="$2";
         fi
-	shift
+        shift
     elif [ "$1" = "--strip-ignore" ]; then
         strip_ignore="1"
     else
-	show_usage=1
-	if [ "$1" != "--help" ]; then
-	    echo "Error: unknown option: $1";
+        show_usage=1
+        if [ "$1" != "--help" ]; then
+            echo "Error: unknown option: $1";
             brief_usage=1
-	fi
+        fi
     fi
     shift 1;
     moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac

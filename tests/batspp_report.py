@@ -15,7 +15,10 @@
 # - By default, this aborts if run under an admin-like account (e.g., root or power user), because the tests might inadvertantly delete files.
 # - It is best to used full paths in traces to facilitate cut-n-paste, such
 #   as if the current directory changes (e.g., in summary_stats.bash).
+# - Use `jupyter console` to invoke a CLI verson of Jupyter (i.e., not ipython).
 #
+## UPDATE 2026-10-15: treats evaluation errors as failures if STOP_ON_FAILURE
+## UPDATE 14 Sep 26: filters console tracing
 
 """
   Test automation & report generation for BatsPP test files for Bash.
@@ -112,7 +115,7 @@ SHOW_FAILURE_CONTEXT = system.getenv_bool(
     description="Show context of test failures--useful with Github runner")
 STOP_ON_FAILURE = system.getenv_bool(
     "STOP_ON_FAILURE", False,
-    description="Stop when failure encountered")
+    description="Stop when failure encountered, including any evaluation errors")
 SINGLE_STORE = system.getenv_bool(
     "SINGLE_STORE", False,
     description=f"Whether to just use {BATSPP_OUTPUT_STORE} for all store dirs except kcov")
@@ -320,9 +323,10 @@ def main():
             # copies ./tests files into bats test dir (under temp); retains outer
             # quotation marks in output; uses single test directory; passes along
             # the --force option; ignores tests segments that are just comments.
+            # CONSOLE_TRACING disabled to facilitate bats header line sanity check.
             eval_log = output_file + ".eval.log"
             lenient_eval = (not STRICT_EVAL)
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} IGNORE_ALL_COMMENTS=1 IGNORE_SETUP_OUTPUT=1 python3 {parent_dir}/simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} IGNORE_ALL_COMMENTS=1 IGNORE_SETUP_OUTPUT=1 CONSOLE_TRACING=0 python3 {parent_dir}/simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         # Output excerpts from BatsPP source file, Bats output file and conversion log file.
@@ -355,7 +359,11 @@ def main():
             print("\nError Details:\n")
             for error in eval_errors:
                 ## BAD: print("\t"+error+"\n")
-                print(f"\t{error}")
+                ## OLD: print(f"\t{error}")
+                # Strip line number column added by check_errors.perl (e.g., "2    >>> ... <<<")
+                # Change facilitated by Gemini 4 Argon
+                error_spec = my_re.sub(r"^[0-9]+ +", "", error)
+                print(f"\t{error_spec}")
             print("")
         
         debug.trace(6, f"\nrun_batspp() ##real_output## => {real_output!r}")
@@ -490,7 +498,8 @@ def main():
                 output_lines_filtered = [item for item in output_lines if not item.startswith("#")]
                 debug.trace_expr(5, output_lines_filtered)
                 if output_lines_filtered:
-                    # Ignore the line given the number of tests (e.g., "1..5")
+                    # Ignore the line giving the number of BATS tests (e.g., "1..5")
+                    # note: CONSOLE_TRACING should be 0 (see startup-tracing.bash)
                     header_line = output_lines_filtered.pop(0)
                     debug.trace_expr(5, header_line)
                     debug.assertion(my_re.search(r"^1\.\.\d+", header_line) or (header_line == "0..0"),
@@ -503,6 +512,8 @@ def main():
                 success_rate = (round((count_ok / count_total)*100, 2) if count_total else 0)
                 min_score = system.to_float(thresholds.get(ipynb_from_batspp, DEFAULT_MIN_SCORE))
                 successful = (success_rate >= min_score)
+                if num_eval_errors and STOP_ON_FAILURE:
+                    successful = False
                 debug.trace_expr(4, min_score, count_ok, count_bad, count_total, success_rate, successful)
                 ## OLD: SUMMARY_TEXT = f"{count_ok} out of {count_total} successful ({success_rate}%)\nSuccess: {successful} (threshold = {min_score}%)"
                 SUMMARY_TEXT_SUCCESS_COUNT = f"Success Score: {count_ok} out of {count_total} ({success_rate}%)"
@@ -623,7 +634,8 @@ def main():
                 t_count_eval_error = item['test_count_eval_error']
                 ## OLD: Revised format includes test passed out of test found
                 # print(f"{index + 1}. {name} ({rate}%): threshold={min_score}%")
-                print(f"{index+1}. {t_name} ({t_rate}%; {t_count_ok}/{t_count_total} OK): threshold={min_score}%; {t_count_eval_error} evaluation errors")
+                ## BAD: print(f"{index+1}. {t_name} ({t_rate}%; {t_count_ok}/{t_count_total} OK): threshold={min_score}%; {t_count_eval_error} evaluation errors")
+                print(f"{index+1}. {t_name} ({t_rate}%; {t_count_ok}/{t_count_total} OK): threshold={t_min_score}%; {t_count_eval_error} evaluation errors")
             if not arr:
                 print("n/a")
 

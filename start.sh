@@ -7,7 +7,9 @@
 # - Allow for user to override the application, such as via enironment
 #   (e.g., IMAGE_APP=gimp).
 # - Get programs for each type from user configuration files (e.g., mime settings).
+# - P2: add env. options to override defaults.
 #
+## UPDATE 31 Aug 26: Updates defaults.
 
 # Uncomment following line(s) for tracing:
 # - xtrace shows arg expansion (and often is sufficient)
@@ -37,6 +39,11 @@ BROWSER=${BROWSER:-firefox}
 # Support for MacOS-special casing
 under_mac=0
 if [ "$(uname)" = "Darwin" ]; then under_mac=1; fi
+# Likewise for Cygwin
+under_cygwin=0
+if [ "$OSTYPE" == "cygwin" ]; then
+    under_cygwin=1
+fi
 
 # Parse command-line options
 # TODO: #
@@ -44,29 +51,32 @@ more_options=0; case "$1" in -*) more_options=1 ;; esac
 show_usage=0;
 for_editting=0
 verbose=0
+use_cmd=0
 while [ "$more_options" = "1" ]; do
     if [ "$1" = "--trace" ]; then
-	set -o xtrace;
+        set -o xtrace;
     elif [ "$1" = "--help" ]; then
-	show_usage=1;
+        show_usage=1;
     elif [ "$1" = "--view" ]; then
-	for_editting=0;
+        for_editting=0;
     elif [ "$1" = "--edit" ]; then
-	for_editting=1;
+        for_editting=1;
     elif [ "$1" = "--open" ]; then
-	for_editting=1;
+        for_editting=1;
     elif [ "$1" = "--under-mac" ]; then
-	under_mac=1;
+        under_mac=1;
     elif [ "$1" = "--not-mac" ]; then
-	under_mac=0;
+        under_mac=0;
     elif [ "$1" = "--verbose" ]; then
-	verbose=1;
+        verbose=1;
+    elif [ "$1" = "--use-cmd" ]; then
+        use_cmd=1;
     elif [ "$1" = "--" ]; then
-	break;
+        break;
     else
-	echo "ERROR: Unknown option: $1";
-	show_usage=1;
-	break
+        echo "ERROR: Unknown option: $1";
+        show_usage=1;
+        break
     fi
     shift;
     more_options=0; case "$1" in -*) more_options=1 ;; esac
@@ -82,7 +92,7 @@ if [[ ($show_usage = 1) || ("$file" = "") || ("$arg2" != "") ]]; then
     script=$(basename "$0")
     echo ""
     echo "Usage: $script [--view|[--edit|--open]] [--verbose] [--trace] [misc-options] file"
-    echo "    misc-options: [--help] [--not-mac]"
+    echo "    misc-options: [--help] [--not-mac] [--use-cmd]"
     echo ""
     echo "Examples:"
     echo ""
@@ -119,17 +129,19 @@ function invoke () {
     log_file="$log_dir/$(basename "$program")-$(basename "$file")-$today.log"
     local program_arg=""
     if [ ! -e "$log_file" ]; then touch "$log_file"; fi
-    ## OLD: if [ "$verbose" = "1" ]; then echo "Issuing: \"$program\" \"$file\" >> \"$log_file\" 2>&1"; fi
     if [[ (! -e "$program") && ("$program" != "open") ]]; then
-	if [ "$under_mac" = "1" ]; then
+        if [ "$under_mac" = "1" ]; then
             if [[ ! ("$program" =~ .*\.app) ]]; then
                 program="$program.app"
             fi
-	    program_arg="-a $program"
-	    program="open"
-	fi
+            program_arg="-a $program"
+            program="open"
+        fi
     fi
-    ## OLD: "$program" "$file" >> "$log_file" 2>&1
+    if [[ ("$under_cygwin" == "1") && ("$use_cmd" == "1") ]]; then
+        ## TODO2: add program_arg support to invoke function
+        program_arg="/c"
+    fi
     # disable shellcheck: SC2086 [Double quote to prevent globbing and word splitting]
     # shellcheck disable=SC2086
     {
@@ -156,10 +168,17 @@ function invoke () {
 
 # If a directory, open using file explorer (e.g., nautilus)
 if [ -d "$file" ]; then
-    ## OLD: nautilus "$file" &
-    file_manager=nautilus
-    ## OLD: if [ "$under_mac" = "1" ]; then file_manager="/System/Library/CoreServices/Finder.app/Contents/MacOS/Finder"; fi
+    ## OLD: file_manager=nautilus
+    ## TODO?: file_manager=nemo
+    file_manager=dolphin
     if [ "$under_mac" = "1" ]; then file_manager="open"; fi
+    if [ "$under_cygwin" = "1" ]; then
+        # via GPT 5.6 Terra:
+        # `start` is a cmd.exe built-in.  The empty string is the window title;
+        # without it, a quoted pathname can be interpreted as that title.
+        cmd.exe /c start "" "$(cygpath -aw -- "$file")" &
+        exit
+    fi
     "$file_manager" "$file" &
     exit
 fi
@@ -169,7 +188,6 @@ lower_file=$(echo "$file" | perl -pe 's/(.*)/\L$1/;')
 # Change invoked program if different for editing than for viewing
 office_program="libreoffice"
 pdf_program="evince"
-## OLD: image_program="eog"
 ## NOTE: eog is anachronistic so trying KDE-ish gwenview; install as follows
 ##   sudo apt install gwenview
 image_program="gwenview"
@@ -187,6 +205,20 @@ if [ "$under_mac" = "1" ]; then
     office_program="open"
     default_program="open"
 fi
+# 
+if [ "$under_cygwin" == "1" ]; then
+    # NOTE: evince doesn't work without active x server (n.b., awkward to use under Windows)
+    pdf_program="acrobat"
+    image_program="mspaint"
+    if [ "$use_cmd" == "1" ]; then
+        cmd="cmd"
+        pdf_program="$cmd"
+        image_program="$cmd"
+        office_program="$cmd"
+        default_program="$cmd"
+    fi
+fi
+#
 if [[ $lower_file =~ ^.*\.xcf$ ]]; then
     image_program="gimp"
 fi
@@ -227,7 +259,7 @@ case "$lower_file" in
     ## This illustrates what happens when ';;' not used at end of case
     ## *.abc* | *.pdq*) echo hey; emacs "$@"
     ## BAD: *.xyz*)
-    ##		   echo hey2; emacs "$@" & ;;
+    ##             echo hey2; emacs "$@" & ;;
 
     # Invoke MacOs-style app as if program (e.g., Safari.app)
     *.app*)

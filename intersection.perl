@@ -17,12 +17,12 @@ require 'common.perl';
 use strict;
 use vars qw/$diff $do_diff $line $single_line $i $trim/;
 
-&init_var(*diff, &FALSE);	# use set difference instead of intersection
-&init_var(*do_diff, $diff);	# alias for -diff
-&init_var(*line, &FALSE);	# do line-level intersection (not word)
+&init_var(*diff, &FALSE);       # use set difference instead of intersection
+&init_var(*do_diff, $diff);     # alias for -diff
+&init_var(*line, &FALSE);       # do line-level intersection (not word)
 &init_var(*single_line, &FALSE); # use single-line for output
-&init_var(*i, &FALSE); 		# ignore case differences
-&init_var(*trim, &FALSE);	# trim whitespace from lines
+&init_var(*i, &FALSE);          # ignore case differences
+&init_var(*trim, &FALSE);       # trim whitespace from lines
 our($ignore_case) = $i;
 
 # Do some sanity checks
@@ -76,7 +76,7 @@ sub get_file_words {
     my($text) = &read_file($file);
 
     if ($ignore_case) {
-	$text = &to_lower($text);
+        $text = &to_lower($text);
     }
 
     return (&tokenize($text));
@@ -90,11 +90,11 @@ sub get_file_lines {
     my($text) = &read_file($file);
 
     if ($ignore_case) {
-	$text = &to_lower($text);
+        $text = &to_lower($text);
     }
     my @lines = split(/\n/, $text);
     if ($trim) {
-	@lines = map { &trim($_); } @lines;
+        @lines = map { &trim($_); } @lines;
     }
 
     return (@lines);

@@ -1,0 +1,205 @@
+# Test of aliases defined in tomohara-proper-aliases.bash
+# See test-tomohara-proper-aliases-part2.ipynb, etc. for followup (and keep in synch).
+
+# TODO2: add tests for, action-lint-yaml, all-tomohara-aliases,
+#     all-tomohara-settings, alt-git-extract-all-versions, calendar,
+#     clone-repo, color-test-failures, color-test-results,
+#     convert-emoticons-aux, detach-job, distro-version-info,
+#     distro-version-info-neo, free-memory, git-add-, git-all-update,
+#     git-diff-, git-difftool-, git-extract-all-versions,
+#     git-files-changed, git-log-, git-repo-url, git-script-update,
+#     git-update-, git-vdiff, indent-text, json-validate, kill-chromiun,
+#     kill-firefox, kill-hp, kill-jupyter, kill-kdiff, kill-sleep,
+#     make-screencast-video, nvidia-batched, nvidia-top, nvsmi, oscar,
+#     para-len-alt, pristine-bash, remote-prompt, reset-under-emacs,
+#     root-prompt-remote, script-config, shell-check-last-snippet, shell-check-stdin,
+#     show-sd-prompts, sleep-for, tabify,
+#     test-python-script-method, test-python-script-method-strict,
+#     test-python-script-strict, tomohara-proper-aliases, yaml-validate,
+#     zip-from-parent
+
+# Global setup
+$ TMP=${TMP:-/tmp}
+$ temp_dir="$TMP/test-tomohara-proper-aliases"
+$ rename-with-file-date "$temp_dir" > /dev/null
+$ command mkdir -p "$temp_dir"
+$ test_dir="$PWD"
+## TODO1: fix-alias for pager fallback (e.g., less missing under some runners)
+$ export PAGER=cat
+$ PYTHON_OUT_DIR="$temp_dir"
+$ alias timestamp-as-today='perl -pe "s/$(T)/today/g; s@\\Q$temp_dir\\E@TEMP_DIR@g;"'
+
+#-------------------------------------------------------------------------------
+# trace-vars
+
+$ one=1
+$ two=2
+$ trace-vars one two 2>&1
+one=1; two=2; 
+
+$ trace-vars one two 2>&1 | tr ' ' $'\n' | grep --perl-regexp --count '\w+=\d;'
+2
+
+#-------------------------------------------------------------------------------
+# run-python-script
+#
+# note:
+# - The output and log filenames use _PSL_ counter (e.g., "_$basename.$date.$_PSL_.log").
+# - Sample output:
+#
+# $ run-python-script template.py --help 
+# ==> ./_template.25feb25.17.log <==
+# my_regex.__init__(): self=<mezcla.my_regex.regex_wrapper object at 0x768d28f1b1d0>
+# mezcla version: 1.4.0.3
+# Warning: redefining env entry for FILE_BASE: env_options.get(var)='Basename for output fi
+# Main.__init__(): self=<mezcla.main.Main object at 0x768d28f7e390>
+# Assertion failed: "TODO:" not in __doc__\n (at /usr/local/misc/programs/bash/tom-shell-sc
+# Main.__init__(): self=<__main__.Script object at 0x768d296eca90>
+# Using sys.argv[1:] for runtime args: ['--help']
+# [/tpo/misc/programs/python/tom-mezcla-clone/mezcla/debug.py] unloaded at 2025-02-25 21:30
+# 0.14user 0.00system 0:00.14elapsed 100%CPU (0avgtext+0avgdata 27924maxresident)k
+# 0inputs+24outputs (0major+6007minor)pagefaults 0swaps
+# 
+# ==> ./_template.25feb25.17.out <==
+#     TEMP_BASE    Debugging override for temporary file basename (None)
+#     TEMP_FILE    Debugging override for temporary filename: avoid if possible (None)
+#     TEMP_LOG_FILE    Log file for stderr such as for issue function ('/home/testuser/temp
+#     TEMP_PREFIX    Prefix to use for temp files ('_temp-')
+#     TEMP_SCRIPT_FILE    File for command invocation ('/home/testuser/temp/tmp/_temp-_laut
+#     TEMP_SUFFIX    Suffix to use for temp files ('_')
+#     TMP    Temporary directory ('/tmp')
+#     TODO_FUBAR    TODO:Fouled Up Beyond All Recognition processing (False)
+#     TRACK_PAGES    Track page boundaries by form feed--\f or ^L (False)
+#     USE_TEMP_BASE_DIR    Whether TEMP_BASE should be a dir instead of prefix (False)
+# 16       Main.__init__(): self=<mezcla.main.Main object at 0x768d28f7e390>
+# 17   >>> Assertion failed: "TODO:" not in __doc__\n (at /usr/local/misc/programs/bash/tom
+# 18       Main.__init__(): self=<__main__.Script object at 0x768d296eca90>
+# 19       Using sys.argv[1:] for runtime args: ['--help']
+
+$ run-python-script
+Usage: [ENV-OPTIONS] run-python-script script arg ...
+   ENV-OPTIONS: [USE_STDIN=B] [USE_STDOUT=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] [KEEP_EMPTY_OUT=b] [PYTHON=path] [PYTHON_RUN_LABEL=str]
+note:
+- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL)
+- PYTHON_OUT_DIR is script dir unless a full path
+
+$ trace-vars _PSL_ 2>&1
+_PSL_=; 
+
+$ [ "$_PSL_" == "" ]; echo $?
+0
+
+# Setup
+$ log_file="$temp_dir/run-python-script.log"
+$ PYTHON_DEBUG_LEVEL=0 run-python-script template.py --help > "$log_file"
+
+## OLD: grep -A1 '==>' "$log_file"
+## OLD: grep -A1 '==>' "$log_file" | timestamp-as-today
+$ grep '==>' "$log_file" | timestamp-as-today | perl -pe 's/\e\[[0-9;]*[A-Za-z]//g; s@^==> TEMP_DIR/(?:test-tomohara-proper-aliases/)?(_template\\.today\\.run)(?:\\.[0-9]+\\.(?:log|out) <==)?$@==> TEMP_DIR/$1@;'
+==> TEMP_DIR/_template.today.run.1.log <==
+==> TEMP_DIR/_template.today.run.1.out <==
+
+$ trace-vars _PSL_ 2>&1
+_PSL_=1; 
+
+$ [ "$_PSL_" == "1" ]; echo $?
+0
+
+## Sample ouput of run-python-script with "==>"
+## ==> /home/tomohara/temp/tmp/test-tomohara-proper-aliases/_template.13jul26.run
+## /home/tomohara/Mezcla/mezcla/template.py --help
+## --
+## ==> /home/tomohara/temp/tmp/test-tomohara-proper-aliases/_template.13jul26.run
+##  filename    Input filename
+
+# note: Run again to ensure counter used in filename updated 
+$ PYTHON_DEBUG_LEVEL=0 run-python-script template.py --help >| "$log_file"
+## OLD: grep -A1 '==>' "$log_file"
+## OLD: grep -A1 '==>' "$log_file" | timestamp-as-today
+$ grep '==>' "$log_file" | timestamp-as-today | perl -pe 's/\e\[[0-9;]*[A-Za-z]//g; s@^==> TEMP_DIR/(?:test-tomohara-proper-aliases/)?(_template\\.today\\.run)(?:\\.[0-9]+\\.(?:log|out) <==)?$@==> TEMP_DIR/$1@;'
+==> TEMP_DIR/_template.today.run.2.log <==
+==> TEMP_DIR/_template.today.run.2.out <==
+
+$ trace-vars _PSL_ 2>&1
+_PSL_=2; 
+
+$ [ "$_PSL_" == "2" ]; echo $?
+0
+
+$ run-python-script-reset 2>&1
+_PSL_=0; 
+
+$ [ "$_PSL_" == "0" ]; echo $?
+0
+
+#-------------------------------------------------------------------------------
+# test-python-script
+#
+# Sample output:
+#
+# $ PYTEST_DEBUG_LEVEL=0 test-python-script test_jupyter_to_batspp.py
+# ==> ./_test_jupyter_to_batspp.25feb25.15.log <==
+# /usr/local/misc/programs/anaconda3/envs/nlp-py-3-11/bin/pytest -vv --capture=tee-sys test
+# 
+# ==> ./_test_jupyter_to_batspp.25feb25.15.out <==
+# cachedir: .pytest_cache
+# hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase(PosixPath('/tpo/mi
+# rootdir: /tpo/misc/programs/bash/shell-scripts-devel/tests
+# plugins: hypothesis-6.97.0, devtools-0.12.2, anyio-3.7.1
+# collecting ... collected 2 items
+#
+# test_jupyter_to_batspp.py::TestIt::test_data_file XFAIL                             [ 50%
+# test_jupyter_to_batspp.py::TestIt::test_valid_notebook XPASS                        [100%
+#
+# ============================== 1 xfailed, 1 xpassed in 0.35s ============================
+
+# Setup
+$ log_file="$temp_dir/test-python-script.log"
+$ PYTEST_DEBUG_LEVEL=0 test-python-script tests/test_jupyter_to_batspp.py > "$log_file" 2>&1
+
+## current output
+## tests/test_jupyter_to_batspp.py::TestIt::test_data_file
+## tests/test_jupyter_to_batspp.py::TestIt::test_valid_notebook
+$ extract-matches '^\S+::TestIt::\S+' "$log_file" | perl -pe 's@^tests/@@'
+test_jupyter_to_batspp.py::TestIt::test_data_file
+test_jupyter_to_batspp.py::TestIt::test_valid_notebook
+
+## current output (for "...=== 2 xpassed in 0.40s ====...")
+## 1
+$ egrep -c '(failed|passed).* in' "$log_file"
+1
+
+#-------------------------------------------------------------------------------
+# git-clone-alias
+#
+# Sample output:
+# 
+# $ git-clone-alias https://github.com/tomasohara/git-sandbox
+# Script started, output log file is '_clone-git-sandbox-26feb25.log'.
+# Cloning into 'git-sandbox'...
+# remote: Enumerating objects: 42, done.
+# remote: Counting objects: 100% (42/42), done.
+# remote: Compressing objects: 100% (28/28), done.
+# remote: Total 42 (delta 14), reused 33 (delta 8), pack-reused 0 (from 0)
+# Receiving objects: 100% (42/42), 16.38 KiB | 5.46 MiB/s, done.
+# Resolving deltas: 100% (14/14), done.
+# Script done.
+# FYI: script-based clone done (see _clone-git-sandbox-26feb25.log)
+
+# Setup
+$ command cd "$temp_dir"
+$ git-clone-alias https://github.com/tomasohara/git-sandbox > "_clone.log" 2>&1
+
+$ [[ -e "$temp_dir"/git-sandbox/LICENSE ]]; echo $?
+0
+
+$ extract-matches "remote: (Compressing|Counting|Enumerating|Total)" "$temp_dir"/_clone-git-sandbox-$(T).log | sort -u
+Compressing
+Counting
+Enumerating
+Total
+
+# Setup
+## TODO3: Add '# Cleanup' to [simple_]batspp.py comment-indicator flags
+$ command cd "$test_dir"
+

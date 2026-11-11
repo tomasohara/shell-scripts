@@ -18,6 +18,7 @@
 #
 # TODO1: fix problem with extraneous error codes from git cat-file over alternative
 # TODO3: merge with extract-all-git-versions.bash
+# TODO2: check for files never in the repo (i.e., to distinguish non-existing current file from never existing file)
 #
 # -------------------------------------------------------------------------------
 # Details of Rename Resolution:
@@ -33,6 +34,8 @@
 #   leaving ALT_PATHS empty and making every fallback attempt fail.
 # -------------------------------------------------------------------------------
 #
+## UPDATE 2026-10-26: reworks usage default
+## UPDATE 07 Sep 26: fix by Gemini 3.1 Pro to allow for deleted files
 
 # Helpers
 function full-usage {
@@ -44,13 +47,13 @@ function full-usage {
     echo ""
     echo "Examples:"
     echo ""
-    ##
-    ## OLD:
-    ## # HACK: Uses Usage in filename so shows up in brief usage
-    ## echo "NUM_REVISIONS=5 $script --human Usage.txt $export_to_expr"
-    ##
-    # HACK: Uses 'Usage' in filename so shows up in brief usage: see USAGE=... below.
-    echo "NUM_REVISIONS=5 $script --human --verbose Usage.txt $export_to_expr"
+    # note: Puts TODO in filename, so shows up in brief usage: see BRIEF_USAGE below.
+    # Also uses alias instead of script name to alleviate manual corrections:
+    #    alias alt-git-extract-all-versions='alt-extract-all-git-versions.bash --human --verbose'
+    # See tomohara-proper-aliases.bash for related aliases.
+    ## OLD: echo "NUM_REVISIONS=5 $script --human --verbose Usage.txt $export_to_expr"
+    ## TODO?: echo "f=\"Usage.txt\"; NUM_REVISIONS=5 alt-git-extract-all-versions \"\$f\" /tmp/git-versions"
+    echo "NUM_REVISIONS=5 alt-git-extract-all-versions TODO_filename /tmp/git-versions"
     echo ""
     echo "PRETTY=1 VERBOSE=1 $0 Dockerfile"
     echo ""
@@ -67,7 +70,10 @@ if [ "${VERBOSE:-0}" = "1" ]; then
     verbose=true
 fi
 debug=false
-if [ "${DEBUG:-0}" = "1" ]; then
+declare -g DEBUG
+# note: TL=4 (detailed) is typically used for debugging
+debug_default=$(( DEBUG_LEVEL >= 4 || DEBUG > 0 )) 
+if [ "${DEBUG:-$debug_default}" = "1" ]; then
     debug=true
 fi
 if [ "${TRACE:-0}" = "1" ]; then
@@ -92,7 +98,6 @@ if [ "${PRETTY:-0}" = "1" ]; then pretty=true; fi
 # Command line argument checks
 while [[ $1 =~ ^-.* ]]; do
     if [ "$1" = "--human" ]; then
-        ## OLD: verbose=true
         pretty=true
         shift
     fi
@@ -113,29 +118,25 @@ GIT_PATH_TO_FILE="$1"
 
 NEWLINE=$'\n'
 TWO_NEWLINES="$NEWLINE$NEWLINE"
-USAGE=$(full-usage | grep 'Usage')      # brief usage
+# note: extracts brief usage example
+BRIEF_USAGE=$(full-usage | grep 'TODO_filename')
 
 # check if got argument
 if [ "${GIT_PATH_TO_FILE}" == "" ]; then
-    echo "${USAGE}" >&2
-    exit 1
-fi
-
-# check if file exists
-if [ ! -f "${GIT_PATH_TO_FILE}" ]; then
-    echo "Error: File '${GIT_PATH_TO_FILE}' does not exist.${TWO_NEWLINES}${USAGE}" >&2
+    echo "${BRIEF_USAGE}" >&2
     exit 1
 fi
 
 # make sure in repo dir
 if ! git rev-parse --show-toplevel >/dev/null 2>&1 ; then
-    echo "Error: you must run this from within a git working directory.${TWO_NEWLINES}${USAGE}" >&2
+    echo "Error: you must run this from within a git working directory.${TWO_NEWLINES}${BRIEF_USAGE}" >&2
     exit 1
 fi
 
 # Resolve relative path with respect to git root directory
+# note: -m (--canonicalize-missing) allows for a missing file
 GIT_ROOT_DIR="$(realpath "$(git rev-parse --show-toplevel)")"
-REL_GIT_PATH_TO_FILE="$(realpath "$GIT_PATH_TO_FILE" | perl -pe "s@$GIT_ROOT_DIR/@@;")"
+REL_GIT_PATH_TO_FILE="$(realpath -m "$GIT_PATH_TO_FILE" | perl -pe "s@$GIT_ROOT_DIR/@@;")"
 
 # extract just a filename from given relative path (will be used in result file names)
 GIT_SHORT_FILENAME=$(basename "$GIT_PATH_TO_FILE")
@@ -157,8 +158,9 @@ info="$TMP/_$base.$$.info"
 ALLOW_RENAMES="${ALLOW_RENAMES:-1}"
 
 # Get information on commits, optionally checking for additional records due to renames
+# note: Filename put after -- in case it no longer exists.
 if [ "$ALLOW_RENAMES" == "0" ]; then
-    git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
+    git log --diff-filter=d --date-order --reverse --format="%ad %H" --date=iso-strict -- "$GIT_PATH_TO_FILE" | grep -v '^commit' > "$info"
 else
     # note: --follow is used to account for renames (see other options above)
     # Combine commit info and per-commit file path into one pass:
@@ -168,7 +170,7 @@ else
     # This avoids a separate rename-detection pass and correctly handles cases
     # where --follow uses content-similarity but produces no R entry (false renames
     # between independently-created files with similar content).
-    git log --follow --name-status --format="COMMIT %ad %H" --date=iso-strict "$GIT_PATH_TO_FILE" | \
+    git log --follow --name-status --format="COMMIT %ad %H" --date=iso-strict -- "$GIT_PATH_TO_FILE" | \
         perl -ne 'if (/^COMMIT (\S+) (\S+)/) { ($date,$sha)=($1,$2) }
                   elsif (/^[ACMT]\t(.+)/)    { print "$date $sha $1\n" }
                   elsif (/^R\d+\t([^\t]+)/)  { print "$date $sha $1\n" }' > "$info"
@@ -198,7 +200,6 @@ while read -r LINE; do
         hour_spec="$(date "+%H%M" --date="$COMMIT_DATE")"
         VERSION_NUM="$COUNT"
         if [ "$ALLOW_RENAMES" == "1" ]; then
-            ## OLD: VERSION_NUM=$(($TOTAL_NUM - $COUNT + 1))
             VERSION_NUM=$((TOTAL_NUM - COUNT + 1))
         fi
         version_spec="v$VERSION_NUM"
@@ -217,17 +218,15 @@ while read -r LINE; do
         output_file="${output_file}_${hour_spec}";
     fi
     $debug && echo "Trying path $COMMIT_FILE_PATH for version $version_spec"
-    git cat-file -p "$COMMIT_SHA:$COMMIT_FILE_PATH" > "$output_file" 2> "$info.err"
+    # note: '>|' used since $info.err reused
+    git cat-file -p "$COMMIT_SHA:$COMMIT_FILE_PATH" > "$output_file" 2>| "$info.err"
     commit_resolved=false
-    ## OLD: if [ $? -eq 0 ]; then
     status="$?"
     if [ $status -eq 0 ]; then
         commit_resolved=true
-        ## OLD: let GOOD_COUNT++
         (( GOOD_COUNT++ ))
     else
         head -3 "$info.err"
-        ## OLD: echo "Error: unable to resolve commit $COMMIT_SHA"
         echo "Error: unable to resolve commit $COMMIT_SHA (status=$status)"
         rm -f "$output_file"
     fi

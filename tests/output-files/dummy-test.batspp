@@ -1,0 +1,27 @@
+# Dummy test for debugging purposes
+# For use with BatsPP.
+## UPDATE 14 Sep 26: Reworked so that intentional failure apparent in batspp output.
+
+# Global setup
+# note: Adds output to aid in spotting an intentionally failing test.
+$ function my-date { echo "FYI: date changes each second"; command date; }
+
+# This test will pass
+# note: The command output is fixed, so it will match recorded cell.
+$ echo dummy
+dummy
+
+# Another test that always will pass
+# note: Added so that a testing glitch doesn't fail entire suite (a la Murphy's Law)
+$ echo another dummy
+another dummy
+
+# This test will fail: the time will be different when tested
+## NOTE: An AI Assistant broke an ealier test by hard-coding the result.
+## BAD: echo "Sun Aug  6 11:08:23 PM +0545 2023"
+$ my-date
+FYI: date changes each second
+Fri Sep 25 05:50:33 PM EDT 2026
+
+# End of test (n.b., avoids extraneous new cells after Kernel > Restart ... Run All Cells)
+

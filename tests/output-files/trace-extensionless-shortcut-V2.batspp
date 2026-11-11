@@ -1,0 +1,278 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## OLD: echo $PS1
+$ actual=${PS1: -1}
+$ [ "$actual" = ">" ]; echo $?
+0
+
+## BAD
+# # Delete all aliases and function
+# # TODO: Instead start from pristine environment
+# unalias -a
+# alias | wc -l
+# for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+# typeset -f | egrep '^\w+' | wc -l
+## OLD: Using approach with rename-with-file-date
+## Setting a temp directory for tests
+# TMP=/tmp/test-extensionless
+# BIN_DIR=$PWD/..
+$ TMP=${TMP:-/tmp}
+$ temp_dir=$TMP/trace-extensionless-shortcut-v2
+
+## OLD: Defined Below @ 8
+# alias testuser="sed -r "s/"$USER"+/user/g""
+
+## OLD: Used the concept of trash-dir, instead use unique temp_dirs
+# temp_dir=$TMP/test-3570
+# trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
+## OLD 
+# mkdir -p "$temp_dir"
+# cd "$temp_dir"
+# pwd
+$ rename-with-file-date "$temp_dir" > /dev/null
+$ command mkdir -p "$temp_dir"
+# command mkdir -p "$trash_dir"
+$ command cd "$temp_dir"
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+
+# Global Setup
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+## For number of digits not being critical
+$ alias testnum="sed -r "s/[0-9][0-9]*/N/g""
+## OLD
+## alias testnum="sed -r "s/[0-9]/N/g"" 
+
+# Count aliases proper
+# OLD: alias | wc -l | testnum
+$ alias | { [ $(wc -l < /dev/stdin) -ne 0 ]; echo $?; }
+0
+
+# Count functions
+# typeset -f | egrep '^\w+' | wc -l | testnum
+$ typeset -f | egrep '^\w+' | { [ $(wc -l < /dev/stdin) -ne 0 ]; echo $?; }
+0
+
+## BAD
+# source $BIN_DIR/tomohara-aliases.bash
+
+# # 1.1) NO EXAMPLES RN FOR kill-em and kill-it [NEED HELP]
+# kill-em () | kill-em and kill-it returns same value
+# kill-em --test firefox | wc -l | testnum
+$ [ "$(kill-em --test firefox | wc -l)" -gt 0 ]; echo $?
+0
+
+## kill-it ()
+# kill-it --test firefox | wc -l | testnum
+$ [ "$(kill-it --test firefox | wc -l)" -gt 0 ]; echo $?
+0
+
+## OLD
+## ## 1.2) ERROR GENERATED - SCRIPT MISSING
+## # $ convert-termstrings
+## # | Can't open perl script "convert_termstrings.perl": No such file or directory
+
+# BAD: rm -rf ./* > /dev/null
+# command mv -f * "$trash_dir"
+$ printf "TOP\nTHIS IS A TEST\nBOTTOM" > test.txt
+$ printf "THIS IS A FILE TO MOVE" > tomove.txt
+$ command mkdir newdir1
+# OLD: move tomove.txt ./newdir1/
+$ move tomove.txt ./newdir1/ > /dev/null
+## OLD
+# ls
+# dobackup test.txt
+# linebr
+# ls
+$ [[ -n "$(ls | grep "newdir1")" && -n "$(ls newdir1 | grep "tomove.txt")" ]]; echo $?
+0
+
+## Debug Purpose
+# OLD: Moved to previous cell
+# [[ -n "$(ls | grep "newdir1")" && -n "$(ls newdir1 | grep "tomove.txt")" ]]; echo $?
+
+## Backing up files using dobackup
+$ dobackup test.txt > /dev/null
+$ [[ -n "$(ls | grep "backup")" && -n "$(ls backup | grep "test.txt")" && -n "$(ls | grep "test.txt")" ]]; echo $?
+0
+
+# Large List of process with full process paths
+# Number of process is random
+## OLD: ps_mine.sh moved to archive
+# OLD: ps-mine-all | wc -l | testnum
+$ [ "$(ps-mine-all | wc -l)" -gt 1 ]; echo $?
+0
+
+## OLD:
+## # HELP REQUIRED FOR RCS FILES (TBC)
+##
+## ## OLD : do_rcsdiff.sh moved to archive
+## 
+## ## OLD 2: bash: /home/zavee/tomProject/shell-scripts/archive/do_rcsdiff.sh: Permission denied
+## # do-rcsdiff | head -n 1
+
+$ uname -r > versionR.txt
+$ uname -a > versionA.txta
+$ uname -v > versionV.txt
+$ uname -i > versionI.txt
+$ uname > "version none.txt"
+$ uname -ra > "version?.txt"
+$ man grep > grep_manual.txt
+# cp ./versionR.txt ./versionR-1.txt
+$ command cp ./versionR.txt ./versionR-1.txt
+# ls
+$ [[ -n "$(ls | grep "versionR.txt")" && -n "$(ls | grep "versionR-1.txt")" ]]; echo $?
+0
+
+# Debug purpose
+## OLD: ls | wc -l | testuser
+## Moved to cell above
+# [[ -n "$(ls | grep "versionR.txt")" && -n "$(ls | grep "versionR-1.txt")" ]]; echo $?
+
+$ rename-files -q test.txt harry.txt > /dev/null 2>&1
+$ [[ -n "$(ls | grep "harry.txt")" && ! -n "$(ls | grep "test.txt")" ]]; echo $?
+0
+
+# # NEED HELP (TBC)
+# $ testwn
+# | Undefined subroutine &main::NO_OP called at /home/xaea12/bin/common.perl line 2172.
+
+## OLD: Command revised to show the working of perlgrep
+# perlgrep "print" ./grep_manual.txt
+# [ "$(perlgrep "print" ./grep_manual.txt | wc -w)" -gt 300 ]; echo $?
+$ [ "$(cat ./grep_manual.txt | perlgrep -c "print")" -gt 10 ]; echo $?
+0
+
+# Need Help with example
+## OLD: domainname.sh moved to archive
+# foreach "echo $f" *.txt | wc -l | testnum
+
+$ rename-spaces > /dev/null 2>&1
+$ [[ -n "$(ls | grep "version_none.txt")" && ! -e "$(ls | grep "version none.txt")" ]]; echo $?
+0
+
+$ rename-special-punct >/dev/null 2>&1
+$ [[ -n "$(ls | grep "version_.txt")" && ! -e "$(ls | grep "version?.txt")" ]]; echo $?
+0
+
+$ ps -l >> "process(L).md"
+$ ps -u >> "process(U).md"
+$ ps -x >> "process(X).md"
+$ ps -al >> "process'all'.md"
+$ ps -aux >> 'psaux(1).txt'
+$ ps -aux >> 'psaux(2).txt'
+$ ps -aux >> 'psaux(3).txt'
+$ num_process="$(ls | grep -c process)"
+$ num_psaux="$(ls | grep -c psaux)"
+$ [[ $num_process -eq 4 && $num_psaux -eq 3 ]]; echo $?
+0
+
+$ move-duplicates > /dev/null 2>&1
+$ [[ -n "$(ls | grep "duplicates")" && "$(ls -l duplicates | wc -l)" -eq 3+1 ]]; echo $?
+0
+
+# Check for files with paranthesis (there are 3 files)
+$ [ "$(ls | grep -E "^process\([A-Z]\)\.md$" | wc -l)" -eq 3 ]; echo $?
+0
+
+$ rename-parens -v > /dev/null 2>&1
+# Check if conversion is successful 
+$ [ "$(ls | grep -E "^process\([A-Z]\)\.md$" | wc -l)" -eq 0 ]; echo $?
+0
+
+## OLD: Shifted to cell above
+## Check if conversion is successful 
+# [ "$(ls | grep -E "^process\([A-Z]\)\.md$" | wc -l)" -eq 0 ]; echo $?
+
+##  Need Help 
+$ rename-quotes > /dev/null 2>&1
+$ [ "$(ls | grep "process'all'\.md" | wc -l) -eq 0" ]; echo $?
+0
+
+## DEBUG
+# ls
+
+## OLD & USELESS
+# man sudo > sudo_manual.out
+# man ansifilter > fakelog.log
+# ps -aux > process_all.html
+
+# # HELP REQUIRED - TBF
+# $ move-log-files
+# | /bin/mv: missing destination file operand after 'log-files'
+# | Try '/bin/mv --help' for more information.
+
+# # HELP REQUIRED - TBF
+# $ move-output-files
+# | mv: cannot stat '$eval_middle': No such file or directory
+
+## OLD: copy-with-file-date *.md | wc -l | testnum
+$ copy-with-file-date processL.md > /dev/null
+$ [ "$(ls | grep processL.md | wc -l)" -eq 2 ]; echo $?
+0
+
+$ rename-with-file-date versionI.txt > /dev/null
+$ [ "$(ls | grep "versionI.txt."* | wc -l)" -eq 1 ]; echo $?
+0
+
+$ man cat > man_cat.txt
+$ [ -e man_cat.txt ]; echo $?
+0
+
+## Before addition, adding TOM_BIN to archive
+$ TOM_BIN_BAK=$TOM_BIN
+$ TOM_BIN=$TOM_BIN/archive
+
+## OLD: count_bigrams.perl moved to archive
+# unigrams man_cat.txt | grep -w "cat" | head -n 1 | testnum
+$ [ "$(unigrams man_cat.txt | grep -w "cat" | wc -l)" -ne 0 ]; echo $?  
+0
+
+## OLD: count_bigrams.perl moved to archive
+# word-count ./man_cat.txt | testuser | testnum
+# word-count man_cat.txt | grep -w "cat" | head -n 1 | testnum
+$ [ "$(word-count man_cat.txt | grep -w "cat" | wc -l)" -ne 0 ]; echo $?  
+0
+
+## OLD: count_bigrams.perl moved to archive
+# bigrams ./man_cat.txt | testuser | testnum
+# bigrams ./man_cat.txt | grep -w "cat" | head -n 1 | testnum
+$ [ "$(bigrams ./man_cat.txt | grep -w "cat" | wc -l)" -ne 0 ]; echo $? 
+0
+
+# # WORKS FINE - HALTS PROCESS
+# $ lynx-html
+
+$ TOM_BIN=$TOM_BIN_BAK
+
+## OLD
+# lynx-dump-stdout | head -n 1
+# lynx-dump-stdout | grep -q "Lynx" && echo "True" || echo "False"
+$ [ ! "$(lynx-dump-stdout | grep -q "Lynx")" ]; echo $?
+0
+
+# (Need Help)
+# $ lynx-dump
+# | bash: .txt: cannot overwrite existing file
+
+$ USERNAME_TEMP="xaea12-temp"
+$ setenv MY_USERNAME xaea12-temp
+$ [ "$(echo $MY_USERNAME)" == "$USERNAME_TEMP" ]; echo $?
+0
+
+$ unexport MY_USERNAME
+# echo $MY_USERNAME
+$ [ "$(echo $MY_USERNAME)" == "" ]; echo $?
+0
+
+# NOTE (PROPOSED APPROACH): Add timestamp to the directory before moving them to trash_dir
+# command mv -f * "$trash_dir"
+# Wrapup
+$ echo "END"
+END
+

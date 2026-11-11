@@ -20,10 +20,10 @@
 # tabulating part-of-speech usage for particular words
 #
 #   $ count_it.py "(outside\/\S+)" ~/OpenMind/data/omcsraw.tag
-#   outside/IN	502
-#   outside/RB	137
-#   outside/NN	53
-#   outside/JJ	19
+#   outside/IN  502
+#   outside/RB  137
+#   outside/NN  53
+#   outside/JJ  19
 #-------------------------------------------------------------------------------
 # Note:
 # - Converted from count_it.perl by Bruno Lima.

@@ -10,6 +10,8 @@ Things to do
       ...
       }
 - Prune temporary scripts (e.g., it.perl).
+- P1: add more standard versioning (i.e., not just version.txt).
+- P1: replace bare python usages with python3
 - P2: Clarify when all-tomohara-settings needed.
 - P3: Document environment variable usage in main scripts.
 - P4: Modernize Bash expressions in scripts (e.g., [ $x = $y ] => [ $x == $y ]).
@@ -18,6 +20,7 @@ Things to do
   archive/bad-telnet.perl  archive/telnet.perl  archive/test-telnet.perl
   archive/new-telnet.perl  archive/telnet.sh    archive/was-telnet.perl
 - P4: make sure shell scripts honor --help
+- P4: standardize shellcheck references to omit dash except for aliases
 
 --------------------------------------------------------------------------------
 Tue 21 Apr 26
@@ -43,3 +46,31 @@ Sat 25 Apr 26
 note:
 - P4: reword usages of maldito
 - ex: "maldito shellcheck" => "shellcheck filtering
+
+--------------------------------------------------------------------------------
+Sun 12 Jul 26
+
+note:
+- P2: rename core alias-related scripts using tomohara affix to make easier to find (e.g., tomohara-startup-tracing.bash).
+
+--------------------------------------------------------------------------------
+Fri 24 Jul 26 [19:52:26]
+
+P2: run scripts under strict error checking (e.g., `set -u` might error on $1 checks)
+P3: address TODO notes in new docs dir (e.g., todo-address-alias-sanity-check-jul2026.pdf)
+
+--------------------------------------------------------------------------------
+Wed 21 Oct 26
+
+P1: fix quirks with git-aliases.bash (e.g., .gitconfig getting overwritten under personal-dot-files)
+
+--------------------------------------------------------------------------------
+Thu 29 Oct 26
+
+P3: Switch from HOST to HOSTNAME in Bash scripts (e.g., set_xterm_title.bash).
+P2: standardize env vars across scripts: see https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html
+
+--------------------------------------------------------------------------------
+Wed 11 Nov 26
+
+P3: Replace direct usages of ~/temp with $TEMP (or $TMP if discardable).

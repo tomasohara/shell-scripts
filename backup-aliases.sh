@@ -59,20 +59,20 @@ function do-backup-dir () {
     # Create tar archive for directory (n.b., unless already there such as if previous 7zip failed)
     # TODO: make re-use optional
     if [ -s "$tar_file" ]; then
-	echo "Warning: using existing tar file ($tar_file)"
+        echo "Warning: using existing tar file ($tar_file)"
     elif [ "$MAX_MOD_TIME" != "" ]; then
-	echo "Finding modified files"
-	find "$dir" -type f -mtime -$MAX_MOD_TIME -print | $NICE_TIMED tar cvfT "$TMP/$dir.tar" -
+        echo "Finding modified files"
+        find "$dir" -type f -mtime -$MAX_MOD_TIME -print | $NICE_TIMED tar cvfT "$TMP/$dir.tar" -
     else
-	echo "Creating tar archive"
-	$NICE_TIMED tar cvf "$TMP/$dir.tar" "$dir";
+        echo "Creating tar archive"
+        $NICE_TIMED tar cvf "$TMP/$dir.tar" "$dir";
     fi
     ls -lh "$tar_file"
     #
     # Compress archive via 7zip
     if [ "$SKIP_COMPRESSION" = "1" ]; then
-	echo "FYI: Skipping compression"
-	copy "$TMP/$dir.tar" "${backup_dir}"
+        echo "FYI: Skipping compression"
+        copy "$TMP/$dir.tar" "${backup_dir}"
     else
         echo "Compresssing tar archive with 7zip"
         $NICE_TIMED 7z a "$zip_file" "$tar_file";
@@ -112,21 +112,21 @@ function do-backup-dir-win32 () {
     zip_file=`win32-path "${backup_dir}/$dir.7z"`
     #
     if [ -s "$tar_file" ]; then
-	echo "Warning: using existing tar file ($tar_file)"
+        echo "Warning: using existing tar file ($tar_file)"
     elif [ "$MAX_MOD_TIME" != "" ]; then
-	echo "Finding modified files"
-	find "$dir" -type f -mtime -$MAX_MOD_TIME -print | $NICE_TIMED tar cvfT "$tar_file_win32" -
+        echo "Finding modified files"
+        find "$dir" -type f -mtime -$MAX_MOD_TIME -print | $NICE_TIMED tar cvfT "$tar_file_win32" -
     else
-	echo "Creating tar archive"
-	$NICE_TIMED tar cvf "$tar_file_win32" "$dir";
+        echo "Creating tar archive"
+        $NICE_TIMED tar cvf "$tar_file_win32" "$dir";
     fi
     #
     echo "Compresssing tar archive with 7zip"
     $NICE_TIMED 7z a "$zip_file" "$tar_file_win32"
     if [ -s "${backup_dir}/$dir.7z" ]; then
-	echo /bin/rm -fv "$TMP/$dir.tar";
+        echo /bin/rm -fv "$TMP/$dir.tar";
     else
-	echo "Error: problem creating backup for $dir";
+        echo "Error: problem creating backup for $dir";
     fi
 }
 
@@ -136,9 +136,9 @@ function do-backup-dir-win32 () {
 function redux-backup-dir () { 
     local dir="$1";
     if [ ! -e "${backup_dir}/$dir.7z" ]; then
-	do-backup-dir "$dir"
+        do-backup-dir "$dir"
     else 
-	echo "Skipping backup for $dir since backup already exists"
+        echo "Skipping backup for $dir since backup already exists"
     fi
 }
 
@@ -159,10 +159,10 @@ function restore-dir () {
     # Unextract 7zip archive first to temp dir
     # note: -y is to force overwrite of existing temp tar archive (e.g., /tmp/Users.tar)
     if [ "$SKIP_COMPRESSION" = "1" ]; then
-	echo "Skipping uncompression"
-	subdir=`basename "$file" .tar`
-	# TODO: rework to eliminate needless copying and deletion (at end)
-	cp "${backup_dir}/${subdir}.tar" "$TMP"
+        echo "Skipping uncompression"
+        subdir=`basename "$file" .tar`
+        # TODO: rework to eliminate needless copying and deletion (at end)
+        cp "${backup_dir}/${subdir}.tar" "$TMP"
     else
         echo "Unzipping 7z archive"
         $NICE_TIMED 7z x -y -o"$TMP" "${backup_dir}/${subdir}.7z"
@@ -238,7 +238,7 @@ Backup example:
     # TODO: 
     # export MAX_MOD_TIME=90    # set for inremental backup
     # type_suffix="-incr-$MAX_MOD_TIME"
-    # export RETAIN_TEMP_TAR=1	# enable for debugging or redundancy
+    # export RETAIN_TEMP_TAR=1  # enable for debugging or redundancy
     backup_dir="/\${target_drive}/backup/$HOSTNAME/\${backup_drive}\${type_suffix}" 
     backup_base="_do_\${backup_drive}_backup"
     TMP=/\${target_drive}/temp

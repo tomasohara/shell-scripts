@@ -1,0 +1,52 @@
+$ function count-aliases { alias | wc -l; }
+## OLD (AND BAD MAYBE?)
+# function clear-aliases { unalias -a; }
+
+# Global Setup
+## NEW
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9]/N/g"" 
+
+## OLD
+# clear-aliases
+$ count-aliases | testnum
+NNN
+
+# Global Setup
+$ function count-aliases { alias | wc -l; }
+$ function list-functions { typeset -f | egrep '^[A-ZZa-z_-]'; }
+$ function count-functions { list-functions | wc -l; }
+
+## OLD
+# # Get alias definitions
+# # Note: assumes Jupyter run from ./tests directory
+# ## DEBUG: set -o xtrace
+# BIN_DIR=$PWD/..
+# echo $BIN_DIR
+# # source $BIN_DIR/tomohara-aliases.bash
+
+## BAD
+# source $BIN_DIR/tomohara-aliases.bash
+
+$ clear
+use cls instead (or command clear)
+
+## OLD
+# help
+$ help | testnum | head -n 5
+GNU bash, version N.N.NN(N)-release (xNN_NN-pc-linux-gnu)
+These shell commands are defined internally.  Type `help' to see this list.
+Type `help name' to find out more about the function `name'.
+Use `info bash' to find out more about the shell in general.
+Use `man -k' or `info' to find out more about commands not in this list.
+
+$ history -c
+
+## OLD
+# hist
+$ hist | testnum
+    N  [NNNN-NN-NN NN:NN:NN] echo $?
+    N  [NNNN-NN-NN NN:NN:NN] ## OLD
+    N  [NNNN-NN-NN NN:NN:NN] # hist
+    N  [NNNN-NN-NN NN:NN:NN] hist | testnum
+

@@ -84,8 +84,8 @@
 ## - pretty result.
 ## - setup for functions tests.
 ## - multiline commands?.
-## - solve comma sanitization, test poc [TODO: what is the issue?]:
-##        $ BATCH_MODE=1 bash -i -c 'source ../tomohara-aliases.bash; mkdir -p $TMP/test-$$; cd $TMP/test-$$; touch  F1.txt F2.list F3.txt F4.list F5.txt; ls | old-count-exts'
+## - solve comma sanitization, test POC [TODO3: what is the comma issue?]:
+##        $ BATCH_MODE=1 bash -i -c 'source ../tomohara-aliases.bash; mkdir -p $TMP/test-$$; cd $TMP/test-$$; touch  F1.txt F2.list F3.txt F4.list F5.txt; ls | count-exts'
 ##        .txt\t3
 ##        .list\t2
 ## - add a tag to avoid running a certain test (example "# OLD").
@@ -93,6 +93,10 @@
 ##   This requires that the test definitions be converted to proper bash functions:
 ##      perl -pe 's/^\@test "(.*)"/function $1/;' my-test.bats > my-text.bash
 ## - add examples below to help clarify processing
+##
+## UPDATE 2026-10-29: Adds optional timeout.
+## UPDATE 04 Aug 26: Adds support for strict eval (i.e., set -euo pipefail).
+##
 
 """
 BATSPP
@@ -115,7 +119,14 @@ Also you can test bash functions:
  fibonacci 9 => "0 1 1 2 3 5 8 13 21 34"
 
 Simple usage:
-MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL=1 {prog} xyz.batspp > xyz.log 2>&1
+APPLY_WORKAROUNDS=1 {prog} - <<<$'$ : && echo "T"\\nT'
+
+Typical usage:
+echo /tmp/root-id.batspp; <<END
+  $ id root
+  uid=0(root) gid=0(root) groups=0(root)
+END
+BASH_EVAL=1 GLOBAL_TEST_DIR=1 {prog} /tmp/id.batspp
 """
 
 
@@ -128,6 +139,7 @@ import random
 
 # Local packages
 from mezcla.main import Main
+## TEST: from mezcla.main import FILENAME
 from mezcla.my_regex import my_re
 from mezcla      import system
 from mezcla      import debug
@@ -157,6 +169,14 @@ COPY_DIR = system.getenv_bool("COPY_DIR", False,
 FORCE_RUN = system.getenv_bool("FORCE_RUN", False,
                                "Force execution of the run even if admin-like user, etc.")
 # Options to work around quirks with Batspp
+COMMON_WORKAROUNDS = "BASH_EVAL=1 GLOBAL_TEST_DIR=1 IGNORE_SETUP_OUTPUT=1 MATCH_SENTINELS=1 PARA_BLOCKS=1 TEST_FILE=1"
+APPLY_WORKAROUNDS = system.getenv_bool(
+    "APPLY_WORKAROUNDS", False,
+    f"Apply common workarounds: {COMMON_WORKAROUNDS}")
+if APPLY_WORKAROUNDS:
+    for spec in COMMON_WORKAROUNDS.split():
+        var, val = tuple(spec.split("="))
+        system.setenv(var, val)
 PREPROCESS_BATSPP = system.getenv_bool("PREPROCESS_BATSPP", False,
                                        "Preprocess .batspp format file, removing line continuations")
 MATCH_SENTINELS = system.getenv_bool("MATCH_SENTINELS", False,
@@ -219,14 +239,24 @@ OLD_ACTUAL_EVAL = system.getenv_bool("OLD_ACTUAL_EVAL", False,
 # Flags
 USE_INDENT_PATTERN = system.getenv_bool("USE_INDENT_PATTERN", False,
                                         "Use old regex for indentation")
+STRICT_EVAL = system.getenv_bool(
+    "STRICT_EVAL", False,
+    "Evaluate scripts with Bash strict mode via `set -euo pipefail`")
+EVAL_TIMEOUT = system.getenv_number(
+    "EVAL_TIMEOUT", -1,
+    "Timeout in seconds for BatsPP evaluation (n.b., ignored if 0 or less)")
 
 # Some constants
+TL = debug.TL
 ## Bruno: can you explain this pattern?
-INDENT_PATTERN = r'^[^\w\$\(\n\{\}]'               # note: modified in __process_tests
+_INDENT_PATTERN_BASE = r'^[^\w\$\(\n\{\}]'
+INDENT_PATTERN = _INDENT_PATTERN_BASE                  # note: recomputed in __process_tests
 BATSPP_EXTENSION = '.batspp'
 # Trace levels usually go from from 6 .. 9, but from 4 .. 7 for tom, tohara, etc.
-USER = system.getenv_text("USER", "user",
-                          "User name")
+## OLD:
+## USER = system.getenv_text("USER", "user",
+##                           "User name")
+USER = system.USER
 T6_DEFAULT = (6 if not USER.startswith("to") else 4)
 T6 = system.getenv_int("T6", T6_DEFAULT,
                        "Trace level to use for T6")
@@ -350,7 +380,6 @@ TestFieldTypes = namedtuple("TestFieldTypes", TEST_FIELD_NAMES)
 class Batspp(Main):
     """This process and run custom tests using bats-core"""
 
-
     # Class-level member variables for arguments (avoids need for class constructor)
     testfile     = ''
     output       = ''
@@ -359,26 +388,47 @@ class Batspp(Main):
     force        = FORCE_RUN
     jupyter      = False
 
-
-    # Global States
+    # Global States (initialized in setup to avoid duplicate code)
     is_test_file = None
-    file_content = ''
-    eval_prog = ("bats" if not BASH_EVAL else "bash")
-    bats_content = f'#!/usr/bin/env {eval_prog}\n\n'
-    if BASH_TRACE:
-        bats_content += "# enable command tracing\nset -o xtrace\n\n"
+    file_content = None
+    eval_prog = None
+    bats_content = None
 
     def setup(self):
         """Process arguments"""
+        debug.trace(T8, f"{self.__class__.__name__}.setup({self})")
+
+        # note: removes non-dir file if exists
+        gh.full_mkdir(TEMP_DIR, force=True)
+        
+        # Reinitialize per-instance mutable state to prevent leakage across
+        # multiple runs in the same process (e.g., during testing).
+        ## TODO2: put the evaluation state in a separate class than this Main-based one,
+        ## which is intended for CLI processing.
+        eval_prog = ("bats" if not BASH_EVAL else "bash")
+        self.bats_content = f'#!/usr/bin/env {eval_prog}\n\n'
+        if BASH_TRACE:
+            self.bats_content += "# enable command tracing\nset -o xtrace\n\n"
+        self.is_test_file = None
+        self.file_content = ''
 
         # Check the command-line options
         self.testfile     = self.get_parsed_argument(TESTFILE, self.testfile)
-        self.output       = self.get_parsed_argument(OUTPUT, self.output)
-        self.source       = self.get_parsed_argument(SOURCE, self.source)
+        ## TODO (n.b., requires skip_input=False): self.testfile = self.filename
+        self.output       = self.get_parsed_option(OUTPUT, self.output)
+        self.source       = self.get_parsed_option(SOURCE, self.source)
         self.jupyter      = self.get_parsed_option(JUPYTER, self.jupyter)
         self.force        = self.get_parsed_option(FORCE, self.force)
         self.verbose      = self.get_parsed_option(VERBOSE, system.getenv_bool("VERBOSE"))
 
+        # Remap stdin to temp file
+        if self.testfile == "-":
+            ## BAD: self.testfile = gh.create_temp_file(system.read_all_stdin())
+            ## TODO: self.testfile = gh.create_temp_file(self.read_entire_input())
+            ## OLD: os.makedirs(TEMP_DIR, exist_ok=True)
+            self.testfile = gh.write_temp_file("testfile.stdin", self.read_entire_input(),
+                                                temp_dir=TEMP_DIR)
+        
         debug.trace(T7, (f'batspp - testfile: {self.testfile}, '
                          f'output: {self.output}, '
                          f'source: {self.source}, '
@@ -391,7 +441,7 @@ class Batspp(Main):
     def run_main_step(self):
         """Process main script"""
         # TODO4: remove temp files unless debugging
-        debug.trace_object(T7, f"{self.__class__.__name__}.run_main_step()")
+        debug.trace(T7, f"{self.__class__.__name__}.run_main_step()")
 
         # Optionally convert Jupyter notebook (.ipynb) to BatsPP file (.batspp)
         if self.jupyter:
@@ -421,13 +471,12 @@ class Batspp(Main):
         if not self.file_content.endswith('\n\n'):
             self.file_content += '\n'
 
-
         self.__process_setup()
         self.__process_teardown()
         self.__process_tests()
 
-
-        # Set Bats filename
+        # Set Bats filename by changing extension to .bats
+        ## TODO2: clarify the intension with respect to directory
         if self.output:
             batsfile = self.output
             if batsfile.endswith('/'):
@@ -436,27 +485,24 @@ class Batspp(Main):
                 batsfile += f'{name}.bats'
         else:
             batsfile = self.temp_file
-
+        debug.trace_expr(T7, batsfile)
 
         # Save Bats file
         system.write_file(batsfile, self.bats_content)
 
-
-        # Add execution permission to directly run the result test file
-        if self.output:
-            gh.run(f'chmod +x {batsfile}')
-
+        ## OLD:
+        ## # Add execution permission to directly run the result test file
+        ## if self.output:
+        ##     gh.run(f'chmod +x {batsfile}')
 
         # Run unless adminstrative user and --force not 
-        skip_bats = SKIP_BATS
-        if not skip_bats:
+        if not SKIP_BATS:
             is_admin = my_re.search(r"\b(root|admin|adm)\b", gh.run("groups"))
             if is_admin:
                 if not self.force:
                     system.exit("Error: running bats under admin-like account requires --{force} option", force=FORCE)
-                system.print_error("FYI: not recommended to run under admin-like account (to avoid inadvertant deletions, etc..)")
-    
-            
+                system.print_error("FYI: not recommended to run under admin-like account (to avoid inadvertant deletions, etc.)")
+        #
         if not SKIP_BATS:
             ## TODO2: include time out to account for hanging tests
             debug.trace(T7, f'batspp - running test {self.temp_file}')
@@ -465,22 +511,28 @@ class Batspp(Main):
             # note: uses empty stdin in case of buggy tests (to avoid hangup);
             # uses .eval.log to avoid conflict with batspp_report.py
             eval_log = (EVAL_LOG if EVAL_LOG else (self.temp_file + ".eval.log"))
-            bats_output = gh.run(f'{eval_prog} {BATS_OPTIONS} {batsfile} < /dev/null 2> {eval_log}')
+            timeout_spec = ("" if (EVAL_TIMEOUT <= 0) else f"timeout {EVAL_TIMEOUT}")
+            bats_output = gh.run(f'{timeout_spec} {eval_prog} {BATS_OPTIONS} {batsfile} < /dev/null 2> {eval_log}')
             print(bats_output)
-            system.print_stderr(debug.call(4, gh.run, f"check_errors.perl {eval_log}") or "")
-            debug.assertion(not my_re.search(r"^0 tests", bats_output, re.MULTILINE))
+            system.print_stderr(debug.call(T6, gh.run, f"check_errors.perl {eval_log}") or "")
+            ## OLD: debug.assertion(not my_re.search(r"^0 tests", bats_output, re.MULTILINE))
+            # Allow 0 tests for empty-test-file (facilitated by Gemini 4 Argon)
+            debug.assertion((not my_re.search(r"^0 tests", bats_output, re.MULTILINE))
+                            or ("empty" in self.testfile))
 
 
     def __process_setup(self):
         """Process tests setup"""
         debug.trace(T7, f'batspp - processing setup')
 
+        # NOTE: files are loaded globally to to avoid problems with functions commands.
 
-        # NOTE: files are loaded globally to
-        #       to avoid problems with functions
-        #       commands.
-
-
+        # Enable optional strict mode
+        # TODO2: apply this at the function level  (e.g., toggle on and off for each).
+        if STRICT_EVAL:
+            self.bats_content += ("# Enable strict evaluation\n" +
+                                  "set -euo pipefail\n\n")
+        
         # Make executables ./tests/../ visible to PATH
         #
         # This is usefull then the file is specially for testing.
@@ -488,7 +540,7 @@ class Batspp(Main):
         # The structure should be:
         #  project
         #     ├ script.bash
-        #  	  └ tests/test_script.batspp
+        #         └ tests/test_script.batspp
         if not OMIT_PATH:
             self.bats_content += ('# Make executables ./tests/../ visible to PATH\n'
                                   f'PATH="{gh.dir_path(gh.real_path(self.testfile))}/../:$PATH"\n\n')
@@ -545,22 +597,26 @@ class Batspp(Main):
         debug.trace(T7, f'batspp - processing teardown')
         # WORK-IN-PROGRESS
 
-
     def __process_tests(self):
         """Process tests"""
         debug.trace(T7, f'batspp - processing tests')
 
         # Tests with simple indentation (i.e. #) are ignored on batspp files.
         # Tests with double indentation (i.e. ##) are ignored on shell scripts.
-        global INDENT_PATTERN
+        # Note: Computes the full indent pattern from the base constant each time
+        # to avoid corrupting the global across multiple runs in the same process.
+        global INDENT_PATTERN, _test_num
+        _test_num = 0
+        indent_pattern = _INDENT_PATTERN_BASE
         if self.is_test_file:
             ## Note: The {0} causes the following indent pattern to be ignored:
             ##   [^\w\$\(\n\{\}]
-            INDENT_PATTERN += r'{0}'
-            ## TODO: INDENT_PATTERN += "[^#]"
+            indent_pattern += r'{0}'
+            ## TODO: indent_pattern += "[^#]"
         else:
-            INDENT_PATTERN += r'?'
-        INDENT_PATTERN += r'\s*'
+            indent_pattern += r'?'
+        indent_pattern += r'\s*'
+        INDENT_PATTERN = indent_pattern
 
         command_tests  = CommandTests(verbose_debug=self.verbose)
         function_tests = FunctionTests(verbose_debug=self.verbose)
@@ -689,8 +745,8 @@ class CustomTestsToBats:
         if STRIP_COMMENTS:
             field = my_re.sub(r'^\s*\#.*\n', '', field, flags=re.MULTILINE)
         ## TODO2: debug.trace(T8, f"_preprocess_command({in_field!r}) ==  {field!r}")
-        debug.trace(5, f"_preprocess_command({in_field!r}) == {field!r}")
-        
+        debug.trace(T7, f"_preprocess_command({in_field!r}) == {field!r}")
+
         return field
 
     def _preprocess_output(self, field):
@@ -718,7 +774,7 @@ class CustomTestsToBats:
 
     def _common_process(self, test):
         """Common process for each field in test"""
-        debug.trace(6, f'in _common_process({test!r})')
+        debug.trace(T6, f'in _common_process({test!r})')
         result = []
 
         # Get indent used
@@ -740,7 +796,6 @@ class CustomTestsToBats:
         result = TestFieldTypes(*[entire, title, setup, actual, expected])
         debug.trace(T7, f'batspp (test {self._test_id}) - _common_process({test!r}) => {result!r}')
         return result
-
 
     def _last_process(self, test):
         """Process test fields before convert into bats"""
@@ -923,7 +978,8 @@ class CustomTestsToBats:
                 if max_len is None:
                     max_len = MAX_ESCAPED_LEN
                 ## OLD: result = gh.elide(repr(text).replace("\'", '\"'), max_len=max_len)
-                result = gh.elide(repr(text), max_len=max_len)
+                ## BAD: result = gh.elide(repr(text), max_len=max_len)
+                result = repr(gh.elide(text, max_len=max_len))
                 result = result.replace("\\", "\\\\").replace('"', '\\"')
                 result = result.replace("$", "\\$").replace("`", "\\`")
                 debug.trace(T9, f"esc_quote_etc({text!r} => {result}")
@@ -933,12 +989,15 @@ class CustomTestsToBats:
             debug_text = ('\techo ""\n' +
                           ('\t# shellcheck disable=SC2016,SC2028\n' if FILTER_SHELLCHECK else '') +
                           ## OLD: f"\techo '========== actual: {esc_quote_etc(actual)} =========='\n" +
+                          ## NOTE: Leads to shellcheck SC2028 [expand escape sequences]; Try FILTER_SHELLCHECK.
                           f'\techo "========== actual: {esc_quote_etc(actual)} =========="\n' +
+                          ## TODO?: f"\tprintf \"========== actual: '%s' ==========\\n\" {esc_quote_etc(actual)} \n" +
                           f'\techo "${actual_var}"\n' +
                           (f'\techo "${actual_var}" {verbose_print}\n' if self._verbose else "") +
                           ('\t# shellcheck disable=SC2016,SC2028\n' if FILTER_SHELLCHECK else '') +
                           ## OLD: f"\techo '========== expect: {esc_quote_etc(expected)} =========='\n" +
                           f'\techo "========== expect: {esc_quote_etc(expected)} =========="\n' +
+                          ## TODO?: f"\tprintf \"========== expect: '%s' ==========\\n\" {esc_quote_etc(expected)} \n" +
                           f'\techo "${expected_var}"\n' +
                           (f'\techo "${expected_var}" {verbose_print}\n' if self._verbose else "") +
                           '\techo "============================"\n')
@@ -1225,7 +1284,6 @@ class CommandTests(CustomTestsToBats):
 
         super().__init__(patterns, re_flags=flags, verbose_debug=verbose_debug)
 
-
     def _first_process(self, match):
         """First process after match, format matched results into [entire, title, setup, actual, expected]"""
 
@@ -1239,7 +1297,6 @@ class CommandTests(CustomTestsToBats):
                 
         debug.trace(T7, f'batspp (test {self._test_id}) - CommandTests._first_process({match}) => {result}')
         return result
-
 
     def _last_process(self, test):
         """Process test fields before convert into bats"""
@@ -1261,11 +1318,9 @@ class FunctionTests(CustomTestsToBats):
     """Extract and process specific function tests"""
     ## TODO: add examples (e.g., to help distinguish regex from one for CommandTests)
 
-
     # Class globals
     assert_eq     = r'=>'
     assert_ne     = r'=\/>'
-
 
     def __init__(self, verbose_debug=False):
 
@@ -1306,7 +1361,6 @@ class FunctionTests(CustomTestsToBats):
 
         super().__init__(patterns, re_flags=flags, verbose_debug=verbose_debug)
 
-
     def _first_process(self, match):
         """First process after match, format matched results into [entire, title, setup, actual, expected]"""
 
@@ -1326,10 +1380,8 @@ class FunctionTests(CustomTestsToBats):
         debug.trace(T7, f'batspp (test {self._test_id}) - _first_process({match}) => {result}')
         return result
 
-
     def _last_process(self, test):
         """Process test fields before convert into bats"""
-
         entire, title, setup, actual, expected = test
 
         # Disable alias adding '//' to functions
@@ -1340,16 +1392,35 @@ class FunctionTests(CustomTestsToBats):
         debug.trace(T7, f'batspp (test {self._test_id}) - _last_process({test}) => {result}')
         return result
 
+def get_app(runtime_args=None, **kwargs):
+    """Instantiates and returns the Batspp application"""
+    debug.trace_expr(T6, runtime_args, kwargs, prefix="get_app: ")
+    app = Batspp(description=__doc__.format(prog=gh.basename(__file__)),
+                 use_temp_base_dir=True,
+                 ## TEST: positional_arguments=[(FILENAME, 'test file path')],
+                 ## OLD: positional_arguments=[(TESTFILE, 'test file path')],
+                 positional_arguments=[(TESTFILE, 'test file path', "-", "?")],
+                 boolean_options=[(VERBOSE, 'show verbose debug'),
+                                  (FORCE, 'Run even under admin-like account'),
+                                  (JUPYTER, 'Convert jupyter file to batspp')],
+                 text_options=[(OUTPUT, 'target output .bats filepath'),
+                               (SOURCE, 'file to be sourced')],
+                 # note: enable run_main_step and skip FILENAME
+                 manual_input=True,
+                 skip_input=True,
+                 ## TEST:
+                 auto_help=True,
+                 runtime_args=runtime_args,
+                 **kwargs)
+    # Workaround: if TEMP_FILE causes temp_file to equal temp_base while being a directory
+    if app.use_temp_base_dir and app.temp_file == app.temp_base:
+        debug.trace(TL.WARNING, "Warning: applying workaround to mezcla temp_base bug")
+        app.temp_file = gh.form_path(app.temp_base, "temp.txt")
+    debug.trace(T7, "app() => {app!r}")
+    return app
+
 #-------------------------------------------------------------------------------
 
 if __name__ == '__main__':
-    app = Batspp(description          = __doc__.format(prog=gh.basename(__file__)),
-                 ## TODO: use_temp_base_dir=True,
-                 positional_arguments = [(TESTFILE, 'test file path')],
-                 boolean_options      = [(VERBOSE,  'show verbose debug'),
-                                         (FORCE,    'Run even under admin-like account'),
-                                         (JUPYTER,  'Convert jupyter file to batspp')],
-                 text_options         = [(OUTPUT,   'target output .bats filepath'),
-                                         (SOURCE,   'file to be sourced')],
-                 manual_input         = True)
-    app.run()
+    main_app = get_app()
+    main_app.run()

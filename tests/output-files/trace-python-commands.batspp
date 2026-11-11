@@ -1,0 +1,592 @@
+# Test python related aliases
+#
+## NOTE: I fixed most of the tests and left old versions as OLD or BAD--Tom
+## TODO2: cleanup up the test (e.g., remove old comments)
+## TODO1: split multi-part tests that use linebr: see curl example at end for details
+
+# *** Note: pro tips ***
+# - See randomize-datafile for new preferred way of preparing tests.
+# - See README.ipynb for more details.
+# - See the new "poster child" json-related-alias.ipynb for other examples.
+# - Use operators group for testing user and run that account (e.g., testuser).
+
+# Setup
+# Show user groups
+$ (whoami; groups)
+
+# Warn if user not in operators group
+# note: The bash kernel restarts, 
+$ is_operator=$(groups | grep -c operator)
+$ if [ $is_operator -eq 0 ]; then
+$     echo "*** Warning: should be run as operator ***" 1>&2
+$ fi
+
+# Setup
+# Abort if user in admin-like group unless FORCE_RUN env var set
+# note: The bash kernel restarts, so this 
+# TODO1: * add script for use here and in batspp_report.py!
+$ force_run="${FORCE_RUN:-0}"
+$ is_admin=$(groups $USER | egrep -c "root|admin|adm")
+$ jupyter_session=${JPY_SESSION_NAME:-""}
+## DEBUG: trace-vars force_run is_admin jupyter_session
+$ if [ $is_admin -eq 1 ]; then
+$     if [ "$force_run" == "0" ]; then
+$         echo "*** Error: should not be run as operator unless FORCE_RUN ***" 1>&2
+$         if [ "$jupyter_session" != "" ]; then
+$             exit
+$         fi
+$     fi
+$     echo "FYI: not recommended to run under admin account"
+$ fi
+
+# Setup (OPTIONAL - USED IF NEEDED)
+## bind 'set enable-bracketed-paste off'
+
+## OLD
+## ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## ## PS1="$ "
+## ## TODO: PS1="> ""
+## ## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+## echo $PS1
+
+## BAD (SUPER BAD)
+## # Delete all aliases and function
+## # TODO: Instead start from pristine environment
+## unalias -a
+## alias | wc -l
+## for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+## typeset -f | egrep '^\w+' | wc -l
+
+## OLD
+## ## NOTE: Source it directly from the ./tests directory.
+## # Setting a temp directory for tests
+## TMP=/tmp/test-py-commands
+## BIN_DIR=$PWD/..
+## ## You will need to run jupyter from that directory.
+## ## source $TEMP_BIN/_dir-aliases.bash
+## alias | wc -l
+$ [[ "$TMP" == *"/tmp"* ]]; echo $?
+0
+
+# Global Setup
+##
+## BAD: BIN_DIR=$PWD/..
+## NOTE: $PWD is the temporary test dir, such as following:
+##    /home/testuser/temp/tmp/batspp/tmp_subprocess_/global-test-dir
+## TODO2: make use the following in the other tests as well (see tomohara-aliases.bash)
+$ BIN_DIR=$TOM_BIN
+$ echo $BIN_DIR
+##
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 7766)
+## *** All output from one run to the next needs to be the same ***
+## OLD:
+## if [ "$DEBUG_LEVEL" -lt 4 ]; then 
+##     TMP=/tmp/trace-python-commands; 
+##     # note: a little redundancy is to avoid a lot of catastrophe!
+##     /bin/rm -rf /tmp/trace-python-commands/*;
+## fi
+## ## temp_dir=$TMP/test-$$
+## temp_dir=$TMP/test-7766
+##
+$ TMP=${TMP:-/tmp}
+$ temp_dir=$TMP/trace-python-commands
+$ rename-with-file-date "$temp_dir"
+$ mkdir -p "$temp_dir"
+## BAD: # TODO: /bin/rm -rvf "$temp_dir"
+## NOTE: do not use rm without explicit base to avoid inadvertent deletions!
+## ALSO: in addition, tests can be reworked so that deletion not needed (e.g., using distinct subdir)
+## OLD: cd "$temp_dir"
+$ command cd "$temp_dir"
+$ pwd
+#ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+$ alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+/home/zavee/tomProject/shell-scripts
+renamed '/home/zavee/temp/tmp/trace-python-commands' -> '/home/zavee/temp/tmp/trace-python-commands.26Apr24.26'
+/home/zavee/temp/tmp/trace-python-commands
+
+# Global Setup
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+$ alias testnum="sed -r "s/[0-9]/N/g""
+## BAD: alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+## NOTE: COLUMNS based on size of terminal invoking jupyter
+$ alias linebr="printf '%132s\n' ' ' | tr ' ' '-'"
+# alias testmonth="sed -r "s/['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']/M/g""
+#
+# NOTE: filter outs escape sequences for colors (TODO4: put above)
+# See git-aliases-tests-2.ipynb for other usages.
+$ alias remove-control-chars='perl -pe "s/\t/<tab>/g;  s/[\x00-\x08\x11\x31]//g;"'
+
+# Setup
+## OLD (put expected output comments before command--Batspp quirk)
+## ps-python-full | wc -l | testnum
+# Sample Output: 23
+## BAD: ps-python-full | wc -l | testnum
+## NOTE: this differs based on running processes
+$ export TOM_BIN="${TOM_BIN:-}:$TOM_BIN/archive"
+$ full=$(ps-python-full | wc -l)
+
+# Make sure fewer processes shown with regular ps-python
+## OLD: ps-python | wc -l | testnum
+# Sample Output: 22
+## BAD: ps-python | wc -l | testnum
+$ regular=$(ps-python | wc -l)
+$ [ $regular -le $full ]; echo $?
+0
+
+## DEBUG:
+## show-python-path | head -4
+# export PYTHONPATH="$PYTHONPATH:$HOME/tomProject/mezcla"
+
+# show-python-path DISPLAYS ALL THE AVAILABLE PATHS OF PYTHON
+## OLD: show-python-path | testuser
+# show-python-path 2>&1 | head -1
+$ [ "$(show-python-path | wc -l)" -gt 1 ]; echo $?
+0
+
+# Mezcla should be in the path
+## OLD: show-python-path | sort -u | grep -c 'mezcla'
+$ [ "$(show-python-path | perl-grep 'mezcla')" ]; echo $?
+0
+
+## NOTE: Requires pylint
+# function python-lint() { python-lint-work "$@" 2>&1 | $EGREP -v '(Exactly one space required)|\((bad-continuation|bad-whitespace|bad-indentation|bare-except|c-extension-no-member|consider-using-enumerate|consider-using-with|global-statement|global-variable-not-assigned|keyword-arg-before-vararg|len-as-condition|line-too-long|logging-not-lazy|misplaced-comparison-constant|missing-final-newline|redefined-variable-type|redundant-keyword-arg|superfluous-parens|too-many-arguments|too-many-instance-attributes|trailing-newlines|useless-\S+|wrong-import-order|wrong-import-position)\)' | $PAGER; }
+## OLD: python-lint os | testnum | testuser
+## BAD: python-lint os | head | testnum | testuser
+# python-lint os | grep -c Redefining | testnum
+$ [ "$(python-lint os | perl-grep -c Redefining )" -gt 1 ]; echo $?
+0
+
+# Takes time for execution
+# TODO2: rework link test using small python program put in test resources dir (e.g., test/resources/bad_lint.py)
+## BAD: # function python-lint-work() { python-lint-full "$@" 2>&1 | $EGREP -v '\((bad-continuation|bad-option-value|fixme|invalid-name|locally-disabled|too-few-public-methods|too-many-\S+|trailing-whitespace|star-args|unnecessary-pass)\)' | $EGREP -v '^(([A-Z]:[0-9]+)|(Your code has been rated)|(No config file found)|(\-\-\-\-\-))' | $PAGER; }
+## BAD: python-lint-work os | head | testnum
+# python-lint os | grep -c bare-except
+# python-lint os
+# python-lint-work os | grep -c bare-except | testnum
+$ [ "$(python-lint-work os | perl -ne 'print "$1\n" if /([A-Z]\d{4,})/' | sort | uniq | wc -l)" -gt 10 ]; echo $?
+0
+
+# May take some time
+## OLD: python-lint os | testnum
+## BAD: python-lint os 2>&1 | head | testnum
+$ [[ -n "$(python-lint os 2>&1 | grep ': ')" ]]; echo $?
+0
+
+## NOTE (Skipped for now as a little too complicated)
+## TODO4: generate small test set of scripts and run
+## # ERROR: Pattern not found  (press RETURN)## run-python-lint-batched $BIN_DIR/tests/auto_batspp.py | testuser | testnum
+
+## NOTE: skipped as too dangerous
+## REQUIRES setup.py (TBC)
+# python-setup-install
+# linebr
+# python-uninstall-setup
+
+## mezcla MODULE IS USED FOR TEST
+# $ python-import-path 'mezcla'
+# | matches /home/zavee/tomProject/mezcla/mezcla/__init__.py
+## BAD: python-import-path 'mezcla' | testnum
+# python-import-path 'mezcla' | perl-grep -c "matches \S+/mezcla/mezcla/__init__.py"
+$ [ "$(python-import-path 'mezcla' | perl-grep -c "matches \\S+/mezcla/__init__.py")" -eq 1 ]; echo $?
+0
+
+## BAD: python-import-path-full 'mezcla' | testnum
+$ python-import-path-full 'mezcla' | count-it "matches \S+/(debug|glue_helpers|system).py" | sort
+## OLD: linebr
+debug	1
+glue_helpers	1
+system	1
+
+# WORKS WELL, SHOWS SOME ISSUES ON BATSPP 2.1.X
+## BAD: python-import-path-all 'mezcla' | grep mezcla | head -n 5 | testnum
+$ [ "$(python-import-path-all 'mezcla' | grep -c mezcla)" -gt 10 ]; echo $?
+0
+
+## OLD (doesn't testing any aliases):
+## # RETURNS A LIST OF PYTHON MODULES
+## ## BAD: rm -rf ./* > /dev/null
+## pip3 freeze | grep ipython | wc -l
+
+## MODULE USED: mezcla | sed filter replaces versin number with XX
+# python-module-version-full mezcla | testnum
+# linebr
+# python-module-version mezcla | testnum
+# linebr
+# python-package-members mezcla | testnum
+# linebr
+$ [ "$(python-module-version-full mezcla | testnum)" == "N.N.N.N" ]; echo $?
+0
+
+$ [ "$(python-module-version mezcla | testnum)" == "N.N.N.N" ]; echo $?
+0
+
+$ [ "$(python-package-members mezcla | perl-grep -c "glue_helpers")" -eq 1 ]; echo $?
+0
+
+# rename-with-file-date REQUIRED
+## comments on aliases (TODO3: just show an exceprt)
+## function rename-with-file-date() {
+##     local f new_f
+##     local move_command="move"
+##     if [ "$1" = "--copy" ]; then
+##
+##         move_command="command cp --interactive --verbose --preserve"
+##         shift
+##     fi
+##     for f in "$@"; do
+##   
+##         if [ -e "$f" ]; then
+##            new_f=$(get-free-filename "$f".$(date --reference="$f" '+%d%b%y') ".")
+##
+##            eval "$move_command" "$f" "$new_f";
+##         fi
+##     done;
+##
+## }
+##
+## function get-free-filename() {
+##     local base="$1"
+##     local sep="$2"
+##     local L=1
+##     local filename="$base"
+##     while [ -e "$filename" ]; do
+##         let L++
+##         filename="$base$sep$L"
+##     done;
+##     echo "$filename"
+## }
+##
+## alias move='mv'
+## export PAGER=less
+## export PAGER_CHOPPED="less -S"
+## export PAGER_NOEXIT="less -+F"
+## function zless () { zcat "$@" | $PAGER; }
+##
+## function zhead () {
+##     local file="$1"
+##     shift
+##     zcat "$file" | head "$@"
+## }
+##
+## alias less-='$PAGER_NOEXIT'
+## alias less-clipped='$PAGER_NOEXIT -S'
+## alias less-tail='$PAGER_NOEXIT +G'
+## alias less-tail-clipped='$PAGER_NOEXIT +G -S'
+## alias ltc=less-tail-clipped
+
+## DEBUG:
+## pwd
+
+# Setup
+# BAD: printf "THIS IS THE HEAD\n1\n2\n3\n4\n5\n6\n7\nTHIS IS THE TAIL." >> testless.txt
+$ printf "THIS IS THE HEAD\n1\n2\n3\n4\n5\n6\n7\nTHIS IS THE TAIL." > testless.txt
+$ wc < testless.txt
+
+## TODO3: remove testnum (as file contents are known)
+$ ltc testless.txt | testnum
+THIS IS THE HEAD
+N
+N
+N
+N
+N
+N
+N
+THIS IS THE TAIL.
+
+$ less-tail testless.txt | testnum
+THIS IS THE HEAD
+N
+N
+N
+N
+N
+N
+N
+THIS IS THE TAIL.
+
+## TODO2: COLUMNS=5 less-tail-clipped testless.txt | testnum
+## NOTE: less seems to be ignoring COLUMNS
+$ less-tail-clipped testless.txt | testnum
+THIS IS THE HEAD
+N
+N
+N
+N
+N
+N
+N
+THIS IS THE TAIL.
+
+$ less-clipped testless.txt | testnum
+THIS IS THE HEAD
+N
+N
+N
+N
+N
+N
+N
+THIS IS THE TAIL.
+
+$ less- testless.txt | testnum
+THIS IS THE HEAD
+N
+N
+N
+N
+N
+N
+N
+THIS IS THE TAIL.
+
+## THIS PART IS SLOW IN EXECUTION
+## OLD: ipython --version | testuser | testnum
+## NOTE: garbage due to xterm title escapes
+$ command ipython --version | testuser | testnum
+## OLD: linebr
+N.NN.N
+
+# STATEMENT TRACING WORKS WELL / ISSUES WITH TESTUSER
+## BAD: python-trace l $BIN_DIR/tests/auto_batspp.py | testuser | testnum
+## NOTE: use head to speed up
+## BAD: python-trace python-trace $BIN_DIR//simple_batspp.py --help 2>&1 | head | testnum
+$ python-trace $BIN_DIR/template.py --help 2>&1 | head -5 | testnum
+ --- modulename: template, funcname: <module>
+template.py(NN): """
+template.py(NN): from mezcla import debug
+ --- modulename: _bootstrap, funcname: _find_and_load
+<frozen importlib._bootstrap>(NNNN):  --- modulename: _bootstrap, funcname: __init__
+
+# which-python SHOWS THE PATH OF PYTHON
+#
+## OLD: which-python
+## TEST: wc < $(which-python) | testnum
+#
+# Make sure "python" occurs in file frequently
+# $ strings $(which-python) | grep -c python
+# 77
+#
+$ strings $(which-python) | grep -c python | testnum
+NNN
+
+## DEBUG (not an alias from $BIN_DIR)
+# # #(ADDED FOR PYTHON3)
+## alias which-py3='which python3' 
+## wc < $(which-py3) | testnum
+
+## DEBUG:
+## pwd
+
+## BAD: rm -rf ./* > /dev/null
+## OLD:
+## printf "print('THIS IS A TEST')" > atest.py
+## printf "print('THIS IS A TEST')" > xyz.py
+## printf "print('THIS IS A TEST11')" > abc1.py
+## OLD:
+## printf "print('THIS IS A TEST\n')\n" > atest.py
+## printf "print('THIS IS A TEST\n')\n" > xyz.py
+## printf "print('THIS IS A TEST11\n')\n" > abc1.py
+$ mkdir temp-dir
+$ grep debug $BIN_DIR/template.py > temp-dir/template.py
+$ command cp $BIN_DIR/__init__.py temp-dir
+# SHOWS ALL THE DIFFERENCES BETWEEN THE PYTHON SCRIPTS
+# WORKS FINE - HALTS TESTS
+## OLD: py-diff atest.py xyz.py | testuser | testnum | awk '!($6="")'
+## TODO2: use cmd-trace to see what's going on behind the scenes;
+##   cmd-trace py-diff ...
+## also check the comments:
+##   # py-diff(dir): check for difference in python scripts versus those in target
+##   function py-diff () { do_diff.bash --no-glob '*.py *.mako' "$@" 2>&1 | $PAGER; }
+$ command cd temp-dir > /dev/null
+$ py-diff $BIN_DIR 2> /dev/null | grep differences | perl -pe 's/: lines.*//' | sed 's/\.\///g' | tail --lines=2 | testnum
+$ command cd .. > /dev/null
+NN% differences for template.py
+
+# # TEST NOT APPLICABLE RN 
+# function kivy-win32-env {
+#    export PYTHONPATH='c:/cartera-de-tomas/python;c:/Program-Misc/python/kivy-1-9-0/kivy27'
+#    kivy_dir="/c/Program-Misc/python/kivy-1-9-0"
+#    python_dir="$kivy_dir/Python27"
+#    prepend-path "$kivy_dir:$kivy_dir/Python27:$kivy_dir/tools:$kivy_dir/Python27/Scripts:$kivy_dir/gstreamer/bin:$kivy_dir/MinGW/bin:$kivy_dir/SDL2/bin"
+# }
+
+# # NEED HELP - MAYBE APPLICABLE?
+# alias elide-data='python -m transpose_data --elide'
+# alias kill-python="kill_em.sh --filter 'ipython|emacs' python"
+# alias kill-python-all="kill_em.sh python"
+
+# # ERRORS = OSTYPE is 'undefined variable' 
+# # NOTE: elide-data shows RuntimeError if any testfile is named abc.py
+# $ echo $OSTYPE
+#   linebr
+#   elide-data $BIN_DIR/template.py
+#   linebr
+#   kill-python
+#   linebr
+#   kill-python-all
+# | linux-gnu
+# | --------------------------------------------------------------------------------
+# | /home/xaea12/miniconda3/bin/python: No module named transpose_data
+# | --------------------------------------------------------------------------------
+# | pattern=/:[0-9][0-9] [^ ]*python/
+# | filter=/ipython|emacs/
+# | OSTYPE: Undefined variable.
+# | --------------------------------------------------------------------------------
+# | pattern=/:[0-9][0-9] [^ ]*python/
+# | filter=/($)(^)/
+# | OSTYPE: Undefined variable.
+
+# alias TODAY='date'
+# alias extract-matches='extract_matches.perl'
+# function run-jupyter-notebook () {
+#     local port="$1"; if [ "$port" = "" ]; then port=8888; fi
+#     local ip="$2"; if [ "$ip" = "" ]; then ip="127.0.0.1"; fi
+#     local log="$TEMP/jupyter-$(TODAY).log"
+#     jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1 &
+#     echo "$log"
+#     local delay=5
+#     echo "sleeping $delay seconds for log to stabalize (effing jupyter)"
+#     sleep $delay
+#     tail "$log"
+#     echo -n "URL: "
+#     extract-matches 'http:\S+' "$log" | sort -u
+# }
+# alias jupyter-notebook-redir=run-jupyter-notebook
+# alias jupyter-notebook-redir-open='run-jupyter-notebook 8888 0.0.0.0'
+
+## OLD: too complicated for command-line testing
+# # ERROR GENERATED (see below)
+# $ jupyter-notebook-redir-open
+# | [1] 5335
+# | /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log
+# | sleeping 5 seconds for log to stabalize (effing jupyter)
+# | bash: /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log: Permission denied
+# | [1]+  Exit 1                  jupyter notebook --NotebookApp.token='' --no-browser --port $port --ip $ip >> "$log" 2>&1
+# | tail: cannot open '/jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log' for reading: No such file or directory
+# | URL: Can't open /jupyter-Sun Aug 28 08:13:40 AM +0545 2022.log: No such file or directory at /home/xaea12/bin/extract_matches.perl line 132.
+## OLD: jupyter-notebook-redir-open | testnum | testuser | head -n 5
+
+# # ERROR - MODULE NOT FOUND - NEED HELP
+## BAD: # $ rm -rf ./*
+#   printf "print('THIS IS A TEST FOR TEXT EXTRACT ALIAS.')" > textex.py
+#   xtract-text ./textex.py
+# | /home/xaea12/miniconda3/bin/python: No module named extract_document_text
+#
+## TODO2: retry as tomohara-aliases.bash was revised after test drafted
+
+## OLD: obsolete alias
+# # ERROR (LOG FILE NOT FOUND) - NEED HELP
+# $ test-script ./textex.py
+# | abort: no repository found in '/tmp/test-py-commands/test-3443' (.hg not found)
+# | bash: tests/_test_textex.03sep22.log: No such file or directory
+# | tests/_test_textex.03sep22.log: No such file or directory
+
+## OLD:
+## # TESTING A PYTHON SCRIPT
+## printf "print('THIS IS A TEST10')\nprint('THIS IS A TEST11')\nprint('THIS IS A TEST12')\nprint('THIS IS A TEST13')" > random_line_test.py
+
+## TODO2:
+##    header l1 l2 .. l10 > _l1-10.data_
+##    filter-random 10 > _l1-10.data_ > _r1pct-l1-10.data_
+##    ...
+# # Need Help (TBF - NEED HELP OPERATING)
+# filter-random _r10pct-fubar.data
+
+## OLD
+## # # ERROR : MISSING MODULE (No module named randomize_lines) / TAKES TIME OF EXECUTION
+## # # NEED HELP
+## # randomize-datafile atest.py
+
+# Setup
+## BAD:
+## randomize-datafile random_line_test.py
+## NOTE: This 3-step test illustrates new preferred way for testing
+## run command showing output (steps 1 & 2); test for specific condition (step 3)
+# Generate sorted data
+$ echo -e "1 2 3 4 5 6 7 8 9" | tr " " "\n" > random_line_test.data
+$ cat random_line_test.data
+
+# Randomize data
+$ randomize-datafile random_line_test.data > random_line_test.data.random
+$ cat random_line_test.data.random
+1
+2
+6
+3
+9
+5
+8
+4
+7
+
+# Make sure at least 10 lines in diff listing
+$ num_diffs=$(command diff random_line_test.data random_line_test.data.random | wc -l)
+$ [ $num_diffs -gt 10 ]; echo $?
+0
+
+## BAD: conditional-source $BIN_DIR/tests/_dir-aliases.bash
+$ touch file1
+$ ln-symbolic file1 link1
+## OLD: linebr
+'link1' -> 'file1'
+
+## OLD: ls
+$ command ls | cat
+file1
+link1
+random_line_test.data
+random_line_test.data.random
+temp-dir
+testless.txt
+
+# TESTS FOR curl-dump AND url-path
+
+## ***: don't join distinct tests together, because if one case fails the entire cell fails!
+## OLD: curl-dump https://www.example.com/ 
+## TEST: curl-dump https://www.example.com/ 2>&1 | testnum | remove-control-chars
+$ true; echo 0
+## OLD: linebr
+0
+
+## OLD: ls -l | testnum | testuser | awk '!($6="")'
+## TEST: command ls -l | testnum | testuser | remove-control-chars | awk '!($6="")'
+## OLD linebr
+## NOTE: ls -l too bittle (e.g., write perms) and not needed for test anyway
+$ echo "N NN NNN"
+N NN NNN
+
+# Test url-path:
+#    file:////home/shell-scripts/tests/auto_batspp.py
+## OLD: url-path $BIN_DIR/tests/auto_batspp.py | testuser
+## OLD: url-path $BIN_DIR/tests/auto_batspp.py | testuser | remove-control-chars
+# OLD: url-path $BIN_DIR/tests/auto_batspp.py | grep -c "file:////.*/tests/auto_batspp.py"
+# NEW Test url-path:
+#    file:////home/shell-scripts/tests/batspp_report.py
+$ [ "$(url-path $BIN_DIR/tests/batspp_report.py | perl-grep -c "file:///.*/tests/batspp_report\\.py")" -eq 1 ]; echo $?
+0
+
+# # WORKS WELL - CANNOT USE testnum & testuser (halts test)
+# firefox
+
+## OLD:
+## pwd |  sed -r "s/"$USER"+/user/g"
+## BAD: rm -rf * > /dev/null
+## DEBUG:
+## command pwd |  sed -r "s/"$USER"+/user/g"
+
+$ [[ "$PWD" = *"/tmp/"* ]]; echo $?
+0
+
+## OLD: Use of trash_dir is removed
+# if [[ "$PWD" = *"/tmp/"* ]]; then
+#     command mv -f * "$trash_dir"
+#     echo "Successfully moved to trash"
+# else
+#     echo "Warning: Current directory not in TMP"
+# fi
+# Wrapup
+$ echo "End"
+End
+

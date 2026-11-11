@@ -9,7 +9,7 @@
 #
 batspp                                  # - Bash Automated Testing System with Preprocessor
 click                                   # - Composable command line interface toolkit
-mezcla>=1.3.9.8                         # - Miscellaneous Python scripts and utilities for R&D
+mezcla>=1.4.1.1                         # - Miscellaneous Python scripts and utilities for R&D
 #
 #...............................................................................
 # Additional dependencies found from imports
@@ -26,6 +26,8 @@ nltk                                    # - Natural Language Toolkit
 numba                                   # - NumPy aware dynamic Python compiler
 pandas                                  # - Powerful data structures for data analysis and statistics
 Pillow                                  # - Python Imaging Library (Fork)
+PyQt6                                   # - Cross-platform GUI toolkit (Qt 6 bindings)
+PyMuPDF                                 # - PDF rendering and text redaction
 psutil                                  # - Cross-platform lib for process and system monitoring
 requests                                # - Python HTTP for Humans
 scikit-learn                            # - Machine learning in Python

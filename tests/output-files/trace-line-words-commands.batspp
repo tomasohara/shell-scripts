@@ -1,0 +1,152 @@
+## SETUP (OPTIONAL - USE IF REQUIRED)
+## Bracketed Paste is disabled to prevent characters after output
+## Example: 
+## $ echo 'Hii'
+## | Hi?2004l
+# bind 'set enable-bracketed-paste off'
+
+## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
+## PS1="$ "
+## TODO: PS1="> "
+## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+$ echo $PS1
+PROMPT_ANTPDWSOBYZZ\[\]>
+
+## BAD
+# # Delete all aliases and function
+# # TODO: Instead start from pristine environment
+# unalias -a
+# alias | wc -l
+# for f in $(typeset -f | egrep '^\w+'); do unset -f $f; done
+# typeset -f | egrep '^\w+' | wc -l
+
+# Setting a temp directory for tests
+## OLD: TMP=/tmp/test-linewords
+## NOTE: Source it directly from the ./tests directory.
+## OLD: BIN_DIR=$PWD/..
+
+## NOTE: For reproducability, the directory name needs to be fixed
+## In place of $$, use a psuedo random number (e,g., 6439)
+## *** All output from one run to the next needs to be the same ***
+## OLD: Used the concept of trash-dir, instead use unique temp_dirs
+## temp_dir=$TMP/test-$$
+# temp_dir=$TMP/test-6439
+# trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
+# command mkdir -p "$trash_dir"
+# command mkdir -p "$temp_dir"
+# command cd "$temp_dir"
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/test-trace-line-words; fi
+$ temp_dir=$TMP/trace-line-words-commands
+$ rename-with-file-date "$temp_dir"
+$ command mkdir -p "$temp_dir"
+$ command cd $temp_dir
+## OLD
+# mkdir -p "$temp_dir"
+# # TODO: /bin/rm -rvf "$temp_dir"
+# cd "$temp_dir"
+# pwd
+# #ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
+# alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
+
+# Global Setup
+$ alias testuser="sed -r "s/"$USER"+/userxf333/g""
+# alias testnum="sed -r "s/[0-9]/N/g""  
+## For number of digits not being critical
+$ alias testnum="sed -r "s/[0-9][0-9]*/N/g""
+
+# Count aliases proper
+$ alias | wc -l | testnum
+N
+
+# Count functions
+$ typeset -f | egrep '^\w+' | wc -l | testnum
+N
+
+## BAD
+# source $BIN_DIR/tomohara-aliases.bash
+
+## OLD & BAD
+# # GENERATES A PARAGRAPH WITH MULTIPLE LINES
+# rm -rf ./*
+# printf "Hi Mom,\nThis is the use of printf\nI can use a backslash n to start a new line\n1\n2\n3" >> abc-test.txt
+# printf "This is another-test file" >> test2.txt
+# printf "This is test-file 3" >> test3.txt
+# printf "This is a test-file 4" >> test4.txt
+$ printf "Hi Mom,\nThis is the use of printf\nI can use a backslash n to start a new line\n1\n2\n3" > abc-test.txt
+$ printf "This is another-test file" > test2.txt
+$ printf "This is test-file 3" > test3.txt
+$ printf "This is a test-file 4" > test4.txt
+
+# Setup
+$ ls
+
+## OLD: 
+## $ ls | count-it '\.([^\.]+)$'
+## WARNING: Anchors currently start or end line: consider -one_per_line
+## Warning: trailing newline in txt\n (consider -trim or -chomp)
+## txt\n	4
+##
+## TODO3: fix anchor warning in count_it.perl and then drop -one_per_line
+$ ls | count-it -chomp -one_per_line '\.([^\.]+)$'
+txt	4
+
+# line-wc | COUNTS WORD FOR EACH LINE
+$ cat abc-test.txt | line-wc | testnum
+N	Hi Mom,
+N	This is the use of printf
+N	I can use a backslash n to start a new line
+N	N
+N	N
+N	N
+
+# line-len | COUNTS CHARACTERS FOR EACH LINE
+$ cat abc-test.txt | line-len | testnum
+N	Hi Mom,
+N	This is the use of printf
+N	I can use a backslash n to start a new line
+N	N
+N	N
+N	N
+
+# para-len | COUNTS CHARACTERS FOR EACH PARAGRAPH
+$ cat abc-test.txt | para-len | testnum
+N	Hi Mom,
+This is the use of printf
+I can use a backslash n to start a new line
+N
+N
+N
+
+# line-word-len | COUNTS WORDS FOR EACH LINE
+$ cat abc-test.txt | line-word-len | testnum
+N	Hi Mom,
+N	This is the use of printf
+N	I can use a backslash n to start a new line
+N	N
+N	N
+N	N
+
+## PROCESS DOESN'T END FOR ls-line-len
+## EXAMPLE: 
+## $ls-line-len
+## |12      abc-test.txt1h=
+$ ls-line-len | { [ $(wc -l < /dev/stdin) -ne 0 ] && echo "NotZero" || echo "Zero"; }
+NotZero
+
+# ## ERROR-GENERATED : check-class-dist
+# $ cat abc-test.txt | check-class-dist
+# | Can't open : No such file or directory at /home/xaea12/bin/count_it.perl line 171.
+# | WARNING: unexpected distribution for FREQ (all 0)
+
+# $ cat abc-test.txt | 2bib
+# | bash: bibitem2bib: command not found
+# | cat: write error: Broken pipe
+
+## OLD & BAD
+# rm -rf ./* > /dev/null
+# command mv -f * "$trash_dir"
+# Wrapup
+$ echo "Done"
+Done
+

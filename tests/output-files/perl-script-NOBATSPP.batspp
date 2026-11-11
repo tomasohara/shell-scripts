@@ -1,0 +1,83 @@
+# Tests for various perl scripts
+
+# paste.perl: pasting columns with row exclusion
+
+## NEW
+$ [ "$DEBUG_LEVEL" -lt 4 ]; echo "$?"
+0
+
+## NEW
+$ TMP=${TMP:-/tmp}
+$ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/test-dir-aliases; fi
+$ mkdir --parents "$TMP"
+
+# Setup
+$ echo 'ABC\nJKL' > $TMP/_col1.list
+$ echo 'DEF\nMNO' > $TMP/_col2.list
+$ echo 'GHI\nPQR' > $TMP/_col3.list
+
+$ paste.perl -cols="1,2,3" $TMP/_col*.list
+ABC\nJKL	DEF\nMNO	GHI\nPQR
+
+$ paste.perl -cols="2,3" $TMP/_col*.list
+DEF\nMNO	GHI\nPQR
+
+#...............................................................................
+# paste.perl: pasting columns by key
+
+# TODO: work out a more intuitive example
+
+# Setup
+$ cd $TMP
+$ echo -e 'ABC\tR1C2\tR1C3\nJKL\tR2C2\tR2C3' > _f1.tsv
+$ echo -e 'DEF\tR1C2\tR1C3\nMNO\tR2C2\tR2C3' > _f2.tsv
+$ echo -e 'GHI\tR1C2\tR1C3\nPQR\tR2C2\tR2C3' > _f3.tsv
+$ echo -e 'ABC\tr1c2\tr1c3\nPQR\tr3c2\tr2c3' > _f4.tsv
+
+# Continuation
+$ paste.perl -keys -default="-" _f*.tsv
+# key	_f1.tsv	_f2.tsv	_f3.tsv	_f4.tsv
+# key	_f1.tsv	_f2.tsv	_f3.tsv	_f4.tsv
+ABC	R1C2, R1C3	-	-	r1c2, r1c3
+DEF	-	R1C2, R1C3	-	-
+GHI	-	-	R1C2, R1C3	-
+JKL	R2C2, R2C3	-	-	-
+MNO	-	R2C2, R2C3	-	-
+PQR	-	-	R2C2, R2C3	r3c2, r2c3
+
+# Continuation
+$ paste.perl -keys -cols="3" -default="-" _f*.tsv
+# key	_f1.tsv	_f2.tsv	_f3.tsv	_f4.tsv
+# key	_f1.tsv	_f2.tsv	_f3.tsv	_f4.tsv
+ABC	R1C3	-	-	r1c3
+DEF	-	R1C3	-	-
+GHI	-	-	R1C3	-
+JKL	R2C3	-	-	-
+MNO	-	R2C3	-	-
+PQR	-	-	R2C3	r2c3
+
+#................................................................................
+# cut.perl
+# TOOD: mucho mas
+
+$ echo "\t" | cut.perl -f=2 -missing=FU -
+Warning: Missing value at line 1 column 1
+FU
+
+#................................................................................
+# extract_matches.perl
+# TODO: add mucho mas!
+
+$ extract_matches.perl -i -utf8 'tom\S+s' ~/organizer/tomas.txt | head -1
+Can't open /home/aveey/organizer/tomas.txt: No such file or directory at /home/aveey/tom-project/shell-scripts/extract_matches.perl line 135.
+
+#...............................................................................
+# perlcalc.perl
+
+# note: should not be itegral
+$ calc "round(100e12, 0)"
+100000000000000.000
+
+$ calc-int '100e12'
+100000000000000
+

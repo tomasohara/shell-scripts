@@ -369,8 +369,10 @@ if __name__ == "__main__":
         description=__doc__,
         skip_input= True,
         manual_input=True,
-        auto_help=False,
-        multiple_files=False,
+        ## NOTE: leave defaults unspecified
+        ## OLD:
+        ## auto_help=False,
+        ## multiple_files=False,
 
         boolean_options=[
             (SUMMARY_MODE, f"Generates summary only"),
