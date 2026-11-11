@@ -94,6 +94,7 @@
 #   set_xterm_title.bash startup-tracing.bash
 # - Supplemental scripts:
 #   anaconda-aliases.bash git-aliases.bash kill_em.bash ps_mine.bash
+## UPDATE 2026-11-11: grepl-entry tweaks
 ## UPDATE 2026-11-01: refine function-usage error handling; adds rename-emoji usage
 ## UPDATE 20 Sep 26: reworks less macros to minimize redundancy; more macro comments
 ## UPDATE 13 Sep 26: changes tar-this-dir warning to an FYI
@@ -2093,6 +2094,10 @@ alias para-gr='para-grep -i -n'
 
 #................................................................................
 # Note grepping (e.g., using timestamp sorted excerpts)
+#
+# The main aliases are notes-entry-gr-aux and its wrappers grepl-entry[-here]. This
+# uses notes files consolidate in advance (see consolidate-notes.bash and Mezcla's
+# merge_notes.py).
 # TOM-IDIOSYNCRATIC
 
 ## TODO: make a pass to ensure aliases have unique leading prefix, as well as being easy to remember (n.b., ease of tab completion vs. recall)
@@ -2162,9 +2167,14 @@ alias entry-notes=notes-entry-gr
 ## OLD: alias cached-entry-gr='notes-entry-gr-aux _master-note-info.list'
 ## TODO3: allow _master-note-info.list to be overwritten
 simple-alias-fn cached-entry-gr 'notes-entry-gr-aux _master-note-info.list'
-## OLD: function cached-entry-gr-less-p { cached-entry-gr "$@" 2>&1 | less-pattern "$1"; }
+## PREVIOUS: function cached-entry-gr-less-p { cached-entry-gr "$@" 2>&1 | less-pattern "$1"; }
 ## TODO2: rework less-tail/-pattern to be more compositional
-function cached-entry-gr-less-p { cached-entry-gr "$@" 2>&1 | less-tail -p "$1"; }
+## OLD: function cached-entry-gr-less-p { cached-entry-gr "$@" 2>&1 | less-tail -p "$1"; }
+# note: ^K (\x0b) highlights without moving, so -p must come before +G; otherwise less paints several times
+# via Claude 5.5
+function cached-entry-gr-less-p { cached-entry-gr "$@" 2>&1 | less-no-exit -p $'\x0b'"$1" +G; }
+## NOTE: Following variant tries to go back from end via '?' but only works when pattern not visible.
+## TEST: function cached-entry-gr-less-p { cached-entry-gr "$@" 2>&1 | less-no-exit -p $'\x0b'"$1" +G +'?'; }
 # TODO: * work good scheme for shortcut aliases (e.g. both memorable and easily tab-completable)!
 # grepl-entry(pattern): find PATTERN in cached notes and show in pager at end"
 alias grepl-entry=cached-entry-gr-less-p
