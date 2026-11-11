@@ -74,3 +74,4 @@ P2: standardize env vars across scripts: see https://www.gnu.org/software/bash/m
 Wed 11 Nov 26
 
 P3: Replace direct usages of ~/temp with $TEMP (or $TMP if discardable).
+P3: Identify "source of truth" for env. vars (e.g., summary_stats.bash for testsand tomohara-settings.bash for miscellaneous alias-related settings).

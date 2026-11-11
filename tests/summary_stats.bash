@@ -11,6 +11,8 @@
 #   *** Otherwise, bad things might happen to your good files! ***
 #
 ## UPDATE 2026-11-11: reworks MY_GIT_TOKEN init
+## UPDATE 2026-11-11: gets SSH key via TEST_SSH_KEY_FILE not repo (facilitated by Claude Code using Claude Fable 5.2)
+## UPDATE 2026-11-11: adds TEST_REPO_USER for Github user with test repo (likewise via Claude Code)
 
 # Set bash regular and/or verbose tracing
 DEBUG_LEVEL=${DEBUG_LEVEL:-0}
@@ -62,12 +64,29 @@ cd "$script_dir"
 #    {/home/shell-scripts, /home/runner, /home/testuser}
 ## TODO2: if [[ $HOME =~ /home/(shell-scripts|runner|testuser) ]]; then
 #
+# - The Github user owning the test repo can be overridden via TEST_REPO_USER, such as
+#   to try out the git alias tests with your own copy (i.e., $TEST_REPO_USER/git-bash-test).
+#   This requires a corresponding SSH key (see TEST_SSH_KEY_FILE below).
+export TEST_REPO_USER="${TEST_REPO_USER:-scrappycito}"
+#
 # note: copies to /tmp so that permissions can be changed without affecting repo
+# - The key is no longer in the repo: instead the path is given via TEST_SSH_KEY_FILE,
+#   which Github Actions derives from the TEST_SSH_KEY repo secret (see github.yml).
+# - Without the key, SSH authentication is disabled (e.g., pull request from fork).
 TMP="${TMP:-/tmp}"
 ssh_key_file="scrappycito.pem"
 ssh_key_path="$TMP/$ssh_key_file"
-cp -vf "${script_dir}/$ssh_key_file" "$ssh_key_path"
-chmod --changes go-rw "$ssh_key_path"
+## BAD:
+## cp -vf "${script_dir}/$ssh_key_file" "$ssh_key_path"
+## chmod --changes go-rw "$ssh_key_path"
+ssh_key_source="${TEST_SSH_KEY_FILE:-}"
+if [ -s "$ssh_key_source" ]; then
+    cp -vf "$ssh_key_source" "$ssh_key_path"
+    chmod --changes go-rw "$ssh_key_path"
+elif [ "${USE_SSH_AUTH:-0}" == "1" ]; then
+    echo "Warning: disabling USE_SSH_AUTH as no SSH key (see TEST_SSH_KEY_FILE): git updates will fail"
+    USE_SSH_AUTH=0
+fi
 #
 if [ "${USE_SSH_AUTH:-0}" == "1" ]; then
     echo "FYI: using SSH for git authentication"
@@ -185,7 +204,8 @@ if [ "${SCP_OUTPUT:-0}" == "1" ]; then
     #
     remote_spec="ubuntu@ec2-54-191-214-184.us-west-2.compute.amazonaws.com:xfer"
     echo "scp'ing $tar_base.tar.gz to $remote_spec"
-    scp -P 22 -i "$ssh_key_file" -o StrictHostKeyChecking=no "$tar_base.tar.gz" $remote_spec
+    ## BAD: scp -P 22 -i "$ssh_key_file" -o StrictHostKeyChecking=no "$tar_base.tar.gz" $remote_spec
+    scp -P 22 -i "$ssh_key_path" -o StrictHostKeyChecking=no "$tar_base.tar.gz" $remote_spec
 fi
 
 # *** Note: the result needs to be that of alias tests (i.e., batspp_report.py)

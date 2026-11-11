@@ -1,0 +1,54 @@
+# Workflow for CodeQL code scanning (n.b., "advanced setup" in Github parlance)
+#
+# Note:
+# - This is used in place of the "default setup" from the repo settings, so that
+#   paths can be excluded via ../codeql/codeql-config.yml (e.g., testing data).
+# - *** The default setup must be disabled first: otherwise the results get rejected.
+#   See Settings > Advanced Security > CodeQL analysis > Switch to advanced.
+# - Only Python and Github Actions are analyzed: Bash and Perl are not supported.
+# - Docs: https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning
+#
+## NOTE: Created with assistance from Claude Code (model Claude Fable 5.2).
+
+name: CodeQL
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+    branches: [main, development]
+  schedule:
+    # Weekly on Monday (n.b., UTC): catches new queries without code changes
+    - cron: "30 12 * * 1"
+
+jobs:
+
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-24.04
+    permissions:
+      # note: security-events is needed to upload the results
+      security-events: write
+      contents: read
+      actions: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [actions, python]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+          config-file: ./.github/codeql/codeql-config.yml
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: "/language:${{ matrix.language }}"
