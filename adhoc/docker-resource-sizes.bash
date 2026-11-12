@@ -313,13 +313,20 @@ fi
 if [ "$show_volumes" == "1" ]; then
     case "$(uname -s)" in
         Linux)
-            docker_root="$(docker info --format '{{.DockerRootDir}}')"
-
+            ## BAD: unprivileged shell glob fails when /var/lib/docker/volumes is only root-readable
+            ## docker_root="$(docker info --format '{{.DockerRootDir}}')"
+            ##
+            ## printf '\n=== Largest Docker named-volume data directories ===\n'
+            ##
+            ## shopt -s nullglob
+            ## volume_data_dirs=( "${docker_root}"/volumes/*/_data )
+            ## shopt -u nullglob
             printf '\n=== Largest Docker named-volume data directories ===\n'
 
-            shopt -s nullglob
-            volume_data_dirs=( "${docker_root}"/volumes/*/_data )
-            shopt -u nullglob
+            # Query volume mountpoints via Docker daemon so path discovery works prior to sudo du
+            mapfile -t volume_data_dirs < <(
+                docker volume ls -q | xargs -r docker volume inspect --format '{{.Mountpoint}}'
+            )
 
             if ((${#volume_data_dirs[@]} == 0)); then
                 printf '%s\n' 'No named-volume data directories found.'
@@ -361,6 +368,13 @@ if [ "$show_tips" == "1" ]; then
 * Prune all unused volumes, INCLUDING named volumes (Docker 23.0+ skips named volumes unless -a is given):
     docker volume prune -a
 * Selectively remove specific volumes by prefix (e.g., codeprefs- or act-):
+    docker volume ls -q | grep -E '^(codeprefs-|act-)' | xargs -r docker volume rm
+* Find containers and host PIDs referencing a specific volume (when "volume is in use"):
+    docker ps -a --filter volume=<volume_name>
+    docker ps -q --filter volume=<volume_name> | xargs -r docker inspect --format '{{.Id}} ({{.Name}}): Status={{.State.Status}} PID={{.State.Pid}}'
+    sudo lsof +D "$(docker volume inspect --format '{{.Mountpoint}}' <volume_name>)"
+* Remove stopped (or running, with -f) containers blocking codeprefs-/act- volumes, then remove the volumes:
+    docker ps -aq --filter status=exited --filter status=created --filter "name=^(codeprefs-|act-)" | xargs -r docker rm -v
     docker volume ls -q | grep -E '^(codeprefs-|act-)' | xargs -r docker volume rm
 * Full container/image reset via shell alias (note: does not remove named volumes):
     docker-cleanup
