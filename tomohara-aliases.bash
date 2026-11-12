@@ -1550,6 +1550,7 @@ function hex2dec { perl -e "printf '%d', 0x$1;" -e 'print "\n";'; }
 function dec2hex { perl -e "printf '%x', $1;" -e 'print "\n";'; }
 function bin2dec { perl -e "printf '%d', 0b$1;" -e 'print "\n";'; }
 function dec2bin { perl -e "printf '%b', $1;" -e 'print "\n";'; }
+function oct2hex { perl -e "printf '%x', oct(q/$1/);" -e 'print "\n";'; }
 ## MISC: alias hv='hexview.perl'
 
 #................................................................................
