@@ -205,7 +205,8 @@ fi
 
 # Collapse whitespace
 if [ "$retain_whitespace" = "0" ]; then
-   perl -i.bak-ws1 -pe "s/\s+/ /g; s/$/\n/;" "$TMP/$base1" "$TMP/$base2"
+   ## BAD: perl -i.bak-ws1 -pe "s/\s+/ /g; s/$/\n/;" "$TMP/$base1" "$TMP/$base2"
+   perl -i.bak-ws1 -pe "s/^\s+//; s/\s+/ /g; s/$/\n/;" "$TMP/$base1" "$TMP/$base2"
 fi
 
 # Do comparison of the result
