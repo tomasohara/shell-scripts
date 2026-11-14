@@ -42,6 +42,7 @@ import subprocess
 import pytest
 
 # Local modules
+import bash2python
 from bash2python import Bash2Python as B2P, OPENAI_API_KEY
 from mezcla import debug
 from mezcla import glue_helpers as gh
@@ -573,6 +574,18 @@ def test_23_bash_script(filename):
     """Test conversion of Bash FILENAME againt corresponding .py file"""
     debug.trace(5, "test_23_bash_script()")
     do_test_external_script(filename)
+
+@pytest.mark.xfail
+def test_24_test_openai_url(monkeypatch):
+    """Make sure OPENAI_URL honored"""
+    debug.trace(5, "test_24_test_openai_url()")
+    bash = "let fubar++"
+    bad_python = r""
+    good_python = r"fubar += 1"
+    monkeypatch.setattr(bash2python, "USE_CODEX", True)
+    bash2py_helper(bash, good_python)
+    monkeypatch.setattr(bash2python, "OPENAI_URL", "bad-url")
+    bash2py_helper(bash, bad_python)
 
 #-------------------------------------------------------------------------------
 
