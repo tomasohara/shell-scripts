@@ -11,6 +11,9 @@
 # There is optional support for doing the converion via OpenAI's Codex, which was trained on
 # Github. See bash2python_diff.py for code that invokes both the regex approach
 # and the Codex approach, showing the conversions in a side-by-side diff listing.
+# Note: This uses the OpenAI API by default, but OPENAI_URL can redirect it to a compatible
+# service (i.e., consolidator), such as Poe or OpenRouter:
+#    OPENAI_URL=https://api.poe.com/v1  OPENAI_API_KEY=<poe-key>  bash2python.py --codex ...
 #
 # Notes:
 # - This just outputs the Python code, along with import for helper module and initialization.
@@ -31,6 +34,8 @@
 # - Global specifications for code linter(s):
 #   # pylint: disable=eval-used
 # - OpenAI API reference: https://platform.openai.com/docs/api-reference
+# - Poe's OpenAI-compatible API: https://creator.poe.com/docs/external-applications/openai-compatible-api
+# - OpenRouter's OpenAI-compatible API: https://openrouter.ai/docs/quickstart
 # - Bash manual: https://www.gnu.org/software/bash/manual/bash.html
 # - Devloped by Tana Alvarez and Tom O'Hara.
 # - Regex cheatsheet:
@@ -96,6 +101,7 @@ debug.assertion(version_to_number("1.3.4") <= version_to_number(mezcla.__version
 TL = debug.TL
 CODEX_PREFIX = "# codex: "
 NEWLINE = "\n"                          # for use in regex's
+CODE_FENCE = "`" * 3                    # Markdown code block delimiter
 
 # Environment constants
 USER = system.getenv_text("USER", "unknown-user",
@@ -107,9 +113,13 @@ INIT_FILE = system.getenv_value("INIT_FILE", None,
 DISK_CACHE = system.getenv_value("DISK_CACHE", None,
                                  "Path to directory with disk cache")
 OPENAI_API_KEY = system.getenv_value("OPENAI_API_KEY", None,
-                                     "API key for OpenAI")
+                                     "API key for OpenAI or compatible service (see OPENAI_URL)")
+OPENAI_URL = system.getenv_value("OPENAI_URL", None,
+                                 "Base URL for OpenAI-compatible service (e.g., https://api.poe.com/v1 for Poe)")
+OPENAI_CHAT_API = system.getenv_bool("OPENAI_CHAT_API", False,
+                                     "Use older chat completions API (e.g., for services without responses API)")
 OPENAI_PAUSE = system.getenv_number("OPENAI_PAUSE", 1.0,
-                                     "Delay in seconds after each OpenAI API call")
+                                    "Delay in seconds after each OpenAI API call")
 JUST_CODEX = system.getenv_bool("JUST_CODEX", False,
                                 "Only do conversion via Codex")
 USE_CODEX = system.getenv_bool("USE_CODEX", (OPENAI_API_KEY or JUST_CODEX),
@@ -132,10 +142,10 @@ OUTPUT_BASENAME = system.getenv_value("OUTPUT_BASENAME", None,
                                       "Basename for optional output files such as Codex json responses")
 EXPORT_RESPONSE = system.getenv_bool("EXPORT_RESPONSE", (OUTPUT_BASENAME is not None),
                                      "Export Codex reponses to JSON")
-MODEL_NAME = system.getenv_text("MODEL_NAME", "text-davinci-002",
-                                description="Name of OpenAI model/engine")
-TEMPERATURE = system.getenv_float("TEMPERATURE", 0.6,
-                                  description="Next token probability")
+MODEL_NAME = system.getenv_text("MODEL_NAME", "gpt-5.3-codex",
+                                description="Name of model (n.b., naming depends on service)")
+TEMPERATURE = system.getenv_value("TEMPERATURE", None,
+                                  "Next token probability (only sent if set)")
 PARA_SPLIT = system.getenv_bool("PARA_SPLIT", False,
                                 "Split code in Perl-style paragraph mode")
 BASHLEX_CHECKS = system.getenv_bool("BASHLEX_CHECKS", False,
@@ -338,6 +348,17 @@ def split_statements(line):
         line = remainder
     debug.trace(6, f"split_statements({in_line!r}) => {statements!r}")
     return statements
+
+
+def strip_code_fences(text):
+    """Extract code from first Markdown fenced block in TEXT, if any
+    Note: chat models often add fences even when asked not to"""
+    # EX: strip_code_fences(CODE_FENCE + "python\nx = 1\n" + CODE_FENCE) => "x = 1"
+    result = text.strip()
+    if my_re.search(fr"{CODE_FENCE}[\w+-]*[ \t]*\n(.*?){CODE_FENCE}", result, flags=my_re.DOTALL):
+        result = my_re.group(1).strip()
+    debug.trace(7, f"strip_code_fences({text!r}) => {result!r}")
+    return result
     
 
 #................................................................................
@@ -374,6 +395,7 @@ class Bash2Python:
         self.skip_var_init = skip_var_init
         self.global_ast = None
         self.cache = None
+        self.openai_client = None
         self.codex_count = 0
         self.line_num = 0
         if DISK_CACHE:
@@ -424,7 +446,8 @@ class Bash2Python:
         return result
 
     def codex_convert_aux(self, line):
-        """Helper to codex_convert"""
+        """Helper to codex_convert: does conversion via OpenAI API
+        Note: OPENAI_URL can redirect this to a compatible service (e.g., Poe)"""
         debug.trace(6, f"codex_convert_aux({line!r})")
 
         # Strip segment comments (see bash2python_diff.py)
@@ -453,30 +476,30 @@ class Bash2Python:
         if not line.strip():
             return CODEX_PREFIX + "# blank line"
 
-        # Make sure OpenAI key set
-        # note: Apply for an API Key at https://beta.openai.com
+        # Make sure API key set
+        # note: With OPENAI_URL, this is the key for that service (e.g., from https://poe.com/api/keys)
         debug.assertion(OPENAI_API_KEY or DISK_CACHE)
         if (not (((OPENAI_API_KEY or "").strip()) or DISK_CACHE)):
             return CODEX_PREFIX + "# OPENAI_API_KEY not set"
-        openai.api_key = OPENAI_API_KEY
 
         # Define the code generation prompt
+        # note: chat models need to be told to omit explanations and Markdown
         TARGET_LANG = system.getenv_text("TARGET_LANG", "Python",
                                          "Target language for Codex")
-        prompt = f"Convert this Bash snippet to {TARGET_LANG}:\n{line}"
+        prompt = (f"Convert this Bash snippet to {TARGET_LANG}. "
+                  "Reply with just the code: no explanation and no Markdown code fences.\n"
+                  f"{line}")
         debug.trace_expr(6, prompt)
         
-        # Call the Codex API
+        # Call the OpenAI API (or compatible service)
         try:
             # Optionally check cache
             params = {
-                "engine": MODEL_NAME,
-                "prompt": prompt,
-                "max_tokens": 3 * len(line.split()),
-                "n": 1,
-                "stop": None,
-                "temperature": TEMPERATURE,
+                "model": MODEL_NAME,
+                "input": prompt,
             }
+            if TEMPERATURE is not None:
+                params["temperature"] = float(TEMPERATURE)
             params_tuple = tuple(list(params.values()))
             response = None
             # Check if the response is already in the cache before calling the API
@@ -487,8 +510,20 @@ class Bash2Python:
             # Submit request to OpenAI
             if response is None:
                 # If the response is not in the cache, make the API call and store the result in the cache
-                debug.trace(5, "Submitting Codex request")
-                response = openai.Completion.create(**params)
+                debug.trace(5, f"Submitting OpenAI request (url={OPENAI_URL or 'default'})")
+                if self.openai_client is None:
+                    # note: with base_url of None, the library uses OPENAI_BASE_URL or else OpenAI proper
+                    self.openai_client = openai.OpenAI(api_key=OPENAI_API_KEY, base_url=OPENAI_URL)
+                if OPENAI_CHAT_API:
+                    chat_params = dict(params)
+                    chat_params["messages"] = [{"role": "user", "content": chat_params.pop("input")}]
+                    api_response = self.openai_client.chat.completions.create(**chat_params)
+                    response_text = (api_response.choices[0].message.content or "")
+                else:
+                    api_response = self.openai_client.responses.create(**params)
+                    response_text = api_response.output_text
+                # note: plain dict so that it works with both the JSON cache and the JSON export
+                response = {"model": MODEL_NAME, "text": response_text}
                 if self.cache is not None:
                     self.cache[params_tuple] = response
                 system.sleep(OPENAI_PAUSE)
@@ -499,9 +534,10 @@ class Bash2Python:
                 system.write_file(json_filename, json.dumps(response, default=str))
             debug.trace_expr(5, response, max_len=4096)
 
-            # Extract text for first choice and convert into single-line comment
-            comment += CODEX_PREFIX + response["choices"][0]["text"].replace("\n", "\n" + CODEX_PREFIX).rstrip()
-        except openai.APIError:     # Catch OpenAI API errors
+            # Extract code from response text and convert into single-line comments
+            python_code = strip_code_fences(response["text"])
+            comment += CODEX_PREFIX + python_code.replace("\n", "\n" + CODEX_PREFIX).rstrip()
+        except openai.APIError:     # Catch API errors
             system.print_exception_info("Error communicating with OpenAI API in codex_convert")
         except IOError:             # Catch file I/O errors
             system.print_exception_info("File I/O error in codex_convert")
@@ -1533,6 +1569,7 @@ if "--verbose" in system.get_args():
         "Notes:\n"
         "- It is best to integrate regular and Codex output\n"
         "- See bash2python_diff.py for way to compare regular vs codex output\n"
+        "- Use OPENAI_URL to access Codex via compatible service (e.g., https://api.poe.com/v1)\n"
         f"- Available env. options:\n{INDENT}{env_opts}\n"
     )
 
@@ -1558,7 +1595,7 @@ def main(script, output, overview, execute, line_numbers, codex, stdin, verbose)
             -Piping to file. (Uses bash for it)
             -All kind of calls to system. 
             -Printing (still using run(echo) for it)
-            -AI sugestions using OpenAI GPT-3 Codex (requires API key)
+            -AI sugestions using OpenAI Codex (requires key for OpenAI or compatible service)
             -Bash defaults
 Not working yet: 
             -For loops")
