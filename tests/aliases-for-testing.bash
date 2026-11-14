@@ -22,12 +22,14 @@
 # - Disables following shellcheck warnings
 #   SC2139 (warning): This expands when defined, not when used. Consider escaping.
 #
+## UPDATE 2026-11-13: fixes xtrace disable at end
 
 #...............................................................................
 # Initialization
 
-## NOTE: xtrace support cuases problems when used as via BASH_ENV
+## NOTE: xtrace support causes problems when used via BASH_ENV
 ## to ensure loaded instead of ~/.bashrc for use with Jupyter notenooks
+## TODO3: elaborate on the problems (and document BASH_ENV usage)
 
 # Set bash regular and/or verbose tracing
 # note: tracing off by default unless active for current shell
@@ -78,6 +80,8 @@ source "$this_source_dir/../all-tomohara-aliases-etc.bash"
 # Cleanup
 
 # Disable tracing unless enabled prior to invocation
-$was_tracing || set - -o xtrace
+## VERY-BAD: $was_tracing || set - -o xtrace
+## NOTE: see all-tomohara-aliases-etc.bash for details
+$was_tracing || set +o xtrace
 
 ## DEBUG: echo "out ${BASH_SOURCE[*]}"
