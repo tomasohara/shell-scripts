@@ -116,6 +116,7 @@
 # - P2: Replace `shift 2` with new shift2 alias using two shift's; see
 #   https://unix.stackexchange.com/questions/673866/shift-shift-versus-shift-2-when-using-bash
 # - ***** Fix problems noted by shellcheck (and rework false positives)!.
+# - *** Add usage notes for multi-argugment aliases (e.g., filter-random and get-free-filename).
 # - *** Indent [maldito] shell-check blocks.
 # - ** Add macros to provide cribsheet on usage!
 # - *** Purge way-old stuff (e.g., lynx related)!
@@ -1304,6 +1305,7 @@ function findgrep-verbose () { find "$1" -iname \*"$2"\* -print -exec $GREP $fin
 # findgrep(dir, filename_pattern, line_pattern): $GREP through files in DIR matching FILENAME_PATTERN for LINE_PATTERN
 function findgrep () { find $1 -iname \*"$2"\* -exec $GREP $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} /dev/null \;; }
 # TODO: archive
+## TODO4: add usage for findgrep, etc.; rename 'findgrep-'
 function findgrep- () { find $1 -iname $2 -print -exec $GREP $findgrep_opts "$3" $4 $5 $6 $7 $8 $9 \{\} \;; }
 ## Lorenzo review: should change this to findgrep-alt following TODO's
 # findgrep-ext(dir, ext, grep-arg, ...): finds EXT in DIR and grep ARG ...
