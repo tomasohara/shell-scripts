@@ -42,7 +42,6 @@ $ rename-with-file-date "$temp_dir"
 $ command mkdir -p "$temp_dir"
 ## OLD: command mkdir -p "$trash_dir"
 $ command cd "$temp_dir"
-renamed '/home/ai-user/temp/tmp/test-unix-alias' -> '/home/ai-user/temp/tmp/test-unix-alias.26Oct26.3'
 
 # Global Setup
 ## TODO2: rename testuser, testnum, etc. to encode-user, encode-num, etc.
@@ -190,9 +189,9 @@ VERSION_ID="N.N"
 $ system-status | testnum | testuser | encode-month | encode-weekday | egrep -v 'pts|tty'
 Linux tpo-vivo N.N.N-N-generic #N~N.N.N-Ubuntu SMP PREEMPT_DYNAMIC weekday month N N:N:N UTC N xN_N xN_N xN_N GNU/Linux
                total        used        free      shared  buff/cache   available
-Mem:        N    N     N     N     N     N
-Swap:       N     N    N
- N:N:N up N days, N:N,  N users,  load average: N.N, N.N, N.N
+Mem:        N    N      N     N     N     N
+Swap:       N    N    N
+ N:N:N up N days,  N:N,  N users,  load average: N.N, N.N, N.N
 USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU  WHAT
 
 
@@ -280,8 +279,8 @@ $ cond-export ENV1 value1 2>&1 | grep ENV1.*value1
 $ c=$(cond-export ENV2 value2 2>&1 | grep -c ENV2.*value2)
 $ bash-trace-off
 $ [ $c -ge 4 ]; echo $?
-+ grep --color=auto 'ENV1.*value1'
 + conditional-export ENV1 value1
++ grep --color=auto 'ENV1.*value1'
 + export [01;31m[KENV1=value1[m[K
 + [01;31m[KENV1=value1[m[K
 + args='[01;31m[KENV1 value1[m[K'
