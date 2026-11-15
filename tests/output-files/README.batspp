@@ -197,5 +197,19 @@ $ num_lower=$(count-it "[a-z]" _abcDEF_.txt_ | wc -l)
 $ [ $num_lower -eq 3 ]; echo $?
 0
 
+# Indent text (4 spaces)
+#
+$ text=$'How\nnow\nbrown\ncow'
+$ indent-text <<<"$text"
+    How
+    now
+    brown
+    cow
+
+# Make sure indented OK
+$ num_indented=$(indent-text <<<"$text" | grep -i -c "^    [a-z]")
+$ [ $num_indented -eq 4 ]; echo $?
+0
+
 # End of test (n.b., avoids extraneous new cells after Kernel > Restart ... Run All Cells)
 
