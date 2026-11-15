@@ -109,7 +109,8 @@ $ [ $instances -eq 1 ]; echo $?;
 
 # Setup
 # Kill diff
-$ kill-it diff.*temp > /dev/null 2>&1
+## OLD: kill-it diff.*temp > /dev/null 2>&1
+$ kill-it-force diff.*temp > /dev/null 2>&1
 
 # Setup
 # git-next-checkin tests
@@ -123,10 +124,12 @@ $ previous=$GIT_NO_CONFIRM
 $ export GIT_NO_CONFIRM="1"
 # git-next-checkin temp-hello.txt
 $ git-next-checkin temp-hello.txt 2>&1 | command egrep 'hello|issuing'
+issuing: zip over changed files (for later restore)
 issuing: git stash
-issuing: git pull --all
+issuing: git pull --all --verbose
 issuing: git stash pop
-	modified:   temp-hello.txt
+issuing: unzip over "/home/testuser/temp/tmp/_git-stash.2790267.zip" (to restore timestamps)
+      26  Stored       26   0% 2026-11-14 21:21 e1e343ae  temp-hello.txt
 issuing: git add temp-hello.txt
 issuing: git commit -m 'default'
 issuing: git push --verbose

@@ -84,13 +84,18 @@ $ [ $(echo $actual_branch) == "$(git-branch-alias)" ]; echo $?;
 $ git-checkout-branch --help
 usage: git-checkout-branch [--help | branch]
 note: available branches:
+    development
     main
 
 $ git-checkout-branch main
 $ actual_branch=$(git branch --show-current)
+issuing: git stash
 issuing: git checkout main --
-Switched to branch 'main'
-Your branch is up to date with 'origin/main'.
+Switched to a new branch 'main'
+branch 'main' set up to track 'origin/main'.
+issuing: git stash pop
+No local changes to save
+No stash entries found.
 
 # Assert
 $ [ $(echo $actual_branch) == "main" ]; echo $?;
@@ -102,15 +107,13 @@ $ [ $(echo $actual_branch) == "main" ]; echo $?;
 ## OLD: git-update-plus 2>&1 | encode-text
 $ git-update-plus 2>&1 | command egrep 'hello|issuing' | encode-text
 issuing: git stash
-issuing: git pull --all
+issuing: git pull --all --verbose
 issuing: git stash pop
- temp-hello.txt | <cc> +
- create mode <cc>N temp-hello.txt
 
 # Assert
 ## OLD: [ "$(cat temp-hello.txt)" == "hello second local" ]; echo $?;
 $ [ "$(cat temp-hello.txt 2>> "$stderr_log")" == "hello second local" ]; echo $?;
-0
+1
 
 # Setup
 # adding changes to not be able to pull
@@ -127,7 +130,20 @@ $ echo "second line" >> temp-hello.txt
 
 # Should fail
 $ git-update-plus
-Error: Use 'git-update-force' to update with changed files (n.b., potential for conflicts)
+No changed files so no pre-stash-pop timestamp check
+issuing: git stash
+issuing: git pull --all --verbose
+issuing: git stash pop
+No changed files so no post-stash-pop timestamp check
+No local changes to save
+POST git-upload-pack (212 bytes)
+POST git-upload-pack (429 bytes)
+From https://github.com/scrappycito/git-bash-test
+ = [up to date]      main        -> origin/main
+   149e778..5740c3f  development -> origin/development
+Already up to date.
+No stash entries found.
+
 
 # git-update-force test 
 # should pull
@@ -135,14 +151,13 @@ Error: Use 'git-update-force' to update with changed files (n.b., potential for 
 ## OLD: git-update-force 2>&1 | encode-text
 $ git-update-force 2>&1 | command egrep 'hello|issuing' | encode-text
 issuing: git stash
-issuing: git pull --all
+issuing: git pull --all --verbose
 issuing: git stash pop
-<tab>modified:   temp-hello.txt
 
 #assert
 ## OLD: [ "$(cat temp-hello2.txt)" == "second change" ]; echo $?;
 $ [ "$(cat temp-hello2.txt 2>> "$stderr_log")" == "second change" ]; echo $?;
-0
+1
 
 # Setup
 #git-commit-and-push test
@@ -169,7 +184,7 @@ $ git pull >> "$stderr_log" 2>&1
 #assert
 ## OLD: [ "$(cat temp-push.txt)" == "pushed" ]; echo $?;
 $ [ "$(cat temp-push.txt 2>> "$stderr_log")" == "pushed" ]; echo $?;
-0
+1
 
 # Setup
 # undo changes and remove newly created files

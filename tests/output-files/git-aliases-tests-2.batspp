@@ -70,10 +70,10 @@ $ git-rename-file temp-hello.txt temp-new-hello.txt 2>&1 | egrep 'hello|issuing'
 issuing: git mv temp-hello.txt temp-new-hello.txt
 issuing: git add temp-new-hello.txt
 issuing: git commit -m 'renamed hello.txt'
-    [main <hex>] renamed hello.txt
+    [development <hex>] renamed hello.txt
      rename temp-hello.txt => temp-new-hello.txt (N%)
 issuing: git push --verbose
-[main <hex>] renamed hello.txt
+[development <hex>] renamed hello.txt
  rename temp-hello.txt => temp-new-hello.txt (N%)
 issuing: git reset HEAD temp-hello.txt
 
@@ -139,10 +139,10 @@ $ git-move-to-dir temp-folder temp-new-hello.txt 2>&1 | command egrep "folder|he
 issuing: git mv temp-new-hello.txt temp-folder
 issuing: git add temp-folder/temp-new-hello.txt
 issuing: git commit -m 'reverted temp-new-hello.txt'
-    [main <hex>] reverted temp-new-hello.txt
+    [development <hex>] reverted temp-new-hello.txt
      rename temp-new-hello.txt => temp-folder/temp-new-hello.txt (N%)
 issuing: git push --verbose
-[main <hex>] reverted temp-new-hello.txt
+[development <hex>] reverted temp-new-hello.txt
  rename temp-new-hello.txt => temp-folder/temp-new-hello.txt (N%)
 
 $ command cd temp-folder > /dev/null
