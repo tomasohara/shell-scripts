@@ -34,7 +34,8 @@
 # Set bash regular and/or verbose tracing
 # note: tracing off by default unless active for current shell
 was_tracing=false
-if [ "1" = "$(set -o | grep -v '^xtrace.*on')" ]; then 
+## BAD: if [ "1" = "$(set -o | grep -v '^xtrace.*on')" ]; then 
+if [ "" != "$(set -o | grep '^xtrace.*on')" ]; then 
     was_tracing=true
 fi
 show_tracing="$was_tracing"
