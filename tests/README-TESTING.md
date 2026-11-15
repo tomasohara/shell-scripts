@@ -27,3 +27,9 @@ To enable delivery, set the repository variable `WEEKLY_TEST_EMAIL_ENABLED` to
 `WEEKLY_TEST_SMTP_PASSWORD`, `WEEKLY_TEST_EMAIL_FROM`, and
 `WEEKLY_TEST_EMAIL_TO`. The workflow uses SMTP STARTTLS and fails explicitly if
 any enabled email setting is absent.
+
+To force the weekly dashboard to run on demand, use any of the following:
+- `python3 tests/weekly_dashboard.py --dispatch`
+- `gh workflow run weekly-test-dashboard.yml --ref development`
+- `gh workflow run weekly-test-dashboard.yml --ref development -f send_email=true -f test_regex="pattern"`
+- Pushing to the `weekly-test-dashboard` branch or clicking **Run workflow** in the GitHub Actions UI.

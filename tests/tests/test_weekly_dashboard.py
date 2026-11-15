@@ -80,6 +80,18 @@ class TestIt(TestWrapper):
         self.do_assert("baseline report" in THE_MODULE.format_markdown(summary))
         self.do_assert("baseline report" in THE_MODULE.format_markdown(summary))
 
+    def test_03_handles_missing_result_paths(self):
+        """Missing log and report paths produce empty counts instead of crashing."""
+        debug.trace(4, f"TestIt.test_03_handles_missing_result_paths(); self={self}")
+        python_log, alias_reports, kcov_reports, environment = self.get_result_paths()
+
+        summary = THE_MODULE.make_summary(
+            python_log, alias_reports, kcov_reports, environment, None)
+        self.do_assert(summary["tests"]["python"]["total"] == 0)
+        self.do_assert(summary["tests"]["aliases"]["total"] == 0)
+        self.do_assert(summary["coverage"]["percent"] is None)
+        self.do_assert("not available" in THE_MODULE.format_markdown(summary))
+
 
 if __name__ == "__main__":
     invoke_tests(__file__)

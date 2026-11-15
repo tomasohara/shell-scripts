@@ -5,6 +5,7 @@
 # consume a stable JSON schema without re-running the tests.
 #
 ## NOTE: Initial dashboard reporting facilitated by GitHub Copilot (GPT-5.6 Terra).
+## UPDATE 2026-11-15: Guard missing paths and add --dispatch.
 
 """
 Create a weekly summary of Python, alias, and Kcov test results.
@@ -18,6 +19,7 @@ Sample usage:
        --kcov-reports=test-results/batspp/kcov-output \
        --output=test-results/weekly-summary.json \
        --markdown=test-results/weekly-summary.md
+   {script} --dispatch
 """
 
 import json
@@ -50,6 +52,8 @@ ENVIRONMENT_ARG = "environment"
 PREVIOUS_ARG = "previous"
 OUTPUT_ARG = "output"
 MARKDOWN_ARG = "markdown"
+DISPATCH_ARG = "dispatch"
+WORKFLOW_FILE = "weekly-test-dashboard.yml"
 
 
 def load_json(path):
@@ -60,6 +64,9 @@ def load_json(path):
 def parse_python_log(path):
     """Return Python test counts indexed by module name from PATH."""
     results = {}
+    if not path or not path.exists():
+        debug.trace(TL.WARNING, f"Python log not found: {path}")
+        return results
     for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
         match = PYTHON_RESULT.match(line)
         if match:
@@ -73,6 +80,9 @@ def parse_python_log(path):
 def parse_alias_reports(directory):
     """Return BatsPP success counts indexed by notebook-derived report name."""
     results = {}
+    if not directory or not directory.exists():
+        debug.trace(TL.WARNING, f"Alias reports directory not found: {directory}")
+        return results
     for path in sorted(directory.glob("*.summary.txt")):
         for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
             match = ALIAS_RESULT.match(line)
@@ -88,6 +98,9 @@ def parse_alias_reports(directory):
 def parse_kcov_reports(directory):
     """Return the aggregate Kcov covered and instrumented line counts."""
     covered = instrumented = 0
+    if not directory or not directory.exists():
+        debug.trace(TL.WARNING, f"Kcov reports directory not found: {directory}")
+        return {"covered": covered, "instrumented": instrumented}
     for path in directory.rglob("*.js"):
         match = KCOV_RESULT.search(path.read_text(encoding="utf-8", errors="replace"))
         if match:
@@ -234,18 +247,26 @@ class WeeklyDashboard(Main):
         self.markdown = self.get_parsed_option(MARKDOWN_ARG)
         required_options = (self.python_log, self.alias_reports, self.kcov_reports,
                             self.output, self.markdown)
-        debug.assertion(all(required_options), "Required dashboard option missing")
+        ## OLD: debug.assertion(all(required_options), "Required dashboard option missing")
+        debug.assertion(self.get_parsed_option(DISPATCH_ARG) or all(required_options),
+                        "Required dashboard option missing")
         debug.trace_object(TL.VERBOSE, self,
                            label=f"{self.__class__.__name__} instance")
 
     def run_main_step(self):
         """Write the dashboard summary using the supplied result directories."""
+        if self.get_parsed_option(DISPATCH_ARG):
+            output = gh.run(f"gh workflow run {WORKFLOW_FILE}")
+            print(output)
+            return
         summary = make_summary(
             Path(self.python_log), Path(self.alias_reports), Path(self.kcov_reports),
             Path(self.environment) if self.environment else None,
             load_json(Path(self.previous)) if self.previous else None)
+        Path(self.output).parent.mkdir(parents=True, exist_ok=True)
         Path(self.output).write_text(
             json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        Path(self.markdown).parent.mkdir(parents=True, exist_ok=True)
         Path(self.markdown).write_text(format_markdown(summary), encoding="utf-8")
 
 
@@ -256,6 +277,9 @@ def main():
         skip_input=True,
         manual_input=True,
         auto_help=True,
+        boolean_options=[
+            (DISPATCH_ARG, "Trigger the GitHub Actions weekly dashboard workflow on demand"),
+        ],
         text_options=[
             (PYTHON_LOG_ARG, "Path to the Python and BatsPP test output log"),
             (ALIAS_REPORTS_ARG, "Directory with BatsPP text summary files"),

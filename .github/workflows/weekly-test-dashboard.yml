@@ -1,12 +1,31 @@
 # Scheduled trend report for the Bash and alias testing infrastructure.
 #
+# Note:
+# - To force a run on demand via GitHub CLI:
+#     gh workflow run weekly-test-dashboard.yml --ref development
+#     gh workflow run weekly-test-dashboard.yml --ref development -f send_email=true -f test_regex="clipboard"
+#
 ## NOTE: Initial dashboard workflow facilitated by GitHub Copilot (GPT-5.6 Terra).
+## UPDATE 2026-11-15: Fix kcov installation, missing directory handling, and on-demand dispatch.
 name: Weekly-Test-Dashboard
 
 on:
   schedule:
     - cron: "15 13 * * 1"
   workflow_dispatch:
+    inputs:
+      send_email:
+        description: "Force sending the summary email on demand"
+        required: false
+        default: false
+        type: boolean
+      test_regex:
+        description: "Optional TEST_REGEX filter for on-demand runs"
+        required: false
+        default: ""
+        type: string
+  push:
+    branches: [weekly-test-dashboard]
 
 permissions:
   actions: read
@@ -18,6 +37,11 @@ jobs:
     runs-on: ubuntu-24.04
 
     steps:
+      - name: Prune Unused Software Directories
+        # note: Needed occasionally to ensure enough space for dependencies
+        run: |
+          sudo rm -rf /usr/local/lib/android /usr/share/dotnet /usr/share/swift
+
       - name: Checkout Repository
         uses: actions/checkout@v7
 
@@ -26,11 +50,29 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Cache Python Dependencies
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-3.12-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-3.12-
+            ${{ runner.os }}-pip-
+
       - name: Install Dependencies
         run: |
           pip install --verbose --requirement requirements.txt
           sudo apt-get update
-          sudo apt-get install --yes --fix-missing tcsh libegl1 kcov
+          ## BAD: sudo apt-get install --yes --fix-missing tcsh libegl1 kcov
+          sudo apt-get install --yes --fix-missing tcsh libegl1
+          sudo apt-get install --yes --fix-missing $(sed 's/ \#.*//' required-packages.txt | grep -v '^#')
+          # Build kcov from source (not in Ubuntu 24.04 apt repos)
+          sudo apt-get install --yes --fix-missing binutils-dev build-essential cmake libcurl4-openssl-dev libdw-dev libelf-dev libiberty-dev libssl-dev zlib1g-dev
+          wget -qO /tmp/_kcov-v43.tar.gz https://github.com/SimonKagstrom/kcov/archive/refs/tags/v43.tar.gz
+          tar -xzf /tmp/_kcov-v43.tar.gz -C /tmp
+          cmake -S /tmp/kcov-43 -B /tmp/kcov-43/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+          cmake --build /tmp/kcov-43/build --parallel "$(nproc)"
+          sudo cmake --install /tmp/kcov-43/build
 
       - name: Download prior dashboard record
         env:
@@ -47,6 +89,8 @@ jobs:
       - name: Run tests with alias coverage
         id: tests
         continue-on-error: true
+        env:
+          TEST_REGEX: ${{ inputs.test_regex }}
         run: |
           mkdir -p test-results/batspp-temp
           set -o pipefail
@@ -58,11 +102,13 @@ jobs:
       - name: Record tested software versions
         if: always()
         run: |
+          mkdir -p test-results
           {
             echo "Python: $(python3 --version)"
             echo "Bash: $(bash --version | head -1)"
             echo "BatsPP: $(batspp --version)"
-            echo "Kcov: $(kcov --version)"
+            ## BAD: echo "Kcov: $(kcov --version)"
+            echo "Kcov: $(kcov --version 2>/dev/null || echo 'not available')"
             echo "Mezcla: $(python3 -m pip show mezcla | awk -F': ' '/^Version:/ {print $2}')"
           } > test-results/environment.txt
 
@@ -84,7 +130,8 @@ jobs:
           cat test-results/weekly-summary.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Send weekly summary email
-        if: always() && vars.WEEKLY_TEST_EMAIL_ENABLED == 'true'
+        ## OLD: if: always() && vars.WEEKLY_TEST_EMAIL_ENABLED == 'true'
+        if: always() && (vars.WEEKLY_TEST_EMAIL_ENABLED == 'true' || inputs.send_email == true)
         env:
           SMTP_HOST: ${{ secrets.SMTP_HOST }}
           SMTP_PORT: ${{ secrets.SMTP_PORT }}
