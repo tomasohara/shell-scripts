@@ -3568,8 +3568,15 @@ function python-lint-full() {
     if [[ "${CHECK_MERCURIAL:-0}" == "1" ]]; then
         root="$root:$(hg root 2> /dev/null)";
     fi
+    local git_root
+    git_root=$(git-root-alias 2> /dev/null)
+    if [[ "$git_root" != "" ]]; then
+        root="$git_root";
+    fi
     ## TODO: --persistent=n (to avoid caching); record pylint status ($?)
-    PYTHONPATH="$root:.:$PYTHONPATH" $NICE pylint --reports=n --score=n --persistent=n "$@" 2>&1 | $PAGER;
+    ## OLD: PYTHONPATH="$root:.:$PYTHONPATH" $NICE pylint --reports=n --score=n --persistent=n "$@" 2>&1 | $PAGER;
+    # note: puts current dir before root (e.g., import test.test_f resolves to test/test_f.py when at ./tests)
+    PYTHONPATH=".:$root:$PYTHONPATH" $NICE pylint --reports=n --score=n --persistent=n "$@" 2>&1 | $PAGER;
     ## TODO3:
     ## local pylint_out="$TMP/_pylint-$$.out"
     ## PYTHONPATH="$root:$PYTHONPATH" $NICE pylint "$@" >| "$pylint_out"
