@@ -80,7 +80,12 @@ class NotebookPostprocessor:
         for cell in cells:
             if not isinstance(cell, dict):
                 raise ValueError("Notebook contains a non-object cell")
-            cell.pop("execution_count", None)
+            # Reset execution_count to null on code cells (required by nbformat)
+            ## BAD: cell.pop("execution_count", None)
+            if cell.get("cell_type") == "code":
+                cell["execution_count"] = None
+            else:
+                cell.pop("execution_count", None)
             metadata = cell.get("metadata")
             if metadata is not None:
                 if not isinstance(metadata, dict):
@@ -96,8 +101,11 @@ class NotebookPostprocessor:
         if not isinstance(notebook, dict):
             raise ValueError(f"Notebook is not an object: {notebook_path}")
         self.strip_cell_execution_metadata(notebook)
+        # Write normalized notebook with sorted keys to match nbformat serialization order
+        # (e.g., keeping restored execution_count right after cell_type)
         notebook_path.write_text(
-            json.dumps(notebook, indent=1, ensure_ascii=True) + "\n",
+            ## OLD: json.dumps(notebook, indent=1, ensure_ascii=True) + "\n",
+            json.dumps(notebook, indent=1, ensure_ascii=True, sort_keys=True) + "\n",
             encoding="utf-8")
 
     def update_batspp_output(self, notebook_path: Path) -> None:

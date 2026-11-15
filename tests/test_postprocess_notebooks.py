@@ -79,7 +79,8 @@ class TestIt(TestWrapper):
         result = json.loads(notebook_path.read_text(encoding="utf-8"))
 
         assert result["metadata"] == NOTEBOOK["metadata"]
-        assert "execution_count" not in result["cells"][0]
+        ## BAD: assert "execution_count" not in result["cells"][0]
+        assert result["cells"][0]["execution_count"] is None
         assert "execution" not in result["cells"][0]["metadata"]
         assert result["cells"][0]["metadata"]["preserved"] == "cell metadata"
         assert "execution_count" not in result["cells"][1]
