@@ -94,6 +94,7 @@
 #   set_xterm_title.bash startup-tracing.bash
 # - Supplemental scripts:
 #   anaconda-aliases.bash git-aliases.bash kill_em.bash ps_mine.bash
+## UPDATE 2026-11-14: perl-[usual] rename
 ## UPDATE 2026-11-11: grepl-entry tweaks
 ## UPDATE 2026-11-01: refine function-usage error handling; adds rename-emoji usage
 ## UPDATE 20 Sep 26: reworks less macros to minimize redundancy; more macro comments
@@ -770,10 +771,11 @@ if [ "$PERLLIB" = "" ]; then PERLLIB="."; else PERLLIB="$PERLLIB:."; fi
 export PERLLIB="$TOM_BIN:$PERLLIB:$HOME/perl/lib/perl5/site_perl/5.8"
 # HACK: not all cygwin directories being recognized
 export PERLLIB="$HOME/perl/lib/perl5/5.16:$HOME/perl/lib/perl5/5.16/vender_perl:$PERLLIB"
-# perl-(): perl with following options: -S use path; -s enable switches (-x=v); -w show warnings;
+# perl-usual(): perl with following options: -S use path; -s enable switches (-x=v); -w show warnings;
 # See perlrun manpage.
-# TODO4: rename perl- to perl-usual???
-alias perl-='perl -Ssw'
+# note: previously just called 'perl-'
+alias perl-usual='perl -Ssw'
+alias perl-=perl-usual
 ## Lorenzo review: should change this to perl-alt following TODO's
 ## TODO: function alias-perl { DURING_ALIAS=1 perl "$@"; }
 # alias-perl(): perl with DURING_ALIAS defined (n.b., avoids excess tracing; see common.perl)
@@ -2402,6 +2404,7 @@ trace "adhoc unix aliases (e.g., showing or killing processes, etc.)"
 alias dobackup='dobackup.sh'
 alias kill-em='kill_em.bash'
 alias kill-it='kill-em --verify --pattern'
+alias kill-it-force='kill-em --pattern'
 # ps-mine: wrapper around ps_mine.sh w/ filtering (e.g., defunct)
 alias ps-mine-regular='ps_mine.bash'
 alias ps-mine='ps-mine-regular --filtered'
@@ -2680,8 +2683,11 @@ function rename-with-file-date() {
 function copy-with-file-date { rename-with-file-date --copy "$@"; }
 
 # Statistical helpers
-alias bigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=2'
-alias unigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=1'
+## BAD:
+## alias bigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=2'
+## alias unigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=1'
+alias bigrams='perl-usual "count_bigrams.perl -N=2'
+alias unigrams='perl-usual count_bigrams.perl -N=1'
 alias word-count=unigrams
 
 # calc-stdev: calculate stdard deviation iv sum_file.perl using -col=1 by default
