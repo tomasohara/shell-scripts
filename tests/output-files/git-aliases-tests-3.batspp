@@ -97,7 +97,9 @@ $ [ $changed -eq 1 ]; echo $?;
 ## OLD: 
 ## killall nvim > /dev/null 2>&1
 ## git-vdiff-alias > /dev/null 2>&1
-$ kill-it diff.*temp > /dev/null 2>&1
+## OLD: kill-it diff.*temp > /dev/null 2>&1
+## NOTE: uses kill-it-force to skip verification recently added
+$ kill-it-force diff.*temp > /dev/null 2>&1
 $ git-vdiff-alias temp-hello.txt &
 $ instances=$(ps -e | grep "diff.*temp" | wc -l)
 
