@@ -326,7 +326,8 @@ def main():
             # CONSOLE_TRACING disabled to facilitate bats header line sanity check.
             eval_log = output_file + ".eval.log"
             lenient_eval = (not STRICT_EVAL)
-            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR=1 FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} IGNORE_ALL_COMMENTS=1 IGNORE_SETUP_OUTPUT=1 CONSOLE_TRACING=0 python3 {parent_dir}/simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            ## OLD: run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR={BASH_EVAL} FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} IGNORE_ALL_COMMENTS=1 IGNORE_SETUP_OUTPUT=1 CONSOLE_TRACING=0 python3 {parent_dir}/simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
+            run_output = gh.run(f"MATCH_SENTINELS=1 PARA_BLOCKS=1 BASH_EVAL={BASH_EVAL} COPY_DIR=1 KEEP_OUTER_QUOTES=1 GLOBAL_TEST_DIR={BASH_EVAL} FORCE_RUN={FORCE_OPTION} EVAL_LOG={eval_log} NORMALIZE_WHITESPACE={lenient_eval} STRIP_COMMENTS={lenient_eval} IGNORE_ALL_COMMENTS=1 IGNORE_SETUP_OUTPUT=1 CONSOLE_TRACING=0 python3 {parent_dir}/simple_batspp.py {input_file} --output {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         else:
             run_output = gh.run(f"batspp {input_file} --save {output_file} {source_spec} > {real_output_file} 2> {log_file}")
         # Output excerpts from BatsPP source file, Bats output file and conversion log file.
@@ -552,11 +553,13 @@ def main():
                 if USE_SIMPLE_BATSPP and BASH_EVAL:
                     bats_program = ""
                 run_batspp(batsppfile_path, f"{BATS_STORE}/{bats_from_batspp}")
-                gh.run(f"kcov {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
+                ## NOTE: Following was a duplicate run
+                ## BAD: gh.run(f"kcov --bash-method=DEBUG {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
                     
                 KCOV_MESSAGE = f"KCOV REPORT PATH: {KCOV_STORE}/{test_extensionless}/"
                 print(gh.indent(KCOV_MESSAGE, indentation="  -  ", max_width=512))
-                gh.run(f"kcov {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
+                # note: --bash-method=DEBUG uses more robust debug-trap method rather than xtrace
+                gh.run(f"kcov --bash-method=DEBUG {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
 
         batspp_count = i - 1 
 
