@@ -81,8 +81,18 @@ jobs:
 
       - name: Run BatsPP and Python Tests under Runner
         run: |
-          PYTHONPATH="$PWD:$PWD/tests:$PYTHONPATH" ./tests/run_tests.bash
-          
+          ## OLD: PYTHONPATH="$PWD:$PWD/tests:$PYTHONPATH" ./tests/run_tests.bash
+          ## TODO: set -o pipefail
+          PYTHONPATH="$PWD:$PWD/tests:$PYTHONPATH" ./tests/run_tests.bash 2>&1 | tee _run_tests.log
+
+      - name: Upload Test Output Artifact
+        # Upload combined test log (facilitated by Antigravity)
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: run-tests-log-${{ matrix.os }}-py${{ matrix.python-version }}
+          path: _run_tests.log
+
       - name: Final Disk Usage
         run: |
           echo "File system usage:"
