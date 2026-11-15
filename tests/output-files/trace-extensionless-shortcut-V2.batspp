@@ -69,7 +69,11 @@ $ [ "$(kill-em --test firefox | wc -l)" -gt 0 ]; echo $?
 
 ## kill-it ()
 # kill-it --test firefox | wc -l | testnum
-$ [ "$(kill-it --test firefox | wc -l)" -gt 0 ]; echo $?
+## NOTE: kill-it now uses verification
+## TODO2: add test for kill-it with timeout; for example,
+##    long=123456789; sleep $long & timeout 3 bash -ic 'kill-it sleep $log'
+## OLD: [ "$(kill-it --test firefox | wc -l)" -gt 0 ]; echo $?
+$ [ "$(kill-it-force --test firefox | wc -l)" -gt 0 ]; echo $?
 0
 
 ## OLD
@@ -224,9 +228,11 @@ $ man cat > man_cat.txt
 $ [ -e man_cat.txt ]; echo $?
 0
 
-## Before addition, adding TOM_BIN to archive
-$ TOM_BIN_BAK=$TOM_BIN
-$ TOM_BIN=$TOM_BIN/archive
+## VERY-BAD: Tests need to run in same environment as user (i.e., TOM_BIN is entire repo).
+##
+## ## Before addition, adding TOM_BIN to archive
+## TOM_BIN_BAK=$TOM_BIN
+## TOM_BIN=$TOM_BIN/archive
 
 ## OLD: count_bigrams.perl moved to archive
 # unigrams man_cat.txt | grep -w "cat" | head -n 1 | testnum
@@ -243,12 +249,15 @@ $ [ "$(word-count man_cat.txt | grep -w "cat" | wc -l)" -ne 0 ]; echo $?
 # bigrams ./man_cat.txt | testuser | testnum
 # bigrams ./man_cat.txt | grep -w "cat" | head -n 1 | testnum
 $ [ "$(bigrams ./man_cat.txt | grep -w "cat" | wc -l)" -ne 0 ]; echo $? 
-0
+bash: command substitution: line 1: unexpected EOF while looking for matching `"'
+bash: [: : integer expression expected
+2
 
 # # WORKS FINE - HALTS PROCESS
 # $ lynx-html
 
-$ TOM_BIN=$TOM_BIN_BAK
+## VERY-BAD
+## TOM_BIN=$TOM_BIN_BAK
 
 ## OLD
 # lynx-dump-stdout | head -n 1
