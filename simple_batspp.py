@@ -44,6 +44,17 @@
 #      [ echo a; # TODO: echo b; ]   => [ echo a; ] [ # TODO: echo b; ]
 #   where the brackets indicate distinct text paragraph blocks or Jupyter cells.
 # - Run the Bash-formatted output through shellcheck (e.g., BASH_EVAL=1 OMIT_TRACE=1).
+# - Bats evaluation (BASH_EVAL=0 / BATS_EVAL=1) vs. Bash evaluation (BASH_EVAL=1):
+#   * bats-core runs with `set -eET` and an ERR trap by default, and re-sources the
+#     top-level .bats file in each per-test subshell (`bats-exec-test`) after the
+#     initial file pass (`bats-exec-file`).
+#   * Consequently, top-level GLOBAL_TEST_DIR setup must check whether the working
+#     directory is already `$test_folder` before copying `./.`, and non-strict
+#     evaluation (`STRICT_EVAL=0`) must suppress `errexit` around `# Global setup`
+#     as well as per-test setup/actual function calls.
+#   * Because bats runs each `@test` in an isolated subshell, shell variables or
+#     directory changes from one test do not persist into subsequent tests unless
+#     placed in `# Global setup` or written to files under `$test_folder`.
 #................................................................................
 #
 ## TODO1:
@@ -95,6 +106,7 @@
 ## - add examples below to help clarify processing
 ##
 ## UPDATE 2026-10-29: Adds optional timeout.
+## UPDATE 2026-11-15: Fixes global setup and directory copying for bats evaluation (BASH_EVAL=0).
 ## UPDATE 04 Aug 26: Adds support for strict eval (i.e., set -euo pipefail).
 ##
 
@@ -853,7 +865,8 @@ class CustomTestsToBats:
         # Process setup commands
         # Note: set COPY_DIR to copy files in current dir to temp. dir.
         ## TODO: temp_dir = Main.temp_base; put copy in setup if GLOBAL_TEST_DIR
-        debug.assertion(BASH_EVAL or not GLOBAL_TEST_DIR)
+        ## NOTE: GLOBAL_TEST_DIR now supported when BASH_EVAL is False (bats mode)
+        ## OLD: debug.assertion(BASH_EVAL or not GLOBAL_TEST_DIR)
         ## OLD: gh.full_mkdir(test_folder)
         self.num_tests += 1
         setup_text = ""
@@ -864,11 +877,15 @@ class CustomTestsToBats:
             ## TODO1: test_folder = gh.form_path(TEMP_DIR, test_subdir)
             ## NOTE: The above is leading to odd errors after running a dozen or so tests files
             ##    '/bin/sh: 1: cannot open /dev/null: No such file'
-            test_folder = gh.form_path(".", test_subdir)
+            ## NOTE: Using "." for test_folder causes 'cp -Rp ./. "$test_folder"' to fail
+            ## under bats ('cannot copy a directory into itself') and breaks relative out_file after cd.
+            ## BAD: test_folder = gh.form_path(".", test_subdir)
+            test_folder = gh.form_path(TEMP_DIR, test_subdir)
             setup_text += (
                 f'\ttest_folder="{test_folder}"\n' +
                 f'\tmkdir --parents "$test_folder"\n' +
                 (f'\tcommand cp -Rp ./. "$test_folder"\n' if COPY_DIR else "") +
+                (f'\tcommand chmod -R ugo+w "$test_folder"\n' if COPY_DIR else "") +
                 # note: warning added for sake of shellcheck
                 f'\tbuiltin cd "$test_folder" || echo Warning: Unable to "cd $test_folder"\n')
         setup_sans_prompt = my_re.sub(r'^\s*\$', '\t', setup, flags=my_re.MULTILINE)
@@ -918,12 +935,15 @@ class CustomTestsToBats:
         ## has_continuation_comment = re.search(r"#\s*Continuation", entire, re.IGNORECASE)
         ## use_setup_function = (has_setup_comment or has_continuation_comment)
         setup_call = ""
+        strict_suffix = ("" if STRICT_EVAL else " || true")
         if use_setup_function:
             debug.trace(T6, f"Using separate setup function {self._setup_funct}")
             if not self._setup_funct:
                 system.print_error(f"Error: No setup function defined for test {unspaced_title}")
             else:
-                setup_call = ("\t" + self._setup_funct + ";\n")
+                ## NOTE: Suppress errexit in setup function under bats when STRICT_EVAL is disabled
+                ## BAD: setup_call = ("\t" + self._setup_funct + ";\n")
+                setup_call = f"\t{self._setup_funct}{strict_suffix};\n"
         else:
             ## TODO: self._setup_funct = None
             pass
@@ -942,7 +962,9 @@ class CustomTestsToBats:
             out_file = gh.form_path(test_folder, f"{unspaced_title}.out")
             main_body += (
                 f'\tout_file="{out_file}"\n' +
-                f'\t{actual_function} >| "$out_file"\n' +
+                ## NOTE: Suppress errexit on actual function call so bats compares output even on non-zero exit
+                ## BAD: f'\t{actual_function} >| "$out_file"\n' +
+                f'\t{actual_function} >| "$out_file"{strict_suffix}\n' +
                 f'\t{actual_var}="$(cat "$out_file")"\n')
             main_body += f'\t{expected_var}="$({expected_function})"\n'
         ## TODO3: just normalize actual at runtime as expected can be done ahead of time
@@ -958,7 +980,10 @@ class CustomTestsToBats:
                 # TODO2: make sure success not counted in stats
                 main_body += (f'\t{actual_var}=ignored\n' +
                               f'\t{expected_var}=ignored\n' +
-                              '\tlet num_ignored_tests++\n' +
+                              ## NOTE: Post-increment 'let num_ignored_tests++' returns exit status 1 when 0,
+                              ## which aborts bats under 'set -e'; pre-increment evaluates to >= 1 (status 0).
+                              ## BAD: '\tlet num_ignored_tests++\n' +
+                              '\tlet ++num_ignored_tests\n' +
                               '\ttest_output_ignored=1\n')
             else:
                 main_body += f'\ttest_output_ignored=0\n'
@@ -1151,14 +1176,28 @@ class CustomTestsToBats:
         ## TODO2: add glob for dirs to copy to avoid recursive one
         if GLOBAL_TEST_DIR:
             test_folder = gh.form_path(TEMP_DIR, "global-test-dir")
+            ## NOTE: Guard copy/cd when already in test_folder because bats re-sources the .bats file
+            ## for each @test after bats-exec-file has already cd'd into test_folder.
+            ## BAD:
+            ## bats_tests += (
+            ##     "# Global test directory setup\n" +
+            ##     f'test_folder="{test_folder}"\n' +
+            ##     f'mkdir --parents "$test_folder"\n' +
+            ##     (f'command cp -Rp ./. "$test_folder"\n' if COPY_DIR else "") +
+            ##     (f'command chmod -R ugo+w "$test_folder"\n' if COPY_DIR else "") +
+            ##     # note: warning added for sake of shellcheck
+            ##     f'command cd "$test_folder" || echo Warning: Unable to "cd $test_folder"\n' +
+            ##     "\n")
             bats_tests += (
                 "# Global test directory setup\n" +
                 f'test_folder="{test_folder}"\n' +
                 f'mkdir --parents "$test_folder"\n' +
-                (f'command cp -Rp ./. "$test_folder"\n' if COPY_DIR else "") +
-                (f'command chmod -R ugo+w "$test_folder"\n' if COPY_DIR else "") +
+                f'if [ "$(realpath .)" != "$(realpath "$test_folder")" ]; then\n' +
+                (f'\tcommand cp -Rp ./. "$test_folder"\n' if COPY_DIR else "") +
+                (f'\tcommand chmod -R ugo+w "$test_folder"\n' if COPY_DIR else "") +
                 # note: warning added for sake of shellcheck
-                f'command cd "$test_folder" || echo Warning: Unable to "cd $test_folder"\n' +
+                f'\tcommand cd "$test_folder" || echo Warning: Unable to "cd $test_folder"\n' +
+                f'fi\n' +
                 "\n")
         ## TODO:
         ## NORMALIZE_WHITESPACE = system.getenv_bool("NORMALIZE_WHITESPACE", False,
@@ -1206,7 +1245,13 @@ class CustomTestsToBats:
                                 "Global setup should not have expected output")
                 global_setup = my_re.sub(r'^\s*\$\s*', '', entire_code, flags=re.MULTILINE)
                 debug.trace_expr(T6, global_setup)
-                bats_tests += global_setup + "\n"
+                ## NOTE: Disable errexit around global setup under bats (when not STRICT_EVAL)
+                ## so non-zero setup commands (e.g., rename-with-file-date on missing dir) don't abort setup_file.
+                ## BAD: bats_tests += global_setup + "\n"
+                if (not BASH_EVAL) and (not STRICT_EVAL):
+                    bats_tests += f"set +o errexit\n{global_setup}\nset -o errexit\n\n"
+                else:
+                    bats_tests += global_setup + "\n"
                 continue
             
             test = self._common_process(test)

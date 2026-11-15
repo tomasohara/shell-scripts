@@ -202,6 +202,33 @@ class TestIt(TestWrapper):
             THE_MODULE.MAX_ESCAPED_LEN = old_max_len
         return
 
+    @trap_exception
+    def test_bats_eval_dir_setup(self):
+        """Make sure BATS mode (BASH_EVAL=False) guards global-test-dir copy and uses TEMP_DIR"""
+        debug.trace(4, f"TestIt.test_bats_eval_dir_setup(); self={self}")
+        self.monkeypatch.setattr(THE_MODULE, "BASH_EVAL", False)
+        self.monkeypatch.setattr(THE_MODULE, "COPY_DIR", True)
+        self.monkeypatch.setattr(THE_MODULE, "STRICT_EVAL", False)
+        # 1. GLOBAL_TEST_DIR=True: global copy guarded against re-sourcing in same dir
+        self.monkeypatch.setattr(THE_MODULE, "GLOBAL_TEST_DIR", True)
+        test_obj = THE_MODULE.CommandTests()
+        bats_tests, _ = test_obj.get_bats_tests(FUBAR_TEST)
+        self.do_assert('if [ "$(realpath .)" != "$(realpath "$test_folder")" ]; then' in bats_tests)
+        self.do_assert("set +o errexit" in bats_tests)
+        # 2. GLOBAL_TEST_DIR=False: per-test folder placed under TEMP_DIR (not '.')
+        self.monkeypatch.setattr(THE_MODULE, "GLOBAL_TEST_DIR", False)
+        test_case = THE_MODULE.TestFieldTypes(
+            entire="# Setup\n$ echo setup\n",
+            title="local-dir",
+            setup="",
+            actual="$ echo ok\n",
+            expected="",
+        )
+        bats_text, _ = test_obj._convert_to_bats(test_case)
+        self.do_assert(f'test_folder="{THE_MODULE.TEMP_DIR}/' in bats_text)
+        self.do_assert("|| true" in bats_text)
+        return
+
 
 #------------------------------------------------------------------------
 
