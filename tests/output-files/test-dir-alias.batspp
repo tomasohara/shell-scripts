@@ -20,7 +20,8 @@ $ [ "$actual" = ">" ]; echo $?
 # Global Setup
 ## For number of digits not being critical
 $ alias testnum="sed -r "s/[0-9][0-9]*/N/g""
-$ alias ln-symbolic-force='ln-symbolic --force'
+## NOTE: Shouldn't re-define aliases to be tested!
+## BAD: alias ln-symbolic-force='ln-symbolic --force'
 
 ## BAD
 # # Delete all aliases and function
@@ -125,7 +126,7 @@ $ [ "$(ls -l | wc -l)" -eq 3 ]; echo $?
 ## BAD
 # bash $BIN_DIR/tests/_dir-aliases.bash
 
-## Note: to make reproducible, only show pemrissions and the file info shown at end,
+## Note: to make reproducible, only show permissions and the file info shown at end,
 ## omitting details like the user and time that could be different.
 ##
 ## $ cd test-7919
