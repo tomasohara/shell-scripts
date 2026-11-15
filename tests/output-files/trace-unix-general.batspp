@@ -93,10 +93,11 @@ $ [ "$(typeset -f | egrep '^\w+' | wc -l)" -ne 0 ]; echo $?
 $ [ "$(ps-all | wc -l)" -ne 0 ]; echo $?
 0
 
-$ TOM_BIN_BAK=$TOM_BIN
-$ TOM_BIN=$TOM_BIN/archive
-$ [[ $TOM_BIN =~ "/archive" ]]; echo $?
-0
+## VERY-BAD: Tests need to run in same environment as user (i.e., TOM_BIN is entire repo).
+##
+## TOM_BIN_BAK=$TOM_BIN
+## TOM_BIN=$TOM_BIN/archive
+## [[ $TOM_BIN =~ "/archive" ]]; echo $?
 
 # ps_sort.perl -by=mem -
 
