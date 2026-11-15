@@ -2686,7 +2686,7 @@ function copy-with-file-date { rename-with-file-date --copy "$@"; }
 ## BAD:
 ## alias bigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=2'
 ## alias unigrams='perl -sw "$TOM_BIN"/count_bigrams.perl -N=1'
-alias bigrams='perl-usual "count_bigrams.perl -N=2'
+alias bigrams='perl-usual count_bigrams.perl -N=2'
 alias unigrams='perl-usual count_bigrams.perl -N=1'
 alias word-count=unigrams
 
