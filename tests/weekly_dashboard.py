@@ -97,6 +97,9 @@ def parse_alias_reports(directory):
 
 def parse_kcov_reports(directory):
     """Return the aggregate Kcov covered and instrumented line counts."""
+    ## TODO2: rework to address issues noted by Claude 5.2 Fable
+    ##    "Alias coverage" is not usable as reported. parse_kcov_reports sums every notebook's Kcov report, including copies of unrelated test scripts, so it shows 9–12% when about 58% of alias-file lines actually run.
+    ##
     covered = instrumented = 0
     if not directory or not directory.exists():
         debug.trace(TL.WARNING, f"Kcov reports directory not found: {directory}")
