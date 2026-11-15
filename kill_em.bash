@@ -17,12 +17,27 @@
 # - separate out the Graphling support into a new script just for that
 # - figure out occasional problem with graphling files not getting deleted after processed killed
 #
+## UPDATE 2026-11-14: omits verification in test mode
 ## UPDATE 2026-10-27: makes sure aux script exists before executing via Gemini
 ## UPDATE 05 Aug 26: adds --verify
 #
 
-# Uncomment the following line for tracing
-# set -x
+# Set bash regular and/or verbose tracing
+# - xtrace shows arg expansion (and often is sufficient)
+# - verbose shows source commands as is (but usually is superfluous w/ xtrace)
+#
+if [ "${DEBUG_LEVEL:-0}" -ge 4 ]; then
+    echo "$0 $*"
+fi
+if [[ "${TRACE:-0}" == "1" ]]; then
+    set -o xtrace
+fi
+if [[ "${VERBOSE:-0}" == "1" ]]; then
+    set -o verbose
+fi
+if [[ "${STRICT:-0}" == "1" ]]; then
+    set -euo pipefail
+fi
 
 # Initialize options and variables
 # NOTE: temp file is of the form /tmp/kill_em_aux_HOSTNAME_PID
@@ -189,7 +204,9 @@ else
     if [ $verify == 1 ]; then
         ## TODO3: add helper script to facilitate consistency (e.g., for use in pause-for-enter)
         echo "Press enter to proceed"
-        read
+        if [ "$test" == 0 ]; then 
+            read
+        fi
     fi
 ## BAD:
 ## fi
