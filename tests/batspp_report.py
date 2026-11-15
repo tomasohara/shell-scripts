@@ -559,7 +559,12 @@ def main():
                 KCOV_MESSAGE = f"KCOV REPORT PATH: {KCOV_STORE}/{test_extensionless}/"
                 print(gh.indent(KCOV_MESSAGE, indentation="  -  ", max_width=512))
                 # note: --bash-method=DEBUG uses more robust debug-trap method rather than xtrace
-                gh.run(f"kcov --bash-method=DEBUG {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
+                misc_args = ""
+                if BASH_EVAL:
+                    misc_args = "--bash-method=DEBUG"
+                else:
+                    misc_args = "--bash-dont-parse-binary-dir --exclude-path=/usr"
+                gh.run(f"kcov {misc_args} {KCOV_STORE}/{test_extensionless} {bats_program} {BATS_STORE}/{bats_from_batspp}")
 
         batspp_count = i - 1 
 
