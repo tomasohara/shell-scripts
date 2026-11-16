@@ -1,4 +1,9 @@
 #! /usr/bin/env python
+#
+# Convert single-line functions and aliases to use multiple lines.
+#
+## NOTE: added to workaround issues with kcov profiling of single-line functions
+## TODO3: rename to something like normalize_aliases.py
 
 """
 Transforms bash aliases and single-line functions into multiline format, preserving comments and structure.
