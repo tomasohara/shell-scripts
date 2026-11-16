@@ -2,6 +2,7 @@
 #
 # Simple tests for tests/bash_to_multiline.py
 #
+## TODO2: use xfail/assert False in placeholder tests (as per test/template.py)
 
 """Tests for tests/bash_to_multiline module"""
 
@@ -65,6 +66,7 @@ class TestBashToMultiline(TestWrapper):
     def test_transform_singleline_function_with_nested_commands(self):
         """Test transformation of a single-line function with nested braces and parentheses."""  
         debug.trace(4, "TestBashToMultiline.test_transform_singleline_function_with_nested_commands()")
+        ## TODO2: xfail/assert as per test/template.py
         pass  
 
     def test_analyze_line_comment(self):
