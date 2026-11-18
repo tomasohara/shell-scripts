@@ -304,6 +304,9 @@ if [[ "${VERBOSE:-0}" == "1" ]]; then set -o verbose; fi
 shopt -s expand_aliases
 
 env --ignore-environment bash --noprofile --norc
+
+# TODO4: explain use of PS4 for source line tracing, as in following:
+PS4='+ ${BASH_SOURCE}:${LINENO}: ' pwd-host-info
 ```
 
 ## Pattern Matching
