@@ -683,6 +683,13 @@ function libreoffice-text-from-html-clipboard() {
         perl -i.bak -pe 's@.*@<!DOCTYPE html><html lang="en">\n$&\n</html>\n@;' "$temp_html"
     fi
 
+    # Remove inline border styles to avoid extraneous borders around text
+    # note: LibreOffice renders zero-width or transparent borders as black hairlines;
+    # this leaves 'box-sizing: border-box' intact but also drops any intentional borders.
+    # ex: style="box-sizing: border-box; border: 0px solid lab(90.952 0 0); margin: 0px;" => style="box-sizing: border-box; margin: 0px;"
+    ## NOTE: Change facilitated by Claude Code using model Claude Fable 5.2
+    perl -i -pe 's@(?<![-\w])border(-[a-z]+)*\s*:[^;"]*;?\s*@@g' "$temp_html"
+
     # Convert HTML to document and then open
     libreoffice --headless --convert-to odt "$temp_html" --outdir "$(dirname "$base")"
     libreoffice "$doc_file" &
