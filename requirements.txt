@@ -32,15 +32,15 @@ psutil                                  # - Cross-platform lib for process and s
 requests                                # - Python HTTP for Humans
 scikit-learn                            # - Machine learning in Python
 stop-words                              # - Get list of common stop words
-torch                                   # - Tensors and Dynamic neural networks (PyTorch)
+#opt# torch                             # - Tensors and Dynamic neural networks (PyTorch)
 tqdm                                    # - Fast, Extensible Progress Meter
 unidecode                               # - Unicode to ASCII transliteration
 webcolors                               # - Library for working with color names and values
 xmltodict                               # - Makes working with XML feel like working with JSON
 youtube-transcript-api                  # - API for getting transcripts for YouTube videos
 pyenchant                               # - Spellchecking library
-#opt# spacy                                   # - Industrial-strength Natural Language Processing
-#opt# transformers                            # - State-of-the-art Machine Learning (Hugging Face)
+#opt# spacy                             # - Industrial-strength Natural Language Processing
+#opt# transformers                      # - State-of-the-art Machine Learning (Hugging Face)
 #
 #...............................................................................
 # Redundant specification of some dependencies due to Git workflow quirk,
