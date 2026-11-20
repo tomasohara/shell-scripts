@@ -64,6 +64,8 @@ $ echo "hello second local" > temp-hello.txt
 $ git add temp-hello.txt >> "$stderr_log" 2>&1
 $ git commit -m "first commit on second local" >> "$stderr_log" 2>&1
 $ git push  >> "$stderr_log" 2>&1
+# note: uses true to make sure steps succeeds so that Jupyter doesn't stop executing notebook
+$ true
 
 # Moving to first local
 $ command cd "$TMPA"
@@ -122,6 +124,8 @@ $ echo "second change" > temp-hello2.txt
 $ git add temp-*.txt >> "$stderr_log" 2>&1
 $ git commit -m "second commit" >> "$stderr_log" 2>&1
 $ git push >> "$stderr_log" 2>&1
+# note: uses true to make sure steps succeeds so that Jupyter doesn't stop executing notebook
+$ true
 
 # Setup
 # Moving to first local
@@ -129,21 +133,21 @@ $ command cd "$TMPA" >> "$stderr_log" 2>&1
 $ echo "second line" >> temp-hello.txt
 
 # Should fail
-$ git-update-plus
+$ git-update-plus | encode-text
 No changed files so no pre-stash-pop timestamp check
 issuing: git stash
 issuing: git pull --all --verbose
 issuing: git stash pop
 No changed files so no post-stash-pop timestamp check
 No local changes to save
-POST git-upload-pack (212 bytes)
-POST git-upload-pack (429 bytes)
+POST git-upload-pack (N<cc>N bytes)
+POST git-upload-pack (N bytes)
 From https://github.com/scrappycito/git-bash-test
  = [up to date]      main        -> origin/main
-   149e778..5740c3f  development -> origin/development
+   bdeN<cc>..NaNeNf<cc>  development -> origin/development
 Already up to date.
 No stash entries found.
-
+<newline>
 
 # git-update-force test 
 # should pull
@@ -197,6 +201,8 @@ $ git commit -m "cleanup test files" >> "$stderr_log" 2>&1
 
 # Setup
 $ git push >> "$stderr_log" 2>&1
+# note: uses true to make sure steps succeeds so that Jupyter doesn't stop executing notebook
+$ true
 
 # Setup
 ## OLD (moved above)
