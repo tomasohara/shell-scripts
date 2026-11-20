@@ -27,6 +27,19 @@ $ rename-with-file-date "$TMPA" > /dev/null 2>&1
 $ true
 
 # Global setup
+# Define aliases for encoding output (e.g., to ensure output the same across runs).
+## TODO: define a better hex encoder to avoid false positives (e.g., abc).
+## OLD: alias encode-control-chars='perl -pe "s/\t/<tab>/g;  s/[\x00-\x08\x11\x31]/<cc>/g;"'
+$ alias remove-control-chars='perl -pe "s/\t/<tab>/g;  s/[\x00-\x08\x11\x31]//g;"'
+$ alias encode-nums='perl -pe "s/[0-9]+/N/g;"'
+## OLD: alias encode-hex='perl -pe "s/[0-9A-F]{4,}/<hex>/ig;"'
+$ alias encode-hex='perl -pe "s/\b[0-9A-F]{4,}\b/<hex>/ig;"'
+# note: uses perl slurp mode (i.e., read entire file) to check for consecutive newlines
+$ alias encode-newlines='perl -0777 -pe "while (/\n\n/) { s/\n\n/\n<newline>\n/g; }"'
+## OLD: function encode-text () { encode-control-chars | encode-nums | encode-hex | encode-newlines; }
+$ function encode-text () { remove-control-chars | encode-hex | encode-nums | encode-newlines; }
+
+# Global setup
 $ git clone https://github.com/scrappycito/git-bash-test.git "$TMPA" > /dev/null 2>&1
 
 # Global setup
@@ -41,6 +54,8 @@ $ echo "hello second local" > temp-hello.txt
 $ git add temp-hello.txt > /dev/null 2>&1
 $ git commit -m "first commit on second local" > /dev/null 2>&1
 $ git push  > /dev/null 2>&1
+# note: uses true to make sure steps succeeds so that Jupyter doesn't stop executing notebook
+$ true
 
 # Note:
 # - changed so that all temp files use "temp-" prefix
@@ -123,13 +138,13 @@ $ export GIT_MESSAGE="checkin"
 $ previous=$GIT_NO_CONFIRM
 $ export GIT_NO_CONFIRM="1"
 # git-next-checkin temp-hello.txt
-$ git-next-checkin temp-hello.txt 2>&1 | command egrep 'hello|issuing'
+$ git-next-checkin temp-hello.txt 2>&1 | command egrep 'hello|issuing' | encode-text
 issuing: zip over changed files (for later restore)
 issuing: git stash
 issuing: git pull --all --verbose
 issuing: git stash pop
-issuing: unzip over "/home/testuser/temp/tmp/_git-stash.2790267.zip" (to restore timestamps)
-      26  Stored       26   0% 2026-11-14 21:21 e1e343ae  temp-hello.txt
+issuing: unzip over "/home/testuser/temp/tmp/_git-stash.<hex>.zip" (to restore timestamps)
+      N  Stored       N   N% <hex>--N N:N <hex>  temp-hello.txt
 issuing: git add temp-hello.txt
 issuing: git commit -m 'default'
 issuing: git push --verbose
@@ -150,6 +165,8 @@ $ git rm -f temp-*.txt > /dev/null 2>&1
 $ git add . > /dev/null > /dev/null 2>&1
 $ git commit -m "cleanup test files" > /dev/null 2>&1
 $ git push > /dev/null 2>&1
+# note: uses true to make sure steps succeeds so that Jupyter doesn't stop executing notebook
+$ true
 
 ## NOTE: no need to cleanup up environment in notebook
 ## OLD: export GIT_NO_CONFIRM=$previous
