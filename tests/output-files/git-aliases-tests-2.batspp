@@ -56,6 +56,8 @@ $ echo "hello second local" > temp-hello.txt
 $ git add temp-hello.txt > /dev/null 2>&1
 $ git commit -m "first commit on second local" > /dev/null 2>&1
 $ git push  > /dev/null 2>&1
+# note: uses true to make sure steps succeeds so that Jupyter doesn't stop executing notebook
+$ true
 
 # git-rename-file tests
 # Assert file doesn't exist
@@ -194,6 +196,8 @@ $ true
 $ git add . > /dev/null 2>&1
 $ git commit -m "cleanup test files" > /dev/null 2>&1
 $ git push > /dev/null 2>&1
+# note: uses true to make sure steps succeeds so that Jupyter doesn't stop executing notebook
+$ true
 
 ## NOTE: no need to cleanup up environment in notebook
 ## OLD: export GIT_NO_CONFIRM=$previous
