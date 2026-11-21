@@ -198,7 +198,7 @@ $ [ $num_lower -eq 3 ]; echo $?
 0
 
 # Indent text (4 spaces)
-#
+# note: adding for testing coverage (e.g., KCOV_DEFAULT=1): check report for tomohara-proper-aliases.bash
 $ text=$'How\nnow\nbrown\ncow'
 $ indent-text <<<"$text"
     How

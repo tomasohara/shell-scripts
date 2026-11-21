@@ -249,9 +249,7 @@ $ [ "$(word-count man_cat.txt | grep -w "cat" | wc -l)" -ne 0 ]; echo $?
 # bigrams ./man_cat.txt | testuser | testnum
 # bigrams ./man_cat.txt | grep -w "cat" | head -n 1 | testnum
 $ [ "$(bigrams ./man_cat.txt | grep -w "cat" | wc -l)" -ne 0 ]; echo $? 
-bash: command substitution: line 1: unexpected EOF while looking for matching `"'
-bash: [: : integer expression expected
-2
+0
 
 # # WORKS FINE - HALTS PROCESS
 # $ lynx-html

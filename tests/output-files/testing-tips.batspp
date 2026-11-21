@@ -99,7 +99,7 @@ $ num-sleep-processes
 
 # Setup: start a sleeping process
 $ sleep 10 &
-[1] 1237787
+[1] 545808
 
 # Output number of sleep processes
 $ num-sleep-processes
@@ -114,6 +114,7 @@ $ [ "$num_sleeping" -eq 1 ]; echo $?
 # Kill the sleep process
 # note: made part of wrapup as output placement not deterministic
 $ kill-sleep >| /tmp/kill-sleep-$$.log 2>&1
+[1]+  Killed                  sleep 10
 
 # End of test (n.b., avoids extraneous new cells after Kernel > Restart ... Run All Cells)
 
