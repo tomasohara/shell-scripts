@@ -1,6 +1,7 @@
 # Third test for git aliases (e.g., git-update-plus, git-next-checkin, etc)
 # Note: The aliases should be defined before Jupyter is invoked.
 # For BatsPP, they can loaded via '--source all-tomohara-aliases-etc.bash' option.
+## UPDATE 2026-11-20: synchronizes git-aliases-tests-[123]
 
 # Note:
 # - Need to be very careful to ensure that the output is reproducible.
@@ -29,15 +30,14 @@ $ true
 # Global setup
 # Define aliases for encoding output (e.g., to ensure output the same across runs).
 ## TODO: define a better hex encoder to avoid false positives (e.g., abc).
-## OLD: alias encode-control-chars='perl -pe "s/\t/<tab>/g;  s/[\x00-\x08\x11\x31]/<cc>/g;"'
 $ alias remove-control-chars='perl -pe "s/\t/<tab>/g;  s/[\x00-\x08\x11\x31]//g;"'
 $ alias encode-nums='perl -pe "s/[0-9]+/N/g;"'
-## OLD: alias encode-hex='perl -pe "s/[0-9A-F]{4,}/<hex>/ig;"'
 $ alias encode-hex='perl -pe "s/\b[0-9A-F]{4,}\b/<hex>/ig;"'
 # note: uses perl slurp mode (i.e., read entire file) to check for consecutive newlines
 $ alias encode-newlines='perl -0777 -pe "while (/\n\n/) { s/\n\n/\n<newline>\n/g; }"'
-## OLD: function encode-text () { encode-control-chars | encode-nums | encode-hex | encode-newlines; }
-$ function encode-text () { remove-control-chars | encode-hex | encode-nums | encode-newlines; }
+# encode-user: replace $USER with USER (e.g., /home/joe/my-file /home/USER/my-file)
+$ alias encode-user='perl -pe "s/$USER/USER/g;"'
+$ function encode-text () { remove-control-chars | encode-hex | encode-nums | encode-newlines | encode-user; }
 
 # Global setup
 $ git clone https://github.com/scrappycito/git-bash-test.git "$TMPA" > /dev/null 2>&1
@@ -143,7 +143,7 @@ issuing: zip over changed files (for later restore)
 issuing: git stash
 issuing: git pull --all --verbose
 issuing: git stash pop
-issuing: unzip over "/home/testuser/temp/tmp/_git-stash.<hex>.zip" (to restore timestamps)
+issuing: unzip over "/home/USER/temp/tmp/_git-stash.<hex>.zip" (to restore timestamps)
       N  Stored       N   N% <hex>--N N:N <hex>  temp-hello.txt
 issuing: git add temp-hello.txt
 issuing: git commit -m 'default'

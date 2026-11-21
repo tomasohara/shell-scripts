@@ -1,6 +1,7 @@
 # First test for git aliases (e.g., git-update-plus, git-next-checkin, etc)
 # Note: The aliases should be defined before Jupyter is invoked.
 # For BatsPP, they can loaded via '--source all-tomohara-aliases-etc.bash' option.
+## UPDATE 2026-11-20: synchronizes git-aliases-tests-[123]
 
 # Note:
 # - Need to be very careful to ensure that the output is reproducible.
@@ -41,13 +42,15 @@ $ true
 
 # Global setup
 # Define aliases for encoding output (e.g., to ensure output the same across runs).
-$ alias encode-control-chars='perl -pe "s/\t/<tab>/g;  s/[\x00-\x08\x11\x31]/<cc>/g;"'
-$ alias encode-nums='perl -pe "s/[0-9]+/N/g;"'
 ## TODO: define a better hex encoder to avoid false positives (e.g., abc).
-$ alias encode-hex='perl -pe "s/[0-9A-F]{4,}/<hex>/ig;"'
+$ alias remove-control-chars='perl -pe "s/\t/<tab>/g;  s/[\x00-\x08\x11\x31]//g;"'
+$ alias encode-nums='perl -pe "s/[0-9]+/N/g;"'
+$ alias encode-hex='perl -pe "s/\b[0-9A-F]{4,}\b/<hex>/ig;"'
 # note: uses perl slurp mode (i.e., read entire file) to check for consecutive newlines
 $ alias encode-newlines='perl -0777 -pe "while (/\n\n/) { s/\n\n/\n<newline>\n/g; }"'
-$ function encode-text () { encode-control-chars | encode-nums | encode-hex | encode-newlines; }
+# encode-user: replace $USER with USER (e.g., /home/joe/my-file /home/USER/my-file)
+$ alias encode-user='perl -pe "s/$USER/USER/g;"'
+$ function encode-text () { remove-control-chars | encode-hex | encode-nums | encode-newlines | encode-user; }
 
 # Global Setup
 # Warning: Due to BatsPP quirk, comments should not be placed within command sequence.
@@ -140,11 +143,11 @@ issuing: git pull --all --verbose
 issuing: git stash pop
 No changed files so no post-stash-pop timestamp check
 No local changes to save
-POST git-upload-pack (N<cc>N bytes)
+POST git-upload-pack (N bytes)
 POST git-upload-pack (N bytes)
 From https://github.com/scrappycito/git-bash-test
  = [up to date]      main        -> origin/main
-   bdeN<cc>..NaNeNf<cc>  development -> origin/development
+   <hex>..<hex>  development -> origin/development
 Already up to date.
 No stash entries found.
 <newline>
@@ -177,9 +180,9 @@ $ export GIT_NO_CONFIRM="1"
 $ git-commit-and-push temp-push.txt 2>&1 | command egrep 'issuing|push' | encode-text
 issuing: git add temp-push.txt
 issuing: git commit -m 'hello'
-     create mode <cc>N temp-push.txt
+     create mode <hex> temp-push.txt
 issuing: git push --verbose
- create mode <cc>N temp-push.txt
+ create mode <hex> temp-push.txt
 
 # Setup
 $ command cd "$TMPB"
