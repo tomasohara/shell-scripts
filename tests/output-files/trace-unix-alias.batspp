@@ -5,6 +5,7 @@
 ## | Hi?2004l
 # bind 'set enable-bracketed-paste off'
 ## UPDATE 2026-11-20: encoding tweaks (e.g., multiple space into one)
+## Note: stderr, xtrace, and ls fixes facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -19,17 +20,23 @@
 #
 # Count non-ascii (excludes newline)
 # via ascii manpage:  Oct   Dec   Hex   Char ... 040   32    20    SPACE ... 176   126   7E    ~
-$ non_ascii_count=$(echo -n "$PS1" | grep -v -c '[ - ~]')
+## DEBUG:
+$ echo -n "$PS1" | grep -v '[ -~]' | hexview.perl -
+$ non_ascii_count=$(echo -n "$PS1" | grep -c -v '[ -~]')
+$ echo $non_ascii_count
+0
+
 $ [ "$non_ascii_count" -eq 0 ]; echo $?
-1
+0
 
 ## OLD: For debug
 # alias | wc -l
-# The debugging level should be at most 3
-# Note: this affects output as bash_kernel conflates stderr w/ stdout
-## TODO: echo "DEBUG_LEVEL=$DEBUG_LEVEL" 1>&2
-$ [ "$DEBUG_LEVEL" -lt 4 ]; echo "$?"
-0
+## OLD:
+## NOTE: Tests should isolate stderr when it might affect result.
+## # The debugging level should be at most 3
+## # Note: this affects output as bash_kernel conflates stderr w/ stdout
+## ## TODO: echo "DEBUG_LEVEL=$DEBUG_LEVEL" 1>&2
+## [ "$DEBUG_LEVEL" -lt 4 ]; echo "$?"
 
 # Global Setup
 $ TMP=${TMP:-/tmp}
@@ -43,7 +50,7 @@ $ rename-with-file-date "$temp_dir" 2> /dev/null
 $ command mkdir -p "$temp_dir"
 ## OLD: command mkdir -p "$trash_dir"
 $ command cd "$temp_dir"
-renamed '/home/testuser/temp/tmp/test-unix-alias' -> '/home/testuser/temp/tmp/test-unix-alias.20Nov26.4'
+renamed '/home/testuser/temp/tmp/test-unix-alias' -> '/home/testuser/temp/tmp/test-unix-alias.20Nov26.6'
 
 # Global Setup
 ## TODO2: rename testuser, testnum, etc. to encode-user, encode-num, etc.
@@ -54,6 +61,7 @@ $ alias linebr="printf '%132s\n' ' ' | tr ' ' '-'"
 $ alias encode-month='perl -pe "s/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/month/ig;"'
 $ alias encode-weekday='perl -pe "s/\b(sun|mon|tue|wed|thur|fri|sat)\b/weekday/ig;"'
 $ alias encode-spaces='perl -pe "s/  +/ /g;"'
+$ alias encode-trace='perl -pe "s/^\++/+/";'
 
 ## OLD
 ## Count aliases proper
@@ -162,11 +170,12 @@ $ [ "$(basename-with-dir himom.txt)" = "./himom.txt" ]; echo $?
 # | Try '/usr/bin/time --help' for more information
 ## OLD
 # gtime -V | testnum
-$ gtime -f "Real: %e seconds\nUser: %U seconds\nSys: %S seconds" uname | testnum
+## OLD: gtime -f "Real: %e seconds\nUser: %U seconds\nSys: %S seconds" uname | testnum
+$ gtime -f "Real: %e seconds\nUser: %U seconds\nSys: %S seconds" uname 2>&1 | testnum
 Linux
-Real: 0.00 seconds
-User: 0.00 seconds
-Sys: 0.00 seconds
+Real: N.N seconds
+User: N.N seconds
+Sys: N.N seconds
 
 ## 4C) linux-version GIVES INFO ALL INFO ABOUT THE OS INSTALLED
 $ linux-version | command grep VERSION_ID | testnum
@@ -189,12 +198,14 @@ VERSION_ID="N.N"
 #
 ## OLD: system-status | testnum | testuser | tail -n +2 | awk '!($8="")'
 ## TODO2: add specific check (e.g., generic.*Ubuntu.*Mem.*Swap.*load.*USER)
-$ system-status | testnum | testuser | encode-month | encode-weekday | encode-spaces | egrep -v 'pts|tty'
+# Note: strips uptime report line as an expedient (since format varies between 'N min' and 'N:N')
+## TODO3: test load average inclusion separately
+## OLD: system-status | testnum | testuser | encode-month | encode-weekday | encode-spaces | egrep -v 'pts|tty'
+$ system-status | testnum | testuser | encode-month | encode-weekday | encode-spaces | egrep -v 'pts|tty|load.average'
 Linux tpo-vivo N.N.N-N-generic #N~N.N.N-Ubuntu SMP PREEMPT_DYNAMIC weekday month N N:N:N UTC N xN_N xN_N xN_N GNU/Linux
  total used free shared buff/cache available
 Mem: N N N N N N
 Swap: N N N
- N:N:N up N days, N min, N users, load average: N.N, N.N, N.N
 USER TTY FROM LOGIN@ IDLE JCPU PCPU WHAT
 
 
@@ -276,20 +287,22 @@ localhost:N.N
 # + export ENV4=value4
 # ...
 $ unset ENV1 ENV2
+$ {
 $ bash-trace-on
 $ cond-export ENV1 value1 2>&1 | command grep ENV1.*value1
 # note: makes sure 4+ references
 $ c=$(cond-export ENV2 value2 2>&1 | command grep -c ENV2.*value2)
 $ bash-trace-off
 $ [ $c -ge 4 ]; echo $?
+$ } 2>&1 | encode-trace
 + conditional-export ENV1 value1
 + command grep 'ENV1.*value1'
 + export ENV1=value1
 + ENV1=value1
 + args='ENV1 value1'
 + '[' 'ENV1 value1' = '' ']'
-++ conditional-export ENV2 value2
-++ command grep -c 'ENV2.*value2'
++ conditional-export ENV2 value2
++ command grep -c 'ENV2.*value2'
 + c=4
 + set +o xtrace
 0
@@ -320,16 +333,19 @@ w/o trace
 # example w/ tracing:
 # $ bash-trace-off
 # + set +o xtrace
+$ {
 $ bash-trace-on
-$ c=$(bash-trace-off | command grep -c xtrace)
+# Note: braces needed so 2>&1 redirects stderr before set +o xtrace is traced
+## OLD: c=$(bash-trace-off | command grep -c xtrace)
+$ c=$({ bash-trace-off; } 2>&1 | command grep -c xtrace)
 $ [ $c -eq 1 ]; echo $?
 $ bash-trace-off
-++ set +o xtrace
-++ command grep -c xtrace
-+ c=0
-+ '[' 0 -eq 1 ']'
-+ echo 1
-1
+$ } 2>&1 | encode-trace
++ command grep -c xtrace
++ c=1
++ '[' 1 -eq 1 ']'
++ echo 0
+0
 + set +o xtrace
 
 # test trace-cmd w/o command and using evaluation
@@ -344,7 +360,8 @@ $ [ $c -ge 2 ]; echo $?
 0
 
 # testing compression and extraction of dirs
-$ ls
+## OLD: ls
+$ command ls -C
 $ cp tf2.txt testfolder/
 ## OLD: MOVED TO NEXT CELLS
 # linebr
@@ -353,20 +370,22 @@ $ cp tf2.txt testfolder/
 # ls
 # linebr
 # ununcompress-this-dir ./testfolder | testnum
-hidad.txt  himom.txt  [0m[01;34mtestfolder[0m  tf1.txt  tf2.txt  tf3.txt
+hidad.txt  himom.txt  testfolder  tf1.txt  tf2.txt  tf3.txt
 'tf2.txt' -> 'testfolder/tf2.txt'
 
 ## TODO3: compress-dir? 
 $ compress-this-dir ./testfolder | { [ $(wc -l < /dev/stdin) -ne 0 ] && echo "NotZero" || echo "Zero"; }
 NotZero
 
-$ command ls
+## OLD: command ls
+$ command ls -C
 hidad.txt.gz  himom.txt.gz  testfolder	tf1.txt.gz  tf2.txt.gz	tf3.txt.gz
 
 $ ununcompress-this-dir ./testfolder | { [ $(wc -l < /dev/stdin) -ne 0 ] && echo "NotZero" || echo "Zero"; }
 NotZero
 
-$ command ls
+## OLD: command ls
+$ command ls -C
 hidad.txt  himom.txt  testfolder  tf1.txt  tf2.txt  tf3.txt
 
 ## You need to use iceweasel to kill it.
