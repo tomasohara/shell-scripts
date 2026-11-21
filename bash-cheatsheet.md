@@ -306,7 +306,10 @@ shopt -s expand_aliases
 env --ignore-environment bash --noprofile --norc
 
 # TODO4: explain use of PS4 for source line tracing, as in following:
-PS4='+ ${BASH_SOURCE}:${LINENO}: ' pwd-host-info
+## BAD: PS4='+ ${BASH_SOURCE}:${LINENO}: ' pwd-host-info
+## NOTE: uses source trick to preserve line numbers from alias definition files
+## See gemini-PS4-command-tracing-quirk-nov2026.html.
+PS4='+ ${BASH_SOURCE}:${LINENO}: ' source <(echo "trace-cmd pwd-host-info") | cat
 ```
 
 ## Pattern Matching
