@@ -4,6 +4,7 @@
 ## $ echo 'Hii'
 ## | Hi?2004l
 # bind 'set enable-bracketed-paste off'
+## UPDATE 2026-11-20: encoding tweaks (e.g., multiple space into one)
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -37,11 +38,12 @@ $ TMP=${TMP:-/tmp}
 ##     TMP=/tmp/trace-unix-alias
 ## fi
 $ temp_dir=$TMP/test-unix-alias
-$ rename-with-file-date "$temp_dir"
+$ rename-with-file-date "$temp_dir" 2> /dev/null
 ## OLD: trash_dir=$TMP/"_temp-trash-$(date "+%Y%m%d%H%M%S")"
 $ command mkdir -p "$temp_dir"
 ## OLD: command mkdir -p "$trash_dir"
 $ command cd "$temp_dir"
+renamed '/home/testuser/temp/tmp/test-unix-alias' -> '/home/testuser/temp/tmp/test-unix-alias.20Nov26.4'
 
 # Global Setup
 ## TODO2: rename testuser, testnum, etc. to encode-user, encode-num, etc.
@@ -51,6 +53,7 @@ $ alias testalpha='sed -r "s/[A-Za-z]/A/g"'
 $ alias linebr="printf '%132s\n' ' ' | tr ' ' '-'"
 $ alias encode-month='perl -pe "s/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/month/ig;"'
 $ alias encode-weekday='perl -pe "s/\b(sun|mon|tue|wed|thur|fri|sat)\b/weekday/ig;"'
+$ alias encode-spaces='perl -pe "s/  +/ /g;"'
 
 ## OLD
 ## Count aliases proper
@@ -89,7 +92,7 @@ $ echo "Hi Dad!" > hidad.txt
 # cat _make.log
 
 ## OLD: ls -l | awk '!($6="")' | testnum | testuser
-$ [ "$(ls | grep -E "himom.txt|hidad.txt|testfolder" | wc -l)" -eq 3 ]; echo $?
+$ [ "$(ls | command grep -E "himom.txt|hidad.txt|testfolder" | wc -l)" -eq 3 ]; echo $?
 0
 
 # 2A) merge REPLACED BY do-merge 
@@ -122,8 +125,8 @@ $ [ "$(merge tf1.txt tf2.txt)" = "do-merge MODFILE1 OLDFILE MODFILE2 > NEWFILE t
 ### TO FIX THE ERROR USE "himom.txt" --> himom.txt ###
 ## OLD
 # which
-$ which python | grep -q "python" && echo "PY-TRUE" || echo "PY-FALSE"
-# [ "$(which python | grep -q "python")" ]; echo $?
+$ which python | command grep -q "python" && echo "PY-TRUE" || echo "PY-FALSE"
+# [ "$(which python | command grep -q "python")" ]; echo $?
 # # 3A) full-dirname RETURNS THE FULL PATH OF THE FILE
 # full-dirname himom.txt | testuser
 # # 3B) base-name-with-dir RETURNS THE BASENAME INCLUDING dir
@@ -166,7 +169,7 @@ User: 0.00 seconds
 Sys: 0.00 seconds
 
 ## 4C) linux-version GIVES INFO ALL INFO ABOUT THE OS INSTALLED
-$ linux-version | grep VERSION_ID | testnum
+$ linux-version | command grep VERSION_ID | testnum
 # os-release ALSO WORKS SAME AS linux-version
 VERSION_ID="N.N"
 
@@ -186,16 +189,16 @@ VERSION_ID="N.N"
 #
 ## OLD: system-status | testnum | testuser | tail -n +2 | awk '!($8="")'
 ## TODO2: add specific check (e.g., generic.*Ubuntu.*Mem.*Swap.*load.*USER)
-$ system-status | testnum | testuser | encode-month | encode-weekday | egrep -v 'pts|tty'
+$ system-status | testnum | testuser | encode-month | encode-weekday | encode-spaces | egrep -v 'pts|tty'
 Linux tpo-vivo N.N.N-N-generic #N~N.N.N-Ubuntu SMP PREEMPT_DYNAMIC weekday month N N:N:N UTC N xN_N xN_N xN_N GNU/Linux
-               total        used        free      shared  buff/cache   available
-Mem:        N    N      N     N     N     N
-Swap:       N    N    N
- N:N:N up N days,  N:N,  N users,  load average: N.N, N.N, N.N
-USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU  WHAT
+ total used free shared buff/cache available
+Mem: N N N N N N
+Swap: N N N
+ N:N:N up N days, N min, N users, load average: N.N, N.N, N.N
+USER TTY FROM LOGIN@ IDLE JCPU PCPU WHAT
 
 
-$ apropos-command time | grep asctime | wc -l | testnum
+$ apropos-command time | command grep asctime | wc -l | testnum
 N
 
 ## How split-tokens work
@@ -274,19 +277,19 @@ localhost:N.N
 # ...
 $ unset ENV1 ENV2
 $ bash-trace-on
-$ cond-export ENV1 value1 2>&1 | grep ENV1.*value1
+$ cond-export ENV1 value1 2>&1 | command grep ENV1.*value1
 # note: makes sure 4+ references
-$ c=$(cond-export ENV2 value2 2>&1 | grep -c ENV2.*value2)
+$ c=$(cond-export ENV2 value2 2>&1 | command grep -c ENV2.*value2)
 $ bash-trace-off
 $ [ $c -ge 4 ]; echo $?
 + conditional-export ENV1 value1
-+ grep --color=auto 'ENV1.*value1'
-+ export [01;31m[KENV1=value1[m[K
-+ [01;31m[KENV1=value1[m[K
-+ args='[01;31m[KENV1 value1[m[K'
-+ '[' '[01;31m[KENV1 value1[m[K' = '' ']'
++ command grep 'ENV1.*value1'
++ export ENV1=value1
++ ENV1=value1
++ args='ENV1 value1'
++ '[' 'ENV1 value1' = '' ']'
 ++ conditional-export ENV2 value2
-++ grep --color=auto -c 'ENV2.*value2'
+++ command grep -c 'ENV2.*value2'
 + c=4
 + set +o xtrace
 0
@@ -296,11 +299,11 @@ $ [ $c -ge 4 ]; echo $?
 $ unset ENV3 ENV4
 $ echo "w/ trace"
 # note: makes sure 4+ references
-$ c=$(trace-cmd cond-export ENV3 value3 | grep -c ENV3.*value3)
+$ c=$(trace-cmd cond-export ENV3 value3 | command grep -c ENV3.*value3)
 $ [ $c -ge 4 ]; echo $?
 # note: makes sure no references
 $ echo "w/o trace"
-$ c=$(cond-export ENV4 value4 | grep -c ENV4.*value4)
+$ c=$(cond-export ENV4 value4 | command grep -c ENV4.*value4)
 $ [ $c -eq 0 ]; echo $?
 w/ trace
 0
@@ -318,11 +321,11 @@ w/o trace
 # $ bash-trace-off
 # + set +o xtrace
 $ bash-trace-on
-$ c=$(bash-trace-off | grep -c xtrace)
+$ c=$(bash-trace-off | command grep -c xtrace)
 $ [ $c -eq 1 ]; echo $?
 $ bash-trace-off
 ++ set +o xtrace
-++ grep --color=auto -c xtrace
+++ command grep -c xtrace
 + c=0
 + '[' 0 -eq 1 ']'
 + echo 1
@@ -332,7 +335,7 @@ $ bash-trace-off
 # test trace-cmd w/o command and using evaluation
 #
 # example:
-# $ EVAL_COMMAND=1 trace-cmd | grep eval
+# $ EVAL_COMMAND=1 trace-cmd | command grep eval
 # +++ eval echo '${EVAL_COMMAND:-false}'
 # + eval ''
 #
