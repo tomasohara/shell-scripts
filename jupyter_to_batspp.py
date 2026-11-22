@@ -182,6 +182,17 @@ class JupyterToBatspp(Main):
 
         # Process cells
         batspp_content  = ''
+        # Check if code cell execution counts are non-sequential (e.g., partial re-run)
+        exec_counts = [
+            cell.get("execution_count") for cell in jupyter_json['cells']
+            if isinstance(cell, dict)
+            and (cell.get("cell_type") == "code")
+            and "".join(cell.get("source", [])).strip()
+        ]
+        non_sequential = (
+            any(count is not None for count in exec_counts)
+            and (exec_counts != list(range(1, len(exec_counts) + 1)))
+        )
         for c, cell in enumerate(jupyter_json['cells']):
             if self.add_annots:
                 batspp_content += ensure_new_line(f"# Cell [{c + 1}]")
@@ -215,12 +226,23 @@ class JupyterToBatspp(Main):
 
                 # Append output lines
                 try:
-                    # Warn if cell contains multiple stdout stream entries
-                    num_stdout = sum(
-                        1 for output in cell['outputs']
+                    # Warn if cell contains multiple stdout stream entries from partial re-evaluation
+                    ## OLD:
+                    ## num_stdout = sum(
+                    ##     1 for output in cell['outputs']
+                    ##     if (output.get("output_type") == "stream")
+                    ##     and (output.get("name") == "stdout"))
+                    ## if num_stdout > 1:
+                    stdout_outputs = [
+                        output for output in cell['outputs']
                         if (output.get("output_type") == "stream")
-                        and (output.get("name") == "stdout"))
-                    if num_stdout > 1:
+                        and (output.get("name") == "stdout")
+                    ]
+                    num_stdout = len(stdout_outputs)
+                    has_multiline_stdout = any(
+                        len(output.get("text", [])) > 1 for output in stdout_outputs
+                    )
+                    if (num_stdout > 1) and (non_sequential or has_multiline_stdout):
                         cell_id = cell.get("id", f"#{c + 1}")
                         system.print_stderr(
                             f"Warning: cell {c + 1} ({cell_id}) has multiple ({num_stdout}) stdout entries; "

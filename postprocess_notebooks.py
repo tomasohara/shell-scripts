@@ -78,6 +78,17 @@ class NotebookPostprocessor:
         cells = notebook.get("cells")
         if not isinstance(cells, list):
             raise ValueError("Notebook is missing a cells array")
+        # Check if code cell execution counts are non-sequential (e.g., partial re-run)
+        exec_counts = [
+            c.get("execution_count") for c in cells
+            if isinstance(c, dict)
+            and (c.get("cell_type") == "code")
+            and "".join(c.get("source", [])).strip()
+        ]
+        non_sequential = (
+            any(count is not None for count in exec_counts)
+            and (exec_counts != list(range(1, len(exec_counts) + 1)))
+        )
         ## OLD: for cell in cells:
         for cell_num, cell in enumerate(cells, start=1):
             if not isinstance(cell, dict):
@@ -93,16 +104,28 @@ class NotebookPostprocessor:
                 if not isinstance(metadata, dict):
                     raise ValueError("Notebook cell metadata is not an object")
                 metadata.pop("execution", None)
-            # Warn if cell contains multiple stdout stream entries
+            # Warn if cell contains multiple stdout stream entries from partial re-evaluation
             outputs = cell.get("outputs")
             if isinstance(outputs, list):
-                num_stdout = sum(
-                    1 for output in outputs
+                ## OLD:
+                ## num_stdout = sum(
+                ##     1 for output in outputs
+                ##     if isinstance(output, dict)
+                ##     and (output.get("output_type") == "stream")
+                ##     and (output.get("name") == "stdout")
+                ## )
+                ## if num_stdout > 1:
+                stdout_outputs = [
+                    output for output in outputs
                     if isinstance(output, dict)
                     and (output.get("output_type") == "stream")
                     and (output.get("name") == "stdout")
+                ]
+                num_stdout = len(stdout_outputs)
+                has_multiline_stdout = any(
+                    len(output.get("text", [])) > 1 for output in stdout_outputs
                 )
-                if num_stdout > 1:
+                if (num_stdout > 1) and (non_sequential or has_multiline_stdout):
                     cell_id = cell.get("id", f"#{cell_num}")
                     system.print_stderr(
                         f"Warning: cell {cell_num} ({cell_id}) has multiple ({num_stdout}) stdout entries; "
