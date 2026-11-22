@@ -7,6 +7,7 @@
 # - It also tests over synthetic data (i.e., not real notebook tests)
 #
 ## UPDATE 2026-10-15: fixup to use preferred output-files
+## Note: Multiple stdout warning test facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 ## TODO1: Test for specific BatsPP output
 
 """Tests for postprocess_notebooks module."""
@@ -107,6 +108,24 @@ class TestIt(TestWrapper):
             [THE_MODULE.sys.executable, str(processor.converter), "--output",
              str(processor.output_dir / "example.batspp"), str(notebook_path)],
             True)]
+
+    def test_multiple_stdout_warning(self):
+        """Warn when a cell contains multiple stdout stream entries."""
+        debug.trace(4, f"TestIt.test_multiple_stdout_warning(); self={self}")
+        processor, notebook_path = self._make_processor()
+        notebook = json.loads(notebook_path.read_text(encoding="utf-8"))
+        notebook["cells"][0]["id"] = "dup-cell"
+        notebook["cells"][0]["outputs"] = [
+            {"name": "stdout", "output_type": "stream", "text": ["line1\n", "line2\n"]},
+            {"name": "stdout", "output_type": "stream", "text": ["line2\n"]},
+        ]
+        notebook_path.write_text(json.dumps(notebook), encoding="utf-8")
+        warnings = []
+        self.monkeypatch.setattr(THE_MODULE.system, "print_stderr", warnings.append)
+        processor.postprocess_notebook(notebook_path)
+        assert len(warnings) == 1
+        assert "multiple (2) stdout entries" in warnings[0]
+        assert "[Restart Kernel and Run All Cells]" in warnings[0]
 
 
 if __name__ == '__main__':

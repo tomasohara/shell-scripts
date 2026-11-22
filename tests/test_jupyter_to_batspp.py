@@ -8,6 +8,7 @@
 # - This can be run as follows:
 #   $ PYTHONPATH=".:$PYTHONPATH" python .tests/test_jupyter_to_batspp.py
 #
+## Note: Multiple stdout warning test facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 #--------------------------------------------------------------------------------
 # Sample input for testing (excerpted from dummy-test.ipynb):
 #
@@ -138,6 +139,16 @@ class TestIt(TestWrapper):
         # Check output with just code
         output = self.run_script(options="--stdout --justcode", data_file=self.data_file)
         assert not my_re.search(r"^dummy$", output.strip(), flags=my_re.MULTILINE)
+        return
+
+    def test_multiple_stdout_warning(self):
+        """Make sure warning is issued when a cell has multiple stdout entries"""
+        debug.trace(4, f"TestIt.test_multiple_stdout_warning(); self={self}")
+        log_file = self.temp_file + ".warn.log"
+        self.run_script(options="--stdout", data_file=self.data_file, log_file=log_file)
+        log_contents = system.read_file(log_file)
+        assert "multiple (2) stdout entries" in log_contents
+        assert "[Restart Kernel and Run All Cells]" in log_contents
         return
 
 #------------------------------------------------------------------------
