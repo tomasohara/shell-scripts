@@ -56,11 +56,12 @@ echo "${#var}"                  # number of characters in value
 
 ## Parameter Expansion (String Operations)
 
+<!-- TODO3: flesh out examples (e.g., via table) -->
 ```bash
 # Prefix/suffix removal
 echo "${var#pattern}"           # shortest prefix removal
 echo "${var##pattern}"          # longest prefix removal
-echo "${var%pattern}"           # shortest suffix removal
+echo "${var%pattern}"           # shortest suffix removal (e.g., "${0%.bash}.log")
 echo "${var%%pattern}"          # longest suffix removal
 
 # Substitution
