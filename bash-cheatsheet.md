@@ -107,17 +107,17 @@ if [[ (EXPR1) && (EXPR2) ]]; then STMT; fi
 if (( n > 10 )); then echo big; fi
 if [ "$n" -eq 3 ]; then echo tres; fi   # * -eq -ne -lt -le -gt -ge
 
-# File tests
-[ -e file ]                     # file exists
-[ -f file ]                     # regular file
-[ -d dir  ]                     # file is directory
-[ -s file ]                     # non-empty file
-[ -r file ]                     # readable file
-[ -h file ]                     # file is symbolic link
+# File tests                    # description with capitalized mnemonic
+[ -e file ]                     # file Exists
+[ -f file ]                     # regular File
+[ -d dir  ]                     # file is Directory
+[ -s file ]                     # non-empty file (i.e., Size > 0)
+[ -r file ]                     # Readable file
+[ -h file ]                     # file is symbolic link (a la Hyperlink)
 
 # String tests
-[ -n "$str" ]                   # non-empty string (i.e., non-zero length)
-[ -z "$str" ]                   # empty string (i.e., zero length)
+[ -n "$str" ]                   # non-empty string (i.e., Non-zero length)
+[ -z "$str" ]                   # empty string (i.e., Zero length)
 
 result=$([ "$test" ] && echo "true-val" || echo "false-val")   # * ternary idiom (template: DEBUG_SCRIPT=...)
 
