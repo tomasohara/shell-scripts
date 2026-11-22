@@ -2484,6 +2484,8 @@ alias move-duplicates='mkdir -p duplicates; move *\([0-9]\).* duplicates 2>&1 | 
 # TODO: rename existing files with file date (instead of blocking rename)
 alias rename-parens='rename-files -global -regex "[\(\)]" "" *[\(\)]*'
 alias rename-etc='rename-spaces; rename-quotes; rename-special-punct; move-duplicates'
+## TEMP: alias for sake of tab completion given rename-e* as emoji vs etc
+alias rename-misc=rename-etc
 ## TODO: alias rename-parens='rename-files -rename_old -global -regex "[\(\)]" "" *[\(\)]*'
 #
 # rename-utf8-encoded: replace runs of non-ascii UTF8 encodings with _
