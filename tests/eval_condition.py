@@ -5,7 +5,7 @@
 # This script evaluates a condition and optionally executes a command
 #
 # Note:
-# - This file can be referenced using the eval-condition alias in testing-aliases.bash.
+# - This file can be referenced using the eval-condition alias in aliases-for-testing.bash.
 #
 # TODO:
 # - Add in motivation in terms of example-based testing.
