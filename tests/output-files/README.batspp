@@ -1,6 +1,7 @@
 # Overview of testing infrastructure for Bash aliases/functions
 #
 # NOTE: Includes work-in-progress revision to testing paradigm.
+## UPDATE 2026-11-22: adds warning about partial notebook updates
 ## UPDATE 14 Sep 26: tips on simple example-based testing without inflating test count
 #
 # 1. Motivation
@@ -80,6 +81,10 @@
 # - *** Run under a less privileged testing account (e.g., testuser) to avoid 
 # inadvertant loss of data ***. Some of the tests delete temporary folders which might
 # be inadvertantly include useful files. In additon, they might make configuration changes.
+#
+# - ** Jupyter can produce cells with multiple outputs due to partial re-evaluation of the
+#   notebook. To alleviate, make sure you run [Restart Kernel and Run All Cells]. Alternatively,
+#   use nbconvert to update the notebook in batch mode.
 #
 # - When starting Juptyter, the best way to ensure the right macros are loaded is follows:
 #      cd .../shell-scripts/tests
