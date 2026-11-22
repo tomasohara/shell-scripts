@@ -50,6 +50,8 @@ $ alias testfilter="perl -pe 's@\Q$temp_dir\E@TEMP_DIR@g; s@\Q$repo_dir\E@REPO_D
 $ alias count-usage-lines="grep -c -i -e '^usage' -e '^synopsis:' -e '^example:' -e '^ex:'"
 # note: splits a PATH-like value into one entry per line
 $ alias split-path="tr ':' '\n'"
+# replace numbers with N (e.g., "2.5" => "N.N")
+$ alias encode-nums='perl -pe "s/[0-9]+/N/g;"'
 $ true
 
 # note: the re-source above should be quiet (any output means it failed,
@@ -95,8 +97,21 @@ $ [ $num_usage -eq 2 ]; echo $?
 # Setup
 $ command cd "$temp_dir"
 
-$ pip-freeze test-env 2>/dev/null | testfilter
-_pip-freeze-test-env-DATE.log
+## Sample output
+## $ pip-freeze test-env 2> /dev/null | head
+## absl-py==2.1.0
+## accelerate==0.30.0
+## adb-enhanced==2.10.0
+## addict==2.4.0
+## aenum==3.1.15
+## aiofiles==23.2.1
+## aiohappyeyeballs==2.6.1
+## aiohttp==3.13.2
+##  aiosignal==1.4.0
+
+## OLD: pip-freeze test-env 2>/dev/null | testfilter
+$ pip-freeze test-env 2>/dev/null | egrep 'batspp' | encode-nums
+batspp==N.N.N
 
 # Make sure the log is named for the env and holds pkg==version requirements
 $ freeze_file="$temp_dir/_pip-freeze-test-env-$(T).log"
