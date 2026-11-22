@@ -3,6 +3,7 @@
 ## NOTE: I fixed most of the tests and left old versions as OLD or BAD--Tom
 ## TODO2: cleanup up the test (e.g., remove old comments)
 ## TODO1: split multi-part tests that use linebr: see curl example at end for details
+## Note: TODO3 note for python-trace facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 
 # *** Note: pro tips ***
 # - See randomize-datafile for new preferred way of preparing tests.
@@ -352,6 +353,7 @@ N.NN.N
 ## BAD: python-trace l $BIN_DIR/tests/auto_batspp.py | testuser | testnum
 ## NOTE: use head to speed up
 ## BAD: python-trace python-trace $BIN_DIR//simple_batspp.py --help 2>&1 | head | testnum
+## TODO3: update expected trace output for typing import in template.py and Python 3.11 importlib._bootstrap
 $ python-trace $BIN_DIR/template.py --help 2>&1 | head -5 | testnum
  --- modulename: template, funcname: <module>
 template.py(NN): """

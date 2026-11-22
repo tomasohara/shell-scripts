@@ -1,5 +1,6 @@
 # Test of aliases defined in tomohara-proper-aliases.bash
 # See test-tomohara-proper-aliases-part2.ipynb, etc. for followup (and keep in synch).
+## Note: minor output fix and TODO3 note facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 
 # TODO2: add tests for, action-lint-yaml, all-tomohara-aliases,
 #     all-tomohara-settings, alt-git-extract-all-versions, calendar,
@@ -80,7 +81,7 @@ $ run-python-script
 Usage: [ENV-OPTIONS] run-python-script script arg ...
    ENV-OPTIONS: [USE_STDIN=B] [USE_STDOUT=B] [PROFILE_SCRIPT=B] [TRACE_SCRIPT=B] [PYTHON_DEBUG_LEVEL=n] [PYTHON_OUT_DIR=p] [KEEP_EMPTY_OUT=b] [PYTHON=path] [PYTHON_RUN_LABEL=str]
 note:
-- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL)
+- PYTHON_DEBUG_LEVEL uses 4 by default (unless regular DEBUG_LEVEL higher)
 - PYTHON_OUT_DIR is script dir unless a full path
 
 $ trace-vars _PSL_ 2>&1
@@ -155,6 +156,7 @@ $ [ "$_PSL_" == "0" ]; echo $?
 
 # Setup
 $ log_file="$temp_dir/test-python-script.log"
+## TODO3: resolve test_jupyter_to_batspp.py path when run from tests/ or GLOBAL_TEST_DIR
 $ PYTEST_DEBUG_LEVEL=0 test-python-script tests/test_jupyter_to_batspp.py > "$log_file" 2>&1
 
 ## current output

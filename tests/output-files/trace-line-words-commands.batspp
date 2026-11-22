@@ -4,11 +4,13 @@
 ## $ echo 'Hii'
 ## | Hi?2004l
 # bind 'set enable-bracketed-paste off'
+## Note: ls and setup fixes facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
 ## TODO: PS1="> "
 ## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
+## TODO3: update PS1 check to match trace-unix-general.ipynb
 $ echo $PS1
 PROMPT_ANTPDWSOBYZZ\[\]>
 
@@ -38,7 +40,8 @@ PROMPT_ANTPDWSOBYZZ\[\]>
 $ TMP=${TMP:-/tmp}
 $ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/test-trace-line-words; fi
 $ temp_dir=$TMP/trace-line-words-commands
-$ rename-with-file-date "$temp_dir"
+## OLD: rename-with-file-date "$temp_dir"
+$ rename-with-file-date "$temp_dir" > /dev/null
 $ command mkdir -p "$temp_dir"
 $ command cd $temp_dir
 ## OLD
@@ -79,7 +82,8 @@ $ printf "This is test-file 3" > test3.txt
 $ printf "This is a test-file 4" > test4.txt
 
 # Setup
-$ ls
+## OLD: ls
+$ command ls -C
 
 ## OLD: 
 ## $ ls | count-it '\.([^\.]+)$'
@@ -88,7 +92,8 @@ $ ls
 ## txt\n	4
 ##
 ## TODO3: fix anchor warning in count_it.perl and then drop -one_per_line
-$ ls | count-it -chomp -one_per_line '\.([^\.]+)$'
+## OLD: ls | count-it -chomp -one_per_line '\.([^\.]+)$'
+$ command ls | count-it -chomp -one_per_line '\.([^\.]+)$'
 txt	4
 
 # line-wc | COUNTS WORD FOR EACH LINE

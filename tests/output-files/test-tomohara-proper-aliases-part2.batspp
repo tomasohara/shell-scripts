@@ -13,6 +13,7 @@
 #   which outputs 0 if and only if the test passes.
 # - The validations are indirect (i.e., counts and patterns rather than literal
 #   text), so that rewording a usage statement doesn't break the test.
+## Note: minor output and ls fixes facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 
 # Note:
 # - Macros with destructive or interactive side effects are only checked for
@@ -64,7 +65,6 @@ $ [ ! -s "$temp_dir/source.log" ]; echo $?
 $ type -t update-env-path all-tomohara-settings-here
 function
 function
-function
 
 # Make sure both macros are defined as functions
 $ num_defined=$(type -t update-env-path all-tomohara-settings-here | grep -c '^function$')
@@ -78,8 +78,7 @@ $ [ $num_defined -eq 2 ]; echo $?
 # script/test-script pair (and optionally pauses for input).
 
 $ plint-tester-testee | head -2
-Usage: [PYLINT=prog] [TEST=B] plint-tester-testee script
-ex: TEST=1 PYLINT=python-lint-work plint-tester-testee cut.py
+Usage: [PYLINT=prog] [TEST=B] [PYTEST_OPTS=text] plint-tester-testee script
 ex: TEST=1 PYLINT=python-lint-work plint-tester-testee cut.py
 
 # Make sure a usage line and an example line are shown
@@ -144,8 +143,6 @@ $ command ls --color=never -1 "$temp_dir" | command grep '^mini\.\(out\|log\|py\
 mini.log
 mini.out
 mini.py
-mini.out
-mini.py
 
 # Make sure the script, output, and log were all produced
 $ num_artifacts=$(command ls -1 "$temp_dir" | grep -c '^mini\.\(out\|log\|py\)$')
@@ -160,7 +157,8 @@ $ TMP="$temp_dir" export-all-notebooks "$temp_dir" "$temp_dir/_all" 2>/dev/null 
 
 # note: the .bak is left by the indentation fixup in export-notebook;
 # color disabled as the ls alias would otherwise emit escape sequences
-$ command ls --color=never "$temp_dir/_all"
+## OLD: command ls --color=never "$temp_dir/_all"
+$ command ls --color=never -C "$temp_dir/_all"
 mini.py  mini.py.bak
 
 # Make sure the one notebook in the dir produced one python script
@@ -178,9 +176,6 @@ usage: compare-exported-notebooks notebook.ipynb
 note:
 - Exports notebook to python and compares against most recent
 - Use compare-notebook-scripts to compare .py version
-note:
-- Exports notebook to python and compares against most recent
-- Use compare-notebook-scripts to compare .py version
 
 # Make sure a non-notebook argument just gets the usage (i.e., no export attempted)
 $ num_usage=$(compare-exported-notebooks foo.py | count-usage-lines)
@@ -195,8 +190,6 @@ $ libreoffice-text
 Usage: libreoffice-text {path | -}    # with - for stdin
 Synopsis: create new LibreOffice text document (or open existing)
 Example: libreoffice-text memo-para-jefe
-Synopsis: create new LibreOffice text document (or open existing)
-Example: libreoffice-text memo-para-jefe
 
 # Make sure the usage, synopsis, and example lines are shown
 $ num_usage=$(libreoffice-text | count-usage-lines)
@@ -208,8 +201,6 @@ $ [ $num_usage -eq 3 ]; echo $?
 
 $ libreoffice-text-from-html-clipboard 2>&1 | testfilter
 Usage: libreoffice-text-from-html-clipboard {path | -}    # with - for stdin
-Synopsis: create LibreOffice text document from clipboard
-Example: libreoffice-text-from-html-clipboard HOME/Documents/chat-google-gemini-billing
 Synopsis: create LibreOffice text document from clipboard
 Example: libreoffice-text-from-html-clipboard HOME/Documents/chat-google-gemini-billing
 
@@ -242,7 +233,6 @@ $ [ $num_words -eq 3 ] && [ $num_named -eq 1 ]; echo $?
 
 $ ( unset PS_symbol; reset-prompt-label alt 2>&1 >/dev/null )
 Warning: reset-prompt-label assumes PS_symbol usage
-FYI: PS_symbol w/o trailing symbol: ''
 FYI: PS_symbol w/o trailing symbol: ''
 
 # Make sure both advisories are issued when PS_symbol is unset
@@ -294,11 +284,13 @@ $ [ "$revised_PS1" = "ADHOC $ " ]; echo $?
 # note: source only the prompt setup section in a subshell so the kernel prompt
 # remains unchanged.
 
+# Setup
 $ active_prompt=$(PS_symbol='$:$'; PS1='$ '; reset-prompt >/dev/null 2>&1; printf '%s' "$PS1")
 $ echo "$active_prompt"
 
 # Make sure an active script retains its searchable prompt marker.
 $ [ "$active_prompt" = '$:$ ' ]; echo $?
+0
 
 #-------------------------------------------------------------------------------
 # copy-to-temp-as-txt
@@ -333,9 +325,10 @@ $ [ "$(type -t rename-last-snapshot)" == "function" ]; echo $?
 # note: only the usage header is checked, as the rest of the usage comes from
 # the mezcla script (and a real run needs network access).
 
-$ youtube-transcript 2>/dev/null | head -3
+## OLD: youtube-transcript 2>/dev/null | head -3
+# Note: blank line stripped to avoid splitting paragraph in BatsPP (PARA_BLOCKS=1)
+$ youtube-transcript 2>/dev/null | head -3 | command grep .
 Usage: youtube-transcript url prefix
-
 Example:
 
 # Make sure the usage and example headers are shown
@@ -409,7 +402,6 @@ $ TEMP="$temp_dir" create-zip zipsrc 2>/dev/null | testfilter
 issuing: zip -r -u  "TEMP_DIR/zipsrc.zip" "zipsrc"
 	zip warning: TEMP_DIR/zipsrc.zip not found or empty
   adding: zipsrc/ (stored 0%)
-  adding: zipsrc/f1.txt (stored 0%)
   adding: zipsrc/f1.txt (stored 0%)
 
 # Make sure the archive was made under TEMP with the dir and its file

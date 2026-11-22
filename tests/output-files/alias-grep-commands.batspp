@@ -4,6 +4,7 @@
 ## $ echo 'Hii'
 ## | Hi?2004l
 # bind 'set enable-bracketed-paste off'
+## Note: TODO3 note for grepl- PAGER facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -117,6 +118,7 @@ $ [[ $GREP_GU_1 == 1 && $GREP_GU_2 == 1 && $GREP_GU_3 == 0 && $GREP_GU_4 == 1 ]]
 
 # C) grepl- (grep-to-less)
 # grepl- "sensitive" testgrep1 testgrep2 testgrep3 testgrep4 | wc -l
+## TODO3: fix grepl- when PAGER=cat (passes -p pattern to PAGER, causing 'cat: invalid option -- p' on stderr)
 $ [ "$(grepl- "sensitive" testgrep1 testgrep2 testgrep3 testgrep4 | wc -l)" -eq 3 ]; echo $?
 0
 

@@ -4,6 +4,7 @@
 ## $ echo 'Hii'
 ## | Hi?2004l
 # bind 'set enable-bracketed-paste off'
+## Note: setup output fix facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
@@ -54,7 +55,8 @@ $ alias testnum="sed -r "s/[0-9][0-9]*/N/g""
 $ TMP=${TMP:-/tmp}
 $ if [ "$DEBUG_LEVEL" -lt 4 ]; then TMP=/tmp/test-cond-env-setting; fi
 $ temp_dir=$TMP/cond-env-settings
-$ rename-with-file-date "$temp_dir"
+## OLD: rename-with-file-date "$temp_dir"
+$ rename-with-file-date "$temp_dir" > /dev/null
 $ command mkdir -p "$temp_dir"
 $ command cd $temp_dir
 ## OLD: For debugging
@@ -62,7 +64,6 @@ $ command cd $temp_dir
 ## OLD
 ## ALIAS FOR PRINTING SEPERATION LINES (FOR JUPYTER)
 # alias linebr="printf '%*s\n' "${COLUMNS:-$(tput cols)}" '' | tr ' ' -"
-renamed '/tmp/test-cond-env-setting/cond-env-settings' -> '/tmp/test-cond-env-setting/cond-env-settings.01May24.7'
 
 # Count aliases proper
 ## OLD: alias | wc -l | testnum

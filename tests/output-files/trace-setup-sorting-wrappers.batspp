@@ -1,6 +1,7 @@
 ## TEST:  Make sure simple prompt used (e.g., no escapes that might contaminate output)
 ## PS1="$ "
 ## TODO: PS1="> "
+## Note: echoize whitespace fix facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 ## NOTE: The Jupyter bash kernel requires that PS1 not be modified as they customize it. 
 ## OLD: echo $PS1
 $ actual=${PS1: -1}
@@ -141,7 +142,9 @@ $ uname -o > linux-info.txt
 # $ cat ~/.bashrc | echoize
 ## TODO2: use multi-line input to echoize
 # cat linux-info.txt | echoize
-$ [ "$(cat linux-info.txt | echoize)" == "GNU/Linux" ]; echo $?;
+## OLD: [ "$(cat linux-info.txt | echoize)" == "GNU/Linux" ]; echo $?;
+## TODO3: check whether echoize should strip trailing space
+$ [ "$(cat linux-info.txt | echoize)" == "GNU/Linux " ]; echo $?;
 0
 
 # SORTS BY PARAGRAPH

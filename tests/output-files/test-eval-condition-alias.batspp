@@ -1,3 +1,4 @@
+## Note: TODO3 note facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 ## TEST: Make sure command is executed when condition is evaluated to true
 $ eval-condition "1 > 0"
 True
@@ -12,6 +13,7 @@ Evaluation of condition 'not True': False
 
 
 ## TEST: Make sure the stdin is replaced in the condition
+## TODO3: capture stderr (2>&1) for 'Processing entire input' trace and use a dedicated temp_dir so file count doesn't exceed 90 as tests/ grows
 $ ls . | eval-condition "10 < len(stdin.splitlines()) <= 90"
 Processing entire input
 True

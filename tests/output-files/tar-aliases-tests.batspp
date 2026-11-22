@@ -9,6 +9,7 @@
 #    SC2164: Use 'cd ... || exit' or 'cd ... || return' in case cd fails.
 # shellcheck disable=SC2002,SC2010,SC2126
 ## UPDATE 14 Sep 26: Clarifies recent tar tests.
+## Note: minor output and grep fixes facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 
 # Global Setup
 ## Update 13 Jul 26: cleanup for nasty uses of 'rm -r"!
@@ -37,7 +38,8 @@ $ mkdir tarFolder/temp
 # Setup
 ## DEBUG:
 # Show tar-dir aliases
-$ show-macros-proper | grep "tar.*dir"
+## OLD: show-macros-proper | grep "tar.*dir"
+$ show-macros-proper | command grep "tar.*dir"
 
 # Setup
 # extract-tar tests
@@ -172,11 +174,11 @@ $ this_dir_dated=$(view-tar "$TAR_BASE-$(TODAY)".tar.gz | wc -l )
 $ [ "$this_dir_dated" -eq "$this_dir" ]; echo $?;
 0
 
+# Setup
 ## OLD: 
 $ rm -f "$TAR_BASE-$(TODAY)".tar.gz
 ## NOTE: The following produced stderr output (":1"), which abouts the script due to jupyter quirk.
 ## TODO3: rename-with-file-date "$TAR_BASE-$(TODAY)".tar.gz &> /dev/null
-removed '/home/ai-user/temp/tmp/tar-aliases-tests/temp/tarFolder-14sep26.tar.gz'
 
 ## OLD:
 ## # tar-this-dir-normal tests
@@ -281,7 +283,8 @@ $ trace-vars GTAR_OPTS 2>&1
 $ option_output="$(echo "$GTAR_OPTS" | perl -pe 's/[a-z]/\n$&/g;' | grep '[a-z]' | sort)"
 $ echo "GTAR_OPTS:"
 $ echo "$option_output"
-$ echo ""
+# Note: blank line omitted to avoid splitting paragraph in BatsPP (PARA_BLOCKS=1)
+## OLD: echo ""
 $ option_count="$(echo "$option_output" | grep -c "[fvz]")"
 $ [ "$option_count" == "3" ];
 $ echo "command_exit_code=$?"
@@ -289,7 +292,6 @@ GTAR_OPTS:
 f
 v
 z
-
 command_exit_code=0
 
 # End of test (n.b., avoids extraneous new cells after Kernel > Restart ... Run All Cells)
