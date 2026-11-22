@@ -67,8 +67,10 @@ alias git-hidden='git ls-files -v | grep -v ^H'
 alias git-status-sans-tom="git-status | egrep -v '(^|[-_/.])tom([-_/.]|$)'"
 alias git-status-tom=git-status-sans-tom
 # TODO: work out better alias name
+## NOTE: short ones just used for frequent aliases
 alias git-stat=git-status-sans-tom
 alias gstat=git-stat
+alias gnext=git-next-checkin
 ## NOTE: name avoid tab-completion conflict with git-next-checkin (i.e., git-n)
 alias git-diff-name-only-main='git diff --name-only main..HEAD | cat'
 #
