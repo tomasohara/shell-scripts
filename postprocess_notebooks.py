@@ -4,6 +4,7 @@
 #
 # Note: Added with assistance from GitHub Copilot CLI using GPT-5.6 Terra.
 ## UPDATE 2026-10-15: fixup to use preferred output-files
+## Note: Multiple stdout warning facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 ## TODO1: rework so that it can operate over single file (e.g., via TEST_REGEX).
 ## TODO2: put into ./tests dir to reflect test focus (i.e., not general script)
 
@@ -77,7 +78,8 @@ class NotebookPostprocessor:
         cells = notebook.get("cells")
         if not isinstance(cells, list):
             raise ValueError("Notebook is missing a cells array")
-        for cell in cells:
+        ## OLD: for cell in cells:
+        for cell_num, cell in enumerate(cells, start=1):
             if not isinstance(cell, dict):
                 raise ValueError("Notebook contains a non-object cell")
             # Reset execution_count to null on code cells (required by nbformat)
@@ -91,6 +93,20 @@ class NotebookPostprocessor:
                 if not isinstance(metadata, dict):
                     raise ValueError("Notebook cell metadata is not an object")
                 metadata.pop("execution", None)
+            # Warn if cell contains multiple stdout stream entries
+            outputs = cell.get("outputs")
+            if isinstance(outputs, list):
+                num_stdout = sum(
+                    1 for output in outputs
+                    if isinstance(output, dict)
+                    and (output.get("output_type") == "stream")
+                    and (output.get("name") == "stdout")
+                )
+                if num_stdout > 1:
+                    cell_id = cell.get("id", f"#{cell_num}")
+                    system.print_stderr(
+                        f"Warning: cell {cell_num} ({cell_id}) has multiple ({num_stdout}) stdout entries; "
+                        "tip: use [Restart Kernel and Run All Cells] to avoid duplicate stream outputs")
 
     def postprocess_notebook(self, notebook_path: Path) -> None:
         """Strip execution metadata from NOTEBOOK_PATH while retaining its contents."""

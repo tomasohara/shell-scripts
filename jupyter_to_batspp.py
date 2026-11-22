@@ -77,6 +77,7 @@
 # - Keep trace level 6 or higher for non-error output.
 #
 ## UPDATE 13 Sep 26: Adds OMIT_PROMPT (for .sh output).
+## Note: Multiple stdout warning facilitated by Antigravity AI Assistant using model Gemini 4 Argon (High)
 
 """
 Jupyter to Batspp: This converts Jupyter to Batspp tests,
@@ -214,6 +215,16 @@ class JupyterToBatspp(Main):
 
                 # Append output lines
                 try:
+                    # Warn if cell contains multiple stdout stream entries
+                    num_stdout = sum(
+                        1 for output in cell['outputs']
+                        if (output.get("output_type") == "stream")
+                        and (output.get("name") == "stdout"))
+                    if num_stdout > 1:
+                        cell_id = cell.get("id", f"#{c + 1}")
+                        system.print_stderr(
+                            f"Warning: cell {c + 1} ({cell_id}) has multiple ({num_stdout}) stdout entries; "
+                            "tip: use [Restart Kernel and Run All Cells] to avoid duplicate stream outputs")
                     cell_output = [ensure_new_line(l) for output in cell['outputs']
                                    if (output["output_type"] == "stream") for l in output['text']]
                 except:
