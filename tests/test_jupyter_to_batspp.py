@@ -145,7 +145,16 @@ class TestIt(TestWrapper):
         """Make sure warning is issued when a cell has multiple stdout entries"""
         debug.trace(4, f"TestIt.test_multiple_stdout_warning(); self={self}")
         log_file = self.temp_file + ".warn.log"
+        ## OLD: self.run_script(options="--stdout", data_file=self.data_file, log_file=log_file)
+        # Clean nbconvert-style dummy-test.ipynb should not warn
         self.run_script(options="--stdout", data_file=self.data_file, log_file=log_file)
+        assert "multiple" not in system.read_file(log_file)
+        # Partial re-evaluation with non-sequential execution_count should warn
+        notebook = json.loads(system.read_file(self.data_file))
+        notebook["cells"][2]["execution_count"] = 5
+        dup_notebook = self.temp_file + ".dup.ipynb"
+        system.write_file(dup_notebook, json.dumps(notebook))
+        self.run_script(options="--stdout", data_file=dup_notebook, log_file=log_file)
         log_contents = system.read_file(log_file)
         assert "multiple (2) stdout entries" in log_contents
         assert "[Restart Kernel and Run All Cells]" in log_contents

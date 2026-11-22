@@ -115,13 +115,24 @@ class TestIt(TestWrapper):
         processor, notebook_path = self._make_processor()
         notebook = json.loads(notebook_path.read_text(encoding="utf-8"))
         notebook["cells"][0]["id"] = "dup-cell"
+        # Clean sequential nbconvert-style single-line stream outputs should not warn
+        notebook["cells"][0]["execution_count"] = 1
         notebook["cells"][0]["outputs"] = [
-            {"name": "stdout", "output_type": "stream", "text": ["line1\n", "line2\n"]},
+            {"name": "stdout", "output_type": "stream", "text": ["line1\n"]},
             {"name": "stdout", "output_type": "stream", "text": ["line2\n"]},
         ]
         notebook_path.write_text(json.dumps(notebook), encoding="utf-8")
         warnings = []
         self.monkeypatch.setattr(THE_MODULE.system, "print_stderr", warnings.append)
+        processor.postprocess_notebook(notebook_path)
+        assert not warnings
+        # Non-sequential execution_count or multi-line duplicate stream outputs should warn
+        notebook["cells"][0]["execution_count"] = 7
+        notebook["cells"][0]["outputs"] = [
+            {"name": "stdout", "output_type": "stream", "text": ["line1\n", "line2\n"]},
+            {"name": "stdout", "output_type": "stream", "text": ["line2\n"]},
+        ]
+        notebook_path.write_text(json.dumps(notebook), encoding="utf-8")
         processor.postprocess_notebook(notebook_path)
         assert len(warnings) == 1
         assert "multiple (2) stdout entries" in warnings[0]
