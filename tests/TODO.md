@@ -5,3 +5,4 @@ An optional priority is indicated by [Pn]
   not supported by BatsPP.
 - [P2] Archive adhoc testing scripts (e.g., NOBATSPPsudo_test_simplebatspp.ipynb).
 - [P1] Add tests for recent serious regressions (e.g., tar-this-dir).
+- [P3] Use subshell trick when adding supporting commands in background to avoid process id display (e.g., 'sleep 10 &' => '(sleep 10 &)).
