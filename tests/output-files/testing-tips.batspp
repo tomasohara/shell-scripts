@@ -3,6 +3,7 @@
 # This describes how to test the Bash aliases and functions (aka "macros")
 # defined in one of the bash files from https://github.com/tomasohara/shell-scripts
 # (e.g., tomohara-proper-aliases.bash).
+## UPDATE 2026-11-22: adds warning about partial notebook updates
 #
 # The focus is on using "example-based testing" to simplify the test suite construction,
 # while allowing for changes in the underlying macro definitions. A typical test has
@@ -45,10 +46,16 @@
 #      $ jupyter nbconvert --inplace --execute --allow-errors tests/dummy-test.ipynb
 # - For more details on this testing paradigm, see <repo>/tests/README.ipynb.
 # - See <repo>/bash-cheatsheet.md for common constructs used in the aliases.
-# - Warnings:
-#   - Comments need to preceed Bash commands (i.e., not intermixed): it is best to use separate cells
+#
+# Warnings:
+# - Be careful when updating notebooks without rerunning the entire notebook. Jupyter can leave 
+#   the notebook in an indeterminate state (e.g., duplicate output cells). To fix, invoke
+#      [Restart Kernel and Run All Cells]
+#   or run nbconvert from command line after editing.
+# - Comments need to preceed Bash commands (i.e., not intermixed): it is best to use separate cells
 #     for multi-step sequences.
-#   - Bash is a real bear! Be careful not to spend too much learning its cryptic syntax, etc.
+# - Bash is a real bear! Be careful not to spend too much learning its cryptic syntax, etc. It is
+#   OK to use simple constructs rather than idiomatic one-liners.
 
 # Global setup
 # Note: Put any helper aliases for your tests here
@@ -99,7 +106,7 @@ $ num-sleep-processes
 
 # Setup: start a sleeping process
 $ sleep 10 &
-[1] 545808
+[1] 1821337
 
 # Output number of sleep processes
 $ num-sleep-processes
