@@ -75,7 +75,9 @@ fi
 # Initialize
 mkdir -p ~/config ~/temp
 log=~/config/_update-all-repos-$(T).log
-temp_log=~/temp/_update-all-repos-$(T).temp.log
+## BAD: temp_log=~/temp/_update-all-repos-$(T).temp.log
+TMP="${TMP:-/tmp}"
+temp_log="$TMP/_update-all-repos-$(T).temp.log"
 rename-with-file-date "$log" "$temp_log" &> /dev/null
 ## TODO4: resolve problem w/ $* leading to 'histappend'
 ## DEBUG: echo "${BASH_SOURCE[0]} $*" | tee "$log"
@@ -151,12 +153,17 @@ for dir in "${repos[@]}"; do
     git-update-plus 2>&1 | grep -v "No stash entries found" >| "$temp_log"
     check-errors-excerpt "$temp_log"
     if [[ "$show_summary" == "1" ]]; then
+        ## TODO?: branch="$(git-branch-alias || echo n/a)"
+        branch="$(git-branch-alias)"; [ -z "$branch" ] && branch="n/a"
         if $verbose_mode; then
-            branch="$(git-branch-alias)"
+            ## OLD: branch="$(git-branch-alias)"
             last_commit_info="$(git log -1 --all | echoize | COLUMNS=256 truncate-width)"
             echo -e "\t$branch; $last_commit_info"
         fi
-        (grep "files changed" "$temp_log" || echo "No changes") | perl -pe 's/^/\t/;'
+        ## OLD: (grep "files changed" "$temp_log" || echo "No changes") | perl -pe 's/^/\t/;'
+        ## TODO3: reword (e.g., "no changes" => "no update"0
+        ## TEST: (grep "files changed" "$temp_log" || echo "No changes") | perl -pe "s/^/\t/; s/$/ on \Q$branch\E/;"
+        (grep "files changed" "$temp_log" || echo "No changes") | perl -pe "s/^/\t/; s@\$@ on $branch@;"
     fi
 
     # Add to master log
