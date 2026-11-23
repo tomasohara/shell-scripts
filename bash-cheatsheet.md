@@ -498,5 +498,6 @@ note: Stuff from old template.bash
 #     src_dir=$(dirname "${BASH_SOURCE[0]}")
 # - name of current function: "${FUNCNAME[0]}"; in general: call stack array
 # - value=${value@L}                    # make lowercase
+# - tricks with parens for subshell (e.g., `(sleep 10 &)` to hide process ID)
 #
 ```
