@@ -1004,6 +1004,12 @@ function git-tar-repo-proper {
 #
 # TODO2: add some type of confirmation; also allow for changing the message
 alias git-checkin-new-alias="GIT_MESSAGE='initial version' git-update-commit-push"
+# git-branch-files-changed: show changes relative to main (or default branch)
+# TODO3: use arg to specify branch override? also, work out more intuitive name
+function git-branch-files-changed {
+    local branch="${GIT_DEFAULT_BRANCH:-main}"
+    invoke-git-command diff --name-status "$branch"...HEAD "$@";
+}
 
 # TODO:
 # NOTE: maldito git is too polymorphic, making it difficult to limit and easy to mess thing up!
