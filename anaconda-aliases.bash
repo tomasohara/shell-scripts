@@ -207,7 +207,13 @@ function conda-activate-env-like {
     #                                            /.../_ENV_/bin/python
     local bin_dir="$ANACONDA_HOME/envs/$env_name/bin"
     if [ ! -e "$bin_dir" ]; then
-        bin_dir=$(which $python | perl -pe "s@^((.*)/[^/]+/bin/$python$)@\2/$env_name/bin@;")
+        ## OLD: bin_dir=$(which $python | perl -pe "s@^((.*)/[^/]+/bin/$python$)@\2/$env_name/bin@;")
+        local python_path="$(which $python)"
+        if [ -z "$python_path" ]; then
+            echo "Error: neither ANACONDA_HOME set nor python in path"
+        else
+            echo "FYI: inferring ANACONDA_HOME from python path ($python_path)"
+        fi
     fi
     #
     if [ ! -e "$bin_dir" ]; then
