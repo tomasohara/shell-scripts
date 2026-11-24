@@ -172,6 +172,9 @@ local dirs=("${@:-.}")          # default to current dir if no args
 declare -A map                  # * associative array aka hash (Bash 4+)
 map[key]="value"                # hash assignment (i.e., replace value for key)
 echo "${map[key]}"              # hash access (i.e., get value for key)
+echo "${!map[@]}"               # hash keys (i.e., array indices)
+echo "${map[@]}"                # hash values (i.e., array values)
+unset "map[key]"                # deleting hash entry
 ```
 
 ## Arithmetic
