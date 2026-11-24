@@ -15,6 +15,7 @@
 #   SC2181: Check exit code directly with e.g. 'if mycmd;', not indirectly with $?.
 #   SC2206: Quote to prevent word splitting/globbing.
 #
+## UPDATE 2026-11-24: let v++ cleanup
 
 # Change git-xyz-plus to git-xyz- for sake of tab completion
 # TODO: automate the derivation of the following (e.g., drop 'plus' or 'alias' suffix)
@@ -232,7 +233,6 @@ function run-python-script {
     local out_dir="${PYTHON_OUT_DIR:-"$default_out_dir"}"
     script_base="$(basename "$script_path" .py)"
     # TODO: find shortcut for min
-    ## OLD: local python_debug_level="${PYTHON_DEBUG_LEVEL:-${DEBUG_LEVEL:-4}}"
     python_debug_level=${PYTHON_DEBUG_LEVEL:-$(max DEBUG_LEVEL 4)}
     #
     # Run script and check for errors
@@ -240,7 +240,8 @@ function run-python-script {
     # TODO3: rework to avoid problem with _PSL_ not being updated (or at least detect the error)!
     declare -g _PSL_ base log out PYTHON      # global declaration
     local module_spec=""
-    let _PSL_++
+    ## OLD: let _PSL_++
+    (( _PSL_++ ))
     # TODO3: add OUT_BASE to override default
     local run_label="${PYTHON_RUN_LABEL:-"run"}"
     run_label=$(echo "$run_label" | perl -pe 'chomp; s/\.$//;')
@@ -305,7 +306,9 @@ function run-python-script-reset {
 # run-python-app: invoke run-python-script-reset in background
 ## NOTE: workaround for Bash quirk with subshell-specific _PSL_ due to '... &'
 function run-python-app {
-    let _PSL_++; _PSL_=$_PSL_ run-python-script "$@" &
+    ## OLD: let _PSL_++; _PSL_=$_PSL_ run-python-script "$@" &
+    (( _PSL_++ ))
+    _PSL_=$_PSL_ run-python-script "$@" &
 }
 
 # pytest stuff
@@ -384,7 +387,9 @@ function run-main {
 ## NOTE: workaround for Bash quirk with subshell-specific _PSL_ due to '... &'
 ## TODO3: add run-python-app
 function run-main-app {
-    let _PSL_++; _PSL_=$_PSL_ run-main &
+    ## OLD: let _PSL_++; _PSL_=$_PSL_ run-main &
+    (( _PSL_++ ));
+    _PSL_=$_PSL_ run-main &
 }
 
 # disable-python-warnings(): Ignore warning due to Pydantic quirks
@@ -842,7 +847,7 @@ function remote-prompt {
     reset-prompt "$prompt"
 }
 alias-fn remote-prompt-root 'remote-prompt "" "#"'
-# TODO2: put alias aliases in separate file to minimize clutter (e.g., to be enabled upon temorary memory lapse)
+# TODO3: put alias aliases in separate file to minimize clutter (e.g., to be enabled upon temporary memory lapse)
 alias root-prompt-remote=remote-prompt-root
 #
 # reset-prompt-label(label): reset part of prompt prior to $, #, etc. with text
