@@ -131,10 +131,14 @@ export LESSBINFMT="*u<%02X>"
 # - TMPDIR: alias for TMP (n.b., stricty speaking, the preferred setting)
 # - See https://docs.python.org/3/library/tempfile.html.
 # - Also see tomohara-aliases.bash and ~/.bash_profile.
-## HACK: don't allow /tmp for TMP or TMPDIR (for persistence)
-if [ "$TMP" = "/tmp" ]; then export TMP="$TEMP/tmp"; fi
-if [ "$TMPDIR" = "/tmp" ]; then export TMPDIR="$TEMP/tmp"; fi
-mkdir -p "$TEMP" "$TMP" "$TMPDIR"
+## OLD:
+## ## HACK: don't allow /tmp for TMP or TMPDIR (for persistence)
+## if [ "$TMP" = "/tmp" ]; then export TMP="$TEMP/tmp"; fi
+## if [ "$TMPDIR" = "/tmp" ]; then export TMPDIR="$TEMP/tmp"; fi
+## NOTE: just outputs debug trace (in support of transition from forced remapping)
+if [ "$TMP" = "/tmp" ]; then startup-trace FYI: consider export TMP="$TEMP/tmp"; fi
+if [ "$TMPDIR" = "/tmp" ]; then startup-trace FYI: consider export TMPDIR="$TEMP/tmp"; fi
+## OLD: mkdir -p "$TEMP" "$TMP" "$TMPDIR"
 
 # Don't enable default .bashrc settings
 cond-export SKIP_DEFAULT_BASHRC 1
