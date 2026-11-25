@@ -1,11 +1,12 @@
 # Regular workflow for Github testing (n.b., runs remote on their servers)
 #
 # Note:
-# - See act.yml for the local workflow file.
-# - It also contains a bunch of tips.
+# - See archive/act.yml for the local workflow file.
+#   -- It was removed to avoid confusion, but it contains a bunch of tips (e.g., docker usage).
 # - For tips on pruning the runners, see
 #   https://dev.to/mathio/squeezing-disk-space-from-github-actions-runners-an-engineers-guide-3pjg
 #
+## UPDATE 2026-11-24: documents dependency quirks and clarifies that act.yml no longer active
 ## UPDATE 13 Sep 26: updates runner to ubuntu-24.04
 
 name: Github-Tests
@@ -57,6 +58,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Cache Python Dependencies
+        # Cache pip's downloaded wheels (~/.cache/pip) keyed by OS, Python
+        # version, and requirements.txt hash, with prefix fallbacks on a miss.
+        ## TODO2: Rework restore-keys to avoid cross-version wheel accumulation and cache eviction issues with different Python versions
         uses: actions/cache@v6
         with:
           path: ~/.cache/pip
@@ -81,7 +85,6 @@ jobs:
 
       - name: Run BatsPP and Python Tests under Runner
         run: |
-          ## OLD: PYTHONPATH="$PWD:$PWD/tests:$PYTHONPATH" ./tests/run_tests.bash
           ## TODO: set -o pipefail
           PYTHONPATH="$PWD:$PWD/tests:$PYTHONPATH" ./tests/run_tests.bash 2>&1 | tee _run_tests.log
 
