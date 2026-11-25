@@ -23,7 +23,7 @@
 
 # Uncomment the following line(s) for tracing:
 ## set -o xtrace
-## DEBUG: echo "in anaconda-aliases.bash"
+startup-trace "in anaconda-aliases.bash"
 
 # Globals
 python="python3"
@@ -47,7 +47,7 @@ fi
 # note: also resets prompt to '$ ' (following change by conda scripts)
 # See set_xterm_title.bash for underyling support (e.g., XTERM_TITLE_SUFFIX).
 function add-conda-env-to-xterm-title {
-    ## DEBUG: echo "in add-conda-env-to-xterm-title"
+    startup-trace "in add-conda-env-to-xterm-title"
     export XTERM_TITLE_SUFFIX
     ## OLD: XTERM_TITLE_SUFFIX="Py$($python --version 2>&1 | $perl extract_matches.perl -i 'python (\d+.\d+)')"
     XTERM_TITLE_SUFFIX="Py$($python --version 2>&1 | $perl -pe 's/^.*Python (\d+.\d+).*/$1/i;')"
@@ -75,7 +75,7 @@ function add-conda-env-to-xterm-title {
 # init-condaN([- | dir]): initialize anaconda using specified dir (or ~/anaconda3)
 function init-condaN {
     local anaconda_dir="$1"
-    ## DEBUG: echo "in init-condaN $1*"
+    startup-trace "in init-condaN $1*"
     if [ "$anaconda_dir" = "" ]; then echo "Usage: init-condaN anaconda-dir"; return; fi
     if [ "$anaconda_dir" = "-" ]; then anaconda_dir="$anaconda3_dir"; fi
     # start: >>> conda initialize >>>
@@ -90,7 +90,7 @@ function init-condaN {
         eval "$conda_setup"
     else
         local conda_script="$anaconda_dir/etc/profile.d/conda.sh"
-        echo "FYI: Return code $status from default conda setup so trying $conda_script"
+        startup-trace "FYI: Return code $status from default conda setup so trying $conda_script"
         if [ -f  "$conda_script" ]; then
             . "$conda_script"
         fi
@@ -104,14 +104,15 @@ function init-condaN {
     # HACK: make sure cls aliased to default Unix version of clear (anaconda3 quirk) and also that it doesn't clear the terminal buffer [n.b., maldito stupid feature introduction in long-stading utility!]
     alias cls='/usr/bin/clear -x'
 
-    ## DEBUG: echo "out: init-condaN()"
+    startup-trace "out: init-condaN()"
 }
 alias init-conda3='init-condaN "$anaconda3_dir"'
 alias init-conda2='init-condaN "$anaconda2_dir"'
 # note: version that makes dir arg optional
 alias init-conda3-new='init-condaN'
-## TODO: reference-var "$anaconda2_dir"
-echo "$anaconda2_dir" > /dev/null
+## TODO:
+reference-variable "$anaconda2_dir"
+## OLD: echo "$anaconda2_dir" > /dev/null
 
 # show-python-path(): display current path for python binary to stderr
 function trace-python-path {
@@ -126,7 +127,7 @@ function trace-python-path {
 # Work around for intermittent problems w/ 'conda activate' requiring 'source activate' instead.
 # activation-helper is to handle deactivate as well
 function activation-helper {
-    ## DEBUG: echo "in activation-helper($@)"
+    startup-trace "in activation-helper($@)"
     local command="$1"
     local env="$2"
     local conda_command="conda"
@@ -136,7 +137,7 @@ function activation-helper {
     local conda_path=""
     conda_path=$(/usr/bin/which conda 2> /dev/null)
     if [ "$conda_path" = "" ]; then
-        ## DEBUG: echo "Switching conda command"
+        startup-trace "Switching conda command"
         conda_command="source"
         alt_conda_command="conda"
     else
@@ -155,7 +156,7 @@ function activation-helper {
         echo "Warning: status $status from invocation"
     fi
     ## DEBUG: trace-python-path
-    ## DEBUG: echo "out activation-helper($@)"
+    startup-trace "out activation-helper($@)"
 }
 alias conda-activate='activation-helper activate'
 alias conda-deactivate='activation-helper deactivate'
@@ -176,7 +177,7 @@ alias conda-env-name='conda env list | $perl extract_matches.perl "^(\S+ )  " | 
 # conda-activate-env(name, [use_hack=0]): Activate NAME or show list of environment if empty or "-"
 # Note: 'conda env list' is slow, so USE_HACK resorts to 'ls ~/.conda/envs'
 function conda-activate-env {
-    ## DEBUG: echo "in conda-activate-env $*"
+    startup-trace "in conda-activate-env $*"
     local env="$1"
     local use_hack="${2:-0}"
     if [[ ("$env" = "") || ("$env" = "-") ]]; then
@@ -212,14 +213,14 @@ function conda-activate-env-like {
         if [ -z "$python_path" ]; then
             echo "Error: neither ANACONDA_HOME set nor python in path"
         else
-            echo "FYI: inferring ANACONDA_HOME from python path ($python_path)"
+            startup-trace "FYI: inferring ANACONDA_HOME from python path ($python_path)"
         fi
     fi
     #
     if [ ! -e "$bin_dir" ]; then
         echo "Error: unable to resolve anaconda bin dir"
     else
-        echo "FYI: only prepending PATH w/ $bin_dir (e.g., no CONDA_ env updates)"
+        startup-trace "FYI: only prepending PATH w/ $bin_dir (e.g., no CONDA_ env updates)"
         export PATH="$bin_dir:$PATH";
     fi
     add-conda-env-to-xterm-title
@@ -243,7 +244,7 @@ function old-init-conda {
         eval "$conda_setup"
     else
         local conda_script="$base/etc/profile.d/conda.sh"
-        echo "FYI: Return code $status from default conda setup so trying $conda_script"
+        startup-trace "FYI: Return code $status from default conda setup so trying $conda_script"
         if [ -f "$conda_script" ]; then
             . "$conda_script"
         fi
@@ -312,7 +313,8 @@ alias conda-disable=disable-conda
 alias conda-info-env='conda info --envs'
 
 # Uncomment the following line for tracing:
-## echo "out anaconda-aliases.bash"
+startup-trace "out anaconda-aliases.bash"
 
-## TODO: delete
-## dummy change for git
+## OLD:
+## ## TODO: delete
+## ## dummy change for git
