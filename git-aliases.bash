@@ -217,6 +217,7 @@ function echo-plus {
 # git-pause-for-enter(): print message and wait for user to press enter
 # TODO: extend to press-any-key; see
 #    https://unix.stackexchange.com/questions/293940/how-can-i-make-press-any-key-to-continue
+# TODO3?: use /dev/tty to prevent silent pass through (see pause-for-enter in tomohara-aliases.bash)
 function git-pause-for-enter () {
     local message="$1"
     ## TODO2: add "enter or ^C" to user message
