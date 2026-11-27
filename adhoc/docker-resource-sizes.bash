@@ -13,6 +13,8 @@
 # - Reworked with template.bash option parsing and selective reporting via
 #   Antigravity (Gemini 4 Argon Medium).
 #
+## UPDATE 2026-11-27: refines cleanup tips and highlights mine
+## TODO2: replace 'codeprefs-/act-' pattern with generic default overridden by env
 
 # Set bash regular and/or verbose tracing
 # - xtrace shows arg expansion (and often is sufficient)
@@ -354,9 +356,17 @@ fi
 # given the potential for data loss (especially with named volumes).
 # Only shown in full when --tips (-c) is specified so size output is not
 # obscured.
-# note: added via Antigravity (Gemini 4 Argon Medium)
+# note: added via Antigravity (Gemini 4 Argon Medium); refined with supporting
+# docker stop calls and regex variables via Antigravity (Gemini 4 Argon High).
 ###############################################################################
 
+## BAD: repeated hardcoded codeprefs-/act- regexes, put "docker volume rm" before container stop/rm, and omitted "# my-cleanup" markers
+## * Selectively remove specific volumes by prefix (e.g., codeprefs- or act-):
+##     docker volume ls -q | grep -E '^(codeprefs-|act-)' | xargs -r docker volume rm
+## ...
+## * Remove stopped (or running, with -f) containers blocking codeprefs-/act- volumes, then remove the volumes:
+##     docker ps -aq --filter status=exited --filter status=created --filter "name=^(codeprefs-|act-)" | xargs -r docker rm -v
+##     docker volume ls -q | grep -E '^(codeprefs-|act-)' | xargs -r docker volume rm
 if [ "$show_tips" == "1" ]; then
     cat <<'EOF'
 
@@ -367,15 +377,23 @@ if [ "$show_tips" == "1" ]; then
     docker system prune -a --volumes
 * Prune all unused volumes, INCLUDING named volumes (Docker 23.0+ skips named volumes unless -a is given):
     docker volume prune -a
-* Selectively remove specific volumes by prefix (e.g., codeprefs- or act-):
-    docker volume ls -q | grep -E '^(codeprefs-|act-)' | xargs -r docker volume rm
+* Selective cleanup by prefix (note: stopped containers still lock volumes until "docker rm"):
+  1. Set target regexes and stop matching running containers ("docker stop" does not expand "*" wildcards):
+    pause-for-enter "Warning: about to purge docker"   # my-cleanup
+    my_volume_regex='^(codeprefs-|act-)'               # my-cleanup
+    my_container_regex="$my_volume_regex"              # my-cleanup
+    docker ps -q --filter "name=$my_container_regex" | xargs -r docker stop   # my-cleanup
+    # (alternatives: "docker stop <id_or_exact_name> ..." or all running via "docker ps -q | xargs -r docker stop")
+  2. Remove stopped matching containers (required before "docker volume rm" to release volume links):
+    docker ps -aq --filter status=exited --filter status=created --filter "name=$my_container_regex" | xargs -r docker rm -v   # my-cleanup
+    # (or force-remove running and stopped matching containers in one step: docker ps -aq --filter "name=$my_container_regex" | xargs -r docker rm -vf)
+  3. Remove matching named volumes and images (now that no containers reference them):
+    docker volume ls -q | grep -E "$my_volume_regex" | xargs -r docker volume rm   # my-cleanup
+    docker image ls --format '{{.Repository}}:{{.Tag}}' | grep -E "$my_volume_regex" | xargs -r docker rmi   # my-cleanup
 * Find containers and host PIDs referencing a specific volume (when "volume is in use"):
     docker ps -a --filter volume=<volume_name>
     docker ps -q --filter volume=<volume_name> | xargs -r docker inspect --format '{{.Id}} ({{.Name}}): Status={{.State.Status}} PID={{.State.Pid}}'
     sudo lsof +D "$(docker volume inspect --format '{{.Mountpoint}}' <volume_name>)"
-* Remove stopped (or running, with -f) containers blocking codeprefs-/act- volumes, then remove the volumes:
-    docker ps -aq --filter status=exited --filter status=created --filter "name=^(codeprefs-|act-)" | xargs -r docker rm -v
-    docker volume ls -q | grep -E '^(codeprefs-|act-)' | xargs -r docker volume rm
 * Full container/image reset via shell alias (note: does not remove named volumes):
     docker-cleanup
 EOF
