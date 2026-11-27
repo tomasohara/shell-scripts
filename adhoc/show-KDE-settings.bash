@@ -6,6 +6,8 @@
 # - Based on grok.
 # - Also see kconsave utility [https://github.com/Prayag2/konsave].
 #
+## UPDATE 2026-11-26: make --all the default, adds --core, adds *notifyrc
+
 
 # Set bash regular and/or verbose tracing
 # - xtrace shows arg expansion (and often is sufficient)
@@ -25,16 +27,18 @@ fi
 # TODO: convert into a function that get invoked when $1 is empty or --help
 # in $@.
 # NOTE: See sync-loop.sh for an example.
+## TODO2: rework so that core configuration files determined
 #
 if [[ ("$1" == "") || ("$1" == "--help") ]]; then
     script=$(basename "$0")
+    core=$(extract_matches.perl "~/.config/([a-z]*rc)" $0 | perl -pe 's/\n/ /g;')
     ## TODO: remove following which is only meant for when ./template.bash run
     if [[ "$script" == "template.bash" ]]; then echo "Warning: not intended for standalone usage"; fi;
     ## TODO: if [[ $script ~= *\ * ]]; then script='"'$script'"; fi
     ## TODO: base=$(basename "$0" .bash)
     echo ""
     ## TODO: add option or remove TODO placeholder
-    echo "Usage: $0 [--TODO] [--trace] [--help] [--all] [--]"
+    echo "Usage: $0 [--TODO] [--trace] [--help] [--all] [--core] [--]"
     echo ""
     echo "Examples:"
     echo ""
@@ -46,7 +50,9 @@ if [[ ("$1" == "") || ("$1" == "--help") ]]; then
     echo "$script - > ~/config/show-KDE-settings.\$ddmmmyy.log 2>&1"
     echo ""
     echo "Notes:"
-    echo "- Use --all to include all ~/.config/k* files"
+    echo "- Use --core to include main configuration files (hardcoded):"
+    echo "  $core"
+    echo "- Use --all to include all ~/.config/k* files [now the default]."
     echo "- The -- option is to use default options and to avoid usage statement."
     ## TODO: add more notes
     ## echo ""
@@ -58,6 +64,7 @@ fi
 # TODO: set getopt-type utility
 #
 moreoptions=0; case "$1" in -*) moreoptions=1 ;; esac
+## OLD: include_all=0
 include_all=0
 while [[ "$moreoptions" == "1" ]]; do
     # TODO : add real options
@@ -65,6 +72,8 @@ while [[ "$moreoptions" == "1" ]]; do
         set -o xtrace
     elif [[ "$1" == "--all" ]]; then
         include_all=1
+    elif [[ "$1" == "--core" ]]; then
+        include_all=0
     elif [[ ("$1" == "--") || ("$1" == "-") ]]; then
         shift
         break
@@ -90,8 +99,9 @@ echo -e "\nChecking for errors in each KCM (this may take a moment):"
 for module in $(kcmshell5 --list | cut -f1 -d' ' | sort); do
     echo "Testing $module..."
     kcmshell5 "$module" --help > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        echo "Error: $module failed to load."
+    status="$?"
+    if [ "$status" -ne 0 ]; then
+        echo "Error: $module failed to load (status=$status)."
     fi
 done
 
@@ -112,8 +122,9 @@ k_config_files=( \
     ~/.config/kwinrc \
     ~/.config/kwinrulesrc)
 if [ "$include_all" == "1" ]; then
-    k_config_files=(~/.config/k*)
+    k_config_files=(~/.config/k* ~/.config/*notifyrc)
 fi
+## TODO3: remove duplicates (e.g., plasmanotifyrc)
 head --lines=10000 "${k_config_files[@]}" \
     ~/.config/plasma-org.kde.plasma.desktop-appletsrc \
     ~/.config/plasmanotifyrc \
