@@ -3486,8 +3486,17 @@ function pause-for-enter () {
         local newline_tab=$'\n\t'
         message="${message}${newline_tab}${press_enter}"
     fi
-    # note: with -p for prompt and -r makes backslash not an escape [avoids shellcheck warning]
-    read -r -p "$message "
+    # Read from /dev/tty when available so redirected stdin (e.g., here-strings,
+    # pipes, or "while read" loops) does not suppress the prompt, skip pausing,
+    # or consume the next input line; fall back to stdin in headless contexts.
+    # note: with -p for prompt and -r makes backslash not an escape [avoids shellcheck warning];
+    # /dev/tty check added via Antigravity (Gemini 4 Argon High).
+    ## BAD: read -r -p "$message "
+    if (: </dev/tty) 2>/dev/null; then
+        read -r -p "$message " </dev/tty
+    else
+        read -r -p "$message "
+    fi
 }
 
 #-------------------------------------------------------------------------------
