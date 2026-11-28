@@ -36,7 +36,11 @@ anaconda2_dir="$HOME/anaconda2"
 if [ "$ANACONDA_HOME" == "" ]; then
     export ANACONDA_HOME
     ## TODO3: rework to check for missing conda prior to path derivation
-    ANACONDA_HOME=$(realpath "$(dirname "$(which conda)" 2> /dev/null )"/../)
+    ## BAD: ANACONDA_HOME=$(realpath "$(dirname "$(which conda)" 2> /dev/null )"/../)
+    conda_path="$(which conda)"
+    if [ -n "$conda_path" ]; then
+        ANACONDA_HOME="$(realpath "$(dirname "$conda_path")"/../)"
+    fi
     if [[ ("$ANACONDA_HOME" = "") || ("$ANACONDA_HOME" = "/home") ]]; then
         export ANACONDA_HOME=/usr/local/misc/programs/anaconda3
     fi
@@ -204,8 +208,9 @@ function conda-activate-env-hack { conda-activate-env "$1" "1"; }
 # ex: /home/tomohara/anaconda3/envs/nlp-py-3-10 => /home/tomohara/anaconda3/envs/test-nlp-py-3-10
 function conda-activate-env-like {
     local env_name="$1"
-    # note: regex groups                        1 222       3333333333  
-    #                                            /.../_ENV_/bin/python
+    ## OLD:
+    ## # note: regex groups                        1 222       3333333333  
+    ## #                                            /.../_ENV_/bin/python
     local bin_dir="$ANACONDA_HOME/envs/$env_name/bin"
     if [ ! -e "$bin_dir" ]; then
         ## OLD: bin_dir=$(which $python | perl -pe "s@^((.*)/[^/]+/bin/$python$)@\2/$env_name/bin@;")
@@ -214,6 +219,9 @@ function conda-activate-env-like {
             echo "Error: neither ANACONDA_HOME set nor python in path"
         else
             startup-trace "FYI: inferring ANACONDA_HOME from python path ($python_path)"
+            # note: regex groups                    1    22222
+            #                                       /.../_ENV_/bin/python
+            bin_dir=$(which $python | perl -pe "s@^((.*)/[^/]+/bin/$python$)@\2/$env_name/bin@;")
         fi
     fi
     #
